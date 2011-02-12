@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+    <head>
+       <title>{% block title %}{% endblock %}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="Keywords" content="{% block meta_keywords %}{% endblock %}" />
+        <meta name="Description" content="{% block meta_description %}{% endblock %}" />
+
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/reset.css?{% now "U" %}" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/style.css?{% now "U" %}" />
+        {% block extra_css %}{% endblock %}
+
+        <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
+        {% block extra_js %}{% endblock %}
+
+        {% block head_extra %}{% endblock %}
+    </head>
+    <body>
+        <div class="layout">
+            {% if messages %}
+            <div class="site-messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="head">
+                <div class="site-info">
+                    <h1>
+                        {{ request.get_host }}
+                    </h1>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <div class="section-head">
+                {% block crumbs %}{% endblock %}
+                <div class="clear"></div>
+            </div>
+            
+            <div class="body">
+                <div class="page-content">
+                    {% block content %}{% endblock %}
+                </div>
+                <div class="right-sidebar">
+                    &nbsp;
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+        <div class="footer">
+            &copy; django-template
+        </div>
+    </body>
+</html>

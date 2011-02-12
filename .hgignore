@@ -1,0 +1,15 @@
+syntax:glob
+
+# Common
+*.pyc
+*.pyo
+*.swp
+*.swo
+*.orig
+
+# Project specific
+settings_local.py
+.env
+pip-log.txt
+update.sh
+dump.sql
