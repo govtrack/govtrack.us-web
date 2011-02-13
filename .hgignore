@@ -13,3 +13,4 @@ settings_local.py
 pip-log.txt
 update.sh
 dump.sql
+data
