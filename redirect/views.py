@@ -7,10 +7,7 @@ from common.pagination import paginate
 
 from person.models import Person
 
-@render_to('person/person_details.html')
-def person_details(request, pk):
+def person_redirect(request):
+    pk = request.GET.get('id', None)
     person = get_object_or_404(Person, pk=pk)
-    if request.path != person.get_absolute_url():
-        return redirect(person.get_absolute_url(), permanent=True)
-    return {'person': person,
-            }
+    return redirect(person.get_absolute_url(), permanent=True)

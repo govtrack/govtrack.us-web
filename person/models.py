@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.template.defaultfilters import slugify
 
 from common import enum
 
@@ -62,6 +63,11 @@ class Person(models.Model):
             return self.roles.get(current=True)
         except PersonRole.DoesNotExist:
             return None
+
+    def get_absolute_url(self):
+        name = slugify('%s %s' % (self.firstname, self.lastname))
+        name = name.replace('-', '_')
+        return '/person/%s/%d' % (name, self.pk)
 
 
 class RoleType(enum.Enum):
