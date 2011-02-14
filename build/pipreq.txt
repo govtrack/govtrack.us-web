@@ -2,4 +2,3 @@ django
 django-common
 django-extensions
 south
-lxml
