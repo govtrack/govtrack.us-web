@@ -37,10 +37,31 @@ class Person(models.Model):
 
     @property
     def name(self):
-        return u'%s %s' % (self.firstname, self.lastname)
+        full_name = u'%s %s' % (self.firstname, self.lastname)
+        role = self.current_role()
+        if not role:
+            return full_name
+        else:
+            head = self.title
+            chunk1 = role.party[0].upper()
+            if self.state:
+                chunk2 = self.state
+                if self.district:
+                    chunk2 += '-%s' % role.district
+            else:
+                chunk2 = ''
+            chunks = [chunk1, chunk2] if chunk2 else [chunk1]
+            tail = '[%s]' % ', '.join(chunks)
+            return u'%s %s %s' % (head, full_name, tail)
 
     def __unicode__(self):
         return self.name
+
+    def current_role(self):
+        try:
+            return self.roles.get(current=True)
+        except PersonRole.DoesNotExist:
+            return None
 
 
 class RoleType(enum.Enum):
@@ -56,7 +77,7 @@ class SenatorClass(enum.Enum):
 
 
 class PersonRole(models.Model):
-    person = models.ForeignKey('person.Person')
+    person = models.ForeignKey('person.Person', related_name='roles')
     role_type = models.IntegerField(choices=RoleType)
     current = models.BooleanField(blank=True, default=False)
     startdate = models.DateField()
