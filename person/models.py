@@ -30,6 +30,7 @@ class Person(models.Model):
     title = models.CharField(max_length=20, blank=True)# enum?
     # state set(['WA', 'DE', 'DC', 'WI', 'WV', 'HI', 'FL', 'AK', 'NH', 'NJ', 'NM', 'TX', 'LA', 'NC', 'ND', 'NE', 'TN', 'NY', 'PA', 'WY', 'RI', 'NV', 'VA', 'GU', 'CO', 'VI', 'CA', 'AL', 'AS', 'AR', 'VT', 'IL', 'GA', 'IN', 'IA', 'OK', 'AZ', 'ID', 'CT', 'ME', 'MD', 'MA', 'OH', 'UT', 'MO', 'MN', 'MI', 'KS', 'MT', 'MP', 'MS', 'PR', 'SC', 'KY', 'OR', 'SD'])
     state = models.CharField(max_length=2, blank=True) # TODO: convert into enum
+    district = models.IntegerField(blank=True, null=True) 
     # namemod set(['II', 'Jr.', 'Sr.', 'III', 'IV'])
     namemod = models.CharField(max_length=10, blank=True)
     nickname = models.CharField(max_length=255, blank=True)
@@ -37,6 +38,9 @@ class Person(models.Model):
     @property
     def name(self):
         return u'%s %s' % (self.firstname, self.lastname)
+
+    def __unicode__(self):
+        return self.name
 
 
 class RoleType(enum.Enum):
