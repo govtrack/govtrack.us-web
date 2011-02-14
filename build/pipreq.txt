@@ -2,3 +2,4 @@ django
 django-common
 django-extensions
 south
+python-dateutil

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.template.defaultfilters import slugify
+import datetime
+from dateutil.relativedelta import relativedelta
 
 from common import enum
 from person.types import Gender, RoleType, SenatorClass, State
@@ -33,11 +35,14 @@ class Person(models.Model):
     nickname = models.CharField(max_length=255, blank=True)
 
     @property
+    def fullname(self):
+        return u'%s %s' % (self.firstname, self.lastname)
+
+    @property
     def name(self):
-        full_name = u'%s %s' % (self.firstname, self.lastname)
         role = self.get_current_role()
         if not role:
-            return full_name
+            return self.fullname
         else:
             head = self.title
             chunk1 = role.party[0].upper()
@@ -49,7 +54,7 @@ class Person(models.Model):
                 chunk2 = ''
             chunks = [chunk1, chunk2] if chunk2 else [chunk1]
             tail = '[%s]' % ', '.join(chunks)
-            return u'%s %s %s' % (head, full_name, tail)
+            return u'%s %s %s' % (head, self.fullname, tail)
 
     def __unicode__(self):
         return self.name
@@ -65,6 +70,13 @@ class Person(models.Model):
         name = name.replace('-', '_')
         return '/person/%s/%d' % (name, self.pk)
 
+    def get_age(self):
+        if not self.birthday:
+            return 0
+        else:
+            today = datetime.date.today()
+            return relativedelta(today, self.birthday).years
+
 
 class PersonRole(models.Model):
     person = models.ForeignKey('person.Person', related_name='roles')
@@ -79,4 +91,8 @@ class PersonRole(models.Model):
     state = models.CharField(choices=State, max_length=255, blank=True)
     party = models.CharField(max_length=255)
 
+    class Meta:
+        ordering = ['-startdate']
 
+    def __unicode__(self):
+        return '%s / %s / %s' % (self.person.fullname, self.startdate, self.get_role_type_display())

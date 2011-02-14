@@ -1,5 +1,5 @@
 body {
-    font: 1.1em serif;
+    font-family: 1.1em serif;
     text-align: center;
 }
 
@@ -45,6 +45,7 @@ h2 {
     font-size: 1.2em;
     font-weight: normal;
     margin-bottom: 0.5em;
+    margin-top: 1em;
 }
 
 .clear {
@@ -53,4 +54,32 @@ h2 {
 
 .crumbs {
     margin-bottom: 1em;
+}
+
+.person-details .photo {
+    float: left;
+    width: 150px;
+}
+
+.person-details .description {
+    float: left;
+}
+
+th, td {
+    padding: 0.3em;
+}
+
+.analysis {}
+
+    .analysis .graph {
+        float: left;
+        width: 200px;
+    }
+
+    .analysis .details {
+        margin-left: 200px;
+    }
+
+p {
+    margin-top: 1em;
 }

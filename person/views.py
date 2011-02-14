@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+
 from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 
@@ -6,6 +8,7 @@ from common.decorators import render_to
 from common.pagination import paginate
 
 from person.models import Person, PersonRole
+from person import analysis
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -21,7 +24,18 @@ def person_details(request, pk):
             role = person.roles.order_by('-enddate')[0]
         except PersonRole.DoesNotExist:
             role = None
+
+    photo_path = 'data/photos/%d-50px.jpeg' % person.pk
+    if os.path.exists(photo_path):
+        photo = '/' + photo_path
+    else:
+        photo = None
+
+    analysis_data = analysis.load_data(person)
+
     return {'person': person,
             'role': role,
             'active_role': active_role,
+            'photo': photo,
+            'analysis_data': analysis_data,
             }

@@ -13,6 +13,65 @@ Congress > Members of Congress
     <div class="role-details">
         {% if not active_role %}Former{% endif %}
         {{ role.get_role_type_display }}, {{ role.get_state_display }}
+        {% endif %}
+    </div>
+    {% if photo %}
+    <div class="photo">
+        <img src="{{ photo }}" />
+    </div>
+    {% endif %}
+    <div class="description">
+        <table>
+            <tr>
+                <td>State:</td>
+                <td>{{ person.get_state_display }}</td>
+            </tr>
+            {% if role %}
+            <tr>
+                <td>Party:</td>
+                <td>{{ role.party }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td>Birthday:</td>
+                <td>{{ person.birthday|date:"F d, Y" }} / {{ person.get_age }} years old</td>
+            </tr>
+        </table>
+    </div>
+    <div class="clear"></div>
+
+    <h2>Elected Positions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>When</th>
+                <th>Role</th>
+                <th>Representing</th>
+            </tr>
+        </thead>
+        {% for role in person.roles.all %}
+        <tr>
+            <td>{{ role.startdate|date:"Y" }}-{{ role.startdate|date:"Y" }}</td>
+            <td>{{ role.get_role_type_display }}</td>
+            <td>{{ role.get_state_display }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% if analysis_data %}
+    <h2>Sponsorship Analysis</h2>
+    <div class="analysis">
+        {% if analysis_data.image %}
+        <div class="graph">
+            <img src="{{ analysis_data.image }}" />
+        </div>
+        {% endif %}
+        <div class="details">
+            {{ person.lastname }} is {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among his peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership.
+
+
+            <p>These labels come from the <a href="#">Political Spectrum & Legislative Leadership statistical analysis</a> that we have carried out. The statistical analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or lonely (i.e. follower) by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
+        </div>
+        <div class="clear"></div>
     {% endif %}
 </div>
 {% endblock %}
