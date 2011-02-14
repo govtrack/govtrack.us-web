@@ -1,5 +1,18 @@
 {% extends 'base.html' %}
 
+{% block title %}{{ person }}{% endblock %}
+
+{% block crumbs %}
+Congress > Members of Congress
+{% endblock %}
+
 {% block content %}
-<h1>{{ person }}</h1>
+<div class="person-details">
+    <h1>{{ person }}</h1>
+    {% if role %}
+    <div class="role-details">
+        {% if not active_role %}Former{% endif %}
+        {{ role.get_role_type_display }}, {{ role.get_state_display }}
+    {% endif %}
+</div>
 {% endblock %}

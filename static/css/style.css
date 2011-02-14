@@ -1,0 +1,56 @@
+body {
+    font: 1.1em serif;
+    text-align: center;
+}
+
+.layout {
+    width: 960px;
+    margin: 1em auto;
+    text-align: left;
+}
+
+.head {
+    margin-bottom: 2em;
+}
+
+    .head .site-info {
+        float: left;
+        width: 50%;
+    }
+
+    .head .site-info .name {
+        font-size: 1.4em;
+        color: red;
+    }
+
+    .head .site-info .description {
+        font-style: italic;
+    }
+
+.footer {
+    margin-bottom: 1em;
+    color: #666;
+    font-size: 0.8em;
+}
+
+    .footer a {
+        color: #666;
+    }
+
+h1 {
+    font-size: 1.5em;
+}
+
+h2 {
+    font-size: 1.2em;
+    font-weight: normal;
+    margin-bottom: 0.5em;
+}
+
+.clear {
+    clear: both;
+}
+
+.crumbs {
+    margin-bottom: 1em;
+}

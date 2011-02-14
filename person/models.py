@@ -3,10 +3,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 
 from common import enum
-
-class Gender(enum.Enum):
-    male = enum.Item(1, 'Male')
-    female = enum.Item(2, 'Female')
+from person.types import Gender, RoleType, SenatorClass, State
 
 class Person(models.Model):
     firstname = models.CharField(max_length=255)
@@ -28,9 +25,8 @@ class Person(models.Model):
     
     # Role related
     # title set(['Rep.', 'Res.Comm.', 'Sen.', 'Del.'])
-    title = models.CharField(max_length=20, blank=True)# enum?
-    # state set(['WA', 'DE', 'DC', 'WI', 'WV', 'HI', 'FL', 'AK', 'NH', 'NJ', 'NM', 'TX', 'LA', 'NC', 'ND', 'NE', 'TN', 'NY', 'PA', 'WY', 'RI', 'NV', 'VA', 'GU', 'CO', 'VI', 'CA', 'AL', 'AS', 'AR', 'VT', 'IL', 'GA', 'IN', 'IA', 'OK', 'AZ', 'ID', 'CT', 'ME', 'MD', 'MA', 'OH', 'UT', 'MO', 'MN', 'MI', 'KS', 'MT', 'MP', 'MS', 'PR', 'SC', 'KY', 'OR', 'SD'])
-    state = models.CharField(max_length=2, blank=True) # TODO: convert into enum
+    title = models.CharField(max_length=20, blank=True)# Should it be Enum class?
+    state = models.CharField(choices=State, max_length=2, blank=True)
     district = models.IntegerField(blank=True, null=True) 
     # namemod set(['II', 'Jr.', 'Sr.', 'III', 'IV'])
     namemod = models.CharField(max_length=10, blank=True)
@@ -39,7 +35,7 @@ class Person(models.Model):
     @property
     def name(self):
         full_name = u'%s %s' % (self.firstname, self.lastname)
-        role = self.current_role()
+        role = self.get_current_role()
         if not role:
             return full_name
         else:
@@ -58,7 +54,7 @@ class Person(models.Model):
     def __unicode__(self):
         return self.name
 
-    def current_role(self):
+    def get_current_role(self):
         try:
             return self.roles.get(current=True)
         except PersonRole.DoesNotExist:
@@ -68,18 +64,6 @@ class Person(models.Model):
         name = slugify('%s %s' % (self.firstname, self.lastname))
         name = name.replace('-', '_')
         return '/person/%s/%d' % (name, self.pk)
-
-
-class RoleType(enum.Enum):
-    senator = enum.Item(1, 'Senator')
-    congressman = enum.Item(2, 'Congressman')
-    president = enum.Item(3, 'President')
-
-
-class SenatorClass(enum.Enum):
-    class1 = enum.Item(1, 'Class 1')
-    class2 = enum.Item(2, 'Class 2')
-    class3 = enum.Item(3, 'Class 3')
 
 
 class PersonRole(models.Model):
@@ -92,11 +76,7 @@ class PersonRole(models.Model):
     senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True)
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts
     district = models.IntegerField(blank=True, null=True) 
-    state = models.CharField(max_length=255, blank=True) # TODO: convert into enum
+    state = models.CharField(choices=State, max_length=255, blank=True)
     party = models.CharField(max_length=255)
 
 
-"""
-class State(enum.Enum):
-    For senators and representatives, the state attribute gives the USPS state abbreviation of the state or territory they represent. Besides the 50 states, this includes delegates from American Samoa (AS), District of Columbia (DC), Guam (GU), Northern Mariana Islands (MP), Puerto Rico (PR), Virgin Islands (VI), and the former (for historical data) Dakota Territory (DK), Philippines Territory/Commonwealth (PI), and Territory of Orleans (OL). Puerto Rico's delegate is called a Resident Commissioner.
-"""

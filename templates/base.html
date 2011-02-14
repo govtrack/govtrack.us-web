@@ -24,16 +24,16 @@
                 {% endfor %}
             </div>
             {% endif %}
+
             <div class="head">
                 <div class="site-info">
-                    <h1>
-                        {{ request.get_host }}
-                    </h1>
+                    <span class="name">govtrack.us</span>
+                    <span class="description">a civic project to track Congress</span>
                 </div>
                 <div class="clear"></div>
             </div>
 
-            <div class="section-head">
+            <div class="crumbs">
                 {% block crumbs %}{% endblock %}
                 <div class="clear"></div>
             </div>
@@ -45,11 +45,11 @@
                 <div class="right-sidebar">
                     &nbsp;
                 </div>
+                <div class="footer">
+                    GovTrack.us is a project of Civic Impulse, LLC. Read about GovTrack. / Feedback (but not political opining) is welcome to operations@govtrack.us, but I can't do your research for you, nor can I pass on messages to Members of Congress. This site is "copyleft": You are encouraged to reuse any material on this site. Developers: GovTrack is open source and supports open knowledge.
+                </div>
                 <div class="clear"></div>
             </div>
-        </div>
-        <div class="footer">
-            &copy; django-template
         </div>
     </body>
 </html>
