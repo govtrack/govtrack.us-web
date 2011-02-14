@@ -78,6 +78,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'south',
     # project modules
+    'person',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
