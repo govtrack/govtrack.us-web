@@ -3,6 +3,7 @@ Installation
 
 * Create database and write access credentials to settings_local.py
 * Install dependencies via OS package manager:
+   * python-virtualenv
    * python-lxml
 * Run build/buildenv.sh
 * Run reset.sh

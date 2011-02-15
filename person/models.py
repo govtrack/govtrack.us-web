@@ -59,6 +59,17 @@ class Person(models.Model):
             today = datetime.date.today()
             return relativedelta(today, self.birthday).years
 
+    def roles_condensed(self):
+        ret = []
+        for role in self.roles.order_by('startdate'):
+            if len(ret) > 0 and role.continues_from(ret[-1]):
+                ret[-1].id = None # prevent corruption
+                ret[-1].enddate = role.enddate
+            else:
+                ret.append(role)
+        ret.reverse()
+        return ret
+
     def get_role_at_date(self, date):
         try:
             return self.roles.get(startdate__lte=date, enddate__gte=date)
@@ -85,12 +96,21 @@ class PersonRole(models.Model):
     district = models.IntegerField(blank=True, null=True) 
     state = models.CharField(choices=State, max_length=255, blank=True)
     party = models.CharField(max_length=255)
+    website = models.CharField(max_length=255, blank=True)
 
     class Meta:
         ordering = ['startdate']
 
     def __unicode__(self):
-        return '%s / %s / %s' % (self.person.fullname, self.startdate, self.get_role_type_display())
+        return '%s / %s to %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display())
+	   
+    def continues_from(self, prev):
+        if self.startdate - prev.enddate > datetime.timedelta(days=120): return False
+        if self.role_type != prev.role_type: return False
+        if self.senator_class != prev.senator_class: return False
+        if self.state != prev.state: return False
+        if self.district != prev.district: return False
+        return True
 
     def get_title(self):
         return self.get_title_name(short=False)

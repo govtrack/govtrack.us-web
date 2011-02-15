@@ -26,7 +26,7 @@ def person_details(request, pk):
         except PersonRole.DoesNotExist:
             role = None
 
-    photo_path = 'data/photos/%d-50px.jpeg' % person.pk
+    photo_path = 'data/photos/%d-100px.jpeg' % person.pk
     if os.path.exists(photo_path):
         photo = '/' + photo_path
     else:
