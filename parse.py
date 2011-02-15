@@ -57,12 +57,12 @@ class Processor(object):
 
 
 class PersonProcessor(Processor):
-    REQUIRED_ATTRIBUTES = ['id', 'firstname', 'lastname', 'bioguideid']
+    REQUIRED_ATTRIBUTES = ['id', 'firstname', 'lastname']
     ATTRIBUTES = [
-        'id', 'firstname', 'lastname',
+        'id', 'firstname', 'lastname', 'bioguideid',
         'metavidid', 'pvsid', 'osid', 'youtubeid', 'gender',
-        'birthday', 'middlename', 'religion', 'title', 'state',
-        'district', 'namemod', 'nickname'
+        'birthday', 'middlename', 'religion', 
+        'namemod', 'nickname'
     ]
     GENDER_MAPPING = {'M': Gender.male, 'F': Gender.female}
     FIELD_MAPPING = {'id': 'pk'}
@@ -81,7 +81,7 @@ class PersonRoleProcessor(Processor):
         'district', 'state', 'party',
     ]
     FIELD_MAPPING = {'type': 'role_type', 'class': 'senator_class'}
-    ROLE_TYPE_MAPPING = {'rep': RoleType.congressman, 'sen': RoleType.senator,
+    ROLE_TYPE_MAPPING = {'rep': RoleType.representative, 'sen': RoleType.senator,
                          'prez': RoleType.president}
     SENATOR_CLASS_MAPPING = {'1': SenatorClass.class1, '2': SenatorClass.class2,
                              '3': SenatorClass.class3}

@@ -22,10 +22,12 @@ Congress > Members of Congress
     {% endif %}
     <div class="description">
         <table>
+            {% if role %}
             <tr>
                 <td>State:</td>
-                <td>{{ person.get_state_display }}</td>
+                <td>{{ role.get_state_display }} [<a href="/congress/findyourreps.xpd?state={{ role.state }}">map</a>]</td>
             </tr>
+            {% endif %}
             {% if role %}
             <tr>
                 <td>Party:</td>

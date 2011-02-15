@@ -3,8 +3,12 @@ from django.contrib import admin
 
 from person.models import Person, PersonRole
 
+class PersonRoleInline(admin.TabularInline):
+    model = PersonRole
+
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['name', 'birthday', 'gender', 'title', 'state']
+    list_display = ['name', 'birthday', 'gender']
+    inlines = [PersonRoleInline]
 
 class PersonRoleAdmin(admin.ModelAdmin):
     list_display = ['person', 'role_type', 'startdate', 'enddate', 'current']
