@@ -7,7 +7,8 @@ class PersonRoleInline(admin.TabularInline):
     model = PersonRole
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['name', 'birthday', 'gender']
+    list_display = ['name', 'birthday', 'gender', 'bioguideid']
+    search_fields = ['pk', 'firstname', 'lastname']
     inlines = [PersonRoleInline]
 
 class PersonRoleAdmin(admin.ModelAdmin):

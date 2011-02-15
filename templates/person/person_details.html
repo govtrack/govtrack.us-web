@@ -42,6 +42,18 @@ Congress > Members of Congress
     </div>
     <div class="clear"></div>
 
+    {% if youtube_channel %}
+    <div class="split-half">
+        <h2>Official YouTube Feed</h2>
+        {% with youtube_channel.latest_video as video %}
+        <a href="{{ video.url }}"><img width="260" src="{{ video.thumbnail }}"></a>
+        <div>"{{ video.title }}" - {{ video.published }}</div>
+        <div><a href="{{ video.url }}">Watch video</a></div>
+        {% endwith %}
+    </div>
+    {% endif %}
+    <div class="clear"></div>
+
     <h2>Elected Positions</h2>
     <table>
         <thead>

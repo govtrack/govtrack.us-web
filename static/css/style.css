@@ -83,3 +83,8 @@ th, td {
 p {
     margin-top: 1em;
 }
+
+.split-half {
+    float: left;
+    width: 50%;
+}

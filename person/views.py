@@ -9,6 +9,7 @@ from common.pagination import paginate
 
 from person.models import Person, PersonRole
 from person import analysis
+from person.video import get_youtube_channel
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -32,10 +33,15 @@ def person_details(request, pk):
         photo = None
 
     analysis_data = analysis.load_data(person)
+    if person.youtubeid:
+        youtube_channel = get_youtube_channel(person.youtubeid)
+    else:
+        youtube_channel = None
 
     return {'person': person,
             'role': role,
             'active_role': active_role,
             'photo': photo,
             'analysis_data': analysis_data,
+            'youtube_channel': youtube_channel,
             }

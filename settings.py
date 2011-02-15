@@ -91,6 +91,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 TEST_DATABASE_CHARSET = 'utf8'
 
+SUNLIGHTLABS_API_KEY = 'eca0795318ba4fe8ac01b96a8ef29b71'
+YOUTUBE_API_KEY = 'AI39si7Qf30FJyZyD1NIeTuvpBON8ZJ4OkHG2swKWLnQsRW-L4Rl3FiUGhEOXxMoKvVktYNLHQR-wfjWzvPw3kK4bhg1DkOwyQ'
+
 try:
     from settings_local import *
 except ImportError:
