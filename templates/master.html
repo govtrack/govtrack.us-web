@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>{% block title %}{% endblock %}</title>
+		
+		<link rel="shortcut icon" type="image/png" href="/static/favicon.png"></link>
+		
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
+		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
+		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}"></meta>
+		
+		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/reset.css?{% now "U" %}" />
+		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}master/stylesheet.css?{% now "U" %}" />
+		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/style.css?{% now "U" %}" />
+		{% block extra_css %}{% endblock %}
+		
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
+		{% block extra_js %}{% endblock %}
+		
+		{% block head %}{% endblock %}
+		
+		<style type="text/css">
+		{% block style %}{% endblock %}
+		</style>
+	</head>
+	
+	<body>
+	<!-- wrap starts here -->
+	<div id="wrap">
+	
+		<div id="header">
+			<div id="header-content">	
+				
+				<h1 id="logo"><a href="/" title="GovTrack.us Home">GovTrack.us</a></h1>	
+				<h2 id="slogan">Tracking the U.S. Congress</h2>		
+				
+				<!-- Menu Tabs -->
+				<ul>
+					<li><a href="/" id="current">Home</a></li>
+					<li><a href="/trackers">Trackers</a></li>
+					<li><a href="/developers">Developers</a></li>
+					<li><a href="/about">About</a></li>			
+				</ul>		
+				
+			</div>
+		</div>
+						
+		<!-- content-wrap starts here -->
+		<div id="content-wrap"><div id="content">
+			{% block crumbs %}{% endblock %}
+			
+			<div id="main">	
+				{% block body %}
+				{% endblock %}
+			</div>					
+			
+			{% block wide-body %}
+			{% endblock %}
+			
+		<!-- content-wrap ends here -->		
+		</div></div>
+	
+	<!-- footer starts here -->	
+	<div id="footer"><div id="footer-content">
+		
+			<div class="col float-left">
+				<h1>About</h1>
+				<p>GovTrack.us has been tracking the activities of the United States Congress since 2004 and has lead the open government data movement surrounding legislative information. It is a project of <a href="http://www.civicimpulse.com/">Civic Impulse, LLC</a>, a private company.</p>
+				<p>Feedback on the site is welcome to <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>, but I can&rsquo;t do your research for you, nor can I pass on messages to Members of Congress.</p>
+			</div>
+			
+			<div class="col float-left">
+				<h1>Links</h1>
+				<ul>				
+					<li><a href="/about">About GovTrack</a></li>
+				</ul>			
+			</div>		
+		
+			<div class="col2 float-right">
+			<p>
+			Copyright &copy; 2011 <strong>Civic Impulse, LLC</strong></p>
+			
+			<ul>						
+				<li><a href="/"><strong>Home</strong></a></li>
+				<li><a href="/blog/rss"><strong>RSS Feed</strong></a></li>								
+			</ul>	
+			</div>
+		
+	</div></div>
+	<!-- footer ends here -->
+		
+	<!-- wrap ends here -->
+	</div>
+	
+	</body>
+</html>

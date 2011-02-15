@@ -78,9 +78,9 @@ class PersonRoleProcessor(Processor):
     REQUIRED_ATTRIBUTES = ['type', 'startdate', 'enddate']
     ATTRIBUTES = [
         'type', 'current', 'startdate', 'enddate', 'senator_class',
-        'district', 'state', 'party',
+        'district', 'state', 'party', 'url'
     ]
-    FIELD_MAPPING = {'type': 'role_type', 'class': 'senator_class'}
+    FIELD_MAPPING = {'type': 'role_type', 'class': 'senator_class', 'url': 'website'}
     ROLE_TYPE_MAPPING = {'rep': RoleType.congressman, 'sen': RoleType.senator,
                          'prez': RoleType.president}
     SENATOR_CLASS_MAPPING = {'1': SenatorClass.class1, '2': SenatorClass.class2,

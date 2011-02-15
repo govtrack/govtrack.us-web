@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
+import os
 import os.path
 import sys
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.join(ROOT, 'apps'))
 
-DEBUG = False
+DEBUG = not ("RELEASE" in os.environ)
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Grigoriy Petukhov', 'lorien@lorien.name'),
 )
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 MANAGERS = ADMINS
 
@@ -73,6 +75,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
+    'django.contrib.humanize',
     # 3rd party libraries
     'common',
     'django_extensions',

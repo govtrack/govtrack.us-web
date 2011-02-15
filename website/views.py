@@ -13,3 +13,7 @@ def index(request):
     world = fromstring(data).xpath('//world/text()')[0]
     return {'world': world,
             }
+		  
+@render_to('website/about.html')
+def about(request):
+    return {}

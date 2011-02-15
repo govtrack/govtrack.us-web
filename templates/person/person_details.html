@@ -1,30 +1,39 @@
-{% extends 'base.html' %}
-
-{% block title %}{{ person }}{% endblock %}
-
+{% extends "master.html" %}
+{% load humanize %}
+{% block title %}{{person}} - GovTrack.us{% endblock %}
+{% block meta_description %}
+        {% if not active_role %}Former{% endif %}
+        {{ role.get_role_type_display }}, {{ role.get_state_display }}
+{% endblock %}
 {% block crumbs %}
 Congress > Members of Congress
 {% endblock %}
-
-{% block content %}
+{% block body %}
 <div class="person-details">
+<div class="col_left">
     <h1>{{ person }}</h1>
     {% if role %}
     <div class="role-details">
         {% if not active_role %}Former{% endif %}
-        {{ role.get_role_type_display }}, {{ role.get_state_display }}
-        {% endif %}
+        {{ role.get_role_type_display }} for
+	   {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}
+	   ({{ role.party }})
     </div>
+    {% if role.website %}
+    <p><a href="{{ role.website }}" target="_blank"><tt>{{ role.website }}</tt></a></p>
+    {% endif %}
+    {% endif %}
+    
     {% if photo %}
     <div class="photo">
-        <img src="{{ photo }}" />
+        <img src="{{ photo }}" alt="Photo" style="border: 1px solid black" />
     </div>
     {% endif %}
     <div class="description">
-        <table>
+        <table width="100%">
             <tr>
                 <td>State:</td>
-                <td>{{ person.get_state_display }}</td>
+                <td>{{ role.get_state_display }}</td>
             </tr>
             {% if role %}
             <tr>
@@ -49,11 +58,11 @@ Congress > Members of Congress
                 <th>Representing</th>
             </tr>
         </thead>
-        {% for role in person.roles.all %}
+        {% for role in person.roles_condensed %}
         <tr>
-            <td>{{ role.startdate|date:"Y" }}-{{ role.startdate|date:"Y" }}</td>
+            <td>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</td>
             <td>{{ role.get_role_type_display }}</td>
-            <td>{{ role.get_state_display }}</td>
+            <td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}</td>
         </tr>
         {% endfor %}
     </table>
@@ -66,12 +75,38 @@ Congress > Members of Congress
         </div>
         {% endif %}
         <div class="details">
-            {{ person.lastname }} is {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among his peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership.
+            {{ person.lastname }} is a {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among his peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership. <a href="#" onclick="$('#sponsorshipanalysis_info').slideDown(); $(this).fadeOut(); return false;">More...</a>
 
-
-            <p>These labels come from the <a href="#">Political Spectrum & Legislative Leadership statistical analysis</a> that we have carried out. The statistical analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or lonely (i.e. follower) by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
+            <p id="sponsorshipanalysis_info" style="color: grey; display: none">These labels come from the <a href="#">Political Spectrum & Legislative Leadership statistical analysis</a> that we have carried out. The statistical analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or lonely (i.e. follower) by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
         </div>
-        <div class="clear"></div>
+        <div class="clear"> </div>
+	</div>
     {% endif %}
+    
+    <h2>Bills Sponsored...</h2>
+    
+    <h2>Committee Assignments</h2>
+    ...
 </div>
+
+<div class="col_right">
+<div class="sidebox">
+	<h2>Happening Now</h2>
+	<p>Feb. 9, 2011. @soandso: Latest Tweet Latest Tweet Latest Tweet.</p> 
+	<p>Video from Sunlight's Real Time Congress if it's recent.</p>
+</div>
+<div class="sidebox">
+	<h2>Media</h2>
+	<p>Video from Sunlight's Real Time Congress if it's old.</p>
+	<p>Latest YouTube clip</p>
+</div>
+<div class="sidebox">
+	<h2>Tracked Events</h2>
+	<p>...</p>
+</div>
+</div>
+
+</div>
+
 {% endblock %}
+
