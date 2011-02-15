@@ -82,6 +82,7 @@ INSTALLED_APPS = (
     'south',
     # project modules
     'person',
+    'committee',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

@@ -7,3 +7,10 @@ Installation
    * python-lxml
 * Run build/buildenv.sh
 * Run reset.sh
+
+How to use parsers
+==================
+
+Run ./parse.py <thing>
+Available things:
+ * person - Person and PersonRole objects
