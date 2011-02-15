@@ -1,17 +1,16 @@
 #!.env/bin/python
-import gdata.youtube.service
-import gdata.service
+"""
+Sandbox for various tests.
+"""
 from common.system import setup_django
 setup_django(__file__)
-from django.conf import settings
+from person.video import get_sunlightlabs_video
 
-try:
-    username = 'SenatorOrrinHatch2'
-    service = gdata.youtube.service.YouTubeService()
-    service.client_id = 'govtrack.us-crawler'
-    service.developer_key = settings.YOUTUBE_API_KEY
-    uri = 'http://gdata.youtube.com/feeds/api/users/%s/uploads' % username
-    feed = service.GetYouTubeVideoFeed(uri)
-    print len(feed.entry)
-except gdata.service.RequestError, ex:
-    print 'Error', ex
+def main():
+    "All things happen here"
+
+    get_sunlightlabs_video('H001032')
+
+
+if __name__ == '__main__':
+    main()
