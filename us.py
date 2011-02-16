@@ -1,3 +1,5 @@
+# TODO: move this module to some package
+
 # Current apportionment to the states, or "T" for territories sending a delegate
 # or resident commissioner. This dict is used to filter out the historical territories
 # from lists of the current states and territories.
