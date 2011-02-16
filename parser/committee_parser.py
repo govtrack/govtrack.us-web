@@ -16,12 +16,11 @@ class CommitteeProcessor(Processor):
     """
 
     REQUIRED_ATTRIBUTES = ['type', 'code', 'displayname']
-    ATTRIBUTES = ['type', 'code', 'displayname', 'abbrev', 'url']
+    ATTRIBUTES = ['type', 'code', 'displayname', 'abbrev', 'url', 'obsolete']
     FIELD_MAPPING = {'type': 'committee_type', 'displayname': 'name'}
     TYPE_MAPPING = {'senate': CommitteeType.senate,
                     'joint': CommitteeType.joint,
                     'house': CommitteeType.house}
-    TYPO_MAPPING = {'abbrev': 'abbref'}
 
     def type_handler(self, value):
         return self.TYPE_MAPPING[value]
@@ -63,13 +62,16 @@ def find():
 
     tree = etree.parse('data/us/committees.xml')
     vars = set()
-    varkey = 'code'
-    for count, item in enumerate(tree.xpath('/committees/committee/subcommittee')):
+    varkey = None
+    attrs = set()
+    for count, item in enumerate(tree.xpath('/committees/committee')):
+        attrs.update(item.attrib.keys())
         if varkey:
             if varkey in item.attrib:
                 vars.add(item.get(varkey))
     if varkey:
         print varkey, vars
+    print 'Attributes: %s' % ', '.join(attrs)
 
 
 if __name__ == '__main__':

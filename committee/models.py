@@ -15,6 +15,7 @@ class Committee(models.Model):
     name = models.CharField(max_length=255)
     url = models.CharField(max_length=255, blank=True)
     abbrev = models.CharField(max_length=255, blank=True)
+    obsolete = models.BooleanField(blank=True, default=False)
 
     def __unicode__(self):
         return self.name
