@@ -103,11 +103,28 @@ Congress > Members of Congress
 	<p>Video from Sunlight's Real Time Congress if it's old.</p>
 
     {% if youtube_channel %}
-	<p>Latest YouTube clip</p>
+    <h3>Latest YouTube clip from <a href="{{ youtube_channel.url }}">youtube channel</a>.</h3>
     {% with youtube_channel.latest_video as video %}
-    <a href="{{ video.url }}"><img width="260" src="{{ video.thumbnail }}"></a>
-    <div>"{{ video.title }}" - {{ video.published }}</div>
-    <div><a href="{{ video.url }}">Watch video</a></div>
+
+        <script type='text/javascript' src='{{ MEDIA_URL }}jwplayer/jwplayer.js'></script>
+        <div id='mediaplayer'></div>
+        <script type="text/javascript">
+            jwplayer("mediaplayer").setup({
+                flashplayer: "{{ MEDIA_URL }}jwplayer/player.swf",
+                file: "{{ video.url }}",
+                width: 200,
+                height: 150,
+                events: {
+                    onPlay: function() {
+                        this.resize(320, 240);
+                    },
+                    onPause: function() {
+                        this.resize(200, 150);
+                    }
+                }
+            });
+        </script>
+
     {% endwith %}
     {% endif %}
 </div>

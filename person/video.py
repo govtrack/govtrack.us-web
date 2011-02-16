@@ -21,7 +21,10 @@ def get_youtube_channel(username):
     except gdata.service.RequestError:
         return None
     else:
-        response = {'latest_video': None}
+        response = {
+            'url': 'http://www.youtube.com/user/%s' % username,
+            'latest_video': None,
+        }
         if len(feed.entry):
             entry = feed.entry[0]
             response['latest_video'] = {
