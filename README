@@ -5,8 +5,16 @@ Installation
 * Install dependencies via OS package manager:
    * python-virtualenv
    * python-lxml
-* Run build/buildenv.sh
-* Run reset.sh
+* Run `build/buildenv.sh`
+* Run `reset.sh parse`
+
+
+reset.sh utility
+================
+
+Run `reset.sh` to recreate the database
+Run `reset.sh parse` to recreate the database and execute all parsers
+
 
 How to use parsers
 ==================
@@ -14,3 +22,4 @@ How to use parsers
 Run ./parse.py <thing>
 Available things:
  * person - Person and PersonRole objects
+ * committee - Committee and CommitteeMember objects

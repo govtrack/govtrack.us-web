@@ -1,5 +1,6 @@
 class Processor(object):
     FIELD_MAPPING = {}
+    DEFAULT_VALUES = {}
 
     def check_required_key(self, key, node):
         """
@@ -15,9 +16,13 @@ class Processor(object):
     def process(self, obj, node):
         for key in self.ATTRIBUTES:
             self.check_required_key(key, node)
-            if key in node.attrib:
+            if key in node.attrib or key in self.DEFAULT_VALUES:
                 field_name = self.FIELD_MAPPING.get(key, key)
-                setattr(obj, field_name, self.convert(key, node.get(key)))
+                if key in node.attrib:
+                    value = node.get(key)
+                else:
+                    value = self.DEFAULT_VALUES[key]
+                setattr(obj, field_name, self.convert(key, value))
         return obj
 
     def display_node(self, node):

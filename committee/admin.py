@@ -1,20 +1,22 @@
 # -*- coding: utf-8
 
 from django.contrib import admin
-from committee.models import Committee, Subcommittee
+from committee.models import Committee, CommitteeMember
 
-class SubcommitteeInline(admin.TabularInline):
-    model = Subcommittee
+class CommitteeInline(admin.TabularInline):
+    model = Committee
 
 class CommitteeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'committee_type', 'code', 'obsolete']
+    list_display = ['name', 'committee_type', 'code', 'obsolete', 'committee']
     list_filter = ['obsolete']
-    inlines = [SubcommitteeInline]
+    inlines = [CommitteeInline]
     search_fields = ['name', 'code']
 
-class SubcommitteeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'committee', 'code']
 
+class CommitteeMemberAdmin(admin.ModelAdmin):
+    list_display = ['person', 'committee', 'role']
+    raw_id_fields = ['person']
+    search_fields = ['person__firstname', 'person__lastname', 'committee__name']
 
 admin.site.register(Committee, CommitteeAdmin)
-admin.site.register(Subcommittee, SubcommitteeAdmin)
+admin.site.register(CommitteeMember, CommitteeMemberAdmin)
