@@ -1,5 +1,6 @@
 {% extends "master.html" %}
 {% load humanize %}
+{% load persontags %}
 {% block title %}{{person}} - GovTrack.us{% endblock %}
 {% block meta_description %}
         {% if not active_role %}Former{% endif %}
@@ -78,7 +79,7 @@ Congress > Members of Congress
         </div>
         {% endif %}
         <div class="details">
-            {{ person.lastname }} is a {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among his peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership. <a href="#" onclick="$('#sponsorshipanalysis_info').slideDown(); $(this).fadeOut(); return false;">More...</a>
+            {{ person.lastname }} is a {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among {{person|hisher}} peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership. <a href="#" onclick="$('#sponsorshipanalysis_info').slideDown(); $(this).fadeOut(); return false;">More...</a>
 
             <p id="sponsorshipanalysis_info" style="color: grey; display: none">These labels come from the <a href="#">Political Spectrum & Legislative Leadership statistical analysis</a> that we have carried out. The statistical analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or lonely (i.e. follower) by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
         </div>
