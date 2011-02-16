@@ -8,6 +8,8 @@ from common import enum
 from person.types import Gender, RoleType, SenatorClass, State
 from name import get_person_name
 
+from us import stateapportionment 
+
 class Person(models.Model):
     firstname = models.CharField(max_length=255)
     lastname = models.CharField(max_length=255)
@@ -37,6 +39,8 @@ class Person(models.Model):
     @property
     def name(self):
         return get_person_name(self, firstname_position='before')
+    def name_no_district(self):
+        return get_person_name(self, firstname_position='before', show_district=False)
 
     def __unicode__(self):
         return self.name
@@ -119,7 +123,6 @@ class PersonRole(models.Model):
         return self.get_title_name(short=True)
 
     def get_title_name(self, short):
-        stateapportionment = {'AL': 7, 'AK': 1, 'AS': 'T', 'AZ': 8, 'AR': 4, 'CA': 53, 'CO': 7, 'CT': 5, 'DE': 1, 'DC': 'T', 'FL': 25, 'GA': 13, 'GU': 'T', 'HI': 2, 'ID': 2, 'IL': 19, 'IN': 9, 'IA': 5, 'KS': 4, 'KY': 6, 'LA': 7, 'ME': 2, 'MD': 8, 'MA': 10, 'MI': 15, 'MN': 8, 'MS': 4, 'MO': 9, 'MT': 1, 'NE': 3, 'NV': 3, 'NH': 2, 'NJ': 13, 'NM': 3, 'NY': 29, 'NC': 13, 'ND':  1, 'MP': 'T', 'OH': 18, 'OK': 5, 'OR': 5, 'PA': 19, 'PR': 'T', 'RI': 2, 'SC': 6, 'SD': 1, 'TN': 9, 'TX': 32, 'UT': 3, 'VT': 1, 'VI': 'T', 'VA': 11, 'WA': 9, 'WV': 3, 'WI': 8, 'WY': 1}
         if self.role_type == RoleType.president:
             return 'President'
         if self.role_type == RoleType.senator:

@@ -34,7 +34,7 @@ Congress > Members of Congress
             {% if role %}
             <tr>
                 <td>State:</td>
-                <td>{{ role.get_state_display }} [<a href="/congress/findyourreps.xpd?state={{ role.state }}">map</a>]</td>
+                <td>{{ role.get_state_display }} [<a href="/congress/members/{{ role.state }}">district map</a>]</td>
             </tr>
             {% endif %}
             {% if role %}
