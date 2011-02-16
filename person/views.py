@@ -9,7 +9,7 @@ from common.pagination import paginate
 
 from person.models import Person, PersonRole
 from person import analysis
-from person.video import get_youtube_channel
+from person.video import get_youtube_channel, get_sunlightlabs_video
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -38,10 +38,18 @@ def person_details(request, pk):
     else:
         youtube_channel = None
 
+    if person.bioguideid:
+        sunlight_video = get_sunlightlabs_video(
+            'H001032')
+            #person.bioguideid)
+    else:
+        sunlight_video = None
+
     return {'person': person,
             'role': role,
             'active_role': active_role,
             'photo': photo,
             'analysis_data': analysis_data,
             'youtube_channel': youtube_channel,
+            'sunlight_video': sunlight_video,
             }

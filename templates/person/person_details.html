@@ -107,9 +107,9 @@ Congress > Members of Congress
     {% with youtube_channel.latest_video as video %}
 
         <script type='text/javascript' src='{{ MEDIA_URL }}jwplayer/jwplayer.js'></script>
-        <div id='mediaplayer'></div>
+        <div id='mediaplayer1'></div>
         <script type="text/javascript">
-            jwplayer("mediaplayer").setup({
+            jwplayer("mediaplayer1").setup({
                 flashplayer: "{{ MEDIA_URL }}jwplayer/player.swf",
                 file: "{{ video.url }}",
                 width: 200,
@@ -127,6 +127,33 @@ Congress > Members of Congress
 
     {% endwith %}
     {% endif %}
+
+    {% comment %}
+    {% if sunlight_video %}
+    <h3>Sunlightlabs API video</h3>
+    {% with sunlight_video as video %}
+        <div>{{ video.published|date }}</div>
+        <script type='text/javascript' src='{{ MEDIA_URL }}jwplayer/jwplayer.js'></script>
+        <div id='mediaplayer2'></div>
+        <script type="text/javascript">
+            jwplayer("mediaplayer2").setup({
+                flashplayer: "{{ MEDIA_URL }}jwplayer/player.swf",
+                file: "{{ video.url }}",
+                width: 200,
+                height: 150,
+                events: {
+                    onPlay: function() {
+                        this.resize(320, 240);
+                    },
+                    onPause: function() {
+                        this.resize(200, 150);
+                    }
+                }
+            });
+        </script>
+    {% endwith %}
+    {% endif %}
+    {% endcomment %}
 </div>
 <div class="sidebox">
 	<h2>Tracked Events</h2>

@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import gdata.youtube.service
 import gdata.service
 from lxml import etree
@@ -40,7 +41,9 @@ def get_sunlightlabs_video(bioguideid):
     """
     Fetch latest video about person from api.realtimecongress.com.
 
-    Documentation: http://services.sunlightlabs.com/docs/Real_Time_Congress_API/
+    Documentation:
+     * http://services.sunlightlabs.com/docs/Real_Time_Congress_API/
+     * http://services.sunlightlabs.com/docs/Real_Time_Congress_API/videos/
     """
 
     url = 'http://api.realtimecongress.org/api/v1/videos.xml?apikey=%s&bioguide_ids=%s' % (
@@ -48,7 +51,27 @@ def get_sunlightlabs_video(bioguideid):
     try:
         data = urllib.urlopen(url).read()
     except IOError, ex:
-        logging.error(ex)
-        return None
+        pass
     else:
         tree = etree.fromstring(data)
+        for video in tree.xpath('//video'):
+            try:
+                url = video.xpath('.//mp4')[0].text
+            except IndexError:
+                pass
+            else:
+                response = {
+                    'published': parse_time(video.xpath('./pubdate')[0].text),
+                    'url': url,
+                }
+                return response
+    return None
+
+
+def parse_time(timestr):
+    timestr = timestr.lower()
+    try:
+        return datetime.strptime(timestr, '%Y-%m-%dt%H:%M:%S:00z') - timedelta(hours=5)
+    except ValueError:
+        # Without seconds
+        return datetime.strptime(timestr, '%Y-%m-%dt%H:%Mz') - timedelta(hours=5)
