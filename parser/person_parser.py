@@ -10,7 +10,7 @@ class PersonProcessor(Processor):
     ATTRIBUTES = [
         'id', 'firstname', 'lastname', 'bioguideid',
         'metavidid', 'pvsid', 'osid', 'youtubeid', 'gender',
-        'birthday', 'middlename', 'religion', 
+        'birthday', 'middlename',
         'namemod', 'nickname', 'twitterid',
     ]
     GENDER_MAPPING = {'M': Gender.male, 'F': Gender.female}

@@ -25,8 +25,6 @@ class Person(models.Model):
     gender = models.IntegerField(choices=Gender, blank=True, null=True)
     metavidid = models.CharField(max_length=255, blank=True)
     youtubeid = models.CharField(max_length=255, blank=True)
-    # religion set(['Catholic', 'Episcopalian', 'Unknown', 'Non-Denominational', 'Reformed Latter Day Saint', 'Unitarian', 'African Methodist Episcopal', 'Lutheran', 'Seventh Day Adventist', 'Christian', 'Latter Day Saints', 'Assembly of God', 'Church of Christ', 'Jewish', 'Moravian', 'Seventh-Day Adventist', 'Roman Catholic', 'Unitarian Universalist', 'Protestant', 'United Church of Christ', 'Presbyterian', 'Nazarene', 'United Methodist', 'Congregationalist', 'Reformed Church in America', 'Zion Lutheran', 'United Brethren in Christ', 'First Christian Church (Disciples of Christ)', 'Methodist', 'Christian Reformed', 'Episcopal', 'Second Baptist', 'Christian Scientist', 'Southern Baptist', 'Baptist', 'Greek Orthodox'])
-    religion = models.CharField(max_length=255, blank=True)
     twitterid = models.CharField(max_length=50, blank=True)
     
     # namemod set(['II', 'Jr.', 'Sr.', 'III', 'IV'])
