@@ -1,14 +1,21 @@
 {% extends "master.html" %}
-{% load humanize %}
-{% load persontags %}
+{% load humanize persontags video %}
+
 {% block title %}{{person}} - GovTrack.us{% endblock %}
+
 {% block meta_description %}
         {% if not active_role %}Former{% endif %}
         {{ role.get_role_type_display }}, {{ role.get_state_display }}
 {% endblock %}
+
+{% block extra_js %}
+<script type='text/javascript' src='{{ MEDIA_URL }}jwplayer/jwplayer.js'></script>
+{% endblock %}
+
 {% block crumbs %}
 Congress > Members of Congress
 {% endblock %}
+
 {% block body %}
 <div class="person-details">
 <div class="col_left">
@@ -98,9 +105,9 @@ Congress > Members of Congress
 	<h2>Happening Now</h2>
     <p id="latest-tweet"></p>
     <script type="text/javascript">
-        // TODO: move code to separate javascript file
         function renderLatestTweet(username) {
-            $.get('http://twitter.com/statuses/user_timeline/' + username + '.json', {count: 1}, function(data) {
+            var url = 'http://twitter.com/statuses/user_timeline/' + username + '.json';
+            $.get(url, {count: 1}, function(data) {
                 if (data.length) {
                     var tweet = data[0];
                     var created = new Date(tweet.created_at);
@@ -116,37 +123,16 @@ Congress > Members of Congress
             renderLatestTweet('{{ person.twitterid }}');
         {% endif %}
     </script>
-	<p>Video from Sunlight's Real Time Congress if it's recent.</p>
+    {% if recent_video %}
+        {% video recent_video %}
+    {% endif %}
 </div>
 <div class="sidebox">
 	<h2>Media</h2>
-	<p>Video from Sunlight's Real Time Congress if it's old.</p>
 
-    {% if youtube_channel %}
-    <h3>Latest YouTube clip from <a href="{{ youtube_channel.url }}">youtube channel</a>.</h3>
-    {% with youtube_channel.latest_video as video %}
-
-        <script type='text/javascript' src='{{ MEDIA_URL }}jwplayer/jwplayer.js'></script>
-        <div id='mediaplayer1'></div>
-        <script type="text/javascript">
-            jwplayer("mediaplayer1").setup({
-                flashplayer: "{{ MEDIA_URL }}jwplayer/player.swf",
-                file: "{{ video.url }}",
-                width: 200,
-                height: 150,
-                events: {
-                    onPlay: function() {
-                        this.resize(320, 240);
-                    },
-                    onPause: function() {
-                        this.resize(200, 150);
-                    }
-                }
-            });
-        </script>
-
-    {% endwith %}
-    {% endif %}
+    {% for video in videos %}
+        {% video video %}
+    {% endfor %}
 
     {% comment %}
     {% if sunlight_video %}

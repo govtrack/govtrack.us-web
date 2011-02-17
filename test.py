@@ -9,7 +9,11 @@ from person.video import get_sunlightlabs_video
 def main():
     "All things happen here"
 
-    get_sunlightlabs_video('H001032')
+    res = get_sunlightlabs_video('H001032')
+    for video in res['videos']:
+        for key, value in video.iteritems():
+            print key, value
+        print '---'
 
 
 if __name__ == '__main__':

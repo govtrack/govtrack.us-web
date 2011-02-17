@@ -1,0 +1,17 @@
+<div id='{{ box_id }}'></div>
+<script type="text/javascript">
+    jwplayer("{{ box_id }}").setup({
+        flashplayer: "{{ MEDIA_URL }}jwplayer/player.swf",
+        file: "{{ video.url }}",
+        width: 200,
+        height: 150,
+        events: {
+            onPlay: function() {
+                this.resize(320, 240);
+            },
+            onPause: function() {
+                this.resize(200, 150);
+            }
+        }
+    });
+</script>
