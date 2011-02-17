@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from datetime import datetime, timedelta
 
 from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
@@ -9,7 +10,7 @@ from common.pagination import paginate
 
 from person.models import Person, PersonRole
 from person import analysis
-from person.video import get_youtube_channel, get_sunlightlabs_video
+from person.video import get_youtube_videos, get_sunlightlabs_videos
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -33,23 +34,35 @@ def person_details(request, pk):
         photo = None
 
     analysis_data = analysis.load_data(person)
+
+    videos = []
+
     if person.youtubeid:
-        youtube_channel = get_youtube_channel(person.youtubeid)
-    else:
-        youtube_channel = None
+        yt_videos = get_youtube_videos(person.youtubeid)
+        videos.extend(yt_videos['videos'])
 
     if person.bioguideid:
-        sunlight_video = get_sunlightlabs_video(
-            'H001032')
-            #person.bioguideid)
-    else:
-        sunlight_video = None
+        sunlight_videos = get_sunlightlabs_videos(
+            'H001032'
+            #person.bioguideid
+        )
+        videos.extend(sunlight_videos['videos'])
+
+    recent_video = None
+    if videos:
+        videos.sort(key=lambda x: x['published'], reverse=True)
+        if videos[0]['published'] > datetime.now() - timedelta(days=10):
+            recent_video = videos[0]
+            videos = videos[1:]
+
+    # We are intrested only in five videos
+    videos = videos[:4]
 
     return {'person': person,
             'role': role,
             'active_role': active_role,
             'photo': photo,
             'analysis_data': analysis_data,
-            'youtube_channel': youtube_channel,
-            'sunlight_video': sunlight_video,
+            'recent_video': recent_video,
+            'videos': videos,
             }
