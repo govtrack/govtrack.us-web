@@ -8,6 +8,8 @@ from django.core.urlresolvers import reverse
 from common.decorators import render_to
 from common.pagination import paginate
 
+from cache_utils.decorators import cached
+
 @render_to('website/index.html')
 def index(request):
     data = '<root><child><world>world!!</world></child></root>'
@@ -18,7 +20,7 @@ def index(request):
 @render_to('website/about.html')
 def about(request):
     return {}
-    
+   
 def http_rest_json(url, args=None, method="GET"):
     import urllib, urllib2, json
     if method == "GET" and args != None:
@@ -64,7 +66,8 @@ def browsemembers(request, state, district):
                 reps.append((i, None))
         
         try:
-            info = http_rest_json("http://www.govtrack.us/perl/wms/list-regions.cgi",
+            info = cached(60*60*24)(http_rest_json)(
+                "http://www.govtrack.us/perl/wms/list-regions.cgi",
                 {
                 "dataset": "http://www.rdfabout.com/rdf/usgov/us/states" if district == None else "http://www.rdfabout.com/rdf/usgov/congress/house/110",
                 "uri": "http://www.rdfabout.com/rdf/usgov/geo/us/" + state.lower() + ("/cd/110/" + district if district != None else ""),
