@@ -95,7 +95,26 @@ Congress > Members of Congress
 <div class="col_right">
 <div class="sidebox">
 	<h2>Happening Now</h2>
-	<p>Feb. 9, 2011. @soandso: Latest Tweet Latest Tweet Latest Tweet.</p> 
+    <p id="latest-tweet"></p>
+    <script type="text/javascript">
+        // TODO: move code to separate javascript file
+        function renderLatestTweet(username) {
+            $.get('http://twitter.com/statuses/user_timeline/' + username + '.json', {count: 1}, function(data) {
+                if (data.length) {
+                    var tweet = data[0];
+                    var created = new Date(tweet.created_at);
+                    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+                                  'Sep', 'Oct', 'Nov', 'Dec'];
+                    var datestr = months[created.getMonth()] + '. ' + created.getDate() + ', ' + created.getFullYear();
+                    var content = tweet.text;
+                    $('#latest-tweet').text(datestr + ' ' + content);
+                }
+            }, 'jsonp');
+        }
+        {% if person.twitterid %}
+            renderLatestTweet('{{ person.twitterid }}');
+        {% endif %}
+    </script>
 	<p>Video from Sunlight's Real Time Congress if it's recent.</p>
 </div>
 <div class="sidebox">

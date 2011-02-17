@@ -11,7 +11,7 @@ class PersonProcessor(Processor):
         'id', 'firstname', 'lastname', 'bioguideid',
         'metavidid', 'pvsid', 'osid', 'youtubeid', 'gender',
         'birthday', 'middlename', 'religion', 
-        'namemod', 'nickname'
+        'namemod', 'nickname', 'twitterid',
     ]
     GENDER_MAPPING = {'M': Gender.male, 'F': Gender.female}
     FIELD_MAPPING = {'id': 'pk'}
