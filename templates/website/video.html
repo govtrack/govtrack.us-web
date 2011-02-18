@@ -11,6 +11,7 @@
 
 <a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1" class="video-box" onmousedown="play(this, '{{ box_id }}')">
     <div id="{{ box_id }}"></div>
+    <div class="title">{{ video.title }}</div>
 </a>
 
 <script type="text/javascript">

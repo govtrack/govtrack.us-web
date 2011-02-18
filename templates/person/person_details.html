@@ -108,7 +108,9 @@ Congress > Members of Congress
 <div class="col_right">
 <div class="sidebox">
 	<h2>Happening Now</h2>
-    <p id="latest-tweet"></p>
+    <p id="latest-tweet" style="display: none">
+        Twitter: <span class="content"></span>
+    </p>
     <script type="text/javascript">
         function renderLatestTweet(username) {
             var url = 'http://twitter.com/statuses/user_timeline/' + username + '.json';
@@ -120,7 +122,7 @@ Congress > Members of Congress
                                   'Sep', 'Oct', 'Nov', 'Dec'];
                     var datestr = months[created.getMonth()] + '. ' + created.getDate() + ', ' + created.getFullYear();
                     var content = tweet.text;
-                    $('#latest-tweet').text(datestr + ' ' + content);
+                    $('#latest-tweet').show().find('.content').text(datestr + ' ' + content).show();
                 }
             }, 'jsonp');
         }

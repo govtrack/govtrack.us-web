@@ -88,6 +88,7 @@ def get_sunlightlabs_videos(bioguideid):
                     clip_start = parse_time(clip.xpath('./time')[0].text)
                     offset = (clip_start - video_start).seconds
                 item = {
+                    'title': video_start.strftime('%B %d, %Y'),
                     'published': video_start,
                     'url': url,
                     'offset': offset,
