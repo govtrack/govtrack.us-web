@@ -66,3 +66,10 @@ def person_details(request, pk):
             'recent_video': recent_video,
             'videos': videos,
             }
+
+
+@render_to('person/person_list.html')
+def person_list(request):
+    page = paginate(Person.objects.all(), request)
+    return {'page': page,
+            }
