@@ -10,6 +10,11 @@
 
 {% block extra_js %}
 <script type='text/javascript' src='{{ MEDIA_URL }}jwplayer/jwplayer.js'></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ MEDIA_URL }}fancybox/jquery.fancybox-1.3.4.css" type="text/css" media="screen" />
 {% endblock %}
 
 {% block crumbs %}
@@ -130,9 +135,12 @@ Congress > Members of Congress
 <div class="sidebox">
 	<h2>Media</h2>
 
+    <div class="video-gallery">
     {% for video in videos %}
         {% video video %}
     {% endfor %}
+    </div>
+    <div class="clear"></div>
 
     {% comment %}
     {% if sunlight_video %}

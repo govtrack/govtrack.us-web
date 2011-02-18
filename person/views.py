@@ -42,10 +42,7 @@ def person_details(request, pk):
         videos.extend(yt_videos['videos'])
 
     if person.bioguideid:
-        sunlight_videos = get_sunlightlabs_videos(
-            'H001032'
-            #person.bioguideid
-        )
+        sunlight_videos = get_sunlightlabs_videos(person.bioguideid)
         videos.extend(sunlight_videos['videos'])
 
     recent_video = None

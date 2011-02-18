@@ -66,7 +66,6 @@ def get_sunlightlabs_videos(bioguideid):
     except IOError, ex:
         pass
     else:
-        open('log', 'w').write(data)
         tree = etree.fromstring(data)
         for video in tree.xpath('//video'):
             # Find mp4 file. Also there could be mp3 and mms - ignore them.

@@ -1,16 +1,32 @@
-<div id='{{ box_id }}'></div>
+<script type="text/javascript">
+    function play(elem, id) {
+        $.fancybox({
+            type: 'swf',
+            href: $(elem).attr('href') + '&foo=bar',
+            swf: {'wmode':'transparent'},
+        });
+        return false;
+    }
+</script>
+
+<a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1" class="video-box" onmousedown="play(this, '{{ box_id }}')">
+    <div id="{{ box_id }}"></div>
+</a>
+
 <script type="text/javascript">
     jwplayer("{{ box_id }}").setup({
         flashplayer: "{{ MEDIA_URL }}jwplayer/player.swf",
+        swf: {'wmode': 'transparent'},
         file: "{{ video.url }}",
         width: 200,
         height: 150,
+        volume: 0,
         events: {
-            onPlay: function() {
-                this.resize(320, 240);
-            },
-            onPause: function() {
-                this.resize(200, 150);
+            // Then we click on player SWF object
+            // it starts playing so we should stop it
+            // We use this small player only as thumbnail container
+            onPlay: function(){
+                this.stop()
             }
         }
     });
