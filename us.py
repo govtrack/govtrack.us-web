@@ -1,5 +1,7 @@
 # TODO: move this module to some package
 
+from datetime import datetime
+
 # Current apportionment to the states, or "T" for territories sending a delegate
 # or resident commissioner. This dict is used to filter out the historical territories
 # from lists of the current states and territories.
@@ -15,4 +17,31 @@ statenames = {"AL":"Alabama", "AK":"Alaska", "AS":"American Samoa", "AZ":"Arizon
 statelist = [s for s in statenames.items() if s[0] in stateapportionment]
 statelist.sort(key=lambda x : x[1])
 
+CONGRESS_DATES = {}
+
+def parse_govtrack_date(d):
+    try:
+        return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-04:00')
+    except ValueError:
+        pass
+	try:
+		return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-05:00')
+	except ValueError:
+		pass
+	return datetime.strptime(d, '%Y-%m-%d')
+
+
+def get_congress_dates(congressnumber):
+    if CONGRESS_DATES == { }:
+        cd = {}
+        for line in open('data/us/sessions.tsv'):
+            cn, sessionname, startdate, enddate = line.strip().split('\t')[0:4]
+            if not '-' in startdate: # header
+                continue
+            cn = int(cn)
+            if not cn in cd:
+                cd[cn] = [parse_govtrack_date(startdate), None]
+            cd[cn][1] = parse_govtrack_date(enddate)
+        CONGRESS_DATES.update(cd)
+    return CONGRESS_DATES[congressnumber]
 

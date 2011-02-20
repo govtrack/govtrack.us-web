@@ -2,13 +2,16 @@
 from lxml.etree import fromstring
 
 from django.http import Http404
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render_to_response
+from django.template import RequestContext
 from django.core.urlresolvers import reverse
 
 from common.decorators import render_to
 from common.pagination import paginate
 
 from cache_utils.decorators import cached
+
+import json
 
 @render_to('website/index.html')
 def index(request):
@@ -17,9 +20,9 @@ def index(request):
     return {'world': world,
             }
 		  
-@render_to('website/about.html')
-def about(request):
-    return {}
+def staticpage(request, pagename):
+    if pagename == "developers": pagename = "developers/index"
+    return render_to_response('website/' + pagename + '.html', { }, RequestContext(request))
    
 def http_rest_json(url, args=None, method="GET"):
     import urllib, urllib2, json
@@ -91,4 +94,40 @@ def browsemembers(request, state, district):
         "senators": sens,
         "reps": reps,
     }
+
+		  
+@render_to('congress/political_spectrum.html')
+def political_spectrum(request):
+    import person.models
+    from datetime import datetime
+    
+    rows = []
+    fnames = [
+        'data/us/112/stats/sponsorshipanalysis_h.txt',
+        'data/us/112/stats/sponsorshipanalysis_s.txt',
+    ]
+    alldata = open(fnames[0]).read() + open(fnames[1]).read()
+    for line in alldata.splitlines():
+        chunks = [x.strip() for x in line.strip().split(',')]
+        if chunks[0] == "ID":
+            continue
+        
+        data = { }
+        data['id'] = chunks[0]
+        data['x'] = float(chunks[1])
+        data['y'] = float(chunks[2])
+        
+        p = person.models.Person.objects.get(id=chunks[0])
+        data['label'] = p.lastname
+        if p.birthday: data['age'] = (datetime.now().date() - p.birthday).days / 365.25
+        data['gender'] = p.gender
+        
+        r = p.get_last_role_at_congress(112)
+        data['type'] = r.role_type
+        data['party'] = r.party
+        data['days_in_congress'] = (r.startdate - p.roles.filter(startdate__lte=r.startdate).order_by('startdate')[0].startdate).days
+        
+        rows.append(data)
+	
+    return { "data": json.dumps(rows) }
 

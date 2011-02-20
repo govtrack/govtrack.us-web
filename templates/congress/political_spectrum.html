@@ -1,0 +1,94 @@
+{% extends "master.html" %}
+{% load humanize %}
+{% block title %}Members of Congress Political Spectrum &amp; Leadership Rankings - GovTrack.us{% endblock %}
+{% block head %}
+{% endblock %}
+{% block style %}
+#fig {
+	float: left;
+	width: 650px;
+	height: 500px;
+}
+#controls {
+	float: left;
+	width: 300px;
+}
+{% endblock %}
+{% block wide-body %}
+
+<h1>Members of Congress Political Spectrum and Leadership Rankings</h1>
+
+<div id="fig">
+<script type="text/javascript" src="{{MEDIA_URL}}js/protovis-r3.2.js"></script>
+<script type="text/javascript+protovis">
+data = {{data|safe}};
+
+/* Sizing and scales. */
+var w = 600,
+    h = 500,
+	cx = 0,
+	cy = 0,
+	zoom = 1,
+    x = pv.Scale.linear(0, 1).range(0, w),
+    y = pv.Scale.linear(0, 1).range(0, h);
+
+/* The root panel. */
+var vis = new pv.Panel()
+    .width(w)
+    .height(h)
+    .bottom(20)
+    .left(20)
+    .right(10)
+    .top(5);
+
+/* Y-axis and ticks. */
+vis.add(pv.Rule)
+    .data(y.ticks())
+    .bottom(y)
+    .strokeStyle(function(d) d ? "#eee" : "#000");
+/* X-axis and ticks. */
+vis.add(pv.Rule)
+    .data(x.ticks())
+    .left(x)
+    .strokeStyle(function(d) d ? "#eee" : "#000");
+
+/* The dot plot! */
+vis.add(pv.Panel)
+    .data(data)
+  .add(pv.Dot)
+    .left(function(d) x(d.x))
+    .bottom(function(d) y(d.y))
+	.strokeStyle(function(d) { if (d.party == "Democrat") return "#00F"; if (d.party == "Republican") return "#F00"; return "#590"; })
+    .fillStyle(function() "#590")
+    .size(function(d) 3)
+	.anchor("bottom").add(pv.Label)
+		.textStyle(function(d) { if (d.party == "Democrat") return "#00A"; if (d.party == "Republican") return "#A00"; return "#590"; })
+		.text(function(	d) d.label);
+		
+function transform() {
+  var t = this.transform().invert();
+  cx = t.x/w;
+  cy = -t.y/h;
+  zoom = 1/(Math.pow(2, (t.k-1)*50));
+  x.domain(cx + .5 - .5/zoom, cx + .5 + .5/zoom);
+  y.domain(cy + .5 - .5/zoom, cy + .5 + .5/zoom);
+  vis.render();
+}
+vis.add(pv.Panel)
+    .events("all")
+    .event("mousedown", pv.Behavior.pan())
+    .event("mousewheel", pv.Behavior.zoom())
+    .event("pan", transform)
+    .event("zoom", transform);
+
+vis.render();
+
+    </script>
+</div>
+
+<div id="controls">
+	<p><em>Zoom in and out with your mouse scroll wheel. Pan by dragging.</em></p>
+</div>
+
+{% endblock %}
+

@@ -8,28 +8,28 @@ from common import enum
 from person.types import Gender, RoleType, SenatorClass, State
 from name import get_person_name
 
-from us import stateapportionment 
+from us import stateapportionment, get_congress_dates 
 
 class Person(models.Model):
     firstname = models.CharField(max_length=255)
     lastname = models.CharField(max_length=255)
     middlename = models.CharField(max_length=255, blank=True)
 
-    #  bioguide.congress.gov
-    bioguideid = models.CharField(max_length=255, blank=True) #  bioguide.congress.gov
-    pvsid = models.CharField(max_length=255, blank=True) #  bioguide.congress.gov
-    osid = models.CharField(max_length=255, blank=True) #  bioguide.congress.gov
-
-    # Misc
+    # misc
     birthday = models.DateField(blank=True, null=True)
     gender = models.IntegerField(choices=Gender, blank=True, null=True)
-    metavidid = models.CharField(max_length=255, blank=True)
-    youtubeid = models.CharField(max_length=255, blank=True)
-    twitterid = models.CharField(max_length=50, blank=True)
     
     # namemod set(['II', 'Jr.', 'Sr.', 'III', 'IV'])
     namemod = models.CharField(max_length=10, blank=True)
     nickname = models.CharField(max_length=255, blank=True)
+
+	# links
+    bioguideid = models.CharField(max_length=255, blank=True) #  bioguide.congress.gov
+    pvsid = models.CharField(max_length=255, blank=True) #  vote-smart.org
+    osid = models.CharField(max_length=255, blank=True) #  opensecrets.org
+    metavidid = models.CharField(max_length=255, blank=True) # metavid.org
+    youtubeid = models.CharField(max_length=255, blank=True) # YouTube
+    twitterid = models.CharField(max_length=50, blank=True) # Twitter
 
     @property
     def fullname(self):
@@ -80,7 +80,7 @@ class Person(models.Model):
             return None
 
     def get_last_role_at_congress(self, congress):
-        start, end = get_congress_dates(date_or_congress)
+        start, end = get_congress_dates(congress)
         try:
             return self.roles.filter(startdate__lte=end, enddate__gte=start).order_by('-startdate')[0]
         except IndexError:

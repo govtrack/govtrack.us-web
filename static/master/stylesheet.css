@@ -60,7 +60,7 @@ img.float-left {
   margin: 5px 15px 5px 0px;
 }
 
-code {
+.code {
   margin: 5px 0;
   padding: 10px;
   text-align: left;
@@ -342,6 +342,7 @@ input.button {
 }
 #main ul li {
 	list-style-image: url(bullet.gif);
+	margin: .75em 0;
 }
 
 .post {
@@ -371,7 +372,7 @@ input.button {
 /* footer */
 #footer {
 	clear: both;
-	margin: 0; padding: 0;
+	margin: 2em 0 0 0; padding: 0;
 	font: normal .95em/1.6em 'Trebuchet MS', Tahoma, Arial, sans-serif;
 	text-align: left;	
 }
@@ -381,7 +382,6 @@ input.button {
 #footer-content {	
 	border-top: 1px solid #EAEAEA;
 	margin: 0 auto;
-	padding-left: 15px;
 }
 #footer-content a {
 	text-decoration: none;
