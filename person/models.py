@@ -16,7 +16,7 @@ class Person(models.Model):
     middlename = models.CharField(max_length=255, blank=True)
 
     #  bioguide.congress.gov
-    bioguideid = models.CharField(max_length=255, blank=True) #  bioguide.congress.gov
+    bioguideid = models.CharField(max_length=255) #  bioguide.congress.gov
     pvsid = models.CharField(max_length=255, blank=True) #  bioguide.congress.gov
     osid = models.CharField(max_length=255, blank=True) #  bioguide.congress.gov
 

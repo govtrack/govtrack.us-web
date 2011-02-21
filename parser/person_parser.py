@@ -6,7 +6,7 @@ from parser.processor import Processor
 from person.models import Person, PersonRole, Gender, RoleType, SenatorClass
 
 class PersonProcessor(Processor):
-    REQUIRED_ATTRIBUTES = ['id', 'firstname', 'lastname']
+    REQUIRED_ATTRIBUTES = ['id', 'firstname', 'lastname', 'biguideid']
     ATTRIBUTES = [
         'id', 'firstname', 'lastname', 'bioguideid',
         'metavidid', 'pvsid', 'osid', 'youtubeid', 'gender',
