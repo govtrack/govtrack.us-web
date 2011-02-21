@@ -2,7 +2,11 @@ from committee.models import CommitteeMemberRole
 
 def get_committee_assignments(person):
     """
-    Find committee assignments.
+    Find committee assignments for the given person
+    in current congress.
+
+    Returns sorted list of CommitteeMemberRole objects where each object is
+    committee assinment which could has subcommittee assignments in ``subroles`` attribute.
     """
 
     role_weights = {
@@ -13,7 +17,12 @@ def get_committee_assignments(person):
         CommitteeMemberRole.member: 1
     }
     def cmp_roles(a, b):
-        return cmp(role_weights[a.role], role_weights[b.role])
+        result = cmp(role_weights[a.role], role_weights[b.role])
+        if result != 0:
+            return result
+        else:
+            return -1 * cmp(unicode(a.committee), unicode(b.committee))
+
 
     roles = person.assignments.all()
     parent_mapping = {}
