@@ -1,0 +1,47 @@
+{% extends "master.html" %}
+{% load humanize persontags %}
+
+{% block title %}U.S. Congress List of Commitees - GovTrack.us{% endblock %}
+
+{% block crumbs %}
+<a href="{% url congress_home %}">Congress</a>
+{% endblock %}
+
+{% block body %}
+<div class="person-details">
+<div class="col_left">
+
+    <h1>Congressional Committees</h1>
+    <p>Click a committee name to view its members and to see legislation assigned to that committee.</p>
+
+    <h2>Senate Committees</h2>
+    <ul>
+        {% for item in senate_committees %}
+        <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h2>House Committees</h2>
+    <ul>
+        {% for item in house_committees %}
+        <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h2>Joint Committees</h2>
+    <ul>
+        {% for item in joint_committees %}
+        <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="col_right">
+    <div class="sidebox">
+        <h2>Upcoming Committee Meetings</h3>
+        <p>Use the Upcoming Meetings Feed to keep an eye on upcoming committee meetings as they are posted. (Unfortunately we cannot track House committees comprehensively.)</p>
+    </div>
+</div>
+
+{% endblock %}
+

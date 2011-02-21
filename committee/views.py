@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from common.decorators import render_to
 from common.pagination import paginate
 
-from committee.models import Committee, CommitteeMemberRole
+from committee.models import Committee, CommitteeMemberRole, CommitteeType
 from committee.util import sort_members
 
 @render_to('committee/committee_details.html')
@@ -25,3 +25,17 @@ def committee_details(request, parent_code, child_code=None):
             'SIMPLE_MEMBER': CommitteeMemberRole.member,
             }
 
+@render_to('committee/committee_list.html')
+def committee_list(request):
+    def key(x):
+        return unicode(x).replace('the ', '')
+    
+    def getlist(type_):
+        items = list(Committee.objects.filter(committee_type=type_))
+        return sorted(items, key=key)
+
+    return {
+        'senate_committees': getlist(CommitteeType.senate),
+        'house_committees': getlist(CommitteeType.house),
+        'joint_committees': getlist(CommitteeType.joint),
+    }
