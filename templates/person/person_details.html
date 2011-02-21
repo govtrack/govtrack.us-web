@@ -137,9 +137,10 @@ Congress > Members of Congress
 <div class="sidebox">
 	<h2>Media</h2>
 
-    <div class="video-gallery">
+    <div class="recent-video-list">
     {% for video in videos %}
         {% video video %}
+        {% if forloop.counter|divisibleby:2 %}<div class="clear"></div>{% endif %}
     {% endfor %}
     </div>
     <div class="clear"></div>

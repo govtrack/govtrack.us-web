@@ -52,7 +52,7 @@ def person_details(request, pk):
             recent_video = videos[0]
             videos = videos[1:]
 
-    # We are intrested only in five videos
+    # We are intrested only in four videos
     videos = videos[:4]
 
     return {'person': person,

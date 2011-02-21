@@ -32,7 +32,7 @@
     width: 50%;
 }
 
-.video-gallery .video-box {
+.recent-video-list .video-thumbnail {
     float: left;
     margin-right: 0.5em;
     margin-bottom: 0.5em;
