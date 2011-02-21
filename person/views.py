@@ -11,6 +11,7 @@ from common.pagination import paginate
 from person.models import Person, PersonRole
 from person import analysis
 from person.video import get_youtube_videos, get_sunlightlabs_videos
+from person.util import get_committee_assignments
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -41,9 +42,10 @@ def person_details(request, pk):
         yt_videos = get_youtube_videos(person.youtubeid)
         videos.extend(yt_videos['videos'])
 
-    if person.bioguideid:
-        sunlight_videos = get_sunlightlabs_videos(person.bioguideid)
-        videos.extend(sunlight_videos['videos'])
+    #if person.bioguideid:
+        #sunlight_videos = get_sunlightlabs_videos(person.bioguideid)
+        ##sunlight_videos = get_sunlightlabs_videos('H001032')
+        #videos.extend(sunlight_videos['videos'])
 
     recent_video = None
     if videos:
@@ -62,6 +64,7 @@ def person_details(request, pk):
             'analysis_data': analysis_data,
             'recent_video': recent_video,
             'videos': videos,
+            'assignments': get_committee_assignments(person),
             }
 
 

@@ -37,7 +37,7 @@ class CommitteeMemberRole(enum.Enum):
     member = enum.Item(5, 'Member')
 
 class CommitteeMember(models.Model):
-    person = models.ForeignKey('person.Person')
+    person = models.ForeignKey('person.Person', related_name='assignments')
     committee = models.ForeignKey('committee.Committee', related_name='members')
     role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member)
 
