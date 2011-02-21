@@ -92,3 +92,7 @@ def browsemembers(request, state, district):
         "reps": reps,
     }
 
+
+@render_to('website/congress_home.html')
+def congress_home(request):
+    return {}

@@ -38,3 +38,10 @@
     margin-bottom: 0.5em;
     width: 200px;
 }
+
+li.committee-member-item {
+    float: left;
+    width: 100px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+}
