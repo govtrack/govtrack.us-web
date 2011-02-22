@@ -101,8 +101,32 @@ Congress > Members of Congress
     
     <h2>Bills Sponsored...</h2>
     
+    {% if assignments %}
     <h2>Committee Assignments</h2>
-    ...
+    <a name="assignments"></a>
+    <ul>
+        {% for role in assignments %}
+        <li class="committee-assignment">
+            <div>
+                {{ role.get_role_display }}, <a href="{{ role.committee.get_absolute_url }}">{{ role.committee }}</a>
+                {% if role.subroles %}
+                <a style="color: #666" href="#" onclick="$(this).hide(); $(this).parents('.committee-assignment').find('.subcommittee-assignment-list').show(); return false;">Show {{ role.subroles|length }} subcommittee assignment{{ role.subroles|pluralize }}</a>
+                {% endif %}
+            </div>
+            {% if role.subroles %}
+            <ul class="subcommittee-assignment-list" style="display: none">
+                {% for subrole in role.subroles %}
+                <li>
+                {{ subrole.get_role_display }}, <a href="{{ subrole.committee.get_absolute_url }}">{{ subrole.committee }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
 </div>
 
 <div class="col_right">
@@ -137,39 +161,13 @@ Congress > Members of Congress
 <div class="sidebox">
 	<h2>Media</h2>
 
-    <div class="video-gallery">
+    <div class="recent-video-list">
     {% for video in videos %}
         {% video video %}
+        {% if forloop.counter|divisibleby:2 %}<div class="clear"></div>{% endif %}
     {% endfor %}
     </div>
     <div class="clear"></div>
-
-    {% comment %}
-    {% if sunlight_video %}
-    <h3>Sunlightlabs API video</h3>
-    {% with sunlight_video as video %}
-        <div>{{ video.published|date }}</div>
-        <script type='text/javascript' src='{{ MEDIA_URL }}jwplayer/jwplayer.js'></script>
-        <div id='mediaplayer2'></div>
-        <script type="text/javascript">
-            jwplayer("mediaplayer2").setup({
-                flashplayer: "{{ MEDIA_URL }}jwplayer/player.swf",
-                file: "{{ video.url }}",
-                width: 200,
-                height: 150,
-                events: {
-                    onPlay: function() {
-                        this.resize(320, 240);
-                    },
-                    onPause: function() {
-                        this.resize(200, 150);
-                    }
-                }
-            });
-        </script>
-    {% endwith %}
-    {% endif %}
-    {% endcomment %}
 </div>
 <div class="sidebox">
 	<h2>Tracked Events</h2>

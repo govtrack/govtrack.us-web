@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.core.urlresolvers import reverse
 
 from common import enum
 
@@ -28,6 +29,16 @@ class Committee(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
+
+    def get_absolute_url(self):
+        parent = self.committee
+        if parent:
+            return reverse('subcommittee_details', args=[parent.code, self.code])
+        else:
+            return reverse('committee_details', args=[self.code])
+
 
 class CommitteeMemberRole(enum.Enum):
     exofficio = enum.Item(1, 'Ex Officio')
@@ -37,9 +48,17 @@ class CommitteeMemberRole(enum.Enum):
     member = enum.Item(5, 'Member')
 
 class CommitteeMember(models.Model):
-    person = models.ForeignKey('person.Person')
+    person = models.ForeignKey('person.Person', related_name='assignments')
     committee = models.ForeignKey('committee.Committee', related_name='members')
     role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member)
 
     def __unicode__(self):
         return '%s @ %s as %s' % (self.person, self.committee, self.get_role_display())
+
+MEMBER_ROLE_WEIGHTS = {
+    CommitteeMemberRole.chairman: 5,
+    CommitteeMemberRole.vice_chairman: 4,
+    CommitteeMemberRole.ranking_member: 3,
+    CommitteeMemberRole.exofficio: 2,
+    CommitteeMemberRole.member: 1
+}

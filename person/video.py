@@ -31,11 +31,15 @@ def get_youtube_videos(username):
     else:
         if len(feed.entry):
             for entry in feed.entry[:5]:
+                thumb = None
+                for node in entry.media.thumbnail:
+                    if int(node.width) == 120:
+                        thumb = node.url
                 item = {
                     'title': entry.media.title.text,
                     'published': parse_time(entry.published.text),
                     'url': entry.media.player.url,
-                    'thumbnail': entry.media.thumbnail[0].url,
+                    'thumbnail': thumb,
                 }
                 response['videos'].append(item)
     return response

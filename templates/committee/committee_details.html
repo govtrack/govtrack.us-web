@@ -1,0 +1,48 @@
+{% extends "master.html" %}
+{% load humanize persontags %}
+
+{% block title %}{{ committee }} - GovTrack.us{% endblock %}
+
+{% block crumbs %}
+<a href="{% url congress_home %}">Congress</a> &gt; Committees
+{% if parent %} &gt; <a href="{{ parent.get_absolute_url }}">{{ parent }}</a>{% endif %}
+{% endblock %}
+
+{% block body %}
+<div class="person-details">
+<div class="col_left">
+
+    <h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
+
+    <h2>Members</h2>
+    <ul>
+        {% for member in members %}
+        <li class="committee-member-item">
+            <div>{% if member.role != SIMPLE_MEMBER %}{{ member.get_role_display }}{% endif %}</div>
+            <div><a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url }}" /></a></div>
+                <div><a href="{{ member.person.get_absolute_url }}">{{ member.person }}</a></div>
+        </li>
+        {% if forloop.counter|divisibleby:4 %}<div class="clear"></div>{% endif %}
+        {% endfor %}
+    </ul>
+    <div class="clear"></div>
+
+    {% if subcommittees %}
+    <h2>Subcommittees</h2>
+    <ul>
+        {% for item in subcommittees %}
+        <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+<div class="col_right">
+    <div class="sidebox">
+        <h2>Upcoming Committee Meetings</h3>
+        <p>Use the Upcoming Meetings Feed to keep an eye on upcoming committee meetings as they are posted. (Unfortunately we cannot track House committees comprehensively.)</p>
+    </div>
+</div>
+
+{% endblock %}
+

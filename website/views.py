@@ -136,3 +136,6 @@ def political_spectrum(request):
         "years_in_congress_max": years_in_congress_max,
         }
 
+@render_to('website/congress_home.html')
+def congress_home(request):
+    return {}

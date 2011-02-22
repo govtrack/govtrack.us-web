@@ -4,15 +4,32 @@
             type: 'swf',
             href: $(elem).attr('href') + '&foo=bar',
             swf: {'wmode':'transparent'},
+            title: $(elem).attr('title'),
         });
         return false;
     }
 </script>
 
-<a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1" class="video-box" onmousedown="play(this, '{{ box_id }}')">
-    <div id="{{ box_id }}"></div>
-    <div class="title">{{ video.title }}</div>
-</a>
+<div class="video-thumbnail">
+    <a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1" onclick="return play(this, '{{ box_id }}')" title="{{ video.title }}">
+        {% if video.thumbnail %}
+        <img src="{{ video.thumbnail }}" />
+        {% else %}
+        <b>NO TUMBNAIL</b>
+        {% endif %}
+        <div class="title">{{ video.title }}</div>
+    </a>
+</div>
+
+{% comment %}
+{# This is another approach when thumbnail is displayed #}
+{# using the jwplayer instance with small dimensions #}
+<div class="video-thumbnail">
+    <a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1"  onmousedown="return play(this, '{{ box_id }}')">
+        <div id="{{ box_id }}"></div>
+        <div class="title">{{ video.title }}</div>
+    </a>
+</div>
 
 <script type="text/javascript">
     jwplayer("{{ box_id }}").setup({
@@ -32,3 +49,4 @@
         }
     });
 </script>
+{% endcomment %}

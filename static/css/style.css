@@ -32,9 +32,16 @@
     width: 50%;
 }
 
-.video-gallery .video-box {
+.recent-video-list .video-thumbnail {
     float: left;
     margin-right: 0.5em;
     margin-bottom: 0.5em;
     width: 200px;
+}
+
+li.committee-member-item {
+    float: left;
+    width: 100px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
 }

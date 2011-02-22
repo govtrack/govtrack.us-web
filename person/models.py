@@ -24,7 +24,7 @@ class Person(models.Model):
     nickname = models.CharField(max_length=255, blank=True)
 
 	# links
-    bioguideid = models.CharField(max_length=255, blank=True) #  bioguide.congress.gov
+    bioguideid = models.CharField(max_length=255) #  bioguide.congress.gov
     pvsid = models.CharField(max_length=255, blank=True) #  vote-smart.org
     osid = models.CharField(max_length=255, blank=True) #  opensecrets.org
     metavidid = models.CharField(max_length=255, blank=True) # metavid.org
@@ -38,6 +38,7 @@ class Person(models.Model):
     @property
     def name(self):
         return get_person_name(self, firstname_position='before')
+
     def name_no_district(self):
         return get_person_name(self, firstname_position='before', show_district=False)
 
@@ -85,6 +86,13 @@ class Person(models.Model):
             return self.roles.filter(startdate__lte=end, enddate__gte=start).order_by('-startdate')[0]
         except IndexError:
             return None
+
+    def get_photo_url(self):
+        """
+        Return URL of 100px photo.
+        """
+
+        return '/data/photos/%d-100px.jpeg' % self.pk
 
 
 class PersonRole(models.Model):
