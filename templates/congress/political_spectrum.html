@@ -7,7 +7,8 @@
 #fig {
 	float: left;
 	width: 650px;
-	height: 500px;
+	height: 530px;
+	border: 1px solid black;
 }
 #controls {
 	float: left;
@@ -21,7 +22,30 @@
 <div id="fig">
 <script type="text/javascript" src="{{MEDIA_URL}}js/protovis-r3.2.js"></script>
 <script type="text/javascript+protovis">
-data = {{data|safe}};
+var data = {{data|safe}};
+var xaxis = "ideology";
+
+function make_yscale() {
+	return [cy + .5 - .6/zoom, cy + .5 + .6/zoom];
+}
+
+function make_xscale() {
+	if (zoom < 1) zoom = 1;
+	
+	if (xaxis == "ideology") {
+		return [cx + .5 - .5/zoom, cx + .5 + .5/zoom];
+	} else if (xaxis == "years_in_congress") {
+		a = {{years_in_congress_max}}/Math.exp(2)
+			- {{years_in_congress_max}}/Math.exp(2)/zoom
+			+ cx*(zoom-1)*{{years_in_congress_max}};
+		if (a < 0) a = 0;
+		
+		b = {{years_in_congress_max}}/Math.exp(2) + ({{years_in_congress_max}}-{{years_in_congress_max}}/Math.exp(2))/zoom
+		+ cx*(zoom-1)*{{years_in_congress_max}};
+		
+		return [.5 + a, b+2];
+	}
+}
 
 /* Sizing and scales. */
 var w = 600,
@@ -29,8 +53,8 @@ var w = 600,
 	cx = 0,
 	cy = 0,
 	zoom = 1,
-    x = pv.Scale.linear(0, 1).range(0, w),
-    y = pv.Scale.linear(0, 1).range(0, h);
+    x = (xaxis == "ideology") ? pv.Scale.linear(make_xscale()).range(0, w) : pv.Scale.log(make_xscale()).base(5).range(0, w),
+    y = pv.Scale.linear(make_yscale()).range(0, h);
 
 /* The root panel. */
 var vis = new pv.Panel()
@@ -41,22 +65,24 @@ var vis = new pv.Panel()
     .right(10)
     .top(5);
 
-/* Y-axis and ticks. */
-vis.add(pv.Rule)
-    .data(y.ticks())
-    .bottom(y)
-    .strokeStyle(function(d) d ? "#eee" : "#000");
+
 /* X-axis and ticks. */
 vis.add(pv.Rule)
     .data(x.ticks())
     .left(x)
-    .strokeStyle(function(d) d ? "#eee" : "#000");
+    .strokeStyle(function(d) d ? "#eee" : "#000")
+	.anchor("bottom").add(pv.Label)
+    .visible(function(d) d >= 1)
+    .text(function(d) d);
 
 /* The dot plot! */
 vis.add(pv.Panel)
     .data(data)
   .add(pv.Dot)
-    .left(function(d) x(d.x))
+  .left(function(d) {
+	if (xaxis == "ideology") return x(d.x);
+	if (xaxis == "years_in_congress") return x(d.years_in_congress);
+  }) 
     .bottom(function(d) y(d.y))
 	.strokeStyle(function(d) { if (d.party == "Democrat") return "#00F"; if (d.party == "Republican") return "#F00"; return "#590"; })
     .fillStyle(function() "#590")
@@ -70,8 +96,8 @@ function transform() {
   cx = t.x/w;
   cy = -t.y/h;
   zoom = 1/(Math.pow(2, (t.k-1)*50));
-  x.domain(cx + .5 - .5/zoom, cx + .5 + .5/zoom);
-  y.domain(cy + .5 - .5/zoom, cy + .5 + .5/zoom);
+  x.domain(make_xscale());
+  y.domain(make_yscale());
   vis.render();
 }
 vis.add(pv.Panel)
@@ -84,6 +110,7 @@ vis.add(pv.Panel)
 vis.render();
 
     </script>
+<center>Years in Congress</center>
 </div>
 
 <div id="controls">

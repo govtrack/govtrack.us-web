@@ -125,9 +125,14 @@ def political_spectrum(request):
         r = p.get_last_role_at_congress(112)
         data['type'] = r.role_type
         data['party'] = r.party
-        data['days_in_congress'] = (r.startdate - p.roles.filter(startdate__lte=r.startdate).order_by('startdate')[0].startdate).days
+        data['years_in_congress'] = (min(datetime.now().date(),r.enddate) - p.roles.filter(startdate__lte=r.startdate).order_by('startdate')[0].startdate).days / 365.25
         
         rows.append(data)
-	
-    return { "data": json.dumps(rows) }
+        
+    years_in_congress_max = max([data['years_in_congress'] for data in rows])
+    
+    return {
+        "data": json.dumps(rows),
+        "years_in_congress_max": years_in_congress_max,
+        }
 
