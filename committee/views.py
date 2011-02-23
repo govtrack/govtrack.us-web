@@ -31,7 +31,7 @@ def committee_list(request):
         return unicode(x).replace('the ', '')
     
     def getlist(type_):
-        items = list(Committee.objects.filter(committee_type=type_))
+        items = list(Committee.objects.filter(committee_type=type_, obsolete=False))
         return sorted(items, key=key)
 
     return {
