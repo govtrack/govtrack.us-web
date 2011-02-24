@@ -1,7 +1,7 @@
 import sys
 
 class Progress(object):
-    def __init__(self, step=None, total=None, stop=None):
+    def __init__(self, step=None, total=None, stop=None, name='records'):
         if not total and not step:
             raise Exception('Both step and total arguments are None')
         if total and not step:
@@ -10,6 +10,7 @@ class Progress(object):
         self.count = 0
         self.total = total
         self.stop = stop
+        self.name = name
     
     def tick(self):
         self.count += 1
@@ -18,7 +19,7 @@ class Progress(object):
                 percents = ' [%d%%]' % int((self.count / float(self.total)) * 100)
             else:
                 percents = ''
-            print 'Processed %d records%s' % (self.count, percents)
+            print 'Processed %d %s%s' % (self.count, self.name, percents)
         if self.count == self.stop:
             print 'Reached stop value %d' % self.stop
             sys.exit()

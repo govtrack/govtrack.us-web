@@ -5,7 +5,7 @@ from optparse import OptionParser
 import sys
 
 PARSER_USAGE = """Usage: %prog action
-Available actions: person, commitee"""
+Available actions: person, commitee, vote"""
 
 def main():
     parser = OptionParser(usage=PARSER_USAGE)
