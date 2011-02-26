@@ -18,7 +18,9 @@
 			  isPng: true
 			};		
 		}
-	
+		
+		var map;
+		
 		$(function() {
 			var myOptions = {
 				zoom: {{center_zoom}},
@@ -30,7 +32,7 @@
 				scaleControl: true,
 				streetViewControl: false
 				};
-			var map = new google.maps.Map(document.getElementById("map_canvas"),
+			map = new google.maps.Map(document.getElementById("map_canvas"),
 			myOptions);
 			
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
@@ -40,19 +42,17 @@
 
 			overlayWMS = new google.maps.ImageMapType(createOverlay("-outlines", .7));
 			map.overlayMapTypes.insertAt(0, overlayWMS);
-
-			/*google.maps.event.addListener(map, "click", function(event) {
-				var req = 'http://www.govtrack.us/perl/wms/get-region.cgi?layer=cd-110&lat=' + event.latLng.lat() + '&long=' + event.latLng.lng() + '&format=json';
-				ajax(req, {}, {
-						success: function(res) {
-							alert(res[0]);
-						},
-						failure: function() {
-							alert(0);
-						}
-				});
-			});*/
 			
+			{% if request.GET.marker %}
+				lnglat = "{{request.GET.marker}}".split(":");
+				loc = new google.maps.LatLng(lnglat[1], lnglat[0]);
+				map.setCenter(loc);
+				var marker = new google.maps.Marker({
+					map: map, 
+					position: loc
+				});
+				map.setZoom({{center_zoom}} + 2);					
+			{% endif %}
 		});
 		
 		function doFullScreen() {
@@ -70,6 +70,44 @@
 				$('#map_canvas').css('height', '99%');
 			}
 		}
+		
+		var geocoder;
+		var geocoder_result;
+		function doGeoCode() {
+			if (!geocoder)
+				geocoder = new google.maps.Geocoder();
+			geocoder.geocode(
+				{ 'address': $('#address').val() },
+				function(results, status) {
+					if (status == google.maps.GeocoderStatus.OK) {
+						geocoder_result = results[0].geometry.location;
+						
+						req = 'http://www.govtrack.us/perl/wms/get-region.cgi?layer=cd-110&lat=' + results[0].geometry.location.lat() + '&long=' + results[0].geometry.location.lng() + '&format=json&json_callback=wms_address_callback';
+						$(document).append("<script src=\"" + req + "\"></scr" + "ipt>");
+					} else {
+					   alert("Sorry Google couldn't find that address: " + status);
+				    }
+				});
+		}
+		
+		function wms_address_callback(ret) {
+			if (ret.length == 0) {
+				alert("The address does not appear to be within a United States Congressional District.");
+				return;
+			}
+			
+			var uri = ret[0].URI;
+
+			var cd_re = /\/(..)\/cd\/110\/(.*)/;
+			var st_re = /us\/(..)/;
+			
+			var m;
+			if (m = cd_re.exec(uri)) {
+				window.location = "/congress/members/" + m[1].toUpperCase() + "/" + m[2] + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
+			} else if (m = st_re.exec(uri)) {
+				window.location = "/congress/members/" + m[1].toUpperCase() + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
+			}
+		}
 	</script>
 {% endblock %}
 {% block style %}
@@ -79,7 +117,7 @@
 
 <h1>Members of Congress &amp; Congressional District Maps</h1>
 
-<div id="leftpanel" style="float: left; width: 310px; padding-right: 2em">
+<div id="leftpanel" style="float: left; width: 310px; padding-right: 30px">
 	{% if not state %}
 	<div id="find">
 		<h2 class="first">Find a Senator or Representative</h2>
@@ -116,8 +154,9 @@
 		<form action="#">	
 		<p>			
 			<input id="address" value="" type="text" size="30" />
-			<input class="button" type="submit" value="Search" />
-			<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>		
+			<input class="button" type="button" value="Search" onclick="doGeoCode()"/>
+			<script>$('#address').input_default('350 5th Ave, New York, NY 10001');
+			$('#address').keydown_enter(doGeoCode);</script>
 		</p>		
 		</form>
 		
@@ -129,10 +168,6 @@
 		
 		<h2>Statistics</h2>
 		<p>Take a look at <a href="/congress/members/stats">statistics</a> about missed votes, bill sponsorship, ideology, and leadership.</p>
-		
-		<h2>More Maps</h2>
-		<p>Want to print these maps? Try our <a href="/congress/members/printablemaps">printable PDF maps</a> instead.</p>
-		<p>You can also use the <a href="/embed/googlemaps">map layer on your maps mash-up or get a KML file</a> for Google Maps/Earth.</p>
 	</div>
 	
 	{% else %}
@@ -187,7 +222,7 @@
 		</div>
 	</div>
 
-	<div id="map_canvas" style="width: 620px; height:450px; border: 1px solid black"> </div>
+	<div id="map_canvas" style="width: 650px; height:475px; border: 1px solid black"> </div>
 
 </div>
 
