@@ -1,0 +1,50 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Data Sources{% endblock %}
+{% block style %}
+.press td { padding-top: 1em }
+{% endblock %}
+{% block crumbs %}
+<a href="/about">About GovTrack</a>
+{% endblock %}
+{% block body %}
+<div class="col_left">
+	<h1>Data Sources</h1>
+	
+	<p>GovTrack pulls the information you see here from a variety of other sources. We also make available the information we collect in a normalized XML format for other projects to reuse. For more information n that, see the <a href="/developers">Developer Documentation</a>.</p>
+	
+	<p>Some information comes from these official government sources:</p>
+		
+		<ul>
+			<li>The Library of Congress and the Congressional Research Service via <a href="http://thomas.loc.gov">THOMAS.gov</a>
+				for the status legislation, subject terms of bills, bill summaries, and upcoming House committee meetings (from the Daily Digest). <i>We have been actively campaigning Congress and the Library of Congress to publish this information in a structured data format. Until then, we &ldquo;screen-scrape&rdquo; their web pages, extracting the information in a semi-reliable automated way.</i></li>
+			<li>The <a href="http://www.house.gov">House of Representatives</a>
+				and the <a href="http://www.senate.gov">Senate</a> for information on Members of Congress, committee membership, voting records,
+				and <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">upcoming committee meetings</a>. <i>Our campaign to have the Senate publish its roll call vote results in XML format came to an end when they began doing so in 2009 (<a href="http://www.cjr.org/campaign_desk/senate_goes_xml.php">more info</a>).</i></li>
+			<li>The <a href="http://www.gpo.gov">Government Printing Office</a> for the text of legislation and photos of members of congress from the Congressional Pictorial Directory.</li>
+			<li>The <a href="http://www.cbo.gov/">Congressional Budget Office (CBO)</a>, a nonpartisan research arm of Congress, for reports related to the projected cost of bills.</li>
+			<li>The <a href="http://bioguide.congress.gov">Congressional Biographical Directory</a> for biographical and historical information on members of Congress.</li>
+			<li>The <a href="http://www.census.gov">Census Bureau</a> for geographic data on congressional districts.</li>
+			<li>Live and archived feeds of House floor video from <a href="http://houselive.gov">HouseLive.gov</a>.</li>
+			<li>The official YouTube feeds of Members of Congress.</li>
+		</ul>
+		
+		<p>And these independent sources:</p>
+		
+		<ul>
+			<li><a href="http://web.mit.edu/17.251/www/data_page.html">Congressional Committees, Historical Standing Committees data set by Garrison Nelson and Charles Stewart</a> for biographical and historical information on Members of Congress, including congressional district assignments.</li>
+			<li>Rosenthal,  Howard  L.,  and  Keith  T.  Poole. <a href="http://voteview.ucsd.edu/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a>. Pittsburgh, PA:  Keith T. Poole, Carnegie  Mellon  University, Graduate School of Industrial Administration, 1991. (1st-100th Congresses)</li>
+			<li>Martis&rsquo;s &ldquo;The Historical Atlas of Political Parties in the United States Congress&rdquo;, via Keith Poole&rsquo;s roll call votes data set, for political party affiliation for Members of Congress from 1789 through about year 2000.</li>
+			<li>The <a href="http://www.law.cornell.edu/">Cornell University Legal Information Institute</a> for the text of the United States Code in the &ldquo;law in context&rdquo; pop-ups in bill text.</li>
+			<li>The <a href="http://services.sunlightlabs.com/api/">Sunlight Labs API</a> for supplemental biographical information on Members of Congress.</li>
+			<li>The <a href="http://services.sunlightlabs.com/docs/Real_Time_Congress_API/">Sunlight Labs Real Time Congress API</a> for an index into House video and live updated data on House activity.</li>
+		</ul>	
+</div>
+
+<div class="col_right">
+	<div class="sidebox">
+	</div>
+
+</div>
+
+{% endblock %}
+

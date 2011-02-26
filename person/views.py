@@ -73,3 +73,4 @@ def person_list(request):
     page = paginate(Person.objects.all(), request)
     return {'page': page,
             }
+

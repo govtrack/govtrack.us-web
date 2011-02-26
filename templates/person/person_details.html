@@ -110,7 +110,7 @@ Congress > Members of Congress
             <div>
                 {{ role.get_role_display }}, <a href="{{ role.committee.get_absolute_url }}">{{ role.committee }}</a>
                 {% if role.subroles %}
-                <a style="color: #666" href="#" onclick="$(this).hide(); $(this).parents('.committee-assignment').find('.subcommittee-assignment-list').show(); return false;">Show {{ role.subroles|length }} subcommittee assignment{{ role.subroles|pluralize }}</a>
+                <div><a style="color: #666" href="#" onclick="$(this).hide(); $(this).parents('.committee-assignment').find('.subcommittee-assignment-list').show(); return false;">Show {{ role.subroles|length }} subcommittee assignment{{ role.subroles|pluralize }}</a></div>
                 {% endif %}
             </div>
             {% if role.subroles %}
