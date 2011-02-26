@@ -52,7 +52,7 @@ def browsemembers(request, state, district):
                 sens.append(None)
     
         reps = []
-        if stateapportionment[state] in ("T", "1"):
+        if stateapportionment[state] in ("T", 1):
             dists = [0]
             if district != None:
                 raise Http404()
