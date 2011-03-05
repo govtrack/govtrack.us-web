@@ -95,7 +95,15 @@ def browsemembers(request, state, district):
         "reps": reps,
     }
 
-		  
+@render_to('website/district_map_embed.html')
+def districtmapembed(request):
+	return {
+		"demo": "demo" in request.GET,
+		"state": request.GET.get("state", ""),
+		"district": request.GET.get("district", ""),
+		"bounds": request.GET.get("bounds", None),
+	}
+
 @render_to('congress/political_spectrum.html')
 def political_spectrum(request):
     import person.models

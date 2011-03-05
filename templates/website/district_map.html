@@ -5,11 +5,17 @@
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
 	<script type="text/javascript">
-		function createOverlay(style, opacity) {
+		function createDistrictsOverlay(outlines_only, opacity, state, district) {
 			return {
 			  getTileUrl: function(coord, zoom) 
 			  {
-				  return "http://www.govtrack.us/perl/wms/wms.cgi?google_tile_template_values=" + coord.x + "," + coord.y + "," + zoom + "&LAYERS=cd-110" + style + "{% if state %}:http://www.rdfabout.com/rdf/usgov/geo/us/{{state|lower}}{% if not district %}%25{% else %}/cd/110/{{district}}{% endif %}{% endif %}&FORMAT=image/png";	
+				  return "http://www.govtrack.us/perl/wms/wms.cgi?google_tile_template_values=" + coord.x + "," + coord.y + "," + zoom
+				  	+ "&LAYERS=cd-110" + (outlines_only ? "-outlines" : "")
+					+ (state ? ":http://www.rdfabout.com/rdf/usgov/geo/us/" + state
+						+ (!district ? "%25"
+							: "/cd/110/" + district)
+						: "")
+					+ "&FORMAT=image/png";	
 			  },
 			  tileSize: new google.maps.Size(256, 256),
 			  minZoom: 2,
@@ -37,10 +43,10 @@
 			
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
 			
-			overlayWMS = new google.maps.ImageMapType(createOverlay("", .2));
+			overlayWMS = new google.maps.ImageMapType(createDistrictsOverlay(false, .2, {% if state %}"{{state|lower}}"{% else %}null{% endif %}, {% if district %}"{{district}}"{% else %}null{% endif %}));
 			map.overlayMapTypes.insertAt(0, overlayWMS);			
 
-			overlayWMS = new google.maps.ImageMapType(createOverlay("-outlines", .7));
+			overlayWMS = new google.maps.ImageMapType(createDistrictsOverlay(true, .7, {% if state %}"{{state|lower}}"{% else %}null{% endif %}, {% if district %}"{{district}}"{% else %}null{% endif %}));
 			map.overlayMapTypes.insertAt(0, overlayWMS);
 			
 			{% if request.GET.marker %}
@@ -53,6 +59,12 @@
 				});
 				map.setZoom({{center_zoom}} + 2);					
 			{% endif %}
+			
+			google.maps.event.addListener(map, "bounds_changed", function() {
+				var b = map.getBounds();
+				$("#embedbounds").text(Math.round(b.getSouthWest().lng()*1000)/1000 + "," + Math.round(b.getNorthEast().lat()*1000)/1000 + "," + Math.round(b.getNorthEast().lng()*1000)/1000 + "," + Math.round(b.getSouthWest().lat()*1000)/1000);
+			});
+			
 		});
 		
 		function doFullScreen() {
@@ -224,6 +236,19 @@
 
 	<div id="map_canvas" style="width: 650px; height:475px; border: 1px solid black"> </div>
 
+	<div style="float: right; padding-top: 1em">
+		<div id="embed_teaser">
+			<a href="#" onclick="$('#embed_teaser').hide(); $('#embed_details').fadeIn(); return false;">Embed this map...</a>
+		</div>
+		<div id="embed_details" style="display: none">
+			<div>Embed this map on your own website using this HTML code:</div>
+		
+			<pre id="embedpre" wrap="hard" style="width: 500px; overflow: auto; margin-left: 2em; font-size: 80%">&lt;iframe width="425" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
+	 src="http://www.govtrack.us/embed/mapframe?{% if state %}state={{state|lower}}{% endif %}{% if district %}&amp;district={{district}}{% endif %}&amp;bounds=<span id="embedbounds"></span>"&gt;&lt;/iframe&gt;</pre>
+	  
+			<div>or advanced web designers can <a href="/embed/mapframe?demo=1">view the source</a>.</div>
+		</div>
+	</div>
 </div>
 
 {% endblock %}
