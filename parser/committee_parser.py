@@ -1,5 +1,6 @@
 """
-Parser of data/us/committees.xml
+Parse list of committees which ever were in Congress.
+Parse members of current congress committees.
 """
 
 from lxml import etree
@@ -7,6 +8,7 @@ from datetime import datetime
 
 from parser.progress import Progress
 from parser.processor import Processor
+from parser.models import File
 from committee.models import (Committee, CommitteeType, CommitteeMember,
                               CommitteeMemberRole)
 from person.models import Person
@@ -63,86 +65,83 @@ class CommitteeMemberProcessor(Processor):
 
 
 def main():
-    "Main parser logic"
+    """
+    Process committees, subcommittees and
+    members of current congress committees.
+    """
 
     com_processor = CommitteeProcessor()
     subcom_processor = SubcommitteeProcessor()
     member_processor = CommitteeMemberProcessor()
-    Committee.objects.all().delete()
 
     print 'Processing committees'
-    tree = etree.parse('data/us/committees.xml')
-    total = len(tree.xpath('/committees/committee'))
-    progress = Progress(total=total)
-    for committee in tree.xpath('/committees/committee'):
-        cobj = com_processor.process(Committee(), committee)
-        cobj.save()
+    COMMITTEES_FILE = 'data/us/committees.xml'
+    # If file changed then delete committees and set
+    # this varible to True, it will be the signal
+    # to run committee members parser anyway
+    committees_deleted = False
 
-        for subcom in committee.xpath('./subcommittee'):
-            sobj = subcom_processor.process(Committee(), subcom)
-            sobj.committee = cobj
-            sobj.save()
-        progress.tick()
+    if not File.objects.is_changed(COMMITTEES_FILE):
+        print 'File %s was not changed' % COMMITTEES_FILE
+    else:
+        # Delete all existing committees and
+        # records which are linked to them via ForeignKey
+        Committee.objects.all().delete()
+        committees_deleted = True
+
+        tree = etree.parse(COMMITTEES_FILE)
+        total = len(tree.xpath('/committees/committee'))
+        progress = Progress(total=total)
+        for committee in tree.xpath('/committees/committee'):
+            cobj = com_processor.process(Committee(), committee)
+            cobj.save()
+
+            for subcom in committee.xpath('./subcommittee'):
+                sobj = subcom_processor.process(Committee(), subcom)
+                sobj.committee = cobj
+                sobj.save()
+            progress.tick()
+
+        File.objects.save_file(COMMITTEES_FILE)
 
     print 'Processing committee members'
-    tree = etree.parse('data/us/112/committees.xml')
-    total = len(tree.xpath('/committees/committee/member'))
-    progress = Progress(total=total)
-    for committee in tree.xpath('/committees/committee'):
-        cobj = Committee.objects.get(code=committee.get('code'))
+    MEMBERS_FILE = 'data/us/112/committees.xml'
+    file_changed = File.objects.is_changed(MEMBERS_FILE)
 
-        for member in committee.xpath('./member'):
-            mobj = member_processor.process(CommitteeMember(), member)
-            mobj.committee = cobj
-            mobj.save()
+    if not committees_deleted and not file_changed:
+        print 'File %s was not changed' % MEMBERS_FILE
+    else:
+        tree = etree.parse(MEMBERS_FILE)
+        total = len(tree.xpath('/committees/committee/member'))
+        progress = Progress(total=total, name='committees')
 
-        for subcom in committee.xpath('./subcommittee'):
-            try:
-                sobj = Committee.objects.get(code=subcom.get('code'), committee=cobj)
-            except Committee.DoesNotExist:
-                print 'Could not process SubCom with code %s which parent Com has code %s' % (
-                    subcom.get('code'), cobj.code)
-            else:
-                for member in subcom.xpath('./member'):
-                    mobj = member_processor.process(CommitteeMember(), member)
-                    mobj.committee = sobj
-                    mobj.save()
+        # Process committee nodes
+        for committee in tree.xpath('/committees/committee'):
+            cobj = Committee.objects.get(code=committee.get('code'))
 
-        progress.tick()
+            # Process members of current committee node
+            for member in committee.xpath('./member'):
+                mobj = member_processor.process(CommitteeMember(), member)
+                mobj.committee = cobj
+                mobj.save()
+            
+            # Process all subcommittees of current committee node
+            for subcom in committee.xpath('./subcommittee'):
+                try:
+                    sobj = Committee.objects.get(code=subcom.get('code'), committee=cobj)
+                except Committee.DoesNotExist:
+                    print 'Could not process SubCom with code %s which parent Com has code %s' % (
+                        subcom.get('code'), cobj.code)
+                else:
+                    # Process members of current subcommittee node
+                    for member in subcom.xpath('./member'):
+                        mobj = member_processor.process(CommitteeMember(), member)
+                        mobj.committee = sobj
+                        mobj.save()
 
+            progress.tick()
 
-def check():
-    print 'Checking integrity'
-    for com in Committee.objects.filter(committee=None):#, code='SSFR'):
-        members = set([x.person_id for x in com.members.all()])
-        members2 = set()
-        for subcom in com.subcommittees.all():
-            members2.update(set([x.person_id for x in subcom.members.all()]))
-        print com
-        if len(members) >= len(members2):
-            print 'OK'
-        else:
-            print 'FALSE'
-            print 'Members: %d' % len(members)
-            print 'Members of subdivisions: %d' % len(members2)
-            print 'Equal: %s' % (members == members2)
-
-
-def find():
-    "Method for testing different things"
-
-    tree = etree.parse('data/us/112/committees.xml')
-    vars = set()
-    varkey = 'role'
-    attrs = set()
-    for count, item in enumerate(tree.xpath('/committees/committee/member')):
-        attrs.update(item.attrib.keys())
-        if varkey:
-            if varkey in item.attrib:
-                vars.add(item.get(varkey))
-    if varkey:
-        print varkey, vars
-    print 'Attributes: %s' % ', '.join(attrs)
+        File.objects.save_file(MEMBERS_FILE)
 
 
 if __name__ == '__main__':

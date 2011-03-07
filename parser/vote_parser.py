@@ -10,6 +10,7 @@ import logging
 from parser.progress import Progress
 from parser.processor import Processor
 from person.models import Person
+from parser.models import File
 from vote.models import Vote, VoteOption, VoteSource, Voter, CongressChamber
 
 
@@ -67,26 +68,43 @@ class VoterProcessor(Processor):
 
 
 def main():
-    "Main parser logic"
+    """
+    Parse rolls.
+    """
 
+    # Setup XML processors
     vote_processor = VoteProcessor()
     option_processor = VoteOptionProcessor()
     voter_processor = VoterProcessor()
     voter_processor.PERSON_CACHE = dict((x.pk, x) for x in Person.objects.all())
+
+    # Remove old votes
     Vote.objects.all().delete()
 
+    # The pattern which the roll file matches
+    # Filename contains info which should be placed to DB
+    # along with info extracted from the XML file
     re_path = re.compile('data/us/(\d+)/rolls/([hs])(\w+)-(\d+)\.xml')
+
     chamber_mapping = {'s': CongressChamber.senate,
                        'h': CongressChamber.house}
 
-    files = glob.glob('data/us/*/rolls/*.xml')
+    files = glob.glob('data/us/112/rolls/*.xml')
     print 'Processing votes: %d files' % len(files)
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
+
     for fname in files:
         try:
             progress.tick()
+
+            # TODO:
+            # Check that file changed
+            # If yes then deleted Vote::* objects related
+            # to that file else do not process the file
             tree = etree.parse(fname)
+
+            # Process role object
             for roll_node in tree.xpath('/roll'):
                 vote = vote_processor.process(Vote(), roll_node)
                 match = re_path.search(fname)
@@ -96,6 +114,7 @@ def main():
                 vote.number = match.group(4)
                 vote.save()
 
+                # Process roll options
                 options = {}
                 for option_node in roll_node.xpath('./option'):
                     option = option_processor.process(VoteOption(), option_node)
@@ -103,34 +122,23 @@ def main():
                     option.save()
                     options[option.key] = option
 
+                # Process roll voters
                 for voter_node in roll_node.xpath('./voter'):
                     voter = voter_processor.process(options, Voter(), voter_node)
                     voter.vote = vote
                     voter.created = vote.created
-                    #voter.save()
+                    voter.save()
+
+            # TODO:
+            # Update file checksum in the DB
+
+            # TODO:
+            # data/us/112/rolls/h2011-2.xml
+            # produces error: Warning: Data truncated for column 'key' at row 1
 
         except Exception, ex:
             logging.error('', exc_info=ex)
             print 'File name: %s' % fname
-
-
-def find():
-    "Method for testing different things"
-
-    vars = set()
-    varkey = None
-    attrs = set()
-    for fname in glob.glob('data/us/112/rolls/*.xml'):
-        tree = etree.parse(fname)
-        for count, item in enumerate(tree.xpath('/roll')):
-            attrs.update(item.attrib.keys())
-            for subitem in item.xpath('./option'):
-                vars.add(subitem.get('key'))
-            if varkey:
-                if varkey in item.attrib:
-                    vars.add(item.get(varkey))
-    print varkey, vars
-    print 'Attributes: %s' % ', '.join(attrs)
 
 
 if __name__ == '__main__':

@@ -85,6 +85,7 @@ INSTALLED_APPS = (
     'committee',
     'website',
     'vote',
+    'parser',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
