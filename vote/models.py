@@ -32,7 +32,7 @@ class Vote(models.Model):
 
 class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote')
-    key = models.CharField(max_length=1)
+    key = models.CharField(max_length=20)
     value = models.CharField(max_length=255)
 
     def __unicode__(self):
