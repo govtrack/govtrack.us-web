@@ -35,7 +35,10 @@ class VoteProcessor(Processor):
         try:
             return datetime.strptime(value, '%Y-%m-%d')
         except ValueError:
-            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-05:00')
+            try:
+                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-05:00')
+            except ValueError:
+                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00') - timedelta(hours=1)
 
 
 class VoteOptionProcessor(Processor):
