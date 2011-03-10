@@ -11,7 +11,7 @@ from parser.progress import Progress
 from parser.processor import Processor
 from person.models import Person
 from parser.models import File
-from vote.models import Vote, VoteOption, VoteSource, Voter, CongressChamber
+from vote.models import Vote, VoteOption, VoteSource, Voter, CongressChamber, VoteCategory
 
 
 class VoteProcessor(Processor):
@@ -22,11 +22,27 @@ class VoteProcessor(Processor):
     REQUIRED_ATTRIBUTES = ['source', 'datetime']
     ATTRIBUTES = ['source', 'datetime']
     REQUIRED_NODES = ['type', 'question', 'required', 'result']
-    NODES = ['type', 'question', 'required', 'result']
+    NODES = ['type', 'question', 'required', 'result', 'category']
     FIELD_MAPPING = {'datetime': 'created', 'type': 'vote_type'}
-    SOURCE_MAPPING = {'senate.gov': VoteSource.senate,
-                      'house.gov': VoteSource.house,
-                      'keithpoole': VoteSource.keithpoole}
+    SOURCE_MAPPING = {
+        'senate.gov': VoteSource.senate,
+        'house.gov': VoteSource.house,
+        'keithpoole': VoteSource.keithpoole,
+    }
+    DEFAULT_VALUES = {'category': 'other'}
+    CATEGORY_MAPPING = {
+        'amendment': VoteCategory.amendment,
+        'passage-suspension': VoteCategory.passage_suspension,
+        'passage': VoteCategory.passage,
+        'cloture': VoteCategory.cloture,
+        'passage-part': VoteCategory.passage_part,
+        'nomination': VoteCategory.nomination,
+        'procedural': VoteCategory.procedural,
+        'other': VoteCategory.other,
+    }
+
+    def category_handler(self, value):
+        return self.CATEGORY_MAPPING[value]
 
     def source_handler(self, value):
         return self.SOURCE_MAPPING[value]
@@ -38,7 +54,7 @@ class VoteProcessor(Processor):
             try:
                 return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-05:00')
             except ValueError:
-                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00') - timedelta(hours=1)
+                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00')
 
 
 class VoteOptionProcessor(Processor):
@@ -92,7 +108,7 @@ def main():
     chamber_mapping = {'s': CongressChamber.senate,
                        'h': CongressChamber.house}
 
-    files = glob.glob('data/us/112/rolls/*.xml')
+    files = glob.glob('data/us/11[012]/rolls/*.xml')
     print 'Processing votes: %d files' % len(files)
     total = len(files)
     progress = Progress(total=total, name='files', step=10)

@@ -20,4 +20,5 @@ urlpatterns = patterns('',
     url(r'', include('website.urls')),
     url(r'^person/', include('person.urls')),
     url(r'', include('committee.urls')),
+    url(r'', include('vote.urls')),
 )

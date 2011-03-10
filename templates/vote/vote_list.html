@@ -1,0 +1,32 @@
+{% extends 'master.html' %}
+
+{% block body %}
+<h1>Votes</h1>
+<form method="get">
+    {{ form.as_p }}
+    <p><input type="submit" value="Filter"></p>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Vote &amp; Date</th>
+            <th>Vote Description</th>
+        </tr>
+    </thead>
+{% for vote in page.object_list %}
+    <tr>
+        <td width="100px">
+            <div>{{ vote.get_chamber_display }} Roll #{{ vote.number }}</div>
+            <div>{{ vote.created|date }}</div>
+        </td>
+        <td>
+            <div><a href="{{ vote.get_absolute_url }}">{{ vote.question }}</a></div>
+            <div>{{ vote.result }} XXX-XXX, XXX not voting ({{ vote.required }} required)</div>
+        </td>
+    </tr>
+{% endfor %}
+</table>
+
+{% include "pagination.html" %}
+{% endblock %}

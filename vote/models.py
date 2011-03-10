@@ -14,6 +14,17 @@ class VoteSource(enum.Enum):
     keithpoole = enum.Item(3, 'keithpoole')
 
 
+class VoteCategory(enum.Enum):
+    amendment = enum.Item(1, 'Amendment')
+    passage_suspension = enum.Item(2, 'Passage Suspension')
+    passage = enum.Item(3, 'Passage')
+    cloture = enum.Item(4, 'Cloture')
+    passage_part = enum.Item(5, 'Passage Part')
+    nomination = enum.Item(6, 'Nomination')
+    procedural = enum.Item(7, 'Procedural')
+    other = enum.Item(8, 'Other')
+
+
 class Vote(models.Model):
     congress = models.IntegerField()
     session = models.CharField(max_length=4)
@@ -22,6 +33,7 @@ class Vote(models.Model):
     source = models.IntegerField(choices=VoteSource)
     created = models.DateTimeField()
     vote_type = models.CharField(max_length=255)
+    category = models.CharField(max_length=255, choices=VoteCategory)
     question = models.TextField()
     required = models.CharField(max_length=10)
     result = models.TextField()

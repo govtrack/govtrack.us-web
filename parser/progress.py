@@ -1,7 +1,7 @@
 import sys
 
 class Progress(object):
-    def __init__(self, step=None, total=None, stop=None, name='records'):
+    def __init__(self, step=None, total=None, stop=None, name='items'):
         if not total and not step:
             raise Exception('Both step and total arguments are None')
         if total and not step:
