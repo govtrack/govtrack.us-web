@@ -18,6 +18,8 @@ def vote_list(request):
     if form.is_valid():
         qs = form.filter(qs)
     page = paginate(qs, request, per_page=50)
+    recent_vote = Vote.objects.order_by('-created')[0]
     return {'page': page,
             'form': form,
+            'recent_vote': recent_vote,
             }

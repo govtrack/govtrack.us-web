@@ -80,6 +80,7 @@ INSTALLED_APPS = (
     'common',
     'django_extensions',
     'south',
+    'GChartWrapper.charts',
     # project modules
     'person',
     'committee',
@@ -102,6 +103,9 @@ SUNLIGHTLABS_API_KEY = 'eca0795318ba4fe8ac01b96a8ef29b71'
 YOUTUBE_API_KEY = 'AI39si7Qf30FJyZyD1NIeTuvpBON8ZJ4OkHG2swKWLnQsRW-L4Rl3FiUGhEOXxMoKvVktYNLHQR-wfjWzvPw3kK4bhg1DkOwyQ'
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+
+DATETIME_FORMAT = 'M d, Y P'
+DATE_FORMAT = 'M d, Y'
 
 try:
     from settings_local import *

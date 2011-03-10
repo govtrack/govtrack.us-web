@@ -11,7 +11,8 @@ from parser.progress import Progress
 from parser.processor import Processor
 from person.models import Person
 from parser.models import File
-from vote.models import Vote, VoteOption, VoteSource, Voter, CongressChamber, VoteCategory
+from vote.models import (Vote, VoteOption, VoteSource, Voter,
+                         CongressChamber, VoteCategory, VoterType)
 
 
 class VoteProcessor(Processor):
@@ -70,17 +71,30 @@ class VoteOptionProcessor(Processor):
 class VoterProcessor(Processor):
     "Parser of /roll/voter nodes"
 
-    def process(self, options, *args, **kwargs):
-        self.options = options
-        return super(VoterProcessor, self).process(*args, **kwargs)
-
     REQUIRED_ATTRIBUTES = ['id', 'vote']
     ATTRIBUTES = ['id', 'vote']
     FIELD_MAPPING = {'id': 'person', 'vote': 'option'}
     PERSON_CACHE = {}
 
+    def process(self, options, obj, node):
+        self.options = options
+        obj = super(VoterProcessor, self).process(obj, node)
+
+        if node.get('VP') == '1':
+            obj.voter_type = VoterType.vice_president
+        elif node.get('id') == '0':
+            obj.voter_type = VoterType.unknown
+        else:
+            obj.voter_type = VoterType.member
+
+        return obj
+
+
     def id_handler(self, value):
-        return self.PERSON_CACHE[int(value)]
+        if int(value):
+            return self.PERSON_CACHE[int(value)]
+        else:
+            return None
 
     def vote_handler(self, value):
         return self.options[value]
@@ -108,7 +122,8 @@ def main():
     chamber_mapping = {'s': CongressChamber.senate,
                        'h': CongressChamber.house}
 
-    files = glob.glob('data/us/11[012]/rolls/*.xml')
+    files = glob.glob('data/us/112/rolls/*.xml')
+    #files = glob.glob('data/us/38/rolls/h1-291.xml')
     print 'Processing votes: %d files' % len(files)
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
@@ -147,6 +162,8 @@ def main():
                     voter.vote = vote
                     voter.created = vote.created
                     voter.save()
+
+                vote.calculate_totals()
 
             # TODO:
             # Update file checksum in the DB

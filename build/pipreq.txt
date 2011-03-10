@@ -5,3 +5,4 @@ south
 python-dateutil
 gdata
 django-cache-utils
+GChartWrapper

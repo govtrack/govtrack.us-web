@@ -1,32 +1,45 @@
 {% extends 'master.html' %}
 
 {% block body %}
+{% with recent_vote as vote %}
+{% include "vote/_recent_vote.html" %}
+{% endwith %}
+
 <h1>Votes</h1>
-<form method="get">
-    {{ form.as_p }}
-    <p><input type="submit" value="Filter"></p>
-</form>
-
-<table>
-    <thead>
+<div style="float: left; width: 70%;">
+    <table>
+        <thead>
+            <tr>
+                <th>Vote &amp; Date</th>
+                <th>Vote Description</th>
+            </tr>
+        </thead>
+    {% for vote in page.object_list %}
         <tr>
-            <th>Vote &amp; Date</th>
-            <th>Vote Description</th>
+            <td width="100px">
+                <div>{{ vote.get_chamber_display }} Roll #{{ vote.number }}</div>
+                <div>{{ vote.created|date }}</div>
+            </td>
+            <td>
+                <div><a href="{{ vote.get_absolute_url }}">{{ vote.question }}</a></div>
+                <div>{{ vote.result }} {{ vote.total_plus }}-{{ vote.total_minus }}{% if vote.total_other %} {{ vote.total_other }}, not voting{% endif %} ({{ vote.required }} required)</div>
+            </td>
         </tr>
-    </thead>
-{% for vote in page.object_list %}
-    <tr>
-        <td width="100px">
-            <div>{{ vote.get_chamber_display }} Roll #{{ vote.number }}</div>
-            <div>{{ vote.created|date }}</div>
-        </td>
-        <td>
-            <div><a href="{{ vote.get_absolute_url }}">{{ vote.question }}</a></div>
-            <div>{{ vote.result }} XXX-XXX, XXX not voting ({{ vote.required }} required)</div>
-        </td>
-    </tr>
-{% endfor %}
-</table>
+    {% endfor %}
+    </table>
+    {% include "pagination.html" %}
+</div>
 
-{% include "pagination.html" %}
+<div style="float: left; width: 25%; margin-left: 4%;">
+    <form method="get">
+        {{ form.as_p }}
+        <p>
+            <input type="submit" value="Filter">
+            <input type="reset" value="Reset" onclick="location.href='{% url vote_list %}';" />
+        </p>
+    </form>
+</div>
+
+<div style="clear: both"></div>
+
 {% endblock %}
