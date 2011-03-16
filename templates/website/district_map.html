@@ -5,11 +5,17 @@
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
 	<script type="text/javascript">
-		function createOverlay(style, opacity) {
+		function createDistrictsOverlay(outlines_only, opacity, state, district) {
 			return {
 			  getTileUrl: function(coord, zoom) 
 			  {
-				  return "http://www.govtrack.us/perl/wms/wms.cgi?google_tile_template_values=" + coord.x + "," + coord.y + "," + zoom + "&LAYERS=cd-110" + style + "{% if state %}:http://www.rdfabout.com/rdf/usgov/geo/us/{{state|lower}}{% if not district %}%25{% else %}/cd/110/{{district}}{% endif %}{% endif %}&FORMAT=image/png";	
+				  return "http://www.govtrack.us/perl/wms/wms.cgi?google_tile_template_values=" + coord.x + "," + coord.y + "," + zoom
+				  	+ "&LAYERS=cd-110" + (outlines_only ? "-outlines" : "")
+					+ (state ? ":http://www.rdfabout.com/rdf/usgov/geo/us/" + state
+						+ (!district ? "%25"
+							: "/cd/110/" + district)
+						: "")
+					+ "&FORMAT=image/png";	
 			  },
 			  tileSize: new google.maps.Size(256, 256),
 			  minZoom: 2,
@@ -18,7 +24,9 @@
 			  isPng: true
 			};		
 		}
-	
+		
+		var map;
+		
 		$(function() {
 			var myOptions = {
 				zoom: {{center_zoom}},
@@ -30,28 +38,32 @@
 				scaleControl: true,
 				streetViewControl: false
 				};
-			var map = new google.maps.Map(document.getElementById("map_canvas"),
+			map = new google.maps.Map(document.getElementById("map_canvas"),
 			myOptions);
 			
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
 			
-			overlayWMS = new google.maps.ImageMapType(createOverlay("", .2));
+			overlayWMS = new google.maps.ImageMapType(createDistrictsOverlay(false, .2, {% if state %}"{{state|lower}}"{% else %}null{% endif %}, {% if district %}"{{district}}"{% else %}null{% endif %}));
 			map.overlayMapTypes.insertAt(0, overlayWMS);			
 
-			overlayWMS = new google.maps.ImageMapType(createOverlay("-outlines", .7));
+			overlayWMS = new google.maps.ImageMapType(createDistrictsOverlay(true, .7, {% if state %}"{{state|lower}}"{% else %}null{% endif %}, {% if district %}"{{district}}"{% else %}null{% endif %}));
 			map.overlayMapTypes.insertAt(0, overlayWMS);
-
-			/*google.maps.event.addListener(map, "click", function(event) {
-				var req = 'http://www.govtrack.us/perl/wms/get-region.cgi?layer=cd-110&lat=' + event.latLng.lat() + '&long=' + event.latLng.lng() + '&format=json';
-				ajax(req, {}, {
-						success: function(res) {
-							alert(res[0]);
-						},
-						failure: function() {
-							alert(0);
-						}
+			
+			{% if request.GET.marker %}
+				lnglat = "{{request.GET.marker}}".split(":");
+				loc = new google.maps.LatLng(lnglat[1], lnglat[0]);
+				map.setCenter(loc);
+				var marker = new google.maps.Marker({
+					map: map, 
+					position: loc
 				});
-			});*/
+				map.setZoom({{center_zoom}} + 2);					
+			{% endif %}
+			
+			google.maps.event.addListener(map, "bounds_changed", function() {
+				var b = map.getBounds();
+				$("#embedbounds").text(Math.round(b.getSouthWest().lng()*1000)/1000 + "," + Math.round(b.getNorthEast().lat()*1000)/1000 + "," + Math.round(b.getNorthEast().lng()*1000)/1000 + "," + Math.round(b.getSouthWest().lat()*1000)/1000);
+			});
 			
 		});
 		
@@ -70,6 +82,44 @@
 				$('#map_canvas').css('height', '99%');
 			}
 		}
+		
+		var geocoder;
+		var geocoder_result;
+		function doGeoCode() {
+			if (!geocoder)
+				geocoder = new google.maps.Geocoder();
+			geocoder.geocode(
+				{ 'address': $('#address').val() },
+				function(results, status) {
+					if (status == google.maps.GeocoderStatus.OK) {
+						geocoder_result = results[0].geometry.location;
+						
+						req = 'http://www.govtrack.us/perl/wms/get-region.cgi?layer=cd-110&lat=' + results[0].geometry.location.lat() + '&long=' + results[0].geometry.location.lng() + '&format=json&json_callback=wms_address_callback';
+						$(document).append("<script src=\"" + req + "\"></scr" + "ipt>");
+					} else {
+					   alert("Sorry Google couldn't find that address: " + status);
+				    }
+				});
+		}
+		
+		function wms_address_callback(ret) {
+			if (ret.length == 0) {
+				alert("The address does not appear to be within a United States Congressional District.");
+				return;
+			}
+			
+			var uri = ret[0].URI;
+
+			var cd_re = /\/(..)\/cd\/110\/(.*)/;
+			var st_re = /us\/(..)/;
+			
+			var m;
+			if (m = cd_re.exec(uri)) {
+				window.location = "/congress/members/" + m[1].toUpperCase() + "/" + m[2] + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
+			} else if (m = st_re.exec(uri)) {
+				window.location = "/congress/members/" + m[1].toUpperCase() + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
+			}
+		}
 	</script>
 {% endblock %}
 {% block style %}
@@ -79,7 +129,7 @@
 
 <h1>Members of Congress &amp; Congressional District Maps</h1>
 
-<div id="leftpanel" style="float: left; width: 310px; padding-right: 2em">
+<div id="leftpanel" style="float: left; width: 310px; padding-right: 30px">
 	{% if not state %}
 	<div id="find">
 		<h2 class="first">Find a Senator or Representative</h2>
@@ -116,8 +166,9 @@
 		<form action="#">	
 		<p>			
 			<input id="address" value="" type="text" size="30" />
-			<input class="button" type="submit" value="Search" />
-			<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>		
+			<input class="button" type="button" value="Search" onclick="doGeoCode()"/>
+			<script>$('#address').input_default('350 5th Ave, New York, NY 10001');
+			$('#address').keydown_enter(doGeoCode);</script>
 		</p>		
 		</form>
 		
@@ -129,10 +180,6 @@
 		
 		<h2>Statistics</h2>
 		<p>Take a look at <a href="/congress/members/stats">statistics</a> about missed votes, bill sponsorship, ideology, and leadership.</p>
-		
-		<h2>More Maps</h2>
-		<p>Want to print these maps? Try our <a href="/congress/members/printablemaps">printable PDF maps</a> instead.</p>
-		<p>You can also use the <a href="/embed/googlemaps">map layer on your maps mash-up or get a KML file</a> for Google Maps/Earth.</p>
 	</div>
 	
 	{% else %}
@@ -187,8 +234,21 @@
 		</div>
 	</div>
 
-	<div id="map_canvas" style="width: 620px; height:450px; border: 1px solid black"> </div>
+	<div id="map_canvas" style="width: 650px; height:475px; border: 1px solid black"> </div>
 
+	<div style="float: right; padding-top: 1em">
+		<div id="embed_teaser">
+			<a href="#" onclick="$('#embed_teaser').hide(); $('#embed_details').fadeIn(); return false;">Embed this map...</a>
+		</div>
+		<div id="embed_details" style="display: none">
+			<div>Embed this map on your own website using this HTML code:</div>
+		
+			<pre id="embedpre" wrap="hard" style="width: 500px; overflow: auto; margin-left: 2em; font-size: 80%">&lt;iframe width="425" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
+	 src="http://www.govtrack.us/embed/mapframe?{% if state %}state={{state|lower}}{% endif %}{% if district %}&amp;district={{district}}{% endif %}&amp;bounds=<span id="embedbounds"></span>"&gt;&lt;/iframe&gt;</pre>
+	  
+			<div>or advanced web designers can <a href="/embed/mapframe?demo=1">view the source</a>.</div>
+		</div>
+	</div>
 </div>
 
 {% endblock %}

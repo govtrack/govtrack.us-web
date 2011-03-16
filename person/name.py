@@ -2,37 +2,6 @@ from datetime import datetime
 
 from person.models import RoleType
 
-CONGRESS_DATES = {}
-
-def parse_govtrack_date(d):
-    try:
-        return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-04:00')
-    except ValueError:
-        pass
-    else:
-        try:
-            return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-05:00')
-        except ValueError:
-            pass
-        else:
-            return datetime.strptime(d, '%Y-%m-%d')
-
-
-def get_congress_dates(congressnumber):
-    if not CONGRESS_DATES:
-        cd = {}
-        for line in open_govtrack_file('us/sessions.tsv'):
-            cn, sessionname, startdate, enddate = line.strip().split('\t')[0:4]
-            if not '-' in startdate: # header
-                continue
-            cn = int(cn)
-            if not cn in cd:
-                cd[cn] = [parse_govtrack_date(startdate), None]
-            cd[cn][1] = parse_govtrack_date(enddate)
-        CONGRESS_DATES.update(cd)
-    return CONGRESS_DATES[congressnumber]
-
-
 def get_person_name(person, role_date=datetime.now(), role_congress=None, firstname_position=None,
                 show_suffix=False, show_title=True, show_party=True, show_district=True):
     """

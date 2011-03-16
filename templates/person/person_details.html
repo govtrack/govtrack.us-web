@@ -18,59 +18,49 @@
 {% endblock %}
 
 {% block crumbs %}
-Congress > Members of Congress
+{% comment %}Congress > Members of Congress{% endcomment %}
 {% endblock %}
 
 {% block body %}
 <div class="person-details">
 <div class="col_left">
-    <h1>{{ person }}</h1>
-    {% if role %}
-    <div class="role-details">
-        {% if not active_role %}Former{% endif %}
-        {{ role.get_role_type_display }} for
-	   {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}
-	   ({{ role.party }})
-    </div>
-    {% if role.website %}
-    <p><a href="{{ role.website }}" target="_blank"><tt>{{ role.website }}</tt></a></p>
-    {% endif %}
-    {% endif %}
-    
     {% if photo %}
     <div class="photo">
         <img src="{{ photo }}" alt="Photo" style="border: 1px solid black" />
     </div>
     {% endif %}
-    <div class="description">
-        <table width="100%">
-            {% if role %}
-            <tr>
-                <td>State:</td>
-                <td>{{ role.get_state_display }} [<a href="/congress/members/{{ role.state }}">district map</a>]</td>
-            </tr>
-            {% endif %}
-            {% if role %}
-            <tr>
-                <td>Party:</td>
-                <td>{{ role.party }}</td>
-            </tr>
-            {% endif %}
-            <tr>
-                <td>Birthday:</td>
-                <td>{{ person.birthday|date:"F d, Y" }} / {{ person.get_age }} years old</td>
-            </tr>
-        </table>
+
+	<div style="float: left; width: 410px">
+    <h1>
+    	{{ person.name_no_details }}
+	    {% if role.website %}
+		    <p><a href="{{ role.website }}" target="_blank"><tt>{{ role.website }}</tt></a></p>
+	    {% endif %}
+    </h1>
     </div>
-    <div class="clear"></div>
+    <div style="float: left; width: 400px; margin-top: 1em">
+    {% if role %}
+    <div class="role-details">
+        {% if not active_role %}Former{% endif %}
+        {{ role.get_role_type_display }} for
+	   {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}
+	</div>
+	<div class="role-details" style="font-style: italic">
+	   {{ role.party }}
+    </div>
+    {% if role.district > 0 %}
+    <p><a href="/congress/members/{{ role.state }}">district map</a></p>
+    {% endif %}
+    {% endif %}
+    </div>
 
-
+	<div class="clear"> </div>
     <h2>Elected Positions</h2>
     <table>
         <thead>
             <tr>
-                <th>When</th>
-                <th>Role</th>
+                <th>Dates</th>
+                <th>Title</th>
                 <th>Representing</th>
             </tr>
         </thead>
@@ -101,6 +91,8 @@ Congress > Members of Congress
     
     <h2>Bills Sponsored...</h2>
     
+    <h2>Recent Votes...</h2>
+    
     {% if assignments %}
     <h2>Committee Assignments</h2>
     <a name="assignments"></a>
@@ -110,7 +102,7 @@ Congress > Members of Congress
             <div>
                 {{ role.get_role_display }}, <a href="{{ role.committee.get_absolute_url }}">{{ role.committee }}</a>
                 {% if role.subroles %}
-                <a style="color: #666" href="#" onclick="$(this).hide(); $(this).parents('.committee-assignment').find('.subcommittee-assignment-list').show(); return false;">Show {{ role.subroles|length }} subcommittee assignment{{ role.subroles|pluralize }}</a>
+                <div><a style="color: #666" href="#" onclick="$(this).hide(); $(this).parents('.committee-assignment').find('.subcommittee-assignment-list').show(); return false;">Show {{ role.subroles|length }} subcommittee assignment{{ role.subroles|pluralize }}</a></div>
                 {% endif %}
             </div>
             {% if role.subroles %}
@@ -130,11 +122,16 @@ Congress > Members of Congress
 </div>
 
 <div class="col_right">
-<div class="sidebox">
+<div id="happening_now" class="sidebox" {% if not recent_video %}style="dispxlay: none"{% endif %}>
 	<h2>Happening Now</h2>
-    <p id="latest-tweet" style="display: none">
-        Twitter: <span class="content"></span>
-    </p>
+    <div id="latest-tweet" style="display: none; margin-bottom: 1em">
+		<a href="" class="tweetlink">
+			<img src="http://twitter-badges.s3.amazonaws.com/t_logo-a.png" style="float: left; margin-right: 1em; margin-bottom: 1em" border="0" width="32" height="32"/>
+		</a>
+		<div style="float: left; width: 370px;">&ldquo;<span class="content"></span>&rdquo;</div>
+		<div style="float: left; width: 370px;">&mdash; @<a class="twittername"></a> on <span class="twitterdate"></span></div>
+		<div class="clear"> </div>
+    </div>
     <script type="text/javascript">
         function renderLatestTweet(username) {
             var url = 'http://twitter.com/statuses/user_timeline/' + username + '.json';
@@ -146,7 +143,11 @@ Congress > Members of Congress
                                   'Sep', 'Oct', 'Nov', 'Dec'];
                     var datestr = months[created.getMonth()] + '. ' + created.getDate() + ', ' + created.getFullYear();
                     var content = tweet.text;
-                    $('#latest-tweet').show().find('.content').text(datestr + ' ' + content).show();
+                    $('#latest-tweet').show().find('.content').text(content).show();
+					$('#latest-tweet').find('.twittername').text(username).show();
+					$('#latest-tweet').find('.twittername, .tweetlink').attr('href', 'http://www.twitter.com/' + username)
+					$('#latest-tweet').find('.twitterdate').text(datestr).show();
+					$('#happening_now').show();
                 }
             }, 'jsonp');
         }
@@ -157,16 +158,18 @@ Congress > Members of Congress
     {% if recent_video %}
         {% video recent_video %}
     {% endif %}
+	<div class="clear"> </div>
 </div>
 <div class="sidebox">
 	<h2>Media</h2>
 
+	<div class="recent-video-list-container">
     <div class="recent-video-list">
     {% for video in videos %}
         {% video video %}
-        {% if forloop.counter|divisibleby:2 %}<div class="clear"></div>{% endif %}
     {% endfor %}
     </div>
+	</div>
     <div class="clear"></div>
 </div>
 <div class="sidebox">
