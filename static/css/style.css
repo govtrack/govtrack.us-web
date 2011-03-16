@@ -6,9 +6,20 @@
     margin-bottom: 1em;
 }
 
+#content h1 {
+	background-color: black;
+	margin-left: -10px;
+	padding: 10px;
+	color: white;
+}
+#content p {
+	font-size: 10px;
+	margin: 5px 0 0 0;
+}
+
 .person-details .photo {
     float: left;
-    width: 150px;
+    width: 120px;
 }
 
 .person-details .description {
@@ -32,11 +43,32 @@
     width: 50%;
 }
 
-.recent-video-list .video-thumbnail {
+.recent-video-list-container {
+	overflow: auto;
+}
+.recent-video-list {
+	width: 5000px;
+}
+.video-thumbnail {
     float: left;
     margin-right: 0.5em;
     margin-bottom: 0.5em;
-    width: 200px;
+	width: 120px;
+	font-size: 8pt;
+}
+.video-thumbnail a {
+	font-weight: normal;
+}
+#happening_now .video-thumbnail {
+	width: 350px;
+}
+#happening_now .video-thumbnail .image {
+	float: left;
+}
+#happening_now .video-thumbnail .title {
+	float: left;
+	margin-left: 1em;
+	width: 160px;
 }
 
 li.committee-member-item {
@@ -45,3 +77,4 @@ li.committee-member-item {
     margin-right: 10px;
     border: 1px solid #ccc;
 }
+

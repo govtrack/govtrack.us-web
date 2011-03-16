@@ -13,11 +13,13 @@
 <div class="video-thumbnail">
     <a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1" onclick="return play(this, '{{ box_id }}')" title="{{ video.title }}">
         {% if video.thumbnail %}
-        <img src="{{ video.thumbnail }}" />
+        <div class="image" style="width: 120px; height: 90px; background-image: url({{ video.thumbnail }})">
+			<img src="{{ MEDIA_URL }}icons/youtube.png"/>
+		</div>
         {% else %}
         <b>NO TUMBNAIL</b>
         {% endif %}
-        <div class="title">{{ video.title }}</div>
+        <div class="title">{{ video.title }} ({{video.published|date:"M j, Y"}})</div>
     </a>
 </div>
 

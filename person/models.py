@@ -42,6 +42,9 @@ class Person(models.Model):
     def name_no_district(self):
         return get_person_name(self, firstname_position='before', show_district=False)
 
+    def name_no_details(self):
+        return get_person_name(self, firstname_position='before', show_district=False, show_party=False)
+        
     def __unicode__(self):
         return self.name
 
