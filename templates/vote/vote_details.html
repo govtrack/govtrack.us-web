@@ -22,7 +22,7 @@ $(document).ready(function() {
             /* Vote */   case 0: sorting = [[index, order], [1, 0], [2, 0]]; break;
             /* State */  case 1: sorting = [[index, order], [2, 0], [0, 0]]; break;
             /* Name */ case 2: sorting = [[index, order], [1, 0], [0, 0]]; break;
-            /* Party */  case 3: sorting = [[index, order], [0, 0], [1, 0], [2, 0]]; break;
+            /* Party */  case 3: sorting = [[index, order], [2, 0], [1, 0], [0, 0]]; break;
         }
         $('#vote-list').trigger('sorton', [sorting]);
         headers.not(headers[index]).removeClass('headerSortDown').removeClass('headerSortUp');
