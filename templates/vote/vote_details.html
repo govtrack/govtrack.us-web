@@ -1,4 +1,5 @@
 {% extends 'master.html' %}
+{% load humanize %}
 
 {% block extra_js %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
@@ -15,10 +16,13 @@ $(document).ready(function() {
         } else {
             order = 0;
         }
-        SORT_STATE = {column: index, order: order}
-        var sorting = [[index, order]];
-        if (SORT_STATE.column != index) {
-            sorting[sorting.length] = [2, 0];
+        SORT_STATE = {column: index, order: order};
+        var sorting;
+        switch (index) {
+            /* Vote */   case 0: sorting = [[index, order], [1, 0], [2, 0]]; break;
+            /* State */  case 1: sorting = [[index, order], [2, 0], [0, 0]]; break;
+            /* Name */ case 2: sorting = [[index, order], [1, 0], [0, 0]]; break;
+            /* Party */  case 3: sorting = [[index, order], [0, 0], [1, 0], [2, 0]]; break;
         }
         $('#vote-list').trigger('sorton', [sorting]);
         headers.not(headers[index]).removeClass('headerSortDown').removeClass('headerSortUp');
@@ -42,16 +46,16 @@ Congress &gt; Roll Call Votes
         <thead>
             <tr>
                 <th>Vote</th>
-                <th>State</th>
+                <th>{% if vote.chamber == 1 %}State{% else %}District{% endif %}</th>
                 <th>Representative</th>
                 <th>Party</th>
             </tr>
         </thead>
         {% for voter in voters %}
         <tr>
-            <td>{{ voter.option.value }}</td>
-            <td>{{ voter.person.role.get_state_display }}{% if voter.person.role.district %}-{{ voter.person.role.district }}{% endif %}</td>
-            <td><a href="{{ voter.person.get_absolute_url }}">{{ voter.person.name_no_details }}</a></td>
+            <td style="text-align: right"><nobr>{{ voter.option.value }}</nobr></td>
+            <td>{{ voter.person.role.state }}{% if voter.person.role.district %} - {{ voter.person.role.district|ordinal|rjust:5 }}{% endif %}</td>
+            <td><a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal">{{ voter.person.name_no_details_lastfirst }}</a></td> {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
             <td>{{ voter.person.role.party }}</td>
         </tr>
     {% endfor %}
