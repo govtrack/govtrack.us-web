@@ -14,17 +14,18 @@
     </dl>
     <div style="float: left; width: 70%;">
         <table>
+            {% with vote.totals as totals %}
             <thead>
                 <tr>
                     <th></th>
                     <th>Totals</th>
-                    <th>Democrats</th>
-                    <th>Republicans</th>
-                    <th>Independents</th>
+                    {% for party in totals.parties %}
+                    <th>{{ party }}</th>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>
-                {% for item in vote.totals %}
+                {% for item in totals.options %}
                 <tr>
                     <td>{{ item.option }}</td>
                     <td>
@@ -32,19 +33,20 @@
                         {% if item.yes %}YES_BAR{% endif %}
                         {% if item.no %}NO_BAR{% endif %}
                     </td>
-                    <td>X</td>
-                    <td>X</td>
-                    <td>X</td>
+                    {% for count in item.party_counts %}
+                    <td>{{ count }}</td>
+                    {% endfor %}
                 </tr>
                 {% endfor %}
                 <tr>
                     <td>Required:</td>
                     <td>{{ vote.required }} (Vacancies in Congress will affect vote totals.)</td>
-                    <td>PIE</td>
-                    <td>PIE</td>
-                    <td>PIE</td>
+                    {% for count in totals.party_counts %}
+                    <td>{% vote_pie count.yes count.no count.other %}</td> 
+                    {% endfor %}
                 </tr>
             </tbody>
+            {% endwith %}
         </table>
         <div>
             More information: <a href="http://www.govtrack.us/blog/2009/11/18/aye-versus-yea-whats-the-difference/">Aye versus Yea Explained</a>

@@ -61,24 +61,68 @@ class Vote(models.Model):
 
     def totals(self):
         items = []
-        total_count = self.voters.count()
 
-        def build_item(option, **kwargs):
-            voters = self.voters.filter(option=option)
-            count = len(voters)
-            #dcount = len(filter(lambda x: 
-            percent = math.ceil((count / float(total_count)) * 100)
-            res = {'option': option, 'count': count, 'percent': percent}
-            res.update(kwargs)
-            return res
+        # Extract all voters, find their role at the time
+        # the vote was
+        all_voters = list(self.voters.all())
+        voters_by_option = {}
+        for option in self.options.all():
+            voters_by_option[option] = [x for x in all_voters if x.option == option]
+        total_count = len(all_voters)
+        for voter in all_voters:
+            voter.role = voter.person.get_role_at_date(self.created)
 
-        for option in self.options.filter(key='+'):
-            items.append(build_item(option, yes=True))
-        for option in self.options.filter(key='-'):
-            items.append(build_item(option, no=True))
-        for option in self.options.exclude(Q(key='+') | Q(key='-')):
-            items.append(build_item(option))
-        return items
+        # Find all parties which participated in vote
+        # and sort them in order which they should be displayed
+
+        def cmp_party(x):
+            """
+            Democrats go first, republicans go second.
+            Other parties go last.
+            """
+
+            if 'demo' in x.lower():
+                return 1
+            if 'repub' in x.lower():
+                return 2
+            return 3
+        
+        all_parties = list(set(x.role.party for x in all_voters))
+        all_parties.sort(key=cmp_party)
+        total_party_stats = dict((x, {'yes': 0, 'no': 0, 'other': 0, 'total': 0})\
+                                 for x in all_parties)
+
+        # For each option find party break down,
+        # total vote count and percentage in total count
+        details = []
+        for option in self.options.all():
+            voters = voters_by_option.get(option, [])
+            percent = math.ceil((len(voters) / float(total_count)) * 100)
+            party_stats = dict((x, 0) for x in all_parties)
+            for voter in voters:
+                party_stats[voter.role.party] += 1
+                total_party_stats[voter.role.party]['total'] += 1
+                if option.key == '+':
+                    total_party_stats[voter.role.party]['yes'] += 1
+                elif option.key == '-':
+                    total_party_stats[voter.role.party]['no'] += 1
+                else:
+                    total_party_stats[voter.role.party]['other'] += 1
+            party_counts = [party_stats.get(x, 0) for x in all_parties]
+                
+            detail = {'option': option, 'count': len(voters),
+                      'percent': percent, 'party_counts': party_counts}
+            if option.key == '+':
+                detail['yes'] = True
+            if option.key == '-':
+                detail['no'] = True
+            details.append(detail)
+
+        party_counts = [total_party_stats[x] for x in all_parties]
+
+        return {'options': details, 'total_count': total_count,
+                'party_counts': party_counts, 'parties': all_parties,
+                }
 
 
 class VoteOption(models.Model):
