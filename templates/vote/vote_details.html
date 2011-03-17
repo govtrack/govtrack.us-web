@@ -1,5 +1,32 @@
 {% extends 'master.html' %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
+<script type="text/javascript">
+var SORT_STATE = null;
+$(document).ready(function() { 
+    $("#vote-list").tablesorter({});
+    var headers = $('#vote-list th');
+    headers.unbind();
+    headers.click(function() {
+        var index = headers.index(this);
+        if (SORT_STATE && SORT_STATE.column == index) {
+            order = SORT_STATE.order == 0 ? 1: 0;
+        } else {
+            order = 0;
+        }
+        SORT_STATE = {column: index, order: order}
+        var sorting = [[index, order]];
+        if (SORT_STATE.column != index) {
+            sorting[sorting.length] = [2, 0];
+        }
+        $('#vote-list').trigger('sorton', [sorting]);
+        headers.not(headers[index]).removeClass('headerSortDown').removeClass('headerSortUp');
+    });
+}); 
+</script>
+{% endblock %}
+
 {% block body %}
 Congress &gt; Roll Call Votes
 
@@ -11,7 +38,7 @@ Congress &gt; Roll Call Votes
 
 <h3>Vote Details</h3>
 <div style="float: left; width: 50%;">
-    <table>
+    <table id="vote-list">
         <thead>
             <tr>
                 <th>Vote</th>
