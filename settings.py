@@ -89,6 +89,7 @@ INSTALLED_APPS = (
     'website',
     'vote',
     'parser',
+    'events',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

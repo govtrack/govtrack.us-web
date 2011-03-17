@@ -2,7 +2,6 @@
 Parser of data/us/committees.xml
 """
 from lxml import etree
-from datetime import datetime
 import glob
 import re
 import logging
@@ -49,14 +48,7 @@ class VoteProcessor(Processor):
         return self.SOURCE_MAPPING[value]
 
     def datetime_handler(self, value):
-        try:
-            return datetime.strptime(value, '%Y-%m-%d')
-        except ValueError:
-            try:
-                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-05:00')
-            except ValueError:
-                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00')
-
+        return Processor.parse_datetime(value)
 
 class VoteOptionProcessor(Processor):
     "Parser of /roll/option nodes"
@@ -147,7 +139,7 @@ def main():
                 vote.session = match.group(3)
                 vote.number = match.group(4)
                 vote.save()
-
+				
                 # Process roll options
                 options = {}
                 for option_node in roll_node.xpath('./option'):
@@ -164,6 +156,8 @@ def main():
                     voter.save()
 
                 vote.calculate_totals()
+
+                vote.create_event()
 
             # TODO:
             # Update file checksum in the DB

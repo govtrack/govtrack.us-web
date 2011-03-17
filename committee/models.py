@@ -38,6 +38,38 @@ class Committee(models.Model):
             return reverse('subcommittee_details', args=[parent.code, self.code])
         else:
             return reverse('committee_details', args=[self.code])
+    
+    def fullname(self):
+        if self.committee == None:
+            return self.name
+        else:
+            return self.committee.name + " Subcommittee on " + self.name
+    
+    def create_events(self):
+        from events.feeds import AllCommitteesFeed, CommitteeFeed
+        from events.models import Event
+        with Event.update(self) as E:
+            for meeting in self.meetings.all():
+                E.add("mtg_" + str(meeting.id), meeting.when, AllCommitteesFeed())
+                E.add("mtg_" + str(meeting.id), meeting.when, CommitteeFeed(self.code))
+                # TODO bills
+	
+    def render_event(self, eventid, feeds):
+        eventinfo = eventid.split("_")
+        mtg = CommitteeMeeting.objects.get(id=eventinfo[1])
+        
+        import events.feeds
+        return {
+            "type": "Committee Meeting",
+            "date": mtg.when,
+            "title": self.fullname() + " Meeting",
+			"url": self.get_absolute_url(),
+            "body_text_template": """{{subject|safe}}""",
+            "body_html_template": """{{subject}}""",
+            "context": {
+                "subject": mtg.subject,
+                }
+            }
 
 
 class CommitteeMemberRole(enum.Enum):
@@ -62,3 +94,12 @@ MEMBER_ROLE_WEIGHTS = {
     CommitteeMemberRole.exofficio: 2,
     CommitteeMemberRole.member: 1
 }
+
+class CommitteeMeeting(models.Model):
+    """Meetings that are scheduled in the future. Since we can't track meeting time changes,
+    we have to clear these out each time we load up new meetings."""
+    committee = models.ForeignKey('committee.Committee', related_name='meetings')
+    when = models.DateTimeField()
+    subject = models.TextField()
+    # TODO: bills
+

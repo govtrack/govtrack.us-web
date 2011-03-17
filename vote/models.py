@@ -94,15 +94,9 @@ class Vote(models.Model):
 
         def cmp_party(x):
             """
-            Democrats go first, republicans go second.
-            Other parties go last.
+            Sort the parties by the number of voters in that party.
             """
-
-            if 'demo' in x.lower():
-                return 1
-            if 'repub' in x.lower():
-                return 2
-            return 3
+            return -len([p for p in all_voters if p.person.role.party == x])
         
         all_parties = list(set(x.person.role.party for x in all_voters))
         all_parties.sort(key=cmp_party)
@@ -143,6 +137,48 @@ class Vote(models.Model):
         self._cached_totals = totals
         return totals
 
+    def summary(self):
+        return self.result + " " + str(self.total_plus) + "/" + str(self.total_minus)
+
+    def create_event(self):
+        from events.feeds import AllVotesFeed, PersonVotesFeed
+        from events.models import Event
+        with Event.update(self) as E:
+            E.add("vote", self.created, AllVotesFeed())
+            for v in self.voters.all():
+                E.add("vote", self.created, PersonVotesFeed(v.person_id))
+	
+    def render_event(self, eventid, feeds):
+        import events.feeds
+        return {
+            "type": "Vote",
+            "date": self.created,
+            "title": self.question,
+			"url": self.get_absolute_url(),
+            "body_text_template":
+"""{{summary|safe}}
+{% for voter in voters %}
+    {{voter.name|safe}}: {{voter.vote|safe}}
+{% endfor %}""",
+            "body_html_template":
+"""<p>{{summary}}</p>
+{% for voter in voters %}
+    {% if forloop.first %}<ul>{% endif %}
+    <p><a href="{{voter.url}}">{{voter.name}}</a>: {{voter.vote}}</p>
+    {% if forloop.last %}</ul>{% endif %}
+{% endfor %}
+""",
+            "context": {
+                "summary": self.summary(),
+                "voters":
+                            [
+                                { "url": f.person().get_absolute_url(), "name": f.person().name, "vote": self.voters.get(person=f.person()).option.value }
+                                for f in feeds if isinstance(f, events.feeds.PersonFeed) and self.voters.filter(person=f.person()).exists()
+                            ]
+                        if feeds != None else []
+                }
+            }
+            
 
 class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='options')

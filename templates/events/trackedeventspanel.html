@@ -1,0 +1,25 @@
+{% load events %}
+
+{% with feed.expand as subfeeds %}
+
+	{% if subfeeds|length > 1 %}
+		<p>[All]
+			{% for feed in subfeeds %}
+				[{{feed.localname}}]
+			{% endfor %}
+		</p>
+	{% endif %}
+
+{% endwith %}
+
+{% for event in feed.get_events %}
+{% with event|render_event:feed as meta %}
+<div style="clear: both; margin-bottom: 1em">
+	<div style="float: right">{{event.when}}</div>
+	<div>{{meta.type}}</div>
+	<div><a href="{{meta.url}}">{{meta.title}}</a></div>
+	{{meta.body_html|safe}}
+</div>
+{% endwith %}
+{% endfor %}
+

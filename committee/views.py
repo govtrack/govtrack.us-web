@@ -10,6 +10,8 @@ from committee.util import sort_members
 
 @render_to('committee/committee_details.html')
 def committee_details(request, parent_code, child_code=None):
+    from events.feeds import CommitteeFeed
+	
     if child_code:
         obj = get_object_or_404(Committee, code=child_code, committee__code=parent_code)
         parent = obj.committee
@@ -23,10 +25,13 @@ def committee_details(request, parent_code, child_code=None):
             'subcommittees': subcommittees,
             'members': members,
             'SIMPLE_MEMBER': CommitteeMemberRole.member,
+            'feed': CommitteeFeed(obj.code),
             }
 
 @render_to('committee/committee_list.html')
 def committee_list(request):
+    from events.feeds import AllCommitteesFeed
+
     def key(x):
         return unicode(x).replace('the ', '')
     
@@ -38,4 +43,5 @@ def committee_list(request):
         'senate_committees': getlist(CommitteeType.senate),
         'house_committees': getlist(CommitteeType.house),
         'joint_committees': getlist(CommitteeType.joint),
+        'feed': AllCommitteesFeed(),
     }

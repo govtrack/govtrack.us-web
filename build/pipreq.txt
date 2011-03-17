@@ -7,3 +7,5 @@ gdata
 django-cache-utils
 GChartWrapper
 django-debug-toolbar
+django-picklefield
+

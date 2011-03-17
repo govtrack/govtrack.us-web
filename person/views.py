@@ -13,6 +13,8 @@ from person import analysis
 from person.video import get_youtube_videos, get_sunlightlabs_videos
 from person.util import get_committee_assignments
 
+from events.feeds import PersonFeed
+
 @render_to('person/person_details.html')
 def person_details(request, pk):
     person = get_object_or_404(Person, pk=pk)
@@ -65,6 +67,7 @@ def person_details(request, pk):
             'recent_video': recent_video,
             'videos': videos,
             'assignments': get_committee_assignments(person),
+            'feed': PersonFeed(person.id),
             }
 
 

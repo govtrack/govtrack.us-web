@@ -166,3 +166,4 @@ class PersonRole(models.Model):
             if stateapportionment[self.state] == 'T':
                 return 'Del.' if short else 'Delegate'
             return 'Rep.' if short else 'Representative'
+		

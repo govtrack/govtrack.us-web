@@ -1,3 +1,5 @@
+from datetime import datetime
+
 class Processor(object):
     REQUIRED_ATTRIBUTES = []
     ATTRIBUTES = []
@@ -56,7 +58,19 @@ class Processor(object):
         return '<%s>: ' % node.tag + ', '.join('%s: %s' % x for x in node.attrib.iteritems())
 
     def convert(self, key, value):
+        key = key.replace("-", "_")
         if hasattr(self, '%s_handler' % key):
             return getattr(self, '%s_handler' % key)(value)
         else:
             return value
+
+    @staticmethod
+    def parse_datetime(value):
+        try:
+            return datetime.strptime(value, '%Y-%m-%d')
+        except ValueError:
+            try:
+                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-05:00')
+            except ValueError:
+                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00')
+

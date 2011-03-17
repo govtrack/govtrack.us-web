@@ -10,9 +10,8 @@ from parser.progress import Progress
 from parser.processor import Processor
 from parser.models import File
 from committee.models import (Committee, CommitteeType, CommitteeMember,
-                              CommitteeMemberRole)
+                              CommitteeMemberRole, CommitteeMeeting)
 from person.models import Person
-
 
 class CommitteeProcessor(Processor):
     """
@@ -64,6 +63,23 @@ class CommitteeMemberProcessor(Processor):
     def role_handler(self, value):
         return self.ROLE_MAPPING[value]
 
+class CommitteeMeetingProcessor(Processor):
+    """
+    Parser of committeeschedule.xml.
+    """
+
+    REQUIRED_ATTRIBUTES = ['committee-id', 'datetime']
+    ATTRIBUTES = ['committee-id', 'datetime']
+    REQUIRED_NODES = ['subject']
+    NODES = ['subject']
+    FIELD_MAPPING = {'committee-id': 'committee', 'datetime': 'when'}
+
+    def committee_id_handler(self, value):
+        return Committee.objects.get(code=value)
+
+    def datetime_handler(self, value):
+        return Processor.parse_datetime(value)
+
 
 def main():
     """
@@ -74,6 +90,7 @@ def main():
     com_processor = CommitteeProcessor()
     subcom_processor = SubcommitteeProcessor()
     member_processor = CommitteeMemberProcessor()
+    meeting_processor = CommitteeMeetingProcessor()
 
     print 'Processing committees'
     COMMITTEES_FILE = 'data/us/committees.xml'
@@ -99,6 +116,7 @@ def main():
 
             for subcom in committee.xpath('./subcommittee'):
                 sobj = subcom_processor.process(Committee(), subcom)
+                sobj.code = cobj.code + sobj.code
                 sobj.committee = cobj
                 sobj.save()
             progress.tick()
@@ -129,7 +147,7 @@ def main():
             # Process all subcommittees of current committee node
             for subcom in committee.xpath('./subcommittee'):
                 try:
-                    sobj = Committee.objects.get(code=subcom.get('code'), committee=cobj)
+                    sobj = Committee.objects.get(code=committee.get('code')+subcom.get('code'), committee=cobj)
                 except Committee.DoesNotExist:
                     print 'Could not process SubCom with code %s which parent Com has code %s' % (
                         subcom.get('code'), cobj.code)
@@ -144,6 +162,30 @@ def main():
 
         File.objects.save_file(MEMBERS_FILE)
 
+    print 'Processing committee schedule'
+    SCHEDULE_FILE = 'data/us/112/committeeschedule.xml'
+    file_changed = File.objects.is_changed(SCHEDULE_FILE)
 
+    if not committees_deleted and not file_changed:
+        print 'File %s was not changed' % SCHEDULE_FILE
+    else:
+        tree = etree.parse(SCHEDULE_FILE)
+
+        CommitteeMeeting.objects.all().delete()
+
+        # Process committee event nodes
+        for meeting in tree.xpath('/committee-schedule/meeting'):
+            try:
+                mobj = meeting_processor.process(CommitteeMeeting(), meeting)
+                mobj.save()
+            except Committee.DoesNotExist:
+                print meeting_processor.display_node(meeting)
+            
+        for committee in Committee.objects.all():
+            committee.create_events()
+            
+        File.objects.save_file(SCHEDULE_FILE)
+        
 if __name__ == '__main__':
     main()
+
