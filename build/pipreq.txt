@@ -6,3 +6,4 @@ python-dateutil
 gdata
 django-cache-utils
 GChartWrapper
+django-debug-toolbar

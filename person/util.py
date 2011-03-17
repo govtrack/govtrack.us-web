@@ -1,5 +1,6 @@
 from committee.util import sort_members
 from committee.models import CommitteeMemberRole
+from person.models import PersonRole
 
 def get_committee_assignments(person):
     """
@@ -22,3 +23,20 @@ def get_committee_assignments(person):
             role_tree.append(role)
     role_tree = sort_members(role_tree)
     return role_tree
+
+
+def load_roles_at_date(persons, when):
+    """
+    Find out role of each person at given date.
+
+    This method is optimized for bulk operation.
+    """
+
+    roles = PersonRole.objects.filter(startdate__lte=when, enddate__gte=when).select_related('person')
+    roles_by_person = {}
+    for role in roles:
+        roles_by_person[role.person] = role
+    for person in persons:
+        person.role = roles_by_person.get(person)
+        person._cached_roles.add(person.role)
+    return None 

@@ -58,6 +58,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -81,6 +82,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'south',
     'GChartWrapper.charts',
+    'debug_toolbar',
     # project modules
     'person',
     'committee',

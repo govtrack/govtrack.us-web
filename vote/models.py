@@ -3,8 +3,11 @@ import math
 
 from django.db import models
 from django.db.models import Q
+from django.core.urlresolvers import reverse
 
 from common import enum
+
+from person.util import load_roles_at_date
 
 class CongressChamber(enum.Enum):
     senate = enum.Item(1, 'Senate')
@@ -59,18 +62,32 @@ class Vote(models.Model):
         self.total_other = self.voters.count() - (self.total_plus + self.total_minus)
         self.save()
 
+    def get_absolute_url(self):
+        if self.chamber == CongressChamber.house:
+            chamber_code = 'h'
+        else:
+            chamber_code = 's'
+        return reverse('vote_details', args=[self.congress, self.session,
+                       chamber_code, self.number])
+
     def totals(self):
+        # If cached value exists then return it
+        if hasattr(self, '_cached_totals'):
+            return self._cached_totals
+        # else do all these things:
+
         items = []
 
         # Extract all voters, find their role at the time
         # the vote was
-        all_voters = list(self.voters.all())
+        all_voters = list(self.voters.all().select_related('person', 'option'))
         voters_by_option = {}
         for option in self.options.all():
             voters_by_option[option] = [x for x in all_voters if x.option == option]
         total_count = len(all_voters)
-        for voter in all_voters:
-            voter.role = voter.person.get_role_at_date(self.created)
+
+        persons = [x.person for x in all_voters]
+        load_roles_at_date(persons, self.created)
 
         # Find all parties which participated in vote
         # and sort them in order which they should be displayed
@@ -87,7 +104,7 @@ class Vote(models.Model):
                 return 2
             return 3
         
-        all_parties = list(set(x.role.party for x in all_voters))
+        all_parties = list(set(x.person.role.party for x in all_voters))
         all_parties.sort(key=cmp_party)
         total_party_stats = dict((x, {'yes': 0, 'no': 0, 'other': 0, 'total': 0})\
                                  for x in all_parties)
@@ -100,14 +117,14 @@ class Vote(models.Model):
             percent = math.ceil((len(voters) / float(total_count)) * 100)
             party_stats = dict((x, 0) for x in all_parties)
             for voter in voters:
-                party_stats[voter.role.party] += 1
-                total_party_stats[voter.role.party]['total'] += 1
+                party_stats[voter.person.role.party] += 1
+                total_party_stats[voter.person.role.party]['total'] += 1
                 if option.key == '+':
-                    total_party_stats[voter.role.party]['yes'] += 1
+                    total_party_stats[voter.person.role.party]['yes'] += 1
                 elif option.key == '-':
-                    total_party_stats[voter.role.party]['no'] += 1
+                    total_party_stats[voter.person.role.party]['no'] += 1
                 else:
-                    total_party_stats[voter.role.party]['other'] += 1
+                    total_party_stats[voter.person.role.party]['other'] += 1
             party_counts = [party_stats.get(x, 0) for x in all_parties]
                 
             detail = {'option': option, 'count': len(voters),
@@ -120,9 +137,11 @@ class Vote(models.Model):
 
         party_counts = [total_party_stats[x] for x in all_parties]
 
-        return {'options': details, 'total_count': total_count,
+        totals = {'options': details, 'total_count': total_count,
                 'party_counts': party_counts, 'parties': all_parties,
                 }
+        self._cached_totals = totals
+        return totals
 
 
 class VoteOption(models.Model):

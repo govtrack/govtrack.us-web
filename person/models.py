@@ -31,6 +31,9 @@ class Person(models.Model):
     youtubeid = models.CharField(max_length=255, blank=True) # YouTube
     twitterid = models.CharField(max_length=50, blank=True) # Twitter
 
+    # Cached roles, see `get_role_at_date` docstring
+    _cached_roles = set()
+
     @property
     def fullname(self):
         return u'%s %s' % (self.firstname, self.lastname)
@@ -43,7 +46,11 @@ class Person(models.Model):
         return get_person_name(self, firstname_position='before', show_district=False)
 
     def name_no_details(self):
-        return get_person_name(self, firstname_position='before', show_district=False, show_party=False)
+        try:
+            return get_person_name(self, firstname_position='before', show_district=False, show_party=False)
+        except Exception, ex:
+            import traceback
+            print traceback.format_exc()
         
     def __unicode__(self):
         return self.name
@@ -77,9 +84,16 @@ class Person(models.Model):
         ret.reverse()
         return ret
 
-    def get_role_at_date(self, date):
+    def get_role_at_date(self, when):
+        if isinstance(when, datetime.datetime):
+            when = when.date()
+        for role in self._cached_roles:
+            if role.startdate <= when <= role.enddate:
+                return role
         try:
-            return self.roles.get(startdate__lte=date, enddate__gte=date)
+            role = self.roles.get(startdate__lte=when, enddate__gte=when)
+            self._cached_roles.add(role)
+            return role
         except PersonRole.DoesNotExist:
             return None
 
@@ -97,13 +111,20 @@ class Person(models.Model):
 
         return '/data/photos/%d-100px.jpeg' % self.pk
 
+    def cache_role(self, role):
+        """
+        Save role to cache.
+        """
+
+        self._cached_roles.add(role)
+
 
 class PersonRole(models.Model):
     person = models.ForeignKey('person.Person', related_name='roles')
     role_type = models.IntegerField(choices=RoleType)
     current = models.BooleanField(blank=True, default=False)
-    startdate = models.DateField()
-    enddate = models.DateField()
+    startdate = models.DateField(db_index=True)
+    enddate = models.DateField(db_index=True)
     # http://en.wikipedia.org/wiki/Classes_of_United_States_Senators
     senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True)
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts

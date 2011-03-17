@@ -1,7 +1,6 @@
 {% load vote_tags %}
 
 <div>
-    <h1>Recent vote: {{ vote }}</h1>
     <dl>
         <dt>Number:</dt>
         <dd>{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}[<a href="#">primary source:{{ vote.get_source_display }}</a>]</dd>

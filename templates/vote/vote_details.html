@@ -1,0 +1,46 @@
+{% extends 'master.html' %}
+
+{% block body %}
+Congress &gt; Roll Call Votes
+
+<div>{{ vote.congress }} Congress</div>
+
+<h1>{{ vote.question }}</h1>
+
+{% include "vote/_recent_vote.html" %}
+
+<h3>Vote Details</h3>
+<div style="float: left; width: 50%;">
+    <table>
+        <thead>
+            <tr>
+                <th>Vote</th>
+                <th>State</th>
+                <th>Representative</th>
+                <th>Party</th>
+            </tr>
+        </thead>
+        {% for voter in voters %}
+        <tr>
+            <td>{{ voter.option.value }}</td>
+            <td>{{ voter.person.role.get_state_display }}{% if voter.person.role.district %}-{{ voter.person.role.district }}{% endif %}</td>
+            <td><a href="{{ voter.person.get_absolute_url }}">{{ voter.person.name_no_details }}</a></td>
+            <td>{{ voter.person.role.party }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+</div>
+
+<div style="float: left; width: 45%; margin-left: 4%;">
+    <h3>Cartogram</h3>
+    MAP#1
+    <h3>Standart Projection<h3>
+    MAP#2
+    <p>Horizontal bars indicate the two senators from a state voted differently.<p>
+    <p>Cartograms give an equal area in an image to an equal number of votes by distorting the image. Senate vote cartograms are shown with each state stretched or shrunk so that the states each take up an equal area because each state has two votes. For House votes, it is each congressional district which is stretched or shrunk.</p>
+</div>
+
+<div style="clear: both"></div>
+
+{% endblock %}
+
