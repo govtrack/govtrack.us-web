@@ -8,8 +8,12 @@ from picklefield import PickledObjectField
 
 from common import enum
 
+class PickledObjectCharField(PickledObjectField):
+    def get_internal_type(self):
+        return 'CharField'
+
 class Feed(models.Model):
-    feedclass = PickledObjectField(unique=True, db_index=True)
+    feedclass = PickledObjectCharField(db_index=True, max_length=255)
 
     def __unicode__(self):
         return unicode(self.feedclass)
