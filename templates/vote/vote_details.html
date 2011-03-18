@@ -38,6 +38,12 @@ Congress &gt; Roll Call Votes
 
 <h1>{{ vote.question }}</h1>
 
+<div style="float: right; margin: 1em;">
+    Export:
+    <a href="{{ vote.get_absolute_url }}/export/csv">CSV</a>,
+    <a href="{{ vote.get_absolute_url }}/export/xml">XML</a>
+</div>
+
 {% include "vote/_recent_vote.html" %}
 
 <h3>Vote Details</h3>
