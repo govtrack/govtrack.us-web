@@ -157,14 +157,10 @@ def main():
 
                 vote.calculate_totals()
 
-                vote.create_event()
+                #vote.create_event()
 
             # TODO:
             # Update file checksum in the DB
-
-            # TODO:
-            # data/us/112/rolls/h2011-2.xml
-            # produces error: Warning: Data truncated for column 'key' at row 1
 
         except Exception, ex:
             logging.error('', exc_info=ex)

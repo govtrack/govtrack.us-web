@@ -179,7 +179,7 @@ def main():
                 mobj = meeting_processor.process(CommitteeMeeting(), meeting)
                 mobj.save()
             except Committee.DoesNotExist:
-                print meeting_processor.display_node(meeting)
+                print 'Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting)
             
         for committee in Committee.objects.all():
             committee.create_events()
