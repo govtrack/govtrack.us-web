@@ -38,4 +38,5 @@ def vote_details(request, congress, session, chamber_code, number):
     load_roles_at_date([x.person for x in voters], vote.created)
     return {'vote': vote,
             'voters': voters,
+            'CongressChamber': CongressChamber,
             }

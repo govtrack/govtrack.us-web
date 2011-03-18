@@ -46,7 +46,7 @@ Congress &gt; Roll Call Votes
         <thead>
             <tr>
                 <th>Vote</th>
-                <th>{% if vote.chamber == 1 %}State{% else %}District{% endif %}</th>
+                <th>{% if vote.chamber == CongressChamber.senate %}State{% else %}District{% endif %}</th>
                 <th>Representative</th>
                 <th>Party</th>
             </tr>

@@ -1,7 +1,6 @@
-import models
-
 from person.models import Person
 from committee.models import Committee
+from events import models
 
 class Feed(object):
     @staticmethod
