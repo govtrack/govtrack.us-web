@@ -13,7 +13,7 @@ class PickledObjectCharField(PickledObjectField):
         return 'CharField'
 
 class Feed(models.Model):
-    feedclass = PickledObjectCharField(db_index=True, max_length=255)
+    feedclass = PickledObjectCharField(unique=True, max_length=255)
 
     def __unicode__(self):
         return unicode(self.feedclass)
