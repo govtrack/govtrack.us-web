@@ -48,7 +48,7 @@ class VoteProcessor(Processor):
         return self.SOURCE_MAPPING[value]
 
     def datetime_handler(self, value):
-        return Processor.parse_datetime(value)
+        return self.parse_datetime(value)
 
 class VoteOptionProcessor(Processor):
     "Parser of /roll/option nodes"

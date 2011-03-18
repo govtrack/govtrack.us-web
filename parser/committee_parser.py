@@ -78,7 +78,7 @@ class CommitteeMeetingProcessor(Processor):
         return Committee.objects.get(code=value)
 
     def datetime_handler(self, value):
-        return Processor.parse_datetime(value)
+        return self.parse_datetime(value)
 
 
 def main():
