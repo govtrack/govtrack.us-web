@@ -46,12 +46,11 @@ class Person(models.Model):
         return get_person_name(self, firstname_position='before', show_district=False)
 
     def name_no_details(self):
-        try:
-            return get_person_name(self, firstname_position='before', show_district=False, show_party=False)
-        except Exception, ex:
-            import traceback
-            print traceback.format_exc()
+        return get_person_name(self, firstname_position='before', show_district=False, show_party=False)
         
+    def name_no_details_lastfirst(self):
+        return get_person_name(self, firstname_position='after', show_district=False, show_party=False)
+			
     def __unicode__(self):
         return self.name
 

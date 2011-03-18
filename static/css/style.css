@@ -78,3 +78,15 @@ li.committee-member-item {
     border: 1px solid #ccc;
 }
 
+th.headerSortUp {
+    background: #777 no-repeat 100% 47% url(/static/img/asc.gif);
+}
+
+th.headerSortDown {
+    background: #777 no-repeat 100% 47% url(/static/img/desc.gif);
+}
+
+th.header {
+    padding-right: 20px;
+    cursor: pointer;
+}
