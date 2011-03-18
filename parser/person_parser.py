@@ -130,7 +130,6 @@ def main():
 
     # Remove person which were not found in XML file
     removed_persons = existing_persons - processed_persons
-    import pdb; pdb.set_trace()
     for pk in removed_persons:
         Person.objects.get(pk=pk).delete()
 

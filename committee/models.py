@@ -19,7 +19,7 @@ class Committee(models.Model):
 
     # committee_type makes sense only for committees
     committee_type = models.IntegerField(choices=CommitteeType, blank=True, null=True)
-    code = models.CharField(max_length=5)
+    code = models.CharField(max_length=10)
     name = models.CharField(max_length=255)
     url = models.CharField(max_length=255, blank=True)
     abbrev = models.CharField(max_length=255, blank=True)

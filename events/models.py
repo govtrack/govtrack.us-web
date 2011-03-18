@@ -8,12 +8,8 @@ from picklefield import PickledObjectField
 
 from common import enum
 
-class PickledObjectCharField(PickledObjectField):
-    def get_internal_type(self):
-        return 'CharField'
-
 class Feed(models.Model):
-    feedclass = PickledObjectCharField(unique=True, max_length=255)
+    feedclass = PickledObjectField()
 
     def __unicode__(self):
         return unicode(self.feedclass)
@@ -59,11 +55,11 @@ class Event(models.Model):
             
             # get a list of events previously created for this source so that if they
             # are not updated we can delete them
-            self.existing_events = { }
+            self.existing_events = {}
             for event in Event.objects.filter(**Event.sourcearg(source)):
                 self.existing_events[event.id] = True
                 
-            self.feed_cache = { }
+            self.feed_cache = {}
             
             try:
                 self.next_id = Event.objects.order_by('-id')[0].id + 1
