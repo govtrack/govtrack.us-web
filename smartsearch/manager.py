@@ -88,7 +88,6 @@ class SearchForm(forms.Form):
         qs = self.manager.model.objects.all()
         if self.is_valid():
             for option in self.manager.options:
-                print 'Processing %s' % option.field_name
                 if option.field_name in self.cleaned_data:
                     if option.filter is not None:
                         qs = option.filter(qs, self)
@@ -97,7 +96,6 @@ class SearchForm(forms.Form):
                         if values:
                             if not u'__ALL__' in values:
                                 qs = qs.filter(**{'%s__in' % option.field_name: values})
-                print 'count', len(qs)
         return qs
 
 
@@ -107,12 +105,14 @@ class SmartChoiceField(forms.MultipleChoiceField):
         # Do GROUP BY, then COUNT
         # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
         resp = model.objects.values(field_name).annotate(_count=Count('id')).order_by()
-        counts = dict((x[field_name], x['_count']) for x in resp)
+        counts = dict((unicode(x[field_name]), x['_count']) for x in resp)
         def generate_choices():
             yield ('__ALL__', 'All')
             for key, value in model._meta.get_field(field_name).choices:
-                value += '(%d)' % counts.get(key, 0)
-                yield (key, value)
+                count = counts.get(unicode(key), 0)
+                if count:
+                    value += ' (%d)' % count
+                    yield (key, value)
         super(SmartChoiceField, self).__init__(
             required=required,
             choices=list(generate_choices()),
