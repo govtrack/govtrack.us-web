@@ -10,18 +10,18 @@ from common.decorators import render_to
 from common.pagination import paginate
 
 from vote.models import Vote, CongressChamber
-from vote.forms import VoteFilterForm
+from vote.search import vote_search_manager
 from person.util import load_roles_at_date
+from smartsearch.manager import SearchManager
 
 @render_to('vote/vote_list.html')
 def vote_list(request):
-    qs = Vote.objects.order_by('-created')
+    sm = vote_search_manager()
     if 'year' in request.GET:
-        form = VoteFilterForm(request.GET)
+        form = sm.form(request)
     else:
-        form = VoteFilterForm()
-    if form.is_valid():
-        qs = form.filter(qs)
+        form = sm.form()
+    qs = form.queryset()
     page = paginate(qs, request, per_page=50)
     recent_vote = Vote.objects.order_by('-created')[0]
     return {'page': page,

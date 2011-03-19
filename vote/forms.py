@@ -6,6 +6,8 @@ YEARS = [('', 'Any')] + [(x, str(x)) for x in xrange(2011, 1788, -1)]
 CHAMBERS = [('', 'Any')] + CongressChamber.choices()
 CATEGORIES = [('', 'Any')] + VoteCategory.choices()
 
+YEAR_FIELD = forms.ChoiceField(choices=YEARS, required=False)
+
 class VoteFilterForm(forms.Form):
     year = forms.ChoiceField(choices=YEARS, required=False)
     chamber = forms.ChoiceField(choices=CHAMBERS, required=False)

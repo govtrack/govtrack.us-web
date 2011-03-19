@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'vote',
     'parser',
     'events',
+    'smartsearch',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
