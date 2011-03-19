@@ -20,7 +20,7 @@ def main():
         for node in tree.xpath('//option'):
             vars.add((node.get('key'), node.text))
     for item in vars:
-        print item
+        logging.info(item)
 
 
 """

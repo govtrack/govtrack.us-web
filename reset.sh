@@ -8,4 +8,11 @@ rm -f database.sqlite
 if [ "$1" = "parse" ]; then
     ./parse.py person
     ./parse.py committee
+    ./parse.py vote
+fi
+
+if [ "$1" = "quick-parse" ]; then
+    ./parse.py person --disable-events
+    ./parse.py committee --disable-events
+    ./parse.py vote --disable-events --congress=112
 fi

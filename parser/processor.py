@@ -1,5 +1,10 @@
 from datetime import datetime
 
+class InvalidNode(Exception):
+    """
+    Raised when XML Node contains invalid data.
+    """
+
 class Processor(object):
     REQUIRED_ATTRIBUTES = []
     ATTRIBUTES = []
@@ -14,7 +19,7 @@ class Processor(object):
         for key in self.ATTRIBUTES:
             if key in self.REQUIRED_ATTRIBUTES:
                 if not key in node.attrib:
-                    raise Exception('Did not found required attribute %s in record %s' % (
+                    raise InvalidNode('Did not found required attribute %s in record %s' % (
                         key, self.display_node(node)))
             if key in node.attrib or key in self.DEFAULT_VALUES:
                 field_name = self.FIELD_MAPPING.get(key, key)
@@ -32,7 +37,7 @@ class Processor(object):
                 subnode = node.xpath('./%s' % key)[0]
             except IndexError:
                 if key in self.REQUIRED_NODES:
-                    raise Exception('Did not found required subnode %s in record %s' % (
+                    raise InvalidNode('Did not found required subnode %s in record %s' % (
                         key, self.display_node(node)))
                 subnode = None
             if subnode is not None or key in self.DEFAULT_VALUES:
@@ -82,7 +87,6 @@ class Processor(object):
             if k in ("id", "_state") or k.endswith("_cache"):
                 continue
             if not hasattr(old_value, k) or getattr(old_value, k) != getattr(new_value, k):
-                #print k, getattr(old_value, k), getattr(new_value, k)
                 return True
         return False
         

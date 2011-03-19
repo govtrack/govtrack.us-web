@@ -1,4 +1,5 @@
 import sys
+import logging
 
 class Progress(object):
     def __init__(self, step=None, total=None, stop=None, name='items'):
@@ -19,7 +20,7 @@ class Progress(object):
                 percents = ' [%d%%]' % int((self.count / float(self.total)) * 100)
             else:
                 percents = ''
-            print 'Processed %d %s%s' % (self.count, self.name, percents)
+            logging.info('Processed %d %s%s' % (self.count, self.name, percents))
         if self.count == self.stop:
-            print 'Reached stop value %d' % self.stop
+            logging.info('Reached stop value %d' % self.stop)
             sys.exit()

@@ -51,8 +51,11 @@ class NoArgFeed(Feed):
     
     def __unicode__(self):
         return self.name
+
+    # TODO: still needs?
     def _getstate__(self):
         return False  # prevent serialization of other information stored with the class
+
     def getname(self):
         return self.name
     
@@ -70,6 +73,8 @@ class OneArgFeed(Feed):
 
     def __unicode__(self):
         return self.name()
+
+    # TODO: still needs?
     def _getstate__(self):
         return { "arg": arg } # prevent serialization of other information
 

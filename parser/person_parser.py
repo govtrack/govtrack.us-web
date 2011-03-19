@@ -9,11 +9,14 @@ PersonRole contains data about role of current congress members.
 """
 from lxml import etree
 from datetime import datetime
+import logging
 
 from parser.progress import Progress
 from parser.processor import Processor
 from parser.models import File
 from person.models import Person, PersonRole, Gender, RoleType, SenatorClass
+
+log = logging.getLogger('parser.person_parser')
 
 class PersonProcessor(Processor):
     """
@@ -21,7 +24,7 @@ class PersonProcessor(Processor):
     a member of Congress at least one time.
     """
 
-    REQUIRED_ATTRIBUTES = ['id', 'firstname', 'lastname', 'biguideid']
+    REQUIRED_ATTRIBUTES = ['id', 'firstname', 'lastname']
     ATTRIBUTES = [
         'id', 'firstname', 'lastname', 'bioguideid',
         'metavidid', 'pvsid', 'osid', 'youtubeid', 'gender',
@@ -61,10 +64,10 @@ class PersonRoleProcessor(Processor):
         return self.ROLE_TYPE_MAPPING[value]
 
     def startdate_handler(self, value):
-        return datetime.strptime(value, '%Y-%m-%d')
+        return datetime.strptime(value, '%Y-%m-%d').date()
 
     def enddate_handler(self, value):
-        return datetime.strptime(value, '%Y-%m-%d')
+        return datetime.strptime(value, '%Y-%m-%d').date()
 
     def current_handler(self, value):
         return value == '1'
@@ -85,7 +88,7 @@ def main(options):
     content = open(XML_FILE).read()
 
     if not File.objects.is_changed(XML_FILE, content=content) and not options.force:
-        print 'File %s was not changed' % XML_FILE
+        log.info('File %s was not changed' % XML_FILE)
         return
 
     person_processor = PersonProcessor()
@@ -98,53 +101,64 @@ def main(options):
     tree = etree.parse(XML_FILE)
     total = len(tree.xpath('/people/person'))
     progress = Progress(total=total)
-    print 'Processing persons'
+    log.info('Processing persons')
 
     for node in tree.xpath('/people/person'):
-        person = person_processor.process(Person(), node)
-
-        # Now try to load the person with such ID from
-        # database. If found it then just update it
-        # else create new Person object
+        # Wrap each iteration in try/except
+        # so that if some node breaks the parsing process
+        # then other nodes could be parsed
         try:
-            ex_person = Person.objects.get(pk=person.pk)
-            if person_processor.changed(ex_person, person) or options.force:
-                # If the person has PK of existing record
-                # then Django ORM will update existing record
-                if not options.force: print "Updated", person
-                person.save()
-                
-        except Person.DoesNotExist:
-            created_persons.add(person.pk)
-            person.save()
-            print "Created", person
+            person = person_processor.process(Person(), node)
 
-        processed_persons.add(person.pk)
-
-        # Process roles of the person
-        existing_roles = set(PersonRole.objects.filter(person=person).values_list('pk', flat=True))
-        processed_roles = set()
-        for role in node.xpath('./role'):
-            role = role_processor.process(PersonRole(), role)
-            role.person = person
-            # Overwrite an existing role if there is one that is different.
+            # Now try to load the person with such ID from
+            # database. If found it then just update it
+            # else create new Person object
             try:
-                ex_role = PersonRole.objects.get(person=person, role_type=role.role_type, startdate=role.startdate, enddate=role.enddate)
-                processed_roles.add(ex_role.id)
-                role.id = ex_role.id
-                if role_processor.changed(ex_role, role) or options.force:
+                ex_person = Person.objects.get(pk=person.pk)
+                if person_processor.changed(ex_person, person) or options.force:
+                    # If the person has PK of existing record
+                    # then Django ORM will update existing record
+                    if not options.force:
+                        log.debug("Updated %s" % person)
+                    person.save()
+                    
+            except Person.DoesNotExist:
+                created_persons.add(person.pk)
+                person.save()
+                log.debug("Created %s" % person)
+
+            processed_persons.add(person.pk)
+
+            # Process roles of the person
+            existing_roles = set(PersonRole.objects.filter(person=person).values_list('pk', flat=True))
+            processed_roles = set()
+            for role in node.xpath('./role'):
+                role = role_processor.process(PersonRole(), role)
+                role.person = person
+                # Overwrite an existing role if there is one that is different.
+                try:
+                    ex_role = PersonRole.objects.get(person=person, role_type=role.role_type, startdate=role.startdate, enddate=role.enddate)
+                    processed_roles.add(ex_role.id)
+                    role.id = ex_role.id
+                    if role_processor.changed(ex_role, role) or options.force:
+                        role.save()
+                        if not options.disable_events: 
+                            role.create_events()
+                        if not options.force:
+                            log.debug("Updated %s" % role)
+                except PersonRole.DoesNotExist:
+                    log.debug("Created %s" % role)
                     role.save()
-                    role.create_events()
-                    if not options.force: print "Updated", role
-            except PersonRole.DoesNotExist:
-                print "Created", role
-                role.save()
-                role.create_events()
+                    if not options.disable_events:
+                        role.create_events()
+        except Exception, ex:
+            # Catch unexpected exceptions and log them
+            log.error('', exc_info=ex)
 
         removed_roles = existing_roles - processed_roles
         for pk in removed_roles:
             pr = PersonRole.objects.get(pk=pk)
-            print "Deleted", pr
+            log.debug("Deleted %s" % pr)
             pr.delete()
             
         progress.tick()
@@ -153,12 +167,12 @@ def main(options):
     removed_persons = existing_persons - processed_persons
     for pk in removed_persons:
         p = Person.objects.get(pk=pk)
-        print "Deleted", p
+        log.debug("Deleted %s" % p)
         p.delete()
 
-    print 'Removed persons: %d' % len(removed_persons)
-    print 'Processed persons: %d' % len(processed_persons)
-    print 'Created persons: %d' % len(created_persons)
+    log.info('Removed persons: %d' % len(removed_persons))
+    log.info('Processed persons: %d' % len(processed_persons))
+    log.info('Created persons: %d' % len(created_persons))
 
     File.objects.save_file(XML_FILE, content)
 

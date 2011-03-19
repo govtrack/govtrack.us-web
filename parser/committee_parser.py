@@ -2,9 +2,9 @@
 Parse list of committees which ever were in Congress.
 Parse members of current congress committees.
 """
-
 from lxml import etree
 from datetime import datetime
+import logging
 
 from parser.progress import Progress
 from parser.processor import Processor
@@ -12,6 +12,8 @@ from parser.models import File
 from committee.models import (Committee, CommitteeType, CommitteeMember,
                               CommitteeMemberRole, CommitteeMeeting)
 from person.models import Person
+
+log = logging.getLogger('parser.committee_parser')
 
 class CommitteeProcessor(Processor):
     """
@@ -92,7 +94,7 @@ def main(options):
     member_processor = CommitteeMemberProcessor()
     meeting_processor = CommitteeMeetingProcessor()
 
-    print 'Processing committees'
+    log.info('Processing committees')
     COMMITTEES_FILE = 'data/us/committees.xml'
     # If file changed then delete committees and set
     # this varible to True, it will be the signal
@@ -100,7 +102,7 @@ def main(options):
     committees_deleted = False
 
     if not File.objects.is_changed(COMMITTEES_FILE) and not options.force:
-        print 'File %s was not changed' % COMMITTEES_FILE
+        log.info('File %s was not changed' % COMMITTEES_FILE)
     else:
         # Delete all existing committees and
         # records which are linked to them via ForeignKey
@@ -123,12 +125,12 @@ def main(options):
 
         File.objects.save_file(COMMITTEES_FILE)
 
-    print 'Processing committee members'
+    log.info('Processing committee members')
     MEMBERS_FILE = 'data/us/112/committees.xml'
     file_changed = File.objects.is_changed(MEMBERS_FILE)
 
     if not committees_deleted and not file_changed and not options.force:
-        print 'File %s was not changed' % MEMBERS_FILE
+        log.info('File %s was not changed' % MEMBERS_FILE)
     else:
         tree = etree.parse(MEMBERS_FILE)
         total = len(tree.xpath('/committees/committee/member'))
@@ -151,8 +153,8 @@ def main(options):
                 try:
                     sobj = Committee.objects.get(code=committee.get('code')+subcom.get('code'), committee=cobj)
                 except Committee.DoesNotExist:
-                    print 'Could not process SubCom with code %s which parent Com has code %s' % (
-                        subcom.get('code'), cobj.code)
+                    log.error('Could not process SubCom with code %s which parent Com has code %s' % (
+                        subcom.get('code'), cobj.code))
                 else:
                     # Process members of current subcommittee node
                     for member in subcom.xpath('./member'):
@@ -164,12 +166,12 @@ def main(options):
 
         File.objects.save_file(MEMBERS_FILE)
 
-    print 'Processing committee schedule'
+    log.info('Processing committee schedule')
     SCHEDULE_FILE = 'data/us/112/committeeschedule.xml'
     file_changed = File.objects.is_changed(SCHEDULE_FILE)
 
     if not committees_deleted and not file_changed and not options.force:
-        print 'File %s was not changed' % SCHEDULE_FILE
+        log.info('File %s was not changed' % SCHEDULE_FILE)
     else:
         tree = etree.parse(SCHEDULE_FILE)
         
@@ -187,13 +189,14 @@ def main(options):
                 mobj = meeting_processor.process(CommitteeMeeting(), meeting)
                 mobj.save()
             except Committee.DoesNotExist:
-                print 'Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting)
-            
+                log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
+
         for committee in Committee.objects.all():
-            committee.create_events()
+            if not options.disable_events:
+                committee.create_events()
             
         File.objects.save_file(SCHEDULE_FILE)
-        
+    
+
 if __name__ == '__main__':
     main()
-

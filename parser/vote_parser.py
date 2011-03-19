@@ -13,6 +13,7 @@ from parser.models import File
 from vote.models import (Vote, VoteOption, VoteSource, Voter,
                          CongressChamber, VoteCategory, VoterType)
 
+log = logging.getLogger('parser.vote_parser')
 
 class VoteProcessor(Processor):
     """
@@ -114,9 +115,12 @@ def main(options):
     chamber_mapping = {'s': CongressChamber.senate,
                        'h': CongressChamber.house}
 
-    files = glob.glob('data/us/112/rolls/*.xml')
-    #files = glob.glob('data/us/38/rolls/h1-291.xml')
-    print 'Processing votes: %d files' % len(files)
+    if options.congress:
+        files = glob.glob('data/us/%s/rolls/*.xml' % options.congress)
+        log.info('Parsing rolls of only congress#%s' % options.congress)
+    else:
+        files = glob.glob('data/us/*/rolls/*.xml')
+    log.info('Processing votes: %d files' % len(files))
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
 
@@ -141,30 +145,30 @@ def main(options):
                 vote.save()
 				
                 # Process roll options
-                options = {}
+                roll_options = {}
                 for option_node in roll_node.xpath('./option'):
                     option = option_processor.process(VoteOption(), option_node)
                     option.vote = vote
                     option.save()
-                    options[option.key] = option
+                    roll_options[option.key] = option
 
                 # Process roll voters
                 for voter_node in roll_node.xpath('./voter'):
-                    voter = voter_processor.process(options, Voter(), voter_node)
+                    voter = voter_processor.process(roll_options, Voter(), voter_node)
                     voter.vote = vote
                     voter.created = vote.created
                     voter.save()
 
                 vote.calculate_totals()
 
-                vote.create_event()
+                if not options.disable_events:
+                    vote.create_event()
 
             # TODO:
             # Update file checksum in the DB
 
         except Exception, ex:
-            logging.error('', exc_info=ex)
-            print 'File name: %s' % fname
+            log.error('Error in processing %s' % fname, exc_info=ex)
 
 
 if __name__ == '__main__':

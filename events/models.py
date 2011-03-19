@@ -4,10 +4,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from picklefield import PickledObjectField
-
-from common import enum
-
 class Feed(models.Model):
     """Maps feed names to integer keys used in the Event model."""
     feedname = models.CharField(max_length=64, unique=True, db_index=True)
