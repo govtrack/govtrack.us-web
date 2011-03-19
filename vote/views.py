@@ -69,7 +69,9 @@ def vote_export_csv(request, congress, session, chamber_code, number):
     firstline = '%s Vote #%d %s - %s\n' % (vote.get_chamber_display(), vote.number,
                                          vote.created.strftime('%b %d, %Y'), vote.question)
     firstline = firstline.encode('utf-8')
-    return HttpResponse(firstline + output, content_type='text/csv')
+    r = HttpResponse(firstline + output, content_type='text/csv')
+    r['Content-Disposition'] = 'attachment; filename=' + vote.get_absolute_url()[1:].replace("/", "_") + ".csv"
+    return r
 
 
 def vote_export_xml(request, congress, session, chamber_code, number):
