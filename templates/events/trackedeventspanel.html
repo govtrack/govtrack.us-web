@@ -12,10 +12,16 @@
 
 {% endwith %}
 
-{% for event in feed.get_events %}
+{% for event in feed.get_events|slice:":5" %}
 {% with event|render_event:feed as meta %}
 <div style="clear: both; margin-bottom: 1em">
-	<div style="float: right">{{event.when}}</div>
+	<div style="float: right">
+		{% if not meta.date_has_no_time %}
+			{{event.when}}
+		{% else %}
+			{{event.when|date}}
+		{% endif %}
+	</div>
 	<div>{{meta.type}}</div>
 	<div><a href="{{meta.url}}">{{meta.title}}</a></div>
 	{{meta.body_html|safe}}

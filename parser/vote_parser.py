@@ -92,7 +92,7 @@ class VoterProcessor(Processor):
         return self.options[value]
 
 
-def main():
+def main(options):
     """
     Parse rolls.
     """
@@ -157,7 +157,7 @@ def main():
 
                 vote.calculate_totals()
 
-                #vote.create_event()
+                vote.create_event()
 
             # TODO:
             # Update file checksum in the DB

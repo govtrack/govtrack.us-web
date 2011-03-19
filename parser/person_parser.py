@@ -73,7 +73,7 @@ class PersonRoleProcessor(Processor):
         return self.SENATOR_CLASS_MAPPING[value]
 
 
-def main():
+def main(options):
     """
     Update Person and PersonRole models.
     
@@ -84,7 +84,7 @@ def main():
     XML_FILE = 'data/us/people.xml'
     content = open(XML_FILE).read()
 
-    if not File.objects.is_changed(XML_FILE, content=content):
+    if not File.objects.is_changed(XML_FILE, content=content) and not options.force:
         print 'File %s was not changed' % XML_FILE
         return
 
@@ -108,30 +108,53 @@ def main():
         # else create new Person object
         try:
             ex_person = Person.objects.get(pk=person.pk)
+            if person_processor.changed(ex_person, person) or options.force:
+                # If the person has PK of existing record
+                # then Django ORM will update existing record
+                if not options.force: print "Updated", person
+                person.save()
+                
         except Person.DoesNotExist:
             created_persons.add(person.pk)
-
-        # If the person has PK of existing record
-        # then Django ORM will update existing record
-        person.save()
+            person.save()
+            print "Created", person
 
         processed_persons.add(person.pk)
 
         # Process roles of the person
-        # For simplicity just remove roles
-        # of existing record
-        person.roles.all().delete()
+        existing_roles = set(PersonRole.objects.filter(person=person).values_list('pk', flat=True))
+        processed_roles = set()
         for role in node.xpath('./role'):
             role = role_processor.process(PersonRole(), role)
             role.person = person
-            role.save()
+            # Overwrite an existing role if there is one that is different.
+            try:
+                ex_role = PersonRole.objects.get(person=person, role_type=role.role_type, startdate=role.startdate, enddate=role.enddate)
+                processed_roles.add(ex_role.id)
+                role.id = ex_role.id
+                if role_processor.changed(ex_role, role) or options.force:
+                    role.save()
+                    role.create_events()
+                    if not options.force: print "Updated", role
+            except PersonRole.DoesNotExist:
+                print "Created", role
+                role.save()
+                role.create_events()
 
+        removed_roles = existing_roles - processed_roles
+        for pk in removed_roles:
+            pr = PersonRole.objects.get(pk=pk)
+            print "Deleted", pr
+            pr.delete()
+            
         progress.tick()
 
     # Remove person which were not found in XML file
     removed_persons = existing_persons - processed_persons
     for pk in removed_persons:
-        Person.objects.get(pk=pk).delete()
+        p = Person.objects.get(pk=pk)
+        print "Deleted", p
+        p.delete()
 
     print 'Removed persons: %d' % len(removed_persons)
     print 'Processed persons: %d' % len(processed_persons)

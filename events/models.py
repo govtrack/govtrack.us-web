@@ -9,15 +9,60 @@ from picklefield import PickledObjectField
 from common import enum
 
 class Feed(models.Model):
-    feedclass = PickledObjectField()
+    """Maps feed names to integer keys used in the Event model."""
+    feedname = models.CharField(max_length=64, unique=True, db_index=True)
 
     def __unicode__(self):
-        return unicode(self.feedclass)
+        return self.feedname
         
 class Event(models.Model):
     """
-    Holds info about an event in a feed. The primary key is used as a monotonically
-    increasing sequence number for all records.
+    Holds info about an event in a feed. This record doesn't contain any information about
+    the event itself except the date of the event so that records can be efficiently queried by date.
+    
+    The primary key is used as a monotonically increasing sequence number for all records so that
+    we can reliably track which events a user has been notified about by tracking the highest
+    primary key the user has seen.
+    
+    Events are created by source objects. A Vote, for instance, creates an Event record
+    for itself, actually multiple Event records one for each feed the event goes into: the
+    all votes feed and the votes feeds for each Member of Congress that voted. The Event
+    refers back to the Vote via the source generic relationship. Information about the event
+    so that it can be displayed is obtained by calling Event.render(), which in turn queries
+    the source object for information about the vote.
+    
+    The source object must have a method render_event(eventid, feeds) which returns
+    a dict containing the keys:
+        type: a string describing the type of the event, for display purposes
+        date: a datetime that the event took place (same as Event.when)
+        title: a string
+        url: a string giving a link URL for the event, starting with the URL's path (i.e. omit scheme & host)
+        body_text_template: a Django template used to render the event for text-only presentation (use "|safe" to prevent autoescaping)
+        body_html_template: a Django template used to render the event in HTML
+        context: a dict passed as the template context when rendering either of the body templates
+    And optionally:
+        date_has_no_time: set to True to indicate the date on this event has no time associated with it
+        
+    Some source objects generate multiple events. In this case, it uses the eventid CharField
+    to track which event is which. It can put anything in the CharField up to 32 characters.
+    For instance, Committee instances generate events for each CommitteeMeeting and code
+    each as mtg_ID where ID is the CommitteeMeeting primary key. When its render_event
+    is called, it is passed back the eventid so it knows what event it is rendering.
+    
+    To create events, do something like the following, which begins the update process for
+    the source object (self) and adds a single event (with eventid "vote") to multiple feeds.
+    Note that Event.update() will clear out any previously created events for the source
+    object if they are not re-added here.
+        from events.feeds import AllVotesFeed, PersonVotesFeed
+        from events.models import Event
+        with Event.update(self) as E:
+            E.add("vote", self.created, AllVotesFeed())
+            for v in self.voters.all():
+                E.add("vote", self.created, PersonVotesFeed(v.person_id))
+                
+    Event.render is optionally passed a keyword argument feeds which is a sequence of
+    feed.Feed objects that allow the event's template to be customized depending on which
+    feed(s) the event is in.
     """
     
     feed = models.ForeignKey(Feed)
@@ -48,7 +93,8 @@ class Event(models.Model):
         
     def render(self, feeds=None):
         return self.source.render_event(self.eventid, feeds)
-        
+    
+    # This is used to update the events for an object and delete any events that are not updated.
     class update:
         def __init__(self, source):
             self.source = source
@@ -74,7 +120,7 @@ class Event(models.Model):
             if feed in self.feed_cache:
                 feedrec = self.feed_cache[feed]
             else:
-                feedrec, created = Feed.objects.get_or_create(feedclass=feed)
+                feedrec, created = Feed.objects.get_or_create(feedname=feed.getname())
                 self.feed_cache[feed] = feedrec
             
             # Create the record for this event for this feed, if it does not exist.
@@ -93,6 +139,7 @@ class Event(models.Model):
                     event.save()
             
         def __exit__(self, type, value, traceback):
+            # Clear out any events that were not updated.
             Event.objects.filter(id__in=self.existing_events).delete()
             return False
 

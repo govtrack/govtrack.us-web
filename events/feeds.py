@@ -1,3 +1,18 @@
+# This module defines the metadata of Feeds, which are collections of tracked events.
+# Each feed has a name (getname()), which is an encoded string such as p:400001, and
+# other metadata such as a title (gettitle()).
+#
+# The association between events and feeds is created by the objects that create the event
+# records.
+#
+# The localname field of a feed is used to display the feed name when it is grouped with
+# other related fields.
+#
+# Feed.get_events() and Feed.get_events_for(feeds) returns a QuerySet over events
+# that match the feed(s).
+#
+# Feed.from_name(name) returns a Feed object from a feed name (e.g. again p:400001).
+
 from person.models import Person
 from committee.models import Committee
 from events import models
@@ -21,9 +36,10 @@ class Feed(object):
     @staticmethod
     def get_events_for(feeds):
         fd = []
-        for f in feeds:
-           fd.extend(f.expand()) 
-        return models.Event.objects.filter(feed__feedclass__in=fd).order_by("-when")
+        for f1 in feeds:
+            for f2 in f1.expand():
+                fd.append(f2.getname())
+        return models.Event.objects.filter(feed__feedname__in=fd).order_by("-when")
         
     def get_events(self):
         return Feed.get_events_for((self,))
@@ -37,6 +53,8 @@ class NoArgFeed(Feed):
         return self.name
     def _getstate__(self):
         return False  # prevent serialization of other information stored with the class
+    def getname(self):
+        return self.name
     
 class OneArgFeed(Feed):
     feedmap = { }
@@ -47,7 +65,7 @@ class OneArgFeed(Feed):
     def __init__(self, arg):
         self.arg = arg
     
-    def name(self):
+    def getname(self):
         return self.prefix + ":" + str(self.arg)
 
     def __unicode__(self):
@@ -64,12 +82,12 @@ class PersonFeed(OneArgFeed):
             self._person = Person.objects.get(id=int(self.arg))
         return self._person
         
-    def display(self):
+    def gettitle(self):
         return self.person().name()
         
     def expand(self):
         if self.__class__ == PersonFeed:
-            return [PersonVotesFeed(self.arg), PersonSponsorshipFeed(self.arg)]
+            return [self, PersonVotesFeed(self.arg), PersonSponsorshipFeed(self.arg)]
         else:
             return [self]
 
@@ -77,14 +95,14 @@ class PersonVotesFeed(PersonFeed):
     prefix = "pv"
     localname = "Voting Record"
 
-    def display(self):
+    def gettitle(self):
         return self.person().name() + "'s Voting Record"
 
 class PersonSponsorshipFeed(PersonFeed):
     prefix = "ps"
     localname = "Bills Sponsored"
 
-    def display(self):
+    def gettitle(self):
         return self.person().name() + "'s Bills Sponsored"
         
 class BillFeed(OneArgFeed):

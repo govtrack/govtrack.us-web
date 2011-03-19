@@ -81,7 +81,7 @@ class CommitteeMeetingProcessor(Processor):
         return self.parse_datetime(value)
 
 
-def main():
+def main(options):
     """
     Process committees, subcommittees and
     members of current congress committees.
@@ -99,7 +99,7 @@ def main():
     # to run committee members parser anyway
     committees_deleted = False
 
-    if not File.objects.is_changed(COMMITTEES_FILE):
+    if not File.objects.is_changed(COMMITTEES_FILE) and not options.force:
         print 'File %s was not changed' % COMMITTEES_FILE
     else:
         # Delete all existing committees and
@@ -127,12 +127,14 @@ def main():
     MEMBERS_FILE = 'data/us/112/committees.xml'
     file_changed = File.objects.is_changed(MEMBERS_FILE)
 
-    if not committees_deleted and not file_changed:
+    if not committees_deleted and not file_changed and not options.force:
         print 'File %s was not changed' % MEMBERS_FILE
     else:
         tree = etree.parse(MEMBERS_FILE)
         total = len(tree.xpath('/committees/committee/member'))
         progress = Progress(total=total, name='committees')
+        
+        CommitteeMember.objects.all().delete()
 
         # Process committee nodes
         for committee in tree.xpath('/committees/committee'):
@@ -166,10 +168,16 @@ def main():
     SCHEDULE_FILE = 'data/us/112/committeeschedule.xml'
     file_changed = File.objects.is_changed(SCHEDULE_FILE)
 
-    if not committees_deleted and not file_changed:
+    if not committees_deleted and not file_changed and not options.force:
         print 'File %s was not changed' % SCHEDULE_FILE
     else:
         tree = etree.parse(SCHEDULE_FILE)
+        
+        # We have to clear out all CommitteeMeeting objects when we refresh because
+        # we have no unique identifier in the upstream data for a meeting. We might use
+        # the meeting's committee & date as an identifier, but since meeting times can
+        # change this might have awkward consequences for the end user if we even
+        # attempted to track that.
 
         CommitteeMeeting.objects.all().delete()
 

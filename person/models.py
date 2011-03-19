@@ -8,7 +8,7 @@ from common import enum
 from person.types import Gender, RoleType, SenatorClass, State
 from name import get_person_name
 
-from us import stateapportionment, get_congress_dates 
+from us import stateapportionment, get_congress_dates, statenames
 
 class Person(models.Model):
     firstname = models.CharField(max_length=255)
@@ -24,7 +24,7 @@ class Person(models.Model):
     nickname = models.CharField(max_length=255, blank=True)
 
 	# links
-    bioguideid = models.CharField(max_length=255) #  bioguide.congress.gov
+    bioguideid = models.CharField(max_length=255, blank=True, null=True) #  bioguide.congress.gov (null for presidents that didn't serve in Congress)
     pvsid = models.CharField(max_length=255, blank=True) #  vote-smart.org
     osid = models.CharField(max_length=255, blank=True) #  opensecrets.org
     metavidid = models.CharField(max_length=255, blank=True) # metavid.org
@@ -128,8 +128,8 @@ class PersonRole(models.Model):
     senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True)
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts
     district = models.IntegerField(blank=True, null=True) 
-    state = models.CharField(choices=State, max_length=255, blank=True)
-    party = models.CharField(max_length=255)
+    state = models.CharField(choices=State, max_length=2, blank=True)
+    party = models.CharField(max_length=255, blank=True, null=True)
     website = models.CharField(max_length=255, blank=True)
 
     class Meta:
@@ -165,4 +165,38 @@ class PersonRole(models.Model):
             if stateapportionment[self.state] == 'T':
                 return 'Del.' if short else 'Delegate'
             return 'Rep.' if short else 'Representative'
-		
+            
+    def get_description(self):
+        if self.role_type == RoleType.president:
+            return self.get_title_name(False)
+        if self.role_type == RoleType.senator:
+            return self.get_title_name(False) + " from " + statenames[self.state]
+        if self.role_type == RoleType.representative:
+            if self.district == -1:
+                return self.get_title_name(False) + " for " + statenames[self.state]
+            elif self.district == 0:
+                return self.get_title_name(False) + " for " + statenames[self.state] + " At Large"
+            else:
+                return self.get_title_name(False) + " for " + statenames[self.state] + "'s District " + str(self.district)
+
+    def create_events(self):
+        from events.feeds import PersonFeed
+        from events.models import Event
+        with Event.update(self) as E:
+            E.add("termstart", self.startdate, PersonFeed(self.person_id))
+            if self.enddate <= datetime.datetime.now().date(): # because we're not sure of end date until it happens
+                E.add("termend", self.startdate, PersonFeed(self.person_id))
+	
+    def render_event(self, eventid, feeds):
+        import events.feeds
+        return {
+            "type": "Elections",
+            "date_has_no_time": True,
+            "date": self.startdate if eventid == "termstart" else self.enddate,
+            "title": self.person.name + (" takes office as " if eventid == "termstart" else " leaves offices as ") + self.get_description(),
+            "url": self.person.get_absolute_url(),
+            "body_text_template": "",
+            "body_html_template": "",
+            "context": {}
+            }
+
