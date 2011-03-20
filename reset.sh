@@ -8,7 +8,7 @@ rm -f database.sqlite
 if [ "$1" = "parse" ]; then
     ./parse.py person
     ./parse.py committee
-    ./parse.py vote
+    ./parse.py vote --congress=112
 fi
 
 if [ "$1" = "quick-parse" ]; then

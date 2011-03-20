@@ -74,15 +74,20 @@ class SearchForm(forms.Form):
     manager = None
     def __init__(self, *args, **kwargs):
         self.manager = kwargs.pop('manager')
+        smart_fields = []
         for option in self.manager.options:
             if option.field:
                 field = option.field
             elif option.simple:
                 field = self.manager.model._meta.get_field(option.field_name).formfield()
             else:
-                field = SmartChoiceField(self.manager.model, option.field_name, option.required)
+                field = SmartChoiceField(self, self.manager.model, option.field_name, option.required)
+                smart_fields.append(option.field_name)
             self.base_fields[option.field_name] = field
         super(SearchForm, self).__init__(*args, **kwargs)
+        for field_name in smart_fields:
+            field = self[field_name].field
+            field.choices = list(field.generate_choices(render_counts=True))
 
     def queryset(self):
         qs = self.manager.model.objects.all()
@@ -101,19 +106,30 @@ class SearchForm(forms.Form):
 
 
 class SmartChoiceField(forms.MultipleChoiceField):
-    def __init__(self, model, field_name, required):
-        # Do GROUP BY, then COUNT
-        # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
-        resp = model.objects.values(field_name).annotate(_count=Count('id')).order_by()
-        counts = dict((unicode(x[field_name]), x['_count']) for x in resp)
-        def generate_choices():
-            yield ('__ALL__', 'All')
-            for key, value in model._meta.get_field(field_name).choices:
+    def __init__(self, form, model, field_name, required):
+        self.meta_form = form
+        self.meta_model = model
+        self.meta_field_name = field_name
+        super(SmartChoiceField, self).__init__(
+            choices=list(self.generate_choices(render_counts=False)),
+            required=required,
+            widget=forms.CheckboxSelectMultiple)
+
+    def generate_choices(self, render_counts):
+        if render_counts:
+            # Calculate number of possible results for each option
+            # Use `form.queryset()` to track already applied options
+            # ORM explanation: do GROUP BY, then COUNT
+            # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
+            resp = self.meta_form.queryset().values(self.meta_field_name).annotate(_count=Count('id')).order_by()
+            counts = dict((unicode(x[self.meta_field_name]), x['_count']) for x in resp)
+
+        yield ('__ALL__', 'All')
+        for key, value in self.meta_model._meta.get_field(self.meta_field_name).choices:
+            if render_counts:
                 count = counts.get(unicode(key), 0)
                 if count:
                     value += ' (%d)' % count
                     yield (key, value)
-        super(SmartChoiceField, self).__init__(
-            required=required,
-            choices=list(generate_choices()),
-            widget=forms.CheckboxSelectMultiple)
+            else:
+                yield (key, value)

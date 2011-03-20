@@ -13,9 +13,9 @@ settings_local.py
 .env
 pip-log.txt
 update.sh
-dump.sql
 database.sqlite
 
 syntax:regexp
+^dump.*\.sql
 ^log/
 ^data/
