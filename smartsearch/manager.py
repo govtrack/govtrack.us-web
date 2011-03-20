@@ -89,18 +89,32 @@ class SearchForm(forms.Form):
             field = self[field_name].field
             field.choices = list(field.generate_choices(render_counts=True))
 
-    def queryset(self):
+    def queryset(self, exclude=None):
+        """
+        Build the `self.model` queryset limited to selected filters.
+        """
+
         qs = self.manager.model.objects.all()
+
+        # If form contains valid data
         if self.is_valid():
+            # Then for each filter
             for option in self.manager.options:
-                if option.field_name in self.cleaned_data:
-                    if option.filter is not None:
-                        qs = option.filter(qs, self)
-                    else:
-                        values = self.cleaned_data[option.field_name]
-                        if values:
-                            if not u'__ALL__' in values:
-                                qs = qs.filter(**{'%s__in' % option.field_name: values})
+                # If filter is not excluded explicitly
+                if option.field_name != exclude:
+                    # If filter contains valid data
+                    if option.field_name in self.cleaned_data:
+                        # Do filtering
+
+                        if option.filter is not None:
+                            qs = option.filter(qs, self)
+                        else:
+                            values = self.cleaned_data[option.field_name]
+                            if values:
+                                # if __ALL__ value presents in filter values
+                                # then do not limit queryset
+                                if not u'__ALL__' in values:
+                                    qs = qs.filter(**{'%s__in' % option.field_name: values})
         return qs
 
 
@@ -121,7 +135,10 @@ class SmartChoiceField(forms.MultipleChoiceField):
             # Use `form.queryset()` to track already applied options
             # ORM explanation: do GROUP BY, then COUNT
             # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
-            resp = self.meta_form.queryset().values(self.meta_field_name).annotate(_count=Count('id')).order_by()
+            resp = self.meta_form.queryset(exclude=self.meta_field_name)\
+                       .values(self.meta_field_name)\
+                       .annotate(_count=Count('id'))\
+                       .order_by()
             counts = dict((unicode(x[self.meta_field_name]), x['_count']) for x in resp)
 
         yield ('__ALL__', 'All')
