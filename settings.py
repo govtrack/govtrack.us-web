@@ -91,6 +91,7 @@ INSTALLED_APPS = (
     'parser',
     'events',
     'smartsearch',
+    'bill',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
