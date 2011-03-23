@@ -22,4 +22,5 @@ urlpatterns = patterns('',
     url(r'^congres/committees/', include('committee.urls')),
     url(r'^congress/votes/', include('vote.urls')),
     url(r'^congress/bills/', include('bill.urls')),
+    url(r'', include('events.urls')),
 )

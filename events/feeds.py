@@ -13,6 +13,8 @@
 #
 # Feed.from_name(name) returns a Feed object from a feed name (e.g. again p:400001).
 
+from django.db.models.query import QuerySet
+
 from person.models import Person
 from committee.models import Committee
 from events import models
@@ -21,25 +23,37 @@ class Feed(object):
     @staticmethod
     def from_name(name):
         if name in NoArgFeed.feedmap:
-            return NoArgFeed.feedmap[name]
+            return NoArgFeed.feedmap[name]()
         
         args = name.split(":")
         if args[0] in OneArgFeed.feedmap:
             clz = OneArgFeed.feedmap[args[0]]
             return clz(":".join(args[1:]))
             
-        return None
+        raise ValueError("Invalid feed: " + name)
         
     def expand(self):
         return [self]
         
     @staticmethod
     def get_events_for(feeds):
-        fd = []
-        for f1 in feeds:
-            for f2 in f1.expand():
-                fd.append(f2.getname())
-        return models.Event.objects.filter(feed__feedname__in=fd).order_by("-when")
+        qs = models.Event.objects.all()
+        qs = qs.order_by("-when")
+        
+        if feeds != None:
+            fd = []
+            for f1 in feeds:
+                for f2 in f1.expand():
+                    fd.append(f2.getname())
+            qs = qs.filter(feed__feedname__in=fd)
+        
+        # because events can occur in multiple feeds, we need to
+        # run a projection & distinct on a subset of the fields, and the
+        # only way to do that is through values() which causes the
+        # iterations to return dicts rather than Events.
+        qs = qs.values("source_content_type", "source_object_id", "eventid", "when").distinct()
+        
+        return qs
         
     def get_events(self):
         return Feed.get_events_for((self,))
@@ -58,6 +72,8 @@ class NoArgFeed(Feed):
 
     def getname(self):
         return self.name
+    def gettitle(self):
+        return self.title
     
 class OneArgFeed(Feed):
     feedmap = { }
@@ -88,7 +104,7 @@ class PersonFeed(OneArgFeed):
         return self._person
         
     def gettitle(self):
-        return self.person().name()
+        return self.person().name
         
     def expand(self):
         if self.__class__ == PersonFeed:
@@ -130,21 +146,26 @@ class DistrictFeed(OneArgFeed):
 
 class ActiveBillsFeed(NoArgFeed):
     name = "misc:activebills"
+    title = "All Activity on Legislation"
     
 class EnactedBillsFeed(NoArgFeed):
     name = "misc:enactedbills"
+    title = "Enacted Bills"
 
 class IntroducedBillsFeed(NoArgFeed):
     name = "misc:introducedbills"
+    title = "Introduced Bills and Resolutions"
 
 class ActiveBills2Feed(NoArgFeed):
     name = "misc:activebills2"
 
 class AllCommitteesFeed(NoArgFeed):
     name = "misc:allcommittee"
+    title = "Upcoming Committee Meetings"
 
 class AllVotesFeed(NoArgFeed):
     name = "misc:allvotes"
+    title = "All Roll Call Votes"
     
 for clz in (eval(x) for x in dir()):
     if isinstance(clz, type) and issubclass(clz, NoArgFeed):

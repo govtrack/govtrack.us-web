@@ -1,0 +1,97 @@
+{% extends 'master.html' %}
+{% load events_utils %}
+{% block head %}
+<script>
+var feeds = {{feeds_json|safe}};
+function togglefeed(feedname) {
+	var idx = feeds.indexOf(feedname);
+	if (idx == -1) {
+		feeds.push(feedname);
+	} else {
+		feeds = feeds.splice(0, idx) + feeds.splice(idx+1, feeds.length); 
+	}
+	
+	idx = document.location.href.indexOf("?");
+	var idx2 = document.location.href.indexOf("#");
+	if ((idx2 < idx && idx2 != -1) || idx == -1) idx = idx2;
+	if (idx == -1) {
+		document.location = document.location.href + "?feeds=" + feeds;
+	} else {
+		document.location = document.location.href.substr(0, idx) + "?feeds=" + feeds;
+	}
+
+	return false; // override href
+}
+function search_feeds(type) {
+	$('#track_' + type + '_results').text("Loading...");
+	ajax("/events/search_feeds", { "type": type, "q": $('#track_' + type + '_input').val() }, {
+			success: function(res) {
+				$('#track_' + type + '_results').html("");
+				var html = $("<ul/>");
+				for (feed in res.feeds) {
+					var li = $("<li/>");
+					html.append(li);
+					
+					var a = $("<a href='#'/>");
+					li.append(a);
+					a.text(res.feeds[feed].title);
+					a.click(function() { togglefeed(res.feeds[feed].name); });
+				}
+				$('#track_' + type + '_results').append(html);
+			}
+	});		
+}
+</script>
+{% endblock %}
+{% block body %}
+<h1>Tracked Events</h1>
+
+<div class="col_left">
+    {% for event in page.object_list %}
+	{% with event|render_event:feeds as meta %}
+        <div class="tracked_event" style="clear: both; margin-bottom: 1em">
+
+			<div style="float: right">
+				{% if not meta.date_has_no_time %}
+					{{event.when}}
+				{% else %}
+					{{event.when|date}}
+				{% endif %}
+			</div>
+			
+			<div>{{meta.type}}</div>
+			
+			<div><a href="{{meta.url}}">{{meta.title}}</a></div>
+			
+			{{meta.body_html|safe}}
+        </div>
+	{% endwith %}
+    {% endfor %}
+    {% include "pagination.html" %}
+</div>
+
+<div class="col_right">
+	<div class="sidebox">
+		<h2>Get These Events as a Feed or Widget</h2>
+		...
+	</div>
+
+	<div class="sidebox">
+		<h2>Customize Your Feed</h2>
+		<p>Add these events to your customized feed:</p>
+		<ul>
+			{% for feed, selected in no_arg_feeds %}
+				<li class="{% if selected %}active{% endif %}" feedname="{{feed.getname}}"><span class="feed_active_span"></span> <a href="#" onclick="return togglefeed('{{feed.getname|escapejs}}');">{{feed.gettitle}}</a></li>
+			{% endfor %}
+		</ul>
+		
+		<p>Track a Member of Congress:</p>
+		<div><input id="track_person_input" type="text" style="width: 100%"/></div>
+		<div id="track_person_results"> </div>
+		<script>
+			$('#track_person_input').input_default("search by last name, zipcode, or state name");
+			$('#track_person_input').keyup_delayed(function() { search_feeds("person"); });
+		</script>
+	</div>
+</div>
+{% endblock %}

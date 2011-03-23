@@ -188,7 +188,7 @@ class PersonRole(models.Model):
         with Event.update(self) as E:
             E.add("termstart", self.startdate, PersonFeed(self.person_id))
             if self.enddate <= datetime.datetime.now().date(): # because we're not sure of end date until it happens
-                E.add("termend", self.startdate, PersonFeed(self.person_id))
+                E.add("termend", self.enddate, PersonFeed(self.person_id))
 	
     def render_event(self, eventid, feeds):
         import events.feeds
@@ -196,7 +196,7 @@ class PersonRole(models.Model):
             "type": "Elections",
             "date_has_no_time": True,
             "date": self.startdate if eventid == "termstart" else self.enddate,
-            "title": self.person.name + (" takes office as " if eventid == "termstart" else " leaves offices as ") + self.get_description(),
+            "title": self.person.name + (" takes office as " if eventid == "termstart" else " leaves office as ") + self.get_description(),
             "url": self.person.get_absolute_url(),
             "body_text_template": "",
             "body_html_template": "",
