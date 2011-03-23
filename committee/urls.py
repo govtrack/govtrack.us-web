@@ -2,7 +2,7 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('committee.views',
-    url(r'congress/committees/$', 'committee_list', name='committee_list'),
-    url(r'congress/committees/(\w+)$', 'committee_details', name='committee_details'),
-    url(r'congress/committees/(\w+)/(\w+)$', 'committee_details', name='subcommittee_details'),
+    url(r'^$', 'committee_list', name='committee_list'),
+    url(r'^(\w+)$', 'committee_details', name='committee_details'),
+    url(r'^(\w+)/(\w+)$', 'committee_details', name='subcommittee_details'),
 )

@@ -3,10 +3,27 @@ from django.db import models
 
 from common import enum
 
+from committee.models import Committee
+
+"Enums"
+
+class BillType(enum.Enum):
+    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr')
+    senate = enum.Item(2, 'S', slug='s', xml_code='s')
+    house_of_representatives = enum.Item(3, 'H.R.', slug='hr', xml_code='h')
+    senate_resolution = enum.Item(4, 'S.Res.', slug='sr', xml_code='sr')
+    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hc', xml_code='hc')
+    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sc', xml_code='sc')
+    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hj', xml_code='hj')
+    senate_joint_resolution = enum.Item(7, 'S.J.Res.', slug='sj', xml_code='sj')
+
+
 class TermType(enum.Enum):
     old = enum.Item(1, 'Old')
     new = enum.Item(2, 'New')
 
+
+"Models"
 
 class BillTerm(models.Model):
     """
@@ -27,3 +44,24 @@ class BillTerm(models.Model):
 
     class Meta:
         unique_together = ('name', 'parent', 'term_type')
+
+
+class Bill(models.Model):
+    title = models.CharField(max_length=255)
+    bill_type = models.IntegerField(choices=BillType)
+    congress = models.IntegerField()
+    number = models.IntegerField()
+    # sponsor ???
+    committees = models.ManyToManyField(Committee, related_name='bills')
+    terms = models.ManyToManyField(BillTerm, related_name='bills')
+    # status = models.CharField(max_lenght=255)
+    # status_date = models.DateField()
+    cosponsor_count = models.IntegerField(blank=True, null=True)
+    # action ???
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        ordering = ('congress', 'bill_type', 'number')
+        unique_together = ('congress', 'bill_type', 'number')
