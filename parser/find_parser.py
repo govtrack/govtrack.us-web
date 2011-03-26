@@ -18,8 +18,8 @@ def main(options):
     progress = Progress(total=len(files))
     for fname in files:
         progress.tick()
-        for event, elem in etree.iterparse(fname, events=('end',), tag='title'):
-            vars.add((elem.get('type'), elem.get('as')))
+        for event, elem in etree.iterparse(fname, events=('end',), tag='state'):
+            vars.add(elem.text)
     for item in vars:
         print item
 

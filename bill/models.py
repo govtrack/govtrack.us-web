@@ -24,6 +24,10 @@ class TermType(enum.Enum):
     new = enum.Item(2, 'New')
 
 
+class BillStatus(enum.Enum):
+    foo = enum.Item(1, 'Foo')
+
+
 "Models"
 
 class BillTerm(models.Model):
@@ -47,6 +51,13 @@ class BillTerm(models.Model):
         unique_together = ('name', 'parent', 'term_type')
 
 
+class Cosponsor(models.Model):
+    person = models.ForeignKey('person.Person')
+    bill = models.ForeignKey('bill.Bill')
+    joined = models.DateField()
+    withdrawn = models.DateField(blank=True, null=True)
+
+
 class Bill(models.Model):
     title = models.CharField(max_length=255)
     # Serialized list of all bill titles
@@ -58,10 +69,10 @@ class Bill(models.Model):
                                 related_name='sponsored_bills')
     committees = models.ManyToManyField(Committee, related_name='bills')
     terms = models.ManyToManyField(BillTerm, related_name='bills')
-    # status = models.CharField(max_lenght=255)
-    # status_date = models.DateField()
-    cosponsor_count = models.IntegerField(blank=True, null=True)
-    # action ???
+    #current_status = models.IntegerField(choices=BillStatus)
+    current_status_date = models.DateField()
+    introduced_date = models.DateField()
+    cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor')
 
     def __unicode__(self):
         return self.title
