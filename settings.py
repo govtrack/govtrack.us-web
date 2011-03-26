@@ -112,6 +112,8 @@ CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 DATETIME_FORMAT = 'M d, Y P'
 DATE_FORMAT = 'M d, Y'
 
+CURRENT_CONGRESS = 112
+
 try:
     from settings_local import *
 except ImportError:

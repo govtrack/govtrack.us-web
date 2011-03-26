@@ -21,5 +21,5 @@ urlpatterns = patterns('',
     url(r'^congress/persons/', include('person.urls')),
     url(r'^congres/committees/', include('committee.urls')),
     url(r'^congress/votes/', include('vote.urls')),
-    url(r'^congress/bills/', include('bills.urls')),
+    #url(r'^congress/bills/', include('bills.urls')),
 )

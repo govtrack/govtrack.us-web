@@ -2,6 +2,7 @@
 from django.db import models
 
 from common import enum
+from common.fields import JSONField
 
 from committee.models import Committee
 
@@ -15,7 +16,7 @@ class BillType(enum.Enum):
     house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hc', xml_code='hc')
     senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sc', xml_code='sc')
     house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hj', xml_code='hj')
-    senate_joint_resolution = enum.Item(7, 'S.J.Res.', slug='sj', xml_code='sj')
+    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sj', xml_code='sj')
 
 
 class TermType(enum.Enum):
@@ -48,10 +49,13 @@ class BillTerm(models.Model):
 
 class Bill(models.Model):
     title = models.CharField(max_length=255)
+    # Serialized list of all bill titles
+    titles = JSONField()
     bill_type = models.IntegerField(choices=BillType)
     congress = models.IntegerField()
     number = models.IntegerField()
-    # sponsor ???
+    sponsor = models.ForeignKey('person.Person', blank=True, null=True,
+                                related_name='sponsored_bills')
     committees = models.ManyToManyField(Committee, related_name='bills')
     terms = models.ManyToManyField(BillTerm, related_name='bills')
     # status = models.CharField(max_lenght=255)
