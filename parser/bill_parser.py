@@ -1,5 +1,7 @@
 """
-Parse bills related data.
+Parser of:
+ * bill terms located in data/us/[liv, liv111, crsnet].xml
+ * bills located in data/us/*/bills/*.xml
 """
 from lxml import etree
 import logging
@@ -10,7 +12,7 @@ import re
 from parser.progress import Progress
 from parser.processor import Processor
 from parser.models import File
-from bill.models import BillTerm, TermType, BillType, Bill, Cosponsor
+from bill.models import BillTerm, TermType, BillType, Bill, Cosponsor, BillStatus
 from person.models import Person
 from bill.title import get_bill_title
 from committee.models import Committee
@@ -75,7 +77,7 @@ class BillProcessor(Processor):
     def process_current_status(self, obj, node):
         elem = node.xpath('./state')[0]
         obj.current_status_date = self.parse_datetime(elem.get('datetime'))
-        # TODO: obj.current_status = 
+        obj.current_status = BillStatus.by_xml_code(elem.text)
 
     def process_titles(self, obj, node):
         titles = []

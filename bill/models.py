@@ -5,6 +5,7 @@ from common import enum
 from common.fields import JSONField
 
 from committee.models import Committee
+from bill.status import BillStatus
 
 "Enums"
 
@@ -22,11 +23,6 @@ class BillType(enum.Enum):
 class TermType(enum.Enum):
     old = enum.Item(1, 'Old')
     new = enum.Item(2, 'New')
-
-
-class BillStatus(enum.Enum):
-    foo = enum.Item(1, 'Foo')
-
 
 "Models"
 
@@ -69,7 +65,7 @@ class Bill(models.Model):
                                 related_name='sponsored_bills')
     committees = models.ManyToManyField(Committee, related_name='bills')
     terms = models.ManyToManyField(BillTerm, related_name='bills')
-    #current_status = models.IntegerField(choices=BillStatus)
+    current_status = models.IntegerField(choices=BillStatus)
     current_status_date = models.DateField()
     introduced_date = models.DateField()
     cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor')
