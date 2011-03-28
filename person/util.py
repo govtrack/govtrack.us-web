@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from committee.util import sort_members
 from committee.models import CommitteeMemberRole
 from person.models import PersonRole
@@ -25,7 +27,7 @@ def get_committee_assignments(person):
     return role_tree
 
 
-def load_roles_at_date(persons, when):
+def load_roles_at_date(persons, when=datetime.now()):
     """
     Find out role of each person at given date.
 

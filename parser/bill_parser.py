@@ -89,7 +89,7 @@ class BillProcessor(Processor):
 
     def process_sponsor(self, obj, node):
         try:
-            obj.sponsor = get_person(node.xpath('./person')[0].get('id'))
+            obj.sponsor = get_person(node.xpath('./sponsor')[0].get('id'))
         except IndexError:
             obj.sponsor = None
 

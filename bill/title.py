@@ -1,28 +1,17 @@
 """
 Function which computes Bill title.
 """
-from django.conf import settings
 import re
 
-def ordinate(num):
-    if num % 100 >= 11 and num % 100 <= 13:
-        return "th"
-    elif num % 10 == 1:
-        return "st"
-    elif num % 10 == 2:
-        return "nd"
-    elif num % 10 == 3:
-        return "rd"
-    else:
-        return "th"
-
+from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import ordinal
 
 def get_bill_number(bill):
     "Compute display form of bill number"
 
     ret = '%s %s' % (bill.bill_type.label, bill.number)
     if bill.congress != settings.CURRENT_CONGRESS:
-        ret += ' (%s%s)' % (bill.congress, ordinate(bill.congress))
+        ret += ' (%s)' % ordinal(bill.congress)
     return ret
 
 

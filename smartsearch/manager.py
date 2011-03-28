@@ -111,6 +111,9 @@ class SearchForm(forms.Form):
                         else:
                             values = self.cleaned_data[option.field_name]
                             if values:
+                                # Hack
+                                if not isinstance(values, (list, tuple)):
+                                    values = [values]
                                 # if __ALL__ value presents in filter values
                                 # then do not limit queryset
                                 if not u'__ALL__' in values:

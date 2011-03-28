@@ -12,19 +12,19 @@
 {% block body %}
 <div class="col_left">
 	<div class="icon_holder">
-		<a href="/congress/members"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/member.png')"> </div></a>
+        <a href="{% url person_list %}"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/member.png')"> </div></a>
 		<div class="icon_text">
-			<h2><a href="/congress/members">Members of Congress</a></h2>
-			<p>Do you know who represents you in Congress? <a href="/congress/members">Find a representative or senator</a>. We also compile <a href="/congress/members/statistics">statistics</a> about Members of Congress.</p>
+            <h2><a href="{% url person_list %}">Members of Congress</a></h2>
+            <p>Do you know who represents you in Congress? <a href="{% url person_list %}">Find a representative or senator</a>. We also compile <a href="/congress/members/statistics">statistics</a> about Members of Congress.</p>
 		</div>
 		<div class="clear"> </div>
 	</div>
 
 	<div class="icon_holder">
-		<a href="/congress/bills"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/bill.png')"> </div></a>
+        <a href="{% url bill_list %}"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/bill.png')"> </div></a>
 		<div class="icon_text">
-			<h2><a href="/congress/bills">Bills &amp; Resolutions</a></h2>
-			<p>Track the status of current pending legislation as it goes through the law-making processs or research bills going back to 1993. <a href="/congress/bills">Search bills</a> and browse by <a href="/congress/subjects">subject area</a>.</p>
+            <h2><a href="{% url bill_list %}">Bills &amp; Resolutions</a></h2>
+            <p>Track the status of current pending legislation as it goes through the law-making processs or research bills going back to 1993. <a href="{% url bill_list %}">Search bills</a> and browse by <a href="{% url bill_list %}">subject area</a>.</p>
 			
 			<p>H.R. 3: Abortion Bill, H.R. 459: Audit the Fed</p>
 			<p>H.R. 514: PATRIOT Act Extension, More Bills...</p>
@@ -33,19 +33,19 @@
 	</div>
 
 	<div class="icon_holder">
-		<a href="/congress/votes"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/vote.png')"> </div></a>
+        <a href="{% url vote_list %}"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/vote.png')"> </div></a>
 		<div class="icon_text">
-			<h2><a href="/congress/votes">Voting Records</a></h2>
-			<p>Browse House and Senate <a href="/congress/votes">roll call votes</a> going back to the founding of the nation.</p>
+            <h2><a href="{% url vote_list %}">Voting Records</a></h2>
+            <p>Browse House and Senate <a href="{% url vote_list %}">roll call votes</a> going back to the founding of the nation.</p>
 		</div>
 		<div class="clear"> </div>
 	</div>
 	
 	<div class="icon_holder">
-		<a href="/congress/committees"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/committee.png')"> </div></a>
+        <a href="{% url committee_list %}"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/committee.png')"> </div></a>
 		<div class="icon_text">
-			<h2><a href="/congress/committees">Congressional Committees</a></h2>
-			<p>Congress is divided into a number of <a href="/congress/committees">congressional committees</a> which perform the first round of considering and revising legislation.</p>
+            <h2><a href="{% url committee_list %}">Congressional Committees</a></h2>
+            <p>Congress is divided into a number of <a href="{% url committee_list %}">congressional committees</a> which perform the first round of considering and revising legislation.</p>
 		</div>
 	</div>
 

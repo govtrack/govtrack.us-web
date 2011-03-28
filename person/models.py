@@ -63,7 +63,7 @@ class Person(models.Model):
     def get_absolute_url(self):
         name = slugify('%s %s' % (self.firstname, self.lastname))
         name = name.replace('-', '_')
-        return '/person/%s/%d' % (name, self.pk)
+        return '/congress/persons/%s/%d' % (name, self.pk)
 
     def get_age(self):
         if not self.birthday:
@@ -116,6 +116,9 @@ class Person(models.Model):
         """
 
         self._cached_roles.add(role)
+
+    class Meta:
+        ordering = ['lastname', 'firstname']
 
 
 class PersonRole(models.Model):

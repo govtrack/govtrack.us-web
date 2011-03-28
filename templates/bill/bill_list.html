@@ -1,0 +1,31 @@
+{% extends 'master.html' %}
+
+{% block body %}
+Congress &gt;
+
+<h1>Search Legislation</h1>
+
+<p>Use this page to find bills and resolutions in the U.S. Congress going back to 1993. You can also browse them by subject area or by committee assignment. (If you're looking for historical documents, see the links page for additional resources.)</p>
+
+<div style="float: left; width: 70%;">
+    <ul>
+        {% for bill in page.object_list %}
+        <li>{{ bill }}</li>
+        {% endfor %}
+    </ul>
+    {% include "pagination.html" %}
+</div>
+
+<div style="float: left; width: 25%; margin-left: 4%;">
+    <form method="get">
+        {{ form.as_p }}
+        <p>
+            <input type="submit" value="Filter">
+            <input type="reset" value="Reset" onclick="location.href='{% url bill_list %}';" />
+        </p>
+    </form>
+</div>
+
+<div style="clear: both"></div>
+
+{% endblock %}
