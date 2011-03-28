@@ -14,7 +14,7 @@ from parser.processor import Processor
 from parser.models import File
 from bill.models import BillTerm, TermType, BillType, Bill, Cosponsor, BillStatus
 from person.models import Person
-from bill.title import get_bill_title
+from bill.title import get_primary_bill_title
 from committee.models import Committee
 
 log = logging.getLogger('parser.bill_parser')
@@ -85,7 +85,7 @@ class BillProcessor(Processor):
             text = unicode(elem.text) if elem.text else None
             titles.append((elem.get('type'), elem.get('as'), text))
         obj.titles = titles
-        obj.title = get_bill_title(obj, titles, 'short')
+        obj.title = get_primary_bill_title(obj, titles)
 
     def process_sponsor(self, obj, node):
         try:
