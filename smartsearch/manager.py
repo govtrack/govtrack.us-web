@@ -145,11 +145,19 @@ class SmartChoiceField(forms.MultipleChoiceField):
             counts = dict((unicode(x[self.meta_field_name]), x['_count']) for x in resp)
 
         yield ('__ALL__', 'All')
-        for key, value in self.meta_model._meta.get_field(self.meta_field_name).choices:
-            if render_counts:
-                count = counts.get(unicode(key), 0)
-                if count:
+
+        def calculate_choices():
+            for key, value in self.meta_model._meta.get_field(self.meta_field_name).choices:
+                if render_counts:
+                    count = counts.get(unicode(key), 0)
                     value += ' (%d)' % count
-                    yield (key, value)
-            else:
-                yield (key, value)
+                    yield (key, value, count)
+                else:
+                    yield (key, value, 0)
+
+        # Sort by label (secondary sort argument)
+        # Then by count (primary sort argument)
+        items = sorted(calculate_choices(), key=lambda x: x[1])
+        items = sorted(items, key=lambda x: x[2], reverse=True)
+        for item in items:
+            yield item[:2]
