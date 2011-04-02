@@ -66,10 +66,6 @@ class NoArgFeed(Feed):
     def __unicode__(self):
         return self.name
 
-    # TODO: still needs?
-    def _getstate__(self):
-        return False  # prevent serialization of other information stored with the class
-
     def getname(self):
         return self.name
     def gettitle(self):
@@ -89,10 +85,6 @@ class OneArgFeed(Feed):
 
     def __unicode__(self):
         return self.name()
-
-    # TODO: still needs?
-    def _getstate__(self):
-        return { "arg": arg } # prevent serialization of other information
 
 class PersonFeed(OneArgFeed):
     prefix = "p"
@@ -167,6 +159,8 @@ class AllVotesFeed(NoArgFeed):
     name = "misc:allvotes"
     title = "All Roll Call Votes"
     
+# Record the feed names and prefixes defined in the classes in two dicts so
+# that feed names can be quickly parsed.
 for clz in (eval(x) for x in dir()):
     if isinstance(clz, type) and issubclass(clz, NoArgFeed):
         NoArgFeed.feedmap[clz.name] = clz
