@@ -79,6 +79,8 @@ class OneArgFeed(Feed):
     
     def __init__(self, arg):
         self.arg = arg
+        if hasattr(arg, "id"):
+            self.arg = arg.id
     
     def getname(self):
         return self.prefix + ":" + str(self.arg)
@@ -127,8 +129,12 @@ class IssueFeed(OneArgFeed):
 class CommitteeFeed(OneArgFeed):
     prefix = "committee"
     def __init__(self, arg):
-        self.arg = arg
-        self.committee = Committee.objects.get(code=self.arg)
+        if isinstance(arg, Committee):
+            self.committee = arg
+            self.arg = self.committee.code
+        else:
+            self.arg = arg
+            self.committee = Committee.objects.get(code=self.arg)
         self.localname = self.committee.name
     def expand(self):
         return [self] + [CommitteeFeed(s.code) for s in self.committee.subcommittees.all()]
@@ -148,12 +154,13 @@ class IntroducedBillsFeed(NoArgFeed):
     name = "misc:introducedbills"
     title = "Introduced Bills and Resolutions"
 
-class ActiveBills2Feed(NoArgFeed):
+class ActiveBillsExceptIntroductionsFeed(NoArgFeed):
     name = "misc:activebills2"
 
 class AllCommitteesFeed(NoArgFeed):
     name = "misc:allcommittee"
-    title = "Upcoming Committee Meetings"
+    def expand(self):
+        return [self] + [CommitteeFeed(s.code) for s in Committee.objects.all()]
 
 class AllVotesFeed(NoArgFeed):
     name = "misc:allvotes"

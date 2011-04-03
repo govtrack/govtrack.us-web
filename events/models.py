@@ -112,6 +112,12 @@ class Event(models.Model):
             return self
             
         def add(self, eventid, when, feed):
+            # If feed is a list or tuple, then call this on each item in the list/tuple.
+            if isinstance(feed, list) or isinstance(feed, tuple):
+                for f in feed:
+                    self.add(eventid, when, f)
+                return
+            
             # Convert the feeds.Feed object feed into a models.Feed fieldrec.
             if feed in self.feed_cache:
                 feedrec = self.feed_cache[feed]

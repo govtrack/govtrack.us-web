@@ -168,11 +168,18 @@ class BillProcessor(Processor):
 
 def main(options):
     """
-    Process bill terms
+    Process bill terms and bills
     """
 
+    # Terms
+
     term_processor = TermProcessor()
-    BillTerm.objects.all().delete()
+    terms_parsed = set()
+    
+    # Cache existing terms. There aren't so many.
+    existing_terms = { }
+    for term in BillTerm.objects.all():
+        existing_terms[(term.term_type, term.parent.id if term.parent else None, term.name)] = term.id
 
     log.info('Processing old bill terms')
     TERMS_FILE = 'data/us/liv.xml'
@@ -180,16 +187,28 @@ def main(options):
     for node in tree.xpath('/liv/top-term'):
         term = term_processor.process(BillTerm(), node)
         term.term_type = TermType.old
-        term.save()
+        try:
+            # No need to update an existing term because there are no other attributes.
+            term.id = existing_terms[(int(term.term_type), None, term.name)]
+            terms_parsed.add(term.id)
+        except:
+            log.debug("Created %s" % term)
+            term.save()
 
         for subnode in node.xpath('./term'):
             subterm = term_processor.process(BillTerm(), subnode)
             subterm.parent = term
             subterm.term_type = TermType.old
             try:
-                subterm.save()
-            except IntegrityError:
-                log.error('Duplicated term %s' % term_processor.display_node(subnode))
+                # No need to update an existing term because there are no other attributes.
+                subterm.id = existing_terms[(int(subterm.term_type), subterm.parent.id, subterm.name)]
+                terms_parsed.add(subterm.id)
+            except:
+                try:
+                    log.debug("Created %s" % subterm)
+                    subterm.save()
+                except IntegrityError:
+                    log.error('Duplicated term %s' % term_processor.display_node(subnode))
 
     log.info('Processing new bill terms')
     for FILE in ('data/us/liv111.xml', 'data/us/crsnet.xml'):
@@ -197,28 +216,60 @@ def main(options):
         for node in tree.xpath('/liv/top-term'):
             term = term_processor.process(BillTerm(), node)
             term.term_type = TermType.new
-            term.save()
+            try:
+                # No need to update an existing term because there are no other attributes.
+                term.id = existing_terms[(int(term.term_type), None, term.name)]
+                terms_parsed.add(term.id)
+            except:
+                log.debug("Created %s" % term)
+                term.save()
 
             for subnode in node.xpath('./term'):
                 subterm = term_processor.process(BillTerm(), subnode)
                 subterm.parent = term
                 subterm.term_type = TermType.new
                 try:
-                    subterm.save()
-                except IntegrityError:
-                    log.error('Duplicated term %s' % term_processor.display_node(subnode))
+                    # No need to update an existing term because there are no other attributes.
+                    subterm.id = existing_terms[(int(subterm.term_type), subterm.parent.id, subterm.name)]
+                    terms_parsed.add(subterm.id)
+                except:
+                    try:
+                        log.debug("Created %s" % term)
+                        subterm.save()
+                    except IntegrityError:
+                        log.error('Duplicated term %s' % term_processor.display_node(subnode))
 
+    for termid in existing_terms.values():
+        if not termid in terms_parsed:
+            term = BillTerm.objects.get(id=termid)
+            log.debug("Deleted %s" % term)
+            term.delete()
 
-def main(options):
-    log.info('Processing bills')
+    # Bills
+
+    if options.congress:
+        files = glob.glob('data/us/%s/bills/*.xml' % options.congress)
+        log.info('Parsing bills of only congress#%s' % options.congress)
+    else:
+        files = glob.glob('data/us/*/bills/*.xml')
+    log.info('Processing bills: %d files' % len(files))
+    total = len(files)
+    progress = Progress(total=total, name='files', step=10)
+
     bill_processor = BillProcessor()
     Bill.objects.all().delete()
-    for fname in glob.glob('data/us/112/bills/*.xml'):
-        print fname
+    for fname in files:
+        progress.tick()
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
             bill = bill_processor.process(Bill(), node)
             bill.save()
+            
+            actions = []
+            for axn in tree.xpath("actions/*[@state]"):
+                actions.append( (bill_processor.parse_datetime(axn.xpath("string(@datetime)")), BillStatus.by_xml_code(axn.xpath("string(@state)")), axn.xpath("string(text)")) )
+            
+            bill.create_events(actions)
 
 
 if __name__ == '__main__':

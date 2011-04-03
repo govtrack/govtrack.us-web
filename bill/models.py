@@ -76,3 +76,51 @@ class Bill(models.Model):
     class Meta:
         ordering = ('congress', 'bill_type', 'number')
         unique_together = ('congress', 'bill_type', 'number')
+        
+    def create_events(self, actions):
+        from events.feeds import PersonSponsorshipFeed, BillFeed, IssueFeed, CommitteeFeed, ActiveBillsFeed, EnactedBillsFeed, IntroducedBillsFeed, ActiveBillsExceptIntroductionsFeed 
+        from events.models import Event
+        with Event.update(self) as E:
+            index_feeds = [BillFeed(self)]
+            if self.sponsor != None:
+                index_feeds.append(PersonSponsorshipFeed(self.sponsor))
+            index_feeds.extend([IssueFeed(ix) for ix in self.terms.all()])
+            index_feeds.extend([CommitteeFeed(cx) for cx in self.committees.all()])
+            
+            E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [ActiveBillsFeed(), IntroducedBillsFeed()])
+            for date, state, text in actions:
+                if state == BillStatus.introduced:
+                    continue # already indexed
+                E.add("state:" + str(state), date, index_feeds + [ActiveBillsFeed(), ActiveBillsExceptIntroductionsFeed()])
+	
+    def render_event(self, eventid, feeds):
+        import events.feeds
+        return {
+            "type": "Vote",
+            "date": self.created,
+            "title": self.question,
+			"url": self.get_absolute_url(),
+            "body_text_template":
+"""{{summary|safe}}
+{% for voter in voters %}
+    {{voter.name|safe}}: {{voter.vote|safe}}
+{% endfor %}""",
+            "body_html_template":
+"""<p>{{summary}}</p>
+{% for voter in voters %}
+    {% if forloop.first %}<ul>{% endif %}
+    <p><a href="{{voter.url}}">{{voter.name}}</a>: {{voter.vote}}</p>
+    {% if forloop.last %}</ul>{% endif %}
+{% endfor %}
+""",
+            "context": {
+                "summary": self.summary(),
+                "voters":
+                            [
+                                { "url": f.person().get_absolute_url(), "name": f.person().name, "vote": self.voters.get(person=f.person()).option.value }
+                                for f in feeds if isinstance(f, events.feeds.PersonFeed) and self.voters.filter(person=f.person()).exists()
+                            ]
+                        if feeds != None else []
+                }
+            }
+        
