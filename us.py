@@ -18,20 +18,22 @@ statelist = [s for s in statenames.items() if s[0] in stateapportionment]
 statelist.sort(key=lambda x : x[1])
 
 CONGRESS_DATES = {}
+SESSION_DATES = []
 
 def parse_govtrack_date(d):
     try:
         return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-04:00')
     except ValueError:
         pass
-	try:
-		return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-05:00')
-	except ValueError:
-		pass
-	return datetime.strptime(d, '%Y-%m-%d')
+    try:
+        return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-05:00')
+    except ValueError:
+        pass
+    return datetime.strptime(d, '%Y-%m-%d')
 
 
 def get_congress_dates(congressnumber):
+    global CONGRESS_DATES
     if CONGRESS_DATES == { }:
         cd = {}
         for line in open('data/us/sessions.tsv'):
@@ -44,4 +46,21 @@ def get_congress_dates(congressnumber):
             cd[cn][1] = parse_govtrack_date(enddate)
         CONGRESS_DATES.update(cd)
     return CONGRESS_DATES[congressnumber]
+
+def get_session_from_date(when):
+    global SESSION_DATES
+    if SESSION_DATES == [ ]:
+        sd = []
+        for line in open('data/us/sessions.tsv'):
+            cn, sessionname, startdate, enddate = line.strip().split('\t')[0:4]
+            if not '-' in startdate: # header
+                continue
+            sd.append((int(cn), sessionname, parse_govtrack_date(startdate), parse_govtrack_date(enddate)))
+        SESSION_DATES = sd
+        
+    for c, s, sd, ed in SESSION_DATES:
+        if sd <= when and when <= ed:
+            return (c, s)
+            
+    return None
 

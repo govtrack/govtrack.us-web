@@ -136,6 +136,8 @@ class CommitteeFeed(OneArgFeed):
             self.arg = arg
             self.committee = Committee.objects.get(code=self.arg)
         self.localname = self.committee.name
+    def gettitle(self):
+        return self.committee.name
     def expand(self):
         return [self] + [CommitteeFeed(s.code) for s in self.committee.subcommittees.all()]
 
@@ -156,9 +158,11 @@ class IntroducedBillsFeed(NoArgFeed):
 
 class ActiveBillsExceptIntroductionsFeed(NoArgFeed):
     name = "misc:activebills2"
+    title = "All Activity on Legislation Except New Introductions"
 
 class AllCommitteesFeed(NoArgFeed):
     name = "misc:allcommittee"
+    title = "All Committee Activity"
     def expand(self):
         return [self] + [CommitteeFeed(s.code) for s in Committee.objects.all()]
 

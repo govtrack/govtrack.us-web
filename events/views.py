@@ -23,7 +23,7 @@ def events_list(request):
     qs = feeds.Feed.get_events_for(feedlist if len(feedlist) > 0 else None).filter(when__lte=datetime.now()) # get all events
     page = paginate(qs, request, per_page=50)
     
-    no_arg_feeds = [feeds.ActiveBillsFeed(), feeds.IntroducedBillsFeed(), feeds.EnactedBillsFeed(), feeds.AllVotesFeed(), feeds.AllCommitteesFeed()]
+    no_arg_feeds = [feeds.ActiveBillsFeed(), feeds.IntroducedBillsFeed(), feeds.ActiveBillsExceptIntroductionsFeed(), feeds.EnactedBillsFeed(), feeds.AllVotesFeed(), feeds.AllCommitteesFeed()]
     no_arg_feeds = [(feed, False) for feed in no_arg_feeds]
         
     return {
@@ -46,8 +46,15 @@ def search_feeds(request):
             if us.statenames[s].lower().startswith(request.POST["q"].lower()):
                 print s, us.statenames[s]
                 feedlist.extend([
-                    feeds.PersonFeed(p.id)
+                    feeds.PersonFeed(p)
                     for p in Person.objects.filter(roles__current=True, roles__state=s)])
+                
+    if request.POST["type"] == "committee":
+        from committee.models import Committee
+        feedlist = [
+            feeds.CommitteeFeed(c)
+            for c in Committee.objects.filter(name__contains=request.POST["q"], obsolete=False)]
+                
     def feedinfo(f):
         return { "name": f.getname(), "title": f.gettitle() }
     return HttpResponse(simplejson.dumps({

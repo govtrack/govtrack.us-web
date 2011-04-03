@@ -12,7 +12,7 @@
 	padding: 10px;
 	color: white;
 }
-#content p {
+#content p, #content li, #content pre {
 	font-size: 10px;
 	margin: 5px 0 0 0;
 }

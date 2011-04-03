@@ -23,8 +23,14 @@ function togglefeed(feedname) {
 	return false; // override href
 }
 function search_feeds(type) {
+	var q = $('#track_' + type + '_input').val();
+	if (q.replace(/\s/g,"") == "") {
+		$('#track_' + type + '_results').text("");
+		return;
+	}
+	
 	$('#track_' + type + '_results').text("Loading...");
-	ajax("/events/search_feeds", { "type": type, "q": $('#track_' + type + '_input').val() }, {
+	ajax("/events/search_feeds", { "type": type, "q": q }, {
 			success: function(res) {
 				$('#track_' + type + '_results').html("");
 				var html = $("<ul/>");
@@ -85,13 +91,22 @@ function search_feeds(type) {
 			{% endfor %}
 		</ul>
 		
-		<p>Track a Member of Congress:</p>
+		<p>Track a Member of Congress: (<a href="/congress/members">browse all</a>)</p>
 		<div><input id="track_person_input" type="text" style="width: 100%"/></div>
 		<div id="track_person_results"> </div>
 		<script>
 			$('#track_person_input').input_default("search by last name, zipcode, or state name");
 			$('#track_person_input').keyup_delayed(function() { search_feeds("person"); });
 		</script>
+		
+		<p>Track a Committee: (<a href="/congress/committees">browse all</a>)</p>
+		<div><input id="track_committee_input" type="text" style="width: 100%"/></div>
+		<div id="track_committee_results"> </div>
+		<script>
+			$('#track_committee_input').input_default("search by committee name");
+			$('#track_committee_input').keyup_delayed(function() { search_feeds("committee"); });
+		</script>
+		
 	</div>
 </div>
 {% endblock %}
