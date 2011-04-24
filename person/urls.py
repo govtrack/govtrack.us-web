@@ -2,6 +2,13 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('person.views',
-    url(r'^$', 'person_list', name='person_list'),
-    url(r'^[^/]+/(\d+)', 'person_details', name='person_details'),
+    url(r'^$', 'browsemembersbymap', name="person_list"),
+	url(r'^(all|search)$', 'searchmembers', name="person_search"),
+
+    url(r'^(?:([A-Z][A-Z])(?:/(\d+))?)?$', 'browsemembersbymap'),
+	url(r'^[^/]+/(\d+)', 'person_details', name='person_details'),
+	
+    url(r'^spectrum$', 'political_spectrum', name='political_spectrum'),
+	
+	url(r'^embed/mapframe(?:\.xpd)?$', 'districtmapembed', name='districtmapembed'),
 )

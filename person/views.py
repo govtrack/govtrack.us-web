@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from datetime import datetime, timedelta
+from math import log, sqrt
 
 from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
@@ -8,12 +9,20 @@ from django.core.urlresolvers import reverse
 from common.decorators import render_to
 from common.pagination import paginate
 
+import json
+
+from us import statelist, statenames, stateapportionment
+
 from person.models import Person, PersonRole
 from person import analysis
+from person.types import RoleType
 from person.video import get_youtube_videos, get_sunlightlabs_videos
 from person.util import get_committee_assignments
 
 from events.feeds import PersonFeed
+
+from smartsearch.manager import SearchManager
+from search import person_search_manager
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -72,8 +81,123 @@ def person_details(request, pk):
 
 
 @render_to('person/person_list.html')
-def person_list(request):
-    page = paginate(Person.objects.all(), request)
+def searchmembers(request, initial_mode=None):
+    sm = person_search_manager()
+    form = sm.form()
+    qs = form.queryset()
+    page = paginate(qs, request, per_page=50)
     return {'page': page,
+            'form': form,
             }
+
+def http_rest_json(url, args=None, method="GET"):
+    import urllib, urllib2, json
+    if method == "GET" and args != None:
+        url += "?" + urllib.urlencode(args).encode("utf8")
+    req = urllib2.Request(url)
+    r = urllib2.urlopen(req)
+    return json.load(r, "utf8")
+    
+@render_to('person/district_map.html')
+def browsemembersbymap(request, state=None, district=None):
+    center_lat, center_long, center_zoom = (38, -96, 4)
+    
+    sens = None
+    reps = None
+    if state != None:
+        if stateapportionment[state] != "T":
+            sens = Person.objects.filter(roles__current=True, roles__state=state, roles__role_type=RoleType.senator)
+            sens = list(sens)
+            for i in xrange(2-len(sens)): # make sure we list at least two slots
+                sens.append(None)
+    
+        reps = []
+        if stateapportionment[state] in ("T", 1):
+            dists = [0]
+            if district != None:
+                raise Http404()
+        else:
+            dists = xrange(1, stateapportionment[state]+1)
+            if district != None:
+                if int(district) < 1 or int(district) > stateapportionment[state]:
+                    raise Http404()
+                dists = [int(district)]
+        for i in dists:
+            try:
+                reps.append((i, Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=i)))
+            except Person.DoesNotExist:
+                reps.append((i, None))
+        
+        try:
+            info = cached(60*60*24)(http_rest_json)(
+                "http://www.govtrack.us/perl/wms/list-regions.cgi",
+                {
+                "dataset": "http://www.rdfabout.com/rdf/usgov/us/states" if district == None else "http://www.rdfabout.com/rdf/usgov/congress/house/110",
+                "uri": "http://www.rdfabout.com/rdf/usgov/geo/us/" + state.lower() + ("/cd/110/" + district if district != None else ""),
+                "fields": "coord,area",
+                "format": "json"
+                  })["regions"][0]
+            
+            center_long, center_lat = info["long"], info["lat"]
+            center_zoom = round(1.5 - log(sqrt(info["area"])/24902.0))
+        except:
+            pass
+    
+    return {
+        "center_lat": center_lat,
+        "center_long": center_long,
+        "center_zoom": center_zoom,
+        "state": state,
+        "district": district,
+        "statename": statenames[state] if state != None else None,
+        "statelist": statelist,
+        "senators": sens,
+        "reps": reps,
+    }
+
+@render_to('person/district_map_embed.html')
+def districtmapembed(request):
+	return {
+		"demo": "demo" in request.GET,
+		"state": request.GET.get("state", ""),
+		"district": request.GET.get("district", ""),
+		"bounds": request.GET.get("bounds", None),
+	}
+
+@render_to('congress/political_spectrum.html')
+def political_spectrum(request):
+    rows = []
+    fnames = [
+        'data/us/112/stats/sponsorshipanalysis_h.txt',
+        'data/us/112/stats/sponsorshipanalysis_s.txt',
+    ]
+    alldata = open(fnames[0]).read() + open(fnames[1]).read()
+    for line in alldata.splitlines():
+        chunks = [x.strip() for x in line.strip().split(',')]
+        if chunks[0] == "ID":
+            continue
+        
+        data = { }
+        data['id'] = chunks[0]
+        data['x'] = float(chunks[1])
+        data['y'] = float(chunks[2])
+        
+        p = Person.objects.get(id=chunks[0])
+        data['label'] = p.lastname
+        if p.birthday: data['age'] = (datetime.now().date() - p.birthday).days / 365.25
+        data['gender'] = p.gender
+        
+        r = p.get_last_role_at_congress(112)
+        data['type'] = r.role_type
+        data['party'] = r.party
+        data['years_in_congress'] = (min(datetime.now().date(),r.enddate) - p.roles.filter(startdate__lte=r.startdate).order_by('startdate')[0].startdate).days / 365.25
+        
+        rows.append(data)
+        
+    years_in_congress_max = max([data['years_in_congress'] for data in rows])
+    
+    return {
+        "data": json.dumps(rows),
+        "years_in_congress_max": years_in_congress_max,
+        }
 

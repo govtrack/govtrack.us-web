@@ -69,6 +69,9 @@ class Vote(models.Model):
             chamber_code = 's'
         return reverse('vote_details', args=[self.congress, self.session,
                        chamber_code, self.number])
+        
+    def name(self):
+        return CongressChamber.by_value(self.chamber).label + " Vote #" + str(self.number)
 
     def totals(self):
         # If cached value exists then return it

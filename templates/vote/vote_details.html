@@ -60,9 +60,29 @@ Congress &gt; Roll Call Votes
         {% for voter in voters %}
         <tr>
             <td style="text-align: right"><nobr>{{ voter.option.value }}</nobr></td>
-            <td>{{ voter.person.role.state }}{% if voter.person.role.district %} - {{ voter.person.role.district|ordinal|rjust:5 }}{% endif %}</td>
-            <td><a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal">{{ voter.person.name_no_details_lastfirst }}</a></td> {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
-            <td>{{ voter.person.role.party }}</td>
+            <td>
+				{% if voter.voter_type == VoterType.unknown %}
+					??
+				{% endif %}
+				{% if voter.voter_type == VoterType.vice_president %}
+					-
+				{% endif %}
+				{% if voter.voter_type == VoterType.member %}
+					{{ voter.person.role.state }}{% if voter.person.role.district %} - {{ voter.person.role.district|ordinal|rjust:5 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
+				{% endif %}
+			</td>
+            <td>
+				{% if voter.voter_type == VoterType.unknown %}
+					[Information Missing]
+				{% endif %}
+				{% if voter.voter_type == VoterType.vice_president %}
+					The Vice President
+				{% endif %}
+				{% if voter.voter_type == VoterType.member %}
+					<a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal">{{ voter.person.name_no_details_lastfirst }}</a>
+				{% endif %}
+			</td>
+            <td>{% if voter.voter_type == VoterType.member %}{{ voter.person.role.party }}{% endif %}</td>
         </tr>
     {% endfor %}
     </table>

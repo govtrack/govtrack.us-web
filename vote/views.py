@@ -1,34 +1,51 @@
 # -*- coding: utf-8 -*-
 import csv
 from StringIO import StringIO
+import json
 
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render_to_response
+from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
+from django.core.paginator import Paginator
 
 from common.decorators import render_to
-from common.pagination import paginate
 
-from vote.models import Vote, CongressChamber
+from vote.models import Vote, CongressChamber, VoterType
 from vote.search import vote_search_manager
 from person.util import load_roles_at_date
 from smartsearch.manager import SearchManager
 
-@render_to('vote/vote_list.html')
 def vote_list(request):
     sm = vote_search_manager()
-    if 'year' in request.GET:
+    
+    if request.META["REQUEST_METHOD"] == "GET":
+        return render_to_response("vote/vote_list.html", {
+            'form': sm.form(),
+            'column_headers': sm.get_column_headers()},
+            RequestContext(request))
+    
+    print request.POST
+    
+    try:
+        page_number = int(request.POST.get("page", "1"))
+        
         form = sm.form(request)
-    else:
-        form = sm.form()
-    qs = form.queryset()
-    page = paginate(qs, request, per_page=50)
-    recent_vote = Vote.objects.order_by('-created')[0]
-    return {'page': page,
-            'form': form,
-            'recent_vote': recent_vote,
-            }
-
+        qs = form.queryset()
+        page = Paginator(qs, 20)
+        
+        return HttpResponse(json.dumps({
+            "form": form.as_p(),
+            "results": sm.results(page.page(page_number).object_list),
+            "page": page_number,
+            "num_pages": page.num_pages,
+            }), content_type='text/json')
+    except Exception as e:
+        return HttpResponse(json.dumps({
+            "form": str(e),
+            "page": None,
+            }), content_type='text/json')
+            
 
 def load_vote(congress, session, chamber_code, number):
     """
@@ -52,6 +69,7 @@ def vote_details(request, congress, session, chamber_code, number):
     return {'vote': vote,
             'voters': voters,
             'CongressChamber': CongressChamber,
+            "VoterType": VoterType,
             }
 
 
