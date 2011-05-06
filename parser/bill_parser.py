@@ -257,12 +257,26 @@ def main(options):
     progress = Progress(total=total, name='files', step=10)
 
     bill_processor = BillProcessor()
-    Bill.objects.all().delete()
+    seen_bill_ids = []
     for fname in files:
         progress.tick()
+        
+        if not File.objects.is_changed(fname) and not options.force:
+            m = re.search(r"/(\d+)/([a-z]+)(\d+)\.xml$")
+            seen_bill_ids.append(Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3)).id)
+            continue
+            
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
             bill = bill_processor.process(Bill(), node)
+            
+            # update existing bill record if one exists, otherwise create a new one on save()
+            try:
+                bill.id = Bill.objects.get(congress=bill.congress, bill_type=bill.bill_type, number=bill.number).id
+                seen_bill_ids.append(bill.id) # don't delete me later
+            except Bill.DoesNotExist:
+                pass
+            
             bill.save()
             
             actions = []
@@ -271,6 +285,10 @@ def main(options):
             
             bill.create_events(actions)
 
+        File.objects.save_file(fname)
+
+    # delete bill objects that are no longer represented on disk
+    Bill.objects.all().exclude(id__in = seen_bill_ids).delete()
 
 if __name__ == '__main__':
     main()
