@@ -22,13 +22,14 @@ class VoteSource(enum.Enum):
 
 class VoteCategory(enum.Enum):
     amendment = enum.Item(1, 'Amendment')
-    passage_suspension = enum.Item(2, 'Passage Suspension')
+    passage_suspension = enum.Item(2, 'Passage under Suspension')
     passage = enum.Item(3, 'Passage')
     cloture = enum.Item(4, 'Cloture')
-    passage_part = enum.Item(5, 'Passage Part')
+    passage_part = enum.Item(5, 'Passage (Part)')
     nomination = enum.Item(6, 'Nomination')
     procedural = enum.Item(7, 'Procedural')
     other = enum.Item(8, 'Other')
+    unknown = enum.Item(9, 'Unknown Category')
 
 
 class VoterType(enum.Enum):
@@ -52,6 +53,9 @@ class Vote(models.Model):
     total_plus = models.IntegerField(blank=True, default=0)
     total_minus = models.IntegerField(blank=True, default=0)
     total_other = models.IntegerField(blank=True, default=0)
+    
+    related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True)
+    missing_data = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.question

@@ -20,6 +20,7 @@ def crc(fname, content=None):
     for line in fobj:
         value = binascii.crc32(line, value)
     value = value & 0xFFFFFFFF
+    fobj.close()
     return "%08x" % value
 
 
@@ -31,7 +32,7 @@ class FileManager(models.Manager):
         `is_changed`  is always true if no info about the file
         is stored in DB.
         """
-
+        
         checksum = crc(path, content)
         try:
             fobj = File.objects.get(path=path)

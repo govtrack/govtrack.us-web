@@ -10,6 +10,7 @@ from parser.progress import Progress
 from parser.processor import Processor
 from person.models import Person
 from parser.models import File
+from bill.models import Bill, BillType
 from vote.models import (Vote, VoteOption, VoteSource, Voter,
                          CongressChamber, VoteCategory, VoterType)
 
@@ -40,6 +41,7 @@ class VoteProcessor(Processor):
         'nomination': VoteCategory.nomination,
         'procedural': VoteCategory.procedural,
         'other': VoteCategory.other,
+        'unknown': VoteCategory.unknown,
     }
 
     def category_handler(self, value):
@@ -124,14 +126,26 @@ def main(options):
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
 
-    for fname in files:
-        try:
-            progress.tick()
+    seen_obj_ids = []
 
-            # TODO:
-            # Check that file changed
-            # If yes then deleted Vote::* objects related
-            # to that file else do not process the file
+    for fname in files:
+        progress.tick()
+
+        match = re_path.search(fname)
+        
+        try:
+            existing_vote = Vote.objects.get(congress=match.group(1), chamber=chamber_mapping[match.group(2)], session=match.group(3), number=match.group(4)).id
+        except Vote.DoesNotExist:
+            existing_vote = None
+        
+        if not File.objects.is_changed(fname) and not options.force and existing_vote != None and not existing_vote.missing_data:
+            seen_obj_ids.append(existing_vote.id)
+            continue
+        
+        if existing_vote != None:
+            existing_vote.delete()
+            
+        try:
             tree = etree.parse(fname)
 
             # Process role object
@@ -142,7 +156,16 @@ def main(options):
                 vote.chamber = chamber_mapping[match.group(2)]
                 vote.session = match.group(3)
                 vote.number = match.group(4)
+                
+                for bill_node in roll_node.xpath("bill"):
+                    try:
+                        vote.related_bill = Bill.objects.get(congress=bill_node.get("session"), bill_type=BillType.by_xml_code(bill_node.get("type")), number=bill_node.get("number"))
+                    except Bill.DoesNotExist:
+                        vote.missing_data = True
+                
                 vote.save()
+                
+                seen_obj_ids.append(vote.id) # don't delete me later
 				
                 # Process roll options
                 roll_options = {}
@@ -164,12 +187,13 @@ def main(options):
                 if not options.disable_events:
                     vote.create_event()
 
-            # TODO:
-            # Update file checksum in the DB
-
         except Exception, ex:
             log.error('Error in processing %s' % fname, exc_info=ex)
 
+        File.objects.save_file(fname)
+        
+    # delete vote objects that are no longer represented on disk
+    Vote.objects.all().exclude(id__in = seen_obj_ids).delete()
 
 if __name__ == '__main__':
     main()

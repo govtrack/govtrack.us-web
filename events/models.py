@@ -134,7 +134,7 @@ class Event(models.Model):
                 )
             if created:
                 self.next_id += 1
-            else:
+            elif event.id in self.existing_events:
                 del self.existing_events[event.id] # i.e. don't delete this event on __exit__
                 if event.when != when: # update this if it changed
                     event.when = when
