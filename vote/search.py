@@ -18,16 +18,15 @@ def sort_filter(qs, form):
     sort = form.cleaned_data['sort']
     if sort != []:
         if sort[0] == "date":
-            qs = qs.order_by("-created")
+            qs = qs.extra(order_by=["-created"])
         if sort[0] == "spread":
-            qs = qs.order_by("total_plus-total_minus")
+            qs = qs.extra(order_by=["total_plus-total_minus"])
     return qs
-    
 
 def vote_search_manager():
     sm = SearchManager(Vote)
     
-    sm.add_option('sort', filter=sort_filter, widget=forms.Select, choices=[("date", "Date"), ("spread", "Spread")])
+    #sm.add_option('sort', filter=sort_filter, widget=forms.Select, choices=[("date", "Date"), ("spread", "Spread")])
     sm.add_option('year', filter=year_filter, widget=forms.Select, choices=years)
     sm.add_option('chamber')
     sm.add_option('category')

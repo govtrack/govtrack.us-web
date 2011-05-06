@@ -29,9 +29,15 @@ Layout:
     Options <--> SearchManager <--> Form <--> (SmartSearchField or any other Field)
 """
 from django import forms
+from django.shortcuts import redirect, get_object_or_404, render_to_response
+from django.template import RequestContext
 from django.db.models import Count
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
+from django.http import HttpResponse
+from django.core.paginator import Paginator
+
+import json
 
 class SearchManager(object):
     def __init__(self, model):
@@ -118,10 +124,36 @@ class SearchManager(object):
                
     def results(self, objects):
         return "".join([self.make_result(obj) for obj in objects])
+        
+    def view(self, request, template):
+        if request.META["REQUEST_METHOD"] == "GET":
+            return render_to_response(template, {
+                'form': self.form(),
+                'column_headers': self.get_column_headers()},
+                RequestContext(request))
+        
+        try:
+            page_number = int(request.POST.get("page", "1"))
+            
+            form = self.form(request)
+            qs = form.queryset()
+            page = Paginator(qs, 20)
+            
+            return HttpResponse(json.dumps({
+                "form": form.as_p(),
+                "results": self.results(page.page(page_number).object_list),
+                "page": page_number,
+                "num_pages": page.num_pages,
+                }), content_type='text/json')
+        except Exception as e:
+            return HttpResponse(json.dumps({
+                "error": str(e),
+                }), content_type='text/json')
+            
 
 class Option(object):
     def __init__(self, manager, field_name, widget=None, required=False,
-                 filter=None, choices=None):
+                 filter=None, choices=None, label=None, sort=True):
         """
         Args:
             manager: `SearchManager` instance
@@ -130,6 +162,7 @@ class Option(object):
             required: it will be passed later to field constructor
             filter: custom logic for filtering queryset
             choices: override the choices available
+            label: override the label
         """
 
         self.manager = manager
@@ -139,9 +172,12 @@ class Option(object):
         self.filter = filter
         self.manager.options.append(self)
         self.choices = choices
+        self.label = label
+        self.sort = sort
 
 class SearchForm(forms.Form):
     manager = None
+    
     def __init__(self, *args, **kwargs):
         self.manager = kwargs.pop('manager')
         smart_fields = []
@@ -163,6 +199,8 @@ class SearchForm(forms.Form):
 
         # If form contains valid data
         if self.is_valid():
+            filters = { }
+            
             # Then for each filter
             for option in self.manager.options:
                 # If filter is not excluded explicitly
@@ -172,7 +210,13 @@ class SearchForm(forms.Form):
                         # Do filtering
 
                         if option.filter is not None:
-                            qs = option.filter(qs, self)
+                            qs_ = option.filter(qs, self)
+                            
+                            if isinstance(qs_, dict):
+                                filters.update(qs_)
+                            else:
+                                qs = qs_
+                            
                         else:
                             values = self.cleaned_data[option.field_name]
                             if values:
@@ -182,8 +226,15 @@ class SearchForm(forms.Form):
                                 # if __ALL__ value presents in filter values
                                 # then do not limit queryset
                                 if not u'__ALL__' in values:
-                                    qs = qs.filter(**{'%s__in' % option.field_name: values})
-        return qs
+                                    filters.update({'%s__in' % option.field_name: values})
+
+            # apply filters simultaneously so that filters on related objects are applied
+            # to the same related object. if they were applied chained (i.e. filter().filter())
+            # then they could apply to different objects.
+            if len(filters) > 0:
+                qs = qs.filter(**filters)
+                                    
+        return qs.distinct()
 
 
 
@@ -193,6 +244,8 @@ class SmartChoiceField(forms.MultipleChoiceField):
         self.meta_model = model
         self.meta_field_name = option.field_name
         self.meta_choices = option.choices
+        self.meta_sort = option.sort
+        self.show_all = False
         
         if option.widget == None:
             option.widget = forms.CheckboxSelectMultiple
@@ -209,8 +262,10 @@ class SmartChoiceField(forms.MultipleChoiceField):
                 def render(self, name, value, attrs=None, choices=()):
                     return super(SelectFromMultiple, self).render(name, value[0] if value != None else None, attrs=attrs, choices=choices)
             option.widget = SelectFromMultiple
+            self.show_all = True
         
         super(SmartChoiceField, self).__init__(
+            label=option.field_name.split("__")[-1] if option.label == None else option.label,
             choices=list(self.generate_choices(render_counts=False)),
             required=option.required,
             widget=option.widget(
@@ -218,7 +273,18 @@ class SmartChoiceField(forms.MultipleChoiceField):
             )
 
     def generate_choices(self, render_counts):
-        if render_counts and not self.meta_choices:
+        if "__" not in self.meta_field_name:
+            meta = self.meta_model._meta
+            fieldname = self.meta_field_name
+        else:
+            path = self.meta_field_name.split("__")
+            fieldname = path.pop()
+            meta = self.meta_model._meta
+            for p in path:
+                meta = [f.model._meta for f in meta.get_all_related_objects() if f.get_accessor_name() == p][0]
+        field = meta.get_field(fieldname)
+        
+        if render_counts:
             # Calculate number of possible results for each option, using the current
             # search terms except for this one.
             # Use `form.queryset()` to track already applied options
@@ -227,33 +293,42 @@ class SmartChoiceField(forms.MultipleChoiceField):
             resp = self.meta_form.queryset(exclude=self.meta_field_name)\
                        .values(self.meta_field_name)\
                        .annotate(_count=Count('id'))\
-                       .order_by()
+                       .distinct().order_by()
             counts = dict((unicode(x[self.meta_field_name]), x['_count']) for x in resp)
-        elif render_counts:
-            counts = {}
+        elif len(field.choices) == 0:
+            # Can't call meta_form.queryset at this point because it's not fully initialized
+            resp = self.meta_form.manager.model.objects.all()\
+               .values(self.meta_field_name)\
+               .annotate(_count=Count('id'))\
+               .distinct().order_by()
+            counts = dict((unicode(x[self.meta_field_name]), x['_count']) for x in resp)
 
-        if self.meta_choices:
-            for key, value in self.meta_choices:
-                yield (key, value)
-            return
-
-        yield ('_ALL_', 'All')
+        if self.show_all:
+            yield ('_ALL_', 'All')
         
         def calculate_choices():
-            for key, value in self.meta_model._meta.get_field(self.meta_field_name).choices:
+            if self.meta_choices:
+                choices = self.meta_choices
+            elif len(field.choices) > 0:
+                choices = field.choices
+            else:
+                choices = [(k,k) for k in counts.keys() if k.strip() != ""]
+            
+            for key, value in choices:
                 if render_counts:
                     count = counts.get(unicode(key), 0)
                     if count == 0:
-                        continue # because we can't easily disable it
+                        continue # because we can't easily disable it, skip it
                     value = conditional_escape(value) + mark_safe(' <span class="count">(%d)</span>' % count)
                     yield (key, value, count)
                 else:
                     yield (key, value, 0)
 
-        # Sort by label (secondary sort argument)
-        # Then by count (primary sort argument)
-        items = sorted(calculate_choices(), key=lambda x: x[1])
-        items = sorted(items, key=lambda x: x[2], reverse=True)
+        # Sort by count then by label.
+        items = calculate_choices()
+        if self.meta_sort:
+            items = sorted(items, key=lambda x: (-x[2], x[1]))
+        
         for item in items:
             yield item[:2]
 

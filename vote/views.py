@@ -1,51 +1,19 @@
 # -*- coding: utf-8 -*-
 import csv
 from StringIO import StringIO
-import json
 
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
-from django.core.paginator import Paginator
 
 from common.decorators import render_to
 
 from vote.models import Vote, CongressChamber, VoterType
 from vote.search import vote_search_manager
 from person.util import load_roles_at_date
-from smartsearch.manager import SearchManager
 
 def vote_list(request):
-    sm = vote_search_manager()
-    
-    if request.META["REQUEST_METHOD"] == "GET":
-        return render_to_response("vote/vote_list.html", {
-            'form': sm.form(),
-            'column_headers': sm.get_column_headers()},
-            RequestContext(request))
-    
-    print request.POST
-    
-    try:
-        page_number = int(request.POST.get("page", "1"))
-        
-        form = sm.form(request)
-        qs = form.queryset()
-        page = Paginator(qs, 20)
-        
-        return HttpResponse(json.dumps({
-            "form": form.as_p(),
-            "results": sm.results(page.page(page_number).object_list),
-            "page": page_number,
-            "num_pages": page.num_pages,
-            }), content_type='text/json')
-    except Exception as e:
-        return HttpResponse(json.dumps({
-            "form": str(e),
-            "page": None,
-            }), content_type='text/json')
-            
+    return vote_search_manager().view(request, "vote/vote_list.html")
 
 def load_vote(congress, session, chamber_code, number):
     """

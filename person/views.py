@@ -80,15 +80,8 @@ def person_details(request, pk):
             }
 
 
-@render_to('person/person_list.html')
 def searchmembers(request, initial_mode=None):
-    sm = person_search_manager()
-    form = sm.form()
-    qs = form.queryset()
-    page = paginate(qs, request, per_page=50)
-    return {'page': page,
-            'form': form,
-            }
+    return person_search_manager().view(request, "person/person_list.html")
 
 def http_rest_json(url, args=None, method="GET"):
     import urllib, urllib2, json

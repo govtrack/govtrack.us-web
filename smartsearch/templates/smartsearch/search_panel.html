@@ -1,88 +1,118 @@
+<style>
+    .pagination span { font-weight: bold; cursor: default }
+    .pagination .prev span { color: #AAA; }
+    .pagination .next span { color: #AAA; }
+</style>
+
 <div style="float: left; width: 70%; display: none" id="searchresults">
     <table>
         <thead>
             <tr>
-				{% for col in column_headers %}
-					<th>{{col}}</th>
-				{% endfor %}
+                {% for col in column_headers %}
+                    <th>{{col}}</th>
+                {% endfor %}
             </tr>
         </thead>
-		<tbody>
-		</tbody>
+        <tbody>
+        </tbody>
     </table>
-	<div class="pagination">
-		<span class="prev"><a href="#" onclick="return update_search(null, -1)">&lt; Previous</a></span>
-		<span class="pages"> </span>
-		<span class="next"><a href="#" onclick="return update_search(null, 1)">Next &gt;</a></span>
-	</div>
+    <div class="pagination">
+        <span class="prev"><span>&lt; Previous</span> <a href="#" onclick="return update_search(null, -1)">&lt; Previous</a></span>
+        <span class="pages"> </span>
+        <span class="next"><span>Next &gt;</span> <a href="#" onclick="return update_search(null, 1)">Next &gt;</a></span>
+    </div>
 </div>
 
 <script>
 var current_page = 1;
 var update_search_lock = false;
 function update_search(pagenum, pageinc) {
-	if (update_search_lock) return;
-	update_search_lock = true;
-	
-	form = $('#searchform')[0];
-	
-	// If any ALL is chosen, clear out the other options.
-	for (var i = 0; i < form.elements.length; i++)
-		if (form.elements[i].checked && form.elements[i].value == "_ALL_")
-			$(form).find("[name=" + form.elements[i].name + "][value!=_ALL_]").attr('checked', '');
+    if (update_search_lock) return;
+    update_search_lock = true;
+    
+    form = $('#searchform')[0];
+    
+    // If any ALL is chosen, clear out the other options.
+    for (var i = 0; i < form.elements.length; i++)
+        if (form.elements[i].checked && form.elements[i].value == "_ALL_")
+            $(form).find("[name=" + form.elements[i].name + "][value!=_ALL_]").attr('checked', '');
 
-	var postdata = { };
-	for (var i = 0; i < form.elements.length; i++) {
-		if (form.elements[i].type == 'checkbox' && !form.elements[i].checked) continue;
-		if (form.elements[i].value == "_ALL_") continue;
-		
-		name = form.elements[i].name;
-		if (form.elements[i].type == 'checkbox') {
-			if (postdata[name] == null) postdata[name] = Array();
-			postdata[name].push(form.elements[i].value);
-		} else {
-			postdata[name] = form.elements[i].value;
-		}
-	}
+    var postdata = { };
+    for (var i = 0; i < form.elements.length; i++) {
+        if (form.elements[i].type == 'checkbox' && !form.elements[i].checked) continue;
+        if (form.elements[i].value == "_ALL_") continue;
+        
+        name = form.elements[i].name;
+        if (form.elements[i].type == 'checkbox') {
+            if (postdata[name] == null) postdata[name] = Array();
+            postdata[name].push(form.elements[i].value);
+        } else {
+            postdata[name] = form.elements[i].value;
+        }
+    }
 
-	if (pagenum)
-		postdata.page = pagenum;
-	else if (pageinc)
-		postdata.page = current_page + pageinc;
-	else
-		postdata.page = current_page;
-		
-	$.ajax(
-		{
-			url: document.location.href,
-			type: "POST",
-			dataType: "json",
-			data: postdata,
-			success: function(res) {
-				if (!pagenum) return;
-				
-				$('#searchresults tbody').html(res.results);
-				$('#searchform').html(res.form);
-				
-				if (res.page > 1) $('#searchresults .prev a').show(); else $('#searchresults .prev a').hide();
-				if (res.page < res.num_pages) $('#searchresults .next a').show(); else $('#searchresults .next a').hide();
-				$('#searchresults .pages').text("");
-				for (var i = 1; i <= res.num_pages; i++) {
-					if (res.page - i > 10) continue;
-					if (i - res.page > 10) break;
-					$('#searchresults .pages').append($('<a href="#" onclick="return update_search(' + i + ')">' + i + '</a>'));
-					$('#searchresults .pages').append(" ");
-				}
-				
-				$('#searchresults').show();
-				
-				current_page = res.page;
-				
-				update_search_lock = false;
-			}
-		});
-	
-	return false; // cancel any event
+    if (pagenum)
+        postdata.page = pagenum;
+    else if (pageinc)
+        postdata.page = current_page + pageinc;
+    else
+        postdata.page = current_page;
+        
+    $.ajax(
+        {
+            url: document.location.href,
+            type: "POST",
+            dataType: "json",
+            data: postdata,
+            success: function(res) {
+                if (res.error) {
+                    $('#searchresults tbody').html("");
+                    $('#searchform').html(res.error);
+                } else {
+                    $('#searchresults tbody').html(res.results);
+                    $('#searchform').html(res.form);
+                    
+                    if (res.page > 1) {
+                        $('#searchresults .prev a').show();
+                        $('#searchresults .prev span').hide();
+                    } else {
+                        $('#searchresults .prev a').hide();
+                        $('#searchresults .prev span').show();
+                    }
+                    if (res.page < res.num_pages) {
+                        $('#searchresults .next a').show();
+                        $('#searchresults .next span').hide();
+                    } else {
+                        $('#searchresults .next a').hide();
+                        $('#searchresults .next span').show();
+                    }
+                    
+                    $('#searchresults .pages').text("");
+                    for (var i = 1; i <= res.num_pages; i++) {
+                        if (res.page - i > 10) continue;
+                        if (i - res.page > 10) break;
+                        if (i == res.page)
+                            $('#searchresults .pages').append($('<span>' + i + '</span>'));
+                        else
+                            $('#searchresults .pages').append($('<a href="#" onclick="return update_search(' + i + ')">' + i + '</a>'));
+                        $('#searchresults .pages').append(" ");
+                    }
+                    
+                    $('#searchresults').show();
+                }
+                
+                current_page = res.page;
+                
+                update_search_lock = false;
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                $('#searchresults tbody').html("");
+                $('#searchform').text("Search is not currently operational: " + textStatus);
+                update_search_lock = false;
+            }
+        });
+    
+    return false; // cancel any event
 }
 
 $(function() { update_search(1); });

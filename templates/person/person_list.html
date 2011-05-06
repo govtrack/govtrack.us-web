@@ -1,21 +1,8 @@
 {% extends 'master.html' %}
 
 {% block body %}
-<h1>Persons</h1>
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Bioguide ID</th>
-        </tr>
-    </thead>
-{% for person in page.object_list %}
-    <tr>
-        <td><a href="{{ person.get_absolute_url }}">{{ person }}</a></td>
-        <td>{{ person.bioguideid }}</td>
-    </tr>
-{% endfor %}
-</table>
+<h1>Members of Congress</h1>
 
-{% include "pagination.html" %}
+{% include "smartsearch/search_panel.html" %}
+
 {% endblock %}

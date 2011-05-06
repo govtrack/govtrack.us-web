@@ -124,14 +124,14 @@ class Person(models.Model):
 class PersonRole(models.Model):
     person = models.ForeignKey('person.Person', related_name='roles')
     role_type = models.IntegerField(choices=RoleType)
-    current = models.BooleanField(blank=True, default=False)
+    current = models.BooleanField(blank=True, default=False, choices=[(False, "No"), (True, "Yes")])
     startdate = models.DateField(db_index=True)
     enddate = models.DateField(db_index=True)
     # http://en.wikipedia.org/wiki/Classes_of_United_States_Senators
     senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True)
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts
     district = models.IntegerField(blank=True, null=True) 
-    state = models.CharField(choices=State, max_length=2, blank=True)
+    state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True)
     party = models.CharField(max_length=255, blank=True, null=True)
     website = models.CharField(max_length=255, blank=True)
 
