@@ -4,7 +4,7 @@ import os.path
 import sys
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(ROOT, 'apps'))
+sys.path.insert(0, os.path.join(ROOT, 'lib'))
 
 DEBUG = not ("RELEASE" in os.environ)
 TEMPLATE_DEBUG = DEBUG
@@ -80,7 +80,7 @@ INSTALLED_APPS = (
     # 3rd party libraries
     'common',
     'django_extensions',
-    'south',
+    #'south',
     'GChartWrapper.charts',
     'debug_toolbar',
     # project modules

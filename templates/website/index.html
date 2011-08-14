@@ -1,123 +1,132 @@
 {% extends "master.html" %}
+{% load events_utils %}
 {% block title %}GovTrack.us: Tracking the U.S. Congress{% endblock %}
 {% block meta_description %}Tracking legislation and votes in the United States Congress.{% endblock %}
 {% block style %}
-	.icon { width: 62px; height: 62px; float: left; margin-right: .75em; margin-bottom: 1em }
-	.icon_text { float: left; width: 400px }
-	.icon_text h2 { margin: 0 }
-	.icon_text p { margin: .5em 0 .5em 0 }
-	h2 a { color: inherit }
-	.icon_holder { clear: both; margin-bottom: 2em }
 {% endblock %}
-{% block body %}
-<div class="col_left">
-	<div class="icon_holder">
-        <a href="{% url person_list %}"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/member.png')"> </div></a>
-		<div class="icon_text">
-            <h2><a href="{% url person_list %}">Members of Congress</a></h2>
-            <p>Do you know who represents you in Congress? <a href="{% url person_list %}">Find a representative or senator</a>. We also compile <a href="/congress/members/statistics">statistics</a> about Members of Congress.</p>
-		</div>
-		<div class="clear"> </div>
+{% block master_content %}
+	<div class="welcome">
+		<h2>Easily track the activities of the United States Congress.</h2>
+		<p>GovTrack lets you browse, search, view, and tracking information from the United States Congress. Find your Congress members, track bills, tally votes, and keep tabs on our Congress.</p>
+		<div class="call_to_action">Get Started</div>
 	</div>
-
-	<div class="icon_holder">
-        <a href="{% url bill_list %}"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/bill.png')"> </div></a>
-		<div class="icon_text">
-            <h2><a href="{% url bill_list %}">Bills &amp; Resolutions</a></h2>
-            <p>Track the status of current pending legislation as it goes through the law-making processs or research bills going back to 1993. <a href="{% url bill_list %}">Search bills</a> and browse by <a href="{% url bill_list %}">subject area</a>.</p>
+	
+	<div class="browse">
+		<p>Dive Into Your Congress</p>
+		
+		<a class="members_of_congress" href="{% url person_list %}">
+			Members of Congress
+		</a>
+		
+		<a class="bills" href="{% url bill_list %}">
+			Bills &amp; Resolutions
+		</a>
+		
+		<a class="votes" href="{% url vote_list %}">
+			Voting Records
+		</a>
+	
+		<a class="committees" href="{% url committee_list %}">
+			Committees
+		</a>
+	</div>
+		
+	<div class="now">
+		<h2>Current Happenings</h2>
+		
+		<div class="panel">
+			<h3>In Congress</h3>
 			
-			<p>H.R. 3: Abortion Bill, H.R. 459: Audit the Fed</p>
-			<p>H.R. 514: PATRIOT Act Extension, More Bills...</p>
+			<div>currently in session</div>
+			
+			<div id="events">
+				<div id="from_the_floor">
+				</div>
+				
+				{% for item in events %}
+				{% with item|render_event:"" as event %}
+				<div class="event">
+					<div class="date">
+					{% if not meta.date_has_no_time %}
+						{{event.when}}
+					{% else %}
+						{{event.when|date}}
+					{% endif %}
+					</div>
+					<div class="title"><a href="{{event.url}}">{{event.date}} {{event.title}}</a></div>
+				</div>
+				{% endwith %}
+				{% endfor %}
+			</div>
+			
+			<script>
+			function sunlight_live_callback(data) {
+				if (data && data.floor_updates && data.floor_updates[0] && data.floor_updates[0].events && data.floor_updates[0].events[0]) {
+					var time = new Date(Date.parse(data.floor_updates[0].timestamp));
+					var hr = time.getHours();
+					var am = "am";
+					if (hr == 0) hr = 12;
+					else if (hr == 12) am = "pm";
+					else if (hr > 12) { hr -= 12; am = "pm"; }
+					time = time.toLocaleDateString() + " " + hr + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes() + " " + am;
+					
+					var n = $("<p><span class='date'/> <span class='text'/></p>");
+					n.find(".date").text(time + " in the House:");
+					n.find(".text").text(data.floor_updates[0].events[0]);
+					$('#from_the_floor').append(n);
+				}
+			}
+			</script>
+			<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=house"></script>
+			
+			<div id="currently_in_congress">
+				...
+			</div>
 		</div>
-		<div class="clear"> </div>
-	</div>
+		
+		<div class="panel">
+			<h3>Popular Bills</h3>
+			
+			<div id="popular_bills">
+				...
+			</div>
+			
+			<h2>Latest Votes</h2>
 
-	<div class="icon_holder">
-        <a href="{% url vote_list %}"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/vote.png')"> </div></a>
-		<div class="icon_text">
-            <h2><a href="{% url vote_list %}">Voting Records</a></h2>
-            <p>Browse House and Senate <a href="{% url vote_list %}">roll call votes</a> going back to the founding of the nation.</p>
+			<div id="latest_votes">
+				...
+			</div>
 		</div>
-		<div class="clear"> </div>
-	</div>
-	
-	<div class="icon_holder">
-        <a href="{% url committee_list %}"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/committee.png')"> </div></a>
-		<div class="icon_text">
-            <h2><a href="{% url committee_list %}">Congressional Committees</a></h2>
-            <p>Congress is divided into a number of <a href="{% url committee_list %}">congressional committees</a> which perform the first round of considering and revising legislation.</p>
-		</div>
-	</div>
-
-	<div class="icon_holder">
-		<a href="/congress/learn"><div class="icon" style="background-image: url('{{ MEDIA_URL }}icons/question.gif')"> </div></a>
-		<div class="icon_text">
-			<h2><a href="/congress/learn">How Congress Works</a></h2>
-			<p>...</p>
+		
+		<div class="panel">
+			<h3>From the GovTrack Blog</h3>
+			
+			<div id="blog_items">
+				...
+			</div>
+			
+			<h3>GovTrack Tweets</h3>
+			
+			<div id="our_tweets">
+				{% for tweet in tweets %}
+					<div class="tweet">{{tweet.text}}</div>
+					<div class="tweet_date">{{tweet.relative_created_at}}</div>
+				{% endfor %}
+			</div>
 		</div>
 	</div>
 	
-	<div class="clear"> </div>
-	
-	<hr/>
-	
-	<h2>Or Take Congress on the Go</h2>
-	
-	<a href="http://sunlightlabs.com/blog/2011/congress-for-android-3/">
-		<img src="http://assets.sunlightlabs.com/blog/android/main-thumb.png" width="80" style="float: left; margin-right: 1em; border: none"/>
-	</a>
-	<div style="float: left; width: 210px">
-		<h3 style="margin-top: 0"><a href="http://sunlightlabs.com/blog/2011/congress-for-android-3/">Congress 3.0</a></h3>
-		<p>Created by the Sunlight Foundation and based in part on GovTrack&rsquo;s database, this app lets you browse the latest activity in Congress and get information on your Members of Congress.</p>
-	</div>
-</div>
-<div class="col_right">
-	<div class="sidebox">
-		<h2>About GovTrack</h2>
+	<div class="tools">
+		<h2>Take Congress on the Go</h2>
 		
-		<p>Tracking the activities of the United States Congress since 2004 and leading the &ldquo;open government data&rdquo; movement. GovTrack is a project of <a href="http://www.civicimpulse.com/">Civic Impulse, LLC</a>, a private company.
-		More <a href="/about">about the site</a>.</p>	
-	</div>			
-
-	<div class="sidebox">
-		<h2>Happening Now</h2>
-		
-		<div style="float: left; width: 160px; margin-right: 15px">
-			<OBJECT id='mediaPlayer' width="160" height="143" 
-				classid='CLSID:22d6f312-b0f6-11d0-94ab-0080c74c7e95' 
-				codebase='http://activex.microsoft.com/activex/controls/mplayer/en/nsmp2inf.cab#Version=5,1,52,701'
-				standby='Loading Microsoft Windows Media Player components...' type='application/x-oleobject'>
-				<param name='fileName' value="http://houselive.gov/ASX.php?view_id=2&camera_id=17">
-				<param name='animationatStart' value='true'>
-				<param name='transparentatStart' value='true'>
-				<param name='autoStart' value="false">
-				<param name='showControls' value="true">
-				<param name='loop' value="false">
-				<EMBED type='application/x-mplayer2'
-				pluginspage='http://microsoft.com/windows/mediaplayer/en/download/'
-				id='mediaPlayer' name='mediaPlayer' displaysize='4' autosize='-1' 
-				bgcolor='darkblue' showcontrols="true" showtracker='-1' 
-				showdisplay='0' showstatusbar='-1' videoborder3d='-1' width="160" height="143"
-				src="http://houselive.gov/ASX.php?view_id=2&camera_id=17" autostart="false" designtimesp='5311' loop="false">
-				</EMBED>
-			</OBJECT>
-			<div>(From HouseLive.gov.)</div>
+		<a href="http://sunlightlabs.com/blog/2011/congress-for-android-3/">
+			<img src="http://assets.sunlightlabs.com/blog/android/main-thumb.png" width="80" style="float: left; margin-right: 1em; border: none"/>
+		</a>
+		<div style="float: left; width: 210px">
+			<h3 style="margin-top: 0"><a href="http://sunlightlabs.com/blog/2011/congress-for-android-3/">Congress 3.0</a></h3>
+			<p>Created by the Sunlight Foundation and based in part on GovTrack&rsquo;s database, this app lets you browse the latest activity in Congress and get information on your Members of Congress.</p>
 		</div>
-		
-		<div style="float: left; width: 272px">
-			<h3>On the House floor...</h3>
-			<p>The Speaker announced that the House do now recess. The next meeting is subject to the call of the Chair.</p>
-			<p><small>(Only the House provides live feeds of its activity.)</small></p>
-		</div>
-		
-		<div class="clear"> </div>
-	</div>			
-
-	<div class="sidebox">
-		<h2>Your Tracked Events</h2>
-		
-		<p>New to Tracking Congress? You're not tracking any Congressional events yet...</p>
 	</div>
-</div>
+	
 {% endblock %}
 

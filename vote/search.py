@@ -27,7 +27,7 @@ def vote_search_manager():
     sm = SearchManager(Vote)
     
     #sm.add_option('sort', filter=sort_filter, widget=forms.Select, choices=[("date", "Date"), ("spread", "Spread")])
-    sm.add_option('year', filter=year_filter, widget=forms.Select, choices=years)
+    #sm.add_option('year', filter=year_filter, widget=forms.Select, choices=years)
     sm.add_option('chamber')
     sm.add_option('category')
     

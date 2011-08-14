@@ -11,7 +11,7 @@ from django.conf import settings
 settings.DEBUG = False
 
 PARSER_USAGE = """Usage: %prog action
-Available actions: person, commitee, vote"""
+Available actions: person, commitee, vote, bill"""
 
 def setup_logging(console_level):
     "Setup logging system"

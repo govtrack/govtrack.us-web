@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from lxml.etree import fromstring
-
 from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext
@@ -11,12 +9,20 @@ from common.pagination import paginate
 
 from cache_utils.decorators import cached
 
+from events import feeds
+
+from datetime import datetime
+
 @render_to('website/index.html')
 def index(request):
-    data = '<root><child><world>world!!</world></child></root>'
-    world = fromstring(data).xpath('//world/text()')[0]
-    return {'world': world,
-            }
+    import twitter
+    api = twitter.Api()
+    
+    # TODO cache
+    return {
+        'events': feeds.Feed.get_events_for(None).filter(when__lte=datetime.now())[0:8],
+        'tweets': api.GetUserTimeline("govtrack", since_id=0, count=5),
+        }
 		  
 def staticpage(request, pagename):
     if pagename == "developers": pagename = "developers/index"

@@ -33,14 +33,22 @@
 			<div id="header-content">	
 				
 				<h1 id="logo"><a href="/" title="GovTrack.us Home">GovTrack.us</a></h1>	
-				<h2 id="slogan">Tracking the U.S. Congress</h2>		
 				
-				<!-- Menu Tabs -->
-				<ul>
-					<li><a href="/" id="current">Home</a></li>
+				<ul class="searchbar">
+					<li><a href="/acccounts/login">Log In</a></li>
+					<li>
+						<form name="header_search" action="/search" method="GET">
+							<input type="text" name="q"/>
+						</form>
+					</li>			
+				</ul>
+				
+				<ul class="menubar">
+					<li><a href="/">Home</a></li>
+					<li><a href="/congress">Browse</a></li>
 					<li><a href="/events">Trackers</a></li>
-					<li><a href="/developers">Developers</a></li>
 					<li><a href="/about">About</a></li>			
+					<li><a href="/developers">Use Our data</a></li>
 				</ul>		
 				
 			</div>
@@ -50,10 +58,12 @@
 		<div id="content-wrap"><div id="content">
 			{% block crumbs %}{% endblock %}
 			
+			{% block master_content %}
 			<div id="main">	
 				{% block body %}
 				{% endblock %}
-			</div>					
+			</div>
+			{% endblock %}
 			
 			{% block wide-body %}
 			{% endblock %}
@@ -64,26 +74,31 @@
 			<div id="footer"><div id="footer-content">
 				
 					<div class="col float-left">
-						<h2>About</h2>
-						<p>GovTrack.us has been tracking the activities of the United States Congress since 2004 and has lead the open government data movement surrounding legislative information. It is a project of <a href="http://www.civicimpulse.com/">Civic Impulse, LLC</a>, a private company.</p>
-						<p>Feedback on the site is welcome to <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>, but I can&rsquo;t do your research for you, nor can I pass on messages to Members of Congress.</p>
+						<ul>
+							<li><a href="/">Home</a></li>
+							<li><a href="/congress">Browse</a></li>
+							<li><a href="/events">Trackers</a></li>
+							<li><a href="/about">About GovTrack</a></li>
+							<li><a href="/developers">For Developers</a></li>
+							<li><a href="/accounts/login">Log in</a></li>
+						</ul>			
 					</div>
 					
 					<div class="col float-left">
-						<h2>Links</h2>
-						<ul>				
-							<li><a href="/about">About GovTrack</a></li>
-						</ul>			
+						<h2>About GovTrack</h2>
+						<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com/">Civic Impulse, LLC</a>.</p>
+						<p>GovTrack.us has been tracking the activities of the United States Congress since 2004 and has lead the open government data movement surrounding legislative information.</p>
+						<p>Feedback on the site is welcome to <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>, but I can&rsquo;t do your research for you, nor can I pass on messages to Members of Congress.</p>
 					</div>		
 				
 					<div class="col2 float-right">
-					<p>
-					Copyright &copy; 2011 <strong>Civic Impulse, LLC</strong></p>
-					
-					<ul>						
-						<li><a href="/"><strong>Home</strong></a></li>
-						<li><a href="/blog/rss"><strong>RSS Feed</strong></a></li>								
-					</ul>	
+						<p>follow GovTrack</p>
+						
+						<ul>						
+							<li><a href="http://www.facebook.com/pages/Civic-Impulse/312186525430">Facebook</a></li>
+							<li><a href="http://twitter.com/#!/govtrack">Twitter</a></li>
+							<li><a href="/blog/rss">RSS Feed</a></li>								
+						</ul>	
 					</div>
 				
 			<!-- footer ends here -->
