@@ -62,36 +62,20 @@ class SearchManager(object):
         self.cols.append(func)
         self.colnames.append(title)
 
-    def form(self, request=None):
-        def fixup(d):
-            # Make sure every value is a list because we render some fields as non-lists.
-            # Also strip jQuery's [] array notation from keys.
-            ret = {}
-            for k, v in d.lists():
-                if k.endswith("[]"): k = k[:-2]
-                ret[k] = v
-            return ret
-        
-        if request:
-            self._form = SearchForm(fixup(request.POST), manager=self)
-        else:
-            self._form = SearchForm(manager=self)
-        return self._form
-        
-    def get_left_info(self, obj):
+    def get_left_info(self, obj, form):
         if self.col_left == None:
             return ""
         else:
-            return mark_safe("".join(["<div>" + conditional_escape(line) + "</div>" for line in self.col_left(obj).split("\n")]))
+            return conditional_escape(self.col_left(obj, form))
         
     def get_column_headers(self):
         return [self.col_left_name] + self.colnames
         
-    def get_columns(self, obj):
-        if self.cols == []:
+    def get_columns(self, obj, form):
+        if len(self.cols) == 0:
             cols = [unicode(obj)]
         else:
-            cols = [c(obj) for c in self.cols]
+            cols = [c(obj, form) for c in self.cols]
         
         cols[0] = mark_safe(
             "<a href=\"" + conditional_escape(obj.get_absolute_url()) + "\">"
@@ -101,234 +85,178 @@ class SearchManager(object):
         
         return cols
         
-    def get_bottom_info(self, obj):
+    def get_bottom_info(self, obj, form):
         if self.col_bottom == None:
             return ""
         else:
-            return mark_safe("".join(["<div>" + conditional_escape(line) + "</div>" for line in self.col_bottom(obj).split("\n")]))
+            return mark_safe("".join(["<div>" + conditional_escape(line) + "</div>" for line in self.col_bottom(obj, form).split("\n")]))
         
-    def make_result(self, obj):
-        left = self.get_left_info(obj)
-        cols = self.get_columns(obj)
-        bottom = self.get_bottom_info(obj)
+    def make_result(self, obj, form):
+        left = self.get_left_info(obj, form)
+        cols = self.get_columns(obj, form)
+        bottom = self.get_bottom_info(obj, form)
         
         return mark_safe(
             "<tr valign='top'>"
-            + ("<td rowspan='2'>%s</td>" % conditional_escape(left))
+            + ("<td rowspan='2' class='rowtop rowleft'>%s</td>" % conditional_escape(left))
             + " ".join(
-                [("<td>%s</td>" % conditional_escape(col)) for col in cols]
+                [("<td class='rowtop col%d'>%s</td>" % (i, conditional_escape(col))) for i, col in enumerate(cols)]
                 )
             + "</tr>"
-            + ("<tr><td colspan='%d'>%s</td></tr>" % (len(cols), conditional_escape(bottom)))
+            + ("<tr><td colspan='%d' style='vertical-align: top' class='rowbottom'>%s</td></tr>" % (len(cols), conditional_escape(bottom)))
             )
                
-    def results(self, objects):
-        return "".join([self.make_result(obj) for obj in objects])
+    def results(self, objects, form):
+        return "".join([self.make_result(obj, form) for obj in objects])
         
     def view(self, request, template):
         if request.META["REQUEST_METHOD"] == "GET":
             return render_to_response(template, {
-                'form': self.form(),
+                'form': self.options,
                 'column_headers': self.get_column_headers()},
                 RequestContext(request))
         
         try:
             page_number = int(request.POST.get("page", "1"))
             
-            form = self.form(request)
-            qs = form.queryset()
+            qs = self.queryset(request)
             page = Paginator(qs, 20)
             
             return HttpResponse(json.dumps({
-                "form": form.as_p(),
-                "results": self.results(page.page(page_number).object_list),
+                "results": self.results(page.page(page_number).object_list, request.POST),
+                "options": [(
+                    option.field_name,
+                    option.type,
+                    self.generate_choices(request, option),
+                    option.visible_if(request.POST) if option.visible_if else True
+                    ) for option in self.options],
                 "page": page_number,
                 "num_pages": page.num_pages,
                 }), content_type='text/json')
         except Exception as e:
             return HttpResponse(json.dumps({
-                "error": str(e),
+                "error": repr(e),
                 }), content_type='text/json')
             
-
-class Option(object):
-    def __init__(self, manager, field_name, widget=None, required=False,
-                 filter=None, choices=None, label=None, sort=True):
-        """
-        Args:
-            manager: `SearchManager` instance
-            field_name: name of model's field for which the filter shoudl be built
-            widget: if is not None then use that class as the field type
-            required: it will be passed later to field constructor
-            filter: custom logic for filtering queryset
-            choices: override the choices available
-            label: override the label
-        """
-
-        self.manager = manager
-        self.field_name = field_name
-        self.widget = widget
-        self.required = False
-        self.filter = filter
-        self.manager.options.append(self)
-        self.choices = choices
-        self.label = label
-        self.sort = sort
-
-class SearchForm(forms.Form):
-    manager = None
-    
-    def __init__(self, *args, **kwargs):
-        self.manager = kwargs.pop('manager')
-        smart_fields = []
-        for option in self.manager.options:
-            field = SmartChoiceField(self, self.manager.model, option)
-            smart_fields.append(option.field_name)
-            self.base_fields[option.field_name] = field
-        super(SearchForm, self).__init__(*args, **kwargs)
-        for field_name in smart_fields:
-            field = self[field_name].field
-            field.choices = list(field.generate_choices(render_counts=True))
-
-    def queryset(self, exclude=None):
+    def queryset(self, request, exclude=None):
         """
         Build the `self.model` queryset limited to selected filters.
         """
 
-        qs = self.manager.model.objects.all()
+        qs = self.model.objects.all()
 
-        # If form contains valid data
-        if self.is_valid():
-            filters = { }
+        filters = { }
+        
+        # Then for each filter
+        for option in self.options:
+            # If filter is not excluded explicitly (used to get counts
+            # for choices).
+            if option == exclude: continue
             
-            # Then for each filter
-            for option in self.manager.options:
-                # If filter is not excluded explicitly
-                if option.field_name != exclude:
-                    # If filter contains valid data
-                    if option.field_name in self.cleaned_data:
-                        # Do filtering
+            # If filter contains valid data, check jQuery style encoding of array params
+            if option.field_name not in request.POST and option.field_name+"[]" not in request.POST: continue
+            
+            # Do filtering
 
-                        if option.filter is not None:
-                            qs_ = option.filter(qs, self)
-                            
-                            if isinstance(qs_, dict):
-                                filters.update(qs_)
-                            else:
-                                qs = qs_
-                            
-                        else:
-                            values = self.cleaned_data[option.field_name]
-                            if values:
-                                # Hack
-                                if not isinstance(values, (list, tuple)):
-                                    values = [values]
-                                # if __ALL__ value presents in filter values
-                                # then do not limit queryset
-                                if not u'__ALL__' in values:
-                                    filters.update({'%s__in' % option.field_name: values})
+            if option.filter is not None:
+                qs_ = option.filter(qs, request.POST)
+                
+                if isinstance(qs_, dict):
+                    filters.update(qs_)
+                else:
+                    qs = qs_
+                
+            else:
+                def clean_values(x):
+                    for y in x:
+                        if y == "true":
+                            yield True
+                        elif y == "false":
+                            yield False
+                        else:                        
+                            yield y
+                values = list(clean_values(request.POST.getlist(option.field_name)+request.POST.getlist(option.field_name+"[]")))
+                # if __ALL__ value presents in filter values
+                # then do not limit queryset
+                if not u'__ALL__' in values:
+                    filters.update({'%s__in' % option.field_name: values})
 
-            # apply filters simultaneously so that filters on related objects are applied
-            # to the same related object. if they were applied chained (i.e. filter().filter())
-            # then they could apply to different objects.
-            if len(filters) > 0:
-                qs = qs.filter(**filters)
+        # apply filters simultaneously so that filters on related objects are applied
+        # to the same related object. if they were applied chained (i.e. filter().filter())
+        # then they could apply to different objects.
+        if len(filters) > 0:
+            qs = qs.filter(**filters)
                                     
         return qs.distinct()
 
-
-
-class SmartChoiceField(forms.MultipleChoiceField):
-    def __init__(self, form, model, option):
-        self.meta_form = form
-        self.meta_model = model
-        self.meta_field_name = option.field_name
-        self.meta_choices = option.choices
-        self.meta_sort = option.sort
-        self.show_all = False
-        
-        if option.widget == None:
-            option.widget = forms.CheckboxSelectMultiple
-           
-        changeattr = {
-            forms.CheckboxSelectMultiple: "onclick",
-            forms.Select: "onchange",
-            forms.SelectMultiple: "onchange",
-            }
-        changeattr = changeattr[option.widget]
-            
-        if option.widget == forms.Select:
-            class SelectFromMultiple(forms.Select):
-                def render(self, name, value, attrs=None, choices=()):
-                    return super(SelectFromMultiple, self).render(name, value[0] if value != None else None, attrs=attrs, choices=choices)
-            option.widget = SelectFromMultiple
-            self.show_all = True
-        
-        super(SmartChoiceField, self).__init__(
-            label=option.field_name.split("__")[-1] if option.label == None else option.label,
-            choices=list(self.generate_choices(render_counts=False)),
-            required=option.required,
-            widget=option.widget(
-                attrs = { changeattr: "update_search()" })
-            )
-
-    def generate_choices(self, render_counts):
-        if "__" not in self.meta_field_name:
-            meta = self.meta_model._meta
-            fieldname = self.meta_field_name
+    def generate_choices(self, request, option):
+        if option.choices:
+            counts = list(option.choices)
         else:
-            path = self.meta_field_name.split("__")
-            fieldname = path.pop()
-            meta = self.meta_model._meta
-            for p in path:
-                meta = [f.model._meta for f in meta.get_all_related_objects() if f.get_accessor_name() == p][0]
-        field = meta.get_field(fieldname)
-        
-        if render_counts:
+            meta = self.model._meta
+            if "__" not in option.field_name:
+                fieldname = option.field_name
+            else:
+                path = option.field_name.split("__")
+                fieldname = path.pop()
+                for p in path:
+                    meta = [f.model._meta for f in meta.get_all_related_objects() if f.get_accessor_name() == p][0]
+            field = meta.get_field(fieldname)
+            if field.choices:
+                choice_label_map = dict(field.choices)
+            
             # Calculate number of possible results for each option, using the current
             # search terms except for this one.
             # Use `form.queryset()` to track already applied options
             # ORM explanation: do GROUP BY, then COUNT
             # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
-            resp = self.meta_form.queryset(exclude=self.meta_field_name)\
-                       .values(self.meta_field_name)\
+            resp = self.queryset(request, exclude=option)\
+                       .values(option.field_name)\
                        .annotate(_count=Count('id'))\
                        .distinct().order_by()
-            counts = dict((unicode(x[self.meta_field_name]), x['_count']) for x in resp)
-        elif len(field.choices) == 0:
-            # Can't call meta_form.queryset at this point because it's not fully initialized
-            resp = self.meta_form.manager.model.objects.all()\
-               .values(self.meta_field_name)\
-               .annotate(_count=Count('id'))\
-               .distinct().order_by()
-            counts = dict((unicode(x[self.meta_field_name]), x['_count']) for x in resp)
-
-        if self.show_all:
-            yield ('_ALL_', 'All')
-        
-        def calculate_choices():
-            if self.meta_choices:
-                choices = self.meta_choices
-            elif len(field.choices) > 0:
-                choices = field.choices
-            else:
-                choices = [(k,k) for k in counts.keys() if k.strip() != ""]
+            def nice_name(value):
+                if value == None: return "N/A"
+                if field.choices:
+                    return choice_label_map[value]
+                if type(value) == bool and value == True: return "Yes"
+                if type(value) == bool and value == False: return "No"
+                return unicode(value)
+            counts = [(x[option.field_name], nice_name(x[option.field_name]), x['_count']) for x in resp if x[option.field_name] != ""]
+                # (key, label, count) tuples
             
-            for key, value in choices:
-                if render_counts:
-                    count = counts.get(unicode(key), 0)
-                    if count == 0:
-                        continue # because we can't easily disable it, skip it
-                    value = conditional_escape(value) + mark_safe(' <span class="count">(%d)</span>' % count)
-                    yield (key, value, count)
-                else:
-                    yield (key, value, 0)
+            # Sort by count then by label.
+            if option.sort:
+                counts.sort(key=lambda x: (-x[2], x[1]))
 
-        # Sort by count then by label.
-        items = calculate_choices()
-        if self.meta_sort:
-            items = sorted(items, key=lambda x: (-x[2], x[1]))
-        
-        for item in items:
-            yield item[:2]
+        if not option.required and counts != "NONE":
+            counts.insert(0, ('__ALL__', 'All', -1))
+
+        return counts
+
+class Option(object):
+    def __init__(self, manager, field_name, type="checkbox", required=False,
+                 filter=None, choices=None, label=None, sort=True,
+                 visible_if=None):
+        """
+        Args:
+            manager: `SearchManager` instance
+            field_name: name of model's field for which the filter shoudl be built
+            type: text, select, or checkbox
+            required: set to True to not include the ALL option
+            filter: custom logic for filtering queryset
+            choices: override the choices available
+            label: override the label
+            visible_if: show this option only if a function returns true (passed one arg, the request.POST)
+        """
+
+        self.manager = manager
+        self.field_name = field_name
+        self.type = type
+        self.required = required
+        self.filter = filter
+        self.manager.options.append(self)
+        self.choices = choices
+        self.label = label
+        self.sort = sort
+        self.visible_if = visible_if
 

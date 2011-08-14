@@ -1,7 +1,12 @@
 <style>
-    .pagination span { font-weight: bold; cursor: default }
+    .pagination span { font-weight: bold; cursor: default; }
     .pagination .prev span { color: #AAA; }
     .pagination .next span { color: #AAA; }
+    .pagination .pages { display: inline-block; width: 450px; height: 1.25em; overflow: hidden; }
+    .rowtop { padding-top: 4px; }
+    .col0 { border-bottom: none;  }
+    .rowbottom { padding-bottom: 6px; }
+    #searchresults td { background-color: #EAEAE3; }
 </style>
 
 <div style="float: left; width: 70%; display: none" id="searchresults">
@@ -26,21 +31,33 @@
 <script>
 var current_page = 1;
 var update_search_lock = false;
-function update_search(pagenum, pageinc) {
+function update_search(pagenum, pageinc, elem) {
     if (update_search_lock) return;
     update_search_lock = true;
+    $('#searchform input').attr('disabled', '1');
+    
+    if (!pagenum && !pageinc) {
+    	// When changing the search options, reset to first page.
+    	pagenum = 1;
+    }
     
     form = $('#searchform')[0];
     
-    // If any ALL is chosen, clear out the other options.
-    for (var i = 0; i < form.elements.length; i++)
-        if (form.elements[i].checked && form.elements[i].value == "_ALL_")
-            $(form).find("[name=" + form.elements[i].name + "][value!=_ALL_]").attr('checked', '');
+    if (elem && elem.type == "checkbox") {
+		// If any ALL is chosen, clear out the other options. If any other option is
+		// clicked, clear out the ALL.
+		for (var i = 0; i < form.elements.length; i++)
+			if (form.elements[i].checked && form.elements[i].name == elem.name && form.elements[i].value != elem.value)
+				if (elem.value == "__ALL__" || form.elements[i].value == "__ALL__")
+					$(form.elements[i]).attr('checked', '');
+	}
 
+    // Collect the POST data.
     var postdata = { };
     for (var i = 0; i < form.elements.length; i++) {
         if (form.elements[i].type == 'checkbox' && !form.elements[i].checked) continue;
-        if (form.elements[i].value == "_ALL_") continue;
+        if (form.elements[i].type == 'radio' && !form.elements[i].checked) continue;
+        if (form.elements[i].value == "__ALL__" || form.elements[i].value == "") continue;
         
         name = form.elements[i].name;
         if (form.elements[i].type == 'checkbox') {
@@ -50,7 +67,7 @@ function update_search(pagenum, pageinc) {
             postdata[name] = form.elements[i].value;
         }
     }
-
+    
     if (pagenum)
         postdata.page = pagenum;
     else if (pageinc)
@@ -67,11 +84,75 @@ function update_search(pagenum, pageinc) {
             success: function(res) {
                 if (res.error) {
                     $('#searchresults tbody').html("");
-                    $('#searchform').html(res.error);
+                    $('#searcherror').text(res.error);
                 } else {
+                	// Display results.                	
                     $('#searchresults tbody').html(res.results);
-                    $('#searchform').html(res.form);
+                    $('#searcherror').text('');
                     
+                    // Display options.
+                    for (var k in res.options) {
+                    	field = res.options[k][0];
+                    	type = res.options[k][1];
+                    	values = res.options[k][2];
+                    	visible = res.options[k][3];
+                    	
+                    	$('#searchform_field_' + field + "_container").toggle(visible);
+                    	
+                    	var node = $('#searchform_field_' + field);
+                    	if (type == "select") {
+                    		node.text("");
+                    		for (var j in values) {
+                    			var opt = $("<option/>");
+                    			opt.attr('value', values[j][0]);
+                    			opt.text(values[j][1] + (values[j][2] > 0 ? "   (" + values[j][2] + ")" : ""));
+                    			node.append(opt);
+                    		}
+                    		if (postdata[field])
+                    			node.val(postdata[field])
+                    		else
+                    			node.val("__ALL__");
+                    	}
+                    	if (type == "checkbox" || type == "radio") {
+                    		node.html("");
+                    		for (var j in values) {
+                    			var opt = $("<div><input type='" + type + "' onchange='update_search(null, null, this)'/> <label style='display: inline'><span class='name'> </span> <span class='count'> </span></label></div>");
+                    			opt.find('input').attr('id', "searchform_field_" + field + "_" + j);
+                    			opt.find('input').attr('name', field);
+                    			opt.find('input').attr('value', values[j][0]);
+                    			
+                   				opt.find('label').attr('for', "searchform_field_" + field + "_" + j);
+                    			if (values[j][0] == "__ALL__") {
+                    				opt.find('.name').text("All");
+                    			} else {
+                    				opt.find('.name').text(values[j][1]);
+                    				if (values[j][2])
+                    					opt.find('.count').text("(" + values[j][2] + ")");
+                    			}
+                    			
+                    			if (type == "checkbox") {
+									// restore checked status
+									if (postdata[field])
+										for (i in postdata[field])
+											if (postdata[field][i] == (""+values[j][0])) // convert value to string
+												opt.find('input').attr('checked', '1');
+									
+									// check ALL if nothing is checked
+									if (!postdata[field] && values[j][0] == "__ALL__")
+										opt.find('input').attr('checked', '1');
+								} else if (type == "radio") {
+									if (postdata[field] == (""+values[j][0])) // convert value to string
+										opt.find('input').attr('checked', '1');
+									else if (!postdata[field] && j == 0) // turn on the first one by default
+										opt.find('input').attr('checked', '1');
+								}
+                    					
+                    			node.append(opt);
+                    		}
+                    	}
+                    }
+                    
+                    // Display page numbers and prev/next.
                     if (res.page > 1) {
                         $('#searchresults .prev a').show();
                         $('#searchresults .prev span').hide();
@@ -90,7 +171,7 @@ function update_search(pagenum, pageinc) {
                     $('#searchresults .pages').text("");
                     for (var i = 1; i <= res.num_pages; i++) {
                         if (res.page - i > 10) continue;
-                        if (i - res.page > 10) break;
+                        //if (i - res.page > 10) break;
                         if (i == res.page)
                             $('#searchresults .pages').append($('<span>' + i + '</span>'));
                         else
@@ -104,11 +185,13 @@ function update_search(pagenum, pageinc) {
                 current_page = res.page;
                 
                 update_search_lock = false;
+                $('#searchform input').attr('disabled', '');
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('#searchresults tbody').html("");
                 $('#searchform').text("Search is not currently operational: " + textStatus);
                 update_search_lock = false;
+                $('#searchform input').attr('disabled', '');
             }
         });
     
@@ -119,8 +202,24 @@ $(function() { update_search(1); });
 </script>
 
 <div style="float: left; width: 25%; margin-left: 4%;">
-    <form id="searchform" onsubmit="return update_search();">
-        {{ form.as_p }}
+	<div id="searcherror"> </div>
+
+    <form id="searchform" onsubmit="update_search(); return false;">
+    	{% for field in form %}
+    		<div id="searchform_field_{{field.field_name}}_container">
+				<label for="searchform_field_{{field.field_name}}">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
+				{% if field.type == "text" %}
+					<input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text"> </input>
+					<input id="searchform_field_{{field.field_name}}_button" type="button" value="Go" onclick="update_search()"> </input>
+				{% endif %}
+				{% if field.type == "select" %}
+					<select id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" size="1" onchange="update_search()"> </select>
+				{% endif %}
+				{% if field.type == "checkbox" or field.type == "radio" %}
+					<div id="searchform_field_{{field.field_name}}"> </div>
+				{% endif %}
+			</div>
+    	{% endfor %}
     </form>
 </div>
 

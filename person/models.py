@@ -37,16 +37,16 @@ class Person(models.Model):
 
     @property
     def name(self):
-        return get_person_name(self, firstname_position='before')
+        return get_person_name(self, firstname_position='before', role_recent=True)
 
     def name_no_district(self):
-        return get_person_name(self, firstname_position='before', show_district=False)
+        return get_person_name(self, firstname_position='before', role_recent=True, show_district=False)
 
     def name_no_details(self):
-        return get_person_name(self, firstname_position='before', show_district=False, show_party=False)
+        return get_person_name(self, firstname_position='before')
         
     def name_no_details_lastfirst(self):
-        return get_person_name(self, firstname_position='after', show_district=False, show_party=False)
+        return get_person_name(self, firstname_position='after')
 			
     def __unicode__(self):
         return self.name
@@ -94,6 +94,18 @@ class Person(models.Model):
         start, end = get_congress_dates(congress)
         try:
             return self.roles.filter(startdate__lte=end, enddate__gte=start).order_by('-startdate')[0]
+        except IndexError:
+            return None
+            
+    def get_role_at_year(self, year):
+        try:
+            return self.roles.filter(startdate__lte=("%d-12-31"%year), enddate__gte=("%d-01-01"%year)).order_by('-startdate')[0]
+        except IndexError:
+            return None
+            
+    def get_most_recent_role(self):
+        try:
+            return self.roles.order_by('-startdate')[0]
         except IndexError:
             return None
 
@@ -192,4 +204,20 @@ class PersonRole(models.Model):
             "body_html_template": "",
             "context": {}
             }
+
+    def logical_dates(self):
+        startdate = None
+        enddate = None
+        prev_role = None
+        found_me = False
+        for role in self.person.roles.filter(role_type=self.role_type, senator_class=self.senator_class, state=self.state, district=self.district).order_by('startdate'):
+            if found_me and not role.continues_from(prev_role):
+                break
+            if prev_role == None or not role.continues_from(prev_role):
+                startdate = role.startdate
+            enddate = role.enddate
+            prev_role = role
+            if role.id == self.id:
+                found_me = True
+        return (startdate, enddate)
 
