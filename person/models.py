@@ -31,9 +31,6 @@ class Person(models.Model):
     youtubeid = models.CharField(max_length=255, blank=True) # YouTube
     twitterid = models.CharField(max_length=50, blank=True) # Twitter
 
-    # Cached roles, see `get_role_at_date` docstring
-    _cached_roles = set()
-
     @property
     def fullname(self):
         return u'%s %s' % (self.firstname, self.lastname)
@@ -86,12 +83,9 @@ class Person(models.Model):
     def get_role_at_date(self, when):
         if isinstance(when, datetime.datetime):
             when = when.date()
-        for role in self._cached_roles:
-            if role.startdate <= when <= role.enddate:
-                return role
+
         try:
             role = self.roles.get(startdate__lte=when, enddate__gte=when)
-            self._cached_roles.add(role)
             return role
         except PersonRole.DoesNotExist:
             return None
@@ -109,13 +103,6 @@ class Person(models.Model):
         """
 
         return '/data/photos/%d-100px.jpeg' % self.pk
-
-    def cache_role(self, role):
-        """
-        Save role to cache.
-        """
-
-        self._cached_roles.add(role)
 
     class Meta:
         ordering = ['lastname', 'firstname']

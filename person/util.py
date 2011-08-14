@@ -40,5 +40,4 @@ def load_roles_at_date(persons, when=datetime.now()):
         roles_by_person[role.person] = role
     for person in persons:
         person.role = roles_by_person.get(person)
-        person._cached_roles.add(person.role)
     return None 
