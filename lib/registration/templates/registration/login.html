@@ -1,0 +1,27 @@
+<p>Sign in with your Google, Facebook, or Twitter account, your email address and password, <div>or <a href="/registration/register{% if next %}?next={{next|urlencode}}{% endif %}">create an account</a>.</div></p>
+			
+<form method="post" class="login">
+	{% csrf_token %}
+
+	<div class="signin_social">
+		<h4>Sign in with:</h4>
+		{% with next as singlesignon_next %}
+			{% include "registration/login_singlesignon.html" %}
+		{% endwith %}
+	</div>
+		
+	{% if errors %}
+		<p class="error">{{errors}} Please try again.</p>
+	{% endif %}
+	
+	<label for="id_email">Email</label> 
+	<input id="id_email" type="text" name="email" maxlength="60" value="{{email}}"/><br /> 
+				
+	<label for="id_password">Password</label> 
+	<input type="password" name="password" id="id_password" value="{{password}}" /><br /> 
+				
+	<input class="submit" type="submit" value="Login" />
+	<a class="forgot" href="{% url registration.views.resetpassword %}">Forgot your password?</a>
+				
+	<input type="hidden" name="next" value="{{ next }}" />
+</form>

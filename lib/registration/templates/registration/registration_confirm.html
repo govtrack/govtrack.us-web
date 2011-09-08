@@ -1,0 +1,17 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Activation Confirm{% endblock %}
+{% block body%}
+
+{% if error %}
+	{{ error }}
+{% else %}
+	Welcome to GovTrack.us!
+
+	Now your account has been activated.  Please try login with your credential and password.
+
+	Thank you,
+
+	GovTrack.us team
+{% endif %}
+{% endblock %}
+

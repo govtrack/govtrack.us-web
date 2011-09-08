@@ -47,6 +47,34 @@ MEDIA_URL = '/static/'
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/static/admin-media/'
 
+
+# django-regitration-pv
+APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
+SITE_ROOT_URL = "http://localhost:8000"
+LOGIN_REDIRECT_URL = "http://localhost:8000/"
+SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
+RECAPTCHA_PUBLIC_KEY = "..."
+RECAPTCHA_PRIVATE_KEY = "..."
+GOOGLE_OAUTH_TOKEN = "..."
+GOOGLE_OAUTH_TOKEN_SECRET = "..."
+GOOGLE_OAUTH_SCOPE = "http://www.google.com/m8/feeds/contacts/default/full&quot;" # can be an empty string
+TWITTER_OAUTH_TOKEN = "zcuFN74ydyl0h5tduGxdA"
+TWITTER_OAUTH_TOKEN_SECRET = "F7fuPicBKJmgX4UGR1kmy6dRugGjRy24rVxGsWmg"
+LINKEDIN_API_KEY = "..."
+LINKEDIN_SECRET_KEY = "..."
+FACEBOOK_APP_ID = "..."
+FACEBOOK_APP_SECRET = "..."
+FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
+
+#set the user profile for registration activation key
+AUTH_PROFILE_MODULE = 'registration.UserProfile'
+
+#dummy email backend through python -m -n -c DebuggingServer localhost:1025 /usr/bin/python: No module named -n
+EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_PORT =
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
@@ -59,6 +87,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -92,6 +121,10 @@ INSTALLED_APPS = (
     'events',
     'smartsearch',
     'bill',
+
+    #for django-registration-pv
+    'emailverification',
+    'registration',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

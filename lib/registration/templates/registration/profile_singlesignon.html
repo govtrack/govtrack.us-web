@@ -1,0 +1,31 @@
+{% load registration_providers %}
+
+{% if user.singlesignon.all %}
+	<p>You have connected your account to these other sites:</p>
+	{% for auth in user.singlesignon.all %}
+	<div style="clear: both;">
+		<div style="float: left; width:32; height: 32; margin-right: 1em; margin-bottom: 3px">
+			<img src="{{ auth.provider|provider_logo:32 }}"/>
+		</div>
+		<div style="font-weight: bold">{{ auth.provider|provider_name }}</div>
+		<div>{% firstof auth.profile.screen_name auth.profile.email %}</div>
+	</div>
+	{% endfor %}
+	<p style="clear: both">You can use any of these services to log in to your account. To connect additional services to your account here, click on a service icon:</p>
+{% else %}
+	<p>Connecting your account to other services lets you log in through those services (rather than a username and password). Select a service to begin the connection process:</p>
+{% endif %}
+
+<div style="clear: both;">
+{% for provider in ""|all_providers %}
+	<div style="float: left; text-align: center; margin-right: 1.5em">
+		<a href="{% url registration.views.external_start "associate" provider %}?next={% url popvox.views.profile.account_profile %}">
+			<div><img src="{{ provider|provider_logo:32 }}"/></div>
+			<div>{{ provider|provider_name }}</div>
+		</a>
+	</div>
+{% endfor %}
+<div style="clear: both"> </div>
+</div>
+
+

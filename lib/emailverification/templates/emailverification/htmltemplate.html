@@ -1,0 +1,79 @@
+{% comment %}
+This file contains a boilerplate template from htmlemailboilerplate.com downloaded July 5, 2011.
+{% endcomment %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+    <title>{% block subject %}{% endblock %}</title> 
+    <style type="text/css">
+    	{% comment %}should be applied inline{% endcomment %}
+    
+        #outlook a { padding: 0; }
+        .ReadMsgBody { width: 100%; } .ExternalClass { width: 100%; }
+        img { height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    
+       {% comment %}should be applied inline{% endcomment %}
+       p {
+           margin: 1em 0;
+       }
+       
+       {% block h_styles %}
+       {% comment %}should be applied inline{% endcomment %}
+       h1, h2, h3, h4, h5, h6 {
+           color: black !important;
+           line-height: 100% !important;
+       }
+       
+       h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+           color: blue !important;
+       }
+       
+       h1 a:active, h2 a:active,  h3 a:active, h4 a:active, h5 a:active, h6 a:active {
+           color: red !important;
+       }
+       
+       h1 a:visited, h2 a:visited,  h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited {
+           color: purple !important;
+       }
+       {% endblock %}
+       
+       table td {
+           border-collapse: collapse;
+       }
+ 
+       .yshortcuts, .yshortcuts a, .yshortcuts a:link,.yshortcuts a:visited, .yshortcuts a:hover, .yshortcuts a span { color: black; text-decoration: none !important; border-bottom: none !important; background: none !important; }
+       </style>
+       
+       {% block head %}
+       {% endblock %}
+</head> 
+<body style="margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: none; -ms-text-size-adjust: none;"> 
+    <table cellpadding="0" cellspacing="0" border="0" style="height: 100% !important; margin: 0; padding: 0; {% block backgroundcss %}{% endblock %}"> 
+    <tr valign="top"> 
+    <td>
+    
+    {% block body %}
+    {% endblock %}
+    
+    {% comment %}
+    <table cellpadding="0" cellspacing="0" border="0"> 
+        <tr> 
+            <td width="200"></td> 
+            <td width="200"></td> 
+            <td width="200"></td> 
+        </tr> 
+    </table>  
+    
+    <a href="http://www.responsys.com/blogs/nsm/2010/07/feeling-blue-over-yahoo-email.html" style="color:red; text-decoration: none;" target ="_blank" title="Feeling Blue Over Yahoo"><span style="color: red;">Here is the fix for Yahoo from Responsys/Smith Harmon</span></a> 
+    
+    <img src="full path to image" alt="Your alt text" title="Your title text" width="x" height="x" style="display: block;" />
+    {% endcomment %}
+    
+    </td> 
+    </tr> 
+    </table>  
+</body> 
+</html>
+

@@ -1,0 +1,13 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Signup Form{% endblock %}
+
+Register for an account
+{% block body %}
+{% if error %}
+	{{ error }}
+{% endif%}
+ <form method='post' action=''>{% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Send activation email" />
+</form>
+{% endblock %}
