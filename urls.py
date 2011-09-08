@@ -23,4 +23,12 @@ urlpatterns = patterns('',
     url(r'^congress/', include('vote.urls')),
     url(r'^congress/bills/', include('bill.urls')),
     url(r'', include('events.urls')),
+
+    # django-registration-pv
+    (r'^emailverif/', include('emailverification.urls')),
+    (r'^registration/', include('registration.urls')),
+    (r'^accounts/login$', 'registration.views.loginform'),
+    (r'^accounts/logout$', 'django.contrib.auth.views.logout'),
+    (r'^accounts/profile/change_password$', 'django.contrib.auth.views.password_change'),
+    (r'^accounts/profile/password_changed$', 'django.contrib.auth.views.password_change_done'),
 )
