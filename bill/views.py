@@ -12,14 +12,15 @@ from smartsearch.manager import SearchManager
 
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
-    try:
-        bill_type = BillType.by_slug(type_slug)
-    except BillType.NotFound:
-        raise Http404
-    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type,
-                             number=number)
-    return {'bill': bill,
-            }
+    if type_slug.isdigit():
+        bill_type = type_slug
+    else:
+        try:
+            bill_type = BillType.by_slug(type_slug)
+        except BillType.NotFound:
+            raise Http404
+    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    return {'bill': bill,}
 
 
 @render_to('bill/bill_list.html')

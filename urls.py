@@ -31,4 +31,7 @@ urlpatterns = patterns('',
     (r'^accounts/logout$', 'django.contrib.auth.views.logout'),
     (r'^accounts/profile/change_password$', 'django.contrib.auth.views.password_change'),
     (r'^accounts/profile/password_changed$', 'django.contrib.auth.views.password_change_done'),
+
+    # django-haystack search
+    (r'^search/', include('haystack.urls')),
 )

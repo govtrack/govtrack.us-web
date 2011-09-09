@@ -9,6 +9,8 @@ from bill.status import BillStatus
 
 from django.conf import settings
 
+from django.core.urlresolvers import reverse
+
 "Enums"
 
 class BillType(enum.Enum):
@@ -240,3 +242,5 @@ class Bill(models.Model):
                 }
             }
         
+    def get_absolute_url(self):
+        return reverse('bill_details', args=[self.congress,self.bill_type,self.number])

@@ -8,4 +8,7 @@ django-cache-utils
 GChartWrapper
 django-debug-toolbar
 django-picklefield
+beautifulsoup
+pysolr
+django-haystack
 

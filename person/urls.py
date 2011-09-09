@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls.defaults import *
+from bill.views import bill_details
 
 urlpatterns = patterns('person.views',
     url(r'^$', 'browsemembersbymap', name="person_list"),

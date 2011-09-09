@@ -53,8 +53,8 @@ APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
 SITE_ROOT_URL = "http://localhost:8000"
 LOGIN_REDIRECT_URL = "http://localhost:8000/"
 SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
-RECAPTCHA_PUBLIC_KEY = "..."
-RECAPTCHA_PRIVATE_KEY = "..."
+RECAPTCHA_PUBLIC_KEY = "6LcK-McSAAAAAG0pmM3wQR3kbAMM6NXhwera2UNg"
+RECAPTCHA_PRIVATE_KEY = "6LcK-McSAAAAAHtd7v2SCtd-oIV-ZVarJYidlmFj"
 GOOGLE_OAUTH_TOKEN = "..."
 GOOGLE_OAUTH_TOKEN_SECRET = "..."
 GOOGLE_OAUTH_SCOPE = "http://www.google.com/m8/feeds/contacts/default/full&quot;" # can be an empty string
@@ -65,6 +65,14 @@ LINKEDIN_SECRET_KEY = "..."
 FACEBOOK_APP_ID = "..."
 FACEBOOK_APP_SECRET = "..."
 FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
+
+#Haystack setup
+
+HAYSTACK_SITECONF = 'search_sites'
+HAYSTACK_SEARCH_ENGINE = 'solr'
+HAYSTACK_SOLR_URL = 'http://localhost:8080/solr/'
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 30
+HAYSTACK_INCLUDE_SPELLING = True
 
 #set the user profile for registration activation key
 AUTH_PROFILE_MODULE = 'registration.UserProfile'
@@ -122,9 +130,12 @@ INSTALLED_APPS = (
     'smartsearch',
     'bill',
 
-    #for django-registration-pv
+    # for django-registration-pv
     'emailverification',
     'registration',
+
+    # for django-haystack
+    'haystack',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

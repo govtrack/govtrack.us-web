@@ -1,0 +1,6 @@
+BeautifulSoup.py
+BeautifulSoupTests.py
+pip-egg-info/BeautifulSoup.egg-info/PKG-INFO
+pip-egg-info/BeautifulSoup.egg-info/SOURCES.txt
+pip-egg-info/BeautifulSoup.egg-info/dependency_links.txt
+pip-egg-info/BeautifulSoup.egg-info/top_level.txt

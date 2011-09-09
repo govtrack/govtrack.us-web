@@ -580,7 +580,7 @@ def registrationform(request, *args, **kwargs):
 	                            \nTo activate your account, click on the link or cut and paste it in the browser
 	                            \nto activate your account within 7 days:
 	                            \n%s""" % ( user.username, url)
-	            send_mail(subject=email_subject, message=email_body, from_email='noreplyGovTrack.us', 
+	            send_mail(subject=email_subject, message=email_body, from_email='noreply@GovTrack.us', 
 	                recipient_list=[user.email], fail_silently=False, auth_user='', auth_password='')
 	        except SMTPRecipientsRefused as e:
 	            # error with email sending

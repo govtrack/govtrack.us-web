@@ -1,0 +1,11 @@
+{{ object.current_status_date }}
+{{ object.introduced_date }}
+{{ object.title }}
+{{ object.titles }}
+{{ object.bill_type }}
+{{ object.congress }}
+{{ object.number }}
+{{ object.current_status }}
+{{ object.cosponsors }}
+{{ object.committees }}
+{{ object.terms }}
