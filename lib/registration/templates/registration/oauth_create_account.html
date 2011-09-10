@@ -4,15 +4,10 @@
 <form method="post">
 	{% csrf_token %}
 
-	{% comment %}
-
-	<!-- This part is optional. If it is included, the user will be prompted to choose
-	a username. If it is omitted, the user's username will be set to his email address. -->
-
+	{% if needs_username %}
 	<label for="username">Username</label>
 	<input type="text" size="20" id="username" name="username" value="{{username}}"/>
-
-	{% endcomment %}
+	{% endif %}
 			
 	{% if email %}
 		<p>We are collecting your email address <tt>{{email}}</tt> from {{provider|provider_name}}.</p>

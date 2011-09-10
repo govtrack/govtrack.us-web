@@ -280,7 +280,7 @@ def external_return(request, login_associate, provider):
 	return HttpResponseRedirect(next)
 
 def external_finish(request):
-	print request
+	
 	if not "registration_credentials" in request.session:
 		# User is coming back to this page later on for no good reason?
 		if request.user.is_authenticated():
@@ -290,27 +290,36 @@ def external_finish(request):
 	
 	# Recover session info.
 	(provider, auth_token, profile, uid, next) = request.session["registration_credentials"]
-	
-	if "username" in request.POST:
-		username = request.POST["username"]
-	else:
+
+	username = None
+	needs_username = False
+	if "email" in request.POST:
 		# experimental support for not requiring the user to choose a username
-		username = ""
-		if "screen_name" in profile:
+		# TODO: If the email doesn't validate, then we may ask for a user name
+		# here when we don't really need to.
+		if "username" in request.POST:
+			username = request.POST["username"]
+		elif "screen_name" in profile:
 			username = profile["screen_name"]
 		elif "email" in profile and "@" in profile["email"]:
 			username = profile["email"][0:profile["email"].index("@")]
 		elif "email" in request.POST and "@" in request.POST["email"]:
 			username = request.POST["email"][0:request.POST["email"].index("@")]
 		else:
-			# Show the form where the user can choose a username and email address.
-			return render_to_response('registration/oauth_create_account.html',
-				{
-					"provider": provider,
-					"username": username,
-					"email": profile["email"] if "email" in profile and len(profile["email"]) <= 64 else "", # longer addresses might be proxy addresses provided by the service that the user isn't aware of and run the risk of getting truncated
-				},
-				context_instance=RequestContext(request))
+			needs_username = True
+		
+	if not username:
+		# This is either a GET, so that the previous if block did not execute
+		# and username was not set, or it is a POST without a username.
+		# Show the form where the user can choose a username and email address.
+		return render_to_response('registration/oauth_create_account.html',
+			{
+				"provider": provider,
+				"username": username,
+				"needs_username": needs_username,
+				"email": profile["email"] if "email" in profile and len(profile["email"]) <= 64 else "", # longer addresses might be proxy addresses provided by the service that the user isn't aware of and run the risk of getting truncated
+			},
+			context_instance=RequestContext(request))
 		
 	# Validation
 		
