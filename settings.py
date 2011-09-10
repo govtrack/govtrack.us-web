@@ -69,8 +69,8 @@ FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
 #Haystack setup
 
 HAYSTACK_SITECONF = 'search_sites'
-HAYSTACK_SEARCH_ENGINE = 'solr'
-HAYSTACK_SOLR_URL = 'http://localhost:8080/solr/'
+HAYSTACK_SEARCH_ENGINE = 'xapian'
+HAYSTACK_XAPIAN_PATH = ROOT + '/xapian'
 HAYSTACK_SEARCH_RESULTS_PER_PAGE = 30
 HAYSTACK_INCLUDE_SPELLING = True
 

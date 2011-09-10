@@ -244,6 +244,7 @@ class Bill(models.Model):
                 "summary": self.get_status_text(status, date),
                 }
             }
-        
+
+    @models.permalink    
     def get_absolute_url(self):
-        return reverse('bill_details', args=[self.congress,self.bill_type,self.number])
+        return ('bill_details', [self.congress,self.bill_type,self.number])

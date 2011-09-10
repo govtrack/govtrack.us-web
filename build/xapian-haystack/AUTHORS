@@ -1,0 +1,24 @@
+Primary Authors:
+----------------
+
+    * David Sauve
+
+
+Thanks to:
+----------
+    * Daniel Lindsley for the awesome Haystack API and putting up with all of my questions.
+    * Trapeze Media <http://www.trapeze.com/> for providing time and resources to complete this project as well as Q&A.
+    * Richard Boulton for answering questions regarding the Xapian python bindings and API.
+    * The Xapian team for creating and releasing under the GPL, such a great search engine.
+    * Supreet Sethi for suggestions regarding morphologic date comparisons and for fixing NOT query expressions.
+    * Joshua Jonah for changes to highlighting logic to avoid reserved words.
+    * J00bar for a fix with `get_identifier`, fixing query_filter reference in SearchQuery, and a better clear method.
+    * Jannis Leidel for setting up the code base for pip, easy_install and PyPI.
+    * Erik Aigner for the initial patch to get_identifier changes.
+    * Travis Cline for the initial patch to support SQ objects in Haystack.
+    * wshallum for a patch that makes date facets compatible with Python 2.4
+    * askfor for reporting issues with narrow_queries and float fields.
+    * Brandon Konkle for a patch that corrected the behaviour of weights on multiple term boosts.
+    * Adam Endicott for the initial patch that corrected an oversight with stemming not always being done during a search.
+    * Sym Roe for a patch that improved performance in "more-like-this" and suggestion the removal of FLAG_PARTIAL.
+    * liranz for pointing out a potential conflict with arguments pass into `SearchResult`
