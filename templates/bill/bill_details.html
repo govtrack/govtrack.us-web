@@ -1,6 +1,142 @@
-{% extends 'master.html' %}
+{% extends "master_a.html" %}
+{% load humanize %}
+
+{% block title %}{{bill}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}
+{{bill}}
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+<li><a href="{% url congress_home %}">Congress</a></li>
+<li><a href="/congress/bills">Bills</a></li>
+<li>{{bill.display_number}}</li>
+</ul>
+{% endblock %}
+
+{% block body_class %}bill{% endblock %}
+
+{% block summary %}
+<div class="container">
+	<h1>{{bill}}</h1>
+	
+	<div class="info">
+		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
+		
+		{% if subtitle %}<p>{{subtitle}}</p>{% endif %}
+		
+		<dl>
+			<dt>Sponsor:</dt>
+			<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
+		
+			<dt>Status:</dt>
+			<dd style="line-height: normal"><strong>{{bill.get_current_status_display}}</strong><br/>
+			{{bill.current_status_description}}</dd>
+		</dl>
+	
+		
+	</div><!-- /info -->
+	
+	<div class="actions">
+		<a href="#" class="track-btn">Track this bill</a>
+		<a href="#" class="pv-speakup">Speak Up at PopVox</a>
+	</div><!-- /actions -->
+
+</div>
+{% endblock %}
 
 {% block body %}
-{{ bill.title }}
-
+<div id="bill-overview" class="section">
+	
+	<h2>Bill Overview</h2>
+		
+	<div class="overview">
+		<div class="holder">
+			<div class="frame">
+				
+				<div class="container">
+					<dl class="heading">
+						<dt>Cosponsors:</dt>
+						<dd>
+							<a href="#">show cosponsors (...)</a></dd>
+					</dl>
+					<dl>
+						<dt>Text:</dt>
+						<dd>
+							<ul class="text-view">
+								<li><a href="#">Summary</a></li>
+								<li><a href="#">Full Text</a></li>
+							</ul>
+						</dd>
+					</dl>
+				</div><!-- /container -->
+				
+				<div class="container">
+					<dl>
+						<dt>Status:</dt>
+						<dd>
+							<table>
+								{% for item in bill.get_major_events %}
+								<tr>
+									<td class="done">{{item.1.label}}</td>
+									<td>{{item.0|date:"DATE_FORMAT"}}</td>
+								</tr>
+								{% endfor %}
+							
+								{% for item in bill.get_future_events %}
+								<tr>
+									<td class="pending">{{item}}</td>
+									<td>(not yet ocurred)</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</dd>
+					</dl>
+				</div><!-- /container -->
+			</div><!-- /frame -->
+		</div><!-- /holder -->
+	</div><!-- /overview -->
+	
+	
+	<div class="overview last">
+		<div class="holder">
+			<div class="frame">
+				<div class="container">
+					<dl>
+						<dt>Last Action:</dt>
+						<dd><p>...</p></dd>
+					</dl>
+				</div>
+				<div class="container">
+					<dl>
+						<dt>Related:</dt>
+						<dd>
+							<p>...</p>
+						</dd>
+					</dl>
+				</div>
+				<div class="container">
+					<dl>
+						<dt>Votes:</dt>
+						<dd>
+							<p>...</p>
+						</dd>
+					</dl>
+				</div>
+				<div class="container">
+					<ul class="download-links">
+						<li><a href="#">Download as CSV</a></li>
+						<li><a href="#">Download as XML</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div><!-- /overview -->
 {% endblock %}

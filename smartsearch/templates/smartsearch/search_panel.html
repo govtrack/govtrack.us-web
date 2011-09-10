@@ -78,13 +78,16 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     			{% if field.field_name == k %}
     				{% if field.type == "checkbox" %}
     					{% if v %}
-    						if (!postdata["{{k|escapejs}}"]) postdata["{{k|escapejs}}"] = ["true"];
+    						postdata["{{k|escapejs}}"] = ["true"];
     					{% endif %}
     				{% endif %}
     				{% if field.type == "radio" %}
     					{% if v %}
-    						if (!postdata["{{k|escapejs}}"]) postdata["{{k|escapejs}}"] = "true";
+    						postdata["{{k|escapejs}}"] = "true";
     					{% endif %}
+    				{% endif %}
+    				{% if field.type == "select" or field.type == "text" %}
+    					postdata["{{k|escapejs}}"] = "{{v|escapejs}}";
     				{% endif %}
     			{% endif %}
     		{% endfor %}

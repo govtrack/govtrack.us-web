@@ -11,14 +11,14 @@ class BillStatus(enum.Enum):
     """
 
     introduced = enum.Item(1, 'Introduced', xml_code='INTRODUCED')
-    referred = enum.Item(2, 'Referred', xml_code='REFERRED')
-    reported = enum.Item(3, 'Reported', xml_code='REPORTED')
+    referred = enum.Item(2, 'Referred to Committee', xml_code='REFERRED')
+    reported = enum.Item(3, 'Reported by Committee', xml_code='REPORTED')
     pass_over_house = enum.Item(4, 'Passed House', xml_code='PASS_OVER:HOUSE')
     pass_over_senate = enum.Item(5, 'Passed Senate', xml_code='PASS_OVER:SENATE')
     passed_simpleres = enum.Item(6, 'Resolution Passed', xml_code='PASSED:SIMPLERES')
     passed_constamend = enum.Item(7, 'Resolution Passed', xml_code='PASSED:CONSTAMEND')
     passed_concurrentres = enum.Item(8, 'Resolution Passed', xml_code='PASSED:CONCURRENTRES')
-    passed_bill = enum.Item(9, 'Passed', xml_code='PASSED:BILL')
+    passed_bill = enum.Item(9, 'Passed Congress', xml_code='PASSED:BILL')
     pass_back_house = enum.Item(10, 'Passed House with Changes', xml_code='PASS_BACK:HOUSE')
     pass_back_senate = enum.Item(11, 'Passed Senate with Changes', xml_code='PASS_BACK:SENATE')
     prov_kill_suspensionfailed = enum.Item(12, 'Failed Under Suspension', xml_code='PROV_KILL:SUSPENSIONFAILED')
@@ -38,4 +38,5 @@ class BillStatus(enum.Enum):
     vetoed_override_fail_second_senate = enum.Item(27, 'Veto Override Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_SECOND:SENATE')
     enacted_signed = enum.Item(28, 'Bill Signed by the President', xml_code='ENACTED:SIGNED')
     enacted_veto_override = enum.Item(29, 'Veto Overridden', xml_code='ENACTED:VETO_OVERRIDE')
+
 

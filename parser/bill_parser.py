@@ -64,7 +64,14 @@ class BillProcessor(Processor):
         self.process_sponsor(obj, node)
         self.process_introduced(obj, node)
         self.process_current_status(obj, node)
-        obj.save()
+
+        # update existing bill record if one exists, otherwise create a new one on save()
+        try:
+            obj.id = Bill.objects.get(congress=obj.congress, bill_type=obj.bill_type, number=obj.number).id
+        except Bill.DoesNotExist:
+            pass
+            
+        obj.save() # save before using m2m relations
         self.process_committees(obj, node)
         self.process_terms(obj, node)
         self.process_consponsors(obj, node)
@@ -262,22 +269,15 @@ def main(options):
         progress.tick()
         
         if not File.objects.is_changed(fname) and not options.force:
-            m = re.search(r"/(\d+)/([a-z]+)(\d+)\.xml$")
+            m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
             seen_bill_ids.append(Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3)).id)
             continue
             
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
             bill = bill_processor.process(Bill(), node)
-            
-            # update existing bill record if one exists, otherwise create a new one on save()
-            try:
-                bill.id = Bill.objects.get(congress=bill.congress, bill_type=bill.bill_type, number=bill.number).id
-                seen_bill_ids.append(bill.id) # don't delete me later
-            except Bill.DoesNotExist:
-                pass
-            
-            bill.save()
+           
+            seen_bill_ids.append(bill.id) # don't delete me later
             
             actions = []
             for axn in tree.xpath("actions/*[@state]"):

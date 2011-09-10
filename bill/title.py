@@ -9,7 +9,8 @@ from django.contrib.humanize.templatetags.humanize import ordinal
 def get_bill_number(bill):
     "Compute display form of bill number"
 
-    ret = '%s %s' % (bill.bill_type.label, bill.number)
+    from bill.models import BillType
+    ret = '%s %s' % (BillType.by_value(bill.bill_type).label, bill.number)
     if bill.congress != settings.CURRENT_CONGRESS:
         ret += ' (%s)' % ordinal(bill.congress)
     return ret

@@ -6,6 +6,7 @@ from common.fields import JSONField
 
 from committee.models import Committee
 from bill.status import BillStatus
+from bill.title import get_bill_number
 
 from django.conf import settings
 
@@ -77,16 +78,23 @@ class Bill(models.Model):
     def __unicode__(self):
         return self.title
         
+    @models.permalink    
     def get_absolute_url(self):
-        return "/congress/bills/%d/%s%d" % (self.congress, self.bill_type, self.number)
+        return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
+        
+    def display_number(self):
+        return get_bill_number(self) 
 
     class Meta:
         ordering = ('congress', 'bill_type', 'number')
         unique_together = ('congress', 'bill_type', 'number')
+        
+    def current_status_description(self):
+        return self.get_status_text(self.current_status, self.current_status_date)
 
     def get_status_text(self, status, date) :
         bill = self
-        status = status.xml_code
+        status = BillStatus.by_value(status).xml_code
         date = date.strftime("%B %d, %Y").replace(" 0", " ")
         
         # Some status messages depend on whether the bill is current:
@@ -223,7 +231,7 @@ class Bill(models.Model):
                 except Vote.DoesNotExist:
                     pass
         
-        import events.feeds
+
         return {
             "type": "Bills and Resolutions",
             "date": date,
@@ -245,6 +253,7 @@ class Bill(models.Model):
                 }
             }
 
-    @models.permalink    
-    def get_absolute_url(self):
-        return ('bill_details', [self.congress,self.bill_type,self.number])
+    def get_major_events(self):
+        from events.feeds import BillFeed
+        from status import BillStatus
+        
