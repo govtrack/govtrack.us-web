@@ -9,6 +9,8 @@ from common import enum
 
 from person.util import load_roles_at_date
 
+from us import get_session_ordinal
+
 class CongressChamber(enum.Enum):
     senate = enum.Item(1, 'Senate')
     house = enum.Item(2, 'House')
@@ -17,7 +19,7 @@ class CongressChamber(enum.Enum):
 class VoteSource(enum.Enum):
     senate = enum.Item(1, 'senate.gov')
     house = enum.Item(2, 'house.gov')
-    keithpoole = enum.Item(3, 'keithpoole')
+    keithpoole = enum.Item(3, 'Professor Keith Poole')
 
 
 class VoteCategory(enum.Enum):
@@ -46,7 +48,7 @@ class Vote(models.Model):
     source = models.IntegerField(choices=VoteSource)
     created = models.DateTimeField()
     vote_type = models.CharField(max_length=255)
-    category = models.CharField(max_length=255, choices=VoteCategory)
+    category = models.IntegerField(max_length=255, choices=VoteCategory)
     question = models.TextField()
     required = models.CharField(max_length=10)
     result = models.TextField()
@@ -73,6 +75,15 @@ class Vote(models.Model):
             chamber_code = 's'
         return reverse('vote_details', args=[self.congress, self.session,
                        chamber_code, self.number])
+        
+    def get_source_link(self):
+        if self.source == VoteSource.senate:
+            return "http://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=%d&session=%s&vote=%05d" % (self.congress, get_session_ordinal(self.congress, self.session), self.number)
+        elif self.source == VoteSource.house:
+            return "http://clerk.house.gov/evs/%d/roll%03d}.xml" % (self.created.year, self.number)
+        elif self.source == VoteSource.keithpoole:
+            return "http://voteview.com/"
+        raise ValueError("invalid source: " + str(self.source))
         
     def name(self):
         return CongressChamber.by_value(self.chamber).label + " Vote #" + str(self.number)
@@ -129,7 +140,7 @@ class Vote(models.Model):
             party_counts = [party_stats.get(x, 0) for x in all_parties]
                 
             detail = {'option': option, 'count': len(voters),
-                      'percent': percent, 'party_counts': party_counts}
+                'percent': percent, 'percent_int': int(percent), 'party_counts': party_counts}
             if option.key == '+':
                 detail['yes'] = True
             if option.key == '-':
@@ -205,3 +216,7 @@ class Voter(models.Model):
 
     def __unicode__(self):
         return '%s: %s' % (self.person, self.vote)
+        
+    def voter_type_is_member(self):
+        return self.voter_type == VoterType.member
+        

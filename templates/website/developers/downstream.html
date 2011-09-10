@@ -1,15 +1,18 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Downstream Users{% endblock %}
 {% block crumbs %}
-<a href="/developers">Developer Documentation</a>
+<ul><li><a href="/developers">Developer Documentation</a></li><li>Data Users</li></ul>
+{% endblock %}
+{% block summary %}
+	{% include "website/developers/menu.html" %}
+	<h1>Other Websites Reusing GovTrack Data</h1>
+	
+	<p>GovTrack isn't <i>just</i> a website. It's a reusable database
+	of congressional information put out there for anyone to build
+	new tools out of. We support open knowledge to the limit.</p>
 {% endblock %}
 {% block body %}
 <div class="col_left">
-	<h1>Other Websites Reusing GovTrack Data</h1>
-	
-		<p>GovTrack isn't <i>just</i> a website. It's a reusable database
-		of congressional information put out there for anyone to build
-		new tools out of. We support open knowledge to the limit.</p>
 		
 		<p>Here's a list of websites using data assembled by GovTrack</p>
 		

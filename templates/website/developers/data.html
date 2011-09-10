@@ -1,22 +1,26 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Data{% endblock %}
 {% block crumbs %}
-<a href="/developers">Developer Documentation</a>
+<ul><li><a href="/developers">Developer Documentation</a></li> <li>Data Docs</li></ul>
 {% endblock %}
-{% block body %}
-<div class="col_left">
+{% block summary %}
+	{% include "website/developers/menu.html" %}
 	<h1>Data Documentation</h1>
 	
 	<p>The underlying data about the U.S. Congress that powers this 
 	site is the only such database made freely available for others 
 	to reuse. The data covers the activity of bills, PDFs of bill 
 	texts, roll call votes, and photos of members of Congress.  
-	Almost all of the data files are in XML format. You can browse 
+	Almost all of the data files are in XML format.</p>
+	
+{% endblock %}
+{% block body %}
+	<p>You can browse 
 	the underlying source data for this website <a 
 	href="/data/">here</a>. These are the very same data files that 
 	GovTrack uses to make itself go, so pretty much anything you see 
 	on the site is in one of those files.</p>
-	
+
 	<p>The data files are released into the public domain but see the
 	<a href="license">license terms</a> which covers your access.
 	Please contact me if you would like to start using the
@@ -367,23 +371,6 @@ types.</li>
 &lt;/bill&gt;
 </pre>
 
-	</Body>
- </Page>
-
-</div>
-
-<div class="col_right">
-<div class="sidebox">
-	<h2>On This Page</h2>
-	<ul>
-		<li><a href="#data">Data Directory</a></li>
-		<li><a href="#bulkaccess">Bulk Access</a></li>
-		<li><a href="#schema_people">Schema: people.xml</a></li>
-		<li><a href="#schema_votes">Schema: Roll Call Vote XML Files</a></li>
-		<li><a href="#schema_bills">Schema: Bills and Resolutions</a></li>
-	</ul>
-</div>
-</div>
 
 {% endblock %}
 

@@ -2,36 +2,40 @@
     .pagination span { font-weight: bold; cursor: default; }
     .pagination .prev span { color: #AAA; }
     .pagination .next span { color: #AAA; }
-    .pagination .pages { display: inline-block; width: 450px; height: 1.25em; overflow: hidden; }
-    .rowtop { padding-top: 4px; }
+    .paging .pages { display: inline-block; width: 300px; height: 1.5em; overflow: hidden; }
+    .rowtop { padding-top: 8px; }
     .col0 { border-bottom: none;  }
-    .rowbottom { padding-bottom: 6px; }
-    #searchresults td { background-color: #EAEAE3; }
+    .rowleft { padding: 4px 12px 6px 0px; }
+    .rowbottom { padding: 6px 0 6px 0; }
 </style>
 
-<div style="float: left; width: 70%; display: none" id="searchresults">
-    <table>
-        <thead>
-            <tr>
-                {% for col in column_headers %}
-                    <th>{{col}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <div class="pagination">
-        <span class="prev"><span>&lt; Previous</span> <a href="#" onclick="return update_search(null, -1)">&lt; Previous</a></span>
-        <span class="pages"> </span>
-        <span class="next"><span>Next &gt;</span> <a href="#" onclick="return update_search(null, 1)">Next &gt;</a></span>
-    </div>
-</div>
-
+<div class="searching">
+<section>
+	<div class="summary" style="display: none">
+		<p><span class="total">xxx</span> item(s) matched your search{% comment %}for <strong>yyy</strong>{% endcomment %}. Showing <span class="start">aaa</span> through <span class="end">bbb</span>.</p>
+	</div>
+	
+	<table class="results" style="display: none;">
+		<thead>
+			<tr>
+				{% for col in column_headers %}
+					<th>{{col}}</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<ul class="paging" style="display: none;">
+		<li class="prev"><span>&laquo; Previous</span> <a href="#" onclick="return update_search(null, -1)">&laquo; Previous</a></li>
+		<span class="pages"> </span>
+		<li class="next"><span>Next &raquo;</span> <a href="#" onclick="return update_search(null, 1)">Next &raquo;</a></li>
+	</ul>
+</section>
 <script>
 var current_page = 1;
 var update_search_lock = false;
-function update_search(pagenum, pageinc, elem) {
+function update_search(pagenum, pageinc, elem, isinitial) {
     if (update_search_lock) return;
     update_search_lock = true;
     $('#searchform input').attr('disabled', '1');
@@ -68,6 +72,25 @@ function update_search(pagenum, pageinc, elem) {
         }
     }
     
+    if (isinitial) {
+    	{% for k, v in defaults.items %}
+    		{% for field in form %}
+    			{% if field.field_name == k %}
+    				{% if field.type == "checkbox" %}
+    					{% if v %}
+    						if (!postdata["{{k|escapejs}}"]) postdata["{{k|escapejs}}"] = ["true"];
+    					{% endif %}
+    				{% endif %}
+    				{% if field.type == "radio" %}
+    					{% if v %}
+    						if (!postdata["{{k|escapejs}}"]) postdata["{{k|escapejs}}"] = "true";
+    					{% endif %}
+    				{% endif %}
+    			{% endif %}
+    		{% endfor %}
+    	{% endfor %}
+    }
+    
     if (pagenum)
         postdata.page = pagenum;
     else if (pageinc)
@@ -83,12 +106,17 @@ function update_search(pagenum, pageinc, elem) {
             data: postdata,
             success: function(res) {
                 if (res.error) {
-                    $('#searchresults tbody').html("");
+                    $('.results tbody').html("");
                     $('#searcherror').text(res.error);
                 } else {
                 	// Display results.                	
-                    $('#searchresults tbody').html(res.results);
+                    $('.results tbody').html(res.results);
                     $('#searcherror').text('');
+                    
+                    $('.summary').show();
+                    $('.summary .total').text(res.total);
+                    $('.summary .start').text((res.page-1)*res.per_page);
+                    $('.summary .end').text((res.page-1)*res.per_page + res.total_this_page - 1);
                     
                     // Display options.
                     for (var k in res.options) {
@@ -154,32 +182,32 @@ function update_search(pagenum, pageinc, elem) {
                     
                     // Display page numbers and prev/next.
                     if (res.page > 1) {
-                        $('#searchresults .prev a').show();
-                        $('#searchresults .prev span').hide();
+                        $('.paging .prev a').show();
+                        $('.paging .prev span').hide();
                     } else {
-                        $('#searchresults .prev a').hide();
-                        $('#searchresults .prev span').show();
+                        $('.paging .prev a').hide();
+                        $('.paging .prev span').show();
                     }
                     if (res.page < res.num_pages) {
-                        $('#searchresults .next a').show();
-                        $('#searchresults .next span').hide();
+                        $('.paging .next a').show();
+                        $('.paging .next span').hide();
                     } else {
-                        $('#searchresults .next a').hide();
-                        $('#searchresults .next span').show();
+                        $('.paging .next a').hide();
+                        $('.paging .next span').show();
                     }
                     
-                    $('#searchresults .pages').text("");
+                    $('.paging .pages').text("");
                     for (var i = 1; i <= res.num_pages; i++) {
                         if (res.page - i > 10) continue;
                         //if (i - res.page > 10) break;
                         if (i == res.page)
-                            $('#searchresults .pages').append($('<span>' + i + '</span>'));
+                            $('.paging .pages').append($('<span>' + i + '</span>'));
                         else
-                            $('#searchresults .pages').append($('<a href="#" onclick="return update_search(' + i + ')">' + i + '</a>'));
-                        $('#searchresults .pages').append(" ");
+                            $('.paging .pages').append($('<a href="#" onclick="return update_search(' + i + ')">' + i + '</a>'));
+                        $('.paging .pages').append(" ");
                     }
                     
-                    $('#searchresults').show();
+                    $('.results, .paging').show();
                 }
                 
                 current_page = res.page;
@@ -188,7 +216,7 @@ function update_search(pagenum, pageinc, elem) {
                 $('#searchform input').attr('disabled', '');
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                $('#searchresults tbody').html("");
+                $('.results tbody').html("");
                 $('#searchform').text("Search is not currently operational: " + textStatus);
                 update_search_lock = false;
                 $('#searchform input').attr('disabled', '');
@@ -198,19 +226,21 @@ function update_search(pagenum, pageinc, elem) {
     return false; // cancel any event
 }
 
-$(function() { update_search(1); });
+$(function() { update_search(1, null, null, true); });
 </script>
 
-<div style="float: left; width: 25%; margin-left: 4%;">
-	<div id="searcherror"> </div>
-
+<div class="advanced-search">
     <form id="searchform" onsubmit="update_search(); return false;">
+	<fieldset>
+	<h3>Search</h3>
+	<div id="searcherror"> </div>
+	<ul>
     	{% for field in form %}
-    		<div id="searchform_field_{{field.field_name}}_container">
+    		<li id="searchform_field_{{field.field_name}}_container" {% if field.type != "select" %}class="wide"{% endif %} style="cursor: pointer">
 				<label for="searchform_field_{{field.field_name}}">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
 				{% if field.type == "text" %}
-					<input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text"> </input>
-					<input id="searchform_field_{{field.field_name}}_button" type="button" value="Go" onclick="update_search()"> </input>
+					<input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text"> </input>
+					<input id="searchform_field_{{field.field_name}}_button" class="btn-search-small" type="submit" value="Search" value="Go" onclick="update_search()"> </input>
 				{% endif %}
 				{% if field.type == "select" %}
 					<select id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" size="1" onchange="update_search()"> </select>
@@ -218,10 +248,14 @@ $(function() { update_search(1); });
 				{% if field.type == "checkbox" or field.type == "radio" %}
 					<div id="searchform_field_{{field.field_name}}"> </div>
 				{% endif %}
-			</div>
+			</li>
     	{% endfor %}
+    </ul>
+    </fieldset>
     </form>
 </div>
 
 <div style="clear: both"></div>
+
+</div>
 

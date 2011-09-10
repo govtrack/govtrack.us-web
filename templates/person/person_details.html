@@ -1,4 +1,4 @@
-{% extends "master.html" %}
+{% extends "master_a.html" %}
 {% load humanize persontags video %}
 
 {% block title %}{{person}} - GovTrack.us{% endblock %}
@@ -18,52 +18,52 @@
 {% endblock %}
 
 {% block crumbs %}
-{% comment %}Congress > Members of Congress{% endcomment %}
+<ul>
+<li><a href="{% url congress_home %}">Congress</a></li>
+<li><a href="/congress/members">Members of Congress</a></li>
+<li>{{person.name_no_details}}</li>
+</ul>
 {% endblock %}
 
-{% block body %}
-<div class="person-details">
-<div class="col_left">
-    {% if photo %}
-    <div class="photo">
-        <img src="{{ photo }}" alt="Photo" style="border: 1px solid black" />
-    </div>
-    {% endif %}
+{% block body_class %}member{% endblock %}
 
-	<div style="float: left; width: 410px">
-    <h1>
-    	{{ person.name_no_details }}
-	    {% if role.website %}
-		    <p><a href="{{ role.website }}" target="_blank"><tt>{{ role.website }}</tt></a></p>
-	    {% endif %}
-    </h1>
-    </div>
-    <div style="float: left; width: 400px; margin-top: 1em">
-    {% if role %}
-    <div class="role-details">
-        {% if not active_role %}Former{% endif %}
-        {{ role.get_role_type_display }} for
-	   {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}
+{% block summary %}
+<div class="container">
+	<h1>{{person.name_no_district}}</h1>
+	
+	{% if role and not active_role %}
+	<p>Former {{ role.get_role_type_display }} for {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}</p>
+	{% endif %}
+	
+	<div class="info">
+		<dl>
+			{% if role and active_role %}
+			{% if role.state and not role.district %}
+			<dt>State:</dt>
+			<dd>{{role.state_name}}</dd>
+			{% endif %}
+
+			{% if role.district > 0 %}
+			<dt>District:</dt>
+			<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a></dd>
+			{% endif %}
+			
+			<dt>Party:</dt>
+			<dd>{{ role.party }}</dd>
+			{% endif %}
+			
+			<dt>Birthday:</dt>
+			<dd>March 22, 1934 / 77 years old</dd>
+		</dl>
 	</div>
-	<div class="role-details" style="font-style: italic">
-	   {{ role.party }}
-    </div>
-    {% if role.district > 0 %}
-    <p><a href="/congress/members/{{ role.state }}">district map</a></p>
-    {% endif %}
-    {% endif %}
-    </div>
-
-	<div class="clear"> </div>
-    <h2>Elected Positions</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Dates</th>
-                <th>Title</th>
-                <th>Representing</th>
-            </tr>
-        </thead>
+	
+	<h2>Elected Positions</h2>
+	<table>
+		<tr>
+			<th>Dates</th>
+			<th>Title</th>
+			<th>Representing</th>
+		</tr>
         {% for role in person.roles_condensed %}
         <tr>
             <td>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</td>
@@ -71,67 +71,115 @@
             <td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}</td>
         </tr>
         {% endfor %}
-    </table>
-    {% if analysis_data %}
-    <h2>Sponsorship Analysis</h2>
-    <div class="analysis">
-        {% if analysis_data.image %}
-        <div class="graph">
-            <img src="{{ analysis_data.image }}" />
-        </div>
-        {% endif %}
-        <div class="details">
-            {{ person.lastname }} is a {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among {{person|hisher}} peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership. <a href="#" onclick="$('#sponsorshipanalysis_info').slideDown(); $(this).fadeOut(); return false;">More...</a>
+	</table>
 
-            <p id="sponsorshipanalysis_info" style="color: grey; display: none">These labels come from the <a href="#">Political Spectrum & Legislative Leadership statistical analysis</a> that we have carried out. The statistical analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or lonely (i.e. follower) by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
-        </div>
-        <div class="clear"> </div>
+</div><!-- /container -->
+
+<div class="aside">
+	{% if photo %}
+		<div class="photo">
+			<img src="{{ photo }}" alt="Photo" width="100" height="122"/> <!-- 90x112 -->
+		</div>
+	{% endif %}
+	
+	{% if active_role %}
+	<a href="#" class="track-btn">Track Member</a>
+	{% endif %}
+	
+	{% if role.website %}
+	<div class="article">
+		<strong>Official Website:</strong>
+		<a href="{{role.website}}">{{role.website}}</a>
 	</div>
-    {% endif %}
-    
-    <h2>Bills Sponsored...</h2>
-    
-    <h2>Recent Votes...</h2>
-    
-    {% if assignments %}
-    <h2>Committee Assignments</h2>
-    <a name="assignments"></a>
-    <ul>
-        {% for role in assignments %}
-        <li class="committee-assignment">
-            <div>
-                {{ role.get_role_display }}, <a href="{{ role.committee.get_absolute_url }}">{{ role.committee }}</a>
-                {% if role.subroles %}
-                <div><a style="color: #666" href="#" onclick="$(this).hide(); $(this).parents('.committee-assignment').find('.subcommittee-assignment-list').show(); return false;">Show {{ role.subroles|length }} subcommittee assignment{{ role.subroles|pluralize }}</a></div>
-                {% endif %}
-            </div>
-            {% if role.subroles %}
-            <ul class="subcommittee-assignment-list" style="display: none">
-                {% for subrole in role.subroles %}
-                <li>
-                {{ subrole.get_role_display }}, <a href="{{ subrole.committee.get_absolute_url }}">{{ subrole.committee }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+	{% endif %}
+</div><!-- /aside -->
+{% endblock %}
 
-</div>
+{% block body %}
+<div id="member-details" class="section">
 
-<div class="col_right">
-<div id="happening_now" class="sidebox" {% if not recent_video %}style="dispxlay: none"{% endif %}>
-	<h2>Happening Now</h2>
-    <div id="latest-tweet" style="display: none; margin-bottom: 1em">
-		<a href="" class="tweetlink">
-			<img src="http://twitter-badges.s3.amazonaws.com/t_logo-a.png" style="float: left; margin-right: 1em; margin-bottom: 1em" border="0" width="32" height="32"/>
+	{% if videos and 0 %}
+	<div id="media">
+		<h3>Recent Media</h3>
+		{% for video in videos %}
+			{% video video %}
+		{% endfor %}
+	</div><!-- /media -->
+	{% endif %}
+	
+	{% if analysis_data %}
+	<div id="analysis">
+		<h3>Sponsorship Analysis</h3>
+        {% if analysis_data.image %}
+        <img src="{{ analysis_data.image }}" alt="Sponsorship analysis graph" />
+        {% endif %}
+        
+		{{ person.lastname }} is a {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among {{person|hisher}} peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership. <a href="#" onclick="$('#sponsorshipanalysis_info').slideDown(); $(this).fadeOut(); return false;">More...</a>
+
+		<p id="sponsorshipanalysis_info" style="color: grey; display: none">These labels come from the <a href="#">Political Spectrum & Legislative Leadership statistical analysis</a> that we have carried out. The statistical analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or lonely (i.e. follower) by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
+	</div><!-- /analysis -->
+    {% endif %}
+	
+	<div id="voting-record">
+		<h3>Voting Record</h3>
+		<img src="#" alt="Voting record graph" />
+		<p>XXXXXXX. View a <a href="#">larger chart and a list of recent votes</a>.</p>
+	</div><!-- /voting-record -->
+	
+	{% if committeeassignments %}
+	<div id="membership">
+		<h3>Committee Membership</h3>
+		<p>{{person.name_no_details}} sits on the following committees:</p>
+		<ul>
+			{% for c in committeeassignments %}
+			<li>
+				{% if c.role_name != 'Member' %}{{c.role_name}}, {% endif %}
+				<a href="{{c.committee.get_absolute_url}}">{{c.committee}}</a>
+				{% if c.subroles %}
+					<ul>
+					{% for s in c.subroles %}
+					<li>{{s.role_name}}, Subcommittee on <a href="{{s.committee.get_absolute_url}}">{{s.committee}}</a></li>
+					{% endfor %}
+					</ul>
+				{% endif %}
+			</li>
+			{% endfor %}
+		</ul>
+	</div><!-- /membership -->
+	{% endif %}
+	
+	{% if recent_bills %}
+	<div id="sponsorship">
+		<h3>Bill Sponsorship <span>&amp;</span> Cosponsorship</h3>
+		<p>blah blah</p>
+		<p>Some of {{person.lastname}}’s most recently sponsored bills include...</p>
+		<ul>
+			{% for bill in recent_bills %}
+			<li><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
+			{% endfor %}
+		</ul>
+		<p><a href="#">View All &raquo;</a> (including bills from previous years)</p>
+	</div><!-- /sponsorship -->
+	{% endif %}
+	
+</div><!-- /member-details -->
+
+<div class="tweets section">
+	<div id="happening_now">
+	<h3>Happening Now</h3>
+	
+	<article class="post" id="latest-tweet" style="display: none">
+		<a href="" class="tweetlink photo">
+			<img src="http://twitter-badges.s3.amazonaws.com/t_logo-a.png" border="0" width="20" height="20"/>
 		</a>
-		<div style="float: left; width: 370px;">&ldquo;<span class="content"></span>&rdquo;</div>
-		<div style="float: left; width: 370px;">&mdash; @<a class="twittername"></a> on <span class="twitterdate"></span></div>
-		<div class="clear"> </div>
-    </div>
+		<div class="article">
+			<h4><a href="#" class="twittername">@XXX</a></h4>
+			<p class="content">YYY</p>
+			<em class="twitterdate">6 hours ago via web</em>
+		</div>
+	</article>
+	</div>
+
     <script type="text/javascript">
         function renderLatestTweet(username) {
             var url = 'http://twitter.com/statuses/user_timeline/' + username + '.json';
@@ -144,7 +192,7 @@
                     var datestr = months[created.getMonth()] + '. ' + created.getDate() + ', ' + created.getFullYear();
                     var content = tweet.text;
                     $('#latest-tweet').show().find('.content').text(content).show();
-					$('#latest-tweet').find('.twittername').text(username).show();
+					$('#latest-tweet').find('.twittername').text("@" + username).show();
 					$('#latest-tweet').find('.twittername, .tweetlink').attr('href', 'http://www.twitter.com/' + username)
 					$('#latest-tweet').find('.twitterdate').text(datestr).show();
 					$('#happening_now').show();
@@ -155,30 +203,10 @@
             renderLatestTweet('{{ person.twitterid }}');
         {% endif %}
     </script>
-    {% if recent_video %}
-        {% video recent_video %}
-    {% endif %}
-	<div class="clear"> </div>
-</div>
-<div class="sidebox">
-	<h2>Media</h2>
 
-	<div class="recent-video-list-container">
-    <div class="recent-video-list">
-    {% for video in videos %}
-        {% video video %}
-    {% endfor %}
-    </div>
-	</div>
-    <div class="clear"></div>
-</div>
-<div class="sidebox">
-	<h2>Tracked Events</h2>
+	<h3>Recent Legislative Activity</h3>
 	
 	{% include "events/trackedeventspanel.html" %}
-</div>
-</div>
-
 </div>
 
 {% endblock %}

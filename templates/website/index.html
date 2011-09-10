@@ -4,129 +4,191 @@
 {% block meta_description %}Tracking legislation and votes in the United States Congress.{% endblock %}
 {% block style %}
 {% endblock %}
-{% block master_content %}
-	<div class="welcome">
-		<h2>Easily track the activities of the United States Congress.</h2>
-		<p>GovTrack lets you browse, search, view, and tracking information from the United States Congress. Find your Congress members, track bills, tally votes, and keep tabs on our Congress.</p>
-		<div class="call_to_action">Get Started</div>
-	</div>
-	
-	<div class="browse">
-		<p>Dive Into Your Congress</p>
-		
-		<a class="members_of_congress" href="{% url person_list %}">
-			Members of Congress
-		</a>
-		
-		<a class="bills" href="{% url bill_list %}">
-			Bills &amp; Resolutions
-		</a>
-		
-		<a class="votes" href="{% url vote_list %}">
-			Voting Records
-		</a>
-	
-		<a class="committees" href="{% url committee_list %}">
-			Committees
-		</a>
-	</div>
-		
-	<div class="now">
-		<h2>Current Happenings</h2>
-		
-		<div class="panel">
-			<h3>In Congress</h3>
-			
-			<div>currently in session</div>
-			
-			<div id="events">
-				<div id="from_the_floor">
-				</div>
-				
-				{% for item in events %}
-				{% with item|render_event:"" as event %}
-				<div class="event">
-					<div class="date">
-					{% if not meta.date_has_no_time %}
-						{{event.when}}
-					{% else %}
-						{{event.when|date}}
-					{% endif %}
-					</div>
-					<div class="title"><a href="{{event.url}}">{{event.date}} {{event.title}}</a></div>
-				</div>
-				{% endwith %}
-				{% endfor %}
-			</div>
-			
-			<script>
-			function sunlight_live_callback(data) {
-				if (data && data.floor_updates && data.floor_updates[0] && data.floor_updates[0].events && data.floor_updates[0].events[0]) {
-					var time = new Date(Date.parse(data.floor_updates[0].timestamp));
-					var hr = time.getHours();
-					var am = "am";
-					if (hr == 0) hr = 12;
-					else if (hr == 12) am = "pm";
-					else if (hr > 12) { hr -= 12; am = "pm"; }
-					time = time.toLocaleDateString() + " " + hr + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes() + " " + am;
-					
-					var n = $("<p><span class='date'/> <span class='text'/></p>");
-					n.find(".date").text(time + " in the House:");
-					n.find(".text").text(data.floor_updates[0].events[0]);
-					$('#from_the_floor').append(n);
-				}
-			}
-			</script>
-			<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=house"></script>
-			
-			<div id="currently_in_congress">
-				...
-			</div>
-		</div>
-		
-		<div class="panel">
-			<h3>Popular Bills</h3>
-			
-			<div id="popular_bills">
-				...
-			</div>
-			
-			<h2>Latest Votes</h2>
 
-			<div id="latest_votes">
-				...
-			</div>
-		</div>
-		
-		<div class="panel">
-			<h3>From the GovTrack Blog</h3>
+{% block body_class %}homepage{% endblock %}
+
+{% block override_breadcrumbs %}
+<div class="intro-box">
+	<div class="section">
+		<h1>Easily track the activities <br> of the United States Congress.</h1>
+		<div class="container">
+			<p class="intro">GovTrack is a free service which gives you an simple interface to browse, search, view and track information from the United States Congress. Find your Congress members, track bills, tally votes, and keep tabs on our Congress.</p>
 			
-			<div id="blog_items">
-				...
-			</div>
-			
-			<h3>GovTrack Tweets</h3>
-			
-			<div id="our_tweets">
-				{% for tweet in tweets %}
-					<div class="tweet">{{tweet.text}}</div>
-					<div class="tweet_date">{{tweet.relative_created_at}}</div>
-				{% endfor %}
+			<div class="block">
+				<a href="#" class="green-btn">Sign up for free</a>
+				<p>Already have an account? <a href="#">Log in</a></p>
 			</div>
 		</div>
 	</div>
-	
-	<div class="tools">
-		<h2>Take Congress on the Go</h2>
-		
-		<a href="http://sunlightlabs.com/blog/2011/congress-for-android-3/">
-			<img src="http://assets.sunlightlabs.com/blog/android/main-thumb.png" width="80" style="float: left; margin-right: 1em; border: none"/>
-		</a>
-		<div style="float: left; width: 210px">
-			<h3 style="margin-top: 0"><a href="http://sunlightlabs.com/blog/2011/congress-for-android-3/">Congress 3.0</a></h3>
-			<p>Created by the Sunlight Foundation and based in part on GovTrack&rsquo;s database, this app lets you browse the latest activity in Congress and get information on your Members of Congress.</p>
+</div><!-- /intro-box -->
+{% endblock %}
+
+{% block override_content %}
+<div class="info-box">
+	<div class="holder">
+		<div class="container">
+			<div class="heading">
+				<h2><span>find</span> Information</h2>
+			</div>
+			<ul id="categories">
+				<li id="link-members">
+					<a href="{% url person_list %}">
+						Members <span>of</span> Congress
+					</a>
+				</li>
+				<li id="link-bills">
+					<a href="{% url bill_list %}">
+						Bills <span>&amp;</span> Resolutions
+					</a>
+				</li>
+				<li id="link-votes">
+					<a href="{% url vote_list %}">
+						Voting Records
+					</a>
+				</li>
+				<li id="link-committees">
+					<a href="{% url committee_list %}">
+						Committees
+					</a>
+				</li>
+			</ul>
 		</div>
 	</div>
+</div><!-- /info-box -->
+
+
+<div class="entries-box">
+	<div class="entries-holder">
+		<div class="frame">
+			<div class="container">
+				<h2><span>Current</span> Happenings</h2>
+				<div class="two-columns">
+					<div class="column">
+						<h3><span>in</span> Congress</h3>
+						<div class="widget-session">
+							<h4>Currently <em>in</em> Session:</h4>
+							<div class="block">
+								<div class="house-area">
+									<span class="ico-house"></span>
+									<strong><em>the</em> Senate</strong>
+								</div>
+								<div class="senate-area active">
+									<span class="ico-senate"></span>
+									<strong><em>the</em> House</strong>
+								</div>
+							</div>
+						</div>
+						<section class="congress-tweets">
+							<div class="holder">
+								<div id="from_the_floor">
+								</div>
+								
+								<script>
+								function sunlight_live_callback(data) {
+									if (data && data.floor_updates && data.floor_updates[0] && data.floor_updates[0].events && data.floor_updates[0].events[0]) {
+										var time = new Date(Date.parse(data.floor_updates[0].timestamp));
+										var hr = time.getHours();
+										var am = "am";
+										if (hr == 0) hr = 12;
+										else if (hr == 12) am = "pm";
+										else if (hr > 12) { hr -= 12; am = "pm"; }
+										time = time.toLocaleDateString() + " " + hr + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes() + " " + am;
+										
+										var n = $("<p><span class='date'/><br/><span class='where'/> <span class='text'/></p>");
+										n.find(".date").text(time);
+										n.find(".where").text("In the House:");
+										n.find(".text").text(data.floor_updates[0].events[0]);
+										$('#from_the_floor').append(n);
+									}
+								}
+								</script>
+								<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=house"></script>
+							
+						
+								{% comment %}
+								<article class="post">
+									<img  class="photo"src="images/photo-1.jpg" alt="image description" />
+									<div class="article">
+										<h4><a href="#">@RepGeoffDavis</a></h4>
+										<p>Today, let us soberly remember the price of our freedom and continue to defend our Republic with vigilance</p>
+										<a href="#">http://goo.gl/xMwuI</a>
+										<em>23 minutes ago</em>
+									</div>
+								</article>
+								<article class="post">
+									<img  class="photo"src="images/photo-1.jpg" alt="image description" />
+									<div class="article">
+										<h4><a href="#">@RepGeoffDavis</a></h4>
+										<p>Today, let us soberly remember the price of our freedom and continue to defend our Republic with vigilance</p>
+										<a href="#">http://goo.gl/xMwuI</a>
+										<em>23 minutes ago</em>
+									</div>
+								</article>
+								<article class="post">
+									<img  class="photo"src="images/photo-1.jpg" alt="image description" />
+									<div class="article">
+										<h4><a href="#">@RepGeoffDavis</a></h4>
+										<p>Today, let us soberly remember the price of our freedom and continue to defend our Republic with vigilance</p>
+										<a href="#">http://goo.gl/xMwuI</a>
+										<em>23 minutes ago</em>
+									</div>
+								</article>
+								{% endcomment %}
+							</div>
+						</section>
+					</div>
+					<div class="column">
+						<section class="featured-articles">
+							<h3><span>recent</span> Activity</h3>
+
+							{% for item in events %}
+							{% with item|render_event:"" as event %}
+							<article class="post">
+								<div class="icon"><img src="images/ico-bill.gif" width="16" height="22" alt="image description"></div>
+								<div class="article">
+									<h4><a href="{{event.url}}">{{event.type}}</a></h4>
+									<p>{{event.title}}. {{event.date}}  (<a href="{{event.url}}">more</a>)</p>
+								</div>
+							</article>
+							{% endwith %}
+							{% endfor %}							
+					</div>
+				</div>
+			</div>
+			<div class="aside">
+				<article class="rss-block">
+					<h3><span>from the</span> GovTrack Blog <a href="#"><img src="images/ico-rss.gif" width="9" height="9" alt="image description"></a></h3>
+					{% for item in blog %}
+					<div class="post">
+						<h4><a href="{{item.link}}">{{item.title}}</a></h4>
+						<div class="article">
+							<em>Posted on {{item.date}}</em>
+							<p>{{item.content|striptags|truncatewords:25}}</p>
+							<div class="block"><a href="{{item.link}}">Read More »</a></div>	
+						</div>
+					</div>
+					{% endfor %}
+				</article>
+				<section class="tweets-block">
+					<h3>GovTrack Tweets</h3>
+					
+					{% for tweet in tweets %}
+					<article class="post">
+						<div class="article">
+							<p>{{tweet.text}}</p>
+							<em>{{tweet.relative_created_at}}</em>
+						</div>
+					</article>
+					{% endfor %}
+					
+					<a href="http://twitter.com/GovTrack" class="twitter-follow-button">Follow @GovTrack</a>
+					<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>			
+				</section>
+			</div>
+		</div>
+	</div>
+</div>
+
 	
 {% endblock %}
 

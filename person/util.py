@@ -13,7 +13,7 @@ def get_committee_assignments(person):
     committee assinment which could has subcommittee assignments in ``subroles`` attribute.
     """
 
-    roles = person.assignments.all()
+    roles = person.committeeassignments.all()
     parent_mapping = {}
     for role in roles:
         if role.committee.committee_id:

@@ -59,6 +59,12 @@
 				});
 				map.setZoom({{center_zoom}} + 2);					
 			{% endif %}
+			
+			google.maps.event.addListener(map, "bounds_changed", function() {
+				var b = map.getBounds();
+				$("#embedbounds").text(Math.round(b.getSouthWest().lng()*1000)/1000 + "," + Math.round(b.getNorthEast().lat()*1000)/1000 + "," + Math.round(b.getNorthEast().lng()*1000)/1000 + "," + Math.round(b.getSouthWest().lat()*1000)/1000);
+			});
+			
 		});
 		
 		function doFullScreen() {
@@ -119,118 +125,150 @@
 {% block style %}
 	#map_canvas { height: 100% }
 {% endblock %}
-{% block wide-body %}
+{% block ad_block %}
+{% endblock %}
 
-<h1>Members of Congress &amp; Congressional District Maps</h1>
+{% block crumbs %}
+<ul>
+	<li><a href="/congress">Congress</a></li>
+	<li>Find Members of Congress</li>
+</ul>
+{% endblock %}
 
-<div id="leftpanel" style="float: left; width: 310px; padding-right: 30px">
+{% block summary %}
 	{% if not state %}
-	<div id="find">
-		<h2 class="first">Find a Senator or Representative</h2>
-		
-		<p>Enter the last name of a senator, representative, or delegate, choose a state, or enter a ZIP or ZIP+4 postal code or street address:</p>
-		
-		<form action="#">	
-		<p>			
-			<input id="lastname" value="" type="text" size="30" />
-			<input class="button" type="submit" value="Search" />
-			<script>$('#lastname').input_default('Last Name');</script>		
-		</p>		
-		</form>
-		
-		<form>	
-		<p>			
-			<select id="state" size="1" onchange="if (this.value != '') window.location='/congress/members/' + this.value">
-				<option value="">(Select State)</option>
-				{% for abbr, name in statelist %}
-				<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
-				{% endfor %}
-			</select>
-		</p>
-		</form>
-	
-		<form action="#">	
-		<p>			
-			<input id="zip" value="" type="text" size="30" />
-			<input class="button" type="submit" value="Search" />
-			<script>$('#zip').input_default('ZIP or ZIP+4');</script>		
-		</p>		
-		</form>
-	
-		<form action="#">	
-		<p>			
-			<input id="address" value="" type="text" size="30" />
-			<input class="button" type="button" value="Search" onclick="doGeoCode()"/>
-			<script>$('#address').input_default('350 5th Ave, New York, NY 10001');
-			$('#address').keydown_enter(doGeoCode);</script>
-		</p>		
-		</form>
-		
-		<h2>Or...</h2>
-		<ul>
-			<li><a href="/congress/members/all">List All Members of Congress</a></li>
-			<li><a href="/congress/members/browse">Search Former Members of Congress</a></li>
-		</ul>
-		
-		<h2>Statistics</h2>
-		<p>Take a look at <a href="/congress/members/stats">statistics</a> about missed votes, bill sponsorship, ideology, and leadership.</p>
-	</div>
-	
-	{% else %}
-	
-	<div id="state">
-		{% if not district %}
-		<h2 class="first">{{statename}} <small>(<a href="/congress/members">View U.S. Map</a>)</small></h2>
-		{% else %}
-		<h2 class="first">{{statename}}&rsquo;s {{district|ordinal}} Congressional District</h2>
-		<p><small>(<a href="/congress/members/{{state}}">View {{statename}} Map</a>) (<a href="/congress/members">View U.S. Map</a>)</small></p>
-		{% endif %}
-		
-		<h3>Senators</h3>
-		{% if stateapp == "T" %}
-			<p>{{statename}} is a U.S. territory and so does not have any senators.</p>
-		{% else %}
-			<ul>
-				{% for rep in senators %}
-					{% if rep %}
-						<li><a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a></li>
-					{% else %}
-						<li><em>Vacant</em></li>
-					{% endif %}
-				{% endfor %}
-			</ul>
-		{% endif %}
-		
-		<h3>Representative{{reps|pluralize}}</h3>
-		<ul>
-			{% for dist, rep in reps %}
-				<li style="margin-bottom: .5em">
-					{% if reps|length > 1 %}
-					<div><strong>{{dist|ordinal}} District:</strong> (<a href="/congress/members/{{state}}/{{dist}}">map</a>)</div>
-					{% endif %}
-					{% if rep %}
-						<a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a>
-					{% else %}
-						<em>Vacant</em>
-					{% endif %}
-				</li>
-			{% endfor %}
-		</ul>
-	</div>
+	<h2>Find a Senator <span>or</span> Representative</h2>
+	<p>Use this page to find current or past Members of Congress. You can also <a href="#">browse by committees</a> or check out <a href="#">congressional statistics</a>.</p>
 	{% endif %}
-</div>
+	{% if state and not district %}
+	<h2>{{statename}}</h2>
+	<p>(<a href="/congress/members">Back to U.S. Map</a>)</small></p>
+	{% endif %}
+	{% if district %}
+	<h2>{{statename}}<br/>{{district|ordinal}} Congressional District</h2>
+	<p>(<a href="/congress/members/{{state}}">Back to {{statename}}</a>) (<a href="/congress/members">Back to U.S. Map</a>)</p>
+	{% endif %}
 	
-<div style="float: left">
-	
-	<div style="display: none">
-		<div id="fullscreen">
-			<img src="{{ MEDIA_URL }}icons/stock_fullscreen.png" title="Toggle Full Screen" onclick="doFullScreen();" style="cursor: pointer"/>
-		</div>
-	</div>
+{% endblock %}
 
-	<div id="map_canvas" style="width: 650px; height:475px; border: 1px solid black"> </div>
+{% block body_class %}member{% endblock %}
 
-</div>
+{% block body %}
+<div id="search-members" class="section">
+	<div class="holder">
+		<div class="frame">
+			<div class="advanced-search">
+				{% if not state %}
+					<form action="#">
+						<fieldset>
+							<h3>Find a Senator <span>or</span> Representative</h3>
+							
+							<p>Enter the last name of a senator or representative, choose a state, or enter a ZIP code or street address:</p>
+							
+							<div class="row">
+								<label for="name">By Last Name</label>
+								<input id="name" class="text" type="text" value="" />
+								<script>$('#name').input_default('type the last name of a Member of Congress');</script>
+							</div>
+							
+							<ul>
+								<li>
+									<label for="state">By State</label>
+									<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value">
+										<option value="">(Select State)</option>
+										{% for abbr, name in statelist %}
+										<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
+										{% endfor %}								
+									</select>
+								</li>
+								<li>
+									<label for="zip">By Zip Code</label>
+									<input id="zip" class="text" type="text" value="" />
+									<script>$('#zip').input_default('ZIP or ZIP+4');</script>
+								</li>
+							</ul>
+							
+							<div class="row">
+								<label for="address">By Address</label>
+								<input id="address" class="text" type="text" value="" />
+								<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
+							</div>
+							
+							<input class="btn-search" type="submit" value="Search" />
+							
+						</fieldset>
+					</form>
+					
+					<ul>
+						<li><a href="/congress/members/all">List all Members of Congress</a></li>
+						<li><a href="/congress/members/browse">Search Former Members of Congress</a></li>
+					</ul>
+					<h5>Statistics</h5>
+					<p>Take a look at <a href="/congress/members/stats">statistics</a> about missed votes, bill sponsorship, ideology, and leadership.</p>
+					
+				{% else %}
+					<h3>Senators</h3>
+					{% if stateapp == "T" %}
+						<p>{{statename}} is a U.S. territory and so does not have any senators.</p>
+					{% else %}
+						<ul>
+							{% for rep in senators %}
+								{% if rep %}
+									<li><a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a></li>
+								{% else %}
+									<li><em>Vacant</em></li>
+								{% endif %}
+							{% endfor %}
+						</ul>
+					{% endif %}
+					
+					<h3>Representative{{reps|pluralize}}</h3>
+					<ul>
+						{% for dist, rep in reps %}
+							<li style="margin-bottom: .5em">
+								{% if reps|length > 1 %}
+								<div><strong>{{dist|ordinal}} District:</strong> (<a href="/congress/members/{{state}}/{{dist}}">map</a>)</div>
+								{% endif %}
+								{% if rep %}
+									<a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a>
+								{% else %}
+									<em>Vacant</em>
+								{% endif %}
+							</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			
+			</div><!-- /advanced-search -->
+
+		
+			<div style="display: none">
+				<div id="fullscreen">
+					<img src="{{ MEDIA_URL }}icons/stock_fullscreen.png" title="Toggle Full Screen" onclick="doFullScreen();" style="cursor: pointer"/>
+				</div>
+			</div>
+			
+			<div id="map_container">
+				<div id="map_canvas">
+				</div>
+			</div>
+			
+			<div style="display: none;">
+				<div id="embed_teaser">
+					<a href="#" onclick="$('#embed_teaser').hide(); $('#embed_details').fadeIn(); return false;">Embed this map...</a>
+				</div>
+				<div id="embed_details" style="display: none">
+					<div>Embed this map on your own website using this HTML code:</div>
+				
+					<pre id="embedpre" wrap="hard" style="width: 500px; overflow: auto; margin-left: 2em; font-size: 80%">&lt;iframe width="425" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
+			 src="http://www.govtrack.us/embed/mapframe?{% if state %}state={{state|lower}}{% endif %}{% if district %}&amp;district={{district}}{% endif %}&amp;bounds=<span id="embedbounds"></span>"&gt;&lt;/iframe&gt;</pre>
+			  
+					<div>or advanced web designers can <a href="/embed/mapframe?demo=1">view the source</a>.</div>
+				</div>
+			</div>
+		</div><!-- /frame -->
+	</div><!-- /holder -->
+</div><!-- /search-members -->
 
 {% endblock %}
 

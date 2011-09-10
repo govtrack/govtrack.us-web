@@ -20,7 +20,7 @@ def vote_totals_pie(vote):
     g.title('All votes')
     g.legend('Yes', 'No', 'No Vote')
     g.size(200, 200)
-    g.color('0000CC','CC0000', '00AAAA')
+    g.color('88ad64','40a4bd', 'DDDDDD')
     return g.img()
 
 
@@ -33,5 +33,5 @@ def vote_pie(yes_count, no_count, other_count):
     g = Pie([yes_count, no_count, other_count])
     g.type('pie')
     g.size(50, 50)
-    g.color('0000CC','CC0000', '00AAAA')
+    g.color('88ad64','40a4bd', 'DDDDDD')
     return g.img()

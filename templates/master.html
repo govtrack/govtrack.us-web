@@ -1,19 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
 	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
+		
 		<title>{% block title %}{% endblock %}</title>
 		
-		<link rel="shortcut icon" type="image/png" href="/static/favicon.png"></link>
+		<link rel="shortcut icon" type="image/png" href="{{ MEDIA_URL }}favicon.png"></link>
+
+		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all.css">
+		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen"/><![endif]-->
 		
-		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
 		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}"></meta>
 		
-		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/reset.css?{% now "U" %}" />
-		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}master/stylesheet.css?{% now "U" %}" />
-		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/style.css?{% now "U" %}" />
 		{% block extra_css %}{% endblock %}
 		
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/main.js" ></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.3.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/ajaxforms.js"></script>
 		{% block extra_js %}{% endblock %}
@@ -25,92 +28,124 @@
 		</style>
 	</head>
 	
-	<body>
-	<!-- wrap starts here -->
-	<div id="wrap">
-	
-		<div id="header">
-			<div id="header-content">	
+<body class="{% block body_class %}{% endblock %}">
+	<div id="wrapper">
+		
+		<div id="masthead">
+			<header id="header">
 				
-				<h1 id="logo"><a href="/" title="GovTrack.us Home">GovTrack.us</a></h1>	
+				<a id="logo" href="/">govtrack.us</a>
 				
-				<ul class="searchbar">
-					<li><a href="/acccounts/login">Log In</a></li>
-					<li>
-						<form name="header_search" action="/search" method="GET">
-							<input type="text" name="q"/>
-						</form>
-					</li>			
-				</ul>
-				
-				<ul class="menubar">
-					<li><a href="/">Home</a></li>
-					<li><a href="/congress">Browse</a></li>
-					<li><a href="/events">Trackers</a></li>
-					<li><a href="/about">About</a></li>			
-					<li><a href="/developers">Use Our data</a></li>
-				</ul>		
-				
-			</div>
-		</div>
-						
-		<!-- content-wrap starts here -->
-		<div id="content-wrap"><div id="content">
-			{% block crumbs %}{% endblock %}
-			
-			{% block master_content %}
-			<div id="main">	
-				{% block body %}
-				{% endblock %}
-			</div>
-			{% endblock %}
-			
-			{% block wide-body %}
-			{% endblock %}
-			
-			<div class="clear"> </div>
+				<div id="nav-block">
+					<div class="row">
+						<div class="block">
+							<ul class="super-nav">
+								{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
+								<li><a href="/accounts/login">Log In</a></li>
+							</ul>
+							<form name="header_search" action="/search" method="GET" class="search-form">
+								<fieldset>
+									<div class="text"><input type="text" value="Search" /></div>
+									<input class="btn-search" type="submit" value="Search" />
+								</fieldset>
+							</form>
+						</div>
+					</div>
 					
-			<!-- footer starts here -->	
-			<div id="footer"><div id="footer-content">
-				
-					<div class="col float-left">
+					<nav id="nav">
 						<ul>
 							<li><a href="/">Home</a></li>
-							<li><a href="/congress">Browse</a></li>
-							<li><a href="/events">Trackers</a></li>
-							<li><a href="/about">About GovTrack</a></li>
-							<li><a href="/developers">For Developers</a></li>
-							<li><a href="/accounts/login">Log in</a></li>
-						</ul>			
-					</div>
+							<li class="dropnav">
+								<a href="/congress">Browse</a>
+								<ul>
+									<li><a href="/congress/members">Members <em>of</em> Congress</a></li>
+									<li><a href="/congress/bills">Bills <em>&amp;</em> Resolutions</a></li>
+									<li><a href="/congress/votes">Voting Records</a></li>
+									<li><a href="/congress/committees">Congressional Committees</a></li>
+								</ul>
+							</li>
+							<li><a href="/accounts/trackers">Trackers</a></li>
+							<li><a href="/about">About</a></li>
+							<li><a href="/developers">Use our data</a></li>
+						</ul>
+					</nav>
 					
-					<div class="col float-left">
-						<h2>About GovTrack</h2>
-						<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com/">Civic Impulse, LLC</a>.</p>
-						<p>GovTrack.us has been tracking the activities of the United States Congress since 2004 and has lead the open government data movement surrounding legislative information.</p>
-						<p>Feedback on the site is welcome to <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>, but I can&rsquo;t do your research for you, nor can I pass on messages to Members of Congress.</p>
-					</div>		
-				
-					<div class="col2 float-right">
-						<p>follow GovTrack</p>
-						
-						<ul>						
-							<li><a href="http://www.facebook.com/pages/Civic-Impulse/312186525430">Facebook</a></li>
-							<li><a href="http://twitter.com/#!/govtrack">Twitter</a></li>
-							<li><a href="/blog/rss">RSS Feed</a></li>								
-						</ul>	
-					</div>
-				
-			<!-- footer ends here -->
-			</div></div>
-
-			<div class="clear"> </div>
+				</div><!-- /nav-block -->
+			</header>
 			
-	<!-- content-wrap ends here -->		
-	</div></div>
+			{% block override_breadcrumbs %}
+			<div class="breadcrumbs">
+				{% block crumbs %}{% endblock %}
+				{% comment %}
+				<ul>
+					<li><a href="#">Congress</a></li>
+					<li>Bills & Resolutions</li>
+				</ul>
+				{% endcomment %}
+			</div>
+			{% endblock %}
+			
+		</div><!-- /masthead -->
+		
+		
+		
+		{% block override_content %}
+		<div id="content">
+			{% block heading_box %}
+			<header class="heading-box">
+				<div class="holder">
+					<div class="frame">
+						<div class="article-wrapper">
+							<div class="article">
+								{% block summary %}
+								{% endblock %}
+							</div>
+						</div>
+					</div>
+				</div>
+			</header>
+			{% endblock %}
+			
+			{% block body %}
+			{% endblock %}
+			
+		</div><!-- /content -->
+		{% endblock %}
+		
+		
+		<footer id="footer">
+			<div class="holder">
+				
+				<nav>
+					<ul>
+						<li><a href="/">Home</a></li>
+						<li><a href="/congress">Browse</a></li>
+						<li><a href="/accounts/trackers">Trackers</a></li>
+						<li><a href="/about">About GovTrack</a></li>
+						<li><a href="/developers">For Developers</a></li>
+						<li><a href="/accounts/login">Log in</a></li>
+					</ul>
+				</nav>
+				
+				<section class="social">
+					<h4><span>follow</span> GovTrack</h4>
+					<ul>
+						<li><a href="http://www.facebook.com/pages/Civic-Impulse/312186525430"><img src="{{MEDIA_URL}}images/ico-fb.png" width="16" height="16" alt="image description"><span>Facebook</span></a></li>
+						<li><a href="http://twitter.com/#!/govtrack"><img src="{{MEDIA_URL}}images/ico-tweet.png" width="16" height="16" alt="image description"><span>Twitter</span></a></li>
+					</ul>
+				</section>
+				
+				<section>
+					<h4><span>site</span> Information</h4>
+					<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. Read <a href="/about">about GovTrack</a>.</p>
+					<p>Feedback is welcome to <a href="mailto:&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>, but we can&rsquo;t pass on messages to Members of Congress.</p>
+					<p>You are encouraged to reuse any material on this site. GovTrack is open source and supports other Congress-tracking websites through our <a href="/developers">open data</a>.</p>
+				</section>
+				
+			</div>
+		</footer>
+		
+	</div><!-- /wrapper -->
 	
-	<!-- wrap ends here -->
-	</div>
-	
-	</body>
+</body>	
 </html>

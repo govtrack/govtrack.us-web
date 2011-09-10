@@ -1,55 +1,44 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - About{% endblock %}
-{% block body %}
-<div class="col_left">
+
+{% block summary %}
+<div class="right">
+<p>Follow us on Twitter <a href="http://twitter.com/govtrack">@govtrack</a> or join our <a href="http://www.facebook.com/pages/Civic-Impulse/312186525430">Facebook page</a>.</p>
+<hr size="1" style="margin: 15px"/>
+<ul>
+<li><a href="/press">Press Clippings &amp; Publications</a></li>
+<li><a href="/sources">Data Sources</a></li>
+<li><a href="/advertising">Advertising Opportunities</a></li>
+<li><a href="/developers">Developer Documentation</a></li>
+</ul>
+</div>
+
 <h1>About GovTrack.us</h1>
 
 <p>GovTrack.us is a tool by <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a> to help the public research and track the activities in the U.S. Congress, promoting and innovating government transparency and civic education through novel uses of technology.</p>
 
 <p>Launched in 2004 as merely a hobby, GovTrack.us was the first website worldwide whose primary goal was to provide free and comprehensive legislative tracking for everyday citizens and to embrace Web 2.0 and open data for government information. GovTrack.us was a 2006 <a href="http://webbyawards.com/webbys/current.php?season=10#webby_entry_politics">Webby Award nominee</a> and has been covered in <a href="http://www.govtrack.us/articles/20050126nyt.xpd">The New York Times</a> and <a href="http://www.govtrack.us/articles/20060301wp.xpd">The Washington Post</a>, and it is the data provider for many other websites displaying legislative information.</p>
 
-<p>You&rsquo;ll find here the status of U.S. federal legislation, voting records for the Senate and House of Representatives, information on Members of Congress, and congressional district maps.</p>
+{% endblock %}
 
-<p>GovTrack openly shares the data it brings together so that other websites can build other tools to help citizens engage with government. Apps based on GovTrack&rsquo;s legislative database include <a href="http://www.opencongress.org">OpenCongress</a>, <a href="http://www.maplight.org">MAPLight</a>, <a href="http://filibusted.us/">Filibusted.us</a>, <a href="http://manybills.researchlabs.ibm.com/">IBM ManyBills</a>, and the <a href="http://sunlightlabs.com/projects/android-congress/">Congress</a> app for Android phones by the Sunlight Foundation. For more information, see <a href="/developers/downstream">the full list</a> and the <a href="/developers">Developer Documentation</a>.</p>
-
+{% block body %}
 <h2>How it works</h2>
 
-<p>The information shown on this site is assembled in an automated way from official government websites, primarily the website <a href="http://thomas.loc.gov/">THOMAS</a> which is the official website for the status of legislation run by the Library of Congress. The process of gathering the information is entirely automatic and Congress isn&rsquo;t always very happy to share, so you may find occasional errors here, but we take errors very seriously and work hard to correct them.</p>
+<p>GovTrack helps you find the status of U.S. federal legislation, voting records for the Senate and House of Representatives, information on Members of Congress, and congressional district maps.</p>
 
-<p>The status and text of legislation is usually delayed by about 24 hours and roll call votes usually appear on the site within an hour. We can only get information as fast as the official sites are updated. Our database also extends into the past. You can search and browse bills going back to the 103rd Congress (1993-94), though the text of legislation goes back only as far as the 106th Congress (1999-2000). Roll call votes are available back to the start of our nation!.</p>
+<p>Much of the information shown on GovTrack is assembled in an automated way from official government websites. primarily the website <a href="http://thomas.loc.gov/">THOMAS</a> which is the official website for the status of legislation run by the Library of Congress. The process of gathering the information is entirely automatic and Congress isn&rsquo;t always very happy to share, so you may find occasional errors here, but we take errors very seriously and work hard to correct them.</p>
+
+<p>The status and text of legislation is usually delayed by about 24 hours and roll call votes usually appear on the site within an hour. We can only get information as fast as the official sites are updated. Our database also extends into the past. You can search and browse bills going back to the 93rd Congress &mdash; that&rsquo;s 1973-74 &mdash; and the text of legislation goes back as far as the 106th Congress (1999-2000). Roll call votes are available back to the start of our nation!</p>
 
 <h2>More about the site</h2>
 
-<p>This site was created and is run by <a href="http://razor.occams.info">Joshua Tauberer</a> and became a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a> when the company was formed in September 2009. GovTrack isn&rsquo;t affiliated with the government or any other group and our only ongoing funding comes from advertising.</p>
-
-<p>We have a small staff: Steve Pearson currently moderates the bill Q&A system; Grigoriy Petukhov built the current (second) version of the site. Kevin Henry developed the interactivity on the bill text display (supported by a Sunlight Foundation grant). Thanks to Mike Drescher for collecting some images of Members of Congress. Ben Rellick designed the logo. Daniel Gabriele was responsible for the look and feel of the previous generation of GovTrack and designed the basis of the current logo.</p>
+<p>This site was created and is run by <a href="http://razor.occams.info">Joshua Tauberer</a> and became a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a> when he formed the company in 2009. GovTrack isn&rsquo;t affiliated with the government or any other group and our only ongoing funding comes from advertising.</p>
 
 <p>To send us a note, email <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>. Please don&rsquo;t email us to contact your Member of Congress or to do research for you, though! Also, please don&rsquo;t cite Josh personally for information you find on this site as the information is derived entirely from other databases. I generally don&rsquo;t do research by hand or exercise any editorial effect over what you see here.</p>
 
-</div>
+<p>GovTrack openly shares the data it brings together so that other websites can build other tools to help citizens engage with government. Apps based on GovTrack&rsquo;s legislative database include <a href="http://www.opencongress.org">OpenCongress</a>, <a href="http://www.maplight.org">MAPLight</a>, <a href="http://filibusted.us/">Filibusted.us</a>, <a href="http://manybills.researchlabs.ibm.com/">IBM ManyBills</a>, and the <a href="http://sunlightlabs.com/projects/android-congress/">Congress</a> app for Android phones by the Sunlight Foundation. For more information, see <a href="/developers/downstream">the full list</a> and the <a href="/developers">Developer Documentation</a>.</p>
 
-
-<div class="col_right">
-	<div class="sidebox">
-		<h2>More Information</h2>
-		<p>Follow us on Twitter (<a href="http://twitter.com/govtrack">@govtrack</a>) or join our <a href="http://www.facebook.com/pages/Civic-Impulse/312186525430">Facebook page</a>. Here are some other resources:</p>
-		<ul>
-		<li><a href="/press">Press Clippings &amp; Publications</a></li>
-		<li><a href="/sources">Data Sources</a></li>
-		<li><a href="/advertising">Advertising Opportunities</a></li>
-		<li><a href="/developers">Developer Documentation</a></li>
-		</ul>
-		
-		<h2 style="margin-top: 2em">Advocating an Open Government</h2>
-		
-		<iframe src="http://rcm.amazon.com/e/cm?t=govt-20&amp;o=1&amp;p=8&amp;l=as1&amp;asins=0596804350&amp;fc1=000000&amp;IS2=1&amp;lt1=_blank&amp;m=amazon&amp;lc1=0000FF&amp;bc1=000000&amp;bg1=FFFFFF&amp;f=ifr" style="width:120px;height:240px;float:left;margin-right: 15px" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
-		
-		<p>Since our launch in 2004, GovTrack has been a leader in the growing and changing open government movement. What was once a fringe movement seeking better access to government records, the movement today involves citizens, web developers, researchers, government managers, and elected officials in a concerted effort to make data a national asset. The <a href="http://publicequalsonline.com/">Public=Online: Government In Real Time</a> campaign, started by <a href="http://www.sunlightfoundation.com/">Sunlight Foundation</a>, gives our movement a name and a face.</p>
-		<p>Our movement opens up access to information about the government to make participation easier and oversight more powerful. We encourage government agencies to work with the public on making information they have practically useful, not just for government oversight but for whatever other applications the public can think of.</p>
-		<p>GovTrack&rsquo;s creator, Josh, has been working on the policy angle of open government data, contributing to <a href="http://www.theopenhouseproject.com/">The Open House Project</a> (2007), <a href="http://www.opengovdata.org/">8 Principles of Open Government Data</a> (2007), and the book <a href="http://www.amazon.com/dp/0596804350">Open Government</a> (2010) pictured at left, working with congressional staff on <a href="http://razor.occams.info/blog/2009/03/11/bulk-data-downloads-approved-in-the-omnibus-spending-bill-success/">legislative language for opening up Congress&rsquo;s legislative data</a> (2009), getting <a href="http://www.cjr.org/campaign_desk/senate_goes_xml.php">the Senate to publish roll call votes in XML</a> (2009), and advising the <a href="http://www.cmfweb.org/index.php?option=com_content&task=view&id=63">Communicating with Congress</a> project, among other roles. He is also co-founder and CTO of <a href="http://www.popvox.com">POPVOX.com</a>, a platform for constituent communication.</p>		
-	</div>
-
-</div>
+<p>Since our launch in 2004, GovTrack has been a leader in the growing and changing open government movement. Today the movement for better access to government records involves citizens, web developers, designers, researchers, statisticians, government managers, and elected officials in a concerted effort to make data a national asset.  GovTrack&rsquo;s creator, Josh, has been working on the policy angle of open government data and wrote about it in the book <a href="http://www.amazon.com/dp/0596804350">Open Government</a> (2010). He is also co-founder and CTO of <a href="http://www.popvox.com">POPVOX.com</a>, a platform for constituent communication.</p>		
 
 {% endblock %}
 

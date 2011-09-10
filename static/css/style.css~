@@ -90,7 +90,3 @@ th.header {
     padding-right: 20px;
     cursor: pointer;
 }
-
-label span.count {
-	font-weight: normal;
-}

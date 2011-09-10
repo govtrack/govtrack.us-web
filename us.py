@@ -57,10 +57,25 @@ def get_session_from_date(when):
                 continue
             sd.append((int(cn), sessionname, parse_govtrack_date(startdate), parse_govtrack_date(enddate)))
         SESSION_DATES = sd
-        
+    
+    if when == None:
+        return None
+    
     for c, s, sd, ed in SESSION_DATES:
         if sd <= when and when <= ed:
             return (c, s)
             
     return None
+
+def get_session_ordinal(congress, session):
+    get_session_from_date(None) # load data
+    
+    ordinal = 0
+    for c, s, sd, ed in SESSION_DATES:
+        if c == congress:
+            ordinal += 1
+            if s == session: return ordinal
+            
+    raise ValueError("Congress or session not found.")
+    
 

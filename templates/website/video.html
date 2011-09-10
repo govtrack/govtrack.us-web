@@ -10,18 +10,19 @@
     }
 </script>
 
-<div class="video-thumbnail">
-    <a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1" onclick="return play(this, '{{ box_id }}')" title="{{ video.title }}">
+<article>
+	<a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1" onclick="return play(this, '{{ box_id }}')" title="{{ video.title }}">
         {% if video.thumbnail %}
-        <div class="image" style="width: 120px; height: 90px; background-image: url({{ video.thumbnail }})">
-			<img src="{{ MEDIA_URL }}icons/youtube.png"/>
-		</div>
+			<img src="{{video.thumbnail}}"/>
         {% else %}
-        <b>NO TUMBNAIL</b>
-        {% endif %}
-        <div class="title">{{ video.title }} ({{video.published|date:"M j, Y"}})</div>
-    </a>
-</div>
+	        <b>NO TUMBNAIL</b>
+		{% endif %}
+	</a>
+	<h4><a href="#">{{ video.source }}</a></h4>
+	<p>&ldquo;{{ video.title }}&rdquo;
+	<span class="date">{{video.published|date:"M j, Y"}}</span>
+	<a>Watch Video</a></p>
+</article>
 
 {% comment %}
 {# This is another approach when thumbnail is displayed #}

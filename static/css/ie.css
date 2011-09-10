@@ -1,0 +1,8 @@
+.add-nav li,
+.summary-box .photo,
+.paging li span,
+.paging a,
+.advansed-search li {
+	display:inline;
+	zoom:1;
+}

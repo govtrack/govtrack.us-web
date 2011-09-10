@@ -23,13 +23,16 @@ class Person(models.Model):
     namemod = models.CharField(max_length=10, blank=True)
     nickname = models.CharField(max_length=255, blank=True)
 
-	# links
+    # links
     bioguideid = models.CharField(max_length=255, blank=True, null=True) #  bioguide.congress.gov (null for presidents that didn't serve in Congress)
     pvsid = models.CharField(max_length=255, blank=True) #  vote-smart.org
     osid = models.CharField(max_length=255, blank=True) #  opensecrets.org
     metavidid = models.CharField(max_length=255, blank=True) # metavid.org
     youtubeid = models.CharField(max_length=255, blank=True) # YouTube
     twitterid = models.CharField(max_length=50, blank=True) # Twitter
+
+    def __unicode__(self):
+        return self.name
 
     @property
     def fullname(self):
@@ -47,7 +50,7 @@ class Person(models.Model):
         
     def name_no_details_lastfirst(self):
         return get_person_name(self, firstname_position='after')
-			
+            
     def __unicode__(self):
         return self.name
 
@@ -123,13 +126,13 @@ class Person(models.Model):
 class PersonRole(models.Model):
     person = models.ForeignKey('person.Person', related_name='roles')
     role_type = models.IntegerField(choices=RoleType)
-    current = models.BooleanField(blank=True, default=False, choices=[(False, "No"), (True, "Yes")])
+    current = models.BooleanField(default=False, choices=[(False, "No"), (True, "Yes")])
     startdate = models.DateField(db_index=True)
     enddate = models.DateField(db_index=True)
     # http://en.wikipedia.org/wiki/Classes_of_United_States_Senators
-    senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True)
+    senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True) # None for representatives
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts
-    district = models.IntegerField(blank=True, null=True) 
+    district = models.IntegerField(blank=True, null=True) # None for senators/presidents
     state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True)
     party = models.CharField(max_length=255, blank=True, null=True)
     website = models.CharField(max_length=255, blank=True)
@@ -139,7 +142,7 @@ class PersonRole(models.Model):
 
     def __unicode__(self):
         return '%s / %s to %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display())
-	   
+       
     def continues_from(self, prev):
         if self.startdate - prev.enddate > datetime.timedelta(days=120): return False
         if self.role_type != prev.role_type: return False
@@ -168,6 +171,9 @@ class PersonRole(models.Model):
                 return 'Del.' if short else 'Delegate'
             return 'Rep.' if short else 'Representative'
             
+    def state_name(self):
+        return State.by_value(self.state).label
+            
     def get_description(self):
         if self.role_type == RoleType.president:
             return self.get_title_name(False)
@@ -191,7 +197,7 @@ class PersonRole(models.Model):
             E.add("termstart", self.startdate, PersonFeed(self.person_id))
             if self.enddate <= now: # because we're not sure of end date until it happens
                 E.add("termend", self.enddate, PersonFeed(self.person_id))
-	
+    
     def render_event(self, eventid, feeds):
         import events.feeds
         return {

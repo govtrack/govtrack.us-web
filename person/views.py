@@ -73,15 +73,17 @@ def person_details(request, pk):
             'active_role': active_role,
             'photo': photo,
             'analysis_data': analysis_data,
+            'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
             'recent_video': recent_video,
             'videos': videos,
-            'assignments': get_committee_assignments(person),
+            'committeeassignments': get_committee_assignments(person),
             'feed': PersonFeed(person.id),
             }
 
 
 def searchmembers(request, initial_mode=None):
-    return person_search_manager().view(request, "person/person_list.html")
+    return person_search_manager().view(request, "person/person_list.html",
+    	defaults = { "roles__current": True if initial_mode=="all" else False })
 
 def http_rest_json(url, args=None, method="GET"):
     import urllib, urllib2, json

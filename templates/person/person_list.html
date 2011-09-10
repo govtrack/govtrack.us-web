@@ -1,7 +1,21 @@
 {% extends 'master.html' %}
 
-{% block body %}
+{% block body_class %}members{% endblock %}
+
+{% block crumbs %}
+<ul>
+<li><a href="{% url congress_home %}">Congress</a></li>
+<li><a href="/congress/members">Members of Congress</a></li>
+<li>Search</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
 <h1>Members of Congress</h1>
+<p>Use this page to find current or past Members of Congress. You can also <a href="/congress/members">view district maps</a>.</p>
+{% endblock %}
+
+{% block body %}
 
 {% include "smartsearch/search_panel.html" %}
 

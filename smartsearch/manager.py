@@ -40,8 +40,9 @@ from django.core.paginator import Paginator
 import json
 
 class SearchManager(object):
-    def __init__(self, model):
+    def __init__(self, model, qs=None):
         self.model = model
+        self.qs = qs
         self.options = []
         self._form = None
         self.col_left = None
@@ -109,21 +110,25 @@ class SearchManager(object):
     def results(self, objects, form):
         return "".join([self.make_result(obj, form) for obj in objects])
         
-    def view(self, request, template):
+    def view(self, request, template, defaults={}):
         if request.META["REQUEST_METHOD"] == "GET":
             return render_to_response(template, {
                 'form': self.options,
-                'column_headers': self.get_column_headers()},
+                'column_headers': self.get_column_headers(),
+                'defaults': defaults,
+                },
                 RequestContext(request))
         
         try:
             page_number = int(request.POST.get("page", "1"))
+            per_page = 20
             
             qs = self.queryset(request)
-            page = Paginator(qs, 20)
+            page = Paginator(qs, per_page)
+            obj_list = page.page(page_number).object_list
             
             return HttpResponse(json.dumps({
-                "results": self.results(page.page(page_number).object_list, request.POST),
+                "results": self.results(obj_list, request.POST),
                 "options": [(
                     option.field_name,
                     option.type,
@@ -132,6 +137,9 @@ class SearchManager(object):
                     ) for option in self.options],
                 "page": page_number,
                 "num_pages": page.num_pages,
+                "per_page": per_page,
+                "total_this_page": len(obj_list),
+                "total": qs.count(),
                 }), content_type='text/json')
         except Exception as e:
             return HttpResponse(json.dumps({
@@ -143,7 +151,10 @@ class SearchManager(object):
         Build the `self.model` queryset limited to selected filters.
         """
 
-        qs = self.model.objects.all()
+        if not self.qs:
+            qs = self.model.objects.all()
+        else:
+            qs = self.qs
 
         filters = { }
         
@@ -193,10 +204,12 @@ class SearchManager(object):
         if option.choices:
             counts = list(option.choices)
         else:
+            include_counts = True
             meta = self.model._meta
             if "__" not in option.field_name:
                 fieldname = option.field_name
             else:
+                include_counts = False # one-to-many relationships make the aggregation return non-distinct results
                 path = option.field_name.split("__")
                 fieldname = path.pop()
                 for p in path:
@@ -216,17 +229,21 @@ class SearchManager(object):
                        .distinct().order_by()
             def nice_name(value):
                 if value == None: return "N/A"
-                if field.choices:
+                if field.choices and value in choice_label_map:
                     return choice_label_map[value]
                 if type(value) == bool and value == True: return "Yes"
                 if type(value) == bool and value == False: return "No"
+                if field.__class__.__name__ == 'ForeignKey':
+                    # values+annotate makes the db return an integer rather than an object
+                    value = field.rel.to.objects.get(id=value)
                 return unicode(value)
-            counts = [(x[option.field_name], nice_name(x[option.field_name]), x['_count']) for x in resp if x[option.field_name] != ""]
-                # (key, label, count) tuples
+            counts = [ # (key, label, count) tuples
+                (x[option.field_name], nice_name(x[option.field_name]), x['_count'] if include_counts else None)
+                for x in resp if x[option.field_name] != ""]
             
             # Sort by count then by label.
             if option.sort:
-                counts.sort(key=lambda x: (-x[2], x[1]))
+                counts.sort(key=lambda x: (-x[2] if x[2] != None else None, x[1]))
 
         if not option.required and counts != "NONE":
             counts.insert(0, ('__ALL__', 'All', -1))

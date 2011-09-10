@@ -1,0 +1,20 @@
+{% extends "master.html" %}
+{% block heading_box %}
+<div class="section">
+	<div class="summary-box">
+		<div class="holder">
+			
+			<div class="frame">
+				{% block summary %}
+				{% endblock %}
+				
+			</div><!-- /frame -->
+		</div><!-- /holder -->
+	</div><!-- /summary-box -->
+	
+	<div class="ads">
+		<img src="/static/images/google-ads.png" width="300" height="250" alt="image description">
+	</div>
+	
+</div><!-- /section -->
+{% endblock %}

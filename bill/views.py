@@ -8,7 +8,6 @@ from common.pagination import paginate
 
 from bill.models import Bill, BillType
 from bill.search import bill_search_manager
-from smartsearch.manager import SearchManager
 
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
@@ -25,13 +24,5 @@ def bill_details(request, congress, type_slug, number):
 
 @render_to('bill/bill_list.html')
 def bill_list(request):
-    sm = bill_search_manager()
-    if 'congress' in request.GET:
-        form = sm.form(request)
-    else:
-        form = sm.form()
-    qs = form.queryset()
-    page = paginate(qs, request, per_page=50)
-    return {'page': page,
-            'form': form,
-            }
+	return bill_search_manager().view(request, "bill/bill_list.html")
+

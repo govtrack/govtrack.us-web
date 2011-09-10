@@ -76,6 +76,9 @@ class Bill(models.Model):
 
     def __unicode__(self):
         return self.title
+        
+    def get_absolute_url(self):
+        return "/congress/bills/%d/%s%d" % (self.congress, self.bill_type, self.number)
 
     class Meta:
         ordering = ('congress', 'bill_type', 'number')

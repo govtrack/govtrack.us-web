@@ -80,12 +80,15 @@ class CommitteeMemberRole(enum.Enum):
     member = enum.Item(5, 'Member')
 
 class CommitteeMember(models.Model):
-    person = models.ForeignKey('person.Person', related_name='assignments')
+    person = models.ForeignKey('person.Person', related_name='committeeassignments')
     committee = models.ForeignKey('committee.Committee', related_name='members')
     role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member)
 
     def __unicode__(self):
         return '%s @ %s as %s' % (self.person, self.committee, self.get_role_display())
+        
+    def role_name(self):
+        return CommitteeMemberRole.by_value(self.role).label
 
 MEMBER_ROLE_WEIGHTS = {
     CommitteeMemberRole.chairman: 5,

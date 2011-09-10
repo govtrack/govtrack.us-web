@@ -4,16 +4,18 @@
 {% block title %}{{ committee }} - GovTrack.us{% endblock %}
 
 {% block crumbs %}
-<a href="{% url congress_home %}">Congress</a> &gt; Committees
-{% if parent %} &gt; <a href="{{ parent.get_absolute_url }}">{{ parent }}</a>{% endif %}
+<ul>
+<li><a href="{% url congress_home %}">Congress</a></li>
+{% if parent %}<li><a href="{{ parent.get_absolute_url }}">{% if parent.abbrev %}{{parent.abbrev}}{% else %}{{parent|truncatewords:3}}{% endif %}</a></li>{% endif %}
+<li>{% if committee.abbrev %}{{committee.abbrev}}{% else %}{{committee|truncatewords:3}}{% endif %}</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+    <h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
 {% endblock %}
 
 {% block body %}
-<div class="person-details">
-<div class="col_left">
-
-    <h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
-
     <h2>Members</h2>
     <ul>
         {% for member in members %}
@@ -34,8 +36,6 @@
         <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
         {% endfor %}
     {% endif %}
-
-</div>
 
 <div class="col_right">
     <div class="sidebox">
