@@ -10,6 +10,7 @@ django-debug-toolbar
 django-picklefield
 beautifulsoup
 #pysolr
+feedparser
 xapian-haystack
 django-haystack
 

@@ -20,3 +20,4 @@ syntax:regexp
 ^log/
 ^data/
 ^xapian/
+^build/

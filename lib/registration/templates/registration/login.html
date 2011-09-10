@@ -1,3 +1,6 @@
+{% extends "master.html" %}
+
+{% block override_content %}
 <p>Sign in with your Google, Facebook, or Twitter account, your email address and password, <div>or <a href="/registration/register{% if next %}?next={{next|urlencode}}{% endif %}">create an account</a>.</div></p>
 			
 <form method="post" class="login">
@@ -25,3 +28,4 @@
 				
 	<input type="hidden" name="next" value="{{ next }}" />
 </form>
+{% endblock %}

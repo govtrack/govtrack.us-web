@@ -8,7 +8,7 @@ Installation
 * Run build/rsync.sh (run it from the main directory, rather than from within build).
 * Run `build/buildenv.sh`
 * Run `reset.sh parse`
-
+* Run 'python manage.py rebuild_index' to reindex the text search xapian.
 
 reset.sh utility
 ================
