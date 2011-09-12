@@ -20,7 +20,9 @@ def render_event(event, feed):
     else:
         feeds = feed
     meta = event.render(feeds=feeds)
+    meta["guid"] = "%s:%d:%s" % (event.source_content_type, event.source_object_id, event.eventid)
     meta["body_html"] = Template(meta["body_html_template"]).render(Context(meta["context"]))
+    meta["body_text"] = Template(meta["body_text_template"]).render(Context(meta["context"]))
     
     return meta
 

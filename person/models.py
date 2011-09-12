@@ -51,6 +51,9 @@ class Person(models.Model):
     def name_no_details_lastfirst(self):
         return get_person_name(self, firstname_position='after')
             
+    def name_and_title(self):
+        return get_person_name(self, firstname_position='before', role_recent=True, show_party=False, show_district=False)
+        
     def __unicode__(self):
         return self.name
 

@@ -122,6 +122,20 @@ class PersonSponsorshipFeed(PersonFeed):
         
 class BillFeed(OneArgFeed):
     prefix = "bill"
+    _bill = None
+    
+    def bill(self):
+    	if self._bill != None: return self._bill
+        if isinstance(self.arg, (str, unicode)):
+            import re, bill.models
+            m = re.match(r"([a-z]+)(\d+)-(\d+)", self.arg)
+            bill_type = bill.models.BillType.by_xml_code(m.group(1))
+            self._bill = bill.models.Bill.objects.get(congress=m.group(2), bill_type=bill_type, number=m.group(3))
+            return self._bill
+        return self.arg
+    
+    def gettitle(self):
+        return self.bill().title
 
 class IssueFeed(OneArgFeed):
     prefix = "crs"

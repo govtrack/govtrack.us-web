@@ -12,11 +12,18 @@
 	<div class="section">
 		<h1>Easily track the activities <br> of the United States Congress.</h1>
 		<div class="container">
-			<p class="intro">GovTrack is a free service which gives you an simple interface to browse, search, view and track information from the United States Congress. Find your Congress members, track bills, tally votes, and keep tabs on our Congress.</p>
+			<p class="intro">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your business.
+			&mdash;
+			Find your Congress members, track bills, tally votes, and keep Congress accountable.</p>
 			
 			<div class="block">
-				<a href="#" class="green-btn">Sign up for free</a>
-				<p>Already have an account? <a href="#">Log in</a></p>
+				{% if not user.is_authenticated %}
+					<a href="#" class="green-btn">Sign up for free</a>
+					<p>Already have an account? <a href="/accounts/login">Log in</a></p>
+					<p>You don&rsquo;t need an account just to <a href="/congress">browse</a>.</p>
+				{% else %}
+					<p>Welcome back!</p>
+				{% endif %}
 			</div>
 		</div>
 	</div>

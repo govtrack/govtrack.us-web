@@ -41,7 +41,12 @@
 						<div class="block">
 							<ul class="super-nav">
 								{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
-								<li><a href="/accounts/login">Log In</a></li>
+								{% if not user.is_authenticated %}
+									<li><a href="/accounts/login">Log In</a></li>
+								{% else %}
+									<li><a href="/accounts/profile">{{user.username}}</a></li>
+									<li><a href="/accounts/logout">Log Out</a></li>
+								{% endif %}
 							</ul>
 							<form name="header_search" action="/search" method="GET" class="search-form">
 								<fieldset>

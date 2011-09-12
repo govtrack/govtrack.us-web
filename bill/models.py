@@ -78,7 +78,7 @@ class Bill(models.Model):
     def __unicode__(self):
         return self.title
         
-    @models.permalink    
+    #@models.permalink    
     def get_absolute_url(self):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
         
@@ -236,9 +236,9 @@ class Bill(models.Model):
             "type": "Bills and Resolutions",
             "date": date,
             "title": status.label + ": " + self.title,
-            #"url": self.get_absolute_url(),
+            "url": self.get_absolute_url(),
             "body_text_template":
-"""{% if sponsor %}{{sponsor|safe}}{% endif %}
+"""{% if sponsor %}Sponsor: {{sponsor|safe}}{% endif %}
 {% if action %}{{action|safe}}{% endif %}
 {{summary|safe}}""",
             "body_html_template":

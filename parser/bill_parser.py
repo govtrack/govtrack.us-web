@@ -288,7 +288,8 @@ def main(options):
         File.objects.save_file(fname)
 
     # delete bill objects that are no longer represented on disk
-    Bill.objects.all().exclude(id__in = seen_bill_ids).delete()
+    if options.congress:
+    	Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
 
 if __name__ == '__main__':
     main()
