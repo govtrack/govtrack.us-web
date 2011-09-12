@@ -24,18 +24,19 @@ def get_feed_list(request):
 @render_to('events/events_list.html')
 def events_list(request):
     feedlist = get_feed_list(request)
+    feedlistnames = [f.getname() for f in feedlist]
         
     qs = feeds.Feed.get_events_for(feedlist if len(feedlist) > 0 else None).filter(when__lte=datetime.now()) # get all events
     page = paginate(qs, request, per_page=50)
     
     no_arg_feeds = [feeds.ActiveBillsFeed(), feeds.IntroducedBillsFeed(), feeds.ActiveBillsExceptIntroductionsFeed(), feeds.EnactedBillsFeed(), feeds.AllVotesFeed(), feeds.AllCommitteesFeed()]
-    no_arg_feeds = [(feed, False) for feed in no_arg_feeds]
+    no_arg_feeds = [(feed, feed.getname() in feedlistnames) for feed in no_arg_feeds]
         
     return {
         'page': page,
         'no_arg_feeds': no_arg_feeds,
         'feeds': feedlist,
-        'feeds_json': simplejson.dumps([f.getname() for f in feedlist]),
+        'feeds_json': simplejson.dumps(feedlistnames),
             }
 
 def search_feeds(request):

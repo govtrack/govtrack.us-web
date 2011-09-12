@@ -1,7 +1,21 @@
 {% extends 'master.html' %}
 {% load events_utils %}
 {% block head %}
+<style>
+.col_6 {
+	width: 440px;
+	float: left;
+}
+.feed_active_span { display: none; }
+.active .feed_inactive_span { display: none; }
+.active .feed_active_span { display: inline; }
+</style>
+
 <script>
+// This variable and function are used if the user is logged out and the
+// Edit Your Feed/List controls are used to modify the feeds= query
+// string parameter on this page. Adding/removing a feed generates a
+// new feeds= value and then opens that page.
 var feeds = {{feeds_json|safe}};
 function togglefeed(feedname) {
 	var idx = feeds.indexOf(feedname);
@@ -22,6 +36,8 @@ function togglefeed(feedname) {
 
 	return false; // override href
 }
+
+
 function search_feeds(type) {
 	var q = $('#track_' + type + '_input').val();
 	if (q.replace(/\s/g,"") == "") {
@@ -49,13 +65,20 @@ function search_feeds(type) {
 }
 </script>
 {% endblock %}
-{% block body %}
-<h1>Tracked Events</h1>
 
-<div class="col_left">
+{% block summary %}
+<h1>Tracked Events</h1>
+<p>Use this page to create a customized feed of legislative activity based on your interests.</p>
+{% if not request.user.is_authenticated %}
+	<p>You must <a href="/acccounts/register">register</a> or <a href="/acccounts/login">log in</a> to save the list, to create multiple lists, or to get updates on these events by email.</p>
+{% endif %}
+{% endblock %}
+
+{% block body %}
+<div class="col_6">
     {% for event in page.object_list %}
 	{% with event|render_event:feeds as meta %}
-        <div class="tracked_event" style="clear: both; margin-bottom: 1em">
+        <div class="tracked_event" style="clear: both; border-bottom: 1px solid #DDD; margin-bottom: 1em">
 
 			<div style="float: right">
 				{% if not meta.date_has_no_time %}
@@ -76,20 +99,51 @@ function search_feeds(type) {
     {% include "pagination.html" %}
 </div>
 
-<div class="col_right">
-	<div class="sidebox">
-		<h2>Get These Events as a Feed or Widget</h2>
-		...
+<div class="col_6" style="margin-left: 40px">
+	<div>
+		<h2>Edit Your Lists</h2>
+		<div style="color: blue">
+		<p>(display if logged in only.</p>
+		<p>the user chooses one of his lists to view/edit. when the user chooses a list, the list of events on the left side is updated to show only events in the feeds in that list. the Edit Your Feed/List section below should display the names of the feeds in the list and let the user add/remove feeds from the list.</p>
+		<p>there is always a special list called Email Updates; selected by default.</p>
+		<p>"rename | delete" appear on hover only.)</p>
+		</div>
+		<p>Email Updates</p> 
+		<p>My List 1</p>
+		<p style="border: 1px solid black">My List 2 (rename | delete)</p>
+		<p>Create a New List</p>
 	</div>
 
-	<div class="sidebox">
-		<h2>Customize Your Feed</h2>
+	<div>
+		<h2>How To Get These Events</h2>
+		<p>Email Updates (If Logged In!)</p>
+		<p><a href="/events/rss?feeds={{request.GET.feeds|urlencode}}">RSS</a></p>
+		<p>Make a Widget</p>
+	</div>
+	
+	<div>
+		<h2>Edit Your Feed/List</h2>
+		<div style="color: blue">
+		<p>(when the user is logged out, this form adds and removes feed names from the page's "feeds" query string parameter --- that is already working.)</p>
+		<p>(when the user is logged in, this form adds or removes feeds from the list that is selected above.)</p>
+		</div>
 		<p>Add these events to your customized feed:</p>
+		<div style="color: blue"><p>(this list shows all available simple feeds ("NoArg" feeds in the code) and indicates whether they are selected (in the list) or not.)</p></div>
 		<ul>
 			{% for feed, selected in no_arg_feeds %}
-				<li class="{% if selected %}active{% endif %}" feedname="{{feed.getname}}"><span class="feed_active_span"></span> <a href="#" onclick="return togglefeed('{{feed.getname|escapejs}}');">{{feed.gettitle}}</a></li>
+				<li class="{% if selected %}active{% endif %}" feedname="{{feed.getname}}"><span class="feed_inactive_span">O</span><span class="feed_active_span">X</span> <a href="#{{feed.getname|urlencode}}" onclick="return togglefeed('{{feed.getname|escapejs}}');">{{feed.gettitle}}</a></li>
 			{% endfor %}
 		</ul>
+		
+		<h3>Other Feeds In Your List</h2>
+		
+		<div style="color: blue"><p>(when the user is logged in, a list of other feeds ("OneArg" feeds in the code) that the user has put into his list should be displayed here, examples follow...)</p></div>
+		
+		<p>H.R. 1234: A Bill To Do Something (remove)</p>
+		<p>Rep. Smith (TX) - Sponsored Bills (remove)</p>
+		<p>...</p>
+		
+		<h3>Add a Feed</h2>
 		
 		<p>Track a Member of Congress: (<a href="/congress/members">browse all</a>)</p>
 		<div><input id="track_person_input" type="text" style="width: 100%"/></div>

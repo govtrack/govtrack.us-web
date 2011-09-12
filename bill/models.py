@@ -12,6 +12,8 @@ from django.conf import settings
 
 from django.core.urlresolvers import reverse
 
+import datetime
+
 "Enums"
 
 class BillType(enum.Enum):
@@ -235,6 +237,7 @@ class Bill(models.Model):
         return {
             "type": "Bills and Resolutions",
             "date": date,
+            "date_has_no_time": isinstance(date, datetime.date),
             "title": status.label + ": " + self.title,
             "url": self.get_absolute_url(),
             "body_text_template":
