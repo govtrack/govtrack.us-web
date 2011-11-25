@@ -1,6 +1,6 @@
 #!.env/bin/python
 from optparse import OptionParser
-import sys
+import sys, os, os.path
 import logging
 
 from common.system import setup_django
@@ -15,6 +15,8 @@ Available actions: person, commitee, vote, bill"""
 
 def setup_logging(console_level):
     "Setup logging system"
+
+    if not os.path.exists("log"): os.mkdir("log")
 
     root = logging.getLogger()
     formatter = logging.Formatter('%(name)s: %(message)s')

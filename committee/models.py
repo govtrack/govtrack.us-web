@@ -46,19 +46,17 @@ class Committee(models.Model):
             return self.committee.name + " Subcommittee on " + self.name
     
     def create_events(self):
-        from events.feeds import AllCommitteesFeed, CommitteeFeed
-        from events.models import Event
+        from events.models import Feed, Event
         with Event.update(self) as E:
             for meeting in self.meetings.all():
-                E.add("mtg_" + str(meeting.id), meeting.when, AllCommitteesFeed())
-                E.add("mtg_" + str(meeting.id), meeting.when, CommitteeFeed(self.code))
+                E.add("mtg_" + str(meeting.id), meeting.when, Feed.AllCommitteesFeed())
+                E.add("mtg_" + str(meeting.id), meeting.when, Feed.CommitteeFeed(self.code))
                 # TODO bills
 	
     def render_event(self, eventid, feeds):
         eventinfo = eventid.split("_")
         mtg = CommitteeMeeting.objects.get(id=eventinfo[1])
         
-        import events.feeds
         return {
             "type": "Committee Meeting",
             "date": mtg.when,

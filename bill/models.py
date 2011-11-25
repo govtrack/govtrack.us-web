@@ -6,7 +6,7 @@ from common.fields import JSONField
 
 from committee.models import Committee
 from bill.status import BillStatus
-from bill.title import get_bill_number
+from bill.title import get_bill_number, get_primary_bill_title
 
 from django.conf import settings
 
@@ -17,14 +17,14 @@ import datetime
 "Enums"
 
 class BillType(enum.Enum):
-    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr')
-    senate = enum.Item(2, 'S.', slug='s', xml_code='s')
-    house_of_representatives = enum.Item(3, 'H.R.', slug='hr', xml_code='h')
+    senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s')
+    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h')
     senate_resolution = enum.Item(4, 'S.Res.', slug='sr', xml_code='sr')
-    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hc', xml_code='hc')
+    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr')
     senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sc', xml_code='sc')
-    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hj', xml_code='hj')
+    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hc', xml_code='hc')
     senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sj', xml_code='sj')
+    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hj', xml_code='hj')
 
 
 class TermType(enum.Enum):
@@ -60,7 +60,6 @@ class Cosponsor(models.Model):
     joined = models.DateField()
     withdrawn = models.DateField(blank=True, null=True)
 
-
 class Bill(models.Model):
     title = models.CharField(max_length=255)
     # Serialized list of all bill titles
@@ -85,7 +84,16 @@ class Bill(models.Model):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
         
     def display_number(self):
-        return get_bill_number(self) 
+        return get_bill_number(self)
+
+    def title_no_number(self):
+        return get_primary_bill_title(self, self.titles, with_number=False)
+        
+    def bill_type_slug(self):
+        return BillType.by_value(self.bill_type).slug
+
+    def cosponsor_records(self):
+        return Cosponsor.objects.filter(bill=self).order_by('joined', 'person__lastname', 'person__firstname')
 
     class Meta:
         ordering = ('congress', 'bill_type', 'number')
@@ -178,20 +186,19 @@ class Bill(models.Model):
         return status % date
 
     def create_events(self, actions):
-        from events.feeds import PersonSponsorshipFeed, BillFeed, IssueFeed, CommitteeFeed, ActiveBillsFeed, EnactedBillsFeed, IntroducedBillsFeed, ActiveBillsExceptIntroductionsFeed 
-        from events.models import Event
+        from events.models import Feed, Event
         with Event.update(self) as E:
-            index_feeds = [BillFeed(self)]
+            index_feeds = [Feed.BillFeed(self)]
             if self.sponsor != None:
-                index_feeds.append(PersonSponsorshipFeed(self.sponsor))
-            index_feeds.extend([IssueFeed(ix) for ix in self.terms.all()])
-            index_feeds.extend([CommitteeFeed(cx) for cx in self.committees.all()])
+                index_feeds.append(Feed.PersonSponsorshipFeed(self.sponsor))
+            index_feeds.extend([Feed.IssueFeed(ix) for ix in self.terms.all()])
+            index_feeds.extend([Feed.CommitteeFeed(cx) for cx in self.committees.all()])
             
-            E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [ActiveBillsFeed(), IntroducedBillsFeed()])
+            E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
             for date, state, text in actions:
                 if state == BillStatus.introduced:
                     continue # already indexed
-                E.add("state:" + str(state), date, index_feeds + [ActiveBillsFeed(), ActiveBillsExceptIntroductionsFeed()])
+                E.add("state:" + str(state), date, index_feeds + [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()])
     
     def render_event(self, eventid, feeds):
         
@@ -201,8 +208,11 @@ class Bill(models.Model):
         status = BillStatus.by_value(int(ev_code))
         date = self.introduced_date
         action = None
+        action_type = None
        
-        if status != BillStatus.introduced:
+        if status == BillStatus.introduced:
+            action_type = "Introduced"
+        else:
             from lxml import etree
             from parser.bill_parser import BillProcessor
             
@@ -257,6 +267,111 @@ class Bill(models.Model):
             }
 
     def get_major_events(self):
-        from events.feeds import BillFeed
-        from status import BillStatus
+        from events.models import Feed
+        events = Feed.BillFeed(self).get_events()
+        def getinfo(eventid, date):
+            ev_type, ev_code = eventid.split(":")
+            status = BillStatus.by_value(int(ev_code))
+            ret = {}
+            ret["label"] = status.label
+            ret["date"] = date 
+            return ret
+        return reversed([getinfo(e["eventid"], e["when"]) for e in events])
+    
+    def get_future_events(self):
+        # predict the major actions not yet occurred on the bill, based on its
+        # current status.
+        
+        # define a state diagram
+        common_paths = {
+            BillStatus.introduced: BillStatus.referred,
+            BillStatus.referred: BillStatus.reported,
+        }
+        
+        type_specific_paths = {
+            BillType.house_bill: {
+                BillStatus.reported: BillStatus.pass_over_house,
+                BillStatus.pass_over_house: BillStatus.passed_bill,
+                BillStatus.pass_back_house: BillStatus.passed_bill,
+                BillStatus.pass_back_senate: BillStatus.passed_bill,
+                BillStatus.passed_bill: BillStatus.enacted_signed,
+                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
+                BillStatus.prov_kill_cloturefailed: BillStatus.passed_bill,
+                BillStatus.prov_kill_pingpongfail: BillStatus.passed_bill,
+                BillStatus.prov_kill_veto: BillStatus.vetoed_override_pass_over_house,
+                BillStatus.vetoed_override_pass_over_house: BillStatus.enacted_veto_override,
+            },
+            BillType.senate_bill: {
+                BillStatus.reported: BillStatus.pass_over_senate,
+                BillStatus.pass_over_senate: BillStatus.passed_bill,
+                BillStatus.pass_back_house: BillStatus.passed_bill,
+                BillStatus.pass_back_senate: BillStatus.passed_bill,
+                BillStatus.passed_bill: BillStatus.enacted_signed,
+                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_bill, 
+                BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
+                BillStatus.prov_kill_pingpongfail: BillStatus.passed_bill,
+                BillStatus.prov_kill_veto: BillStatus.vetoed_override_pass_over_senate,
+                BillStatus.vetoed_override_pass_over_senate: BillStatus.enacted_veto_override,
+            },                
+            BillType.house_resolution:  {
+                BillStatus.reported: BillStatus.passed_simpleres,
+                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
+            },
+            BillType.senate_resolution: {
+                BillStatus.reported: BillStatus.passed_simpleres,
+                BillStatus.prov_kill_cloturefailed: BillStatus.passed_simpleres,
+            },
+            BillType.house_concurrent_resolution: {
+                BillStatus.reported: BillStatus.pass_over_house,
+                BillStatus.pass_over_house: BillStatus.passed_concurrentres,
+                BillStatus.pass_back_house: BillStatus.passed_concurrentres,
+                BillStatus.pass_back_senate: BillStatus.passed_concurrentres,
+                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
+                BillStatus.prov_kill_cloturefailed: BillStatus.passed_concurrentres,
+                BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
+            },
+            BillType.senate_concurrent_resolution: {
+                BillStatus.reported: BillStatus.pass_over_senate,
+                BillStatus.pass_over_senate: BillStatus.passed_concurrentres,
+                BillStatus.pass_back_house: BillStatus.passed_concurrentres,
+                BillStatus.pass_back_senate: BillStatus.passed_concurrentres,
+                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_concurrentres, 
+                BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
+                BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
+            },
+            BillType.house_joint_resolution: { # assuming const amend
+                BillStatus.reported: BillStatus.pass_over_house,
+                BillStatus.pass_over_house: BillStatus.passed_constamend,
+                BillStatus.pass_back_house: BillStatus.passed_constamend,
+                BillStatus.pass_back_senate: BillStatus.passed_constamend,
+                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
+                BillStatus.prov_kill_cloturefailed: BillStatus.passed_constamend,
+                BillStatus.prov_kill_pingpongfail: BillStatus.passed_constamend,
+            },
+            BillType.senate_joint_resolution: { # assuming const amend
+                BillStatus.reported: BillStatus.pass_over_senate,
+                BillStatus.pass_over_senate: BillStatus.passed_constamend,
+                BillStatus.pass_back_house: BillStatus.passed_constamend,
+                BillStatus.pass_back_senate: BillStatus.passed_constamend,
+                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_constamend, 
+                BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
+                BillStatus.prov_kill_pingpongfail: BillStatus.passed_constamend,
+            }
+        }
+            
+        bt = self.bill_type
+        if bt == BillType.house_joint_resolution and not "Proposing an Amendment" in self.title: bt = BillType.house_bill
+        if bt == BillType.senate_joint_resolution and not "Proposing an Amendment" in self.title: bt = BillType.senate_bill
+
+        path = { }
+        path.update(common_paths)
+        path.update(type_specific_paths[bt])
+        
+        seq = []
+        st = self.current_status
+        while st in path:
+            st = path[st]
+            seq.append(st)
+            
+        return seq
         

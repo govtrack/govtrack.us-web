@@ -1,7 +1,7 @@
 from django import template
 from django.template import Context, Template
 
-import events.models, events.feeds
+import events.models
 
 register = template.Library()
 
@@ -13,7 +13,7 @@ def render_event(event, feed):
         event["source_content_type"] = ContentType.objects.get(id=event["source_content_type"])
         event = events.models.Event(**event)
     
-    if isinstance(feed, events.feeds.Feed):
+    if isinstance(feed, events.models.Feed):
         feeds = (feed,)
     elif feed == "":
         feeds = None

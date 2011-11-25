@@ -34,7 +34,8 @@
 		
 		<dl>
 			<dt>Sponsor:</dt>
-			<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
+			<dd>
+<a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
 		
 			<dt>Status:</dt>
 			<dd style="line-height: normal"><strong>{{bill.get_current_status_display}}</strong><br/>
@@ -46,7 +47,8 @@
 	
 	<div class="actions">
 		<a href="#" class="track-btn">Track this bill</a>
-		<a href="#" class="pv-speakup">Speak Up at PopVox</a>
+		
+		<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
 	</div><!-- /actions -->
 
 </div>
@@ -65,14 +67,24 @@
 					<dl class="heading">
 						<dt>Cosponsors:</dt>
 						<dd>
-							<a href="#">show cosponsors (...)</a></dd>
+							{% if bill.cosponsors.all|length == 0 %}
+								none
+							{% else %}
+								<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show cosponsors ({{bill.cosponsors.all|length}})</a>
+								<div id="cosponsors" style="display: none">
+									{% for cosp in bill.cosponsor_records %}
+									<div>{{cosp.person}} {% if cosp.joined != bill.introduced_date %}({{cosp.joined}}){% endif %} {% if cosp.withdraw %}  (withdrawn {{cosp.withdrawn}}){% endif %}</div>
+									{% endfor %}
+								</div>
+							{% endif %}
+						</dd>
 					</dl>
 					<dl>
 						<dt>Text:</dt>
 						<dd>
 							<ul class="text-view">
-								<li><a href="#">Summary</a></li>
-								<li><a href="#">Full Text</a></li>
+								<!--<li><a href="#">Summary</a></li>-->
+								<li><a href="{{bill.get_absolute_url}}/text">Read Bill Text</a></li>
 							</ul>
 						</dd>
 					</dl>
@@ -85,14 +97,14 @@
 							<table>
 								{% for item in bill.get_major_events %}
 								<tr>
-									<td class="done">{{item.1.label}}</td>
-									<td>{{item.0|date:"DATE_FORMAT"}}</td>
+									<td class="done">{{item.label}}</td>
+									<td>{{item.date|date:"DATE_FORMAT"}}</td>
 								</tr>
 								{% endfor %}
 							
 								{% for item in bill.get_future_events %}
 								<tr>
-									<td class="pending">{{item}}</td>
+									<td class="pending">{{item.label}}</td>
 									<td>(not yet ocurred)</td>
 								</tr>
 								{% endfor %}
@@ -110,32 +122,23 @@
 			<div class="frame">
 				<div class="container">
 					<dl>
-						<dt>Last Action:</dt>
-						<dd><p>...</p></dd>
-					</dl>
-				</div>
-				<div class="container">
-					<dl>
-						<dt>Related:</dt>
-						<dd>
-							<p>...</p>
-						</dd>
-					</dl>
-				</div>
-				<div class="container">
-					<dl>
 						<dt>Votes:</dt>
 						<dd>
-							<p>...</p>
+							{% for v in bill.votes.all %}
+							<p><a href="{{v.get_absolute_url}}">{{v}}</a><br/>
+								{{v.created}}. {{v.result}}.</p>
+							{% endfor %}
 						</dd>
 					</dl>
 				</div>
+				{% comment %}
 				<div class="container">
 					<ul class="download-links">
 						<li><a href="#">Download as CSV</a></li>
 						<li><a href="#">Download as XML</a></li>
 					</ul>
 				</div>
+				{% endcomment %}
 			</div>
 		</div>
 	</div><!-- /overview -->

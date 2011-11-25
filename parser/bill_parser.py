@@ -48,7 +48,7 @@ class TermProcessor(Processor):
     REQUIRED_ATTRIBUTES = ['value']
     ATTRIBUTES = ['value']
     FIELD_MAPPING = {'value': 'name'}
-
+    
 
 class BillProcessor(Processor):
     REQUIRED_ATTRIBUTES = ['type', 'session', 'number']
@@ -97,7 +97,9 @@ class BillProcessor(Processor):
     def process_sponsor(self, obj, node):
         try:
             obj.sponsor = get_person(node.xpath('./sponsor')[0].get('id'))
-        except IndexError:
+        except IndexError: # no sponsor node
+            obj.sponsor = None
+        except TypeError: # no id attribute
             obj.sponsor = None
 
     def process_consponsors(self, obj, node):
@@ -289,6 +291,7 @@ def main(options):
 
     # delete bill objects that are no longer represented on disk
     if options.congress:
+    	# this doesn't work because seen_bill_ids is too big for sqlite!
     	Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
 
 if __name__ == '__main__':

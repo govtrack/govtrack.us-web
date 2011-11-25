@@ -36,7 +36,7 @@ class BillStatus(enum.Enum):
     vetoed_override_fail_originating_senate = enum.Item(25, 'Veto Override Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE')
     vetoed_override_fail_second_house = enum.Item(26, 'Veto Override Failed in House', xml_code='VETOED:OVERRIDE_FAIL_SECOND:HOUSE')
     vetoed_override_fail_second_senate = enum.Item(27, 'Veto Override Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_SECOND:SENATE')
-    enacted_signed = enum.Item(28, 'Bill Signed by the President', xml_code='ENACTED:SIGNED')
+    enacted_signed = enum.Item(28, 'Signed by the President', xml_code='ENACTED:SIGNED')
     enacted_veto_override = enum.Item(29, 'Veto Overridden', xml_code='ENACTED:VETO_OVERRIDE')
 
 

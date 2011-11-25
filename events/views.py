@@ -9,7 +9,6 @@ from common.pagination import paginate
 from datetime import datetime, time
 import simplejson
 
-import feeds
 from models import *
 from events.templatetags.events_utils import render_event
 
@@ -18,7 +17,7 @@ def get_feed_list(request):
     if feedlist == [""]:
         feedlist = []
     else:
-        feedlist = [feeds.Feed.from_name(f) for f in feedlist]
+        feedlist = [Feed.from_name(f) for f in feedlist]
     return feedlist
 
 @render_to('events/events_list.html')
@@ -26,10 +25,10 @@ def events_list(request):
     feedlist = get_feed_list(request)
     feedlistnames = [f.getname() for f in feedlist]
         
-    qs = feeds.Feed.get_events_for(feedlist if len(feedlist) > 0 else None).filter(when__lte=datetime.now()) # get all events
+    qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None).filter(when__lte=datetime.now()) # get all events
     page = paginate(qs, request, per_page=50)
     
-    no_arg_feeds = [feeds.ActiveBillsFeed(), feeds.IntroducedBillsFeed(), feeds.ActiveBillsExceptIntroductionsFeed(), feeds.EnactedBillsFeed(), feeds.AllVotesFeed(), feeds.AllCommitteesFeed()]
+    no_arg_feeds = [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.EnactedBillsFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
     no_arg_feeds = [(feed, feed.getname() in feedlistnames) for feed in no_arg_feeds]
         
     return {
@@ -43,7 +42,7 @@ def search_feeds(request):
     if request.POST["type"] == "person":
         from person.models import Person
         feedlist = [
-            feeds.PersonFeed(p.id)
+            Feed.PersonFeed(p.id)
             for p in Person.objects.filter(lastname__contains=request.POST["q"])
             if p.get_current_role() != None]
             
@@ -52,13 +51,13 @@ def search_feeds(request):
             if us.statenames[s].lower().startswith(request.POST["q"].lower()):
                 print s, us.statenames[s]
                 feedlist.extend([
-                    feeds.PersonFeed(p)
+                    Feed.PersonFeed(p)
                     for p in Person.objects.filter(roles__current=True, roles__state=s)])
                 
     if request.POST["type"] == "committee":
         from committee.models import Committee
         feedlist = [
-            feeds.CommitteeFeed(c)
+            Feed.CommitteeFeed(c)
             for c in Committee.objects.filter(name__contains=request.POST["q"], obsolete=False)]
                 
     def feedinfo(f):
@@ -79,7 +78,7 @@ def events_rss(request):
         description = "GovTrack tracks the activities of the United States Congress."
         
         def items(self):
-            return [render_event(item, feedlist) for item in feeds.Feed.get_events_for(feedlist)[0:20]]
+            return [render_event(item, feedlist) for item in Feed.get_events_for(feedlist)[0:20]]
             
         def item_title(self, item):
             return item["title"]

@@ -159,12 +159,11 @@ class Vote(models.Model):
         return self.result + " " + str(self.total_plus) + "/" + str(self.total_minus)
 
     def create_event(self):
-        from events.feeds import AllVotesFeed, PersonVotesFeed
-        from events.models import Event
+        from events.models import Feed, Event
         with Event.update(self) as E:
-            E.add("vote", self.created, AllVotesFeed())
+            E.add("vote", self.created, Feed.AllVotesFeed())
             for v in self.voters.all():
-                E.add("vote", self.created, PersonVotesFeed(v.person_id))
+                E.add("vote", self.created, Feed.PersonVotesFeed(v.person_id))
 	
     def render_event(self, eventid, feeds):
         import events.feeds

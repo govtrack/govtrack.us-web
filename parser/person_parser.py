@@ -132,9 +132,11 @@ def main(options):
             # Process roles of the person
             existing_roles = set(PersonRole.objects.filter(person=person).values_list('pk', flat=True))
             processed_roles = set()
+            role_list = []
             for role in node.xpath('./role'):
                 role = role_processor.process(PersonRole(), role)
                 role.person = person
+                role_list.append(role)
                 # Overwrite an existing role if there is one that is different.
                 try:
                     ex_role = PersonRole.objects.get(person=person, role_type=role.role_type, startdate=role.startdate, enddate=role.enddate)
@@ -142,15 +144,22 @@ def main(options):
                     role.id = ex_role.id
                     if role_processor.changed(ex_role, role) or options.force:
                         role.save()
-                        if not options.disable_events: 
-                            role.create_events()
                         if not options.force:
                             log.debug("Updated %s" % role)
                 except PersonRole.DoesNotExist:
                     log.debug("Created %s" % role)
                     role.save()
-                    if not options.disable_events:
-                        role.create_events()
+                        
+            # create the events for the roles after all have been loaded
+            # because we don't create events for ends of terms and
+            # starts of terms that are adjacent.
+            if not options.disable_events:
+                for i in xrange(len(role_list)):
+                    role_list[i].create_events(
+                        role_list[i-1] if i > 0 else None,
+                        role_list[i+1] if i < len(role_list)-1 else None
+                        )
+            
         except Exception, ex:
             # Catch unexpected exceptions and log them
             log.error('', exc_info=ex)

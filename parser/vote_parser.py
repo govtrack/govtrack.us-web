@@ -1,5 +1,5 @@
 """
-Parser of data/us/committees.xml
+Parser of roll call votes
 """
 from lxml import etree
 import glob

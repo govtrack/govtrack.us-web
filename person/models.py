@@ -190,19 +190,18 @@ class PersonRole(models.Model):
             else:
                 return self.get_title_name(False) + " for " + statenames[self.state] + "'s District " + str(self.district)
 
-    def create_events(self):
+    def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()
-        if self.enddate < now-datetime.timedelta(days=365*2):
-            return
-        from events.feeds import PersonFeed
-        from events.models import Event
+        from events.models import Feed, Event
         with Event.update(self) as E:
-            E.add("termstart", self.startdate, PersonFeed(self.person_id))
-            if self.enddate <= now: # because we're not sure of end date until it happens
-                E.add("termend", self.enddate, PersonFeed(self.person_id))
-    
+            f = Feed.PersonFeed(self.person_id)
+            if not prev_role or not self.continues_from(prev_role):
+                E.add("termstart", self.startdate, f)
+            if not next_role or not next_role.continues_from(self):
+                if self.enddate <= now: # because we're not sure of end date until it happens
+                    E.add("termend", self.enddate, f)
+        
     def render_event(self, eventid, feeds):
-        import events.feeds
         return {
             "type": "Elections",
             "date_has_no_time": True,

@@ -21,6 +21,9 @@ How to use parsers
 ==================
 
 Run ./parse.py <thing>
-Available things:
+Available parsers (to be run in this order):
  * person - Person and PersonRole objects
- * committee - Committee and CommitteeMember objects
+ * committee - Committee, CommitteeMember, CommitteeMeeting objects
+ * bill - BillTerm, Bill objects (--congress NNN is a good idea)
+ * vote - Vote objects (--congress NNN is a good idea)
+ 

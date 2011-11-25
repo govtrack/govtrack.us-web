@@ -11,7 +11,7 @@ class BillMockup(object):
 class BillTitleTestCase(TestCase):
     def test_title_calculation(self):
         bill = BillMockup(congress=112,
-                          bill_type=BillType.house_of_representatives,
+                          bill_type=BillType.house_bill,
                           number=525)
         # Simple test
         titles = (('short', 'abc', 'title1'),)

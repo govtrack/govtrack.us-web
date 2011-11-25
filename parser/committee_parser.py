@@ -153,8 +153,8 @@ def main(options):
                 try:
                     sobj = Committee.objects.get(code=committee.get('code')+subcom.get('code'), committee=cobj)
                 except Committee.DoesNotExist:
-                    log.error('Could not process SubCom with code %s which parent Com has code %s' % (
-                        subcom.get('code'), cobj.code))
+                    log.error('In committee membership file, reference to unknown committee %s-%s' % (
+                        cobj.code, subcom.get('code')))
                 else:
                     # Process members of current subcommittee node
                     for member in subcom.xpath('./member'):

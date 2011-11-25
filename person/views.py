@@ -19,7 +19,7 @@ from person.types import RoleType
 from person.video import get_youtube_videos, get_sunlightlabs_videos
 from person.util import get_committee_assignments
 
-from events.feeds import PersonFeed
+from events.models import Feed
 
 from smartsearch.manager import SearchManager
 from search import person_search_manager
@@ -77,7 +77,7 @@ def person_details(request, pk):
             'recent_video': recent_video,
             'videos': videos,
             'committeeassignments': get_committee_assignments(person),
-            'feed': PersonFeed(person.id),
+            'feed': Feed.PersonFeed(person.id),
             }
 
 

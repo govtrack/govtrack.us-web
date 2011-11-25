@@ -4,13 +4,152 @@ from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
+import re
+
 class Feed(models.Model):
-    """Maps feed names to integer keys used in the Event model."""
+    """Each Feed has a code name that can be used to reconstruct information about the feed."""
     feedname = models.CharField(max_length=64, unique=True, db_index=True)
 
     def __unicode__(self):
         return self.feedname
+
+    @staticmethod
+    def from_name(feedname):
+        raise Exception("Not implemented.")
+
+    @staticmethod
+    def get_events_for(feeds):
+        # This method returns the events in a set of feeds. Because
+        # events can occur in multiple feeds, values(...).distinct() is
+        # used to return a distinct set of events.
         
+        qs = Event.objects.all()
+        qs = qs.order_by("-when")
+        
+        if feeds != None:
+            qs = qs.filter(feed__in=feeds)
+        
+        # this causes the QuerySet to return dicts rather than Events.
+        qs = qs.values("source_content_type", "source_object_id", "eventid", "when").distinct()
+        
+        return qs
+        
+    def get_events(self):
+        return Feed.get_events_for((self,))
+        
+    # constructors for feeds
+
+    @staticmethod # private method
+    def get_noarg_feed(feedname):
+        feed, is_new = Feed.objects.get_or_create(feedname=feedname)
+        return feed
+
+    @staticmethod
+    def ActiveBillsFeed():
+        return Feed.get_noarg_feed("misc:activebills")
+        #"All Activity on Legislation"
+    
+    @staticmethod
+    def EnactedBillsFeed():
+        return Feed.get_noarg_feed("misc:enactedbills")
+        #"Enacted Bills"
+    
+    @staticmethod
+    def IntroducedBillsFeed():
+        return Feed.get_noarg_feed("misc:introducedbills")
+        #"Introduced Bills and Resolutions"
+    
+    @staticmethod
+    def ActiveBillsExceptIntroductionsFeed():
+        return Feed.get_noarg_feed("misc:activebills2")
+        #"All Activity on Legislation Except New Introductions"
+    
+    @staticmethod
+    def AllCommitteesFeed():
+        return Feed.get_noarg_feed("misc:allcommittee")
+        #"All Committee Activity"
+    
+    @staticmethod
+    def AllVotesFeed():
+        return Feed.get_noarg_feed("misc:allvotes")
+        #"All Roll Call Votes"
+
+    # constructors that take object instances, object IDs, or the encoded
+    # object reference used in feed names and returns (possibly creating)
+    # a Feed object.
+
+    @staticmethod # private method
+    def get_arg_feed(prefix, objclass, id_ref_instance, dereference, reference):
+        # Always dereference id's and references before get_or_created to
+        # prevent the creation of feeds that do not correspond with objects.
+        if type(id_ref_instance) == int:
+            obj = objclass.objects.get(pk=id_ref_instance)
+        elif type(id_ref_instance) == str:
+            obj = dereference(id_ref_instance)
+        elif type(id_ref_instance) == objclass:
+            obj = id_ref_instance
+        else:
+            raise ValueError(unicode(id_ref_instance))
+       
+        feedname = prefix + ":" + reference(obj)
+        feed, is_new = Feed.objects.get_or_create(feedname=feedname)
+        feed._ref = obj
+        return feed
+
+    @staticmethod
+    def _PersonFeed(prefix, id_ref_instance):
+        from person.models import Person
+        return Feed.get_arg_feed(prefix, Person, id_ref_instance,
+            lambda id : Person.objects.get(id=id),
+            lambda p : str(p.id))
+
+    @staticmethod
+    def PersonFeed(id_ref_instance):
+        return Feed._PersonFeed("p", id_ref_instance)
+        
+    @staticmethod
+    def PersonVotesFeed(id_ref_instance):
+        return Feed._PersonFeed("pv", id_ref_instance)
+        
+    @staticmethod
+    def PersonSponsorshipFeed(id_ref_instance):
+        return Feed._PersonFeed("ps", id_ref_instance)
+    
+    @staticmethod
+    def BillFeed(id_ref_instance):
+        from bill.models import Bill, BillType
+        def dereference(ref):
+            m = re.match(r"([a-z]+)(\d+)-(\d+)", ref)
+            bill_type = BillType.by_xml_code(m.group(1))
+            bill = Bill.objects.get(congress=m.group(2), bill_type=bill_type, number=m.group(3))
+            return bill
+        def reference(bill):
+            bt = BillType.by_value(bill.bill_type)
+            return bt.xml_code + str(bill.congress) + "-" + str(bill.number)
+        return Feed.get_arg_feed("bill", Bill, id_ref_instance,
+            dereference,
+            reference)
+
+    @staticmethod
+    def IssueFeed(id_ref_instance):
+        from bill.models import BillTerm
+        def dereference(ref):
+            if ref.isdigit():
+                return BillTerm.objects.get(id=int(ref))
+            return BillTerm.objects.get(name=ref)
+        return Feed.get_arg_feed("crs", BillTerm, id_ref_instance,
+            dereference,
+            lambda ix : str(ix.id))
+        
+    @staticmethod
+    def CommitteeFeed(id_ref_instance):
+        from committee.models import Committee
+        return Feed.get_arg_feed("committee", Committee, id_ref_instance,
+            lambda ref : Committee.objects.get(code=ref),
+            lambda obj : obj.code)
+        
+    # DistrictFeed?
+
 class Event(models.Model):
     """
     Holds info about an event in a feed. This record doesn't contain any information about
@@ -88,6 +227,7 @@ class Event(models.Model):
         return unicode(self.source) + " " + unicode(self.eventid) + " / " + unicode(self.feed)
         
     def render(self, feeds=None):
+        if self.source == None: print self.id
         return self.source.render_event(self.eventid, feeds)
     
     # This is used to update the events for an object and delete any events that are not updated.
@@ -101,8 +241,6 @@ class Event(models.Model):
             for event in Event.objects.filter(**Event.sourcearg(source)):
                 self.existing_events[event.id] = True
                 
-            self.feed_cache = {}
-            
             try:
                 self.next_id = Event.objects.order_by('-id')[0].id + 1
             except IndexError:
@@ -118,16 +256,9 @@ class Event(models.Model):
                     self.add(eventid, when, f)
                 return
             
-            # Convert the feeds.Feed object feed into a models.Feed fieldrec.
-            if feed in self.feed_cache:
-                feedrec = self.feed_cache[feed]
-            else:
-                feedrec, created = Feed.objects.get_or_create(feedname=feed.getname())
-                self.feed_cache[feed] = feedrec
-            
             # Create the record for this event for this feed, if it does not exist.
             event, created = Event.objects.get_or_create(
-                feed = feedrec,
+                feed = feed,
                 eventid = eventid,
                 defaults = {"id": self.next_id, "when": when},
                 **Event.sourcearg(self.source)

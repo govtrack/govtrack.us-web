@@ -1353,11 +1353,15 @@ aside .download-links { padding: 31px 0 0 	}
     width: 120px;
     margin: 0 20px 23px 0;
 	}
+	.advanced-search form li.wide {
+		width: 250px;
+		}
 .advanced-search label {
     font-size: 12px;
     line-height: 24px;
     text-transform: uppercase;
     color: #555;
+    display: block;
 	}
 select, input.text {
     font: 12px/16px /*CallunaRegular, Georgia, 'Times New Roman', Times, serif*/Arial, sans-serif;
@@ -1367,7 +1371,6 @@ select, input.text {
 	-webkit-border-radius: 3px; 
 	border-radius: 3px;
 	-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box; 
-
 	}
 .advanced-search select {
     width: 120px;
@@ -1375,7 +1378,7 @@ select, input.text {
     background-color: white;
 	}
 .advanced-search input.text {
-    width: 246px;
+    width: 165px;
     padding: 2px 5px;
     height: 18px;
     line-height: 18px;
@@ -1397,6 +1400,22 @@ select, input.text {
     border: 0;
     line-height: 18px;
     font-size: 15px;
+    font-family: CallunaSansRegular;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    color: #fff;
+	}
+.advanced-search .btn-search-small {
+    background: url(../images/btn-advans-search-small.png) no-repeat;
+    width: 66px;
+    height: 24px;
+    display: inline-block;
+    overflow: hidden;
+    padding: 2px 0 2px;
+    border: 0;
+    line-height: 18px;
+    font-size: 13px;
     font-family: CallunaSansRegular;
     text-transform: uppercase;
     text-align: center;

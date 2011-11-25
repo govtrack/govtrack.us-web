@@ -9,19 +9,19 @@ from common.pagination import paginate
 
 from cache_utils.decorators import cached
 
-from events import feeds
+from events.models import Feed
 
 from datetime import datetime, timedelta
 
 @render_to('website/index.html')
 def index(request):
     import twitter
-    api = twitter.Api()
+    twitter_api = twitter.Api()
     
     # TODO cache
     return {
-        'events': feeds.Feed.get_events_for(None).filter(when__lte=datetime.now())[0:6],
-        'tweets': api.GetUserTimeline("govtrack", since_id=0, count=3),
+        'events': Feed.get_events_for(None).filter(when__lte=datetime.now())[0:6],
+        'tweets': twitter_api.GetUserTimeline("govtrack", since_id=0, count=3),
         'blog': get_blog_items()[0:2],
         }
 		  
