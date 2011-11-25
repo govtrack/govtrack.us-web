@@ -36,13 +36,12 @@ def normalize_name(name):
     return name.lower()
 
 
-def get_term(name):
+def get_term(name, congress):
     global TERM_CACHE
     if not TERM_CACHE:
         for term in BillTerm.objects.all():
-            TERM_CACHE.setdefault(normalize_name(term.name), []).append(term)
-    return TERM_CACHE[normalize_name(name)]
-
+        	TERM_CACHE[(term.term_type, normalize_name(term.name))] = term
+    return TERM_CACHE[(TermType.new if congress >= 111 else TermType.old, normalize_name(name))]
 
 class TermProcessor(Processor):
     REQUIRED_ATTRIBUTES = ['value']
@@ -73,7 +72,7 @@ class BillProcessor(Processor):
             
         obj.save() # save before using m2m relations
         self.process_committees(obj, node)
-        self.process_terms(obj, node)
+        self.process_terms(obj, node, obj.congress)
         self.process_consponsors(obj, node)
         return obj
 
@@ -121,54 +120,23 @@ class BillProcessor(Processor):
         return int(value)
 
     def process_committees(self, obj, node):
-        items = []
-        for subnode in node.xpath('./committees/committee'):
-            items.append({'code': subnode.get('code'),
-                          'name': subnode.get('name'),
-                          'subcommittee': subnode.get('subcommittee'),
-                          })
-
         comlist = []
-        for x, item in enumerate(items):
-            # If subcommittee then continue
-            # because we already process it in previous step
-            if item['subcommittee']:
-                continue
+        for subnode in node.xpath('./committees/committee'):
+            if subnode.get('code') == "": continue
+            try:
+                com = Committee.objects.get(code=subnode.get('code'))
+            except Committee.DoesNotExist:
+                log.error('Could not find committee %s' % subnode.get('code'))
             else:
-                processed = False
-                # Ok, current item is committee
-                # If next item exists
-                if x + 1 <= len(items) - 1:
-                    # if next item is subcommittee
-                    if items[x + 1]['subcommittee']:
-                        # then save next item
-                        processed = True
-                        next_item = items[x + 1]
-                        try:
-                            com = Committee.objects.get(name=next_item['subcommittee'],
-                                                        committee__code=item['code'])
-                        except Committee.DoesNotExist:
-                            log.error('Could not find subcommittee [name: %s, parent_code: %s]' % (next_item['subcommittee'], item['code']))
-                        else:
-                            comlist.append(com)
-                if not processed:
-                    # Next item is not subcommittee
-                    # OR it is the last item in list
-                    # Save current committee
-                    try:
-                        com = Committee.objects.get(code=item['code'])
-                    except Committee.DoesNotExist:
-                        log.error('Could not find committee [code: %s]' % item['code'])
-                    else:
-                        comlist.append(com)
+                comlist.append(com)
         obj.committees = comlist
 
-    def process_terms(self, obj, node):
+    def process_terms(self, obj, node, congress):
         termlist = []
         for subnode in node.xpath('./subjects/term'):
             name = subnode.get('name')
             try:
-                termlist.extend(get_term(name))
+                termlist.append(get_term(name, congress))
             except KeyError:
                 log.error('Could not find term [name: %s]' % name)
         obj.terms = termlist

@@ -5,6 +5,16 @@
 {% block head %}
 <style>
 .stats th { cursor: pointer; }
+.party_D, .party_I, .party_R {
+	cursor: default;
+	color: white;
+}
+.color_D { background-color: #0041a1; }
+.color_R { background-color: #e60e13; }
+.color_I { background-color: #921b85; }
+.party_D { background-color: #0041a1; }
+.party_R { background-color: #e60e13; }
+.party_I { border: 1px solid black; color: black; }
 </style>
 {% endblock %}
 
@@ -79,9 +89,13 @@ $(document).ready(function() {
     <dd>{{ vote.created|date:"DATETIME_FORMAT" }} ({{ vote.congress|ordinal }} Congress)</dd>
     <dt>Result:</dt>
     <dd>{{ vote.result }}</dd>
-    {% if related_bill %}
-    <dt>Bill:</dt>
-    <dd><a href="{[related_bill.get_absolute_url}}">{{related_bill}}</a></dd>
+    {% if vote.related_bill %}
+    <dt>Related Bill:</dt>
+    <dd><a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>
+    	<br/>Introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a>
+    	on {{vote.related_bill.introduced_date|date:"F j, Y"}}
+    	<br/>Current Status: {{vote.related_bill.get_current_status_display}}
+    	</dd>
     {% endif %}
 </dl>
 {% endblock %}
@@ -94,7 +108,7 @@ $(document).ready(function() {
         <thead>
             <tr>
                 <th></th>
-                <th>Totals</th>
+                <th colspan="2">Totals</th>
                 {% for party in totals.parties %}
                     <th>{{ party }}</th>
                 {% endfor %}
@@ -103,25 +117,40 @@ $(document).ready(function() {
         <tbody>
             {% for item in totals.options %}
             <tr>
-                <td>{{ item.option }}</td>
+                <td style="font-weight: bold; ">{{ item.option }}</td>
+                <td style="font-weight: bold; padding: 0 6px 0 6px;">{{ item.count }}</td>
                 <td>
-                    {{ item.count }} ({{ item.percent_int }}%)
+                	<!--
+					<div style="width: {{item.chart_width}}px; background-color: black; color: white; padding: 1px; text-align: right; float: left; padding-right: 5px;"> 
+						{{ item.count }}
+					</div>
+					-->
+					{% for count in item.party_counts %}
+						<div style="width: {{count.chart_width}}px; float: left;" class="color_{{count.party|slice:"0:1"}}"> 
+							&nbsp;
+						</div>
+					{% endfor %}
+					<div style="float: left; padding-left: 5px">
+                    	{{ item.percent }}%
+                    </div>
                 </td>
                 {% for count in item.party_counts %}
-                <td>{{ count }}</td>
+                <td>{{ count.count }}</td>
                 {% endfor %}
             </tr>
             {% endfor %}
             <tr>
                 <td>Required:</td>
-                <td>{{ vote.required }}</td>
+                <td colspan="2">{{ vote.required }}</td>
             </tr>
+            {% comment %}
             <tr class="gradient">
-                <td class="empty" colspan="2"></td>
+                <td class="empty" colspan="3"></td>
                 {% for count in totals.party_counts %}
                 <td>{% vote_pie count.yes count.no count.other %}</td> 
                 {% endfor %}
             </tr>
+            {% endcomment %}
         </tbody>
     </table>
     <aside>
@@ -149,7 +178,7 @@ $(document).ready(function() {
 			<div class="map-box">
 				<h3>Cartogram</h3>
 				<img src="images/cartogram.png" width="378" height="207" alt="image description">
-				<div class="tooltip">
+				<div class="tooltip" style="display: none">
 					<div class="holder">
 						<div class="frame">
 							<p>Cartograms give an equal area in an image to an equal number of votes by distorting the image. Senate vote cartograms are shown with each state stretched or shrunk so that the states each take up an equal area because each state has two votes. For House votes, it is each congressional district which is stretched or shrunk.</p>
@@ -157,6 +186,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 			</div>
+			<script>$('.map-box').hover(function() { $(this).find('.tooltip').show(); }, function() { $(this).find('.tooltip').hide(); });</script>
 		</div>
 	</div>
 </div>
@@ -185,7 +215,7 @@ $(document).ready(function() {
                 <td><nobr>{{ voter.option.value }}</nobr></td>
                 <td>
                     {% if voter.voter_type_is_member %}
-                        {{ voter.person.role.state }}{% if voter.person.role.district %} - {{ voter.person.role.district|ordinal|rjust:5 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
+                        {{ voter.person.role.state }}{% if voter.person.role.district %} {{ voter.person.role.district|ordinal|rjust:5 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
                     {% else %}
                      -
                     {% endif %}
@@ -201,7 +231,19 @@ $(document).ready(function() {
                         <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal">{{ voter.person.name_no_details_lastfirst }}</a>
                     {% endif %}
                 </td>
-                <td>{% if voter.voter_type == 3 %}{{ voter.person.role.party }}{% endif %}</td>
+                <td>
+                	{% if voter.voter_type == 3 %}
+                		{% if voter.person.role.party|slice:"0:1" in "DIR" %}
+                			<span class="party_{{voter.person.role.party|slice:"0:1"}}" title="{{ voter.person.role.party }}">
+                				&nbsp;
+                				{{voter.person.role.party|slice:"0:1"}}
+                				&nbsp;
+                			</span>
+                		{% else %}
+	                		{{ voter.person.role.party }}
+                		{% endif %}
+                	{% endif %}
+                </td>
             </tr>
         {% endfor %}
         </table>

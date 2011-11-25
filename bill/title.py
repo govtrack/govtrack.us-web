@@ -6,12 +6,12 @@ import re
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
 
-def get_bill_number(bill):
+def get_bill_number(bill, show_congress_number="ARCHIVAL"):
     "Compute display form of bill number"
 
     from bill.models import BillType
     ret = '%s %s' % (BillType.by_value(bill.bill_type).label, bill.number)
-    if bill.congress != settings.CURRENT_CONGRESS:
+    if (bill.congress != settings.CURRENT_CONGRESS and show_congress_number == "ARCHIVAL") or show_congress_number == "ALL":
         ret += ' (%s)' % ordinal(bill.congress)
     return ret
 

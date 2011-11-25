@@ -131,7 +131,7 @@
 {% block crumbs %}
 <ul>
 	<li><a href="/congress">Congress</a></li>
-	<li>Find Members of Congress</li>
+	<li>Members of Congress</li>
 </ul>
 {% endblock %}
 

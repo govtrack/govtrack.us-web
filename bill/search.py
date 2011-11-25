@@ -30,5 +30,6 @@ def bill_search_manager():
     sm = SearchManager(Bill)
     sm.add_option('congress', type="select", filter=congress_filter, choices=congress_list())
     sm.add_option('sponsor', type="select")
+    sm.add_option('bill_type')
     sm.add_option('current_status')
     return sm

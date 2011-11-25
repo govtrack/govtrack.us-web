@@ -126,7 +126,7 @@ class Vote(models.Model):
         details = []
         for option in self.options.all():
             voters = voters_by_option.get(option, [])
-            percent = math.ceil((len(voters) / float(total_count)) * 100)
+            percent = round(len(voters) / float(total_count) * 100.0)
             party_stats = dict((x, 0) for x in all_parties)
             for voter in voters:
                 party_stats[voter.person.role.party] += 1
@@ -138,16 +138,23 @@ class Vote(models.Model):
                 else:
                     total_party_stats[voter.person.role.party]['other'] += 1
             party_counts = [party_stats.get(x, 0) for x in all_parties]
+            party_counts = [{"party": all_parties[i], "count": c, 'chart_width': 190 * c / total_count} for i, c in enumerate(party_counts)]
                 
             detail = {'option': option, 'count': len(voters),
-                'percent': percent, 'percent_int': int(percent), 'party_counts': party_counts}
+                'percent': int(percent), 'party_counts': party_counts,
+            	'chart_width': 190 * int(percent) / 100}
             if option.key == '+':
                 detail['yes'] = True
             if option.key == '-':
                 detail['no'] = True
+            if option.key in ('0', 'P'):
+                detail['hide_if_empty'] = True
             details.append(detail)
 
         party_counts = [total_party_stats[x] for x in all_parties]
+        
+        # hide Present/Not Voting if no one voted that way
+        details = [d for d in details if d["count"] > 0 or "hide_if_empty" not in d]
 
         totals = {'options': details, 'total_count': total_count,
                 'party_counts': party_counts, 'parties': all_parties,

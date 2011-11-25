@@ -57,3 +57,7 @@ def get_blog_items():
 @render_to('website/congress_home.html')
 def congress_home(request):
     return {}
+    
+@render_to('website/search.html')
+def search(request):
+    return {}

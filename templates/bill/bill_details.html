@@ -59,6 +59,8 @@
 	
 	<h2>Bill Overview</h2>
 		
+	CRS SUMMARY, RELATED LEG, STATUS WIDGET
+	
 	<div class="overview">
 		<div class="holder">
 			<div class="frame">
@@ -70,10 +72,10 @@
 							{% if bill.cosponsors.all|length == 0 %}
 								none
 							{% else %}
-								<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show cosponsors ({{bill.cosponsors.all|length}})</a>
+								<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show cosponsors ({{bill.cosponsor_count}})</a>
 								<div id="cosponsors" style="display: none">
 									{% for cosp in bill.cosponsor_records %}
-									<div>{{cosp.person}} {% if cosp.joined != bill.introduced_date %}({{cosp.joined}}){% endif %} {% if cosp.withdraw %}  (withdrawn {{cosp.withdrawn}}){% endif %}</div>
+									<div><a href="{{cosp.person.get_absolute_url}}">{{cosp.person}}</a> {% if cosp.joined != bill.introduced_date %}(joined {{cosp.joined}}{% if cosp.withdrawn %}; withdrawn {{cosp.withdrawn}}{% endif %}){% else %}{% if cosp.withdrawn %}  (withdrawn {{cosp.withdrawn}}){% endif %}{% endif %}</div>
 									{% endfor %}
 								</div>
 							{% endif %}
@@ -112,6 +114,64 @@
 						</dd>
 					</dl>
 				</div><!-- /container -->
+				
+				<div class="container">
+					<dl>
+						{% if bill.committees.exists %}
+						<dt>Committee Assignments:</dt>
+						<dd>
+							{% for c in bill.committees.all %}
+								{% if not c.committee %}
+									<p><a href="{{c.get_absolute_url}}">{{c}}</a></p>
+									{% for s in bill.committees.all %}
+										{% if s.committee == c %}
+											<p style="margin-left: 2em"><a href="{{s.get_absolute_url}}">{{s}}</a></p>
+										{% endif %}
+									{% endfor %}
+								{% endif %}
+							{% endfor %}
+							<p>The committee chair determines whether a bill will move past the committee stage.</p>
+						</dd>
+						{% endif %}
+					</dl>
+				</div>
+				
+				<div class="container">
+					<dl>
+						<dt>Primary Source</dt>
+						<dd>
+							<p><a href="{{bill.thomas_link}}">THOMAS (The Library of Congress)</a><br/>THOMAS is updated generally one day after events occur and events since the last update may not be reflected here.</p>
+						</dd>
+						<dt>Citation</dt>
+						<dd>
+							<script>function show_cite(fmt) {
+								var v = $("#cite_" + fmt).is(":visible");
+								$('#cite_ala, #cite_mla, #cite_wikipedia').slideUp();
+								if (!v) $("#cite_" + fmt).slideDown();
+								return false;
+							}</script>
+							<p>This page can be cited in one of these formats (click for details):
+								<a href="#" onclick="return show_cite('ala')">ALA</a>,
+								<a href="#" onclick="return show_cite('mla')">MLA</a>,
+								<a href="#" onclick="return show_cite('wikipedia')">Wikipedia Template</a>.
+							</p>
+							<p id="cite_ala" style="display: none">{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}. ({{bill.introduced_date|date:"Y"}}). In GovTrack.us (database of federal legislation). Retrieved {% now "F j, Y" %}, from {{request.build_absolute_uri}}</p>
+
+							<p id="cite_mla" style="display: none">&ldquo;{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}.&rdquo; GovTrack.us (database of federal legislation). {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
+
+							<p id="cite_wikipedia" style="display: none">{{cite web<br/>
+							|url={{request.build_absolute_uri}}<br/>
+							|title={{bill.display_number_with_congress_number}}<br/>
+							|accessdate={% now "F j, Y" %}<br/>
+							|author={{bill.congress|ordinal}} Congress ({{bill.introduced_date|date:"Y"}})<br/>
+							|date={{bill.introduced_date|date:"F j, Y"}}<br/>
+							|work=Legislation<br/>
+							|publisher=GovTrack.us<br/>
+							|quote={{bill.title_no_number}}<br/>
+							}}</p>
+						</dd>
+					</dl>
+				</div>
 			</div><!-- /frame -->
 		</div><!-- /holder -->
 	</div><!-- /overview -->
@@ -122,6 +182,7 @@
 			<div class="frame">
 				<div class="container">
 					<dl>
+						{% if bill.votes.exists %}
 						<dt>Votes:</dt>
 						<dd>
 							{% for v in bill.votes.all %}
@@ -129,6 +190,19 @@
 								{{v.created}}. {{v.result}}.</p>
 							{% endfor %}
 						</dd>
+						{% endif %}
+
+						{% if bill.terms.exists %}
+						<dt>Subject Areas:</dt>
+						<dd>
+							<p>Use these subject areas to explore related legislation:</p>
+							<div style="max-height: 15em; overflow: auto">
+							{% for term in bill.terms.all %}
+								<div><a {% if not term.parent %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}">{{term}}</a></div>
+							{% endfor %}
+							</div>
+						</dd>
+						{% endif %}
 					</dl>
 				</div>
 				{% comment %}

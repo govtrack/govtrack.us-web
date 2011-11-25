@@ -99,7 +99,6 @@ h3 {
 }
 h4 {
 	font-size: 15px;
-	text-transform: uppercase;
 }
 h5 { 
 	font-family: CallunaSansRegular;
@@ -399,7 +398,7 @@ h2 span, h3 span, h4 span, span span, a em {
         padding-bottom: 0;
     	}
     .intro-box h1 {
-        font: normal 66px/60px CallunaRegular;
+        font: normal 66px/70px CallunaRegular;
         color: #fff;
         margin: 10px 0 34px;
         text-shadow: 0 1px 1px #066982;
@@ -531,7 +530,7 @@ h2 span, h3 span, h4 span, span span, a em {
         float: left;
         width: 620px;
     	}
-    .entries-box .two-columns { width: 640px 	}
+    .entries-box .two-columns { width: 600px 	}
     .entries-box .column {
         width: 300px;
         float: left;
@@ -660,7 +659,6 @@ h2 span, h3 span, h4 span, span span, a em {
 .entries-box .aside {
     width: 300px;
     float: right;
-    padding: 41px 0 0;
 	}
 .rss-block { margin: 0 0 27px 	}
 .aside h4 {
@@ -1048,7 +1046,7 @@ aside .download-links { padding: 31px 0 0 	}
         background: url(../images/bg-grey-box-section.gif) repeat-x;
         padding: 15px 11px 12px 13px;
     	}
-        .overview .container dt {
+        .overview .container > dl > dt {
             width: 87px;
             float: left;
             clear: left;
@@ -1557,3 +1555,7 @@ input[type=text].default {
 	color: #888;
 	}
 	
+#from_the_floor .date {
+	display: block;
+	margin-bottom: .5em;
+	}

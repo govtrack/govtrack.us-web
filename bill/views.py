@@ -46,7 +46,7 @@ def bill_text(request, congress, type_slug, number):
     
     pv_bill_id = None
     pvinfo = query_popvox("v1/bills/search", {
-            "q": bill.display_number()
+            "q": bill.display_number
         })
     try:
         pv_bill_id = pvinfo["items"][0]["id"]

@@ -10,7 +10,7 @@ DEBUG = not ("RELEASE" in os.environ)
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Grigoriy Petukhov', 'lorien@lorien.name'),
+    ('Joshua Tauberer', 'tauberer@govtrack.us'),
 )
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

@@ -1046,7 +1046,7 @@ aside .download-links { padding: 31px 0 0 	}
         background: url(../images/bg-grey-box-section.gif) repeat-x;
         padding: 15px 11px 12px 13px;
     	}
-        .overview .container dt {
+        .overview .container > dl > dt {
             width: 87px;
             float: left;
             clear: left;
@@ -1544,6 +1544,14 @@ select, input.text {
 	}
 	
 /* JT added things below here */
+
+.breadcrumbs h1 {
+	width: 940px;
+	margin: 0 auto;
+	font-size: 38px;
+	color: #fff;
+	text-shadow: 0 1px 1px #066982;
+}
 
 .clear {
 	clear: both;

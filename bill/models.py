@@ -76,6 +76,10 @@ class Bill(models.Model):
     introduced_date = models.DateField()
     cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor')
 
+    class Meta:
+        ordering = ('congress', 'bill_type', 'number')
+        unique_together = ('congress', 'bill_type', 'number')
+        
     def __unicode__(self):
         return self.title
         
@@ -83,22 +87,32 @@ class Bill(models.Model):
     def get_absolute_url(self):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
         
+    @property
     def display_number(self):
         return get_bill_number(self)
+    @property
+    def display_number_no_congress_number(self):
+        return get_bill_number(self, show_congress_number="NONE")
+    @property
+    def display_number_with_congress_number(self):
+        return get_bill_number(self, show_congress_number="ALL")
 
+    @property
     def title_no_number(self):
         return get_primary_bill_title(self, self.titles, with_number=False)
         
+    @property
     def bill_type_slug(self):
         return BillType.by_value(self.bill_type).slug
 
+    @property
+    def cosponsor_count(self):
+        return self.cosponsor_records.filter(withdrawn=None).count()
+    @property
     def cosponsor_records(self):
         return Cosponsor.objects.filter(bill=self).order_by('joined', 'person__lastname', 'person__firstname')
 
-    class Meta:
-        ordering = ('congress', 'bill_type', 'number')
-        unique_together = ('congress', 'bill_type', 'number')
-        
+    @property
     def current_status_description(self):
         return self.get_status_text(self.current_status, self.current_status_date)
 
@@ -184,6 +198,10 @@ class Bill(models.Model):
             status = "This bill was enacted after a congressional override of the President's veto on %s."
         
         return status % date
+
+    def thomas_link(self):
+        return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%d:%s%d:" \
+            % (self.congress, self.bill_type_slug, self.number)
 
     def create_events(self, actions):
         from events.models import Feed, Event
