@@ -1,0 +1,58 @@
+{% extends 'master.html' %}
+{% load humanize %}
+
+{% block body_class %}{% endblock %}
+
+{% block title %}{{bill|truncatewords:6}} - Full Text - GovTrack.us{% endblock %}
+
+{% block meta_description %}{{bill}}{% endblock %}
+
+{% block extra_css %}
+<style>
+.heading-box .article { padding: 0; }
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+<li><a href="{% url congress_home %}">Congress</a></li>
+<li><a href="/congress/bills">Bills</a></li>
+<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
+<li>Bill Text</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+	<h1>Text of {{bill.display_number}}</h1>
+	
+	<div class="info">
+		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
+		
+		<p>{{bill.title_no_number}}</p>
+	</div><!-- /info -->
+{% endblock %}
+
+{% block body %}
+
+{% if not pv_bill_id %}
+	<p>The text of this bill is not yet available. Please check back soon.</p>
+{% else %}
+	<script src="https://www.popvox.com/widgets/bill-text.js?billid={{pv_bill_id}}&width=940&height=800"> </script>
+	
+	<script>
+	function adjust_widget_size() {
+		var w = $('#popvox_billtext_widget');
+		if (!w.length) return;
+		
+		var h = $(window).height() - w.offset().top + $(window).scrollTop() - 5;
+		if (h < 150) h = 150;
+		if (h > $(window).height()) h = $(window).height();
+		w.css({"height": h });
+	}
+	$(window).resize(adjust_widget_size);
+	$(window).scroll(adjust_widget_size);
+	adjust_widget_size();
+	</script>
+{% endif %}
+
+{% endblock %}

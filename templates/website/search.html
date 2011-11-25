@@ -1,0 +1,31 @@
+{% extends "master.html" %}
+{% block title %}Search GovTrack.us{% endblock %}
+{% block style %}
+{% endblock %}
+{% block crumbs %}
+	<h1>Search Congress</h1>
+{% endblock %}
+{% block override_content %}
+<div id="content">
+
+<div class="advanced-search">
+	<form method="get" style="width: auto; border: none; padding: 0;">
+	<fieldset>
+			<label for="search_entry">Search bills, Members of Congress, committees...</label>
+			<input id="search_entry" name="q" type="text" class="text" value="{{request.GET.q}}" style="width: 300px"/>
+			<input class="btn-search-small" type="submit" value="Search"/>
+    </fieldset>
+	</form>
+	
+	<div style="margin: 1.5em 0 2em 0">
+	{% if request.GET.q %}
+		<h2>Results</h2>
+		{% if not results %}
+			<p>Sorry, we couldn&rsquo;t find anything that matched your search.</p>
+		{% else %}
+		{% endif %}
+	{% endif %}
+	</div>
+</div>
+{% endblock %}
+
