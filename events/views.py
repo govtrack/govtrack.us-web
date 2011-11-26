@@ -23,13 +23,13 @@ def get_feed_list(request):
 @render_to('events/events_list.html')
 def events_list(request):
     feedlist = get_feed_list(request)
-    feedlistnames = [f.getname() for f in feedlist]
+    feedlistnames = [f.feedname for f in feedlist]
         
     qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None).filter(when__lte=datetime.now()) # get all events
     page = paginate(qs, request, per_page=50)
     
     no_arg_feeds = [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.EnactedBillsFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
-    no_arg_feeds = [(feed, feed.getname() in feedlistnames) for feed in no_arg_feeds]
+    no_arg_feeds = [(feed, feed.feedname in feedlistnames) for feed in no_arg_feeds]
         
     return {
         'page': page,
@@ -61,7 +61,7 @@ def search_feeds(request):
             for c in Committee.objects.filter(name__contains=request.POST["q"], obsolete=False)]
                 
     def feedinfo(f):
-        return { "name": f.getname(), "title": f.gettitle() }
+        return { "name": f.feedname, "title": f.title }
     return HttpResponse(simplejson.dumps({
         "status": "success",
         "feeds": [feedinfo(f) for f in feedlist],
@@ -73,7 +73,7 @@ def events_rss(request):
     feedlist = get_feed_list(request)
     
     class DjangoFeed(django.contrib.syndication.views.Feed):
-        title = ", ".join(f.gettitle() for f in feedlist) + " - Tracked Events from GovTrack.us"
+        title = ", ".join(f.title for f in feedlist) + " - Tracked Events from GovTrack.us"
         link = "/"
         description = "GovTrack tracks the activities of the United States Congress."
         

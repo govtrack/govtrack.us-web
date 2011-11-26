@@ -173,7 +173,6 @@ class Vote(models.Model):
                 E.add("vote", self.created, Feed.PersonVotesFeed(v.person_id))
 	
     def render_event(self, eventid, feeds):
-        import events.feeds
         return {
             "type": "Vote",
             "date": self.created,
@@ -197,7 +196,7 @@ class Vote(models.Model):
                 "voters":
                             [
                                 { "url": f.person().get_absolute_url(), "name": f.person().name, "vote": self.voters.get(person=f.person()).option.value }
-                                for f in feeds if isinstance(f, events.feeds.PersonFeed) and self.voters.filter(person=f.person()).exists()
+                                for f in feeds if f.person()!=None and self.voters.filter(person=f.person()).exists()
                             ]
                         if feeds != None else []
                 }

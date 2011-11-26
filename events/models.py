@@ -5,17 +5,18 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
 import re
+import urllib
 
 class Feed(models.Model):
     """Each Feed has a code name that can be used to reconstruct information about the feed."""
     feedname = models.CharField(max_length=64, unique=True, db_index=True)
-
+    
     def __unicode__(self):
         return self.feedname
 
     @staticmethod
     def from_name(feedname):
-        raise Exception("Not implemented.")
+        return Feed.objects.get(feedname=feedname)
 
     @staticmethod
     def get_events_for(feeds):
@@ -27,6 +28,17 @@ class Feed(models.Model):
         qs = qs.order_by("-when")
         
         if feeds != None:
+            # Some feeds include the events of other feeds.
+            # Tail-recursively expand the feeds.
+            feeds = list(feeds)
+            i = 0
+            while i < len(feeds):
+                meta = feeds[i].type_metadata()
+                if "includes" in meta:
+                    feeds.extend(meta["includes"](feeds[i]))
+                i += 1
+                
+            # and apply the filter.
             qs = qs.filter(feed__in=feeds)
         
         # this causes the QuerySet to return dicts rather than Events.
@@ -36,6 +48,30 @@ class Feed(models.Model):
         
     def get_events(self):
         return Feed.get_events_for((self,))
+        
+    # feed metadata
+    
+    feed_metadata = {
+        "p:": {
+            "noun": "person",
+            "includes": lambda self : [Feed.PersonVotesFeed(self.person()), Feed.PersonSponsorshipFeed(self.person())],
+        },
+        "ps:": {
+            "noun": "person",
+        },
+        "pv:": {
+            "noun": "person",
+        }
+    }
+        
+    def type_metadata(self):
+        if self.feedname in Feed.feed_metadata:
+            return Feed.feed_metadata[self.feedname]
+        if ":" in self.feedname:
+            t = self.feedname.split(":")[0]
+            if t+":" in Feed.feed_metadata:
+                return Feed.feed_metadata[t+":"]
+        return { }
         
     # constructors for feeds
 
@@ -77,7 +113,7 @@ class Feed(models.Model):
     # constructors that take object instances, object IDs, or the encoded
     # object reference used in feed names and returns (possibly creating)
     # a Feed object.
-
+    
     @staticmethod # private method
     def get_arg_feed(prefix, objclass, id_ref_instance, dereference, reference):
         # Always dereference id's and references before get_or_created to
@@ -149,6 +185,25 @@ class Feed(models.Model):
             lambda obj : obj.code)
         
     # DistrictFeed?
+    
+    # accessor methods
+    
+    @property
+    def title(self):
+        return self.feedname.upper()
+    
+    @property
+    def rss_url(self):
+        return "/events/events.rss?feeds=" + urllib.quote(self.feedname)
+    
+    def person(self):
+         if not hasattr(self, "_ref"):
+               if ":" in self.feedname and self.feedname.split(":")[0] in ("p", "pv", "ps"):
+                    import person.models
+                    return person.models.Person.objects.get(id=self.feedname.split(":")[1])
+               else:
+                    self._ref = None
+         return self._ref
 
 class Event(models.Model):
     """
