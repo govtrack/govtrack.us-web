@@ -5,7 +5,7 @@
 
 {% block meta_description %}
         {% if not active_role %}Former{% endif %}
-        {{ role.get_role_type_display }}, {{ role.get_state_display }}
+        {{ role.get_role_type_display }}}{% if role.state %}, {{ role.get_state_display }}{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -33,7 +33,7 @@
 	
 	<div id="track_panel_base">
 	{% if role and not active_role %}
-	<p>Former {{ role.get_role_type_display }} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}</p>
+	<p>Former {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}{% endif %}</p>
 	{% endif %}
 	
 	<div class="info">
@@ -163,10 +163,28 @@
 		</ul>
 		<p><a href="#">View All &raquo;</a> (including bills from previous years)</p>
 	</div><!-- /sponsorship -->
-	{% endif %}
+{% endif %}
 	
+	<h3>Primary Sources</h3>
+	<p>The information on this page is originally sourced from a variety of materials, including:</p>
+	<ul>
+	{% with person.vote_sources as person_vote_sources %}
+		{% if recent_bills %}
+			<li><a href="http://thomas.loc.gov">THOMAS</a>, for sponsored bills</li>
+		{% endif %}
+		{% if committeeassignments or "congress" in person_vote_sources %}
+			<li>The <a href="http://www.house.gov">House</a> and <a href="http://www.senate.gov">Senate</a> websites, for committee membership and voting records</li>
+		{% endif %}
+		{% if person.bioguideid %}
+			<li>The <a href="http://bioguide.congress.gov/scripts/biodisplay.pl?index={{person.bioguideid}}">Congressional Biographical Directory</a> for elected positions.</li>
+		{% endif %}
+		{% if "keithpoole" in person_vote_sources %}
+			<li><a href="http://voteview.ucsd.edu/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a> by Howard L. Rosenthal and Keith  T.  Poole. </li>
+			<li>Martis&rsquo;s &ldquo;The Historical Atlas of Political Parties in the United States Congress&rdquo;, via Keith Poole&rsquo;s roll call votes data set, for political party affiliation for Members of Congress from 1789 through about year 2000.</li>
+		{% endif %}
+	{% endwith %}
+	</ul>
 </div><!-- /member-details -->
-
 
 <div class="tweets section">
 	<div id="happening_now" style="display: none">

@@ -1,0 +1,59 @@
+<script>
+function show_track_panel() {
+	if (!$('#track_panel').is(":visible")) {
+		$('#track_panel_base').hide();
+		$('#track_panel').fadeIn();
+	} else {
+		$('#track_panel_base').fadeIn();
+		$('#track_panel').hide();
+	}
+	return false;
+}
+</script>
+
+<div id="track_panel" style="display: none; margin-top: 20px;">
+	{% if not request.user.is_authenticated %}
+		<h2>RSS Feed</h2>
+		
+		<p>Use the RSS feed link above to track this {{feed.type_metadata.noun}}. Copy the link location into a feed reader such as Google Reader.</p>
+		
+		<p><a href="{{feed.rss_url}}">RSS</a></p>
+	
+		<h2>Sign Up or Log In</h2>
+		
+		<p>Lists, custom feeds, and updates by email, are available to signed in users. Registration is free.</p>
+		
+		{% with request.get_full_path as singlesignon_next %}
+		{% include "registration/login_singlesignon.html" %}
+		{% endwith %}
+		
+	{% else %}
+		<p><a href="{{feed.view_url}}">View Tracked Events</a> | <a href="{{feed.rss_url}}">RSS</a></p>
+	
+		<h2>Add to Tracker List</h2>
+		
+		<table>
+		{% for list in request.user.userprofile.lists %}
+			<tr valign="top">
+				<td style="line-height: 130%">
+					<div style="float: left">[+]</div>
+					<div style="float: left">
+					{{list.name}}
+					{% if list.email %}
+					<br/><small>{{list.get_email_display}}</small>
+					{% endif %}
+					</div>
+				</td>
+			</tr>
+		{% endfor %}
+		<tr>
+			<td>New List...</td>
+		</tr>
+		</table>
+		
+		<h2>RSS Feed</h2>
+		
+		<p>Use the RSS feed link above to track this {{feed.type_metadata.noun}}. Copy the link location into a feed reader such as Google Reader.</p>
+		
+	{% endif %}
+</div>

@@ -53,6 +53,7 @@ APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
 SITE_ROOT_URL = "http://localhost:8000"
 LOGIN_REDIRECT_URL = "http://localhost:8000/"
 SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
+REGISTRATION_ASK_USERNAME = False
 RECAPTCHA_PUBLIC_KEY = "6LcK-McSAAAAAG0pmM3wQR3kbAMM6NXhwera2UNg"
 RECAPTCHA_PRIVATE_KEY = "6LcK-McSAAAAAHtd7v2SCtd-oIV-ZVarJYidlmFj"
 GOOGLE_OAUTH_TOKEN = "..."

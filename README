@@ -5,6 +5,7 @@ Installation
 * Install dependencies via OS package manager:
    * python-virtualenv
    * python-lxml
+   * python-openid
 * Run build/rsync.sh (run it from the main directory, rather than from within build).
 * Run `build/buildenv.sh`
 * Run `reset.sh parse`

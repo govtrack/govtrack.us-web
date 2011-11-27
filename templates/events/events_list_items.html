@@ -1,0 +1,39 @@
+{% load events_utils %}
+
+{% if list %}
+<script>
+list_set_state([
+		{% for t in list.trackers.all %}
+		["{{t.title|escapejs}}", "{{t.feedname|escapejs}}"] {% if not forloop.last %}, {% endif %}
+		{% endfor %}
+]);
+{% if newlist %}
+list_created({{list.id}}, "{{list.name|escapejs}}", "{{list.get_email_display|escapejs}}");
+{% endif %}
+</script>
+{% endif %}
+
+{% for event in page.object_list %}
+{% with event|render_event:feeds as meta %}
+	<div class="tracked_event" style="clear: both; border-bottom: 1px solid #DDD; margin-bottom: 1em">
+
+		<div style="float: right">
+			{% if not meta.date_has_no_time %}
+				{{event.when}}
+			{% else %}
+				{{event.when|date}}
+			{% endif %}
+		</div>
+		
+		<div>{{meta.type}}</div>
+		
+		<div><a href="{{meta.url}}">{{meta.title}}</a></div>
+		
+		{{meta.body_html|safe}}
+	</div>
+{% endwith %}
+{% empty %}
+<p>No events are tracked by the selected list.</p>
+{% endfor %}
+{% include "pagination.html" %}
+

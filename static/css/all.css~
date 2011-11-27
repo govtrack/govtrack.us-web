@@ -1545,6 +1545,14 @@ select, input.text {
 	
 /* JT added things below here */
 
+.breadcrumbs h1 {
+	width: 940px;
+	margin: 0 auto;
+	font-size: 38px;
+	color: #fff;
+	text-shadow: 0 1px 1px #066982;
+}
+
 .clear {
 	clear: both;
 }
@@ -1558,4 +1566,9 @@ input[type=text].default {
 #from_the_floor .date {
 	display: block;
 	margin-bottom: .5em;
+	}
+	
+.singlesignon li {
+	float: left;
+	margin-right: 5px;
 	}

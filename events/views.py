@@ -10,6 +10,7 @@ from datetime import datetime, time
 import simplejson
 
 from models import *
+from website.models import *
 from events.templatetags.events_utils import render_event
 
 def get_feed_list(request):
@@ -22,20 +23,68 @@ def get_feed_list(request):
 
 @render_to('events/events_list.html')
 def events_list(request):
-    feedlist = get_feed_list(request)
+    if not request.user.is_authenticated():
+        feedlist = get_feed_list(request)
+    else:
+        feedlist = [] # ignore query string if user is logged in
     feedlistnames = [f.feedname for f in feedlist]
         
-    qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None).filter(when__lte=datetime.now()) # get all events
-    page = paginate(qs, request, per_page=50)
-    
     no_arg_feeds = [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.EnactedBillsFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
     no_arg_feeds = [(feed, feed.feedname in feedlistnames) for feed in no_arg_feeds]
         
     return {
-        'page': page,
         'no_arg_feeds': no_arg_feeds,
         'feeds': feedlist,
         'feeds_json': simplejson.dumps(feedlistnames),
+            }
+
+@render_to('events/events_list_items.html')
+def events_list_items(request):
+    sublist = None
+    show_empty = True
+    newlist = False
+    if "listid" not in request.GET:
+        feedlist = get_feed_list(request)
+    elif not request.user.is_authenticated():
+        return {} # invalid call
+    elif request.GET["listid"] == "_new_list" and request.GET["command"] not in ("toggle", "add"):
+        feedlist = []
+        show_empty = False
+    else:
+        if request.GET["listid"] != "_new_list":
+            sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.GET["listid"])
+        else:
+            sublist = SubscriptionList.objects.create(user=request.user, name="New List " + datetime.now().isoformat()) # make new name such that it will always be unique!
+            newlist = True
+        
+        if request.GET["command"] in ("toggle", "add"):
+            f = get_object_or_404(Feed, feedname=request.GET["command_arg"])
+            if f in sublist.trackers.all() and request.GET["command"] == "toggle":
+                sublist.trackers.remove(f)
+            else:
+                sublist.trackers.add(f)
+        if request.GET["command"] == "rename":
+            sublist.name = request.GET["command_arg"]
+            sublist.save()
+            return { } # response is ignored
+        if request.GET["command"] == "delete" and not sublist.is_default:
+            sublist.delete()
+            return { } # response is ignored
+        
+        feedlist = sublist.trackers.all()
+        show_empty = False
+      
+    if len(feedlist) > 0 or show_empty:
+        qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None).filter(when__lte=datetime.now()) # get all events
+    else:
+        qs = []
+    page = paginate(qs, request, per_page=50)
+    
+    return {
+        'page': page,
+        'list': sublist,
+        'feeds': feedlist,
+        'newlist': newlist,
             }
 
 def search_feeds(request):

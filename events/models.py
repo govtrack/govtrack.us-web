@@ -191,6 +191,10 @@ class Feed(models.Model):
     @property
     def title(self):
         return self.feedname.upper()
+
+    @property
+    def view_url(self):
+        return "/events?feeds=" + urllib.quote(self.feedname)
     
     @property
     def rss_url(self):

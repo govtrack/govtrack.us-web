@@ -1567,3 +1567,12 @@ input[type=text].default {
 	display: block;
 	margin-bottom: .5em;
 	}
+	
+.singlesignon li {
+	float: left;
+	margin-right: 5px;
+	}
+	
+small {
+	font-size: 80%;
+	}

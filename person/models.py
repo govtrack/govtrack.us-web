@@ -125,6 +125,15 @@ class Person(models.Model):
     class Meta:
         ordering = ['lastname', 'firstname']
 
+    def vote_sources(self):
+        from vote.models import Vote
+        sources = set()
+        for v in Vote.objects.filter(voters__person=self).values("source").distinct():
+            if v["source"] in (1, 2):
+                sources.add("congress")
+            elif v["source"] == 3:
+                sources.add("keithpoole")
+        return sources
 
 class PersonRole(models.Model):
     person = models.ForeignKey('person.Person', related_name='roles')
