@@ -174,7 +174,7 @@ h2 span, h3 span, h4 span, span span, a em {
 .section {
     width: 100%;
     padding: 0 0 26px;
-    min-height: 248px;
+    /*min-height: 248px; causes trouble*/
 	}
 .section:after {
     content: '';
@@ -1575,4 +1575,12 @@ input[type=text].default {
 	
 small {
 	font-size: 80%;
+	}
+	
+ul.bullets {
+	list-style: circle;
+	margin-left: 1.75em;
+	}
+ul.bullets li {
+	margin: .25em 0 .25em 0;
 	}

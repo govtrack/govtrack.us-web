@@ -34,12 +34,12 @@
 </style>
 
 <script>
+var feeds = {{feeds_json|safe}};
 {% if not request.user.is_authenticated %}
 // This variable and function are used if the user is logged out and the
 // Edit Your Feed/List controls are used to modify the feeds= query
 // string parameter on this page. Adding/removing a feed generates a
 // new feeds= value and then opens that page.
-var feeds = {{feeds_json|safe}};
 function togglefeed(feedname, force_add) {
 	var idx = feeds.indexOf(feedname);
 	if (idx == -1) {
@@ -61,19 +61,22 @@ function togglefeed(feedname, force_add) {
 }
 
 $(function() {
-	alert(feeds);
+	load_feed_items();
 });
 
 {% else %}
 function activate_list(elem) {
-	if (!elem.parentNode) return; // when we delete a node, its div click handler gets executed, but it is already deleted
+	if (elem && !elem.parentNode) return; // when we delete a node, its div click handler gets executed, but it is already deleted
 	$("#lists > div").removeClass("active");
-	$(elem).addClass("active");
-	if ($(elem).attr("listid") == "_new_list") {
-		$('#basic_trackers li').removeClass("active");
-		$('#other_feed_items').text("");
+	if (elem) {
+		$(elem).addClass("active");
+		if ($(elem).attr("listid") == "_new_list") {
+			$('#basic_trackers li').removeClass("active");
+			$('#other_feed_items').text("");
+		}
 	}
 	load_feed_items();
+	$('#edit_list').toggle(elem != null);
 }
 
 // This function is used to modify a user's tracker list.
@@ -109,26 +112,6 @@ function list_set_state(trackers) {
 	}
 }
 
-function load_feed_items(command) {
-	var list = $('#lists > div.active').attr("listid");
-
-	$.ajax({
-		url: "/events/_load_events",
-		data: {
-			listid: list,
-			command: !command ? "show" : command[0],
-			command_arg: !command ? "true" : command[1]
-		},
-		dataType: "html",
-		success: function(data) {
-			if (command && command[0] == "rename") return;
-			if (command && command[0] == "delete") return;
-			$('#events').html(data);
-		}
-	});
-			
-}
-
 function list_created(listid, listname, listemailinfo) {
 	// use the first list (there is always one) as a template
 	var n = $('#lists > div:first').clone();
@@ -147,7 +130,7 @@ function rename_list(node) {
 	node.addClass("active");
 	
 	var newname = prompt("Rename list " + node.find('.name').text() + " to...", node.find(".name").text());
-	if (newname != "") {
+	if (newname && newname != "") {
 		load_feed_items(["rename", newname]);
 		node.find(".name").text(newname);
 	}
@@ -181,6 +164,29 @@ $(function() {
 });
 
 {% endif %}
+
+function load_feed_items(command) {
+	var list = $('#lists > div.active').attr("listid");
+
+	$.ajax({
+		url: "/events/_load_events",
+		data: {
+			feeds: feeds.join(","),
+			{% if request.user.is_authenticated %}
+			listid: list,
+			{% endif %}
+			command: !command ? "show" : command[0],
+			command_arg: !command ? "true" : command[1]
+		},
+		dataType: "html",
+		success: function(data) {
+			if (command && command[0] == "rename") return;
+			if (command && command[0] == "delete") return;
+			$('#events').html(data);
+		}
+	});
+			
+}
 
 function search_feeds(type) {
 	var q = $('#track_' + type + '_input').val();
@@ -223,7 +229,7 @@ function search_feeds(type) {
 <div class="col_6">
 	<div id="getevents">
 		<h2>How To Get These Events</h2>
-		<p><a href="/events/rss?feeds={{request.GET.feeds|urlencode}}">RSS</a></p>
+		<p><a href="/events/events.rss?feeds={{request.GET.feeds|urlencode}}">RSS</a></p>
 		<p>Make a Widget</p>
 	</div>
 	
@@ -233,13 +239,22 @@ function search_feeds(type) {
 <div class="col_6" style="margin-left: 40px">
 	{% if request.user.is_authenticated %}
 	<div>
-		<h2>Your Tracker List{{request.user.userprofile.lists|pluralize}}</h2>
+		{% if feeds|length > 0 %}
+		<h2>Currently showing events for...</h2>
+		<ul class="bullets" onclick="activate_list(null)">
+			{% for f in feeds %}
+				<li>{{f.title}}</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+	
+		<h2>Tracker Lists</h2>
 		<div id="lists">
 		{% for list in request.user.userprofile.lists %}
 			{% comment %}since the first of these nodes is cloned when we
 			create a new list, it should not have any list-specific data hidden away
 			except where we expect that to be{% endcomment %}
-			<div class="{% if forloop.first %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)">
+			<div class="{% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)">
 				<span class="name">{{list.name}}</span>
 				<span class="opts"><a href="#" onclick="return rename_list(this.parentNode.parentNode);">rename</a></span>
 				<span class="opts no_default_list">| <a href="#" onclick="return delete_list(this.parentNode.parentNode);">delete</a></span>
@@ -253,7 +268,7 @@ function search_feeds(type) {
 	</div>
 	{% endif %}
 
-	<div>
+	<div id="edit_list" {% if feeds %}style="display: none"{% endif %}>
 		{% if not request.user.is_authenticated %}
 		<h2>Customize a Feed</h2>
 		{% else %}

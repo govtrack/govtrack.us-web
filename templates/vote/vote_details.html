@@ -6,8 +6,8 @@
 <style>
 .stats th { cursor: pointer; }
 .party_D, .party_I, .party_R {
-	cursor: default;
-	color: white;
+    cursor: default;
+    color: white;
 }
 .color_D { background-color: #0041a1; }
 .color_R { background-color: #e60e13; }
@@ -15,6 +15,13 @@
 .party_D { background-color: #0041a1; }
 .party_R { background-color: #e60e13; }
 .party_I { border: 1px solid black; color: black; }
+
+.vote_positive { background-color: #EFE; }
+.vote_negative { background-color: #FEE; }
+
+#dotchart { position: relative; font-size: 11px; margin-bottom: 10px; }
+#dotchart .dot { position: absolute; width: 6px; height: 6px; }
+#dotchart .party_I { width: 4px; height: 4px; }
 </style>
 {% endblock %}
 
@@ -23,25 +30,61 @@
 <script type="text/javascript">
 var SORT_STATE = null;
 function show_table() {
-	var table = $('#vote-list');
-	$("#vote-details .stats").remove();
-	for (var i = 0; i < 3; i++) {
-		var group = table.clone(true);
-		group.attr('style', '');
-		group.attr('id', '');
-		group.addClass('stats');
-		$(table[0].parentNode).append(group);
-		
-		var count = table.find('tr').length - 1;
-		
-		var rows = group.find("tr");
-		for (var j = 1; j < rows.length; j++) {
-			if (Math.floor((j - 1)/Math.ceil(count/3)) != i)
-				$(rows[j]).remove();
+    var table = $('#vote-list');
+    $("#vote-details .stats").remove();
+    for (var i = 0; i < 3; i++) {
+        var group = table.clone(true);
+        group.attr('style', '');
+        group.attr('id', '');
+        group.addClass('stats');
+        $(table[0].parentNode).append(group);
+        
+        var count = table.find('tr').length - 1;
+        
+        var rows = group.find("tr");
+        for (var j = 1; j < rows.length; j++) {
+            if (Math.floor((j - 1)/Math.ceil(count/3)) != i)
+                $(rows[j]).remove();
+        }
+    }
+    
+    // make the dot diagram
+   	var margin = 0;
+   	var tops = Array();
+   	$('#dotchart .label').each(function() {
+   		tops[this.getAttribute('key')] = $(this).position().top;
+   		var w = $(this).find('span').width();
+   		if (w > margin) margin = w;
+   	});
+   	var width = $('#dotchart').width() - margin - 1;
+    var rows = $('#vote-list tr');
+    var state_off = 0;
+    var state_shift = 10;
+    var prev_state = [null, null];
+    if (SORT_STATE && SORT_STATE.column == 3) width -= state_shift*51;
+    for (var i = 0; i < rows.length; i++) {
+    	var dot = $('#dv' + rows[i].getAttribute('vid'));
+    	
+    	var left_off = 0;
+    	
+    	var st = dot.attr("state");
+    	if (SORT_STATE && SORT_STATE.column == 3) {
+    		if (st != prev_state[0]) {
+				state_off += state_shift;
+			} else if ({{vote.chamber}} == 1 && prev_state[1] != dot.attr('vote')) {
+				left_off = -width/rows.length;
+			}
 		}
-	}
+    	
+    	dot.animate({
+    		left: (margin + width*i/rows.length + state_off + left_off) + "px",
+    		top: tops[dot.attr('vote')] + 7
+    	});
+
+    	prev_state = [st, dot.attr('vote')];
+    }
 }
-$(document).ready(function() { 
+$(function() { 
     $("#vote-list").tablesorter({});
     var headers = $('#vote-list th');
     headers.unbind();
@@ -55,10 +98,10 @@ $(document).ready(function() {
         SORT_STATE = {column: index, order: order};
         var sorting;
         switch (index) {
-            /* Vote */   case 0: sorting = [[index, order], [1, 0], [2, 0]]; break;
-            /* State */  case 1: sorting = [[index, order], [2, 0], [0, 0]]; break;
-            /* Name */ case 2: sorting = [[index, order], [1, 0], [0, 0]]; break;
-            /* Party */  case 3: sorting = [[index, order], [2, 0], [1, 0], [0, 0]]; break;
+            /* Vote  */  case 0: sorting = [[index, order], [1, 0], [2, 0], [3, 0]]; break;
+            /* Party */  case 1: sorting = [[index, order], [4, order], [2, 0], [3, 0], [1, 0]]; break;
+            /* Name  */  case 2: sorting = [[index, order], [3, 0], [1, 0]]; break;
+            /* State */  case 3: sorting = [[index, order], [2, 0], [0, 0]]; break;
         }
         $('#vote-list').trigger('sorton', [sorting]);
         headers.not(headers[index]).removeClass('headerSortDown').removeClass('headerSortUp');
@@ -92,10 +135,10 @@ $(document).ready(function() {
     {% if vote.related_bill %}
     <dt>Related Bill:</dt>
     <dd><a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>
-    	<br/>Introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a>
-    	on {{vote.related_bill.introduced_date|date:"F j, Y"}}
-    	<br/>Current Status: {{vote.related_bill.get_current_status_display}}
-    	</dd>
+        <br/>Introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a>
+        on {{vote.related_bill.introduced_date|date:"F j, Y"}}
+        <br/>Current Status: {{vote.related_bill.get_current_status_display}}
+        </dd>
     {% endif %}
 </dl>
 {% endblock %}
@@ -103,7 +146,7 @@ $(document).ready(function() {
 {% block body %}
 
 {% with vote.totals as totals %}
-<div id="member-stats" class="section">
+<div voters_by_district"member-stats" class="section">
     <table class="stats">
         <thead>
             <tr>
@@ -117,21 +160,21 @@ $(document).ready(function() {
         <tbody>
             {% for item in totals.options %}
             <tr>
-                <td style="font-weight: bold; ">{{ item.option }}</td>
+                <td style="font-weight: bold; " class="vote_{{ item.option.alpha_key }}">{{ item.option }}</td>
                 <td style="font-weight: bold; padding: 0 6px 0 6px;">{{ item.count }}</td>
                 <td>
-                	<!--
-					<div style="width: {{item.chart_width}}px; background-color: black; color: white; padding: 1px; text-align: right; float: left; padding-right: 5px;"> 
-						{{ item.count }}
-					</div>
-					-->
-					{% for count in item.party_counts %}
-						<div style="width: {{count.chart_width}}px; float: left;" class="color_{{count.party|slice:"0:1"}}"> 
-							&nbsp;
-						</div>
-					{% endfor %}
-					<div style="float: left; padding-left: 5px">
-                    	{{ item.percent }}%
+                    <!--
+                    <div style="width: {{item.chart_width}}px; background-color: black; color: white; padding: 1px; text-align: right; float: left; padding-right: 5px;"> 
+                        {{ item.count }}
+                    </div>
+                    -->
+                    {% for count in item.party_counts %}
+                        <div style="width: {{count.chart_width}}px; float: left;" class="color_{{count.party|slice:"0:1"}}"> 
+                            &nbsp;
+                        </div>
+                    {% endfor %}
+                    <div style="float: left; padding-left: 5px">
+                        {{ item.percent }}%
                     </div>
                 </td>
                 {% for count in item.party_counts %}
@@ -160,64 +203,87 @@ $(document).ready(function() {
         </ul>
     </aside>
 </div>
-{% endwith %}
 
+{% comment %}
 <div id="vote-infographics" class="section">
-	<div class="heading">
-		<h2>Vote Visualizations</h2>
-		{% if vote.chamber == 1 %}
-		<em class="tips">Horizontal bars indicate the two senators from a state voted differently.</em>
-		{% endif %}
-	</div>
-	<div class="visualization">
-		<div class="container">
-			<div class="map-box">
-				<h3>Standard Projection</h3>
-				<img src="images/map.png" width="390" height="209" alt="image description">
-			</div>
-			<div class="map-box">
-				<h3>Cartogram</h3>
-				<img src="images/cartogram.png" width="378" height="207" alt="image description">
-				<div class="tooltip" style="display: none">
-					<div class="holder">
-						<div class="frame">
-							<p>Cartograms give an equal area in an image to an equal number of votes by distorting the image. Senate vote cartograms are shown with each state stretched or shrunk so that the states each take up an equal area because each state has two votes. For House votes, it is each congressional district which is stretched or shrunk.</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<script>$('.map-box').hover(function() { $(this).find('.tooltip').show(); }, function() { $(this).find('.tooltip').hide(); });</script>
-		</div>
-	</div>
+    <div class="heading">
+        <h2>Vote Visualizations</h2>
+        {% if vote.chamber == 1 %}
+        <em class="tips">Horizontal bars indicate the two senators from a state voted differently.</em>
+        {% endif %}
+    </div>
+    <div class="visualization">
+        <div class="container">
+            <div class="map-box">
+                <h3>Standard Projection</h3>
+                <img src="images/map.png" width="390" height="209" alt="image description">
+            </div>
+            <div class="map-box">
+                <h3>Cartogram</h3>
+                <img src="images/cartogram.png" width="378" height="207" alt="image description">
+                <div class="tooltip" style="display: none">
+                    <div class="holder">
+                        <div class="frame">
+                            <p>Cartograms give an equal area in an image to an equal number of votes by distorting the image. Senate vote cartograms are shown with each state stretched or shrunk so that the states each take up an equal area because each state has two votes. For House votes, it is each congressional district which is stretched or shrunk.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>$('.map-box').hover(function() { $(this).find('.tooltip').show(); }, function() { $(this).find('.tooltip').hide(); });</script>
+        </div>
+    </div>
 </div>
+{% endcomment %}
 
 <!--
 <div style="float: right; width: 300px">
-	{% vote_totals_pie vote %}
+    {% vote_totals_pie vote %}
 </div>
 -->
-
 <div id="vote-details" class="section">
 <h2>Vote Details</h2>
+
 <div class="details-box">
+	<div id="dotchart">
+		{% for item in totals.options %}
+			<div class="label" key="{{item.option.key}}"><span>{{item.option}}</span></div>
+		{% endfor %}
+		{% for voter in voters %}
+			<span
+				class="dot party_{{voter.person.role.party|slice:"0:1"}}"
+				id="dv{{voter.id}}"
+				vote="{{ voter.option.key }}"
+				state="{{voter.person.role.state}}"
+				title="{% if voter.voter_type == 1 %}[Information Missing]{% endif %}{% if voter.voter_type == 2 %}The Vice President{% endif %}{% if voter.voter_type == 3 %}{{ voter.person.name }}{% endif %}"
+			> </span>
+		{% endfor %}
+	</div>
+
     <div class="container">
         <table id="vote-list" style="display: none">
             <thead>
                 <tr>
                     <th>Vote</th>
-                    <th>{% if vote.chamber == 1 %}State{% else %}District{% endif %}</th>
-                    <th>Representative</th>
                     <th>Party</th>
+                    <th>Representative</th>
+                    <th>{% if vote.chamber == 1 %}State{% else %}District{% endif %}</th>
+                    <th style="display: none">Score</th> <!-- for sorting only -->
                 </tr>
             </thead>
             {% for voter in voters %}
-            <tr>
-                <td><nobr>{{ voter.option.value }}</nobr></td>
+            <tr vid="{{voter.id}}">
+                <td class="vote_{{ voter.option.alpha_key }}"><nobr>{{ voter.option.value }}</nobr></td>
                 <td>
-                    {% if voter.voter_type_is_member %}
-                        {{ voter.person.role.state }}{% if voter.person.role.district %} {{ voter.person.role.district|ordinal|rjust:5 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
-                    {% else %}
-                     -
+                    {% if voter.voter_type == 3 %}
+                        {% if voter.person.role.party|slice:"0:1" in "DIR" %}
+                            <span class="party_{{voter.person.role.party|slice:"0:1"}}" title="{{ voter.person.role.party }}">
+                                &nbsp;
+                                {{voter.person.role.party|slice:"0:1"}}
+                                &nbsp;
+                            </span>
+                        {% else %}
+                            {{ voter.person.role.party }}
+                        {% endif %}
                     {% endif %}
                 </td>
                 <td>
@@ -228,21 +294,18 @@ $(document).ready(function() {
                         The Vice President
                     {% endif %}
                     {% if voter.voter_type == 3 %}
-                        <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal">{{ voter.person.name_no_details_lastfirst }}</a>
+                        <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444">{{ voter.person.name_no_details_lastfirst }}</a>
                     {% endif %}
                 </td>
                 <td>
-                	{% if voter.voter_type == 3 %}
-                		{% if voter.person.role.party|slice:"0:1" in "DIR" %}
-                			<span class="party_{{voter.person.role.party|slice:"0:1"}}" title="{{ voter.person.role.party }}">
-                				&nbsp;
-                				{{voter.person.role.party|slice:"0:1"}}
-                				&nbsp;
-                			</span>
-                		{% else %}
-	                		{{ voter.person.role.party }}
-                		{% endif %}
-                	{% endif %}
+                    {% if voter.voter_type_is_member %}
+                        {{ voter.person.role.state }}{% if voter.person.role.district %} {{ voter.person.role.district|ordinal|rjust:5 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
+                    {% else %}
+                     -
+                    {% endif %}
+                </td>
+                <td style="display: none"> <!-- using for sorting only -->
+                    {{voter.ideolog_score}}
                 </td>
             </tr>
         {% endfor %}
@@ -250,6 +313,13 @@ $(document).ready(function() {
     </div>
 </div>
 
+<h2 style="margin-top: 30px">What&rsquo;s the difference between aye and yea?</h2>
+
+<p>Although there is no meaningful difference between aye and yea (and nay and no), the terms are used in different sorts of votes based on Congress&rsquo;s long tradition of parliamentary procedure. The U.S. Constitution specifically says that &ldquo;Yea&rdquo; and &ldquo;Nay&rdquo; be used for votes on the passage of bills (Article I, Section 7). The House and Senate follow the Constitution stricly for these votes using exactly the words that appear in the Constitution, and the Senate uses these words for all types of votes.</p>
+
+<p>When the House votes by &ldquo;voice vote&rdquo;, when congressmen simply shout out their vote, they use the terms Aye and No. (The chair judges which side had a majority just by listening, but anyone can subsequently demand that the votes be recorded individually, in which case a recorded vote is used.) The House sometimes operates under a separate set of rules called the &ldquo;Committee of the Whole on the State of the Union&rdquo; (&ldquo;Committee of the Whole&rdquo; for short), which is a sort of pseudo-committee that is made up of every congressman. During this mode of operation, the House uses the terms Aye and No for votes. (See the Rules of the House, Rule XX, and House Practice in the section Voting.)</p>
+
+{% endwith %}
 
 {% endblock %}
 

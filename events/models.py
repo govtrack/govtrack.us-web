@@ -25,7 +25,7 @@ class Feed(models.Model):
         # used to return a distinct set of events.
         
         qs = Event.objects.all()
-        qs = qs.order_by("-when")
+        qs = qs.order_by("-when", "-id") # non-timed events should be sorted in database insertion order 
         
         if feeds != None:
             # Some feeds include the events of other feeds.
@@ -52,14 +52,35 @@ class Feed(models.Model):
     # feed metadata
     
     feed_metadata = {
+        "misc:activebills": {
+            "title": "All Activity on Legislation",
+        },
+        "misc:enactedbills": {
+            "title": "Enacted Bills",
+        },
+        "misc:introducedbills": {
+            "title": "Introduced Bills and Resolutions",
+        },
+        "misc:activebills2": {
+            "title": "Activity on Legislation Except New Introductions",
+        },
+        "misc:allcommittee": {
+            "title": "Committee Activity",
+        },
+        "misc:allvotes": {
+            "title": "Roll Call Votes",
+        },
         "p:": {
+            "title": lambda self : self.person().name,
             "noun": "person",
             "includes": lambda self : [Feed.PersonVotesFeed(self.person()), Feed.PersonSponsorshipFeed(self.person())],
         },
         "ps:": {
+            "title": lambda self : self.person().name + " - Bills Sponsored",
             "noun": "person",
         },
         "pv:": {
+            "title": lambda self : self.person().name + " - Voting Record",
             "noun": "person",
         }
     }
@@ -83,32 +104,26 @@ class Feed(models.Model):
     @staticmethod
     def ActiveBillsFeed():
         return Feed.get_noarg_feed("misc:activebills")
-        #"All Activity on Legislation"
     
     @staticmethod
     def EnactedBillsFeed():
         return Feed.get_noarg_feed("misc:enactedbills")
-        #"Enacted Bills"
     
     @staticmethod
     def IntroducedBillsFeed():
         return Feed.get_noarg_feed("misc:introducedbills")
-        #"Introduced Bills and Resolutions"
     
     @staticmethod
     def ActiveBillsExceptIntroductionsFeed():
         return Feed.get_noarg_feed("misc:activebills2")
-        #"All Activity on Legislation Except New Introductions"
     
     @staticmethod
     def AllCommitteesFeed():
         return Feed.get_noarg_feed("misc:allcommittee")
-        #"All Committee Activity"
     
     @staticmethod
     def AllVotesFeed():
         return Feed.get_noarg_feed("misc:allvotes")
-        #"All Roll Call Votes"
 
     # constructors that take object instances, object IDs, or the encoded
     # object reference used in feed names and returns (possibly creating)
@@ -190,8 +205,12 @@ class Feed(models.Model):
     
     @property
     def title(self):
-        return self.feedname.upper()
-
+        m = self.type_metadata()
+        if "title" not in m: return unicode(self)
+        if callable(m["title"]):
+            return m["title"](self)
+        return m["title"]
+        
     @property
     def view_url(self):
         return "/events?feeds=" + urllib.quote(self.feedname)

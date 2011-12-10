@@ -23,10 +23,7 @@ def get_feed_list(request):
 
 @render_to('events/events_list.html')
 def events_list(request):
-    if not request.user.is_authenticated():
-        feedlist = get_feed_list(request)
-    else:
-        feedlist = [] # ignore query string if user is logged in
+    feedlist = get_feed_list(request)
     feedlistnames = [f.feedname for f in feedlist]
         
     no_arg_feeds = [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.EnactedBillsFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
@@ -43,13 +40,10 @@ def events_list_items(request):
     sublist = None
     show_empty = True
     newlist = False
-    if "listid" not in request.GET:
+    if request.GET.get('listid', '') == '':
         feedlist = get_feed_list(request)
     elif not request.user.is_authenticated():
         return {} # invalid call
-    elif request.GET["listid"] == "_new_list" and request.GET["command"] not in ("toggle", "add"):
-        feedlist = []
-        show_empty = False
     else:
         if request.GET["listid"] != "_new_list":
             sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.GET["listid"])
@@ -88,26 +82,25 @@ def events_list_items(request):
             }
 
 def search_feeds(request):
-    if request.POST["type"] == "person":
+    if request.REQUEST["type"] == "person":
         from person.models import Person
         feedlist = [
             Feed.PersonFeed(p.id)
-            for p in Person.objects.filter(lastname__contains=request.POST["q"])
+            for p in Person.objects.filter(lastname__contains=request.REQUEST["q"])
             if p.get_current_role() != None]
             
         import us
         for s in us.statenames:
-            if us.statenames[s].lower().startswith(request.POST["q"].lower()):
-                print s, us.statenames[s]
+            if us.statenames[s].lower().startswith(request.REQUEST["q"].lower()):
                 feedlist.extend([
                     Feed.PersonFeed(p)
                     for p in Person.objects.filter(roles__current=True, roles__state=s)])
                 
-    if request.POST["type"] == "committee":
+    if request.REQUEST["type"] == "committee":
         from committee.models import Committee
         feedlist = [
             Feed.CommitteeFeed(c)
-            for c in Committee.objects.filter(name__contains=request.POST["q"], obsolete=False)]
+            for c in Committee.objects.filter(name__contains=request.REQUEST["q"], obsolete=False)]
                 
     def feedinfo(f):
         return { "name": f.feedname, "title": f.title }
@@ -134,7 +127,7 @@ def events_rss(request):
         def item_description(self, item):
             return item["body_text"]
         def item_link(self, item):
-            return item["url"] 
+            return "http://www.govtrack.us" + item["url"] 
         def item_guid(self, item):
             return "http://www.govtrack.us/events/guid/" + item["guid"] 
         def item_pubdate(self, item):

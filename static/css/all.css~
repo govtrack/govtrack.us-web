@@ -1572,3 +1572,15 @@ input[type=text].default {
 	float: left;
 	margin-right: 5px;
 	}
+	
+small {
+	font-size: 80%;
+	}
+	
+ul.bullets {
+	list-style: circle;
+	margin-left: 1.75em;
+	}
+ul.bullets li {
+	margin: .25em 0 .25em 0;
+	}

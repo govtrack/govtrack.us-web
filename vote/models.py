@@ -80,7 +80,7 @@ class Vote(models.Model):
         if self.source == VoteSource.senate:
             return "http://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=%d&session=%s&vote=%05d" % (self.congress, get_session_ordinal(self.congress, self.session), self.number)
         elif self.source == VoteSource.house:
-            return "http://clerk.house.gov/evs/%d/roll%03d}.xml" % (self.created.year, self.number)
+            return "http://clerk.house.gov/evs/%d/roll%03d.xml" % (self.created.year, self.number)
         elif self.source == VoteSource.keithpoole:
             return "http://voteview.com/"
         raise ValueError("invalid source: " + str(self.source))
@@ -210,7 +210,14 @@ class VoteOption(models.Model):
 
     def __unicode__(self):
         return self.value
-
+        
+    @property
+    def alpha_key(self):
+        if self.key == "+": return "positive"
+        if self.key == "-": return "negative"
+        if self.key == "0": return "absent"
+        if self.key == "present": return "present"
+        return "other"
 
 class Voter(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='voters')

@@ -40,8 +40,11 @@ def person_details(request, pk):
             role = None
 
     photo_path = 'data/photos/%d-100px.jpeg' % person.pk
+    photo_credit = None
     if os.path.exists(photo_path):
         photo = '/' + photo_path
+        with open(photo_path.replace("-100px.jpeg", "-credit.txt"), "r") as f:
+            photo_credit = f.read().strip().split(" ", 1)
     else:
         photo = None
 
@@ -72,6 +75,7 @@ def person_details(request, pk):
             'role': role,
             'active_role': active_role,
             'photo': photo,
+            'photo_credit': photo_credit,
             'analysis_data': analysis_data,
             'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
             'recent_video': recent_video,
@@ -83,7 +87,7 @@ def person_details(request, pk):
 
 def searchmembers(request, initial_mode=None):
     return person_search_manager().view(request, "person/person_list.html",
-    	defaults = { "roles__current": True if initial_mode=="all" else False })
+        defaults = { "roles__current": True if initial_mode=="all" else False })
 
 def http_rest_json(url, args=None, method="GET"):
     import urllib, urllib2, json
@@ -152,12 +156,12 @@ def browsemembersbymap(request, state=None, district=None):
 
 @render_to('person/district_map_embed.html')
 def districtmapembed(request):
-	return {
-		"demo": "demo" in request.GET,
-		"state": request.GET.get("state", ""),
-		"district": request.GET.get("district", ""),
-		"bounds": request.GET.get("bounds", None),
-	}
+    return {
+        "demo": "demo" in request.GET,
+        "state": request.GET.get("state", ""),
+        "district": request.GET.get("district", ""),
+        "bounds": request.GET.get("bounds", None),
+    }
 
 @render_to('congress/political_spectrum.html')
 def political_spectrum(request):
