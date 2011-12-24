@@ -24,7 +24,7 @@ def sort_filter(qs, form):
     return qs
 
 def vote_search_manager():
-    sm = SearchManager(Vote)
+    sm = SearchManager(Vote, qs=Vote.objects.order_by('-created'))
     
     #sm.add_option('sort', filter=sort_filter, widget=forms.Select, choices=[("date", "Date"), ("spread", "Spread")])
     #sm.add_option('year', filter=year_filter, widget=forms.Select, choices=years)
