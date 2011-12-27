@@ -57,7 +57,7 @@
 					map: map, 
 					position: loc
 				});
-				map.setZoom({{center_zoom}} + 2);					
+				map.setZoom(13);					
 			{% endif %}
 			
 			google.maps.event.addListener(map, "bounds_changed", function() {
@@ -98,11 +98,11 @@
 		
 		var geocoder;
 		var geocoder_result;
-		function doGeoCode() {
+		function doGeoCode(addr) {
 			if (!geocoder)
 				geocoder = new google.maps.Geocoder();
 			geocoder.geocode(
-				{ 'address': $('#address').val() },
+				{ 'address': addr },
 				function(results, status) {
 					if (status == google.maps.GeocoderStatus.OK) {
 						geocoder_result = results[0].geometry.location;
@@ -133,6 +133,17 @@
 				window.location = "/congress/members/" + m[1].toUpperCase() + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
 			}
 		}
+		
+		function doform() {
+			if (!$('#name').hasClass('default') && $('#name').val()) {
+				window.location = "/congress/members/current?name=" + encodeURI($('#name').val());
+			} else if (!$('#address').hasClass('default') && $('#address').val()) {
+				doGeoCode($('#address').val());
+			} else if (!$('#zip').hasClass('default') && $('#zip').val()) {
+				doGeoCode($('#zip').val());
+			}
+			return false;
+		}
 	</script>
 {% endblock %}
 {% block style %}
@@ -144,24 +155,23 @@
 {% block crumbs %}
 <ul>
 	<li><a href="/congress">Congress</a></li>
+	{% if not state %}
 	<li>Members of Congress</li>
+	{% else %}
+	<li><a href="/congress/members">Members of Congress</a></li>
+		{% if not district %}
+		<li>{{statename}}</li>
+		{% else %}
+		<li><a href="/congress/members/{{state}}">{{statename}}</a></li>
+		<li>{{district|ordinal}}</li>
+		{% endif %}
+	{% endif %}
 </ul>
 {% endblock %}
 
 {% block summary %}
-	{% if not state %}
 	<h2>Find a Senator <span>or</span> Representative</h2>
 	<p>Use this page to find current or past Members of Congress. You can also <a href="#">browse by committees</a> or check out <a href="#">congressional statistics</a>.</p>
-	{% endif %}
-	{% if state and not district %}
-	<h2>{{statename}}</h2>
-	<p>(<a href="/congress/members">Back to U.S. Map</a>)</small></p>
-	{% endif %}
-	{% if district %}
-	<h2>{{statename}}<br/>{{district|ordinal}} Congressional District</h2>
-	<p>(<a href="/congress/members/{{state}}">Back to {{statename}}</a>) (<a href="/congress/members">Back to U.S. Map</a>)</p>
-	{% endif %}
-	
 {% endblock %}
 
 {% block body_class %}member{% endblock %}
@@ -172,7 +182,7 @@
 		<div class="frame">
 			<div class="advanced-search">
 				{% if not state %}
-					<form action="#">
+					<form action="#" onsubmit="return doform();">
 						<fieldset>
 							<h3>Find a Senator <span>or</span> Representative</h3>
 							
@@ -213,13 +223,16 @@
 					</form>
 					
 					<ul>
-						<li><a href="/congress/members/all">List all Members of Congress</a></li>
-						<li><a href="/congress/members/browse">Search Former Members of Congress</a></li>
+						<li><a href="/congress/members/current">List all Members of Congress</a></li>
+						<li><a href="/congress/members/all">Search Former Members of Congress</a></li>
 					</ul>
 					<h5>Statistics</h5>
 					<p>Take a look at <a href="/congress/members/stats">statistics</a> about missed votes, bill sponsorship, ideology, and leadership.</p>
 					
 				{% else %}
+					<h2>{{statename}}</h2>
+					<p>(<a href="/congress/members">Back to U.S. Map</a>)</small></p>
+					
 					<h3>Senators</h3>
 					{% if stateapp == "T" %}
 						<p>{{statename}} is a U.S. territory and so does not have any senators.</p>
@@ -235,21 +248,30 @@
 						</ul>
 					{% endif %}
 					
+					{% if not district %}
 					<h3>Representative{{reps|pluralize}}</h3>
+					{% else %}
+					<h3>{{district|ordinal}} Congressional District</h3>
+					{% endif %}
 					<ul>
 						{% for dist, rep in reps %}
 							<li style="margin-bottom: .5em">
 								{% if reps|length > 1 %}
 								<div><strong>{{dist|ordinal}} District:</strong> (<a href="/congress/members/{{state}}/{{dist}}">map</a>)</div>
 								{% endif %}
+								<div style="margin-left: 1em">
 								{% if rep %}
 									<a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a>
 								{% else %}
 									<em>Vacant</em>
 								{% endif %}
+								</div>
 							</li>
 						{% endfor %}
 					</ul>
+					{% if district %}
+					<p>(<a href="/congress/members/{{state}}">Back to all of {{statename}}</a>)</p>
+					{% endif %}
 				{% endif %}
 			
 			</div><!-- /advanced-search -->

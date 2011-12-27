@@ -1,32 +1,4 @@
 """
-This is module automatically builds
-search interface for the django model.
-Search interface is a django form with extra features. The
-main feature is the labels which displays the number of
-possible results for each option.
-
-`SearchManger` is the main objects which stores configuration.
-`SearcManager` contains one or more `Option` objects.
-`Option` object is reference to model field.
-`SearchForm` is enchanced Django Form which associated with
-`SearchManager` instance. `SearchForm` able to build itself
-using options of SearchManager.
-
-Example of usage:
-    @render_to('someapp/user_list.html')
-    def some_view(request):
-        sm = SearchManager(User)
-        sm.add_option('sex')
-        # If we pass request to the `form` method
-        # then the from will be bound with `request.POST` data
-        form = sm.form(request)
-        # Get the queryset limited
-        # to selected options
-        qs = form.queryset()
-        return {'qs': qs, 'manager': sm}
-
-Layout:
-    Options <--> SearchManager <--> Form <--> (SmartSearchField or any other Field)
 """
 from django import forms
 from django.shortcuts import redirect, get_object_or_404, render_to_response
@@ -142,6 +114,8 @@ class SearchManager(object):
                 "total": qs.count(),
                 }), content_type='text/json')
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return HttpResponse(json.dumps({
                 "error": repr(e),
                 }), content_type='text/json')
@@ -180,7 +154,7 @@ class SearchManager(object):
             else:
                 def clean_values(x):
                     for y in x:
-                        if y == "true":
+                        if y in ("true", "on"):
                             yield True
                         elif y == "false":
                             yield False
@@ -253,7 +227,7 @@ class SearchManager(object):
 class Option(object):
     def __init__(self, manager, field_name, type="checkbox", required=False,
                  filter=None, choices=None, label=None, sort=True,
-                 visible_if=None):
+                 visible_if=None, help=None):
         """
         Args:
             manager: `SearchManager` instance
@@ -276,4 +250,5 @@ class Option(object):
         self.label = label
         self.sort = sort
         self.visible_if = visible_if
+        self.help = help
 

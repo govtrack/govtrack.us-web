@@ -67,21 +67,34 @@
 			
 		});
 		
+		var is_full_screen = false;
 		function doFullScreen() {
-			if ($('#leftpanel').css('display') == 'none') {
-				$('#leftpanel').show();
+			if (is_full_screen) {
 				$('#map_canvas').css('position', 'relative');
-				$('#map_canvas').css('width', '620px');
-				$('#map_canvas').css('height', '450px');
+				$('#map_canvas').css('width', '');
+				$('#map_canvas').css('top', '');
+				$('#map_canvas').css('left', '');
+				$("#map_container").append($('#map_canvas'));
+				google.maps.event.trigger(map, "resize");
 			} else {
-				$('#leftpanel').hide();
 				$('#map_canvas').css('position', 'absolute');
-				$('#map_canvas').css('top', '1px');
-				$('#map_canvas').css('left', '1px');
-				$('#map_canvas').css('width', '99%');
-				$('#map_canvas').css('height', '99%');
+				$('#map_canvas').css('z-index', '1000');
+				$("body").append($('#map_canvas'));
 			}
+			is_full_screen = !is_full_screen;
+			canvas_resize();
 		}
+		function canvas_resize() {
+			if (!is_full_screen) return;
+			$('#map_canvas').css({
+				left: $(window).scrollLeft(),
+				top: $(window).scrollTop(),
+				width: $(window).width(),
+				height: $(window).height() });
+			google.maps.event.trigger(map, "resize");
+		}
+		$(window).scroll(canvas_resize);
+		$(window).resize(canvas_resize);
 		
 		var geocoder;
 		var geocoder_result;
@@ -243,7 +256,7 @@
 
 		
 			<div style="display: none">
-				<div id="fullscreen">
+				<div id="fullscreen" style="padding: 10px">
 					<img src="{{ MEDIA_URL }}icons/stock_fullscreen.png" title="Toggle Full Screen" onclick="doFullScreen();" style="cursor: pointer"/>
 				</div>
 			</div>

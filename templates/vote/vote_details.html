@@ -313,6 +313,11 @@ $(function() {
     </div>
 </div>
 
+{% if vote.chamber == 2 %}
+<h2 style="margin-top: 30px">Where is the Speaker&rsquo;s vote?</h2>
+<p>According to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful to do so. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk.</p>
+{% endif %}
+
 <h2 style="margin-top: 30px">What&rsquo;s the difference between aye and yea?</h2>
 
 <p>Although there is no meaningful difference between aye and yea (and nay and no), the terms are used in different sorts of votes based on Congress&rsquo;s long tradition of parliamentary procedure. The U.S. Constitution specifically says that &ldquo;Yea&rdquo; and &ldquo;Nay&rdquo; be used for votes on the passage of bills (Article I, Section 7). The House and Senate follow the Constitution stricly for these votes using exactly the words that appear in the Constitution, and the Senate uses these words for all types of votes.</p>

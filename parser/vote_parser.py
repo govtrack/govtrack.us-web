@@ -14,6 +14,8 @@ from bill.models import Bill, BillType
 from vote.models import (Vote, VoteOption, VoteSource, Voter,
                          CongressChamber, VoteCategory, VoterType)
 
+from django.template.defaultfilters import truncatewords
+
 log = logging.getLogger('parser.vote_parser')
 
 class VoteProcessor(Processor):
@@ -106,9 +108,6 @@ def main(options):
     voter_processor = VoterProcessor()
     voter_processor.PERSON_CACHE = dict((x.pk, x) for x in Person.objects.all())
 
-    # Remove old votes
-    Vote.objects.all().delete()
-
     # The pattern which the roll file matches
     # Filename contains info which should be placed to DB
     # along with info extracted from the XML file
@@ -142,15 +141,13 @@ def main(options):
             seen_obj_ids.append(existing_vote.id)
             continue
         
-        if existing_vote != None:
-            existing_vote.delete()
-            
         try:
             tree = etree.parse(fname)
 
             # Process role object
             for roll_node in tree.xpath('/roll'):
                 vote = vote_processor.process(Vote(), roll_node)
+                vote.id = existing_vote
                 match = re_path.search(fname)
                 vote.congress = match.group(1)
                 vote.chamber = chamber_mapping[match.group(2)]
@@ -160,6 +157,11 @@ def main(options):
                 for bill_node in roll_node.xpath("bill"):
                     try:
                         vote.related_bill = Bill.objects.get(congress=bill_node.get("session"), bill_type=BillType.by_xml_code(bill_node.get("type")), number=bill_node.get("number"))
+                        
+                        if vote.category == VoteCategory.passage:
+                            vote.question = truncatewords(vote.related_bill.title, 7) + " (" + vote.vote_type + ")"
+                            print vote.question
+                        
                     except Bill.DoesNotExist:
                         vote.missing_data = True
                 
@@ -169,6 +171,7 @@ def main(options):
 				
                 # Process roll options
                 roll_options = {}
+                VoteOption.objects.filter(vote=vote).delete()
                 for option_node in roll_node.xpath('./option'):
                     option = option_processor.process(VoteOption(), option_node)
                     option.vote = vote
@@ -176,6 +179,7 @@ def main(options):
                     roll_options[option.key] = option
 
                 # Process roll voters
+                Voter.objects.filter(vote=vote).delete()
                 for voter_node in roll_node.xpath('./voter'):
                     voter = voter_processor.process(roll_options, Voter(), voter_node)
                     voter.vote = vote

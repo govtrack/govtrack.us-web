@@ -78,4 +78,8 @@ def get_session_ordinal(congress, session):
             
     raise ValueError("Congress or session not found.")
     
+def get_all_sessions():
+    get_session_from_date(None) # load data
+    return SESSION_DATES # [(congress, session, startdate, enddate), ...]
+
 

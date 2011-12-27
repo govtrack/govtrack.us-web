@@ -74,6 +74,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     
     if (isinitial) {
     	{% for k, v in defaults.items %}
+    	{% if v %}
     		{% for field in form %}
     			{% if field.field_name == k %}
     				{% if field.type == "checkbox" %}
@@ -91,6 +92,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     				{% endif %}
     			{% endif %}
     		{% endfor %}
+    	{% endif %}
     	{% endfor %}
     }
     
@@ -143,8 +145,9 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                     			node.val(postdata[field])
                     		else
                     			node.val("__ALL__");
-                    	}
-                    	if (type == "checkbox" || type == "radio") {
+                    	} else if (type == "text") {
+                    		node.val(postdata[field])
+                    	} else if (type == "checkbox" || type == "radio") {
                     		node.html("");
                     		for (var j in values) {
                     			var opt = $("<div><input type='" + type + "' onchange='update_search(null, null, this)'/> <label style='display: inline'><span class='name'> </span> <span class='count'> </span></label></div>");
@@ -239,7 +242,7 @@ $(function() { update_search(1, null, null, true); });
 	<div id="searcherror"> </div>
 	<ul>
     	{% for field in form %}
-    		<li id="searchform_field_{{field.field_name}}_container" {% if field.type != "select" %}class="wide"{% endif %} style="cursor: pointer">
+    		<li id="searchform_field_{{field.field_name}}_container" {% if field.type != "select" or field.help %}class="wide"{% endif %} style="cursor: pointer">
 				<label for="searchform_field_{{field.field_name}}">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
 				{% if field.type == "text" %}
 					<input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text"> </input>
@@ -250,6 +253,9 @@ $(function() { update_search(1, null, null, true); });
 				{% endif %}
 				{% if field.type == "checkbox" or field.type == "radio" %}
 					<div id="searchform_field_{{field.field_name}}"> </div>
+				{% endif %}
+				{% if field.help %}
+					<div style="margin-top: 3px"><small>{{field.help}}</small></div>
 				{% endif %}
 			</li>
     	{% endfor %}
