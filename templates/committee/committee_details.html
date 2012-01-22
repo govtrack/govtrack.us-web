@@ -1,50 +1,117 @@
-{% extends "master.html" %}
+{% extends "master_a.html" %}
 {% load humanize persontags %}
 
 {% block title %}{{ committee }} - GovTrack.us{% endblock %}
 
+{% block meta_description %}{{ committee }}{% endblock %}
+
 {% block crumbs %}
 <ul>
-<li><a href="{% url congress_home %}">Congress</a></li>
-{% if parent %}<li><a href="{{ parent.get_absolute_url }}">{% if parent.abbrev %}{{parent.abbrev}}{% else %}{{parent|truncatewords:3}}{% endif %}</a></li>{% endif %}
-<li>{% if committee.abbrev %}{{committee.abbrev}}{% else %}{{committee|truncatewords:3}}{% endif %}</li>
+<li><a href="/congress/committees">Committees</a></li>
+{% if parent %}
+	<li><a href="{{ parent.get_absolute_url }}">{% if parent.abbrev %}{{parent.committee_type_abbrev}}.{{parent.abbrev}}.{% else %}{{parent|truncatewords:3}}{% endif %}</a></li>
+	<li>{% if committee.abbrev %}{{committee.abbrev}}{% else %}{{committee|truncatewords:3}}{% endif %}</li>
+{% else %}
+	<li>{{committee|truncatewords:5}}</li>
+{% endif %}
 </ul>
 {% endblock %}
 
 {% block summary %}
+<div class="container">
     <h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
+	
+	<div id="track_panel_base">
+	<div class="info">
+		<dl class="wide">
+			{% for mem in member_highlights %}
+				<dt>{{mem.get_role_display}}</dt>
+				<dd><a href="{{mem.person.get_absolute_url}}">{{mem.person}}</a></dd>
+			{% endfor %}
+		</dl>
+		<p style="margin-top: .5em; line-height: 110%"><small>The chairman is always selected from the majority party. The ranking member is the most senior member of the minority party.</small></p>
+		
+		<dl class="wide" style="margin-top: 1em">
+			{% for party, count in party_counts %}
+				<dt>{{party}}s</dt>
+				<dd>{{count}}</dd>
+			{% endfor %}
+		</dl>
+	</div>
+	</div>
+	
+	{% include "events/subscribe_inline.html" %}
+</div><!-- /container -->
+
+<div class="aside">
+	<a href="#" class="track-btn" onclick="return show_track_panel();">Track Committee</a>
+	
+    {% if committee.url %}
+		<div class="article">
+			<strong>Official Website:</strong>
+			<a href="{{committee.url}}" target="_blank">{{committee.url}}</a>
+		</div>
+    {% endif %}
+</div><!-- /aside -->
 {% endblock %}
 
 {% block body %}
-    <h2>Members</h2>
-    <ul>
+    <h2>{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</h2>
+    <table style="margin-top: 1.5em; margin-bottom: 30px;">
+    <tr>
         {% for member in members %}
-        <li class="committee-member-item">
-            <div>{% if member.role != SIMPLE_MEMBER %}{{ member.get_role_display }}{% endif %}</div>
-            <div><a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url }}" /></a></div>
-                <div><a href="{{ member.person.get_absolute_url }}">{{ member.person }}</a></div>
-        </li>
-        {% if forloop.counter|divisibleby:4 %}<div class="clear"></div>{% endif %}
+        {% if forloop.counter0|divisibleby:7 and not forloop.first %}</tr><tr>{% endif %}
+        <td width="20%" {% if not forloop.counter0|divisibleby:7 %}style="padding-left: 22px"{% endif %}>
+        	<center style="padding-bottom: .5em">
+            <div style="width: 102px;">
+            	<div style="font-weight: bold; font-size: 12px; overflow: hidden; height: 1.75em;">
+            	{% if member.role != SIMPLE_MEMBER %}
+	            	<div style="background: black; color: white; ">{{ member.get_role_display }}</div>
+	            {% else %}
+	            	{% if member.subcommittee_role %}
+	                	<div style="background: #666; color: white; font-size: 10px;  padding: 2px;" title="Subcommittee Chair: {{member.subcommittee_role.committee.name}}">{{member.subcommittee_role.committee.name|truncatewords:1}}</div>
+	                {% else %}
+	            		<div>&nbsp;</div>
+	            	{% endif %}
+	            {% endif %}
+	            </div>
+            	<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url }}" style="border: 1px solid black; width: 100px; height: 122px;" /></a>
+            </div>
+            <div><a href="{{ member.person.get_absolute_url }}">{{ member.person.name_no_details }}</a></div>
+            {% with member.person.get_current_role as role %}
+            <div style="font-size: 90%; color: #777;">
+            	{% if committee.committee_type == TYPE_JOINT %}
+            		{{role.get_title}}
+            	{% endif %}
+            	{% if not role.district %}
+            		<div>{{role.state_name}}</div>
+            	{% else %}
+            		<div>{{role.state}}-{{role.district}}</div>
+            	{% endif %}
+            	<div>{{role.party}}</div>
+            </div>
+            {% endwith %}
+            </center>
+        </td>
         {% endfor %}
-    </ul>
-    <div class="clear"></div>
+    </tr>
+    </table>
+
+    <div class="col_left">
+		<h2>Committee Activity</h3>
+		{% include "events/trackedeventspanel.html" %}
+	</div>
 
     {% if subcommittees %}
-    <h2>Subcommittees</h2>
-    <ul>
-        {% for item in subcommittees %}
-        <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
-        {% endfor %}
+    <div class="col_right">
+		<h2>Subcommittees</h2>
+		<ul>
+			{% for item in subcommittees %}
+			<li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+			{% endfor %}
+		</ul>
+	</div>
     {% endif %}
-
-<div class="col_right">
-    <div class="sidebox">
-        <h2>Upcoming Committee Meetings</h3>
-        <p>Use the Upcoming Meetings Feed to keep an eye on upcoming committee meetings as they are posted.</p>
-		
-		{% include "events/trackedeventspanel.html" %}
-    </div>
-</div>
 
 {% endblock %}
 

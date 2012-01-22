@@ -226,8 +226,11 @@
 						<li><a href="/congress/members/current">List all Members of Congress</a></li>
 						<li><a href="/congress/members/all">Search Former Members of Congress</a></li>
 					</ul>
+					
+					{% comment %}
 					<h5>Statistics</h5>
 					<p>Take a look at <a href="/congress/members/stats">statistics</a> about missed votes, bill sponsorship, ideology, and leadership.</p>
+					{% endcomment %}
 					
 				{% else %}
 					<h2>{{statename}}</h2>
@@ -253,13 +256,15 @@
 					{% else %}
 					<h3>{{district|ordinal}} Congressional District</h3>
 					{% endif %}
-					<ul>
+					<ul style="height: 320px; width: 250px; overflow: auto;">
 						{% for dist, rep in reps %}
 							<li style="margin-bottom: .5em">
-								{% if reps|length > 1 %}
-								<div><strong>{{dist|ordinal}} District:</strong> (<a href="/congress/members/{{state}}/{{dist}}">map</a>)</div>
+								{% if not district %}
+								{% if reps|length > 1 or dist > 0 %}
+								<div><a href="/congress/members/{{state}}/{{dist}}"><strong>{{dist|ordinal}} District</strong></a> <span style="color: #777">(map)</span></div>
 								{% endif %}
-								<div style="margin-left: 1em">
+								{% endif %}
+								<div>
 								{% if rep %}
 									<a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a>
 								{% else %}
@@ -286,9 +291,10 @@
 			<div id="map_container">
 				<div id="map_canvas">
 				</div>
+				x
 			</div>
 			
-			<div style="display: none;">
+			<div>
 				<div id="embed_teaser">
 					<a href="#" onclick="$('#embed_teaser').hide(); $('#embed_details').fadeIn(); return false;">Embed this map...</a>
 				</div>

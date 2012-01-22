@@ -90,7 +90,8 @@ def searchmembers(request, initial_mode=None):
         defaults = {
         	"roles__current": True if initial_mode=="current" else False,
         	"name": request.GET["name"] if "name" in request.GET else None,
-        	})
+        	},
+        noun = ('person', 'people') )
 
 def http_rest_json(url, args=None, method="GET"):
     import urllib, urllib2, json

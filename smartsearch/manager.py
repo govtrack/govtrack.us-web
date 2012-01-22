@@ -82,12 +82,14 @@ class SearchManager(object):
     def results(self, objects, form):
         return "".join([self.make_result(obj, form) for obj in objects])
         
-    def view(self, request, template, defaults={}):
+    def view(self, request, template, defaults={}, noun=("item", "items")):
         if request.META["REQUEST_METHOD"] == "GET":
             return render_to_response(template, {
                 'form': self.options,
                 'column_headers': self.get_column_headers(),
                 'defaults': defaults,
+                'noun_singular': noun[0],
+                'noun_plural': noun[1],
                 },
                 RequestContext(request))
         

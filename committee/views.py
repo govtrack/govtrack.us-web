@@ -20,12 +20,21 @@ def committee_details(request, parent_code, child_code=None):
         parent = None
     members = sort_members(obj.members.all())
     subcommittees = obj.subcommittees.all()
+    
+    party_counts = { }
+    for m in members:
+    	party_counts[m.person.get_current_role().party] = party_counts.get(m.person.get_current_role().party, 0) + 1
+    party_counts = sorted(party_counts.items(), key = lambda p : -p[1])
+    
     return {'committee': obj,
             'parent': parent,
             'subcommittees': subcommittees,
             'members': members,
             'SIMPLE_MEMBER': CommitteeMemberRole.member,
+            'TYPE_JOINT': CommitteeType.joint,
             'feed': Feed.CommitteeFeed(obj),
+            "member_highlights": [m for m in members if m.role != CommitteeMemberRole.member],
+            "party_counts": party_counts,
             }
 
 @render_to('committee/committee_list.html')

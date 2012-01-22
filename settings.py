@@ -149,9 +149,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 TEST_DATABASE_CHARSET = 'utf8'
 
-SUNLIGHTLABS_API_KEY = 'eca0795318ba4fe8ac01b96a8ef29b71'
-YOUTUBE_API_KEY = 'AI39si7Qf30FJyZyD1NIeTuvpBON8ZJ4OkHG2swKWLnQsRW-L4Rl3FiUGhEOXxMoKvVktYNLHQR-wfjWzvPw3kK4bhg1DkOwyQ'
-
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 
 DATETIME_FORMAT = 'M d, Y P'
@@ -166,3 +163,4 @@ except ImportError:
 
 if not SECRET_KEY:
     raise Exception('You must provide SECRET_KEY value in settings_local.py')
+

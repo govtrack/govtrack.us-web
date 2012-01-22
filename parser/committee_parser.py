@@ -55,6 +55,8 @@ class CommitteeMemberProcessor(Processor):
         'Chair': CommitteeMemberRole.chairman,
         'Ranking Member': CommitteeMemberRole.ranking_member,
         'Vice Chairman': CommitteeMemberRole.vice_chairman,
+        'Vice Chair': CommitteeMemberRole.vice_chairman,
+        'Vice Chairwoman': CommitteeMemberRole.vice_chairman,
         'Member': CommitteeMemberRole.member,
     }
     DEFAULT_VALUES = {'role': 'Member'}
@@ -140,7 +142,11 @@ def main(options):
 
         # Process committee nodes
         for committee in tree.xpath('/committees/committee'):
-            cobj = Committee.objects.get(code=committee.get('code'))
+            try:
+                cobj = Committee.objects.get(code=committee.get('code'))
+            except Committee.DoesNotExist:
+                print "Committee not found:", committee.get('code')
+                continue
 
             # Process members of current committee node
             for member in committee.xpath('./member'):

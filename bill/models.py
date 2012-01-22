@@ -59,6 +59,8 @@ class Cosponsor(models.Model):
     bill = models.ForeignKey('bill.Bill')
     joined = models.DateField()
     withdrawn = models.DateField(blank=True, null=True)
+    class Meta:
+    	unique_together = [("bill", "person"),]
 
 class Bill(models.Model):
     title = models.CharField(max_length=255)
@@ -294,7 +296,10 @@ class Bill(models.Model):
             ret["label"] = status.label
             ret["date"] = date 
             return ret
-        return reversed([getinfo(e["eventid"], e["when"]) for e in events])
+        ret = [getinfo(e["eventid"], e["when"]) for e in events]
+        if len(ret) == 0: # ??
+            ret = [{ "label": "Introduced", "date": self.introduced_date }]
+        return reversed(ret)
     
     def get_future_events(self):
         # predict the major actions not yet occurred on the bill, based on its
@@ -309,25 +314,25 @@ class Bill(models.Model):
         type_specific_paths = {
             BillType.house_bill: {
                 BillStatus.reported: BillStatus.pass_over_house,
-                BillStatus.pass_over_house: BillStatus.passed_bill,
-                BillStatus.pass_back_house: BillStatus.passed_bill,
-                BillStatus.pass_back_senate: BillStatus.passed_bill,
+                BillStatus.pass_over_house: (BillStatus.passed_bill, "Passed Senate"),
+                BillStatus.pass_back_house: (BillStatus.passed_bill, "Senate Approves House Changes"),
+                BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
                 BillStatus.passed_bill: BillStatus.enacted_signed,
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
-                BillStatus.prov_kill_cloturefailed: BillStatus.passed_bill,
-                BillStatus.prov_kill_pingpongfail: BillStatus.passed_bill,
+                BillStatus.prov_kill_cloturefailed: (BillStatus.passed_bill, "Passed Senate"),
+                BillStatus.prov_kill_pingpongfail: (BillStatus.passed_bill, "Passed House/Senate"),
                 BillStatus.prov_kill_veto: BillStatus.vetoed_override_pass_over_house,
                 BillStatus.vetoed_override_pass_over_house: BillStatus.enacted_veto_override,
             },
             BillType.senate_bill: {
                 BillStatus.reported: BillStatus.pass_over_senate,
-                BillStatus.pass_over_senate: BillStatus.passed_bill,
-                BillStatus.pass_back_house: BillStatus.passed_bill,
-                BillStatus.pass_back_senate: BillStatus.passed_bill,
+                BillStatus.pass_over_senate: (BillStatus.passed_bill, "Passed House"),
+                BillStatus.pass_back_house: (BillStatus.passed_bill, "Senate Approves House Changes"),
+                BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
                 BillStatus.passed_bill: BillStatus.enacted_signed,
-                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_bill, 
+                BillStatus.prov_kill_suspensionfailed: (BillStatus.passed_bill, "Passed House"), 
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
-                BillStatus.prov_kill_pingpongfail: BillStatus.passed_bill,
+                BillStatus.prov_kill_pingpongfail: (BillStatus.passed_bill, "Passed Senate/House"),
                 BillStatus.prov_kill_veto: BillStatus.vetoed_override_pass_over_senate,
                 BillStatus.vetoed_override_pass_over_senate: BillStatus.enacted_veto_override,
             },                
@@ -389,7 +394,17 @@ class Bill(models.Model):
         st = self.current_status
         while st in path:
             st = path[st]
-            seq.append(st)
+            if type(st) == tuple:
+            	label = st[1]
+            	st = st[0]
+            else:
+            	label = st.label
+            seq.append(label)
             
         return seq
-        
+
+class RelatedBill(models.Model):
+    bill = models.ForeignKey(Bill, related_name="relatedbills")
+    related_bill = models.ForeignKey(Bill, related_name="relatedtobills")
+    relation = models.CharField(max_length=16)
+	

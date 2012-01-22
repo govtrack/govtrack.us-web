@@ -15,7 +15,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json
+import urllib, urllib2, json, os.path
 
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
@@ -26,11 +26,60 @@ def bill_details(request, congress, type_slug, number):
             bill_type = BillType.by_slug(type_slug)
         except BillType.NotFound:
             raise Http404("Invalid bill type: " + type_slug)
-    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    
+	bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+	
+	summary = None
+	sfn = "data/us/%d/bills.summary/%s%d.summary.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
+	if os.path.exists(sfn):
+		from lxml import etree
+		dom = etree.parse(open(sfn))
+		xslt_root = etree.XML('''
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+		<xsl:output omit-xml-declaration="yes"/>
+		<xsl:template match="summary//Paragraph[string(.)!='']">
+			<div style="margin-top: .5em; margin-bottom: .5em">
+				<xsl:apply-templates/>
+			</div>
+		</xsl:template>
+
+		<xsl:template match="Division|Title|Subtitle|Part|Chapter|Section">
+            <xsl:if test="not(@number='meta')">
+            <div>
+                <xsl:choose>
+                <xsl:when test="@name='' and count(*)=1">
+                <div style="margin-top: .75em">
+                <span xml:space="preserve" style="font-weight: bold;"><xsl:value-of select="name()"/> <xsl:value-of select="@number"/>.</span>
+                <xsl:value-of select="Paragraph"/>
+                </div>
+                </xsl:when>
+
+                <xsl:otherwise>
+                <div style="font-weight: bold; margin-top: .75em" xml:space="preserve">
+                    <xsl:value-of select="name()"/>
+                    <xsl:value-of select="@number"/>
+                    <xsl:if test="not(@name='')"> - </xsl:if>
+                    <xsl:value-of select="@name"/>
+                </div>
+                <div style="margin-left: 2em">
+                    <xsl:apply-templates/>
+                </div>
+                </xsl:otherwise>
+                </xsl:choose>
+            </div>
+            </xsl:if>
+        </xsl:template>
+</xsl:stylesheet>''')
+		transform = etree.XSLT(xslt_root)
+		summary = transform(dom)
+		if unicode(summary).strip() == "":
+			summary = None
+	
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
+        "summary": summary,
     }
 
 @render_to('bill/bill_text.html')
@@ -61,8 +110,14 @@ def bill_text(request, congress, type_slug, number):
 
 @render_to('bill/bill_list.html')
 def bill_list(request):
-    return bill_search_manager().view(request, "bill/bill_list.html", defaults={"congress": CURRENT_CONGRESS})
-
+    return bill_search_manager().view(request, "bill/bill_list.html",
+    	defaults={
+    		"congress": CURRENT_CONGRESS,
+    		"sponsor": request.GET.get("sponsor", None)
+    	},
+    	noun = ("bill", "bills")
+    	)
+ 
 def query_popvox(method, args):
     if isinstance(method, (list, tuple)):
         method = "/".join(method)

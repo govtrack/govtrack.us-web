@@ -116,16 +116,17 @@
         
 		{{ person.lastname }} is a {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among {{person|hisher}} peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership. <a href="#" onclick="$('#sponsorshipanalysis_info').slideDown(); $(this).fadeOut(); return false;">More...</a>
 
-		<p id="sponsorshipanalysis_info" style="color: grey; display: none">These labels come from the <a href="#">Political Spectrum & Legislative Leadership statistical analysis</a> that we have carried out. The statistical analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or lonely (i.e. follower) by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
+		<p id="sponsorshipanalysis_info" style="color: grey; display: none">These labels come from the <a href="#">Political Spectrum & Legislative Leadership statistical analysis</a> that we have carried out. The statistical analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or follower by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
 	</div><!-- /analysis -->
     {% endif %}
 
-	
+    {% comment %}
 	<div id="voting-record">
 		<h3>Voting Record</h3>
 		<img src="#" alt="Voting record graph" />
 		<p>XXXXXXX. View a <a href="#">larger chart and a list of recent votes</a>.</p>
 	</div><!-- /voting-record -->
+	{% endcomment %}
 	
 	{% if committeeassignments %}
 	<div id="membership">
@@ -154,14 +155,13 @@
 {% if recent_bills %}
 	<div id="sponsorship">
 		<h3>Bill Sponsorship <span>&amp;</span> Cosponsorship</h3>
-		<p>blah blah</p>
 		<p>Some of {{person.lastname}}’s most recently sponsored bills include...</p>
 		<ul>
 			{% for bill in recent_bills %}
 			<li><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
 			{% endfor %}
 		</ul>
-		<p><a href="#">View All &raquo;</a> (including bills from previous years)</p>
+		<p><a href="/congress/bills?sponsor={{person.id}}">View All &raquo;</a> (including bills from previous years)</p>
 	</div><!-- /sponsorship -->
 {% endif %}
 	

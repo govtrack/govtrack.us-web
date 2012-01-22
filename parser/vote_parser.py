@@ -133,7 +133,7 @@ def main(options):
         match = re_path.search(fname)
         
         try:
-            existing_vote = Vote.objects.get(congress=match.group(1), chamber=chamber_mapping[match.group(2)], session=match.group(3), number=match.group(4)).id
+            existing_vote = Vote.objects.get(congress=match.group(1), chamber=chamber_mapping[match.group(2)], session=match.group(3), number=match.group(4))
         except Vote.DoesNotExist:
             existing_vote = None
         
@@ -147,7 +147,7 @@ def main(options):
             # Process role object
             for roll_node in tree.xpath('/roll'):
                 vote = vote_processor.process(Vote(), roll_node)
-                vote.id = existing_vote
+                if existing_vote: vote.id = existing_vote.id
                 match = re_path.search(fname)
                 vote.congress = match.group(1)
                 vote.chamber = chamber_mapping[match.group(2)]
@@ -158,9 +158,12 @@ def main(options):
                     try:
                         vote.related_bill = Bill.objects.get(congress=bill_node.get("session"), bill_type=BillType.by_xml_code(bill_node.get("type")), number=bill_node.get("number"))
                         
+                        # for votes on passage, reverse the order of the title so that the
+                        # name of the bill comes first, but keep the vote_type at the end
+                        # to distinguish suspension votes etc. also, the title that comes
+                        # from the upstream source is not formatted in our style.
                         if vote.category == VoteCategory.passage:
                             vote.question = truncatewords(vote.related_bill.title, 7) + " (" + vote.vote_type + ")"
-                            print vote.question
                         
                     except Bill.DoesNotExist:
                         vote.missing_data = True
@@ -168,7 +171,7 @@ def main(options):
                 vote.save()
                 
                 seen_obj_ids.append(vote.id) # don't delete me later
-				
+                
                 # Process roll options
                 roll_options = {}
                 VoteOption.objects.filter(vote=vote).delete()
@@ -185,6 +188,9 @@ def main(options):
                     voter.vote = vote
                     voter.created = vote.created
                     voter.save()
+                    if voter.voter_type == VoterType.unknown:
+                        vote.missing_data = True
+                        vote.save() # not good to do it a lot, but shouldn't occur often
 
                 vote.calculate_totals()
 

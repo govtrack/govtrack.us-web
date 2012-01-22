@@ -5,9 +5,9 @@ from django.core.urlresolvers import reverse
 from common import enum
 
 class CommitteeType(enum.Enum):
-    senate = enum.Item(1, 'Senat')
-    joint = enum.Item(2, 'Joint')
-    house = enum.Item(3, 'House')
+    senate = enum.Item(1, 'Senate', abbrev="S")
+    joint = enum.Item(2, 'Joint', abbrev="J")
+    house = enum.Item(3, 'House', abbrev="H")
 
 
 class Committee(models.Model):
@@ -43,7 +43,10 @@ class Committee(models.Model):
         if self.committee == None:
             return self.name
         else:
-            return self.committee.name + " Subcommittee on " + self.name
+            return self.committee.name + ": Subcommittee on " + self.name
+            
+    def committee_type_abbrev(self):
+        return CommitteeType.by_value(self.committee_type).abbrev
     
     def create_events(self):
         from events.models import Feed, Event
@@ -52,7 +55,7 @@ class Committee(models.Model):
                 E.add("mtg_" + str(meeting.id), meeting.when, Feed.AllCommitteesFeed())
                 E.add("mtg_" + str(meeting.id), meeting.when, Feed.CommitteeFeed(self.code))
                 # TODO bills
-	
+    
     def render_event(self, eventid, feeds):
         eventinfo = eventid.split("_")
         mtg = CommitteeMeeting.objects.get(id=eventinfo[1])
@@ -61,7 +64,7 @@ class Committee(models.Model):
             "type": "Committee Meeting",
             "date": mtg.when,
             "title": self.fullname() + " Meeting",
-			"url": self.get_absolute_url(),
+            "url": self.get_absolute_url(),
             "body_text_template": """{{subject|safe}}""",
             "body_html_template": """{{subject}}""",
             "context": {
@@ -87,6 +90,12 @@ class CommitteeMember(models.Model):
         
     def role_name(self):
         return CommitteeMemberRole.by_value(self.role).label
+        
+    def subcommittee_role(self):
+        try:
+            return CommitteeMember.objects.filter(committee__committee=self.committee, person=self.person, role=CommitteeMemberRole.chairman)[0]
+        except IndexError:
+            return None
 
 MEMBER_ROLE_WEIGHTS = {
     CommitteeMemberRole.chairman: 5,

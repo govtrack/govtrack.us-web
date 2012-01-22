@@ -1,23 +1,9 @@
 from committee.models import MEMBER_ROLE_WEIGHTS
 
-def compare_members(a, b):
-    """
-    Commettee members should be displayed in sorted order.
-    Comparison is performed with this function.
-    """
-
-    result = cmp(MEMBER_ROLE_WEIGHTS[a.role],
-                 MEMBER_ROLE_WEIGHTS[b.role])
-    if result != 0:
-        return result
-    else:
-        return -1 * cmp(unicode(a.committee), unicode(b.committee))
-
-
 def sort_members(members):
     """
     Commettee members should be displayed in sorted order.
     Sorting is performed with this function.
     """
 
-    return sorted(members, cmp=compare_members, reverse=True)
+    return sorted(members, key=lambda c : (-MEMBER_ROLE_WEIGHTS[c.role], not c.subcommittee_role(), c.person.name_no_details_lastfirst()))

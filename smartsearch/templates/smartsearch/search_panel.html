@@ -12,14 +12,14 @@
 <div class="searching">
 <section>
 	<div class="summary" style="display: none">
-		<p><span class="total">xxx</span> item(s) matched your search{% comment %}for <strong>yyy</strong>{% endcomment %}. Showing <span class="start">aaa</span> through <span class="end">bbb</span>.</p>
+		<p><span class="total">xxx</span> <span class="noun">things</span> matched your search{% comment %}for <strong>yyy</strong>{% endcomment %}. Showing <span class="start">aaa</span> through <span class="end">bbb</span>.</p>
 	</div>
 	
 	<table class="results" style="display: none;">
 		<thead>
 			<tr>
 				{% for col in column_headers %}
-					<th>{{col}}</th>
+					<th>{% if col %}{{col}}{% endif %}</th>
 				{% endfor %}
 			</tr>
 		</thead>
@@ -120,8 +120,9 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                     
                     $('.summary').show();
                     $('.summary .total').text(res.total);
-                    $('.summary .start').text((res.page-1)*res.per_page);
-                    $('.summary .end').text((res.page-1)*res.per_page + res.total_this_page - 1);
+                    $('.summary .noun').text(res.total == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}");
+                    $('.summary .start').text((res.page-1)*res.per_page + 1);
+                    $('.summary .end').text((res.page-1)*res.per_page + res.total_this_page);
                     
                     // Display options.
                     for (var k in res.options) {

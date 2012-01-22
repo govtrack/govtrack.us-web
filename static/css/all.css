@@ -90,6 +90,7 @@ form, fieldset {
 	}
 h1, h2, h3, h4, h5 {
 	font: normal normal normal 32px/1.5em CallunaBold, 'Pallatino Linotype', Georgia, 'Times New Roman', serif;
+	line-height: 130%;
 	color: #666;
 	}
 h2 { font-size: 24px; 	}
@@ -750,10 +751,8 @@ h2 span, h3 span, h4 span, span span, a em {
     	}
     .summary-box .container {
         float: left;
-        width: 571px;
+        /*width: 571px;*/
         padding: 5px 0 0;
-    	}
-    .member .summary-box .container {
     	width: 360px;
     	}
     .summary-box h1 {
@@ -782,6 +781,9 @@ h2 span, h3 span, h4 span, span span, a em {
         float: left;
         clear: left;
         width: 80px;
+    	}
+    .summary-box dl.wide dt {
+        width: 130px;
     	}
     .summary-box dd {
         font-family: CallunaItalic;
@@ -814,12 +816,6 @@ h2 span, h3 span, h4 span, span span, a em {
         height: 16px;
         vertical-align: middle;
     	}
-.summary-box .actions {
-    width: 172px;
-    float: right;
-    text-align: center;
-    padding: 12px 0 0;
-	}
 .summary-box .aside {
     width: 172px;
     float: right;
@@ -1584,3 +1580,13 @@ ul.bullets {
 ul.bullets li {
 	margin: .25em 0 .25em 0;
 	}
+	
+.col_left {
+	width: 450px;
+	float: left;
+	margin-right: 40px;
+}
+.col_right {
+	width: 450px;
+	float: left;
+}

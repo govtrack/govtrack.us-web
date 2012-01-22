@@ -153,14 +153,23 @@ $(function() {
                 <th></th>
                 <th colspan="2">Totals</th>
                 {% for party in totals.parties %}
-                    <th>{{ party }}</th>
+                    <th>
+						<span class="party_{{party.0}}" style="padding-left: 3px">&nbsp;</span>
+						&nbsp;
+                    	{{ party }}
+                    </th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
             {% for item in totals.options %}
             <tr>
-                <td style="font-weight: bold; " class="vote_{{ item.option.alpha_key }}">{{ item.option }}</td>
+                <td style="font-weight: bold;">
+                	{% if item.option.key == "+" or item.option.key == "-" %}
+                		<span class="vote_{{ item.option.alpha_key }}" style="padding-left: 4px; border: 1px solid #AAA;">&nbsp;</span>
+                	{% endif %}
+                	{{ item.option }}
+                </td>
                 <td style="font-weight: bold; padding: 0 6px 0 6px;">{{ item.count }}</td>
                 <td>
                     <!--

@@ -25,17 +25,22 @@
 
 {% block summary %}
 <div class="container">
-	<h1>{{bill}}</h1>
+	<h1>{{bill.title|truncatewords:15}}</h1>
 	
 	<div class="info">
+		{% if bill.title != bill.title|truncatewords:15 %}
+			{% with bill.title|truncatewords:15|cut:"..." as bt %}
+				<p style="line-height: 130%">...{{bill.title|cut:bt}}</p>
+			{% endwith %}
+		{% endif %}
+	
 		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
 		
 		{% if subtitle %}<p>{{subtitle}}</p>{% endif %}
 		
 		<dl>
 			<dt>Sponsor:</dt>
-			<dd>
-<a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
+			<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
 		
 			<dt>Status:</dt>
 			<dd style="line-height: normal"><strong>{{bill.get_current_status_display}}</strong><br/>
@@ -44,14 +49,13 @@
 	
 		
 	</div><!-- /info -->
-	
-	<div class="actions">
-		<a href="#" class="track-btn">Track this bill</a>
-		
-		<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
-	</div><!-- /actions -->
-
 </div>
+
+<div class="aside">
+	<a href="#" class="track-btn">Track this bill</a>
+	
+	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
+</div><!-- /actions -->
 {% endblock %}
 
 {% block body %}
@@ -59,8 +63,6 @@
 	
 	<h2>Bill Overview</h2>
 		
-	CRS SUMMARY, RELATED LEG, STATUS WIDGET
-	
 	<div class="overview">
 		<div class="holder">
 			<div class="frame">
@@ -106,7 +108,7 @@
 							
 								{% for item in bill.get_future_events %}
 								<tr>
-									<td class="pending">{{item.label}}</td>
+									<td class="pending">{{item}}</td>
 									<td>(not yet ocurred)</td>
 								</tr>
 								{% endfor %}
@@ -181,8 +183,8 @@
 		<div class="holder">
 			<div class="frame">
 				<div class="container">
+					{% if bill.votes.exists %}
 					<dl>
-						{% if bill.votes.exists %}
 						<dt>Votes:</dt>
 						<dd>
 							{% for v in bill.votes.all %}
@@ -190,9 +192,11 @@
 								{{v.created}}. {{v.result}}.</p>
 							{% endfor %}
 						</dd>
-						{% endif %}
-
-						{% if bill.terms.exists %}
+					</dl>
+					{% endif %}
+					
+					{% if bill.terms.exists %}
+					<dl style="margin-top: 1em">
 						<dt>Subject Areas:</dt>
 						<dd>
 							<p>Use these subject areas to explore related legislation:</p>
@@ -202,8 +206,22 @@
 							{% endfor %}
 							</div>
 						</dd>
-						{% endif %}
 					</dl>
+					{% endif %}
+						
+					{% if bill.relatedbills.exists %}
+					<dl style="margin-top: 1em">
+						<dt>Related Bills:</dt>
+						<dd>
+							<div style="max-height: 15em; overflow: auto">
+							{% for rb in bill.relatedbills.all %}
+								<div>{{rb.relation}}: <a {% if href="{{rb.bill.get_absolute_url}}">{{rb.bill}}</a></div>
+							{% endfor %}
+							</div>
+							<p><small>Related bills are identified by the Congressional Research Service.</small></p>
+						</dd>
+					</dl>
+					{% endif %}
 				</div>
 				{% comment %}
 				<div class="container">
@@ -216,4 +234,12 @@
 			</div>
 		</div>
 	</div><!-- /overview -->
+	
+	{% if summary %}
+	<section class="clear" style="padding-top: 2em">
+		<h3>Official Bill Summary</h3>
+		<p>The following summary was written by the Congressional Research Service, a nonpartisan arm of the Library of Congress, which serves Congress. GovTrack did not write and has no control over these summaries.</p>
+		{{summary|safe}}
+	</section>
+	{% endif %}
 {% endblock %}

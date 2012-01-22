@@ -12,15 +12,13 @@
 	<div class="section">
 		<h1>Easily track the activities <br> of the United States Congress.</h1>
 		<div class="container">
-			<p class="intro">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your business.
-			&mdash;
-			Find your Congress members, track bills, tally votes, and keep Congress accountable.</p>
+			<p class="intro">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your life or business.</p>
 			
 			<div class="block">
 				{% if not user.is_authenticated %}
-					<a href="#" class="green-btn">Sign up for free</a>
+					<a href="#" class="green-btn">Sign up for updates</a>
 					<p>Already have an account? <a href="/accounts/login">Log in</a></p>
-					<p>You don&rsquo;t need an account just to <a href="/congress">browse</a>.</p>
+					<p>You don&rsquo;t need an account just to <a href="/overview">browse</a>.</p>
 				{% else %}
 					<p>Welcome back!</p>
 				{% endif %}
@@ -161,7 +159,7 @@
 					{% for tweet in tweets %}
 					<article class="post">
 						<div class="article">
-							<p>{{tweet.text}}</p>
+							<p>{{tweet.text|safe}}</p>
 							<em>{{tweet.relative_created_at}}</em>
 						</div>
 					</article>
@@ -174,7 +172,5 @@
 		</div>
 	</div>
 </div>
-
-	
 {% endblock %}
 

@@ -53,6 +53,10 @@ class Person(models.Model):
             
     def name_and_title(self):
         return get_person_name(self, firstname_position='before', role_recent=True, show_party=False, show_district=False)
+       
+    @property
+    def sortname(self):
+    	return get_person_name(self, firstname_position='after', role_recent=True, show_district=True)
         
     def __unicode__(self):
         return self.name
@@ -187,6 +191,8 @@ class PersonRole(models.Model):
         return State.by_value(self.state).label
             
     def get_description(self):
+    	from django.contrib.humanize.templatetags.humanize import ordinal
+    	
         if self.role_type == RoleType.president:
             return self.get_title_name(False)
         if self.role_type == RoleType.senator:
@@ -197,7 +203,7 @@ class PersonRole(models.Model):
             elif self.district == 0:
                 return self.get_title_name(False) + " for " + statenames[self.state] + " At Large"
             else:
-                return self.get_title_name(False) + " for " + statenames[self.state] + "'s District " + str(self.district)
+                return self.get_title_name(False) + " for " + statenames[self.state] + "'s " + ordinal(self.district) + " congressional district"
 
     def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()

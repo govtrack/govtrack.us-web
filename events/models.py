@@ -82,7 +82,20 @@ class Feed(models.Model):
         "pv:": {
             "title": lambda self : self.person().name + " - Voting Record",
             "noun": "person",
-        }
+        },
+        "committee:": {
+            "title": lambda self : self.committee().name,
+            "noun": "committee",
+            "includes": lambda self : [Feed.CommitteeBillsFeed(self.committee()), Feed.CommitteeMeetingsFeed(self.committee())],
+        },
+        "committeebills:": {
+            "title": lambda self : "Bills in " + self.committee().name,
+            "noun": "committee",
+        },
+        "committeemeetings:": {
+            "title": lambda self : "Meetings for " + self.committee().name,
+            "noun": "committee",
+        },
     }
         
     def type_metadata(self):
@@ -198,6 +211,20 @@ class Feed(models.Model):
         return Feed.get_arg_feed("committee", Committee, id_ref_instance,
             lambda ref : Committee.objects.get(code=ref),
             lambda obj : obj.code)
+
+    @staticmethod
+    def CommitteeBillsFeed(id_ref_instance):
+        from committee.models import Committee
+        return Feed.get_arg_feed("committeebills", Committee, id_ref_instance,
+            lambda ref : Committee.objects.get(code=ref),
+            lambda obj : obj.code)
+
+    @staticmethod
+    def CommitteeMeetingsFeed(id_ref_instance):
+        from committee.models import Committee
+        return Feed.get_arg_feed("committeemeetings", Committee, id_ref_instance,
+            lambda ref : Committee.objects.get(code=ref),
+            lambda obj : obj.code)
         
     # DistrictFeed?
     
@@ -227,6 +254,16 @@ class Feed(models.Model):
                else:
                     self._ref = None
          return self._ref
+         
+    def committee(self):
+         if not hasattr(self, "_ref"):
+               if ":" in self.feedname and self.feedname.split(":")[0] in ("committee", "committeebills", "committeemeetings"):
+                    import committee.models
+                    return committee.models.Committee.objects.get(code=self.feedname.split(":")[1])
+               else:
+                    self._ref = None
+         return self._ref
+         
 
 class Event(models.Model):
     """

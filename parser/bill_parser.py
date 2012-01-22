@@ -12,7 +12,7 @@ import re
 from parser.progress import Progress
 from parser.processor import Processor
 from parser.models import File
-from bill.models import BillTerm, TermType, BillType, Bill, Cosponsor, BillStatus
+from bill.models import BillTerm, TermType, BillType, Bill, Cosponsor, BillStatus, RelatedBill
 from person.models import Person
 from bill.title import get_primary_bill_title
 from committee.models import Committee
@@ -40,7 +40,7 @@ def get_term(name, congress):
     global TERM_CACHE
     if not TERM_CACHE:
         for term in BillTerm.objects.all():
-        	TERM_CACHE[(term.term_type, normalize_name(term.name))] = term
+            TERM_CACHE[(term.term_type, normalize_name(term.name))] = term
     return TERM_CACHE[(TermType.new if congress >= 111 else TermType.old, normalize_name(name))]
 
 class TermProcessor(Processor):
@@ -74,6 +74,7 @@ class BillProcessor(Processor):
         self.process_committees(obj, node)
         self.process_terms(obj, node, obj.congress)
         self.process_consponsors(obj, node)
+        self.process_relatedbills(obj, node)
         return obj
 
     def process_introduced(self, obj, node):
@@ -112,9 +113,11 @@ class BillProcessor(Processor):
 
                 value = subnode.get('withdrawn')
                 withdrawn = self.parse_datetime(value) if value else None
-                Cosponsor.objects.create(person=person, bill=obj, joined=joined,
-                                         withdrawn=withdrawn)
-
+                ob, isnew = Cosponsor.objects.get_or_create(person=person, bill=obj, defaults={"joined": joined, "withdrawn": withdrawn})
+                if ob.joined != joined or ob.withdrawn != withdrawn:
+                    ob.joined = joined
+                    ob.withdrawn = withdrawn
+                    ob.save()
 
     def session_handler(self, value):
         return int(value)
@@ -141,6 +144,15 @@ class BillProcessor(Processor):
                 log.error('Could not find term [name: %s]' % name)
         obj.terms = termlist
 
+    def process_relatedbills(self, obj, node):
+        RelatedBill.objects.filter(bill=obj).delete()
+        for subnode in node.xpath('./relatedbills/bill'):
+            try:
+                related_bill = Bill.objects.get(congress=subnode.get("session"), bill_type=BillType.by_xml_code(subnode.get("type")), number=int(subnode.get("number")))
+            except Bill.DoesNotExist:
+                continue
+            RelatedBill.objects.create(bill=obj, related_bill=related_bill, relation=subnode.get("relation"))
+                    
 
 
 def main(options):
@@ -259,8 +271,8 @@ def main(options):
 
     # delete bill objects that are no longer represented on disk
     if options.congress:
-    	# this doesn't work because seen_bill_ids is too big for sqlite!
-    	Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
+        # this doesn't work because seen_bill_ids is too big for sqlite!
+        Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
 
 if __name__ == '__main__':
     main()
