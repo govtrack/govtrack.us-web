@@ -168,7 +168,7 @@ def main(options):
     # Cache existing terms. There aren't so many.
     existing_terms = { }
     for term in BillTerm.objects.all():
-        existing_terms[(term.term_type, term.parent.id if term.parent else None, term.name)] = term.id
+        existing_terms[(int(term.term_type), term.name)] = term
 
     log.info('Processing old bill terms')
     TERMS_FILE = 'data/us/liv.xml'
@@ -178,24 +178,29 @@ def main(options):
         term.term_type = TermType.old
         try:
             # No need to update an existing term because there are no other attributes.
-            term.id = existing_terms[(int(term.term_type), None, term.name)]
+            term = existing_terms[(int(term.term_type), term.name)]
             terms_parsed.add(term.id)
         except:
             log.debug("Created %s" % term)
             term.save()
-
+            term.subterms.clear()
+            
         for subnode in node.xpath('./term'):
             subterm = term_processor.process(BillTerm(), subnode)
-            subterm.parent = term
             subterm.term_type = TermType.old
             try:
                 # No need to update an existing term because there are no other attributes.
-                subterm.id = existing_terms[(int(subterm.term_type), subterm.parent.id, subterm.name)]
+                subterm = existing_terms[(int(subterm.term_type), subterm.name)]
+                term.subterms.add(subterm) 
                 terms_parsed.add(subterm.id)
             except:
                 try:
                     log.debug("Created %s" % subterm)
                     subterm.save()
+                    term.subterms.add(subterm)
+                    
+                    existing_terms[(int(subterm.term_type), subterm.name)] = subterm
+                    terms_parsed.add(subterm.id)
                 except IntegrityError:
                     log.error('Duplicated term %s' % term_processor.display_node(subnode))
 
@@ -207,30 +212,34 @@ def main(options):
             term.term_type = TermType.new
             try:
                 # No need to update an existing term because there are no other attributes.
-                term.id = existing_terms[(int(term.term_type), None, term.name)]
+                term = existing_terms[(int(term.term_type), term.name)]
                 terms_parsed.add(term.id)
             except:
                 log.debug("Created %s" % term)
                 term.save()
+                term.subterms.clear()
 
             for subnode in node.xpath('./term'):
                 subterm = term_processor.process(BillTerm(), subnode)
-                subterm.parent = term
                 subterm.term_type = TermType.new
                 try:
                     # No need to update an existing term because there are no other attributes.
-                    subterm.id = existing_terms[(int(subterm.term_type), subterm.parent.id, subterm.name)]
+                    subterm = existing_terms[(int(subterm.term_type), subterm.name)]
                     terms_parsed.add(subterm.id)
+                    term.subterms.add(subterm)
                 except:
                     try:
                         log.debug("Created %s" % term)
                         subterm.save()
+                        term.subterms.add(subterm)
+                        
+                        existing_terms[(int(subterm.term_type), subterm.name)] = subterm
+                        terms_parsed.add(subterm.id)
                     except IntegrityError:
                         log.error('Duplicated term %s' % term_processor.display_node(subnode))
 
-    for termid in existing_terms.values():
-        if not termid in terms_parsed:
-            term = BillTerm.objects.get(id=termid)
+    for term in existing_terms.values():
+        if not term.id in terms_parsed:
             log.debug("Deleted %s" % term)
             term.delete()
 

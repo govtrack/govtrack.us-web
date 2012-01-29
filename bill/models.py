@@ -43,15 +43,15 @@ class BillTerm(models.Model):
      * http://www.govtrack.us/data/us/liv111.xml
      * http://www.govtrack.us/data/us/crsnet.xml
     """
-    name = models.CharField(max_length=255)
-    parent = models.ForeignKey('bill.BillTerm', blank=True, null=True)
     term_type = models.IntegerField(choices=TermType)
+    name = models.CharField(max_length=255)
+    subterms = models.ManyToManyField('self', related_name="parents")
 
     def __unicode__(self):
         return self.name
 
     class Meta:
-        unique_together = ('name', 'parent', 'term_type')
+        unique_together = ('name', 'term_type')
 
 
 class Cosponsor(models.Model):
