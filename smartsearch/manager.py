@@ -128,7 +128,7 @@ class SearchManager(object):
         """
 
         if not self.qs:
-            qs = self.model.objects.all()
+            qs = self.model.objects.all().select_related()
         else:
             qs = self.qs
 
@@ -209,7 +209,7 @@ class SearchManager(object):
                     return choice_label_map[value]
                 if type(value) == bool and value == True: return "Yes"
                 if type(value) == bool and value == False: return "No"
-                if field.__class__.__name__ == 'ForeignKey':
+                if field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
                     # values+annotate makes the db return an integer rather than an object
                     value = field.rel.to.objects.get(id=value)
                 return unicode(value)

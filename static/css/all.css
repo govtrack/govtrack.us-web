@@ -186,6 +186,11 @@ h2 span, h3 span, h4 span, span span, a em {
 	width: 300px;
 	float: right;
 	}
+	.ads .explainer {
+		text-align: center;
+		font-size: 10px;
+		color: #E63;
+		}
 #content ul {
 	margin-bottom: 1em;
 }

@@ -26,6 +26,7 @@
 		}
 		
 		var map;
+		var cur_mouse_pos = null;
 		
 		$(function() {
 			var myOptions = {
@@ -65,7 +66,61 @@
 				$("#embedbounds").text(Math.round(b.getSouthWest().lng()*1000)/1000 + "," + Math.round(b.getNorthEast().lat()*1000)/1000 + "," + Math.round(b.getNorthEast().lng()*1000)/1000 + "," + Math.round(b.getSouthWest().lat()*1000)/1000);
 			});
 			
+			google.maps.event.addListener(map, "mousemove", function(e) {
+				cur_mouse_pos = e.latLng;
+				setTimeout("doMouseHover(" + e.latLng.lat() + "," + e.latLng.lng() + ")", 1000);
+			});
+			// Create a div to hold the control.
+			var controlDiv = document.createElement('DIV');
+			// Set CSS styles for the DIV containing the control
+			// Setting padding to 5 px will offset the control
+			// from the edge of the map.
+			controlDiv.style.padding = '5px';
+			// Set CSS for the control border.
+			var controlUI = document.createElement('DIV');
+			controlUI.style.backgroundColor = 'white';
+			controlUI.style.borderStyle = 'solid';
+			controlUI.style.borderWidth = '2px';
+			controlUI.style.cursor = 'pointer';
+			controlUI.style.textAlign = 'center';
+			controlDiv.appendChild(controlUI);
+			// Set CSS for the control interior.
+			var controlText = document.createElement('DIV');
+			controlText.id = "map_district_hover_label";
+			controlText.style.fontFamily = 'Arial,sans-serif';
+			controlText.style.fontSize = '12px';
+			controlText.style.paddingLeft = '4px';
+			controlText.style.paddingRight = '4px';
+			controlText.innerHTML = '';
+			controlUI.appendChild(controlText);
+			map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
 		});
+		
+		function doMouseHover(lat, lng) {
+			if (!cur_mouse_pos || cur_mouse_pos.lat() != lat || cur_mouse_pos.lng() != lng) return;
+			
+			var req = 'http://www.govtrack.us/perl/wms/get-region.cgi?layer=cd-110' + unescape("%26") + 'lat=' + cur_mouse_pos.lat() + unescape("%26") + 'long=' + cur_mouse_pos.lng() + unescape("%26") + 'format=json' + unescape("%26") + 'json_callback=wms_hover_callback';
+			$(document).append("<script src=\"" + req + "\"></scr" + "ipt>");
+		}
+		
+		function wms_hover_callback(wms_listing) {
+			if (wms_listing.length == 0) {
+				$('#map_district_hover_label').text("");
+				return;
+			}
+			
+			uri = wms_listing[wms_listing.length-1].URI; // uri of last (smallest) matching region
+		
+			var cd_re = /\/(..)\/cd\/110\/(.*)/;
+			var st_re = /us\/(..)/;
+			
+			var m;
+			if (m = cd_re.exec(uri)) {
+				$('#map_district_hover_label').html("<a href='/congress/members/" + m[1].toUpperCase() + "/" + m[2] + "'>" + m[1].toUpperCase() + "-" + m[2] + "</a>");
+			} else if (m = st_re.exec(uri)) {
+				$('#map_district_hover_label').html("<a href='/congress/members/" + m[1].toUpperCase() + "'>" + m[1].toUpperCase() + " At-Large" + "</a>");
+			}
+		}		
 		
 		var is_full_screen = false;
 		function doFullScreen() {
@@ -171,7 +226,8 @@
 
 {% block summary %}
 	<h2>Find a Senator <span>or</span> Representative</h2>
-	<p>Use this page to find current or past Members of Congress. You can also <a href="#">browse by committees</a> or check out <a href="#">congressional statistics</a>.</p>
+	<p style="margin-top: 1em">Use this page to find current or past Members of Congress.</p>
+	<p style="margin-bottom: 0"><strong>Looking for redistricting maps?</strong> Since we show you your current Members of Congress, which is based on the district lines at the time you last voted, our maps won't be updated to reflect redistricting until the new Members of Congress elected from the new districts take office in January 2013.</p>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}
@@ -291,7 +347,6 @@
 			<div id="map_container">
 				<div id="map_canvas">
 				</div>
-				x
 			</div>
 			
 			<div>

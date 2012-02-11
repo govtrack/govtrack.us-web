@@ -67,14 +67,6 @@ FACEBOOK_APP_ID = "..."
 FACEBOOK_APP_SECRET = "..."
 FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
 
-#Haystack setup
-
-HAYSTACK_SITECONF = 'search_sites'
-HAYSTACK_SEARCH_ENGINE = 'xapian'
-HAYSTACK_XAPIAN_PATH = ROOT + '/xapian'
-HAYSTACK_SEARCH_RESULTS_PER_PAGE = 30
-HAYSTACK_INCLUDE_SPELLING = True
-
 #set the user profile for registration activation key
 AUTH_PROFILE_MODULE = 'registration.UserProfile'
 
@@ -134,9 +126,6 @@ INSTALLED_APPS = (
     # for django-registration-pv
     'emailverification',
     'registration',
-
-    # for django-haystack
-    'haystack',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

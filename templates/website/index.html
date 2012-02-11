@@ -128,7 +128,7 @@
 						{% for item in events %}
 						{% with item|render_event:"" as event %}
 						<article class="post">
-							<div class="icon"><img src="images/ico-bill.gif" width="16" height="22" alt="image description"></div>
+							{% comment %}<div class="icon"><img src="images/ico-bill.gif" width="16" height="22" alt="image description"></div>{% endcomment %}
 							<div class="article">
 								<h4><a href="{{event.url}}">{{event.title|truncatewords:30}}</a></h4>
 								<p>{{event.date}}  (<a href="{{event.url}}">more</a>)</p>

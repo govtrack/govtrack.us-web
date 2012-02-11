@@ -45,7 +45,7 @@ class BillTerm(models.Model):
     """
     term_type = models.IntegerField(choices=TermType)
     name = models.CharField(max_length=255)
-    subterms = models.ManyToManyField('self', related_name="parents")
+    subterms = models.ManyToManyField('self', related_name="parents", symmetrical=False)
 
     def __unicode__(self):
         return self.name
@@ -53,6 +53,8 @@ class BillTerm(models.Model):
     class Meta:
         unique_together = ('name', 'term_type')
 
+    def is_top_term(self):
+        return self.parents.count() == 0
 
 class Cosponsor(models.Model):
     person = models.ForeignKey('person.Person')
@@ -321,8 +323,8 @@ class Bill(models.Model):
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
                 BillStatus.prov_kill_cloturefailed: (BillStatus.passed_bill, "Passed Senate"),
                 BillStatus.prov_kill_pingpongfail: (BillStatus.passed_bill, "Passed House/Senate"),
-                BillStatus.prov_kill_veto: BillStatus.vetoed_override_pass_over_house,
-                BillStatus.vetoed_override_pass_over_house: BillStatus.enacted_veto_override,
+                BillStatus.prov_kill_veto: BillStatus.override_pass_over_house,
+                BillStatus.override_pass_over_house: BillStatus.enacted_veto_override,
             },
             BillType.senate_bill: {
                 BillStatus.reported: BillStatus.pass_over_senate,
@@ -333,8 +335,8 @@ class Bill(models.Model):
                 BillStatus.prov_kill_suspensionfailed: (BillStatus.passed_bill, "Passed House"), 
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: (BillStatus.passed_bill, "Passed Senate/House"),
-                BillStatus.prov_kill_veto: BillStatus.vetoed_override_pass_over_senate,
-                BillStatus.vetoed_override_pass_over_senate: BillStatus.enacted_veto_override,
+                BillStatus.prov_kill_veto: BillStatus.override_pass_over_senate,
+                BillStatus.override_pass_over_senate: BillStatus.enacted_veto_override,
             },                
             BillType.house_resolution:  {
                 BillStatus.reported: BillStatus.passed_simpleres,
@@ -402,9 +404,22 @@ class Bill(models.Model):
             seq.append(label)
             
         return seq
+        
+    def get_related_bills(self):
+        ret = []
+        seen = set()
+        bills = list(self.relatedbills.all().select_related("bill"))
+        bills.sort(key = lambda rb : RelatedBill.relation_sort_order.get(rb.relation, 999))
+        for rb in bills:
+            if not rb.bill in seen:
+                ret.append(rb)
+                seen.add(rb.bill)
+        return ret
 
 class RelatedBill(models.Model):
     bill = models.ForeignKey(Bill, related_name="relatedbills")
     related_bill = models.ForeignKey(Bill, related_name="relatedtobills")
     relation = models.CharField(max_length=16)
+	
+    relation_sort_order = { "identical": 0 }
 	

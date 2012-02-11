@@ -113,7 +113,8 @@ def bill_list(request):
     return bill_search_manager().view(request, "bill/bill_list.html",
     	defaults={
     		"congress": CURRENT_CONGRESS,
-    		"sponsor": request.GET.get("sponsor", None)
+    		"sponsor": request.GET.get("sponsor", None),
+    		"terms": request.GET.get("subject", None),
     	},
     	noun = ("bill", "bills")
     	)

@@ -4,7 +4,7 @@ from django.contrib import admin
 from bill.models import BillTerm, Bill, Cosponsor
 
 class BillTermAdmin(admin.ModelAdmin):
-    list_display = ['name', 'parent', 'term_type']
+    list_display = ['name', 'term_type']
     search_fields = ['name']
 
 class CosponsorInline(admin.TabularInline):

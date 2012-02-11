@@ -25,7 +25,7 @@ class Feed(models.Model):
         # used to return a distinct set of events.
         
         qs = Event.objects.all()
-        qs = qs.order_by("-when", "-id") # non-timed events should be sorted in database insertion order 
+        qs = qs.order_by("-when", "source_content_type", "source_object_id", "-seq") 
         
         if feeds != None:
             # Some feeds include the events of other feeds.
@@ -146,7 +146,7 @@ class Feed(models.Model):
     def get_arg_feed(prefix, objclass, id_ref_instance, dereference, reference):
         # Always dereference id's and references before get_or_created to
         # prevent the creation of feeds that do not correspond with objects.
-        if type(id_ref_instance) == int:
+        if isinstance(id_ref_instance, (int, long)):
             obj = objclass.objects.get(pk=id_ref_instance)
         elif type(id_ref_instance) == str:
             obj = dereference(id_ref_instance)
@@ -299,6 +299,10 @@ class Event(models.Model):
     each as mtg_ID where ID is the CommitteeMeeting primary key. When its render_event
     is called, it is passed back the eventid so it knows what event it is rendering.
     
+    Since some events are only tied to a date, without a time, yet they may have an order, the seq
+    field records the order of related events from a single source. The seq field must be constant
+    across event instances in the table in multiple fields, otherwise we have a problem using DISTINCT.
+    
     To create events, do something like the following, which begins the update process for
     the source object (self) and adds a single event (with eventid "vote") to multiple feeds.
     Note that Event.update() will clear out any previously created events for the source
@@ -323,6 +327,7 @@ class Event(models.Model):
     eventid = models.CharField(max_length=32) # unique w.r.t. the source object 
 
     when = models.DateTimeField(db_index=True)
+    seq = models.IntegerField()
     
     @staticmethod
     def sourcearg(source):
@@ -355,11 +360,7 @@ class Event(models.Model):
             self.existing_events = {}
             for event in Event.objects.filter(**Event.sourcearg(source)):
                 self.existing_events[event.id] = True
-                
-            try:
-                self.next_id = Event.objects.order_by('-id')[0].id + 1
-            except IndexError:
-                self.next_id = 1
+            self.seq = { }
 
         def __enter__(self):
             return self
@@ -370,17 +371,18 @@ class Event(models.Model):
                 for f in feed:
                     self.add(eventid, when, f)
                 return
+                
+            # Track the sequence number for this eventid, increment in insertion order.
+            if not eventid in self.seq: self.seq[eventid] = len(self.seq)
             
             # Create the record for this event for this feed, if it does not exist.
             event, created = Event.objects.get_or_create(
                 feed = feed,
                 eventid = eventid,
-                defaults = {"id": self.next_id, "when": when},
+                defaults = {"when": when, "seq": self.seq[eventid]},
                 **Event.sourcearg(self.source)
                 )
-            if created:
-                self.next_id += 1
-            elif event.id in self.existing_events:
+            if not created and event.id in self.existing_events:
                 del self.existing_events[event.id] # i.e. don't delete this event on __exit__
                 if event.when != when: # update this if it changed
                     event.when = when

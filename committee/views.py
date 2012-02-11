@@ -33,7 +33,7 @@ def committee_details(request, parent_code, child_code=None):
             'SIMPLE_MEMBER': CommitteeMemberRole.member,
             'TYPE_JOINT': CommitteeType.joint,
             'feed': Feed.CommitteeFeed(obj),
-            "member_highlights": [m for m in members if m.role != CommitteeMemberRole.member],
+            "member_highlights": [m for m in members if m.role in (CommitteeMemberRole.chairman, CommitteeMemberRole.vice_chairman, CommitteeMemberRole.ranking_member)],
             "party_counts": party_counts,
             }
 
