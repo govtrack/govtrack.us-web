@@ -19,13 +19,9 @@ class Feed(models.Model):
         return Feed.objects.get(feedname=feedname)
 
     @staticmethod
-    def get_events_for(feeds):
-        # This method returns the events in a set of feeds. Because
-        # events can occur in multiple feeds, values(...).distinct() is
-        # used to return a distinct set of events.
-        
-        qs = Event.objects.all()
-        qs = qs.order_by("-when", "source_content_type", "source_object_id", "-seq") 
+    def get_events_for(feeds, count):
+        # This method returns the most recent events matching a set of feeds,
+        # or all events if feeds is None.
         
         if feeds != None:
             # Some feeds include the events of other feeds.
@@ -37,17 +33,33 @@ class Feed(models.Model):
                 if "includes" in meta:
                     feeds.extend(meta["includes"](feeds[i]))
                 i += 1
-                
-            # and apply the filter.
-            qs = qs.filter(feed__in=feeds)
         
-        # this causes the QuerySet to return dicts rather than Events.
-        qs = qs.values("source_content_type", "source_object_id", "eventid", "when").distinct()
+        from django.db import connection, transaction
+        cursor = connection.cursor()
         
-        return qs
+        # pull events in batches, eliminating duplicate results (events in multiple feeds),
+        # which is done faster here than in MySQL.
+        start = 0
+        size = count * 2
+        ret = []
+        seen = set()
+        while len(ret) < count:
+            # The Django ORM can't handle generating a nice query. It adds joins that ruin indexing.
+            cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when` FROM events_event " + ("" if not feeds or len(feeds) == 0 else "WHERE feed_id IN (" + ",".join(str(f.id) for f in feeds) + ")") + " ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC, seq DESC LIMIT %s OFFSET %s ", [size, start])
+            
+            batch = cursor.fetchall()
+            for b in batch:
+                if not b in seen:
+                    ret.append( { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3] } )
+                    seen.add(b)
+            if len(batch) < size: break # no more items
+            start += size
+            size *= 2
         
-    def get_events(self):
-        return Feed.get_events_for((self,))
+        return ret
+        
+    def get_events(self, count):
+        return Feed.get_events_for((self,), count)
         
     # feed metadata
     
@@ -96,6 +108,10 @@ class Feed(models.Model):
             "title": lambda self : "Meetings for " + self.committee().name,
             "noun": "committee",
         },
+        "crs:": {
+            "title": lambda self : self.issue().name,
+            "noun": "subject area",
+        }
     }
         
     def type_metadata(self):
@@ -264,7 +280,15 @@ class Feed(models.Model):
                     self._ref = None
          return self._ref
          
-
+    def issue(self):
+         if not hasattr(self, "_ref"):
+               if ":" in self.feedname and self.feedname.split(":")[0] in ("crs",):
+                    import bill.models
+                    return bill.models.BillTerm.objects.get(id=self.feedname.split(":")[1])
+               else:
+                    self._ref = None
+         return self._ref
+         
 class Event(models.Model):
     """
     Holds info about an event in a feed. This record doesn't contain any information about
@@ -341,7 +365,8 @@ class Event(models.Model):
         unique_together = (
              ('source_content_type', 'source_object_id', 'eventid', 'feed'),
              ('feed', 'id'),
-             ('feed', 'when', 'source_content_type', 'source_object_id', 'eventid'))
+             ('feed', 'when', 'source_content_type', 'source_object_id', 'eventid'),
+             ('when', 'source_content_type', 'source_object_id', 'seq'))
     
     def __unicode__(self):
         return unicode(self.source) + " " + unicode(self.eventid) + " / " + unicode(self.feed)

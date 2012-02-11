@@ -1,4 +1,5 @@
 {% extends 'master.html' %}
+{% block title %}Tracked Events in Congress -- GovTrack.us{% endblock %}
 {% block head %}
 <style>
 .col_6 {
@@ -217,26 +218,28 @@ function search_feeds(type) {
 </script>
 {% endblock %}
 
-{% block summary %}
+{% block crumbs %}
 <h1>Tracked Events</h1>
-<p>Use this page to create a customized feed of legislative activity based on your interests.</p>
-{% if not request.user.is_authenticated %}
-	<p>You must <a href="/acccounts/register">register</a> or <a href="/acccounts/login">log in</a> to save the list, to create multiple lists, or to get updates on these events by email.</p>
-{% endif %}
+{% endblock %}
+
+{% block heading_box %}
 {% endblock %}
 
 {% block body %}
 <div class="col_6">
-	<div id="getevents">
-		<h2>How To Get These Events</h2>
-		<p><a href="/events/events.rss?feeds={{request.GET.feeds|urlencode}}">RSS</a></p>
-		<p>Make a Widget</p>
-	</div>
-	
 	<div id="events"> </div>
+	&nbsp;
 </div>
 
 <div class="col_6" style="margin-left: 40px">
+	{% if not request.user.is_authenticated %}
+	<div id="getevents">
+		<h2 style="margin-bottom: .5em">How To Subscribe</h2>
+		<p>Use a RSS feed reader to subscribe to the <a href="/events/events.rss?feeds={{request.GET.feeds|urlencode}}">RSS feed</a> for the events shown to the left.</p>
+		<p>You must <a href="/acccounts/register">register</a> or <a href="/acccounts/login">log in</a> to save the list or get updates on these events by email.</p>
+	</div>
+	{% endif %}
+	
 	{% if request.user.is_authenticated %}
 	<div>
 		{% if feeds|length > 0 %}
@@ -268,27 +271,35 @@ function search_feeds(type) {
 	</div>
 	{% endif %}
 
-	<div id="edit_list" {% if feeds %}style="display: none"{% endif %}>
+	<div id="edit_list" {% if feeds and request.user.is_authenticated %}style="display: none"{% endif %}>
 		{% if not request.user.is_authenticated %}
-		<h2>Customize a Feed</h2>
+		<h2 style="margin-bottom: .5em">Customize The Feed</h2>
+		<p>Select which events to include in your feed.</p>
 		{% else %}
 		<h2>Add/Remove Trackers from List</h2>
 		{% endif %}
 		
-		
-		<h3>Basic Trackers</h3>
+		<h3 style="margin-bottom: .5em">Basic Events</h3>
 		<ul id="basic_trackers">
 			{% for feed, selected in no_arg_feeds %}
 				<li class="{% if selected %}active{% endif %}" feedname="{{feed.feedname}}"><span class="feed_inactive_span">O</span><span class="feed_active_span">X</span> <a href="#" onclick="return togglefeed('{{feed.feedname|escapejs}}');">{{feed.title}}</a></li>
 			{% endfor %}
 		</ul>
+		{% if other_feeds %}
+		<h3 style="margin-bottom: .5em">Other Events</h3>
+		<ul id="additional_trackers">
+			{% for feed in other_feeds %}
+				<li class="active" feedname="{{feed.feedname}}"><span class="feed_active_span">X</span> <a href="#" onclick="return togglefeed('{{feed.feedname|escapejs}}');">{{feed.title}}</a></li>
+			{% endfor %}
+		</ul>
+		{% endif %}
 		
-		<div id="other_feed_items"> </div>
+		<div id="other_feed_items"></div>
 		
-		<h3>Add a Tracker</h2>
+		<h3 style="margin-bottom: .5em">Add More Events</h2>
 		<div id="search_trackers">
 		
-		<p>Track a Member of Congress: (<a href="/congress/members">browse all</a>)</p>
+		<div>Add events related to a Member of Congress: (<a href="/congress/members">browse all</a>)</div>
 		<div><input id="track_person_input" type="text" style="width: 100%"/></div>
 		<div class="results" id="track_person_results"> </div>
 		<script>
@@ -296,13 +307,20 @@ function search_feeds(type) {
 			$('#track_person_input').keyup_delayed(function() { search_feeds("person"); });
 		</script>
 		
-		<p>Track a Committee: (<a href="/congress/committees">browse all</a>)</p>
+		<div style="margin-top: 1em">Add events related to a committee: (<a href="/congress/committees">browse all</a>)</div>
 		<div><input id="track_committee_input" type="text" style="width: 100%"/></div>
 		<div class="results" id="track_committee_results"> </div>
 		<script>
 			$('#track_committee_input').input_default("search by committee name");
 			$('#track_committee_input').keyup_delayed(function() { search_feeds("committee"); });
 		</script>
+		
+		<div style="margin-top: 1em">Add events related to a subject area:</div>
+		<div><select id="track_subject_input"><option value="">(Select a Subject Area)</option>{% for id, name in subject_choices %}<option value="{{id}}">{{name}}</option>{% endfor %}</select></div>
+		<script>$('#track_subject_input').change(function() { togglefeed("crs:" + this.value); });</script>
+		
+		
+		<p style="margin-top: 1em">You can find other events by <a href="/congress/bills">searching for bills</a>.</p>
 		
 		</div>
 	</div>

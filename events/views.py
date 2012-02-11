@@ -27,12 +27,17 @@ def events_list(request):
     feedlistnames = [f.feedname for f in feedlist]
         
     no_arg_feeds = [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.EnactedBillsFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
+    other_feeds = [f for f in feedlist if f not in no_arg_feeds]
     no_arg_feeds = [(feed, feed.feedname in feedlistnames) for feed in no_arg_feeds]
-        
+    
+    from bill.search import subject_choices
+    
     return {
         'no_arg_feeds': no_arg_feeds,
+        'other_feeds': other_feeds,
         'feeds': feedlist,
         'feeds_json': simplejson.dumps(feedlistnames),
+        'subject_choices': subject_choices(),
             }
 
 @render_to('events/events_list_items.html')
@@ -69,7 +74,7 @@ def events_list_items(request):
         show_empty = False
       
     if len(feedlist) > 0 or show_empty:
-        qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None).filter(when__lte=datetime.now()) # get all events
+        qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, 100) # get all events
     else:
         qs = []
     page = paginate(qs, request, per_page=50)
@@ -120,7 +125,7 @@ def events_rss(request):
         description = "GovTrack tracks the activities of the United States Congress."
         
         def items(self):
-            return [render_event(item, feedlist) for item in Feed.get_events_for(feedlist)[0:20]]
+            return [render_event(item, feedlist) for item in Feed.get_events_for(feedlist, 20)]
             
         def item_title(self, item):
             return item["title"]

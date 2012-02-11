@@ -16,7 +16,7 @@ def congress_list():
         yield (x, '%s Congress (%d-%d)' % (ordinal(x), start, end))
 
 subject_choices_data = None
-def subject_choices():
+def subject_choices(include_legacy=True):
     global subject_choices_data
     if subject_choices_data == None:
         top_terms = { }
@@ -26,15 +26,18 @@ def subject_choices():
             for p in t.parents.all():
                 top_terms[ (-p.term_type, p.name, p.id) ].append((t.id, "-- " + t.name))
                 
-        ret = []
+        ret0 = [] # all terms
+        ret1 = [] # current terms only
         for t, subterms in sorted(top_terms.items(), key = lambda kv : kv[0]):
-            ret.append((t[2], t[1] + ("" if -t[0] == TermType.new else " (Legacy Subject Code)")))
-            for tt in sorted(subterms, key = lambda kv : kv[1]):
-                ret.append(tt)
+            for ret in ret0, ret1:
+                if -t[0] == TermType.old and ret == ret1: continue
+                ret.append((t[2], t[1] + ("" if -t[0] == TermType.new else " (Legacy Subject Code)")))
+                for tt in sorted(subterms, key = lambda kv : kv[1]):
+                    ret.append(tt)
         
-        subject_choices_data = ret
+        subject_choices_data = (ret0, ret1)
     
-    return subject_choices_data
+    return subject_choices_data[0 if include_legacy else 1]
 
 def person_list():
     persons = Person.objects.all()

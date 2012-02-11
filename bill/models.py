@@ -290,7 +290,7 @@ class Bill(models.Model):
 
     def get_major_events(self):
         from events.models import Feed
-        events = Feed.BillFeed(self).get_events()
+        events = Feed.BillFeed(self).get_events(100)
         def getinfo(eventid, date):
             ev_type, ev_code = eventid.split(":")
             status = BillStatus.by_value(int(ev_code))
