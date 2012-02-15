@@ -151,7 +151,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                     	} else if (type == "checkbox" || type == "radio") {
                     		node.html("");
                     		for (var j in values) {
-                    			var opt = $("<div><input type='" + type + "' onchange='update_search(null, null, this)'/> <label style='display: inline'><span class='name'> </span> <span class='count'> </span></label></div>");
+                    			var opt = $("<div class='choices'><input type='" + type + "' onchange='update_search(null, null, this)'/> <label style='display: inline'><span class='name'> </span> <span class='count'> </span></label></div>");
                     			opt.find('input').attr('id', "searchform_field_" + field + "_" + j);
                     			opt.find('input').attr('name', field);
                     			opt.find('input').attr('value', values[j][0]);
