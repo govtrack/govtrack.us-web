@@ -96,6 +96,12 @@ class CommitteeMember(models.Model):
             return CommitteeMember.objects.filter(committee__committee=self.committee, person=self.person, role=CommitteeMemberRole.chairman)[0]
         except IndexError:
             return None
+            
+    def role_name_2(self):
+        if self.role in (CommitteeMemberRole.member, CommitteeMemberRole.exofficio):
+            return "a member of"
+        else:
+            return "the %s of" % self.role_name().lower()
 
 MEMBER_ROLE_WEIGHTS = {
     CommitteeMemberRole.chairman: 5,

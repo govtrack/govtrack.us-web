@@ -68,33 +68,6 @@
 			<div class="frame">
 				
 				<div class="container">
-					<dl class="heading">
-						<dt>Cosponsors:</dt>
-						<dd>
-							{% if bill.cosponsors.all|length == 0 %}
-								none
-							{% else %}
-								<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show cosponsors ({{bill.cosponsor_count}})</a>
-								<div id="cosponsors" style="display: none">
-									{% for cosp in bill.cosponsor_records %}
-									<div><a href="{{cosp.person.get_absolute_url}}">{{cosp.person}}</a> {% if cosp.joined != bill.introduced_date %}(joined {{cosp.joined}}{% if cosp.withdrawn %}; withdrawn {{cosp.withdrawn}}{% endif %}){% else %}{% if cosp.withdrawn %}  (withdrawn {{cosp.withdrawn}}){% endif %}{% endif %}</div>
-									{% endfor %}
-								</div>
-							{% endif %}
-						</dd>
-					</dl>
-					<dl>
-						<dt>Text:</dt>
-						<dd>
-							<ul class="text-view">
-								<!--<li><a href="#">Summary</a></li>-->
-								<li><a href="{{bill.get_absolute_url}}/text">Read Bill Text</a></li>
-							</ul>
-						</dd>
-					</dl>
-				</div><!-- /container -->
-				
-				<div class="container">
 					<dl>
 						<dt>Status:</dt>
 						<dd>
@@ -114,29 +87,23 @@
 								{% endfor %}
 							</table>
 						</dd>
-					</dl>
-				</div><!-- /container -->
-				
-				<div class="container">
-					<dl>
-						{% if bill.committees.exists %}
-						<dt>Committee Assignments:</dt>
+						
+						{% if relevant_assignments or good_cosp_assignments > 0 %}
+						<dt>Prognosis:</dt>
 						<dd>
-							{% for c in bill.committees.all %}
-								{% if not c.committee %}
-									<p><a href="{{c.get_absolute_url}}">{{c}}</a></p>
-									{% for s in bill.committees.all %}
-										{% if s.committee == c %}
-											<p style="margin-left: 2em"><a href="{{s.get_absolute_url}}">{{s}}</a></p>
-										{% endif %}
-									{% endfor %}
-								{% endif %}
+							<p>The following factors favor this bill&rsquo;s progress:</p>
+						
+							{% for person, ca in relevant_assignments %}
+								<p>{{person}} is {{ca.role_name_2}} the {{ca.committee.name}}, where the bill has been referred.</p>
 							{% endfor %}
-							<p>The committee chair determines whether a bill will move past the committee stage.</p>
+							{% if good_cosp_assignments > 0 %}
+								<p>{{good_cosp_assignments}} {% if good_cosp_assignments_other %}other {% endif %} cosponsor{{good_cosp_assignments|pluralize}} are members of a committee to which the bill has been referred.</p>
+							{% endif %}
 						</dd>
 						{% endif %}
+				
 					</dl>
-				</div>
+				</div><!-- /container -->
 				
 				<div class="container">
 					<dl>
@@ -178,10 +145,59 @@
 		</div><!-- /holder -->
 	</div><!-- /overview -->
 	
-	
 	<div class="overview last">
 		<div class="holder">
 			<div class="frame">
+				<div class="container">
+					<dl>
+						<dt>Text:</dt>
+						<dd>
+							<ul class="text-view">
+								<!--<li><a href="#">Summary</a></li>-->
+								<li><a href="{{bill.get_absolute_url}}/text">Read Bill Text</a></li>
+							</ul>
+						</dd>
+					</dl>
+				</div><!-- /container -->
+				
+				<div class="container">
+					<dl class="heading">
+						<dt>Cosponsors:</dt>
+						<dd>
+							{% if bill.cosponsors.all|length == 0 %}
+								none
+							{% else %}
+								<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show cosponsors ({{bill.cosponsor_count}})</a>
+								<div id="cosponsors" style="display: none">
+									{% for cosp in bill.cosponsor_records %}
+									<div><a href="{{cosp.person.get_absolute_url}}">{{cosp.person}}</a> {% if cosp.joined != bill.introduced_date %}(joined {{cosp.joined}}{% if cosp.withdrawn %}; withdrawn {{cosp.withdrawn}}{% endif %}){% else %}{% if cosp.withdrawn %}  (withdrawn {{cosp.withdrawn}}){% endif %}{% endif %}</div>
+									{% endfor %}
+								</div>
+							{% endif %}
+						</dd>
+						</dl>
+
+					{% if bill.committees.exists %}
+					<dl class="heading">
+						<dt>Committees:</dt>
+						<dd>
+							{% for c in bill.committees.all %}
+								{% if not c.committee %}
+									<p><a href="{{c.get_absolute_url}}">{{c}}</a></p>
+									{% for s in bill.committees.all %}
+										{% if s.committee == c %}
+											<p style="margin-left: 2em"><a href="{{s.get_absolute_url}}">{{s}}</a></p>
+										{% endif %}
+									{% endfor %}
+								{% endif %}
+							{% endfor %}
+							<p>The committee chair determines whether a bill will move past the committee stage.</p>
+						</dd>
+					</dl>
+					{% endif %}
+					</div> <!-- ?? -->
+				</dv> <!-- /container -->
+				
 				<div class="container">
 					{% if bill.votes.exists %}
 					<dl>

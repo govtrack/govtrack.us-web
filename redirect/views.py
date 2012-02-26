@@ -47,6 +47,6 @@ def bill_redirect(request):
         bill_type = BillType.by_xml_code(type_code)
     except BillType.NotFound:
         raise Http404()
-    bill = get_object_or_404(Bill, bill_type=bill_type, congres=congress,
+    bill = get_object_or_404(Bill, bill_type=bill_type, congress=congress,
                              number=number)
     return redirect(bill, permanent=True)

@@ -164,7 +164,7 @@ class Feed(models.Model):
         # prevent the creation of feeds that do not correspond with objects.
         if isinstance(id_ref_instance, (int, long)):
             obj = objclass.objects.get(pk=id_ref_instance)
-        elif type(id_ref_instance) == str:
+        elif isinstance(id_ref_instance, (str, unicode)):
             obj = dereference(id_ref_instance)
         elif type(id_ref_instance) == objclass:
             obj = id_ref_instance

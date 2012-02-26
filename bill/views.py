@@ -10,6 +10,8 @@ from common.pagination import paginate
 from bill.models import Bill, BillType
 from bill.search import bill_search_manager
 from bill.title import get_secondary_bill_title
+from committee.models import CommitteeMember, CommitteeMemberRole
+from committee.util import sort_members
 
 from settings import CURRENT_CONGRESS
 
@@ -28,6 +30,19 @@ def bill_details(request, congress, type_slug, number):
             raise Http404("Invalid bill type: " + type_slug)
     
 	bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+	
+	relevant_assignments = []
+	for ca in sort_members(bill.sponsor.committeeassignments.filter(committee__in=bill.committees.all()).select_related()):
+		relevant_assignments.append( ("The sponsor", ca) )
+		break
+	good_cosp_assignments = 0
+	good_cosp_assignments_other = False
+	for ca in sort_members(CommitteeMember.objects.filter(person__in=bill.cosponsors.all(), committee__in=bill.committees.all()).select_related()):
+		if ca.role not in (CommitteeMemberRole.member, CommitteeMemberRole.exofficio):
+			relevant_assignments.append( (ca.person.name + ", a cosponsor,", ca) )
+			good_cosp_assignments_other = True
+		else:
+			good_cosp_assignments += 1
 	
 	summary = None
 	sfn = "data/us/%d/bills.summary/%s%d.summary.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
@@ -80,6 +95,9 @@ def bill_details(request, congress, type_slug, number):
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
         "summary": summary,
+        "relevant_assignments": relevant_assignments,
+        "good_cosp_assignments": good_cosp_assignments,
+        "good_cosp_assignments_other": good_cosp_assignments_other,
     }
 
 @render_to('bill/bill_text.html')

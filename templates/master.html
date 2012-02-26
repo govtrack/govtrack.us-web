@@ -125,10 +125,15 @@
 					<ul>
 						<li><a href="/">Home</a></li>
 						<li><a href="/congress">Browse</a></li>
-						<li><a href="/accounts/trackers">Trackers</a></li>
+						<li><a href="/trackers">Trackers</a></li>
 						<li><a href="/about">About GovTrack</a></li>
 						<li><a href="/developers">For Developers</a></li>
+						{% if not user.is_authenticated %}
 						<li><a href="/accounts/login">Log in</a></li>
+						{% else %}
+						<li><a href="/accounts/profile">Account Settings</a></li>
+						<li><a href="/accounts/logout">Log Out</a></li>
+						{% endif %}
 					</ul>
 				</nav>
 				

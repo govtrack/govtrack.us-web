@@ -16,6 +16,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 MANAGERS = ADMINS
 
+if "SSH_CONNECTION" in os.environ:
+	# When launched from an SSH session, add the remote host to
+	# the list of INTERNAL_IPSs so that he can see the SQL.
+	# debugging output.
+	INTERNAL_IPS = ('127.0.0.1', os.environ["SSH_CONNECTION"].split(" ")[0])
+	print "Internal IPs:", repr(INTERNAL_IPS)
+                                        
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -50,8 +57,8 @@ ADMIN_MEDIA_PREFIX = '/static/admin-media/'
 
 # django-regitration-pv
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
-SITE_ROOT_URL = "http://localhost:8000"
-LOGIN_REDIRECT_URL = "http://localhost:8000/"
+SITE_ROOT_URL = "http://test.govtrack.us"
+LOGIN_REDIRECT_URL = "/"
 SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
 RECAPTCHA_PUBLIC_KEY = "6LcK-McSAAAAAG0pmM3wQR3kbAMM6NXhwera2UNg"
