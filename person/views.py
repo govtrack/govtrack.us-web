@@ -27,8 +27,12 @@ from search import person_search_manager
 @render_to('person/person_details.html')
 def person_details(request, pk):
     person = get_object_or_404(Person, pk=pk)
+    
+    # redirect to canonical URL
     if request.path != person.get_absolute_url():
         return redirect(person.get_absolute_url(), permanent=True)
+       
+    # current role
     role = person.get_current_role()
     if role:
         active_role = True
@@ -39,6 +43,7 @@ def person_details(request, pk):
         except PersonRole.DoesNotExist:
             role = None
 
+    # photo
     photo_path = 'data/photos/%d-100px.jpeg' % person.pk
     photo_credit = None
     if os.path.exists(photo_path):

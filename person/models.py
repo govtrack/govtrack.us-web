@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.conf import settings
+
 import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -8,7 +10,7 @@ from common import enum
 from person.types import Gender, RoleType, SenatorClass, State
 from name import get_person_name
 
-from us import stateapportionment, get_congress_dates, statenames
+from us import stateapportionment, get_congress_dates, statenames, get_session_from_date
 
 class Person(models.Model):
     firstname = models.CharField(max_length=255)
@@ -204,6 +206,18 @@ class PersonRole(models.Model):
                 return self.get_title_name(False) + " for " + statenames[self.state] + " At Large"
             else:
                 return self.get_title_name(False) + " for " + statenames[self.state] + "'s " + ordinal(self.district) + " congressional district"
+
+    def congress_numbers(self):
+        # Senators can span Congresses, so return a range.
+        cs1 = get_session_from_date(self.startdate)
+        cs2 = get_session_from_date(self.enddate)
+        if not cs1: return None
+        if not cs2: cs2 = (settings.CURRENT_CONGRESS, None)
+        return range(cs1[0], cs2[0]+1) # congress number only, not session
+    def most_recent_congress_number(self):
+        n = self.congress_numbers()
+        if not n: return None
+        return n[-1]
 
     def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()

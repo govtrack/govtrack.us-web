@@ -9,8 +9,11 @@
 {% endblock %}
 
 {% block extra_js %}
+{% comment %}
 <script type='text/javascript' src='{{ MEDIA_URL }}jwplayer/jwplayer.js'></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+{% endcomment %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/highcharts.js" ></script>
 {% endblock %}
 
 {% block extra_css %}
@@ -107,29 +110,99 @@
 	</div><!-- /media -->
 	{% endif %}
 	
-	{% if analysis_data %}
-	<div id="analysis">
+	{% if analysis_data.sponsorship %}
+	<section id="sponsorship_analysis">
 		<h3>Sponsorship Analysis</h3>
-        {% if analysis_data.image %}
-        <img src="{{ analysis_data.image }}" alt="Sponsorship analysis graph" />
-        {% endif %}
         
-		{{ person.lastname }} is a {{ analysis_data.description }} according to GovTrack's own analysis of bill sponsorship. The graph to the left shows {{ person.lastname }} as a large dot among {{person|hisher}} peers, with the left-right axis indicating ideology and the up-down axis representing legislative leadership. <a href="#" onclick="$('#sponsorshipanalysis_info').slideDown(); $(this).fadeOut(); return false;">More...</a>
+		<p>{{ person.lastname }} is a {{ analysis_data.sponsorship.description }} according to GovTrack's own analysis of bill sponsorship. Use this chart to compare {{ person.lastname }} to other members of the {{analysis_data.sponsorship.chamber}} on leadership and ideology.</p>
 
-		<p id="sponsorshipanalysis_info" style="color: grey; display: none">These labels come from our own statistical analysis. The analysis is blind to party affiliation and the content of bills. From there, we have divided the Members of Congress into far-left/right, rank-and-file, and centrist; and leader, rank-and-file, or follower by 20<sup>th</sup> and 80<sup>th</sup> percentiles.</p>
-	</div><!-- /analysis -->
+		<div id="sponsorship_analysis_chart"> </div>
+		<script>
+		$(document).ready(function() {
+			var chart = new Highcharts.Chart({
+				chart: {
+					renderTo: 'sponsorship_analysis_chart',
+					type: 'scatter',
+					zoomType: 'xy',
+					height: 350,
+					marginTop: 5
+				},
+				title: {
+					text: ''
+				},
+				credits: { enabled: false },
+				xAxis: {
+					title: { text: 'Ideology Score' },
+					labels: { enabled: false },
+					gridLineWidth: 1
+				},
+				yAxis: {
+					title: { text: 'Leadership Score' },
+					labels: { enabled: false }
+				},
+				tooltip: {
+					formatter: function() {
+							return this.point.name;
+					}
+				},
+				legend: {
+					layout: 'horizontal',
+					align: 'center',
+					verticalAlign: 'top'
+				},
+				plotOptions: {
+					scatter: {
+						marker: {
+							states: {
+								hover: {
+									enabled: true,
+									lineColor: 'rgb(100,100,100)'
+								}
+							}
+						},
+						states: {
+							hover: {
+								marker: {
+									enabled: false
+								}
+							}
+						}
+					}
+				},
+				series: [{
+					marker: { symbol: "triangle", radius: 7 },
+					dataLabels: { enabled: true, formatter: function() { return this.point.name; } },
+					name: '{{person.lastname|escapejs}}',
+					color: 'rgba(223, 83, 223, 1)',
+					data: [{x: {{analysis_data.sponsorship.ideology}}, y: 	{{analysis_data.sponsorship.leadership}}, name: "{{person.lastname|escapejs}}"}]
+		
+				}
+				{% regroup analysis_data.sponsorship.all by party as data_party %}
+				{% for party in data_party %}
+				, {
+					marker: { symbol: "circle", radius: 3 },
+					name: '{{party.grouper|escapejs}}s',
+					{% if party.grouper == 'Democrat' %}color: 'rgba(20, 20, 255, .75)',{% endif %}
+					{% if party.grouper == 'Republican' %}color: 'rgba(255, 20, 20, .75)',{% endif %}
+					{% if party.grouper == 'Independent' %}color: 'rgba(100, 100, 100, .85)',{% endif %}
+					data: [
+						{% for item in party.list %}
+							{ x: {{item.ideology}}, y: {{item.leadership}}, name: "{{item.name|escapejs}}" }
+							{% if not forloop.last %},{% endif %}
+						{% endfor %}
+					]
+				}
+				{% endfor %}
+				]
+			});
+		});
+		</script>
+	</section><!-- /analysis -->
     {% endif %}
 
-    {% comment %}
-	<div id="voting-record">
-		<h3>Voting Record</h3>
-		<img src="#" alt="Voting record graph" />
-		<p>XXXXXXX. View a <a href="#">larger chart and a list of recent votes</a>.</p>
-	</div><!-- /voting-record -->
-	{% endcomment %}
-	
+
 	{% if committeeassignments %}
-	<div id="membership">
+	<section id="membership">
 		<h3>Committee Membership</h3>
 		<p>{{person.name_no_details}} sits on the following committees:</p>
 		<ul>
@@ -147,13 +220,13 @@
 			</li>
 			{% endfor %}
 		</ul>
-	</div><!-- /membership -->
+	</section><!-- /membership -->
 	
 {% endif %}
 	
 	
 {% if recent_bills %}
-	<div id="sponsorship">
+	<section id="sponsorship">
 		<h3>Bill Sponsorship <span>&amp;</span> Cosponsorship</h3>
 		<p>Some of {{person.lastname}}’s most recently sponsored bills include...</p>
 		<ul>
@@ -162,9 +235,105 @@
 			{% endfor %}
 		</ul>
 		<p><a href="/congress/bills?sponsor={{person.id}}">View All &raquo;</a> (including bills from previous years)</p>
-	</div><!-- /sponsorship -->
+	</section><!-- /sponsorship -->
 {% endif %}
+
+	{% if analysis_data.missedvotes %}
+	<section id="voting-record">
+		<h3>Voting Record</h3>
+		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed}} of {{analysis_data.missedvotes.total}} recorded or roll call votes, which is {{analysis_data.missedvotes.percent}}%. {% if analysis_data.missedvotes.percent < 2.4 %}This is better than the median.{% else %}This is worse than the median.{% endif %} The chart below reports missed votes by calendar quarter (every three months).</p>
+		<div id="voting_record_chart"> </div>
+		<script>
+		$(document).ready(function() {
+			var chart = new Highcharts.Chart({
+				chart: {
+					renderTo: 'voting_record_chart',
+					type: 'spline',
+					height: 225,
+					marginTop: 5,
+				},
+				title: { text: 'Missed Votes (%)' },
+				legend: { enabled: false },
+				credits: { enabled: false },
+				xAxis: {
+					labels: { rotation: -90, align: "right" {% if analysis_data.missedvotes.data|length > 20 %}, step: 2{% endif %} },
+					categories: [{% for time, value in analysis_data.missedvotes.data %}"{{time|escapejs}}"{% if not forloop.last %}, {% endif %}{% endfor %} ]
+				},
+				yAxis: {
+					title: {
+						text: 'Missed Votes (%)'
+					},
+					min: 0,
+					minorGridLineWidth: 0,
+					gridLineWidth: 0,
+					alternateGridColor: null,
+					plotBands: [{
+						from: 0,
+						to: 1.22,
+						color: 'rgba(68, 170, 213, 0.1)',
+						label: {
+							text: '25th Percentile',
+							style: { color: '#606060' }
+						}
+					}, {
+						from: 1.22,
+						to: 2.36,
+						color: 'rgba(68, 170, 213, 0.3)',
+						label: {
+							text: 'Median',
+							style: { color: '#606060' }
+						}
+					}, {
+						from: 2.36,
+						to: 4.12,
+						color: 'rgba(68, 170, 213, 0.1)',
+						label: {
+							text: '75th Percentile',
+							style: { color: '#606060' }
+						}
+					}, {
+						from: 4.12,
+						to: 5.98,
+						color: 'rgba(68, 170, 213, 0.3)',
+						label: {
+							text: '90th Percentile',
+							style: { color: '#606060' }
+						}
+					}]
+				},
+				tooltip: {
+					formatter: function() {
+							return this.x +': '+ this.y +'% votes missed';
+					}
+				},
+				plotOptions: {
+					spline: {
+						lineWidth: 4,
+						states: {
+							hover: {
+								lineWidth: 5
+							}
+						}
+					}
+				},
+				series: [{
+					name: '{{person.lastname|escapejs }} - Missed Votes %',
+					data: [{% for time, value in analysis_data.missedvotes.data %}{{value}}{% if not forloop.last %}, {% endif %}{% endfor %} ]
+		
+				}],
+				navigation: {
+					menuItemStyle: {
+						fontSize: '10px'
+					}
+				}
+			});
+		});
+		</script>
+	</section><!-- /voting-record -->
+	{% endif %}
 	
+	
+	<section>
 	<h3>Primary Sources</h3>
 	<p>The information on this page is originally sourced from a variety of materials, including:</p>
 	<ul>
@@ -187,6 +356,8 @@
 		{% endif %}
 	{% endwith %}
 	</ul>
+	</section>
+	
 </div><!-- /member-details -->
 
 <div class="tweets section">

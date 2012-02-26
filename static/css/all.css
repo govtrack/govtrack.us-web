@@ -921,7 +921,10 @@ h2 span, h3 span, h4 span, span span, a em {
     float: left;
 	padding: 0 0 26px;
 	}
-#member-details div {
+	#member-details section {
+		margin-bottom: 52px;
+		}
+/*#member-details div {
 	float: left;
 	margin-bottom: 52px;
 	width: 100%;
@@ -931,7 +934,7 @@ h2 span, h3 span, h4 span, span span, a em {
     content: '';
     display: block;
     clear: both;
-	}
+	}*/
 
 	#member-details h3,
 	.tweets h3 {

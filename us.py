@@ -20,7 +20,10 @@ statelist.sort(key=lambda x : x[1])
 CONGRESS_DATES = {}
 SESSION_DATES = []
 
-def parse_govtrack_date(d):
+def parse_govtrack_date(d, as_date=False):
+    if as_date:
+        return datetime.strptime(d, '%Y-%m-%d').date()
+    
     try:
         return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-04:00')
     except ValueError:
@@ -55,11 +58,14 @@ def get_session_from_date(when):
             cn, sessionname, startdate, enddate = line.strip().split('\t')[0:4]
             if not '-' in startdate: # header
                 continue
-            sd.append((int(cn), sessionname, parse_govtrack_date(startdate), parse_govtrack_date(enddate)))
+            sd.append((int(cn), sessionname, parse_govtrack_date(startdate, as_date=True), parse_govtrack_date(enddate, as_date=True)))
         SESSION_DATES = sd
     
     if when == None:
         return None
+        
+    if isinstance(when, datetime):
+        when = when.date()
     
     for c, s, sd, ed in SESSION_DATES:
         if sd <= when and when <= ed:
