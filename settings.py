@@ -120,6 +120,9 @@ INSTALLED_APPS = (
     #'south',
     'GChartWrapper.charts',
     'debug_toolbar',
+    
+    'haystack',
+    
     # project modules
     'person',
     'committee',
@@ -146,6 +149,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 TEST_DATABASE_CHARSET = 'utf8'
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'xapian_backend.XapianEngine',
+        'PATH': os.path.join(os.path.dirname(__file__), 'xapian_index'),
+    },
+}
 
 DATETIME_FORMAT = 'M d, Y P'
 DATE_FORMAT = 'M d, Y'

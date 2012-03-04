@@ -12,5 +12,4 @@ beautifulsoup
 #pysolr
 feedparser
 xapian-haystack
-django-haystack
 

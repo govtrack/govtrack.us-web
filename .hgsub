@@ -1,1 +1,2 @@
 ext/django-registration-pv = [git]git://github.com/tauberer/django-registration-pv.git
+ext/django-haystack = [git]git://github.com/toastdriven/django-haystack.git

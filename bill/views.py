@@ -12,6 +12,7 @@ from bill.search import bill_search_manager
 from bill.title import get_secondary_bill_title
 from committee.models import CommitteeMember, CommitteeMemberRole
 from committee.util import sort_members
+from person.models import Person
 
 from settings import CURRENT_CONGRESS
 
@@ -130,7 +131,7 @@ def bill_text(request, congress, type_slug, number):
 def bill_list(request):
     return bill_search_manager().view(request, "bill/bill_list.html",
     	defaults={
-    		"congress": CURRENT_CONGRESS,
+    		"congress": CURRENT_CONGRESS if "sponsor" not in request.GET else Person.objects.get(id=request.GET["sponsor"]).most_recent_role_congress(),
     		"sponsor": request.GET.get("sponsor", None),
     		"terms": request.GET.get("subject", None),
     	},

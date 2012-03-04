@@ -2,6 +2,7 @@
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.conf import settings
+from django.core.cache import cache
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -11,6 +12,18 @@ from person.types import Gender, RoleType, SenatorClass, State
 from name import get_person_name
 
 from us import stateapportionment, get_congress_dates, statenames, get_session_from_date
+
+import functools
+def cache_result(f):
+    @functools.wraps(f)
+    def g(self):
+        ckey = "cache_result_%s_%s_%d" % (self.__class__.__name__, f.__name__, self.id)
+        v = cache.get(ckey)
+        if not v:
+            v = f(self)
+            cache.set(ckey, v)
+        return v
+    return g
 
 class Person(models.Model):
     firstname = models.CharField(max_length=255)
@@ -33,6 +46,13 @@ class Person(models.Model):
     youtubeid = models.CharField(max_length=255, blank=True) # YouTube
     twitterid = models.CharField(max_length=50, blank=True) # Twitter
 
+    # indexing
+    def get_index_text(self):
+        return self.name_no_details()
+    haystack_index = ('lastname', 'gender')
+    haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'))
+    #######
+
     def __unicode__(self):
         return self.name
 
@@ -41,33 +61,38 @@ class Person(models.Model):
         return u'%s %s' % (self.firstname, self.lastname)
 
     @property
+    @cache_result
     def name(self):
-        return get_person_name(self, firstname_position='before', role_recent=True)
+           return get_person_name(self, firstname_position='before', role_recent=True)
 
+    @cache_result
     def name_no_district(self):
         return get_person_name(self, firstname_position='before', role_recent=True, show_district=False)
 
+    @cache_result
     def name_no_details(self):
         return get_person_name(self, firstname_position='before')
         
+    @cache_result
     def name_no_details_lastfirst(self):
         return get_person_name(self, firstname_position='after')
             
+    @cache_result
     def name_and_title(self):
         return get_person_name(self, firstname_position='before', role_recent=True, show_party=False, show_district=False)
        
     @property
+    @cache_result
     def sortname(self):
-    	return get_person_name(self, firstname_position='after', role_recent=True, show_district=True)
+        return get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
         
-    def __unicode__(self):
-        return self.name
-
     def get_current_role(self):
         try:
             return self.roles.get(current=True)
         except PersonRole.DoesNotExist:
             return None
+    def is_currently_serving(self):
+        return self.roles.filter(current=True).exists()
 
     def get_absolute_url(self):
         name = slugify('%s %s' % (self.firstname, self.lastname))
@@ -120,6 +145,23 @@ class Person(models.Model):
             return self.roles.order_by('-startdate')[0]
         except IndexError:
             return None
+
+    def get_most_recent_role_field(self, fieldname):
+        role = self.get_most_recent_role()
+        if not role: return None
+        ret = getattr(role, fieldname)
+        if callable(ret): ret = ret()
+        return ret
+    def most_recent_role_type(self):
+        return self.get_most_recent_role_field('get_title')
+    def most_recent_role_state(self):
+        return self.get_most_recent_role_field('state')
+    def most_recent_role_district(self):
+        return self.get_most_recent_role_field('district')
+    def most_recent_role_party(self):
+        return self.get_most_recent_role_field('party')
+    def most_recent_role_congress(self):
+        return self.get_most_recent_role_field('most_recent_congress_number')
 
     def get_photo_url(self):
         """
@@ -193,8 +235,8 @@ class PersonRole(models.Model):
         return State.by_value(self.state).label
             
     def get_description(self):
-    	from django.contrib.humanize.templatetags.humanize import ordinal
-    	
+        from django.contrib.humanize.templatetags.humanize import ordinal
+        
         if self.role_type == RoleType.president:
             return self.get_title_name(False)
         if self.role_type == RoleType.senator:

@@ -791,7 +791,7 @@ h2 span, h3 span, h4 span, span span, a em {
         width: 130px;
     	}
     .summary-box dd {
-        font-family: CallunaItalic;
+        font-family: Calluna/*Italic*/;
         overflow: hidden;
     	}
 #content .summary-box h2 {
@@ -811,7 +811,7 @@ h2 span, h3 span, h4 span, span span, a em {
         padding: 0 9px 0;
         vertical-align: middle;
         height: 30px;
-        font: normal 14px/30px CallunaSansRegular, Verdana, Arial, Helvetica, sans-serif;
+        font: normal 14px/16px CallunaSansRegular, Verdana, Arial, Helvetica, sans-serif;
     	}
     .summary-box table th {
         text-align: left;

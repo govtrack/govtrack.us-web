@@ -5,7 +5,7 @@ from person.models import RoleType
 def get_person_name(person,
 				firstname_position=None, show_suffix=False,
 				role_date=None, role_congress=None, role_recent=None, role_year=None,
-                show_title=True, show_party=True, show_district=True):
+                show_title=True, show_party=True, show_district=True, show_type=False):
     """
     Args:
         role_date - the date from which the person role should be extracted
@@ -42,11 +42,11 @@ def get_person_name(person,
     if role is None:
         return name
  
-    if role.role_type == RoleType.president:
-        return 'President ' + name
-        
     if show_title:
         name = role.get_title_abbreviated() + ' ' + name
+ 
+    if show_type:
+        name += " (%s)" % role.get_title_abbreviated()
  
     if show_party or show_district:
         name += ' ['

@@ -66,8 +66,7 @@ class Cosponsor(models.Model):
 
 class Bill(models.Model):
     title = models.CharField(max_length=255)
-    # Serialized list of all bill titles
-    titles = JSONField()
+    titles = JSONField() # serialized list of all bill titles as (type, as_of, text)
     bill_type = models.IntegerField(choices=BillType)
     congress = models.IntegerField()
     number = models.IntegerField()
@@ -90,6 +89,15 @@ class Bill(models.Model):
     #@models.permalink    
     def get_absolute_url(self):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
+        
+    # indexing
+    def get_index_text(self):
+        return "\n".join([self.title] + [t[2] for t in self.titles])
+    haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date')
+    def get_terms_index_list(self):
+    	return [t.id for t in self.terms.all().distinct()]
+    #######
+
         
     @property
     def display_number(self):
