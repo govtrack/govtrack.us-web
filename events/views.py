@@ -2,12 +2,15 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 from common.decorators import render_to
 from common.pagination import paginate
 
 from datetime import datetime, time
 import simplejson
+
+from registration.helpers import json_response
 
 from models import *
 from website.models import *
@@ -21,57 +24,58 @@ def get_feed_list(request):
         feedlist = [Feed.from_name(f) for f in feedlist]
     return feedlist
 
-@render_to('events/events_list.html')
-def events_list(request):
-    feedlist = get_feed_list(request)
-    feedlistnames = [f.feedname for f in feedlist]
-        
+@login_required
+@render_to('events/edit_lists.html')
+def edit_subscription_lists(request):
     no_arg_feeds = [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.EnactedBillsFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
-    other_feeds = [f for f in feedlist if f not in no_arg_feeds]
-    no_arg_feeds = [(feed, feed.feedname in feedlistnames) for feed in no_arg_feeds]
     
     from bill.search import subject_choices
     
     return {
         'no_arg_feeds': no_arg_feeds,
-        'other_feeds': other_feeds,
-        'feeds': feedlist,
-        'feeds_json': simplejson.dumps(feedlistnames),
         'subject_choices': subject_choices(),
             }
+            
+@login_required
+@json_response
+def edit_subscription_list(request):
+    if not request.user.is_authenticated():
+        return { "error": "not logged in" }
+        
+    if request.GET["listid"] != "_new_list":
+        sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.GET["listid"])
+    else:
+        sublist = None
+        ctr = 1
+        while not sublist and ctr < 1000:
+            try:
+                sublist = SubscriptionList.objects.create(user=request.user, name="New List " + str(ctr))
+            except:
+                ctr += 1
+    
+    if request.GET["command"] in ("toggle", "add", "remove"):
+        f = get_object_or_404(Feed, feedname=request.GET["feed"])
+        if (request.GET["command"] == "toggle" and f in sublist.trackers.all()) or request.GET["command"] == "remove":
+            sublist.trackers.remove(f)
+        else:
+            sublist.trackers.add(f)
+    if request.GET["command"] == "rename":
+        sublist.name = request.GET["name"]
+        sublist.save()
+    if request.GET["command"] == "delete" and not sublist.is_default:
+        sublist.delete()
+    if request.GET["command"] == "email_toggle":
+        sublist.email = (sublist.email + 1) % len(SubscriptionList.EMAIL_CHOICES)
+        sublist.save()
+    
+    return { "list_id": sublist.id, "list_name": sublist.name, "list_email": sublist.get_email_display(), "list_trackers": [ { "id": f.id, "name": f.feedname, "title": f.title } for f in sublist.trackers.all() ] } # response is ignored
 
 @render_to('events/events_list_items.html')
 def events_list_items(request):
-    sublist = None
-    show_empty = True
-    newlist = False
-    if request.GET.get('listid', '') == '':
-        feedlist = get_feed_list(request)
-    elif not request.user.is_authenticated():
-        return {} # invalid call
-    else:
-        if request.GET["listid"] != "_new_list":
-            sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.GET["listid"])
-        else:
-            sublist = SubscriptionList.objects.create(user=request.user, name="New List " + datetime.now().isoformat()) # make new name such that it will always be unique!
-            newlist = True
+    sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.GET["listid"])
         
-        if request.GET["command"] in ("toggle", "add"):
-            f = get_object_or_404(Feed, feedname=request.GET["command_arg"])
-            if f in sublist.trackers.all() and request.GET["command"] == "toggle":
-                sublist.trackers.remove(f)
-            else:
-                sublist.trackers.add(f)
-        if request.GET["command"] == "rename":
-            sublist.name = request.GET["command_arg"]
-            sublist.save()
-            return { } # response is ignored
-        if request.GET["command"] == "delete" and not sublist.is_default:
-            sublist.delete()
-            return { } # response is ignored
-        
-        feedlist = sublist.trackers.all()
-        show_empty = False
+    feedlist = sublist.trackers.all()
+    show_empty = False
       
     if len(feedlist) > 0 or show_empty:
         qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, 100) # get all events
@@ -83,7 +87,6 @@ def events_list_items(request):
         'page': page,
         'list': sublist,
         'feeds': feedlist,
-        'newlist': newlist,
             }
 
 def search_feeds(request):
@@ -91,7 +94,7 @@ def search_feeds(request):
         from person.models import Person
         feedlist = [
             Feed.PersonFeed(p.id)
-            for p in Person.objects.filter(lastname__contains=request.REQUEST["q"])
+            for p in Person.objects.filter(lastname__icontains=request.REQUEST["q"])
             if p.get_current_role() != None]
             
         import us
@@ -105,7 +108,7 @@ def search_feeds(request):
         from committee.models import Committee
         feedlist = [
             Feed.CommitteeFeed(c)
-            for c in Committee.objects.filter(name__contains=request.REQUEST["q"], obsolete=False)]
+            for c in Committee.objects.filter(name__icontains=request.REQUEST["q"], obsolete=False).order_by("committee__name", "name")]
                 
     def feedinfo(f):
         return { "name": f.feedname, "title": f.title }

@@ -17,14 +17,14 @@ import datetime
 "Enums"
 
 class BillType(enum.Enum):
-    senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s')
-    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h')
-    senate_resolution = enum.Item(4, 'S.Res.', slug='sr', xml_code='sr')
-    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr')
-    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sc', xml_code='sc')
-    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hc', xml_code='hc')
-    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sj', xml_code='sj')
-    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hj', xml_code='hj')
+    senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s', search_help_text="Senate bills")
+    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h', search_help_text="House bills")
+    senate_resolution = enum.Item(4, 'S.Res.', slug='sr', xml_code='sr', search_help_text="Senate simple resolutions, which do not have the force of law")
+    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr', search_help_text="House simple resolutions, which do not have the force of law")
+    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sc', xml_code='sc', search_help_text="Concurrent resolutions originating in the Senate, which do not have the force of law")
+    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hc', xml_code='hc', search_help_text="Concurrent resolutions originating in the House, which do not have the force of law")
+    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sj', xml_code='sj', search_help_text="Joint resolutions originating in the Senate, which may be used to enact laws or propose constitutional amendments")
+    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hj', xml_code='hj', search_help_text="Joint resolutions originating in the House, which may be used to enact laws or propose constitutional amendments")
 
 
 class TermType(enum.Enum):
@@ -166,7 +166,7 @@ class Bill(models.Model):
         
         else: # Bill is not current.
             if status == "INTRODUCED" or status == "REFERRED" or status == "REPORTED":
-                status = "This bill or resolution was introduced on %s, in a previous session of Congress, but was not passed."
+                status = "This bill or resolution was introduced on %s, in a previous session of Congress, but was not enacted."
             elif status == "PASS_OVER:HOUSE":
                 status = "This bill or resolution was introduced in a previous session of Congress and was passed by the House on %s but was never passed by the Senate."
             elif status == "PASS_OVER:SENATE":

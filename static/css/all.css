@@ -1605,3 +1605,40 @@ ul.bullets li {
 	width: 450px;
 	float: left;
 }
+
+#track_panel {
+}
+.tracker_lists span.rename {
+	display: none;
+	float: right;
+}
+.tracker_lists td:hover span.rename {
+	display: inline;
+}
+
+.error {
+	color: #C22;
+	font-weight: bold;
+}
+
+.login label {
+	display: block;
+	float: left;
+	width: 80px;
+}
+
+#sitenewscontainer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+}
+#sitenews {
+	margin: auto;
+	width: 540px;
+	background-color: white;
+	border-left: 1px solid #444;
+	border-bottom: 1px solid #444;
+	border-right: 1px solid #444;
+	text-align: center;
+}

@@ -7,12 +7,13 @@ from django.conf import settings
 from common.decorators import render_to
 from common.pagination import paginate
 
-from bill.models import Bill, BillType
+from bill.models import Bill, BillType, BillStatus, BillTerm
 from bill.search import bill_search_manager
 from bill.title import get_secondary_bill_title
 from committee.models import CommitteeMember, CommitteeMemberRole
 from committee.util import sort_members
 from person.models import Person
+from events.models import Feed
 
 from settings import CURRENT_CONGRESS
 
@@ -30,36 +31,37 @@ def bill_details(request, congress, type_slug, number):
         except BillType.NotFound:
             raise Http404("Invalid bill type: " + type_slug)
     
-	bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
-	
-	relevant_assignments = []
-	for ca in sort_members(bill.sponsor.committeeassignments.filter(committee__in=bill.committees.all()).select_related()):
-		relevant_assignments.append( ("The sponsor", ca) )
-		break
-	good_cosp_assignments = 0
-	good_cosp_assignments_other = False
-	for ca in sort_members(CommitteeMember.objects.filter(person__in=bill.cosponsors.all(), committee__in=bill.committees.all()).select_related()):
-		if ca.role not in (CommitteeMemberRole.member, CommitteeMemberRole.exofficio):
-			relevant_assignments.append( (ca.person.name + ", a cosponsor,", ca) )
-			good_cosp_assignments_other = True
-		else:
-			good_cosp_assignments += 1
-	
-	summary = None
-	sfn = "data/us/%d/bills.summary/%s%d.summary.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
-	if os.path.exists(sfn):
-		from lxml import etree
-		dom = etree.parse(open(sfn))
-		xslt_root = etree.XML('''
+    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    
+    relevant_assignments = []
+    good_cosp_assignments = 0
+    good_cosp_assignments_other = False
+    if bill.congress == CURRENT_CONGRESS:
+        for ca in sort_members(bill.sponsor.committeeassignments.filter(committee__in=bill.committees.all()).select_related()):
+            relevant_assignments.append( ("The sponsor", ca) )
+            break
+        for ca in sort_members(CommitteeMember.objects.filter(person__in=bill.cosponsors.all(), committee__in=bill.committees.all()).select_related()):
+            if ca.role not in (CommitteeMemberRole.member, CommitteeMemberRole.exofficio):
+                relevant_assignments.append( (ca.person.name + ", a cosponsor,", ca) )
+                good_cosp_assignments_other = True
+            else:
+                good_cosp_assignments += 1
+        
+    summary = None
+    sfn = "data/us/%d/bills.summary/%s%d.summary.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
+    if os.path.exists(sfn):
+        from lxml import etree
+        dom = etree.parse(open(sfn))
+        xslt_root = etree.XML('''
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-		<xsl:output omit-xml-declaration="yes"/>
-		<xsl:template match="summary//Paragraph[string(.)!='']">
-			<div style="margin-top: .5em; margin-bottom: .5em">
-				<xsl:apply-templates/>
-			</div>
-		</xsl:template>
+        <xsl:output omit-xml-declaration="yes"/>
+        <xsl:template match="summary//Paragraph[string(.)!='']">
+            <div style="margin-top: .5em; margin-bottom: .5em">
+                <xsl:apply-templates/>
+            </div>
+        </xsl:template>
 
-		<xsl:template match="Division|Title|Subtitle|Part|Chapter|Section">
+        <xsl:template match="Division|Title|Subtitle|Part|Chapter|Section">
             <xsl:if test="not(@number='meta')">
             <div>
                 <xsl:choose>
@@ -86,11 +88,11 @@ def bill_details(request, congress, type_slug, number):
             </xsl:if>
         </xsl:template>
 </xsl:stylesheet>''')
-		transform = etree.XSLT(xslt_root)
-		summary = transform(dom)
-		if unicode(summary).strip() == "":
-			summary = None
-	
+        transform = etree.XSLT(xslt_root)
+        summary = transform(dom)
+        if unicode(summary).strip() == "":
+            summary = None
+    
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
@@ -99,6 +101,9 @@ def bill_details(request, congress, type_slug, number):
         "relevant_assignments": relevant_assignments,
         "good_cosp_assignments": good_cosp_assignments,
         "good_cosp_assignments_other": good_cosp_assignments_other,
+        "current": bill.congress == CURRENT_CONGRESS,
+        "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status,
+        'feed': Feed.BillFeed(bill),
     }
 
 @render_to('bill/bill_text.html')
@@ -129,14 +134,26 @@ def bill_text(request, congress, type_slug, number):
 
 @render_to('bill/bill_list.html')
 def bill_list(request):
+    ix1 = None
+    ix2 = None
+    if "subject" in request.GET:
+        ix = BillTerm.objects.get(id=request.GET["subject"])
+        if ix.parents.all().count() == 0:
+            ix1 = ix
+        else:
+            ix1 = ix.parents.all()[0]
+            ix2 = ix
+    
     return bill_search_manager().view(request, "bill/bill_list.html",
-    	defaults={
-    		"congress": CURRENT_CONGRESS if "sponsor" not in request.GET else Person.objects.get(id=request.GET["sponsor"]).most_recent_role_congress(),
-    		"sponsor": request.GET.get("sponsor", None),
-    		"terms": request.GET.get("subject", None),
-    	},
-    	noun = ("bill", "bills")
-    	)
+        defaults={
+            "congress": request.GET["congress"] if "congress" in request.GET else (CURRENT_CONGRESS if "sponsor" not in request.GET else Person.objects.get(id=request.GET["sponsor"]).most_recent_role_congress()),
+            "sponsor": request.GET.get("sponsor", None),
+            "terms": ix1.id if ix1 else None,
+            "terms2": ix2.id if ix2 else None,
+            "text": request.GET.get("text", None),
+        },
+        noun = ("bill", "bills")
+        )
  
 def query_popvox(method, args):
     if isinstance(method, (list, tuple)):

@@ -27,8 +27,7 @@ urlpatterns = patterns('',
     # django-registration-pv
     (r'^emailverif/', include('emailverification.urls')),
     (r'^registration/', include('registration.urls')),
-    (r'^accounts/login$', 'registration.views.loginform'),
-    (r'^accounts/logout$', 'django.contrib.auth.views.logout'),
-    (r'^accounts/profile/change_password$', 'django.contrib.auth.views.password_change'),
-    (r'^accounts/profile/password_changed$', 'django.contrib.auth.views.password_change_done'),
+    (r'^accounts/login/?$', 'registration.views.loginform'), # Django adds a slash when logging out?
+    (r'^accounts/logout$', 'django.contrib.auth.views.logout', { "redirect_field_name": "next" }),
+    (r'^accounts/profile$', 'registration.views.profile'),
 )

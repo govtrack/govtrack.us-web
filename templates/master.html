@@ -17,8 +17,9 @@
 		{% block extra_css %}{% endblock %}
 		
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/main.js" ></script>
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.4.3.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/ajaxforms.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"> </script>
 		{% block extra_js %}{% endblock %}
 		
 		{% block head %}{% endblock %}
@@ -33,7 +34,27 @@
 		
 		<div id="masthead">
 			<header id="header">
-				
+				<div id="sitenewscontainer" style="display: none">
+					<div id="sitenews" seq="0">
+						<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
+						<div style="float: right; width: 500px; padding: 10px;">
+							Welcome to GovTrack 2.0. We&rsquo;ve made some changes, but this is just the beginning. <a href="/blog/blah">Read more</a> and stay tuned for more changes.
+						</div>
+						<div style="clear: both"> </div>
+					</div>
+				</div>
+				<script>
+				function hide_site_news() {
+					$('#sitenewscontainer').fadeOut();
+					$.cookie("sitenewsbanner", $('#sitenews').attr("seq"), { expires: 14 });
+				}
+				$(function() {
+					if ($.cookie("sitenewsbanner") != $('#sitenews').attr("seq")) {
+						$('#sitenewscontainer').fadeIn();
+					}
+				});
+				</script>
+								
 				<a id="logo" href="/">govtrack.us</a>
 				
 				<div id="nav-block">
@@ -44,8 +65,8 @@
 								{% if not user.is_authenticated %}
 									<li><a href="/accounts/login">Log In</a></li>
 								{% else %}
-									<li><a href="/accounts/profile">{{user.username}}</a></li>
-									<li><a href="/accounts/logout">Log Out</a></li>
+									<li><a href="/accounts/profile">{{user.email}}</a></li>
+									<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
 								{% endif %}
 							</ul>
 							<form name="header_search" action="/search" method="GET" class="search-form">
@@ -69,7 +90,9 @@
 									<li><a href="/congress/committees">Congressional Committees</a></li>
 								</ul>
 							</li>
-							<li><a href="/events">Trackers</a></li>
+							{% if user.is_authenticated %}
+							<li><a href="/accounts/lists">Lists</a></li>
+							{% endif %}
 							<li><a href="/about">About</a></li>
 							<li><a href="/developers">Use our data</a></li>
 						</ul>
@@ -125,14 +148,16 @@
 					<ul>
 						<li><a href="/">Home</a></li>
 						<li><a href="/congress">Browse</a></li>
-						<li><a href="/trackers">Trackers</a></li>
+						{% if user.is_authenticated %}
+						<li><a href="/accounts/lists">Lists</a></li>
+						{% endif %}
 						<li><a href="/about">About GovTrack</a></li>
 						<li><a href="/developers">For Developers</a></li>
 						{% if not user.is_authenticated %}
 						<li><a href="/accounts/login">Log in</a></li>
 						{% else %}
 						<li><a href="/accounts/profile">Account Settings</a></li>
-						<li><a href="/accounts/logout">Log Out</a></li>
+						<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
 						{% endif %}
 					</ul>
 				</nav>

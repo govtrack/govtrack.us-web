@@ -31,10 +31,9 @@
 {% block body_class %}member{% endblock %}
 
 {% block summary %}
-<div class="container">
+<div id="track_panel_base" class="container">
 	<h1>{{person.name_and_title}}</h1>
 	
-	<div id="track_panel_base">
 	{% if role and not active_role %}
 	<p>Former {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}{% endif %}</p>
 	{% endif %}
@@ -73,10 +72,10 @@
         </tr>
         {% endfor %}
 	</table>
-	</div>
 	
-	{% include "events/subscribe_inline.html" %}
 </div><!-- /container -->
+
+{% include "events/subscribe_inline.html" %}
 
 <div class="aside">
 	{% if photo %}

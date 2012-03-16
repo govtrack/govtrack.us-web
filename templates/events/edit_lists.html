@@ -1,0 +1,340 @@
+{% extends 'master.html' %}
+{% block title %}Your Lists -- GovTrack.us{% endblock %}
+{% block head %}
+<style>
+.col_6 {
+	width: 440px;
+	float: left;
+}
+.feed_active_span { display: none; }
+.active .feed_inactive_span { display: none; }
+.active .feed_active_span { display: inline; }
+
+#lists .opts { display: none; }
+#lists > div.list {
+	float: left;
+	width: 280px;
+	height: 3em;
+	margin: 10px 15px 0 0;
+	background-color: #EEE;
+	border: 1px solid #CCC;
+	padding: 5px;
+	cursor: pointer;
+}
+#lists > div#newlist {
+	height: auto;
+	font-weight: bold;
+	font-size: 11px;
+}
+	#lists > div#newlist:hover {
+		text-decoration: underline;
+	}
+#lists > div.active {
+	color: black;
+	background-color: #FEE;
+}
+#lists > div.active .opts {
+	display: inline;
+	font-size: 90%;
+	color: #777;
+}
+#lists > div.default_list .no_default_list { display: none; }
+#lists > div.active .opts a {
+	color: #666;
+}
+	#lists > div.active .opts a:hover {
+		border: none;
+		text-decoration: underline;
+	}
+	#lists > div.list .name {
+		float: left;
+		width: 175px;
+		height: 1.5em;
+		overflow: hidden;
+	}
+	
+#list_view {
+	margin-top: 20px;
+	border-top: 1px solid #AAA;
+	padding-top: 20px;
+}
+</style>
+
+<script>
+var active_list = null;
+
+function activate_list(elem) {
+	active_list = $(elem).attr("listid");
+	$('#lists div').removeClass('active');
+	$(elem).addClass("active");
+	$("#list_view h2").text($(elem).find(".name").text());
+	
+	$('#basic_trackers input').prop('checked', false);
+	$("#other_feed_items").text("");
+
+	$('#search_trackers input').val("");
+	$('#search_trackers .results').html("");
+	
+	$.ajax({
+		url: "/events/_edit",
+		data: {
+			listid: active_list,
+			command: "list"
+		},
+		dataType: "json",
+		success: function(data) {
+			for (var i = 0; i < data.list_trackers.length; i++) {
+				var n = $('#basicfeed_' + data.list_trackers[i].id);
+				if (n.length) {
+					// it is a basic tracker
+					n.prop('checked', true);
+				} else {
+					add_feed_node(data.list_trackers[i].id, data.list_trackers[i].name, data.list_trackers[i].title);
+				}
+			}
+		}
+	});
+	
+	refresh_events();
+}
+
+function refresh_events() {
+	$('#events').html("Loading...");
+	$.ajax({
+		url: "/events/_load_events",
+		data: {
+			{% if request.GET.page %}page: "{{request.GET.page|escapejs}}",{% endif %}
+			listid: active_list
+		},
+		dataType: "html",
+		success: function(data) {
+			$('#events').html(data);
+		}
+	});	
+}
+
+function add_feed_node(id, name, title) {
+	var t = $("<li><input type='checkbox' checked onclick='return toggle_list_item(this);'/><label/></li>");
+	t.find("input").attr('id', "feed_" + id);
+	t.find("input").attr('feedname', name);
+	t.find("label").text(title);
+	t.find("label").attr('for', "feed_" + id);
+
+	$("#other_feed_items").append(t);
+}
+
+function toggle_list_item(elem, refresh) {
+	toggle_list_item2($(elem).attr("feedname"), refresh);
+}
+function toggle_list_item2(feedname, refresh) {
+	$.ajax({
+		url: "/events/_edit",
+		data: {
+			listid: active_list,
+			command: "toggle",
+			feed: feedname
+		},
+		dataType: "json",
+		success: function(data) {
+			if (refresh)
+				activate_list($('#lists div.active')[0]);
+			refresh_events();
+		}
+	});		
+}
+
+function delete_list(node) {
+	if (!confirm("Delete list " + $(node).find(".name").text() + "?")) return false; 
+	$.ajax({
+		url: "/events/_edit",
+		data: {
+			listid: $(node).attr("listid"),
+			command: "delete"
+		},
+		dataType: "json",
+		success: function(data) {
+			activate_list($(node).prev()[0]);
+			$(node).fadeOut(function() { $(node).remove(); });
+		}
+	});
+	return false;
+}
+
+function rename_list(node) {
+	var oldname = $(node).find(".name").text();
+	var newname = prompt("Rename list " + oldname + " to...", oldname);
+	if (newname && newname != "") {
+		$.ajax({
+			url: "/events/_edit",
+			data: {
+				listid: $(node).attr("listid"),
+				command: "rename",
+				name: newname
+			},
+			dataType: "json",
+			success: function(data) {
+				$(node).find(".name").text(newname);
+				activate_list(node);
+			}
+		});
+	}
+	return false;
+}
+
+function change_email_options(node) {
+	$.ajax({
+		url: "/events/_edit",
+		data: {
+			listid: $(node).attr("listid"),
+			command: "email_toggle"
+		},
+		dataType: "json",
+		success: function(data) {
+			$(node).find(".emailinfo").text(data.list_email);
+		}
+	});
+	return false;
+}
+
+function new_list(node) {
+	$.ajax({
+		url: "/events/_edit",
+		data: {
+			listid: "_new_list",
+			command: "create"
+		},
+		dataType: "json",
+		success: function(data) {
+			var n = $('#lists > div:first').clone();
+			n.insertBefore($('#newlist'));
+			n.find(".name").text(data.list_name);
+			n.find(".emailinfo").text(data.list_email);
+			n.attr("listid", data.list_id);
+			n.removeClass("default_list");
+			n.hide();
+			n.fadeIn();
+			activate_list(n);
+		}
+	});
+	return false;
+}
+
+function search_feeds(type) {
+	var q = $('#track_' + type + '_input').val();
+	if (q.replace(/\s/g,"") == "") {
+		$('#track_' + type + '_results').text("");
+		return;
+	}
+	
+	$('#track_' + type + '_results').text("Loading...");
+	ajax("/events/search_feeds", { "type": type, "q": q }, {
+			success: function(res) {
+				$('#track_' + type + '_results').html("");
+				var html = $("<ul/>");
+				for (feed in res.feeds) {
+					var li = $("<li/>");
+					html.append(li);
+					
+					var a = $("<a href='#' onclick='return false'/>");
+					li.append(a);
+					a.text(res.feeds[feed].title);
+					a.attr("feedname", res.feeds[feed].name);
+					a.click(function() { toggle_list_item(this, true); });
+				}
+				$('#track_' + type + '_results').append(html);
+			}
+	});		
+}
+
+$(function() {
+	{% if request.GET.listid %}
+	$('#lists div.list').each(function() {
+		if (this.getAttribute("listid") == "{{request.GET.listid|escapejs}}")
+			activate_list(this);
+	});
+	{% endif %}
+	if (!active_list) activate_list($('#lists div.list')[0]);
+});
+</script>
+{% endblock %}
+
+{% block crumbs %}
+<h1>Your Lists</h1>
+{% endblock %}
+
+{% block heading_box %}
+{% endblock %}
+
+{% block body %}
+<section>
+	<h2>Your Lists</h2>
+	<div id="lists">
+	{% for list in request.user.userprofile.lists %}
+		{% comment %}since the first of these nodes is cloned when we
+		create a new list, it should not have any list-specific data hidden away
+		except where we expect that to be{% endcomment %}
+		<div class="list {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)">
+			<div class="name">{{list.name}}</div>
+			<div style="float: right; width: 100px; text-align: right;">
+				<span class="opts"><a href="#" onclick="return rename_list(this.parentNode.parentNode.parentNode);">rename</a></span>
+				<span class="opts no_default_list">| <a href="#" onclick="return delete_list(this.parentNode.parentNode.parentNode);">delete</a></span>
+			</div>
+			<div style="clear: both"><small>Email Updates: <span class="emailinfo">{{list.get_email_display}}</span> <span class="opts">(<a href="#" onclick="return change_email_options(this.parentNode.parentNode.parentNode.parentNode);">toggle</a>)</span></small></div>
+		</div>
+	{% endfor %}
+	<div id="newlist" class="list" onclick="new_list()">
+		Create New List...
+	</div>
+	<div style="clear: both"> </div>
+	</div>
+</section>
+
+<section id="list_view">
+
+<h2 style="margin-bottom: 1em">Edit List</h2>
+
+<div id="edit_list" class="col_6">
+	<h3 style="margin-bottom: .5em">Events In This List</h3>
+	<ul id="basic_trackers">
+		{% for feed in no_arg_feeds %}
+			<li>
+				<input id="basicfeed_{{feed.id}}" feedname="{{feed.feedname}}" type="checkbox" onclick="return toggle_list_item(this);"/>
+				<label for="basicfeed_{{feed.id}}">{{feed.title}}</label>
+			</li>
+		{% endfor %}
+	</ul>
+	<ul id="other_feed_items">
+	</ul>
+	
+	<h3 style="margin-bottom: .5em">Add More Events</h2>
+	<div id="search_trackers">
+	
+	<div>Add events related to a Member of Congress: (<a href="/congress/members">browse all</a>)</div>
+	<div><input id="track_person_input" type="text" style="width: 100%" placeholder="search by last name, zipcode, or state name"/></div>
+	<div class="results" id="track_person_results"> </div>
+	<script>
+		$('#track_person_input').keyup_delayed(function() { search_feeds("person"); });
+	</script>
+	
+	<div style="margin-top: 1em">Add events related to a committee: (<a href="/congress/committees">browse all</a>)</div>
+	<div><input id="track_committee_input" type="text" style="width: 100%" placeholder="search by committee name"/></div>
+	<div class="results" id="track_committee_results"> </div>
+	<script>
+		$('#track_committee_input').keyup_delayed(function() { search_feeds("committee"); });
+	</script>
+	
+	<div style="margin-top: 1em">Add events related to a subject area:</div>
+	<div><select id="track_subject_input"><option value="">(Select a Subject Area)</option>{% for id, name in subject_choices %}<option value="{{id}}">{{name}}</option>{% endfor %}</select></div>
+	<script>$('#track_subject_input').change(function() { toggle_list_item2("crs:" + this.value, true); });</script>
+	
+	
+	<p style="margin-top: 1em">You can find other events by <a href="/congress/bills">searching for bills</a>.</p>
+	
+	</div>
+</div>
+
+<div id="events" class="col_6" style="margin: 0 0 25px 20px; border-left: 1px solid #DDD; padding: 5px 0 20px 20px; min-height: 480px;">
+</div>
+
+</section>
+{% endblock %}

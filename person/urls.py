@@ -9,7 +9,6 @@ urlpatterns = patterns('person.views',
     url(r'^(?:([A-Z][A-Z])(?:/(\d+))?)?$', 'browsemembersbymap'),
 	url(r'^[^/]+/(\d+)', 'person_details', name='person_details'),
 	
-    url(r'^spectrum$', 'political_spectrum', name='political_spectrum'),
-	
+    url(r'^ajax/district_lookup$', 'district_lookup'),
 	url(r'^embed/mapframe(?:\.xpd)?$', 'districtmapembed', name='districtmapembed'),
 )

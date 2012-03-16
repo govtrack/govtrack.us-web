@@ -39,6 +39,7 @@ class Committee(models.Model):
         else:
             return reverse('committee_details', args=[self.code])
     
+    @property
     def fullname(self):
         if self.committee == None:
             return self.name
@@ -63,7 +64,7 @@ class Committee(models.Model):
         return {
             "type": "Committee Meeting",
             "date": mtg.when,
-            "title": self.fullname() + " Meeting",
+            "title": self.fullname + " Meeting",
             "url": self.get_absolute_url(),
             "body_text_template": """{{subject|safe}}""",
             "body_html_template": """{{subject}}""",

@@ -11,7 +11,7 @@ from common.decorators import render_to
 
 from numpy import median
 
-from vote.models import Vote, CongressChamber, VoterType
+from vote.models import Vote, CongressChamber, VoterType, VoteCategory
 from vote.search import vote_search_manager
 from person.util import load_roles_at_date
 
@@ -59,6 +59,7 @@ def vote_details(request, congress, session, chamber_code, number):
             'voters': voters,
             'CongressChamber': CongressChamber,
             "VoterType": VoterType,
+            "VoteCategory": VoteCategory._items,
             }
 
 

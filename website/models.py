@@ -2,7 +2,7 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-from events.models import Feed
+from events.models import Feed, SubscriptionList
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True, db_index=True)
@@ -22,12 +22,16 @@ def get_user_profile(user):
     return profile
 User.userprofile = get_user_profile 
     
-class SubscriptionList(models.Model):
-    user = models.ForeignKey(User, db_index=True)
-    name = models.CharField(max_length=64)
-    trackers = models.ManyToManyField(Feed)
-    is_default = models.BooleanField(default=False)
-    email = models.IntegerField(default=0, choices=[(0, 'No Email Updates'), (1, 'Daily Email Updates'), (2, 'Weekly Email Updates')])
+class CampaignSupporter(models.Model):
+    campaign = models.CharField(max_length=96)
+    prefix = models.CharField(max_length=96)
+    firstname = models.CharField(max_length=96)
+    lastname = models.CharField(max_length=96)
+    address = models.CharField(max_length=96)
+    city = models.CharField(max_length=96)
+    state = models.CharField(max_length=96)
+    zipcode = models.CharField(max_length=96)
+    email = models.CharField(max_length=96)
+    message = models.CharField(max_length=256, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
     
-    class Meta:
-        unique_together = [('user', 'name')]

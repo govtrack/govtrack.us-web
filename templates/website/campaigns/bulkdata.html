@@ -1,0 +1,229 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>THOMAS Bulk Data</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<meta name="viewport" content="width=device-width">
+	
+	<style>
+	@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700,600,300);
+
+	body {
+		background: url(/static/images/bg-intro-box.jpg) -640px 0;
+		font-size: 13px;
+		margin: 0;
+	}
+	
+	body > div {
+		height: 422px;
+	}
+	
+	h1 {
+		font-family: 'Open Sans', sans-serif;
+		font-weight: 800;
+		margin: 30px 0 55px 170px;
+		width: 340px;
+		color: #333;
+	}
+	
+	p {
+		font-family: 'Open Sans', sans-serif;
+		margin-left: 170px;
+		width: 340px;
+	}
+	
+	form div {
+		margin-bottom: 3px;
+	}
+	
+	h2 {
+		font-family: 'Open Sans', sans-serif;
+		font-size: 13px;
+		text-align: center;
+		margin: 42px 0 8px 170px;
+		width: 340px;
+	}
+	
+	input {
+		font-size: 12px;
+		border: none;
+		padding: 2px;
+		margin-right: 6px;
+	}
+		input.placeholder {
+			color: #AAA;
+		}
+	select {
+		background-color: white;
+		border: none;
+		margin-right: 6px;
+	}
+	
+	form span {
+		font-family: 'Open Sans', sans-serif;
+		font-size: 11px;
+		color: white;
+	}
+	
+	footer {
+		color: #444;
+		font-family: 'Open Sans', sans-serif;
+		font-size: 10px;
+		padding-left: 10px;
+	}
+	</style>
+	
+	<script src="http://www.modernizr.com/downloads/modernizr-latest.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"> </script>
+	<script>
+/**
+ * HTML5 Placeholder Text jQuery Fallback with Modernizr
+ *
+ * @url     http://uniquemethod.com/
+ * @author  Unique Method
+ */
+$(function()
+{
+    // check placeholder browser support
+    if (!Modernizr.input.placeholder)
+    {
+ 
+        // set placeholder values
+        $(this).find('[placeholder]').each(function()
+        {
+            if ($(this).val() == '') // if field is empty
+            {
+                $(this).val( $(this).attr('placeholder') );
+                $(this).addClass("placeholder");
+            }
+        });
+ 
+        // focus and blur of placeholders
+        $('[placeholder]').focus(function()
+        {
+            if ($(this).val() == $(this).attr('placeholder'))
+            {
+                $(this).val('');
+                $(this).removeClass('placeholder');
+            }
+        }).blur(function()
+        {
+            if ($(this).val() == '' || $(this).val() == $(this).attr('placeholder'))
+            {
+                $(this).val($(this).attr('placeholder'));
+                $(this).addClass('placeholder');
+            }
+        });
+ 
+        // remove placeholders on submit
+        $('[placeholder]').closest('form').submit(function()
+        {
+            $(this).find('[placeholder]').each(function()
+            {
+                if ($(this).val() == $(this).attr('placeholder'))
+                {
+                    $(this).val('');
+                }
+            })
+        });
+ 
+    }
+});
+</script>
+</head>
+<body>
+<header>
+
+</header>
+<div role="main">
+
+	<h1>Ask Congress For More Transparency</h1>
+
+	<p>GovTrack has been meeting with congressional staff to
+	get better information about what Congress is doing.</p>
+	
+	<p>We are being asked if anyone uses GovTrack!</p>
+	
+	<p>Over the last eight years GovTrack has helped millions of
+	citizens track bills and learn about the U.S. Congress.</p>
+	
+	{% if stage == 1 %}
+		{% if not error %}
+			<h2>Will you ask for better transparency?</h2>
+		{% else %}
+			<h2 style="color: #A00">{{error}}</h2>
+		{% endif %}
+		
+		<form method="post" style="margin-left: 190px; width: 320px;">
+			<div>
+				<select name="prefix" style="width: 50px">
+					<option></option>
+					{% for prefix in prefixes %}
+					<option {% if request.POST.prefix == prefix %}selected{% endif %}>{{prefix}}</option>
+					{% endfor %}
+				</select>
+				<input type="text" name="firstname" placeholder="first name" style="width: 100px" value="{{request.POST.firstname}}"/>
+				<input type="text" name="lastname" placeholder="last name" style="width: 120px" value="{{request.POST.lastname}}"/>
+			</div>
+			<div>
+				<input type="text" name="address" placeholder="address" style="width: 290px" value="{{request.POST.address}}"/>
+			</div>
+			<div>
+				<input type="text" name="city" placeholder="city" style="width: 120px" value="{{request.POST.city}}"/>
+				<input type="text" name="state" placeholder="state" maxlength="2" style="width: 60px" value="{{request.POST.state}}"/>
+				<input type="text" name="zipcode" placeholder="zip code"  style="width: 85px" value="{{request.POST.zipcode}}"/>
+			</div>
+			<div>
+				<input type="text" name="email" placeholder="email address" style="width: 170px" value="{{request.POST.email}}"/>
+				<input type="submit" value="Next &gt;" style="width: 110px;"/>
+			</div>
+		</form>
+	{% endif %}
+	
+	{% if stage == 2 %}
+		<h2>Tell Congress Why GovTrack Matters</h2>
+
+		<form method="post" style="margin-left: 170px; width: 340px;">
+			<input type="hidden" name="sid" value="{{sid}}"/>
+			<input type="hidden" name="prefix" value="{{request.POST.prefix}}"/>
+			<input type="hidden" name="firstname" value="{{request.POST.firstname}}"/>
+			<input type="hidden" name="lastname" value="{{request.POST.lastname}}"/>
+			<input type="hidden" name="address" value="{{request.POST.address}}"/>
+			<input type="hidden" name="city" value="{{request.POST.city}}"/>
+			<input type="hidden" name="state" value="{{request.POST.state}}"/>
+			<input type="hidden" name="zipcode" value="{{request.POST.zipcode}}"/>
+			<input type="hidden" name="email" value="{{request.POST.email}}"/>
+			
+			<textarea name="message" style="width: 100%; height: 70px;" maxlength="250"></textarea>
+			
+			<div>
+				<input type="submit" value="Submit &gt;" style="width: 110px;"/>
+				<span>Thanks for standing up for transparency!</option>
+			</div>
+			
+		</form>
+	
+	{% endif %}
+	
+	{% if stage == 3 %}
+	<h2>Thanks!</h2>
+	<p style="text-align: center">Your support will help us help you keep tabs on the United States Congress.</p>
+	{% endif %}
+</div>
+<footer>
+Your personal information will be shared with congressional staff only.
+</footer>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+
+</body>
+</html>

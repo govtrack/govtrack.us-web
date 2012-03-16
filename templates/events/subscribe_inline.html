@@ -1,3 +1,8 @@
+<style>
+#new_list_row p {
+	margin: 3px 0 3px 0;
+}
+</style>
 <script>
 function show_track_panel() {
 	if (!$('#track_panel').is(":visible")) {
@@ -9,51 +14,137 @@ function show_track_panel() {
 	}
 	return false;
 }
+{% if request.user.is_authenticated %}
+function toggle_list_item(node) {
+	$.ajax({
+		url: "/events/_edit",
+		data: {
+			listid: $(node).parents("tr").attr("list_id"),
+			command: "toggle",
+			feed: "{{feed.feedname|escapejs}}"
+		},
+		dataType: "json",
+		success: function(data) {
+		}
+	});
+			
+}
+function rename_list(node) {
+	var oldname = $(node).parents("tr").find("label").text();
+	var newname = prompt("Rename list " + oldname + " to...", oldname);
+	if (newname && newname != "") {
+		$.ajax({
+			url: "/events/_edit",
+			data: {
+				listid: $(node).parents("tr").attr("list_id"),
+				command: "rename",
+				name: newname
+			},
+			dataType: "json",
+			success: function(data) {
+				$(node).parents("tr").find("label").text(newname);
+			}
+		});
+	}
+	return false;
+}
+function new_list(node) {
+	$.ajax({
+		url: "/events/_edit",
+		data: {
+			listid: "_new_list",
+			command: "add",
+			feed: "{{feed.feedname|escapejs}}"
+		},
+		dataType: "json",
+		success: function(data) {
+			var tr = $('#base_list_row').clone();
+			tr.attr("list_id", data.list_id);
+			tr.find("input").attr("id", "trackers_list_" + data.list_id);
+			tr.find("input").prop("checked", true);
+			tr.find("label").attr("for", "trackers_list_" + data.list_id);
+			tr.find("label").text(data.list_name);
+			tr.find("span.freq").text(data.list_email);
+			tr.hide();
+			tr.insertBefore($('#new_list_row'));
+			tr.fadeIn();
+			return false;
+		}
+	});
+	return false;
+}
+{% endif %}
+$(function() {
+	if (window.location.hash == "#track") {
+		show_track_panel();
+		window.location.hash = "";
+	}
+});
 </script>
 
-<div id="track_panel" style="display: none; margin-top: 20px;">
+<div id="track_panel" style="display: none;" class="container">
+	<h1>Track {{feed.title}}</h1>
+	
 	{% if not request.user.is_authenticated %}
-		<h2>RSS Feed</h2>
+
+		<p style="margin: 20px 0 25px 0; line-height: normal;">You will need to sign in or register to create lists and get updates about this {{feed.type_metadata.noun}} by email. It is all free.</p>
 		
-		<p>Use the RSS feed link above to track this {{feed.type_metadata.noun}}. Copy the link location into a feed reader such as Google Reader.</p>
+		<div class="signin_social" style="width: 140px; margin-right: 15px; float: left;">
+			<p style="margin-bottom: 4px">Have one of these?</p>
+			{% with request.get_full_path|add:"#track" as singlesignon_next %}
+			{% include "registration/login_singlesignon.html" %}
+			{% endwith %}
+		</div>
 		
-		<p><a href="{{feed.rss_url}}">RSS</a></p>
-	
-		<h2>Sign Up or Log In</h2>
-		
-		<p>Lists, custom feeds, and updates by email, are available to signed in users. Registration is free.</p>
-		
-		{% with request.get_full_path as singlesignon_next %}
-		{% include "registration/login_singlesignon.html" %}
-		{% endwith %}
-		
+		<div class="signin_social" style="width: 180px; float: left;">
+			<form method="post" class="login" action="/accounts/login">
+			{% csrf_token %}
+			<input type="hidden" name="next" value="{{request.path}}#track" />
+			<p style="margin-bottom: 4px">Or use an email and password:</p>
+			<input id="id_email" type="text" name="email" maxlength="60" placeholder="email address"/><br /> 
+			<input type="password" name="password" id="id_password"  placeholder="govtrack password" /> 
+			
+			<p style="margin-top: 5px"><input class="submit" type="submit" value="Login" /></p>
+			</form>
+		</div>
+
+		<p style="clear: both; margin-top: 15px;">
+			<a href="/accounts/register?next={{request.path|add:"#track"|urlencode}}">New to GovTrack?</a>
+			<a class="forgot" href="{% url registration.views.resetpassword %}">Forgot password?</a>
+		</p>
+
+		{% comment %}<p>You can also track this {{feed.type_metadata.noun}} using the <a href="{{feed.rss_url}}">RSS feed</a> without having to sign up.</p>{% endcomment %}
 	{% else %}
-		<p><a href="{{feed.view_url}}">View Tracked Events</a> | <a href="{{feed.rss_url}}">RSS</a></p>
+		{% if feed in subscription_feeds %}
+			<p>You are tracking this {{feed.type_metadata.noun}}.</p>
+		{% else %}
+			<p>Add this {{feed.type_metadata.noun}} to one of your lists:</p>
+		{% endif %}
 	
-		<h2>Add to Tracker List</h2>
-		
-		<table>
+		<table class="tracker_lists">
 		{% for list in request.user.userprofile.lists %}
-			<tr valign="top">
-				<td style="line-height: 130%">
-					<div style="float: left">[+]</div>
-					<div style="float: left">
-					{{list.name}}
-					{% if list.email %}
-					<br/><small>{{list.get_email_display}}</small>
-					{% endif %}
+			<tr valign="top" id="base_list_row" list_id="{{list.id}}">
+				<td style="padding: 3px; text-align: center;">
+				<input id="trackers_list_{{list.id}}" type="checkbox" {% if feed in list.trackers.all %}checked{% endif %} onclick="toggle_list_item(this);"/>
+				</td>
+				<td style="padding: 3px 3px 3px 6px;">
+					<div>
+						<label for="trackers_list_{{list.id}}">{{list.name}}</label>
+						<span class="rename">(<a href="#" onclick="return rename_list(this);">rename</a>)</span>
 					</div>
+					<div><small>Email Updates Frequency: <span class="freq">{{list.get_email_display}}</span></small></div>
 				</td>
 			</tr>
 		{% endfor %}
-		<tr>
-			<td>New List...</td>
+		<tr id="new_list_row">
+			<td>
+			</td>
+			<td style="padding: 3px 3px 3px 6px;">
+				<p><a href="#" onclick="return new_list()">New List...</a></p>
+				<p><a href="/accounts/lists">View/Edit Lists</a></p>
+			</td>
 		</tr>
 		</table>
-		
-		<h2>RSS Feed</h2>
-		
-		<p>Use the RSS feed link above to track this {{feed.type_metadata.noun}}. Copy the link location into a feed reader such as Google Reader.</p>
-		
+
 	{% endif %}
 </div>

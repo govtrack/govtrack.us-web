@@ -11,23 +11,27 @@
 <div class="advanced-search">
 	<form method="get" style="width: auto; border: none; padding: 0;">
 	<fieldset>
-			<label for="search_entry">Search bills, Members of Congress, committees...</label>
+			<label for="search_entry">Search all of GovTrack for...</label>
 			<input id="search_entry" name="q" type="text" class="text" value="{{request.GET.q}}" style="width: 300px"/>
 			<input class="btn-search-small" type="submit" value="Search"/>
     </fieldset>
 	</form>
+	<p>You can search for bills and resolutions, Members of Congres by name or state, and committees.</p>
 	
 	<div style="margin: 1.5em 0 2em 0">
 	{% if request.GET.q %}
-		{% for category, browseurl, matches in results %}
+		{% for category, browseurl, more_at, matches in results %}
 			<div style="margin-bottom: 15px">
 			<h2>{{category}}</h2>
 			{% if not matches %}
 				<p>We couldn&rsquo;t find anything that matched your search in this category. <a href="{{browseurl}}">Browse</a> for more.</p>
 			{% else %}
 				{% for ret in matches %}
-					<div><a href="{{ret.href}}">{{ret.label}}</a></div>
+					<div style="margin-bottom: .5em"><a href="{{ret.href}}">{{ret.label}}</a></div>
 				{% endfor %}
+				{% if more_at %}
+					<p><a href="{{browseurl}}?{{more_at}}={{request.GET.q|urlencode}}">more...</a></p>
+				{% endif %}
 			{% endif %}
 			</div>
 		{% endfor %}

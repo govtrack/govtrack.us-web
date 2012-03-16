@@ -24,7 +24,7 @@
 {% block body_class %}bill{% endblock %}
 
 {% block summary %}
-<div class="container">
+<div id="track_panel_base" class="container">
 	<h1>{{bill.title|truncatewords:15}}</h1>
 	
 	<div class="info">
@@ -36,23 +36,31 @@
 	
 		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
 		
-		{% if subtitle %}<p>{{subtitle}}</p>{% endif %}
+		{% if subtitle %}<p style="line-height: 135%">{{subtitle}}</p>{% endif %}
 		
 		<dl>
 			<dt>Sponsor:</dt>
 			<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
 		
 			<dt>Status:</dt>
-			<dd style="line-height: normal"><strong>{{bill.get_current_status_display}}</strong><br/>
+			<dd style="line-height: normal"><strong>
+			{% if not dead %}
+				{{bill.get_current_status_display}}
+			{% else %}
+				Died ({{bill.get_current_status_display}})
+			{% endif %}
+			</strong><br/>
 			{{bill.current_status_description}}</dd>
 		</dl>
 	
-		
 	</div><!-- /info -->
+	
+	<p style="margin: 0"><small>Bill titles {% if subtitle %}and summaries{% endif %} are written by the sponsor.</small></p>
 </div>
+{% include "events/subscribe_inline.html" %}
 
 <div class="aside">
-	<a href="#" class="track-btn">Track this bill</a>
+	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 	
 	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
 </div><!-- /actions -->
@@ -79,12 +87,17 @@
 								</tr>
 								{% endfor %}
 							
+								{% if current %}
 								{% for item in bill.get_future_events %}
 								<tr>
 									<td class="pending">{{item}}</td>
 									<td>(not yet ocurred)</td>
 								</tr>
 								{% endfor %}
+								{% endif %}
+								{% if died %}
+								<tr><td>This bill died in a previous session of Congress.</td></tr>
+								{% endif %}
 							</table>
 						</dd>
 						
@@ -97,7 +110,7 @@
 								<p>{{person}} is {{ca.role_name_2}} the {{ca.committee.name}}, where the bill has been referred.</p>
 							{% endfor %}
 							{% if good_cosp_assignments > 0 %}
-								<p>{{good_cosp_assignments}} {% if good_cosp_assignments_other %}other {% endif %} cosponsor{{good_cosp_assignments|pluralize}} are members of a committee to which the bill has been referred.</p>
+								<p>{{good_cosp_assignments}} {% if good_cosp_assignments_other %}other {% endif %} cosponsor{% if good_cosp_assignments > 1 %}s are members{% else %} is a member{% endif %} of a committee to which the bill has been referred.</p>
 							{% endif %}
 						</dd>
 						{% endif %}
@@ -218,7 +231,7 @@
 							<p>Use these subject areas to explore related legislation:</p>
 							<div style="max-height: 15em; overflow: auto">
 							{% for term in bill.terms.all %}
-								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="/congress/bills?subject={{term.id}}">{{term}}</a></div>
+								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="/congress/bills?congress={{bill.congress}}&subject={{term.id}}">{{term}}</a></div>
 							{% endfor %}
 							</div>
 						</dd>

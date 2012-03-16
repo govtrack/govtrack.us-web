@@ -12,6 +12,8 @@ from django.core.cache import cache
 
 import json, urllib
 
+from common.enum import MetaEnum
+
 class SearchManager(object):
     def __init__(self, model, qs=None):
         self.model = model
@@ -282,6 +284,10 @@ class SearchManager(object):
 
             resp = self.queryset(request, exclude=option if omit_me else None)
             
+            def build_choice(value, count):
+            	# (key, label, count, help_text) tuples
+            	return (value, nice_name(value, objs), count, getattr(field.choices.by_value(value), "search_help_text", None) if field and field.choices and type(field.choices) == MetaEnum else None)
+            
             if hasattr(resp, 'facet'):
                 # Haystack.
                 resp = resp.facet(option.field_name).facet_counts()
@@ -289,10 +295,7 @@ class SearchManager(object):
                     return []
                 facet_counts = resp["fields"][option.field_name]
                 objs = get_object_set([opt[0] for opt in facet_counts])
-                counts = [
-                    (opt[0], nice_name(opt[0], objs), opt[1])
-                    for opt in facet_counts
-                ]
+                counts = [build_choice(opt[0], opt[1]) for opt in facet_counts               ]
             else:
                 # ORM explanation: do GROUP BY, then COUNT
                 # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
@@ -302,8 +305,8 @@ class SearchManager(object):
                            .distinct().order_by()
                        
                 objs = get_object_set([x[option.field_name] for x in resp if x[option.field_name] != ""])
-                counts = [ # (key, label, count) tuples
-                    (x[option.field_name], nice_name(x[option.field_name], objs), x['_count'] if include_counts else None)
+                counts = [ 
+                    build_choice(x[option.field_name], x['_count'] if include_counts else None)
                     for x in resp if x[option.field_name] != ""]
             
             # Sort by count then by label.
@@ -313,15 +316,15 @@ class SearchManager(object):
                 counts.sort(key=lambda x: x[0])
             elif option.sort == "KEY-REVERSE":
                 counts.sort(key=lambda x: x[0], reverse=True)
-            elif option.sort == "KEY":
+            elif option.sort == "LABEL":
                 counts.sort(key=lambda x: x[1])
-            elif option.sort == "KEY-REVERSE":
+            elif option.sort == "LABEL-REVERSE":
                 counts.sort(key=lambda x: x[1], reverse=True)
             elif callable(option.sort):
                 counts.sort(key=lambda x : option.sort( objs[x[0]] if objs and x[0] in objs else x[0] ))
 
         if not option.required and counts != "NONE":
-            counts.insert(0, ('__ALL__', 'All', -1))
+            counts.insert(0, ('__ALL__', 'All', -1, None))
             
         cache.set(cache_key, counts, 60*60) # cache facets for one hour
 

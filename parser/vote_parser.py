@@ -164,6 +164,8 @@ def main(options):
                         # from the upstream source is not formatted in our style.
                         if vote.category == VoteCategory.passage:
                             vote.question = truncatewords(vote.related_bill.title, 7) + " (" + vote.vote_type + ")"
+                        if vote.category == VoteCategory.passage_suspension:
+                            vote.question = truncatewords(vote.related_bill.title, 7) + " (" + vote.vote_type + ")"
                         
                     except Bill.DoesNotExist:
                         vote.missing_data = True

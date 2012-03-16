@@ -39,7 +39,7 @@ def index(request):
     
     events_feed = cache.get("frontpage_events_feed")
     if not events_feed:
-        events_feed = Feed.get_events_for(None, 6)
+        events_feed = Feed.get_events_for(("misc:activebills", "misc:allvotes"), 6)
         cache.set("frontpage_events_feed", events_feed, 60*15) # 15 minutes
 
     return {
@@ -81,34 +81,62 @@ def search(request):
     
     results = []
     
-    from person.models import Person
-    results.append(("People", "/congress/members",
-        sorted([{"href": p.get_absolute_url(), "label": p.name, "obj": p, "secondary": p.get_current_role() == None } for p in Person.objects.filter(lastname__contains=q)]
-            , key=lambda p : (p["secondary"], p["obj"].sortname))))
+    from haystack.query import SearchQuerySet
+    
+    results.append(("People", "/congress/members", "name",
+        [{"href": p.object.get_absolute_url(), "label": p.object.name, "obj": p.object, "secondary": p.object.get_current_role() == None } for p in SearchQuerySet().filter(indexed_model_name__in=["Person"], content=q)[0:9]]))
         
     import us
-    results.append(("States", "/congress/members",
+    results.append(("States", "/congress/members", "most_recent_role_state",
         sorted([{"href": "/congress/members/%s" % s, "label": us.statenames[s] }
             for s in us.statenames
             if us.statenames[s].lower().startswith(q.lower())
             ], key=lambda p : p["label"])))
     
     from committee.models import Committee
-    results.append(("Committees", "/congress/committees",
-        sorted([{"href": c.get_absolute_url(), "label": c.fullname(), "obj": c }
+    results.append(("Committees", "/congress/committees", None,
+        sorted([{"href": c.get_absolute_url(), "label": c.fullname, "obj": c }
         for c in Committee.objects.filter(name__contains=q, obsolete=False)]
         , key=lambda c : c["label"])))
        
     # TODO: Replace this with our own search if we want to go back into the archives...
-    import urllib, json
-    from settings import POPVOX_API_KEY, CURRENT_CONGRESS
-    results.append(("Bills and Resolutions", "/congress/bills", [
-            { "href": "/congress/bills/%s/%s%d" % (rec["congressnumber"], rec["billtype"], rec["billnumber"]), "label": rec["title"], "secondary": rec["congressnumber"] != CURRENT_CONGRESS }
-        for rec in json.load(urllib.urlopen("https://www.popvox.com/api/v1/bills/search?" + urllib.urlencode({ "q": q, "api_key": POPVOX_API_KEY })))["items"]
-        if rec["billtype"] in ("hr", "hres", "hjres", "hconres", "s", "sres", "sjres", "sconres")
-        ][0:15]))
+    from settings import CURRENT_CONGRESS
+    results.append(("Bills and Resolutions", "/congress/bills", "text", 
+        [{"href": b.object.get_absolute_url(), "label": b.object.title, "obj": b.object, "secondary": b.object.congress != CURRENT_CONGRESS } for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], content=q)[0:9]]))
     
     # sort first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
-    results.sort(key = lambda c : (len([d for d in c[2] if d.get("secondary", False) == False]) == False, len(c[2]) == 0, len(c[2])))
+    results.sort(key = lambda c : (len([d for d in c[3] if d.get("secondary", False) == False]) == False, len(c[3]) == 0, len(c[3])))
         
     return { "results": results }
+    
+@render_to('website/campaigns/bulkdata.html')
+def campaign_bulk_data(request):
+    prefixes = ("Mr.", "Ms.", "Mrs.", "Dr.")
+    
+    # Validate.
+    if request.method == 'POST':
+        from models import CampaignSupporter
+
+        s = CampaignSupporter()
+        
+        if "sid" in request.POST:
+            try:
+                s = CampaignSupporter.objects.get(id=request.POST.get("sid"), email=request.POST.get("email", ""))
+            except:
+                pass
+        
+        s.campaign = "2012_03_buldata"
+        for field in ('prefix', 'firstname', 'lastname', 'address', 'city', 'state', 'zipcode', 'email'):
+            if request.POST.get(field, '').strip() == "":
+                return { "stage": 1, "error": "All fields are required!", "prefixes": prefixes }
+            setattr(s, field, request.POST.get(field, ""))
+        s.message = request.POST.get('message', '')
+        s.save()
+
+        if "message" not in request.POST:
+            return { "stage": 2, "sid": s.id }
+        else:
+            return { "stage": 3 }
+    return { "stage": 1, "prefixes": prefixes }
+
+

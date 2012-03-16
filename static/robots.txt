@@ -1,0 +1,34 @@
+User-agent: Mediapartners-Google*
+Disallow:
+
+User-agent: *
+Disallow: /tmp
+Disallow: /webstats
+Disallow: /congress/votingrecord.xpd
+Allow: /users/events.xpd?monitors=misc:activebills
+Allow: /users/events.xpd?monitors=misc:enactedbills
+Allow: /users/events.xpd?monitors=misc:allcommittee
+Disallow: /users/events.xpd
+Disallow: /users/ajax_addmonitor.xpd
+Disallow: /embed
+Disallow: /data
+Disallow: /service
+Disallow: /*page-command
+Disallow: /rdfbrowse.xpd
+Disallow: /sparql
+Disallow: /sparql.xpd
+Disallow: //
+Crawl-delay: 30
+
+User-agent: BecomeBot
+Disallow: /
+
+User-agent: Wget
+Disallow: /
+
+User-agent: ia_archiver
+Disallow: /
+
+
+Sitemap: http://www.govtrack.us/sitemap.xml
+

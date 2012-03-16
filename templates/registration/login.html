@@ -14,14 +14,15 @@
 	<tr valign="top">
 		<td width="50%" style="padding-right: 2em">
 			<div class="signin_social">
-				<p>Use one of your social accounts to log in or register:</p>
+				<h3 style="margin-bottom: 1em">Have one of these?</h3>
 				{% with next as singlesignon_next %}
 					{% include "registration/login_singlesignon.html" %}
 				{% endwith %}
+				<p style="margin-top: 1em">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack.</p>
 			</div>
 		</td>
 		<td width="50%" style="padding-right: 2em">
-			<p>Or log in with your email and password:</p>
+			<h3 style="margin-bottom: 1em">Use your email and password:</h3>
 
 			{% if errors %}
 				<p class="error">{{errors}} Please try again.</p>
@@ -33,10 +34,11 @@
 			<label for="id_password">Password</label> 
 			<input type="password" name="password" id="id_password" value="{{password}}" /><br /> 
 						
-			<input class="submit" type="submit" value="Login" />
-			<a class="forgot" href="{% url registration.views.resetpassword %}">Forgot your password?</a>
+			<p style="margin: 5px 0 15px 80px"><input class="submit" type="submit" value="Login" /></p>
+			
+			<p><a class="forgot" href="{% url registration.views.resetpassword %}">Forgot your password?</p>
 		
-			<p><a href="/accounts/register{% if next %}?next={{next|urlencode}}{% endif %}">New here? Create a login.</a></p>
+			<p><a href="/registration/signup{% if next %}?next={{next|urlencode}}{% endif %}">New here? Create a login.</a></p>
 
 			
 		</td>

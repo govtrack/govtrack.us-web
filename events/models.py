@@ -3,6 +3,8 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.contrib.auth.models import User
+from django.utils.text import truncate_words
 
 import re
 import urllib
@@ -21,12 +23,13 @@ class Feed(models.Model):
     @staticmethod
     def get_events_for(feeds, count):
         # This method returns the most recent events matching a set of feeds,
-        # or all events if feeds is None.
+        # or all events if feeds is None. Feeds is an iterable of Feed objects
+        # or str's of Feed feednames, which must exist.
         
         if feeds != None:
             # Some feeds include the events of other feeds.
             # Tail-recursively expand the feeds.
-            feeds = list(feeds)
+            feeds = [f if isinstance(f, Feed) else Feed.objects.get(feedname=f) for f in feeds]
             i = 0
             while i < len(feeds):
                 meta = feeds[i].type_metadata()
@@ -82,6 +85,10 @@ class Feed(models.Model):
         "misc:allvotes": {
             "title": "Roll Call Votes",
         },
+        "bill:": {
+            "title": lambda self : truncate_words(self.bill().title, 12),
+            "noun": "bill",
+        },
         "p:": {
             "title": lambda self : self.person().name,
             "noun": "person",
@@ -96,16 +103,16 @@ class Feed(models.Model):
             "noun": "person",
         },
         "committee:": {
-            "title": lambda self : self.committee().name,
+            "title": lambda self : truncate_words(self.committee().fullname, 12),
             "noun": "committee",
             "includes": lambda self : [Feed.CommitteeBillsFeed(self.committee()), Feed.CommitteeMeetingsFeed(self.committee())],
         },
         "committeebills:": {
-            "title": lambda self : "Bills in " + self.committee().name,
+            "title": lambda self : "Bills in " + truncate_words(self.committee().fullname, 12),
             "noun": "committee",
         },
         "committeemeetings:": {
-            "title": lambda self : "Meetings for " + self.committee().name,
+            "title": lambda self : "Meetings for " + truncate_words(self.committee().fullname, 12),
             "noun": "committee",
         },
         "crs:": {
@@ -261,7 +268,18 @@ class Feed(models.Model):
     @property
     def rss_url(self):
         return "/events/events.rss?feeds=" + urllib.quote(self.feedname)
-    
+
+    def bill(self):
+         if not hasattr(self, "_ref"):
+               if ":" in self.feedname and self.feedname.split(":")[0] in ("bill",):
+                    from bill.models import Bill, BillType
+                    m = re.match(r"([a-z]+)(\d+)-(\d+)", self.feedname.split(":")[1])
+                    bill_type = BillType.by_xml_code(m.group(1))
+                    return Bill.objects.get(congress=m.group(2), bill_type=bill_type, number=m.group(3))
+               else:
+                    self._ref = None
+         return self._ref
+
     def person(self):
          if not hasattr(self, "_ref"):
                if ":" in self.feedname and self.feedname.split(":")[0] in ("p", "pv", "ps"):
@@ -417,4 +435,16 @@ class Event(models.Model):
             # Clear out any events that were not updated.
             Event.objects.filter(id__in=self.existing_events).delete()
             return False
+
+class SubscriptionList(models.Model):
+    EMAIL_CHOICES = [(0, 'No Email Updates'), (1, 'Daily'), (2, 'Weekly')]
+    
+    user = models.ForeignKey(User, db_index=True)
+    name = models.CharField(max_length=64)
+    trackers = models.ManyToManyField(Feed)
+    is_default = models.BooleanField(default=False)
+    email = models.IntegerField(default=0, choices=EMAIL_CHOICES)
+    
+    class Meta:
+        unique_together = [('user', 'name')]
 

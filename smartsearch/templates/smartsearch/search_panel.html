@@ -75,6 +75,9 @@ function show_facets(postdata, options) {
                         opt.find('.count').text("(" + values[j][2] + " " + (values[j][2] == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}") + ")");
                 }
                 
+                if (values[j][3])
+                	opt.attr("title", values[j][3]);
+                
                 if (type == "checkbox") {
                     // restore checked status
                     if (postdata[field])

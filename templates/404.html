@@ -1,5 +1,8 @@
-{% extends 'master.html' %}
+{% extends 'base.html' %}
 
-{% block content %}
-Page not found! Go back to <a href="/">GovTrack's home page</a>.
+{% block title %}Page Not Found -- GovTrack.us{% endblock %}
+
+{% block body %}
+<h1>Page Not Found</h1>
+<p style="margin-top: 2em">There is no page at the address you visited. Go back to <a href="/">GovTrack's home page</a>.</p>
 {% endblock %}

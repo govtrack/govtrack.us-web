@@ -69,7 +69,7 @@
 	            	<div style="background: black; color: white; ">{{ member.get_role_display }}</div>
 	            {% else %}
 	            	{% if member.subcommittee_role %}
-	                	<div style="background: #666; color: white; font-size: 10px;  padding: 2px;" title="Subcommittee Chair: {{member.subcommittee_role.committee.name}}">{{member.subcommittee_role.committee.name|truncatewords:1}}</div>
+	                	<div style="background: #888; color: white; font-size: 10px;  padding: 2px;" title="Subcommittee Chair: {{member.subcommittee_role.committee.name}}">{{member.subcommittee_role.committee.name|cut:"The "|truncatewords:1}}</div>
 	                {% else %}
 	            		<div>&nbsp;</div>
 	            	{% endif %}
@@ -89,6 +89,10 @@
             		<div>{{role.state}}-{{role.district}}</div>
             	{% endif %}
             	<div>{{role.party}}</div>
+            	
+				{% if member.subcommittee_role %}
+					<div style="font-size: 95%; line-height: 120%; border-top: 1px solid #AAA; margin-top: 3px; padding-top: 3px;">Chair, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
+				{% endif %}
             </div>
             {% endwith %}
             </center>

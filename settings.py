@@ -12,7 +12,6 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     ('Joshua Tauberer', 'tauberer@govtrack.us'),
 )
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 MANAGERS = ADMINS
 
@@ -28,7 +27,7 @@ if "SSH_CONNECTION" in os.environ:
 # although not all choices may be available on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = 'America/New_York'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -57,31 +56,21 @@ ADMIN_MEDIA_PREFIX = '/static/admin-media/'
 
 # django-regitration-pv
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
-SITE_ROOT_URL = "http://test.govtrack.us"
-LOGIN_REDIRECT_URL = "/"
+if not DEBUG:
+	SITE_ROOT_URL = "http://www.govtrack.us"
+else:
+	SITE_ROOT_URL = "http://test.govtrack.us"
+LOGIN_REDIRECT_URL = "/accounts/login"
 SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
-RECAPTCHA_PUBLIC_KEY = "6LcK-McSAAAAAG0pmM3wQR3kbAMM6NXhwera2UNg"
-RECAPTCHA_PRIVATE_KEY = "6LcK-McSAAAAAHtd7v2SCtd-oIV-ZVarJYidlmFj"
-GOOGLE_OAUTH_TOKEN = "..."
-GOOGLE_OAUTH_TOKEN_SECRET = "..."
-GOOGLE_OAUTH_SCOPE = "http://www.google.com/m8/feeds/contacts/default/full&quot;" # can be an empty string
-TWITTER_OAUTH_TOKEN = "zcuFN74ydyl0h5tduGxdA"
-TWITTER_OAUTH_TOKEN_SECRET = "F7fuPicBKJmgX4UGR1kmy6dRugGjRy24rVxGsWmg"
-LINKEDIN_API_KEY = "..."
-LINKEDIN_SECRET_KEY = "..."
-FACEBOOK_APP_ID = "..."
-FACEBOOK_APP_SECRET = "..."
-FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
 
 #set the user profile for registration activation key
 AUTH_PROFILE_MODULE = 'registration.UserProfile'
 
-#dummy email backend through python -m -n -c DebuggingServer localhost:1025 /usr/bin/python: No module named -n
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'localhost'
 #EMAIL_PORT =
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+#EMAIL_HOST_USER = ''
+#EMAIL_HOST_PASSWORD = ''
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -94,7 +83,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
@@ -144,6 +133,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
+    'events.middleware.template_context_processor',
 )
 
 TEST_DATABASE_CHARSET = 'utf8'
@@ -161,6 +151,9 @@ DATETIME_FORMAT = 'M d, Y P'
 DATE_FORMAT = 'M d, Y'
 
 CURRENT_CONGRESS = 112
+
+if DEBUG:
+	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 try:
     from settings_local import *

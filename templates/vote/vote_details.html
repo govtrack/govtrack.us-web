@@ -140,6 +140,24 @@ $(function() {
         <br/>Current Status: {{vote.related_bill.get_current_status_display}}
         </dd>
     {% endif %}
+    
+    <div style="padding-top: 1em; font-size: 95%; line-height: 120%;">
+    {% if vote.category == VoteCategory.amendment %}
+    <p>This was a vote to approve or reject an amendment.</p>
+    {% endif %}
+    {% if vote.category == VoteCategory.passage %}
+    <p>This was a vote to approve or reject a bill or resolution.</p>
+    {% endif %}
+    {% if vote.category == VoteCategory.passage_suspension %}
+    <p>This vote was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
+    {% endif %}
+    {% if vote.category == VoteCategory.cloture %}
+    <p>This was a vote on &ldquo;cloture&rdquo;, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate, while a vote against is a vote to prolong debate or to filibuster.</p>
+    {% endif %}
+    {% if vote.category == VoteCategory.procedural %}
+    <p>This was a procedural vote.</p>
+    {% endif %}
+    </div>
 </dl>
 {% endblock %}
 
@@ -321,17 +339,16 @@ $(function() {
         </table>
     </div>
 </div>
+</div>
 
+<h2>Notes</h2>
 {% if vote.chamber == 2 %}
-<h2 style="margin-top: 30px">Where is the Speaker&rsquo;s vote?</h2>
-<p>According to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful to do so. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk.</p>
+<h3 style="margin-top: 30px">Where is the Speaker&rsquo;s vote?</h3>
+<p>According to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk.</p>
 {% endif %}
 
-<h2 style="margin-top: 30px">What&rsquo;s the difference between aye and yea?</h2>
-
-<p>Although there is no meaningful difference between aye and yea (and nay and no), the terms are used in different sorts of votes based on Congress&rsquo;s long tradition of parliamentary procedure. The U.S. Constitution specifically says that &ldquo;Yea&rdquo; and &ldquo;Nay&rdquo; be used for votes on the passage of bills (Article I, Section 7). The House and Senate follow the Constitution stricly for these votes using exactly the words that appear in the Constitution, and the Senate uses these words for all types of votes.</p>
-
-<p>When the House votes by &ldquo;voice vote&rdquo;, when congressmen simply shout out their vote, they use the terms Aye and No. (The chair judges which side had a majority just by listening, but anyone can subsequently demand that the votes be recorded individually, in which case a recorded vote is used.) The House sometimes operates under a separate set of rules called the &ldquo;Committee of the Whole on the State of the Union&rdquo; (&ldquo;Committee of the Whole&rdquo; for short), which is a sort of pseudo-committee that is made up of every congressman. During this mode of operation, the House uses the terms Aye and No for votes. (See the Rules of the House, Rule XX, and House Practice in the section Voting.)</p>
+<h3 style="margin-top: 30px">What&rsquo;s the difference between aye and yea?</h3>
+<p>There is no meaningful difference between aye and yea (and nay and no), but the terms are used in different sorts of votes based on Congress&rsquo;s long tradition of parliamentary procedure. The House and Senate follow the U.S. Constitution strictly when it says that bills should be decided on by the &ldquo;yeas and nays&rdquo; (Article I, Section 7). The House sometimes operates under a special set of rules called the &ldquo;Committee of the Whole on the State of the Union&rdquo; (or &ldquo;Committee of the Whole&rdquo; for short), which is a sort of pseudo-committee that is made up of every congressman. During this mode of operation, the House uses the terms &ldquo;aye&rdquo; and &ldquo;no&rdquo; instead. (See the Rules of the House, Rule XX, and House Practice in the section Voting.)</p>
 
 {% endwith %}
 

@@ -1,0 +1,22 @@
+{% extends "master.html" %}
+{% comment %}
+This is used to slurp in 3rd-party templates intended for this sort of structure.
+
+Blocks:
+title
+meta_description
+meta_keywords
+extra_css --- use your own style tags
+extra_js --- use your own script tags
+head
+style --- do not use a style tag
+body
+{% endcomment %}
+
+
+{% block override_content %}
+<div id="content" style="margin-bottom: 40px">
+	{% block body %}
+	{% endblock %}
+</div>
+{% endblock %}

@@ -99,28 +99,26 @@
 		function doMouseHover(lat, lng) {
 			if (!cur_mouse_pos || cur_mouse_pos.lat() != lat || cur_mouse_pos.lng() != lng) return;
 			
-			var req = 'http://www.govtrack.us/perl/wms/get-region.cgi?layer=cd-110' + unescape("%26") + 'lat=' + cur_mouse_pos.lat() + unescape("%26") + 'long=' + cur_mouse_pos.lng() + unescape("%26") + 'format=json' + unescape("%26") + 'json_callback=wms_hover_callback';
-			$(document).append("<script src=\"" + req + "\"></scr" + "ipt>");
+			$.ajax({
+				url: "/congress/members/ajax/district_lookup",
+				data: {
+					lat: lat,
+					lng: lng
+				},
+				dataType: "json",
+				success: function(data) {
+					if (!data.state) {
+						$('#map_district_hover_label').text("");
+					} else {
+						if (data.district) {
+							$('#map_district_hover_label').html("<a href='/congress/members/" + data.state + "/" + data.district + "'>" + data.state + "-" + data.district + "</a>");
+						} else {
+							$('#map_district_hover_label').html("<a href='/congress/members/" + data.state + "'>" + data.state + " At-Large" + "</a>");
+						}
+					}
+				}
+			});
 		}
-		
-		function wms_hover_callback(wms_listing) {
-			if (wms_listing.length == 0) {
-				$('#map_district_hover_label').text("");
-				return;
-			}
-			
-			uri = wms_listing[wms_listing.length-1].URI; // uri of last (smallest) matching region
-		
-			var cd_re = /\/(..)\/cd\/110\/(.*)/;
-			var st_re = /us\/(..)/;
-			
-			var m;
-			if (m = cd_re.exec(uri)) {
-				$('#map_district_hover_label').html("<a href='/congress/members/" + m[1].toUpperCase() + "/" + m[2] + "'>" + m[1].toUpperCase() + "-" + m[2] + "</a>");
-			} else if (m = st_re.exec(uri)) {
-				$('#map_district_hover_label').html("<a href='/congress/members/" + m[1].toUpperCase() + "'>" + m[1].toUpperCase() + " At-Large" + "</a>");
-			}
-		}		
 		
 		var is_full_screen = false;
 		function doFullScreen() {
@@ -152,7 +150,6 @@
 		$(window).resize(canvas_resize);
 		
 		var geocoder;
-		var geocoder_result;
 		function doGeoCode(addr) {
 			if (!geocoder)
 				geocoder = new google.maps.Geocoder();
@@ -160,33 +157,30 @@
 				{ 'address': addr },
 				function(results, status) {
 					if (status == google.maps.GeocoderStatus.OK) {
-						geocoder_result = results[0].geometry.location;
-						
-						req = 'http://www.govtrack.us/perl/wms/get-region.cgi?layer=cd-110&lat=' + results[0].geometry.location.lat() + '&long=' + results[0].geometry.location.lng() + '&format=json&json_callback=wms_address_callback';
-						$(document).append("<script src=\"" + req + "\"></scr" + "ipt>");
+						var geocoder_result = results[0].geometry.location;
+
+						$.ajax({
+							url: "/congress/members/ajax/district_lookup",
+							data: {
+								lat: results[0].geometry.location.lat(),
+								lng: results[0].geometry.location.lng()
+							},
+							dataType: "json",
+							success: function(data) {
+								if (!data.state) {
+									alert("The address does not appear to be within a United States Congressional District.");
+								} else {
+									if (data.district)
+										window.location = "/congress/members/" + data.state + "/" + data.district + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
+									else
+										window.location = "/congress/members/" + data.state + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
+								}
+							}
+						});
 					} else {
-					   alert("Sorry Google couldn't find that address: " + status);
+					   alert("Sorry, Google couldn't find that address: " + status);
 				    }
 				});
-		}
-		
-		function wms_address_callback(ret) {
-			if (ret.length == 0) {
-				alert("The address does not appear to be within a United States Congressional District.");
-				return;
-			}
-			
-			var uri = ret[0].URI;
-
-			var cd_re = /\/(..)\/cd\/110\/(.*)/;
-			var st_re = /us\/(..)/;
-			
-			var m;
-			if (m = cd_re.exec(uri)) {
-				window.location = "/congress/members/" + m[1].toUpperCase() + "/" + m[2] + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
-			} else if (m = st_re.exec(uri)) {
-				window.location = "/congress/members/" + m[1].toUpperCase() + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
-			}
 		}
 		
 		function doform() {
