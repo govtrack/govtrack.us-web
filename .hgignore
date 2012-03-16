@@ -19,5 +19,7 @@ syntax:regexp
 ^dump.*\.sql
 ^log/
 ^data/
-^xapian/
+^data
+^ext_data/
+^xapian_index/
 ^build/
