@@ -2,6 +2,7 @@
 import os
 import os.path
 import sys
+import re
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.join(ROOT, 'lib'))
@@ -83,7 +84,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
@@ -150,10 +151,14 @@ HAYSTACK_CONNECTIONS = {
 DATETIME_FORMAT = 'M d, Y P'
 DATE_FORMAT = 'M d, Y'
 
+SEND_BROKEN_LINK_EMAILS = True
+IGNORABLE_404_ENDS = ('.php', '.cgi')
+IGNORABLE_404_STARTS = ('/phpmyadmin/',)
+
 CURRENT_CONGRESS = 112
 
-if DEBUG:
-	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#if DEBUG: # sometimes we debug in a live environment
+#	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 try:
     from settings_local import *

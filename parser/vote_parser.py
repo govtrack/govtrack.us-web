@@ -44,6 +44,8 @@ class VoteProcessor(Processor):
         'procedural': VoteCategory.procedural,
         'other': VoteCategory.other,
         'unknown': VoteCategory.unknown,
+        'ratification': VoteCategory.ratification,
+        'veto-override': VoteCategory.veto_override,
     }
 
     def category_handler(self, value):
@@ -125,7 +127,7 @@ def main(options):
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
 
-    seen_obj_ids = []
+    seen_obj_ids = set()
 
     for fname in files:
         progress.tick()
@@ -138,7 +140,7 @@ def main(options):
             existing_vote = None
         
         if not File.objects.is_changed(fname) and not options.force and existing_vote != None and not existing_vote.missing_data:
-            seen_obj_ids.append(existing_vote.id)
+            seen_obj_ids.add(existing_vote.id)
             continue
         
         try:
@@ -162,9 +164,7 @@ def main(options):
                         # name of the bill comes first, but keep the vote_type at the end
                         # to distinguish suspension votes etc. also, the title that comes
                         # from the upstream source is not formatted in our style.
-                        if vote.category == VoteCategory.passage:
-                            vote.question = truncatewords(vote.related_bill.title, 7) + " (" + vote.vote_type + ")"
-                        if vote.category == VoteCategory.passage_suspension:
+                        if vote.category in (VoteCategory.passage, VoteCategory.passage_suspension, VoteCategory.veto_override):
                             vote.question = truncatewords(vote.related_bill.title, 7) + " (" + vote.vote_type + ")"
                         
                     except Bill.DoesNotExist:
@@ -172,7 +172,7 @@ def main(options):
                 
                 vote.save()
                 
-                seen_obj_ids.append(vote.id) # don't delete me later
+                seen_obj_ids.add(vote.id) # don't delete me later
                 
                 # Process roll options
                 roll_options = {}
@@ -205,7 +205,8 @@ def main(options):
         File.objects.save_file(fname)
         
     # delete vote objects that are no longer represented on disk
-    Vote.objects.all().exclude(id__in = seen_obj_ids).delete()
+    if options.congress:
+    	Vote.objects.filter(congress=options.congress).exclude(id__in = seen_obj_ids).delete()
 
 if __name__ == '__main__':
     main()

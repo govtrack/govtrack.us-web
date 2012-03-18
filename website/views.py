@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
@@ -69,9 +69,8 @@ def get_blog_items():
 
     return [{"link":entry.link, "title":decode_unicode_references(entry.title), "date":datetime(*entry.updated_parsed[0:6]), "content":decode_unicode_references(entry.content[0].value)} for entry in feed["entries"][0:4]]
 
-@render_to('website/congress_home.html')
 def congress_home(request):
-    return {}
+    return HttpResponseRedirect("/overview")
     
 @render_to('website/search.html')
 def search(request):
@@ -99,7 +98,6 @@ def search(request):
         for c in Committee.objects.filter(name__contains=q, obsolete=False)]
         , key=lambda c : c["label"])))
        
-    # TODO: Replace this with our own search if we want to go back into the archives...
     from settings import CURRENT_CONGRESS
     results.append(("Bills and Resolutions", "/congress/bills", "text", 
         [{"href": b.object.get_absolute_url(), "label": b.object.title, "obj": b.object, "secondary": b.object.congress != CURRENT_CONGRESS } for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], content=q)[0:9]]))

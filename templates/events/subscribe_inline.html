@@ -4,6 +4,12 @@
 }
 </style>
 <script>
+var feed_list_state = {{% for f in feed.includes_feeds_and_self %}
+	"{{f.feedname|escapejs}}": {
+		{% for list in request.user.userprofile.lists %}{{list.id}}: {% if f in list.trackers.all %}true{% else %}false{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}
+	}{% if not forloop.last %}, {% endif %}{% endfor %}
+};
+
 function show_track_panel() {
 	if (!$('#track_panel').is(":visible")) {
 		$('#track_panel_base').hide();
@@ -16,15 +22,19 @@ function show_track_panel() {
 }
 {% if request.user.is_authenticated %}
 function toggle_list_item(node) {
+	var listid = $(node).parents("tr").attr("list_id");
+	var feedname = $("#track_panel_selected_feed").val();
 	$.ajax({
 		url: "/events/_edit",
 		data: {
-			listid: $(node).parents("tr").attr("list_id"),
+			listid: listid,
 			command: "toggle",
-			feed: "{{feed.feedname|escapejs}}"
+			feed: feedname
 		},
 		dataType: "json",
 		success: function(data) {
+			feed_list_state[feedname][listid] = data.state;
+			$(node).prop('checked', data.state); // should be in sync but just in case
 		}
 	});
 			
@@ -54,7 +64,7 @@ function new_list(node) {
 		data: {
 			listid: "_new_list",
 			command: "add",
-			feed: "{{feed.feedname|escapejs}}"
+			feed: $("#track_panel_selected_feed").val()
 		},
 		dataType: "json",
 		success: function(data) {
@@ -72,6 +82,12 @@ function new_list(node) {
 		}
 	});
 	return false;
+}
+function selected_feed_changed() {
+	var feedname = $("#track_panel_selected_feed").val();
+	$('.tracker_lists input').prop('checked', false);
+	for (var key in feed_list_state[feedname])
+		$('#trackers_list_' + key).prop('checked', feed_list_state[feedname][key]);
 }
 {% endif %}
 $(function() {
@@ -120,10 +136,21 @@ $(function() {
 		{% else %}
 			<p>Add this {{feed.type_metadata.noun}} to one of your lists:</p>
 		{% endif %}
+		
+		<div {% if feed.includes_feeds|length == 0 %}style="display: none"{% endif %}>
+		<p style="margin: 0">What events do you want to track?</p>
+		<select id="track_panel_selected_feed" style="margin-top: 0; margin-bottom: 1em">
+			<option value="{{feed.feedname}}">All Events for {{feed.title}}</option>
+			{% for f in feed.includes_feeds %}
+				<option value="{{f.feedname}}">{{f.title}}</option>
+			{% endfor %}
+		</select>
+		<script>$('#track_panel_selected_feed').change(selected_feed_changed)</script>
+		</div>
 	
 		<table class="tracker_lists">
 		{% for list in request.user.userprofile.lists %}
-			<tr valign="top" id="base_list_row" list_id="{{list.id}}">
+			<tr valign="top" {% if forloop.first %}id="base_list_row"{% endif %} list_id="{{list.id}}">
 				<td style="padding: 3px; text-align: center;">
 				<input id="trackers_list_{{list.id}}" type="checkbox" {% if feed in list.trackers.all %}checked{% endif %} onclick="toggle_list_item(this);"/>
 				</td>

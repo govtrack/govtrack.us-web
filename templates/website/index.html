@@ -15,6 +15,7 @@
 			<p class="intro">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your life or business.</p>
 			
 			<div class="block">
+				<!--
 				{% if not user.is_authenticated %}
 					<a href="#" class="green-btn">Sign up for updates</a>
 					<p>Already have an account? <a href="/accounts/login">Log in</a></p>
@@ -22,6 +23,7 @@
 				{% else %}
 					<p>Welcome back!</p>
 				{% endif %}
+				-->
 			</div>
 		</div>
 	</div>
@@ -91,6 +93,7 @@
 					</div>
 					{% endcomment %}
 				
+					{% comment %}
 					<section class="featured-articles">
 						<div id="from_the_floor">
 						</div>
@@ -124,14 +127,16 @@
 						<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=house"></script>
 
 						<h3><span>recent</span> Activity</h3>
+						{% endcomment %}
 
 						{% for item in events %}
 						{% with item|render_event:"" as event %}
-						<article class="post">
+						<article class="post" style="margin-bottom: .75em">
 							{% comment %}<div class="icon"><img src="images/ico-bill.gif" width="16" height="22" alt="image description"></div>{% endcomment %}
 							<div class="article">
-								<h4><a href="{{event.url}}">{{event.title|truncatewords:30}}</a></h4>
-								<p>{{event.date}}  (<a href="{{event.url}}">more</a>)</p>
+								<p>{{event.date}} &mdash; {{event.type}}</p>
+								<h4>{{event.title|truncatewords:30}}</h4>
+								<p><a href="{{event.url}}">More information...</a></p>
 							</div>
 						</article>
 						{% endwith %}
@@ -141,7 +146,7 @@
 			</div>
 			<div class="aside">
 				<article class="rss-block">
-					<h3><span>from the</span> GovTrack Blog <a href="/blog"><img src="images/ico-rss.gif" width="9" height="9" alt="image description"></a></h3>
+					<h3><span>from the</span> GovTrack Blog <!--<a href="/blog"><img src="images/ico-rss.gif" width="9" height="9" alt="image description"></a>--></h3>
 					{% for item in blog %}
 					<div class="post">
 						<h4><a href="{{item.link}}">{{item.title}}</a></h4>

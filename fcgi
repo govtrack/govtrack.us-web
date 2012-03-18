@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# Start, graceful switch, or stop the FastCGI Python instance.
-# Run with the argument 'stop' to stop all executing instances.
-# Otherwise, a new instance is started on a fresh port and once
+# Start, stop, restart, or graceful restart the Python backend.
+# With no arguments, stops any executing instance and then
+# starts a new one. With the argument 'stop', stops all executing
+# instances but does not start a new one. With the argument
+# 'graceful', a new instance is started on a fresh port and once
 # it is started the old instances are killed for a graceful
 # restart, using SIGHUP to gracefully end FastCGI.
 
@@ -10,6 +12,12 @@
 ME=`readlink -m $0`
 MYDIR=`dirname $ME`
 cd $MYDIR
+
+if [ "$1" = "" ]; then
+	# Hard restart: Do a stop first. The rest of this script
+	# will start a new instance on the default port.
+	./fcgi stop
+fi
 
 HOSTNAME=`hostname -I | tr -d ' '` # assumes only one interface
 HOSTNAME=127.0.0.1

@@ -23,7 +23,6 @@ def session_filter(qs, form):
 	session_index = form["session"]
 	if session_index != None:
 		s = get_all_sessions()[int(session_index)]
-		print s
 		qs = qs.filter(congress=s[0], session=s[1])
 	return qs
 

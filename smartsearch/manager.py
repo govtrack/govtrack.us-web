@@ -88,17 +88,18 @@ class SearchManager(object):
     def results(self, objects, form):
         return "".join([self.make_result(obj, form) for obj in objects])
         
-    def view(self, request, template, defaults={}, noun=("item", "items")):
+    def view(self, request, template, defaults={}, noun=("item", "items"), context={}):
         if request.META["REQUEST_METHOD"] == "GET":
-            return render_to_response(template, {
+            c = {
                 'form': self.options,
                 'sort_options': self.sort_options,
                 'column_headers': self.get_column_headers(),
                 'defaults': defaults,
                 'noun_singular': noun[0],
                 'noun_plural': noun[1],
-                },
-                RequestContext(request))
+                }
+            c.update(context)
+            return render_to_response(template, c, RequestContext(request))
         
         try:
             page_number = int(request.POST.get("page", "1"))
@@ -234,7 +235,6 @@ class SearchManager(object):
                 counts = list(option.choices)
         else:
             ret = cache.get(cache_key)
-            print cache_key, ret is None
             if ret: return ret
            
             # Get the model field metadata object that represents this field. 
@@ -285,8 +285,8 @@ class SearchManager(object):
             resp = self.queryset(request, exclude=option if omit_me else None)
             
             def build_choice(value, count):
-            	# (key, label, count, help_text) tuples
-            	return (value, nice_name(value, objs), count, getattr(field.choices.by_value(value), "search_help_text", None) if field and field.choices and type(field.choices) == MetaEnum else None)
+                # (key, label, count, help_text) tuples
+                return (value, nice_name(value, objs), count, getattr(field.choices.by_value(value), "search_help_text", None) if field and field.choices and type(field.choices) == MetaEnum else None)
             
             if hasattr(resp, 'facet'):
                 # Haystack.

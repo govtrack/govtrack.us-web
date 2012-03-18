@@ -89,7 +89,7 @@ function activate_list(elem) {
 					// it is a basic tracker
 					n.prop('checked', true);
 				} else {
-					add_feed_node(data.list_trackers[i].id, data.list_trackers[i].name, data.list_trackers[i].title);
+					add_feed_node(data.list_trackers[i].id, data.list_trackers[i].name, data.list_trackers[i].title, data.list_trackers[i].link);
 				}
 			}
 		}
@@ -113,12 +113,13 @@ function refresh_events() {
 	});	
 }
 
-function add_feed_node(id, name, title) {
-	var t = $("<li><input type='checkbox' checked onclick='return toggle_list_item(this);'/><label/></li>");
+function add_feed_node(id, name, title, link) {
+	var t = $("<li><input type='checkbox' checked onclick='return toggle_list_item(this);'/><a/></li>");
 	t.find("input").attr('id', "feed_" + id);
 	t.find("input").attr('feedname', name);
-	t.find("label").text(title);
-	t.find("label").attr('for', "feed_" + id);
+	t.find("a").text(title);
+	t.find("a").attr("href", link);
+	//t.find("label").attr('for', "feed_" + id);
 
 	$("#other_feed_items").append(t);
 }
@@ -309,26 +310,30 @@ $(function() {
 	<h3 style="margin-bottom: .5em">Add More Events</h2>
 	<div id="search_trackers">
 	
-	<div>Add events related to a Member of Congress: (<a href="/congress/members">browse all</a>)</div>
+	<div>Search Members of Congress: (<a href="/congress/members">browse all</a>)</div>
 	<div><input id="track_person_input" type="text" style="width: 100%" placeholder="search by last name, zipcode, or state name"/></div>
 	<div class="results" id="track_person_results"> </div>
 	<script>
 		$('#track_person_input').keyup_delayed(function() { search_feeds("person"); });
 	</script>
+
+	<div style="margin-top: 1em">Search Bills: (<a href="/congress/bills">browse all</a>)</div>
+	<div><input id="track_bill_input" type="text" style="width: 100%" placeholder="search bill titles"/></div>
+	<div class="results" id="track_bill_results"> </div>
+	<script>
+		$('#track_bill_input').keyup_delayed(function() { search_feeds("bill"); });
+	</script>
 	
-	<div style="margin-top: 1em">Add events related to a committee: (<a href="/congress/committees">browse all</a>)</div>
+	<div style="margin-top: 1em">Search Committees: (<a href="/congress/committees">browse all</a>)</div>
 	<div><input id="track_committee_input" type="text" style="width: 100%" placeholder="search by committee name"/></div>
 	<div class="results" id="track_committee_results"> </div>
 	<script>
 		$('#track_committee_input').keyup_delayed(function() { search_feeds("committee"); });
 	</script>
 	
-	<div style="margin-top: 1em">Add events related to a subject area:</div>
-	<div><select id="track_subject_input"><option value="">(Select a Subject Area)</option>{% for id, name in subject_choices %}<option value="{{id}}">{{name}}</option>{% endfor %}</select></div>
+	<div style="margin-top: 1em">Add a Subject Areas:</div>
+	<div><select id="track_subject_input" style="background-color: white"><option value="">(Select a Subject Area)</option>{% for id, name in subject_choices %}<option value="{{id}}">{{name}}</option>{% endfor %}</select></div>
 	<script>$('#track_subject_input').change(function() { toggle_list_item2("crs:" + this.value, true); });</script>
-	
-	
-	<p style="margin-top: 1em">You can find other events by <a href="/congress/bills">searching for bills</a>.</p>
 	
 	</div>
 </div>

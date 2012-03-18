@@ -3,11 +3,12 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import ordinal
 
 from common.decorators import render_to
 from common.pagination import paginate
 
-from bill.models import Bill, BillType, BillStatus, BillTerm
+from bill.models import Bill, BillType, BillStatus, BillTerm, TermType
 from bill.search import bill_search_manager
 from bill.title import get_secondary_bill_title
 from committee.models import CommitteeMember, CommitteeMemberRole
@@ -102,7 +103,7 @@ def bill_details(request, congress, type_slug, number):
         "good_cosp_assignments": good_cosp_assignments,
         "good_cosp_assignments_other": good_cosp_assignments_other,
         "current": bill.congress == CURRENT_CONGRESS,
-        "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status,
+        "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         'feed': Feed.BillFeed(bill),
     }
 
@@ -132,7 +133,6 @@ def bill_text(request, congress, type_slug, number):
         "pv_bill_id": pv_bill_id,
     }
 
-@render_to('bill/bill_list.html')
 def bill_list(request):
     ix1 = None
     ix2 = None
@@ -143,16 +143,20 @@ def bill_list(request):
         else:
             ix1 = ix.parents.all()[0]
             ix2 = ix
-    
-    return bill_search_manager().view(request, "bill/bill_list.html",
+    return show_bill_browse("bill/bill_list.html", request, ix1, ix2, { })
+
+def show_bill_browse(template, request, ix1, ix2, context):
+    return bill_search_manager().view(request, template,
         defaults={
             "congress": request.GET["congress"] if "congress" in request.GET else (CURRENT_CONGRESS if "sponsor" not in request.GET else Person.objects.get(id=request.GET["sponsor"]).most_recent_role_congress()),
             "sponsor": request.GET.get("sponsor", None),
             "terms": ix1.id if ix1 else None,
             "terms2": ix2.id if ix2 else None,
             "text": request.GET.get("text", None),
+            "current_status": request.GET.get("status").split(",") if "status" in request.GET else None,
         },
-        noun = ("bill", "bills")
+        noun = ("bill", "bills"),
+        context = context,
         )
  
 def query_popvox(method, args):
@@ -174,3 +178,52 @@ def query_popvox(method, args):
     ret = ret.decode(encoding)
     return json.loads(ret)
 
+subject_choices_data = None
+def subject_choices(include_legacy=True):
+    global subject_choices_data
+    if subject_choices_data == None:
+        subject_choices_data = { }
+        for t in BillTerm.objects.filter(term_type=TermType.new).exclude(parents__id__gt=0):
+            x = []
+            subject_choices_data[t] = x
+            for tt in t.subterms.all():
+                x.append(tt)
+        subject_choices_data = sorted(subject_choices_data.items(), key = lambda x : x[0].name)
+    return subject_choices_data
+
+@render_to('bill/bill_docket.html')
+def bill_docket(request):
+    groups = [
+        ("Active Bills", "bills", " that are awaiting the president's signature, have differences between the chambers to be resolved, or were vetoed", BillStatus.active_status),
+        ("Waiting Bills", "bills and resolutions", " that had a significant vote", BillStatus.waiting_status),
+        ("Successful Bills", "enacted bills", "", BillStatus.final_status_passed_bill),
+        ("Successful Resolutions", "passed resolutions", "", BillStatus.final_status_passed_resolution),
+        ("Unsuccessful Bills", "bills and resolutions", " that failed a vote", BillStatus.final_status_failed),
+        ("Inactive Bills", "bills and resolutions", " that have been introduced, referred to committee, or reported by committee", BillStatus.inactive_status),
+    ]
+    
+    groups = [
+        (g[0], g[1], g[2], ",".join(str(s) for s in g[3]), Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=g[3]).order_by('-current_status_date'))
+        for g in groups ]
+    
+    start, end = get_congress_dates(CURRENT_CONGRESS)
+    end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
+    current_congress = '%s Congress, for %d-%d' % (ordinal(CURRENT_CONGRESS), start.year, end.year)    
+    
+    return {
+        "total": Bill.objects.filter(congress=CURRENT_CONGRESS).count(),
+        "current_congress": current_congress,
+        "groups": groups,
+        "subjects": subject_choices(),
+    }
+
+def subject(request, sluggedname, termid):
+    ix = BillTerm.objects.get(id=termid)
+    if ix.parents.all().count() == 0:
+        ix1 = ix
+        ix2 = None
+    else:
+        ix1 = ix.parents.all()[0]
+        ix2 = ix
+    return show_bill_browse("bill/subject.html", request, ix1, ix2, { "term": ix, "feed": Feed.IssueFeed(ix) })
+    

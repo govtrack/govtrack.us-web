@@ -1,19 +1,8 @@
 {% load events_utils %}
 
-{% with feed.expand as subfeeds %}
-
-	{% if subfeeds|length > 1 %}
-		<p>[All]
-			{% for feed in subfeeds %}
-				[{{feed.localname}}]
-			{% endfor %}
-		</p>
-	{% endif %}
-
-{% endwith %}
-
-{% for event in feed.get_events|slice:":5" %}
+{% for event in feed.get_five_events %}
 {% with event|render_event:feed as meta %}
+{% if meta %}
 	<article class="post">
 		<div class="article">
 			<h4>{{meta.type}}</h4>
@@ -28,7 +17,7 @@
 			</em>
 		</div>
 	</article>
-
+{% endif %}
 {% endwith %}
 {% empty %}
 	<p>No recent events are available.</p>

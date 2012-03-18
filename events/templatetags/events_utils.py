@@ -12,6 +12,8 @@ def render_event(event, feed):
         from django.contrib.contenttypes.models import ContentType
         event["source_content_type"] = ContentType.objects.get(id=event["source_content_type"])
         event = events.models.Event(**event)
+        if not event.source: # database inconsistency
+            return None
     
     if isinstance(feed, events.models.Feed):
         feeds = (feed,)

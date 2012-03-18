@@ -1,0 +1,116 @@
+{% extends "master.html" %}
+{% load humanize %}
+
+{% block title %}Bills and Resolutions -- GovTrack.us{% endblock %}
+
+{% block meta_description %}A list of legislation in the U.S. Congress.{% endblock %}
+
+{% block head %}
+<style>
+.col_6 {
+	width: 420px;
+	float: left;
+}
+#subject_list span {
+	display: none;
+	font-size: 90%;
+}
+	#subject_list span a {
+		color: #C77;
+	}
+	#subject_list li:hover span {
+		display: inline;
+	}
+#subject_list ul {
+	display: none;
+}
+</style>
+<script>
+$(function() {
+	$("#subject_list span a").click(function() {
+		var nodes = $(this.parentNode.parentNode.parentNode).find("ul");
+		if (nodes.is(":visible")) {
+			nodes.slideUp();
+		} else {
+			nodes.slideDown();
+		}
+		return false;
+	});
+});
+</script>
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+<li><a href="{% url congress_home %}">Congress</a></li>
+<li>Bills</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+	<h1>Bills and Resolutions</h1>
+	<p style="margin-top: 1em; margin-bottom: 0">The U.S. Congress considers roughly 10,000 bills in each two-year cycle. After each cycle, unfinished bills are cleared, and bill numbering restarts from 1. The current cycle is called the {{current_congress}}.</p>
+{% endblock %}
+
+{% block body %}
+
+<div class="col_6" style="margin-right: 40px; padding-right: 40px; border-right: 1px solid #EEE;">
+<h2 style="margin-bottom: 1em">By the Numbers</h2>
+<p style="">There are {{total|intcomma}} bills and resolutions currently before the U.S. Congress. Here is how they break down by the numbers.</p>
+{% for name, descr1, descr2, statusesarray, queryset in groups %}
+{% with queryset.count as count %}
+{% if count > 0 %}
+	<h3 style="margin-top: 1.5em; margin-bottom: .5em">{{name}}</h3>
+	
+	{% if 20 > count %}
+		<p>There are {{count|intcomma}} {{descr1}}{{descr2}}:</p>
+
+		<ul>
+		{% for bill in queryset %}
+			<li>
+				<div><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:20}}</a></div>
+				<div style="margin-bottom: .5em">{{bill.current_status_description}}</div>
+			</li>
+		{% endfor %}
+		</ul>
+	{% else %}
+		<p>There are <a href="/congress/bills/browse?status={{statusesarray|urlencode}}">{{count|intcomma}} {{descr1}}</a>{{descr2}}.</p>
+	{% endif %}
+{% endif %}
+{% endwith %}
+{% endfor %}
+</div>
+
+<div class="col_6 searching">
+	<div class="advanced-search" style="float: none; width: auto;">
+		<form method="get" action="/congress/bills/browse" style="width: auto">
+		<fieldset>
+		<h3 style="width: auto; margin-bottom: 15px;">Search Bills and Resolutions</h3>
+		<ul>
+			<li id="searchform_field_text_container" class="wide" style="cursor: pointer">
+				<label for="searchform_field_text">search title</label>
+				<input id="searchform_field_text" name="text" type="text" class="text"> </input>
+				<input id="searchform_field_text_button" class="btn-search-small" type="submit" value="Search" value="Go" onclick="update_search()"> </input>
+			</li>
+		</ul>
+		<p><a href="/congress/bills/browse">Use advanced search...</a></p>
+		</fieldset>
+		</form>
+	</div>
+	
+	<h3 style="margin-bottom: 1em">Browse Bills by Subject</h3>
+	<ul id="subject_list">
+	{% for topterm, subterms in subjects %}
+		<li>
+			<div><a href="{{topterm.get_absolute_url}}">{{topterm.name}}</a> <span>(<a href="#">narrow topic...</a>)</span></div>
+			<ul class="bullets">
+				{% for subterm in subterms %}
+					<li><a href="{{subterm.get_absolute_url}}">{{subterm.name}}</a></li>
+				{% endfor %}
+			</ul>
+		</li>
+	{% endfor %}
+	</ul>
+</div>
+
+{% endblock %}

@@ -58,27 +58,6 @@ def person_details(request, pk):
 
     analysis_data = analysis.load_data(person)
 
-    videos = []
-
-    if person.youtubeid:
-        yt_videos = get_youtube_videos(person.youtubeid)
-        videos.extend(yt_videos['videos'])
-
-    #if person.bioguideid:
-        #sunlight_videos = get_sunlightlabs_videos(person.bioguideid)
-        ##sunlight_videos = get_sunlightlabs_videos('H001032')
-        #videos.extend(sunlight_videos['videos'])
-
-    recent_video = None
-    if videos:
-        videos.sort(key=lambda x: x['published'], reverse=True)
-        if videos[0]['published'] > datetime.now() - timedelta(days=10):
-            recent_video = videos[0]
-            videos = videos[1:]
-
-    # We are intrested only in four videos
-    videos = videos[:4]
-
     return {'person': person,
             'role': role,
             'active_role': active_role,
@@ -86,8 +65,6 @@ def person_details(request, pk):
             'photo_credit': photo_credit,
             'analysis_data': analysis_data,
             'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
-            'recent_video': recent_video,
-            'videos': videos,
             'committeeassignments': get_committee_assignments(person),
             'feed': Feed.PersonFeed(person.id),
             }
@@ -183,7 +160,9 @@ def districtmapembed(request):
 @json_response
 def district_lookup(request):
     lng, lat = float(request.GET.get("lng", "0")), float(request.GET.get("lat", "0"))
-    
+    return do_district_lookup(lng, lat)
+
+def do_district_lookup(lng, lat):
     # Query based on bounding box.
     cursor = connection.cursor()
     cursor.execute("SELECT state, district, pointspickle FROM districtpolygons WHERE MBRContains(bbox, GeomFromText('Point(%s %s)'))", [lng, lat])

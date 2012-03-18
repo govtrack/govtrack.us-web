@@ -129,7 +129,7 @@ $(function() {
     <dt>Number:</dt>
     <dd>{{ vote.get_chamber_display }} Vote #{{ vote.number }} [primary source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>]</dd>
     <dt>Date:</dt>
-    <dd>{{ vote.created|date:"DATETIME_FORMAT" }} ({{ vote.congress|ordinal }} Congress)</dd>
+    <dd>{{ vote.created|date:"DATE_FORMAT" }} ({{ vote.congress|ordinal }} Congress)</dd>
     <dt>Result:</dt>
     <dd>{{ vote.result }}</dd>
     {% if vote.related_bill %}
@@ -211,7 +211,13 @@ $(function() {
             {% endfor %}
             <tr>
                 <td>Required:</td>
-                <td colspan="2">{{ vote.required }}</td>
+                <td colspan="2" style="text-align: left; padding-left: 12px;">
+                	{% if vote.required == "1/2" %}
+                		Simple Majority
+                	{% else %}
+                		{{ vote.required }}
+                	{% endif %}
+                </td>
             </tr>
             {% comment %}
             <tr class="gradient">
@@ -299,7 +305,7 @@ $(function() {
             </thead>
             {% for voter in voters %}
             <tr vid="{{voter.id}}">
-                <td class="vote_{{ voter.option.alpha_key }}"><nobr>{{ voter.option.value }}</nobr></td>
+                <td class="vote_{{ voter.option.alpha_key }}"><nobr>{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</nobr></td>
                 <td>
                     {% if voter.voter_type == 3 %}
                         {% if voter.person.role.party|slice:"0:1" in "DIR" %}

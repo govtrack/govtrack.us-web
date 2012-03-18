@@ -147,7 +147,10 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                 {% if field.field_name == k %}
                     {% if field.type == "checkbox" %}
                         {% if v %}
-                            postdata["{{k|escapejs}}"] = ["true"];
+                        	if (postdata["{{k|escapejs}}"] == null) postdata["{{k|escapejs}}"] = Array();
+                        	{% for vv in v %}
+                            postdata["{{k|escapejs}}"].push("{{vv|escapejs}}");
+                            {% endfor %}
                         {% endif %}
                     {% endif %}
                     {% if field.type == "radio" %}

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import csv
 from StringIO import StringIO
+from datetime import datetime
 
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404, render_to_response
@@ -14,11 +15,13 @@ from numpy import median
 from vote.models import Vote, CongressChamber, VoterType, VoteCategory
 from vote.search import vote_search_manager
 from person.util import load_roles_at_date
+from us import get_all_sessions
 
 ideology_scores = { }
 
 def vote_list(request):
-    return vote_search_manager().view(request, "vote/vote_list.html")
+    return vote_search_manager().view(request, "vote/vote_list.html",
+        defaults = { "session": len(get_all_sessions())-1 })
 
 def load_vote(congress, session, chamber_code, number):
     """
@@ -45,15 +48,19 @@ def vote_details(request, congress, session, chamber_code, number):
     if not congress in ideology_scores:
         ideology_scores[congress] = { }
         for ch in ('h', 's'):
-            for ideolog in csv.reader(open("data/us/%d/stats/sponsorshipanalysis_%s.txt" % (int(congress), ch))):
-                if ideolog[0] == "ID": continue # header row
-                ideology_scores[congress][int(ideolog[0])] = float(ideolog[1])
-        ideology_scores[congress]["MEDIAN"] = median(ideology_scores[congress].values())
+            try:
+                for ideolog in csv.reader(open("data/us/%d/stats/sponsorshipanalysis_%s.txt" % (int(congress), ch))):
+                    if ideolog[0] == "ID": continue # header row
+                    ideology_scores[congress][int(ideolog[0])] = float(ideolog[1])
+                ideology_scores[congress]["MEDIAN"] = median(ideology_scores[congress].values())
+            except IOError:
+                ideology_scores[congress] = None
     
-    for voter in voters:
-        voter.ideolog_score = ideology_scores[congress].get(voter.person.id, ideology_scores[congress]["MEDIAN"])
-    
-    voters.sort(key = lambda x : (x.option.key, x.person.role.party, x.person.name_no_details_lastfirst))
+    if ideology_scores[congress]:
+        for voter in voters:
+            voter.ideolog_score = ideology_scores[congress].get(voter.person.id, ideology_scores[congress]["MEDIAN"])
+        
+    voters.sort(key = lambda x : (x.option.key, x.person.role.party if x.person.role else "", x.person.name_no_details_lastfirst))
     
     return {'vote': vote,
             'voters': voters,

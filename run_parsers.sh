@@ -1,3 +1,4 @@
+export RELEASE=1
 ./parse.py person
 ./parse.py committee
 ./parse.py --congress=112 bill

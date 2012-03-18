@@ -15,6 +15,7 @@ from registration.helpers import json_response
 from models import *
 from website.models import *
 from events.templatetags.events_utils import render_event
+from settings import CURRENT_CONGRESS
 
 def get_feed_list(request):
     feedlist = request.GET.get('feeds', '').split(',')
@@ -57,8 +58,10 @@ def edit_subscription_list(request):
         f = get_object_or_404(Feed, feedname=request.GET["feed"])
         if (request.GET["command"] == "toggle" and f in sublist.trackers.all()) or request.GET["command"] == "remove":
             sublist.trackers.remove(f)
+            return { "state": False }
         else:
             sublist.trackers.add(f)
+            return { "state": True }
     if request.GET["command"] == "rename":
         sublist.name = request.GET["name"]
         sublist.save()
@@ -68,7 +71,7 @@ def edit_subscription_list(request):
         sublist.email = (sublist.email + 1) % len(SubscriptionList.EMAIL_CHOICES)
         sublist.save()
     
-    return { "list_id": sublist.id, "list_name": sublist.name, "list_email": sublist.get_email_display(), "list_trackers": [ { "id": f.id, "name": f.feedname, "title": f.title } for f in sublist.trackers.all() ] } # response is ignored
+    return { "list_id": sublist.id, "list_name": sublist.name, "list_email": sublist.get_email_display(), "list_trackers": [ { "id": f.id, "name": f.feedname, "title": f.title, "link": f.link } for f in sublist.trackers.all() ] } # response is ignored
 
 @render_to('events/events_list_items.html')
 def events_list_items(request):
@@ -104,11 +107,17 @@ def search_feeds(request):
                     Feed.PersonFeed(p)
                     for p in Person.objects.filter(roles__current=True, roles__state=s)])
                 
+    if request.REQUEST["type"] == "bill":
+        from haystack.query import SearchQuerySet
+        feedlist = [
+            Feed.BillFeed(b.object)
+            for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], congress__in=[CURRENT_CONGRESS], content=request.REQUEST["q"])[0:10]]
+    
     if request.REQUEST["type"] == "committee":
         from committee.models import Committee
         feedlist = [
             Feed.CommitteeFeed(c)
-            for c in Committee.objects.filter(name__icontains=request.REQUEST["q"], obsolete=False).order_by("committee__name", "name")]
+            for c in Committee.objects.filter(name__icontains=request.REQUEST["q"], obsolete=False).order_by("committee__name", "name")[0:10]]
                 
     def feedinfo(f):
         return { "name": f.feedname, "title": f.title }

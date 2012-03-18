@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.template.defaultfilters import slugify
+from django.core.urlresolvers import reverse
 
 from common import enum
 from common.fields import JSONField
@@ -9,8 +11,6 @@ from bill.status import BillStatus
 from bill.title import get_bill_number, get_primary_bill_title
 
 from django.conf import settings
-
-from django.core.urlresolvers import reverse
 
 import datetime
 
@@ -49,12 +49,17 @@ class BillTerm(models.Model):
 
     def __unicode__(self):
         return self.name
-
+    def __repr__(self):
+        return "<BillTerm: %s:%s>" % (TermType.by_value(self.term_type).label, self.name)
+        
     class Meta:
         unique_together = ('name', 'term_type')
 
     def is_top_term(self):
         return self.parents.count() == 0
+
+    def get_absolute_url(self):
+        return "/congress/bills/subjects/%s/%d" % (slugify(self.name).replace('-', '_'), self.id)
 
 class Cosponsor(models.Model):
     person = models.ForeignKey('person.Person')
@@ -62,7 +67,7 @@ class Cosponsor(models.Model):
     joined = models.DateField()
     withdrawn = models.DateField(blank=True, null=True)
     class Meta:
-    	unique_together = [("bill", "person"),]
+        unique_together = [("bill", "person"),]
 
 class Bill(models.Model):
     title = models.CharField(max_length=255)
@@ -95,7 +100,7 @@ class Bill(models.Model):
         return "\n".join([self.title] + [t[2] for t in self.titles])
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date')
     def get_terms_index_list(self):
-    	return [t.id for t in self.terms.all().distinct()]
+        return [t.id for t in self.terms.all().distinct()]
     #######
 
         
@@ -216,6 +221,7 @@ class Bill(models.Model):
             % (self.congress, self.bill_type_slug, self.number)
 
     def create_events(self, actions):
+        if self.congress < 111: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
         with Event.update(self) as E:
             index_feeds = [Feed.BillFeed(self)]
@@ -225,10 +231,13 @@ class Bill(models.Model):
             index_feeds.extend([Feed.CommitteeFeed(cx) for cx in self.committees.all()])
             
             E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
+            
+            common_feeds = [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()]
+            enacted_feed = [Feed.EnactedBillsFeed()]
             for date, state, text in actions:
                 if state == BillStatus.introduced:
                     continue # already indexed
-                E.add("state:" + str(state), date, index_feeds + [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()])
+                E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_passed_bill else []))
     
     def render_event(self, eventid, feeds):
         
@@ -405,10 +414,10 @@ class Bill(models.Model):
         while st in path:
             st = path[st]
             if type(st) == tuple:
-            	label = st[1]
-            	st = st[0]
+                label = st[1]
+                st = st[0]
             else:
-            	label = st.label
+                label = st.label
             seq.append(label)
             
         return seq
@@ -428,6 +437,6 @@ class RelatedBill(models.Model):
     bill = models.ForeignKey(Bill, related_name="relatedbills")
     related_bill = models.ForeignKey(Bill, related_name="relatedtobills")
     relation = models.CharField(max_length=16)
-	
+    
     relation_sort_order = { "identical": 0 }
-	
+    

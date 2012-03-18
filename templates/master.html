@@ -1,3 +1,4 @@
+{% with "/static/" as MEDIA_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
 <!DOCTYPE html>
 <html>
 	<head>
@@ -30,31 +31,34 @@
 	</head>
 	
 <body class="{% block body_class %}{% endblock %}">
+	{% comment %}
+	<div id="sitenewscontainer" style="display: none">
+		<div id="sitenews" seq="1">
+			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
+			<div style="float: right; width: 500px; padding: 10px;">
+				Welcome to GovTrack 2.0. We&rsquo;ve made a lot of changes and are still working out the kinks. This is just the beginning. <a href="/blog/blah">Read about 2.0</a>, and stay tuned for improvements.
+			</div>
+			<div style="clear: both"> </div>
+		</div>
+	</div>
+	<script>
+	function hide_site_news() {
+		$('#sitenewscontainer').fadeOut();
+		$.cookie("sitenewsbanner", $('#sitenews').attr("seq"), { expires: 14, path: '/' });
+	}
+	$(function() {
+		if ($.cookie("sitenewsbanner") != $('#sitenews').attr("seq")) {
+			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
+			$('#sitenewscontainer').fadeIn();
+		}
+	});
+	</script>
+	{% endcomment %}
+				
 	<div id="wrapper">
 		
 		<div id="masthead">
 			<header id="header">
-				<div id="sitenewscontainer" style="display: none">
-					<div id="sitenews" seq="0">
-						<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
-						<div style="float: right; width: 500px; padding: 10px;">
-							Welcome to GovTrack 2.0. We&rsquo;ve made some changes, but this is just the beginning. <a href="/blog/blah">Read more</a> and stay tuned for more changes.
-						</div>
-						<div style="clear: both"> </div>
-					</div>
-				</div>
-				<script>
-				function hide_site_news() {
-					$('#sitenewscontainer').fadeOut();
-					$.cookie("sitenewsbanner", $('#sitenews').attr("seq"), { expires: 14 });
-				}
-				$(function() {
-					if ($.cookie("sitenewsbanner") != $('#sitenews').attr("seq")) {
-						$('#sitenewscontainer').fadeIn();
-					}
-				});
-				</script>
-								
 				<a id="logo" href="/">govtrack.us</a>
 				
 				<div id="nav-block">
@@ -184,3 +188,4 @@
 	
 </body>	
 </html>
+{% endwith %}

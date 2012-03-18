@@ -63,7 +63,10 @@ class Feed(models.Model):
         
     def get_events(self, count):
         return Feed.get_events_for((self,), count)
-        
+
+    def get_five_events(self):
+        return self.get_events(5)
+
     # feed metadata
     
     feed_metadata = {
@@ -88,36 +91,44 @@ class Feed(models.Model):
         "bill:": {
             "title": lambda self : truncate_words(self.bill().title, 12),
             "noun": "bill",
+            "link": lambda self: self.bill().get_absolute_url(),
         },
         "p:": {
             "title": lambda self : self.person().name,
             "noun": "person",
             "includes": lambda self : [Feed.PersonVotesFeed(self.person()), Feed.PersonSponsorshipFeed(self.person())],
+            "link": lambda self: self.person().get_absolute_url(),
         },
         "ps:": {
             "title": lambda self : self.person().name + " - Bills Sponsored",
             "noun": "person",
+            "link": lambda self: self.person().get_absolute_url(),
         },
         "pv:": {
             "title": lambda self : self.person().name + " - Voting Record",
             "noun": "person",
+            "link": lambda self: self.person().get_absolute_url(),
         },
         "committee:": {
             "title": lambda self : truncate_words(self.committee().fullname, 12),
             "noun": "committee",
             "includes": lambda self : [Feed.CommitteeBillsFeed(self.committee()), Feed.CommitteeMeetingsFeed(self.committee())],
+            "link": lambda self: self.committee().get_absolute_url(),
         },
         "committeebills:": {
             "title": lambda self : "Bills in " + truncate_words(self.committee().fullname, 12),
             "noun": "committee",
+            "link": lambda self: self.committee().get_absolute_url(),
         },
         "committeemeetings:": {
             "title": lambda self : "Meetings for " + truncate_words(self.committee().fullname, 12),
             "noun": "committee",
+            "link": lambda self: self.committee().get_absolute_url(),
         },
         "crs:": {
             "title": lambda self : self.issue().name,
             "noun": "subject area",
+            "link": lambda self: self.issue().get_absolute_url(),
         }
     }
         
@@ -262,12 +273,28 @@ class Feed(models.Model):
         return m["title"]
         
     @property
+    def link(self):
+        m = self.type_metadata()
+        if "link" not in m: return None
+        return m["link"](self)
+        
+    @property
     def view_url(self):
         return "/events?feeds=" + urllib.quote(self.feedname)
     
     @property
     def rss_url(self):
         return "/events/events.rss?feeds=" + urllib.quote(self.feedname)
+
+    def includes_feeds(self):
+        m = self.type_metadata()
+        if "includes" not in m: return []
+        if callable(m["includes"]):
+            return m["includes"](self)
+        return m["includes"]
+
+    def includes_feeds_and_self(self):
+        return [self] + self.includes_feeds()
 
     def bill(self):
          if not hasattr(self, "_ref"):
@@ -390,7 +417,6 @@ class Event(models.Model):
         return unicode(self.source) + " " + unicode(self.eventid) + " / " + unicode(self.feed)
         
     def render(self, feeds=None):
-        if self.source == None: print self.id
         return self.source.render_event(self.eventid, feeds)
     
     # This is used to update the events for an object and delete any events that are not updated.
@@ -444,6 +470,7 @@ class SubscriptionList(models.Model):
     trackers = models.ManyToManyField(Feed)
     is_default = models.BooleanField(default=False)
     email = models.IntegerField(default=0, choices=EMAIL_CHOICES)
+    last_event_mailed = models.IntegerField(blank=True, null=True) # id of last event
     
     class Meta:
         unique_together = [('user', 'name')]

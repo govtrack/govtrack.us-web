@@ -100,15 +100,6 @@
 {% block body %}
 <div id="member-details" class="section">
 
-	{% if videos and 0 %}
-	<div id="media">
-		<h3>Recent Media</h3>
-		{% for video in videos %}
-			{% video video %}
-		{% endfor %}
-	</div><!-- /media -->
-	{% endif %}
-	
 	{% if analysis_data.sponsorship %}
 	<section id="sponsorship_analysis">
 		<h3>Sponsorship Analysis</h3>
@@ -117,6 +108,11 @@
 
 		<div id="sponsorship_analysis_chart"> </div>
 		<script>
+		var party_colors = {
+			'Democrat': 'rgba(20, 20, 255, .75)',
+			'Republican': 'rgba(255, 20, 20, .75)',
+			'Independent': 'rgba(100, 100, 100, .85)'
+		}
 		$(document).ready(function() {
 			var chart = new Highcharts.Chart({
 				chart: {
@@ -136,6 +132,7 @@
 					gridLineWidth: 1
 				},
 				yAxis: {
+					min: 0,
 					title: { text: 'Leadership Score' },
 					labels: { enabled: false }
 				},
@@ -181,12 +178,18 @@
 				, {
 					marker: { symbol: "circle", radius: 3 },
 					name: '{{party.grouper|escapejs}}s',
-					{% if party.grouper == 'Democrat' %}color: 'rgba(20, 20, 255, .75)',{% endif %}
-					{% if party.grouper == 'Republican' %}color: 'rgba(255, 20, 20, .75)',{% endif %}
-					{% if party.grouper == 'Independent' %}color: 'rgba(100, 100, 100, .85)',{% endif %}
+					color: party_colors['{{party.grouper|escapejs}}'],
 					data: [
 						{% for item in party.list %}
-							{ x: {{item.ideology}}, y: {{item.leadership}}, name: "{{item.name|escapejs}}" }
+							{
+								x: {{item.ideology}},
+								y: {{item.leadership}},
+								name: "{{item.name|escapejs}}{% if item.id in analysis_data.influence.influencers %} - Influences {{person.lastname|escapejs}}{% endif %}{% if item.id in analysis_data.influence.influencees %} - Influenced by {{person.lastname|escapejs}}{% endif %}"
+								{% if item.id in analysis_data.influence.influencers %}, marker: { radius: 4, fillColor: "white", lineColor: party_colors['{{party.grouper|escapejs}}'], lineWidth: 2 }
+								{% else %}
+								{% if item.id in analysis_data.influence.influencees %}, marker: { radius: 4, fillColor: "#CCC", lineColor: party_colors['{{party.grouper|escapejs}}'], lineWidth: 2 }{% endif %}
+								{% endif %}
+							}
 							{% if not forloop.last %},{% endif %}
 						{% endfor %}
 					]
@@ -196,7 +199,15 @@
 			});
 		});
 		</script>
-		<p style="margin-left: 25px; line-height: 110%"><small>This chart is based on a principle components analysis (for ideology) and PageRank (for leadership) of a sponsor-cosponsor matrix. See <a href="http://www.govtrack.us/blog/2010/12/26/repstats/">analysis details</a>.</small></p>
+		<div style="margin-left: 25px; line-height: 110%; font-size: 13px;">
+		{% if analysis_data.influence.influencers|length > 0 %}
+			<p>Influenced by: {% for p in analysis_data.influence.influencers.values %}<a href="{{p.get_absolute_url}}">{{p.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+		{% endif %}
+		{% if analysis_data.influence.influencees|length > 0 %}
+			<p>Influences: {% for p in analysis_data.influence.influencees.values %}<a href="{{p.get_absolute_url}}">{{p.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+		{% endif %}
+		<p><small>This chart is based on principle components analysis for ideology, PageRank for leadership, and network inference for influence. See <a href="http://www.govtrack.us/blog/2010/12/26/repstats/">analysis details</a>.</small></p>
+		</div>
 	</section><!-- /analysis -->
     {% endif %}
 
@@ -234,14 +245,14 @@
 			<li><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
 			{% endfor %}
 		</ul>
-		<p><a href="/congress/bills?sponsor={{person.id}}">View All &raquo;</a> (including bills from previous years)</p>
+		<p><a href="/congress/bills/browse?sponsor={{person.id}}">View All &raquo;</a> (including bills from previous years)</p>
 	</section><!-- /sponsorship -->
 {% endif %}
 
 	{% if analysis_data.missedvotes %}
 	<section id="voting-record">
 		<h3>Voting Record</h3>
-		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed}} of {{analysis_data.missedvotes.total}} recorded or roll call votes, which is {{analysis_data.missedvotes.percent}}%. {% if analysis_data.missedvotes.percent < 2.4 %}This is better than the median.{% else %}This is worse than the median.{% endif %} The chart below reports missed votes by calendar quarter (every three months).</p>
+		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed}} of {{analysis_data.missedvotes.total}} recorded or roll call votes, which is {{analysis_data.missedvotes.percent}}%. {% if analysis_data.missedvotes.percent < 2.4 %}This is better than the median of 2.4%.{% else %}This is worse than the median of 2.4%.{% endif %} The chart below reports missed votes by calendar quarter (every three months).</p>
 		<div id="voting_record_chart"> </div>
 		<script>
 		$(document).ready(function() {
@@ -256,7 +267,7 @@
 				legend: { enabled: false },
 				credits: { enabled: false },
 				xAxis: {
-					labels: { rotation: -90, align: "right" {% if analysis_data.missedvotes.data|length > 20 %}, step: 2{% endif %} },
+					labels: { rotation: -90, align: "right" {% if analysis_data.missedvotes.data|length > 20 and analysis_data.missedvotes.data|length < 40 %}, step: 2{% endif %} {% if analysis_data.missedvotes.data|length >= 40 %}, step: 4{% endif %} },
 					categories: [{% for time, value in analysis_data.missedvotes.data %}"{{time|escapejs}}"{% if not forloop.last %}, {% endif %}{% endfor %} ]
 				},
 				yAxis: {
@@ -308,10 +319,13 @@
 				},
 				plotOptions: {
 					spline: {
-						lineWidth: 4,
+						lineWidth: 2,
+						marker: {
+							radius: 3
+						},
 						states: {
 							hover: {
-								lineWidth: 5
+								lineWidth: 2
 							}
 						}
 					}

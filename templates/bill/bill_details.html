@@ -47,7 +47,7 @@
 			{% if not dead %}
 				{{bill.get_current_status_display}}
 			{% else %}
-				Died ({{bill.get_current_status_display}})
+				Died: ({{bill.get_current_status_display}})
 			{% endif %}
 			</strong><br/>
 			{{bill.current_status_description}}</dd>
@@ -231,7 +231,7 @@
 							<p>Use these subject areas to explore related legislation:</p>
 							<div style="max-height: 15em; overflow: auto">
 							{% for term in bill.terms.all %}
-								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="/congress/bills?congress={{bill.congress}}&subject={{term.id}}">{{term}}</a></div>
+								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
 							{% endfor %}
 							</div>
 						</dd>

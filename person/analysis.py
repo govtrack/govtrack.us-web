@@ -2,11 +2,13 @@ import os
 from lxml import etree
 from us import parse_govtrack_date
 from types import RoleType
+from models import Person
 
 def load_data(person):
     return {
         "sponsorship": load_sponsorship_analysis(person),
         "missedvotes": load_votes_analysis(person),
+        "influence": load_influence_analysis(person),
     }
     
 def load_sponsorship_analysis(person):
@@ -34,9 +36,10 @@ def load_sponsorship_analysis(person):
     
     for line in open(fname).read().splitlines():
         chunks = [x.strip() for x in line.strip().split(',')]
-        if chunks[1] == "ideology": continue
+        if chunks[0] == "ID": continue
         
         pt = { }
+        pt['id'] = int(chunks[0])
         pt['ideology'] = chunks[1]
         pt['leadership'] = chunks[2]
         pt['name'] = chunks[3]
@@ -76,3 +79,17 @@ def load_votes_analysis(person):
         "lastdate": parse_govtrack_date(dom.xpath("novote")[0].get("LastVoteDate")),
         "data": [(node.get("time"), round(100.0*float(node.get("NoVotePct")), 1)) for node in dom.xpath("novote/hist-stat") ] }
 
+def load_influence_analysis(person):
+    influencers = []
+    influencees = []
+    
+    # only the first 100 entries seemed to be helpful
+    for line in open("/home/govtrack/scripts/analysis/influence_network_full.csv").readlines()[0:100]:
+        influencer, influencee = line.strip().split(",")
+        influencer = int(influencer)
+        influencee = int(influencee)
+        if person.id == influencer: influencees.append(influencee)
+        if person.id == influencee: influencers.append(influencer)
+    
+    return { "influencers": Person.objects.in_bulk(influencers), "influencees": Person.objects.in_bulk(influencees) }
+    

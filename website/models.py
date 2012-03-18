@@ -6,6 +6,8 @@ from events.models import Feed, SubscriptionList
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True, db_index=True)
+    massemail = models.BooleanField(default=True)
+    old_id = models.IntegerField(blank=True, null=True)
     
     def lists(self):
         # make sure the 'default' list exists
@@ -34,4 +36,5 @@ class CampaignSupporter(models.Model):
     email = models.CharField(max_length=96)
     message = models.CharField(max_length=256, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    
+    district = models.IntegerField(blank=True, null=True)
+    geocode_response = models.TextField(blank=True, null=True)

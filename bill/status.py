@@ -35,8 +35,28 @@ class BillStatus(enum.Enum):
     vetoed_override_fail_originating_house = enum.Item(24, 'Veto Override Failed in House', xml_code='VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE', search_help_text="The House's attempt to override a veto failed.")
     vetoed_override_fail_originating_senate = enum.Item(25, 'Veto Override Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE', search_help_text="The Senate's attempt to override a veto failed.")
     vetoed_override_fail_second_house = enum.Item(26, 'Veto Override Passed House, Failed in House', xml_code='VETOED:OVERRIDE_FAIL_SECOND:HOUSE', search_help_text="The Senate overrode the veto but the House's attempt to override the veto failed.")
-    vetoed_override_fail_second_senate = enum.Item(27, 'Veto Override Passed Senate, Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_SECOND:SENATE', search_help_text="The House overrode the veto but the Senate's attempt to override the veto failed.")
+    vetoed_override_fail_second_senate = enum.Item(27, 'Veto Override Passed House, Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_SECOND:SENATE', search_help_text="The House overrode the veto but the Senate's attempt to override the veto failed.")
     enacted_signed = enum.Item(28, 'Signed by the President', xml_code='ENACTED:SIGNED', search_help_text="Enacted by a signature of the President.")
     enacted_veto_override = enum.Item(29, 'Veto Overridden', xml_code='ENACTED:VETO_OVERRIDE', search_help_text="Enacted by a veto override.")
 
-    final_status = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override)
+	# indicates statuses whose descriptions are clear that the bill is no longer active,
+	# other statuses are displayed as "Died: " for bills from previous congresses.
+    final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)
+    
+    # indicates a bill that is likely to receive further action
+    active_status = (passed_bill, pass_back_senate, pass_back_house, override_pass_over_house, override_pass_over_senate, prov_kill_veto)
+    
+    # indicates a bill that has significant action but that is not active
+    waiting_status = (pass_over_house, pass_over_senate, prov_kill_suspensionfailed, prov_kill_cloturefailed, prov_kill_pingpongfail)
+
+    # indicates a bill at the end of its life cycle and passed
+    final_status_passed_bill = (enacted_signed, enacted_veto_override)
+    final_status_passed_resolution = (passed_simpleres, passed_constamend, passed_concurrentres)
+    
+    # indicates a bill at the end of its life cycle and failed
+    final_status_failed = (fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)
+
+    # indicates a bill that has had no significant action
+    inactive_status = (introduced, referred, reported)
+    
+    

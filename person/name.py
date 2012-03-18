@@ -28,6 +28,9 @@ def get_person_name(person,
         if person.namemod:
             name += ' ' + person.namemod
     
+    if hasattr(person, "role"):
+        role = person.role # use this when it is set
+        role_recent = False
     if role_congress:
         role = person.get_last_role_at_congress(role_congress)
     elif role_date:

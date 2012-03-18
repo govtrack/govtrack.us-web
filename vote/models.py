@@ -23,16 +23,17 @@ class VoteSource(enum.Enum):
 
 
 class VoteCategory(enum.Enum):
-    amendment = enum.Item(1, 'Amendment')
-    passage_suspension = enum.Item(2, 'Passage under Suspension')
-    passage = enum.Item(3, 'Passage')
-    cloture = enum.Item(4, 'Cloture')
-    passage_part = enum.Item(5, 'Passage (Part)')
-    nomination = enum.Item(6, 'Nomination')
-    procedural = enum.Item(7, 'Procedural')
-    other = enum.Item(8, 'Other')
-    unknown = enum.Item(9, 'Unknown Category')
-
+    amendment = enum.Item(1, 'Amendment', search_help_text="Votes on accepting or rejecting amendments to bills and resolutions.")
+    passage_suspension = enum.Item(2, 'Passage under Suspension', search_help_text="Fast-tracked votes on the passage of bills requiring a 2/3rds majority.")
+    passage = enum.Item(3, 'Passage', search_help_text="Votes on passing or failing bills and resolutions.")
+    cloture = enum.Item(4, 'Cloture', search_help_text="Votes to end debate and move to a vote, i.e. to end a filibuster.")
+    passage_part = enum.Item(5, 'Passage (Part)', search_help_text="Votes on the passage of parts of legislation.")
+    nomination = enum.Item(6, 'Nomination', search_help_text="Senate votes on presidential nominations.")
+    procedural = enum.Item(7, 'Procedural', search_help_text="A variety of procedural votes such as quorum calls.")
+    other = enum.Item(8, 'Other', search_help_text="A variety of uncategorized votes.")
+    unknown = enum.Item(9, 'Unknown Category', search_help_text="A variety of uncategorized votes.")
+    ratification = enum.Item(9, 'Treaty Ratification', search_help_text="Senate votes to ratify treaties.")
+    veto_override = enum.Item(10, 'Veto Override', search_help_text="Votes to override a presidential veto.")
 
 class VoterType(enum.Enum):
     unknown = enum.Item(1, 'Unknown')
@@ -114,9 +115,9 @@ class Vote(models.Model):
             """
             Sort the parties by the number of voters in that party.
             """
-            return -len([p for p in all_voters if p.person.role.party == x])
+            return -len([p for p in all_voters if p.person.role and p.person.role.party == x])
         
-        all_parties = list(set(x.person.role.party for x in all_voters))
+        all_parties = list(set(x.person.role.party if x.person.role else "Unknown" for x in all_voters))
         all_parties.sort(key=cmp_party)
         total_party_stats = dict((x, {'yes': 0, 'no': 0, 'other': 0, 'total': 0})\
                                  for x in all_parties)
@@ -129,14 +130,15 @@ class Vote(models.Model):
             percent = round(len(voters) / float(total_count) * 100.0)
             party_stats = dict((x, 0) for x in all_parties)
             for voter in voters:
-                party_stats[voter.person.role.party] += 1
-                total_party_stats[voter.person.role.party]['total'] += 1
+            	party = voter.person.role.party if voter.person.role else "Unknown"
+                party_stats[party] += 1
+                total_party_stats[party]['total'] += 1
                 if option.key == '+':
-                    total_party_stats[voter.person.role.party]['yes'] += 1
+                    total_party_stats[party]['yes'] += 1
                 elif option.key == '-':
-                    total_party_stats[voter.person.role.party]['no'] += 1
+                    total_party_stats[party]['no'] += 1
                 else:
-                    total_party_stats[voter.person.role.party]['other'] += 1
+                    total_party_stats[party]['other'] += 1
             party_counts = [party_stats.get(x, 0) for x in all_parties]
             party_counts = [{"party": all_parties[i], "count": c, 'chart_width': 190 * c / total_count} for i, c in enumerate(party_counts)]
                 
@@ -166,6 +168,7 @@ class Vote(models.Model):
         return self.result + " " + str(self.total_plus) + "/" + str(self.total_minus)
 
     def create_event(self):
+    	if self.congress < 111: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
         with Event.update(self) as E:
             E.add("vote", self.created, Feed.AllVotesFeed())
