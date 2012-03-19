@@ -6,5 +6,5 @@ urlpatterns = patterns('bill.views',
     url(r'^(\d+)/([a-z]+)(\d+)$', 'bill_details', name='bill_details'),
     url(r'^(\d+)/([a-z]+)(\d+)/text$', 'bill_text', name='bill_text'),
 	url(r'^subjects/([^/]+)/(\d+)', 'subject', name='person_details'),
-    url(r'^$', 'bill_docket'),
+    url(r'^$', 'bill_docket', name='bill_docket'),
 )

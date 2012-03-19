@@ -118,7 +118,7 @@ var update_search_lock = false;
 function update_search(pagenum, pageinc, elem, isinitial) {
     if (update_search_lock) return;
     update_search_lock = true;
-    $('#searchform input').attr('disabled', '1');
+    $('#searchform input').prop('disabled', true);
     
     if (!pagenum && !pageinc) {
         // When changing the search options, reset to first page.
@@ -198,6 +198,9 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                 if (res.error) {
                     $('.results tbody').html("");
                     $('#searcherror').text(res.error);
+                } else if (res.redirect) {
+                	window.location = res.redirect;
+                	return;
                 } else {
                     // Display results.                    
                     $('.results tbody').html(res.results);
@@ -262,13 +265,13 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                 current_page = res.page;
                 
                 update_search_lock = false;
-                $('#searchform input').attr('disabled', '');
+                $('#searchform input').prop('disabled', false);
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 $('.results tbody').html("");
                 $('#searchform').text("Search is not currently operational: " + textStatus);
                 update_search_lock = false;
-                $('#searchform input').attr('disabled', '');
+                $('#searchform input').prop('disabled', false);
             }
         });
     

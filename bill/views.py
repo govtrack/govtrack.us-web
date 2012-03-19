@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
 
@@ -9,7 +9,7 @@ from common.decorators import render_to
 from common.pagination import paginate
 
 from bill.models import Bill, BillType, BillStatus, BillTerm, TermType
-from bill.search import bill_search_manager
+from bill.search import bill_search_manager, parse_bill_number
 from bill.title import get_secondary_bill_title
 from committee.models import CommitteeMember, CommitteeMemberRole
 from committee.util import sort_members
@@ -21,6 +21,7 @@ from settings import CURRENT_CONGRESS
 from us import get_congress_dates
 
 import urllib, urllib2, json, os.path
+from registration.helpers import json_response
 
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
@@ -119,21 +120,39 @@ def bill_text(request, congress, type_slug, number):
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
     
     pv_bill_id = None
-    pvinfo = query_popvox("v1/bills/search", {
-            "q": bill.display_number
-        })
-    try:
-        pv_bill_id = pvinfo["items"][0]["id"]
-    except:
-        pass
+    bill_text_content = None
     
+    if bill.congress == CURRENT_CONGRESS:
+        # the congress number filter doesn't seem to work
+        pvinfo = query_popvox("v1/bills/search", {
+                "q": bill.display_number + "/" + str(bill.congress)
+            })
+        try:
+            pv_bill_id = pvinfo["items"][0]["id"]
+        except:
+            pass
+    else:
+        try:
+            bt = BillType.by_value(bill.bill_type).xml_code
+            bill_text_content = open("data/us/bills.text/%s/%s/%s%d.html" % (bill.congress, bt, bt, bill.number)).read()
+        except IOError:
+            pass
+        
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "pv_bill_id": pv_bill_id,
+        "text_html": bill_text_content,
     }
 
 def bill_list(request):
+    bill = parse_bill_number(request.POST.get("text", ""))
+    if bill:
+        @json_response
+        def get_redirect_response():
+            return { "redirect": bill.get_absolute_url() }
+        return get_redirect_response()
+	
     ix1 = None
     ix2 = None
     if "subject" in request.GET:

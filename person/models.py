@@ -17,6 +17,7 @@ import functools
 def cache_result(f):
     @functools.wraps(f)
     def g(self):
+        if hasattr(self, "role"): return f(self)
         ckey = "cache_result_%s_%s_%d" % (self.__class__.__name__, f.__name__, self.id)
         v = cache.get(ckey)
         if not v:

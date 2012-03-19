@@ -15,7 +15,10 @@ from bill.models import Bill, BillType, BillTerm, TermType
 BILL_TOKEN_REGEXP = re.compile('^([a-z]+)(\d+)-(\d+)$')
 
 def person_redirect(request):
-    pk = request.GET.get('id', None)
+    try:
+        pk = int(request.GET.get('id', ""))
+    except ValueError:
+        raise Http404()
     person = get_object_or_404(Person, pk=pk)
     return redirect(person, permanent=True)
 
@@ -29,12 +32,7 @@ def committee_redirect(request):
     pk = request.GET.get('id', None)
     if pk == None:
         return redirect("/congress/committees", permanent=True)
-    elif len(pk) > 4:
-        parent_pk = pk[:4]
-        child_pk = pk[4:]
-        committee = get_object_or_404(Committee, code=child_pk, committee__code=parent_pk)
-    else:
-        committee = get_object_or_404(Committee, code=pk)
+    committee = get_object_or_404(Committee, code=pk)
     return redirect(committee, permanent=True)
 
 
@@ -76,7 +74,10 @@ def subject_redirect(request):
 def vote_redirect(request):
     if not "-" in request.GET.get("vote", ""):
         return HttpResponseRedirect("/congress/votes")
-    a, roll = request.GET["vote"].split("-")
+    try:
+        a, roll = request.GET["vote"].split("-")
+    except:
+        raise Http404()
     chamber = a[0]
     session = a[1:]
     from us import get_all_sessions

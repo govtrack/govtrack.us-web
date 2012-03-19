@@ -3,10 +3,13 @@ from django.contrib.humanize.templatetags.humanize import ordinal
 
 from smartsearch.manager import SearchManager
 
-from bill.models import Bill, BillTerm, TermType
+from bill.models import Bill, BillTerm, TermType, BillType
 from person.models import Person
 from person.util import load_roles_at_date
 from us import get_congress_dates
+from settings import CURRENT_CONGRESS
+
+import re
 
 subject_choices_data = None
 def subject_choices(include_legacy=True):
@@ -50,6 +53,20 @@ def format_congress_number(value):
     start, end = get_congress_dates(value)
     end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
     return '%s Congress: %d-%d' % (ordinal(value), start.year, end.year)
+
+# this regex must match slugs in BillType enum!
+bill_number_re = re.compile(r"(hr|s|hconres|sconres|hjres|sjres|hres|sres)(\d+)(/(\d+))?", re.I)
+def parse_bill_number(q):
+    m = bill_number_re.match(q.replace(" ", "").replace(".", "").replace("-", ""))
+    if m == None: return None
+    if m.group(3) != None:
+        cn = int(m.group(4))
+    else:
+        cn = CURRENT_CONGRESS
+    try:
+        return Bill.objects.get(congress=cn, bill_type=BillType.by_slug(m.group(1).lower()), number=int(m.group(2)))
+    except Bill.DoesNotExist:
+        return None
 
 def bill_search_manager():
     sm = SearchManager(Bill)

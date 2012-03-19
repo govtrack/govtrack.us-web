@@ -10,6 +10,10 @@
 {% block extra_css %}
 <style>
 .heading-box .article { padding: 0; }
+
+#bill_text_content blockquote { margin: 1em; }
+#bill_text_content ul { margin-left: 1em; }
+
 </style>
 {% endblock %}
 
@@ -34,9 +38,11 @@
 
 {% block body %}
 
-{% if not pv_bill_id %}
+{% if not pv_bill_id and not text_html %}
 	<p>The text of this bill is not yet available. Please check back soon.</p>
-{% else %}
+{% endif %}
+	
+{% if pv_bill_id %}
 	<script src="https://www.popvox.com/widgets/bill-text.js?billid={{pv_bill_id}}&width=940&height=800"> </script>
 	
 	<script>
@@ -53,6 +59,12 @@
 	$(window).scroll(adjust_widget_size);
 	adjust_widget_size();
 	</script>
+{% endif %}
+
+{% if text_html %}
+	<div id="bill_text_content">
+		{{text_html|safe}}
+	</div>
 {% endif %}
 
 {% endblock %}

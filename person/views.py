@@ -13,7 +13,7 @@ from common.pagination import paginate
 
 import json, cPickle, base64
 
-from us import statelist, statenames, stateapportionment
+from us import statelist, statenames, stateapportionment, state_abbr_from_name
 
 from person.models import Person, PersonRole
 from person import analysis
@@ -94,6 +94,13 @@ def browsemembersbymap(request, state=None, district=None):
     sens = None
     reps = None
     if state != None:
+        if state.lower() in state_abbr_from_name:
+            state = state_abbr_from_name[state.lower()]
+        elif state.upper() not in statenames:
+            raise Http404()
+        else:
+            state = state.upper()
+       
         # Load senators for all states that are not territories.
         if stateapportionment[state] != "T":
             sens = Person.objects.filter(roles__current=True, roles__state=state, roles__role_type=RoleType.senator)
@@ -126,6 +133,8 @@ def browsemembersbymap(request, state=None, district=None):
             center_long, center_lat, center_zoom = (145.7, 15.1, 11.0)
         elif state == "AS":
             center_long, center_lat, center_zoom = (-170.255127, -14.514462, 8.0)
+        elif state == "HI":
+            center_long, center_lat, center_zoom = (-155.5, 20, 7.0)
         else:
             cursor = connection.cursor()
             cursor.execute("SELECT MIN(X(PointN(ExteriorRing(bbox), 1))), MIN(Y(PointN(ExteriorRing(bbox), 1))), MAX(X(PointN(ExteriorRing(bbox), 3))), MAX(Y(PointN(ExteriorRing(bbox), 3))), SUM(Area(bbox)) FROM districtpolygons WHERE state=%s", [state])

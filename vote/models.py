@@ -105,7 +105,7 @@ class Vote(models.Model):
             voters_by_option[option] = [x for x in all_voters if x.option == option]
         total_count = len(all_voters)
 
-        persons = [x.person for x in all_voters]
+        persons = [x.person for x in all_voters if x.person != None]
         load_roles_at_date(persons, self.created)
 
         # Find all parties which participated in vote
@@ -115,9 +115,9 @@ class Vote(models.Model):
             """
             Sort the parties by the number of voters in that party.
             """
-            return -len([p for p in all_voters if p.person.role and p.person.role.party == x])
+            return -len([p for p in all_voters if p.person and p.person.role and p.person.role.party == x])
         
-        all_parties = list(set(x.person.role.party if x.person.role else "Unknown" for x in all_voters))
+        all_parties = list(set(x.person.role.party if x.person and x.person.role else "Unknown" for x in all_voters))
         all_parties.sort(key=cmp_party)
         total_party_stats = dict((x, {'yes': 0, 'no': 0, 'other': 0, 'total': 0})\
                                  for x in all_parties)
@@ -130,7 +130,7 @@ class Vote(models.Model):
             percent = round(len(voters) / float(total_count) * 100.0)
             party_stats = dict((x, 0) for x in all_parties)
             for voter in voters:
-            	party = voter.person.role.party if voter.person.role else "Unknown"
+            	party = voter.person.role.party if voter.person and voter.person.role else "Unknown"
                 party_stats[party] += 1
                 total_party_stats[party]['total'] += 1
                 if option.key == '+':

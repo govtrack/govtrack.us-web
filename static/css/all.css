@@ -1632,6 +1632,8 @@ ul.bullets li {
 	left: 0;
 	top: 0;
 	width: 100%;
+	z-index: 999;
+	opacity: .8;
 }
 #sitenews {
 	margin: auto;
@@ -1641,4 +1643,5 @@ ul.bullets li {
 	border-bottom: 1px solid #444;
 	border-right: 1px solid #444;
 	text-align: center;
+	font-weight: bold;
 }

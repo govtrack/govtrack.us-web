@@ -17,14 +17,15 @@ import datetime
 "Enums"
 
 class BillType(enum.Enum):
+    # slug must match regex for parse_bill_number
     senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s', search_help_text="Senate bills")
     house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h', search_help_text="House bills")
-    senate_resolution = enum.Item(4, 'S.Res.', slug='sr', xml_code='sr', search_help_text="Senate simple resolutions, which do not have the force of law")
+    senate_resolution = enum.Item(4, 'S.Res.', slug='sres', xml_code='sr', search_help_text="Senate simple resolutions, which do not have the force of law")
     house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr', search_help_text="House simple resolutions, which do not have the force of law")
-    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sc', xml_code='sc', search_help_text="Concurrent resolutions originating in the Senate, which do not have the force of law")
-    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hc', xml_code='hc', search_help_text="Concurrent resolutions originating in the House, which do not have the force of law")
-    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sj', xml_code='sj', search_help_text="Joint resolutions originating in the Senate, which may be used to enact laws or propose constitutional amendments")
-    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hj', xml_code='hj', search_help_text="Joint resolutions originating in the House, which may be used to enact laws or propose constitutional amendments")
+    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sconres', xml_code='sc', search_help_text="Concurrent resolutions originating in the Senate, which do not have the force of law")
+    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hconres', xml_code='hc', search_help_text="Concurrent resolutions originating in the House, which do not have the force of law")
+    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sjres', xml_code='sj', search_help_text="Joint resolutions originating in the Senate, which may be used to enact laws or propose constitutional amendments")
+    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hjres', xml_code='hj', search_help_text="Joint resolutions originating in the House, which may be used to enact laws or propose constitutional amendments")
 
 
 class TermType(enum.Enum):

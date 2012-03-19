@@ -99,8 +99,15 @@ def search(request):
         , key=lambda c : c["label"])))
        
     from settings import CURRENT_CONGRESS
-    results.append(("Bills and Resolutions", "/congress/bills", "text", 
-        [{"href": b.object.get_absolute_url(), "label": b.object.title, "obj": b.object, "secondary": b.object.congress != CURRENT_CONGRESS } for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], content=q)[0:9]]))
+    from bill.search import parse_bill_number
+    bill = parse_bill_number(q)
+    if not bill:
+        bills = \
+            [{"href": b.object.get_absolute_url(), "label": b.object.title, "obj": b.object, "secondary": b.object.congress != CURRENT_CONGRESS } for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], content=q)[0:9]]
+    else:
+        #bills = [{"href": bill.get_absolute_url(), "label": bill.title, "obj": bill, "secondary": bill.congress != CURRENT_CONGRESS }]
+        return HttpResponseRedirect(bill.get_absolute_url())
+    results.append(("Bills and Resolutions", "/congress/bills", "text", bills))
     
     # sort first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
     results.sort(key = lambda c : (len([d for d in c[3] if d.get("secondary", False) == False]) == False, len(c[3]) == 0, len(c[3])))
