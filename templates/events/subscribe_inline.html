@@ -125,7 +125,7 @@ $(function() {
 		</div>
 
 		<p style="clear: both; margin-top: 15px;">
-			<a href="/accounts/register?next={{request.path|add:"#track"|urlencode}}">New to GovTrack?</a>
+			<a href="/registration/signup?next={{request.path|add:"#track"|urlencode}}">New to GovTrack?</a>
 			<a class="forgot" href="{% url registration.views.resetpassword %}">Forgot password?</a>
 		</p>
 

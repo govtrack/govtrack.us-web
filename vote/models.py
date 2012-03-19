@@ -173,7 +173,8 @@ class Vote(models.Model):
         with Event.update(self) as E:
             E.add("vote", self.created, Feed.AllVotesFeed())
             for v in self.voters.all():
-                E.add("vote", self.created, Feed.PersonVotesFeed(v.person_id))
+                if v.person_id:
+            	    E.add("vote", self.created, Feed.PersonVotesFeed(v.person_id))
 	
     def render_event(self, eventid, feeds):
         return {

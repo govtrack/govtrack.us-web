@@ -57,11 +57,8 @@ ADMIN_MEDIA_PREFIX = '/static/admin-media/'
 
 # django-regitration-pv
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
-if not DEBUG:
-	SITE_ROOT_URL = "http://www.govtrack.us"
-else:
-	SITE_ROOT_URL = "http://test.govtrack.us"
-LOGIN_REDIRECT_URL = "/accounts/login"
+SITE_ROOT_URL = "http://www.govtrack.us"
+LOGIN_REDIRECT_URL = "/accounts/lists"
 SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
 
@@ -152,7 +149,7 @@ DATETIME_FORMAT = 'M d, Y P'
 DATE_FORMAT = 'M d, Y'
 
 SEND_BROKEN_LINK_EMAILS = True
-IGNORABLE_404_ENDS = ('.php', '.cgi')
+IGNORABLE_404_ENDS = ('spinner.gif', 'billtext/images/quote.png')
 IGNORABLE_404_STARTS = ('/phpmyadmin/',)
 
 CURRENT_CONGRESS = 112

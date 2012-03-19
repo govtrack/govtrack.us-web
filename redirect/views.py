@@ -61,7 +61,12 @@ def bill_redirect(request, istext=None):
 def bill_search_redirect(request):
     return HttpResponseRedirect("/congress/bills/browse")
 
+def bill_overview_redirect(request):
+    return HttpResponseRedirect("/congress/bills")
+
 def subject_redirect(request):
+    if request.GET.get("type", "") != "crs" or "term" not in request.GET:
+        return redirect("/congress/bills", permanent=True)
     try:
         term = get_object_or_404(BillTerm, name=request.GET["term"], term_type=TermType.new)
     except:
@@ -69,11 +74,17 @@ def subject_redirect(request):
     return redirect(term.get_absolute_url(), permanent=True)
 
 def vote_redirect(request):
+    if not "-" in request.GET.get("vote", ""):
+        return HttpResponseRedirect("/congress/votes")
     a, roll = request.GET["vote"].split("-")
     chamber = a[0]
     session = a[1:]
     from us import get_all_sessions
     for cong, sess, start, end in get_all_sessions():
-        if sess == session:
+        if sess == session or str(cong) + "_" + sess == session:
             return HttpResponseRedirect("/congress/votes/%s-%s/%s%s" % (cong, sess, chamber, roll))
     raise Http404()
+    
+def votes_redirect(request):
+    return HttpResponseRedirect("/congress/votes") # missing year, chamber, person parameters
+

@@ -21,7 +21,8 @@ ideology_scores = { }
 
 def vote_list(request):
     return vote_search_manager().view(request, "vote/vote_list.html",
-        defaults = { "session": len(get_all_sessions())-1 })
+        defaults = { "session": len(get_all_sessions())-1 },
+        paginate = lambda form : "session" not in form ) # people like to see all votes for a year on one page
 
 def load_vote(congress, session, chamber_code, number):
     """

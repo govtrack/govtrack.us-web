@@ -62,7 +62,10 @@ class CommitteeMemberProcessor(Processor):
     DEFAULT_VALUES = {'role': 'Member'}
 
     def id_handler(self, value):
-        return Person.objects.get(pk=value)
+    	try:
+    		return Person.objects.get(pk=value, roles__current=True)
+    	except:
+    		raise ValueError("Committe member %s is no longer a current MoC." % value)
 
     def role_handler(self, value):
         return self.ROLE_MAPPING[value]

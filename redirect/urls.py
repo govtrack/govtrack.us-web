@@ -7,6 +7,8 @@ urlpatterns = patterns('redirect.views',
     url(r'^congress/committee\.xpd$', 'committee_redirect', name='committee_redirect'),
     url(r'^congress/bill(text)?\.xpd$', 'bill_redirect', name='bill_redirect'),
     url(r'^congress/billsearch\.xpd', "bill_search_redirect"),
+    url(r'^congress/legislation.xpd', "bill_overview_redirect"),
     url(r'^congress/subjects\.xpd', "subject_redirect"),
     url(r'^congress/vote\.xpd', "vote_redirect"),
+    url(r'^congress/votes\.xpd', "votes_redirect"),
 )

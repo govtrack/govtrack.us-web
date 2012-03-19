@@ -88,7 +88,7 @@ class SearchManager(object):
     def results(self, objects, form):
         return "".join([self.make_result(obj, form) for obj in objects])
         
-    def view(self, request, template, defaults={}, noun=("item", "items"), context={}):
+    def view(self, request, template, defaults={}, noun=("item", "items"), context={}, paginate=None):
         if request.META["REQUEST_METHOD"] == "GET":
             c = {
                 'form': self.options,
@@ -102,10 +102,15 @@ class SearchManager(object):
             return render_to_response(template, c, RequestContext(request))
         
         try:
-            page_number = int(request.POST.get("page", "1"))
-            per_page = 20
-            
             qs = self.queryset(request)
+            
+            if not paginate or paginate(request.POST):
+                page_number = int(request.POST.get("page", "1"))
+                per_page = 20
+            else:
+                page_number = 1
+                per_page = len(qs)
+            
             page = Paginator(qs, per_page)
             obj_list = page.page(page_number).object_list
             

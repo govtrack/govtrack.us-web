@@ -1,0 +1,28 @@
+{% extends "master.html" %}
+{% block title %}(?php wp_title(' '); ?> (?php if(wp_title(' ', false)) { echo ' : '; } ?>(?php bloginfo('name'); ?>{% endblock %}
+
+{% block head %}
+	<meta name="generator" content="WordPress (?php bloginfo('version'); ?>" /> <!-- leave this for stats -->
+	<link rel="alternate" type="application/rss+xml" title="(?php bloginfo('name'); ?> RSS Feed" href="(?php bloginfo('rss2_url'); ?>" />
+	<link rel="stylesheet" href="(?php bloginfo('stylesheet_url'); ?>" type="text/css" media="screen" />
+	<link rel="pingback" href="(?php bloginfo('pingback_url'); ?>" />
+	(?php wp_head(); ?>
+	<style>
+	blockquote { margin-left: 2em; }
+	</style>
+{% endblock %}
+
+{% block crumbs %}
+<ul><li><a href="/blog">GovTrack.us Blog</a></li><li> <li><a href="(?php bloginfo('rss2_url'); ?>" class="RSS">RSS</a></li></ul>
+{% endblock %}
+
+{% block summary %}
+<p>GovTrack.us is a tool by <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a> to help the public research and track the activities in the U.S. Congress, promoting and innovating government transparency and civic education through novel uses of technology.</p>
+{% endblock %}
+
+{% block body %}
+(SPLIT)
+
+(?php wp_footer(); ?>
+{% endblock %}
+

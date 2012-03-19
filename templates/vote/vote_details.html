@@ -2,6 +2,9 @@
 {% load vote_tags %}
 {% load humanize %}
 
+{% block title %}{{ vote.question }} -- GovTrack.us{% endblock %}
+{% block meta_description %}{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}, in the United States Congress.{% endblock %}
+
 {% block head %}
 <style>
 .stats th { cursor: pointer; }

@@ -6,6 +6,7 @@ from math import log, sqrt
 from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.db import connection
+from django.http import Http404
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -43,7 +44,7 @@ def person_details(request, pk):
         active_role = False
         try:
             role = person.roles.order_by('-enddate')[0]
-        except PersonRole.DoesNotExist:
+        except IndexError:
             role = None
 
     # photo

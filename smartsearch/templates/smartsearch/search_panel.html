@@ -33,6 +33,18 @@
     </ul>
 </section>
 <script>
+function addCommas(nStr)
+{
+  nStr += '';
+  x = nStr.split('.');
+  x1 = x[0];
+  x2 = x.length > 1 ? '.' + x[1] : '';
+  var rgx = /(\d+)(\d{3})/;
+  while (rgx.test(x1)) {
+    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+  }
+  return x1 + x2;
+}
 function show_facets(postdata, options) {
     // Display options.
     for (var k in options) {
@@ -49,7 +61,7 @@ function show_facets(postdata, options) {
             for (var j in values) {
                 var opt = $("<option/>");
                 opt.attr('value', values[j][0]);
-                opt.text(values[j][1] + (values[j][2] > 0 ? "   (" + values[j][2] + " " + (values[j][2] == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}") + ")" : ""));
+                opt.text(values[j][1] + (values[j][2] > 0 ? "   (" + addCommas(values[j][2]) + " " + (values[j][2] == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}") + ")" : ""));
                 node.append(opt);
             }
             if (postdata[field])
@@ -72,7 +84,7 @@ function show_facets(postdata, options) {
                 } else {
                     opt.find('.name').text(values[j][1]);
                     if (values[j][2])
-                        opt.find('.count').text("(" + values[j][2] + " " + (values[j][2] == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}") + ")");
+                        opt.find('.count').text("(" + addCommas(values[j][2]) + " " + (values[j][2] == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}") + ")");
                 }
                 
                 if (values[j][3])
@@ -192,7 +204,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                     $('#searcherror').text('');
                     
                     $('.summary').show();
-                    $('.summary .total').text(res.total);
+                    $('.summary .total').text(addCommas(res.total));
                     $('.summary .noun').text(res.total == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}");
                     if (res.total > 0) {
                         $('.summary .start').text((res.page-1)*res.per_page + 1);
