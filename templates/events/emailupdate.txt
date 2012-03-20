@@ -1,0 +1,25 @@
+{% load events_utils %}GovTrack Email Update
+=====================
+
+--- GovTrack was recently updated. Check out the new www.GovTrack.us and confirm that any trackers you had on the old website are set up correctly at http://www.govtrack.us/accounts/lists. This is only the beginning of GovTrack 2.0. Stay tuned for more improvements. ---
+
+This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to http://www.govtrack.us/accounts/lists.
+
+{% for list, events in eventslists %}
+{{list.name}}
+----------------------------------{% for event in events %}
+{% with event|render_event:feed as meta %}
+{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %}
+{{meta.title}}
+http://www.govtrack.us{{meta.url}}
+{{meta.body_text|safe}}
+
+/ / / /{% endwith %}{% endfor %}
+{% endfor %}
+
+=====================================================================
+
+To unsubscribe or change your email updates settings, go to http://www.govtrack.us/accounts/lists.
+
+This email was sent by Civic Impulse, LLC <http://www.civicimpulse.com>. You may contact us at operations@govtrack.us. The email address this message was sent from is not monitored for replies.
+

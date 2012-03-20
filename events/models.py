@@ -8,6 +8,7 @@ from django.utils.text import truncate_words
 
 import re
 import urllib
+from datetime import datetime, timedelta
 
 class Feed(models.Model):
     """Each Feed has a code name that can be used to reconstruct information about the feed."""
@@ -27,15 +28,7 @@ class Feed(models.Model):
         # or str's of Feed feednames, which must exist.
         
         if feeds != None:
-            # Some feeds include the events of other feeds.
-            # Tail-recursively expand the feeds.
-            feeds = [f if isinstance(f, Feed) else Feed.objects.get(feedname=f) for f in feeds]
-            i = 0
-            while i < len(feeds):
-                meta = feeds[i].type_metadata()
-                if "includes" in meta:
-                    feeds.extend(meta["includes"](feeds[i]))
-                i += 1
+            feeds = expand_feeds(feeds)
         
         from django.db import connection, transaction
         cursor = connection.cursor()
@@ -463,9 +456,10 @@ class Event(models.Model):
             return False
 
 class SubscriptionList(models.Model):
+    # see send_email_updates.py
     EMAIL_CHOICES = [(0, 'No Email Updates'), (1, 'Daily'), (2, 'Weekly')]
     
-    user = models.ForeignKey(User, db_index=True)
+    user = models.ForeignKey(User, db_index=True, related_name="subscription_lists")
     name = models.CharField(max_length=64)
     trackers = models.ManyToManyField(Feed)
     is_default = models.BooleanField(default=False)
@@ -474,4 +468,45 @@ class SubscriptionList(models.Model):
     
     class Meta:
         unique_together = [('user', 'name')]
+
+    def get_new_events(self):
+        feeds = expand_feeds(self.trackers.all())
+        if len(feeds) == 0: return []
+        
+        from django.db import connection, transaction
+        cursor = connection.cursor()
+        
+        # Pull events that this list has not seen yet according to last_event_mailed,
+        # but not going back further than a certain period of time, so that if past
+        # events are added we don't overflow the user with new events that are actually
+        # archival data. Also, the first email update for a user will go back that time
+        # period unless we set last_event_mailed.
+        
+        # The Django ORM can't handle generating a nice query. It adds joins that ruin indexing.
+        cursor.execute("SELECT id, source_content_type_id, source_object_id, eventid, `when`, seq FROM events_event WHERE id > %s AND `when` > %s AND feed_id IN (" + ",".join(str(f.id) for f in feeds) + ") ORDER BY `when`, source_content_type_id, source_object_id, seq", [self.last_event_mailed if self.last_event_mailed else 0, datetime.now() - timedelta(days=4 if self.email == 1 else 14)])
+        
+        ret = []
+        seen = set() # uniqify because events are duped for each feed they are in
+        batch = cursor.fetchall()
+        for b in batch:
+            b1 = b[1:] # strip off the event entry id since it dups for each feed
+            if not b1 in seen:
+                ret.append( { "id": b[0], "source_content_type": b[1], "source_object_id": b[2], "eventid": b[3], "when": b[4], "seq": b[5] } )
+                seen.add(b1)
+                
+        ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]))
+    
+        return ret
+        
+def expand_feeds(feeds):
+    # Some feeds include the events of other feeds.
+    # Tail-recursively expand the feeds.
+    feeds = [f if isinstance(f, Feed) else Feed.objects.get(feedname=f) for f in feeds]
+    i = 0
+    while i < len(feeds):
+        meta = feeds[i].type_metadata()
+        if "includes" in meta:
+            feeds.extend(meta["includes"](feeds[i]))
+        i += 1
+    return feeds
 

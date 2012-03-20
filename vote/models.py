@@ -184,15 +184,12 @@ class Vote(models.Model):
 			"url": self.get_absolute_url(),
             "body_text_template":
 """{{summary|safe}}
-{% for voter in voters %}
-    {{voter.name|safe}}: {{voter.vote|safe}}
+{% for voter in voters %}{{voter.name|safe}}: {{voter.vote|safe}}
 {% endfor %}""",
             "body_html_template":
 """<p>{{summary}}</p>
 {% for voter in voters %}
-    {% if forloop.first %}<ul>{% endif %}
     <p><a href="{{voter.url}}">{{voter.name}}</a>: {{voter.vote}}</p>
-    {% if forloop.last %}</ul>{% endif %}
 {% endfor %}
 """,
             "context": {

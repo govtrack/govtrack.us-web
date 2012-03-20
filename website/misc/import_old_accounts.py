@@ -1,4 +1,7 @@
 #!.env/bin/python
+
+raise Exception("We should not run this again. It destroys data.")
+
 import sys, os
 sys.path.insert(0, "..")
 sys.path.insert(0, ".")
