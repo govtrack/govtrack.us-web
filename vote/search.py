@@ -25,7 +25,7 @@ def session_filter(qs, form):
 		s = get_all_sessions()[int(session_index)]
 		qs = qs.filter(congress=s[0], session=s[1])
 	return qs
-
+	
 def vote_search_manager():
     sm = SearchManager(Vote, qs=Vote.objects.order_by('-created'))
     
@@ -58,7 +58,10 @@ def vote_search_manager():
         if len(name) < 60: return name
         return name[0:57] + "..."
     
-    sm.add_left_column("Vote and Date", lambda vote, form : conditional_escape(vote.name()) + mark_safe("<br/>") + conditional_escape(vote.created.strftime("%b %d, %Y %I:%M%p")))
+    def safe_strftime(date, format):
+        return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
+
+    sm.add_left_column("Vote and Date", lambda vote, form : conditional_escape(vote.name()) + mark_safe("<br/>") + conditional_escape(safe_strftime(vote.created, "%b %d, %Y %I:%M%p")))
     sm.add_bottom_column(lambda vote, form : vote.summary())
     sm.add_column("Description and Result", lambda vote, form : truncate(vote.question))
     

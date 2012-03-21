@@ -26,6 +26,7 @@ function toggle_list_item(node) {
 	var feedname = $("#track_panel_selected_feed").val();
 	$.ajax({
 		url: "/events/_edit",
+		type: "POST",
 		data: {
 			listid: listid,
 			command: "toggle",
@@ -45,6 +46,7 @@ function rename_list(node) {
 	if (newname && newname != "") {
 		$.ajax({
 			url: "/events/_edit",
+			type: "POST",
 			data: {
 				listid: $(node).parents("tr").attr("list_id"),
 				command: "rename",
@@ -61,6 +63,7 @@ function rename_list(node) {
 function new_list(node) {
 	$.ajax({
 		url: "/events/_edit",
+		type: "POST",
 		data: {
 			listid: "_new_list",
 			command: "add",

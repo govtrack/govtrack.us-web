@@ -107,7 +107,7 @@ def search(request):
     else:
         #bills = [{"href": bill.get_absolute_url(), "label": bill.title, "obj": bill, "secondary": bill.congress != CURRENT_CONGRESS }]
         return HttpResponseRedirect(bill.get_absolute_url())
-    results.append(("Bills and Resolutions", "/congress/bills", "text", bills))
+    results.append(("Bills and Resolutions", "/congress/bills/browse", "text", bills))
     
     # sort first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
     results.sort(key = lambda c : (len([d for d in c[3] if d.get("secondary", False) == False]) == False, len(c[3]) == 0, len(c[3])))

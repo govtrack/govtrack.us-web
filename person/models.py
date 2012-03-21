@@ -275,7 +275,7 @@ class PersonRole(models.Model):
         
     def render_event(self, eventid, feeds):
         return {
-            "type": "Elections",
+            "type": "Elections and Offices",
             "date_has_no_time": True,
             "date": self.startdate if eventid == "termstart" else self.enddate,
             "title": self.person.name + (" takes office as " if eventid == "termstart" else " leaves office as ") + self.get_description(),

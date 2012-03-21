@@ -44,6 +44,8 @@ class Command(BaseCommand):
 			# Find all users who have a subscription list with email
 			# updates turned on to the right daily/weekly setting.
 			users = User.objects.filter(subscription_lists__email__in = list_email_freq).distinct()
+			
+		#users=users.filter(id__gt=113315)
 
 		total_emails_sent = 0
 		total_events_sent = 0
@@ -75,12 +77,11 @@ def send_email_update(user, list_email_freq, testing):
 	for sublist in user.subscription_lists.all():
 		all_trackers |= set(sublist.trackers.all()) # include trackers for non-email-update list
 		if sublist.email in list_email_freq:
-			events = sublist.get_new_events()
+			max_id, events = sublist.get_new_events()
 			if len(events) > 0:
 				eventslists.append( (sublist, events) )
 				eventcount += len(events)
-				for evt in events:
-					most_recent_event = max(most_recent_event, evt["id"])
+				most_recent_event = max(most_recent_event, max_id)
 	
 	if len(eventslists) == 0:
 		return 0
@@ -102,7 +103,7 @@ def send_email_update(user, list_email_freq, testing):
 	try:
 		print "emailing", user.id, user.email, "x", eventcount, "..."
 		email.send(fail_silently=False)
-	except IOError as e:
+	except Exception as e:
 		print user, e
 		return 0 # skip updating what events were sent, False = did not sent
 	

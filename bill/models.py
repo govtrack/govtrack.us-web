@@ -134,6 +134,10 @@ class Bill(models.Model):
     def current_status_description(self):
         return self.get_status_text(self.current_status, self.current_status_date)
 
+    @property
+    def is_alive(self):
+        return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
+
     def get_status_text(self, status, date) :
         bill = self
         status = BillStatus.by_value(status).xml_code
@@ -307,6 +311,21 @@ class Bill(models.Model):
             }
 
     def get_major_events(self):
+        sfn = "data/us/%d/bills/%s%d.xml" % (self.congress, BillType.by_value(self.bill_type).xml_code, self.number)
+        from lxml import etree
+        from parser.processor import Processor
+        p = Processor()
+        dom = etree.parse(open(sfn))
+        ret = [{ "label": "Introduced", "date": self.introduced_date }]
+        for axn in dom.xpath("actions/*[@state]"):
+            ret.append({
+                "label": BillStatus.by_xml_code(axn.xpath("string(@state)")).label,
+                "date": p.parse_datetime(axn.xpath("string(@datetime)")),
+            })
+        return ret
+
+    def get_major_events__old(self):
+        # DEPRECATED - Not all Bill objects have had events loaded.
         from events.models import Feed
         events = Feed.BillFeed(self).get_events(100)
         def getinfo(eventid, date):

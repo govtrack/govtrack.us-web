@@ -23,7 +23,9 @@ def committee_details(request, parent_code, child_code=None):
     
     party_counts = { }
     for m in members:
-    	party_counts[m.person.get_current_role().party] = party_counts.get(m.person.get_current_role().party, 0) + 1
+        role = m.person.get_current_role()
+        if role: # member left congress but is still listed as committee member
+            party_counts[role.party] = party_counts.get(role.party, 0) + 1
     party_counts = sorted(party_counts.items(), key = lambda p : -p[1])
     
     return {'committee': obj,

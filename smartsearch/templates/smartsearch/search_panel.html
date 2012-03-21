@@ -190,7 +190,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         
     $.ajax(
         {
-            url: document.location.href,
+            url: document.location.pathname,
             type: "POST",
             dataType: "json",
             data: postdata,
@@ -251,7 +251,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                     // After showing the main content, show the full faceted results.
                     postdata.faceting = "true";
                     $.ajax({
-                            url: document.location.href,
+                            url: document.location.pathname,
                             type: "POST",
                             dataType: "json",
                             data: postdata,

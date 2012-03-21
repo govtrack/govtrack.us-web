@@ -43,8 +43,8 @@ def edit_subscription_list(request):
     if not request.user.is_authenticated():
         return { "error": "not logged in" }
         
-    if request.GET["listid"] != "_new_list":
-        sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.GET["listid"])
+    if request.POST["listid"] != "_new_list":
+        sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.POST["listid"])
     else:
         sublist = None
         ctr = 1
@@ -54,28 +54,30 @@ def edit_subscription_list(request):
             except:
                 ctr += 1
     
-    if request.GET["command"] in ("toggle", "add", "remove"):
-        f = get_object_or_404(Feed, feedname=request.GET["feed"])
-        if (request.GET["command"] == "toggle" and f in sublist.trackers.all()) or request.GET["command"] == "remove":
+    state = None
+    
+    if request.POST["command"] in ("toggle", "add", "remove"):
+        f = get_object_or_404(Feed, feedname=request.POST["feed"])
+        if (request.POST["command"] == "toggle" and f in sublist.trackers.all()) or request.POST["command"] == "remove":
             sublist.trackers.remove(f)
-            return { "state": False }
+            state = False
         else:
             sublist.trackers.add(f)
-            return { "state": True }
-    if request.GET["command"] == "rename":
-        sublist.name = request.GET["name"]
+            state = True
+    if request.POST["command"] == "rename":
+        sublist.name = request.POST["name"]
         sublist.save()
-    if request.GET["command"] == "delete" and not sublist.is_default:
+    if request.POST["command"] == "delete" and not sublist.is_default:
         sublist.delete()
-    if request.GET["command"] == "email_toggle":
+    if request.POST["command"] == "email_toggle":
         sublist.email = (sublist.email + 1) % len(SubscriptionList.EMAIL_CHOICES)
         sublist.save()
     
-    return { "list_id": sublist.id, "list_name": sublist.name, "list_email": sublist.get_email_display(), "list_trackers": [ { "id": f.id, "name": f.feedname, "title": f.title, "link": f.link } for f in sublist.trackers.all() ] } # response is ignored
+    return { "list_id": sublist.id, "list_name": sublist.name, "list_email": sublist.get_email_display(), "list_trackers": [ { "id": f.id, "name": f.feedname, "title": f.title, "link": f.link } for f in sublist.trackers.all() ], "state": state }
 
 @render_to('events/events_list_items.html')
 def events_list_items(request):
-    sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.GET["listid"])
+    sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.POST["listid"])
         
     feedlist = sublist.trackers.all()
     show_empty = False

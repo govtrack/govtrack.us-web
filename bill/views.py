@@ -4,6 +4,8 @@ from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -95,6 +97,21 @@ def bill_details(request, congress, type_slug, number):
         if unicode(summary).strip() == "":
             summary = None
     
+    # simple predictive market implementation
+    from website.models import TestMarketVote
+    from math import exp
+    market_score = TestMarketVote.objects.filter(bill=bill).values("prediction").annotate(count=Count("prediction"))
+    market_score = dict((int(x["prediction"]), x["count"]) for x in market_score)
+    b = 5.0
+    initial_no = 2.5
+    initial_yes = 0 # use the prognosis info to add to this, but that's not currently working
+    market_score = exp(initial_yes+market_score.get(1, 0)/b) / (exp(initial_no+market_score.get(-1, 0)/b) + exp(initial_yes+market_score.get(1, 0)/b))
+    market_score = int(round(100*market_score))
+    try:
+        market_score_you = TestMarketVote.objects.get(user=request.user, bill=bill)
+    except:
+        market_score_you = None
+        
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
@@ -106,7 +123,26 @@ def bill_details(request, congress, type_slug, number):
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         'feed': Feed.BillFeed(bill),
+        "market_score": market_score,
+        "market_score_you": market_score_you,
     }
+
+@json_response
+@login_required
+def market_test_vote(request):
+    bill = get_object_or_404(Bill, id = request.POST.get("bill", "0"))
+    prediction = int(request.POST.get("prediction", "0"))
+    
+    from website.models import TestMarketVote
+    if prediction != 0:
+        v, is_new = TestMarketVote.objects.get_or_create(user=request.user, bill=bill,
+            defaults = { "prediction": prediction })
+        if not is_new:
+            v.prediction = prediction
+            v.save()
+    else:
+        TestMarketVote.objects.filter(user=request.user, bill=bill).delete()
+    return { "vote": prediction }
 
 @render_to('bill/bill_text.html')
 def bill_text(request, congress, type_slug, number):

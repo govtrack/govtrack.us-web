@@ -38,3 +38,11 @@ class CampaignSupporter(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     district = models.IntegerField(blank=True, null=True)
     geocode_response = models.TextField(blank=True, null=True)
+   
+from bill.models import Bill
+class TestMarketVote(models.Model):
+    user = models.ForeignKey(User, db_index=True)
+    bill = models.ForeignKey(Bill, db_index=True)
+    prediction = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
+    

@@ -47,7 +47,7 @@ class Vote(models.Model):
     chamber = models.IntegerField(choices=CongressChamber)
     number = models.IntegerField('Vote Number')
     source = models.IntegerField(choices=VoteSource)
-    created = models.DateTimeField()
+    created = models.DateTimeField(db_index=True)
     vote_type = models.CharField(max_length=255)
     category = models.IntegerField(max_length=255, choices=VoteCategory)
     question = models.TextField()
@@ -59,6 +59,10 @@ class Vote(models.Model):
     
     related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True)
     missing_data = models.BooleanField(default=False)
+    
+    class Meta:
+        # The ordering makes sure votes are in the right order on bill pages.
+        ordering = ["created", "chamber", "number"]
 
     def __unicode__(self):
         return self.question

@@ -39,8 +39,8 @@ class BillStatus(enum.Enum):
     enacted_signed = enum.Item(28, 'Signed by the President', xml_code='ENACTED:SIGNED', search_help_text="Enacted by a signature of the President.")
     enacted_veto_override = enum.Item(29, 'Veto Overridden', xml_code='ENACTED:VETO_OVERRIDE', search_help_text="Enacted by a veto override.")
 
-	# indicates statuses whose descriptions are clear that the bill is no longer active,
-	# other statuses are displayed as "Died: " for bills from previous congresses.
+    # indicates statuses whose descriptions are clear that the bill is no longer active,
+    # other statuses are displayed as "Died: " for bills from previous congresses.
     final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)
     
     # indicates a bill that is likely to receive further action
@@ -55,6 +55,9 @@ class BillStatus(enum.Enum):
     
     # indicates a bill at the end of its life cycle and failed
     final_status_failed = (fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)
+
+    # all final statuses
+    final_status = tuple(list(final_status_passed_bill) + list(final_status_passed_resolution) + list(final_status_failed))
 
     # indicates a bill that has had no significant action
     inactive_status = (introduced, referred, reported)

@@ -471,10 +471,20 @@ class SubscriptionList(models.Model):
 
     def get_new_events(self):
         feeds = expand_feeds(self.trackers.all())
-        if len(feeds) == 0: return []
+        if len(feeds) == 0: return None, []
         
         from django.db import connection, transaction
         cursor = connection.cursor()
+
+        # Temporary workaround. Get the maximum id for the event corresponding to
+        # last_event_mailed.
+        if self.last_event_mailed:
+            try:
+                e = Event.objects.get(id=self.last_event_mailed)
+                e2 = Event.objects.filter(source_content_type=e.source_content_type, source_object_id=e.source_object_id, eventid=e.eventid).order_by('-id')[0]
+                self.last_event_mailed = e2.id
+            except Event.DoesNotExist:
+                pass # hmm, that is odd
         
         # Pull events that this list has not seen yet according to last_event_mailed,
         # but not going back further than a certain period of time, so that if past
@@ -485,18 +495,23 @@ class SubscriptionList(models.Model):
         # The Django ORM can't handle generating a nice query. It adds joins that ruin indexing.
         cursor.execute("SELECT id, source_content_type_id, source_object_id, eventid, `when`, seq FROM events_event WHERE id > %s AND `when` > %s AND feed_id IN (" + ",".join(str(f.id) for f in feeds) + ") ORDER BY `when`, source_content_type_id, source_object_id, seq", [self.last_event_mailed if self.last_event_mailed else 0, datetime.now() - timedelta(days=4 if self.email == 1 else 14)])
         
+        max_id = None
         ret = []
         seen = set() # uniqify because events are duped for each feed they are in
         batch = cursor.fetchall()
         for b in batch:
             b1 = b[1:] # strip off the event entry id since it dups for each feed
+            max_id = max(max_id, b[0]) # since we return one event record randomly out of
+            						   # all of the dups for the feeds for all records,
+            						   # make sure we return the max of the ids, or else
+            						   # we might re-send an event in an email.
             if not b1 in seen:
                 ret.append( { "id": b[0], "source_content_type": b[1], "source_object_id": b[2], "eventid": b[3], "when": b[4], "seq": b[5] } )
                 seen.add(b1)
                 
         ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]))
     
-        return ret
+        return max_id, ret
         
 def expand_feeds(feeds):
     # Some feeds include the events of other feeds.

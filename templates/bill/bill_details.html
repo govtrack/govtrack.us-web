@@ -11,6 +11,18 @@
 {% endblock %}
 
 {% block extra_css %}
+<style>
+#make_prediction {
+	margin-top: 2em;
+	border-top: 1px dotted #AAA;
+	border-bottom: 1px dotted #AAA;
+	padding-top: 2em;
+	padding-bottom: 2em;
+	line-height: normal;
+	font-size: 85%;
+	font-family: sans-serif;
+}
+</style>
 {% endblock %}
 
 {% block crumbs %}
@@ -63,6 +75,48 @@
 	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 	
 	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
+	
+	{% if bill.is_alive %}
+	{% if not user.is_authenticated %}
+	<div id="make_prediction">
+	<p>We think this bill has a <b>{{market_score}}%</b> chance of passing Congress. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
+	</div>
+	{% else %}
+	<div id="make_prediction">
+	<p>We think this bill has a <b>{{market_score}}%</b> chance of passing Congress. What do you think?</p>
+	<ul class="empty" {% if market_score_you %}style="display: none"{% endif %}>
+		<li><a href="#" prediction="1">That&rsquo;s Too Low</a></li>
+		<li><a href="#" prediction="-1">That&rsquo;s Too High</a></li>
+	</ul>
+	<p class="nonempty" {% if not market_score_you %}style="display: none"{% endif %}>You predict <span>{% if market_score_you.prediction == 1 %}the bill will pass{% else %}the bill will not pass{% endif %}</span>. <a href="#" prediction="0">Clear my bet</a>.</p>
+	</div>
+	<script>
+	$("#make_prediction a").click(function() {
+		var p = this.getAttribute("prediction");
+		$.ajax({
+			url: "/congress/bills/_ajax/market_test_vote",
+			type: "POST",
+			data: {
+				bill: {{bill.id}},
+				prediction: p
+			},
+			dataType: "json",
+			success: function(data) {
+				if (data.vote == 0) {
+					$("#make_prediction .empty").show();
+					$("#make_prediction .nonempty").hide();
+				} else {
+					$("#make_prediction .empty").hide();
+					$("#make_prediction .nonempty").show();
+					$("#make_prediction .nonempty span").text(data.vote == 1 ? "the bill will pass" : "the bill will not pass");
+				}
+			}
+		});	
+		return false;
+	});
+	</script>
+	{% endif %}
+	{% endif %}	
 </div><!-- /actions -->
 {% endblock %}
 
@@ -244,7 +298,7 @@
 						<dd>
 							<div style="max-height: 15em; overflow: auto">
 							{% for rb in bill.get_related_bills %}
-								<div>{{rb.relation}}: <a {% if href="{{rb.bill.get_absolute_url}}">{{rb.bill}}</a></div>
+								<div>{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
 							{% endfor %}
 							</div>
 							<p><small>Related bills are identified by the Congressional Research Service.</small></p>
@@ -272,4 +326,7 @@
 	</section>
 	{% endif %}
 </div><!-- /container -->
+
+
+
 {% endblock %}

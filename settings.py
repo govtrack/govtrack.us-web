@@ -83,6 +83,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -148,7 +149,7 @@ HAYSTACK_CONNECTIONS = {
 DATETIME_FORMAT = 'M d, Y P'
 DATE_FORMAT = 'M d, Y'
 
-SEND_BROKEN_LINK_EMAILS = True
+SEND_BROKEN_LINK_EMAILS = False
 IGNORABLE_404_ENDS = ('spinner.gif', 'billtext/images/quote.png')
 IGNORABLE_404_STARTS = ('/phpmyadmin/',)
 

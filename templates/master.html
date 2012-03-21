@@ -19,6 +19,7 @@
 		
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/main.js" ></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
+		<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/ajaxforms.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"> </script>
 		{% block extra_js %}{% endblock %}
@@ -154,6 +155,7 @@
 						<li><a href="/accounts/lists">Lists</a></li>
 						{% endif %}
 						<li><a href="/about">About GovTrack</a></li>
+						<li><a href="/blog">GovTrack Blog</a></li>
 						<li><a href="/developers">For Developers</a></li>
 						{% if not user.is_authenticated %}
 						<li><a href="/accounts/login">Log in</a></li>
@@ -169,6 +171,7 @@
 					<ul>
 						<li><a href="http://www.facebook.com/pages/Civic-Impulse/312186525430"><img src="{{MEDIA_URL}}images/ico-fb.png" width="16" height="16" alt="image description"><span>Facebook</span></a></li>
 						<li><a href="http://twitter.com/#!/govtrack"><img src="{{MEDIA_URL}}images/ico-tweet.png" width="16" height="16" alt="image description"><span>Twitter</span></a></li>
+						<li><a href="/blog"><span>GovTrack Blog</span></a></li>
 					</ul>
 				</section>
 				
@@ -183,6 +186,16 @@
 		</footer>
 		
 	</div><!-- /wrapper -->
+
+	<!-- Google Analytics -->
+	<script type="text/javascript">
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	<script type="text/javascript">
+	try { var pageTracker = _gat._getTracker("UA-1190841-1"); pageTracker._trackPageview(); }
+	catch(err) {}
+	</script>
 	
 </body>	
 </html>
