@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Download and unzip ftp://ftp.census.gov/geo/tiger/TIGER2011/CD/tl_2011_us_cd112.zip
-# into ext_data.
+# into ../extdata/gis/national.
 
 import sys, os
 sys.path.insert(0, "..")
@@ -39,7 +39,7 @@ cursor.execute("CREATE TABLE districtpolygons_ (state VARCHAR(2), district TINYI
 cursor.execute("CREATE INDEX state_district_index ON districtpolygons_ (state, district)")
 cursor.execute("CREATE SPATIAL INDEX bbox_index ON districtpolygons_ (bbox)")
 
-shpRecords = shpUtils.loadShapefile("ext_data/tl_2011_us_cd112.shp")
+shpRecords = shpUtils.loadShapefile("../extdata/gis/national/tl_2011_us_cd112.shp")
 for district in shpRecords["features"]:
 	state = state_fips_codes[int(district["info"]["STATEFP"])]
 	cd = int(district["info"]["CD112FP"])

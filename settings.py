@@ -142,7 +142,7 @@ CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'xapian_backend.XapianEngine',
-        'PATH': os.path.join(os.path.dirname(__file__), 'xapian_index'),
+        'PATH': os.path.join(os.path.dirname(__file__), '../xapian_index'),
     },
 }
 
