@@ -45,8 +45,10 @@ jQuery.fn.input_default = function(value) {
 		default_value = jQuery(this).val();
 		jQuery(this).addClass("default");
 		clear_on_focus = false;
-	} else if (jQuery(this).val() == "") {
+	} else if (jQuery(this).val() == "" || jQuery(this).val() == default_value) {
 		// Otherwise, if the field is empty, replace it with the default.
+		// If the field already has the default text (e.g. navigating back to
+		// the page), make sure it has the default class.
 		jQuery(this).val(default_value);
 		jQuery(this).addClass("default");
 	}

@@ -3,7 +3,7 @@ from django.contrib.humanize.templatetags.humanize import ordinal
 
 from smartsearch.manager import SearchManager
 
-from bill.models import Bill, BillTerm, TermType, BillType
+from bill.models import Bill, BillTerm, TermType, BillType, BillStatus
 from person.models import Person
 from person.util import load_roles_at_date
 from us import get_congress_dates
@@ -78,14 +78,17 @@ def bill_search_manager():
     sm.add_option('terms2', type="select", label="subject 2", choices=sub_terms, visible_if=lambda post:"terms" in post, filter=sub_term_filter)
     sm.add_option('bill_type', label="bill or resolution type")
     
+    sm.add_sort("Popularity", "-total_bets", default=True)
     sm.add_sort("Introduced Date (Newest First)", "-introduced_date")
     sm.add_sort("Introduced Date (Oldest First)", "introduced_date")
     sm.add_sort("Last Major Action (Recent First)", "-current_status_date")
 
+    def safe_strftime(date, format):
+        return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
     
     sm.add_bottom_column(lambda bill, form :
             "Sponsor: " + unicode(bill.sponsor) + "\n" +
-            "Introduced: " + unicode(bill.introduced_date) + "\n" +
-            "Last Major Action: " + unicode(bill.current_status_date) + ": " + bill.get_current_status_display())
+            "Introduced: " + safe_strftime(bill.introduced_date, "%b %d, %Y") + "\n" +
+            ((bill.get_current_status_display() + ": " + safe_strftime(bill.current_status_date, "%b %d, %Y")) if bill.current_status != BillStatus.introduced else ""))
     
     return sm

@@ -16,6 +16,9 @@ def get_person_name(person,
 
     if firstname.endswith('.'):
         firstname = person.middlename
+        
+    if person.nickname:
+        firstname += u" \u201c%s\u201d" % person.nickname
  
     if firstname_position == 'before':
         name = firstname + ' ' + person.lastname

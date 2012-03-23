@@ -8,6 +8,7 @@ import logging
 from django.db.utils import IntegrityError
 import glob
 import re
+import time
 
 from parser.progress import Progress
 from parser.processor import Processor
@@ -250,6 +251,10 @@ def main(options):
         log.info('Parsing bills of only congress#%s' % options.congress)
     else:
         files = glob.glob('data/us/*/bills/*.xml')
+        
+    if options.filter:
+        files = [f for f in files if re.match(options.filter, f)]
+        
     log.info('Processing bills: %d files' % len(files))
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
@@ -263,6 +268,9 @@ def main(options):
             m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
             seen_bill_ids.append(Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3)).id)
             continue
+            
+        if options.slow:
+            time.sleep(1)
             
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
@@ -278,8 +286,8 @@ def main(options):
 
         File.objects.save_file(fname)
 
-    # delete bill objects that are no longer represented on disk
-    if options.congress:
+    # delete bill objects that are no longer represented on disk.... this is too dangerous.
+    if options.congress and not options.filter and False:
         # this doesn't work because seen_bill_ids is too big for sqlite!
         Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
 

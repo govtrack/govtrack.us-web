@@ -311,8 +311,8 @@ $(function() { update_search(1, null, null, true); });
                 <label for="searchform_sort">Sort by</label>
                 <select id="searchform_sort" name="sort" size="1" onchange="update_search()">
                     <option value="relevance">Relevance</option>
-                    {% for label, key in sort_options %}
-                        <option value="{{key}}">{{label}}</option>
+                    {% for label, key, default in sort_options %}
+                        <option value="{{key}}" {% if default %}selected{% endif %}>{{label}}</option>
                     {% endfor %}
                 </select>
             </li>

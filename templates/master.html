@@ -151,15 +151,13 @@
 					<ul>
 						<li><a href="/">Home</a></li>
 						<li><a href="/congress">Browse</a></li>
-						{% if user.is_authenticated %}
-						<li><a href="/accounts/lists">Lists</a></li>
-						{% endif %}
 						<li><a href="/about">About GovTrack</a></li>
 						<li><a href="/blog">GovTrack Blog</a></li>
 						<li><a href="/developers">For Developers</a></li>
 						{% if not user.is_authenticated %}
 						<li><a href="/accounts/login">Log in</a></li>
 						{% else %}
+						<li><a href="/accounts/lists">Your Lists</a></li>
 						<li><a href="/accounts/profile">Account Settings</a></li>
 						<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
 						{% endif %}

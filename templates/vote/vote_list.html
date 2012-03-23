@@ -3,6 +3,13 @@
 {% block title %}Congressional Votes Database - GovTrack.us{% endblock %}
 {% block body_class %}votes{% endblock %}
 
+{% block crumbs %}
+<ul>
+<li><a href="{% url congress_home %}">Congress</a></li>
+<li>Voting Records</li>
+</ul>
+{% endblock %}
+
 {% block summary %}
 <h1>Congressional Votes Database</h1>
 

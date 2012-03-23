@@ -30,8 +30,8 @@ class SearchManager(object):
     def add_option(self, *args, **kwargs):
         Option(self, *args, **kwargs)
         
-    def add_sort(self, sort_name, sort_key):
-        self.sort_options.append( (sort_name, sort_key) )
+    def add_sort(self, sort_name, sort_key, default=False):
+        self.sort_options.append( (sort_name, sort_key, default) )
         
     def add_left_column(self, title, func):
         self.col_left = func
@@ -189,7 +189,7 @@ class SearchManager(object):
         if len(filters) > 0:
             qs = qs.filter(**filters)
             
-        for name, key in self.sort_options:
+        for name, key, default in self.sort_options:
             if request.POST.get("sort", "") == key:
                 qs = qs.order_by(key)
         

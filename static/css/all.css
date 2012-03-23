@@ -170,7 +170,7 @@ h2 span, h3 span, h4 span, span span, a em {
 #content {
     width: 940px;
     margin: 0 auto;
-    padding: 30px 0 0;
+    padding: 15px 0 0;
 	}
 .section {
     width: 100%;
@@ -182,9 +182,13 @@ h2 span, h3 span, h4 span, span span, a em {
     display: block;
     clear: both;
 	}
-.ads { 
+.ads.square { 
 	width: 300px;
 	float: right;
+	}
+.ads.footer.leaderboard { 
+	margin: 20px 0 20px 0;
+	text-align: center;
 	}
 	.ads .explainer {
 		text-align: center;
@@ -733,7 +737,7 @@ h2 span, h3 span, h4 span, span span, a em {
     float: left;
     font: 14px/24px CallunaRegular, Georgia, 'Times New Roman', Times, serif;
     position: relative;
-    margin: -66px 0 0 -3px;
+    margin: -51px 0 0 -3px;
 	}
     .summary-box .holder {
         background: url(../images/bg-summary-box.png) no-repeat -636px 100%;
@@ -743,7 +747,7 @@ h2 span, h3 span, h4 span, span span, a em {
         background: url(../images/bg-summary-box-c.png) repeat-y;
         padding: 0 32px 0 23px;
         overflow: hidden;
-        min-height: 289px;
+        min-height: 274px;
 			}
 	.member .summary-box {
 	    background: url(../images/bg-summary-box-members.png) no-repeat;
@@ -858,7 +862,7 @@ h2 span, h3 span, h4 span, span span, a em {
     width: 940px;
     background: url(../images/bg-search-heading.png) no-repeat -1880px 100%; /* bottom bg image */
     color: #545454;
-    margin: -66px 0 34px -3px;
+    margin: -45px 0 34px -3px;
     padding-bottom: 45px;
 	}
     .heading-box .holder,
@@ -1250,6 +1254,9 @@ aside .download-links { padding: 31px 0 0 	}
             border-bottom: 1px solid #dae2df;
             padding: 15px 10px 17px 18px;
         	}
+		.searching .results .rowbottom {
+			font-size: 95%;
+        	}
     .searching .details {
         font-size: 12px;
         line-height: 18px;
@@ -1267,7 +1274,6 @@ aside .download-links { padding: 31px 0 0 	}
             display: inline;
             color: #444;
         	}
-
 
 
 /* Pagination Styles ================================== */

@@ -36,9 +36,9 @@
 {% block body_class %}bill{% endblock %}
 
 {% block summary %}
-<div id="track_panel_base" class="container">
 	<h1>{{bill.title|truncatewords:15}}</h1>
 	
+<div id="track_panel_base" class="container">
 	<div class="info">
 		{% if bill.title != bill.title|truncatewords:15 %}
 			{% with bill.title|truncatewords:15|cut:"..." as bt %}
@@ -55,14 +55,13 @@
 			<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
 		
 			<dt>Status:</dt>
-			<dd style="line-height: normal"><strong>
+			<dd>
 			{% if not dead %}
 				{{bill.get_current_status_display}}
 			{% else %}
-				Died: ({{bill.get_current_status_display}})
+				Died ({{bill.get_current_status_display}})
 			{% endif %}
-			</strong><br/>
-			{{bill.current_status_description}}</dd>
+			</dd>
 		</dl>
 	
 	</div><!-- /info -->
@@ -149,10 +148,16 @@
 								</tr>
 								{% endfor %}
 								{% endif %}
-								{% if died %}
-								<tr><td>This bill died in a previous session of Congress.</td></tr>
+								
+								<tr><td colspan="2" style="padding-top: 5px">
+								{% if not died %}
+									{{bill.current_status_description}}
+								{% else %}
+									This bill died in a previous session of Congress.
 								{% endif %}
+								</td></tr>
 							</table>
+
 						</dd>
 						
 						{% if relevant_assignments or good_cosp_assignments > 0 %}
@@ -172,49 +177,6 @@
 					</dl>
 				</div><!-- /container -->
 				
-				<div class="container">
-					<dl>
-						<dt>Primary Source</dt>
-						<dd>
-							<p><a href="{{bill.thomas_link}}">THOMAS (The Library of Congress)</a><br/>THOMAS is updated generally one day after events occur and events since the last update may not be reflected here.</p>
-						</dd>
-						<dt>Citation</dt>
-						<dd>
-							<script>function show_cite(fmt) {
-								var v = $("#cite_" + fmt).is(":visible");
-								$('#cite_ala, #cite_mla, #cite_wikipedia').slideUp();
-								if (!v) $("#cite_" + fmt).slideDown();
-								return false;
-							}</script>
-							<p>This page can be cited in one of these formats (click for details):
-								<a href="#" onclick="return show_cite('ala')">ALA</a>,
-								<a href="#" onclick="return show_cite('mla')">MLA</a>,
-								<a href="#" onclick="return show_cite('wikipedia')">Wikipedia Template</a>.
-							</p>
-							<p id="cite_ala" style="display: none">{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}. ({{bill.introduced_date|date:"Y"}}). In GovTrack.us (database of federal legislation). Retrieved {% now "F j, Y" %}, from {{request.build_absolute_uri}}</p>
-
-							<p id="cite_mla" style="display: none">&ldquo;{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}.&rdquo; GovTrack.us (database of federal legislation). {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
-
-							<p id="cite_wikipedia" style="display: none">{{cite web<br/>
-							|url={{request.build_absolute_uri}}<br/>
-							|title={{bill.display_number_with_congress_number}}<br/>
-							|accessdate={% now "F j, Y" %}<br/>
-							|author={{bill.congress|ordinal}} Congress ({{bill.introduced_date|date:"Y"}})<br/>
-							|date={{bill.introduced_date|date:"F j, Y"}}<br/>
-							|work=Legislation<br/>
-							|publisher=GovTrack.us<br/>
-							|quote={{bill.title_no_number}}<br/>
-							}}</p>
-						</dd>
-					</dl>
-				</div>
-			</div><!-- /frame -->
-		</div><!-- /holder -->
-	</div><!-- /overview -->
-	
-	<div class="overview last">
-		<div class="holder">
-			<div class="frame">
 				<div class="container">
 					<dl>
 						<dt>Text:</dt>
@@ -265,6 +227,14 @@
 					</div> <!-- ?? -->
 				</dv> <!-- /container -->
 				
+			</div><!-- /frame -->
+		</div><!-- /holder -->
+	</div><!-- /overview -->
+	
+	<div class="overview last">
+		<div class="holder">
+			<div class="frame">
+				
 				<div class="container">
 					{% if bill.votes.exists %}
 					<dl>
@@ -284,7 +254,7 @@
 						<dd>
 							<p>Use these subject areas to explore related legislation:</p>
 							<div style="max-height: 15em; overflow: auto">
-							{% for term in bill.terms.all %}
+							{% for term in bill.get_terms_sorted %}
 								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
 							{% endfor %}
 							</div>
@@ -306,14 +276,43 @@
 					</dl>
 					{% endif %}
 				</div>
-				{% comment %}
+			
 				<div class="container">
-					<ul class="download-links">
-						<li><a href="#">Download as CSV</a></li>
-						<li><a href="#">Download as XML</a></li>
-					</ul>
+					<dl>
+						<dt>Primary Source</dt>
+						<dd>
+							<p><a href="{{bill.thomas_link}}">THOMAS (The Library of Congress)</a><br/>THOMAS is updated generally one day after events occur and events since the last update may not be reflected here.</p>
+						</dd>
+						<dt>Citation</dt>
+						<dd>
+							<script>function show_cite(fmt) {
+								var v = $("#cite_" + fmt).is(":visible");
+								$('#cite_ala, #cite_mla, #cite_wikipedia').slideUp();
+								if (!v) $("#cite_" + fmt).slideDown();
+								return false;
+							}</script>
+							<p>This page can be cited in one of these formats (click for details):
+								<a href="#" onclick="return show_cite('ala')">ALA</a>,
+								<a href="#" onclick="return show_cite('mla')">MLA</a>,
+								<a href="#" onclick="return show_cite('wikipedia')">Wikipedia Template</a>.
+							</p>
+							<p id="cite_ala" style="display: none">{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}. ({{bill.introduced_date|date:"Y"}}). In GovTrack.us (database of federal legislation). Retrieved {% now "F j, Y" %}, from {{request.build_absolute_uri}}</p>
+
+							<p id="cite_mla" style="display: none">&ldquo;{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}.&rdquo; GovTrack.us (database of federal legislation). {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
+
+							<p id="cite_wikipedia" style="display: none">{{cite web<br/>
+							|url={{request.build_absolute_uri}}<br/>
+							|title={{bill.display_number_with_congress_number}}<br/>
+							|accessdate={% now "F j, Y" %}<br/>
+							|author={{bill.congress|ordinal}} Congress ({{bill.introduced_date|date:"Y"}})<br/>
+							|date={{bill.introduced_date|date:"F j, Y"}}<br/>
+							|work=Legislation<br/>
+							|publisher=GovTrack.us<br/>
+							|quote={{bill.title_no_number}}<br/>
+							}}</p>
+						</dd>
+					</dl>
 				</div>
-				{% endcomment %}
 			</div>
 		</div>
 	</div><!-- /overview -->

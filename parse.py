@@ -53,6 +53,10 @@ def parse_args():
                       help='Disable events processing')
     parser.add_option('--congress',
                       help='Limit parsing to the specified congress')
+    parser.add_option('--slow', action='store_true',
+                      help='Slow down parsing so we don\'t interfere with other processes.')
+    parser.add_option('--filter',
+                      help='Only process files matching a regex.')
     kwargs, args = parser.parse_args()
     if not args:
         parser.print_usage()

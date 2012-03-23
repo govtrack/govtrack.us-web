@@ -62,7 +62,7 @@ while [ "`netstat -tln |grep $PORT`" != "" ]; do
 	sleep 1;
 done
 
-INSTANCES=8
+INSTANCES=20
 
 echo "Starting $HOSTNAME:$PORT x $INSTANCES...";
 

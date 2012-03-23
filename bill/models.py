@@ -100,8 +100,12 @@ class Bill(models.Model):
     def get_index_text(self):
         return "\n".join([self.title] + [t[2] for t in self.titles])
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date')
+    haystack_index_extra = (('total_bets', 'Integer'),)
     def get_terms_index_list(self):
         return [t.id for t in self.terms.all().distinct()]
+    def total_bets(self):
+        from website.models import TestMarketVote
+        return TestMarketVote.objects.filter(bill=self).count()
     #######
 
         
@@ -156,7 +160,7 @@ class Bill(models.Model):
             elif status == "PASS_OVER:SENATE":
                 status = "This bill or resolution passed in the Senate on %s and goes to the House next for consideration."
             elif status == "PASSED:BILL":
-                status = "This bill passed by Congress on %s and goes to the President next."
+                status = "This bill was passed by Congress on %s and goes to the President next."
             elif status == "PASS_BACK:HOUSE":
                 status = "This bill or resolution passed in the Senate and the House, but the House made changes and sent it back to the Senate on %s."
             elif status == "PASS_BACK:SENATE":
@@ -229,26 +233,45 @@ class Bill(models.Model):
         if self.congress < 111: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
         with Event.update(self) as E:
-            index_feeds = [Feed.BillFeed(self)]
+            # collect the feeds that we'll add major actions to
+            bill_feed = Feed.BillFeed(self)
+            index_feeds = [bill_feed]
             if self.sponsor != None:
                 index_feeds.append(Feed.PersonSponsorshipFeed(self.sponsor))
             index_feeds.extend([Feed.IssueFeed(ix) for ix in self.terms.all()])
             index_feeds.extend([Feed.CommitteeFeed(cx) for cx in self.committees.all()])
             
+            # generate events for major actions
             E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
-            
             common_feeds = [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()]
             enacted_feed = [Feed.EnactedBillsFeed()]
             for date, state, text in actions:
                 if state == BillStatus.introduced:
                     continue # already indexed
                 E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_passed_bill else []))
+                
+            # generate events for new cosponsors... group by join date, and
+            # assume that join dates we've seen don't have new cosponsors
+            # added later, or else we may miss that in an email update. we
+            # don't actually need the people listed here, just the unique join
+            # dates.
+            cosponsor_join_dates = set()
+            for cosp in Cosponsor.objects.filter(bill=self, withdrawn=None).exclude(joined=self.introduced_date):
+                cosponsor_join_dates.add(cosp.joined)
+            for joindate in cosponsor_join_dates:
+                E.add("cosp:" + joindate.isoformat(), joindate, [bill_feed])
     
     def render_event(self, eventid, feeds):
-        
-        from status import BillStatus
         ev_type, ev_code = eventid.split(":")
-        
+        if ev_type == "state":
+            return self.render_event_state(ev_code, feeds)
+        elif ev_type == "cosp":
+            return self.render_event_cosp(ev_code, feeds)
+        else:
+            raise Exception()
+          
+    def render_event_state(self, ev_code, feeds):
+        from status import BillStatus
         status = BillStatus.by_value(int(ev_code))
         date = self.introduced_date
         action = None
@@ -310,18 +333,57 @@ class Bill(models.Model):
                 }
             }
 
+    def render_event_cosp(self, ev_code, feeds):
+        cosp = Cosponsor.objects.filter(bill=self, withdrawn=None, joined=ev_code)
+        if len(cosp) == 0:
+            # What to do if there are no longer new cosponsors on this date?
+            # TODO test this.
+            return {
+                "type": "Bills and Resolutions",
+                "date": datetime.date(*ev_code.split('-')),
+                "date_has_no_time": True,
+                "title": "New Cosponsors: " + self.title,
+                "url": self.get_absolute_url(),
+                "body_text_template": "Event error.",
+                "body_html_template": "Event error.",
+                "context": {},
+                }
+            
+        return {
+            "type": "Bills and Resolutions",
+            "date": cosp[0].joined,
+            "date_has_no_time": True,
+            "title": "New Cosponsor" + ("" if len(cosp) == 1 else "s") + ": " + self.title,
+            "url": self.get_absolute_url(),
+            "body_text_template":
+"""{% for p in cosponsors %}{{ p.person.name }}
+{% endfor %}""",
+            "body_html_template": """{% for p in cosponsors %}<p><a href="{{p.person.get_absolute_url}}">{{ p.person.name }}</a></p>{% endfor %}""",
+            "context": {
+                "cosponsors": cosp,
+                }
+            }
+        
     def get_major_events(self):
         sfn = "data/us/%d/bills/%s%d.xml" % (self.congress, BillType.by_value(self.bill_type).xml_code, self.number)
         from lxml import etree
         from parser.processor import Processor
         p = Processor()
         dom = etree.parse(open(sfn))
-        ret = [{ "label": "Introduced", "date": self.introduced_date }]
+        ret = []
         for axn in dom.xpath("actions/*[@state]"):
+            st = BillStatus.by_xml_code(axn.xpath("string(@state)"))
+            if st == BillStatus.passed_bill and self.bill_type in (BillType.senate_bill, BillType.senate_joint_resolution):
+                st = "Passed House"
+            elif st == BillStatus.passed_bill and self.bill_type in (BillType.house_bill, BillType.house_joint_resolution):
+                st = "Passed Senate"
+            else:
+                st = st.label
             ret.append({
-                "label": BillStatus.by_xml_code(axn.xpath("string(@state)")).label,
+                "label": st,
                 "date": p.parse_datetime(axn.xpath("string(@datetime)")),
             })
+        if len(ret) == 0: ret = [{ "label": "Introduced", "date": self.introduced_date }]
         return ret
 
     def get_major_events__old(self):
@@ -441,6 +503,11 @@ class Bill(models.Model):
             seq.append(label)
             
         return seq
+        
+    def get_terms_sorted(self):
+        terms = list(self.terms.all())
+        terms.sort(key = lambda x : (not x.is_top_term(), x.name))
+        return terms
         
     def get_related_bills(self):
         ret = []
