@@ -17,6 +17,8 @@ from vote.search import vote_search_manager
 from person.util import load_roles_at_date
 from us import get_all_sessions
 
+from settings import CURRENT_CONGRESS
+
 ideology_scores = { }
 
 def vote_list(request):
@@ -94,3 +96,21 @@ def vote_export_xml(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
     fobj = open('data/us/%s/rolls/%s%s-%s.xml' % (congress, chamber_code, session, number))
     return HttpResponse(fobj, content_type='text/xml')
+    
+import django.contrib.sitemaps
+class sitemap_current(django.contrib.sitemaps.Sitemap):
+    changefreq = "yearly"
+    priority = 1.0
+    def items(self):
+        return Vote.objects.filter(congress=CURRENT_CONGRESS)
+class sitemap_previous(django.contrib.sitemaps.Sitemap):
+    changefreq = "yearly"
+    priority = 0.25
+    def items(self):
+        return Vote.objects.filter(congress=CURRENT_CONGRESS-1)
+class sitemap_archive(django.contrib.sitemaps.Sitemap):
+    changefreq = "yearly"
+    priority = 0.25
+    def items(self):
+        return Vote.objects.filter(congress__lt=CURRENT_CONGRESS-1)
+    

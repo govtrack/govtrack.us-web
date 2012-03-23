@@ -240,3 +240,15 @@ def political_spectrum(request):
         "years_in_congress_max": years_in_congress_max,
         }
 
+import django.contrib.sitemaps
+class sitemap_current(django.contrib.sitemaps.Sitemap):
+    changefreq = "weekly"
+    priority = 1.0
+    def items(self):
+        return Person.objects.filter(roles__current=True).distinct()
+class sitemap_archive(django.contrib.sitemaps.Sitemap):
+    changefreq = "yearly"
+    priority = 0.25
+    def items(self):
+        return Person.objects.filter(roles__current=False).distinct()
+    

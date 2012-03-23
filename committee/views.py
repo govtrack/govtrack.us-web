@@ -56,3 +56,11 @@ def committee_list(request):
         'joint_committees': getlist(CommitteeType.joint),
         'feed': Feed.AllCommitteesFeed(),
     }
+    
+import django.contrib.sitemaps
+class sitemap(django.contrib.sitemaps.Sitemap):
+    changefreq = "weekly"
+    priority = 1.0
+    def items(self):
+        return Committee.objects.filter(obsolete=False)
+

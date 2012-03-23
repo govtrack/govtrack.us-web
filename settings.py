@@ -102,6 +102,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.humanize',
+    'django.contrib.sitemaps',
     # 3rd party libraries
     'common',
     'django_extensions',

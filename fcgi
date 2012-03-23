@@ -19,14 +19,18 @@ if [ "$1" = "" ]; then
 	./fcgi stop
 fi
 
+if [ -f PORT ]; then
+	NAME=-`cat PORT`
+fi
+
 HOSTNAME=`hostname -I | tr -d ' '` # assumes only one interface
 HOSTNAME=127.0.0.1
 
 # Get the CURPID, CURPIDFILE, and CURPORT of the running instance.
-for CURPIDFILE in `ls /tmp | egrep "django-fcgi-$USER(-.*)?.pid"`
+for CURPIDFILE in `ls /tmp | egrep "django-fcgi-$USER$NAME(-.*)?.pid"`
 do
     CURPID=`cat -- /tmp/$CURPIDFILE`;
-    CURPORT=`echo $CURPIDFILE | sed "s/django-fcgi-$USER-\([0-9]*\).pid/\1/"`;
+    CURPORT=`echo $CURPIDFILE | sed "s/.*-\([0-9]*\).pid/\1/"`;
 
     # Stop: Kill the running instance and exit.
     if [ "$1" = "stop" ]; then
@@ -42,9 +46,14 @@ if [ "$1" = "stop" ]; then
 fi
 
 # Select a port for the new instance.
-PORT=`echo 1000+$UID*2|bc`
+if [ -f PORT ]; then
+	PORT=`cat PORT`
+else
+	PORT=`echo 1000+$UID*2|bc`
+fi
 
-# If it is the same as the running instance's port, add 1.
+# If it is the same as the running instance's port in a
+# graceful restart, add 1.
 if [ "$PORT" = "$CURPORT" ]; then
     PORT=`echo $PORT+1|bc`
 fi
@@ -64,10 +73,10 @@ done
 
 INSTANCES=20
 
-echo "Starting $HOSTNAME:$PORT x $INSTANCES...";
+echo "Starting $USER$NAME $HOSTNAME:$PORT x $INSTANCES...";
 
 # select a PIDFILE
-PIDFILE=/tmp/django-fcgi-$USER-$PORT.pid
+PIDFILE=/tmp/django-fcgi-$USER$NAME-$PORT.pid
 
 PYTHONPATH=.. ./manage.py runfcgi host=$HOSTNAME port=$PORT pidfile=$PIDFILE \
                  workdir=$MYDIR umask=0002 debug=1 \
@@ -79,7 +88,7 @@ if [ "$CURPIDFILE" != "" ]; then
     sleep 2; # give the new instance a chance to start up and
              # the old instance a chance to complete requests
 
-    echo "Stopping $CURPORT (pid=$CURPID)...";
+    echo "Stopping $CURPIDFILE (port=$CURPORT, pid=$CURPID)...";
     kill -HUP $CURPID;
     rm -f -- /tmp/$CURPIDFILE;
 

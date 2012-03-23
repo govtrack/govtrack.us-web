@@ -282,3 +282,20 @@ def subject(request, sluggedname, termid):
         ix2 = ix
     return show_bill_browse("bill/subject.html", request, ix1, ix2, { "term": ix, "feed": Feed.IssueFeed(ix) })
     
+import django.contrib.sitemaps
+class sitemap_current(django.contrib.sitemaps.Sitemap):
+    changefreq = "weekly"
+    priority = 1.0
+    def items(self):
+        return Bill.objects.filter(congress=CURRENT_CONGRESS)
+class sitemap_previous(django.contrib.sitemaps.Sitemap):
+    changefreq = "yearly"
+    priority = 0.25
+    def items(self):
+        return Bill.objects.filter(congress=CURRENT_CONGRESS-1)
+class sitemap_archive(django.contrib.sitemaps.Sitemap):
+    changefreq = "yearly"
+    priority = 0.25
+    def items(self):
+        return Bill.objects.filter(congress__lt=CURRENT_CONGRESS-1)
+    
