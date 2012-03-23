@@ -13,11 +13,12 @@
 {% block extra_css %}
 <style>
 #make_prediction {
-	margin-top: 2em;
+	margin-top: 1em;
+	margin-bottom: 1.2em;
 	border-top: 1px dotted #AAA;
 	border-bottom: 1px dotted #AAA;
-	padding-top: 2em;
-	padding-bottom: 2em;
+	padding-top: 1em;
+	padding-bottom: 0;
 	line-height: normal;
 	font-size: 85%;
 	font-family: sans-serif;
@@ -71,11 +72,9 @@
 {% include "events/subscribe_inline.html" %}
 
 <div class="aside">
+	{% if bill.is_alive %}
 	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 	
-	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
-	
-	{% if bill.is_alive %}
 	{% if not user.is_authenticated %}
 	<div id="make_prediction">
 	<p>We think this bill has a <b>{{market_score}}%</b> chance of passing Congress. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
@@ -83,10 +82,11 @@
 	{% else %}
 	<div id="make_prediction">
 	<p>We think this bill has a <b>{{market_score}}%</b> chance of passing Congress. What do you think?</p>
-	<ul class="empty" {% if market_score_you %}style="display: none"{% endif %}>
-		<li><a href="#" prediction="1">That&rsquo;s Too Low</a></li>
-		<li><a href="#" prediction="-1">That&rsquo;s Too High</a></li>
-	</ul>
+	<p class="empty" {% if market_score_you %}style="display: none"{% endif %}>
+		That&rsquo;s...
+		<a href="#" prediction="1">Too Low</a> | 
+		<a href="#" prediction="-1">Too High</a>
+	</p>
 	<p class="nonempty" {% if not market_score_you %}style="display: none"{% endif %}>You predict <span>{% if market_score_you.prediction == 1 %}the bill will pass{% else %}the bill will not pass{% endif %}</span>. <a href="#" prediction="0">Clear my bet</a>.</p>
 	</div>
 	<script>
@@ -115,7 +115,11 @@
 	});
 	</script>
 	{% endif %}
+	
+	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
 	{% endif %}	
+	
+	<div class="fb-like" data-send="true" data-layout="button_count" data-width="170" data-show-faces="false" style="margin-top: 10px"></div>
 </div><!-- /actions -->
 {% endblock %}
 
