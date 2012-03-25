@@ -39,7 +39,7 @@
 
 {% block summary %}
 
-{% cache 600 billhead %}
+{% cache 600 billhead bill.id %}
 <h1>{{bill.title|truncatewords:15}}</h1>
 	
 <div id="track_panel_base" class="container">
@@ -129,7 +129,7 @@
 {% endblock %}
 
 {% block body %}
-{% cache 600 billoverview %}
+{% cache 600 billoverview bill.id %}
 <div id="bill-overview" class="section">
 	
 	<h2>Bill Overview</h2>

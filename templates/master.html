@@ -32,6 +32,7 @@
 	</head>
 	
 <body class="{% block body_class %}{% endblock %}">
+	{% if pagename != "blog_template" %}
 	<div id="sitenewscontainer" style="display: none">
 		<div id="sitenews" seq="3">
 			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
@@ -54,6 +55,7 @@
 		}
 	});
 	</script>
+	{% endif %}
 				
 	<div id="wrapper">
 		
