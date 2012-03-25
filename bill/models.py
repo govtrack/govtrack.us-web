@@ -373,9 +373,9 @@ class Bill(models.Model):
         ret = []
         for axn in dom.xpath("actions/*[@state]"):
             st = BillStatus.by_xml_code(axn.xpath("string(@state)"))
-            if st == BillStatus.passed_bill and self.bill_type in (BillType.senate_bill, BillType.senate_joint_resolution):
+            if (st == BillStatus.passed_bill and self.bill_type in (BillType.senate_bill, BillType.senate_joint_resolution)) or (st == BillStatus.passed_concurrentres and self.bill_type == BillType.senate_concurrent_resolution):
                 st = "Passed House"
-            elif st == BillStatus.passed_bill and self.bill_type in (BillType.house_bill, BillType.house_joint_resolution):
+            elif (st == BillStatus.passed_bill and self.bill_type in (BillType.house_bill, BillType.house_joint_resolution)) or (st == BillStatus.passed_concurrentres and self.bill_type == BillType.house_concurrent_resolution):
                 st = "Passed Senate"
             else:
                 st = st.label
@@ -447,18 +447,18 @@ class Bill(models.Model):
             },
             BillType.house_concurrent_resolution: {
                 BillStatus.reported: BillStatus.pass_over_house,
-                BillStatus.pass_over_house: BillStatus.passed_concurrentres,
-                BillStatus.pass_back_house: BillStatus.passed_concurrentres,
-                BillStatus.pass_back_senate: BillStatus.passed_concurrentres,
+                BillStatus.pass_over_house: (BillStatus.passed_concurrentres, "Passed Senate"),
+                BillStatus.pass_back_house: (BillStatus.passed_concurrentres, "Senate Approves House Changes"),
+                BillStatus.pass_back_senate: (BillStatus.passed_concurrentres, "House Approves Senate Changes"),
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
                 BillStatus.prov_kill_cloturefailed: BillStatus.passed_concurrentres,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
             },
             BillType.senate_concurrent_resolution: {
                 BillStatus.reported: BillStatus.pass_over_senate,
-                BillStatus.pass_over_senate: BillStatus.passed_concurrentres,
-                BillStatus.pass_back_house: BillStatus.passed_concurrentres,
-                BillStatus.pass_back_senate: BillStatus.passed_concurrentres,
+                BillStatus.pass_over_senate: (BillStatus.passed_concurrentres, "Passed House"),
+                BillStatus.pass_back_house: (BillStatus.passed_concurrentres, "Senate Approves House Changes"),
+                BillStatus.pass_back_senate: (BillStatus.passed_concurrentres, "House Approves Senate Changes"),
                 BillStatus.prov_kill_suspensionfailed: BillStatus.passed_concurrentres, 
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
