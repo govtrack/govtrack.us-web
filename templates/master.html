@@ -195,6 +195,7 @@
 	  fjs.parentNode.insertBefore(js, fjs);
 	}(document, 'script', 'facebook-jssdk'));</script>
 
+	{% if not debug %}
 	<!-- Google Analytics -->
 	<script type="text/javascript">
 	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
@@ -204,6 +205,7 @@
 	try { var pageTracker = _gat._getTracker("UA-1190841-1"); pageTracker._trackPageview(); }
 	catch(err) {}
 	</script>
+	{% endif %}
 	
 </body>	
 </html>

@@ -7,6 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.db import connection
 from django.http import Http404
+from django.core.cache import cache
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -30,46 +31,53 @@ from registration.helpers import json_response
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
-    person = get_object_or_404(Person, pk=pk)
+    def build_info():
+        person = get_object_or_404(Person, pk=pk)
+        
+        # redirect to canonical URL
+        if request.path != person.get_absolute_url():
+            return redirect(person.get_absolute_url(), permanent=True)
+           
+        # current role
+        role = person.get_current_role()
+        if role:
+            active_role = True
+        else:
+            active_role = False
+            try:
+                role = person.roles.order_by('-enddate')[0]
+            except IndexError:
+                role = None
     
-    # redirect to canonical URL
-    if request.path != person.get_absolute_url():
-        return redirect(person.get_absolute_url(), permanent=True)
-       
-    # current role
-    role = person.get_current_role()
-    if role:
-        active_role = True
-    else:
-        active_role = False
-        try:
-            role = person.roles.order_by('-enddate')[0]
-        except IndexError:
-            role = None
+        # photo
+        photo_path = 'data/photos/%d-100px.jpeg' % person.pk
+        photo_credit = None
+        if os.path.exists(photo_path):
+            photo = '/' + photo_path
+            with open(photo_path.replace("-100px.jpeg", "-credit.txt"), "r") as f:
+                photo_credit = f.read().strip().split(" ", 1)
+        else:
+            photo = None
+    
+        analysis_data = analysis.load_data(person)
+    
+        return {'person': person,
+                'role': role,
+                'active_role': active_role,
+                'photo': photo,
+                'photo_credit': photo_credit,
+                'analysis_data': analysis_data,
+                'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
+                'committeeassignments': get_committee_assignments(person),
+                'feed': Feed.PersonFeed(person.id),
+                }
 
-    # photo
-    photo_path = 'data/photos/%d-100px.jpeg' % person.pk
-    photo_credit = None
-    if os.path.exists(photo_path):
-        photo = '/' + photo_path
-        with open(photo_path.replace("-100px.jpeg", "-credit.txt"), "r") as f:
-            photo_credit = f.read().strip().split(" ", 1)
-    else:
-        photo = None
-
-    analysis_data = analysis.load_data(person)
-
-    return {'person': person,
-            'role': role,
-            'active_role': active_role,
-            'photo': photo,
-            'photo_credit': photo_credit,
-            'analysis_data': analysis_data,
-            'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
-            'committeeassignments': get_committee_assignments(person),
-            'feed': Feed.PersonFeed(person.id),
-            }
-
+    ck = "person_details_%d" % int(pk)
+    ret = cache.get(ck)
+    if not ret:
+        ret = build_info()
+        cache.set(ck, ret, 600)
+    return ret
 
 def searchmembers(request, initial_mode=None):
     return person_search_manager().view(request, "person/person_list.html",
