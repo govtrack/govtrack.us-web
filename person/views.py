@@ -13,7 +13,7 @@ from common.pagination import paginate
 
 import json, cPickle, base64
 
-from us import statelist, statenames, stateapportionment, state_abbr_from_name
+from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs
 
 from person.models import Person, PersonRole
 from person import analysis
@@ -251,4 +251,18 @@ class sitemap_archive(django.contrib.sitemaps.Sitemap):
     priority = 0.25
     def items(self):
         return Person.objects.filter(roles__current=False).distinct()
-    
+class sitemap_districts(django.contrib.sitemaps.Sitemap):
+    changefreq = "monthly"
+    priority = 0.5
+    def items(self):
+        ret = []
+        for state in stateabbrs:
+            if state not in stateapportionment: continue
+            ret.append( (state, 0) )
+            if stateapportionment[state] not in (1, "T"):
+                for district in xrange(1, stateapportionment[state]+1):
+                    ret.append( (state, district) )
+        return ret
+    def location(self, item):
+        return "/congress/members/" + item[0] + ("/"+str(item[1]) if item[1] else "")
+        
