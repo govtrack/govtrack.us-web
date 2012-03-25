@@ -7,13 +7,14 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.db import connection
 from django.http import Http404
+from django.core.cache import cache
 
 from common.decorators import render_to
 from common.pagination import paginate
 
 import json, cPickle, base64
 
-from us import statelist, statenames, stateapportionment, state_abbr_from_name
+from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs
 
 from person.models import Person, PersonRole
 from person import analysis
@@ -30,46 +31,53 @@ from registration.helpers import json_response
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
-    person = get_object_or_404(Person, pk=pk)
+    def build_info():
+        person = get_object_or_404(Person, pk=pk)
+        
+        # redirect to canonical URL
+        if request.path != person.get_absolute_url():
+            return redirect(person.get_absolute_url(), permanent=True)
+           
+        # current role
+        role = person.get_current_role()
+        if role:
+            active_role = True
+        else:
+            active_role = False
+            try:
+                role = person.roles.order_by('-enddate')[0]
+            except IndexError:
+                role = None
     
-    # redirect to canonical URL
-    if request.path != person.get_absolute_url():
-        return redirect(person.get_absolute_url(), permanent=True)
-       
-    # current role
-    role = person.get_current_role()
-    if role:
-        active_role = True
-    else:
-        active_role = False
-        try:
-            role = person.roles.order_by('-enddate')[0]
-        except IndexError:
-            role = None
+        # photo
+        photo_path = 'data/photos/%d-100px.jpeg' % person.pk
+        photo_credit = None
+        if os.path.exists(photo_path):
+            photo = '/' + photo_path
+            with open(photo_path.replace("-100px.jpeg", "-credit.txt"), "r") as f:
+                photo_credit = f.read().strip().split(" ", 1)
+        else:
+            photo = None
+    
+        analysis_data = analysis.load_data(person)
+    
+        return {'person': person,
+                'role': role,
+                'active_role': active_role,
+                'photo': photo,
+                'photo_credit': photo_credit,
+                'analysis_data': analysis_data,
+                'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
+                'committeeassignments': get_committee_assignments(person),
+                'feed': Feed.PersonFeed(person.id),
+                }
 
-    # photo
-    photo_path = 'data/photos/%d-100px.jpeg' % person.pk
-    photo_credit = None
-    if os.path.exists(photo_path):
-        photo = '/' + photo_path
-        with open(photo_path.replace("-100px.jpeg", "-credit.txt"), "r") as f:
-            photo_credit = f.read().strip().split(" ", 1)
-    else:
-        photo = None
-
-    analysis_data = analysis.load_data(person)
-
-    return {'person': person,
-            'role': role,
-            'active_role': active_role,
-            'photo': photo,
-            'photo_credit': photo_credit,
-            'analysis_data': analysis_data,
-            'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
-            'committeeassignments': get_committee_assignments(person),
-            'feed': Feed.PersonFeed(person.id),
-            }
-
+    ck = "person_details_%d" % int(pk)
+    ret = cache.get(ck)
+    if not ret:
+        ret = build_info()
+        cache.set(ck, ret, 600)
+    return ret
 
 def searchmembers(request, initial_mode=None):
     return person_search_manager().view(request, "person/person_list.html",
@@ -251,4 +259,18 @@ class sitemap_archive(django.contrib.sitemaps.Sitemap):
     priority = 0.25
     def items(self):
         return Person.objects.filter(roles__current=False).distinct()
-    
+class sitemap_districts(django.contrib.sitemaps.Sitemap):
+    changefreq = "monthly"
+    priority = 0.5
+    def items(self):
+        ret = []
+        for state in stateabbrs:
+            if state not in stateapportionment: continue
+            ret.append( (state, 0) )
+            if stateapportionment[state] not in (1, "T"):
+                for district in xrange(1, stateapportionment[state]+1):
+                    ret.append( (state, district) )
+        return ret
+    def location(self, item):
+        return "/congress/members/" + item[0] + ("/"+str(item[1]) if item[1] else "")
+        

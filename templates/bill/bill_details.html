@@ -1,5 +1,6 @@
 {% extends "master_a.html" %}
 {% load humanize %}
+{% load cache %}
 
 {% block title %}{{bill}} - GovTrack.us{% endblock %}
 
@@ -37,7 +38,9 @@
 {% block body_class %}bill{% endblock %}
 
 {% block summary %}
-	<h1>{{bill.title|truncatewords:15}}</h1>
+
+{% cache 600 billhead %}
+<h1>{{bill.title|truncatewords:15}}</h1>
 	
 <div id="track_panel_base" class="container">
 	<div class="info">
@@ -69,6 +72,8 @@
 	
 	<p style="margin: 0"><small>Bill titles {% if subtitle %}and summaries{% endif %} are written by the sponsor.</small></p>
 </div>
+{% endcache %}
+
 {% include "events/subscribe_inline.html" %}
 
 <div class="aside">
@@ -124,6 +129,7 @@
 {% endblock %}
 
 {% block body %}
+{% cache 600 billoverview %}
 <div id="bill-overview" class="section">
 	
 	<h2>Bill Overview</h2>
@@ -321,6 +327,7 @@
 		</div>
 	</div><!-- /overview -->
 	
+	{% with bill.get_formatted_summary as summary %}
 	{% if summary %}
 	<section class="clear" style="padding-top: 2em">
 		<h3>Official Bill Summary</h3>
@@ -328,8 +335,8 @@
 		{{summary|safe}}
 	</section>
 	{% endif %}
+	{% endwith %}
 </div><!-- /container -->
 
-
-
+{% endcache %}
 {% endblock %}

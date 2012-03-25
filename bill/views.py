@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.core.cache import cache
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -22,7 +23,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json, os.path
+import urllib, urllib2, json
 from registration.helpers import json_response
 
 @render_to('bill/bill_details.html')
@@ -51,52 +52,6 @@ def bill_details(request, congress, type_slug, number):
             else:
                 good_cosp_assignments += 1
         
-    summary = None
-    sfn = "data/us/%d/bills.summary/%s%d.summary.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
-    if os.path.exists(sfn):
-        from lxml import etree
-        dom = etree.parse(open(sfn))
-        xslt_root = etree.XML('''
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-        <xsl:output omit-xml-declaration="yes"/>
-        <xsl:template match="summary//Paragraph[string(.)!='']">
-            <div style="margin-top: .5em; margin-bottom: .5em">
-                <xsl:apply-templates/>
-            </div>
-        </xsl:template>
-
-        <xsl:template match="Division|Title|Subtitle|Part|Chapter|Section">
-            <xsl:if test="not(@number='meta')">
-            <div>
-                <xsl:choose>
-                <xsl:when test="@name='' and count(*)=1">
-                <div style="margin-top: .75em">
-                <span xml:space="preserve" style="font-weight: bold;"><xsl:value-of select="name()"/> <xsl:value-of select="@number"/>.</span>
-                <xsl:value-of select="Paragraph"/>
-                </div>
-                </xsl:when>
-
-                <xsl:otherwise>
-                <div style="font-weight: bold; margin-top: .75em" xml:space="preserve">
-                    <xsl:value-of select="name()"/>
-                    <xsl:value-of select="@number"/>
-                    <xsl:if test="not(@name='')"> - </xsl:if>
-                    <xsl:value-of select="@name"/>
-                </div>
-                <div style="margin-left: 2em">
-                    <xsl:apply-templates/>
-                </div>
-                </xsl:otherwise>
-                </xsl:choose>
-            </div>
-            </xsl:if>
-        </xsl:template>
-</xsl:stylesheet>''')
-        transform = etree.XSLT(xslt_root)
-        summary = transform(dom)
-        if unicode(summary).strip() == "":
-            summary = None
-    
     # simple predictive market implementation
     from website.models import TestMarketVote
     from math import exp
@@ -116,7 +71,6 @@ def bill_details(request, congress, type_slug, number):
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
-        "summary": summary,
         "relevant_assignments": relevant_assignments,
         "good_cosp_assignments": good_cosp_assignments,
         "good_cosp_assignments_other": good_cosp_assignments_other,
@@ -248,30 +202,44 @@ def subject_choices(include_legacy=True):
 
 @render_to('bill/bill_docket.html')
 def bill_docket(request):
-    groups = [
-        ("Active Bills", "bills", " that are awaiting the president's signature, have differences between the chambers to be resolved, or were vetoed", BillStatus.active_status),
-        ("Waiting Bills", "bills and resolutions", " that had a significant vote", BillStatus.waiting_status),
-        ("Successful Bills", "enacted bills", "", BillStatus.final_status_passed_bill),
-        ("Successful Resolutions", "passed resolutions", "", BillStatus.final_status_passed_resolution),
-        ("Unsuccessful Bills", "bills and resolutions", " that failed a vote", BillStatus.final_status_failed),
-        ("Inactive Bills", "bills and resolutions", " that have been introduced, referred to committee, or reported by committee", BillStatus.inactive_status),
-    ]
+    def build_info():
+        groups = [
+            ("Active Bills", "bills", " that are awaiting the president's signature, have differences between the chambers to be resolved, or were vetoed", BillStatus.active_status),
+            ("Waiting Bills", "bills and resolutions", " that had a significant vote", BillStatus.waiting_status),
+            ("Successful Bills", "enacted bills", "", BillStatus.final_status_passed_bill),
+            ("Successful Resolutions", "passed resolutions", "", BillStatus.final_status_passed_resolution),
+            ("Unsuccessful Bills", "bills and resolutions", " that failed a vote", BillStatus.final_status_failed),
+            ("Inactive Bills", "bills and resolutions", " that have been introduced, referred to committee, or reported by committee", BillStatus.inactive_status),
+        ]
+        
+        groups = [
+            (   g[0], # title
+                g[1], # text 1
+                g[2], # text 2
+                ",".join(str(s) for s in g[3]), # status descriptions
+                Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=g[3]).count(), # count in category
+                Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=g[3]).order_by('-current_status_date')[0:6], # top 6 in this category
+                )
+            for g in groups ]
+        
+        start, end = get_congress_dates(CURRENT_CONGRESS)
+        end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
+        current_congress = '%s Congress, for %d-%d' % (ordinal(CURRENT_CONGRESS), start.year, end.year)    
+        
+        return {
+            "total": Bill.objects.filter(congress=CURRENT_CONGRESS).count(),
+            "current_congress": current_congress,
+            "groups": groups,
+            "subjects": subject_choices(),
+        }
+        
+    ret = cache.get("bill_docket_info")    
+    if not ret:
+        ret = build_info()
+        cache.set("bill_docket_info", ret, 60*60)
     
-    groups = [
-        (g[0], g[1], g[2], ",".join(str(s) for s in g[3]), Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=g[3]).order_by('-current_status_date'))
-        for g in groups ]
+    return ret
     
-    start, end = get_congress_dates(CURRENT_CONGRESS)
-    end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
-    current_congress = '%s Congress, for %d-%d' % (ordinal(CURRENT_CONGRESS), start.year, end.year)    
-    
-    return {
-        "total": Bill.objects.filter(congress=CURRENT_CONGRESS).count(),
-        "current_congress": current_congress,
-        "groups": groups,
-        "subjects": subject_choices(),
-    }
-
 def subject(request, sluggedname, termid):
     ix = BillTerm.objects.get(id=termid)
     if ix.parents.all().count() == 0:

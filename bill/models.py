@@ -12,7 +12,8 @@ from bill.title import get_bill_number, get_primary_bill_title
 
 from django.conf import settings
 
-import datetime
+import datetime, os.path
+from lxml import etree
 
 "Enums"
 
@@ -141,6 +142,9 @@ class Bill(models.Model):
     @property
     def is_alive(self):
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
+
+    def get_formatted_summary(self):
+        return get_formatted_bill_summary(self)
 
     def get_status_text(self, status, date) :
         bill = self
@@ -526,4 +530,51 @@ class RelatedBill(models.Model):
     relation = models.CharField(max_length=16)
     
     relation_sort_order = { "identical": 0 }
+    
+def get_formatted_bill_summary(bill):
+    sfn = "data/us/%d/bills.summary/%s%d.summary.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
+    if not os.path.exists(sfn): return None
+    
+    dom = etree.parse(open(sfn))
+    xslt_root = etree.XML('''
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output omit-xml-declaration="yes"/>
+    <xsl:template match="summary//Paragraph[string(.)!='']">
+        <div style="margin-top: .5em; margin-bottom: .5em">
+            <xsl:apply-templates/>
+        </div>
+    </xsl:template>
+
+    <xsl:template match="Division|Title|Subtitle|Part|Chapter|Section">
+        <xsl:if test="not(@number='meta')">
+        <div>
+            <xsl:choose>
+            <xsl:when test="@name='' and count(*)=1">
+            <div style="margin-top: .75em">
+            <span xml:space="preserve" style="font-weight: bold;"><xsl:value-of select="name()"/> <xsl:value-of select="@number"/>.</span>
+            <xsl:value-of select="Paragraph"/>
+            </div>
+            </xsl:when>
+
+            <xsl:otherwise>
+            <div style="font-weight: bold; margin-top: .75em" xml:space="preserve">
+                <xsl:value-of select="name()"/>
+                <xsl:value-of select="@number"/>
+                <xsl:if test="not(@name='')"> - </xsl:if>
+                <xsl:value-of select="@name"/>
+            </div>
+            <div style="margin-left: 2em">
+                <xsl:apply-templates/>
+            </div>
+            </xsl:otherwise>
+            </xsl:choose>
+        </div>
+        </xsl:if>
+    </xsl:template>
+</xsl:stylesheet>''')
+    transform = etree.XSLT(xslt_root)
+    summary = transform(dom)
+    if unicode(summary).strip() == "":
+        return None
+    return summary
     

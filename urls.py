@@ -13,6 +13,7 @@ sitemaps = {
         #"bills_archive": bill.views.sitemap_archive, # takes too long to load
         "people_current": person.views.sitemap_current,
         "people_archive": person.views.sitemap_archive,
+        "districts": person.views.sitemap_districts,
         "committees": committee.views.sitemap,
         "votes_current": vote.views.sitemap_current,
         "votes_previous": vote.views.sitemap_previous,
