@@ -11,6 +11,7 @@
 
 		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all.css">
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen"/><![endif]-->
+		<meta name="viewport" content="width=1000">
 		
 		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}"></meta>
@@ -68,12 +69,14 @@
 						<div class="block">
 							<ul class="super-nav">
 								{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
+								{% block override_login %}
 								{% if not user.is_authenticated %}
 									<li><a href="/accounts/login">Log In</a></li>
 								{% else %}
 									<li><a href="/accounts/profile">{{user.email}}</a></li>
 									<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
 								{% endif %}
+								{% endblock %}
 							</ul>
 							<form name="header_search" action="/search" method="GET" class="search-form">
 								<fieldset>

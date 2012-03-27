@@ -7,6 +7,7 @@ Installation
    * python-lxml
    * python-openid
    * python-oauth2
+   * python-iso8601
 * Run build/rsync.sh (run it from the main directory, rather than from within build).
 * Run `build/buildenv.sh`
 * Run `reset.sh parse`

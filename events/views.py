@@ -28,7 +28,7 @@ def get_feed_list(request):
 @login_required
 @render_to('events/edit_lists.html')
 def edit_subscription_lists(request):
-    no_arg_feeds = [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.EnactedBillsFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
+    no_arg_feeds = [Feed.IntroducedBillsFeed(), Feed.EnactedBillsFeed(), Feed.ActiveBillsFeed(),  Feed.ActiveBillsExceptIntroductionsFeed(), Feed.ComingUpFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
     
     from bill.search import subject_choices
     

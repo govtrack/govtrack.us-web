@@ -1,6 +1,8 @@
 {% extends "master.html" %}
 {% block title %}(?php wp_title(' '); ?> (?php if(wp_title(' ', false)) { echo ' : '; } ?>(?php bloginfo('name'); ?>{% endblock %}
 
+{% block override_login %}{% endblock %}
+
 {% block head %}
 	<meta name="generator" content="WordPress (?php bloginfo('version'); ?>" /> <!-- leave this for stats -->
 	<link rel="alternate" type="application/rss+xml" title="(?php bloginfo('name'); ?> RSS Feed" href="(?php bloginfo('rss2_url'); ?>" />

@@ -145,7 +145,7 @@
 							<table>
 								{% for item in bill.get_major_events %}
 								<tr>
-									<td class="done">{{item.label}}</td>
+									<td class="done" title="{{item.extra}}">{{item.label}}</td>
 									<td>{{item.date|date:"DATE_FORMAT"}}</td>
 								</tr>
 								{% endfor %}
