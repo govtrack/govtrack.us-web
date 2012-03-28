@@ -129,6 +129,10 @@ class Bill(models.Model):
     @property
     def bill_type_slug(self):
         return BillType.by_value(self.bill_type).slug
+    
+    @property
+    def noun(self):
+        return "bill" if self.bill_type in (BillType.house_bill, BillType.senate_bill) else "resolution"
 
     @property
     def cosponsor_count(self):
