@@ -23,7 +23,7 @@
 {% block body_class %}member{% endblock %}
 
 {% block summary %}
-{% cache 600 member_head %}
+{% cache 600 member_head person.id %}
 <div id="track_panel_base" class="container">
 	<h1>{{person.name_and_title}}</h1>
 	
@@ -70,7 +70,7 @@
 
 {% include "events/subscribe_inline.html" %}
 
-{% cache 600 member_aside %}
+{% cache 600 member_aside person.id %}
 <div class="aside">
 	{% if photo %}
 		<div class="photo">
@@ -93,7 +93,7 @@
 {% endblock %}
 
 {% block body %}
-{% cache 600 member_details %}
+{% cache 600 member_details person.id %}
 <div id="member-details" class="section">
 
 	{% if analysis_data.sponsorship %}
@@ -371,7 +371,7 @@
 </div><!-- /member-details -->
 {% endcache %}
 
-{% cache 600 member_news %}
+{% cache 600 member_news person.id %}
 <div class="tweets section">
 	<div id="happening_now" style="display: none">
 	<h3>Happening Now</h3>

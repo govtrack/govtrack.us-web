@@ -7,10 +7,11 @@
 		
 		<title>{% block title %}{% endblock %}</title>
 		
-		<link rel="shortcut icon" type="image/png" href="{{ MEDIA_URL }}favicon.png"></link>
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
 		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all.css">
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen"/><![endif]-->
+		<meta name="viewport" content="width=1000">
 		
 		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}"></meta>
@@ -32,11 +33,13 @@
 	</head>
 	
 <body class="{% block body_class %}{% endblock %}">
+	{% if pagename != "blog_template" %}
 	<div id="sitenewscontainer" style="display: none">
-		<div id="sitenews" seq="2">
+		<div id="sitenews" seq="3">
 			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
 			<div style="float: right; width: 500px; padding: 8px;">
-				Why all the changes? <a href="http://www.govtrack.us/blog/2012/03/19/weve-made-a-few-tweaks-to-govtrack/">Read More</a>.
+				<div>Why all the changes? <a href="http://www.govtrack.us/blog/2012/03/19/weve-made-a-few-tweaks-to-govtrack/">Read more about GovTrack 2.0</a>.</div>
+				<div style="margin-top: .5em">New Feature: <a href="http://www.govtrack.us/blog/2012/03/24/new-on-govtrack-bill-prognosis/">Bill Prognosis</a>.</div>
 			</div>
 			<div style="clear: both"> </div>
 		</div>
@@ -53,6 +56,7 @@
 		}
 	});
 	</script>
+	{% endif %}
 				
 	<div id="wrapper">
 		
@@ -65,12 +69,14 @@
 						<div class="block">
 							<ul class="super-nav">
 								{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
+								{% block override_login %}
 								{% if not user.is_authenticated %}
 									<li><a href="/accounts/login">Log In</a></li>
 								{% else %}
 									<li><a href="/accounts/profile">{{user.email}}</a></li>
 									<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
 								{% endif %}
+								{% endblock %}
 							</ul>
 							<form name="header_search" action="/search" method="GET" class="search-form">
 								<fieldset>

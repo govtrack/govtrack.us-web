@@ -1,7 +1,9 @@
 {% load events_utils %}GovTrack Email Update
 =====================
 
+{% comment %}
 --- GovTrack was recently updated. Check out the new www.GovTrack.us and confirm that any trackers you had on the old website are set up correctly at http://www.govtrack.us/accounts/lists. This is only the beginning of GovTrack 2.0. Stay tuned for more improvements. ---
+{% endcomment %}
 
 This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to http://www.govtrack.us/accounts/lists.
 
@@ -9,10 +11,10 @@ This is your email update from www.GovTrack.us. To change your email update sett
 {{list.name}}
 ----------------------------------{% for event in events %}
 {% with event|render_event:feed as meta %}
-{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %}
+{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} -- {{meta.type}}
 {{meta.title}}
-http://www.govtrack.us{{meta.url}}
 {{meta.body_text|safe}}
+http://www.govtrack.us{{meta.url}}
 
 / / / /{% endwith %}{% endfor %}
 {% endfor %}

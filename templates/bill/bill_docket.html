@@ -59,7 +59,7 @@ $(function() {
 <div class="col_6" style="margin-right: 40px; padding-right: 40px; border-right: 1px solid #EEE;">
 <h2 style="margin-bottom: 1em">By the Numbers</h2>
 <p style="">There are {{total|intcomma}} bills and resolutions currently before the U.S. Congress. Here is how they break down by the numbers.</p>
-{% for name, descr1, descr2, statusesarray, count, queryset in groups %}
+{% for name, descr1, descr2, href, count, queryset in groups %}
 {% if count > 0 %}
 	<h3 style="margin-top: 1.5em; margin-bottom: .5em">{{name}}</h3>
 	
@@ -75,7 +75,7 @@ $(function() {
 		{% endfor %}
 		</ul>
 	{% else %}
-		<p>There are <a href="/congress/bills/browse?status={{statusesarray|urlencode}}">{{count|intcomma}} {{descr1}}</a>{{descr2}}.</p>
+		<p>There are <a href="{{href}}">{{count|intcomma}} {{descr1}}</a>{{descr2}}.</p>
 	{% endif %}
 {% endif %}
 {% endfor %}

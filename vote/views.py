@@ -76,13 +76,18 @@ def vote_details(request, congress, session, chamber_code, number):
 def vote_export_csv(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
     voters = vote.voters.all().select_related('person', 'option')
-    load_roles_at_date([x.person for x in voters], vote.created)
+    load_roles_at_date([x.person for x in voters if x.person], vote.created)
 
     outfile = StringIO()
     writer = csv.writer(outfile)
     for voter in voters:
-        writer.writerow([voter.person.pk, voter.person.role.state if voter.person.role else "--", voter.person.role.district if voter.person.role else "--",
-                         voter.option.value, voter.person.name_no_district().encode('utf-8') if voter.person else voter.get_voter_type_display()])
+        writer.writerow([
+            voter.person.pk if voter.person else "--",
+            voter.person.role.state if voter.person and voter.person.role else "--",
+            voter.person.role.district if voter.person and voter.person.role else "--",
+            voter.option.value,
+            voter.person.name_no_district().encode('utf-8') if voter.person else voter.get_voter_type_display(),
+            voter.person.role.party if voter.person and voter.person.role else "--",])
     output = outfile.getvalue()
     firstline = '%s Vote #%d %s - %s\n' % (vote.get_chamber_display(), vote.number,
                                          vote.created.isoformat(), vote.question) # strftime doesn't work on dates before 1900

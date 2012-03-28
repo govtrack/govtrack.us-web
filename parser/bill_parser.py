@@ -9,6 +9,7 @@ from django.db.utils import IntegrityError
 import glob
 import re
 import time
+import urllib
 
 from parser.progress import Progress
 from parser.processor import Processor
@@ -17,6 +18,7 @@ from bill.models import BillTerm, TermType, BillType, Bill, Cosponsor, BillStatu
 from person.models import Person
 from bill.title import get_primary_bill_title
 from committee.models import Committee
+from settings import CURRENT_CONGRESS
 
 log = logging.getLogger('parser.bill_parser')
 PERSON_CACHE = {}
@@ -257,7 +259,7 @@ def main(options):
         
     log.info('Processing bills: %d files' % len(files))
     total = len(files)
-    progress = Progress(total=total, name='files', step=10)
+    progress = Progress(total=total, name='files', step=100)
 
     bill_processor = BillProcessor()
     seen_bill_ids = []
@@ -272,24 +274,67 @@ def main(options):
         if options.slow:
             time.sleep(1)
             
+        skip_stuff = False
+            
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
-            bill = bill_processor.process(Bill(), node)
+            if not skip_stuff:
+                bill = bill_processor.process(Bill(), node)
+            else:
+                m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
+                bill = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
            
             seen_bill_ids.append(bill.id) # don't delete me later
             
             actions = []
             for axn in tree.xpath("actions/*[@state]"):
-                actions.append( (bill_processor.parse_datetime(axn.xpath("string(@datetime)")), BillStatus.by_xml_code(axn.xpath("string(@state)")), axn.xpath("string(text)")) )
+                actions.append( (repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))), BillStatus.by_xml_code(axn.xpath("string(@state)")), axn.xpath("string(text)")) )
+            bill.major_actions = actions
+            bill.save()
             
-            bill.create_events(actions)
+            if not options.disable_events:
+                bill.create_events()
 
-        File.objects.save_file(fname)
-
+        if not skip_stuff:
+            File.objects.save_file(fname)
+        
     # delete bill objects that are no longer represented on disk.... this is too dangerous.
     if options.congress and not options.filter and False:
         # this doesn't work because seen_bill_ids is too big for sqlite!
         Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
+
+    # Parse docs.house.gov for what might be coming up this week.
+    import iso8601
+    dhg_html = urllib.urlopen("http://docs.house.gov/").read()
+    m = re.search(r"class=\"downloadXML\" href=\"(Download.aspx\?file=.*?)\"", dhg_html)
+    if not m:
+        log.error('No docs.house.gov download link found at http://docs.house.gov.')
+    else:
+        def bt_re(bt): return re.escape(bt[1]).replace(r"\.", "\.?\s*")
+        dhg = etree.parse(urllib.urlopen("http://docs.house.gov/" + m.group(1))).getroot()
+        # iso8601.parse_date(dhg.get("week-date")+"T00:00:00").date()
+        for item in dhg.xpath("category/floor-items/floor-item"):
+            billname = item.xpath("legis-num")[0].text
+            m = re.match("\s*(?:Concur in the Senate Amendment to )?("
+                + "|".join(bt_re(bt) for bt in BillType)
+                + ")(\d+)\s*$", billname, re.I)
+            if not m:
+                log.error('Could not parse legis-num "%s" in docs.house.gov.' % billname)
+            else:
+                for bt in BillType:
+                    if re.match(bt_re(bt) + "$", m.group(1)):
+                        try:
+                            bill = Bill.objects.get(congress=CURRENT_CONGRESS, bill_type=bt[0], number=m.group(2))
+                            bill.docs_house_gov_postdate = iso8601.parse_date(item.get("add-date")).replace(tzinfo=None)
+                            bill.save()
+                            
+                            if not options.disable_events:
+                                bill.create_events()
+                        except Bill.DoesNotExist:
+                            log.error('Could not find bill "%s" in docs.house.gov.' % billname)
+                        break
+                else:
+                    log.error('Could not parse legis-num bill type "%s" in docs.house.gov.' % billname)
 
 if __name__ == '__main__':
     main()

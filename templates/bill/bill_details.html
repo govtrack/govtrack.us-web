@@ -39,7 +39,7 @@
 
 {% block summary %}
 
-{% cache 600 billhead %}
+{% cache 600 billhead bill.id %}
 <h1>{{bill.title|truncatewords:15}}</h1>
 	
 <div id="track_panel_base" class="container">
@@ -129,7 +129,7 @@
 {% endblock %}
 
 {% block body %}
-{% cache 600 billoverview %}
+{% cache 600 billoverview bill.id %}
 <div id="bill-overview" class="section">
 	
 	<h2>Bill Overview</h2>
@@ -145,7 +145,7 @@
 							<table>
 								{% for item in bill.get_major_events %}
 								<tr>
-									<td class="done">{{item.label}}</td>
+									<td class="done" title="{{item.extra}}">{{item.label}}</td>
 									<td>{{item.date|date:"DATE_FORMAT"}}</td>
 								</tr>
 								{% endfor %}
@@ -297,16 +297,16 @@
 						<dd>
 							<script>function show_cite(fmt) {
 								var v = $("#cite_" + fmt).is(":visible");
-								$('#cite_ala, #cite_mla, #cite_wikipedia').slideUp();
+								$('#cite_apa, #cite_mla, #cite_wikipedia').slideUp();
 								if (!v) $("#cite_" + fmt).slideDown();
 								return false;
 							}</script>
 							<p>This page can be cited in one of these formats (click for details):
-								<a href="#" onclick="return show_cite('ala')">ALA</a>,
+								<a href="#" onclick="return show_cite('apa')">APA</a>,
 								<a href="#" onclick="return show_cite('mla')">MLA</a>,
 								<a href="#" onclick="return show_cite('wikipedia')">Wikipedia Template</a>.
 							</p>
-							<p id="cite_ala" style="display: none">{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}. ({{bill.introduced_date|date:"Y"}}). In GovTrack.us (database of federal legislation). Retrieved {% now "F j, Y" %}, from {{request.build_absolute_uri}}</p>
+							<p id="cite_apa" style="display: none">{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}. ({{bill.introduced_date|date:"Y"}}). In GovTrack.us (database of federal legislation). Retrieved {% now "F j, Y" %}, from {{request.build_absolute_uri}}</p>
 
 							<p id="cite_mla" style="display: none">&ldquo;{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}.&rdquo; GovTrack.us (database of federal legislation). {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
 

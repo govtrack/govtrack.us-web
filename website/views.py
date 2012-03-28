@@ -50,7 +50,7 @@ def index(request):
           
 def staticpage(request, pagename):
     if pagename == "developers": pagename = "developers/index"
-    return render_to_response('website/' + pagename + '.html', { }, RequestContext(request))
+    return render_to_response('website/' + pagename + '.html', { "pagename": pagename }, RequestContext(request))
 
 def get_blog_items():
     # c/o http://stackoverflow.com/questions/1208916/decoding-html-entities-with-python

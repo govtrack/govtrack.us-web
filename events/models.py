@@ -64,7 +64,7 @@ class Feed(models.Model):
     
     feed_metadata = {
         "misc:activebills": {
-            "title": "All Activity on Legislation",
+            "title": "Major Activity on All Legislation",
         },
         "misc:enactedbills": {
             "title": "Enacted Bills",
@@ -73,7 +73,10 @@ class Feed(models.Model):
             "title": "Introduced Bills and Resolutions",
         },
         "misc:activebills2": {
-            "title": "Activity on Legislation Except New Introductions",
+            "title": "Major Activity on All Legislation Except New Introductions",
+        },
+        "misc:comingup": {
+            "title": "Legislation Coming Up",
         },
         "misc:allcommittee": {
             "title": "Committee Activity",
@@ -156,6 +159,10 @@ class Feed(models.Model):
     @staticmethod
     def ActiveBillsExceptIntroductionsFeed():
         return Feed.get_noarg_feed("misc:activebills2")
+    
+    @staticmethod
+    def ComingUpFeed():
+        return Feed.get_noarg_feed("misc:comingup")
     
     @staticmethod
     def AllCommitteesFeed():

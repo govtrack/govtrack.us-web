@@ -26,7 +26,8 @@ class Command(BaseCommand):
 		
 		# What kind of subscription lists are we processing?
 		users = None
-		testing = False
+		send_mail = True
+		mark_lists = True
 		if args[0] == "daily":
 			list_email_freq = (1,)
 		elif args[0] == "weekly":
@@ -35,10 +36,13 @@ class Command(BaseCommand):
 			# test an email to the site administrator only
 			list_email_freq = (1,2)
 			users = User.objects.filter(email="jt@occams.info")
+			send_mail = True
+			mark_lists = False
 		elif args[0] == "testcount":
 			# count up how many daily emails we would send, but don't send any
 			list_email_freq = (1,)
-			testing = True
+			send_mail = False
+			mark_lists = False
 
 		if users == None: # overridden for the testadmin case
 			# Find all users who have a subscription list with email
@@ -50,7 +54,7 @@ class Command(BaseCommand):
 		total_emails_sent = 0
 		total_events_sent = 0
 		for user in list(users.order_by('id')): # clone up front to avoid holding the cursor (?)
-			events_sent = send_email_update(user, list_email_freq, testing)
+			events_sent = send_email_update(user, list_email_freq, send_mail, mark_lists)
 			if events_sent > 0:
 				total_emails_sent += 1
 				total_events_sent += events_sent
@@ -61,9 +65,9 @@ class Command(BaseCommand):
 			from django import db
 			db.reset_queries()
 				
-		print "Sent" if not testing else "Would send", total_emails_sent, "emails and", total_events_sent, "events"
+		print "Sent" if send_mail else "Would send", total_emails_sent, "emails and", total_events_sent, "events"
 			
-def send_email_update(user, list_email_freq, testing):
+def send_email_update(user, list_email_freq, send_mail, mark_lists):
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
 			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
 		
@@ -86,9 +90,9 @@ def send_email_update(user, list_email_freq, testing):
 	if len(eventslists) == 0:
 		return 0
 		
-	if testing:
+	if not send_mail:
 		# don't email, don't update lists with the last emailed id
-		return len(events)
+		return eventcount
 		
 	templ_txt = get_template("events/emailupdate.txt")
 	templ_html = get_template("events/emailupdate.html")
@@ -106,6 +110,9 @@ def send_email_update(user, list_email_freq, testing):
 	except Exception as e:
 		print user, e
 		return 0 # skip updating what events were sent, False = did not sent
+	
+	if not mark_lists:
+		return eventcount
 	
 	# mark each list as having mailed events up to the max id found from the
 	# events table so that we know not to email those events in a future update.

@@ -13,6 +13,11 @@ ME=`readlink -m $0`
 MYDIR=`dirname $ME`
 cd $MYDIR
 
+if [ "$USER" = "" ]; then
+	echo "USER environment variable not set.";
+	exit;
+fi
+
 if [ "$1" = "" ]; then
 	# Hard restart: Do a stop first. The rest of this script
 	# will start a new instance on the default port.
@@ -32,10 +37,28 @@ do
     CURPID=`cat -- /tmp/$CURPIDFILE`;
     CURPORT=`echo $CURPIDFILE | sed "s/.*-\([0-9]*\).pid/\1/"`;
 
-    # Stop: Kill the running instance and exit.
+    # Stop: Kill the running instance (exit after killing all
+    # running instances).
     if [ "$1" = "stop" ]; then
         echo "Stopping $CURPORT (pid=$CURPID)...";
         kill -HUP $CURPID;
+        
+		# Wait for the port to clear.
+		CTR=0
+		while [ "`netstat -tln |grep $CURPORT`" != "" ]; do
+			if [ $CTR -gt 1 ]; then
+				echo "Port $CURPORT still bound...";
+				netstat -tln |grep $CURPORT;
+			fi
+			if [ $CTR -gt 10 ]; then
+		        echo "Killing $CURPORT (pid=$CURPID)...";
+		        kill $CURPID;
+				break;
+			fi
+			CTR=`echo $CTR+1|bc`
+			sleep 1;
+		done
+
         rm -f -- /tmp/$CURPIDFILE;
     fi
 done

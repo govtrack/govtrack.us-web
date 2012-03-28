@@ -171,3 +171,7 @@ except ImportError:
 if not SECRET_KEY:
     raise Exception('You must provide SECRET_KEY value in settings_local.py')
 
+# Since we rely on external APIs in a few places, make sure
+# that downed APIs elsewhere don't hold us too long.
+import socket
+socket.setdefaulttimeout(10.0)

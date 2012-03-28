@@ -85,6 +85,8 @@ class Bill(models.Model):
     current_status_date = models.DateField()
     introduced_date = models.DateField()
     cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor')
+    docs_house_gov_postdate = models.DateTimeField()
+    major_actions = JSONField() # serialized list of all major actions (date/datetime, BillStatus, description)
 
     class Meta:
         ordering = ('congress', 'bill_type', 'number')
@@ -233,7 +235,7 @@ class Bill(models.Model):
         return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%d:%s%d:" \
             % (self.congress, self.bill_type_slug, self.number)
 
-    def create_events(self, actions):
+    def create_events(self):
         if self.congress < 111: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
         with Event.update(self) as E:
@@ -249,9 +251,10 @@ class Bill(models.Model):
             E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
             common_feeds = [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()]
             enacted_feed = [Feed.EnactedBillsFeed()]
-            for date, state, text in actions:
+            for datestr, state, text in self.major_actions:
                 if state == BillStatus.introduced:
                     continue # already indexed
+                date = eval(datestr)
                 E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_passed_bill else []))
                 
             # generate events for new cosponsors... group by join date, and
@@ -264,8 +267,14 @@ class Bill(models.Model):
                 cosponsor_join_dates.add(cosp.joined)
             for joindate in cosponsor_join_dates:
                 E.add("cosp:" + joindate.isoformat(), joindate, [bill_feed])
+                
+            # generate an event for appearing on docs.house.gov:
+            if self.docs_house_gov_postdate:
+                E.add("dhg", self.docs_house_gov_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
     
     def render_event(self, eventid, feeds):
+        if eventid == "dhg":
+            return self.render_event_dhg(feeds)
         ev_type, ev_code = eventid.split(":")
         if ev_type == "state":
             return self.render_event_state(ev_code, feeds)
@@ -284,42 +293,49 @@ class Bill(models.Model):
         if status == BillStatus.introduced:
             action_type = "Introduced"
         else:
-            from lxml import etree
-            from parser.bill_parser import BillProcessor
-            
-            xml = etree.parse("data/us/%s/bills/%s%d.xml" % (self.congress, BillType.by_value(self.bill_type).xml_code, self.number))
-            node = xml.xpath("actions/*[@state='%s']" % status.xml_code)[0]
-            date = BillProcessor().parse_datetime(node.get("datetime"))
-            action = node.xpath("string(text)")
-            
-            if node.tag in ("vote", "vote-aux") and node.get("how") == "roll":
-                from vote.models import Vote, VoteCategory, CongressChamber
-                from us import get_session_from_date
-                try:
-                    cn, sn = get_session_from_date(date)
-                    vote = Vote.objects.get(congress=cn, session=sn, chamber=CongressChamber.house if node.get("where")=="h" else CongressChamber.senate, number=int(node.get("roll")))
-                    cat = VoteCategory.by_value(int(vote.category))
-                    if cat == VoteCategory.passage:
-                        action = ""
-                        second = ""
-                    elif cat == VoteCategory.passage_suspension:
-                        action = ""
-                        second = " under \"suspension of the rules\""
-                    else:
-                        action = vote.question + ": "
-                        second = ""
-                    req = vote.required
-                    if req == "1/2": req = "simple majority"
-                    action += vote.result + " " + "%d/%d"%(vote.total_plus,vote.total_minus) + ", " + req + " required" + second + "."
-                except Vote.DoesNotExist:
-                    pass
+            for datestr, st, text in self.major_actions:
+                if st == status:
+                    date = eval(datestr)
+                    action = text
+                    break
+            else:
+                raise Exception("Invalid event.")
+                
+            if status not in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
+                from lxml import etree
+                from parser.bill_parser import BillProcessor
+                
+                xml = etree.parse("data/us/%s/bills/%s%d.xml" % (self.congress, BillType.by_value(self.bill_type).xml_code, self.number))
+                node = xml.xpath("actions/*[@state='%s']" % status.xml_code)[0]
+                
+                if node.tag in ("vote", "vote-aux") and node.get("how") == "roll":
+                    from vote.models import Vote, VoteCategory, CongressChamber
+                    from us import get_session_from_date
+                    try:
+                        cn, sn = get_session_from_date(date)
+                        vote = Vote.objects.get(congress=cn, session=sn, chamber=CongressChamber.house if node.get("where")=="h" else CongressChamber.senate, number=int(node.get("roll")))
+                        cat = VoteCategory.by_value(int(vote.category))
+                        if cat == VoteCategory.passage:
+                            action = ""
+                            second = ""
+                        elif cat == VoteCategory.passage_suspension:
+                            action = ""
+                            second = " under \"suspension of the rules\""
+                        else:
+                            action = vote.question + ": "
+                            second = ""
+                        req = vote.required
+                        if req == "1/2": req = "simple majority"
+                        action += vote.result + " " + "%d/%d"%(vote.total_plus,vote.total_minus) + ", " + req + " required" + second + "."
+                    except Vote.DoesNotExist:
+                        pass
         
 
         return {
-            "type": "Bills and Resolutions",
+            "type": status.label,
             "date": date,
             "date_has_no_time": isinstance(date, datetime.date),
-            "title": status.label + ": " + self.title,
+            "title": self.title,
             "url": self.get_absolute_url(),
             "body_text_template":
 """{% if sponsor %}Sponsor: {{sponsor|safe}}{% endif %}
@@ -343,10 +359,10 @@ class Bill(models.Model):
             # What to do if there are no longer new cosponsors on this date?
             # TODO test this.
             return {
-                "type": "Bills and Resolutions",
+                "type": "New Cosponsors",
                 "date": datetime.date(*ev_code.split('-')),
                 "date_has_no_time": True,
-                "title": "New Cosponsors: " + self.title,
+                "title": self.title,
                 "url": self.get_absolute_url(),
                 "body_text_template": "Event error.",
                 "body_html_template": "Event error.",
@@ -354,10 +370,10 @@ class Bill(models.Model):
                 }
             
         return {
-            "type": "Bills and Resolutions",
+            "type": "New Cosponsor" + ("" if len(cosp) == 1 else "s"),
             "date": cosp[0].joined,
             "date_has_no_time": True,
-            "title": "New Cosponsor" + ("" if len(cosp) == 1 else "s") + ": " + self.title,
+            "title": self.title,
             "url": self.get_absolute_url(),
             "body_text_template":
 """{% for p in cosponsors %}{{ p.person.name }}
@@ -367,44 +383,39 @@ class Bill(models.Model):
                 "cosponsors": cosp,
                 }
             }
+
+    def render_event_dhg(self, feeds):
+        return {
+            "type": "Legislation Coming Up",
+            "date": self.docs_house_gov_postdate,
+            "date_has_no_time": False,
+            "title": self.title,
+            "url": self.get_absolute_url(),
+            "body_text_template":
+"""This bill has been listed by the House Majority Leader as to be considered in the week ahead. More information can be found at http://docs.house.gov.""",
+            "body_html_template": """<p>This bill has been listed by the House Majority Leader as to be considered in <a href="http://docs.house.gov">the week ahead</a>.</p>""",
+            "context": { }
+            }
         
     def get_major_events(self):
-        sfn = "data/us/%d/bills/%s%d.xml" % (self.congress, BillType.by_value(self.bill_type).xml_code, self.number)
-        from lxml import etree
-        from parser.processor import Processor
-        p = Processor()
-        dom = etree.parse(open(sfn))
         ret = []
-        for axn in dom.xpath("actions/*[@state]"):
-            st = BillStatus.by_xml_code(axn.xpath("string(@state)"))
-            if st == BillStatus.passed_bill and self.bill_type in (BillType.senate_bill, BillType.senate_joint_resolution):
+        saw_intro = False
+        for datestr, st, text in self.major_actions:
+            date = eval(datestr)
+            if (st == BillStatus.passed_bill and self.bill_type in (BillType.senate_bill, BillType.senate_joint_resolution)) or (st == BillStatus.passed_concurrentres and self.bill_type == BillType.senate_concurrent_resolution):
                 st = "Passed House"
-            elif st == BillStatus.passed_bill and self.bill_type in (BillType.house_bill, BillType.house_joint_resolution):
+            elif (st == BillStatus.passed_bill and self.bill_type in (BillType.house_bill, BillType.house_joint_resolution)) or (st == BillStatus.passed_concurrentres and self.bill_type == BillType.house_concurrent_resolution):
                 st = "Passed Senate"
             else:
-                st = st.label
+                if st == BillStatus.introduced: saw_intro = True
+                st = BillStatus.by_value(st).label
             ret.append({
                 "label": st,
-                "date": p.parse_datetime(axn.xpath("string(@datetime)")),
+                "date": date,
+                "extra": text,
             })
-        if len(ret) == 0: ret = [{ "label": "Introduced", "date": self.introduced_date }]
+        if not saw_intro: ret.insert(0, { "label": "Introduced", "date": self.introduced_date })
         return ret
-
-    def get_major_events__old(self):
-        # DEPRECATED - Not all Bill objects have had events loaded.
-        from events.models import Feed
-        events = Feed.BillFeed(self).get_events(100)
-        def getinfo(eventid, date):
-            ev_type, ev_code = eventid.split(":")
-            status = BillStatus.by_value(int(ev_code))
-            ret = {}
-            ret["label"] = status.label
-            ret["date"] = date 
-            return ret
-        ret = [getinfo(e["eventid"], e["when"]) for e in events]
-        if len(ret) == 0: # ??
-            ret = [{ "label": "Introduced", "date": self.introduced_date }]
-        return reversed(ret)
     
     def get_future_events(self):
         # predict the major actions not yet occurred on the bill, based on its
@@ -451,18 +462,18 @@ class Bill(models.Model):
             },
             BillType.house_concurrent_resolution: {
                 BillStatus.reported: BillStatus.pass_over_house,
-                BillStatus.pass_over_house: BillStatus.passed_concurrentres,
-                BillStatus.pass_back_house: BillStatus.passed_concurrentres,
-                BillStatus.pass_back_senate: BillStatus.passed_concurrentres,
+                BillStatus.pass_over_house: (BillStatus.passed_concurrentres, "Passed Senate"),
+                BillStatus.pass_back_house: (BillStatus.passed_concurrentres, "Senate Approves House Changes"),
+                BillStatus.pass_back_senate: (BillStatus.passed_concurrentres, "House Approves Senate Changes"),
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
                 BillStatus.prov_kill_cloturefailed: BillStatus.passed_concurrentres,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
             },
             BillType.senate_concurrent_resolution: {
                 BillStatus.reported: BillStatus.pass_over_senate,
-                BillStatus.pass_over_senate: BillStatus.passed_concurrentres,
-                BillStatus.pass_back_house: BillStatus.passed_concurrentres,
-                BillStatus.pass_back_senate: BillStatus.passed_concurrentres,
+                BillStatus.pass_over_senate: (BillStatus.passed_concurrentres, "Passed House"),
+                BillStatus.pass_back_house: (BillStatus.passed_concurrentres, "Senate Approves House Changes"),
+                BillStatus.pass_back_senate: (BillStatus.passed_concurrentres, "House Approves Senate Changes"),
                 BillStatus.prov_kill_suspensionfailed: BillStatus.passed_concurrentres, 
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
