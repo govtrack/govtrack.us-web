@@ -207,14 +207,25 @@ h2 span, h3 span, h4 span, span span, a em {
 	
 /* Header styles ====================================== */
 /* ==================================================== */
-#masthead { background: #40a4bd url(../images/bg-header.jpg) repeat-x 	}
-    .homepage #masthead { background: url(../images/bg-intro-box.jpg) no-repeat 50% 0 	}
-    #masthead .inner { background: none 	}
+#masthead {
+    background: #40a4bd url(../images/bg-masthead.jpg) repeat-x;
+    height: 236px;
+}
+    .homepage #masthead {
+        background: #40a4bd url(../images/bg-header.jpg) repeat-x 50% 0;
+        height: 450px;
+    }
+    #masthead .inner {
+        background: none;
+    }
 #header {
-    height: 129px;
+    height: 130px;
     width: 940px;
     margin: 0 auto;
 	}
+.homepage #header {
+    background: url(../images/header-capitol.png) 50% bottom no-repeat;
+}
 #header:after {
     content: '';
     display: block;
@@ -399,8 +410,11 @@ h2 span, h3 span, h4 span, span span, a em {
 /* Home page styles
    =============================================== */
 .intro-box {
-    padding: 23px 0 10px;
-    min-height: 288px;
+    width: 940px;
+    margin: 0 auto;
+    padding: 15px 0 10px;
+    height: 295px;
+    background: url(../images/bg-intro-box.jpg) 50% 0 no-repeat;
 	}
     .intro-box .section {
         width: 940px;
@@ -420,9 +434,9 @@ h2 span, h3 span, h4 span, span span, a em {
     	}
     .intro-box .intro {
         float: left;
-        width: 330px;
+        width: 300px;
         color: #fff;
-        font: normal 15px/24px CallunaBold, Georgia, 'Times New Roman', Times, serif;
+        font: normal 16px/24px CallunaBold, Georgia, 'Times New Roman', Times, serif;
         text-shadow: 0 1px 1px #066982;
     	}
     .intro-box p { margin: 0 	}
@@ -510,6 +524,10 @@ h2 span, h3 span, h4 span, span span, a em {
     		padding-top: 137px;
     		text-align: center;
     		}
+            #categories li a span {
+                font-style: italic;
+                text-transform: lowercase;
+            }
     	#categories a:hover {
     		border-bottom: 0;
     		}
@@ -889,20 +907,20 @@ h2 span, h3 span, h4 span, span span, a em {
 		}
 	.votes .heading-box .article-wrapper,
 	.search.votes .heading-box .article-wrapper {
-		background: url(../images/img-voting-records.png) right center no-repeat;
+		background: url(../images/img-voting-records.png) 690px center no-repeat;
 		padding-bottom: 35px;
 		}
     .bills .heading-box .article-wrapper,
     .search.bills .heading-box .article-wrapper {
-    	background: url(../images/img-bills-resolutions.png) right center no-repeat;
+    	background: url(../images/img-bills-resolutions.png) 690px center no-repeat;
 		}
     .member .heading-box .article-wrapper,
     .search.member .heading-box .article-wrapper {
-    	background: url(../images/img-congress-members.png) right center no-repeat;
+    	background: url(../images/img-congress-members.png) 690px center no-repeat;
     	}
     .committees .heading-box .article-wrapper,
     .search.committees .heading-box .article-wrapper {
-    	background: url(../images/img-committees.png) right center no-repeat;
+    	background: url(../images/img-committees.png) 690px center no-repeat;
     	}
         
     	
