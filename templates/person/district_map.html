@@ -43,8 +43,7 @@
 				scaleControl: true,
 				streetViewControl: false
 				};
-			map = new google.maps.Map(document.getElementById("map_canvas"),
-			myOptions);
+			map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 			
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
 			
@@ -347,17 +346,17 @@
 				</div>
 			</div>
 			
-			<div>
-				<div id="embed_teaser">
+			<div style="clear: both; ">
+				<div id="embed_teaser" style="text-align: center">
 					<a href="#" onclick="$('#embed_teaser').hide(); $('#embed_details').fadeIn(); return false;">Embed this map...</a>
 				</div>
 				<div id="embed_details" style="display: none">
-					<div>Embed this map on your own website using this HTML code:</div>
+					<div style="text-align: center">Embed this map on your own website using this HTML code:</div>
 				
-					<pre id="embedpre" wrap="hard" style="width: 500px; overflow: auto; margin-left: 2em; font-size: 80%">&lt;iframe width="425" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
-			 src="http://www.govtrack.us/embed/mapframe?{% if state %}state={{state|lower}}{% endif %}{% if district %}&amp;district={{district}}{% endif %}&amp;bounds=<span id="embedbounds"></span>"&gt;&lt;/iframe&gt;</pre>
+					<pre id="embedpre" wrap="hard" style="overflow: auto; margin: 15px; font-size: 85%">&lt;iframe width="425" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
+  src="http://www.govtrack.us/congress/members/embed/mapframe?{% if state %}state={{state|lower}}{% endif %}{% if district %}&amp;district={{district}}{% endif %}&amp;bounds=<span id="embedbounds"></span>"&gt;&lt;/iframe&gt;</pre>
 			  
-					<div>or advanced web designers can <a href="/embed/mapframe?demo=1">view the source</a>.</div>
+					<div style="text-align: center">Advanced web designers can <a href="/congress/members/embed/mapframe?demo=1">view the source</a> and adapt it to your website&rsquo;s needs.</div>
 				</div>
 			</div>
 		</div><!-- /frame -->
