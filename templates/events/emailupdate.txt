@@ -11,10 +11,10 @@ This is your email update from www.GovTrack.us. To change your email update sett
 {{list.name}}
 ----------------------------------{% for event in events %}
 {% with event|render_event:feed as meta %}
-{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %}
+{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} -- {{meta.type}}
 {{meta.title}}
-http://www.govtrack.us{{meta.url}}
 {{meta.body_text|safe}}
+http://www.govtrack.us{{meta.url}}
 
 / / / /{% endwith %}{% endfor %}
 {% endfor %}
