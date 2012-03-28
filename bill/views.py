@@ -23,7 +23,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json
+import urllib, urllib2, json, datetime
 from registration.helpers import json_response
 
 @render_to('bill/bill_details.html')
@@ -212,15 +212,31 @@ def bill_docket(request):
             ("Inactive Bills", "bills and resolutions", " that have been introduced, referred to committee, or reported by committee", BillStatus.inactive_status),
         ]
         
+        dhg_cutoff = datetime.datetime.now() - datetime.timedelta(days=10)
+        def loadgroupqs(statuses):
+            qs = Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=statuses)
+            return qs.filter(docs_house_gov_postdate=None) | qs.exclude(docs_house_gov_postdate__gt=dhg_cutoff)
+        
         groups = [
             (   g[0], # title
                 g[1], # text 1
                 g[2], # text 2
-                ",".join(str(s) for s in g[3]), # status descriptions
-                Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=g[3]).count(), # count in category
-                Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=g[3]).order_by('-current_status_date')[0:6], # top 6 in this category
+                "/congress/bills/browse?status=" + ",".join(str(s) for s in g[3]), # link
+               loadgroupqs(g[3]).count(), # count in category
+               loadgroupqs(g[3]).order_by('-current_status_date')[0:6], # top 6 in this category
                 )
             for g in groups ]
+            
+        dhg_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, docs_house_gov_postdate__gt=dhg_cutoff)
+        if len(dhg_bills) > 0:
+            groups.insert(0, (
+                "Coming Up",
+                "bills and resolutions",
+                " that the House Majority Leader has indicated may be considered in the week ahead",
+                "http://docs.house.gov",
+                len(dhg_bills),
+                dhg_bills.order_by('-docs_house_gov_postdate')
+            ))
         
         start, end = get_congress_dates(CURRENT_CONGRESS)
         end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
