@@ -32,27 +32,56 @@ class Feed(models.Model):
         
         from django.db import connection, transaction
         cursor = connection.cursor()
-        
-        # pull events in batches, eliminating duplicate results (events in multiple feeds),
-        # which is done faster here than in MySQL.
-        start = 0
-        size = count * 2
-        ret = []
-        seen = set()
-        while len(ret) < count:
-            # The Django ORM can't handle generating a nice query. It adds joins that ruin indexing.
-            cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when` FROM events_event " + ("" if not feeds or len(feeds) == 0 else "WHERE feed_id IN (" + ",".join(str(f.id) for f in feeds) + ")") + " ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC, seq DESC LIMIT %s OFFSET %s ", [size, start])
+
+        # Our table has multiple entries for each event, one entry for each feed it is a
+        # part of. Thus, if we query on no feeds or on multiple feeds, we have to make
+        # the results distinct. The Django ORM can't handle generating a nice query for this:
+        # It adds joins that ruin indexing. So we handle this by querying in batches until
+        # we get 'count' distinct events.
+        #
+        # Additionally, MySQL doesnt do indexing well if we query on multiple feeds at once.
+        # In that case, we take a different code path and find 'count' events from each feed,
+        # then put them together, sort, distinct, and take the most recent 'count' items.
+
+        if not feeds or len(feeds) == 0:
+            # pull events in batches, eliminating duplicate results (events in multiple feeds),
+            # which is done faster here than in MySQL.
+            start = 0
+            size = count * 2
+            ret = []
+            seen = set()
+            while len(ret) < count:
+                cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when` FROM events_event ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC, seq DESC LIMIT %s OFFSET %s ", [size, start])
+                
+                batch = cursor.fetchall()
+                for b in batch:
+                    if not b in seen:
+                        ret.append( { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3] } )
+                        seen.add(b)
+                if len(batch) < size: break # no more items
+                start += size
+                size *= 2
             
-            batch = cursor.fetchall()
-            for b in batch:
-                if not b in seen:
-                    ret.append( { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3] } )
-                    seen.add(b)
-            if len(batch) < size: break # no more items
-            start += size
-            size *= 2
+            return ret
         
-        return ret
+        else:
+            # pull events by feed. When we query on the 'seq' column, MySQL uses the when-based
+            # index rather than the feed-based index, which causes a big problem if there are
+            # no recent events.
+            ret = []
+            seen = set()
+            for feed in feeds:
+                cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when`, seq FROM events_event WHERE feed_id = %s ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC LIMIT %s", [feed.id, count])
+                
+                batch = cursor.fetchall()
+                for b in batch:
+                    if not b in seen:
+                        ret.append( { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3], "seq": b[4] } )
+                        seen.add(b)
+                        
+            ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]), reverse=True)
+            
+            return ret
         
     def get_events(self, count):
         return Feed.get_events_for((self,), count)
