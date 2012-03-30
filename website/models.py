@@ -45,4 +45,8 @@ class TestMarketVote(models.Model):
     bill = models.ForeignKey(Bill, db_index=True)
     prediction = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
-    
+
+class Req(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    request = models.TextField()
+
