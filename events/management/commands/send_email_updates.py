@@ -23,6 +23,8 @@ class Command(BaseCommand):
 		if args[0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
 			print "Specify daily or weekly or testadmin or testcount."
 			return
+			
+		verbose = True
 		
 		# What kind of subscription lists are we processing?
 		users = None
@@ -54,7 +56,7 @@ class Command(BaseCommand):
 		total_emails_sent = 0
 		total_events_sent = 0
 		for user in list(users.order_by('id')): # clone up front to avoid holding the cursor (?)
-			events_sent = send_email_update(user, list_email_freq, send_mail, mark_lists)
+			events_sent = send_email_update(user, list_email_freq, verbose, send_mail, mark_lists)
 			if events_sent > 0:
 				total_emails_sent += 1
 				total_events_sent += events_sent
@@ -67,7 +69,7 @@ class Command(BaseCommand):
 				
 		print "Sent" if send_mail else "Would send", total_emails_sent, "emails and", total_events_sent, "events"
 			
-def send_email_update(user, list_email_freq, send_mail, mark_lists):
+def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists):
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
 			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
 		
@@ -80,6 +82,7 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists):
 	eventcount = 0
 	for sublist in user.subscription_lists.all():
 		all_trackers |= set(sublist.trackers.all()) # include trackers for non-email-update list
+		#if not mark_lists: sublist.last_event_mailed = None
 		if sublist.email in list_email_freq:
 			max_id, events = sublist.get_new_events()
 			if len(events) > 0:
@@ -105,7 +108,8 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists):
 	email.attach_alternative(templ_html.render(ctx), "text/html")
 	
 	try:
-		print "emailing", user.id, user.email, "x", eventcount, "..."
+		if verbose:
+			print "emailing", user.id, user.email, "x", eventcount, "..."
 		email.send(fail_silently=False)
 	except Exception as e:
 		print user, e

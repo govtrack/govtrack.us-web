@@ -346,7 +346,7 @@ class Bill(models.Model):
 {% if action %}{{action|safe}}{% endif %}
 {{summary|safe}}""",
             "body_html_template":
-"""{% if sponsor %}<p>Sponsor: <a href="{{sponsor.get_absolute_url}}">{{sponsor}}</a></p>{% endif %}
+"""{% if sponsor %}<p>Sponsor: <a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a></p>{% endif %}
 {% if action %}<p>{{action}}</p>{% endif %}
 <p>{{summary}}</p>
 """,
@@ -382,7 +382,7 @@ class Bill(models.Model):
             "body_text_template":
 """{% for p in cosponsors %}{{ p.person.name }}
 {% endfor %}""",
-            "body_html_template": """{% for p in cosponsors %}<p><a href="{{p.person.get_absolute_url}}">{{ p.person.name }}</a></p>{% endfor %}""",
+            "body_html_template": """{% for p in cosponsors %}<p><a href="{{SITE_ROOT}}{{p.person.get_absolute_url}}">{{ p.person.name }}</a></p>{% endfor %}""",
             "context": {
                 "cosponsors": cosp,
                 }

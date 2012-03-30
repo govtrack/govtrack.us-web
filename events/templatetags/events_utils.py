@@ -1,5 +1,6 @@
 from django import template
 from django.template import Context, Template
+from django.conf import settings
 
 import events.models
 
@@ -24,8 +25,13 @@ def render_event(event, feed):
         feeds = feed
     meta = event.render(feeds=feeds)
     meta["guid"] = "%s:%d:%s" % (event.source_content_type, event.source_object_id, event.eventid)
-    meta["body_html"] = Template(meta["body_html_template"]).render(Context(meta["context"]))
-    meta["body_text"] = Template(meta["body_text_template"]).render(Context(meta["context"]))
+    
+    c = dict()
+    c.update(meta["context"])
+    c["SITE_ROOT"] = settings.SITE_ROOT_URL
+    
+    meta["body_html"] = Template(meta["body_html_template"]).render(Context(c))
+    meta["body_text"] = Template(meta["body_text_template"]).render(Context(c))
     
     return meta
 

@@ -19,6 +19,7 @@ Disallow: /sparql
 Disallow: /sparql.xpd
 Disallow: //
 Disallow: /registration/ext
+Disallow: /congress/bills/browse?
 Crawl-delay: 30
 
 User-agent: BecomeBot

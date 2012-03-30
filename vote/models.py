@@ -193,7 +193,7 @@ class Vote(models.Model):
             "body_html_template":
 """<p>{{summary}}</p>
 {% for voter in voters %}
-    <p><a href="{{voter.url}}">{{voter.name}}</a>: {{voter.vote}}</p>
+    <p><a href="{{SITE_ROOT}}{{voter.url}}">{{voter.name}}</a>: {{voter.vote}}</p>
 {% endfor %}
 """,
             "context": {
