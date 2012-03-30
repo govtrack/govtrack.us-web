@@ -139,7 +139,8 @@ def events_rss(request):
         description = "GovTrack tracks the activities of the United States Congress."
         
         def items(self):
-            return [render_event(item, feedlist) for item in Feed.get_events_for(feedlist, 20)]
+            events = [render_event(item, feedlist) for item in Feed.get_events_for(feedlist, 20)]
+            return [e for e in events if e != None]
             
         def item_title(self, item):
             return item["title"]
