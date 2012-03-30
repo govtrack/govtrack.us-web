@@ -274,6 +274,7 @@ class PersonRole(models.Model):
                     E.add("termend", self.enddate, f)
         
     def render_event(self, eventid, feeds):
+        self.person.role = self # affects name generation
         return {
             "type": "Elections and Offices",
             "date_has_no_time": True,
