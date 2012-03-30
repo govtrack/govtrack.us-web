@@ -57,7 +57,9 @@ def bill_redirect(request, istext=None):
     return redirect(bill.get_absolute_url() + ("" if not istext else "/text"), permanent=True)
 
 def bill_search_redirect(request):
-    return HttpResponseRedirect("/congress/bills/browse")
+    qs = request.META.get("QUERY_STRING", "")
+    if len(qs) > 0: qs = "?" + qs
+    return HttpResponseRedirect("/congress/bills/browse" + qs)
 
 def bill_overview_redirect(request):
     return HttpResponseRedirect("/congress/bills")
