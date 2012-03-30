@@ -18,6 +18,7 @@ Disallow: /rdfbrowse.xpd
 Disallow: /sparql
 Disallow: /sparql.xpd
 Disallow: //
+Disallow: /registration/ext
 Crawl-delay: 30
 
 User-agent: BecomeBot
