@@ -1,7 +1,7 @@
 from models import SubscriptionList
 
 def template_context_processor(request):
-	context = { }
+	context = { "subscription_feeds": None }
 	
 	if request.user.is_authenticated():
 		subfeeds = set()

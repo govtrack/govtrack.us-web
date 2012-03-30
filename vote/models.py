@@ -181,6 +181,12 @@ class Vote(models.Model):
             	    E.add("vote", self.created, Feed.PersonVotesFeed(v.person_id))
 	
     def render_event(self, eventid, feeds):
+        if feeds:
+            my_reps = set(f.person() for f in feeds if f.person() != None)
+            my_reps = sorted(my_reps, key = lambda p : p.sortname)
+        else:
+            my_reps = []
+        
         return {
             "type": "Vote",
             "date": self.created,
@@ -200,8 +206,8 @@ class Vote(models.Model):
                 "summary": self.summary(),
                 "voters":
                             [
-                                { "url": f.person().get_absolute_url(), "name": f.person().name, "vote": self.voters.get(person=f.person()).option.value }
-                                for f in feeds if f.person()!=None and self.voters.filter(person=f.person()).exists()
+                                { "url": p.get_absolute_url(), "name": p.name, "vote": self.voters.get(person=p).option.value }
+                                for p in my_reps if self.voters.filter(person=p).exists()
                             ]
                         if feeds != None else []
                 }
