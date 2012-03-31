@@ -32,5 +32,9 @@
 <p>To unsubscribe or change your email updates settings, go to <a href="http://www.govtrack.us/accounts/lists">Your Lists</a>.</p>
 <p>This email was sent by <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. You may contact us at <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</p>
 
+{% if emailpingurl %}
+<!-- Sorry but we want to know if your email address is still valid. -->
+<img src="{{emailpingurl}}" width="1" height="1"/>
+{% endif %}
 	</body>
 </html>

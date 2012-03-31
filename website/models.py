@@ -6,8 +6,8 @@ from events.models import Feed, SubscriptionList
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True, db_index=True)
-    massemail = models.BooleanField(default=True)
-    old_id = models.IntegerField(blank=True, null=True)
+    massemail = models.BooleanField(default=True) # may we send you mail?
+    old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
     
     def lists(self):
         # make sure the 'default' list exists

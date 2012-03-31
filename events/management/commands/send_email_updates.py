@@ -10,7 +10,7 @@ from optparse import make_option
 
 from events.models import *
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Command(BaseCommand):
 	args = 'daily|weekly|testadmin|testcount'
@@ -30,6 +30,7 @@ class Command(BaseCommand):
 		users = None
 		send_mail = True
 		mark_lists = True
+		send_old_events = False
 		if args[0] == "daily":
 			list_email_freq = (1,)
 		elif args[0] == "weekly":
@@ -40,6 +41,7 @@ class Command(BaseCommand):
 			users = User.objects.filter(email="jt@occams.info")
 			send_mail = True
 			mark_lists = False
+			send_old_events = True
 		elif args[0] == "testcount":
 			# count up how many daily emails we would send, but don't send any
 			list_email_freq = (1,)
@@ -56,7 +58,7 @@ class Command(BaseCommand):
 		total_emails_sent = 0
 		total_events_sent = 0
 		for user in list(users.order_by('id')): # clone up front to avoid holding the cursor (?)
-			events_sent = send_email_update(user, list_email_freq, verbose, send_mail, mark_lists)
+			events_sent = send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events)
 			if events_sent > 0:
 				total_emails_sent += 1
 				total_events_sent += events_sent
@@ -69,7 +71,7 @@ class Command(BaseCommand):
 				
 		print "Sent" if send_mail else "Would send", total_emails_sent, "emails and", total_events_sent, "events"
 			
-def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists):
+def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events):
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
 			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
 		
@@ -82,7 +84,7 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists):
 	eventcount = 0
 	for sublist in user.subscription_lists.all():
 		all_trackers |= set(sublist.trackers.all()) # include trackers for non-email-update list
-		#if not mark_lists: sublist.last_event_mailed = None
+		if send_old_events: sublist.last_event_mailed = None
 		if sublist.email in list_email_freq:
 			max_id, events = sublist.get_new_events()
 			if len(events) > 0:
@@ -96,12 +98,22 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists):
 	if not send_mail:
 		# don't email, don't update lists with the last emailed id
 		return eventcount
+	
+	# Add a pingback image into the email to know (with some low accuracy) which
+	# email addresses are still valid, for folks that have not logged in recently
+	# and did not successfully recently ping back.
+	emailpingurl = None
+	from emailverification.models import Ping
+	if user.last_login < datetime.now() - timedelta(days=60) \
+		and not Ping.objects.filter(user=user, pingtime__gt=datetime.now() - timedelta(days=60)).exists():
+		emailpingurl = Ping.get_ping_url(user)
 		
 	templ_txt = get_template("events/emailupdate.txt")
 	templ_html = get_template("events/emailupdate.html")
 	ctx = Context({
 		"eventslists": eventslists,
 		"feed": all_trackers, # use all trackers in the user's account as context for displaying events
+		"emailpingurl": emailpingurl,
 	})
 	
 	email = EmailMultiAlternatives(emailsubject, templ_txt.render(ctx), emailfromaddr, [user.email])
