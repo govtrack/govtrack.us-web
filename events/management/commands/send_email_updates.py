@@ -24,7 +24,7 @@ class Command(BaseCommand):
 			print "Specify daily or weekly or testadmin or testcount."
 			return
 			
-		verbose = True
+		verbose = (args[0] not in ('daily', 'weekly',))
 		
 		# What kind of subscription lists are we processing?
 		users = None
