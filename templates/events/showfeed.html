@@ -1,0 +1,59 @@
+{% extends 'master.html' %}
+{% load events_utils %}
+
+{% block title %}{{meta.title}} -- GovTrack.us{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block crumbs %}
+{% if not meta.breadcrumbs %}
+<ul><li>Feeds</ul></li>
+{% else %}
+<ul>{% for url, name in meta.breadcrumbs %}<li><a href="{{url}}">{{name}}</a></li>{% endfor %}<li>{{meta.title}}</li></ul>
+{% endif %}
+{% endblock %}
+
+{% block summary %}
+<div class="right">
+	<a href="#" class="track-btn" onclick="return show_track_panel();">Track events</a>
+	<p><a href="events.rss?feeds={{feed.feedname|urlencode}}">RSS</a></p>
+</div>
+
+<div id="track_panel_base" class="container">
+	<h1 style="margin-bottom: 12px">{{meta.title}}</h1>
+	{{meta.intro_html|safe}}
+</div>
+
+{% include "events/subscribe_inline.html" %}
+
+{% endblock %}
+
+{% block body %}
+
+<h2>Recent Events</h2>
+
+{% for event in feed.get_five_events %}
+{% with event|render_event:"" as meta %}
+	<div class="tracked_event" style="clear: both; border-bottom: 1px solid #DDD; margin-bottom: 1em">
+
+		<div style="float: right">
+			{% if not meta.date_has_no_time %}
+				{{event.when}}
+			{% else %}
+				{{event.when|date}}
+			{% endif %}
+		</div>
+		
+		<div>{{meta.type}}</div>
+		
+		<div><a href="{{meta.url}}">{{meta.title}}</a></div>
+		
+		{{meta.body_html|safe}}
+	</div>
+{% endwith %}
+{% empty %}
+<p>No events are tracked by this feed.</p>
+{% endfor %}
+
+{% endblock %}

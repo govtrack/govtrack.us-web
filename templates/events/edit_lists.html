@@ -307,7 +307,11 @@ $(function() {
 		{% for feed in no_arg_feeds %}
 			<li>
 				<input id="basicfeed_{{feed.id}}" feedname="{{feed.feedname}}" type="checkbox" onclick="return toggle_list_item(this);"/>
-				<label for="basicfeed_{{feed.id}}">{{feed.title}}</label>
+				{% if not feed.link %}
+					<label for="basicfeed_{{feed.id}}">{{feed.title}}</label>
+				{% else %}
+					<a href="{{feed.link}}">{{feed.title}}</a>
+				{% endif %}
 			</li>
 		{% endfor %}
 	</ul>

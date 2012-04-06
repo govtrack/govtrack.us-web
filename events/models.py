@@ -65,24 +65,41 @@ class Feed(models.Model):
     feed_metadata = {
         "misc:activebills": {
             "title": "Major Activity on All Legislation",
+            "slug": "bill-activity",
+            "intro_html": """<p>This feed tracks all major activity on legislation, including newly introduced bills and resolutions, votes on bills and resolutions, enacted bills, and other such events.</p> <p>To exclude newly introduced bills and resolutions, use the <a href="/events/major-bill-activity">Major Activity on All Legislation Except New Introductions</a> feed.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
+            "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
         },
         "misc:enactedbills": {
             "title": "Enacted Bills",
+            "slug": "enacted-bills",
+            "intro_html": """<p>This feed tracks the enactment of bills either by the the signature of the president or a veto override.</p> <p>You can also <a href="/congress/bills/browse?status=28,29">browse enacted bills</a> using advanced bill search.</p>""",
+            "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
         },
         "misc:introducedbills": {
             "title": "Introduced Bills and Resolutions",
+            "slug": "introduced-bills",
+            "intro_html": """<p>This feed tracks newly introduced bills and resolutions.</p> <p>You can also <a href="/congress/bills/browse?sort=-introduced_date">browse introduced bills</a> using advanced bill search.</p>""",
+            "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
         },
         "misc:activebills2": {
             "title": "Major Activity on All Legislation Except New Introductions",
+            "slug": "major-bill-activity",
+            "intro_html": """<p>This feed tracks major activity on legislation, including votes on bills and resolutions, enacted bills, and other such events.</p> <p>This feed includes all of the same events as the <a href="/events/bill-activity">Major Activity on All Legislation</a> feed except newly introduced bills and resolutions.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
+            "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
         },
         "misc:comingup": {
             "title": "Legislation Coming Up",
+            "slug": "coming-up",
+            "intro_html": """<p>This feed tracks legislation posted on the House Majority Leader&rsquo;s week-ahead website at <a href="http://docs.house.gov">docs.house.gov</a>. There is currently no corresponding source of upcoming legislation for the Senate.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
+            "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
         },
         "misc:allcommittee": {
             "title": "Committee Activity",
+            "link": "/congress/committees",
         },
         "misc:allvotes": {
             "title": "Roll Call Votes",
+            "link": "/congress/votes",
         },
         "bill:": {
             "title": lambda self : truncate_words(self.bill().title, 12),
@@ -275,7 +292,9 @@ class Feed(models.Model):
     @property
     def link(self):
         m = self.type_metadata()
+        if "slug" in m: return "/events/" + m["slug"]
         if "link" not in m: return None
+        if not callable(m["link"]): return m["link"]
         return m["link"](self)
         
     @property

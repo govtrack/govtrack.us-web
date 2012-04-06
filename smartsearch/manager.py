@@ -92,7 +92,7 @@ class SearchManager(object):
         if request.META["REQUEST_METHOD"] == "GET":
             c = {
                 'form': self.options,
-                'sort_options': self.sort_options,
+                'sort_options': [(name, key, isdefault if defaults.get("sort", None) == None else defaults.get("sort", None) == key) for name, key, isdefault in self.sort_options],
                 'column_headers': self.get_column_headers(),
                 'defaults': defaults,
                 'noun_singular': noun[0],

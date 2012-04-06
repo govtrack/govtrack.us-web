@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 
 from common.decorators import render_to
@@ -154,4 +154,18 @@ def events_rss(request):
             
     return DjangoFeed()(request)
     
-            
+@render_to('events/showfeed.html')
+def events_show_feed(request, feedslug):
+    # Map slug to feed internal name, then Feed object.
+    for feedname, feedmeta in Feed.feed_metadata.items():
+        if feedmeta.get("slug", "") == feedslug:
+            feed = Feed.from_name(feedname)
+            break
+    else:
+        raise Http404()
+        
+    return {
+        "feed": feed,
+        "meta":  feedmeta,
+    }
+

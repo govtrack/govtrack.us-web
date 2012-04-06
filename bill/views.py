@@ -187,6 +187,7 @@ def show_bill_browse(template, request, ix1, ix2, context):
             "terms2": ix2.id if ix2 else None,
             "text": request.GET.get("text", None),
             "current_status": request.GET.get("status").split(",") if "status" in request.GET else None,
+            "sort": request.GET.get("sort", None),
         },
         noun = ("bill", "bills"),
         context = context,

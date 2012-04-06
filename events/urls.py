@@ -7,4 +7,5 @@ urlpatterns = patterns('events.views',
     url('^events/_load_events$', 'events_list_items', name='events_list_items'),
     url('^events/search_feeds$', 'search_feeds', name='search_feeds'),
     url('^events/events.rss$', 'events_rss'),
+    url('^events/([\w\-]+)$', 'events_show_feed'),
 )
