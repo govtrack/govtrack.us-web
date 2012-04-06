@@ -23,7 +23,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json, datetime
+import urllib, urllib2, json, datetime, lxml
 from registration.helpers import json_response
 
 @render_to('bill/bill_details.html')
@@ -100,39 +100,63 @@ def market_test_vote(request):
 
 @render_to('bill/bill_text.html')
 def bill_text(request, congress, type_slug, number):
-    if type_slug.isdigit():
-        bill_type = type_slug
-    else:
-        try:
-            bill_type = BillType.by_slug(type_slug)
-        except BillType.NotFound:
-            raise Http404("Invalid bill type: " + type_slug)
+    # if type_slug.isdigit():
+        # bill_type = type_slug
+    # else:
+        # try:
+            # bill_type = BillType.by_slug(type_slug)
+        # except BillType.NotFound:
+            # raise Http404("Invalid bill type: " + type_slug)
+    # bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    # 
+    # pv_bill_id = None
+    # bill_text_content = None
+    # 
+    # if bill.congress == CURRENT_CONGRESS:
+        # # the congress number filter doesn't seem to work
+        # pvinfo = query_popvox("v1/bills/search", {
+                # "q": bill.display_number + "/" + str(bill.congress)
+            # })
+        # try:
+            # pv_bill_id = pvinfo["items"][0]["id"]
+        # except:
+            # pass
+    # else:
+    
+    try:
+        bill_type = BillType.by_slug(type_slug)
+    except BillType.NotFound:
+        raise Http404("Invalid bill type: " + type_slug)
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
     
-    pv_bill_id = None
-    bill_text_content = None
-    
-    if bill.congress == CURRENT_CONGRESS:
-        # the congress number filter doesn't seem to work
-        pvinfo = query_popvox("v1/bills/search", {
-                "q": bill.display_number + "/" + str(bill.congress)
-            })
-        try:
-            pv_bill_id = pvinfo["items"][0]["id"]
-        except:
-            pass
-    else:
-        try:
-            bt = BillType.by_value(bill.bill_type).xml_code
-            bill_text_content = open("data/us/bills.text/%s/%s/%s%d.html" % (bill.congress, bt, bt, bill.number)).read()
-        except IOError:
-            pass
+    try:
+        bt = BillType.by_value(bill.bill_type).xml_code
+        bill_text_content = open("data/us/bills.text/%s/%s/%s%d.html" % (bill.congress, bt, bt, bill.number)).read()
+        
+        mods = lxml.etree.parse("data/us/bills.text/%s/%s/%s%d.mods.xml" % (bill.congress, bt, bt, bill.number))
+        ns = { "mods": "http://www.loc.gov/mods/v3" }
+        docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
+        gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
+        gpo_pdf_url = mods.xpath("string(mods:location/url[@displayLabel='PDF rendition'])", namespaces=ns)
+        doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
+        
+        docdate = datetime.date(*(int(d) for d in docdate.split("-")))
+        
+        from billtext import bill_gpo_status_codes
+        doc_version_name = bill_gpo_status_codes[doc_version]
+    except IOError:
+        bill_text_content = None
         
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
-        "pv_bill_id": pv_bill_id,
+        #"pv_bill_id": pv_bill_id,
         "text_html": bill_text_content,
+        "docdate": docdate,
+        "gpo_url": gpo_url,
+        "gpo_pdf_url": gpo_pdf_url,
+        "doc_version": doc_version,
+        "doc_version_name": doc_version_name,
     }
 
 def bill_list(request):

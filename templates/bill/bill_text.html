@@ -1,18 +1,43 @@
 {% extends 'master.html' %}
 {% load humanize %}
 
-{% block body_class %}{% endblock %}
+{% block body_class %}bills{% endblock %}
 
-{% block title %}{{bill|truncatewords:6}} - Full Text - GovTrack.us{% endblock %}
+{% block title %}Full Text of {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
 
 {% block meta_description %}{{bill}}{% endblock %}
 
 {% block extra_css %}
 <style>
+h1 {
+	font-size: 24px;
+	line-height: 30px;
+	color: #565656;
+	background: url(../images/divider-4.gif) repeat-x 0 100%;
+	padding: 0 0 6px;
+	margin: 0 0 6px;
+}	
+
 .heading-box .article { padding: 0; }
 
+#bill_text_content {
+	width: 640px;
+	float: left;
+	border: 1px solid #555;
+	padding: 1em;
+	font-family: serif;
+	color: #000;
+}
+
+#bill_text_content h1, #bill_text_content h2, #bill_text_content h3, #bill_text_content h4, #bill_text_content h5 { font-family: serif; text-transform: none; font-weight: bold; color: #000;}
 #bill_text_content blockquote { margin: 1em; }
 #bill_text_content ul { margin-left: 1em; }
+
+#sidebar {
+	width: 230px;
+	float: left;
+	padding-left: 20px;
+}
 
 </style>
 {% endblock %}
@@ -27,44 +52,51 @@
 {% endblock %}
 
 {% block summary %}
-	<h1>Text of {{bill.display_number}}</h1>
-	
+	<h1>{{bill.title|truncatewords:20}}</h1>
+	{% if bill.title != bill.title|truncatewords:20 %}
+		{% with bill.title|truncatewords:20|cut:"..." as bt %}
+			<p style="line-height: 130%">...{{bill.title|cut:bt}}</p>
+		{% endwith %}
+	{% endif %}
+
 	<div class="info">
-		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
+		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}. Text as of {{docdate}} ({{doc_version_name}}).</p>
 		
-		<p>{{bill.title_no_number}}</p>
+		<p><a href="{{bill.get_absolute_url}}">Status &amp; Summary</a>
+		| <a href="{{gpo_pdf_url}}">PDF</a>
+		| Source: <a href="{{gpo_url}}">GPO</a></p>
 	</div><!-- /info -->
 {% endblock %}
 
 {% block body %}
 
-{% if not pv_bill_id and not text_html %}
+<div id="bill_text_content">
+{% if not text_html %}
 	<p>The text of this bill is not yet available. Please check back soon.</p>
-{% endif %}
-	
-{% if pv_bill_id %}
-	<script src="https://www.popvox.com/widgets/bill-text.js?billid={{pv_bill_id}}&width=940&height=800"> </script>
-	
-	<script>
-	function adjust_widget_size() {
-		var w = $('#popvox_billtext_widget');
-		if (!w.length) return;
-		
-		var h = $(window).height() - w.offset().top + $(window).scrollTop() - 5;
-		if (h < 150) h = 150;
-		if (h > $(window).height()) h = $(window).height();
-		w.css({"height": h });
-	}
-	$(window).resize(adjust_widget_size);
-	$(window).scroll(adjust_widget_size);
-	adjust_widget_size();
-	</script>
-{% endif %}
-
-{% if text_html %}
-	<div id="bill_text_content">
+{% else %}
 		{{text_html|safe}}
-	</div>
 {% endif %}
+</div>
 
+<div id="sidebar">
+	{% if bill.is_alive %}
+	<p>You are reading the latest text of the {{bill.noun}}. The text of a {{bill.noun}} may change in committee or through the amendment process.</p>
+	{% endif %}
+	
+
+	<div style="float: right; width: 120px;">
+		<script type="text/javascript"><!--
+		google_ad_client = "ca-pub-3418906291605762";
+		/* GT Vertical 120x600, created 8/17/08 */
+		google_ad_slot = "7906528817";
+		google_ad_width = 120;
+		google_ad_height = 600;
+		//-->
+		</script>
+		<script type="text/javascript"
+		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+		</script>
+	</div>
+</div>
+	
 {% endblock %}
