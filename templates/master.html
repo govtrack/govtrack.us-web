@@ -15,6 +15,7 @@
 		
 		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}"></meta>
+		{% if HTTP_HOST == "test.govtrack.us" %}<meta name="robots" content="noindex" />{% endif %} {% comment %}moot because site is currently behind authz {% endcomment %}
 		
 		{% block extra_css %}{% endblock %}
 		
@@ -143,9 +144,12 @@
 			</header>
 			{% endblock %}
 			
+			
 			{% block body %}
 			{% endblock %}
-			
+
+
+
 		</div><!-- /content -->
 		{% endblock %}
 		
