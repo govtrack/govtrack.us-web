@@ -52,6 +52,7 @@ class CommitteeMemberProcessor(Processor):
     ROLE_MAPPING = {
         'Ex Officio': CommitteeMemberRole.exofficio,
         'Chairman': CommitteeMemberRole.chairman,
+        'Cochairman': CommitteeMemberRole.chairman, # huh!
         'Chair': CommitteeMemberRole.chairman,
         'Ranking Member': CommitteeMemberRole.ranking_member,
         'Vice Chairman': CommitteeMemberRole.vice_chairman,
