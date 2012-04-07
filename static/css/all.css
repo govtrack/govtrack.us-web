@@ -66,7 +66,7 @@ table {
 	}
 body {
     color: #444;
-    font: 14px/21px CallunaSansRegular, Arial, Helvetica, sans-serif;
+    font: 15px/1.5em CallunaSansRegular, Arial, Helvetica, sans-serif;
     background: #2b393b;
     width: 100%;
     min-width: 940px;
@@ -113,8 +113,38 @@ h2 span, h3 span, h4 span, span span, a em {
     font-style: normal;    
     text-transform: none;
 	}
+
+#content h2,
+#content h3,
+#content h4 {
+    padding-bottom: .5em;
+}
+p+h2,
+ul+h2,
+ol+h2,
+pre+h2 {
+    margin-top: 1.5em;
+}
 #content p {
 	margin-bottom: 1em;
+}
+
+
+pre {
+    margin: 0 0 1em 16px;
+    font-family: 'Droid Sans Mono', Monaco, "Courier New", Courier, monospace;
+    border-left: 5px solid #eee;
+    padding: 10px;
+
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+code {
+    font-family: 'Droid Sans Mono', Monaco, "Courier New", Courier, monospace;
 }
 
 /* General classes ============================== */
@@ -156,7 +186,19 @@ h2 span, h3 span, h4 span, span span, a em {
 	font-size: 12px;
 	line-height: 18px;
 	font-family: CallunaItalic;
-}
+    }
+.group:after,
+#content:after {
+    visibility: hidden;
+    display: block;
+    content: "";
+    clear: both;
+    height: 0;
+    }
+* html .group,
+* html #content { zoom: 1; } /* IE6 */
+*:first-child+html .group,
+*:first-child+html #content { zoom: 1; } /* IE7 */
 
 
 /* General Layout styles =============================== */
@@ -170,7 +212,7 @@ h2 span, h3 span, h4 span, span span, a em {
 #content {
     width: 940px;
     margin: 0 auto;
-    padding: 15px 0 0;
+    padding: 15px 0 25px;
 	}
 .section {
     width: 100%;
@@ -203,8 +245,58 @@ h2 span, h3 span, h4 span, span span, a em {
 	margin-bottom: 0;
 }
 
+    #content .main {
+        width: 620px;
+        float: left;
+    }
+    #content .main p,
+    #content .main ul {
+        margin-left: 16px;
+        font-family: callunaRegular;
+        font-size: 16px;
+        line-height: 1.5em;
+    }
+    #content .main ul {
+    counter-reset:li; /* Initiate a counter */
+    margin-left:16px; /* Remove the default left margin */
+    padding: 5px 10px 2px 0;
+    background:#fafafa;
+    color: #555;
+    border-radius: 5px;
+}
+#content .main ul > li {
+    position:relative; /* Create a positioning context */
+    margin:0 0 6px 20px; /* Give each list item a left margin to make room for the numbers */
+    padding:4px 8px; /* Add some spacing around the content */
+    list-style:none; /* Disable the normal item numbering */
+    border-bottom: 1px solid #eaeaea;
+}
+#content .main li:last-child {
+    border-bottom: 0;
+}
+#content .main ul > li:before {
+    content:'›'; /* Use the counter as content */
+    counter-increment:li; /* Increment the counter by 1 */
+    /* Position and style the number */
+    position:absolute;
+    top:3px;
+    left:-12px;
+    -moz-box-sizing:border-box;
+    -webkit-box-sizing:border-box;
+    box-sizing:border-box;
+    width:1em;
+    /* Some space between the number and the content in browsers that support
+       generated content but not positioning it (Camino 2 is one example) */
+    margin-right:8px;
+    color:#40a4bd;
+    text-align:center;
+}
+#content .main li ol,
+#content .main li ul {margin-top:6px;}
+#content .main ul ul li:last-child {margin-bottom:0;}
 	
-	
+
+
 /* Header styles ====================================== */
 /* ==================================================== */
 #masthead {
@@ -551,7 +643,7 @@ h2 span, h3 span, h4 span, span span, a em {
         width: 940px;
         margin: 0 auto;
         overflow: hidden;
-        padding: 25px 0 0;
+        padding: 25px 0 25px;
         background: url(../images/bg-aside.png) no-repeat 620px 0;
     	}
     .entries-box .container {
@@ -744,7 +836,6 @@ h2 span, h3 span, h4 span, span span, a em {
     	text-shadow: 0 1px 2px #333;
     	border-bottom: dashed #a9d7e3 1px;
     }
-
 
 /* Summary box styles
    ================================================= */
@@ -1511,7 +1602,8 @@ select, input.text {
 #footer {
 	clear: both;
     background: #2b393b;
-    line-height: 12px;
+    /*line-height: 12px;*/
+    font-size: 1em;
     color: #a7bfc3;
     padding: 24px 0 25px;
 	}
@@ -1527,8 +1619,8 @@ select, input.text {
         overflow: hidden;
     	}
     #footer nav {
-        font-size: 12px;
-        line-height: 23px;
+        /*font-size: 12px;*/
+        line-height: 2em;
         width: 140px;
         float: left;
         margin: 0 98px 0 0;
@@ -1561,10 +1653,13 @@ select, input.text {
         text-transform: none;
     	}
 #footer .social ul {
-    line-height: 16px;
+    line-height: 2em;
     text-transform: uppercase;
 	}
-#footer .social li { margin: 0 0 16px 	}
+    #footer .social li {
+        vertical-align: top;
+        border-bottom: 1px solid #405255;
+        }
 #footer .social ul img {
     vertical-align: middle;
     padding: 0 8px 0 2px;
@@ -1574,7 +1669,7 @@ select, input.text {
 #footer section { overflow: hidden 	}
 #footer p { 
 	margin: 0 0 12px;
-	font-size: 12px;
+/*	font-size: 12px;*/
 	line-height: 18px;
 	}
 	
