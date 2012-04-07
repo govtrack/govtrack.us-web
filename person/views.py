@@ -143,13 +143,18 @@ def browsemembersbymap(request, state=None, district=None):
             center_long, center_lat, center_zoom = (-170.255127, -14.514462, 8.0)
         elif state == "HI":
             center_long, center_lat, center_zoom = (-155.5, 20, 7.0)
+        elif state == "AK":
+            # Alaska has a longitude wrap-around problem so it's easier to just specify
+            # the coordinates manually than to figure out generically how to do the math
+            # of taking the average of the bounding box coordinates.
+            center_long, center_lat, center_zoom = (-150, 63, 4.0)
         else:
             cursor = connection.cursor()
             cursor.execute("SELECT MIN(X(PointN(ExteriorRing(bbox), 1))), MIN(Y(PointN(ExteriorRing(bbox), 1))), MAX(X(PointN(ExteriorRing(bbox), 3))), MAX(Y(PointN(ExteriorRing(bbox), 3))), SUM(Area(bbox)) FROM districtpolygons WHERE state=%s", [state])
             rows = cursor.fetchall()
             
             sw_lng, sw_lat, ne_lng, ne_lat, area = rows[0]
-    
+                
             center_long, center_lat = (sw_lng+ne_lng)/2.0, (sw_lat+ne_lat)/2.0
             center_zoom = round(1.0 - log(sqrt(area)/1000.0))
     
