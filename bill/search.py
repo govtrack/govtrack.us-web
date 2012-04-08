@@ -78,7 +78,7 @@ def bill_search_manager():
     sm.add_option('terms2', type="select", label="subject 2", choices=sub_terms, visible_if=lambda post:"terms" in post, filter=sub_term_filter)
     sm.add_option('bill_type', label="bill or resolution type")
     
-    sm.add_sort("Popularity", "-total_bets", default=True)
+    #sm.add_sort("Popularity", "-total_bets", default=True)
     sm.add_sort("Introduced Date (Newest First)", "-introduced_date")
     sm.add_sort("Introduced Date (Oldest First)", "introduced_date")
     sm.add_sort("Last Major Action (Recent First)", "-current_status_date")

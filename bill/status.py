@@ -52,6 +52,7 @@ class BillStatus(enum.Enum):
     # indicates a bill at the end of its life cycle and passed
     final_status_passed_bill = (enacted_signed, enacted_veto_override)
     final_status_passed_resolution = (passed_simpleres, passed_constamend, passed_concurrentres)
+    final_status_passed = tuple(list(final_status_passed_bill) + list(final_status_passed_resolution))
     
     # indicates a bill at the end of its life cycle and failed
     final_status_failed = (fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)

@@ -38,19 +38,12 @@ def bill_details(request, congress, type_slug, number):
     
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
     
-    relevant_assignments = []
-    good_cosp_assignments = 0
-    good_cosp_assignments_other = False
-    if bill.congress == CURRENT_CONGRESS:
-        for ca in sort_members(bill.sponsor.committeeassignments.filter(committee__in=bill.committees.all()).select_related()):
-            relevant_assignments.append( ("The sponsor", ca) )
-            break
-        for ca in sort_members(CommitteeMember.objects.filter(person__in=bill.cosponsors.all(), committee__in=bill.committees.all()).select_related()):
-            if ca.role not in (CommitteeMemberRole.member, CommitteeMemberRole.exofficio):
-                relevant_assignments.append( (ca.person.name + ", a cosponsor,", ca) )
-                good_cosp_assignments_other = True
-            else:
-                good_cosp_assignments += 1
+    def get_prognosis():
+    	if bill.congress != CURRENT_CONGRESS: return None
+    	import prognosis
+    	prog = prognosis.compute_prognosis(bill)
+        prog["congressdates"] = get_congress_dates(prog["congress"])
+        return prog
         
     # simple predictive market implementation
     from website.models import TestMarketVote
@@ -71,14 +64,12 @@ def bill_details(request, congress, type_slug, number):
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
-        "relevant_assignments": relevant_assignments,
-        "good_cosp_assignments": good_cosp_assignments,
-        "good_cosp_assignments_other": good_cosp_assignments_other,
+        "prognosis": get_prognosis, # defer so we can use template caching
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         'feed': Feed.BillFeed(bill),
-        "market_score": market_score,
-        "market_score_you": market_score_you,
+        #"market_score": market_score,
+        #"market_score_you": market_score_you,
     }
 
 @json_response

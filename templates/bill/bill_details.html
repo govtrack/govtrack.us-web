@@ -70,7 +70,7 @@
 	
 	</div><!-- /info -->
 	
-	<p style="margin: 0"><small>Bill titles {% if subtitle %}and summaries{% endif %} are written by the sponsor.</small></p>
+	<p style="margin: 0; line-height: 100%"><small>Bill titles {% if subtitle %}and summaries{% endif %} are written by the sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 </div>
 {% endcache %}
 
@@ -80,6 +80,7 @@
 	{% if bill.is_alive %}
 	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 	
+	{% comment %}
 	{% if not user.is_authenticated %}
 	<div id="make_prediction">
 	<p>We think this bill has a <b>{{market_score}}%</b> chance of passing Congress. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
@@ -120,6 +121,7 @@
 	});
 	</script>
 	{% endif %}
+	{% endcomment %}
 	
 	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
 	{% endif %}	
@@ -170,19 +172,20 @@
 
 						</dd>
 						
-						{% if relevant_assignments or good_cosp_assignments > 0 %}
+						{% with prognosis as p %}
+						{% if p %}
 						<dt>Prognosis:</dt>
 						<dd>
-							<p>The following factors favor this bill&rsquo;s progress:</p>
-						
-							{% for person, ca in relevant_assignments %}
-								<p>{{person}} is {{ca.role_name_2}} the {{ca.committee.name}}, where the bill has been referred.</p>
+							{% for factor in p.factors %}
+								{% if forloop.first %}
+									<p>This {{bill.noun}} has a <b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}. The following factors were considered:</p>
+								{% endif %}
+								<p style="margin: 0 0 .5em 1em">{{factor.description}} <small>({% if factor.success_change > 0 %}+{% endif %}{{factor.success_change|floatformat:0}}%)</small></p>
 							{% endfor %}
-							{% if good_cosp_assignments > 0 %}
-								<p>{{good_cosp_assignments}} {% if good_cosp_assignments_other %}other {% endif %} cosponsor{% if good_cosp_assignments > 1 %}s are members{% else %} is a member{% endif %} of a committee to which the bill has been referred.</p>
-							{% endif %}
+							<p>{% if 40 > p.overall_success_rate %}Just {% endif %}{{p.overall_success_rate|floatformat:0}}% of all {{bill.bill_type_name}}s {% if not p.is_introduced %}reported favorably by committee{% endif %} in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} <!--(the {{p.congress|ordinal}} Congress)--> were {{p.success_name}}.</p>
 						</dd>
 						{% endif %}
+						{% endwith %}
 				
 					</dl>
 				</div><!-- /container -->

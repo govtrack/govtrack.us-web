@@ -121,11 +121,13 @@ class Person(models.Model):
     def get_role_at_date(self, when):
         if isinstance(when, datetime.datetime):
             when = when.date()
-
+        
+        # A person may have two roles on the same date, such as when simultaneously
+        # resigning from the House to take office in the Senate. In that case, return the
+        # most recent role.
         try:
-            role = self.roles.get(startdate__lte=when, enddate__gte=when)
-            return role
-        except PersonRole.DoesNotExist:
+            return self.roles.filter(startdate__lte=when, enddate__gte=when).order_by("-startdate")[0]
+        except IndexError:
             return None
 
     def get_last_role_at_congress(self, congress):

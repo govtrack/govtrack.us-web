@@ -19,14 +19,14 @@ from lxml import etree
 
 class BillType(enum.Enum):
     # slug must match regex for parse_bill_number
-    senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s', search_help_text="Senate bills")
-    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h', search_help_text="House bills")
-    senate_resolution = enum.Item(4, 'S.Res.', slug='sres', xml_code='sr', search_help_text="Senate simple resolutions, which do not have the force of law")
-    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr', search_help_text="House simple resolutions, which do not have the force of law")
-    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sconres', xml_code='sc', search_help_text="Concurrent resolutions originating in the Senate, which do not have the force of law")
-    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hconres', xml_code='hc', search_help_text="Concurrent resolutions originating in the House, which do not have the force of law")
-    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sjres', xml_code='sj', search_help_text="Joint resolutions originating in the Senate, which may be used to enact laws or propose constitutional amendments")
-    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hjres', xml_code='hj', search_help_text="Joint resolutions originating in the House, which may be used to enact laws or propose constitutional amendments")
+    senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s', full_name="Senate bill", search_help_text="Senate bills")
+    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h', full_name="House bill", search_help_text="House bills")
+    senate_resolution = enum.Item(4, 'S.Res.', slug='sres', xml_code='sr', full_name="Senate simple resolution", search_help_text="Senate simple resolutions, which do not have the force of law")
+    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr', full_name="House simple resolution", search_help_text="House simple resolutions, which do not have the force of law")
+    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sconres', full_name="Senate concurrent resolution", xml_code='sc', search_help_text="Concurrent resolutions originating in the Senate, which do not have the force of law")
+    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hconres', full_name="House concurrent resolution", xml_code='hc', search_help_text="Concurrent resolutions originating in the House, which do not have the force of law")
+    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sjres', xml_code='sj', full_name="Senate joint resolution", search_help_text="Joint resolutions originating in the Senate, which may be used to enact laws or propose constitutional amendments")
+    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hjres', xml_code='hj', full_name="House joint resolution", search_help_text="Joint resolutions originating in the House, which may be used to enact laws or propose constitutional amendments")
 
 
 class TermType(enum.Enum):
@@ -70,6 +70,12 @@ class Cosponsor(models.Model):
     withdrawn = models.DateField(blank=True, null=True)
     class Meta:
         unique_together = [("bill", "person"),]
+        
+    _role = None
+    def get_person_role(self):
+        if not self._role:
+            self._role = self.person.get_role_at_date(self.joined)
+        return self._role
 
 class Bill(models.Model):
     title = models.CharField(max_length=255)
@@ -103,12 +109,12 @@ class Bill(models.Model):
     def get_index_text(self):
         return "\n".join([self.title] + [t[2] for t in self.titles])
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date')
-    haystack_index_extra = (('total_bets', 'Integer'),)
+    #haystack_index_extra = (('total_bets', 'Integer'),)
     def get_terms_index_list(self):
         return [t.id for t in self.terms.all().distinct()]
-    def total_bets(self):
-        from website.models import TestMarketVote
-        return TestMarketVote.objects.filter(bill=self).count()
+    #def total_bets(self):
+    #    from website.models import TestMarketVote
+    #    return TestMarketVote.objects.filter(bill=self).count()
     #######
 
         
@@ -129,6 +135,12 @@ class Bill(models.Model):
     @property
     def bill_type_slug(self):
         return BillType.by_value(self.bill_type).slug
+    @property
+    def bill_type_name(self):
+        return BillType.by_value(self.bill_type).full_name
+    @property
+    def noun(self):
+        return "bill" if self.bill_type in (BillType.house_bill, BillType.senate_bill) else "resolution"
 
     @property
     def cosponsor_count(self):
@@ -156,9 +168,9 @@ class Bill(models.Model):
         # Some status messages depend on whether the bill is current:
         if bill.congress == settings.CURRENT_CONGRESS:
             if status == "INTRODUCED":
-                status = "This bill or resolution is in the first stage of the legislative process. It was introduced into Congress on %s. Most bills and resolutions are assigned to committees which consider them before they move to the House or Senate as a whole."
+                status = "This bill or resolution is in the first stage of the legislative process. It was introduced into Congress on %s. It will typically be considered by committee next."
             elif status == "REFERRED":
-                status = "This bill or resolution was assigned to a congressional committee on %s, which will consider it before possibly sending it on to the House or Senate as a whole. The majority of bills never make it past this point."
+                status = "This bill or resolution was assigned to a congressional committee on %s, which will consider it before possibly sending it on to the House or Senate as a whole."
             elif status == "REPORTED":
                 status = "The committees assigned to this bill or resolution sent it to the House or Senate as a whole for consideration on %s."
             elif status == "PASS_OVER:HOUSE":
