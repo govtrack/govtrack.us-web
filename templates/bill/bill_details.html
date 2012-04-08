@@ -66,11 +66,16 @@
 				Died ({{bill.get_current_status_display}})
 			{% endif %}
 			</dd>
+			
+			{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
+			<dt>Schedule:</dt>
+			<dd>The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</dd>
+			{% endif %}
 		</dl>
 	
 	</div><!-- /info -->
 	
-	<p style="margin: 0; line-height: 100%"><small>Bill titles {% if subtitle %}and summaries{% endif %} are written by the sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
+	<p style="margin: 0; line-height: 100%"><small>{{bill.noun|capfirst}} titles {% if subtitle %}and summaries{% endif %} are written by the sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 </div>
 {% endcache %}
 
@@ -83,17 +88,17 @@
 	{% comment %}
 	{% if not user.is_authenticated %}
 	<div id="make_prediction">
-	<p>We think this bill has a <b>{{market_score}}%</b> chance of passing Congress. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
+	<p>We think this {{bill.noun}} has a <b>{{market_score}}%</b> chance of passing Congress. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
 	</div>
 	{% else %}
 	<div id="make_prediction">
-	<p>We think this bill has a <b>{{market_score}}%</b> chance of passing Congress. What do you think?</p>
+	<p>We think this {{bill.noun}} has a <b>{{market_score}}%</b> chance of passing Congress. What do you think?</p>
 	<p class="empty" {% if market_score_you %}style="display: none"{% endif %}>
 		That&rsquo;s...
 		<a href="#" prediction="1">Too Low</a> | 
 		<a href="#" prediction="-1">Too High</a>
 	</p>
-	<p class="nonempty" {% if not market_score_you %}style="display: none"{% endif %}>You predict <span>{% if market_score_you.prediction == 1 %}the bill will pass{% else %}the bill will not pass{% endif %}</span>. <a href="#" prediction="0">Clear my bet</a>.</p>
+	<p class="nonempty" {% if not market_score_you %}style="display: none"{% endif %}>You predict <span>{% if market_score_you.prediction == 1 %}the {{bill.noun}} will pass{% else %}the {{bill.noun}} will not pass{% endif %}</span>. <a href="#" prediction="0">Clear my bet</a>.</p>
 	</div>
 	<script>
 	$("#make_prediction a").click(function() {
@@ -113,7 +118,7 @@
 				} else {
 					$("#make_prediction .empty").hide();
 					$("#make_prediction .nonempty").show();
-					$("#make_prediction .nonempty span").text(data.vote == 1 ? "the bill will pass" : "the bill will not pass");
+					$("#make_prediction .nonempty span").text(data.vote == 1 ? "the {{bill.noun|escapejs}} will pass" : "the {{bill.noun|escapejs}} will not pass");
 				}
 			}
 		});	
@@ -134,7 +139,7 @@
 {% cache 600 billoverview bill.id %}
 <div id="bill-overview" class="section">
 	
-	<h2>Bill Overview</h2>
+	<h2>{{bill.noun|capfirst}} Overview</h2>
 		
 	<div class="overview">
 		<div class="holder">
@@ -165,7 +170,7 @@
 								{% if not died %}
 									{{bill.current_status_description}}
 								{% else %}
-									This bill died in a previous session of Congress.
+									This {{bill.noun}} died in a previous session of Congress.
 								{% endif %}
 								</td></tr>
 							</table>
@@ -196,7 +201,7 @@
 						<dd>
 							<ul class="text-view">
 								<!--<li><a href="#">Summary</a></li>-->
-								<li><a href="{{bill.get_absolute_url}}/text">Read Bill Text</a></li>
+								<li><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text</a></li>
 							</ul>
 						</dd>
 					</dl>
@@ -233,7 +238,7 @@
 									{% endfor %}
 								{% endif %}
 							{% endfor %}
-							<p>The committee chair determines whether a bill will move past the committee stage.</p>
+							<p>The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
 						</dd>
 					</dl>
 					{% endif %}
@@ -333,7 +338,7 @@
 	{% with bill.get_formatted_summary as summary %}
 	{% if summary %}
 	<section class="clear" style="padding-top: 2em">
-		<h3>Official Bill Summary</h3>
+		<h3>Official Summary</h3>
 		<p>The following summary was written by the Congressional Research Service, a nonpartisan arm of the Library of Congress, which serves Congress. GovTrack did not write and has no control over these summaries.</p>
 		{{summary|safe}}
 	</section>

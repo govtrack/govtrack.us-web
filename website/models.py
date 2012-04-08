@@ -6,8 +6,8 @@ from events.models import Feed, SubscriptionList
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True, db_index=True)
-    massemail = models.BooleanField(default=True)
-    old_id = models.IntegerField(blank=True, null=True)
+    massemail = models.BooleanField(default=True) # may we send you mail?
+    old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
     
     def lists(self):
         # make sure the 'default' list exists
@@ -45,4 +45,8 @@ class TestMarketVote(models.Model):
     bill = models.ForeignKey(Bill, db_index=True)
     prediction = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
-    
+
+class Req(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    request = models.TextField()
+

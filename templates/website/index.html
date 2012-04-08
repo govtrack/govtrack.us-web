@@ -130,13 +130,16 @@
 						{% endcomment %}
 
 						{% for item in events %}
-						{% with item|render_event:"" as event %}
+						{% with item|render_event:subscription_feeds as event %}
 						<article class="post" style="margin-bottom: .75em">
 							{% comment %}<div class="icon"><img src="images/ico-bill.gif" width="16" height="22" alt="image description"></div>{% endcomment %}
 							<div class="article">
 								<p>{{event.date}} &mdash; {{event.type}}</p>
 								<h4>{{event.title|truncatewords:30}}</h4>
+								<div style="margin-left: 2em; font-size: 95%">
+								{% if event.type == "Vote" %}{{event.body_html|safe}}{% endif %}
 								<p><a href="{{event.url}}">More information...</a></p>
+								</div>
 							</div>
 						</article>
 						{% endwith %}

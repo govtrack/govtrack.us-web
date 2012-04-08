@@ -56,11 +56,16 @@ def format_congress_number(value):
 
 # this regex must match slugs in BillType enum!
 bill_number_re = re.compile(r"(hr|s|hconres|sconres|hjres|sjres|hres|sres)(\d+)(/(\d+))?", re.I)
-def parse_bill_number(q):
+def parse_bill_number(q, congress=None):
     m = bill_number_re.match(q.replace(" ", "").replace(".", "").replace("-", ""))
     if m == None: return None
     if m.group(3) != None:
         cn = int(m.group(4))
+    elif congress != None:
+        try:
+            cn = int(congress)
+        except:
+            cn = CURRENT_CONGRESS
     else:
         cn = CURRENT_CONGRESS
     try:

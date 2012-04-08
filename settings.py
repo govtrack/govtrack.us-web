@@ -82,6 +82,7 @@ if not DEBUG:
       )
 
 MIDDLEWARE_CLASSES = (
+    'website.middleware.DebugMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

@@ -69,7 +69,10 @@ function show_facets(postdata, options) {
             else
                 node.val("__ALL__");
         } else if (type == "text") {
-            node.val(postdata[field])
+        	// There is never a reason to update a free-form text field with
+        	// data returned by the search server because the user has already
+        	// entered something, and we don't want to mess with it.
+            //node.val(postdata[field])
         } else if (type == "checkbox" || type == "radio") {
             node.html("");
             for (var j in values) {
@@ -113,8 +116,35 @@ function show_facets(postdata, options) {
     }
 }
 
+var default_search = { };
+{% for k, v in defaults.items %}
+{% if v %}
+	{% for field in form %}
+		{% if field.field_name == k %}
+			{% if field.type == "checkbox" %}
+				{% if v %}
+					if (default_search["{{k|escapejs}}"] == null) default_search["{{k|escapejs}}"] = Array();
+					{% for vv in v %}
+					default_search["{{k|escapejs}}"].push("{{vv|escapejs}}");
+					{% endfor %}
+				{% endif %}
+			{% endif %}
+			{% if field.type == "radio" %}
+				{% if v %}
+					default_search["{{k|escapejs}}"] = "true";
+				{% endif %}
+			{% endif %}
+			{% if field.type == "select" or field.type == "text" %}
+				default_search["{{k|escapejs}}"] = "{{v|escapejs}}";
+			{% endif %}
+		{% endif %}
+	{% endfor %}
+{% endif %}
+{% endfor %}
+
 var current_page = 1;
 var update_search_lock = false;
+var prev_search = default_search;
 function update_search(pagenum, pageinc, elem, isinitial) {
     if (update_search_lock) return;
     update_search_lock = true;
@@ -143,6 +173,12 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         if (form.elements[i].type == 'radio' && !form.elements[i].checked) continue;
         if (form.elements[i].value == "__ALL__" || form.elements[i].value == "") continue;
         
+        // We should not facet on free-form text fields on the initial search because
+        // these entries can result in zero results, which messes up faceting because
+        // there will be no drill-down options. This can occur when the user navigates
+        // back to this page after doing a free-form search.
+        if (isinitial && form.elements[i].type == "text") continue;
+        
         name = form.elements[i].name;
         if (form.elements[i].type == 'checkbox') {
             if (postdata[name] == null) postdata[name] = Array();
@@ -153,30 +189,8 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     }
     
     if (isinitial) {
-        {% for k, v in defaults.items %}
-        {% if v %}
-            {% for field in form %}
-                {% if field.field_name == k %}
-                    {% if field.type == "checkbox" %}
-                        {% if v %}
-                        	if (postdata["{{k|escapejs}}"] == null) postdata["{{k|escapejs}}"] = Array();
-                        	{% for vv in v %}
-                            postdata["{{k|escapejs}}"].push("{{vv|escapejs}}");
-                            {% endfor %}
-                        {% endif %}
-                    {% endif %}
-                    {% if field.type == "radio" %}
-                        {% if v %}
-                            postdata["{{k|escapejs}}"] = "true";
-                        {% endif %}
-                    {% endif %}
-                    {% if field.type == "select" or field.type == "text" %}
-                        postdata["{{k|escapejs}}"] = "{{v|escapejs}}";
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-        {% endfor %}
+    	for (var k in default_search)
+    		postdata[k] = default_search[k];
     }
     
     if (pagenum)
@@ -187,6 +201,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         postdata.page = current_page;
     
     postdata.faceting = "false";
+    postdata.allow_redirect = (isinitial ? "false" : "true"); // hit back after getting a redirect would generate an immediate redirect again, not helpful
         
     $.ajax(
         {
@@ -216,50 +231,76 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                     } else {
                         $('.summary .range').hide();
                     }
+
+					// Display page numbers and prev/next.
+					if (res.page > 1) {
+						$('.paging .prev a').show();
+						$('.paging .prev span').hide();
+					} else {
+						$('.paging .prev a').hide();
+						$('.paging .prev span').show();
+					}
+					if (res.page < res.num_pages) {
+						$('.paging .next a').show();
+						$('.paging .next span').hide();
+					} else {
+						$('.paging .next a').hide();
+						$('.paging .next span').show();
+					}
+					
+					$('.paging .pages').text("");
+					for (var i = 1; i <= res.num_pages; i++) {
+						if (res.page - i > 10) continue;
+						//if (i - res.page > 10) break;
+						if (i == res.page)
+							$('.paging .pages').append($('<span>' + i + '</span>'));
+						else
+							$('.paging .pages').append($('<a href="#" onclick="return update_search(' + i + ')">' + i + '</a>'));
+						$('.paging .pages').append(" ");
+					}
+					
+					$('.results, .paging').show();
+					
                     
-                    show_facets(postdata, res.options);
-                    
-                    // Display page numbers and prev/next.
-                    if (res.page > 1) {
-                        $('.paging .prev a').show();
-                        $('.paging .prev span').hide();
+                    if (res.total == 0) {
+						// Now we have a problem. If there are no results, then the facets
+						// are going to be messed up because there can be no drill-down.
+						// We got here because the user did a free-form text search that
+						// resulted in no answers. In this case, show the facets from the
+						// last successful search.
+						prev_search.page = 1;
+						prev_search.faceting = "true";
+						$.ajax({
+								url: document.location.pathname,
+								type: "POST",
+								dataType: "json",
+								data: prev_search,
+								success: function(res) {
+									if (res.error) return;
+									show_facets(postdata, res.options);
+								}
+							});
                     } else {
-                        $('.paging .prev a').hide();
-                        $('.paging .prev span').show();
-                    }
-                    if (res.page < res.num_pages) {
-                        $('.paging .next a').show();
-                        $('.paging .next span').hide();
-                    } else {
-                        $('.paging .next a').hide();
-                        $('.paging .next span').show();
-                    }
-                    
-                    $('.paging .pages').text("");
-                    for (var i = 1; i <= res.num_pages; i++) {
-                        if (res.page - i > 10) continue;
-                        //if (i - res.page > 10) break;
-                        if (i == res.page)
-                            $('.paging .pages').append($('<span>' + i + '</span>'));
-                        else
-                            $('.paging .pages').append($('<a href="#" onclick="return update_search(' + i + ')">' + i + '</a>'));
-                        $('.paging .pages').append(" ");
-                    }
-                    
-                    $('.results, .paging').show();
-                    
-                    // After showing the main content, show the full faceted results.
-                    postdata.faceting = "true";
-                    $.ajax({
-                            url: document.location.pathname,
-                            type: "POST",
-                            dataType: "json",
-                            data: postdata,
-                            success: function(res) {
-                                if (res.error) return;
-                                show_facets(postdata, res.options);
-                            }
-                        });
+						// Updates checkboxes and radio buttons and the current values
+						// for selects, but in order to be fast we were not returned
+						// the other options for selects- that comes later.
+						show_facets(postdata, res.options);
+						
+						// After showing the main content and basic facets, show the full faceted results.
+						postdata.faceting = "true";
+						$.ajax({
+								url: document.location.pathname,
+								type: "POST",
+								dataType: "json",
+								data: postdata,
+								success: function(res) {
+									if (res.error) return;
+									show_facets(postdata, res.options);
+								}
+							});
+						
+						prev_search = postdata;
+					}
                 }
                 
                 current_page = res.page;

@@ -1,3 +1,6 @@
+{% if not 'googlebot(at)googlebot.com' in request.META.HTTP_FROM %}
+	{% comment %}Google likes to follow the social registration links which generates an error at Twitter that gets sent in an email to the site maintainer.{% endcomment %}
+
 <style>
 #new_list_row p {
 	margin: 3px 0 3px 0;
@@ -178,3 +181,6 @@ $(function() {
 
 	{% endif %}
 </div>
+
+{% endif %}
+

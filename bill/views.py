@@ -151,12 +151,13 @@ def bill_text(request, congress, type_slug, number):
     }
 
 def bill_list(request):
-    bill = parse_bill_number(request.POST.get("text", ""))
-    if bill:
-        @json_response
-        def get_redirect_response():
-            return { "redirect": bill.get_absolute_url() }
-        return get_redirect_response()
+    if request.POST.get("allow_redirect", "") == "true":
+        bill = parse_bill_number(request.POST.get("text", ""), congress=request.POST.get("congress", ""))
+        if bill:
+            @json_response
+            def get_redirect_response():
+                return { "redirect": bill.get_absolute_url() }
+            return get_redirect_response()
 	
     ix1 = None
     ix2 = None
