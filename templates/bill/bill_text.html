@@ -20,7 +20,7 @@ h1 {
 
 .heading-box .article { padding: 0; }
 
-#bill_text_content {
+.bill_text_content {
 	width: 640px;
 	float: left;
 	border: 1px solid #555;
@@ -29,9 +29,25 @@ h1 {
 	color: #000;
 }
 
-#bill_text_content h1, #bill_text_content h2, #bill_text_content h3, #bill_text_content h4, #bill_text_content h5 { font-family: serif; text-transform: none; font-weight: bold; color: #000;}
-#bill_text_content blockquote { margin: 1em; }
-#bill_text_content ul { margin-left: 1em; }
+.bill_text_content h1, .bill_text_content h2, .bill_text_content h3, .bill_text_content h4, .bill_text_content h5 { font-family: serif; text-transform: none; font-weight: bold; color: #000;}
+.bill_text_content blockquote { margin: 1em; }
+.bill_text_content ul { margin-left: 1em; }
+
+.bill_text_content span.ins {
+	text-decoration: underline;
+	background-color: #EEE;
+}
+.bill_text_content span.del {
+	text-decoration: line-through;
+	background-color: #EEE;
+}
+.bill_text_content span.change {
+	background-color: #EEE;
+}
+
+.bill_text_content .highlight {
+	background-color: #EEF;
+}
 
 #sidebar {
 	width: 230px;
@@ -40,6 +56,62 @@ h1 {
 }
 
 </style>
+{% endblock %}
+
+{% block head %}
+<script>
+$(function() {
+	/*var docs = $(".bill_text_content");
+	var doc_fixed;
+	var doc_movable;
+	if ($(docs[0]).height() > $(docs[1]).height()) {
+		doc_fixed = docs[1];
+		doc_movable = docs[0];
+	} else {
+		doc_fixed = docs[0];
+		doc_movable = docs[1];
+	}*/
+		
+	/*$("#bill_comparison_content").hover(function() { }, function() {
+		$(".bill_text_content").stop(true).css({marginTop: 0});
+	});*/
+	
+	function align_panels() {
+		$("#bill_comparison_content").css({ marginLeft: -$("h1").offset().left+50,
+		width: $(window).width() - 30 });
+		$(".bill_text_content").css({ width: ($(window).width() - 100)/2 });
+	}
+	align_panels();
+	$(window).resize(align_panels);
+	
+	$(window).scroll(function() {
+		$(".bill_text_content").each(function() {
+				var top = $(this).offset().top;
+				if (top > $(window).scrollTop())
+					$(this).stop(true).css({marginTop: 0});
+		});
+	});
+	
+	$(".bill_text_content *").hover(function() {
+	//$(doc_fixed).find("*").hover(function() {
+		var a = $(this);
+		if (!a.attr("corresponds_with_top")) return;
+		var b = $("#" + $(this).attr("corresponds_with_top"));
+		if (!b.length) return;
+		b.addClass("highlight");
+		
+		var ap = a.parents(".bill_text_content");
+		var bp = b.parents(".bill_text_content");
+		var ctop = parseFloat(ap.css("marginTop").replace("px", ""));
+		var new_pos = ctop + (a.offset().top-ap.offset().top) - (b.offset().top-bp.offset().top);
+		var dist = Math.abs(bp.css("marginTop").replace("px", "") - new_pos);
+		if (dist > 15)
+			bp.stop(true).animate({marginTop: new_pos }, dist < 30 ? "slow" : "fast");
+	}, function() {
+		$("#" + $(this).attr("corresponds_with_top")).removeClass("highlight");
+	});
+});
+</script>
 {% endblock %}
 
 {% block crumbs %}
@@ -60,23 +132,37 @@ h1 {
 	{% endif %}
 
 	<div class="info">
-		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}. Text as of {{docdate}} ({{doc_version_name}}).</p>
+		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}. Text as of {{textdata.docdate}} ({{textdata.doc_version_name}}).</p>
 		
 		<p><a href="{{bill.get_absolute_url}}">Status &amp; Summary</a>
-		| <a href="{{gpo_pdf_url}}">PDF</a>
-		| Source: <a href="{{gpo_url}}">GPO</a></p>
+		| <a href="{{textdata.gpo_pdf_url}}">PDF</a>
+		| Source: <a href="{{textdata.gpo_url}}">GPO</a></p>
 	</div><!-- /info -->
 {% endblock %}
 
 {% block body %}
 
-<div id="bill_text_content">
-{% if not text_html %}
-	<p>The text of this bill is not yet available. Please check back soon.</p>
+{% if not comparison %}
+	<div class="bill_text_content">
+	{% if not textdata.text_html %}
+		<p>The text of this bill is not yet available. Please check back soon.</p>
+	{% else %}
+			{{textdata.text_html|safe}}
+	{% endif %}
+	</div>
 {% else %}
-		{{text_html|safe}}
+	<div id="bill_comparison_content" style="width: 3000px; overflow: hidden;">
+		<div class="bill_text_content">
+			{{textdata.text_html|safe}}
+		</div>
+		
+		<div class="bill_text_content">
+			{{textdata.text_html_2|safe}}
+		</div>
+		
+		<div style="clear: both"> </div>
+	</div>
 {% endif %}
-</div>
 
 <div id="sidebar">
 	{% if bill.is_alive %}
