@@ -11,7 +11,7 @@ if __name__ == "__main__":
 	sys.path.insert(0, ".env/lib/python2.7/site-packages")
 	os.environ["DJANGO_SETTINGS_MODULE"] = 'settings'
 
-import lxml, scipy.stats, numpy, itertools
+import lxml, scipy.stats, numpy, itertools, re
 from logistic_regression import *
 
 from bill.models import *
@@ -118,7 +118,17 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		factors.append(("cosponsors_bipartisan", "While the sponsor is in the majority party, at least one third of the %s's cosponsors are from the minority party." % bill.noun))
 	elif num_cosp_majority > 0 and num_cosp_majority < len(cosponsors):
 		factors.append(("cosponsors_crosspartisan", "There is at least one cosponsor from the majority party and one cosponsor outside of the majority party."))
-		
+
+	# Is this bill a re-intro from last Congress?
+	if bill.sponsor:
+		def normalize_title(title):
+			# remove anything that looks like a year
+			return re.sub(r"of \d\d\d\d$", "", title)
+		for reintro in Bill.objects.filter(congress=bill.congress-1, sponsor=bill.sponsor):
+			if normalize_title(bill.title_no_number) == normalize_title(reintro.title_no_number):
+				factors.append(("reintroduced", "This %s was a re-introduction of %s from the previous session of Congress." % (bill.noun, reintro.display_number)))
+				break
+
 	return factors
 
 def build_model(congress):
@@ -159,6 +169,8 @@ def build_model(congress):
 	MODEL = dict()
 	
 	for (bill_type, bill_type_descr), is_introduced in itertools.product(BillType, (True, False)):
+		#if bill_type != BillType.house_bill: continue
+		
 		bills = BILLS.filter(bill_type=bill_type)
 		if not is_introduced:
 			# When is_introduced is True, we scan across all bills, because all bills were
@@ -195,7 +207,7 @@ def build_model(congress):
 			regression_predictors.append(factors)
 			
 		# check which factors were useful
-		significant_factors = set()
+		significant_factors = dict()
 		for key, bill_counts in sorted_bills.items():
 			# create a binomial distribution based on the overall pass rate for this
 			# type of bill (H.R., H.Res., etc.) and a draw the number of bills
@@ -207,7 +219,7 @@ def build_model(congress):
 			pmore = 1.0-distr.cdf(bill_counts[1])
 			if pless < .02 or pmore < .02:
 				# only show statistically significant differences from the group mean
-				significant_factors.add(key)
+				significant_factors[key] = (pless, pmore)
 				
 		# run a logistic regression
 		regression_predictors_map = None
@@ -240,6 +252,7 @@ def build_model(congress):
 		model["factors"] = model_factors
 		for key, bill_counts in sorted_bills.items():
 			if key not in significant_factors: continue
+			pless, pmore = significant_factors[key]
 			print "\t" + key, int(round(100.0*bill_counts[1]/bill_counts[0])), "%; N=", bill_counts[0], int(round(100*pless)), int(round(100*pmore))
 			model_factors[key] = dict()
 			model_factors[key]["count"] = bill_counts[0]
@@ -311,3 +324,5 @@ def test_prognosis(congress):
 if __name__ == "__main__":
 	build_model(111)
 	#test_prognosis(112)
+	#print compute_prognosis(Bill.objects.get(congress=112, bill_type=BillType.house_bill, number=1125))
+	
