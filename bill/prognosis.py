@@ -67,7 +67,7 @@ def get_leadership_score(person):
 	cached_leadership_scores[person.id] = score
 	return score
 
-def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party):
+def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, include_related_bills=True):
 	factors = list()
 	
 	# does the bill's title start with a common prefix?
@@ -146,15 +146,27 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 					factors.append(("cosponsor_leader_minority", "A cosponsor in the minority party has a high leadership score."))
 				break
 
-	# Is this bill a re-intro from last Congress?
+	# Is this bill a re-intro from last Congress, and if so was that bill reported by committee?
 	if bill.sponsor:
 		def normalize_title(title):
 			# remove anything that looks like a year
 			return re.sub(r"of \d\d\d\d$", "", title)
 		for reintro in Bill.objects.filter(congress=bill.congress-1, sponsor=bill.sponsor):
 			if normalize_title(bill.title_no_number) == normalize_title(reintro.title_no_number):
-				factors.append(("reintroduced", "This %s was a re-introduction of %s from the previous session of Congress." % (bill.noun, reintro.display_number)))
+				if reintro.current_status not in (BillStatus.introduced, BillStatus.referred):
+					factors.append(("reintroduced_of_reported", "This %s was reported by committee as %s in the previous session of Congress." % (bill.noun, reintro.display_number)))
+				else:
+					factors.append(("reintroduced", "This %s was a re-introduction of %s from the previous session of Congress." % (bill.noun, reintro.display_number)))
 				break
+
+	if include_related_bills: # prevent infinite recursion
+		# Add factors from any CRS-identified identical bill, changing each factor's
+		# key into companion_KEY so that they become separate factors to consider.
+		for rb in RelatedBill.objects.filter(bill=bill, relation="identical").select_related("related_bill"):
+			for f in get_bill_factors(rb.related_bill, pop_title_prefixes, committee_membership, majority_party, include_related_bills=False):
+				if "startswith" in f[0]: continue # don't include title factors because the title is probs the same
+				f = ("companion_" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1])
+				factors.append(f)
 
 	return factors
 
@@ -220,7 +232,10 @@ def build_model(congress):
 			#import random # speed this up?
 			#if random.random() < .7: continue
 			
+			# What's the measured binary outcome for this bill? Check if the bill
+			# ended in a success state.
 			success = bill.current_status in BillStatus.final_status_passed
+			
 			factors = get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party)
 			
 			# maintain a simple list of success percent rates for each factor individually
@@ -240,11 +255,11 @@ def build_model(congress):
 			# type of bill (H.R., H.Res., etc.) and a draw the number of bills
 			# within this subset (key) that are passed, and see if it is statistically
 			# different from the overall count. only include statistical differences.
-			if bill_counts[0] < 10: continue
+			if bill_counts[0] < 20: continue
 			distr = scipy.stats.binom(bill_counts[0], float(passed)/float(total))
 			pless = distr.cdf(bill_counts[1])
 			pmore = 1.0-distr.cdf(bill_counts[1])
-			if pless < .02 or pmore < .02:
+			if pless < .015 or pmore < .015:
 				# only show statistically significant differences from the group mean
 				significant_factors[key] = (pless, pmore)
 				
@@ -367,3 +382,5 @@ if __name__ == "__main__":
 	#print compute_prognosis(Bill.objects.get(congress=112, bill_type=BillType.house_bill, number=1125))
 	#print top_prognosis(112, BillType.house_bill)
 	#print top_prognosis(112, BillType.senate_bill)
+	
+
