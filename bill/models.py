@@ -154,6 +154,9 @@ class Bill(models.Model):
         return self.get_status_text(self.current_status, self.current_status_date)
 
     @property
+    def is_current(self):
+        return self.congress == settings.CURRENT_CONGRESS
+    @property
     def is_alive(self):
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
 
