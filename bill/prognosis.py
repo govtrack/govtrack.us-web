@@ -11,7 +11,7 @@ if __name__ == "__main__":
 	sys.path.insert(0, ".env/lib/python2.7/site-packages")
 	os.environ["DJANGO_SETTINGS_MODULE"] = 'settings'
 
-import lxml, scipy.stats, numpy, itertools, re
+import lxml, scipy.stats, numpy, itertools, re, csv
 from logistic_regression import *
 
 from bill.models import *
@@ -67,7 +67,30 @@ def get_leadership_score(person):
 	cached_leadership_scores[person.id] = score
 	return score
 
-def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, include_related_bills=True):
+def load_lobbying_data(congress):
+	return None # otherwise loading bill pages would invoke this and take a long time to load
+	# Count up the number of ocurrences of each bill in the CRP lobbying database.
+	from numpy import median
+	bill_number_re = re.compile(r"^(hr?|s|hconres|hcon|sconres|scon|hjres|hj|sjres|sj|hres|sres|sr)(\d+)$", re.I)
+	bill_type_special = { "h": "hr", "sr": "sres", "hj": "hjres", "sj": "sjres", "scon": "sconres", "hcon": "hconres" }
+	lob_bills = csv.reader(open("../crp_lob_bills_20120408.txt"), quotechar="|")
+	lobbying_data = { }
+	for pk, isssue_id, bill_congress, bill_number in lob_bills:
+		if bill_congress.strip() == "" or congress != int(bill_congress): continue
+		if bill_number.replace(".", "").startswith("HAMDT"): continue
+		if bill_number.replace(".", "").startswith("SAMDT"): continue
+		m = bill_number_re.match(bill_number.strip().lower().replace(".", ""))
+		if m == None:
+			print "bad bill in lobbying data %s %s" % (bill_congress, bill_number)
+		else:
+			bt, bn = m.group(1), m.group(2)
+			bt = bill_type_special.get(bt, bt)
+			bt = BillType.by_slug(bt)
+			bn = int(bn)
+			lobbying_data[(bt, bn)] = lobbying_data.get((bt, bn), 0) + 1
+	return { "median": median(lobbying_data.values()), "counts": lobbying_data }
+
+def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data, include_related_bills=True):
 	factors = list()
 	
 	# does the bill's title start with a common prefix?
@@ -163,16 +186,41 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		# Add factors from any CRS-identified identical bill, changing each factor's
 		# key into companion_KEY so that they become separate factors to consider.
 		for rb in RelatedBill.objects.filter(bill=bill, relation="identical").select_related("related_bill"):
-			for f in get_bill_factors(rb.related_bill, pop_title_prefixes, committee_membership, majority_party, include_related_bills=False):
+			for f in get_bill_factors(rb.related_bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data, include_related_bills=False):
 				if "startswith" in f[0]: continue # don't include title factors because the title is probs the same
 				f = ("companion_" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1])
 				factors.append(f)
+
+	# Are lobbyists registering that they are lobbying on this bill? Does this bill
+	# have more registered lobbying than the median bill? Overall this picks out
+	# bills NOT likely to be enacted.
+	#	
+	# Two possible explanations: First, lobbying can be to defeat a bill not just
+	# pass it. So this would indicate that on balance lobbying is having that effect.
+	#
+	# Second it could be because lobbyists don't bother with
+	# the easy bills that don't need their help. Meaning, they pick out a pool of
+	# improbable bllls, and presumably make those bills more likely to be enacted
+	# but still not as likely as the easy bills. (If they truly hurt a bill's future, they
+	# would presumably know and stop lobbying!)
+	#
+	# Looking at lobbying might be more useful if we combined it with another
+	# factor that could pick out the hard bills, and then this might show that for
+	# hard bills, lobbying made the bills more successful. But it's a bit impossible
+	# because surely the lobbyists know better than we do which bills are hard,
+	# so it would be impossible to factor out "hard bills" entirely.
+	if False:
+		if lobbying_data["counts"].get( (bill.bill_type, bill.number), 0 ) > lobbying_data["median"]:
+			factors.append( ("crp-lobby-many", "The Center for Responsive Politics reports that a large number of organizations are lobbying on this %s." % bill.noun) )
+		elif lobbying_data["counts"].get( (bill.bill_type, bill.number), 0 ) > 0:
+			factors.append( ("crp-lobby", "The Center for Responsive Politics reports that organizations are lobbying on this %s." % bill.noun) )
 
 	return factors
 
 def build_model(congress):
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
+	lobbying_data = load_lobbying_data(congress)
 	
 	# universe
 	BILLS = Bill.objects.filter(congress=congress).select_related("sponsor")
@@ -236,7 +284,7 @@ def build_model(congress):
 			# ended in a success state.
 			success = bill.current_status in BillStatus.final_status_passed
 			
-			factors = get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party)
+			factors = get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data)
 			
 			# maintain a simple list of success percent rates for each factor individually
 			for key, descr in factors:
@@ -310,12 +358,12 @@ def build_model(congress):
 		modelfile.write("factors = ")
 		pprint(MODEL, modelfile)
 
-def compute_prognosis_2(bill, committee_membership, majority_party):
+def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_data):
 	import prognosis_model
 	
 	# get a list of (factorkey, descr) tuples of the factors that are true for
 	# this bill. use the model to convert these tuples into %'s and descr's.
-	factors = get_bill_factors(bill, prognosis_model.pop_title_prefixes, committee_membership, majority_party)
+	factors = get_bill_factors(bill, prognosis_model.pop_title_prefixes, committee_membership, majority_party, lobbying_data)
 	
 	is_introduced = bill.current_status in (BillStatus.introduced, BillStatus.referred)
 	
@@ -352,7 +400,7 @@ def compute_prognosis(bill):
 	import prognosis_model
 	majority_party = load_majority_party(bill.congress)
 	committee_membership = load_committee_membership(bill.congress)
-	prog = compute_prognosis_2(bill, committee_membership, majority_party)
+	prog = compute_prognosis_2(bill, committee_membership, majority_party, None)
 	prog["congress"] = prognosis_model.congress
 	return prog
 		
