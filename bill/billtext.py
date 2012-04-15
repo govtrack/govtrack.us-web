@@ -89,7 +89,7 @@ def load_bill_text(bill, version):
 	ns = { "mods": "http://www.loc.gov/mods/v3" }
 	docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
 	gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
-	gpo_pdf_url = mods.xpath("string(mods:location/url[@displayLabel='PDF rendition'])", namespaces=ns)
+	gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
 	doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
 	
 	docdate = datetime.date(*(int(d) for d in docdate.split("-")))
