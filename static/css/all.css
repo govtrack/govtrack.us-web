@@ -1707,11 +1707,11 @@ small {
 	font-size: 80%;
 	}
 	
-ul.bullets {
+ul.bullets, .postcontent ul {
 	list-style: circle;
 	margin-left: 1.75em;
 	}
-ul.bullets li {
+ul.bullets li, .postcontent ul li {
 	margin: .25em 0 .25em 0;
 	}
 	
