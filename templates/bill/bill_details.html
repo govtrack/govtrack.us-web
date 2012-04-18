@@ -2,11 +2,10 @@
 {% load humanize %}
 {% load cache %}
 
-{% block title %}{{bill}} - GovTrack.us{% endblock %}
+{% block title %}{{bill.title_no_number}} ({% if not bill.is_current %}{{bill.current_status_date|date:"Y"}}; {{bill.congress|ordinal}} Congress {% endif %}{{bill.display_number_no_congress_number}}) - GovTrack.us{% endblock %}
 
-{% block meta_description %}
-{{bill}}
-{% endblock %}
+{% block meta_description %}{% if not bill.is_current %}{{bill.current_status_date}}. {% endif %}{{bill.display_number}}. {% if subtitle %}{{subtitle}}{% endif %} In GovTrack.us, a database of bills in the U.S. Congress.{% endblock %}
+{% block meta_keywords %}U.S. Congress,Congress,legislation,bill{% for term in bill.terms.all %}{% if 10 > forloop.counter %},{{term}}{% endif %}{% endfor %},law{% endblock %}
 
 {% block extra_js %}
 {% endblock %}

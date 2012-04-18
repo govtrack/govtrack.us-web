@@ -6,7 +6,7 @@ if __name__ == "__main__":
 	sys.path.insert(0, ".env/lib/python2.7/site-packages")
 	os.environ["DJANGO_SETTINGS_MODULE"] = 'settings'
 
-import datetime, lxml
+import datetime, lxml, os.path
 
 from bill.models import BillType
 
@@ -83,13 +83,31 @@ bill_gpo_status_codes = {
 	
 def load_bill_text(bill, version):
 	bt = BillType.by_value(bill.bill_type).xml_code
-	bill_text_content = open("data/us/bills.text/%s/%s/%s%d%s.html" % (bill.congress, bt, bt, bill.number, version if version != None else "")).read()
+	basename = "data/us/bills.text/%s/%s/%s%d%s" % (bill.congress, bt, bt, bill.number, version if version != None else "")
 	
-	mods = lxml.etree.parse("data/us/bills.text/%s/%s/%s%d.mods.xml" % (bill.congress, bt, bt, bill.number))
+	if os.path.exists(basename + ".xml"):
+		dom = lxml.etree.parse(basename + ".xml")
+		transform = lxml.etree.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "textxsl/billres.xsl"))
+		transform = lxml.etree.XSLT(transform)
+		result = transform(dom)
+		
+		# empty nodes cause HTML parsing problems, so remove them.
+		# iterate in reverse document order so that we hit parents after
+		# their children, since if we remove all of the children then we may
+		# want to remove the parent too.
+		for node in reversed(list(result.getiterator())):
+			if node.xpath("string(.)") == "":
+				node.getparent().remove(node)
+				
+		bill_text_content = lxml.etree.tostring(result.xpath("head/style")[0]) + lxml.etree.tostring(result.xpath("body")[0])
+	else:
+		bill_text_content = open(basename + ".html").read()
+	
+	mods = lxml.etree.parse(basename + ".mods.xml")
 	ns = { "mods": "http://www.loc.gov/mods/v3" }
 	docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
 	gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
-	gpo_pdf_url = mods.xpath("string(mods:location/url[@displayLabel='PDF rendition'])", namespaces=ns)
+	gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
 	doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
 	
 	docdate = datetime.date(*(int(d) for d in docdate.split("-")))
@@ -295,7 +313,9 @@ def compare_xml_text(doc1, doc2):
     return doc1, doc2
     
 if __name__ == "__main__":
-    doc1 = lxml.etree.parse("data/us/bills.text/112/h/h3606ih.html")
-    doc2 = lxml.etree.parse("data/us/bills.text/112/h/h3606eh.html")
-    compare_xml_text(doc1, doc2)
-    print lxml.etree.tostring(doc2)
+	from bill.models import Bill, BillType
+	load_bill_text(Bill.objects.get(congress=112, bill_type=BillType.house_bill, number=9), None)
+    #doc1 = lxml.etree.parse("data/us/bills.text/112/h/h3606ih.html")
+    #doc2 = lxml.etree.parse("data/us/bills.text/112/h/h3606eh.html")
+    #compare_xml_text(doc1, doc2)
+    #print lxml.etree.tostring(doc2)

@@ -1,10 +1,8 @@
 {% extends "master.html" %}
 {% load humanize %}
-{% block title %}
-	{% if not state %}Members of Congress &amp; Congressional District Maps{% endif %}
-	{% if state and not district %}{{statename}}&rsquo;s Members of Congress &amp; Congressional District Map{% endif %}
-	{% if state and district %}{{statename}}&rsquo;s {{district|ordinal}} Congressional District - Representatives &amp; District Map{% endif %}
-	- GovTrack.us{% endblock %}
+{% block title %}{% if not state %}Members of Congress &amp; Congressional District Maps{% endif %}{% if state and not district %}{{statename}}&rsquo;s Members of Congress &amp; Congressional District Map{% endif %}{% if state and district %}{{statename}}&rsquo;s {{district|ordinal}} Congressional District - Representatives &amp; District Map{% endif %} - GovTrack.us{% endblock %}
+{% block meta_description %}{% if not state %}What congressional district are you in?{% endif %} Find your U.S. Congress senators and representative {% if state and not district %}in {{statename}}{% endif %}{% if state and district %}in {{statename}}&rsquo;s {{district|ordinal}} Congressional District{% endif %} using a map.{% endblock %}
+{% block meta_keywords %}U.S. Congress,congressional districts,map,senators,representatives,congressmen{% endblock %}
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
