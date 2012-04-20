@@ -85,7 +85,7 @@ def load_bill_text(bill, version):
 	bt = BillType.by_value(bill.bill_type).xml_code
 	basename = "data/us/bills.text/%s/%s/%s%d%s" % (bill.congress, bt, bt, bill.number, version if version != None else "")
 	
-	if os.path.exists(basename + ".xml"):
+	if os.path.exists(basename + ".xml") and False:
 		dom = lxml.etree.parse(basename + ".xml")
 		transform = lxml.etree.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "textxsl/billres.xsl"))
 		transform = lxml.etree.XSLT(transform)
