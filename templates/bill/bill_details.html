@@ -54,6 +54,11 @@
 		{% if subtitle %}<p style="line-height: 135%">{{subtitle}}</p>{% endif %}
 		
 		<dl>
+			{% if not bill.is_alive %}
+			<dt>Introduced:</dt>
+			<dd>{{bill.introduced_date}}</dd>
+			{% endif %}
+		
 			<dt>Sponsor:</dt>
 			<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
 		
@@ -69,6 +74,11 @@
 			{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
 			<dt>Schedule:</dt>
 			<dd>The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</dd>
+			{% endif %}
+			
+			{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
+			<dt>Schedule:</dt>
+			<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
 			{% endif %}
 		
 			{% with reintros.1 as reintro_as %}

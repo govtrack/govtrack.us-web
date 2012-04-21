@@ -10,6 +10,7 @@ import glob
 import re
 import time
 import urllib
+from datetime import datetime, timedelta
 
 from parser.progress import Progress
 from parser.processor import Processor
@@ -302,7 +303,7 @@ def main(options):
     if options.congress and not options.filter and False:
         # this doesn't work because seen_bill_ids is too big for sqlite!
         Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
-
+        
     # Parse docs.house.gov for what might be coming up this week.
     import iso8601
     dhg_html = urllib.urlopen("http://docs.house.gov/").read()
@@ -335,6 +336,22 @@ def main(options):
                         break
                 else:
                     log.error('Could not parse legis-num bill type "%s" in docs.house.gov.' % billname)
+
+    # Parse Senate.gov's "Floor Schedule" blurb for coming up tomorrow.
+    now = datetime.now()
+    sfs = urllib.urlopen("http://www.senate.gov/pagelayout/legislative/d_three_sections_with_teasers/calendars.htm").read()
+    try:
+        sfs = re.search(r"Floor Schedule([\w\W]*)Previous Meeting", sfs).group(1)
+        for congress, bill_type, number in re.findall(r"http://hdl.loc.gov/loc.uscongress/legislation.(\d+)([a-z]+)(\d+)", sfs):
+            bill_type = BillType.by_slug(bill_type)
+            bill = Bill.objects.get(congress=congress, bill_type=bill_type, number=number)
+            if bill.senate_floor_schedule_postdate == None or now - bill.senate_floor_schedule_postdate > timedelta(days=7):
+                bill.senate_floor_schedule_postdate = now
+                bill.save()
+                if not options.disable_events:
+                    bill.create_events()
+    except Exception as e:
+        log.error('Could not parse Senate Floor Schedule: ' + repr(e))
 
 if __name__ == '__main__':
     main()

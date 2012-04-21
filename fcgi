@@ -104,6 +104,7 @@ PIDFILE=/tmp/django-fcgi-$USER$NAME-$PORT.pid
 PYTHONPATH=.. ./manage.py runfcgi host=$HOSTNAME port=$PORT pidfile=$PIDFILE \
                  workdir=$MYDIR umask=0002 debug=1 \
                  maxchildren=$INSTANCES maxspare=$INSTANCES \
+                 timeout=25 \
                  outlog=~/logs/django_output_log errlog=~/logs/django_error_log ;
 
 # Kill the previously running instance.
