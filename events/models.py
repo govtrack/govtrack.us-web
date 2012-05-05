@@ -69,15 +69,18 @@ class Feed(models.Model):
             # index rather than the feed-based index, which causes a big problem if there are
             # no recent events.
             ret = []
-            seen = set()
+            seen = { }
             for feed in feeds:
                 cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when`, seq FROM events_event WHERE feed_id = %s ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC LIMIT %s", [feed.id, count])
                 
                 batch = cursor.fetchall()
                 for b in batch:
-                    if not b in seen:
-                        ret.append( { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3], "seq": b[4] } )
-                        seen.add(b)
+                    key = tuple(b[0:3]) # the unique part for identifying the event
+                    if not key in seen:
+                        v = { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3], "seq": b[4], "feeds": set() }
+                        ret.append(v)
+                        seen[key] = v
+                    seen[key]["feeds"].add(feed)
                         
             ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]), reverse=True)
             
@@ -550,21 +553,24 @@ class SubscriptionList(models.Model):
         # period unless we set last_event_mailed.
         
         # The Django ORM can't handle generating a nice query. It adds joins that ruin indexing.
-        cursor.execute("SELECT id, source_content_type_id, source_object_id, eventid, `when`, seq FROM events_event WHERE id > %s AND `when` > %s AND feed_id IN (" + ",".join(str(f.id) for f in feeds) + ") ORDER BY `when`, source_content_type_id, source_object_id, seq", [self.last_event_mailed if self.last_event_mailed else 0, datetime.now() - timedelta(days=4 if self.email == 1 else 14)])
+        cursor.execute("SELECT id, source_content_type_id, source_object_id, eventid, `when`, seq, feed_id FROM events_event WHERE id > %s AND `when` > %s AND feed_id IN (" + ",".join(str(f.id) for f in feeds) + ") ORDER BY `when`, source_content_type_id, source_object_id, seq", [self.last_event_mailed if self.last_event_mailed else 0, datetime.now() - timedelta(days=4 if self.email == 1 else 14)])
         
         max_id = None
         ret = []
-        seen = set() # uniqify because events are duped for each feed they are in
+        seen = { } # uniqify because events are duped for each feed they are in, but track which feeds generated the events
+        feedmap = dict((f.id, f) for f in feeds)
         batch = cursor.fetchall()
         for b in batch:
-            b1 = b[1:] # strip off the event entry id since it dups for each feed
+            key = b[1:3] # get the part that uniquely identifies the event, across feeds
             max_id = max(max_id, b[0]) # since we return one event record randomly out of
-            						   # all of the dups for the feeds for all records,
-            						   # make sure we return the max of the ids, or else
-            						   # we might re-send an event in an email.
-            if not b1 in seen:
-                ret.append( { "id": b[0], "source_content_type": b[1], "source_object_id": b[2], "eventid": b[3], "when": b[4], "seq": b[5] } )
-                seen.add(b1)
+                                       # all of the dups for the feeds for all records,
+                                       # make sure we return the max of the ids, or else
+                                       # we might re-send an event in an email.
+            if not key in seen:
+                v = { "id": b[0], "source_content_type": b[1], "source_object_id": b[2], "eventid": b[3], "when": b[4], "seq": b[5], "feeds": set() }
+                ret.append(v)
+                seen[key] = v
+            v["feeds"].add(feedmap[b[6]])
                 
         ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]))
     

@@ -2,7 +2,15 @@
 
 {% for event in page.object_list %}
 {% with event|render_event:feeds as meta %}
-	<div class="tracked_event" style="clear: both; border-bottom: 1px solid #DDD; margin-bottom: 1em">
+	<div class="tracked_event" style="clear: both; border-bottom: 1px solid #DDD; margin-bottom: 1em; padding-bottom: 1em;">
+		{% if event.feeds|length > 0 %}
+			<div><small>
+				{% for feed in event.feeds %}
+					{% if not forloop.first %}, {% endif %}
+					{{feed.title}}
+				{% endfor %}
+			</small></div>
+		{% endif %}
 
 		<div style="float: right">
 			{% if not meta.date_has_no_time %}
