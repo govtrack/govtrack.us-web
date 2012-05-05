@@ -39,9 +39,9 @@ def bill_details(request, congress, type_slug, number):
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
     
     def get_prognosis():
-    	if bill.congress != CURRENT_CONGRESS: return None
-    	import prognosis
-    	prog = prognosis.compute_prognosis(bill)
+        if bill.congress != CURRENT_CONGRESS: return None
+        import prognosis
+        prog = prognosis.compute_prognosis(bill)
         prog["congressdates"] = get_congress_dates(prog["congress"])
         return prog
         
@@ -56,7 +56,11 @@ def bill_details(request, congress, type_slug, number):
             if reintro.congress < bill.congress: reintro_prev = reintro
             if reintro.congress > bill.congress and not reintro_next: reintro_next = reintro
         return reintro_prev, reintro_next
-            
+        
+    def get_market():
+        m = bill.get_open_market(request.user)
+        m.name = m.name.replace(bill.display_number, "it")
+        return m
                                                     
     # simple predictive market implementation
     from website.models import TestMarketVote
@@ -79,6 +83,7 @@ def bill_details(request, congress, type_slug, number):
         "subtitle": get_secondary_bill_title(bill, bill.titles),
         "prognosis": get_prognosis, # defer so we can use template caching
         "reintros": get_reintroductions, # defer so we can use template caching
+        "market": get_market,
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         'feed': Feed.BillFeed(bill),
@@ -91,16 +96,24 @@ def bill_details(request, congress, type_slug, number):
 def market_test_vote(request):
     bill = get_object_or_404(Bill, id = request.POST.get("bill", "0"))
     prediction = int(request.POST.get("prediction", "0"))
+    market = bill.get_open_market(request.user)
+    if not market: return { }
     
-    from website.models import TestMarketVote
+    from predictionmarket.models import Trade, TradingAccount
+    account = TradingAccount.get(request.user)
     if prediction != 0:
-        v, is_new = TestMarketVote.objects.get_or_create(user=request.user, bill=bill,
-            defaults = { "prediction": prediction })
-        if not is_new:
-            v.prediction = prediction
-            v.save()
+        # Buy shares in one of the outcomes.
+        try:
+            t = Trade.place(account, market.outcomes.get(owner_key = 1 if prediction == 1 else 0), 10)
+        except ValueError as e:
+            return { "error": str(e) }
+            
     else:
-        TestMarketVote.objects.filter(user=request.user, bill=bill).delete()
+        # Sell shares.
+        positions, pl = account.position_in_market(market)
+        for outcome in positions:
+            Trade.place(account, outcome, -positions[outcome]["shares"])
+    
     return { "vote": prediction }
 
 @render_to('bill/bill_text.html')
@@ -139,7 +152,7 @@ def bill_list(request):
             def get_redirect_response():
                 return { "redirect": bill.get_absolute_url() }
             return get_redirect_response()
-	
+    
     ix1 = None
     ix2 = None
     if "subject" in request.GET:

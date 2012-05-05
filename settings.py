@@ -126,6 +126,7 @@ INSTALLED_APPS = (
     'events',
     'smartsearch',
     'bill',
+    'predictionmarket',
 
     # for django-registration-pv
     'emailverification',
@@ -160,6 +161,9 @@ IGNORABLE_404_ENDS = ('spinner.gif', 'billtext/images/quote.png')
 IGNORABLE_404_STARTS = ('/phpmyadmin/',)
 
 CURRENT_CONGRESS = 112
+
+PREDICTIONMARKET_SEED_MONEY = 1000
+PREDICTIONMARKET_BANK_UID = 136196
 
 #if DEBUG: # sometimes we debug in a live environment
 #	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

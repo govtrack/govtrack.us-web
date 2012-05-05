@@ -37,6 +37,7 @@ urlpatterns = patterns('',
     url(r'^congress/', include('vote.urls')),
     url(r'^congress/bills/', include('bill.urls')),
     url(r'', include('events.urls')),
+    url(r'^market/', include('predictionmarket.urls')),
 
     # django-registration-pv
     (r'^emailverif/', include('emailverification.urls')),

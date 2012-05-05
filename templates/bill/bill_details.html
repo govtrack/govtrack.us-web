@@ -102,20 +102,32 @@
 	{% if bill.is_alive %}
 	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 	
-	{% comment %}
+	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
+
+	{% if market %}
 	{% if not user.is_authenticated %}
 	<div id="make_prediction">
-	<p>We think this {{bill.noun}} has a <b>{{market_score}}%</b> chance of passing Congress. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
+	<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
 	</div>
 	{% else %}
 	<div id="make_prediction">
-	<p>We think this {{bill.noun}} has a <b>{{market_score}}%</b> chance of passing Congress. What do you think?</p>
-	<p class="empty" {% if market_score_you %}style="display: none"{% endif %}>
-		That&rsquo;s...
-		<a href="#" prediction="1">Too Low</a> | 
-		<a href="#" prediction="-1">Too High</a>
+	<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>. <span class="youthink" {% if market.user_positions %}style="display: none"{% endif %}>What do you think?</span></p>
+	<p class="empty" {% if market.user_positions %}style="display: none"{% endif %}>
+		<a href="#" prediction="-1">Lower</a> | 
+		<a href="#" prediction="1">Higher</a>
 	</p>
-	<p class="nonempty" {% if not market_score_you %}style="display: none"{% endif %}>You predict <span>{% if market_score_you.prediction == 1 %}the {{bill.noun}} will pass{% else %}the {{bill.noun}} will not pass{% endif %}</span>. <a href="#" prediction="0">Clear my bet</a>.</p>
+	<p class="nonempty" {% if not market.user_positions %}style="display: none"{% endif %}>
+		You bet on <span>{% if market.user_positions.1.shares > 0 %}yes{% else %}no{% endif %}</span>.
+		{% if market.user_profit == 0 %}
+			<a href="#" prediction="0">Clear bet</a>.
+		{% endif %}
+		{% if market.user_profit > 0 %}
+			<a href="#" prediction="0">Cash out</a> for {{market.user_profit|floatformat:0}} points.
+		{% endif %}
+		{% if market.user_profit < 0 %}
+			<a href="#" prediction="0">Take your loss</a> of {{market.user_profit|floatformat:0}} points before it gets worse.
+		{% endif %}
+	</p>
 	</div>
 	<script>
 	$("#make_prediction a").click(function() {
@@ -132,10 +144,12 @@
 				if (data.vote == 0) {
 					$("#make_prediction .empty").show();
 					$("#make_prediction .nonempty").hide();
+					$("#make_prediction .youthink").show();
 				} else {
 					$("#make_prediction .empty").hide();
 					$("#make_prediction .nonempty").show();
-					$("#make_prediction .nonempty span").text(data.vote == 1 ? "the {{bill.noun|escapejs}} will pass" : "the {{bill.noun|escapejs}} will not pass");
+					$("#make_prediction .nonempty span").text(data.vote == 1 ? "yes" : "no");
+					$("#make_prediction .youthink").hide();
 				}
 			}
 		});	
@@ -143,9 +157,9 @@
 	});
 	</script>
 	{% endif %}
-	{% endcomment %}
+	{% endif %}
 	
-	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
+	
 	{% endif %}	
 	
 	<div class="fb-like" data-send="true" data-layout="button_count" data-width="170" data-show-faces="false" style="margin-top: 10px"></div>

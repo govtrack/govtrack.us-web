@@ -142,6 +142,12 @@ class Bill(models.Model):
     @property
     def noun(self):
         return "bill" if self.bill_type in (BillType.house_bill, BillType.senate_bill) else "resolution"
+    @property
+    def originating_chamber(self):
+        return "House" if self.bill_type in (BillType.house_bill, BillType.house_resolution, BillType.house_joint_resolution, BillType.house_concurrent_resolution) else "Senate"
+    @property
+    def opposite_chamber(self):
+        return "Senate" if self.bill_type in (BillType.house_bill, BillType.house_resolution, BillType.house_joint_resolution, BillType.house_concurrent_resolution) else "House"
 
     @property
     def cosponsor_count(self):
@@ -566,6 +572,30 @@ class Bill(models.Model):
                 seen.add(rb.bill)
         return ret
 
+    
+    def get_open_market(self, user):
+        from django.contrib.contenttypes.models import ContentType
+        bill_ct = ContentType.objects.get_for_model(Bill)
+        
+        import predictionmarket.models
+        try:
+            m = predictionmarket.models.Market.objects.get(owner_content_type=bill_ct, owner_object_id=self.id, isopen=True)
+        except predictionmarket.models.Market.DoesNotExist:
+            return None
+            
+        for outcome in m.outcomes.all():
+            if outcome.owner_key == "1": # "yes"
+                m.yes = outcome
+                m.yes_price = int(round(outcome.price() * 100.0))
+        if user and user.is_authenticated():
+            account = predictionmarket.models.TradingAccount.get(user)
+            positions, profit = account.position_in_market(m)
+            m.user_profit = round(profit, 1)
+            m.user_positions = { }
+            for outcome in positions:
+                m.user_positions[outcome.owner_key] = positions[outcome]
+        return m
+            
 class RelatedBill(models.Model):
     bill = models.ForeignKey(Bill, related_name="relatedbills")
     related_bill = models.ForeignKey(Bill, related_name="relatedtobills")
@@ -619,4 +649,4 @@ def get_formatted_bill_summary(bill):
     if unicode(summary).strip() == "":
         return None
     return summary
-    
+

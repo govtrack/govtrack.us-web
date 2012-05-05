@@ -1,0 +1,72 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us Prediction Market Account{% endblock %}
+
+{% block body_class %}market{% endblock %}
+
+{% block head %}
+<style>
+table.positions {
+	margin-left: 2em;
+}
+	table.positions td, table.positions th {
+		padding: 2px .75em 2px .75em;
+	}
+table.history {
+}
+	table.history td, table.history th {
+		padding: 2px .75em 2px .75em;
+	}
+</style>
+{% endblock %}
+
+{% block summary %}
+<h1>Your Prediction Market* Account</h1>
+
+<p style="margin-top: 1em">Use your GovTrack.us Prediction Market account to bet on bills before the United States Congress &mdash; with fake money.</p>
+
+<p style="margin-top: 1em">*Prediction markets are an experimental BETA feature of GovTrack.</p>
+{% endblock %}
+
+{% block body %}
+<section class="main">
+	<h2>Account Summary</h2>
+
+	<p><strong>Balance:</strong> ${{account.balance|floatformat:2}}</p>
+	
+	{% with account.positions as pos %}
+	<p><strong>Positions:</strong> {% if not pos %}<em>(none)</em>{% endif %}</p>
+	{% if pos %}
+	<table class="positions">
+		<tr><th>Market Outcome</th> <th>Shares</th> <th>Bought For</th> <th>Current Profit</th></tr>
+		{% for outcome, position in pos.items %}
+			<tr>
+				<td>{{outcome.market.name}} -- {{outcome.name}}</td>
+				<td>{{position.shares}}</td> <td>${{position.principle|floatformat:2}}</td> <td>${{position.profitloss|floatformat:2}}</td>
+			</tr>
+		{% endfor %}
+		<tr>
+			<td colspan="3" style="text-align: right"><em>Total Unrealized Profit/Loss:</em></td>
+			<td><em>${{account.unrealized_profit_loss|floatformat:2}}</em></td>
+		</tr>
+	</table>
+	{% endif %}
+	{% endwith %}
+			
+	<h2 style="margin-top: 1em">Trading History</h2>
+	<table class="history">
+		<tr><th>Date</th> <th>Market Outcome</th> <th>Shares Bought/Sold</th> <th>Price</th> <th>Gain/Loss</th></tr>
+		{% for trade in trades %}
+			<tr>
+				<td><nobr>{{trade.created}}</nobr></td>
+				<td>{{trade.outcome.market.name}} -- {{trade.outcome.name}}</td>
+				<td>{{trade.shares}}</td>
+				<td>{{trade.purchase_price|floatformat:3}}</td>
+				<td>${{trade.value|floatformat:2}}</td>
+			</tr>
+		{% empty %}
+			<tr><td colspan="4"><em>You have not yet placed any trades.</em></td></tr>
+		{% endfor %}
+	</table>
+</section>
+{% endblock %}
+
