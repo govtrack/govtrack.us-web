@@ -55,8 +55,8 @@ def vote_search_manager():
     sm.add_option('category')
     
     def truncate(name):
-        if len(name) < 60: return name
-        return name[0:57] + "..."
+        if len(name) < 130: return name
+        return name[0:127] + "..."
     
     def safe_strftime(date, format):
         return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")

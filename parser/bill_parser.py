@@ -316,7 +316,7 @@ def main(options):
         # iso8601.parse_date(dhg.get("week-date")+"T00:00:00").date()
         for item in dhg.xpath("category/floor-items/floor-item"):
             billname = item.xpath("legis-num")[0].text
-            m = re.match("\s*(?:Concur in the Senate Amendment to )?("
+            m = re.match("\s*(?:Concur in the Senate Amendment to |Senate Amendment to )?("
                 + "|".join(bt_re(bt) for bt in BillType)
                 + ")(\d+)\s*$", billname, re.I)
             if not m:
