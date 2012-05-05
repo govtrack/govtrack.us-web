@@ -172,80 +172,80 @@ class Bill(models.Model):
         # Some status messages depend on whether the bill is current:
         if bill.congress == settings.CURRENT_CONGRESS:
             if status == "INTRODUCED":
-                status = "This bill or resolution is in the first stage of the legislative process. It was introduced into Congress on %s. It will typically be considered by committee next."
+                status = "This %s is in the first stage of the legislative process. It was introduced into Congress on %s. It will typically be considered by committee next."
             elif status == "REFERRED":
-                status = "This bill or resolution was assigned to a congressional committee on %s, which will consider it before possibly sending it on to the House or Senate as a whole."
+                status = "This %s was assigned to a congressional committee on %s, which will consider it before possibly sending it on to the House or Senate as a whole."
             elif status == "REPORTED":
-                status = "The committees assigned to this bill or resolution sent it to the House or Senate as a whole for consideration on %s."
+                status = "The committees assigned to this %s sent it to the House or Senate as a whole for consideration on %s."
             elif status == "PASS_OVER:HOUSE":
-                status = "This bill or resolution passed in the House on %s and goes to the Senate next for consideration."
+                status = "This %s passed in the House on %s and goes to the Senate next for consideration."
             elif status == "PASS_OVER:SENATE":
-                status = "This bill or resolution passed in the Senate on %s and goes to the House next for consideration."
+                status = "This %s passed in the Senate on %s and goes to the House next for consideration."
             elif status == "PASSED:BILL":
-                status = "This bill was passed by Congress on %s and goes to the President next."
+                status = "This %s was passed by Congress on %s and goes to the President next."
             elif status == "PASS_BACK:HOUSE":
-                status = "This bill or resolution passed in the Senate and the House, but the House made changes and sent it back to the Senate on %s."
+                status = "This %s passed in the Senate and the House, but the House made changes and sent it back to the Senate on %s."
             elif status == "PASS_BACK:SENATE":
-                status = "This bill or resolution has been passed in the House and the Senate, but the Senate made changes and sent it back to the House on %s."
+                status = "This %s has been passed in the House and the Senate, but the Senate made changes and sent it back to the House on %s."
             elif status == "PROV_KILL:SUSPENSIONFAILED":
-                status = "This bill or resolution is provisionally dead due to a failed vote on %s under a fast-track procedure called \"suspension.\" It may or may not get another vote."
+                status = "This %s is provisionally dead due to a failed vote on %s under a fast-track procedure called \"suspension.\" It may or may not get another vote."
             elif status == "PROV_KILL:CLOTUREFAILED":
-                status = "This bill or resolution is provisionally dead due to a failed vote for cloture, i.e. to stop a filibuster or threat of a filibuster, on %s."
+                status = "This %s is provisionally dead due to a failed vote for cloture, i.e. to stop a filibuster or threat of a filibuster, on %s."
             elif status == "PROV_KILL:PINGPONGFAIL":
-                status = "This bill or resolution is provisionally dead due to a failed attempt to resolve differences between the House and Senate versions, on %s."
+                status = "This %s is provisionally dead due to a failed attempt to resolve differences between the House and Senate versions, on %s."
             elif status == "PROV_KILL:VETO":
-                status = "This bill was vetoed by the President on %s. The bill is dead unless Congress can override it."
+                status = "This %s was vetoed by the President on %s. The bill is dead unless Congress can override it."
             elif status == "OVERRIDE_PASS_OVER:HOUSE":
-                status = "After a presidential veto, the House succeeeded in an override on %s. It goes to the Senate next."
+                status = "After a presidential veto of the %s, the House succeeeded in an override on %s. It goes to the Senate next."
             elif status == "OVERRIDE_PASS_OVER:SENATE":
-                status = "After a presidential veto, the Senate succeeded in an override on %s. It goes to the House next."
+                status = "After a presidential veto of the %s, the Senate succeeded in an override on %s. It goes to the House next."
         
         else: # Bill is not current.
             if status == "INTRODUCED" or status == "REFERRED" or status == "REPORTED":
-                status = "This bill or resolution was introduced on %s, in a previous session of Congress, but was not enacted."
+                status = "This %s was introduced on %s, in a previous session of Congress, but was not enacted."
             elif status == "PASS_OVER:HOUSE":
-                status = "This bill or resolution was introduced in a previous session of Congress and was passed by the House on %s but was never passed by the Senate."
+                status = "This %s was introduced in a previous session of Congress and was passed by the House on %s but was never passed by the Senate."
             elif status == "PASS_OVER:SENATE":
-                status = "This bill or resolution was introduced in a previous session of Congress and was passed by the Senate on %s but was never passed by the House."
+                status = "This %s was introduced in a previous session of Congress and was passed by the Senate on %s but was never passed by the House."
             elif status == "PASSED:BILL":
-                status = "This bill was passed by Congress on %s but was not enacted before the end of its Congressional session."
+                status = "This %s was passed by Congress on %s but was not enacted before the end of its Congressional session."
             elif status == "PASS_BACK:HOUSE" or status == "PASS_BACK:SENATE":
-                status = "This bill or resolution was introduced in a previous session of Congress and though it was passed by both chambers on %s it was passed in non-identical forms and the differences were never resolved."
+                status = "This %s was introduced in a previous session of Congress and though it was passed by both chambers on %s it was passed in non-identical forms and the differences were never resolved."
             elif status == "PROV_KILL:SUSPENSIONFAILED" or status == "PROV_KILL:CLOTUREFAILED" or status == "PROV_KILL:PINGPONGFAIL":
-                status = "This bill or resolution was introduced in a previous session of Congress but was killed due to a failed vote for cloture, under a fast-track vote called \"suspension\", or while resolving differences on %s."
+                status = "This %s was introduced in a previous session of Congress but was killed due to a failed vote for cloture, under a fast-track vote called \"suspension\", or while resolving differences on %s."
             elif status == "PROV_KILL:VETO":
-                status = "This bill was vetoed by the President on %s and Congress did not attempt an override before the end of the Congressional session."
+                status = "This %s was vetoed by the President on %s and Congress did not attempt an override before the end of the Congressional session."
             elif status == "OVERRIDE_PASS_OVER:HOUSE" or status == "OVERRIDE_PASS_OVER:SENATE":
-                status = "This bill was vetoed by the President and Congress did not finish an override begun on %s before the end of the Congressional session."
+                status = "This %s was vetoed by the President and Congress did not finish an override begun on %s before the end of the Congressional session."
             
         # Some status messages do not depend on whether the bill is current.
         
         if status == "PASSED:SIMPLERES":
-            status = "This simple resolution passed on %s. That is the end of the legislative process for a simple resolution."
+            status = "This simple %s passed on %s. That is the end of the legislative process for a simple resolution."
         elif status == "PASSED:CONSTAMEND":
-            status = "This proposal for a constitutional amendment passed Congress on %s and goes to the states for consideration next."
+            status = "This %s proposing a constitutional amendment passed Congress on %s and goes to the states for consideration next."
         elif status == "PASSED:CONCURRENTRES":
-            status = "This concurrent resolution passed both chambers of Congress on %s. That is the end of the legislative process for concurrent resolutions. They do not have the force of law."
+            status = "This concurrent %s passed both chambers of Congress on %s. That is the end of the legislative process for concurrent resolutions. They do not have the force of law."
         elif status == "FAIL:ORIGINATING:HOUSE":
-            status = "This bill or resolution failed in the House on %s."
+            status = "This %s failed in the House on %s."
         elif status == "FAIL:ORIGINATING:SENATE":
-            status = "This bill or resolution failed in the Senate on %s."
+            status = "This %s failed in the Senate on %s."
         elif status == "FAIL:SECOND:HOUSE":
-            status = "After passing in the Senate, this bill failed in the House on %s."
+            status = "After passing in the Senate, this %s failed in the House on %s."
         elif status == "FAIL:SECOND:SENATE":
-            status = "After passing in the House, this bill failed in the Senate on %s."
+            status = "After passing in the House, this %s failed in the Senate on %s."
         elif status == "VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE" or status == "VETOED_OVERRIDE_FAIL_SECOND:HOUSE":
-            status = "This bill was vetoed. The House attempted to override the veto on %s but failed."
+            status = "This %s was vetoed. The House attempted to override the veto on %s but failed."
         elif status == "VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE" or status == "VETOED:OVERRIDE_FAIL_SECOND:SENATE":
-            status = "This bill was vetoed. The Senate attempted to override the veto on %s but failed."
+            status = "This %s was vetoed. The Senate attempted to override the veto on %s but failed."
         elif status == "VETOED:POCKET":
-            status = "This bill was pocket vetoed on %s."
+            status = "This %s was pocket vetoed on %s."
         elif status == "ENACTED:SIGNED":
-            status = "This bill was enacted after being signed by the President on %s."
+            status = "This %s was enacted after being signed by the President on %s."
         elif status == "ENACTED:VETO_OVERRIDE":
-            status = "This bill was enacted after a congressional override of the President's veto on %s."
+            status = "This %s was enacted after a congressional override of the President's veto on %s."
         
-        return status % date
+        return status % (self.noun, date)
 
     def thomas_link(self):
         return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%d:%s%d:" \
