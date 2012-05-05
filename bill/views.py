@@ -240,7 +240,7 @@ def bill_docket(request):
             "groups": groups,
             "coming_up": coming_up,
             "subjects": subject_choices(),
-            "BILL_STATUS_REPORTED": BillStatus.reported,
+            "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.referred, BillStatus.reported),
         }
         
     ret = cache.get("bill_docket_info")    

@@ -82,7 +82,7 @@ $(function() {
 				<div style="margin-left: 1em">
 					{% if bill.docs_house_gov_postdate %}<p style="margin-bottom: .5em;">The <b>House</b> Majority Leader indicated the {{bill.noun}} would be considered in the week ahead on {{bill.docs_house_gov_postdate|date}}.</p>{% endif %}
 					{% if bill.senate_floor_schedule_postdate %}<p style="margin-bottom: .5em;">The <b>Senate</b> added the {{bill.noun}} to its floor schedule for the following day on {{bill.senate_floor_schedule_postdate|date}}.</p>{% endif %}
-					{% if bill.current_status != BILL_STATUS_REPORTED %}
+					{% if not bill.current_status in BILL_STATUS_INTRO %}
 						<p><b>Status: </b>{{bill.current_status_description}}</p>
 					{% endif %}
 				</div>
