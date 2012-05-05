@@ -332,7 +332,7 @@ $(function() { update_search(1, null, null, true); });
             <li id="searchform_field_{{field.field_name}}_container" {% if field.type != "select" or field.help %}class="wide"{% endif %} style="cursor: pointer">
                 <label for="searchform_field_{{field.field_name}}">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
                 {% if field.type == "text" %}
-                    <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text"> </input>
+                    <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text with_search_button"> </input>
                     <input id="searchform_field_{{field.field_name}}_button" class="btn-search-small" type="submit" value="Search" value="Go" onclick="update_search()"> </input>
                 {% endif %}
                 {% if field.type == "select" %}

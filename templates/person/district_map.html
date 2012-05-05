@@ -222,7 +222,7 @@
 {% block summary %}
 	<h2>Find a Senator <span>or</span> Representative</h2>
 	<p style="margin-top: 1em">Use this page to find current or past Members of Congress.</p>
-	<p style="margin-bottom: 0"><strong>Looking for redistricting maps?</strong> Since we show you your current Members of Congress, which is based on the district lines at the time you last voted, our maps won't be updated to reflect redistricting until the new Members of Congress elected from the new districts take office in January 2013.</p>
+	<p style="margin-bottom: 0"><strong>Looking for redistricting maps?</strong> Your current Members of Congress are based on the district lines at the time you last voted. Our maps won't be updated to reflect redistricting until the new Members of Congress elected this year take office in January 2013.</p>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}
@@ -241,8 +241,9 @@
 							
 							<div class="row">
 								<label for="name">By Last Name</label>
-								<input id="name" class="text" type="text" value="" />
-								<script>$('#name').input_default('type the last name of a Member of Congress');</script>
+								<input id="name" class="text" type="text" value=""/>
+								<script>$('#name').input_default('type the last name of a Member of Congress');
+								</script>
 							</div>
 							
 							<ul>
