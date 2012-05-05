@@ -59,7 +59,7 @@ def bill_details(request, congress, type_slug, number):
         
     def get_market():
         m = bill.get_open_market(request.user)
-        m.name = m.name.replace(bill.display_number, "it")
+        if m: m.name = m.name.replace(bill.display_number, "it")
         return m
                                                     
     # simple predictive market implementation
