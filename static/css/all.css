@@ -2058,10 +2058,75 @@ select, input.text {
   }
 */
 
+/******************************
+ TABS
+ ******************************/
+ 
 
+/* root element for tabs  */
+ul.tabs {
+    margin:0 !important;
+    padding:0;
+    height:30px;
+    border-bottom:1px solid #DDC;
+}
 
-/* JT added things below here */
+/* single tab */
+ul.tabs li {
+    float:left;
+    padding:0;
+    margin:0;
+    list-style-type:none;
+}
 
+/* link inside the tab. uses a background image */
+ul.tabs a {
+    float:left;
+    font-size:13px;
+    display:block;
+    padding:5px 30px;
+    text-decoration:none;
+    border:1px solid #DDC;
+    border-bottom:0px;
+    height:18px;
+    background-color:#F3F1E9;
+    color:#444;
+    margin-right:2px;
+    position:relative;
+    top:1px;
+    outline:0;
+    -moz-border-radius:4px 4px 0 0;
+}
+
+ul.tabs a:hover {
+    background-color:#F7F7F7;
+    color:#333;
+}
+
+/* selected tab */
+ul.tabs a.current {
+    background-color:#DDC;
+    border-top:1px solid #bbb;
+    border-right:1px solid #bbb;
+    border-left:1px solid #bbb;
+    color:#000;
+    cursor:default;
+}
+
+/* tab pane */
+.panes > div {
+    display:none;
+    /*border:1px solid #666;
+    border-width:0 1px 1px 1px;*/
+    min-height:150px;
+    padding:15px 0 20px 0;
+    /*background-color:#ddd;*/
+}
+
+/******************************
+ JT added things below here
+ ******************************/
+ 
 .breadcrumbs h1 {
 	width: 940px;
 	margin: 0 auto;

@@ -103,7 +103,7 @@ def search(request):
     bill = parse_bill_number(q)
     if not bill:
         bills = \
-            [{"href": b.object.get_absolute_url(), "label": b.object.title, "obj": b.object, "secondary": b.object.congress != CURRENT_CONGRESS } for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], content=q)[0:9]]
+            [{"href": b.object.get_absolute_url(), "label": b.object.title, "obj": b.object, "secondary": b.object.congress != CURRENT_CONGRESS } for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], content=q).order_by('-current_status_date')[0:9]]
     else:
         #bills = [{"href": bill.get_absolute_url(), "label": bill.title, "obj": bill, "secondary": bill.congress != CURRENT_CONGRESS }]
         return HttpResponseRedirect(bill.get_absolute_url())

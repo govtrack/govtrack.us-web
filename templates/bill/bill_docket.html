@@ -51,75 +51,107 @@ $(function() {
 
 {% block summary %}
 	<h1>Bills and Resolutions</h1>
-	<p style="margin-top: 1em; margin-bottom: 0">The U.S. Congress considers roughly 10,000 bills in each two-year cycle. After each cycle, unfinished bills are cleared, and bill numbering restarts from 1. The current cycle is called the {{current_congress}}.</p>
+	<p style="margin-top: 1em; margin-bottom: 0">
+		{% if 5000 > total %}
+		Around 10,000 bills and resolutions are considered by the United States Congress in each two-year session, but of those bills and resolutions only about 400 will become law.{% comment %} The current cycle is called the {{current_congress}}.{% endcomment %}
+		{% else %}
+		There are {{total|intcomma}} bills and resolutions currently before the United States Congress. Of those, only about 5% will become law. They must be enacted before the end of the {{current_congress_years}} session (the &ldquo;{{current_congress}} Congress&rdquo;).
+		{% endif %}
+	</p>
 {% endblock %}
 
 {% block body %}
 
-<div class="col_6" style="margin-right: 40px; padding-right: 40px; border-right: 1px solid #EEE;">
-<h2 style="margin-bottom: 1em">By the Numbers</h2>
-<p style="">There are {{total|intcomma}} bills and resolutions currently before the U.S. Congress. Here is how they break down by the numbers.</p>
-{% for name, descr1, descr2, href, count, queryset in groups %}
-{% if count > 0 %}
-	<h3 style="margin-top: 1.5em; margin-bottom: .5em">{{name}}</h3>
-	
-	{% if 10 > count %}
-		<p>There are {{count|intcomma}} {{descr1}}{{descr2}}:</p>
+<ul class="tabs">
+	<li><a href="#">Docket</a></li>
+	<li><a href="#">By Subject</a></li>
+	<li><a href="#">Search and Track</a></li>
+</ul>
 
-		<ul>
-		{% for bill in queryset %}
-			<li>
-				<div><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:20}}</a></div>
-				<div style="margin-bottom: .5em">{{bill.current_status_description}}</div>
+<div class="panes">
+	<div>
+		<h2 style="margin: 1em 0 1em 0">Congress&rsquo;s Docket</h2>
+		
+		<div class="col_6" style="margin-right: 40px; padding-right: 40px; border-right: 1px solid #EEE;">
+			<h4>Coming Up This Week</h4>
+			
+			<p style="margin-top: 1em">{{coming_up|length}} {% if coming_up|length == 1 %}bill or resolution is{% else %}bills and resolutions are{% endif %} on the House and Senate calendars for the coming days. Once bills are scheduled for floor action, they typically have enough support to pass.</p>
+			
+			{% for bill in coming_up %}
+				<div style="margin-top: 2em; margin-bottom: .5em;"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a></div>
+				<div style="margin-left: 1em">
+					{% if bill.docs_house_gov_postdate %}<p style="margin-bottom: .5em;">The <b>House</b> Majority Leader indicated the {{bill.noun}} would be considered in the week ahead on {{bill.docs_house_gov_postdate|date}}.</p>{% endif %}
+					{% if bill.senate_floor_schedule_postdate %}<p style="margin-bottom: .5em;">The <b>Senate</b> added the {{bill.noun}} to its floor schedule for the following day on {{bill.senate_floor_schedule_postdate|date}}.</p>{% endif %}
+					{% if bill.current_status != BILL_STATUS_REPORTED %}
+						<p><b>Status: </b>{{bill.current_status_description}}</p>
+					{% endif %}
+				</div>
+			{% endfor %}
+		</div>
+		
+		<div class="col_6">
+		<p>Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
+			
+		{% for name, descr1, descr2, href, count, queryset in groups %}
+		{% if count > 0 %}
+			<h4 style="margin-top: 2em; margin-bottom: .5em">{{name}}</h4>
+			
+			{% if 10 > count %}
+				<p>There are {{count|intcomma}} {{descr1}}{{descr2}}:</p>
+		
+				<ul>
+				{% for bill in queryset %}
+					<li>
+						<div><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:20}}</a></div>
+						<div style="margin-bottom: .5em">{{bill.current_status_description}}</div>
+					</li>
+				{% endfor %}
+				</ul>
+			{% else %}
+				<p>There are <a href="{{href}}">{{count|intcomma}} {{descr1}}</a>{{descr2}}.</p>
+			{% endif %}
+		{% endif %}
+		{% endfor %}
+		</div>		
+	</div>
+	
+	<div>
+		<h2 style="margin: 1em 0 .5em 0">Browse Bills by Subject</h2>
+		<p>Use the Library of Congress&rsquo;s subject categorization of bills and resolutions to explore pending legislation in Congress.</p>
+		<ul id="subject_list">
+		{% for topterm, subterms in subjects %}
+			<li style="margin-bottom: .33em">
+				<div><a href="{{topterm.get_absolute_url}}">{{topterm.name}}</a> <span>(<a href="#">narrow topic...</a>)</span></div>
+				<ul class="bullets">
+					{% for subterm in subterms %}
+						<li><a href="{{subterm.get_absolute_url}}">{{subterm.name}}</a></li>
+					{% endfor %}
+				</ul>
 			</li>
 		{% endfor %}
 		</ul>
-	{% else %}
-		<p>There are <a href="{{href}}">{{count|intcomma}} {{descr1}}</a>{{descr2}}.</p>
-	{% endif %}
-{% endif %}
-{% endfor %}
-</div>
-
-<div class="col_6 searching">
-	<div class="advanced-search" style="float: none; width: auto;">
-		<form method="get" action="/congress/bills/browse" style="width: auto">
-		<fieldset>
-		<h3 style="width: auto; margin-bottom: 15px;">Search Bills and Resolutions</h3>
-		<ul>
-			<li id="searchform_field_text_container" class="wide" style="cursor: pointer">
-				<label for="searchform_field_text">search title</label>
-				<input id="searchform_field_text" name="text" type="text" class="text"> </input>
-				<input id="searchform_field_text_button" class="btn-search-small" type="submit" value="Search" value="Go" onclick="update_search()"> </input>
-			</li>
-		</ul>
-		<p><a href="/congress/bills/browse">Use advanced search...</a></p>
-		</fieldset>
-		</form>
 	</div>
 	
-	<h3 style="margin-bottom: 1em">Track Legislative Events</h3>
-	<ul class="bullets">
-		<li><a href="/events/introduced-bills">Introduced Bills</a></li>
-		<li><a href="/events/enacted-bills">Enacted Bills</a></li>
-		<li><a href="/events/major-bill-activity">All Major Activity</a></li>
-		<li><a href="/events/bill-activity">All Major Activity with Introductions</a></li>
-		<li><a href="/events/coming-up">Coming Up</a></li>
-	</ul>
-
-	<h3 style="margin-bottom: 1em">Browse Bills by Subject</h3>
-	<ul id="subject_list">
-	{% for topterm, subterms in subjects %}
-		<li>
-			<div><a href="{{topterm.get_absolute_url}}">{{topterm.name}}</a> <span>(<a href="#">narrow topic...</a>)</span></div>
-			<ul class="bullets">
-				{% for subterm in subterms %}
-					<li><a href="{{subterm.get_absolute_url}}">{{subterm.name}}</a></li>
-				{% endfor %}
-			</ul>
-		</li>
-	{% endfor %}
-	</ul>
+	<div>
+		<h2 style="margin: 1em 0 .5em 0">Search Bills and Resolutions</h2>
+		<p style="width: 600px">Search for bills using the search box at the top right of every page, or use the <a href="/congress/bills/browse">advanced search</a> to screen by status, subject, and other factors.</p>
+		
+		<h2 style="margin: 1em 0 .5em 0">Track Legislative Events</h2>
+		<p style="width: 600px">Use these pages to subscribe to email updates to track bills and resolutions in Congress.</p>
+		<ul class="bullets">
+			<li><a href="/events/introduced-bills">Introduced Bills</a></li>
+			<li><a href="/events/enacted-bills">Enacted Bills</a></li>
+			<li><a href="/events/major-bill-activity">All Major Activity</a></li>
+			<li><a href="/events/bill-activity">All Major Activity with Introductions</a></li>
+			<li><a href="/events/coming-up">Coming Up</a></li>
+		</ul>
+	
+	</div>	
 </div>
+
+<script>$("ul.tabs").tabs("div.panes > div");</script>
+
+
+
 
 {% endblock %}

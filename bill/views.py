@@ -5,7 +5,7 @@ from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, F
 from django.core.cache import cache
 
 from common.decorators import render_to
@@ -202,18 +202,16 @@ def subject_choices(include_legacy=True):
 def bill_docket(request):
     def build_info():
         groups = [
+            ("Successful Bills", "enacted bills", " so far in this session of Congress", BillStatus.final_status_passed_bill),
+            ("Successful Resolutions", "passed resolutions", " so far in this session of Congress", BillStatus.final_status_passed_resolution),
             ("Active Bills", "bills", " that are awaiting the president's signature, have differences between the chambers to be resolved, or were vetoed", BillStatus.active_status),
-            ("Waiting Bills", "bills and resolutions", " that had a significant vote", BillStatus.waiting_status),
-            ("Successful Bills", "enacted bills", "", BillStatus.final_status_passed_bill),
-            ("Successful Resolutions", "passed resolutions", "", BillStatus.final_status_passed_resolution),
-            ("Unsuccessful Bills", "bills and resolutions", " that failed a vote", BillStatus.final_status_failed),
-            ("Inactive Bills", "bills and resolutions", " that have been introduced, referred to committee, or reported by committee", BillStatus.inactive_status),
+            ("Waiting Bills", "bills and resolutions", " that had a significant vote in one chamber and are likely to get a vote in the other chamber", BillStatus.waiting_status),
+            ("Inactive Bills", "bills and resolutions", " that have been introduced, referred to committee, or reported by committee and await further action", BillStatus.inactive_status),
+            ("Unsuccessful Bills", "bills and resolutions", " that failed a vote and are now dead", BillStatus.final_status_failed),
         ]
         
-        dhg_cutoff = datetime.datetime.now() - datetime.timedelta(days=10)
         def loadgroupqs(statuses):
-            qs = Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=statuses)
-            return qs.filter(docs_house_gov_postdate=None) | qs.exclude(docs_house_gov_postdate__gt=dhg_cutoff)
+            return Bill.objects.filter(congress=CURRENT_CONGRESS, current_status__in=statuses)
         
         groups = [
             (   g[0], # title
@@ -225,26 +223,24 @@ def bill_docket(request):
                 )
             for g in groups ]
             
-        dhg_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, docs_house_gov_postdate__gt=dhg_cutoff)
-        if len(dhg_bills) > 0:
-            groups.insert(0, (
-                "Coming Up",
-                "bills and resolutions",
-                " that the House Majority Leader has indicated may be considered in the week ahead",
-                "http://docs.house.gov",
-                len(dhg_bills),
-                dhg_bills.order_by('-docs_house_gov_postdate')
-            ))
+        dhg_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, docs_house_gov_postdate__gt=datetime.datetime.now() - datetime.timedelta(days=10)).filter(docs_house_gov_postdate__gt=F('current_status_date'))
+        sfs_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, senate_floor_schedule_postdate__gt=datetime.datetime.now() - datetime.timedelta(days=5)).filter(senate_floor_schedule_postdate__gt=F('current_status_date'))
+        coming_up = list(dhg_bills | sfs_bills)
+        coming_up.sort(key = lambda b : b.docs_house_gov_postdate if (b.docs_house_gov_postdate and (not b.senate_floor_schedule_postdate or b.senate_floor_schedule_postdate < b.docs_house_gov_postdate)) else b.senate_floor_schedule_postdate, reverse=True)
         
         start, end = get_congress_dates(CURRENT_CONGRESS)
         end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
-        current_congress = '%s Congress, for %d-%d' % (ordinal(CURRENT_CONGRESS), start.year, end.year)    
+        current_congress_years = '%d-%d' % (start.year, end.year)
+        current_congress = ordinal(CURRENT_CONGRESS)     
         
         return {
             "total": Bill.objects.filter(congress=CURRENT_CONGRESS).count(),
+            "current_congress_years": current_congress_years,
             "current_congress": current_congress,
             "groups": groups,
+            "coming_up": coming_up,
             "subjects": subject_choices(),
+            "BILL_STATUS_REPORTED": BillStatus.reported,
         }
         
     ret = cache.get("bill_docket_info")    
