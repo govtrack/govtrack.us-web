@@ -69,7 +69,7 @@ class Command(BaseCommand):
 				else:
 					print "Don't know what to do with market:", market, market.owner_key
 						
-			if not did_see_market and market_key:
+			if not did_see_market and market_key != None:
 				starting_price = compute_prognosis(bill)["prediction"] / 100.0
 				
 				# Create the market.
@@ -94,9 +94,9 @@ class Command(BaseCommand):
 				bank = TradingAccount.get(User.objects.get(id=settings.PREDICTIONMARKET_BANK_UID))
 				shares = int(round(m.volatility * log(starting_price / (1.0 - starting_price))))
 				t = None
-				if starting_price > .5:
+				if starting_price > .5 and shares > 0:
 					t = Trade.place(bank, ocmap[1], shares, check_balance=False)
-				elif starting_price < .5:
+				elif starting_price < .5 and shares < 0:
 					t = Trade.place(bank, ocmap[0], -shares, check_balance=False)
 					
 				print "Created market", m
