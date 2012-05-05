@@ -92,6 +92,7 @@ class Bill(models.Model):
     introduced_date = models.DateField()
     cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor')
     docs_house_gov_postdate = models.DateTimeField()
+    senate_floor_schedule_postdate = models.DateTimeField()
     major_actions = JSONField() # serialized list of all major actions (date/datetime, BillStatus, description)
 
     class Meta:
@@ -283,13 +284,18 @@ class Bill(models.Model):
             for joindate in cosponsor_join_dates:
                 E.add("cosp:" + joindate.isoformat(), joindate, [bill_feed])
                 
-            # generate an event for appearing on docs.house.gov:
+            # generate an event for appearing on docs.house.gov or the senate floor schedule:
             if self.docs_house_gov_postdate:
                 E.add("dhg", self.docs_house_gov_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
+            if self.senate_floor_schedule_postdate:
+                E.add("sfs", self.senate_floor_schedule_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
     
     def render_event(self, eventid, feeds):
-        if eventid == "dhg":
+        if eventid in "dhg":
             return self.render_event_dhg(feeds)
+        if eventid in "sfs":
+            return self.render_event_sfs(feeds)
+            
         ev_type, ev_code = eventid.split(":")
         if ev_type == "state":
             return self.render_event_state(ev_code, feeds)
@@ -406,10 +412,20 @@ class Bill(models.Model):
             "date_has_no_time": False,
             "title": self.title,
             "url": self.get_absolute_url(),
-            "body_text_template":
-"""This bill has been listed by the House Majority Leader as to be considered in the week ahead. More information can be found at http://docs.house.gov.""",
-            "body_html_template": """<p>This bill has been listed by the House Majority Leader as to be considered in <a href="http://docs.house.gov">the week ahead</a>.</p>""",
-            "context": { }
+            "body_text_template": """This {{noun}} has been added to the House's schedule for the coming week, according to the House Majority Leader. More information can be found at http://docs.house.gov.\n\n{{current_status}}""",
+            "body_html_template": """<p>This {{noun}} has been added to the House&rsquo;s schedule for the coming week, according to the House Majority Leader. See <a href="http://docs.house.gov">the week ahead</a>.</p><p>{{current_status}}</p>""",
+            "context": { "noun": self.noun, "current_status": self.current_status_description },
+            }
+    def render_event_sfs(self, feeds):
+        return {
+            "type": "Legislation Coming Up",
+            "date": self.senate_floor_schedule_postdate,
+            "date_has_no_time": False,
+            "title": self.title,
+            "url": self.get_absolute_url(),
+            "body_text_template": """This {{noun}} has been added to the Senate's floor schedule for the next legislative day.\n\n{{current_status}}""",
+            "body_html_template": """<p>This {{noun}} has been added to the Senate&rsquo;s floor schedule for the next legislative day.</p><p>{{current_status}}</p>""",
+            "context": { "noun": self.noun, "current_status": self.current_status_description },
             }
         
     def get_major_events(self):

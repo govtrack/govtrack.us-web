@@ -33,7 +33,7 @@
 
 <h2>Recent Events</h2>
 
-{% for event in feed.get_five_events %}
+{% for event in feed.get_ten_events %}
 {% with event|render_event:"" as meta %}
 	<div class="tracked_event" style="clear: both; border-bottom: 1px solid #DDD; margin-bottom: 1em">
 

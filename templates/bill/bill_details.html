@@ -54,6 +54,11 @@
 		{% if subtitle %}<p style="line-height: 135%">{{subtitle}}</p>{% endif %}
 		
 		<dl>
+			{% if not bill.is_alive %}
+			<dt>Introduced:</dt>
+			<dd>{{bill.introduced_date}}</dd>
+			{% endif %}
+		
 			<dt>Sponsor:</dt>
 			<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
 		
@@ -70,6 +75,19 @@
 			<dt>Schedule:</dt>
 			<dd>The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</dd>
 			{% endif %}
+			
+			{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
+			<dt>Schedule:</dt>
+			<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
+			{% endif %}
+		
+			{% with reintros.1 as reintro_as %}
+			{% if reintro_as %}
+			<dt>See Instead:</dt>
+			<dd>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
+			{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</dd>
+			{% endif %}
+			{% endwith %}
 		</dl>
 	
 	</div><!-- /info -->
@@ -160,7 +178,7 @@
 								{% for item in bill.get_future_events %}
 								<tr>
 									<td class="pending">{{item}}</td>
-									<td>(not yet ocurred)</td>
+									<td>(not yet occurred)</td>
 								</tr>
 								{% endfor %}
 								{% endif %}
@@ -278,20 +296,28 @@
 						</dd>
 					</dl>
 					{% endif %}
-						
-					{% if bill.relatedbills.exists %}
+
+					{% with reintros.0 as reintro_from %}
+					{% if bill.relatedbills.exists or reintro_from %}
 					<dl style="margin-top: 1em">
 						<dt>Related Bills:</dt>
 						<dd>
+							{% if bill.relatedbills.exists %}
 							<div style="max-height: 15em; overflow: auto">
 							{% for rb in bill.get_related_bills %}
 								<div>{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
 							{% endfor %}
 							</div>
-							<p><small>Related bills are identified by the Congressional Research Service.</small></p>
+							<p><small>Related bills above are identified by the Congressional Research Service.</small></p>
+							{% endif %}
+							
+							{% if reintro_from %}
+							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
+							{% endif %}
 						</dd>
 					</dl>
 					{% endif %}
+					{% endwith %}
 				</div>
 			
 				<div class="container">

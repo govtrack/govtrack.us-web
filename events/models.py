@@ -88,6 +88,8 @@ class Feed(models.Model):
 
     def get_five_events(self):
         return self.get_events(5)
+    def get_ten_events(self):
+        return self.get_events(10)
 
     # feed metadata
     
@@ -119,7 +121,7 @@ class Feed(models.Model):
         "misc:comingup": {
             "title": "Legislation Coming Up",
             "slug": "coming-up",
-            "intro_html": """<p>This feed tracks legislation posted on the House Majority Leader&rsquo;s week-ahead website at <a href="http://docs.house.gov">docs.house.gov</a>. There is currently no corresponding source of upcoming legislation for the Senate.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
+            "intro_html": """<p>This feed tracks legislation posted on the House Majority Leader&rsquo;s week-ahead website at <a href="http://docs.house.gov">docs.house.gov</a> and the <a href="http://www.senate.gov/pagelayout/legislative/d_three_sections_with_teasers/calendars.htm">Senate Floor Schedule</a> which gives rough one-day-ahead notice.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
         },
         "misc:allcommittee": {

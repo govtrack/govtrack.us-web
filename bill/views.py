@@ -23,7 +23,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json, datetime
+import urllib, urllib2, json, datetime, re
 from registration.helpers import json_response
 
 @render_to('bill/bill_details.html')
@@ -45,6 +45,19 @@ def bill_details(request, congress, type_slug, number):
         prog["congressdates"] = get_congress_dates(prog["congress"])
         return prog
         
+    def get_reintroductions():
+        reintro_prev = None
+        reintro_next = None
+        def normalize_title(title):
+            # remove anything that looks like a year
+            return re.sub(r"of \d\d\d\d$", "", title)
+        for reintro in Bill.objects.exclude(congress=bill.congress).filter(sponsor=bill.sponsor).order_by('congress'):
+            if normalize_title(bill.title_no_number) != normalize_title(reintro.title_no_number): continue
+            if reintro.congress < bill.congress: reintro_prev = reintro
+            if reintro.congress > bill.congress and not reintro_next: reintro_next = reintro
+        return reintro_prev, reintro_next
+            
+                                                    
     # simple predictive market implementation
     from website.models import TestMarketVote
     from math import exp
@@ -65,6 +78,7 @@ def bill_details(request, congress, type_slug, number):
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
         "prognosis": get_prognosis, # defer so we can use template caching
+        "reintros": get_reintroductions, # defer so we can use template caching
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         'feed': Feed.BillFeed(bill),

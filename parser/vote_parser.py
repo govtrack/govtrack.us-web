@@ -165,7 +165,7 @@ def main(options):
                         # to distinguish suspension votes etc. also, the title that comes
                         # from the upstream source is not formatted in our style.
                         if vote.category in (VoteCategory.passage, VoteCategory.passage_suspension, VoteCategory.veto_override):
-                            vote.question = truncatewords(vote.related_bill.title, 7) + " (" + vote.vote_type + ")"
+                            vote.question = truncatewords(vote.related_bill.title, 12) + " (" + vote.vote_type + ")"
                         
                     except Bill.DoesNotExist:
                         vote.missing_data = True
