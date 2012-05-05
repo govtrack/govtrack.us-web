@@ -148,6 +148,7 @@ def push_to_social_media_rss(request):
     import django.contrib.syndication.views
     from events.models import Feed
     from events.templatetags.events_utils import render_event
+    import re
     
     feedlist = [Feed.from_name("misc:comingup"), Feed.from_name('misc:enactedbills')]
     
@@ -161,11 +162,11 @@ def push_to_social_media_rss(request):
             return [e for e in events if e != None]
             
         def item_title(self, item):
-            return item["type"] + ": " + item["title"]
+            return re.sub(r"^Legislation ", "", item["type"]) + ": " + item["title"]
         def item_description(self, item):
             return item["body_text"]
         def item_link(self, item):
-            return "http://www.govtrack.us" + item["url"] + "?utm_campaign=govtrack_push&utm_source=govtrack_push" 
+            return "http://www.govtrack.us" + item["url"]# + "?utm_campaign=govtrack_push&utm_source=govtrack_push" 
         def item_guid(self, item):
             return "http://www.govtrack.us/events/guid/" + item["guid"] 
         def item_pubdate(self, item):
