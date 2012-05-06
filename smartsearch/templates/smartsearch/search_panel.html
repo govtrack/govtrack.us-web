@@ -1,3 +1,5 @@
+<script src="/static/js/jquery.ba-bbq.min.js"> </script>
+
 <style>
     .rowtop { padding-top: 8px; }
     .col0 { border-bottom: none;  }
@@ -41,7 +43,7 @@ function addCommas(nStr)
   }
   return x1 + x2;
 }
-function show_facets(postdata, options) {
+function show_facets(postdata, options, isinitial) {
     // Display options.
     for (var k in options) {
         field = options[k][0];
@@ -67,8 +69,9 @@ function show_facets(postdata, options) {
         } else if (type == "text") {
         	// There is never a reason to update a free-form text field with
         	// data returned by the search server because the user has already
-        	// entered something, and we don't want to mess with it.
-            //node.val(postdata[field])
+        	// entered something, and we don't want to mess with it.... except
+        	// when loading the initial state from the search query fragment.
+        	if (isinitial) node.val(postdata[field])
         } else if (type == "checkbox" || type == "radio") {
             node.html("");
             for (var j in values) {
@@ -137,10 +140,21 @@ var default_search = { };
 	{% endfor %}
 {% endif %}
 {% endfor %}
+{% for label, key, default in sort_options %}
+	{% if default %}
+		default_search["sort"] = "{{key|escapejs}}";
+	{% endif %}
+{% endfor %}
+
+// The initial search combines the default faceting with the URL fragment.
+var fragment_params =  $.deparam.fragment();
+var initial_search = { };
+for (var k in default_search) initial_search[k] = default_search[k];
+for (var k in fragment_params) initial_search[k] = fragment_params[k];
 
 var current_page = 1;
 var update_search_lock = false;
-var prev_search = default_search;
+var prev_search = initial_search;
 function update_search(pagenum, pageinc, elem, isinitial) {
     if (update_search_lock) return;
     update_search_lock = true;
@@ -159,7 +173,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         for (var i = 0; i < form.elements.length; i++)
             if (form.elements[i].checked && form.elements[i].name == elem.name && form.elements[i].value != elem.value)
                 if (elem.value == "__ALL__" || form.elements[i].value == "__ALL__")
-                    $(form.elements[i]).attr('checked', '');
+                    $(form.elements[i]).prop('checked', false);
     }
 
     // Collect the POST data.
@@ -176,6 +190,8 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         if (isinitial && form.elements[i].type == "text") continue;
         
         name = form.elements[i].name;
+        if (name == "" || name == "undefined") continue;
+        
         if (form.elements[i].type == 'checkbox') {
             if (postdata[name] == null) postdata[name] = Array();
             postdata[name].push(form.elements[i].value);
@@ -184,9 +200,18 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         }
     }
     
-    if (isinitial) {
-    	for (var k in default_search)
-    		postdata[k] = default_search[k];
+    // Apply any initial search options.
+    if (isinitial) for (var k in initial_search) postdata[k] = initial_search[k];
+    
+    // Copy just the faceting so far into a separate array, minus the parts that
+    // match the defaults.
+    var current_search = { };
+    var current_search_set = false;
+    for (var k in postdata) {
+    	if (postdata[k] != default_search[k]) {
+    		current_search[k] = postdata[k];
+    		current_search_set = true;
+    	}
     }
     
     if (pagenum)
@@ -201,6 +226,10 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 
     $("#loading_status").show();
     $("#show_more").hide();
+    if (postdata.page == 1) {
+    	$('.summary').hide();
+    	$('.results tbody').html("");
+    }
 
     $.ajax(
         {
@@ -210,7 +239,6 @@ function update_search(pagenum, pageinc, elem, isinitial) {
             data: postdata,
             success: function(res) {
                 if (res.error) {
-                    if (postdata.page == 1) $('.results tbody').html("");
                     $('#searcherror').text(res.error);
                     $("#loading_status").hide();
                 } else if (res.redirect) {
@@ -218,10 +246,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                 	return;
                 } else {
                     // Display results.
-                    if (postdata.page == 1)
-                    	$('.results tbody').html(res.results);
-                    else
-                    	$('.results tbody').append($(res.results));
+                   	$('.results tbody').append($(res.results));
                     $('#searcherror').text('');
                     
                     $('.summary').show();
@@ -247,14 +272,14 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 								data: prev_search,
 								success: function(res) {
 									if (res.error) return;
-									show_facets(postdata, res.options);
+									show_facets(postdata, res.options, isinitial);
 								}
 							});
                     } else {
 						// Updates checkboxes and radio buttons and the current values
 						// for selects, but in order to be fast we were not returned
 						// the other options for selects- that comes later.
-						show_facets(postdata, res.options);
+						show_facets(postdata, res.options, isinitial);
 						
 						// After showing the main content and basic facets, show the full faceted results.
 						postdata.faceting = "true";
@@ -265,11 +290,20 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 								data: postdata,
 								success: function(res) {
 									if (res.error) return;
-									show_facets(postdata, res.options);
+									show_facets(postdata, res.options, isinitial);
 								}
 							});
 						
 						prev_search = postdata;
+						
+						// Store the current search query in the hash so that the user can back-button to
+						// this page and we will try to restore the query options.
+						if (!current_search_set) {
+							if (window.location.hash) // don't set if already blank
+								window.location.hash = "#_"; // setting to blank jumps page to top
+						} else {
+							window.location.hash = "#" + $.param(current_search, true);
+						}
 					}
                 }
                 
