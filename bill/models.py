@@ -267,7 +267,7 @@ class Bill(models.Model):
             if self.sponsor != None:
                 index_feeds.append(Feed.PersonSponsorshipFeed(self.sponsor))
             index_feeds.extend([Feed.IssueFeed(ix) for ix in self.terms.all()])
-            index_feeds.extend([Feed.CommitteeFeed(cx) for cx in self.committees.all()])
+            index_feeds.extend([Feed.CommitteeBillsFeed(cx) for cx in self.committees.all()])
             
             # generate events for major actions
             E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
