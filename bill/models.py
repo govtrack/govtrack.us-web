@@ -588,12 +588,13 @@ class Bill(models.Model):
                 m.yes = outcome
                 m.yes_price = int(round(outcome.price() * 100.0))
         if user and user.is_authenticated():
-            account = predictionmarket.models.TradingAccount.get(user)
-            positions, profit = account.position_in_market(m)
-            m.user_profit = round(profit, 1)
-            m.user_positions = { }
-            for outcome in positions:
-                m.user_positions[outcome.owner_key] = positions[outcome]
+            account = predictionmarket.models.TradingAccount.get(user, if_exists=True)
+            if account:
+                positions, profit = account.position_in_market(m)
+                m.user_profit = round(profit, 1)
+                m.user_positions = { }
+                for outcome in positions:
+                    m.user_positions[outcome.owner_key] = positions[outcome]
         return m
             
 class RelatedBill(models.Model):
