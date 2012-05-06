@@ -1,18 +1,18 @@
+<script src="/static/js/jquery.ba-bbq.min.js"> </script>
+
 <style>
-    .pagination span { font-weight: bold; cursor: default; }
-    .pagination .prev span { color: #AAA; }
-    .pagination .next span { color: #AAA; }
-    .paging .pages { display: inline-block; width: 300px; height: 1.5em; overflow: hidden; }
     .rowtop { padding-top: 8px; }
     .col0 { border-bottom: none;  }
     .rowleft { padding: 4px 12px 6px 0px; }
     .rowbottom { padding: 6px 0 6px 0; }
+    #loading_status { text-align: center; border: 1px solid #AAA; background-color: #EEE; }
+    #show_more { text-align: center; border: 1px solid #CB4B16; background-color: #ffcebb; font-weight: bold; }
 </style>
 
 <div class="searching">
 <section>
     <div class="summary" style="display: none">
-        <p><span class="total">xxx</span> <span class="noun">things</span> matched your search. <span class="range">Showing <span class="start">aaa</span> through <span class="end">bbb</span>.</span></p>
+        <p><span class="total">xxx</span> <span class="noun">things</span> matched your search.</p>
     </div>
     
     <table class="results" style="display: none;">
@@ -26,11 +26,9 @@
         <tbody>
         </tbody>
     </table>
-    <ul class="paging" style="display: none;">
-        <li class="prev"><span>&laquo; Previous</span> <a href="#" onclick="return update_search(null, -1)">&laquo; Previous</a></li>
-        <span class="pages"> </span>
-        <li class="next"><span>Next &raquo;</span> <a href="#" onclick="return update_search(null, 1)">Next &raquo;</a></li>
-    </ul>
+    
+    <div id="loading_status" style="display: none;">Loading...</div>
+    <div id="show_more" style="display: none;"><a href="#" onclick="return update_search(null, 1)">Show More Results</a></div>
 </section>
 <script>
 function addCommas(nStr)
@@ -45,7 +43,7 @@ function addCommas(nStr)
   }
   return x1 + x2;
 }
-function show_facets(postdata, options) {
+function show_facets(postdata, options, isinitial) {
     // Display options.
     for (var k in options) {
         field = options[k][0];
@@ -71,8 +69,10 @@ function show_facets(postdata, options) {
         } else if (type == "text") {
         	// There is never a reason to update a free-form text field with
         	// data returned by the search server because the user has already
-        	// entered something, and we don't want to mess with it.
-            //node.val(postdata[field])
+        	// entered something, and we don't want to mess with it.... except
+        	// when loading the initial state from the search query fragment.
+        	if (isinitial) node.val(postdata[field])
+			node.focus();
         } else if (type == "checkbox" || type == "radio") {
             node.html("");
             for (var j in values) {
@@ -141,10 +141,21 @@ var default_search = { };
 	{% endfor %}
 {% endif %}
 {% endfor %}
+{% for label, key, default in sort_options %}
+	{% if default %}
+		default_search["sort"] = "{{key|escapejs}}";
+	{% endif %}
+{% endfor %}
+
+// The initial search combines the default faceting with the URL fragment.
+var fragment_params =  $.deparam.fragment();
+var initial_search = { };
+for (var k in default_search) initial_search[k] = default_search[k];
+for (var k in fragment_params) initial_search[k] = fragment_params[k];
 
 var current_page = 1;
 var update_search_lock = false;
-var prev_search = default_search;
+var prev_search = initial_search;
 function update_search(pagenum, pageinc, elem, isinitial) {
     if (update_search_lock) return;
     update_search_lock = true;
@@ -163,7 +174,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         for (var i = 0; i < form.elements.length; i++)
             if (form.elements[i].checked && form.elements[i].name == elem.name && form.elements[i].value != elem.value)
                 if (elem.value == "__ALL__" || form.elements[i].value == "__ALL__")
-                    $(form.elements[i]).attr('checked', '');
+                    $(form.elements[i]).prop('checked', false);
     }
 
     // Collect the POST data.
@@ -180,6 +191,8 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         if (isinitial && form.elements[i].type == "text") continue;
         
         name = form.elements[i].name;
+        if (name == "" || name == "undefined") continue;
+        
         if (form.elements[i].type == 'checkbox') {
             if (postdata[name] == null) postdata[name] = Array();
             postdata[name].push(form.elements[i].value);
@@ -188,9 +201,18 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         }
     }
     
-    if (isinitial) {
-    	for (var k in default_search)
-    		postdata[k] = default_search[k];
+    // Apply any initial search options.
+    if (isinitial) for (var k in initial_search) postdata[k] = initial_search[k];
+    
+    // Copy just the faceting so far into a separate array, minus the parts that
+    // match the defaults.
+    var current_search = { };
+    var current_search_set = false;
+    for (var k in postdata) {
+    	if (postdata[k] != default_search[k]) {
+    		current_search[k] = postdata[k];
+    		current_search_set = true;
+    	}
     }
     
     if (pagenum)
@@ -202,7 +224,14 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     
     postdata.faceting = "false";
     postdata.allow_redirect = (isinitial ? "false" : "true"); // hit back after getting a redirect would generate an immediate redirect again, not helpful
-        
+
+    $("#loading_status").show();
+    $("#show_more").hide();
+    if (postdata.page == 1) {
+    	$('.summary').hide();
+    	$('.results tbody').html("");
+    }
+
     $.ajax(
         {
             url: document.location.pathname,
@@ -211,56 +240,23 @@ function update_search(pagenum, pageinc, elem, isinitial) {
             data: postdata,
             success: function(res) {
                 if (res.error) {
-                    $('.results tbody').html("");
                     $('#searcherror').text(res.error);
+                    $("#loading_status").hide();
                 } else if (res.redirect) {
                 	window.location = res.redirect;
                 	return;
                 } else {
-                    // Display results.                    
-                    $('.results tbody').html(res.results);
+                    // Display results.
+                   	$('.results tbody').append($(res.results));
                     $('#searcherror').text('');
                     
                     $('.summary').show();
                     $('.summary .total').text(addCommas(res.total));
                     $('.summary .noun').text(res.total == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}");
-                    if (res.total > 0) {
-                        $('.summary .start').text((res.page-1)*res.per_page + 1);
-                        $('.summary .end').text((res.page-1)*res.per_page + res.total_this_page);
-                        $('.summary .range').show();
-                    } else {
-                        $('.summary .range').hide();
-                    }
 
-					// Display page numbers and prev/next.
-					if (res.page > 1) {
-						$('.paging .prev a').show();
-						$('.paging .prev span').hide();
-					} else {
-						$('.paging .prev a').hide();
-						$('.paging .prev span').show();
-					}
-					if (res.page < res.num_pages) {
-						$('.paging .next a').show();
-						$('.paging .next span').hide();
-					} else {
-						$('.paging .next a').hide();
-						$('.paging .next span').show();
-					}
-					
-					$('.paging .pages').text("");
-					for (var i = 1; i <= res.num_pages; i++) {
-						if (res.page - i > 10) continue;
-						//if (i - res.page > 10) break;
-						if (i == res.page)
-							$('.paging .pages').append($('<span>' + i + '</span>'));
-						else
-							$('.paging .pages').append($('<a href="#" onclick="return update_search(' + i + ')">' + i + '</a>'));
-						$('.paging .pages').append(" ");
-					}
-					
-					$('.results, .paging').show();
-					
+					$("#loading_status").hide();
+					$("#show_more").toggle(res.page < res.num_pages);
+					$('.results').show();
                     
                     if (res.total == 0) {
 						// Now we have a problem. If there are no results, then the facets
@@ -277,14 +273,14 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 								data: prev_search,
 								success: function(res) {
 									if (res.error) return;
-									show_facets(postdata, res.options);
+									show_facets(postdata, res.options, isinitial);
 								}
 							});
                     } else {
 						// Updates checkboxes and radio buttons and the current values
 						// for selects, but in order to be fast we were not returned
 						// the other options for selects- that comes later.
-						show_facets(postdata, res.options);
+						show_facets(postdata, res.options, isinitial);
 						
 						// After showing the main content and basic facets, show the full faceted results.
 						postdata.faceting = "true";
@@ -295,11 +291,20 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 								data: postdata,
 								success: function(res) {
 									if (res.error) return;
-									show_facets(postdata, res.options);
+									show_facets(postdata, res.options, isinitial);
 								}
 							});
 						
 						prev_search = postdata;
+						
+						// Store the current search query in the hash so that the user can back-button to
+						// this page and we will try to restore the query options.
+						if (!current_search_set) {
+							if (window.location.hash) // don't set if already blank
+								window.location.hash = "#_"; // setting to blank jumps page to top
+						} else {
+							window.location.hash = "#" + $.param(current_search, true);
+						}
 					}
                 }
                 
@@ -313,6 +318,8 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                 $('#searchform').text("Search is not currently operational: " + textStatus);
                 update_search_lock = false;
                 $('#searchform input').prop('disabled', false);
+				$("#loading_status").show();
+				$("#show_more").hide();
             }
         });
     
@@ -332,8 +339,9 @@ $(function() { update_search(1, null, null, true); });
             <li id="searchform_field_{{field.field_name}}_container" {% if field.type != "select" or field.help %}class="wide"{% endif %} style="cursor: pointer">
                 <label for="searchform_field_{{field.field_name}}">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
                 {% if field.type == "text" %}
-                    <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text with_search_button"> </input>
+                    <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text with_search_button" onchange="$('#show_more').hide()"> </input>
                     <input id="searchform_field_{{field.field_name}}_button" class="btn-search-small" type="submit" value="Search" value="Go" onclick="update_search()"> </input>
+                    	{% comment %}when the text value changes, hide Show More so that we don't try to access a later page on a different search query than what we've loaded so far{% endcomment %}
                 {% endif %}
                 {% if field.type == "select" %}
                     <select id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" size="1" onchange="update_search()"> </select>

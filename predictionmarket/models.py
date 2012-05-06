@@ -16,12 +16,18 @@ class TradingAccount(models.Model):
 		return unicode(self.user)
 		
 	@staticmethod
-	def get(user):
-		acct, isnew = TradingAccount.objects.get_or_create(
-			user = user,
-			defaults = { "balance": settings.PREDICTIONMARKET_SEED_MONEY }
-			)
-		return acct
+	def get(user, if_exists=False):
+		if not if_exists:
+			acct, isnew = TradingAccount.objects.get_or_create(
+				user = user,
+				defaults = { "balance": settings.PREDICTIONMARKET_SEED_MONEY }
+				)
+			return acct
+		else:
+			try:
+				return TradingAccount.objects.get(user = user)
+			except TradingAccount.DoesNotExist:
+				return None
 	
 	def positions(self, **filters):
 		"""Returns a dict from Outcomes to a dict containing shares held of each outcome,

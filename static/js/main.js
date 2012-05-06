@@ -19,7 +19,7 @@ function clearFormFields(o)
 		var inputs = document.getElementsByTagName("input");
 		for (var i = 0; i < inputs.length; i++ ) {
 			if((inputs[i].type == "text" || inputs[i].type == "password") && inputs[i].className.indexOf(o.filterClass) == -1) {
-				inputs[i].valueHtml = inputs[i].value;
+				inputs[i].valueHtml = inputs[i].placeholder;
 				inputs[i].onfocus = function ()	{
 					if(this.valueHtml == this.value) this.value = "";
 					if(this.fake) {
@@ -57,7 +57,7 @@ function clearFormFields(o)
 		var textareas = document.getElementsByTagName("textarea");
 		for(var i=0; i<textareas.length; i++) {
 			if(textareas[i].className.indexOf(o.filterClass) == -1) {
-				textareas[i].valueHtml = textareas[i].value;
+				textareas[i].valueHtml = textareas[i].placeholder;
 				textareas[i].onfocus = function() {
 					if(this.value == this.valueHtml) this.value = "";
 					if(o.addClassFocus) {

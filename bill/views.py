@@ -62,21 +62,6 @@ def bill_details(request, congress, type_slug, number):
         if m: m.name = m.name.replace(bill.display_number, "it")
         return m
                                                     
-    # simple predictive market implementation
-    from website.models import TestMarketVote
-    from math import exp
-    market_score = TestMarketVote.objects.filter(bill=bill).values("prediction").annotate(count=Count("prediction"))
-    market_score = dict((int(x["prediction"]), x["count"]) for x in market_score)
-    b = 5.0
-    initial_no = 2.5
-    initial_yes = 0 # use the prognosis info to add to this, but that's not currently working
-    market_score = exp(initial_yes+market_score.get(1, 0)/b) / (exp(initial_no+market_score.get(-1, 0)/b) + exp(initial_yes+market_score.get(1, 0)/b))
-    market_score = int(round(100*market_score))
-    try:
-        market_score_you = TestMarketVote.objects.get(user=request.user, bill=bill)
-    except:
-        market_score_you = None
-        
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
@@ -87,8 +72,6 @@ def bill_details(request, congress, type_slug, number):
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         'feed': Feed.BillFeed(bill),
-        #"market_score": market_score,
-        #"market_score_you": market_score_you,
     }
 
 @json_response
