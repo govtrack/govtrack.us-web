@@ -17,6 +17,7 @@ class Command(BaseCommand):
 	help = 'Make and update prediction markets.'
 	
 	def handle(self, *args, **options):
+		bank = TradingAccount.get(User.objects.get(id=settings.PREDICTIONMARKET_BANK_UID))
 		bill_ct = ContentType.objects.get_for_model(Bill)
 		
 		# For every bill, make a market for its next major step and close any other markets.
@@ -63,9 +64,13 @@ class Command(BaseCommand):
 					did_see_market = True
 				elif int(market.owner_key) in market_close:
 					print "Closing market:", market
-					market.close_market()
-					for outcome in market.outcomes.all():
-						outcome.liquidate(1.0 if market_close[int(market.owner_key)] == int(outcome.owner_key) else 0.0)
+					market.close_market() # do this before the next check to make sure no trades slip in at the last moment
+					if Trade.objects.filter(outcome__market=market).exclude(account=bank).count() == 0:
+						print "\tDeleting market because the only trader was the bank."
+						market.delete() # TODO: Leaves the bank's account balance alone, which is not really good.
+					else:
+						for outcome in market.outcomes.all():
+							outcome.liquidate(1.0 if market_close[int(market.owner_key)] == int(outcome.owner_key) else 0.0)
 				else:
 					print "Don't know what to do with market:", market, market.owner_key
 						
@@ -91,7 +96,6 @@ class Command(BaseCommand):
 				# The bank buys enough shares to make the starting price match our bill prognosis.
 				# Since we have two outcomes and the yes-price is exp(q1/b) / (exp(q1/b) + exp(q2/b))
 				# then....
-				bank = TradingAccount.get(User.objects.get(id=settings.PREDICTIONMARKET_BANK_UID))
 				if starting_price < .01: starting_price = .01
 				if starting_price > .99: starting_price = .99
 				shares = int(round(m.volatility * log(starting_price / (1.0 - starting_price))))

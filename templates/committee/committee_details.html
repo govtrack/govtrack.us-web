@@ -56,7 +56,16 @@
 {% endblock %}
 
 {% block body %}
-    <h2>{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</h2>
+<ul class="tabs">
+	<li><a href="#">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
+	<li><a href="#">Committee Activity</a></li>
+	{% if subcommittees %}<li><a href="#">Subcommittees</a></li>{% endif %}
+</ul>
+
+<div class="panes">
+<div>
+	<h2 style="margin: 1em 0 1em 0">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</h2>
+		
     <table style="margin-top: 1.5em; margin-bottom: 30px;">
     <tr>
         {% for member in members %}
@@ -100,22 +109,27 @@
         {% endfor %}
     </tr>
     </table>
-
-    <div class="col_left">
-		<h2>Committee Activity</h3>
+</div>
+<div>
+	<h2 style="margin: 1em 0 1em 0">Committee Activity</h3>
+	
+    <div class="col_left tweets">	
 		{% include "events/trackedeventspanel.html" %}
 	</div>
-
-    {% if subcommittees %}
-    <div class="col_right">
-		<h2>Subcommittees</h2>
-		<ul>
+</div>
+{% if subcommittees %}
+<div>
+    <h2 style="margin: 1em 0 1em 0">Subcommittees</h2>
+		<ul class="bullets">
 			{% for item in subcommittees %}
 			<li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
 			{% endfor %}
 		</ul>
-	</div>
-    {% endif %}
+</div>
+{% endif %}
+</div>
+
+<script>$("ul.tabs").tabs("div.panes > div");</script>
 
 {% endblock %}
 

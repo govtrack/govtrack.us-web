@@ -75,7 +75,7 @@ class Market(models.Model):
 	created = models.DateTimeField(db_index=True, auto_now_add=True)
 	volatility = models.FloatField(default=5.0) # prediction market volatility factor
 	volume = models.IntegerField(default=0) # total held shares across all outcomes
-	tradecount = models.IntegerField(default=0) # total number of trades across all outcomes
+	tradecount = models.IntegerField(default=0, db_index=True) # total number of trades across all outcomes
 	
 	isopen = models.BooleanField(default=True)
 	
@@ -159,7 +159,7 @@ class Outcome(models.Model):
 	name = models.CharField(max_length=128)
 	created = models.DateTimeField(db_index=True, auto_now_add=True)
 	volume = models.IntegerField(default=0) # total held shares
-	tradecount = models.IntegerField(default=0) # total number of trades
+	tradecount = models.IntegerField(default=0, db_index=True) # total number of trades
 	
 	def __unicode__(self):
 		return self.name
@@ -211,7 +211,7 @@ class Trade(models.Model):
 	outcome = models.ForeignKey(Outcome, related_name="trades")
 	created = models.DateTimeField(db_index=True, auto_now_add=True)
 	shares = models.IntegerField() # shares bought (positive) or sold (negative).
-	value = models.FloatField() # monetary value of the transaction
+	value = models.FloatField() # monetary value of the transaction, positive means a credit to the account (selling shares), negative means a debit (buying shares)
 	liquidation = models.BooleanField() # if true, this is due to the liquidation of a closing market
 
 	def purchase_price(self):

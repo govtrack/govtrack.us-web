@@ -26,12 +26,16 @@ class SearchManager(object):
         self.cols = []
         self.colnames = []
         self.sort_options = []
+        self.global_filters = { }
 
     def add_option(self, *args, **kwargs):
         Option(self, *args, **kwargs)
         
     def add_sort(self, sort_name, sort_key, default=False):
         self.sort_options.append( (sort_name, sort_key, default) )
+        
+    def add_filter(self, key, value):
+        self.global_filters[key] = value
         
     def add_left_column(self, title, func):
         self.col_left = func
@@ -143,7 +147,7 @@ class SearchManager(object):
         if not self.qs:
             #qs = self.model.objects.all().select_related()
             from haystack.query import SearchQuerySet
-            qs = SearchQuerySet().filter(indexed_model_name__in=[self.model.__name__])
+            qs = SearchQuerySet().filter(indexed_model_name__in=[self.model.__name__], **self.global_filters)
         else:
             qs = self.qs
 
