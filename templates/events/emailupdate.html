@@ -18,7 +18,7 @@
 	{% with event|render_event:feed as meta %}
 	<div style="margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #999;">
 	<p>{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} &mdash; {{meta.type}}</p>
-	<h4><a href="http://www.govtrack.us{{meta.url}}">{{meta.title}}</a></h4>
+	<h4><a href="http://www.govtrack.us{{meta.url}}?utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email">{{meta.title}}</a></h4>
 	<div style="margin-left: 2em">
 		{{meta.body_html|safe}}
 		{% if event.feeds and event.feeds|length > 0 %}

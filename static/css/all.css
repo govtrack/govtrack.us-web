@@ -976,7 +976,6 @@ code {
 	.votes .heading-box .article-wrapper,
 	.search.votes .heading-box .article-wrapper {
 		background: url(../images/img-voting-records.png) 690px center no-repeat;
-		padding-bottom: 35px;
 		}
     .bills .heading-box .article-wrapper,
     .search.bills .heading-box .article-wrapper {

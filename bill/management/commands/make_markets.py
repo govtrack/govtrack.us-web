@@ -92,6 +92,8 @@ class Command(BaseCommand):
 				# Since we have two outcomes and the yes-price is exp(q1/b) / (exp(q1/b) + exp(q2/b))
 				# then....
 				bank = TradingAccount.get(User.objects.get(id=settings.PREDICTIONMARKET_BANK_UID))
+				if starting_price < .01: starting_price = .01
+				if starting_price > .99: starting_price = .99
 				shares = int(round(m.volatility * log(starting_price / (1.0 - starting_price))))
 				t = None
 				if starting_price > .5 and shares > 0:

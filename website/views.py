@@ -158,7 +158,7 @@ def push_to_social_media_rss(request):
         description = "GovTrack tracks the activities of the United States Congress. We push this feed to our Twitter and Facebook accounts."
         
         def items(self):
-            events = [render_event(item, feedlist) for item in Feed.get_events_for(feedlist, 5)]
+            events = [render_event(item, feedlist) for item in Feed.get_events_for(feedlist, 25)]
             return [e for e in events if e != None]
             
         def item_title(self, item):
