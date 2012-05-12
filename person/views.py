@@ -82,7 +82,7 @@ def person_details(request, pk):
 def searchmembers(request, initial_mode=None):
     return person_search_manager().view(request, "person/person_list.html",
         defaults = {
-            "is_currently_serving": True if initial_mode=="current" else False,
+            "is_currently_moc": True if initial_mode=="current" else False,
             "text": request.GET["name"] if "name" in request.GET else None,
             },
         noun = ('person', 'people') )

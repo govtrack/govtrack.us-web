@@ -8,8 +8,6 @@ if __name__ == "__main__":
 
 import datetime, lxml, os.path
 
-from bill.models import BillType
-
 bill_gpo_status_codes = {
 	"ah": "Amendment",
 	"ah2": "Amendment",
@@ -81,11 +79,18 @@ bill_gpo_status_codes = {
 	"s_p": "Star Print of an Amendment",
 	}
 	
-def load_bill_text(bill, version):
+def load_bill_text(bill, version, plain_text=False):
+	from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
+
 	bt = BillType.by_value(bill.bill_type).xml_code
 	basename = "data/us/bills.text/%s/%s/%s%d%s" % (bill.congress, bt, bt, bill.number, version if version != None else "")
 	
-	if os.path.exists(basename + ".xml") and False:
+	if plain_text:
+		try:
+			return open(basename + ".txt").read().decode("utf8", "ignore") # otherwise we get 'Chuck failed' in the xapian_backend apparently due to decoding issue.
+		except IOError:
+			return ""
+	elif os.path.exists(basename + ".xml") and False:
 		dom = lxml.etree.parse(basename + ".xml")
 		transform = lxml.etree.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "textxsl/billres.xsl"))
 		transform = lxml.etree.XSLT(transform)

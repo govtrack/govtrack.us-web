@@ -9,6 +9,7 @@ from common.fields import JSONField
 from committee.models import Committee
 from bill.status import BillStatus
 from bill.title import get_bill_number, get_primary_bill_title
+from bill.billtext import load_bill_text
 
 from django.conf import settings
 
@@ -108,7 +109,8 @@ class Bill(models.Model):
         
     # indexing
     def get_index_text(self):
-        return "\n".join([self.title] + [t[2] for t in self.titles])
+        return "\n".join([self.title] + [t[2] for t in self.titles]) \
+        	+ "\n\n" + load_bill_text(self, None, plain_text=True)
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date')
     #haystack_index_extra = (('total_bets', 'Integer'),)
     def get_terms_index_list(self):

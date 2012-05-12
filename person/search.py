@@ -65,10 +65,12 @@ def bottom_content(obj, form):
         return ""
 
 def person_search_manager():
-    sm = SearchManager(Person) #, qs=Person.objects.filter(roles__role_type__in=(RoleType.representative, RoleType.senator))) # make sure person has a role, and is not a president
+    sm = SearchManager(Person)
+    
+    sm.add_filter("was_moc__in", [True]) # exclude presidents
     
     sm.add_option('text', label='name', type="text")
-    sm.add_option('is_currently_serving', label="currently serving?", type="radio", choices=[(False, "No"), (True, "Yes")])
+    sm.add_option('is_currently_moc', label="currently serving?", type="radio", choices=[(False, "No"), (True, "Yes")])
     sm.add_option('most_recent_role_type', label="senator or representative", type="radio", formatter = lambda v : v.capitalize())
     sm.add_option('most_recent_role_state', label="state", type="select", formatter = lambda state : statenames[state.upper()], sort="LABEL")
     sm.add_option('most_recent_role_district', label="district", type="select", formatter = lambda v : "At Large" if v == 0 else ordinal(v), visible_if=lambda form:"most_recent_role_state" in form, sort="KEY")

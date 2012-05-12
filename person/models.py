@@ -51,7 +51,7 @@ class Person(models.Model):
     def get_index_text(self):
         return self.name_no_details()
     haystack_index = ('lastname', 'gender')
-    haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'))
+    haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'), ('was_moc', 'Boolean'), ('is_currently_moc', 'Boolean'))
     #######
 
     def __unicode__(self):
@@ -165,6 +165,10 @@ class Person(models.Model):
         return self.get_most_recent_role_field('party')
     def most_recent_role_congress(self):
         return self.get_most_recent_role_field('most_recent_congress_number')
+    def was_moc(self):
+        return self.roles.filter(role_type__in=(RoleType.representative, RoleType.senator)).exists() # ability to exclude people who only were president
+    def is_currently_moc(self):
+        return self.roles.filter(current=True, role_type__in=(RoleType.representative, RoleType.senator)).exists()
 
     def get_photo_url(self):
         """
