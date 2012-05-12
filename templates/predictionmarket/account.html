@@ -60,9 +60,15 @@ table.history {
 				<td><nobr>{{trade.created}}</nobr></td>
 				<td>{{trade.outcome.market.name}} -- {{trade.outcome.name}}</td>
 				<td>{{trade.shares}}</td>
-				<td>{{trade.purchase_price|floatformat:3}}</td>
+				<td>{{trade.purchase_price|floatformat:3}}{% if trade.liquidation %}*{% endif %}</td>
 				<td>${{trade.value|floatformat:2}}</td>
 			</tr>
+			{% if trade.liquidation %}
+			<tr>
+				<td/>
+				<td colspan="4" style="padding-bottom: .75em; line-height: normal;"><small>*Your position in this outcome was automatically sold at the indicated price as part of the closing of the market because the outcome was determined by real-world events.</small></td>
+			</tr>
+			{% endif %}
 		{% empty %}
 			<tr><td colspan="4"><em>You have not yet placed any trades.</em></td></tr>
 		{% endfor %}

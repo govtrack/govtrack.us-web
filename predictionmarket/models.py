@@ -211,7 +211,7 @@ class Trade(models.Model):
 	outcome = models.ForeignKey(Outcome, related_name="trades")
 	created = models.DateTimeField(db_index=True, auto_now_add=True)
 	shares = models.IntegerField() # shares bought (positive) or sold (negative).
-	value = models.FloatField() # monetary value of the transaction
+	value = models.FloatField() # monetary value of the transaction, positive means a credit to the account (selling shares), negative means a debit (buying shares)
 	liquidation = models.BooleanField() # if true, this is due to the liquidation of a closing market
 
 	def purchase_price(self):
