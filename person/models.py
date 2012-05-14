@@ -87,6 +87,9 @@ class Person(models.Model):
     def sortname(self):
         return get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
         
+    @property
+    def current_role(self):
+        return self.get_current_role()
     def get_current_role(self):
         try:
             return self.roles.get(current=True)
@@ -149,20 +152,25 @@ class Person(models.Model):
         except IndexError:
             return None
 
-    def get_most_recent_role_field(self, fieldname):
-        role = self.get_most_recent_role()
+    def get_most_recent_role_field(self, fieldname, current=False):
+        if not current:
+            role = self.get_most_recent_role()
+        else:
+            role = self.get_current_role()
         if not role: return None
         ret = getattr(role, fieldname)
         if callable(ret): ret = ret()
         return ret
-    def most_recent_role_type(self):
-        return self.get_most_recent_role_field('get_title')
-    def most_recent_role_state(self):
-        return self.get_most_recent_role_field('state')
-    def most_recent_role_district(self):
-        return self.get_most_recent_role_field('district')
-    def most_recent_role_party(self):
-        return self.get_most_recent_role_field('party')
+    def most_recent_role_typeid(self, current=False):
+        return self.get_most_recent_role_field('role_type', current=current)
+    def most_recent_role_type(self, current=False):
+        return self.get_most_recent_role_field('get_title', current=current)
+    def most_recent_role_state(self, current=False):
+        return self.get_most_recent_role_field('state', current=current)
+    def most_recent_role_district(self, current=False):
+        return self.get_most_recent_role_field('district', current=current)
+    def most_recent_role_party(self, current=False):
+        return self.get_most_recent_role_field('party', current=current)
     def most_recent_role_congress(self):
         return self.get_most_recent_role_field('most_recent_congress_number')
     def was_moc(self):

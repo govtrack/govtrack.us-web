@@ -50,3 +50,10 @@ urlpatterns = patterns('',
     (r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),
     (r'^sitemap-(?P<section>.+)\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
 )
+
+# API access points
+from website.api import v1_api
+urlpatterns += patterns('',
+    (r'^api/', include(v1_api.urls)),
+)
+

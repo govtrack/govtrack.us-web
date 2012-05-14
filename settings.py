@@ -116,6 +116,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     
     'haystack',
+    'tastypie',
     
     # project modules
     'person',

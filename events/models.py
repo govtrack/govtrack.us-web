@@ -128,7 +128,7 @@ class Feed(models.Model):
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
         },
         "misc:allcommittee": {
-            "title": "Committee Activity",
+            "title": "Committee Meetings",
             "link": "/congress/committees",
         },
         "misc:allvotes": {

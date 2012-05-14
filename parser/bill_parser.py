@@ -10,6 +10,7 @@ import glob
 import re
 import time
 import urllib
+import os.path
 from datetime import datetime, timedelta
 
 from parser.progress import Progress
@@ -248,6 +249,9 @@ def main(options):
             term.delete()
 
     # Bills
+    
+    from bill.search_indexes import BillIndex
+    bill_index = BillIndex()
 
     if options.congress:
         files = glob.glob('data/us/%s/bills/*.xml' % options.congress)
@@ -269,7 +273,14 @@ def main(options):
         
         if not File.objects.is_changed(fname) and not options.force:
             m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
-            seen_bill_ids.append(Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3)).id)
+            b = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
+            seen_bill_ids.append(b.id)
+            
+            # Update the index for any bill with recently changed text
+            textfile = "data/us/bills.text/%s/%s/%s%s.txt" % (m.group(1), m.group(2), m.group(2), m.group(3))
+            if os.path.exists(textfile) and File.objects.is_changed(textfile):
+                bill_index.update_object(b)
+                File.objects.save_file(textfile)
             continue
             
         if options.slow:
@@ -292,6 +303,7 @@ def main(options):
                 actions.append( (repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))), BillStatus.by_xml_code(axn.xpath("string(@state)")), axn.xpath("string(text)")) )
             bill.major_actions = actions
             bill.save()
+            bill_index.update_object(bill)
             
             if not options.disable_events:
                 bill.create_events()
@@ -328,6 +340,7 @@ def main(options):
                             bill = Bill.objects.get(congress=CURRENT_CONGRESS, bill_type=bt[0], number=m.group(2))
                             bill.docs_house_gov_postdate = iso8601.parse_date(item.get("add-date")).replace(tzinfo=None)
                             bill.save()
+                            bill_index.update_object(bill)
                             
                             if not options.disable_events:
                                 bill.create_events()
@@ -348,10 +361,12 @@ def main(options):
             if bill.senate_floor_schedule_postdate == None or now - bill.senate_floor_schedule_postdate > timedelta(days=7):
                 bill.senate_floor_schedule_postdate = now
                 bill.save()
+                bill_index.update_object(bill)
                 if not options.disable_events:
                     bill.create_events()
     except Exception as e:
         log.error('Could not parse Senate Floor Schedule: ' + repr(e))
+
 
 if __name__ == '__main__':
     main()
