@@ -9,3 +9,5 @@ beautifulsoup
 feedparser
 xapian-haystack
 flup
+django-tastypie
+

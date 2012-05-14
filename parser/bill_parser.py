@@ -127,6 +127,9 @@ class BillProcessor(Processor):
     def session_handler(self, value):
         return int(value)
 
+    def number_handler(self, value):
+        return int(value)
+
     def process_committees(self, obj, node):
         comlist = []
         for subnode in node.xpath('./committees/committee'):
