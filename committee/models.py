@@ -111,13 +111,12 @@ MEMBER_ROLE_WEIGHTS = {
     CommitteeMemberRole.member: 1
 }
 
-from bill.models import Bill
 class CommitteeMeeting(models.Model):
     """Meetings that are scheduled in the future. Since we can't track meeting time changes,
     we have to clear these out each time we load up new meetings."""
     committee = models.ForeignKey('committee.Committee', related_name='meetings')
     when = models.DateTimeField()
     subject = models.TextField()
-    bills = models.ManyToManyField(Bill, blank=True)
+    bills = models.ManyToManyField('bill.Bill', blank=True)
     # TODO: bills
 
