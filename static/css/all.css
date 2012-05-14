@@ -821,7 +821,7 @@ code {
     background: url(../images/bg-summary-box.png) no-repeat;
     padding: 13px 0 0;
     float: left;
-    font: 14px/24px CallunaRegular, Georgia, 'Times New Roman', Times, serif;
+    font: 14px/20px CallunaRegular, Georgia, 'Times New Roman', Times, serif;
     position: relative;
     margin: -51px 0 0 -3px;
 	}
@@ -883,6 +883,7 @@ code {
     .summary-box dd {
         font-family: Calluna/*Italic*/;
         overflow: hidden;
+        margin-bottom: 4px;
     	}
 #content .summary-box h2 {
     font-size: 16px;
