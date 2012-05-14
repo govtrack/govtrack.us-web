@@ -198,7 +198,7 @@ class Bill(models.Model):
             elif status == "PROV_KILL:SUSPENSIONFAILED":
                 status = "This %s is provisionally dead due to a failed vote on %s under a fast-track procedure called \"suspension.\" It may or may not get another vote."
             elif status == "PROV_KILL:CLOTUREFAILED":
-                status = "This %s is provisionally dead due to a failed vote for cloture, i.e. to stop a filibuster or threat of a filibuster, on %s."
+                status = "This %s is provisionally dead due to a failed vote for cloture on %s. Cloture is required to move past a Senate filibuster or the threat of a filibuster and takes a 3/5ths vote. In practice, most bills must pass cloture to move forward in the Senate."
             elif status == "PROV_KILL:PINGPONGFAIL":
                 status = "This %s is provisionally dead due to a failed attempt to resolve differences between the House and Senate versions, on %s."
             elif status == "PROV_KILL:VETO":
