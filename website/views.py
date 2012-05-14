@@ -82,7 +82,7 @@ def search(request):
     
     from haystack.query import SearchQuerySet
     
-    results.append(("People", "/congress/members", "name",
+    results.append(("Members of Congress and Presidents", "/congress/members", "name",
         [{"href": p.object.get_absolute_url(), "label": p.object.name, "obj": p.object, "secondary": p.object.get_current_role() == None } for p in SearchQuerySet().filter(indexed_model_name__in=["Person"], content=q)[0:9]]))
         
     import us
