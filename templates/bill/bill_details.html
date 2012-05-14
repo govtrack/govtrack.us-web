@@ -80,6 +80,16 @@
 			<dt>Schedule:</dt>
 			<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
 			{% endif %}
+			
+			{% if upcoming_meetings|length %}
+			<dt>Schedule:</dt>
+			<dd>
+				<div>This {{bill.noun}} is scheduled for the following committee meetings:</div>
+				{% for m in upcoming_meetings %}
+					<div>{{m.when}} &mdash; {{m.committee.fullname}}</div>
+				{% endfor %}
+			</dd>
+			{% endif %}
 		
 			{% with reintros.1 as reintro_as %}
 			{% if reintro_as %}

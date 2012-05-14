@@ -12,6 +12,7 @@ from parser.models import File
 from committee.models import (Committee, CommitteeType, CommitteeMember,
                               CommitteeMemberRole, CommitteeMeeting)
 from person.models import Person
+from bill.models import Bill, BillType
 
 log = logging.getLogger('parser.committee_parser')
 
@@ -198,6 +199,11 @@ def main(options):
             try:
                 mobj = meeting_processor.process(CommitteeMeeting(), meeting)
                 mobj.save()
+                
+                mobj.bills.clear()
+                for bill in meeting.xpath('bill'):
+                    bill = Bill.objects.get(congress=bill.get("session"), bill_type=BillType.by_xml_code(bill.get("type")), number=int(bill.get("number")))
+                    mobj.bills.add(bill)
             except Committee.DoesNotExist:
                 log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
 
