@@ -92,8 +92,8 @@ class Bill(models.Model):
     current_status_date = models.DateField()
     introduced_date = models.DateField()
     cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor')
-    docs_house_gov_postdate = models.DateTimeField()
-    senate_floor_schedule_postdate = models.DateTimeField()
+    docs_house_gov_postdate = models.DateTimeField(blank=True, null=True)
+    senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True)
     major_actions = JSONField() # serialized list of all major actions (date/datetime, BillStatus, description)
 
     class Meta:
