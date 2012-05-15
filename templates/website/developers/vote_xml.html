@@ -1,0 +1,114 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Schema - Roll Call Votes XML{% endblock %}
+{% block crumbs %}
+<ul><li><a href="/developers">Developer Documentation</a></li> <li><a href="/developers/data">Bulk Raw Data</a></li> <li>Roll Call Votes XML</li></ul>
+{% endblock %}
+{% block summary %}
+	{% include "website/developers/menu.html" %}
+	<h1>Schema: Roll Call Votes XML</h1>
+	
+	<p style="margin-top: 1em">Roll call votes can be found in directories such as
+<a href="/data/us/112/rolls">data/us/112/rolls</a>.</p>
+	
+{% endblock %}
+{% block body %}
+<section class="main">
+	
+<h2>File Naming Convention</h2>
+		
+<p>The files are named as follows: data/us/CCC/rolls/[hs]SSSS-NNN.xml:</p>
+
+<ul>
+<li>CCC signifies the Congress number. See the first column of <a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>.
+It is a number from 1 to 111 (at the time of writing) and does NOT have
+zero-padding.</li>
+
+<li>"h" or "s" signifies whether the vote took place in the House or Senate.</li>
+
+<li>SSSS is the "session" of Congress that the vote took 
+place in. Here I mean what is really called a session. Today, 
+sessions follow calendar years and are named in GovTrack 
+accordingly. So SSSS will be the four-digit year that vote took 
+place in. Before the end of World War II, there were usually 
+three sessions to Congress and these are labeled either 1, 2, 3 
+or with a letter. See the second column of <a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>.
+(There is no zero- or space-padding.)</li>
+
+<li>NNN is the roll call number according to the House or 
+Senate. There is no zero-padding. The Senate restarts its 
+numbering every calendar year, whereas the House restarts its 
+numbering after each two-year session.</li>
+
+</ul>
+
+<h2>Example</h2>
+
+<p>Here is an example file, data/us/111/rolls/h2009-1.xml:</p>
+
+<pre class="code">
+&lt;roll where=&quot;house&quot; session=&quot;111&quot; year=&quot;2009&quot; roll=&quot;3&quot; when=&quot;1231276080&quot;
+	datetime=&quot;2009-01-06T16:08:00-05:00&quot; updated=&quot;2009-01-06T19:25:39-05:00&quot;
+	aye=&quot;174&quot; nay=&quot;249&quot; nv=&quot;6&quot; present=&quot;0&quot;&gt; 
+	&lt;type&gt;On Motion to Commit with Instructions&lt;/type&gt; 
+	&lt;question&gt;On Motion to Commit with Instructions: H RES 5 Adopting rules for the One Hundred Eleventh Congress&lt;/question&gt; 
+	&lt;required&gt;1/2&lt;/required&gt; 
+	&lt;result&gt;Failed&lt;/result&gt; 
+	&lt;bill session=&quot;111&quot; type=&quot;hr&quot; number=&quot;5&quot; /&gt; 
+	&lt;option key=&quot;+&quot;&gt;Yea&lt;/option&gt; 
+	&lt;option key=&quot;-&quot;&gt;Nay&lt;/option&gt; 
+	&lt;option key=&quot;P&quot;&gt;Present&lt;/option&gt; 
+	&lt;option key=&quot;0&quot;&gt;Not Voting&lt;/option&gt; 
+	&lt;voter id=&quot;400004&quot; vote=&quot;+&quot; value=&quot;Yea&quot; state=&quot;AL&quot; district=&quot;4&quot;/&gt; 
+	&lt;voter id=&quot;400005&quot; vote=&quot;+&quot; value=&quot;Yea&quot; state=&quot;MO&quot; district=&quot;2&quot;/&gt; 
+	&lt;voter id=&quot;400006&quot; vote=&quot;+&quot; value=&quot;Yea&quot; state=&quot;LA&quot; district=&quot;5&quot;/&gt; 
+	...
+</pre>
+
+<h2>Schema</h2>
+
+<p>The root element is "roll" and has the following attributes:</p>
+<ul>
+	<li> <b>where</b> attribute: either &quot;house&quot; or &quot;senate&quot;</li>
+	<li> <b>session</b> attribute which contains what GovTrack calls a session but is really the Congress number, e.g. 111</li>
+	<li> <b>year</b> attribute: the year the vote took place in (same as in the file name for recent data)</li>
+	<li> <b>roll</b> attribute: the number of the vote (same as in the file name)</li>
+	<li> <b>datetime</b> attribute: the date and time of the vote, such as &quot;2007-01-04T12:32:00-05:00&quot;. If the time of day is not known, the date will be in YYYY-MM-DD format.</li>
+	<li> <b>updated</b> attribute: the date and time the file was updated, same date format as above (but time is always present)</li>
+	<li> <b>aye</b>, <b>nay</b>, <b>nv</b>, <b>present</b> attributes: total counts for aye, nay, not voting, and present votes.</li>
+	<li> <b>source</b> is either &quot;house.gov&quot;, &quot;senate.gov&quot; or &quot;keithpoole&quot; which refers to data imported from <a href="http://voteview.com/dwnl.htm" class="external text" title="http://voteview.com/dwnl.htm" rel="nofollow">this page</a>.</li>
+</ul>
+
+<p>Then there are these elements:</p>
+
+<ul>
+<li> <b>type</b> element: The type of the vote, taken right from the source data.  Something like &quot;On Passage&quot;. This is suitable for display. It's up to you to scan all of the different values of this element if you want to use it programmatically.</li>
+<li> <b>question</b> element: A description of the vote, taken right from the source data. Again, suitable for display, not necessarily processing.</li>
+<li> <b>required</b> element: Describes what is required for the vote to pass.  Values can be unknown, 1/2, 2/3, 3/5, and QUORUM (if it's a quorum call) but be prepared for other things to show up.
+However, this isn't simple to use. For most votes, this means out of the Members voting, so exclude the "voter" elements whose vote is "0". 1/2 means more than 50% of those voting, 2/3 means at least 2/3rds of Members voting, etc. Senate quorum calls, cloture votes, Motions to Waive Rule XXVIII, and XLIV are out of all senators "duly sworn", meaning including those who didn't actually vote: meaning include all voter elements except those with VP=1.</li>
+<li> <b>result</b> element: This is a textual element for human consumption, but any of the following substrings indicate a passing vote: &quot;Passed&quot;, &quot;Agreed&quot;, &quot;Confirmed&quot;.  &quot;Failed&quot;, &quot;Defeated&quot;, &quot;Rejected&quot;, and &quot;Not Sustained&quot; indicating a failing vote.</li>
+<li> <b>bill</b> element: If this vote is related to a bill (on passage of bill, on a motion related to the bill, on an amendment to the bill, etc.), this node will be present with <b>session</b>, <b>type</b>, and <b>number</b> attributes.</li>
+<li> <b>amendment</b> element: If this vote is related to an amendment, this node will be present.  The <b>ref</b> attribute will be either &quot;bill-serial&quot; and the <b>number</b> attribute indicates the ordinal number of the amendment for the bill given in the <b>bill</b> node.  That is, if the <b>number</b> attribute is &quot;5&quot;, the amendment referred to is the 5th amendment to the bill referenced in the <b>bill</b> node.  If <b>ref</b> is &quot;regular&quot;, <b>number</b> contains an identifier of an amendment, such as &quot;s1234&quot;.</li>
+<li> <b>option</b> elements: These elements indicate the types of votes that are permitted to be cast. Each vote option has a key and a textual description of the vote cast. The reason for this is primarily that votes in favor can be both Aye and Yea depending on the type of vote, and we want to preserve this info. The keys for normal votes are always "+" (aye/yea), "-" (nay,no), "P" (present but not voting), "0" (zero; absent/not voting). There are also quorum calls and votes to determine the Speaker of the House which have other values.</li>
+</ul>
+
+<p>And finally there is a "voter" element for each Member of Congress
+who was elligible to vote. There are two oddities here. First,
+the Vice President casts tie-breakers in the Senate. The VP has a
+voter element just when he casts a tie-breaker. Second, the Speaker
+of the House is not required to vote, generally. That means that when
+the Speaker abstains in such a vote, he or she is simply omitted
+from the roll call, rather than portraying the speaker as having
+abstained or missed the vote. (We just do what the House does.)
+These elements have the following attributes:</p>
+
+<ul>
+<li> <b>id</b> attribute: The GovTrack ID of the person who cast the vote. Can be &quot;0&quot; if the ID of the voter could not be determined (but the node is left in so that the totals are correct).  Also &quot;0&quot; if <b>VP</b> = &quot;1&quot;.</li>
+<li> <b>VP</b> attribute.  Set to &quot;1&quot; if the node represents the vote of the vice president in the case of a tie in the Senate.  The <b>id</b> attribute is set to &quot;0&quot;.  Otherwise the attribute is absent.</li>
+<li> <b>vote</b> attribute: Generally &quot;+&quot;, &quot;-&quot;, &quot;0&quot;, or &quot;P&quot; indicating an aye, nay, a &quot;no vote&quot; (absence), or a &quot;Present&quot; vote, which is used in quorum calls (and perhaps can show up elsewhere). These correspond to the keys of the vote options, described above.</li>
+<li> <b>value</b> attribute: This is a textual name for the actual vote cast, e.g. Aye, Yea, etc.</li>
+</ul>
+
+
+</section>
+{% endblock %}
+

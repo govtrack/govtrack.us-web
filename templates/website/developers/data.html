@@ -1,54 +1,77 @@
 {% extends "master.html" %}
-{% block title %}GovTrack.us - Data{% endblock %}
+{% block title %}GovTrack.us - Bulk Raw Data{% endblock %}
 {% block crumbs %}
-<ul><li><a href="/developers">Developer Documentation</a></li> <li>Data Docs</li></ul>
+<ul><li><a href="/developers">Developer Documentation</a></li> <li>Bulk Raw Data</li></ul>
 {% endblock %}
 {% block summary %}
 	{% include "website/developers/menu.html" %}
-	<h1>Data Documentation</h1>
+	<h1>Bulk Raw Data Documentation</h1>
 	
-	<p>The underlying data about the U.S. Congress that powers this 
-	site is the only such database made freely available for others 
-	to reuse. The data covers the activity of bills, PDFs of bill 
-	texts, roll call votes, and photos of members of Congress.  
-	Almost all of the data files are in XML format.</p>
+	<p style="margin-top: 1em">GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
 	
 {% endblock %}
 {% block body %}
 <section class="main">
-	<p>You can browse 
-	the underlying source data for this website <a 
-	href="/data/">here</a>. These are the very same data files that 
-	GovTrack uses to make itself go, so pretty much anything you see 
-	on the site is in one of those files.</p>
+	{% include "website/developers/gettingstarted.html" %}
 
-	<p>The data files are released into the public domain but see the
-	<a href="license">license terms</a> which covers your access.
-	Please contact me if you would like to start using the
-	data, just because I'm curious and like to know what it's being
-	used for. Also, if you are an ongoing user of the data it is
-	really important that you <a href="http://groups.yahoo.com/group/govtrack/">join the GovTrack mail list</a>
-	to stay updated with any data format changes which are occasionally
-	not backwards compatible.</p>
-
-	<h2><a name="data"></a>Data Directory</h2>
+	<h2>Getting the Data</h2>
 	
-	<p>Here is an overview of much of the data provided by GovTrack.
-	Read on below for how to access the data. Occasional downloads
-	by HTTP are permitted, but in most cases the only supported method
-	for you to get these files is to download them in bulk with Unix
-	rsync (see below).</p>
-
+	<p>The raw data is 43 gigabytes in all. As a result, we have a few different methods for helping you get the data you want:</p>
+	
 	<ul>
-	<li>The root of the data directory is <a href="/data">http://www.govtrack.us/data</a>. Feel free to explore. However, do not use HTTP to refresh a file more than once daily or to download data in bulk. See the section on rsync below for that.</li>
+	<li>You can browse the bulk data at <a 
+	href="/data/">http://www.govtrack.us/data</a>. Start here to get an idea for the directory structure and what the files look at. We discourage using HTTP to actually download the data in bulk. (Also see the <a href="/developers/api">API</a> for HTTP-based access.)</li>
+
+	<li>&ldquo;Rsync&rdquo; is the preferred method for obtaining the bulk data. You can use rsync to choose just the directories you want and it efficiently keeps  your files up to date by downloading only changes since your last update. <a href="/developers/rsync">Rsync Instructions &gt;</a></li>
+	</ul>
+
+	<h2>Bulk Data Schema</h2>
 	
+	<h3>General Structure</h3>
+	
+	<p>Most files are organized by &ldquo;Congress.&rdquo; A &ldquo;Congress&rdquo; 
+	is a two-year term of activity, starting in the year after an 
+	election year. Many things in Congress reset after each two year 
+	term, such as bill numbers. In GovTrack, a "Congress" is called 
+	a "session" (which is actually a misnomer because each 
+	"Congress" is made up of two "sessions" which follow the 
+	calendar years).</p>
+	
+	<p>The 112<sup>th</sup> Congress (<tt>session = 112</tt>) roughly covers the period 2011-2012, although technically the Congress usually starts a few days into January of the first year and extends a few days into January of the year following the last full year of the Congress.
+	Each Congress is in its own directory: <tt>data/us/112</tt>, <tt>data/us/111</tt>,
+	<tt>data/us/110</tt>, etc. We have roll call data going back to the first
+	Congress, so we have data going back to the directory <tt>data/us/1</tt>.</p>
+	
+	<h3>Important Files</h3>
+	
+	<ul>
 	<li><a href="/data/us/people.xml">data/us/people.xml</a>:
 	This file contains everyone that has ever served in Congress, and U.S. presidents, with their party
 	affiliation, terms in Congress, birthdays, etc.
 	This file is quite large... best not to open it in your browser.
 	This file has been put together from a variety of sources and is
-	maintained by hand. See the schema documentation below.</li>
+	maintained by hand. <a href="/developers/people_xml">People.xml Schema &gt;</a></li>
 
+	<li><a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>
+	gives the start and end date of each session (typically one year) and 
+	Congress (typically two years).</li>
+	</ul>
+	
+	<h3>Other Schemas</h3>
+
+	<ul>
+
+	<li>Bills are resolutions are stored in <a href="/data/us/112/bills">data/us/112/bills</a> for the current Congress and similarly named directories for other Congresses.
+	The format of this file type is described in the schema documentation below. <a href="/developers/bill_xml">Bill XML Schema &gt;</a></li>
+	
+	<li>Roll call votes are stored in <a href="/data/us/112/rolls">data/us/112/rolls</a> for the current Congress and similarly named directories for other Congresses. Votes by unanimous consent, for example,
+	are not included here because they are not recorded votes. <a href="/developers/vote_xml">Roll Call Vote XML Schema &gt;</a> </li>
+
+	</ul>
+	
+	<h3>Other Files</h3>
+	
+	<ul>
 	<li>The <a href="/data/photos">data/photos</a> directory 
 	contains jpeg images of Members of Congress, past and present. 
 	Not all MoC's have photos. The name of the photo is the GovTrack 
@@ -58,319 +81,10 @@
 	give a tab-delimeted source URL and source description information
 	for each photo.</li>
 	
-	<li>Most other files are organized by "Congress". A "Congress" 
-	is a two-year session of activity, starting in the year after an 
-	election year. Many things in Congress reset after each two year 
-	term, such as bill numbers. In GovTrack, a "Congress" is called 
-	a "session", which is actually a misnomer because each 
-	"Congress" is made up of two "sessions" which follow the 
-	calendar years. 2011 starts the 112<sup>th</sup> Congress.
-	Each session is in its own directory: data/us/112, data/us/111,
-	data/us/110, etc. We have roll call data going back to the first
-	Congress, so we have that going back to data/us/1.</li>
-	
-	<li><a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>
-	gives the start and end date of each (one-year) session and 
-	(two-year) Congress.</li>
-
-	<li><a href="/data/us/111/people.xml">data/us/111/people.xml</a>
-	mimics the layout of the full people.xml file but
-	only contains those Members of Congress who have or had a role
-	during this particular session of Congress. See the schema documentation below.</li>
-	
-	<li>Roll call votes in <a href="/data/us/111/rolls">data/us/111/rolls</a>
-	represent all votes where individual votes have been recorded. Votes by unanimous consent, for instance,
-	are not included here. The format of this file type is described in the schema documentation below.</li>
-
-	<li>Bills are resolutions are encoded in <a href="/data/us/111/bills">data/us/111/bills</a>.
-	The format of this file type is described in the schema documentation below.</li>
-
-	<li><a href="/data/us/gis/zip4dist-prefix.txt.gz">data/us/gis/zip4dist-prefix.txt.gz</a>:
-	A table (.gz-compressed) mapping ZIP+4 codes to congressional districts.
-	If all zipcodes starting with a prefix map to the same district, only
-	the prefix is included. An entry like "123 NY-01" means all zip and zip4
-	codes starting with "123" are in New York's first congressional district.
-	Current as of the summer of 2008; this comes from work by Carl Malamud
-	and Aaron Swartz <a href="http://watchdog.net/about/api#zip2rep">here</a>.</li>
+	<li>The <a href="/data/us/bills.text">/data/us/bills.text</a> directory includes the text of legislation in PDF, XML, and text format (from GPO) and in HTML format (from THOMAS). It is organzized by Congress, bill type, and GPO bill status code.</li>
 	
 	</ul>
-
-	<h2><a name="bulkaccess"></a>Bulk Access</h2>
 	
-	<p>To download files in bulk, or if you plan to regularly update files,
-	you must use the rsync tool. I require rsync because it will only download
-	updated files when you want to refresh your local files, and it supports
-	compression.</p>
-	
-	<h3>Getting the Data On Linux/Mac OS X</h3>
-	<p>rsync is available on Linux and you should be
-	able to find it for Mac OS X as well; just type on a command-line e.g.:</p>
-	
-	<pre class="code">rsync -az --delete --delete-excluded govtrack.us::govtrackdata/us/111/bills .</pre>
-	
-	<p>This will download the 111th Congress bill data into a directory
-	called <tt>bills</tt> in the current directory.</p>
-
-	<h3>Getting the Data on Windows</h3>
-	
-	<p>On Windows, install <a href="http://www.aboutmyip.com/AboutMyXApp/DeltaCopy.jsp">DeltaCopy</a>,
-	which contains rsync for Windows. Then on a command line type:</p>
-	
-	<pre class="code">mkdir C:\GovTrackData
-cd "\Program Files\Synametrics Technologies\DeltaCopy"
-rsync -avz --delete govtrack.us::govtrackdata/us/111/bills /GovTrackData</pre>
-
-	<p>Note that you have to give a relative path to your GovTrackData directory
-	because rsync will interpret "C:" as something other than a drive letter,
-	since there are no drive letters in the Unix world.</p>
-
-	<p>This will put bill XML files in either C:\GovTrackData\bills or C:\cygwin\GovTrackData\bills.
-	cygwin is the name of a common Windows wrapper around Unix tools. That's something to do with
-	DeltaCopy, not GovTrack.</p>
-
-	<h3>What This Does</h3>
-	
-	<p>This will download the 111th Congress bill data. The first
-	download should be roughly 75MB.  Subsequent updates will
-	be much less.  The directory structure exposed by rsync mirrors
-	the HTTP-browsable <a href="/data">data</a> directory (but, again,
-	please don't do massive downloading by HTTP).</p>
-	
-	<p>The source data in all is 16 gigabytes, so <b>don't
-	think about downloading the whole thing in one shot</b>.  And
-	be nice on my bandwidth.</p>
-
-	<p>The XML files are updated roughly daily (a good time for you
-	to rsync them is 4PM Eastern time, daily). The directories for
-	roll call votes (e.g. <tt>data/us/111/rolls</tt>) are updated much more
-	frequently. If you need almost-real-time roll call vote data,
-	you can rsync that directory hourly.</p>
-
-
-<h2><a name="schema_people"></a>Schema: people.xml</h2>
-
-<p><a href="/data/us/people.xml">data/us/people.xml</a> lists everyone that has ever served in Congress, and U.S. presidents, with their party affiliation, terms in Congress, birthdays, etc. This file is quite large. This file has been put together from a variety of sources and is maintained by hand. All people in the database are identified by a numeric ID with no particular meaning.</p>
-
-<p><a href="/data/us/111/people.xml">data/us/111/people.xml</a> and similar Congress-specific people.xml files mimic the layout of the full people.xml file but only contain those Members of Congress who have or had a role during that particular Congress and the roles they served in that Congress only.</p>
-
-<p>The format of this file is essentially self-explanatory. Here are the details:</p>
-
-<ul>
-<li>On the &lt;person&gt; elements, the only obligatory fields are "id", "firstname", "lastname", and "name". Other fields are omitted if they are not known. "name" is a good field for you to display.</li>
-<li>Biographical attributes include "gender" ("M" or "F") and "birthday" (YYYY-MM-DD).</li>
-<li>The attributes "bioguideid", "osid", and "pvsid" refer to the ids assigned at <a href="http://bioguide.congress.gov">bioguide.congress.gov</a>, the <a href="http://www.opensecrets.org">Center for Responsive Politics</a>, and <a href="http://www.votesmart.org">VoteSmart</a>. "youtubeid" and "twitterid" give the name of the official YouTube feed of the person; twitterid gives the person&rsquo;s Twitter screen name. Note that bioguideid will be absent for records for presidents that never served in Congress.</li>
-<li>"title", "state", and "district" attributes on each &lt;person&gt; element are set if the person currently has a role in Congress. They are redundant with the information contained in the &lt;role&gt; elements.</li>
-<li>&lt;role&gt; elements within each &lt;person&gt; element indicate each elected term in Congress or as President the person has served or is serving. The start and end date of the terms are given in the "startdate" and "enddate" attributes in YYYY-MM-DD format. For senator and representative roles, the dates normally refer to the starting day of the Congressional session and the day of adjournment of the Congressional session to which the Member of Congress was elected (i.e. two-year terms for representatives, six-year terms for senators). But Members that are sworn-in late or resign or die will have those dates.</li>
-<li>The "type" attribute on a &lt;role&gt; is "sen" (senator), "rep" (congressman), or "prez" (U.S. president). For senators, the "state" attribute gives their state and a "class" attribute gives their election class (1, 2, or 3). (Senior vs. junior status are not indicated.) For representatives, the "state" attribute gives their state and the "district" attribute gives the congressional district, or 0 for at-large districts and -1 for historical data where the district is not known.</li>
-<li>The "party" attribute has the political party of the individual during that term. (When an individual changes parties, it is the most recent party.) The "url" attribute gives the address of the official homepage of the individual at the time the element was created. The "current" attribute is present and set to 1 if the role is current. You can also determine this by looking at the start and end dates, which are in YYYY-MM-DD format.</li>
-</ul>
-
-<p>Here is an example record:</p>
-<pre class="code">
-&lt;people&gt;
-...
-    &lt;person id='300087' lastname='Schumer' firstname='Charles' middlename='E.'
-       birthday='1950-11-23' gender='M' pvsid='26976' osid='N00001093' bioguideid='S000148' 
-       metavidid='Charles_Schumer' youtubeid='senatorschumer'
-       name='Sen. Charles Schumer [D, NY]' title='Sen.' state='NY' &gt;
-        &lt;role type='rep' startdate='1981-01-05' enddate='1982-12-23' party='Democrat' state='NY' district='16' /&gt;
-        &lt;role type='rep' startdate='1983-01-03' enddate='1984-10-12' party='Democrat' state='NY' district='10' /&gt;
-        &lt;role type='rep' startdate='1985-01-03' enddate='1986-10-18' party='Democrat' state='NY' district='10' /&gt;
-        &lt;role type='rep' startdate='1987-01-06' enddate='1988-10-22' party='Democrat' state='NY' district='10' /&gt;
-        &lt;role type='rep' startdate='1989-01-03' enddate='1990-10-28' party='Democrat' state='NY' district='10' /&gt;
-        &lt;role type='rep' startdate='1991-01-03' enddate='1992-10-09' party='Democrat' state='NY' district='10' /&gt;
-        &lt;role type='rep' startdate='1993-01-05' enddate='1994-12-01' party='Democrat' state='NY' district='9' /&gt;
-        &lt;role type='rep' startdate='1995-01-04' enddate='1996-10-04' party='Democrat' state='NY' district='9' /&gt;
-        &lt;role type='rep' startdate='1997-01-07' enddate='1998-12-19' party='Democrat' state='NY' district='9' /&gt;
-        &lt;role type='sen' startdate='1999-01-06' enddate='2004-12-09' party='Democrat' state='NY' class='3' url='http://schumer.senate.gov/' /&gt;
-        &lt;role type='sen' startdate='2005-01-04' enddate='2010-12-22' party='Democrat' state='NY' class='3' url='http://schumer.senate.gov/' /&gt;
-        &lt;role type='sen' startdate='2011-01-05' enddate='2016-12-31' party='Democrat' state='NY' class='3' url='http://schumer.senate.gov/' current='1' /&gt;
-    &lt;/person&gt;
-...
-&lt;/people&gt;
-</pre>
-
-<p>In the Congress-specific people.xml file, only the role with the "current" attribute is included.</p>
-
-<h2><a name="schema_votes"></a>Schema: Roll Call Vote Files</h2>
-		
-<p>Roll call votes can be found in directories such as
-<a href="/data/us/111/rolls">data/us/111/rolls</a>.</p>
-
-<p>The files are named as follows: data/us/CCC/rolls/[hs]SSSS-NNN.xml:</p>
-<ul>
-
-<li>CCC signifies the Congress number. See the first column of <a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>.
-It is a number from 1 to 111 (at the time of writing) and does NOT have
-zero-padding.</li>
-
-<li>"h" or "s" signifies whether the vote took place in the House or Senate.</li>
-
-<li>SSSS is the "session" of Congress that the vote took 
-place in. Here I mean what is really called a session. Today, 
-sessions follow calendar years and are named in GovTrack 
-accordingly. So SSSS will be the four-digit year that vote took 
-place in. Before the end of World War II, there were usually 
-three sessions to Congress and these are labeled either 1, 2, 3 
-or with a letter. See the second column of <a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>.
-(There is no zero- or space-padding.)</li>
-
-<li>NNN is the roll call number according to the House or 
-Senate. There is no zero-padding. The Senate restarts its 
-numbering every calendar year, whereas the House restarts its 
-numbering after each two-year session.</li>
-
-</ul>
-
-<p>The root element is "roll" and has the following attributes:</p>
-<ul>
-	<li> <b>where</b> attribute: either &quot;house&quot; or &quot;senate&quot;</li>
-	<li> <b>session</b> attribute which contains what GovTrack calls a session but is really the Congress number, e.g. 111</li>
-	<li> <b>year</b> attribute: the year the vote took place in (same as in the file name for recent data)</li>
-	<li> <b>roll</b> attribute: the number of the vote (same as in the file name)</li>
-	<li> <b>datetime</b> attribute: the date and time of the vote, such as &quot;2007-01-04T12:32:00-05:00&quot;. If the time of day is not known, the date will be in YYYY-MM-DD format.</li>
-	<li> <b>updated</b> attribute: the date and time the file was updated, same date format as above (but time is always present)</li>
-	<li> <b>aye</b>, <b>nay</b>, <b>nv</b>, <b>present</b> attributes: total counts for aye, nay, not voting, and present votes.</li>
-	<li> <b>source</b> is either &quot;house.gov&quot;, &quot;senate.gov&quot; or &quot;keithpoole&quot; which refers to data imported from <a href="http://voteview.com/dwnl.htm" class="external text" title="http://voteview.com/dwnl.htm" rel="nofollow">this page</a>.</li>
-</ul>
-
-<p>Then there are these elements:</p>
-
-<ul>
-<li> <b>type</b> element: The type of the vote, taken right from the source data.  Something like &quot;On Passage&quot;. This is suitable for display. It's up to you to scan all of the different values of this element if you want to use it programmatically.</li>
-<li> <b>question</b> element: A description of the vote, taken right from the source data. Again, suitable for display, not necessarily processing.</li>
-<li> <b>required</b> element: Describes what is required for the vote to pass.  Values can be unknown, 1/2, 2/3, 3/5, and QUORUM (if it's a quorum call) but be prepared for other things to show up.
-However, this isn't simple to use. For most votes, this means out of the Members voting, so exclude the "voter" elements whose vote is "0". 1/2 means more than 50% of those voting, 2/3 means at least 2/3rds of Members voting, etc. Senate quorum calls, cloture votes, Motions to Waive Rule XXVIII, and XLIV are out of all senators "duly sworn", meaning including those who didn't actually vote: meaning include all voter elements except those with VP=1.</li>
-<li> <b>result</b> element: This is a textual element for human consumption, but any of the following substrings indicate a passing vote: &quot;Passed&quot;, &quot;Agreed&quot;, &quot;Confirmed&quot;.  &quot;Failed&quot;, &quot;Defeated&quot;, &quot;Rejected&quot;, and &quot;Not Sustained&quot; indicating a failing vote.</li>
-<li> <b>bill</b> element: If this vote is related to a bill (on passage of bill, on a motion related to the bill, on an amendment to the bill, etc.), this node will be present with <b>session</b>, <b>type</b>, and <b>number</b> attributes.</li>
-<li> <b>amendment</b> element: If this vote is related to an amendment, this node will be present.  The <b>ref</b> attribute will be either &quot;bill-serial&quot; and the <b>number</b> attribute indicates the ordinal number of the amendment for the bill given in the <b>bill</b> node.  That is, if the <b>number</b> attribute is &quot;5&quot;, the amendment referred to is the 5th amendment to the bill referenced in the <b>bill</b> node.  If <b>ref</b> is &quot;regular&quot;, <b>number</b> contains an identifier of an amendment, such as &quot;s1234&quot;.</li>
-<li> <b>option</b> elements: These elements indicate the types of votes that are permitted to be cast. Each vote option has a key and a textual description of the vote cast. The reason for this is primarily that votes in favor can be both Aye and Yea depending on the type of vote, and we want to preserve this info. The keys for normal votes are always "+" (aye/yea), "-" (nay,no), "P" (present but not voting), "0" (zero; absent/not voting). There are also quorum calls and votes to determine the Speaker of the House which have other values.</li>
-</ul>
-
-<p>And finally there is a "voter" element for each Member of Congress
-who was elligible to vote. There are two oddities here. First,
-the Vice President casts tie-breakers in the Senate. The VP has a
-voter element just when he casts a tie-breaker. Second, the Speaker
-of the House is not required to vote, generally. That means that when
-the Speaker abstains in such a vote, he or she is simply omitted
-from the roll call, rather than portraying the speaker as having
-abstained or missed the vote. (We just do what the House does.)
-These elements have the following attributes:</p>
-
-<ul>
-<li> <b>id</b> attribute: The GovTrack ID of the person who cast the vote. Can be &quot;0&quot; if the ID of the voter could not be determined (but the node is left in so that the totals are correct).  Also &quot;0&quot; if <b>VP</b> = &quot;1&quot;.</li>
-<li> <b>VP</b> attribute.  Set to &quot;1&quot; if the node represents the vote of the vice president in the case of a tie in the Senate.  The <b>id</b> attribute is set to &quot;0&quot;.  Otherwise the attribute is absent.</li>
-<li> <b>vote</b> attribute: Generally &quot;+&quot;, &quot;-&quot;, &quot;0&quot;, or &quot;P&quot; indicating an aye, nay, a &quot;no vote&quot; (absence), or a &quot;Present&quot; vote, which is used in quorum calls (and perhaps can show up elsewhere). These correspond to the keys of the vote options, described above.</li>
-<li> <b>value</b> attribute: This is a textual name for the actual vote cast, e.g. Aye, Yea, etc.</li>
-</ul>
-
-<p>Here is an example file, data/us/111/rolls/h2009-1.xml:</p>
-
-<pre class="code">
-&lt;roll where=&quot;house&quot; session=&quot;111&quot; year=&quot;2009&quot; roll=&quot;3&quot; when=&quot;1231276080&quot;
-	datetime=&quot;2009-01-06T16:08:00-05:00&quot; updated=&quot;2009-01-06T19:25:39-05:00&quot;
-	aye=&quot;174&quot; nay=&quot;249&quot; nv=&quot;6&quot; present=&quot;0&quot;&gt; 
-	&lt;type&gt;On Motion to Commit with Instructions&lt;/type&gt; 
-	&lt;question&gt;On Motion to Commit with Instructions: H RES 5 Adopting rules for the One Hundred Eleventh Congress&lt;/question&gt; 
-	&lt;required&gt;1/2&lt;/required&gt; 
-	&lt;result&gt;Failed&lt;/result&gt; 
-	&lt;bill session=&quot;111&quot; type=&quot;hr&quot; number=&quot;5&quot; /&gt; 
-	&lt;option key=&quot;+&quot;&gt;Yea&lt;/option&gt; 
-	&lt;option key=&quot;-&quot;&gt;Nay&lt;/option&gt; 
-	&lt;option key=&quot;P&quot;&gt;Present&lt;/option&gt; 
-	&lt;option key=&quot;0&quot;&gt;Not Voting&lt;/option&gt; 
-	&lt;voter id=&quot;400004&quot; vote=&quot;+&quot; value=&quot;Yea&quot; state=&quot;AL&quot; district=&quot;4&quot;/&gt; 
-	&lt;voter id=&quot;400005&quot; vote=&quot;+&quot; value=&quot;Yea&quot; state=&quot;MO&quot; district=&quot;2&quot;/&gt; 
-	&lt;voter id=&quot;400006&quot; vote=&quot;+&quot; value=&quot;Yea&quot; state=&quot;LA&quot; district=&quot;5&quot;/&gt; 
-	...
-</pre>
-
-<h2><a name="schema_bills"></a>Schema: Bills and Resolutions</h2>
-
-<p>Bills (and resolutions) can be found in directories such as
-<a href="/data/us/111/bills">data/us/111/bills</a>.</p>
-
-<p>The files are named as follows: data/us/CCC/rolls/TTTNNN.xml.</p>
-<ul>
-<li>CCC signifies the Congress number. See the first column of <a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>.
-It is a number from 1 to 111 (at the time of writing) and does NOT have
-zero-padding.</li>
-<li>TTT is the type of bill or resolution from the following codes:
-"h" (displayed "H.R." i.e. a House bill), "hr" (displayed "H.Res.", a House resolution),
-"hj" (displayed "H.J.Res." i.e. a House joint resolution), "hc" (displayed "H.Con.Res.", i.e.
-a House Concurrent Resolution), and similarly "s", "sr", "sj", and "sc" for Senate bills
-displayed as "S.", "S.Res.", etc.
-See <a href="http://www.govtrack.us/blog/2009/11/11/what-are-the-different-types-of-bills/">this blog post</a> for an explanation of the
-types.</li>
-<li>NNN is the bill number, without zero-padding.</li>
-</ul>
-
-<p>The format of the XML file is:</p> 
-<ul><li> <b>bill</b> root element
-<ul><li> attributes:
-<ul><li> <b>session</b>: The session (i.e. Congress) that this bill is a part of (i.e. 110).</li>
-<li> <b>type</b>: The type of the bill (h, hr, hc, etc., as above).</li>
-<li> <b>number</b>: The number of the bill.</li>
-<li> <b>updated</b>: The date the bill XML file was last updated, such as "2007-01-05T15:30:39-05:00".</li>
-</ul> </li>
-<li> <b>state</b> element: Contains a value indicating the current status of the bill.  See below.</li>
-<li> <b>introduced</b> element: <b>datetime</b> attribute gives the date the bill was introduced.</li>
-<li> <b>titles</b> element:
-<ul><li> <b>title</b> element, once for each title given to the bill.  The element content has the text of the title.  <b>type</b> attribute is "official", "short", or "popular", and <b>as</b> attribute is the status of the bill in which the title was assigned, such as "introduced".  This is all as given by THOMAS.</li><li> The elements are in the order that they appear in THOMAS, which is chronological order, so the last element tells you the last <b>as</b> status available.</li></ul> </li><li> <b>sponsor</b> element: Most bills have sponsors, and in that case the <b>id</b> attribute is the GovTrack ID of the person sponsoring the bill. Otherwise, a <b>none</b> attribute is set to <b>true</b> if the bill has no sponsor, which has been the case for debt limit raising bills.</li><li> <b>cosponsors</b>:
-<ul><li> <b>cosponsor</b> element: Once for each cosponsor. <b>id</b> attribute gives the ID of the cosponsor.  (ID attribute is always present.)</li></ul> </li><li> <b>actions</b>:
-<ul><li> These elements come in various forms.  In all cases, the node (whatever it is), has a <b>text</b> subnode containing a description of the action.  It may also have <b>reference</b> subnodes (siblings of the <b>text</b> node) that indicate references to pages in the Congressional Record, as given in THOMAS.</li><li> <b>vote</b> nodes represent votes on the passage of bills. The <b>where</b> attribute is <b>h</b> or <b>s</b> indicating where the vote took place. <b>type</b> is <b>vote</b> for the vote in the originating chamber, <b>vote2</b> for the vote in the other chamber, <b>override</b> if the vote is on a veto override. <b>result</b> is <b>pass</b> or <b>fail</b>. <b>how</b> is a textual description of how the vote was conducted, or the string <b>roll</b> if it was a roll call vote, in which case the <b>roll</b> attribute gives the roll call number. <b>suspension</b> may be set to <b>1</b> and indicates that the vote was conducted under a suspension of the rules (i.e. On motion to suspend the rules and pass), which requires a 2/3 vote.</li><li> <b>vote-aux</b> nodes are for other votes. <b>type</b> is <b>conference</b> for conference reports, or <b>cloture</b> for a motion in the Senate to invoke cloture on a motion to proceed to consideration.</li><li> Other actions are:</li><li> <b>calendar</b>: Bill was put on a legislative calendar or ordered to be reported by a committee.</li><li> <b>topresident</b>: Cleared for White House or Presented to President.</li><li> <b>signed</b>: Signed by president.</li><li> <b>veto</b>: Vetoed by president. @pocket="1" if it was a pocket veto (not set otherwise).</li><li> <b>enacted</b>: Bill was enacted. <b>type</b> and <b>number</b> attributes give the law number assigned to the bill.</li></ul> </li><li> <b>committees</b>:
-<ul><li> <b>committee</b> element: Once per committee or subcommittee assignment.  <b>name</b> attribute gives the name of the main committee.  <b>subcommittee</b> attribute is "" for main committee assignments, otherwise the name of the subcommittee.  <b>activity</b> attribute give some additional information that I do not understand.</li></ul> </li><li> <b>relatedbills</b>:
-<ul><li> <b>bill</b> element: One per related bill or resolution. 
-<ul><li> attributes:
-<ul><li> <b>relation</b> attribute (rule, unknown, ?).  </li><li> <b>session</b> attribute gives the session for the related item (i.e. 111).</li><li> <b>type</b> attribute gives the type of the related item (see Bill Type Codes above).</li><li> <b>number</b> attribute gives the number of the related item (the number of the bill.)</li></ul> </li></ul> </li></ul> </li><li> <b>subjects</b>:
-<ul><li> <b>term</b> element: <b>name</b> attribute defines a subject that might be used as a search or categorization term.</li></ul> </li></ul> </li></ul> 
-<p>The status of the bill is given in a "state" element (think "finite state machine") with the following values:</p>
-<ul><li> INTRODUCED. The bill or resolution was introduced but not yet referred to committee.</li><li> REFERRED. The bill or resolution has been referred to committee in the originating chamber and needs committee action to continue.</li><li> REPORTED. The bill or resolution was reported by committee in the originating chamber and can now continue with floor debate in the originating chamber.</li><li> PASS_OVER:. These are a family of status codes indicating the bill or joint or concurrent resolution has passed favorably in its originating chamber and now goes on to the other chamber. If it failed, the status would be the corresponding FAIL:ORIGINATING:.
-<ul><li> PASS_OVER:HOUSE. The bill or resolution passed the House (Senate next).</li><li> PASS_OVER:SENATE. The bill or resolution passed the Senate (House next).</li></ul> </li><li> PASSED:. These are a family of status codes indicating the bill has passed favorably out of Congress. It is a final status code for resolutions but not for bills. If the vote that PASSED it had gone the other way, the status would be the corresponding FAIL:ORIGINATING: for PASSED:SIMPLERES or FAIL:SECOND: for the others.
-<ul><li> PASSED:SIMPLERES. A simple resolution has been passed in its originating chamber. This is the end of the life for a simple resolution. </li><li> PASSED:CONSTAMEND. A joint resolution which is proposing an amendment to the Constitution has passed both chambers. This is the end of the life for the resolution in the legislative branch. It goes on subsequently to the states.</li><li> PASSED:CONCURRENTRES. A concurrent resolution has been passed by both chambers. This is the end of the life for concurrent resolutions.</li><li> PASSED:BILL. A bill or a joint resolution not proposing an amendment to the constitution has been passed by both chambers. It may require a conference committee first, but will eventually go on to the President.</li></ul> </li><li> PASS_BACK:. These are a family of status codes that occur when a bill is passed in both chambers, but the second chamber made changes that the first chamber now has to agree to. The bill goes to conference or "ping pong" ensues where the chambers go back and forth between passing the bill until no one makes any more changes. When that finishes, the bill goes into the state PASSED:BILL.
-<ul><li> PASS_BACK:HOUSE. The House voted on a Senate bill, making changes and sending it back to the Senate.</li><li> PASS_BACK:SENATE. The Senate voted on a House bill, making changes and sending it back to the House.</li></ul> </li><li> PROV_KILL:. These are a family of status codes indicating the bill or resolution is provisionally killed, meaning Congress took some action that would often mean the end of life for it (often enough to warrant a status code) but that it could still recover.
-<ul><li> PROV_KILL:SUSPENSIONFAILED. The bill or resolution was brought up "under suspension of the rules" and failed that vote. It could be voted on again. If the vote had passed, the status would be one of PASSED, PASS_OVER, etc.</li><li> PROV_KILL:CLOTUREFAILED. A cloture vote was taken on the bill or resolution and the vote failed, meaning it was successfully filibustered. If the vote had succeeded, no status would be noted.</li><li> PROV_KILL:PINGPONGFAIL. After both chambers have passed a bill or joint/concurrent resolution, if the second chamber made a change the chambers have to resolve their differences. When the second chamber's changes go back to the first chamber for a vote, if the vote fails it's a provisional failure since I think they can try again.</li><li> PROV_KILL:VETO. The bill "PASSED:BILL" out of Congress but was vetoed by the President. A veto can be overridden. This status applies until an override attempt is made. If the bill was signed instead, the ENACTED status would follow (but not immediately). A pocket veto is indicated separately with VETOED:POCKET.</li></ul> </li><li> FAIL:. These are a family of status codes indicating the end of life of a bill or resolution. (Unlike PROVKILL, these are always final.)
-<ul><li> FAIL:ORIGINATING:. This is a subgroup for when a bill or resolution fails in its originating chamber.
-<ul><li> FAIL:ORIGINATING:HOUSE. The bill or resolution failed in its originating chamber, the House.</li><li> FAIL:ORIGINATING:SENATE. The bill or resolution failed in its originating chamber, the Senate.</li></ul> </li><li> FAIL:SECOND. This is a subgroup for when a bill or joint or concurrent resolution fails in the second chamber. It must have passed in the originating chamber to get this far.
-<ul><li> FAIL:SECOND:HOUSE. The bill or resolution passed in the Senate but failed in the House.</li><li> FAIL:SECOND:SENATE. The bill or resolution passed in the House but failed in the Senate.</li></ul> </li></ul> </li><li> VETOED:OVERRIDE_PASS_OVER:. This is a family of status codes indicating a veto override attempt was successful in the originating chamber, and that it is now up to the second chamber to attempt the override. If the override failed, the status would be one of VETOED:OVERRIDE_FAIL_ORIGINATING:.
-<ul><li> VETOED:OVERRIDE_PASS_OVER:HOUSE. The House (the originating chamber) succeeded at the veto override. It goes on to the Senate next.</li><li> VETOED:OVERRIDE_PASS_OVER:SENATE. The Senate (the originating chamber) succeeded at the veto override. It goes on to the House next.</li></ul> </li><li> VETOED:. These are a family of status codes indicating the end of life for a bill that has been vetoed. It is a final status code for a bill.
-<ul><li> VETOED:POCKET. This status code is for bills that were pocket-vetoed, meaning the President does not sign the bill and Congress adjourns. The bill does not become law and Congress has no opportunity to override.</li><li> VETOED:OVERRIDE_FAIL_ORIGINATING:. This is a subgroup for bills who failed in the veto-override attempt of its originating chamber, which comes first.
-<ul><li> VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE. Veto override failed in the House, the bill's originating chamber. It had not gotten to the Senate yet for an override.</li><li> VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE. Veto override failed in the Senate, the bill's originating chamber. It had not gotten to the House yet for an override.</li></ul> </li><li> VETOED:OVERRIDE_FAIL_SECOND::. This is a subgroup for bills whose veto was successfully overridden in its originating chamber but failed in the veto-override attempt of the other chamber, which comes second. If the override had passed, the status would shortly be ENACTED:VETO_OVERRIDE.
-<ul><li> VETOED:OVERRIDE_FAIL_SECOND:HOUSE. Veto override passed in the Senate (the originating chamber) but failed in the House.</li><li> VETOED:OVERRIDE_FAIL_SECOND:SENATE. Veto override passed in the House (the originating chamber) but failed in the Senate.</li></ul> </li></ul> </li><li> ENACTED:. These are a family of status codes for bills and joint resolutions not proposing an amendment to the constitution that have been enacted as law. It comes after a short delay between the signature or override and the administrative action to actually make the bill law.
-<ul><li> ENACTED:SIGNED. The president signed the bill.</li><li> ENACTED:VETO_OVERRIDE. The bill was vetoed but the veto was overridden in both chambers.</li></ul> </li></ul> 
-
-<p>Here is an example bill file, data/us/111/bills/h14.xml:</p>
-<pre class="code">
-&lt;bill session=&quot;111&quot; type=&quot;h&quot; number=&quot;14&quot; 
-     updated=&quot;2011-01-29T15:05:26-05:00&quot;&gt; 
-	&lt;state datetime=&quot;2009-01-06&quot;&gt;REFERRED&lt;/state&gt; 
- 
-	&lt;introduced datetime=&quot;2009-01-06&quot;/&gt; 
-	&lt;titles&gt; 
-		&lt;title type=&quot;short&quot; as=&quot;introduced&quot;&gt;Federal Ocean Acidification Research And Monitoring Act of 2009&lt;/title&gt; 
-		&lt;title type=&quot;short&quot; as=&quot;introduced&quot;&gt;FOARAM Act&lt;/title&gt; 
-		&lt;title type=&quot;official&quot; as=&quot;introduced&quot;&gt;To provide for ocean acidification research and monitoring, and for other purposes.&lt;/title&gt; 
-	&lt;/titles&gt; 
-	&lt;sponsor id=&quot;400011&quot;/&gt; 
-	&lt;cosponsors&gt; 
-		&lt;cosponsor id=&quot;400041&quot; joined=&quot;2009-01-13&quot;/&gt; 
-		...
-	&lt;/cosponsors&gt; 
-	&lt;actions&gt; 
-		&lt;action datetime=&quot;2009-01-06&quot;&gt;&lt;text&gt;Referred to the House Committee on Science and Technology.&lt;/text&gt;&lt;/action&gt; 
-		&lt;action datetime=&quot;2009-01-06&quot;&gt;&lt;committee name=&quot;House Committee on Science and Technology&quot;/&gt;&lt;text&gt;Referred to the Subcommittee on Energy and Environment.&lt;/text&gt;&lt;/action&gt; 
-	&lt;/actions&gt; 
-	&lt;committees&gt; 
-		&lt;committee code=&quot;HSSY&quot; name=&quot;House Science and Technology&quot; activity=&quot;Referral, In Committee&quot; /&gt; 
-		&lt;committee code=&quot;HSSY-20&quot; name=&quot;House Science and Technology&quot; subcommittee=&quot;Energy and Environment&quot; activity=&quot;Referral&quot; /&gt; 
-	&lt;/committees&gt; 
-	&lt;subjects&gt; 
-		&lt;term name=&quot;Environmental protection&quot;/&gt; 
-		&lt;term name=&quot;Air quality&quot;/&gt; 
-		... 
-	&lt;/subjects&gt; 
-&lt;/bill&gt;
-</pre>
 
 </section>
 {% endblock %}

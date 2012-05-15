@@ -144,6 +144,7 @@ pre+h2 {
 
 pre {
     margin: 0 0 1em 16px;
+    font-size: 10pt;
     font-family: 'Droid Sans Mono', Monaco, "Courier New", Courier, monospace;
     border-left: 5px solid #eee;
     padding: 10px;
@@ -1001,7 +1002,12 @@ code {
         	width: 180px;
         	margin-right: -205px;
         	font-size: 95%;
+        	line-height: normal;
         	}
+        	
+        	.heading-box .right li {
+        		margin-bottom: .5em;
+        		}
         	
 
 /* Member details styles

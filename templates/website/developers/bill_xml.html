@@ -1,0 +1,111 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Schema - Bill XML{% endblock %}
+{% block crumbs %}
+<ul><li><a href="/developers">Developer Documentation</a></li> <li><a href="/developers/data">Bulk Raw Data</a></li> <li>Bill XML</li></ul>
+{% endblock %}
+{% block summary %}
+	{% include "website/developers/menu.html" %}
+	<h1>Schema: Bill XML</h1>
+	
+	<p style="margin-top: 1em">Bills and resolutions can be found in directories such as
+<a href="/data/us/112/bills">data/us/112/bills</a>.</p>
+	
+{% endblock %}
+{% block body %}
+<section class="main">
+	
+<h2>File Naming Convention</h2>
+
+<p>Bill files are named as follows: data/us/CCC/rolls/TTTNNN.xml.</p>
+<ul>
+<li>CCC signifies the Congress number. See the first column of <a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>.
+It is a number from <tt>1</tt> to <tt>112</tt> (at the time of writing) without
+zero-padding.</li>
+<li>TTT is the type of bill or resolution from the following codes:
+"h" (displayed "H.R." i.e. a House bill), "hr" (displayed "H.Res.", a House resolution),
+"hj" (displayed "H.J.Res." i.e. a House joint resolution), "hc" (displayed "H.Con.Res.", i.e.
+a House Concurrent Resolution), and similarly "s", "sr", "sj", and "sc" for Senate bills
+displayed as "S.", "S.Res.", "S.J.Res.", and "S.Con.Res."
+See <a href="http://www.govtrack.us/blog/2009/11/11/what-are-the-different-types-of-bills/">this blog post</a> for an explanation of the
+types.</li>
+<li>NNN is the bill number, without zero-padding.</li>
+</ul>
+
+<h2>Example</h2>
+
+<p>Here is an example bill file, <a href="/data/us/111/bills/h14.xml">data/us/111/bills/h14.xml</a>:</p>
+<pre class="code" style="width: 900px">
+&lt;bill session=&quot;111&quot; type=&quot;h&quot; number=&quot;14&quot; 
+     updated=&quot;2011-01-29T15:05:26-05:00&quot;&gt; 
+	&lt;state datetime=&quot;2009-01-06&quot;&gt;REFERRED&lt;/state&gt; 
+ 
+	&lt;introduced datetime=&quot;2009-01-06&quot;/&gt; 
+	&lt;titles&gt; 
+		&lt;title type=&quot;short&quot; as=&quot;introduced&quot;&gt;Federal Ocean Acidification Research And Monitoring Act of 2009&lt;/title&gt; 
+		&lt;title type=&quot;short&quot; as=&quot;introduced&quot;&gt;FOARAM Act&lt;/title&gt; 
+		&lt;title type=&quot;official&quot; as=&quot;introduced&quot;&gt;To provide for ocean acidification research and monitoring, and for other purposes.&lt;/title&gt; 
+	&lt;/titles&gt; 
+	&lt;sponsor id=&quot;400011&quot;/&gt; 
+	&lt;cosponsors&gt; 
+		&lt;cosponsor id=&quot;400041&quot; joined=&quot;2009-01-13&quot;/&gt; 
+		...
+	&lt;/cosponsors&gt; 
+	&lt;actions&gt; 
+		&lt;action datetime=&quot;2009-01-06&quot;&gt;&lt;text&gt;Referred to the House Committee on Science and Technology.&lt;/text&gt;&lt;/action&gt; 
+		&lt;action datetime=&quot;2009-01-06&quot;&gt;&lt;committee name=&quot;House Committee on Science and Technology&quot;/&gt;&lt;text&gt;Referred to the Subcommittee on Energy and Environment.&lt;/text&gt;&lt;/action&gt; 
+	&lt;/actions&gt; 
+	&lt;committees&gt; 
+		&lt;committee code=&quot;HSSY&quot; name=&quot;House Science and Technology&quot; activity=&quot;Referral, In Committee&quot; /&gt; 
+		&lt;committee code=&quot;HSSY-20&quot; name=&quot;House Science and Technology&quot; subcommittee=&quot;Energy and Environment&quot; activity=&quot;Referral&quot; /&gt; 
+	&lt;/committees&gt; 
+	&lt;subjects&gt; 
+		&lt;term name=&quot;Environmental protection&quot;/&gt; 
+		&lt;term name=&quot;Air quality&quot;/&gt; 
+		... 
+	&lt;/subjects&gt; 
+&lt;/bill&gt;
+</pre>
+
+<h2>Schema</h2>
+
+<p>The format of the XML file is:</p> 
+<ul><li> <b>bill</b> root element
+<ul><li> attributes:
+<ul><li> <b>session</b>: The session (i.e. Congress) that this bill is a part of (i.e. 110).</li>
+<li> <b>type</b>: The type of the bill (h, hr, hc, etc., as above).</li>
+<li> <b>number</b>: The number of the bill.</li>
+<li> <b>updated</b>: The date the bill XML file was last updated, such as "2007-01-05T15:30:39-05:00".</li>
+</ul> </li>
+<li> <b>state</b> element: Contains a value indicating the current status of the bill.  See below.</li>
+<li> <b>introduced</b> element: <b>datetime</b> attribute gives the date the bill was introduced.</li>
+<li> <b>titles</b> element:
+<ul><li> <b>title</b> element, once for each title given to the bill.  The element content has the text of the title.  <b>type</b> attribute is "official", "short", or "popular", and <b>as</b> attribute is the status of the bill in which the title was assigned, such as "introduced".  This is all as given by THOMAS.</li><li> The elements are in the order that they appear in THOMAS, which is chronological order, so the last element tells you the last <b>as</b> status available.</li></ul> </li><li> <b>sponsor</b> element: Most bills have sponsors, and in that case the <b>id</b> attribute is the GovTrack ID of the person sponsoring the bill. Otherwise, a <b>none</b> attribute is set to <b>true</b> if the bill has no sponsor, which has been the case for debt limit raising bills.</li><li> <b>cosponsors</b>:
+<ul><li> <b>cosponsor</b> element: Once for each cosponsor. <b>id</b> attribute gives the ID of the cosponsor.  (ID attribute is always present.)</li></ul> </li><li> <b>actions</b>:
+<ul><li> These elements come in various forms.  In all cases, the node (whatever it is), has a <b>text</b> subnode containing a description of the action.  It may also have <b>reference</b> subnodes (siblings of the <b>text</b> node) that indicate references to pages in the Congressional Record, as given in THOMAS.</li><li> <b>vote</b> nodes represent votes on the passage of bills. The <b>where</b> attribute is <b>h</b> or <b>s</b> indicating where the vote took place. <b>type</b> is <b>vote</b> for the vote in the originating chamber, <b>vote2</b> for the vote in the other chamber, <b>override</b> if the vote is on a veto override. <b>result</b> is <b>pass</b> or <b>fail</b>. <b>how</b> is a textual description of how the vote was conducted, or the string <b>roll</b> if it was a roll call vote, in which case the <b>roll</b> attribute gives the roll call number. <b>suspension</b> may be set to <b><tt>1</tt></b> and indicates that the vote was conducted under a suspension of the rules (i.e. On motion to suspend the rules and pass), which requires a 2/3 vote.</li><li>You will see other tag names on these elements. The names should no longer be relied on. In order to determine what status change was caused by a particular action, use the <b>state</b> attribute (think &ldquo;finite state machine&rdquo;), which is documented below.</li></ul> </li><li> <b>committees</b>:
+<ul><li> <b>committee</b> element: Once per committee or subcommittee assignment.  <b>name</b> attribute gives the name of the main committee.  <b>subcommittee</b> attribute is "" for main committee assignments, otherwise the name of the subcommittee.  <b>activity</b> attribute give some additional information that I do not understand.</li></ul> </li><li> <b>relatedbills</b>:
+<ul><li> <b>bill</b> element: One per related bill or resolution. 
+<ul><li> attributes:
+<ul><li> <b>relation</b> attribute (rule, unknown, ?).  </li><li> <b>session</b> attribute gives the session for the related item (i.e. 111).</li><li> <b>type</b> attribute gives the type of the related item (see Bill Type Codes above).</li><li> <b>number</b> attribute gives the number of the related item (the number of the bill.)</li></ul> </li></ul> </li></ul> </li><li> <b>subjects</b>:
+<ul><li> <b>term</b> element: <b>name</b> attribute defines a subject that might be used as a search or categorization term.</li></ul> </li></ul> </li></ul> 
+
+<h2>Bill Status</h2>
+
+<p>The status of the bill is given in a "state" element (think "finite state machine"). That element indicates the current bill status. "state" attributes are also present on action elements when the action resulted in a major status change for the bill.</p>
+<p>The value of the state element and attributes are as follows:</p>
+<ul><li> INTRODUCED. The bill or resolution was introduced but not yet referred to committee.</li><li> REFERRED. The bill or resolution has been referred to committee in the originating chamber and needs committee action to continue.</li><li> REPORTED. The bill or resolution was reported by committee in the originating chamber and can now continue with floor debate in the originating chamber.</li><li> PASS_OVER:. These are a family of status codes indicating the bill or joint or concurrent resolution has passed favorably in its originating chamber and now goes on to the other chamber. If it failed, the status would be the corresponding FAIL:ORIGINATING:.
+<ul><li> PASS_OVER:HOUSE. The bill or resolution passed the House (Senate next).</li><li> PASS_OVER:SENATE. The bill or resolution passed the Senate (House next).</li></ul> </li><li> PASSED:. These are a family of status codes indicating the bill has passed favorably out of Congress. It is a final status code for resolutions but not for bills. If the vote that PASSED it had gone the other way, the status would be the corresponding FAIL:ORIGINATING: for PASSED:SIMPLERES or FAIL:SECOND: for the others.
+<ul><li> PASSED:SIMPLERES. A simple resolution has been passed in its originating chamber. This is the end of the life for a simple resolution. </li><li> PASSED:CONSTAMEND. A joint resolution which is proposing an amendment to the Constitution has passed both chambers. This is the end of the life for the resolution in the legislative branch. It goes on subsequently to the states.</li><li> PASSED:CONCURRENTRES. A concurrent resolution has been passed by both chambers. This is the end of the life for concurrent resolutions.</li><li> PASSED:BILL. A bill or a joint resolution not proposing an amendment to the constitution has been passed by both chambers. It may require a conference committee first, but will eventually go on to the President.</li></ul> </li><li> PASS_BACK:. These are a family of status codes that occur when a bill is passed in both chambers, but the second chamber made changes that the first chamber now has to agree to. The bill goes to conference or "ping pong" ensues where the chambers go back and forth between passing the bill until no one makes any more changes. When that finishes, the bill goes into the state PASSED:BILL.
+<ul><li> PASS_BACK:HOUSE. The House voted on a Senate bill, making changes and sending it back to the Senate.</li><li> PASS_BACK:SENATE. The Senate voted on a House bill, making changes and sending it back to the House.</li></ul> </li><li> PROV_KILL:. These are a family of status codes indicating the bill or resolution is provisionally killed, meaning Congress took some action that would often mean the end of life for it (often enough to warrant a status code) but that it could still recover.
+<ul><li> PROV_KILL:SUSPENSIONFAILED. The bill or resolution was brought up "under suspension of the rules" and failed that vote. It could be voted on again. If the vote had passed, the status would be one of PASSED, PASS_OVER, etc.</li><li> PROV_KILL:CLOTUREFAILED. A cloture vote was taken on the bill or resolution and the vote failed, meaning it was successfully filibustered. If the vote had succeeded, no status would be noted.</li><li> PROV_KILL:PINGPONGFAIL. After both chambers have passed a bill or joint/concurrent resolution, if the second chamber made a change the chambers have to resolve their differences. When the second chamber's changes go back to the first chamber for a vote, if the vote fails it's a provisional failure since I think they can try again.</li><li> PROV_KILL:VETO. The bill "PASSED:BILL" out of Congress but was vetoed by the President. A veto can be overridden. This status applies until an override attempt is made. If the bill was signed instead, the ENACTED status would follow (but not immediately). A pocket veto is indicated separately with VETOED:POCKET.</li></ul> </li><li> FAIL:. These are a family of status codes indicating the end of life of a bill or resolution. (Unlike PROVKILL, these are always final.)
+<ul><li> FAIL:ORIGINATING:. This is a subgroup for when a bill or resolution fails in its originating chamber.
+<ul><li> FAIL:ORIGINATING:HOUSE. The bill or resolution failed in its originating chamber, the House.</li><li> FAIL:ORIGINATING:SENATE. The bill or resolution failed in its originating chamber, the Senate.</li></ul> </li><li> FAIL:SECOND. This is a subgroup for when a bill or joint or concurrent resolution fails in the second chamber. It must have passed in the originating chamber to get this far.
+<ul><li> FAIL:SECOND:HOUSE. The bill or resolution passed in the Senate but failed in the House.</li><li> FAIL:SECOND:SENATE. The bill or resolution passed in the House but failed in the Senate.</li></ul> </li></ul> </li><li> VETOED:OVERRIDE_PASS_OVER:. This is a family of status codes indicating a veto override attempt was successful in the originating chamber, and that it is now up to the second chamber to attempt the override. If the override failed, the status would be one of VETOED:OVERRIDE_FAIL_ORIGINATING:.
+<ul><li> VETOED:OVERRIDE_PASS_OVER:HOUSE. The House (the originating chamber) succeeded at the veto override. It goes on to the Senate next.</li><li> VETOED:OVERRIDE_PASS_OVER:SENATE. The Senate (the originating chamber) succeeded at the veto override. It goes on to the House next.</li></ul> </li><li> VETOED:. These are a family of status codes indicating the end of life for a bill that has been vetoed. It is a final status code for a bill.
+<ul><li> VETOED:POCKET. This status code is for bills that were pocket-vetoed, meaning the President does not sign the bill and Congress adjourns. The bill does not become law and Congress has no opportunity to override.</li><li> VETOED:OVERRIDE_FAIL_ORIGINATING:. This is a subgroup for bills who failed in the veto-override attempt of its originating chamber, which comes first.
+<ul><li> VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE. Veto override failed in the House, the bill's originating chamber. It had not gotten to the Senate yet for an override.</li><li> VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE. Veto override failed in the Senate, the bill's originating chamber. It had not gotten to the House yet for an override.</li></ul> </li><li> VETOED:OVERRIDE_FAIL_SECOND::. This is a subgroup for bills whose veto was successfully overridden in its originating chamber but failed in the veto-override attempt of the other chamber, which comes second. If the override had passed, the status would shortly be ENACTED:VETO_OVERRIDE.
+<ul><li> VETOED:OVERRIDE_FAIL_SECOND:HOUSE. Veto override passed in the Senate (the originating chamber) but failed in the House.</li><li> VETOED:OVERRIDE_FAIL_SECOND:SENATE. Veto override passed in the House (the originating chamber) but failed in the Senate.</li></ul> </li></ul> </li><li> ENACTED:. These are a family of status codes for bills and joint resolutions not proposing an amendment to the constitution that have been enacted as law. It comes after a short delay between the signature or override and the administrative action to actually make the bill law.
+<ul><li> ENACTED:SIGNED. The president signed the bill.</li><li> ENACTED:VETO_OVERRIDE. The bill was vetoed but the veto was overridden in both chambers.</li></ul> </li></ul> 
+
+</section>
+{% endblock %}
+

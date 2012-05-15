@@ -1,29 +1,34 @@
 {% extends "master.html" %}
-{% block title %}GovTrack.us - Developer Documentation{% endblock %}
+{% block title %}GovTrack.us Developer Documentation{% endblock %}
 {% block summary %}
 	{% include "website/developers/menu.html" %}
-	<h1>Developing with GovTrack Data</h1>
-	<p>Everything on this page is for software developers. If you&rsquo;re looking for downloadable data for use in Excel, you&rsquo;ll have to look elsewhere on the site such as on the bill search page, the vote database page, etc.</p>
+	<h1>Developer Documentation</h1>
+	<p style="margin-top: 1em">Want to build an app? Part of GovTrack&rsquo;s core mission is to make legislative data freely available so that others can build new tools to promote civic education and engagement.</p>
 {% endblock %}
 {% block body %}
 <section class="main">
-	<p>If you are a developer looking to get involved in the open data movement, a great place to start is to contribute to the <a href="http://openstates.sunlightlabs.com/">Open States Project</a> run by the Sunlight Foundation. The goal is to build a database of legislation, like GovTrack, but for all 50 states.</p>
+	<p>GovTrack applies the principles of open data to legislative transparency since Congress wont do it themselves. We screen scrape <a href="/sources">a variety of official government websites</a> each day and make the resulting normalized database of legislative information available for free for reuse &mdash; in bulk and with an API.</p>
+	
+	<p>What kind of data is it? Our database includes</p>
+	
+	<ul class="bullets">
+		<li>Everyone who has ever served in Congress since the founding of the nation.</li>
+		<li>Every roll call vote in Congress since the founding of the nation.</li>
+		<li>Every bill in Congress since 1973 (full text since 1987).</li>
+		<li>Current committee assignments.</li>
+	</ul>
+	
+	<p>Our database is the foundation for <a href="/developers/downstream">dozens of other open government websites</a>.</p>
 
-	<h2>Source Data</h2>
+	{% include "website/developers/gettingstarted.html" %}
 	
-	<p>All of the source data that powers the site is made available in static XML files which you can download in bulk and reuse for other purposes. They are made available under open terms. &mdash; <a href="/developers/data">Source Data Documentation</a> | <a href="developers/license">License Terms</a></p>
+	<h2>Bulk Raw Data</h2>
 	
-	<h2>Mail List</h2>
+	<p>There are two ways to access GovTrack&rsquo;s database. The first and most supported is to download the data in bulk. The database consists mostly of a large collection of flat XML files. The structure of the files is quite stable: it has been relatively unchanged for seven years. <a href="/developers/data">More Information on Bulk Data &gt;</a></p>
 	
-	<p>If you are a regular user of the source data or APIs, it is important that you join our <a href="http://groups.yahoo.com/group/govtrack/">mail list</a> for notices about any data format changes. If you have any ideas, please post a message to let others know.</p>
+	<h2>API Access</h2>
 	
-	<h2>Who&rsquo;s using the data?</h2>
-	
-	<p>I also keep a list of <a href="/developers/downstream">projects using data from GovTrack</a>.</p>
-	
-	<h2>APIs?</h2>
-	
-	<p>TBA</p>
+	<p>The second way to access GovTrack&rsquo;s database is through our API. The API went online in May 2012 and is currently beta, subject to change, etc. It is not as supported as the bulk raw data download and is not as complete. <a href="/developers/api">More Information on the API &gt;</a></p>
 </section>
 {% endblock %}
 

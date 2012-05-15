@@ -1,0 +1,57 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Rsync for Bulk Raw Data{% endblock %}
+{% block crumbs %}
+<ul><li><a href="/developers">Developer Documentation</a></li> <li><a href="/developers/data">Bulk Raw Data</a></li> <li>rsync</li></ul>
+{% endblock %}
+{% block summary %}
+	{% include "website/developers/menu.html" %}
+	<h1>Getting Bulk Raw Data with Rsync</h1>
+	
+	<p style="margin-top: 1em">GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
+	
+{% endblock %}
+{% block body %}
+<section class="main">
+	<p>To download GovTrack&rsquo;s raw data files in bulk, or if you plan to regularly update the files,
+	you should use the rsync tool. Rsync is good for selecting which directory of data you want and
+	keeping your files up to date by only downloading changes on each update.</p>
+	
+	<p>Using rsync is pretty easy on Linux and Mac if you are comfortable with the command line. It is harder on Windows. Windows users may prefer the <a href="/developers/api">GovTrack API</a>.</p>
+	
+	<h2>Rsync On Linux and Mac</h2>
+	
+	<p>Once you install rsync, just type on a command-line:</p>
+	
+	<pre class="code">rsync -avz --delete --delete-excluded govtrack.us::govtrackdata/us/112/bills .</pre>
+	
+	<p>That is all one line. Note the double colons and the period at the end.</p>
+	
+	<h2>Rsync on Windows</h2>
+	
+	<p>On Windows, install <a href="http://www.aboutmyip.com/AboutMyXApp/DeltaCopy.jsp">DeltaCopy</a>,
+	which contains rsync for Windows. Then on a command line type:</p>
+	
+	<pre class="code">mkdir C:\GovTrackData
+cd "\Program Files\Synametrics Technologies\DeltaCopy"
+rsync -avz --delete govtrack.us::govtrackdata/us/112/bills /GovTrackData</pre>
+
+	<p>Note that you have to give a relative path to your GovTrackData directory
+	because rsync will interpret "C:" as something other than a drive letter,
+	since there are no drive letters in the Unix world. Watch out for the double colons in the middle.</p>
+
+	<p>This will put bill XML files in either C:\GovTrackData\bills or C:\cygwin\GovTrackData\bills.
+	cygwin is the name of a common Windows wrapper around Unix tools. That's something to do with
+	DeltaCopy, not GovTrack.</p>
+	
+	<h2>File Structure / Getting Updates</h2>
+	
+	<p>This will download the current bill data into a directory
+	called <tt>bills</tt> in the current directory. It will be about 50-100 MB. Run the same command again to fetch updated files. You can run this command daily around 4pm.</p>
+	
+	<p>The directory path after <tt>govtrackdata</tt> mirrors the same structure you will see if you <a href="/data">browse the data directory over HTTP</a>. Use your web browser and consult the raw data schema to figure out what directory(s) you want.</p>
+
+
+
+</section>
+{% endblock %}
+
