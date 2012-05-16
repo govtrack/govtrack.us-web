@@ -250,8 +250,10 @@ def main(options):
 
     # Bills
     
-    from bill.search_indexes import BillIndex
-    bill_index = BillIndex()
+    bill_index = None
+    if not options.disable_indexing:
+	    from bill.search_indexes import BillIndex
+	    bill_index = BillIndex()
 
     if options.congress:
         files = glob.glob('data/us/%s/bills/*.xml' % options.congress)
@@ -278,7 +280,7 @@ def main(options):
             
             # Update the index for any bill with recently changed text
             textfile = "data/us/bills.text/%s/%s/%s%s.txt" % (m.group(1), m.group(2), m.group(2), m.group(3))
-            if os.path.exists(textfile) and File.objects.is_changed(textfile):
+            if bill_index and os.path.exists(textfile) and File.objects.is_changed(textfile):
                 bill_index.update_object(b)
                 File.objects.save_file(textfile)
             continue
@@ -303,7 +305,7 @@ def main(options):
                 actions.append( (repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))), BillStatus.by_xml_code(axn.xpath("string(@state)")), axn.xpath("string(text)")) )
             bill.major_actions = actions
             bill.save()
-            bill_index.update_object(bill)
+            if bill_index: bill_index.update_object(bill)
             
             if not options.disable_events:
                 bill.create_events()
@@ -340,7 +342,7 @@ def main(options):
                             bill = Bill.objects.get(congress=CURRENT_CONGRESS, bill_type=bt[0], number=m.group(2))
                             bill.docs_house_gov_postdate = iso8601.parse_date(item.get("add-date")).replace(tzinfo=None)
                             bill.save()
-                            bill_index.update_object(bill)
+                            if bill_index: bill_index.update_object(bill)
                             
                             if not options.disable_events:
                                 bill.create_events()
@@ -361,7 +363,7 @@ def main(options):
             if bill.senate_floor_schedule_postdate == None or now - bill.senate_floor_schedule_postdate > timedelta(days=7):
                 bill.senate_floor_schedule_postdate = now
                 bill.save()
-                bill_index.update_object(bill)
+                if bill_index: bill_index.update_object(bill)
                 if not options.disable_events:
                     bill.create_events()
     except Exception as e:

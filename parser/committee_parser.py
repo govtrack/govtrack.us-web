@@ -63,10 +63,10 @@ class CommitteeMemberProcessor(Processor):
     DEFAULT_VALUES = {'role': 'Member'}
 
     def id_handler(self, value):
-    	try:
-    		return Person.objects.get(pk=value, roles__current=True)
-    	except:
-    		raise ValueError("Committe member %s is no longer a current MoC." % value)
+        try:
+            return Person.objects.get(pk=value, roles__current=True)
+        except:
+            raise ValueError("Committe member %s is no longer a current MoC." % value)
 
     def role_handler(self, value):
         return self.ROLE_MAPPING[value]
@@ -102,30 +102,29 @@ def main(options):
 
     log.info('Processing committees')
     COMMITTEES_FILE = 'data/us/committees.xml'
-    # If file changed then delete committees and set
-    # this varible to True, it will be the signal
-    # to run committee members parser anyway
-    committees_deleted = False
 
     if not File.objects.is_changed(COMMITTEES_FILE) and not options.force:
         log.info('File %s was not changed' % COMMITTEES_FILE)
     else:
-        # Delete all existing committees and
-        # records which are linked to them via ForeignKey
-        Committee.objects.all().delete()
-        committees_deleted = True
-
         tree = etree.parse(COMMITTEES_FILE)
         total = len(tree.xpath('/committees/committee'))
         progress = Progress(total=total)
         for committee in tree.xpath('/committees/committee'):
             cobj = com_processor.process(Committee(), committee)
+            try: # update existing record if exists
+                cobj.id = Committee.objects.get(code=cobj.code).id
+            except Committee.DoesNotExist:
+                pass
             cobj.save()
 
             for subcom in committee.xpath('./subcommittee'):
                 sobj = subcom_processor.process(Committee(), subcom)
                 sobj.code = cobj.code + sobj.code
                 sobj.committee = cobj
+                try: # update existing record if exists
+                    sobj.id = Committee.objects.get(code=sobj.code).id
+                except Committee.DoesNotExist:
+                    pass
                 sobj.save()
             progress.tick()
 
@@ -135,13 +134,15 @@ def main(options):
     MEMBERS_FILE = 'data/us/112/committees.xml'
     file_changed = File.objects.is_changed(MEMBERS_FILE)
 
-    if not committees_deleted and not file_changed and not options.force:
+    if not file_changed and not options.force:
         log.info('File %s was not changed' % MEMBERS_FILE)
     else:
         tree = etree.parse(MEMBERS_FILE)
         total = len(tree.xpath('/committees/committee/member'))
         progress = Progress(total=total, name='committees')
         
+        # We can delete CommitteeMember objects because we don't have
+        # any foreign keys to them.
         CommitteeMember.objects.all().delete()
 
         # Process committee nodes
@@ -180,7 +181,7 @@ def main(options):
     SCHEDULE_FILE = 'data/us/112/committeeschedule.xml'
     file_changed = File.objects.is_changed(SCHEDULE_FILE)
 
-    if not committees_deleted and not file_changed and not options.force:
+    if not file_changed and not options.force:
         log.info('File %s was not changed' % SCHEDULE_FILE)
     else:
         tree = etree.parse(SCHEDULE_FILE)

@@ -82,6 +82,11 @@ class CommitteeMemberRole(enum.Enum):
     member = enum.Item(5, 'Member')
 
 class CommitteeMember(models.Model):
+    
+    # The parser wipes out this table each time it loads up
+    # committee membership, so we should not create any
+    # foreign keys to this model.
+    
     person = models.ForeignKey('person.Person', related_name='committeeassignments')
     committee = models.ForeignKey('committee.Committee', related_name='members')
     role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member)
@@ -113,10 +118,11 @@ MEMBER_ROLE_WEIGHTS = {
 }
 
 class CommitteeMeeting(models.Model):
-    """Meetings that are scheduled in the future. Since we can't track meeting time changes,
-    we have to clear these out each time we load up new meetings."""
+    # The parser wipes out this table each time it loads up
+    # committee schedules, so we should not create any
+    # foreign keys to this model.
+
     committee = models.ForeignKey('committee.Committee', related_name='meetings')
     when = models.DateTimeField()
     subject = models.TextField()
-    # TODO: bills
 

@@ -51,6 +51,8 @@ def parse_args():
                       help='Default logging level')
     parser.add_option('--disable-events', action='store_true', default=False,
                       help='Disable events processing')
+    parser.add_option('--disable-indexing', action='store_true', default=False,
+                      help='Disable synchronous indexing')
     parser.add_option('--congress',
                       help='Limit parsing to the specified congress')
     parser.add_option('--slow', action='store_true',
