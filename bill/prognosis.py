@@ -155,7 +155,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		if cosponsor.get_person_role().party == maj_party:
 			num_cosp_majority += 1
 	if bill.sponsor and sponsor_party == maj_party and len(cosponsors) >= 6 and num_cosp_majority < 2.0*len(cosponsors)/3:
-		factors.append(("cosponsors_bipartisan", "While the sponsor is in the majority party, at least one third of the %s's cosponsors are from the minority party." % bill.noun))
+		factors.append(("cosponsors_bipartisan", "The sponsor is in the majority party and at least one third of the %s's cosponsors are from the minority party." % bill.noun))
 	elif num_cosp_majority > 0 and num_cosp_majority < len(cosponsors):
 		factors.append(("cosponsors_crosspartisan", "There is at least one cosponsor from the majority party and one cosponsor outside of the majority party."))
 

@@ -80,6 +80,16 @@
 			<dt>Schedule:</dt>
 			<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
 			{% endif %}
+			
+			{% if upcoming_meetings|length %}
+			<dt>Schedule:</dt>
+			<dd>
+				<div>This {{bill.noun}} is scheduled for the following committee meetings:</div>
+				{% for m in upcoming_meetings %}
+					<div>{{m.when}} &mdash; {{m.committee.fullname}}</div>
+				{% endfor %}
+			</dd>
+			{% endif %}
 		
 			{% with reintros.1 as reintro_as %}
 			{% if reintro_as %}
@@ -111,10 +121,11 @@
 	</div>
 	{% else %}
 	<div id="make_prediction">
-	<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>. <span class="youthink" {% if market.user_positions %}style="display: none"{% endif %}>What do you think?</span></p>
+	<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>.</p>
+	<p class="youthink" {% if market.user_positions %}style="display: none"{% endif %}>What do you think?</p>
 	<p class="empty" {% if market.user_positions %}style="display: none"{% endif %}>
-		<a href="#" prediction="-1">Lower</a> | 
-		<a href="#" prediction="1">Higher</a>
+		1) <a href="#" prediction="-1">Worse Than {{market.yes_price}}%</a>.<br/>
+		2) <a href="#" prediction="1">Better Than {{market.yes_price}}%</a>.
 	</p>
 	<p class="nonempty" {% if not market.user_positions %}style="display: none"{% endif %}>
 		You bet on <span>{% if market.user_positions.1.shares > 0 %}yes{% else %}no{% endif %}</span>.

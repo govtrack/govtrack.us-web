@@ -14,7 +14,7 @@ from common.pagination import paginate
 from bill.models import Bill, BillType, BillStatus, BillTerm, TermType
 from bill.search import bill_search_manager, parse_bill_number
 from bill.title import get_secondary_bill_title
-from committee.models import CommitteeMember, CommitteeMemberRole
+from committee.models import CommitteeMeeting
 from committee.util import sort_members
 from person.models import Person
 from events.models import Feed
@@ -61,6 +61,9 @@ def bill_details(request, congress, type_slug, number):
         m = bill.get_open_market(request.user)
         if m: m.name = m.name.replace(bill.display_number, "it")
         return m
+        
+    def get_upcoming_meetings():
+        return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=bill)
                                                     
     return {
         'bill': bill,
@@ -69,6 +72,7 @@ def bill_details(request, congress, type_slug, number):
         "prognosis": get_prognosis, # defer so we can use template caching
         "reintros": get_reintroductions, # defer so we can use template caching
         "market": get_market,
+        'upcoming_meetings': get_upcoming_meetings,
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         'feed': Feed.BillFeed(bill),

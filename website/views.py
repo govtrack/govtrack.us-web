@@ -82,7 +82,7 @@ def search(request):
     
     from haystack.query import SearchQuerySet
     
-    results.append(("People", "/congress/members", "name",
+    results.append(("Members of Congress and Presidents", "/congress/members", "name",
         [{"href": p.object.get_absolute_url(), "label": p.object.name, "obj": p.object, "secondary": p.object.get_current_role() == None } for p in SearchQuerySet().filter(indexed_model_name__in=["Person"], content=q)[0:9]]))
         
     import us
@@ -158,7 +158,7 @@ def push_to_social_media_rss(request):
         description = "GovTrack tracks the activities of the United States Congress. We push this feed to our Twitter and Facebook accounts."
         
         def items(self):
-            events = [render_event(item, feedlist) for item in Feed.get_events_for(feedlist, 20)]
+            events = [render_event(item, feedlist) for item in Feed.get_events_for(feedlist, 25)]
             return [e for e in events if e != None]
             
         def item_title(self, item):

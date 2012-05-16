@@ -71,8 +71,10 @@ function show_facets(postdata, options, isinitial) {
         	// data returned by the search server because the user has already
         	// entered something, and we don't want to mess with it.... except
         	// when loading the initial state from the search query fragment.
-        	if (isinitial) node.val(postdata[field])
-			node.focus();
+        	if (isinitial) {
+        		node.val(postdata[field])
+				node.focus();
+			}
         } else if (type == "checkbox" || type == "radio") {
             node.html("");
             for (var j in values) {

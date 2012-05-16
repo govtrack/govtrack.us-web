@@ -57,6 +57,7 @@ def bill_redirect(request, istext=None):
     return redirect(bill.get_absolute_url() + ("" if not istext else "/text"), permanent=True)
 
 def bill_search_redirect(request):
+    if "PostFormID" in request.GET: raise Http404()
     qs = request.META.get("QUERY_STRING", "")
     if len(qs) > 0: qs = "?" + qs
     return HttpResponseRedirect("/congress/bills/browse" + qs)
