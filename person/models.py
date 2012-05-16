@@ -27,25 +27,25 @@ def cache_result(f):
     return g
 
 class Person(models.Model):
-    firstname = models.CharField(max_length=255)
-    lastname = models.CharField(max_length=255)
-    middlename = models.CharField(max_length=255, blank=True)
+    firstname = models.CharField(max_length=255, help_text="The person's first name or first initial.")
+    lastname = models.CharField(max_length=255, help_text="The person's last name.")
+    middlename = models.CharField(max_length=255, blank=True, help_text="The person's middle name (optional).")
 
     # misc
-    birthday = models.DateField(blank=True, null=True)
-    gender = models.IntegerField(choices=Gender, blank=True, null=True)
+    birthday = models.DateField(blank=True, null=True, help_text="The person's birthday.")
+    gender = models.IntegerField(choices=Gender, blank=True, null=True, help_text="The person's gender, if known. For historical data, the gender is sometimes not known.")
     
     # namemod set(['II', 'Jr.', 'Sr.', 'III', 'IV'])
-    namemod = models.CharField(max_length=10, blank=True)
-    nickname = models.CharField(max_length=255, blank=True)
+    namemod = models.CharField(max_length=10, blank=True, help_text="The suffix on the person's name usually one of Jr., Sr., I, II, etc.")
+    nickname = models.CharField(max_length=255, blank=True, help_text="The person's nickname. If set, the nickname should usually be displayed in quotes where a middle name would go. For instance, Joe \"Buster\" Smith.")
 
     # links
-    bioguideid = models.CharField(max_length=255, blank=True, null=True) #  bioguide.congress.gov (null for presidents that didn't serve in Congress)
-    pvsid = models.CharField(max_length=255, blank=True) #  vote-smart.org
-    osid = models.CharField(max_length=255, blank=True) #  opensecrets.org
-    metavidid = models.CharField(max_length=255, blank=True) # metavid.org
-    youtubeid = models.CharField(max_length=255, blank=True) # YouTube
-    twitterid = models.CharField(max_length=50, blank=True) # Twitter
+    bioguideid = models.CharField(max_length=255, blank=True, null=True, help_text="The person's ID on bioguide.congress.gov. May be null if the person served only as a president and not in Congress.")
+    pvsid = models.CharField(max_length=255, blank=True, help_text="The person's ID on vote-smart.org (Project Vote Smart), if known.")
+    osid = models.CharField(max_length=255, blank=True, help_text="The person's ID on opensecrets.org (The Center for Responsive Politics), if known.")
+    metavidid = models.CharField(max_length=255, blank=True, help_text="The person's ID on metavid.org, if known.")
+    youtubeid = models.CharField(max_length=255, blank=True, help_text="The name of the person's official YouTube channel, if known.")
+    twitterid = models.CharField(max_length=50, blank=True, help_text="The name of the person's official Twitter handle, if known.")
 
     # indexing
     def get_index_text(self):
@@ -200,17 +200,17 @@ class Person(models.Model):
 
 class PersonRole(models.Model):
     person = models.ForeignKey('person.Person', related_name='roles')
-    role_type = models.IntegerField(choices=RoleType)
-    current = models.BooleanField(default=False, choices=[(False, "No"), (True, "Yes")])
-    startdate = models.DateField(db_index=True)
-    enddate = models.DateField(db_index=True)
+    role_type = models.IntegerField(choices=RoleType, help_text="The type of this role: a U.S. senator, a U.S. congressperson, or a U.S. president.")
+    current = models.BooleanField(default=False, choices=[(False, "No"), (True, "Yes")], help_text="Whether the role is currently held, or if this is archival information.")
+    startdate = models.DateField(db_index=True, help_text="The date the role began (when the person took office).")
+    enddate = models.DateField(db_index=True, help_text="The date the role ended (when the person resigned, died, etc.)")
     # http://en.wikipedia.org/wiki/Classes_of_United_States_Senators
-    senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True) # None for representatives
+    senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True, help_text="For senators, their election class, which determines which years they are up for election. (It has nothing to do with seniority.)") # None for representatives
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts
-    district = models.IntegerField(blank=True, null=True) # None for senators/presidents
-    state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True)
-    party = models.CharField(max_length=255, blank=True, null=True)
-    website = models.CharField(max_length=255, blank=True)
+    district = models.IntegerField(blank=True, null=True, help_text="For representatives, the number of their congressional district. 0 for at-large districts, -1 in historical data if the district is not known.") # None for senators/presidents
+    state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True, help_text="For senators and representatives, the two-letter USPS abbrevation for the state they are serving.")
+    party = models.CharField(max_length=255, blank=True, null=True, help_text="The political party of the person. If the person changes party, it is usually the most recent party during this role.")
+    website = models.CharField(max_length=255, blank=True, help_text="The URL to the official website of the person during this role, if known.")
 
     class Meta:
         ordering = ['startdate']

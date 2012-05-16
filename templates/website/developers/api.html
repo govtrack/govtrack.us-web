@@ -1,0 +1,29 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Data API{% endblock %}
+{% block crumbs %}
+<ul><li><a href="/developers">Developer Documentation</a></li> <li>Data API</li></ul>
+{% endblock %}
+{% block summary %}
+	{% include "website/developers/menu.html" %}
+	<h1>GovTrack Data API Documentation</h1>
+	
+	<p style="margin-top: 1em">GovTrack&rsquo;s data API provides programmatic access to information about the U.S. Congress.</p>
+	
+{% endblock %}
+{% block body %}
+<section class="main">
+
+	<p>The GovTrack API was first released in May 2012. You might consider instead using our <a href="/developers/data">bulk raw data</a> which is the most supported method for accessing our data and the way we&rsquo;ve been making data available since 2005. The API will be playing catch-up over the next few months.</p>
+	
+	{% include "website/developers/gettingstarted.html" %}
+
+	<h2>Setting Up</h2>
+	
+	<p>There is currently no setup required to use the API. There is no need for an API key. Just start hitting the URLs. That may change in the future.</p>
+
+	<p>The base URL for all APIs is <tt>http://www.govtrack.us/api/v1/</tt>.</p>
+
+	<p>The API is based on the <a href="http://tastypieapi.org/">Tastypie</a> Django framework. See Tastypie&rsquo;s documentation on <a href="http://django-tastypie.readthedocs.org/en/latest/interacting.html">interacting with the API</a> for some background instructions.</p>
+</section>
+{% endblock %}
+

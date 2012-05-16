@@ -20,12 +20,12 @@
 	
 	<ul>
 	<li>You can browse the bulk data at <a 
-	href="/data/">http://www.govtrack.us/data</a>. Start here to get an idea for the directory structure and what the files look at. We discourage using HTTP to actually download the data in bulk. (Also see the <a href="/developers/api">API</a> for HTTP-based access.)</li>
+	href="/data/">http://www.govtrack.us/data</a>. Start here to get an idea for the directory structure and what the files look like. We discourage using HTTP to actually download the data in bulk, though. (Also see the <a href="/developers/api">API</a> for HTTP-based access.)</li>
 
 	<li>&ldquo;Rsync&rdquo; is the preferred method for obtaining the bulk data. You can use rsync to choose just the directories you want and it efficiently keeps  your files up to date by downloading only changes since your last update. <a href="/developers/rsync">Rsync Instructions &gt;</a></li>
 	</ul>
 
-	<h2>Bulk Data Schema</h2>
+	<h2 style="margin-bottom: 1em">Bulk Data Schema</h2>
 	
 	<h3>General Structure</h3>
 	
@@ -61,8 +61,7 @@
 
 	<ul>
 
-	<li>Bills are resolutions are stored in <a href="/data/us/112/bills">data/us/112/bills</a> for the current Congress and similarly named directories for other Congresses.
-	The format of this file type is described in the schema documentation below. <a href="/developers/bill_xml">Bill XML Schema &gt;</a></li>
+	<li>Bills and resolutions are stored in <a href="/data/us/112/bills">data/us/112/bills</a> for the current Congress and similarly named directories for other Congresses. <a href="/developers/bill_xml">Bill XML Schema &gt;</a></li>
 	
 	<li>Roll call votes are stored in <a href="/data/us/112/rolls">data/us/112/rolls</a> for the current Congress and similarly named directories for other Congresses. Votes by unanimous consent, for example,
 	are not included here because they are not recorded votes. <a href="/developers/vote_xml">Roll Call Vote XML Schema &gt;</a> </li>
@@ -81,7 +80,7 @@
 	give a tab-delimeted source URL and source description information
 	for each photo.</li>
 	
-	<li>The <a href="/data/us/bills.text">/data/us/bills.text</a> directory includes the text of legislation in PDF, XML, and text format (from GPO) and in HTML format (from THOMAS). It is organzized by Congress, bill type, and GPO bill status code.</li>
+	<li>The <a href="/data/us/bills.text">data/us/bills.text</a> directory includes the text of legislation in PDF, XML, and text format (from GPO) and in HTML format (from THOMAS). It is organzized by Congress, bill type, and GPO bill status code.</li>
 	
 	</ul>
 	

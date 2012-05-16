@@ -79,21 +79,21 @@ class Cosponsor(models.Model):
         return self._role
 
 class Bill(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, help_text="The bill's primary display title, including its number.")
     titles = JSONField() # serialized list of all bill titles as (type, as_of, text)
-    bill_type = models.IntegerField(choices=BillType)
-    congress = models.IntegerField()
-    number = models.IntegerField()
+    bill_type = models.IntegerField(choices=BillType, help_text="The bill's type (e.g. H.R., S., H.J.Res. etc.)")
+    congress = models.IntegerField(help_text="The number of the Congress in which the bill was introduced.")
+    number = models.IntegerField(help_text="The bill's number (just the integer part).")
     sponsor = models.ForeignKey('person.Person', blank=True, null=True,
-                                related_name='sponsored_bills')
+                                related_name='sponsored_bills', help_text="The primary sponsor of the bill.")
     committees = models.ManyToManyField(Committee, related_name='bills')
     terms = models.ManyToManyField(BillTerm, related_name='bills')
-    current_status = models.IntegerField(choices=BillStatus)
-    current_status_date = models.DateField()
-    introduced_date = models.DateField()
-    cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor')
-    docs_house_gov_postdate = models.DateTimeField(blank=True, null=True)
-    senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True)
+    current_status = models.IntegerField(choices=BillStatus, help_text="The current status of the bill.")
+    current_status_date = models.DateField(help_text="The date of the last major action on the bill corresponding to the current_status.")
+    introduced_date = models.DateField(help_text="The date the bill was introduced.")
+    cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor', help_text="The bill's cosponsors.")
+    docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
+    senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated.")
     major_actions = JSONField() # serialized list of all major actions (date/datetime, BillStatus, description)
 
     class Meta:
@@ -123,9 +123,11 @@ class Bill(models.Model):
         
     @property
     def display_number(self):
+    	"""The bill's number, suitable for display, e.g. H.R. 1234. If the bill is for a past session of Congress, includes the Congress number."""
         return get_bill_number(self)
     @property
     def display_number_no_congress_number(self):
+    	"""The bill's number, suitable for display, e.g. H.R. 1234."""
         return get_bill_number(self, show_congress_number="NONE")
     @property
     def display_number_with_congress_number(self):
@@ -133,6 +135,7 @@ class Bill(models.Model):
 
     @property
     def title_no_number(self):
+    	"""The title of the bill without the number."""
         return get_primary_bill_title(self, self.titles, with_number=False)
         
     @property
@@ -143,6 +146,7 @@ class Bill(models.Model):
         return BillType.by_value(self.bill_type).full_name
     @property
     def noun(self):
+    	"""The appropriate noun to use to refer to this instance, either 'bill' or 'resolution'."""
         return "bill" if self.bill_type in (BillType.house_bill, BillType.senate_bill) else "resolution"
     @property
     def originating_chamber(self):
@@ -160,13 +164,16 @@ class Bill(models.Model):
 
     @property
     def current_status_description(self):
+    	"""Descriptive text for the bill's current status."""
         return self.get_status_text(self.current_status, self.current_status_date)
 
     @property
     def is_current(self):
+    	"""Whether the bill was introduced in the current session of Congress."""
         return self.congress == settings.CURRENT_CONGRESS
     @property
     def is_alive(self):
+    	"""Whether the bill was introduced in the current session of Congress and the bill's status is not a final status (i.e. can take no more action like a failed vote)."""
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
 
     def get_formatted_summary(self):
@@ -256,6 +263,7 @@ class Bill(models.Model):
         return status % (self.noun, date)
 
     def thomas_link(self):
+    	"""Returns the URL for the bill page on http://thomas.loc.gov."""
         return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%d:%s%d:" \
             % (self.congress, self.bill_type_slug, self.number)
 
