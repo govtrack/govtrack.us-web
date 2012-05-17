@@ -1,5 +1,46 @@
 {% extends "master.html" %}
+{% load cache %}
+
 {% block title %}GovTrack.us - Data API{% endblock %}
+
+{% block head %}
+<style>
+pre.example {
+	height: 25em;
+	width: 800px;
+	margin: 1em 0 1.5em 16px;
+	border: 1px solid black;
+	overflow: auto;
+}
+
+h4 {
+	margin-left: 16px;
+}
+dl.schema {
+	margin: 1em 0 2em 16px;
+}
+dl.schema > dt {
+	float: left;
+	clear: both;
+	width: 150px;
+	margin-bottom: 1em;
+}
+dl.schema > dd {
+	float: left;
+	width: 450px;
+	margin-bottom: .75em;
+}
+dl.schema > div {
+	border-bottom: 1px solid #DDD;
+	margin-bottom: .75em;
+}
+</style>
+
+<link href="/static/js/prettify.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="/static/js/prettify.js"></script>
+<script>$(function() { prettyPrint(); });</script>
+{% endblock %}
+
 {% block crumbs %}
 <ul><li><a href="/developers">Developer Documentation</a></li> <li>Data API</li></ul>
 {% endblock %}
@@ -21,9 +62,77 @@
 	
 	<p>There is currently no setup required to use the API. There is no need for an API key. Just start hitting the URLs. That may change in the future.</p>
 
-	<p>The base URL for all APIs is <tt>http://www.govtrack.us/api/v1/</tt>.</p>
+	<p>The base URL for all APIs is <tt>{{baseurl}}</tt>.</p>
 
 	<p>The API is based on the <a href="http://tastypieapi.org/">Tastypie</a> Django framework. See Tastypie&rsquo;s documentation on <a href="http://django-tastypie.readthedocs.org/en/latest/interacting.html">interacting with the API</a> for some background instructions.</p>
+	
+	<h2>The API Access Points and Schemas</h2>
+	
+	<p>Here are some quick examples:</p>
+	
+	<ul class="bullets">
+		<li><a href="{{baseurl}}person?roles__current=true">{{baseurl}}person?roles__current=true</a><br/>List current Members of Congress.</li>
+		<li><a href="{{baseurl}}bill?congress=112">{{baseurl}}bill?congress=112</a><br/>List current bills in Congress.</li>
+		<li><a href="{{baseurl}}bill/74369">{{baseurl}}bill/74369</a><br/>H.R. 1349: Public Online Information Act of 2011.</li>
+	</ul>
+	
+	<p>The following resources are available in the API.</p>
+	
+	{% cache 6000 govtrack_api_docs_2 request.META.HTTP_HOST %}
+	
+	{% for endpoint, resourcedef in api %}
+		<h3>{{endpoint|capfirst}}</h3>
+		<p>{{resourcedef.get_docstring}}</p>
+		<p>Use the list API at <a href="{{baseurl}}{{endpoint}}">{{baseurl}}{{endpoint}}</a> to get a list of objects of this type. The output will look like this:</p>
+		<pre class="example prettyprint">{{resourcedef.example_content}}</pre>
+		
+		{% if resourcedef.Meta.filtering %}
+			<h4 style="margin-bottom: 1em">Filtering</h4>
+			<p>You can filter the results using <em>field=value</em> query string arguments using the following fields:
+				{% for field, type in resourcedef.Meta.filtering.items %}
+					{{ field }}<sup style="vertical-align: super; font-size: 75%; color: #777;">{% if type == 1 %}*{% endif %}{% if type == 2 %}**{% endif %}</sup>{% if not forloop.last %}, {% endif %}{% endfor %}.
+			</p>
+			<p>(Fields marked with a * support <a href="https://docs.djangoproject.com/en/dev/ref/models/querysets/#field-lookups">Django-style filters</a> like __gt. Fields marked with ** support filters that span the relationship, such as x__y=112.)</p>
+		{% endif %}
+		
+		{% if resourcedef.canonical_example %}
+			<h4 style="margin-bottom: 1em">Example Resource</h4>
+			<p>Add a slash and the ID of any object to get just that object. For instance, try out <a href="{{baseurl}}{{endpoint}}/{{resourcedef.canonical_example}}">{{baseurl}}{{endpoint}}/{{resourcedef.canonical_example}}</a>.</p>
+		{% endif %}
+		
+		<h4>Field Documentation</h4>
+		
+		<p style="margin: 1em 0 2em 16px;">The fields of each resource have the following meanings. This list can also be accessed programmatically at <a href="{{baseurl}}{{endpoint}}/schema">{{baseurl}}{{endpoint}}/schema</a>.</p>
+		
+		<dl class="schema">
+		{% for field, field_display, info in resourcedef.fields_list %}
+			<dt>{{field_display}}</dt>
+			<dd>
+				<div>
+				{% if field == "id" %}The primary key of this resource.{% endif %}
+				{% if field == "resource_uri" %}The URL path to this resource in the API.{% endif %}
+				{% if field != "id" and field != "resource_uri" %}{{info.help_text}}{% endif %}
+				</div>
+				
+				{% if info.enum_values %}
+				<div style="margin: 1em 0 1em 0">This field can take on the following values:</div>
+				<table>
+				<tr><th>Value</th> <th style="padding-left: 2em">Notes</th></tr>
+				{% for k, v in info.enum_values.items %}
+					<tr>
+					<td>{{k}}</td>
+					<td style="padding-left: 2em">{{v.label}}</td>
+					</tr>
+				{% endfor %}
+				</table>
+				{% endif %}
+			</dd>
+			<div style="clear: both"> </div>
+		{% endfor %}
+		</dl>
+	{% endfor %}
+	
+	{% endcache %}
 </section>
 {% endblock %}
 

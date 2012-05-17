@@ -82,7 +82,7 @@ class Bill(models.Model):
     title = models.CharField(max_length=255, help_text="The bill's primary display title, including its number.")
     titles = JSONField() # serialized list of all bill titles as (type, as_of, text)
     bill_type = models.IntegerField(choices=BillType, help_text="The bill's type (e.g. H.R., S., H.J.Res. etc.)")
-    congress = models.IntegerField(help_text="The number of the Congress in which the bill was introduced.")
+    congress = models.IntegerField(help_text="The number of the Congress in which the bill was introduced. The current Congress is %d." % settings.CURRENT_CONGRESS)
     number = models.IntegerField(help_text="The bill's number (just the integer part).")
     sponsor = models.ForeignKey('person.Person', blank=True, null=True,
                                 related_name='sponsored_bills', help_text="The primary sponsor of the bill.")
@@ -93,7 +93,7 @@ class Bill(models.Model):
     introduced_date = models.DateField(help_text="The date the bill was introduced.")
     cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor', help_text="The bill's cosponsors.")
     docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
-    senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated.")
+    senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
     major_actions = JSONField() # serialized list of all major actions (date/datetime, BillStatus, description)
 
     class Meta:

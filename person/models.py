@@ -64,7 +64,8 @@ class Person(models.Model):
     @property
     @cache_result
     def name(self):
-           return get_person_name(self, firstname_position='before', role_recent=True)
+    	"""The person's full name with title, district, and party information for current Members of Congress."""
+        return get_person_name(self, firstname_position='before', role_recent=True)
 
     @cache_result
     def name_no_district(self):
@@ -72,6 +73,7 @@ class Person(models.Model):
 
     @cache_result
     def name_no_details(self):
+    	"""The person's full name (excluding all title details)."""
         return get_person_name(self, firstname_position='before')
         
     @cache_result
@@ -85,6 +87,7 @@ class Person(models.Model):
     @property
     @cache_result
     def sortname(self):
+    	"""The person's name suitable for sorting lexicographically by last name or for display in a sorted list of names. Title, district, and party information are included for current Members of Congress."""
         return get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
         
     @property
@@ -227,9 +230,11 @@ class PersonRole(models.Model):
         return True
 
     def get_title(self):
+    	"""The long form of the title used to prefix the names of people with this role: Representative, Senator, President, Delegate, or Resident Commissioner."""
         return self.get_title_name(short=False)
 
     def get_title_abbreviated(self):
+    	"""The title used to prefix the names of people with this role: Rep., Sen., President, Del. (delegate), or Res.Com. (resident commissioner)."""
         return self.get_title_name(short=True)
 
     def get_title_name(self, short):
@@ -250,6 +255,8 @@ class PersonRole(models.Model):
         return State.by_value(self.state).label
             
     def get_description(self):
+    	"""A description of this role, e.g. Delegate for District of Columbia At Large."""
+    	
         from django.contrib.humanize.templatetags.humanize import ordinal
         
         if self.role_type == RoleType.president:
@@ -265,6 +272,7 @@ class PersonRole(models.Model):
                 return self.get_title_name(False) + " for " + statenames[self.state] + "'s " + ordinal(self.district) + " congressional district"
 
     def congress_numbers(self):
+    	"""The Congressional sessions (Congress numbers) that this role spans, as a list from the starting Congress number through consecutive numbers to the ending Congress number."""
         # Senators can span Congresses, so return a range.
         cs1 = get_session_from_date(self.startdate)
         cs2 = get_session_from_date(self.enddate)

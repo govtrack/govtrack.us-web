@@ -63,7 +63,7 @@ class GBaseModel(ModelResource):
 			try:
 				enum = model._meta.get_field(field).choices
 				if issubclass(enum, enummodule.Enum):
-					info["values"] = dict((v.key, { "label": v.label } ) for v in enum.values())
+					info["enum_values"] = dict((v.key, { "label": v.label } ) for v in enum.values())
 			except:
 				# Entry does not correspond to a field with choices.
 				pass
@@ -83,9 +83,17 @@ class GBaseModel(ModelResource):
 			}
 			
 		return schema
+		
+	@classmethod
+	def get_docstring(self):
+		return self.__doc__
 
 from person.models import Person, PersonRole
 class PersonModel(GBaseModel):
+	"""Members of Congress and U.S. Presidents since the founding of the nation."""
+	
+	canonical_example = 400326
+	
 	class Meta(GBaseModel.BaseMeta):
 		queryset = Person.objects.all()
 		resource_name = 'person'
@@ -109,10 +117,12 @@ class PersonModel(GBaseModel):
 			"name_sortable": "sortname",
 			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
 		}
-	roles = fields.ToManyField('website.api.PersonRoleModel', 'roles')
-	current_role = fields.ToOneField('website.api.PersonRoleModel', 'current_role', null=True, full=True)
+	roles = fields.ToManyField('website.api.PersonRoleModel', 'roles', help_text="A list of terms in Congress or as President that this person has been elected to. A list of API resources to query for more information.")
+	current_role = fields.ToOneField('website.api.PersonRoleModel', 'current_role', null=True, full=True, help_text="The current term in Congress or as President that this person is currently serving, or null if none.")
 	
 class PersonRoleModel(GBaseModel):
+	"""Terms held in office by Members of Congress and U.S. Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President four years, and in the Senate six years (three 'Congresses')."""
+	
 	class Meta(GBaseModel.BaseMeta):
 		queryset = PersonRole.objects.all()
 		resource_name = 'role'
@@ -130,10 +140,15 @@ class PersonRoleModel(GBaseModel):
 			"title": "get_title_abbreviated",
 			"title_long": "get_title",
 			"description": "get_description",
+			"congress_numbers": "congress_numbers",
 		}
 	
 from bill.models import Bill
 class BillModel(GBaseModel):
+	"""Bills and resolutions in the U.S. Congress since 1973 (the 93rd Congress)."""
+	
+	canonical_example = 76416
+	
 	class Meta(GBaseModel.BaseMeta):
 		queryset = Bill.objects.all()
 		resource_name = 'bill'
@@ -162,8 +177,8 @@ class BillModel(GBaseModel):
 			"is_alive": "is_alive",
 			"thomas_link": "thomas_link",
 		}
-	sponsor = fields.ToOneField('website.api.PersonModel', 'sponsor', null=True, full=True)
-	cosponsors = fields.ToManyField('website.api.PersonModel', 'cosponsors')
+	sponsor = fields.ToOneField('website.api.PersonModel', 'sponsor', null=True, full=True, help_text="The primary sponsor of the bill (optional).")
+	cosponsors = fields.ToManyField('website.api.PersonModel', 'cosponsors', help_text="A list of cosponsors of the bill. A list of API resources to query for more information.")
 	# missing: terms, committees
 
 
@@ -172,4 +187,25 @@ v1_api = Api(api_name='v1')
 v1_api.register(PersonModel())
 v1_api.register(PersonRoleModel())
 v1_api.register(BillModel())
+
+from django.shortcuts import redirect, get_object_or_404, render_to_response
+from django.template import RequestContext
+import urllib
+
+def api_overview(request):
+	baseurl = "http://%s/api/v1/" % request.META["HTTP_HOST"]
+	
+	def get_resources():
+		# wrapped in a function so it is cachable at the template level
+		resources = sorted(v1_api._registry.items())
+		for ep, r in resources:
+			r.example_content = r.dispatch_list(request, congress=112, current=True, roles__current=True).content
+			r.fields_list = sorted((k, k.replace("_", u"_\u00AD"), v) for (k, v) in r.build_schema()["fields"].items())
+		return resources
+	
+	return render_to_response('website/developers/api.html', {
+		"baseurl": baseurl,
+		"api": get_resources,
+		},
+		RequestContext(request))
 
