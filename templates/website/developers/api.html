@@ -120,8 +120,8 @@ dl.schema > div {
 				<tr><th>Value</th> <th style="padding-left: 2em">Notes</th></tr>
 				{% for k, v in info.enum_values.items %}
 					<tr>
-					<td>{{k}}</td>
-					<td style="padding-left: 2em">{{v.label}}</td>
+					<td style="padding-bottom: .5em">{{k}}</td>
+					<td style="padding-left: 2em; padding-bottom: .5em">{{v.label}}{% if v.description %}. <em>{{v.description}}</em>{% endif %}</td>
 					</tr>
 				{% endfor %}
 				</table>

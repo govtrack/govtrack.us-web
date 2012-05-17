@@ -63,7 +63,7 @@ class GBaseModel(ModelResource):
 			try:
 				enum = model._meta.get_field(field).choices
 				if issubclass(enum, enummodule.Enum):
-					info["enum_values"] = dict((v.key, { "label": v.label } ) for v in enum.values())
+					info["enum_values"] = dict((v.key, { "label": v.label, "description": getattr(v, "search_help_text", None) } ) for v in enum.values())
 			except:
 				# Entry does not correspond to a field with choices.
 				pass
