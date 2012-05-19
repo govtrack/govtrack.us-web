@@ -255,8 +255,8 @@ def main(options):
     
     bill_index = None
     if not options.disable_indexing:
-	    from bill.search_indexes import BillIndex
-	    bill_index = BillIndex()
+        from bill.search_indexes import BillIndex
+        bill_index = BillIndex()
 
     if options.congress:
         files = glob.glob('data/us/%s/bills/*.xml' % options.congress)
@@ -281,11 +281,13 @@ def main(options):
             b = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
             seen_bill_ids.append(b.id)
             
-            # Update the index for any bill with recently changed text
+            # Update the index/evets for any bill with recently changed text
             textfile = "data/us/bills.text/%s/%s/%s%s.txt" % (m.group(1), m.group(2), m.group(2), m.group(3))
-            if bill_index and os.path.exists(textfile) and File.objects.is_changed(textfile):
-                bill_index.update_object(b)
+            if (bill_index and not options.disable_events) and os.path.exists(textfile) and File.objects.is_changed(textfile):
+                bill_index.update_object(b) # index the full text
+                bill.create_events() # events for new bill text documents
                 File.objects.save_file(textfile)
+                
             continue
             
         if options.slow:

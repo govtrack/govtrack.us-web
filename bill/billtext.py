@@ -79,34 +79,37 @@ bill_gpo_status_codes = {
 	"s_p": "Star Print of an Amendment",
 	}
 	
-def load_bill_text(bill, version, plain_text=False):
+def load_bill_text(bill, version, plain_text=False, mods_only=False):
 	from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
 
 	bt = BillType.by_value(bill.bill_type).xml_code
 	basename = "data/us/bills.text/%s/%s/%s%d%s" % (bill.congress, bt, bt, bill.number, version if version != None else "")
 	
-	if plain_text:
-		try:
-			return open(basename + ".txt").read().decode("utf8", "ignore") # otherwise we get 'Chuck failed' in the xapian_backend apparently due to decoding issue.
-		except IOError:
-			return ""
-	elif os.path.exists(basename + ".xml") and False:
-		dom = lxml.etree.parse(basename + ".xml")
-		transform = lxml.etree.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "textxsl/billres.xsl"))
-		transform = lxml.etree.XSLT(transform)
-		result = transform(dom)
-		
-		# empty nodes cause HTML parsing problems, so remove them.
-		# iterate in reverse document order so that we hit parents after
-		# their children, since if we remove all of the children then we may
-		# want to remove the parent too.
-		for node in reversed(list(result.getiterator())):
-			if node.xpath("string(.)") == "":
-				node.getparent().remove(node)
-				
-		bill_text_content = lxml.etree.tostring(result.xpath("head/style")[0]) + lxml.etree.tostring(result.xpath("body")[0])
+	if mods_only:
+		bill_text_content = None
 	else:
-		bill_text_content = open(basename + ".html").read()
+		if plain_text:
+			try:
+				return open(basename + ".txt").read().decode("utf8", "ignore") # otherwise we get 'Chuck failed' in the xapian_backend apparently due to decoding issue.
+			except IOError:
+				return ""
+		elif os.path.exists(basename + ".xml") and False:
+			dom = lxml.etree.parse(basename + ".xml")
+			transform = lxml.etree.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "textxsl/billres.xsl"))
+			transform = lxml.etree.XSLT(transform)
+			result = transform(dom)
+			
+			# empty nodes cause HTML parsing problems, so remove them.
+			# iterate in reverse document order so that we hit parents after
+			# their children, since if we remove all of the children then we may
+			# want to remove the parent too.
+			for node in reversed(list(result.getiterator())):
+				if node.xpath("string(.)") == "":
+					node.getparent().remove(node)
+					
+			bill_text_content = lxml.etree.tostring(result.xpath("head/style")[0]) + lxml.etree.tostring(result.xpath("body")[0])
+		else:
+			bill_text_content = open(basename + ".html").read()
 	
 	mods = lxml.etree.parse(basename + ".mods.xml")
 	ns = { "mods": "http://www.loc.gov/mods/v3" }
