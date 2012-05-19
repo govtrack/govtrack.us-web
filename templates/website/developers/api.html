@@ -72,7 +72,7 @@ dl.schema > div {
 	
 	<ul class="bullets">
 		<li><a href="{{baseurl}}person?roles__current=true">{{baseurl}}person?roles__current=true</a><br/>List current Members of Congress.</li>
-		<li><a href="{{baseurl}}bill?congress=112">{{baseurl}}bill?congress=112</a><br/>List current bills in Congress.</li>
+		<li><a href="{{baseurl}}bill?congress=112&amp;order_by=-current_status_date">{{baseurl}}bill?congress=112&amp;order_by=-current_status_date</a><br/>List current bills in Congress with the most recently active bills first.</li>
 		<li><a href="{{baseurl}}bill/74369">{{baseurl}}bill/74369</a><br/>H.R. 1349: Public Online Information Act of 2011.</li>
 	</ul>
 	
@@ -93,6 +93,14 @@ dl.schema > div {
 					{{ field }}<sup style="vertical-align: super; font-size: 75%; color: #777;">{% if type == 1 %}*{% endif %}{% if type == 2 %}**{% endif %}</sup>{% if not forloop.last %}, {% endif %}{% endfor %}.
 			</p>
 			<p>(Fields marked with a * support <a href="https://docs.djangoproject.com/en/dev/ref/models/querysets/#field-lookups">Django-style filters</a> like __gt. Fields marked with ** support filters that span the relationship, such as x__y=112.)</p>
+		{% endif %}
+		
+		{% if resourcedef.Meta.ordering %}
+			<h4 style="margin-bottom: 1em">Ordering</h4>
+			<p>You can order the results using <em>order_by=fieldname</em> (ascending) or <em>order_by=-fieldname</em> (descending) using the following fields:
+				{% for field in resourcedef.Meta.ordering %}
+					{{ field }}{% if not forloop.last %}, {% endif %}{% endfor %}.
+			</p>
 		{% endif %}
 		
 		{% if resourcedef.canonical_example %}

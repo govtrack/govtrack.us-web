@@ -136,6 +136,7 @@ class PersonRoleModel(GBaseModel):
 			"startdate": ALL,
 			"state": ('exact,'),
 		}
+		ordering = ['startdate', 'enddate']
 		additional_properties = {
 			"title": "get_title_abbreviated",
 			"title_long": "get_title",
@@ -167,6 +168,7 @@ class BillModel(GBaseModel):
 			"senate_floor_schedule_postdate": ALL,
 		}
 		excludes = ["titles", "major_actions"]
+		ordering = ['current_status_date', 'introduced_date', 'docs_house_gov_postdate', 'senate_floor_schedule_postdate']
 		additional_properties = {
 			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
 			"display_number": "display_number_no_congress_number",
