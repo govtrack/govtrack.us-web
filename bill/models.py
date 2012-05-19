@@ -305,11 +305,21 @@ class Bill(models.Model):
                 E.add("dhg", self.docs_house_gov_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
             if self.senate_floor_schedule_postdate:
                 E.add("sfs", self.senate_floor_schedule_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
+                
+            # generate an event for each new GPO text availability
+            from glob import glob
+            from billtext import bill_gpo_status_codes
+            bt = BillType.by_value(self.bill_type).xml_code
+            for st in bill_gpo_status_codes:
+                textfn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (self.congress, bt, bt, self.number, st) # use pdf since we don't modify it once we download it, and hopefully we actually have a displayable format like HTML
+                if os.path.exists(textfn):
+                    textmodtime = datetime.datetime.fromtimestamp(os.path.getmtime(textfn))
+                    E.add("text:" + st, textmodtime, index_feeds + common_feeds)
     
     def render_event(self, eventid, feeds):
-        if eventid in "dhg":
+        if eventid == "dhg":
             return self.render_event_dhg(feeds)
-        if eventid in "sfs":
+        if eventid == "sfs":
             return self.render_event_sfs(feeds)
             
         ev_type, ev_code = eventid.split(":")
@@ -317,6 +327,8 @@ class Bill(models.Model):
             return self.render_event_state(ev_code, feeds)
         elif ev_type == "cosp":
             return self.render_event_cosp(ev_code, feeds)
+        elif ev_type == "text":
+            return self.render_event_text(ev_code, feeds)
         else:
             raise Exception()
           
@@ -442,6 +454,26 @@ class Bill(models.Model):
             "body_text_template": """This {{noun}} has been added to the Senate's floor schedule for the next legislative day.\n\n{{current_status}}""",
             "body_html_template": """<p>This {{noun}} has been added to the Senate&rsquo;s floor schedule for the next legislative day.</p><p>{{current_status}}</p>""",
             "context": { "noun": self.noun, "current_status": self.current_status_description },
+            }
+        
+    def render_event_text(self, ev_code, feeds):
+        from billtext import bill_gpo_status_codes, load_bill_text
+        if not ev_code in bill_gpo_status_codes: raise Exception()
+        bt = BillType.by_value(self.bill_type).xml_code
+        textfn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (self.congress, bt, bt, self.number, ev_code) # use pdf since we don't modify it once we download it, and hopefully we actually have a displayable format like HTML
+        if not os.path.exists(textfn): raise Exception()
+        
+        modsinfo = load_bill_text(self, ev_code, mods_only=True)
+        
+        return {
+            "type": "Bill Text",
+            "date": datetime.datetime.fromtimestamp(os.path.getmtime(textfn)),
+            "date_has_no_time": False,
+            "title": self.title,
+            "url": self.get_absolute_url() + "/text",
+            "body_text_template": """This {{noun}}'s text {% if doc_version_name != "Introduced" %}for status <{{doc_version_name}}> ({{doc_date}}) {% endif %}is now available.""",
+            "body_html_template": """<p>This {{noun}}&rsquo;s text {% if doc_version_name != "Introduced" %}for status &lt;{{doc_version_name}}&gt; ({{doc_date}}) {% endif %}is now available.</p>""",
+            "context": { "noun": self.noun, "doc_date": modsinfo["docdate"], "doc_version_name": modsinfo["doc_version_name"] },
             }
         
     def get_major_events(self):
