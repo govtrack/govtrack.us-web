@@ -8,6 +8,13 @@
         {{ role.get_role_type_display }}}{% if role.state %}, {{ role.get_state_display }}{% endif %}
 {% endblock %}
 
+{% block head %}
+<style>
+#missedvotestable { margin-top: 1.5em; margin-left: 3em; }
+#missedvotestable th { padding-right: 1em; }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/highcharts.js" ></script>
 {% endblock %}
@@ -343,6 +350,15 @@
 			});
 		});
 		</script>
+		
+		<p style="text-align: center; margin-top: .5em; font-size: 90%;"><a href="#" onclick="$('#missedvotestable').slideDown(); $(this).hide(); return false;">Show the numbers...</a></p>
+		<table id="missedvotestable" style="display: none">
+			<tr> <th>Time Period</th> <th>Votes Elligible</th> <th>Missed Votes</th> <th>Percent</th> </tr>
+			{% for time, pct, novote, numvote in analysis_data.missedvotes.data %}
+				<tr><td>{{time}}</td> <td>{{numvote}}</td> <td>{{novote}}</td> <td>{{pct}}%</td></tr>
+			{% endfor %}
+		</table>
+
 	</section><!-- /voting-record -->
 	{% endif %}
 	

@@ -77,7 +77,7 @@ def load_votes_analysis(person):
         "percent": round(100*float(dom.xpath("novote")[0].get("NoVotePct"))),
         "firstdate": parse_govtrack_date(dom.xpath("novote")[0].get("FirstVoteDate")),
         "lastdate": parse_govtrack_date(dom.xpath("novote")[0].get("LastVoteDate")),
-        "data": [(node.get("time"), round(100.0*float(node.get("NoVotePct")), 1)) for node in dom.xpath("novote/hist-stat") ] }
+        "data": [(node.get("time"), round(100.0*float(node.get("NoVotePct")), 1), node.get("NoVote"), node.get("NumVote")) for node in dom.xpath("novote/hist-stat") ] }
 
 def load_influence_analysis(person):
     influencers = []
