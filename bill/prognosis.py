@@ -358,7 +358,7 @@ def build_model(congress):
 		modelfile.write("factors = ")
 		pprint(MODEL, modelfile)
 
-def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_data):
+def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_data, proscore=False):
 	import prognosis_model
 	
 	# get a list of (factorkey, descr) tuples of the factors that are true for
@@ -368,6 +368,13 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 	is_introduced = bill.current_status in (BillStatus.introduced, BillStatus.referred)
 	
 	model = prognosis_model.factors[(bill.bill_type, is_introduced)]
+	
+	# If we are doing a "proscore", remove any startswith factors that increase
+	# a bill's prognosis. These are usually indicative of boring bills like renaming a
+	# post office. Startswith factors that decrease a bill's prognosis are still good
+	# to include.
+	if proscore:
+		factors = [(key, decr) for (key, decr) in factors if key in model["factors"] and (not key.startswith("startswith:") or model["factors"][key]["regression_beta"] < 0)]
 	
 	factors_list = [{ "description": descr, "count": model["factors"][key]["count"], "success_rate": model["factors"][key]["success_rate"], "success_change": model["factors"][key]["success_rate"]-model["success_rate"] } for key, descr in factors if key in model["factors"]]
 	factors_list.sort(key = lambda x : x["success_rate"], reverse=True)
@@ -396,11 +403,11 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 		"factors": factors_list,
 	}
 
-def compute_prognosis(bill):
+def compute_prognosis(bill, proscore=False):
 	import prognosis_model
 	majority_party = load_majority_party(bill.congress)
 	committee_membership = load_committee_membership(bill.congress)
-	prog = compute_prognosis_2(bill, committee_membership, majority_party, None)
+	prog = compute_prognosis_2(bill, committee_membership, majority_party, None, proscore=proscore)
 	prog["congress"] = prognosis_model.congress
 	return prog
 		

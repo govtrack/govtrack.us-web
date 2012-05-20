@@ -84,9 +84,10 @@ def bill_search_manager():
     sm.add_option('bill_type', label="bill or resolution type")
     
     #sm.add_sort("Popularity", "-total_bets", default=True)
+    sm.add_sort("Secret Sauce", "-proscore", default=True)
     sm.add_sort("Introduced Date (Newest First)", "-introduced_date")
     sm.add_sort("Introduced Date (Oldest First)", "introduced_date")
-    sm.add_sort("Last Major Action (Recent First)", "-current_status_date", default=True)
+    sm.add_sort("Last Major Action (Recent First)", "-current_status_date")
 
     def safe_strftime(date, format):
         return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")

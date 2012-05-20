@@ -10,6 +10,7 @@ from committee.models import Committee
 from bill.status import BillStatus
 from bill.title import get_bill_number, get_primary_bill_title
 from bill.billtext import load_bill_text
+from us import get_congress_dates
 
 from django.conf import settings
 
@@ -112,13 +113,18 @@ class Bill(models.Model):
         return "\n".join([self.title] + [t[2] for t in self.titles]) \
         	+ "\n\n" + load_bill_text(self, None, plain_text=True)
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date')
-    #haystack_index_extra = (('total_bets', 'Integer'),)
+    haystack_index_extra = (('proscore', 'Float'),)
     def get_terms_index_list(self):
         return [t.id for t in self.terms.all().distinct()]
-    #def total_bets(self):
-    #    from website.models import TestMarketVote
-    #    return TestMarketVote.objects.filter(bill=self).count()
-    #######
+    def proscore(self):
+        """A modified prognosis score that omits factors associated with uninteresting bills, such as naming post offices. Only truly valid for current bills, and useless to compare across Congresses, but returns a value for all bills."""
+        # To aid search, especially for non-current bills, add in something to give most recently active bills a boost.
+        cstart, cend = get_congress_dates(self.congress)
+        r = (self.current_status_date - cstart.date()).days / 365.0 # ranges from 0.0 to about 2.0.
+        if self.is_current:
+            from prognosis import compute_prognosis
+            r += compute_prognosis(self, proscore=True)["prediction"]
+        return r
 
         
     @property
