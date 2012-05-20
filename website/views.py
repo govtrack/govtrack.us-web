@@ -113,7 +113,7 @@ def search(request):
     for grp in results:
         for i in xrange(len(grp[3])):
             grp[3][i]["index"] = i
-       	grp[3].sort(key = lambda o : (o["secondary"], o["index"]))
+       	grp[3].sort(key = lambda o : (o.get("secondary", False), o["index"]))
     
     # sort first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
     results.sort(key = lambda c : (len([d for d in c[3] if d.get("secondary", False) == False]) == False, len(c[3]) == 0, len(c[3])))
