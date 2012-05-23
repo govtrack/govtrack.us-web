@@ -13,6 +13,9 @@
 	</div><!-- /summary-box -->
 	
 	<div class="ads square">
+		{% if remote_net_house or remote_net_senate or request.user.username == "admin" %}
+			<img src="/static/images/ad_walk_left.png">
+		{% else %}
 		<script type="text/javascript"><!--
 		google_ad_client = "ca-pub-3418906291605762";
 		/* GT title square */
@@ -24,6 +27,7 @@
 		<script type="text/javascript"
 		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 		</script>
+		{% endif %}
 		<div class="explainer"><a href="/advertising">(About Ads | Advertise Here)</a></div>
 	</div>
 	

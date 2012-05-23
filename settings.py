@@ -141,6 +141,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.core.context_processors.request',
     'events.middleware.template_context_processor',
+    'website.middleware.template_context_processor',
 )
 
 TEST_DATABASE_CHARSET = 'utf8'
