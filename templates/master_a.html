@@ -14,7 +14,39 @@
 	
 	<div class="ads square">
 		{% if remote_net_house or remote_net_senate or request.user.username == "admin" %}
-			<img src="/static/images/ad_walk_left.png">
+			{% if wmata_info %}
+				<style>
+					.wmata_line { padding: 2px; text-align: center; }
+					.wmata_BL { background-color: #0079c2; color: white; }
+					.wmata_OR { background-color: #f79238; color: white; }
+					.wmata_RD { background-color: #ed3f34; color: white; }
+					.wmata_GR { background-color: #009e56; color: white; }
+					.wmata_YL { background-color: #fee11b; color: white; }
+				</style>
+				<div style="width: 284px; height: 240px; border: 1px solid #AAA; background-color: #F8F6F8; padding: 7px; overflow: auto">
+				<center style="font-size: italic; margin-bottom: 1em">Plan Your Ride Home</center>
+				<center>
+				{% if wmata_info.Incidents|length > 0 %}
+					<table style="font-size: 10px; line-height: normal; margin-bottom: 1em;">
+					<tr><th></th> <th style="padding-left: 1em">Delay/Incident</th></tr>
+					{% for inc in wmata_info.Incidents %}
+						<tr><td>{% for ln in inc.LinesAffected %}<span class="wmata_line wmata_{{ln}}">{{ln}}</span>{% endfor %}</td> <td style="padding-left: 1em">{{inc.Description}}</td></tr>
+					{% endfor %}
+					</table>
+				{% endif %}
+				
+				<table style="font-size: 10px; line-height: normal;">
+				<tr><th style="padding: 2px">Line</th> <th style="padding: 2px 2em 2px 0">Destination</th> <th style="padding: 2px">Minutes</th></tr>
+				{% for train in wmata_info.Trains %}
+					<tr><td class="wmata_line wmata_{{train.Line}}">{{train.Line}}</td> <td style="padding: 2px 2em 2px 1em">{{train.Destination}}</td> <td style="padding: 2px">{{train.Min}}</td></tr>
+				{% endfor %}
+				</table>
+				</center>
+				<center style="font-size: 11px; margin-top: 1em; line-height: normal">Arrivals for Capitol South and Union Station. Reload this page to refresh.</center>
+				</div>
+			{% else %}
+				<img src="/static/images/ad_walk_left.png">
+			{% endif %}
 		{% else %}
 		<script type="text/javascript"><!--
 		google_ad_client = "ca-pub-3418906291605762";
