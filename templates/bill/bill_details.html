@@ -112,7 +112,9 @@
 	{% if bill.is_alive %}
 	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 	
+	{% comment %}
 	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
+	{% endcomment %}
 
 	{% if market %}
 	{% if not user.is_authenticated %}

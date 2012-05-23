@@ -285,7 +285,7 @@ def main(options):
             textfile = "data/us/bills.text/%s/%s/%s%s.txt" % (m.group(1), m.group(2), m.group(2), m.group(3))
             if (bill_index and not options.disable_events) and os.path.exists(textfile) and File.objects.is_changed(textfile):
                 bill_index.update_object(b) # index the full text
-                bill.create_events() # events for new bill text documents
+                b.create_events() # events for new bill text documents
                 File.objects.save_file(textfile)
                 
             continue
