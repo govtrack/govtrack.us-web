@@ -119,11 +119,20 @@ class Bill(models.Model):
     def proscore(self):
         """A modified prognosis score that omits factors associated with uninteresting bills, such as naming post offices. Only truly valid for current bills, and useless to compare across Congresses, but returns a value for all bills."""
         # To aid search, especially for non-current bills, add in something to give most recently active bills a boost.
+ 
+        type_boost = {
+           BillType.senate_bill: 1.0, BillType.house_bill: 1.0,
+           BillType.senate_resolution: 0.2, BillType.house_resolution: 0.2,
+           BillType.senate_concurrent_resolution: 0.3, BillType.house_concurrent_resolution: 0.3,
+           BillType.senate_joint_resolution: 0.35, BillType.house_joint_resolution: 0.35,
+        }
+        
         cstart, cend = get_congress_dates(self.congress)
         r = (self.current_status_date - cstart.date()).days / 365.0 # ranges from 0.0 to about 2.0.
         if self.is_current:
             from prognosis import compute_prognosis
             r += compute_prognosis(self, proscore=True)["prediction"]
+        r *= type_boost[self.bill_type]
         return r
 
         
