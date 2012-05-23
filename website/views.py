@@ -109,6 +109,12 @@ def search(request):
         return HttpResponseRedirect(bill.get_absolute_url())
     results.append(("Bills and Resolutions", "/congress/bills/browse", "text", bills))
     
+    # in each group, make sure the secondary results are placed last
+    for grp in results:
+        for i in xrange(len(grp[3])):
+            grp[3][i]["index"] = i
+       	grp[3].sort(key = lambda o : (o.get("secondary", False), o["index"]))
+    
     # sort first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
     results.sort(key = lambda c : (len([d for d in c[3] if d.get("secondary", False) == False]) == False, len(c[3]) == 0, len(c[3])))
         

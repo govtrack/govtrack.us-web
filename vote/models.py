@@ -25,7 +25,7 @@ class VoteSource(enum.Enum):
 class VoteCategory(enum.Enum):
     amendment = enum.Item(1, 'Amendment', search_help_text="Votes on accepting or rejecting amendments to bills and resolutions.")
     passage_suspension = enum.Item(2, 'Passage under Suspension', search_help_text="Fast-tracked votes on the passage of bills requiring a 2/3rds majority.")
-    passage = enum.Item(3, 'Passage', search_help_text="Votes on passing or failing bills and resolutions.")
+    passage = enum.Item(3, 'Passage', search_help_text="Votes on passing or failing bills and resolutions and on agreeing to conference reports.")
     cloture = enum.Item(4, 'Cloture', search_help_text="Votes to end debate and move to a vote, i.e. to end a filibuster.")
     passage_part = enum.Item(5, 'Passage (Part)', search_help_text="Votes on the passage of parts of legislation.")
     nomination = enum.Item(6, 'Nomination', search_help_text="Senate votes on presidential nominations.")

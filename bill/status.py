@@ -34,7 +34,7 @@ class BillStatus(enum.Enum):
     vetoed_pocket = enum.Item(23, 'Pocket Vetoed', xml_code='VETOED:POCKET', search_help_text="Pocket vetoed by the President.")
     vetoed_override_fail_originating_house = enum.Item(24, 'Veto Override Failed in House', xml_code='VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE', search_help_text="The House's attempt to override a veto failed.")
     vetoed_override_fail_originating_senate = enum.Item(25, 'Veto Override Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE', search_help_text="The Senate's attempt to override a veto failed.")
-    vetoed_override_fail_second_house = enum.Item(26, 'Veto Override Passed House, Failed in House', xml_code='VETOED:OVERRIDE_FAIL_SECOND:HOUSE', search_help_text="The Senate overrode the veto but the House's attempt to override the veto failed.")
+    vetoed_override_fail_second_house = enum.Item(26, 'Veto Override Passed Senate, Failed in House', xml_code='VETOED:OVERRIDE_FAIL_SECOND:HOUSE', search_help_text="The Senate overrode the veto but the House's attempt to override the veto failed.")
     vetoed_override_fail_second_senate = enum.Item(27, 'Veto Override Passed House, Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_SECOND:SENATE', search_help_text="The House overrode the veto but the Senate's attempt to override the veto failed.")
     enacted_signed = enum.Item(28, 'Signed by the President', xml_code='ENACTED:SIGNED', search_help_text="Enacted by a signature of the President.")
     enacted_veto_override = enum.Item(29, 'Veto Overridden', xml_code='ENACTED:VETO_OVERRIDE', search_help_text="Enacted by a veto override.")
