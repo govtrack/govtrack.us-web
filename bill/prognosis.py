@@ -246,6 +246,7 @@ def build_model(congress):
 		if seen: continue
 		pop_title_prefixes.append(t)
 		if len(pop_title_prefixes) == 40: break
+	pop_title_prefixes.append("A joint resolution proposing an amendment to the Constitution")
 		
 	# We create separate models for bills by the bill type (H.R., S., H.Res., etc.)
 	# and by whether the bill is introduced/referred or has been reported or more.
@@ -257,6 +258,7 @@ def build_model(congress):
 	
 	for (bill_type, bill_type_descr), is_introduced in itertools.product(BillType, (True, False)):
 		#if bill_type != BillType.house_bill: continue
+		#if bill_type not in (BillType.house_joint_resolution, BillType.senate_joint_resolution): continue
 		
 		bills = BILLS.filter(bill_type=bill_type)
 		if not is_introduced:
@@ -303,11 +305,11 @@ def build_model(congress):
 			# type of bill (H.R., H.Res., etc.) and a draw the number of bills
 			# within this subset (key) that are passed, and see if it is statistically
 			# different from the overall count. only include statistical differences.
-			if bill_counts[0] < 20: continue
+			if bill_counts[0] < 15: continue
 			distr = scipy.stats.binom(bill_counts[0], float(passed)/float(total))
 			pless = distr.cdf(bill_counts[1])
 			pmore = 1.0-distr.cdf(bill_counts[1])
-			if pless < .015 or pmore < .015:
+			if pless < .015 or pmore < .015 or (total < 100 and (pless < .05 or pmore < .05)):
 				# only show statistically significant differences from the group mean
 				significant_factors[key] = (pless, pmore)
 				

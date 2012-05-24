@@ -124,7 +124,7 @@ class Bill(models.Model):
            BillType.senate_bill: 1.0, BillType.house_bill: 1.0,
            BillType.senate_resolution: 0.2, BillType.house_resolution: 0.2,
            BillType.senate_concurrent_resolution: 0.3, BillType.house_concurrent_resolution: 0.3,
-           BillType.senate_joint_resolution: 0.35, BillType.house_joint_resolution: 0.35,
+           BillType.senate_joint_resolution: 0.75, BillType.house_joint_resolution: 0.75,
         }
         
         cstart, cend = get_congress_dates(self.congress)
