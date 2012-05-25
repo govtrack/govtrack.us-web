@@ -405,8 +405,15 @@ class XapianSearchBackend(BaseSearchBackend):
         if hasattr(settings, 'HAYSTACK_XAPIAN_WEIGHTING_SCHEME'):
             enquire.set_weighting_scheme(xapian.BM25Weight(*settings.HAYSTACK_XAPIAN_WEIGHTING_SCHEME))
         enquire.set_query(query)
-
-        if sort_by:
+        
+        facet_counters = []
+        if facets:
+            for f in facets:
+                ctr = xapian.ValueCountMatchSpy(self._value_column(f))
+                enquire.add_matchspy(ctr)
+                facet_counters.append(ctr)
+                
+        if sort_by and not facets:
             sorter = xapian.MultiValueSorter()
 
             for sort_field in sort_by:
@@ -428,23 +435,39 @@ class XapianSearchBackend(BaseSearchBackend):
 
         if not end_offset:
             end_offset = database.get_doccount() - start_offset
+        if facets:
+            start_offset = 0
+            end_offset = database.get_doccount()
 
         matches = self._get_enquire_mset(database, enquire, start_offset, end_offset)
 
-        for match in matches:
-            app_label, module_name, pk, model_data = pickle.loads(self._get_document_data(database, match.document))
-            if highlight:
-                model_data['highlighted'] = {
-                    self.content_field_name: self._do_highlight(
-                        model_data.get(self.content_field_name), query
-                    )
-                }
-            results.append(
-                result_class(app_label, module_name, pk, match.percent, **model_data)
-            )
+        if not facets:
+            for match in matches:
+                app_label, module_name, pk, model_data = pickle.loads(self._get_document_data(database, match.document))
+                if highlight:
+                    model_data['highlighted'] = {
+                        self.content_field_name: self._do_highlight(
+                            model_data.get(self.content_field_name), query
+                        )
+                    }
+                results.append(
+                    result_class(app_label, module_name, pk, match.percent, **model_data)
+                )
 
         if facets:
-            facets_dict['fields'] = self._do_field_facets(results, facets)
+            facets_dict['fields'] = { }
+            for i in xrange(len(facets)):
+                is_numeric = False
+                for field in self.schema:
+                    if field['field_name'] == facets[i]:
+                        if field['type'] == 'long':
+                            is_numeric = True
+                        
+                itr = facet_counters[i].values()
+                facets_dict['fields'][facets[i]] = [
+                    (long(t.term) if is_numeric else t.term, t.termfreq)
+                    for t in itr ]
+                    
         if date_facets:
             facets_dict['dates'] = self._do_date_facets(results, date_facets)
         if query_facets:
