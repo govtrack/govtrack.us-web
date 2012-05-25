@@ -1,4 +1,4 @@
-# Copyright (C) 2009, 2010, 2011 David Sauve
+# Copyright (C) 2009, 2010, 2011, 2012 David Sauve
 # Copyright (C) 2009, 2010 Trapeze
 
 __author__ = 'David Sauve'
@@ -11,7 +11,6 @@ import os
 import re
 import shutil
 import sys
-import warnings
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -19,9 +18,8 @@ from django.utils.encoding import force_unicode
 
 from haystack import connections
 from haystack.backends import BaseEngine, BaseSearchBackend, BaseSearchQuery, SearchNode, log_query
-from haystack.constants import ID, DJANGO_CT, DJANGO_ID
-from haystack.exceptions import HaystackError, MissingDependency, MoreLikeThisError
-from haystack.fields import DateField, DateTimeField, IntegerField, FloatField, BooleanField, MultiValueField
+from haystack.constants import ID
+from haystack.exceptions import HaystackError, MissingDependency
 from haystack.models import SearchResult
 from haystack.utils import get_identifier
 
@@ -34,6 +32,8 @@ except ImportError:
 DOCUMENT_ID_TERM_PREFIX = 'Q'
 DOCUMENT_CUSTOM_TERM_PREFIX = 'X'
 DOCUMENT_CT_TERM_PREFIX = DOCUMENT_CUSTOM_TERM_PREFIX + 'CONTENTTYPE'
+
+MEMORY_DB_NAME = ':memory:'
 
 DEFAULT_XAPIAN_FLAGS = (
     xapian.QueryParser.FLAG_PHRASE |
@@ -71,7 +71,7 @@ class XHValueRangeProcessor(xapian.ValueRangeProcessor):
             if field_dict['field_name'] == field_name:
                 if not begin:
                     if field_dict['type'] == 'text':
-                        begin = u'a' # TODO: A better way of getting a min text value?
+                        begin = u'a'  # TODO: A better way of getting a min text value?
                     elif field_dict['type'] == 'long':
                         begin = -sys.maxint - 1
                     elif field_dict['type'] == 'float':
@@ -80,7 +80,7 @@ class XHValueRangeProcessor(xapian.ValueRangeProcessor):
                         begin = u'00010101000000'
                 elif end == '*':
                     if field_dict['type'] == 'text':
-                        end = u'z' * 100 # TODO: A better way of getting a max text value?
+                        end = u'z' * 100  # TODO: A better way of getting a max text value?
                     elif field_dict['type'] == 'long':
                         end = sys.maxint
                     elif field_dict['type'] == 'float':
@@ -126,7 +126,9 @@ class XapianSearchBackend(BaseSearchBackend):
     `connection_options`.  This should point to a location where you would your
     indexes to reside.
     """
-    def __init__(self, connection_alias, language='english', **connection_options):
+    inmemory_db = None
+
+    def __init__(self, connection_alias, **connection_options):
         """
         Instantiates an instance of `SearchBackend`.
 
@@ -145,11 +147,11 @@ class XapianSearchBackend(BaseSearchBackend):
 
         self.path = connection_options.get('PATH')
 
-        if not os.path.exists(self.path):
+        if self.path != MEMORY_DB_NAME and not os.path.exists(self.path):
             os.makedirs(self.path)
 
         self.flags = connection_options.get('FLAGS', DEFAULT_XAPIAN_FLAGS)
-        self.language = language
+        self.language = getattr(settings, 'HAYSTACK_XAPIAN_LANGUAGE', 'english')
         self._schema = None
         self._content_field_name = None
 
@@ -273,7 +275,7 @@ class XapianSearchBackend(BaseSearchBackend):
             pass
 
         finally:
-            database = None
+            database.close()
 
     def remove(self, obj):
         """
@@ -284,6 +286,7 @@ class XapianSearchBackend(BaseSearchBackend):
         """
         database = self._database(writable=True)
         database.delete_document(DOCUMENT_ID_TERM_PREFIX + get_identifier(obj))
+        database.close()
 
     def clear(self, models=[]):
         """
@@ -313,6 +316,7 @@ class XapianSearchBackend(BaseSearchBackend):
                     DOCUMENT_CT_TERM_PREFIX + '%s.%s' %
                     (model._meta.app_label, model._meta.module_name)
                 )
+        database.close()
 
     def document_count(self):
         try:
@@ -400,25 +404,17 @@ class XapianSearchBackend(BaseSearchBackend):
         enquire = xapian.Enquire(database)
         if hasattr(settings, 'HAYSTACK_XAPIAN_WEIGHTING_SCHEME'):
             enquire.set_weighting_scheme(xapian.BM25Weight(*settings.HAYSTACK_XAPIAN_WEIGHTING_SCHEME))
-        
-        facet_counters = []
-        if facets:
-            for f in facets:
-                ctr = xapian.ValueCountMatchSpy(self._value_column(f))
-                enquire.add_matchspy(ctr)
-                facet_counters.append(ctr)
-            
         enquire.set_query(query)
 
-        if sort_by and not facets:
+        if sort_by:
             sorter = xapian.MultiValueSorter()
 
             for sort_field in sort_by:
                 if sort_field.startswith('-'):
                     reverse = True
-                    sort_field = sort_field[1:] # Strip the '-'
+                    sort_field = sort_field[1:]  # Strip the '-'
                 else:
-                    reverse = False # Reverse is inverted in Xapian -- http://trac.xapian.org/ticket/311
+                    reverse = False  # Reverse is inverted in Xapian -- http://trac.xapian.org/ticket/311
                 sorter.add(self._value_column(sort_field), reverse)
 
             enquire.set_sort_by_key_then_relevance(sorter, True)
@@ -432,40 +428,23 @@ class XapianSearchBackend(BaseSearchBackend):
 
         if not end_offset:
             end_offset = database.get_doccount() - start_offset
-        if facets:
-            start_offset = 0
-            end_offset = database.get_doccount()
 
         matches = self._get_enquire_mset(database, enquire, start_offset, end_offset)
 
-        if not facets:
-            for match in matches:
-                app_label, module_name, pk, model_data = pickle.loads(self._get_document_data(database, match.document))
-                if highlight:
-                    model_data['highlighted'] = {
-                        self.content_field_name: self._do_highlight(
-                            model_data.get(self.content_field_name), query
-                        )
-                    }
-                results.append(
-                    result_class(app_label, module_name, pk, match.percent, **model_data)
-                )
+        for match in matches:
+            app_label, module_name, pk, model_data = pickle.loads(self._get_document_data(database, match.document))
+            if highlight:
+                model_data['highlighted'] = {
+                    self.content_field_name: self._do_highlight(
+                        model_data.get(self.content_field_name), query
+                    )
+                }
+            results.append(
+                result_class(app_label, module_name, pk, match.percent, **model_data)
+            )
 
         if facets:
-            #facets_dict['fields'] = self._do_field_facets(results, facets)
-            facets_dict['fields'] = { }
-            for i in xrange(len(facets)):
-                is_numeric = False
-                for field in self.schema:
-                    if field['field_name'] == facets[i]:
-                        if field['type'] == 'long':
-                            is_numeric = True
-                        
-                itr = facet_counters[i].values()
-                facets_dict['fields'][facets[i]] = [
-                    (long(t.term) if is_numeric else t.term, t.termfreq)
-                    for t in itr ]
-
+            facets_dict['fields'] = self._do_field_facets(results, facets)
         if date_facets:
             facets_dict['dates'] = self._do_date_facets(results, date_facets)
         if query_facets:
@@ -585,9 +564,9 @@ class XapianSearchBackend(BaseSearchBackend):
         Returns a xapian.Query
         """
         if query_string == '*':
-            return xapian.Query('') # Match everything
+            return xapian.Query('')  # Match everything
         elif query_string == '':
-            return xapian.Query()   # Match nothing
+            return xapian.Query()  # Match nothing
 
         qp = xapian.QueryParser()
         qp.set_database(self._database())
@@ -664,7 +643,7 @@ class XapianSearchBackend(BaseSearchBackend):
             `text` -- The text to be highlighted
         """
         for term in query:
-            for match in re.findall('[^A-Z]+', term): # Ignore field identifiers
+            for match in re.findall('[^A-Z]+', term):  # Ignore field identifiers
                 match_re = re.compile(match, re.I)
                 content = match_re.sub('<%s>%s</%s>' % (tag, term, tag), content)
 
@@ -690,7 +669,7 @@ class XapianSearchBackend(BaseSearchBackend):
             for result in results:
                 field_value = getattr(result, field)
                 if self._multi_value_field(field):
-                    for item in field_value: # Facet each item in a MultiValueField
+                    for item in field_value:  # Facet each item in a MultiValueField
                         facet_list[item] = facet_list.get(item, 0) + 1
                 else:
                     facet_list[field_value] = facet_list.get(field_value, 0) + 1
@@ -759,7 +738,7 @@ class XapianSearchBackend(BaseSearchBackend):
                 elif gap_type == 'second':
                     date_range += datetime.timedelta(seconds=int(gap_value))
 
-            facet_list = sorted(facet_list, key=lambda n:n[0], reverse=True)
+            facet_list = sorted(facet_list, key=lambda n: n[0], reverse=True)
 
             for result in results:
                 result_date = getattr(result, date_facet)
@@ -821,7 +800,7 @@ class XapianSearchBackend(BaseSearchBackend):
 
         term_set = set()
         for term in query:
-            for match in re.findall('[^A-Z]+', term): # Ignore field identifiers
+            for match in re.findall('[^A-Z]+', term):  # Ignore field identifiers
                 term_set.add(database.get_spelling_suggestion(match))
 
         return ' '.join(term_set)
@@ -835,6 +814,10 @@ class XapianSearchBackend(BaseSearchBackend):
 
         Returns an instance of a xapian.Database or xapian.WritableDatabase
         """
+        if self.path == MEMORY_DB_NAME:
+            if not self.inmemory_db:
+                self.inmemory_db = xapian.inmemory_open()
+            return self.inmemory_db
         if writable:
             database = xapian.WritableDatabase(self.path, xapian.DB_CREATE_OR_OPEN)
         else:
@@ -952,7 +935,7 @@ class XapianSearchQuery(BaseSearchQuery):
                             DOCUMENT_CT_TERM_PREFIX,
                             model._meta.app_label, model._meta.module_name
                         )
-                    ), 0 # Pure boolean sub-query
+                    ), 0  # Pure boolean sub-query
                 ) for model in self.models
             ]
             query = xapian.Query(
@@ -997,7 +980,9 @@ class XapianSearchQuery(BaseSearchQuery):
                 if field == 'content':
                     query_list.append(self._content_field(term, is_not))
                 else:
-                    if filter_type == 'exact':
+                    if filter_type == 'contains':
+                        query_list.append(self._filter_contains(term, field, is_not))
+                    elif filter_type == 'exact':
                         query_list.append(self._filter_exact(term, field, is_not))
                     elif filter_type == 'gt':
                         query_list.append(self._filter_gt(term, field, is_not))
@@ -1044,7 +1029,7 @@ class XapianSearchQuery(BaseSearchQuery):
             else:
                 return self._term_query(term)
 
-    def _filter_exact(self, term, field, is_not):
+    def _filter_contains(self, term, field, is_not):
         """
         Private method that returns a xapian.Query that searches for `term`
         in a specified `field`.
@@ -1058,17 +1043,32 @@ class XapianSearchQuery(BaseSearchQuery):
             A xapian.Query
         """
         if ' ' in term:
-            if is_not:
-                return xapian.Query(
-                    xapian.Query.OP_AND_NOT, self._all_query(), self._phrase_query(term.split(), field)
-                )
-            else:
-                return self._phrase_query(term.split(), field)
+            return self._filter_exact(term, field, is_not)
         else:
             if is_not:
                 return xapian.Query(xapian.Query.OP_AND_NOT, self._all_query(), self._term_query(term, field))
             else:
                 return self._term_query(term, field)
+
+    def _filter_exact(self, term, field, is_not):
+        """
+        Private method that returns a xapian.Query that searches for an exact
+        match for `term` in a specified `field`.
+
+        Required arguments:
+            ``term`` -- The term to search for
+            ``field`` -- The field to search
+            ``is_not`` -- Invert the search results
+
+        Returns:
+            A xapian.Query
+        """
+        if is_not:
+            return xapian.Query(
+                xapian.Query.OP_AND_NOT, self._all_query(), self._phrase_query(term.split(), field)
+            )
+        else:
+            return self._phrase_query(term.split(), field)
 
     def _filter_in(self, term_list, field, is_not):
         """
