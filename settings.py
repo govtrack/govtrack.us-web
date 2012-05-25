@@ -146,7 +146,20 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 TEST_DATABASE_CHARSET = 'utf8'
 
-CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+if not DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '127.0.0.1:11211',
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake'
+        }
+    }    
 
 HAYSTACK_CONNECTIONS = {
     'default': {
