@@ -28,9 +28,9 @@ class GBaseModel(ModelResource):
 		
 	def determine_format(self, request):
 		# Make JSON the default output format if not specified.
-		if not hasattr(request, 'format'):
+		if not hasattr(request, 'format') and "format" not in request.GET:
 			return "application/json"
-		return super(UserResource, self).determine_format(request)
+		return super(GBaseModel, self).determine_format(request)
 	
 	def dehydrate(self, bundle):
 		# Add additional properties.
