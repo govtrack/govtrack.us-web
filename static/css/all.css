@@ -523,21 +523,27 @@ code {
             text-decoration: underline;
         	}
         .intro-box .block a:hover { text-decoration: none 	}
-.green-btn {
+.green-btn, .grey-btn {
     display: block;
     height: 41px;
+    width: 268px;
     font-size: 20px;
     line-height: 38px;
     text-align: center;
     letter-spacing: 1px;
     text-transform: uppercase;
     color: #fff;
-    background: url(../images/btn-sprite.png) no-repeat;
     overflow: hidden;
     margin: 0 0 8px;
     text-decoration: none !important;
     text-shadow: 0 1px 1px #066982;
 	}
+	.green-btn {
+		background: url(../images/btn-sprite.png) no-repeat;
+		}
+	.grey-btn {
+		background: url(../images/btn-sprite-grey.png) no-repeat;
+		}
 .green-btn:hover {
     text-decoration: none;
     background-position: 0 -43px;

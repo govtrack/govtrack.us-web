@@ -4,6 +4,7 @@ from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -120,8 +121,13 @@ def search(request):
         
     return { "results": results }
     
-@render_to('website/campaigns/bulkdata.html')
+@cache_page(60 * 15)
+@render_to('website/campaigns/bulkdata2.html')
 def campaign_bulk_data(request):
+    return { }
+
+@render_to('website/campaigns/bulkdata.html')
+def campaign_bulk_data_old(request):
     prefixes = ("Mr.", "Ms.", "Mrs.", "Dr.")
     
     # Validate.
