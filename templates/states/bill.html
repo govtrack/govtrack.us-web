@@ -1,0 +1,175 @@
+{% extends "master_a.html" %}
+{% load humanize %}
+{% load cache %}
+
+{% block logo_class %}states{% endblock %}
+{% block footer_extra %}{% include "states/footer.html" %}{% endblock %}
+
+{% block title %}{{bill.state}} {{bill.state_session.slug}} {{bill.bill_number}}. {{bill.short_title|truncatewords:25}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}{{bill.short_title}}. In GovTrack.us, a database of U.S. legislation.{% endblock %}
+{% block meta_keywords %}{{bill.state_session.state}},legislation,bill,law{% endblock %}
+
+{% block head %}
+<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}fonts/stateface.css">
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+<li><a href="/overview#states">States</a></li>
+<li><a href="/states/{{bill.state_session.state|lower}}">{{bill.state_session.state}}</a></li>
+<li><a href="/states/{{bill.state_session.state|lower}}/bills/browse">Bills</a></li>
+<li><a href="/states/{{bill.state_session.state|lower}}/bills/browse#state_session={{bill.state_session.id}}">{{bill.state_session.slug}}</a></li>
+<li>{{bill.bill_number}}</li>
+</ul>
+{% endblock %}
+
+{% block body_class %}state bill{% endblock %}
+
+{% block summary %}
+
+<h1><span class="stateface stateface-{{bill.state_session.state|lower}}">{{bill.bill_number}}</span>. {{bill.short_title|truncatewords:25}}</h1>
+	
+<div id="track_panel_base" class="container">
+	<p class="date">{{state_metadata.legislature_name}}. {{bill.session}}. {% if chamber_name %}{{chamber_name}}.{% endif %}</p>
+	
+	<div class="info">
+		{% if bill.long_title != bill.short_title %}
+			<p style="line-height: 130%">{{bill.long_title}}</p>
+		{% endif %}
+
+		<dl>
+			{% if bill.introduced_date %}
+			<dt>Introduced:</dt>
+			<dd>{{bill.introduced_date|date}}</dd>
+			{% endif %}
+			
+			{% if bill.last_action_date %}
+			<dt>Last Action:</dt>
+			<dd>{{bill.last_action_date|date}}<br/>{{bill.last_action_text}}</dd>
+			{% endif %}
+		</dl>
+	</div>
+	
+	<p style="margin: 0; line-height: 100%"><small>State legislative information provided by <a href="http://www.BillTrack50.com">LegiNation, Inc.</a> and <a href="http://www.LegiScan.com">LegiScan, Inc.</a> Some information also from <a href="http://openstates.org/">Open States</a>.</small></p>
+	
+</div>
+
+{% if bill.is_current and feed %}
+{% include "events/subscribe_inline.html" %}
+{% endif %}
+
+<div class="aside">
+	{% if bill.is_current and feed %}
+	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
+	{% endif %}
+	
+	{% if bill.state == "VA" %}
+		<p style="margin-top: 2em; font-style: italic; font-size: 95%; line-height: normal;">For tracking Virginia state legislation, GovTrack actually recommends using <a href="http://www.richmondsunlight.com/search/?q={{bill.bill_number|urlencode}}">RichmondSunlight.com</a>.</p>
+	{% endif %}
+</div><!-- /actions -->
+{% endblock %}
+
+{% block body %}
+<div id="bill-overview" class="section">
+	
+	<div class="overview">
+		<div class="holder">
+			<div class="frame">
+				
+				<div class="container">
+					<dl>
+						{% comment %}
+						{% for doc in openstates_api_info.versions %}
+							{% if forloop.first %}
+							<dt>Full Text</dt>
+							<dd>
+							{% endif %}
+							<div><a href="{{doc.url}}">{{doc.name}} {% if doc.mimetype == "application/pdf" %}(PDF){% endif %}{% if doc.mimetype == "application/msword" %}(Word){% endif %}</a></div>
+							{% if forloop.last %}
+							</dd>
+							{% endif %}
+						{% endfor %}
+						{% endcomment %}
+						
+						{% for doc in bill.documents.all %}
+							{% if forloop.first %}
+							<dt>Documents</dt>
+							<dd>
+							{% endif %}
+							<div><a href="{{doc.url}}">{{doc.type}}</a></div>
+							{% if forloop.last %}
+							</dd>
+							{% endif %}
+						{% endfor %}
+						
+					</dl>
+				</div>
+				
+				{% for action in bill.actions.all %}
+					{% if forloop.first %}
+					<div class="container">
+						<dl>
+							<dt>History</dt>
+							<dd>
+								<table>
+					{% endif %}
+					<tr valign="top"><td style="width: 6em;">{{action.date|date}}</td> <td>{{action.text}}</td></tr>
+					{% if forloop.last %}
+								</table>
+							</dd>
+						</dl>
+					</div>
+					{% endif %}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	
+	<div class="overview last">
+		<div class="holder">
+			<div class="frame">
+				
+				<div class="container">
+					<dl>
+						{% comment %}
+						{% for doc in openstates_api_info.documents %}
+							{% if forloop.first %}
+							<dt>Related Documents</dt>
+							<dd>
+							{% endif %}
+							<div><a href="{{doc.url}}">{{doc.name}} {% if doc.mimetype == "application/pdf" %}(PDF){% endif %}{% if doc.mimetype == "application/msword" %}(Word){% endif %}</a></div>
+							{% if forloop.last %}
+							</dd>
+							{% endif %}
+						{% endfor %}
+						{% endcomment %}
+						
+						{% for source in openstates_api_info.sources %}
+							{% if forloop.first %}
+							<dt>Official Source</dt>
+							<dd>
+							{% endif %}
+								<div><a href="{{source.url}}">{{source.url}}</a></div>
+							{% if forloop.last %}
+							</dd>
+							{% endif %}				
+						{% endfor %}
+						
+					</dl>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+					
+{% if bill.summary %}
+<section class="clear" style="padding-top: 2em">
+	<h3>Summary</h3>
+	{{bill.summary}}
+</section>
+{% endif %}
+
+{% endblock %}
+
+

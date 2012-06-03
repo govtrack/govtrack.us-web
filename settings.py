@@ -127,6 +127,7 @@ INSTALLED_APPS = (
     'events',
     'smartsearch',
     'bill',
+    'states',
     'predictionmarket',
 
     # for django-registration-pv
@@ -146,28 +147,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 TEST_DATABASE_CHARSET = 'utf8'
 
-if not DEBUG:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': '127.0.0.1:11211',
-        }
-    }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-snowflake'
-        }
-    }    
-
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'xapian_backend.XapianEngine',
-        'PATH': os.path.join(os.path.dirname(__file__), '../xapian_index'),
-    },
-}
-
 DATETIME_FORMAT = 'M d, Y P'
 DATE_FORMAT = 'M d, Y'
 
@@ -176,6 +155,8 @@ IGNORABLE_404_ENDS = ('spinner.gif', 'billtext/images/quote.png')
 IGNORABLE_404_STARTS = ('/phpmyadmin/',)
 
 CURRENT_CONGRESS = 112
+
+#HAYSTACK_ROUTERS = ['states.search_indexes.MyRouter', 'haystack.routers.DefaultRouter'] # causes weird import error
 
 PREDICTIONMARKET_SEED_MONEY = 1000
 PREDICTIONMARKET_BANK_UID = 136196
@@ -192,6 +173,8 @@ if not SECRET_KEY:
     raise Exception('You must provide SECRET_KEY value in settings_local.py')
 
 # Since we rely on external APIs in a few places, make sure
-# that downed APIs elsewhere don't hold us too long.
+# that downed APIs elsewhere don't hold us too long. Not
+# sure this has any useful effect.
 import socket
 socket.setdefaulttimeout(10.0)
+

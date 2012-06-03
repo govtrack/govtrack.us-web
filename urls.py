@@ -6,19 +6,22 @@ from django.contrib import admin
 admin.autodiscover()
 
 # define sitemaps
-import person.views, bill.views, committee.views, vote.views
-sitemaps = {
-        "bills_current": bill.views.sitemap_current,
-        "bills_previous": bill.views.sitemap_previous,
-        #"bills_archive": bill.views.sitemap_archive, # takes too long to load
-        "people_current": person.views.sitemap_current,
-        "people_archive": person.views.sitemap_archive,
-        "districts": person.views.sitemap_districts,
-        "committees": committee.views.sitemap,
-        "votes_current": vote.views.sitemap_current,
-        "votes_previous": vote.views.sitemap_previous,
-        #"votes_archive": vote.views.sitemap_archive, # takes too long to load
-    }
+from collections import OrderedDict
+import person.views, bill.views, committee.views, vote.views, states.models, states.views
+sitemaps = OrderedDict([
+        ("bills_current", bill.views.sitemap_current),
+        ("bills_previous", bill.views.sitemap_previous),
+        #("bills_archive", bill.views.sitemap_archive), # takes too long to load
+        ("people_current", person.views.sitemap_current),
+        ("people_archive", person.views.sitemap_archive),
+        ("districts", person.views.sitemap_districts),
+        ("committees", committee.views.sitemap),
+        ("votes_current", vote.views.sitemap_current),
+        ("votes_previous", vote.views.sitemap_previous),
+        #("votes_archive", vote.views.sitemap_archive), # takes too long to load
+	])
+for ss in states.models.StateSession.objects.all():
+    sitemaps["state_%s_bills_%s" % (ss.state.lower(), ss.slug.lower())] = states.views.sitemap(ss)
     
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
@@ -38,6 +41,7 @@ urlpatterns = patterns('',
     url(r'^congress/bills/', include('bill.urls')),
     url(r'', include('events.urls')),
     url(r'^market/', include('predictionmarket.urls')),
+    url(r'^states(/|$)', include('states.urls')),
 
     # django-registration-pv
     (r'^emailverif/', include('emailverification.urls')),

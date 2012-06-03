@@ -13,11 +13,13 @@ class Progress(object):
         self.stop = stop
         self.name = name
     
-    def tick(self):
+    def tick(self, x=None, y=None):
         self.count += 1
         if not self.count % self.step:
             if self.total:
-                percents = ' [%d%%]' % int((self.count / float(self.total)) * 100)
+                percents = ' [%d%%]' % int(round((self.count / float(self.total)) * 100))
+            elif x and y:
+                percents = ' [%d%%]' % int(round((x / float(y)) * 100))
             else:
                 percents = ''
             logging.info('Processed %d %s%s' % (self.count, self.name, percents))

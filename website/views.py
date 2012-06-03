@@ -4,6 +4,7 @@ from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -11,6 +12,7 @@ from common.pagination import paginate
 from cache_utils.decorators import cached
 
 from events.models import Feed
+import us
 
 import re
 from datetime import datetime, timedelta
@@ -50,7 +52,15 @@ def index(request):
           
 def staticpage(request, pagename):
     if pagename == "developers": pagename = "developers/index"
-    return render_to_response('website/' + pagename + '.html', { "pagename": pagename }, RequestContext(request))
+    
+    ctx = { 'pagename': pagename }
+    
+    if pagename == "overview":
+        from us import statenames
+        from states.views import states_with_data
+        ctx['states'] = ((s, statenames[s]) for s in states_with_data())
+    
+    return render_to_response('website/' + pagename + '.html', ctx, RequestContext(request))
 
 def get_blog_items():
     # c/o http://stackoverflow.com/questions/1208916/decoding-html-entities-with-python
@@ -107,19 +117,22 @@ def search(request):
     else:
         #bills = [{"href": bill.get_absolute_url(), "label": bill.title, "obj": bill, "secondary": bill.congress != CURRENT_CONGRESS }]
         return HttpResponseRedirect(bill.get_absolute_url())
-    results.append(("Bills and Resolutions", "/congress/bills/browse", "text", bills))
-    
+    results.append(("Bills and Resolutions (Federal)", "/congress/bills/browse", "text", bills))
+
+    results.append(("State Legislation", "/states/bills/browse", "text",
+        [{"href": p.object.get_absolute_url(), "label": p.object.short_display_title, "obj": p.object, "secondary": False } for p in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"], content=q)[0:9]]))
+
     # in each group, make sure the secondary results are placed last
     for grp in results:
         for i in xrange(len(grp[3])):
-            grp[3][i]["index"] = i
-       	grp[3].sort(key = lambda o : (o.get("secondary", False), o["index"]))
+           grp[3][i]["index"] = i
+           grp[3].sort(key = lambda o : (o.get("secondary", False), o["index"]))
     
     # sort first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
     results.sort(key = lambda c : (len([d for d in c[3] if d.get("secondary", False) == False]) == False, len(c[3]) == 0, len(c[3])))
         
     return { "results": results }
-    
+
 @render_to('website/campaigns/bulkdata.html')
 def campaign_bulk_data(request):
     prefixes = ("Mr.", "Ms.", "Mrs.", "Dr.")

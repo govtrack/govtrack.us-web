@@ -1,6 +1,7 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Research Congress {% endblock %}
-{% block style %}
+{% block head %}
+<style>
 #categories li {
 	vertical-align: top;
 }
@@ -12,6 +13,12 @@
 	font-size: 10pt;
 	line-height: 140%;
 }
+</style>
+<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}fonts/stateface.css">
+{% endblock %}
+
+{% block crumbs %}
+<h1>Overview</h1>
 {% endblock %}
 
 {% block heading_box %}
@@ -22,7 +29,8 @@
 	<div class="holder">
 		<div class="container">
 			<div class="heading">
-				<h2>Overview</h2>
+				<h2>Federal Legislation</h2>
+				<p style="margin: 1em">Use GovTrack to research and track legislation in the United States Congress, including Members of Congress, bills and resolutions, voting records, and committee activity.</p>
 			</div>
 			<ul id="categories">
 				<li id="link-members">
@@ -63,5 +71,35 @@
 			</ul>
 		</div>
 	</div>
+	
+	<a name="states"> </a>
+	<div class="holder">
+		<div class="container">
+			<div class="heading">
+				<h2>State Legislation</h2>
+				<p style="margin: 1em">Starting in May 2012 we have been offering experimental state legislative tracking tools.</p>
+			</div>
+			<div style="float: left; width: 400px; margin-top: 40px;">
+				<h4>Choose a State</h4>
+				<p>Start tracking legislation in your state:</p>
+				<ul>
+					{% for state in states %}
+					<li><a href="/states/{{state.0|lower}}"><span class="stateface stateface-{{state.0|lower}}" style="display: inline-block; width: 1.5em"> </span><span style="display: inline-block; width: 1.75em">{{state.0}}</span> &mdash; {{state.1}}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div style="float: left; width: 300px; margin-top: 40px;">
+				<h4>50-State Tracking</h4>
+				<p>Or <a href="/states/bills/browse">search bills in all 50 states</a>:</p>
+				
+				<form name="header_search" action="/states/bills/browse" method="GET" class="search-form">
+					<fieldset>
+						<div class="text"><input type="text" defaulttext="Search" name="text"/></div>
+						<input class="btn-search" type="submit" value="Search" />
+					</fieldset>
+				</form>
+			</div>
+		</div>
+	</div>	
 </div><!-- /info-box -->
 {% endblock %}
