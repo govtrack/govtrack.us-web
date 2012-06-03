@@ -15,7 +15,7 @@ import json, urllib
 from common.enum import MetaEnum
 
 class SearchManager(object):
-    def __init__(self, model, qs=None):
+    def __init__(self, model, qs=None, connection=None):
         self.model = model
         self.qs = qs
         self.options = []
@@ -27,6 +27,7 @@ class SearchManager(object):
         self.colnames = []
         self.sort_options = []
         self.global_filters = { }
+        self.connection = connection
 
     def add_option(self, *args, **kwargs):
         Option(self, *args, **kwargs)
@@ -137,6 +138,7 @@ class SearchManager(object):
             traceback.print_exc()
             return HttpResponse(json.dumps({
                 "error": repr(e),
+                "stack": traceback.format_exc(),
                 }), content_type='text/json')
             
     def queryset(self, request, exclude=None):
@@ -147,7 +149,9 @@ class SearchManager(object):
         if not self.qs:
             #qs = self.model.objects.all().select_related()
             from haystack.query import SearchQuerySet
-            qs = SearchQuerySet().filter(indexed_model_name__in=[self.model.__name__], **self.global_filters)
+            qs = SearchQuerySet()
+            if self.connection: qs = qs.using(self.connection)
+            qs = qs.filter(indexed_model_name__in=[self.model.__name__], **self.global_filters)
         else:
             qs = self.qs
 
@@ -234,6 +238,8 @@ class SearchManager(object):
         cache_key = "smartsearch_faceting_%s__%s__%s" % (
             self.model.__name__,
             option.field_name,
+            "&".join( unicode(k) + "=" + unicode(v) for k, v in self.global_filters.items() )
+            + "&&" +
             "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in request.POST or o.field_name + "[]" in request.POST) and (not omit_me or o != option) ),
             )
         
