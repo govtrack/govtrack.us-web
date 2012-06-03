@@ -77,6 +77,7 @@ def edit_subscription_list(request):
 
 @render_to('events/events_list_items.html')
 def events_list_items(request):
+    if "listid" not in request.POST: raise Http404()
     sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.POST["listid"])
         
     feedlist = sublist.trackers.all()
@@ -95,6 +96,11 @@ def events_list_items(request):
             }
 
 def search_feeds(request):
+    if "type" not in request.REQUEST:
+        return HttpResponse(simplejson.dumps({
+            "status": "fail",
+            }), mimetype="text/json")
+
     if request.REQUEST["type"] == "person":
         from person.models import Person
         feedlist = [
