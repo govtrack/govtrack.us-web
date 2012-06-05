@@ -35,9 +35,19 @@
 	</head>
 	
 <body class="{% block body_class %}{% endblock %}">
-	{% if not bulk_data_took_action %}
 	<!-- Bulk Data Campaign -->
-	<div id="campaign">
+	<div style="position: absolute; top: 0; left: 0; width: 100%; height: 1em; z-index: 10;">
+		<div style="margin: 0 auto; width: 960px; height: 1em; margin-top: .5em; text-align: center; font-weight: bold;">
+			<a href="/campaigns/bulkdata">Congress is rolling the clock back on transparency. Take action!</a>
+		</div>
+	</div>
+	<!-- End Bulk Data Campaign -->
+
+
+	{% if 1 and pagename != "blog_template" %}
+	<div id="sitenewscontainer" style="display: none" seq="9">
+		
+	<!-- Bulk Data Campaign -->
 	<div id="campaign_bg1" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: white; z-index: 10; opacity: 0.5; filter: alpha(opacity=50);"> </div>
 	<div id="campaign_bg2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;">
 		<div style="margin: 0 auto; width: 960px; height: 700px;">
@@ -47,14 +57,12 @@
 	<div id="campaign_bg3" style="position: absolute; top: 60px; left: 0; width: 100%; height: 100%; z-index: 10; display: none;">
 		<div style="margin: 0 auto; padding: 50px; width: 700px; height: 650px; background-color: white; border: 1px solid #999; opacity: 0.9; filter: alpha(opacity=90);">
 		
-		<h1 style="margin-bottom: 1em; font-size: 26px;">This is what GovTrack could<br/>look like if H.R. 5882 passes.</h1>
-		
 		<div id="for_staff" {% if remote_net_house or remote_net_senate or request.user.username == "admin" %}{% else %}style="display: none;"{% endif %}>
-			<p style="margin-top: .75em">The <a href="http://appropriations.house.gov/UploadedFiles/LEGBRANCH-FY13-FULLCOMMITTEEREPORT.pdf" target="_blank">committee report</a> for <a href="http://www.govtrack.us/congress/bills/112/hr5882" target="_blank">H.R. 5882</a>, the legislative branch appropriations bill for 2013, instructs GPO to stop making available bulk data downloads of legislative data.</p>
-			<p style="margin-top: .75em">More than <a href="https://www.popvox.com/bills/us/112/hr5882/report" target="_blank"><b>900 letters</b></a> have been written about this issue in the last two days alone. Your office will be hearing from constituents shortly, if you haven&rsquo;t already! {% if remote_net_house or remote_net_senate or request.user.username == "admin"  %}Contact Joshua Tauberer, president of Civic Impulse LLC, at &lt;tauberer@govtrack.us&gt; or 202-558-7227 for more.{% endif %}</p>
-			<p style="margin-top: .75em"><b>You&rsquo;ve benefitted from bulk data downloads.</b> We use bulk data from GPO and the House Clerk to make GovTrack what it is. Hundreds of staffers use GovTrack each day.</p>
+			<h1 style="margin-bottom: 1em; font-size: 26px;">H.R. 5882&rsquo;s committee report implies the American public can&rsquo;t handle legislative information.</h1>
+			<p style="margin-top: .75em">More than <a href="https://www.popvox.com/bills/us/112/hr5882/report" target="_blank"><b>1,000 letters</b></a> have been written so far this week. Your office will be hearing from constituents shortly, if you haven&rsquo;t already! {% if remote_net_house or remote_net_senate or request.user.username == "admin"  %}Contact Joshua Tauberer, president of Civic Impulse LLC, at &lt;tauberer@govtrack.us&gt; or 202-558-7227 for more.{% endif %}</p>
+			<p style="margin-top: .75em">The <a href="http://appropriations.house.gov/UploadedFiles/LEGBRANCH-FY13-FULLCOMMITTEEREPORT.pdf" target="_blank">committee report</a> for <a href="http://www.govtrack.us/congress/bills/112/hr5882" target="_blank">H.R. 5882</a>, the legislative branch appropriations bill for 2013, originally halted the publication of &ldquo;bulk data downloads.&rdquo; Now it creates a task force to study what we already know is feasible.</p>
 			<hr style="margin: 2em"/>
-			<p style="margin-top: .75em">Speaker Boehner and Majority Leader Cantor have <a href="http://www.speaker.gov/press-release/speaker-boehner-majority-leader-cantor-call-new-data-standards-make-congress-more-open">supported bulk legislative data</a> throughout the 112th Congress, creating the new <a href="http://docs.house.gov">Docs.House.Gov</a> and <a href="http://www.speaker.gov/general/open-house-updated-clerk-website-offers-better-access-real-time-info">Real Time Floor Updates</a>. House Appropriations has invented techno-sounding concerns that the Republican leadership has already demonstrated are non-issues. (This is a non-partisan issue. Rep. Honda (D, CA) <a href="http://www.wired.com/threatlevel/2009/03/federal-bill-wo/">has supported bulk data</a> too.)</p>
+			<p style="margin-top: .75em">Speaker Boehner and Majority Leader Cantor have <a href="http://www.speaker.gov/press-release/speaker-boehner-majority-leader-cantor-call-new-data-standards-make-congress-more-open">supported bulk legislative data</a> throughout the 112th Congress. House Appropriations has invented techno-sounding concerns that the Republican leadership has already demonstrated are non-issues. (This is a non-partisan issue. Rep. Honda (D, CA) <a href="http://www.wired.com/threatlevel/2009/03/federal-bill-wo/">has supported bulk data</a> too.)</p>
 			<div style="float: left; width: 400px">
 				<p style="margin-top: 1em; font-weight: bold;">Learn more...</p>
 				<ul class="bullets">
@@ -68,49 +76,49 @@
 				<p style="margin-top: 1em; font-weight: bold;">Stay tuned...</p>
 				<p style="margin-top: .75em">House Rules is closing amendments at 4pm Tuesday. Check back here for developments.</p>
 				
-				<a href="#" class="green-btn" style="margin: 2em 1em 1em 1em" onclick="$('#campaign').hide(); return false;">On to GovTrack...</a>
+				<a href="#" class="green-btn" style="margin: 2em 1em 1em 1em" onclick="$('#sitenewscontainer').hide(); return false;">On to GovTrack...</a>
 			</div>
 		</div>
 		{% if remote_net_house or remote_net_senate or request.user.username == "admin" %}{% else %}
 		<div id="for_public">
-			<p style="margin-top: .75em">In the last two days <a href="https://www.popvox.com/bills/us/112/hr5882/report" target="_blank">more than 900 people</a> have written Congress about <a href="http://www.govtrack.us/congress/bills/112/hr5882" target="_blank">H.R. 5882</a>, which may come to the floor this week with a provision that rolls back the clock on transparency.</p>
-			<p style="margin-top: .75em">Step up and <a href="/campaigns/bulkdata">write your representative</a> to fix the bill, or <a href="http://www.govtrack.us/blog/2012/06/04/rep-crenshaw-thinks-american-public-cant-be-trusted-with-overseeing-congress/">read more</a> about what&rsquo;s going on. The quicker we get this bill fixed, the faster GovTrack will return to normal!</p>
+			<h1 style="margin-bottom: 1em;">Congressman Crenshaw doesn&rsquo;t think Americans can handle this data.</h1>
+			<p style="margin-top: .75em"><a href="https://www.popvox.com/bills/us/112/hr5882/report" target="_blank">More than 1,000 people</a> wrote Congress this week about <a href="http://www.govtrack.us/congress/bills/112/hr5882" target="_blank">H.R. 5882</a>. The bill&rsquo;s committee report says Congress shouldn&rsquo;t publish more raw data without funding to check that what the public does with the data is correct.</p>
+			<p style="margin-top: .75em">UPDATE: The House Appropriations committee has <a href="http://sunlightfoundation.com/blog/2012/06/05/bulk-access-language-tweaked-by-approps/">slightly revised</a> their position. The committee previously wanted to stop publishing all &ldquo;bulk legislative data.&rdquo; Now they want to study the situation more. A new task force is not enough. More doing less talking about doing, please!</p>
+			<p style="margin-top: .75em">Step up and <a href="/campaigns/bulkdata">write your representative</a> to fix the bill, or <a href="http://www.govtrack.us/blog/2012/06/04/rep-crenshaw-thinks-american-public-cant-be-trusted-with-overseeing-congress/">read more</a> about what&rsquo;s going on.</p>
 			<div style="padding: 1em 0 1em 350px"><a href="/campaigns/bulkdata" class="green-btn">Take Action</a></div>
 			<p style="margin-top: 1em">Speaker Boehner and House Majority Leader Cantor have <a href="http://www.speaker.gov/press-release/speaker-boehner-majority-leader-cantor-call-new-data-standards-make-congress-more-open">supported bulk legislative data</a> over the last year. Rep. Honda <a href="http://www.wired.com/threatlevel/2009/03/federal-bill-wo/">has supported bulk data</a> for many years. We need to show that the public cares about this issue too before the bill comes to a vote.</p>
 			<p style="margin-top: 1em">Read <a href="#" onclick="$('#for_public').hide(); $('#for_staff').fadeIn(); return false;">information for legislative staff</a> about H.R. 5882.</p></p>
 			<hr style="margin: 2em"/>
-			<div style="padding: 0 0 0 350px"><a href="#" class="grey-btn" onclick="$('#campaign').hide(); return false;">Close</a></div>
+			<div style="padding: 0 0 0 350px"><a href="#" class="grey-btn" onclick="return hide_site_news();">Hide</a></div>
 		</div>
 		{% endif %}
 		
 		</div>
 	</div>
-	</div>
 	<script>$(function() {
+		$('#sitenewscontainer').css({opacity: 1.0});
 		$('#campaign_bg1').css({ height: $(document).height() });
 		window.setTimeout("$('#campaign_bg3').fadeIn(2000);", 4000);
 	});</script>
 	<!-- End of Bulk Data Campaign -->
-	{% endif %}
 
-
-	{% if bulk_data_took_action and 1 and pagename != "blog_template" %}
-	<div id="sitenewscontainer" style="display: none">
-		<div id="sitenews" seq="8">
+		{% comment %}
+		<div id="sitenews">
 			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
 			<div style="float: right; width: 500px; padding: 8px;">
 				<div>Thanks for telling Congress to fix H.R. 5882. For more background on what&rsquo;s going on, <a href="http://www.govtrack.us/blog/2012/06/04/rep-crenshaw-thinks-american-public-cant-be-trusted-with-overseeing-congress/">read our blog post</a>.</div>
 			</div>
 			<div style="clear: both"> </div>
+		{% endcomment %}
 		</div>
 	</div>
 	<script>
 	function hide_site_news() {
 		$('#sitenewscontainer').fadeOut();
-		$.cookie("sitenewsbanner", $('#sitenews').attr("seq"), { expires: 14, path: '/' });
+		$.cookie("sitenewsbanner", $('#sitenewscontainer').attr("seq"), { expires: 14, path: '/' });
 	}
 	$(function() {
-		if ($.cookie("sitenewsbanner") != $('#sitenews').attr("seq")) {
+		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("seq")) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
 			$('#sitenewscontainer').fadeIn();
 		}

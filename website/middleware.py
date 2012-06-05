@@ -18,8 +18,6 @@ SENATE_NET_RANGES = (
     ("156.33.0.0", "156.33.255.255"),
     )
 
-bulk_data_users_took_action = set(line.strip().lower() for line in open('campaign_bulk_data_emails') if line.strip() != "")
-
 def template_context_processor(request):
     context = { }
     
@@ -63,9 +61,6 @@ def template_context_processor(request):
         cache.set("hill_wmata_info", ret, 15) # 15 seconds
         return ret
     context["wmata_info"] = wmata_info
-    
-    # Has the user participated in the bulk data campaign?
-    context["bulk_data_took_action"] = request.user.is_authenticated() and request.user.email.lower() in bulk_data_users_took_action
     
     return context
     
