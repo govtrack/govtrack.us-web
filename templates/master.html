@@ -47,11 +47,12 @@
 	<div id="campaign_bg3" style="position: absolute; top: 60px; left: 0; width: 100%; height: 100%; z-index: 10; display: none;">
 		<div style="margin: 0 auto; padding: 50px; width: 700px; height: 650px; background-color: white; border: 1px solid #999; opacity: 0.9; filter: alpha(opacity=90);">
 		
-		<h1 style="margin-bottom: 1em">This is what GovTrack could look like<br/>if H.R. 5882 passes.</h1>
+		<h1 style="margin-bottom: 1em; font-size: 26px;">This is what GovTrack could<br/>look like if H.R. 5882 passes.</h1>
 		
 		<div id="for_staff" {% if remote_net_house or remote_net_senate or request.user.username == "admin" %}{% else %}style="display: none;"{% endif %}>
 			<p style="margin-top: .75em">The <a href="http://appropriations.house.gov/UploadedFiles/LEGBRANCH-FY13-FULLCOMMITTEEREPORT.pdf" target="_blank">committee report</a> for <a href="http://www.govtrack.us/congress/bills/112/hr5882" target="_blank">H.R. 5882</a>, the legislative branch appropriations bill for 2013, instructs GPO to stop making available bulk data downloads of legislative data.</p>
-			<p style="margin-top: .75em">If you&rsquo;ve ever found GovTrack useful, you&rsquo;ve benefitted from bulk data downloads. We use bulk data from GPO and the House Clerk to make GovTrack what it is.</p>
+			<p style="margin-top: .75em">More than <a href="https://www.popvox.com/bills/us/112/hr5882/report" target="_blank"><b>900 letters</b></a> have been written about this issue in the last two days alone. Your office will be hearing from constituents shortly, if you haven&rsquo;t already! {% if remote_net_house or remote_net_senate or request.user.username == "admin"  %}Contact Joshua Tauberer, president of Civic Impulse LLC, at &lt;tauberer@govtrack.us&gt; or 202-558-7227 for more.{% endif %}</p>
+			<p style="margin-top: .75em"><b>You&rsquo;ve benefitted from bulk data downloads.</b> We use bulk data from GPO and the House Clerk to make GovTrack what it is. Hundreds of staffers use GovTrack each day.</p>
 			<hr style="margin: 2em"/>
 			<p style="margin-top: .75em">Speaker Boehner and Majority Leader Cantor have <a href="http://www.speaker.gov/press-release/speaker-boehner-majority-leader-cantor-call-new-data-standards-make-congress-more-open">supported bulk legislative data</a> throughout the 112th Congress, creating the new <a href="http://docs.house.gov">Docs.House.Gov</a> and <a href="http://www.speaker.gov/general/open-house-updated-clerk-website-offers-better-access-real-time-info">Real Time Floor Updates</a>. House Appropriations has invented techno-sounding concerns that the Republican leadership has already demonstrated are non-issues. (This is a non-partisan issue. Rep. Honda (D, CA) <a href="http://www.wired.com/threatlevel/2009/03/federal-bill-wo/">has supported bulk data</a> too.)</p>
 			<div style="float: left; width: 400px">
@@ -65,16 +66,16 @@
 			</div>
 			<div style="float: left; width: 280px; margin-left: 20px;">
 				<p style="margin-top: 1em; font-weight: bold;">Stay tuned...</p>
-				<p style="margin-top: .75em">H.R. 5882 could be brought up under suspension as early as Wednesday. Check back here for developments.</p>
+				<p style="margin-top: .75em">House Rules is closing amendments at 4pm Tuesday. Check back here for developments.</p>
 				
 				<a href="#" class="green-btn" style="margin: 2em 1em 1em 1em" onclick="$('#campaign').hide(); return false;">On to GovTrack...</a>
 			</div>
 		</div>
 		{% if remote_net_house or remote_net_senate or request.user.username == "admin" %}{% else %}
 		<div id="for_public">
-			<p style="margin-top: .75em">The American public can’t be trusted with records about what Congress is doing, at least according to <a href="http://www.govtrack.us/congress/bills/112/hr5882" target="_blank">H.R. 5882</a>. The bill may come to the floor this week with a provision that rolls back the clock on transparency.</p>
-			<p style="margin-top: .75em">You are already an upstanding citizen for researching bills in Congress. Now step up to the next challenge and <a href="/campaigns/bulkdata">write your representative</a> to fix the bill.</p>
-			<div style="padding: 1em 0 1em 350px"><a href="/campaigns/bulkdata" class="green-btn">Write a Letter</a></div>
+			<p style="margin-top: .75em">In the last two days <a href="https://www.popvox.com/bills/us/112/hr5882/report" target="_blank">more than 900 people</a> have written Congress about <a href="http://www.govtrack.us/congress/bills/112/hr5882" target="_blank">H.R. 5882</a>, which may come to the floor this week with a provision that rolls back the clock on transparency.</p>
+			<p style="margin-top: .75em">Step up and <a href="/campaigns/bulkdata">write your representative</a> to fix the bill, or <a href="http://www.govtrack.us/blog/2012/06/04/rep-crenshaw-thinks-american-public-cant-be-trusted-with-overseeing-congress/">read more</a> about what&rsquo;s going on. The quicker we get this bill fixed, the faster GovTrack will return to normal!</p>
+			<div style="padding: 1em 0 1em 350px"><a href="/campaigns/bulkdata" class="green-btn">Take Action</a></div>
 			<p style="margin-top: 1em">Speaker Boehner and House Majority Leader Cantor have <a href="http://www.speaker.gov/press-release/speaker-boehner-majority-leader-cantor-call-new-data-standards-make-congress-more-open">supported bulk legislative data</a> over the last year. Rep. Honda <a href="http://www.wired.com/threatlevel/2009/03/federal-bill-wo/">has supported bulk data</a> for many years. We need to show that the public cares about this issue too before the bill comes to a vote.</p>
 			<p style="margin-top: 1em">Read <a href="#" onclick="$('#for_public').hide(); $('#for_staff').fadeIn(); return false;">information for legislative staff</a> about H.R. 5882.</p></p>
 			<hr style="margin: 2em"/>
