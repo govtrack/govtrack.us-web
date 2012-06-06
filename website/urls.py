@@ -7,7 +7,7 @@ urlpatterns = patterns('website.views',
     url(r'^developers/api$', 'api_overview'),
     url(r'^congress/?$', 'congress_home', name='congress_home'),
     url(r'^search$', 'search', name='search'),
-    url(r'^campaigns/bulkdata', 'campaign_bulk_data'),
+    #url(r'^campaigns/bulkdata', 'campaign_bulk_data'),
     url(r'^events/syndication-feed', 'push_to_social_media_rss'),
 )
 
