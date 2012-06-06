@@ -12,6 +12,8 @@ from events.models import *
 
 from datetime import datetime, timedelta
 
+now = datetime.now()
+
 class Command(BaseCommand):
 	args = 'daily|weekly|testadmin|testcount'
 	help = 'Sends out email updates of events to subscribing users.'
@@ -44,11 +46,11 @@ class Command(BaseCommand):
 			send_old_events = True
 		elif args[0] == "testcount":
 			# count up how many daily emails we would send, but don't send any
-			list_email_freq = (1,)
+			list_email_freq = (1,2)
 			send_mail = False
 			mark_lists = False
 
-		if users == None: # overridden for the testadmin case
+		if users == None: # overridden by the testadmin case above
 			# Find all users who have a subscription list with email
 			# updates turned on to the right daily/weekly setting.
 			users = User.objects.filter(subscription_lists__email__in = list_email_freq).distinct()
@@ -59,7 +61,7 @@ class Command(BaseCommand):
 		total_events_sent = 0
 		for user in list(users.order_by('id')): # clone up front to avoid holding the cursor (?)
 			events_sent = send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events)
-			if events_sent > 0:
+			if events_sent != None:
 				total_emails_sent += 1
 				total_events_sent += events_sent
 			
@@ -72,10 +74,14 @@ class Command(BaseCommand):
 		print "Sent" if send_mail else "Would send", total_emails_sent, "emails and", total_events_sent, "events"
 			
 def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events):
+	global now
+	
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
 			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
 		
 	emailsubject = "GovTrack.us Email Update for %s" % datetime.now().strftime("%x")
+
+	send_no_events = send_old_events
 
 	all_trackers = set()
 
@@ -92,8 +98,8 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 				eventcount += len(events)
 				most_recent_event = max(most_recent_event, max_id)
 	
-	if len(eventslists) == 0:
-		return 0
+	if len(eventslists) == 0 and not send_no_events:
+		return None
 		
 	if not send_mail:
 		# don't email, don't update lists with the last emailed id
@@ -125,7 +131,7 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 		email.send(fail_silently=False)
 	except Exception as e:
 		print user, e
-		return 0 # skip updating what events were sent, False = did not sent
+		return None # skip updating what events were sent, False = did not sent
 	
 	if not mark_lists:
 		return eventcount
@@ -134,6 +140,7 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 	# events table so that we know not to email those events in a future update.
 	for sublist, events in eventslists:
 		sublist.last_event_mailed = max(sublist.last_event_mailed, most_recent_event)
+		sublist.last_email_sent = now
 		sublist.save()
 		
 	return eventcount # did sent email

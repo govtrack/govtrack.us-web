@@ -525,6 +525,7 @@ class SubscriptionList(models.Model):
     is_default = models.BooleanField(default=False)
     email = models.IntegerField(default=0, choices=EMAIL_CHOICES)
     last_event_mailed = models.IntegerField(blank=True, null=True) # id of last event
+    last_email_sent = models.DateTimeField(blank=True, null=True) # date of last email update sent
     
     class Meta:
         unique_together = [('user', 'name')]

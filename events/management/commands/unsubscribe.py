@@ -9,6 +9,7 @@ from django.conf import settings
 from optparse import make_option
 
 from events.models import *
+from website.models import UserProfile
 
 from datetime import datetime
 
@@ -21,9 +22,18 @@ class Command(BaseCommand):
 			print "Specify a user's email address."
 			return
 		
+		try:
+			p = UserProfile.objects.get(user__email=args[0])
+		except UserProfile.DoesNotExist:
+			print "No such user."
+			return
+		print "Turning off mass email option."
+		p.massemail = False
+		p.save()
+		
 		print "Turning off email updates on the following subscription lists..."
 		for sublist in SubscriptionList.objects.filter(user__email=args[0]):
-			print sublist.user.email, sublist.name, sublist.email
+			print sublist.user.email, sublist.name, "was", sublist.email
 			
 			sublist.email = 0
 			sublist.save()
