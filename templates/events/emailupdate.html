@@ -6,11 +6,11 @@
 	<body>
 <h1>GovTrack.us Email Update</h1>
 
-{% comment %}
-<p style="margin: 1em; padding: 1em; border: 1px solid #DDD;">GovTrack was recently updated. Check out <a href="http://www.govtrack.us">the new GovTrack.us</a> and confirm that any trackers you had on the old website are set up correctly in <a href="http://www.govtrack.us/accounts/lists">Your Lists</a>. This is only the beginning of GovTrack 2.0. Stay tuned for more improvements.</p>
-{% endcomment %}
+{% with "?utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email" as utm %}
 
-<p>This is your email update from <a href="http://www.govtrack.us">GovTrack.us</a>. To change your email update settings, including to unsubscribe, go to <a href="http://www.govtrack.us/accounts/lists">Your Lists</a>.</p>
+<p style="margin: 1em; padding: 1em; border: 1px solid #DDD; background-color: #F3F3FF">There have been positive developments with H.R. 5882. Check the <a href="http://www.govtrack.us/blog{{utm}}">GovTrack Blog</a> for details.</p>
+
+<p>This is your email update from <a href="http://www.govtrack.us{{utm}}">GovTrack.us</a>. To change your email update settings, including to unsubscribe, go to <a href="http://www.govtrack.us/accounts/lists{{utm}}">Your Lists</a>.</p>
 
 {% for list, events in eventslists %}
 <h3>{{list.name}}</h3>
@@ -18,13 +18,13 @@
 	{% with event|render_event:feed as meta %}
 	<div style="margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #999;">
 	<p>{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} &mdash; {{meta.type}}</p>
-	<h4><a href="http://www.govtrack.us{{meta.url}}?utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email">{{meta.title}}</a></h4>
+	<h4><a href="http://www.govtrack.us{{meta.url}}{{utm}}">{{meta.title}}</a></h4>
 	<div style="margin-left: 2em">
 		{{meta.body_html|safe}}
 		{% if event.feeds and event.feeds|length > 0 %}
 			<div><small>You are seeing this event because you subscribe to
 				{% for feed in event.feeds %}{% if not forloop.first %}, {% endif %}
-					<a href="http://www.govtrack.us{{feed.link}}">{{feed.title}}</a>{% endfor %}.
+					<a href="http://www.govtrack.us{{feed.link}}{{utm}}">{{feed.title}}</a>{% endfor %}.
 			</small></div>
 		{% endif %}
 	</div>
@@ -35,8 +35,10 @@
 
 <hr/>
 
-<p>To unsubscribe or change your email updates settings, go to <a href="http://www.govtrack.us/accounts/lists">Your Lists</a>.</p>
-<p>This email was sent by <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. You may contact us at <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</p>
+<p>To unsubscribe or change your email updates settings, go to <a href="http://www.govtrack.us/accounts/lists{{utm}}">Your Lists</a>.</p>
+<p>This email was sent by <a href="http://www.civicimpulse.com{{utm}}">Civic Impulse, LLC</a>. You may contact us at <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</p>
+
+{% endwith %}
 
 {% if emailpingurl %}
 <!-- Sorry but we want to know if your email address is still valid. -->
