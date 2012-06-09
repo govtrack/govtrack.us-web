@@ -1428,6 +1428,76 @@ aside .download-links { padding: 31px 0 0 	}
         color: #fff;
     	}
 
+/* Manage Lists Page ========================================================= */
+/* =========================================================================== */
+.col_6 {
+    width: 440px;
+    float: left;
+}
+.feed_active_span { display: none; }
+.active .feed_inactive_span { display: none; }
+.active .feed_active_span { display: inline; }
+
+#lists .opts { display: none; }
+#lists > div.list {
+    float: left;
+    width: 270px;
+    height: 3em;
+    margin: 10px 25px 15px 0;
+    background-color: #fff;
+    border-radius: 1px;
+    border: solid #e7e4dc 1px;
+    box-shadow:
+        0 0 0 5px hsl(48, 2%, 98%),
+        0 1px 2px 5px rgba(106,106,106,.4);
+    padding: 10px;
+    cursor: pointer;
+}
+#lists div.list:nth-child(3n+1){
+    margin-left: 6px;
+}
+#lists div.list:nth-child(3n+3){
+    margin-right: 0;
+}
+#lists > div#newlist {
+    height: auto;
+    font-weight: bold;
+    font-size: 11px;
+}
+    #lists > div#newlist:hover {
+        text-decoration: underline;
+    }
+#lists > div.active {
+    color: black;
+    background-color: #FEE;
+}
+#lists > div.active .opts {
+    display: inline;
+    font-size: 90%;
+    color: #777;
+}
+#lists > div.default_list .no_default_list { display: none; }
+#lists > div.active .opts a {
+    color: #666;
+}
+    #lists > div.active .opts a:hover {
+        border: none;
+        text-decoration: underline;
+    }
+    #lists > div.list .name {
+        float: left;
+        width: 175px;
+        height: 1.5em;
+        overflow: hidden;
+    }
+    
+#list_view {
+    margin-top: 20px;
+    border-top: 1px solid #AAA;
+    padding-top: 20px;
+}
+
+
 
 
 /* Footer Styles ========================= */
@@ -2134,6 +2204,8 @@ ul.tabs a.current {
     padding:15px 0 20px 0;
     /*background-color:#ddd;*/
 }
+
+
 
 /******************************
  JT added things below here
