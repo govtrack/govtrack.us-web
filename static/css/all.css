@@ -2228,3 +2228,8 @@ ul.bullets li, .postcontent ul li {
 	text-align: center;
 	font-weight: bold;
 }
+
+#logo.states {
+	background: url(../images/logo_states.png) no-repeat;
+	width: 250px;
+}

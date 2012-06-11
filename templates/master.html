@@ -133,7 +133,7 @@
 		
 		<div id="masthead">
 			<header id="header">
-				<a id="logo" href="/">govtrack.us</a>
+				<a id="logo" href="/" class="{% block logo_class %}{% endblock %}">govtrack.us</a>
 				
 				<div id="nav-block">
 					<div class="row">
@@ -168,6 +168,7 @@
 									<li><a href="/congress/bills">Bills <em>&amp;</em> Resolutions</a></li>
 									<li><a href="/congress/votes">Voting Records</a></li>
 									<li><a href="/congress/committees">Congressional Committees</a></li>
+									<li><a href="/overview#states">State Legislation (Beta)</a></li>
 								</ul>
 							</li>
 							{% if user.is_authenticated %}
@@ -258,6 +259,7 @@
 					<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. Read <a href="/about">about GovTrack</a>.</p>
 					<p>Feedback is welcome to <a href="mailto:&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>, but we can&rsquo;t pass on messages to Members of Congress.</p>
 					<p>You are encouraged to reuse any material on this site. GovTrack supports other Congress-tracking websites through our <a href="/developers">open data</a>.</p>
+					{% block footer_extra %}{% endblock %}
 				</section>
 				
 			</div>

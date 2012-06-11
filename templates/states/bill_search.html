@@ -1,0 +1,40 @@
+{% extends 'master.html' %}
+
+{% block logo_class %}states{% endblock %}
+{% block footer_extra %}{% include "states/footer.html" %}{% endblock %}
+
+{% block title %}Search State Legislation - GovTrack.us{% endblock %}
+{% block body_class %}search state bills{% endblock %}
+{% block meta_description %}Search state bills and resolutions in the fifty states of the United States.{% endblock %}
+{% block meta_keywords %}state,legislation,bill,law,united states{% endblock %}
+
+{% block head %}
+<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}fonts/stateface.css">
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+<li><a href="/overview#states">States</a></li>
+{% if state %}<li><a href="/states/{{state|lower}}">{{state}}</a></li>{% endif %}
+<li>Bill Search</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+<h2>{% if state %}<span class="stateface stateface-{{state|lower}}"> </span>{% endif %}{% if not state %}Search {% else %}{{ statename }}{% endif %} State Legislation</h2>
+
+{% if not state %}
+<p>Use this page to find recent bills and resolutions in the 50 states of the United States. Use GovTrack to <a href="/events/states_bills">be notified when each new bill is introduced</a>.</p>
+{% else %}
+<p>Use this page to find recent bills and resolutions in the {{statename}} state legislature.  Use GovTrack to <a href="/states/{{state|lower}}">be notified when each new {{statename}} bill is introduced</a>.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block body %}
+
+{% include "smartsearch/search_panel.html" %}
+
+{% endblock %}
+
+

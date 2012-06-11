@@ -1,5 +1,4 @@
 {% extends 'master.html' %}
-{% load events_utils %}
 
 {% block title %}{{meta.title}} -- GovTrack.us{% endblock %}
 
@@ -33,27 +32,6 @@
 
 <h2>Recent Events</h2>
 
-{% for event in feed.get_ten_events %}
-{% with event|render_event:"" as meta %}
-	<div class="tracked_event" style="clear: both; border-bottom: 1px solid #DDD; margin-bottom: 1em">
-
-		<div style="float: right">
-			{% if not meta.date_has_no_time %}
-				{{event.when}}
-			{% else %}
-				{{event.when|date}}
-			{% endif %}
-		</div>
-		
-		<div>{{meta.type}}</div>
-		
-		<div><a href="{{meta.url}}">{{meta.title}}</a></div>
-		
-		{{meta.body_html|safe}}
-	</div>
-{% endwith %}
-{% empty %}
-<p>No events are tracked by this feed.</p>
-{% endfor %}
+{% include "events/trackedeventslist.html" %}
 
 {% endblock %}

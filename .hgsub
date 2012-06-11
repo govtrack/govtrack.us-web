@@ -1,3 +1,4 @@
 ext/django-registration-pv = [git]git://github.com/tauberer/django-registration-pv.git
 ext/django-haystack = [git]git://github.com/toastdriven/django-haystack.git
 ext/diff_match_patch-python = [git]git://github.com/tauberer/diff_match_patch-python.git
+ext/stateface = [git]https://github.com/propublica/stateface
