@@ -52,9 +52,16 @@ def BT50FileReader(stream, headerstream, encoding, **kwargs):
     stream = removeNulls(stream)
     
     headers = list(csv.reader(headerstream, delimiter='\t'))[0]
+
     csv_reader = csv.reader(stream, **kwargs)
+    rownum = 0
     for values in csv_reader:
-        yield dict((headers[i], (values[i].decode(encoding, "replace")) if i < len(values) else None) for i in xrange(len(headers)))
+        rownum += 1
+        if len(headers) != len(values):
+            print "Wrong number of fields on line %d" % rownum
+            continue
+        #yield dict((headers[i], (values[i].decode(encoding, "replace")) if i < len(values) else None) for i in xrange(len(headers)))
+        yield rownum, dict((headers[i], values[i].decode(encoding, "replace")) for i in xrange(len(headers)))
 
 # Decorator wraps function in a check for whether the source file has been modified.
 def iffilechanged(func):
@@ -78,17 +85,22 @@ def rowbyrow(func):
         f.seek(0, os.SEEK_SET)
         
         fmt = 'tsv'
-        if "BillSubject" in filename or "ActionHistory" in filename: fmt = 'csv'
+        if "BillSubject" in filename: fmt = 'csv'
 
-        for row in BT50FileReader(
+        for rownum, row in BT50FileReader(
             f, open(filename.replace(".txt", "FD.txt"), "rb"),
             "cp1252",
             delimiter = ',' if fmt == 'csv' else '\t',
             quotechar = '"' if fmt == 'csv' else None):
         
+            rownum += 1
             row["_hash"] = hashlib.sha1(repr(sorted(row.items()))).hexdigest()
             progress.tick(x=f.tell(), y=total)
-            func(row, options, filename, *args, **kwargs)
+            try:
+                func(row, options, filename, *args, **kwargs)
+            except:
+                print "Error in %s line %d." % (filename, rownum)
+                raise
         return None
     return g
 
