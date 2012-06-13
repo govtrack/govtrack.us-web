@@ -138,7 +138,7 @@ class SearchManager(object):
             traceback.print_exc()
             return HttpResponse(json.dumps({
                 "error": repr(e),
-                "stack": traceback.format_exc(),
+                "stack": traceback.format_exc().split("\n"),
                 }), content_type='text/json')
             
     def queryset(self, request, exclude=None):
@@ -310,7 +310,7 @@ class SearchManager(object):
                     return []
                 facet_counts = resp["fields"][option.field_name]
                 objs = get_object_set([opt[0] for opt in facet_counts])
-                counts = [build_choice(opt[0], opt[1]) for opt in facet_counts               ]
+                counts = [build_choice(opt[0], opt[1]) for opt in facet_counts]
             else:
                 # ORM explanation: do GROUP BY, then COUNT
                 # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
