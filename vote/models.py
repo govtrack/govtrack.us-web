@@ -10,6 +10,7 @@ from common import enum
 from person.util import load_roles_at_date
 
 from us import get_session_ordinal
+from settings import CURRENT_CONGRESS
 
 class CongressChamber(enum.Enum):
     senate = enum.Item(1, 'Senate')
@@ -42,23 +43,23 @@ class VoterType(enum.Enum):
 
 
 class Vote(models.Model):
-    congress = models.IntegerField()
-    session = models.CharField(max_length=4)
-    chamber = models.IntegerField(choices=CongressChamber)
-    number = models.IntegerField('Vote Number')
-    source = models.IntegerField(choices=VoteSource)
-    created = models.DateTimeField(db_index=True)
-    vote_type = models.CharField(max_length=255)
-    category = models.IntegerField(max_length=255, choices=VoteCategory)
-    question = models.TextField()
-    required = models.CharField(max_length=10)
-    result = models.TextField()
-    total_plus = models.IntegerField(blank=True, default=0)
-    total_minus = models.IntegerField(blank=True, default=0)
-    total_other = models.IntegerField(blank=True, default=0)
+    congress = models.IntegerField(help_text="The number of the Congress in which the vote took place. The current Congress is %d. In recent history Congresses are two years; however, this was not always the case." % CURRENT_CONGRESS)
+    session = models.CharField(max_length=4, help_text="Within each Congress there are sessions. In recent history the sessions correspond to calendar years and are named accordingly. However, in historical data the sessions may be named in completely other ways, such as with letters A, B, and C. Session names are unique *within* a Congress.")
+    chamber = models.IntegerField(choices=CongressChamber, help_text="The chamber in which the vote was held, House or Senate.")
+    number = models.IntegerField('Vote Number', help_text="The number of the vote, unique to a Congress and session pair.")
+    source = models.IntegerField(choices=VoteSource, help_text="The source of the vote information.")
+    created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.")
+    vote_type = models.CharField(max_length=255, help_text="Descriptive text for the type of the vote.")
+    category = models.IntegerField(max_length=255, choices=VoteCategory, help_text="The type of the vote.")
+    question = models.TextField(help_text="Descriptive text for what the vote was about.")
+    required = models.CharField(max_length=10, help_text="A code indicating what number of votes was required for success. Often '1/2' or '3/5'. This field should be interpreted with care. It comes directly from the upstream source and may need some 'unpacking.' For instance, while 1/2 always mean 1/2 of those voting (i.e. excluding absent and abstain), 3/5 in some cases means to include absent/abstain and in other cases to exclude.")
+    result = models.TextField(help_text="Descriptive text for the result of the vote.")
+    total_plus = models.IntegerField(blank=True, default=0, help_text="The count of positive votes (aye/yea).")
+    total_minus = models.IntegerField(blank=True, default=0, help_text="The count of negative votes (nay/no).")
+    total_other = models.IntegerField(blank=True, default=0, help_text="The count of abstain or absent voters.")
     
-    related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True)
-    missing_data = models.BooleanField(default=False)
+    related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.")
+    missing_data = models.BooleanField(default=False, help_text="If something in the source could be parsed and we should revisit the file.")
     
     class Meta:
         # The ordering makes sure votes are in the right order on bill pages.
@@ -82,6 +83,7 @@ class Vote(models.Model):
                        chamber_code, self.number])
         
     def get_source_link(self):
+    	"""A link to the website where this vote information was obtained."""
         if self.source == VoteSource.senate:
             return "http://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=%d&session=%s&vote=%05d" % (self.congress, get_session_ordinal(self.congress, self.session), self.number)
         elif self.source == VoteSource.house:
@@ -170,6 +172,17 @@ class Vote(models.Model):
 
     def summary(self):
         return self.result + " " + str(self.total_plus) + "/" + str(self.total_minus)
+        
+    def get_options(self):
+        """The options available for the voters of this vote. Returned as key/value pairs. The keys correspond to the voter data, and the values are the display text for this option ('aye', 'nay', 'yea', 'no', etc.)"""
+        return dict((opt.key, opt.value) for opt in self.options.all())
+    def get_voters(self):
+        """The way the voters voted in this vote."""
+        return [
+            { "person": v.person_id, "value": v.option.key } if v.voter_type_is_member else
+            { "vice_president": True, "value": v.option.key }
+            for v in Voter.objects.filter(vote=self)
+        ]
 
     def create_event(self):
     	if self.congress < 111: return # not interested, creates too much useless data and slow to load
@@ -233,9 +246,9 @@ class VoteOption(models.Model):
 class Voter(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='voters')
     person = models.ForeignKey('person.Person', null=True)
-    voter_type = models.IntegerField(choices=VoterType)
-    option = models.ForeignKey('vote.VoteOption')
-    created = models.DateTimeField(db_index=True) # equal to vote.created
+    voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President (in which case, the person field is null).")
+    option = models.ForeignKey('vote.VoteOption', help_text="How the person voted.")
+    created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.") # equal to vote.created
 
     def __unicode__(self):
         return '%s: %s' % (self.person, self.vote)
@@ -243,3 +256,11 @@ class Voter(models.Model):
     def voter_type_is_member(self):
         return self.voter_type == VoterType.member
         
+    def get_option_key(self):
+        """Returns the way this person voted. The value corresponds to the key of an option on the vote object."""
+        return self.option.key
+        
+    def person_name(self):
+        """The name of the voter."""
+        return self.person.name if self.person else None
+    
