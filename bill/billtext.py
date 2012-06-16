@@ -340,7 +340,7 @@ def compare_xml_text(doc1, doc2):
         rightnode.set("corresponds_with_" + ab, leftnode.get("id"))
            
     import diff_match_patch
-    diff = diff_match_patch.diff(doc1data.text, doc2data.text)
+    diff = diff_match_patch.diff(doc1data.text, doc2data.text, timelimit=10)
     diff = reformat_diff(simplify_diff(diff))
     idx = 0
     for op, left_pos, left_len, right_pos, right_len in diff:
