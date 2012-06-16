@@ -183,12 +183,62 @@ class BillModel(GBaseModel):
 	cosponsors = fields.ToManyField('website.api.PersonModel', 'cosponsors', help_text="A list of cosponsors of the bill. A list of API resources to query for more information.")
 	# missing: terms, committees
 
+from vote.models import Vote
+class VoteModel(GBaseModel):
+	"""Roll call votes in the U.S. Congress since 1789. How people voted is accessed through the Vote_voter API."""
+	
+	canonical_example = 1
+	
+	class Meta(GBaseModel.BaseMeta):
+		queryset = Vote.objects.all().select_related('options')
+		resource_name = 'vote'
+		filtering = {
+			"congress": ALL,
+			"session": ALL,
+			"chamber": ('exact',),
+			"number": ALL,
+			"created": ALL,
+			"category": ('exact'),
+			"related_bill": ALL_WITH_RELATIONS,
+		}
+		excludes = ["missing_data"]
+		ordering = ['created']
+		additional_properties = {
+			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+			"source_link": "get_source_link",
+			"options": "get_options",
+			#"voters": "get_voters",
+		}
+	related_bill = fields.ToOneField('website.api.BillModel', 'related_bill', null=True, full=True, help_text="A bill related to this vote (optional, and possibly present even if this is not a vote on the passage of the bill).")
+
+from vote.models import Voter
+class VoteVoterModel(GBaseModel):
+	"""How people voted on roll call votes in the U.S. Congress since 1789. See the Vote API. Filter on the vote field to get the results of a particular vote."""
+	
+	canonical_example = 8248474
+	
+	class Meta(GBaseModel.BaseMeta):
+		queryset = Voter.objects.all().select_related('vote', 'person', 'option')
+		resource_name = 'vote_voter'
+		filtering = {
+			"vote": ALL_WITH_RELATIONS,
+			"person": ALL_WITH_RELATIONS,
+		}
+		additional_properties = {
+			"option": "get_option_key",
+			"person_name": "person_name",
+		}
+		ordering = ['created']
+	vote = fields.ToOneField('website.api.VoteModel', 'vote', help_text="The vote that this was a part of.")
+	person = fields.ToOneField('website.api.PersonModel', 'person', help_text="The person making this vote.")
 
 v1_api = Api(api_name='v1')
 
 v1_api.register(PersonModel())
 v1_api.register(PersonRoleModel())
 v1_api.register(BillModel())
+v1_api.register(VoteModel())
+v1_api.register(VoteVoterModel())
 
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext

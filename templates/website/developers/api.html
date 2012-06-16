@@ -74,13 +74,23 @@ dl.schema > div {
 		<li><a href="{{baseurl}}person?roles__current=true">{{baseurl}}person?roles__current=true</a><br/>List current Members of Congress.</li>
 		<li><a href="{{baseurl}}bill?congress=112&amp;order_by=-current_status_date">{{baseurl}}bill?congress=112&amp;order_by=-current_status_date</a><br/>List current bills in Congress with the most recently active bills first.</li>
 		<li><a href="{{baseurl}}bill/74369">{{baseurl}}bill/74369</a><br/>H.R. 1349: Public Online Information Act of 2011.</li>
+		<li><a href="{{baseurl}}vote/?congress=112&session=2011">{{baseurl}}vote/?congress=112&amp;session=2011</a><br/>Roll call votes in 2011</li>
+		<li><a href="{{baseurl}}vote/1">{{baseurl}}vote/1</a><br/>Roll call vote metadata for House vote #183 in 2011</li>
+		<li><a href="{{baseurl}}vote_voter/?vote=1&limit=441">{{baseurl}}vote_voter/?vote=1&limit=441</a><br/>Actual votes in House vote #183 in 2011 with a limit set so all results appear in one page.</li>
 	</ul>
 	
 	<p>The following resources are available in the API.</p>
 	
 	{% cache 6000 govtrack_api_docs_2 request.META.HTTP_HOST %}
 	
+	<ul class="bullets">
 	{% for endpoint, resourcedef in api %}
+		<li><a href="#endpoint_{{endpoint}}">{{endpoint|capfirst}}</a><br/>{{resourcedef.get_docstring}}</li>
+	{% endfor %}
+	</ul>
+	
+	{% for endpoint, resourcedef in api %}
+		<a name="endpoint_{{endpoint}}"> </a>
 		<h3>{{endpoint|capfirst}}</h3>
 		<p>{{resourcedef.get_docstring}}</p>
 		<p>Use the list API at <a href="{{baseurl}}{{endpoint}}">{{baseurl}}{{endpoint}}</a> to get a list of objects of this type. The output will look like this:</p>

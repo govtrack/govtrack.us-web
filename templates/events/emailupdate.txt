@@ -1,7 +1,9 @@
 {% load events_utils %}GovTrack Email Update
 =====================
 
+{% comment %}
 ------ There have been positive developments with H.R. 5882. Check the GovTrack Blog for details. ------
+{% endcomment %}
 
 This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to http://www.govtrack.us/accounts/lists.
 
