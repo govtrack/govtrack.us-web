@@ -94,13 +94,15 @@ def search(request):
     
     results.append(("Members of Congress and Presidents", "/congress/members", "name",
         [{"href": p.object.get_absolute_url(), "label": p.object.name, "obj": p.object, "secondary": p.object.get_current_role() == None } for p in SearchQuerySet().filter(indexed_model_name__in=["Person"], content=q)[0:9]]))
-        
-    import us
-    results.append(("States", "/congress/members", "most_recent_role_state",
-        sorted([{"href": "/congress/members/%s" % s, "label": us.statenames[s] }
-            for s in us.statenames
-            if us.statenames[s].lower().startswith(q.lower())
-            ], key=lambda p : p["label"])))
+       
+    # Skipping states for now because we might want to go to the district maps or to
+    # the state's main page for state legislative information.
+    #import us
+    #results.append(("States", "/congress/members", "most_recent_role_state",
+    #    sorted([{"href": "/congress/members/%s" % s, "label": us.statenames[s] }
+    #        for s in us.statenames
+    #        if us.statenames[s].lower().startswith(q.lower())
+    #        ], key=lambda p : p["label"])))
     
     from committee.models import Committee
     results.append(("Committees", "/congress/committees", None,
@@ -122,13 +124,13 @@ def search(request):
     results.append(("State Legislation", "/states/bills/browse", "text",
         [{"href": p.object.get_absolute_url(), "label": p.object.short_display_title, "obj": p.object, "secondary": False } for p in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"], content=q)[0:9]]))
 
-    # in each group, make sure the secondary results are placed last
+    # in each group, make sure the secondary results are placed last, but otherwise preserve order
     for grp in results:
-        for i in xrange(len(grp[3])):
-           grp[3][i]["index"] = i
-           grp[3].sort(key = lambda o : (o.get("secondary", False), o["index"]))
+        for i, obj in enumerate(grp[3]):
+           obj["index"] = i
+        grp[3].sort(key = lambda o : (o.get("secondary", False), o["index"]))
     
-    # sort first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
+    # sort categories first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
     results.sort(key = lambda c : (len([d for d in c[3] if d.get("secondary", False) == False]) == False, len(c[3]) == 0, len(c[3])))
         
     return { "results": results }
