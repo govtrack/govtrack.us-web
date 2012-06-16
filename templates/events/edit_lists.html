@@ -216,83 +216,104 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-<section>
-	<h2>Your Lists</h2>
+<section class="group">
 	<div id="lists">
+	<h3>Select a list to manage</h3>
 	{% for list in request.user.userprofile.lists %}
 		{% comment %}since the first of these nodes is cloned when we
 		create a new list, it should not have any list-specific data hidden away
 		except where we expect that to be{% endcomment %}
+		
+
 		<div class="list {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)">
-			<div class="name">{{list.name}}</div>
-			<div style="float: right; width: 100px; text-align: right;">
-				<span class="opts"><a href="#" onclick="return rename_list(this.parentNode.parentNode.parentNode);">rename</a></span>
-				<span class="opts no_default_list">| <a href="#" onclick="return delete_list(this.parentNode.parentNode.parentNode);">delete</a></span>
+			<h3>{{list.name}}</h3>
+			<div class="options">
+				<span class="opts edit"><a class="icon edit" href="#" onclick="return rename_list(this.parentNode.parentNode.parentNode);">Rename</a></span>
+				<span class="opts no_default_list"><a class="icon trash" href="#" onclick="return delete_list(this.parentNode.parentNode.parentNode);">Delete</a></span>
 			</div>
-			<div style="clear: both"><small>Email Updates: <span class="emailinfo">{{list.get_email_display}}</span> <span class="opts">(<a href="#" onclick="return change_email_options(this.parentNode.parentNode.parentNode.parentNode);">toggle</a>)</span></small></div>
+			<div class="list_info">
+				<div class="num">## items</div>
+				<div class="freq">Update frequency: <span class="email_info">Weekly</span></div>
+			</div>
 		</div>
+
+
 	{% endfor %}
-	<div id="newlist" class="list" onclick="new_list()">
-		Create New List...
-	</div>
-	<div style="clear: both"> </div>
-	</div>
+		<a id="newlist" class="button" href="#" onclick="new_list()">+ Create New List</a>
+
+	</div><!-- /lists -->
 </section>
 
 <section id="list_view">
 
-<h2 style="margin-bottom: 1em">Edit List</h2>
+	<h1><span>Settings For </span>List Name Goes Here</h1>
 
-<div id="edit_list" class="col_6">
-	<h3 style="margin-bottom: .5em">Events In This List</h3>
-	<ul id="basic_trackers">
-		{% for feed in no_arg_feeds %}
-			<li>
-				<input id="basicfeed_{{feed.id}}" feedname="{{feed.feedname}}" type="checkbox" onclick="return toggle_list_item(this);"/>
-				{% if not feed.link %}
-					<label for="basicfeed_{{feed.id}}">{{feed.title}}</label>
-				{% else %}
-					<a href="{{feed.link}}">{{feed.title}}</a>
-				{% endif %}
-			</li>
-		{% endfor %}
-	</ul>
-	<ul id="other_feed_items">
-	</ul>
-	
-	<h3 style="margin-bottom: .5em">Add More Events</h2>
-	<div id="search_trackers">
-	
-	<div>Search Members of Congress: (<a href="/congress/members">browse all</a>)</div>
-	<div><input id="track_person_input" type="text" style="width: 100%" placeholder="search by last name, zipcode, or state name"/></div>
-	<div class="results" id="track_person_results"> </div>
-	<script>
-		$('#track_person_input').keyup_delayed(function() { search_feeds("person"); });
-	</script>
+	<div id="edit_list" class="col_6">
+		
+		<div id="set_freq" class="control">
+			<h3>How often do you want updates?</h3>
+			<div>
+				<label for="email_frequency">Receive update emails</label>
+				<select name="email_frequency">
+					<option value="daily">Daily</option>
+					<option value="weekly">Weekly</option>
+					<option value="monthly">Monthly</option>
+					<option value="ends_y">Days that end with "Y"</option>
+					<option value="9th_thurs">Every 9th Thursday</option>
+				</select>
+			</div>
+		</div><!-- /set_freq -->
 
-	<div style="margin-top: 1em">Search Bills: (<a href="/congress/bills">browse all</a>)</div>
-	<div><input id="track_bill_input" type="text" style="width: 100%" placeholder="search bill titles"/></div>
-	<div class="results" id="track_bill_results"> </div>
-	<script>
-		$('#track_bill_input').keyup_delayed(function() { search_feeds("bill"); });
-	</script>
-	
-	<div style="margin-top: 1em">Search Committees: (<a href="/congress/committees">browse all</a>)</div>
-	<div><input id="track_committee_input" type="text" style="width: 100%" placeholder="search by committee name"/></div>
-	<div class="results" id="track_committee_results"> </div>
-	<script>
-		$('#track_committee_input').keyup_delayed(function() { search_feeds("committee"); });
-	</script>
-	
-	<div style="margin-top: 1em">Add a Subject Areas:</div>
-	<div><select id="track_subject_input" style="background-color: white"><option value="">(Select a Subject Area)</option>{% for id, name in subject_choices %}<option value="{{id}}">{{name}}</option>{% endfor %}</select></div>
-	<script>$('#track_subject_input').change(function() { toggle_list_item2("crs:" + this.value, true); });</script>
-	
+
+		<div id="items" class="control">
+			<h3>Tracked Items <span>in</span> This List</h3>
+			<ul id="other_feed_items">
+			</ul>
+		</div><!-- /items -->
+		
+		<div id="search_trackers" class="control">
+			<h3>Find More Items <span>to</span> Track</h3>
+			<label>Search For:</label>
+			<div>
+				<input id="track_person_input" type="text" style="width: 100%" placeholder="search by last name, zipcode, or state name"/>
+			</div>
+			<div class="results" id="track_person_results"> </div>
+			<script>
+				$('#track_person_input').keyup_delayed(function() { search_feeds("person"); });
+			</script>
+
+			<div id="browse_links">
+				<h4>Browse:</h4>
+				<a href="/congress/members">Members</a> &#8226; <a href="/congress/bills">Bills</a> &#8226; <a href="/congress/votes">Votes</a> &#8226; <a href="/congress/committees">Committees</a>
+			</div>
+		</div><!-- /search_trackers -->
+
+		<div id="suggested" class="control">
+			<h3>Suggested Items <span>to</span> Track</h3>
+			<ul id="basic_trackers">
+				{% for feed in no_arg_feeds %}
+					<li>
+						<input id="basicfeed_{{feed.id}}" feedname="{{feed.feedname}}" type="checkbox" onclick="return toggle_list_item(this);"/>
+						{% if not feed.link %}
+							<label for="basicfeed_{{feed.id}}">{{feed.title}}</label>
+						{% else %}
+							<a href="{{feed.link}}">{{feed.title}}</a>
+						{% endif %}
+					</li>
+				{% endfor %}
+			</ul>
+		</div><!-- /suggested -->
+
 	</div>
-</div>
 
-<div id="events" class="col_6" style="margin: 0 0 25px 20px; border-left: 1px solid #DDD; padding: 5px 0 20px 20px; min-height: 480px;">
-</div>
+	<div id="events_list" class="col_6">
+		<div id="events_header" class="group">
+			<h3>List Feed</h3>
+			<a href="#" class="add_icon rss">Subscribe by RSS</a>
+		</div>
+
+		<div id="events">
+	</div><!-- /events -->
 
 </section>
 {% endblock %}

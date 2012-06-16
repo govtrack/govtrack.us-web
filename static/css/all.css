@@ -1437,66 +1437,196 @@ aside .download-links { padding: 31px 0 0 	}
 .feed_active_span { display: none; }
 .active .feed_inactive_span { display: none; }
 .active .feed_active_span { display: inline; }
-
-#lists .opts { display: none; }
+#lists {
+    padding-top: 20px;
+}
+#lists .options { display: none; }
+#lists > h3 {
+    border-bottom: 1px solid #dae2df;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
 #lists > div.list {
     float: left;
     width: 270px;
     height: 3em;
     margin: 10px 25px 15px 0;
-    background-color: #fff;
+    background-color: #fcfcfc;
     border-radius: 1px;
     border: solid #e7e4dc 1px;
     box-shadow:
-        0 0 0 5px hsl(48, 2%, 98%),
+        0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
     padding: 10px;
     cursor: pointer;
 }
-#lists div.list:nth-child(3n+1){
+#lists div.list:nth-child(3n+2){
     margin-left: 6px;
 }
-#lists div.list:nth-child(3n+3){
+#lists div.list:nth-child(3n+4){
     margin-right: 0;
 }
-#lists > div#newlist {
+#lists > a#newlist {
+    display: block;
+    float: left;
     height: auto;
     font-weight: bold;
-    font-size: 11px;
+    font-size: 1em;
 }
-    #lists > div#newlist:hover {
-        text-decoration: underline;
+    #lists > a#newlist:hover {
+        border-bottom: 0;
     }
 #lists > div.active {
     color: black;
-    background-color: #FEE;
+    background-color: #fffbf0;
+    box-shadow:
+        0 0 0 5px #fcf3d0,
+        0 1px 2px 5px rgba(106,106,106,.4);
 }
-#lists > div.active .opts {
-    display: inline;
-    font-size: 90%;
-    color: #777;
-}
-#lists > div.default_list .no_default_list { display: none; }
-#lists > div.active .opts a {
-    color: #666;
-}
-    #lists > div.active .opts a:hover {
-        border: none;
-        text-decoration: underline;
-    }
-    #lists > div.list .name {
+#lists > div.list h3 {
         float: left;
         width: 175px;
         height: 1.5em;
+        font-size: 1em;
+        color: #cb4b16;
         overflow: hidden;
     }
+#lists div.active .options,
+#lists div.list:hover .options {
+    display: block;
+    float: right;
+    width: 30px;
+}
+#lists div.default_list .options,
+#lists div.default_list:hover .options {
+    width: 12px;
+}
+#lists > div .opts {
+    display: inline;
+    float: left;
+}
+#lists > div.default_list .no_default_list { display: none; }
+#lists > div .opts a {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    text-indent: -9999px;
+    background: url(../images/icons.png) left top no-repeat;
+    color: #666;
+}
+#lists > div.default_list .opts a {
+    margin-right: 0;
+}
+    #lists > div .opts a.icon.trash {
+        background-position: right top;
+        margin-right: 0;
+    }
+    #lists > div .opts a.icon.edit:hover {
+        background-position: left bottom;
+    }
+    #lists > div .opts a.icon.trash:hover {
+        background-position: right bottom;
+    }
+
+#lists .list_info {
+    clear: both;
+    font-size: .75em;
+    text-transform: uppercase;
+}
+    #lists .list_info .num {
+        float: left;
+    }
+    #lists .list_info .freq {
+        float: right;
+    }
+        #lists .list_info .freq .email_info {
+            text-transform: none;
+            font-size: 1.25em;
+        }
+    
     
 #list_view {
+    clear: both;
     margin-top: 20px;
-    border-top: 1px solid #AAA;
-    padding-top: 20px;
+    border-top: 1px solid #dae2df;
+    padding-top: 30px;
 }
+    #list_view h1 {
+        font-size: 1.6em;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+        #list_view h1 span {
+            font-family: 'CallunaItalic';
+            color: #40a4bd;
+            text-transform: none;
+        }
+    #list_view h3 {
+        font-size: 1em;
+        color: #40a4bd;
+    }
 
+    #edit_list {
+        background: #f8f7f7;
+        border-radius: 1px;
+        border: solid #e7e4dc 1px;
+        box-shadow:
+            0 0 0 5px #f9f8f4,
+            0 1px 2px 5px rgba(106,106,106,.4);
+        padding: 25px;
+        margin: 0 6px 30px;
+        width: 380px;
+    }
+    #edit_list .control {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: solid #dfdbcf 1px;
+    }
+
+    #edit_list h4,
+    #edit_list label {
+        text-transform: uppercase;
+        font-family: 'CallunaSansRegular';
+        font-size: 12px;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        color: #555;
+    }
+    #set_freq label {
+        display: inline-block;
+        float: left;
+        margin-right: 1em;
+        margin-top: 5px;
+
+    }
+    #browse_links {
+        margin-top: 1.5em;
+    }
+
+    #events_list {
+        margin: 0 0 25px 20px;
+        border-left: 1px solid #DDD;
+        padding: 5px 0 20px 20px;
+        min-height: 480px;
+    }
+        #events_header {
+            border-bottom: solid #dae2df 5px;
+        }
+            #events_header h3 {
+                float: left;
+                font-size: 1.25em;
+            }
+            #events_header a {
+                display: block;
+                float: right;
+                height: 16px;
+                padding-right: 20px;
+                background: url(../images/icon_rss.png) right top no-repeat;
+            }
+            #events_header a:hover {
+                background-position: right bottom;
+            }
 
 
 
