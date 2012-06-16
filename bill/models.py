@@ -14,7 +14,7 @@ from us import get_congress_dates
 
 from django.conf import settings
 
-import datetime, os.path
+import datetime, os.path, re
 from lxml import etree
 
 "Enums"
@@ -623,13 +623,20 @@ class Bill(models.Model):
     def get_related_bills(self):
         ret = []
         seen = set()
-        bills = list(self.relatedbills.all().select_related("bill"))
+        bills = list(self.relatedbills.all().select_related("related_bill"))
         bills.sort(key = lambda rb : RelatedBill.relation_sort_order.get(rb.relation, 999))
         for rb in bills:
-            if not rb.bill in seen:
+            if not rb.related_bill in seen:
                 ret.append(rb)
-                seen.add(rb.bill)
+                seen.add(rb.related_bill)
         return ret
+
+    def find_reintroductions(self):
+        def normalize_title(title): # remove anything that looks like a year
+            return re.sub(r"of \d\d\d\d$", "", title)
+        for reintro in Bill.objects.exclude(congress=self.congress).filter(sponsor=self.sponsor).order_by('congress'):
+            if normalize_title(self.title_no_number) != normalize_title(reintro.title_no_number): continue
+            yield reintro
 
     
     def get_open_market(self, user):

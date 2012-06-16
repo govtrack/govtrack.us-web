@@ -69,7 +69,7 @@ function hide_comparison() {
 	return false;
 }
 
-function load_comparison(alt_version) {
+function load_comparison(alt_bill, alt_version) {
 	$('#main_text_content').hide();
 	$('#content_loading').show();
 	
@@ -77,10 +77,11 @@ function load_comparison(alt_version) {
 		url: "/congress/bills/_ajax/load_text",
 		type: "GET",
 		data: {
-			bill: "{{bill.id}}",
 			mode: "comparison",
-			left: "{{textdata.doc_version}}",
-			right: alt_version,
+			left_bill: {{bill.id}},
+			left_version: "{{textdata.doc_version}}",
+			right_bill: alt_bill ? alt_bill : {{bill.id}},
+			right_version: alt_version ? alt_version : "",
 		},
 		dataType: "json",
 		success: function(data) {
@@ -97,8 +98,8 @@ function display_comparison(left_text, right_text, left_meta, right_meta) {
 	$('#bill_comparison_content').show();
 	
 	var docs = $("#bill_comparison_content .bill_text_content");
-	$(docs[0]).find('> .header').text(left_meta.docdate + ": " + left_meta.doc_version_name);
-	$(docs[1]).find('> .header').text(right_meta.docdate + ": " + right_meta.doc_version_name);
+	$(docs[0]).find('> .header').text((left_meta.bill_id == right_meta.bill_id ? "" : left_meta.bill_name + " --- ") + left_meta.docdate + ": " + left_meta.doc_version_name);
+	$(docs[1]).find('> .header').text((left_meta.bill_id == right_meta.bill_id ? "" : right_meta.bill_name + " --- ") + right_meta.docdate + ": " + right_meta.doc_version_name);
 	$(docs[0]).find('> .body').html(left_text);
 	$(docs[1]).find('> .body').html(right_text);
 	
@@ -257,12 +258,21 @@ $(window).resize(align_panels);
 			{% if textdata.doc_version == alt.doc_version %}
 				<li style="color: #777;">{{alt.docdate|date}}: {{alt.doc_version_name}}</li>
 			{% else %}
-				<li><a href="#" onclick="return load_comparison('{{alt.doc_version}}');">{{alt.docdate|date}}: {{alt.doc_version_name}}</a></li>
+				<li><a href="#" onclick="return load_comparison(null, '{{alt.doc_version}}');">{{alt.docdate|date}}: {{alt.doc_version_name}}</a></li>
 			{% endif %}
 		{% endfor %}
 	</ul>
 	{% endif %}
 	
+	{% if related_bills %}
+	<p>Compare this bill to another bill:</p>
+	<ul class="bullets">
+		{% for rb in related_bills %}
+			<li><a href="#" onclick="return load_comparison({{rb.id}}, null);">{{rb}}</a></li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+
 
 	{% comment %}
 	<div style="float: right; width: 120px;">

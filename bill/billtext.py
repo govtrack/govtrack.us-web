@@ -123,6 +123,8 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     doc_version_name = bill_gpo_status_codes[doc_version]
     
     return {
+        "bill_id": bill.id,
+        "bill_name": bill.title,
         "basename": basename,
         "text_html": bill_text_content,
         "docdate": docdate,

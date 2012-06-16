@@ -23,7 +23,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json, datetime, re, os.path
+import urllib, urllib2, json, datetime, os.path
 from registration.helpers import json_response
 
 @render_to('bill/bill_details.html')
@@ -48,11 +48,7 @@ def bill_details(request, congress, type_slug, number):
     def get_reintroductions():
         reintro_prev = None
         reintro_next = None
-        def normalize_title(title):
-            # remove anything that looks like a year
-            return re.sub(r"of \d\d\d\d$", "", title)
-        for reintro in Bill.objects.exclude(congress=bill.congress).filter(sponsor=bill.sponsor).order_by('congress'):
-            if normalize_title(bill.title_no_number) != normalize_title(reintro.title_no_number): continue
+        for reintro in bill.find_reintroductions():
             if reintro.congress < bill.congress: reintro_prev = reintro
             if reintro.congress > bill.congress and not reintro_next: reintro_next = reintro
         return reintro_prev, reintro_next
@@ -136,21 +132,23 @@ def bill_text(request, congress, type_slug, number, version=None):
         "textdata": textdata,
         "version": version,
         "alternates": alternates,
+        "related_bills": list(bill.find_reintroductions()) + [r.related_bill for r in bill.get_related_bills()],
     }
 
 @json_response
 def bill_text_ajax(request):
-    for p in ("bill", "left", "right", "mode"):
+    for p in ("left_bill", "left_version", "right_bill", "right_version", "mode"):
         if not p in request.GET:
             raise Http404()
     
     from billtext import load_bill_text, compare_xml_text
     import lxml
     
-    bill = Bill.objects.get(id = request.GET["bill"])
+    left_bill = Bill.objects.get(id = request.GET["left_bill"])
+    left = load_bill_text(left_bill, request.GET["left_version"], mods_only=True)
     
-    left = load_bill_text(bill, request.GET["left"], mods_only=True)
-    right = load_bill_text(bill, request.GET["right"], mods_only=True)
+    right_bill = Bill.objects.get(id = request.GET["right_bill"])
+    right = load_bill_text(right_bill, request.GET["right_version"], mods_only=True)
     
     doc1 = lxml.etree.parse(left["basename"] + ".html")
     doc2 = lxml.etree.parse(right["basename"] + ".html")
