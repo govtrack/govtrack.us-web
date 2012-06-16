@@ -1552,13 +1552,12 @@ aside .download-links { padding: 31px 0 0 	}
     border-top: 1px solid #dae2df;
     padding-top: 30px;
 }
-    #list_view h1 {
+    #list_view h2 {
         font-size: 1.6em;
         text-transform: uppercase;
         margin-bottom: 20px;
     }
-        #list_view h1 span {
-            font-family: 'CallunaItalic';
+        #list_view h2 span.italic {
             color: #40a4bd;
             text-transform: none;
         }

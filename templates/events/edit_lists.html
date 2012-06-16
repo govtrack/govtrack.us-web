@@ -9,13 +9,15 @@ function activate_list(elem) {
 	active_list = $(elem).attr("listid");
 	$('#lists div').removeClass('active');
 	$(elem).addClass("active");
-	$("#list_view h2").text($(elem).find(".name").text());
+	$("#list_view h2 .name").text($(elem).find(".name").text());
 	
 	$('#basic_trackers input').prop('checked', false);
-	$("#other_feed_items").text("");
+	$("#list_trackers").text("");
 
 	$('#search_trackers input').val("");
 	$('#search_trackers .results').html("");
+	
+	$('#email_frequency').val($(elem).attr('list_email'));
 	
 	$.ajax({
 		url: "/events/_edit",
@@ -26,13 +28,16 @@ function activate_list(elem) {
 		},
 		dataType: "json",
 		success: function(data) {
+			$('#events_header a').attr('href', '/events/events.rss?list_id=' + active_list);
+			
+			$('#items p').toggle(data.list_trackers.length == 0);
+			
 			for (var i = 0; i < data.list_trackers.length; i++) {
+				add_tracker(data.list_trackers[i].id, data.list_trackers[i].name, data.list_trackers[i].title, data.list_trackers[i].link, false);
 				var n = $('#basicfeed_' + data.list_trackers[i].id);
 				if (n.length) {
-					// it is a basic tracker
-					n.prop('checked', true);
-				} else {
-					add_feed_node(data.list_trackers[i].id, data.list_trackers[i].name, data.list_trackers[i].title, data.list_trackers[i].link);
+					// it is in the basic tracker recommended list. TODO: Remove this class.
+					n.addClass("active");
 				}
 			}
 		}
@@ -57,36 +62,69 @@ function refresh_events() {
 	});	
 }
 
-function add_feed_node(id, name, title, link) {
-	var t = $("<li><input type='checkbox' checked onclick='return toggle_list_item(this);'/><a/></li>");
-	t.find("input").attr('id', "feed_" + id);
-	t.find("input").attr('feedname', name);
-	t.find("a").text(title);
-	t.find("a").attr("href", link);
-	//t.find("label").attr('for', "feed_" + id);
-
-	$("#other_feed_items").append(t);
+function add_tracker(id, name, title, link, save) {
+	var t = $("<li><span/> <a href='#' onclick='return toggle_tracker(this);' class='active'>remove</a></li>");
+	t.find("span").text(title);
+	t.find("a").attr("feedname", name);
+	$('#items p').fadeOut();
+	$("#list_trackers").append(t);
+	if (save) add_remove_tracker(true, name, false);
+	
+	// if it is in the removed list, hide it
+	$('#removed_trackers *').each(function() {
+		if ($(this).find('a').attr('feedname') == name)
+			$(this).remove();
+	});
+	$('#removed').toggle($('#removed_trackers *').length > 0);
+	
+	if (save) update_count();
+	
+	return false;
 }
 
-function toggle_list_item(elem, refresh) {
-	toggle_list_item2($(elem).attr("feedname"), refresh);
+function update_count() {
+	var c = $('#list_trackers li').length;
+	$(".list[listid=" + active_list + "]").find(".num").text(c + " item" + (c == 1 ? "" : "s"));
 }
-function toggle_list_item2(feedname, refresh) {
+
+function toggle_tracker(node) {
+	if ($(node).hasClass('active')) {
+		$(node).removeClass('active');
+		$(node).text('add back');
+		$('#removed').fadeIn();
+		$('#removed_trackers').append($(node.parentNode));
+		$('#items p').toggle($('#list_trackers *').length == 0); 
+		add_remove_tracker(false, $(node).attr('feedname'), false);
+	} else {
+		$(node).addClass('active');
+		$(node).text('remove');
+		$('#items p').fadeOut();
+		$('#list_trackers').append($(node.parentNode));
+		$('#removed').toggle($('#removed_trackers *').length > 0);
+		add_remove_tracker(true, $(node).attr('feedname'), false);
+	}
+	update_count();
+	return false;
+}
+
+function add_remove_tracker(add_remove, feedname, refresh) {
 	$.ajax({
 		url: "/events/_edit",
 		type: "POST",
 		data: {
 			listid: active_list,
-			command: "toggle",
+			command: add_remove ? "add" : "remove",
 			feed: feedname
 		},
 		dataType: "json",
 		success: function(data) {
 			if (refresh)
 				activate_list($('#lists div.active')[0]);
-			refresh_events();
+			else
+				refresh_events();
 		}
 	});		
+	return false;
 }
 
 function delete_list(node) {
@@ -129,17 +167,18 @@ function rename_list(node) {
 	return false;
 }
 
-function change_email_options(node) {
+function change_email_options() {
 	$.ajax({
 		url: "/events/_edit",
 		type: "POST",
 		data: {
-			listid: $(node).attr("listid"),
-			command: "email_toggle"
+			listid: active_list,
+			command: "set_email_frequency",
+			value: $('#email_frequency').val()
 		},
 		dataType: "json",
 		success: function(data) {
-			$(node).find(".emailinfo").text(data.list_email);
+			$(".list[listid=" + active_list + "]").find(".email_info").text(data.list_email_display);
 		}
 	});
 	return false;
@@ -158,8 +197,10 @@ function new_list(node) {
 			var n = $('#lists > div:first').clone();
 			n.insertBefore($('#newlist'));
 			n.find(".name").text(data.list_name);
-			n.find(".emailinfo").text(data.list_email);
+			n.find(".email_info").text(data.list_email_display);
+			n.find('.num').text('Empty');
 			n.attr("listid", data.list_id);
+			n.attr("list_email", data.list_email);
 			n.removeClass("default_list");
 			n.hide();
 			n.fadeIn();
@@ -225,52 +266,58 @@ $(function() {
 		except where we expect that to be{% endcomment %}
 		
 
-		<div class="list {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)">
-			<h3>{{list.name}}</h3>
+		<div class="list {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)" list_email="{{list.email}}">
+			<h3 class="name">{{list.name}}</h3>
 			<div class="options">
 				<span class="opts edit"><a class="icon edit" href="#" onclick="return rename_list(this.parentNode.parentNode.parentNode);">Rename</a></span>
 				<span class="opts no_default_list"><a class="icon trash" href="#" onclick="return delete_list(this.parentNode.parentNode.parentNode);">Delete</a></span>
 			</div>
 			<div class="list_info">
-				<div class="num">## items</div>
-				<div class="freq">Update frequency: <span class="email_info">Weekly</span></div>
+				<div class="num">{{list.trackers.count}} item{{list.trackers.count|pluralize}}</div>
+				<div class="freq">{% if list.name != "Email Updates" %}Email Updates:{% else %}Frequency:{% endif %} <span class="email_info">{{list.get_email_display}}</span></div>
 			</div>
 		</div>
 
 
 	{% endfor %}
-		<a id="newlist" class="button" href="#" onclick="new_list()">+ Create New List</a>
+		<a id="newlist" class="button" href="#" onclick="return new_list();">+ Create New List</a>
 
 	</div><!-- /lists -->
 </section>
 
 <section id="list_view">
 
-	<h1><span>Settings For </span>List Name Goes Here</h1>
+	<h2><span class="italic">Settings For </span><span class="name">List Name Goes Here</span></h2>
 
 	<div id="edit_list" class="col_6">
 		
 		<div id="set_freq" class="control">
 			<h3>How often do you want updates?</h3>
 			<div>
-				<label for="email_frequency">Receive update emails</label>
-				<select name="email_frequency">
-					<option value="daily">Daily</option>
-					<option value="weekly">Weekly</option>
-					<option value="monthly">Monthly</option>
-					<option value="ends_y">Days that end with "Y"</option>
-					<option value="9th_thurs">Every 9th Thursday</option>
+				<label for="email_frequency">Send update emails</label>
+				<select id="email_frequency" name="email_frequency" onchange="change_email_options();">
+					<option value="0">Don&rsquo;t Send Emails</option>
+					<option value="1">Daily</option>
+					<option value="2">Weekly</option>
 				</select>
 			</div>
 		</div><!-- /set_freq -->
 
 
 		<div id="items" class="control">
-			<h3>Tracked Items <span>in</span> This List</h3>
-			<ul id="other_feed_items">
+			<h3>Tracked <span>in</span> This List</h3>
+			<ul id="list_trackers">
+			</ul>
+			<p>Select something to track!</p>
+		</div><!-- /items -->
+
+		<div id="removed" class="control" style="display: none;">
+			<h3>Recently Deleted</h3>
+			<ul id="removed_trackers">
 			</ul>
 		</div><!-- /items -->
 		
+		{% comment %}
 		<div id="search_trackers" class="control">
 			<h3>Find More Items <span>to</span> Track</h3>
 			<label>Search For:</label>
@@ -284,22 +331,16 @@ $(function() {
 
 			<div id="browse_links">
 				<h4>Browse:</h4>
-				<a href="/congress/members">Members</a> &#8226; <a href="/congress/bills">Bills</a> &#8226; <a href="/congress/votes">Votes</a> &#8226; <a href="/congress/committees">Committees</a>
+				<a href="/congress/members">Members of Congress</a> &#8226; <a href="/congress/bills">Bills</a> &#8226; <a href="/congress/votes">Votes</a> &#8226; <a href="/congress/committees">Committees</a>
 			</div>
 		</div><!-- /search_trackers -->
+		{% endcomment %}
 
 		<div id="suggested" class="control">
 			<h3>Suggested Items <span>to</span> Track</h3>
 			<ul id="basic_trackers">
 				{% for feed in no_arg_feeds %}
-					<li>
-						<input id="basicfeed_{{feed.id}}" feedname="{{feed.feedname}}" type="checkbox" onclick="return toggle_list_item(this);"/>
-						{% if not feed.link %}
-							<label for="basicfeed_{{feed.id}}">{{feed.title}}</label>
-						{% else %}
-							<a href="{{feed.link}}">{{feed.title}}</a>
-						{% endif %}
-					</li>
+					<li><a href="#" onclick="return add_tracker({{feed.id}}, '{{feed.feedname|escapejs}}', '{{feed.title|escapejs}}', '{{feed.link|escapejs}}', true);">{{feed.title}}</a></li>
 				{% endfor %}
 			</ul>
 		</div><!-- /suggested -->

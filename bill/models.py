@@ -331,7 +331,7 @@ class Bill(models.Model):
                 textfn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (self.congress, bt, bt, self.number, st) # use pdf since we don't modify it once we download it, and hopefully we actually have a displayable format like HTML
                 if os.path.exists(textfn):
                     textmodtime = datetime.datetime.fromtimestamp(os.path.getmtime(textfn))
-                    E.add("text:" + st, textmodtime, index_feeds + common_feeds)
+                    E.add("text:" + st, textmodtime, index_feeds)
     
     def render_event(self, eventid, feeds):
         if eventid == "dhg":
@@ -489,7 +489,7 @@ class Bill(models.Model):
             "title": self.title,
             "url": self.get_absolute_url() + "/text",
             "body_text_template": """This {{noun}}'s text {% if doc_version_name != "Introduced" %}for status <{{doc_version_name}}> ({{doc_date}}) {% endif %}is now available.""",
-            "body_html_template": """<p>This {{noun}}&rsquo;s text {% if doc_version_name != "Introduced" %}for status &lt;{{doc_version_name}}&gt; ({{doc_date}}) {% endif %}is now available.</p>""",
+            "body_html_template": """<p>This {{noun}}&rsquo;s text {% if doc_version_name != "Introduced" %}for status <i>{{doc_version_name}}</i> ({{doc_date}}) {% endif %}is now available.</p>""",
             "context": { "noun": self.noun, "doc_date": modsinfo["docdate"], "doc_version_name": modsinfo["doc_version_name"] },
             }
         
