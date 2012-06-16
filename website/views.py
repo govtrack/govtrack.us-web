@@ -92,20 +92,20 @@ def search(request):
     
     from haystack.query import SearchQuerySet
     
-    results.append(("Members of Congress and Presidents", "/congress/members", "name",
+    results.append(("Members of Congress and Presidents", "/congress/members", "name", "Members of Congress or presidents",
         [{"href": p.object.get_absolute_url(), "label": p.object.name, "obj": p.object, "secondary": p.object.get_current_role() == None } for p in SearchQuerySet().filter(indexed_model_name__in=["Person"], content=q)[0:9]]))
        
     # Skipping states for now because we might want to go to the district maps or to
     # the state's main page for state legislative information.
     #import us
-    #results.append(("States", "/congress/members", "most_recent_role_state",
+    #results.append(("States", "/congress/members", "most_recent_role_state", "states",
     #    sorted([{"href": "/congress/members/%s" % s, "label": us.statenames[s] }
     #        for s in us.statenames
     #        if us.statenames[s].lower().startswith(q.lower())
     #        ], key=lambda p : p["label"])))
     
     from committee.models import Committee
-    results.append(("Committees", "/congress/committees", None,
+    results.append(("Congressional Committees", "/congress/committees", None, "committees in Congress",
         sorted([{"href": c.get_absolute_url(), "label": c.fullname, "obj": c }
         for c in Committee.objects.filter(name__contains=q, obsolete=False)]
         , key=lambda c : c["label"])))
@@ -119,19 +119,19 @@ def search(request):
     else:
         #bills = [{"href": bill.get_absolute_url(), "label": bill.title, "obj": bill, "secondary": bill.congress != CURRENT_CONGRESS }]
         return HttpResponseRedirect(bill.get_absolute_url())
-    results.append(("Bills and Resolutions (Federal)", "/congress/bills/browse", "text", bills))
+    results.append(("Bills and Resolutions (Federal)", "/congress/bills/browse", "text", "federal bills or resolutions", bills))
 
-    results.append(("State Legislation", "/states/bills/browse", "text",
-        [{"href": p.object.get_absolute_url(), "label": p.object.short_display_title, "obj": p.object, "secondary": False } for p in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"], content=q)[0:9]]))
+    results.append(("State Legislation", "/states/bills/browse", "text", "state legislation",
+        [{"href": p.object.get_absolute_url(), "label": p.object.short_display_title, "obj": p.object, "secondary": True } for p in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"], content=q)[0:9]]))
 
     # in each group, make sure the secondary results are placed last, but otherwise preserve order
     for grp in results:
-        for i, obj in enumerate(grp[3]):
+        for i, obj in enumerate(grp[4]):
            obj["index"] = i
-        grp[3].sort(key = lambda o : (o.get("secondary", False), o["index"]))
+        grp[4].sort(key = lambda o : (o.get("secondary", False), o["index"]))
     
     # sort categories first by whether all results are secondary results, then by number of matches (fewest first, if greater than zero)
-    results.sort(key = lambda c : (len([d for d in c[3] if d.get("secondary", False) == False]) == False, len(c[3]) == 0, len(c[3])))
+    results.sort(key = lambda c : (len([d for d in c[4] if d.get("secondary", False) == False]) == False, len(c[4]) == 0, len(c[4])))
         
     return { "results": results }
     

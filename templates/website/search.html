@@ -20,11 +20,11 @@
 	
 	<div style="margin: 1.5em 0 2em 0">
 	{% if request.GET.q %}
-		{% for category, browseurl, more_at, matches in results %}
+		{% for category, browseurl, more_at, no_match_noun, matches in results %}
 			<div style="float: left; margin: 10px 60px 30px 0; width: 390px;">
 			<h2>{{category}}</h2>
 			{% if not matches %}
-				<p>We couldn&rsquo;t find anything that matched your search in this category. <a href="{{browseurl}}">Browse</a> for more.</p>
+				<p>We couldn&rsquo;t find any {{no_match_noun}} that matched your search. <a href="{{browseurl}}">Browse</a> for more.</p>
 			{% else %}
 				{% for ret in matches %}
 					<div style="margin-bottom: .5em"><a href="{{ret.href}}">{{ret.label}}</a></div>
