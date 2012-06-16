@@ -18,12 +18,15 @@ from events.templatetags.events_utils import render_event
 from settings import CURRENT_CONGRESS
 
 def get_feed_list(request):
-    feedlist = request.GET.get('feeds', '').split(',')
-    if feedlist == [""]:
-        feedlist = []
+    if "list_id" in request.GET:
+        return get_object_or_404(SubscriptionList, id=request.GET["list_id"]).trackers.all()
     else:
-        feedlist = [Feed.from_name(f) for f in feedlist]
-    return feedlist
+        feedlist = request.GET.get('feeds', '').split(',')
+        if feedlist == [""]:
+            feedlist = []
+        else:
+            feedlist = [Feed.from_name(f) for f in feedlist]
+        return feedlist
 
 @login_required
 @render_to('events/edit_lists.html')
@@ -69,11 +72,11 @@ def edit_subscription_list(request):
         sublist.save()
     if request.POST["command"] == "delete" and not sublist.is_default:
         sublist.delete()
-    if request.POST["command"] == "email_toggle":
-        sublist.email = (sublist.email + 1) % len(SubscriptionList.EMAIL_CHOICES)
+    if request.POST["command"] == "set_email_frequency":
+        sublist.email = int(request.POST["value"])
         sublist.save()
     
-    return { "list_id": sublist.id, "list_name": sublist.name, "list_email": sublist.get_email_display(), "list_trackers": [ { "id": f.id, "name": f.feedname, "title": f.title, "link": f.link } for f in sublist.trackers.all() ], "state": state }
+    return { "list_id": sublist.id, "list_name": sublist.name, "list_email": sublist.email, "list_email_display": sublist.get_email_display(), "list_trackers": [ { "id": f.id, "name": f.feedname, "title": f.title, "link": f.link } for f in sublist.trackers.all() ], "state": state }
 
 @render_to('events/events_list_items.html')
 def events_list_items(request):
