@@ -13,7 +13,6 @@ h1 {
 	font-size: 24px;
 	line-height: 30px;
 	color: #565656;
-	background: url(../images/divider-4.gif) repeat-x 0 100%;
 	padding: 0 0 6px;
 	margin: 0 0 6px;
 }	
@@ -23,7 +22,7 @@ h1 {
 .bill_text_content {
 	width: 640px;
 	float: left;
-	border: 1px solid #555;
+	border-right: 1px solid #AAA;
 	padding: 1em;
 	font-family: serif;
 	color: #000;
@@ -33,20 +32,23 @@ h1 {
 .bill_text_content blockquote { margin: 1em; }
 .bill_text_content ul { margin-left: 1em; }
 
-.bill_text_content span.ins {
-	text-decoration: underline;
-	background-color: #EEE;
-}
-.bill_text_content span.del {
-	text-decoration: line-through;
-	background-color: #EEE;
-}
-.bill_text_content span.change {
-	background-color: #EEE;
+.bill_text_content span.ins, .bill_text_content span.del, .bill_text_content span.change {
+	background-color: #A00;
+	color: #FFF;
 }
 
-.bill_text_content .highlight {
-	background-color: #EEF;
+.bill_text_content div.spacer {
+	background-color: #F3F3F3;
+	background-image: url('/static/images/text_compare_line_filler.gif');
+	margin: 10px; /* this affects the javascript */
+}
+
+#bill_comparison_content .bill_text_content > .header {
+	padding: 1em;
+	margin-bottom: 1em;
+	background-color: #EEE;
+	font-weight: bold;
+	text-align: center;
 }
 
 #sidebar {
@@ -60,9 +62,69 @@ h1 {
 
 {% block head %}
 <script>
-$(function() {
-	/*var docs = $(".bill_text_content");
-	var doc_fixed;
+function hide_comparison() {
+	$('#main_text_content').show();
+	$('#bill_comparison_content').hide();
+	$('#sidebar').show();
+	return false;
+}
+
+function load_comparison(alt_version) {
+	$('#main_text_content').hide();
+	$('#content_loading').show();
+	
+	$.ajax({
+		url: "/congress/bills/_ajax/load_text",
+		type: "GET",
+		data: {
+			bill: "{{bill.id}}",
+			mode: "comparison",
+			left: "{{textdata.doc_version}}",
+			right: alt_version,
+		},
+		dataType: "json",
+		success: function(data) {
+			display_comparison(data.left_text, data.right_text, data.left_meta, data.right_meta);
+		}
+	});
+	
+	return false;
+}
+
+function display_comparison(left_text, right_text, left_meta, right_meta) {
+	$('#content_loading').hide();
+	$('#sidebar').hide();
+	$('#bill_comparison_content').show();
+	
+	var docs = $("#bill_comparison_content .bill_text_content");
+	$(docs[0]).find('> .header').text(left_meta.docdate + ": " + left_meta.doc_version_name);
+	$(docs[1]).find('> .header').text(right_meta.docdate + ": " + right_meta.doc_version_name);
+	$(docs[0]).find('> .body').html(left_text);
+	$(docs[1]).find('> .body').html(right_text);
+	
+	align_panels();
+	
+	// Add spacing to create alignments between corresponding paragraphs on each side.
+	$(docs[0]).find("> .body *").each(function() {
+		if ($(this).css('display') != 'block') return;
+		for (var topbot = 0; topbot <= 1; topbot++) {
+			var cr = $(this).attr("corresponds_with_" + (topbot == 0 ? "top" : "bottom"));
+			if (!cr) return;
+			var b = $("#" + cr);
+			if (b.length) {
+				var p = b.offset().top - $(this).offset().top;
+				if (Math.abs(p) > 20) { // should be at least the total margin
+					var d = $('<div class="spacer"/>').css({ height: Math.abs(p)-20 }); // subtract the total margin
+					if (topbot == 0)
+						d.insertBefore(p > 0 ? $(this) : b);
+					else
+						d.insertAfter(p > 0 ? $(this) : b);
+				}
+			}
+		}
+	});
+	
+	/*var doc_fixed;
 	var doc_movable;
 	if ($(docs[0]).height() > $(docs[1]).height()) {
 		doc_fixed = docs[1];
@@ -70,38 +132,30 @@ $(function() {
 	} else {
 		doc_fixed = docs[0];
 		doc_movable = docs[1];
-	}*/
-		
-	/*$("#bill_comparison_content").hover(function() { }, function() {
-		$(".bill_text_content").stop(true).css({marginTop: 0});
-	});*/
-	
-	function align_panels() {
-		$("#bill_comparison_content").css({ marginLeft: -$("h1").offset().left+50,
-		width: $(window).width() - 30 });
-		$(".bill_text_content").css({ width: ($(window).width() - 100)/2 });
 	}
-	align_panels();
-	$(window).resize(align_panels);
+		
+	$("#bill_comparison_content").hover(function() { }, function() {
+		$(".bill_text_content").stop(true).css({marginTop: 0});
+	});
 	
 	$(window).scroll(function() {
-		$(".bill_text_content").each(function() {
+		$("#bill_comparison_content  .bill_text_content").each(function() {
 				var top = $(this).offset().top;
 				if (top > $(window).scrollTop())
 					$(this).stop(true).css({marginTop: 0});
 		});
 	});
 	
-	$(".bill_text_content *").hover(function() {
+	$("#bill_comparison_content .bill_text_content *").hover(function() {
 	//$(doc_fixed).find("*").hover(function() {
 		var a = $(this);
 		if (!a.attr("corresponds_with_top")) return;
-		var b = $("#" + $(this).attr("corresponds_with_top"));
+		var b = $("#" + a.attr("corresponds_with_top"));
 		if (!b.length) return;
 		b.addClass("highlight");
 		
-		var ap = a.parents(".bill_text_content");
-		var bp = b.parents(".bill_text_content");
+		var ap = a.parents("#bill_comparison_content .bill_text_content");
+		var bp = b.parents("#bill_comparison_content  .bill_text_content");
 		var ctop = parseFloat(ap.css("marginTop").replace("px", ""));
 		var new_pos = ctop + (a.offset().top-ap.offset().top) - (b.offset().top-bp.offset().top);
 		var dist = Math.abs(bp.css("marginTop").replace("px", "") - new_pos);
@@ -110,7 +164,15 @@ $(function() {
 	}, function() {
 		$("#" + $(this).attr("corresponds_with_top")).removeClass("highlight");
 	});
-});
+	*/
+}
+
+function align_panels() {
+	$("#bill_comparison_content").css({ marginLeft: -$("h1").offset().left+50,
+	width: $(window).width() - 30 });
+	$("#bill_comparison_content .bill_text_content").css({ width: ($(window).width() - 100)/2 });
+}
+$(window).resize(align_panels);
 </script>
 {% endblock %}
 
@@ -142,34 +204,67 @@ $(function() {
 
 {% block body %}
 
-{% if not comparison %}
-	<div class="bill_text_content">
-	{% if not textdata.text_html %}
-		<p>The text of this bill is not yet available. Please check back soon.</p>
-	{% else %}
-			{{textdata.text_html|safe}}
-	{% endif %}
-	</div>
+<div id="main_text_content" class="bill_text_content">
+{% if not textdata.text_html %}
+	<p>The text of this bill is not yet available. Please check back soon.</p>
 {% else %}
-	<div id="bill_comparison_content" style="width: 3000px; overflow: hidden;">
-		<div class="bill_text_content">
-			{{textdata.text_html|safe}}
-		</div>
-		
-		<div class="bill_text_content">
-			{{textdata.text_html_2|safe}}
-		</div>
-		
-		<div style="clear: both"> </div>
-	</div>
+		{{textdata.text_html|safe}}
 {% endif %}
+</div>
+
+<div id="content_loading" class="bill_text_content" style="display: none;">
+	<p>Loading...</p>
+</div>
+
+<div id="bill_comparison_content" style="width: 3000px; overflow: hidden; display: none;">
+	<center style="padding: 1em">
+		<a href="#" onclick="return hide_comparison();">Close Comparison</a>
+	</center>
+
+	<div class="bill_text_content">
+		<div class="header"> </div>
+		<div class="body"> </div>
+	</div>
+	
+	<div class="bill_text_content">
+		<div class="header"> </div>
+		<div class="body"> </div>
+	</div>
+	
+	<div style="clear: both"> </div>
+</div>
 
 <div id="sidebar">
-	{% if bill.is_alive %}
+	{% if bill.is_alive and not version %}
 	<p>You are reading the latest text of the {{bill.noun}}. The text of a {{bill.noun}} may change in committee or through the amendment process.</p>
 	{% endif %}
 	
+	{% if alternates and alternates|length > 1 %}
+	<p>Select a version of this bill to view:</p>
+	<ul class="bullets">
+		{% for alt in alternates %}
+			{% if textdata.doc_version == alt.doc_version %}
+				<li style="font-weight: bold;">{{alt.docdate|date}}: {{alt.doc_version_name}}</li>
+			{% else %}
+				<li><a href="{{bill.get_absolute_url}}/text/{{alt.doc_version}}">{{alt.docdate|date}}: {{alt.doc_version_name}}</a></li>
+			{% endif %}
+		{% endfor %}
+	</ul>
+	
+	<p>Compare this version to:</p>
+	<ul class="bullets">
+		{% for alt in alternates %}
+			{% if textdata.doc_version == alt.doc_version %}
+				<li style="color: #777;">{{alt.docdate|date}}: {{alt.doc_version_name}}</li>
+			{% else %}
+				<li><a href="#" onclick="return load_comparison('{{alt.doc_version}}');">{{alt.docdate|date}}: {{alt.doc_version_name}}</a></li>
+			{% endif %}
+		{% endfor %}
+	</ul>
+	{% endif %}
+	
 
+	{% comment %}
 	<div style="float: right; width: 120px;">
 		<script type="text/javascript"><!--
 		google_ad_client = "ca-pub-3418906291605762";
@@ -183,6 +278,7 @@ $(function() {
 		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 		</script>
 	</div>
+	{% endcomment %}
 </div>
 	
 {% endblock %}

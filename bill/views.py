@@ -23,7 +23,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json, datetime, re
+import urllib, urllib2, json, datetime, re, os.path
 from registration.helpers import json_response
 
 @render_to('bill/bill_details.html')
@@ -104,31 +104,67 @@ def market_test_vote(request):
     return { "vote": prediction }
 
 @render_to('bill/bill_text.html')
-def bill_text(request, congress, type_slug, number):
+def bill_text(request, congress, type_slug, number, version=None):
+    if version == "":
+        version = None
+    
     try:
         bill_type = BillType.by_slug(type_slug)
     except BillType.NotFound:
         raise Http404("Invalid bill type: " + type_slug)
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
     
+    from billtext import load_bill_text, bill_gpo_status_codes
     try:
-        from billtext import load_bill_text
-        textdata = load_bill_text(bill, None)
+        textdata = load_bill_text(bill, version)
     except IOError:
         textdata = None
 
-    #from billtext import compare_xml_text
-    #import lxml
-    #doc1 = lxml.etree.parse("data/us/bills.text/112/h/h3606ih.html")
-    #doc2 = lxml.etree.parse("data/us/bills.text/112/h/h3606rh.html")
-    #compare_xml_text(doc1, doc2)
-    #textdata["text_html"] = lxml.etree.tostring(doc1)
-    #textdata["text_html_2"] = lxml.etree.tostring(doc2)
+    # Get a list of the alternate versions of this bill.
+    alternates = None
+    if textdata:
+        alternates = []
+        for v in bill_gpo_status_codes:
+            fn = "data/us/bills.text/%s/%s/%s%d%s.mods.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, BillType.by_value(bill.bill_type).xml_code, bill.number, v)
+            if os.path.exists(fn):
+                alternates.append(load_bill_text(bill, v, mods_only=True))
+        alternates.sort(key = lambda mods : mods["docdate"])
 
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "textdata": textdata,
+        "version": version,
+        "alternates": alternates,
+    }
+
+@json_response
+def bill_text_ajax(request):
+    for p in ("bill", "left", "right", "mode"):
+        if not p in request.GET:
+            raise Http404()
+    
+    from billtext import load_bill_text, compare_xml_text
+    import lxml
+    
+    bill = Bill.objects.get(id = request.GET["bill"])
+    
+    left = load_bill_text(bill, request.GET["left"], mods_only=True)
+    right = load_bill_text(bill, request.GET["right"], mods_only=True)
+    
+    doc1 = lxml.etree.parse(left["basename"] + ".html")
+    doc2 = lxml.etree.parse(right["basename"] + ".html")
+    compare_xml_text(doc1, doc2) # revises DOMs in-place
+    
+    # dates aren't JSON serializable
+    left["docdate"] = left["docdate"].strftime("%x")
+    right["docdate"] = right["docdate"].strftime("%x")
+    
+    return {
+        "left_meta": left,
+        "right_meta": right,
+        "left_text": lxml.etree.tostring(doc1),
+        "right_text": lxml.etree.tostring(doc2),
     }
 
 def bill_list(request):

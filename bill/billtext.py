@@ -1,135 +1,136 @@
 if __name__ == "__main__":
-	import sys, os
-	sys.path.insert(0, "..")
-	sys.path.insert(0, ".")
-	sys.path.insert(0, "lib")
-	sys.path.insert(0, ".env/lib/python2.7/site-packages")
-	os.environ["DJANGO_SETTINGS_MODULE"] = 'settings'
+    import sys, os
+    sys.path.insert(0, "..")
+    sys.path.insert(0, ".")
+    sys.path.insert(0, "lib")
+    sys.path.insert(0, ".env/lib/python2.7/site-packages")
+    os.environ["DJANGO_SETTINGS_MODULE"] = 'settings'
 
 import datetime, lxml, os.path
 
 bill_gpo_status_codes = {
-	"ah": "Amendment",
-	"ah2": "Amendment",
-	"as": "Amendment",
-	"as2": "Amendment",
-	"ash": "Additional Sponsors",
-	"sas": "Additional Sponsors",
-	"sc": "Sponsor Change",
-	"ath": "Resolution Agreed to",
-	"ats": "Resolution Agreed to",
-	"cdh": "Committee Discharged",
-	"cds": "Committee Discharged",
-	"cph": "Considered and Passed by the House",
-	"cps": "Considered and Passed by the Senate",
-	"eah": "Passed the House (Engrossed) with an Amendment",
-	"eas": "Passed the Senate (Engrossed) with an Amendment",
-	"eh": "Passed the House (Engrossed)",
-	"ehr": "Passed the House (Engrossed)/Reprint",
-	"eh_s": "Passed the House (Engrossed)/Star Print",
-	"enr": "Passed Congress/Enrolled Bill",
-	"renr": "Passed Congress/Re-enrolled",
-	"es": "Passed the Senate (Engrossed)",
-	"esr": "Passed the Senate (Engrossed)/Reprint",
-	"es_s": "Passed the Senate (Engrossed)/Star Print",
-	"fah": "Failed Amendment",
-	"fps": "Failed Passage",
-	"hdh": "Held at Desk in the House",
-	"hds": "Held at Desk in the Senate",
-	"ih": "Introduced",
-	"ihr": "Introduced/Reprint",
-	"ih_s": "Introduced/Star Print",
-	"is": "Introduced",
-	"isr": "Introduced/Reprint",
-	"is_s": "Introduced/Star Print",
-	"iph": "Indefinitely Postponed in the House",
-	"ips": "Indefinitely Postponed in the Senate",
-	"lth": "Laid on Table in the House",
-	"lts": "Laid on Table in the Senate",
-	"oph": "Ordered to be Printed",
-	"ops": "Ordered to be Printed",
-	"pch": "Placed on Calendar in the House",
-	"pcs": "Placed on Calendar in the Senate",
-	"pp": "Public Print",
-	"rah": "Referred to House Committee (w/ Amendments)",
-	"ras": "Referred to Senate Committee (w/ Amendments)",
-	"rch": "Reference Change",
-	"rcs": "Reference Change",
-	"rdh": "Received by the House",
-	"rds": "Received by the Senate",
-	"reah": "Passed the House (Re-Engrossed) with an Amendment",
-	"re": "Reprint of an Amendment",
-	"res": "Passed the Senate (Re-Engrossed) with an Amendment",
-	"rfh": "Referred to House Committee",
-	"rfhr": "Referred to House Committee/Reprint",
-	"rfh_s": "Referred to House Committee/Star Print",
-	"rfs": "Referred to Senate Committee",
-	"rfsr": "Referred to Senate Committee/Reprint",
-	"rfs_s": "Referred to Senate Committee/Star Print",
-	"rh": "Reported by House Committee",
-	"rhr": "Reported by House Committee/Reprint",
-	"rh_s": "Reported by House Committee/Star Print",
-	"rs": "Reported by Senate Committee",
-	"rsr": "Reported by Senate Committee/Reprint",
-	"rs_s": "Reported by Senate Committee/Star Print",
-	"rih": "Referral Instructions in the House",
-	"ris": "Referral Instructions in the Senate",
-	"rth": "Referred to House Committee",
-	"rts": "Referred to Senate Committee",
-	"s_p": "Star Print of an Amendment",
-	}
-	
+    "ah": "Amendment",
+    "ah2": "Amendment",
+    "as": "Amendment",
+    "as2": "Amendment",
+    "ash": "Additional Sponsors",
+    "sas": "Additional Sponsors",
+    "sc": "Sponsor Change",
+    "ath": "Resolution Agreed to",
+    "ats": "Resolution Agreed to",
+    "cdh": "Committee Discharged",
+    "cds": "Committee Discharged",
+    "cph": "Considered and Passed by the House",
+    "cps": "Considered and Passed by the Senate",
+    "eah": "Passed the House (Engrossed) with an Amendment",
+    "eas": "Passed the Senate (Engrossed) with an Amendment",
+    "eh": "Passed the House (Engrossed)",
+    "ehr": "Passed the House (Engrossed)/Reprint",
+    "eh_s": "Passed the House (Engrossed)/Star Print",
+    "enr": "Passed Congress/Enrolled Bill",
+    "renr": "Passed Congress/Re-enrolled",
+    "es": "Passed the Senate (Engrossed)",
+    "esr": "Passed the Senate (Engrossed)/Reprint",
+    "es_s": "Passed the Senate (Engrossed)/Star Print",
+    "fah": "Failed Amendment",
+    "fps": "Failed Passage",
+    "hdh": "Held at Desk in the House",
+    "hds": "Held at Desk in the Senate",
+    "ih": "Introduced",
+    "ihr": "Introduced/Reprint",
+    "ih_s": "Introduced/Star Print",
+    "is": "Introduced",
+    "isr": "Introduced/Reprint",
+    "is_s": "Introduced/Star Print",
+    "iph": "Indefinitely Postponed in the House",
+    "ips": "Indefinitely Postponed in the Senate",
+    "lth": "Laid on Table in the House",
+    "lts": "Laid on Table in the Senate",
+    "oph": "Ordered to be Printed",
+    "ops": "Ordered to be Printed",
+    "pch": "Placed on Calendar in the House",
+    "pcs": "Placed on Calendar in the Senate",
+    "pp": "Public Print",
+    "rah": "Referred to House Committee (w/ Amendments)",
+    "ras": "Referred to Senate Committee (w/ Amendments)",
+    "rch": "Reference Change",
+    "rcs": "Reference Change",
+    "rdh": "Received by the House",
+    "rds": "Received by the Senate",
+    "reah": "Passed the House (Re-Engrossed) with an Amendment",
+    "re": "Reprint of an Amendment",
+    "res": "Passed the Senate (Re-Engrossed) with an Amendment",
+    "rfh": "Referred to House Committee",
+    "rfhr": "Referred to House Committee/Reprint",
+    "rfh_s": "Referred to House Committee/Star Print",
+    "rfs": "Referred to Senate Committee",
+    "rfsr": "Referred to Senate Committee/Reprint",
+    "rfs_s": "Referred to Senate Committee/Star Print",
+    "rh": "Reported by House Committee",
+    "rhr": "Reported by House Committee/Reprint",
+    "rh_s": "Reported by House Committee/Star Print",
+    "rs": "Reported by Senate Committee",
+    "rsr": "Reported by Senate Committee/Reprint",
+    "rs_s": "Reported by Senate Committee/Star Print",
+    "rih": "Referral Instructions in the House",
+    "ris": "Referral Instructions in the Senate",
+    "rth": "Referred to House Committee",
+    "rts": "Referred to Senate Committee",
+    "s_p": "Star Print of an Amendment",
+    }
+    
 def load_bill_text(bill, version, plain_text=False, mods_only=False):
-	from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
+    from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
 
-	bt = BillType.by_value(bill.bill_type).xml_code
-	basename = "data/us/bills.text/%s/%s/%s%d%s" % (bill.congress, bt, bt, bill.number, version if version != None else "")
-	
-	if mods_only:
-		bill_text_content = None
-	else:
-		if plain_text:
-			try:
-				return open(basename + ".txt").read().decode("utf8", "ignore") # otherwise we get 'Chuck failed' in the xapian_backend apparently due to decoding issue.
-			except IOError:
-				return ""
-		elif os.path.exists(basename + ".xml") and False:
-			dom = lxml.etree.parse(basename + ".xml")
-			transform = lxml.etree.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "textxsl/billres.xsl"))
-			transform = lxml.etree.XSLT(transform)
-			result = transform(dom)
-			
-			# empty nodes cause HTML parsing problems, so remove them.
-			# iterate in reverse document order so that we hit parents after
-			# their children, since if we remove all of the children then we may
-			# want to remove the parent too.
-			for node in reversed(list(result.getiterator())):
-				if node.xpath("string(.)") == "":
-					node.getparent().remove(node)
-					
-			bill_text_content = lxml.etree.tostring(result.xpath("head/style")[0]) + lxml.etree.tostring(result.xpath("body")[0])
-		else:
-			bill_text_content = open(basename + ".html").read()
-	
-	mods = lxml.etree.parse(basename + ".mods.xml")
-	ns = { "mods": "http://www.loc.gov/mods/v3" }
-	docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
-	gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
-	gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
-	doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
-	
-	docdate = datetime.date(*(int(d) for d in docdate.split("-")))
-	
-	doc_version_name = bill_gpo_status_codes[doc_version]
-
-	return {
-		"text_html": bill_text_content,
-		"docdate": docdate,
-		"gpo_url": gpo_url,
-		"gpo_pdf_url": gpo_pdf_url,
-		"doc_version": doc_version,
-		"doc_version_name": doc_version_name,
-	}
+    bt = BillType.by_value(bill.bill_type).xml_code
+    basename = "data/us/bills.text/%s/%s/%s%d%s" % (bill.congress, bt, bt, bill.number, version if version != None else "")
+    
+    if mods_only:
+        bill_text_content = None
+    else:
+        if plain_text:
+            try:
+                return open(basename + ".txt").read().decode("utf8", "ignore") # otherwise we get 'Chuck failed' in the xapian_backend apparently due to decoding issue.
+            except IOError:
+                return ""
+        elif os.path.exists(basename + ".xml") and False:
+            dom = lxml.etree.parse(basename + ".xml")
+            transform = lxml.etree.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "textxsl/billres.xsl"))
+            transform = lxml.etree.XSLT(transform)
+            result = transform(dom)
+            
+            # empty nodes cause HTML parsing problems, so remove them.
+            # iterate in reverse document order so that we hit parents after
+            # their children, since if we remove all of the children then we may
+            # want to remove the parent too.
+            for node in reversed(list(result.getiterator())):
+                if node.xpath("string(.)") == "":
+                    node.getparent().remove(node)
+                    
+            bill_text_content = lxml.etree.tostring(result.xpath("head/style")[0]) + lxml.etree.tostring(result.xpath("body")[0])
+        else:
+            bill_text_content = open(basename + ".html").read()
+    
+    mods = lxml.etree.parse(basename + ".mods.xml")
+    ns = { "mods": "http://www.loc.gov/mods/v3" }
+    docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
+    gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
+    gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
+    doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
+    
+    docdate = datetime.date(*(int(d) for d in docdate.split("-")))
+    
+    doc_version_name = bill_gpo_status_codes[doc_version]
+    
+    return {
+        "basename": basename,
+        "text_html": bill_text_content,
+        "docdate": docdate,
+        "gpo_url": gpo_url,
+        "gpo_pdf_url": gpo_pdf_url,
+        "doc_version": doc_version,
+        "doc_version_name": doc_version_name,
+    }
 
 def compare_xml_text(doc1, doc2):
     # Compare the text of two XML documents, marking up each document with new
@@ -171,6 +172,39 @@ def compare_xml_text(doc1, doc2):
         
     doc1data = serialize_document(doc1)
     doc2data = serialize_document(doc2)
+    
+    def simplify_diff(diff_iter):
+        # Simplify the diff by collapsing any regions with more changes than
+        # similarities, so that small unchanged regions appear within the larger
+        # set of changes (as changes, not as similarities).
+        prev = []
+        for op, length in diff_iter:
+            if len(prev) < 2:
+                prev.append( (op, length) )
+            else:
+                # If the op two hunks ago is the same as the current hunk and
+                # the total lengths of two hunks ago and the current is creater
+                # than the length of the hunk in the middle...
+                if op in ('-', '+') and prev[0][0] == op and prev[1][0] == '=' \
+                    and prev[0][1] + length > (prev[1][1]-1)**2:
+                    prev.append( (op, prev[0][1] + prev[1][1] + length) )
+                    prev.append( ('-' if op == '+' else '+', prev[1][1]) )
+                    prev.pop(0)
+                    prev.pop(0)
+                    
+                # If the two hunks differ in op, combine them a different way.
+                elif op in ('-', '+') and prev[0][0] in ('-', '+') and prev[1][0] == '=' \
+                    and prev[0][1] + length > (prev[1][1]-1)**2:
+                    prev.append( (prev[0][0], prev[0][1] + prev[1][1]) )
+                    prev.append( (op, prev[1][1] + length) )
+                    prev.pop(0)
+                    prev.pop(0)
+                
+                else:
+                    yield prev.pop(0)
+                    prev.append( (op, length) )
+        for p in prev:
+            yield p
     
     def reformat_diff(diff_iter):
         # Re-format the operations of the diffs to indicate the byte
@@ -305,8 +339,9 @@ def compare_xml_text(doc1, doc2):
            
     import diff_match_patch
     diff = diff_match_patch.diff(doc1data.text, doc2data.text)
+    diff = reformat_diff(simplify_diff(diff))
     idx = 0
-    for op, left_pos, left_len, right_pos, right_len in reformat_diff(diff):
+    for op, left_pos, left_len, right_pos, right_len in diff:
         idx += 1
         left_nodes = get_bounding_nodes(left_pos, left_len, doc1data.offsets)
         right_nodes = get_bounding_nodes(right_pos, right_len, doc2data.offsets)
@@ -321,8 +356,8 @@ def compare_xml_text(doc1, doc2):
     return doc1, doc2
     
 if __name__ == "__main__":
-	from bill.models import Bill, BillType
-	load_bill_text(Bill.objects.get(congress=112, bill_type=BillType.house_bill, number=9), None)
+    from bill.models import Bill, BillType
+    load_bill_text(Bill.objects.get(congress=112, bill_type=BillType.house_bill, number=9), None)
     #doc1 = lxml.etree.parse("data/us/bills.text/112/h/h3606ih.html")
     #doc2 = lxml.etree.parse("data/us/bills.text/112/h/h3606eh.html")
     #compare_xml_text(doc1, doc2)
