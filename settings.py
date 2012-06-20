@@ -16,7 +16,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-if "SSH_CONNECTION" in os.environ:
+if DEBUG and "SSH_CONNECTION" in os.environ:
 	# When launched from an SSH session, add the remote host to
 	# the list of INTERNAL_IPSs so that he can see the SQL.
 	# debugging output.

@@ -480,7 +480,10 @@ class Bill(models.Model):
         textfn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (self.congress, bt, bt, self.number, ev_code) # use pdf since we don't modify it once we download it, and hopefully we actually have a displayable format like HTML
         if not os.path.exists(textfn): raise Exception()
         
-        modsinfo = load_bill_text(self, ev_code, mods_only=True)
+        try:
+            modsinfo = load_bill_text(self, ev_code, mods_only=True)
+        except IOError:
+            modsinfo = { "docdate": "Unknown Date", "doc_version_name": "Unknown Version" }
         
         return {
             "type": "Bill Text",
@@ -716,4 +719,13 @@ def get_formatted_bill_summary(bill):
     if unicode(summary).strip() == "":
         return None
     return summary
+
+class BillLink(models.Model):
+    bill = models.ForeignKey(Bill, db_index=True)
+    url = models.CharField(max_length=256)
+    title = models.CharField(max_length=256)
+    created = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+    class Meta:
+        unique_together = ( ('bill', 'url'), )
 
