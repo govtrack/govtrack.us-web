@@ -49,13 +49,16 @@ def state_bill(request, state, session, billnum):
 		
 	@cache_result
 	def openstates_api_info():
-		if bill.openstatesid == None: return None
-		os_state, os_session, os_bill = bill.openstatesid.split(" ", 2)
-		state_chamber = { StateChamberEnum.lower: "lower/", StateChamberEnum.upper: "upper/" }
-		url = "http://openstates.org/api/v1/bills/%s/%s/%s%s?apikey=%s" \
-			% (os_state, os_session, state_chamber.get(bill.chamber, ""), os_bill, SUNLIGHTLABS_API_KEY)
-		print url
-		return json.load(urllib.urlopen(url))
+		try:
+			if bill.openstatesid == None: return None
+			os_state, os_session, os_bill = bill.openstatesid.split(" ", 2)
+			state_chamber = { StateChamberEnum.lower: "lower/", StateChamberEnum.upper: "upper/" }
+			url = "http://openstates.org/api/v1/bills/%s/%s/%s%s?apikey=%s" \
+				% (os_state, os_session, state_chamber.get(bill.chamber, ""), os_bill, SUNLIGHTLABS_API_KEY)
+			print url
+			return json.load(urllib.urlopen(url))
+		except:
+			return None
 			
 	def get_feed():
 		return Feed.objects.get(feedname="states_bill:%d" % bill.id)
