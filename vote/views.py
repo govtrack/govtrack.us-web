@@ -61,7 +61,7 @@ def vote_details(request, congress, session, chamber_code, number):
     
     if ideology_scores[congress]:
         for voter in voters:
-            voter.ideolog_score = ideology_scores[congress].get(voter.person.id, ideology_scores[congress]["MEDIAN"])
+            voter.ideolog_score = ideology_scores[congress].get(voter.person.id if voter.person else 0, ideology_scores[congress]["MEDIAN"])
         
     voters.sort(key = lambda x : (x.option.key, x.person.role.party if x.person and x.person.role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
     
