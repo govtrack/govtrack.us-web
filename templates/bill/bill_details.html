@@ -24,6 +24,9 @@
 	font-size: 85%;
 	font-family: sans-serif;
 }
+.minor_vote {
+	display: none;
+}
 </style>
 {% endblock %}
 
@@ -222,6 +225,46 @@
 
 						</dd>
 						
+						{% if bill.votes.exists %}
+							<dt>Votes:</dt>
+							<dd>
+								{% for v in bill.votes.all %}
+								<p class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote">
+									<a href="{{v.get_absolute_url}}">
+										{% if v.is_major %}
+											{{v.get_chamber_display}}: {{v.vote_type}}
+										{% else %}
+											{{v}}
+										{% endif %}
+									</a><br/>
+									{{v.created}}<br/>
+									{{v.summary}}</p>
+								{% endfor %}
+								<p id="more_votes" style="display: none; font-style: italic;"><a href="#" onclick="return show_all_votes();">Show <span class='num'> </span> <span class='desc'> </span> votes...</a><p>
+								<p id="fewer_votes" style="display: none"><a href="#" onclick="return hide_minor_votes();">Hide minor votes...</a><p>
+							</dd>
+							<script>
+								var minor_votes = $('.minor_vote');
+								if (minor_votes.length > 0) {
+									$('#more_votes').show();
+									$('#more_votes').find('span.num').text(minor_votes.length);
+									$('#more_votes').find('span.desc').text($('.major_vote').length == 0 ? "" : "additional");
+								}
+								function show_all_votes() {
+									$('.minor_vote').fadeIn();
+									$('#more_votes').hide();
+									$('#fewer_votes').show();
+									return false;
+								}
+								function hide_minor_votes() {
+									$('.minor_vote').fadeOut();
+									$('#more_votes').show();
+									$('#fewer_votes').hide();
+									return false;
+								}
+							</script>
+						{% endif %}
+				
 						{% with prognosis as p %}
 						{% if p %}
 						<dt>Prognosis:</dt>
@@ -333,6 +376,8 @@
 	<div class="overview last">
 		<div class="holder">
 			<div class="frame">
+				
+			
 				{% with bill.links.all as links %}
 				{% if links|length > 0 %}
 				<div class="container">
@@ -374,21 +419,9 @@
 				</div>
 				{% endif %}
 				{% endwith %}
-				
-				<div class="container">
-					{% if bill.votes.exists %}
-					<dl>
-						<dt>Votes:</dt>
-						<dd>
-							{% for v in bill.votes.all %}
-							<p><a href="{{v.get_absolute_url}}">{{v}}</a><br/>
-								{{v.created}}. {{v.result}}.</p>
-							{% endfor %}
-						</dd>
-					</dl>
-					{% endif %}
 					
-					{% if bill.terms.exists %}
+				{% if bill.terms.exists %}
+				<div class="container">
 					<dl style="margin-top: 1em">
 						<dt>Subject Areas:</dt>
 						<dd>
@@ -400,9 +433,8 @@
 							</div>
 						</dd>
 					</dl>
-					{% endif %}
-
 				</div>
+				{% endif %}
 			
 
 			</div>
