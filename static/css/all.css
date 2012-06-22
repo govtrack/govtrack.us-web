@@ -1519,14 +1519,14 @@ aside .download-links { padding: 31px 0 0 	}
     margin-right: 0;
 }
     #lists > div .opts a.icon.trash {
-        background-position: right top;
+        background-position: -12px top;
         margin-right: 0;
     }
     #lists > div .opts a.icon.edit:hover {
         background-position: left bottom;
     }
     #lists > div .opts a.icon.trash:hover {
-        background-position: right bottom;
+        background-position: -12px bottom;
     }
 
 #lists .list_info {
@@ -1553,13 +1553,16 @@ aside .download-links { padding: 31px 0 0 	}
     padding-top: 30px;
 }
     #list_view h2 {
+        color: #40a4bd;
+        text-transform: none;
         font-size: 1.6em;
-        text-transform: uppercase;
         margin-bottom: 20px;
+        font-family: 'CallunaItalic';
     }
-        #list_view h2 span.italic {
-            color: #40a4bd;
-            text-transform: none;
+        #list_view h2 span.name {
+            text-transform: uppercase;
+            color: #666;
+            font-family: 'CallunaBold';
         }
     #list_view h3 {
         font-size: 1em;
@@ -1611,6 +1614,7 @@ aside .download-links { padding: 31px 0 0 	}
     }
         #events_header {
             border-bottom: solid #dae2df 5px;
+            margin-bottom: 20px;
         }
             #events_header h3 {
                 float: left;
@@ -1627,6 +1631,110 @@ aside .download-links { padding: 31px 0 0 	}
                 background-position: right bottom;
             }
 
+        .tracked_event {
+            clear: both; 
+            padding: 20px;
+            border: 1px solid #eee;
+            margin-bottom: 20px;
+            border-radius: 3px;
+            moz-border-radius: 3px;
+            webkit-border-radius: 3px;
+        }
+        .tracked_event:hover {
+            background: #fffcf5;
+            padding-left: 19px;
+            border-left: 2px solid #40A4BD
+        }
+            .tracked_event .event_feed_title,
+            .tracked_event .event_type,
+            .tracked_event .event_body h5,
+            .tracked_event .event_date span {
+                font-family: 'CallunaItalic';
+                font-size: .83em;
+                color: #999;
+                }
+            .tracked_event .event_feed_title {
+                margin-top: 1em;
+                margin-bottom: 1em;
+                border-top: solid #eee 1px;
+                border-bottom: solid #eee 1px;
+                padding: 2px 0;
+            }
+                .tracked_event .event_feed_title small,
+                .tracked_event .event_type span {
+                    text-transform: uppercase;
+                    font-family: 'CallunaBold';
+                    color: #7a7a7a;
+                }
+            .tracked_event .event_type {
+                float: right;
+            }
+                .tracked_event .event_type span {
+                    display: inline-block;
+                    background: #efefef;
+                    padding: 0 8px;
+                    margin-left: .5em;
+                    border: solid #ddd 1px;
+                    border-radius: 3px;
+                    moz-border-radius: 3px;
+                    webkit-border-radius: 3px;
+                }
+
+            .tracked_event .event_date {
+                display: inline-block;
+                font-family: 'CallunaItalic';
+                color: #40a4bd;
+            }
+            .tracked_event h4 {
+                clear: both;
+                margin-bottom: .5em;
+            }
+            .tracked_event .event_body h5 {
+                text-transform: none;
+            }
+            .tracked_event .event_body p {
+                margin-bottom: .5em !important;
+            }
+
+#list_trackers li,
+#basic_trackers li a {
+    display: block;
+    padding: 0 10px;
+    height: 25px;
+    line-height: 25px;
+    margin-bottom: 10px;
+    background: #fff;
+    border: solid #dcd6c3 1px;
+    border-radius: 5px;
+    moz-border-radius: 5px;
+    webkit-border-radius: 5px;
+    overflow: hidden;
+    font-size: .9em;
+}
+#list_trackers li:hover,
+#basic_trackers li a:hover {
+    box-shadow:
+        0 2px 5px rgba(0,0,0,.2);
+}
+
+    #list_trackers li a,
+    #basic_trackers li span {
+        display: inline-block;
+        float: right;
+        width: 12px;
+        height: 12px;
+        margin-top: 6px;
+        text-indent: -9999px;
+        background: url(../images/icons.png) -12px top no-repeat;
+        color: #666;
+    }
+        #list_trackers li a:hover,
+        #basic_trackers li a:hover span {
+            background-position: -12px bottom;
+            border-bottom: 0;
+        }
+    #basic_trackers li span { background-position: -24px top; }
+    #basic_trackers li a:hover span { background-position: -24px bottom; }
 
 
 /* Footer Styles ========================= */

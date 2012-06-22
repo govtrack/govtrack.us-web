@@ -94,6 +94,10 @@ class Vote(models.Model):
         
     def name(self):
         return CongressChamber.by_value(self.chamber).label + " Vote #" + str(self.number)
+        
+    @property
+    def is_major(self):
+        return self.category in (VoteCategory.passage_suspension, VoteCategory.passage, VoteCategory.passage_part, VoteCategory.nomination, VoteCategory.ratification, VoteCategory.veto_override)
 
     def totals(self):
         # If cached value exists then return it

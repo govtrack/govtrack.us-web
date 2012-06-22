@@ -14,7 +14,7 @@ from us import get_congress_dates
 
 from django.conf import settings
 
-import datetime, os.path, re
+import datetime, os.path, re, urlparse
 from lxml import etree
 
 "Enums"
@@ -721,11 +721,15 @@ def get_formatted_bill_summary(bill):
     return summary
 
 class BillLink(models.Model):
-    bill = models.ForeignKey(Bill, db_index=True)
+    bill = models.ForeignKey(Bill, db_index=True, related_name="links")
     url = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
     created = models.DateTimeField(auto_now_add=True)
     approved = models.BooleanField(default=False)
     class Meta:
         unique_together = ( ('bill', 'url'), )
+        ordering = ('bill', 'created')
+    @property
+    def hostname(self):
+        return urlparse.urlparse(self.url).hostname
 

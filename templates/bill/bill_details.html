@@ -24,6 +24,9 @@
 	font-size: 85%;
 	font-family: sans-serif;
 }
+.minor_vote {
+	display: none;
+}
 </style>
 {% endblock %}
 
@@ -222,6 +225,46 @@
 
 						</dd>
 						
+						{% if bill.votes.exists %}
+							<dt>Votes:</dt>
+							<dd>
+								{% for v in bill.votes.all %}
+								<p class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote">
+									<a href="{{v.get_absolute_url}}">
+										{% if v.is_major %}
+											{{v.get_chamber_display}}: {{v.vote_type}}
+										{% else %}
+											{{v}}
+										{% endif %}
+									</a><br/>
+									{{v.created}}<br/>
+									{{v.summary}}</p>
+								{% endfor %}
+								<p id="more_votes" style="display: none; font-style: italic;"><a href="#" onclick="return show_all_votes();">Show <span class='num'> </span> <span class='desc'> </span> votes...</a><p>
+								<p id="fewer_votes" style="display: none"><a href="#" onclick="return hide_minor_votes();">Hide minor votes...</a><p>
+							</dd>
+							<script>
+								var minor_votes = $('.minor_vote');
+								if (minor_votes.length > 0) {
+									$('#more_votes').show();
+									$('#more_votes').find('span.num').text(minor_votes.length);
+									$('#more_votes').find('span.desc').text($('.major_vote').length == 0 ? "" : "additional");
+								}
+								function show_all_votes() {
+									$('.minor_vote').fadeIn();
+									$('#more_votes').hide();
+									$('#fewer_votes').show();
+									return false;
+								}
+								function hide_minor_votes() {
+									$('.minor_vote').fadeOut();
+									$('#more_votes').show();
+									$('#fewer_votes').hide();
+									return false;
+								}
+							</script>
+						{% endif %}
+				
 						{% with prognosis as p %}
 						{% if p %}
 						<dt>Prognosis:</dt>
@@ -289,65 +332,7 @@
 					{% endif %}
 					</div> <!-- ?? -->
 				</dv> <!-- /container -->
-				
-			</div><!-- /frame -->
-		</div><!-- /holder -->
-	</div><!-- /overview -->
-	
-	<div class="overview last">
-		<div class="holder">
-			<div class="frame">
-				
-				<div class="container">
-					{% if bill.votes.exists %}
-					<dl>
-						<dt>Votes:</dt>
-						<dd>
-							{% for v in bill.votes.all %}
-							<p><a href="{{v.get_absolute_url}}">{{v}}</a><br/>
-								{{v.created}}. {{v.result}}.</p>
-							{% endfor %}
-						</dd>
-					</dl>
-					{% endif %}
-					
-					{% if bill.terms.exists %}
-					<dl style="margin-top: 1em">
-						<dt>Subject Areas:</dt>
-						<dd>
-							<p>Use these subject areas to explore related legislation:</p>
-							<div style="max-height: 15em; overflow: auto">
-							{% for term in bill.get_terms_sorted %}
-								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
-							{% endfor %}
-							</div>
-						</dd>
-					</dl>
-					{% endif %}
 
-					{% with reintros.0 as reintro_from %}
-					{% if bill.relatedbills.exists or reintro_from %}
-					<dl style="margin-top: 1em">
-						<dt>Related Bills:</dt>
-						<dd>
-							{% if bill.relatedbills.exists %}
-							<div style="max-height: 15em; overflow: auto">
-							{% for rb in bill.get_related_bills %}
-								<div>{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
-							{% endfor %}
-							</div>
-							<p><small>Related bills above are identified by the Congressional Research Service.</small></p>
-							{% endif %}
-							
-							{% if reintro_from %}
-							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
-							{% endif %}
-						</dd>
-					</dl>
-					{% endif %}
-					{% endwith %}
-				</div>
-			
 				<div class="container">
 					<dl>
 						<dt>Primary Source</dt>
@@ -383,7 +368,75 @@
 							}}</p>
 						</dd>
 					</dl>
+				</div>				
+			</div><!-- /frame -->
+		</div><!-- /holder -->
+	</div><!-- /overview -->
+	
+	<div class="overview last">
+		<div class="holder">
+			<div class="frame">
+				
+			
+				{% with bill.links.all as links %}
+				{% if links|length > 0 %}
+				<div class="container">
+					<dl style="margin-top: 1em">
+						<dt>News Sites &amp; Links:</dt>
+						<dd>
+							{% for link in links %}
+								<div style="margin-bottom: .5em">
+									<div><a href="{{link.url}}" target="_blank" rel="nofollow">{{link.title}}</a></div>
+									<div><small>{{link.created|date}} &mdash; {{link.hostname}}</small></div>
+								</div>
+							{% endfor %}
+						</dd>
+					</dl>
 				</div>
+				{% endif %}
+				{% endwith %}
+			
+				{% with reintros.0 as reintro_from %}
+				{% if bill.relatedbills.exists or reintro_from %}
+				<div class="container">
+					<dl style="margin-top: 1em">
+						<dt>Related Bills:</dt>
+						<dd>
+							{% if bill.relatedbills.exists %}
+							<div style="max-height: 15em; overflow: auto">
+							{% for rb in bill.get_related_bills %}
+								<div>{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
+							{% endfor %}
+							</div>
+							<p><small>Related bills above are identified by the Congressional Research Service.</small></p>
+							{% endif %}
+							
+							{% if reintro_from %}
+							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
+							{% endif %}
+						</dd>
+					</dl>
+				</div>
+				{% endif %}
+				{% endwith %}
+					
+				{% if bill.terms.exists %}
+				<div class="container">
+					<dl style="margin-top: 1em">
+						<dt>Subject Areas:</dt>
+						<dd>
+							<p>Use these subject areas to explore related legislation:</p>
+							<div style="max-height: 15em; overflow: auto">
+							{% for term in bill.get_terms_sorted %}
+								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
+							{% endfor %}
+							</div>
+						</dd>
+					</dl>
+				</div>
+				{% endif %}
+			
+
 			</div>
 		</div>
 	</div><!-- /overview -->
