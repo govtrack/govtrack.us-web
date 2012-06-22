@@ -20,19 +20,23 @@ from datetime import datetime, timedelta
 @render_to('website/index.html')
 def index(request):
     twitter_feed = cache.get("our_twitter_feed")
-    if not twitter_feed:
-        import twitter
-        twitter_api = twitter.Api()
-        twitter_feed = twitter_api.GetUserTimeline("govtrack", since_id=0, count=3)
+    if twitter_feed == None:
+        try:
+            import twitter
+            twitter_api = twitter.Api()
+            twitter_feed = twitter_api.GetUserTimeline("govtrack", since_id=0, count=3)
         
-        # replace links
-        from django.utils.html import conditional_escape
-        from django.utils.safestring import mark_safe
-        re_url = re.compile(r"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))")
-        for item in twitter_feed:
-            item.text = re_url.sub(lambda m : "<a target=\"_blank\" href=\"" + m.group(0) + "\">" + m.group(0) + "</a>", conditional_escape(item.text))
+            # replace links
+            from django.utils.html import conditional_escape
+            from django.utils.safestring import mark_safe
+            re_url = re.compile(r"(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))")
+            for item in twitter_feed:
+                item.text = re_url.sub(lambda m : "<a target=\"_blank\" href=\"" + m.group(0) + "\">" + m.group(0) + "</a>", conditional_escape(item.text))
+            cache.set("our_twitter_feed", twitter_feed, 60*30) # 30 minutes
+        except IOError:
+            twitter_feed = []
+            cache.set("our_twitter_feed", twitter_feed, 60*2) # 2 minutes
             
-        cache.set("our_twitter_feed", twitter_feed, 60*30) # 30 minutes
         
     blog_feed = cache.get("our_blog_feed")
     if not blog_feed:

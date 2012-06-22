@@ -59,6 +59,12 @@ class Command(BaseCommand):
 			hostname = url.hostname
 			qs = urlparse.parse_qs(url.query)
 			
+			if not hostname: continue
+			
+			# Filter out known useless domains.
+			if hostname in ("t.co", "longurl.org", "ow.ly", "bit.ly", "www.facebook.com", "www.weblinkvalidator.com", "static.ak.facebook.com", "info.com", "altavista.com", "tumblr.com", "www.freerepublic.com", "www.reddit.com"): continue
+			if hostname.endswith(".ru"): continue
+			
 			# For referrals from Google, look at the 'q' argument to see how
 			# people are searching for this page.
 			if hostname.replace("www.", "").replace("search.", "") in ("google.com", "bing.com", "aol.com", "yahoo.com"):
@@ -68,7 +74,7 @@ class Command(BaseCommand):
 				
 			# Filter out other domains if the link has a 'q' argument since it's probs
 			# a search engine.
-			if "q" in qs: continue
+			if "q" in qs or "pid" in qs: continue
 				
 			key = (m.groups(), url)
 			spider[key] = spider.get(key, 0) + 1
@@ -111,16 +117,16 @@ class Command(BaseCommand):
 			
 			# white-list some domains, provided we were able to
 			# get a title
-			if referral_url.hostname in ("en.wikipedia.org", "www.truthorfiction.com"):
+			if referral_url.hostname in ("en.wikipedia.org", "www.truthorfiction.com", "www.theatlantic.com", "www.snopes.com"):
 				lnk.approved = True
 			else:
 				if first_print:
 					print "Links pending approval:"
 					print
 					first_print = False
-				print bill
 				print referral_url.geturl()
-				print title
+				print title.encode("utf8")
+				print unicode(bill).encode("utf8")
 				print
 			
 			lnk.save()
