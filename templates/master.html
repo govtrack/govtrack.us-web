@@ -171,9 +171,15 @@
 									<li><a href="/overview#states">State Legislation (Beta)</a></li>
 								</ul>
 							</li>
-							{% if user.is_authenticated %}
-							<li><a href="/accounts/lists">Lists</a></li>
-							{% endif %}
+							<li>
+								<a href="#" onclick="return false;">Track</a>
+								<ul>
+									{% if user.is_authenticated %}
+									<li><a href="/accounts/lists">Your Lists</a></li>
+									{% endif %}
+									<li><a href="/tools">Other Tools</a></li>
+								</ul>
+							</li>
 							<li><a href="/about">About</a></li>
 							<li><a href="/developers">Use our data</a></li>
 						</ul>
@@ -235,6 +241,7 @@
 						<li><a href="/about">About GovTrack</a></li>
 						<li><a href="/blog">GovTrack Blog</a></li>
 						<li><a href="/developers">For Developers</a></li>
+						<li><a href="/tools">Other Tools</a></li>
 						{% if not user.is_authenticated %}
 						<li><a href="/accounts/login">Log in</a></li>
 						{% else %}
