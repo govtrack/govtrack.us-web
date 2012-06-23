@@ -12,7 +12,7 @@ def load_data(person):
     }
     
 def load_sponsorship_analysis(person):
-    role = person.get_most_recent_role()
+    role = person.get_most_recent_congress_role()
     if not role: return None
     
     congressnumber = role.most_recent_congress_number()
@@ -60,7 +60,7 @@ def load_sponsorship_analysis(person):
     return data
     
 def load_votes_analysis(person):
-    role = person.get_most_recent_role()
+    role = person.get_most_recent_congress_role()
     if not role: return None
     
     congressnumber = role.most_recent_congress_number()
