@@ -19,14 +19,23 @@ from settings import CURRENT_CONGRESS
 
 def get_feed_list(request):
     if "list_id" in request.GET:
-        return get_object_or_404(SubscriptionList, id=request.GET["list_id"]).trackers.all()
+        lst = get_object_or_404(SubscriptionList, public_id=request.GET["list_id"])
+        return lst.trackers.all(), lst.user.username + "'s " + lst.name
     else:
         feedlist = request.GET.get('feeds', '').split(',')
         if feedlist == [""]:
             feedlist = []
+            feedtitle = "Tracked Events from GovTrack.us (All Events)"
         else:
-            feedlist = [Feed.from_name(f) for f in feedlist]
-        return feedlist
+            feedlist2 = []
+            for f in feedlist:
+                try:
+                    feedlist2.append(Feed.from_name(f))
+                except Feed.DoesNotExist:
+                    pass
+            feedlist = feedlist2
+            feedtitle = ", ".join(f.title for f in feedlist) + " - Tracked Events from GovTrack.us"
+        return feedlist, feedtitle
 
 @login_required
 @render_to('events/edit_lists.html')
@@ -76,7 +85,15 @@ def edit_subscription_list(request):
         sublist.email = int(request.POST["value"])
         sublist.save()
     
-    return { "list_id": sublist.id, "list_name": sublist.name, "list_email": sublist.email, "list_email_display": sublist.get_email_display(), "list_trackers": [ { "id": f.id, "name": f.feedname, "title": f.title, "link": f.link } for f in sublist.trackers.all() ], "state": state }
+    return {
+        "list_id": sublist.id,
+        "list_name": sublist.name,
+        "list_public_id": sublist.get_public_id(),
+        "list_email": sublist.email,
+        "list_email_display": sublist.get_email_display(),
+        "list_trackers": [
+            { "id": f.id, "name": f.feedname, "title": f.title, "link": f.link }
+            for f in sublist.trackers.all() ], "state": state }
 
 @render_to('events/events_list_items.html')
 def events_list_items(request):
@@ -139,11 +156,12 @@ def search_feeds(request):
    
 def events_rss(request):
     import django.contrib.syndication.views
+    import urllib
     
-    feedlist = get_feed_list(request)
+    feedlist, feedtitle = get_feed_list(request)
     
     class DjangoFeed(django.contrib.syndication.views.Feed):
-        title = ", ".join(f.title for f in feedlist) + " - Tracked Events from GovTrack.us"
+        title = feedtitle
         link = "/"
         description = "GovTrack tracks the activities of the United States Congress."
         
@@ -156,9 +174,9 @@ def events_rss(request):
         def item_description(self, item):
             return item["body_text"]
         def item_link(self, item):
-            return "http://www.govtrack.us" + item["url"] 
+            return "http://www.govtrack.us" + item["url"] + "?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss"
         def item_guid(self, item):
-            return "http://www.govtrack.us/events/guid/" + item["guid"] 
+            return self.item_link(item) + "#eventid=" + urllib.quote_plus(item["guid"]) 
         def item_pubdate(self, item):
             return item["date"] if isinstance(item["date"], datetime) else datetime.combine(item["date"], time.min)
             

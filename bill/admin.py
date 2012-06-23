@@ -18,7 +18,7 @@ class BillAdmin(admin.ModelAdmin):
     inlines = (CosponsorInline,)
 
 class BillLinkAdmin(admin.ModelAdmin):
-    list_display = ['url', 'title', 'approved']
+    list_display = ['created', 'url', 'title', 'approved']
     raw_id_fields = ['bill']
     def make_approved(modeladmin, request, queryset):
         queryset.update(approved=True)

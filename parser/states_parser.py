@@ -115,7 +115,7 @@ def process_legislators(row, options, filename):
         p = StateLegislator()
         p.bt50id = row["LegislatorID"]
         
-    if row["SunlightLegislatorID"] not in ("", "0"): p.openstatesid = row["SunlightLegislatorID"]
+    #if row["SunlightLegislatorID"] not in ("", "0"): p.openstatesid = row["SunlightLegislatorID"] # causing uniqueness violation
     if row["LegiScanLegislatorID"] != "": p.legiscanid = row["LegiScanLegislatorID"]
     
     p.state = row["StateCode"]

@@ -192,6 +192,9 @@ class Bill(models.Model):
     def is_alive(self):
     	"""Whether the bill was introduced in the current session of Congress and the bill's status is not a final status (i.e. can take no more action like a failed vote)."""
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
+        
+    def get_approved_links(self):
+        return self.links.filter(approved=True)
 
     def get_formatted_summary(self):
         return get_formatted_bill_summary(self)
@@ -728,7 +731,7 @@ class BillLink(models.Model):
     approved = models.BooleanField(default=False)
     class Meta:
         unique_together = ( ('bill', 'url'), )
-        ordering = ('bill', 'created')
+        ordering = ('-created',)
     @property
     def hostname(self):
         return urlparse.urlparse(self.url).hostname

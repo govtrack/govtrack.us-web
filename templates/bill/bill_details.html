@@ -378,7 +378,7 @@
 			<div class="frame">
 				
 			
-				{% with bill.links.all as links %}
+				{% with bill.get_approved_links as links %}
 				{% if links|length > 0 %}
 				<div class="container">
 					<dl style="margin-top: 1em">
