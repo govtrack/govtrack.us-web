@@ -223,6 +223,7 @@ class VoteVoterModel(GBaseModel):
 		filtering = {
 			"vote": ALL_WITH_RELATIONS,
 			"person": ALL_WITH_RELATIONS,
+			"option": ('exact',), 
 		}
 		additional_properties = {
 			"option": "get_option_key",
@@ -231,6 +232,15 @@ class VoteVoterModel(GBaseModel):
 		ordering = ['created']
 	vote = fields.ToOneField('website.api.VoteModel', 'vote', help_text="The vote that this was a part of.")
 	person = fields.ToOneField('website.api.PersonModel', 'person', help_text="The person making this vote.")
+	
+	def build_filters(self, filters=None):
+		# So that we don't have to create a model for the options, we rewrite
+		# the output "option" key with the option's... key. To make it filterable,
+		# we have to do a rewrite on the other end (this part).
+		orm_filters = super(VoteVoterModel, self).build_filters(filters)
+		if filters and "option" in filters:
+			orm_filters["option__key"] = filters["option"]
+		return orm_filters	
 
 v1_api = Api(api_name='v1')
 
