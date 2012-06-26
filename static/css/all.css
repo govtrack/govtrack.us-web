@@ -1722,13 +1722,6 @@ aside .download-links { padding: 31px 0 0 	}
 
 /* TRACKER WIDGET STYLES ================= */
 /* ======================================= */
-.tracker {
-    position: relative;
-    height: 39px;
-    width: 170px;
-    z-index: 1;
-}
-
     .track-btn {
         position: relative;
         background: url(../images/btn-sprte-1.png) no-repeat;
@@ -1768,7 +1761,7 @@ aside .download-links { padding: 31px 0 0 	}
             0 3px 8px 5px rgba(106,106,106,.4);*/
         padding-top: 18px;
         background: url(../images/tracker_widget_top.png) center 0 no-repeat;
-        font-family: 'CallunaRegular';
+        font-family: 'CallunaSans';
     }
         .widget_content {
             position: relative;
@@ -1789,12 +1782,13 @@ aside .download-links { padding: 31px 0 0 	}
                 border-bottom: solid #dfdbcf 1px;
             }
             .events_to_track { padding-bottom: 1em; }
+            #content .list_select ul { margin-bottom: 0; } /* override a default page style */
             .events_to_track li a,
             .list_select li a {
                 display: block;
                 padding: 0 10px;
                 height: 25px;
-                line-height: 25px;
+                line-height: 28px;
                 margin-bottom: 10px;
                 background: #fff;
                 border: solid #dcd6c3 1px;
@@ -1809,9 +1803,21 @@ aside .download-links { padding: 31px 0 0 	}
                 border: 0;
                 margin-bottom: 0;
             }
-            .list_select li.new a {  /* Styles the "Add New List" link */
+            .list_select li.new {
+                float: left;
+                font-size: 90%;
+            }
+            .list_select li.all {
+                float: right;
+            }
+            .list_select li.new a,
+            .list_select li.all a {  /* Styles the "Add New List" link */
+                display: inline-block;
                 background: transparent;
                 border: 0;
+                width: auto;
+                color: rgb(230, 105, 55);
+                font-size: 95%;
             }
             .list_select li.selected a {
                 background: #8e8778;
@@ -1821,11 +1827,12 @@ aside .download-links { padding: 31px 0 0 	}
                 box-shadow:
                     0 2px 5px rgba(0,0,0,.2);
             }
-            .list_select li.new a:hover {
+            .list_select li.new a:hover,
+            .list_select li.all a:hover {
                 box-shadow: none;
             }
-                .events_to_track li span,
-                .list_select li span    {
+                .events_to_track li span.icon,
+                .list_select li span.icon    {
                     display: inline-block;
                     float: left;
                     width: 12px;
@@ -1836,24 +1843,30 @@ aside .download-links { padding: 31px 0 0 	}
                     background: url(../images/icons.png) -36px 0 no-repeat;
                     color: #666;
                 }
-                .events_to_track li span { background-position: -48px 0; }
-                .events_to_track li:hover span { background-position: -48px -12px; }
-                .events_to_track li.selected span { background-position: -48px -24px; }
-                .list_select li:hover span {
+                .events_to_track li span.icon { background-position: -48px 0; }
+                .events_to_track li:hover span.icon { background-position: -48px -12px; }
+                .events_to_track li.selected span.icon { background-position: -48px -24px; }
+                .list_select li:hover span.icon {
                     background-position: -36px -12px;
                 }
-                .list_select li.selected span {
+                .list_select li.selected span.icon {
                     background-position: -36px -24px;
                 }
-                .list_select li.new span {
+                .list_select li.new span.icon {
                     background-position: -24px 0;
                 }
-                .list_select li.new:hover span {
+                .list_select li.new:hover span.icon {
                     background-position: -24px -12px;
                 }
-            .tracker .tracker_widget .btn {
-                line-height: 24px;
-                margin: 10px auto 0;
+                .list_select li.all span.icon {
+                    background-position: 0 0;
+                }
+                .list_select li.all:hover span.icon {
+                    background-position: 0 -12px;
+                }
+            .tracker_widget .btn {
+                line-height: 24px !important; /* override default button style */
+                margin: 10px auto 0 !important; /* override default button margins */
             }
         .widget_footer {
             padding-bottom: 15px;
@@ -2402,7 +2415,7 @@ select, input.text {
     }
 .advanced-search .row { margin: 0 0 20px    }
 .advanced-search .btn-search,
-.tracker .btn {
+.tracker_widget .btn.done {
     background: url(../images/btn-advans-search.png) no-repeat;
     width: 120px;
     height: 24px;
@@ -2420,7 +2433,7 @@ select, input.text {
     color: #fff;
     }
     .advanced-search .btn-search:hover,
-    .tracker .btn:hover {
+    .tracker_widget .btn.done:hover {
         background-position: left bottom;
     }
 .advanced-search .btn-search-small {

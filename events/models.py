@@ -145,32 +145,38 @@ class Feed(models.Model):
             "noun": "person",
             "includes": lambda self : [Feed.PersonVotesFeed(self.person()), Feed.PersonSponsorshipFeed(self.person())],
             "link": lambda self: self.person().get_absolute_url(),
+            "scoped_title": lambda self : "All Events for " + self.person().lastname,
         },
         "ps:": {
             "title": lambda self : self.person().name + " - Bills Sponsored",
             "noun": "person",
             "link": lambda self: self.person().get_absolute_url(),
+            "scoped_title": lambda self : self.person().lastname + "'s Sponsored Bills",
         },
         "pv:": {
             "title": lambda self : self.person().name + " - Voting Record",
             "noun": "person",
             "link": lambda self: self.person().get_absolute_url(),
+            "scoped_title": lambda self : self.person().lastname + "'s Voting Record",
         },
         "committee:": {
             "title": lambda self : truncate_words(self.committee().fullname, 12),
             "noun": "committee",
             "includes": lambda self : [Feed.CommitteeBillsFeed(self.committee()), Feed.CommitteeMeetingsFeed(self.committee())],
             "link": lambda self: self.committee().get_absolute_url(),
+            "scoped_title": lambda self : "All Events for This Committee",
         },
         "committeebills:": {
             "title": lambda self : "Bills in " + truncate_words(self.committee().fullname, 12),
             "noun": "committee",
             "link": lambda self: self.committee().get_absolute_url(),
+            "scoped_title": lambda self : "Activity on This Committee's Bills",
         },
         "committeemeetings:": {
             "title": lambda self : "Meetings for " + truncate_words(self.committee().fullname, 12),
             "noun": "committee",
             "link": lambda self: self.committee().get_absolute_url(),
+            "scoped_title": lambda self : "This Committee's Hearings and Markups",
         },
         "crs:": {
             "title": lambda self : self.issue().name,
@@ -348,6 +354,14 @@ class Feed(models.Model):
         if callable(m["title"]):
             return m["title"](self)
         return m["title"]
+        
+    @property
+    def scoped_title(self):
+        m = self.type_metadata()
+        if "scoped_title" not in m: return self.title
+        if callable(m["scoped_title"]):
+            return m["scoped_title"](self)
+        return m["scoped_title"]
         
     @property
     def link(self):
