@@ -109,10 +109,55 @@ def events_list_items(request):
         qs = []
     page = paginate(qs, request, per_page=50)
     
+    # Based on the last 100 events, how often do we expect to get email updates?
+    # Compute this using the median time between events, which should give us an
+    # idea of how often the events occur in a way that is robust to a few long
+    # periods of no events, e.g. which Congress is out of session.
+    expected_frequency = None
+    if len(qs) > 5:
+        # Get the time between consecutive events, in days.
+        seps = []
+        for i in xrange(1, len(qs)):
+            s = (qs[i-1]["when"]-qs[i]["when"]).total_seconds()
+            if s == 0: continue # skip things that happen at exactly the same time,
+                                # since they probably don't help us understand frequency
+            seps.append( s/float(60*60*24) )
+        
+        # Find the median.
+        if len(seps) == 0:
+            # everything occurred at the same moment
+            days_between_events = 1000
+        else:
+            seps.sort()
+            days_between_events = seps[len(seps)/2]
+        
+        if sublist.email == 0:
+            if days_between_events < 1:
+                expected_frequency = "Turn on daily email updates if you would like to get these events sent to you each day."
+            elif days_between_events < 7:
+                expected_frequency = "Turn on daily or weekly email updates if you would like to get these events mailed to you each day or week."
+        elif sublist.email == 1:
+            if days_between_events < 1:
+                expected_frequency = "You can expect an email update roughly every day Congress is in session."
+            elif days_between_events < 4:
+                expected_frequency = "You can expect an email update every couple of days."
+            elif days_between_events < 6:
+                expected_frequency = "You can expect an email update every week."
+            else:
+                expected_frequency = "You will get email updates when more events in Congress occur matching the items you are tracking."
+        elif sublist.email == 2:
+            if days_between_events < 6:
+                expected_frequency = "You can expect an email update every week."
+            elif days_between_events < 20:
+                expected_frequency = "You can expect an email update every couple of weeks."
+            else:
+                expected_frequency = "You will get email updates when more events in Congress occur matching the items you are tracking."
+
     return {
         'page': page,
         'list': sublist,
         'feeds': feedlist,
+        'expected_frequency': expected_frequency,
             }
 
 def search_feeds(request):

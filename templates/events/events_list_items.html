@@ -1,5 +1,11 @@
 {% load events_utils %}
 
+{% if expected_frequency %}
+	<p>
+		{{expected_frequency}}
+	</p>
+{% endif %}
+
 {% for event in page.object_list %}
 {% with event|render_event:feeds as meta %}
 	<div class="tracked_event">

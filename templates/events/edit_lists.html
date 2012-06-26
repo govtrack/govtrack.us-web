@@ -179,6 +179,7 @@ function change_email_options() {
 		dataType: "json",
 		success: function(data) {
 			$(".list[listid=" + active_list + "]").find(".email_info").text(data.list_email_display);
+			refresh_events(); // because of 'you can expect...'
 		}
 	});
 	return false;

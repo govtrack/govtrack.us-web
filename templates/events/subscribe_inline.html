@@ -145,8 +145,8 @@ $(function() {
 					{% if feed in list.trackers.all %}class="selected"{% endif %} ><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">{{list.name}}</span></a></li>
 				{% endfor %}
 				
-				<li id="new_list_row" class="new"><a href="#" onclick="return new_list();"><span></span> Add a new list</a></li>
-				<li class="all"><a href="/accounts/lists"><span></span> Edit your lists</a></li>
+				<li id="new_list_row" class="new"><a href="#" onclick="return new_list();"><span class="icon"></span> Add a new list</a></li>
+				<li class="all"><a href="/accounts/lists"><span class="icon"></span> Edit your lists</a></li>
 				
 				<div style="clear: both"> </div>
 			</ul>
