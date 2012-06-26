@@ -34,6 +34,10 @@ dl.schema > div {
 	border-bottom: 1px solid #DDD;
 	margin-bottom: .75em;
 }
+.example_api_uses a {
+	font-family: monospace;
+	font-size: 85%;
+}
 </style>
 
 <link href="/static/js/prettify.css" type="text/css" rel="stylesheet" />
@@ -62,22 +66,29 @@ dl.schema > div {
 	
 	<p>There is currently no setup required to use the API. There is no need for an API key. Just start hitting the URLs. That may change in the future.</p>
 
-	<p>The base URL for all APIs is <tt>{{baseurl}}</tt>. Results are returned in JSON by default, but you can change the result format with <tt>?format=xml</tt> or <tt>?format=jsonp&amp;callback=your_function</tt>.</p>
+	<p>The base URL for all APIs is <tt>{{baseurl}}</tt>.</p>
+	
+	<p>Results are returned in JSON by default, but you can change the result format to JSONP, XML, or CSV using the <tt>format</tt> query string parameter. For instance, add <tt>format=jsonp&amp;callback=your_function</tt>, <tt>format=xml</tt> (currently buggy for some resources), or <tt>format=csv</tt> to your query string arguments. (You will need either a ? or an &amp; to separate it from the rest of the URL or arguments, of course.)</p>
+	
+	<p>Results are paged 20 per call by default. This is true even in CSV format. Set the <tt>limit</tt> parameter to a high value to get all of the results at once.</p>
 
 	<p>The API is based on the <a href="http://tastypieapi.org/">Tastypie</a> Django framework. See Tastypie&rsquo;s documentation on <a href="http://django-tastypie.readthedocs.org/en/latest/interacting.html">interacting with the API</a> for some background instructions.</p>
 	
-	<h2>The API Access Points and Schemas</h2>
+	<h2>Examples</h2>
 	
 	<p>Here are some quick examples:</p>
 	
-	<ul class="bullets">
+	<ul class="bullets example_api_uses">
 		<li><a href="{{baseurl}}person?roles__current=true">{{baseurl}}person?roles__current=true</a><br/>List current Members of Congress.</li>
 		<li><a href="{{baseurl}}bill?congress=112&amp;order_by=-current_status_date">{{baseurl}}bill?congress=112&amp;order_by=-current_status_date</a><br/>List current bills in Congress with the most recently active bills first.</li>
 		<li><a href="{{baseurl}}bill/74369">{{baseurl}}bill/74369</a><br/>H.R. 1349: Public Online Information Act of 2011.</li>
 		<li><a href="{{baseurl}}vote/?congress=112&session=2011">{{baseurl}}vote/?congress=112&amp;session=2011</a><br/>Roll call votes in 2011</li>
 		<li><a href="{{baseurl}}vote/1">{{baseurl}}vote/1</a><br/>Roll call vote metadata for House vote #183 in 2011</li>
 		<li><a href="{{baseurl}}vote_voter/?vote=1&limit=441">{{baseurl}}vote_voter/?vote=1&limit=441</a><br/>Actual votes in House vote #183 in 2011 with a limit set so all results appear in one page.</li>
+		<li><a href="{{baseurl}}vote_voter/?person=400222&amp;option=0&amp;limit=1000&amp;order_by=created&format=csv">{{baseurl}}vote_voter/?person=400222&amp;option=0&amp;limit=1000&amp;order_by=created&amp;format=csv</a><br/>Missed votes by Rep.-then-Sen. Mark Kirk, returned in CSV format. A high limit is set so all of the results make it into the file.</li>
 	</ul>
+
+	<h2>The API Access Points and Schemas</h2>
 	
 	<p>The following resources are available in the API.</p>
 	

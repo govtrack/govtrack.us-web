@@ -8,23 +8,78 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 from common import enum as enummodule
 
-import json
+import csv, json, StringIO
 
-class PrettyJSONSerializer(Serializer):
+class MySerializer(Serializer):
+    def __init__(self, *args, **kwargs):
+        Serializer.__init__(self, *args, **kwargs)
+        self.formats += ['csv']
+        self.content_types['csv'] = 'text/csv'
+    
+	# Make JSON output pretty.
     json_indent = 2
-
     def to_json(self, data, options=None):
         options = options or {}
         data = self.to_simple(data, options)
         return simplejson.dumps(data, cls=django_json.DjangoJSONEncoder,
                 sort_keys=True, ensure_ascii=False, indent=self.json_indent)
+
+    # CSV outputter.
+    def to_csv(self, data, options=None):
+        options = options or {}
+        data = self.to_simple(data, options)
         
+        data = data.get("objects", [])
+        
+        # get an (ordered) list of column names from top-level keys, if
+        # not specified
+        if "columns" in options:
+            # This doesn't work. options doesn't seem to have the
+            # query string arguments.
+            columns = options["columns"].split(",")
+        else:
+            # Recursively find all keys in the object, making keys like
+            # a__b when we dive into dicts within dicts.
+            def get_keys(obj, prefix):
+                ret = []
+                for key in obj.keys():
+                    if not isinstance(obj[key], dict):
+                        ret.append(prefix + key)
+                    else:
+                        for inkey in get_keys(obj[key], prefix + key + "__"):
+                            ret.append(inkey)
+                return ret
+            columns = []
+            for item in data:
+                for key in get_keys(item, ""):
+                    if key not in columns:
+                        columns.append(key)
+            columns.sort()
+                    
+        # write CSV to buffer
+        raw_data = StringIO.StringIO()
+        writer = csv.writer(raw_data)
+        writer.writerow(columns)
+        def get_value_recursively(item, key):
+            for k in key.split("__"):
+                if not isinstance(item, dict): return None
+                item = item.get(k, None)
+            return item
+        def format_value(v):
+            if v != None: v = unicode(v).encode("utf8")
+            return v
+        for item in data:
+            if not isinstance(item, dict): continue
+            writer.writerow([format_value(get_value_recursively(item, c)) for c in columns])
+            
+        return raw_data.getvalue()
+
 class GBaseModel(ModelResource):
 	
 	# Base options.
 	class BaseMeta:
 		allowed_methods = ['get']
-		serializer = PrettyJSONSerializer() # Override to make JSON output pretty.
+		serializer = MySerializer()
 		
 	def determine_format(self, request):
 		# Make JSON the default output format if not specified.
@@ -223,11 +278,14 @@ class VoteVoterModel(GBaseModel):
 		filtering = {
 			"vote": ALL_WITH_RELATIONS,
 			"person": ALL_WITH_RELATIONS,
-			"option": ('exact',), 
+			"option": ('exact',),
+			"created": ALL,
 		}
 		additional_properties = {
 			"option": "get_option_key",
 			"person_name": "person_name",
+			"vote_description": "get_vote_name",
+			"link": lambda obj : "http://www.govtrack.us" + obj.vote.get_absolute_url(),
 		}
 		ordering = ['created']
 	vote = fields.ToOneField('website.api.VoteModel', 'vote', help_text="The vote that this was a part of.")

@@ -83,7 +83,7 @@ class Vote(models.Model):
                        chamber_code, self.number])
         
     def get_source_link(self):
-    	"""A link to the website where this vote information was obtained."""
+        """A link to the website where this vote information was obtained."""
         if self.source == VoteSource.senate:
             return "http://www.senate.gov/legislative/LIS/roll_call_lists/roll_call_vote_cfm.cfm?congress=%d&session=%s&vote=%05d" % (self.congress, get_session_ordinal(self.congress, self.session), self.number)
         elif self.source == VoteSource.house:
@@ -140,7 +140,7 @@ class Vote(models.Model):
             percent = round(len(voters) / float(total_count) * 100.0)
             party_stats = dict((x, 0) for x in all_parties)
             for voter in voters:
-            	party = voter.person.role.party if voter.person and voter.person.role else "Unknown"
+                party = voter.person.role.party if voter.person and voter.person.role else "Unknown"
                 party_stats[party] += 1
                 total_party_stats[party]['total'] += 1
                 if option.key == '+':
@@ -154,7 +154,7 @@ class Vote(models.Model):
                 
             detail = {'option': option, 'count': len(voters),
                 'percent': int(percent), 'party_counts': party_counts,
-            	'chart_width': 190 * int(percent) / 100}
+                'chart_width': 190 * int(percent) / 100}
             if option.key == '+':
                 detail['yes'] = True
             if option.key == '-':
@@ -189,14 +189,14 @@ class Vote(models.Model):
         ]
 
     def create_event(self):
-    	if self.congress < 111: return # not interested, creates too much useless data and slow to load
+        if self.congress < 111: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
         with Event.update(self) as E:
             E.add("vote", self.created, Feed.AllVotesFeed())
             for v in self.voters.all():
                 if v.person_id:
-            	    E.add("vote", self.created, Feed.PersonVotesFeed(v.person_id))
-	
+                    E.add("vote", self.created, Feed.PersonVotesFeed(v.person_id))
+    
     def render_event(self, eventid, feeds):
         if feeds:
             my_reps = set(f.person() for f in feeds if f.person() != None)
@@ -208,7 +208,7 @@ class Vote(models.Model):
             "type": "Vote",
             "date": self.created,
             "title": self.question,
-			"url": self.get_absolute_url(),
+            "url": self.get_absolute_url(),
             "body_text_template":
 """{{summary|safe}}
 {% for voter in voters %}{{voter.name|safe}}: {{voter.vote|safe}}
@@ -268,3 +268,6 @@ class Voter(models.Model):
         """The name of the voter."""
         return self.person.name if self.person else None
     
+    def get_vote_name(self):
+        return self.vote.name()
+
