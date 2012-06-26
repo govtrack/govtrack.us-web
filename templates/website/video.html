@@ -1,55 +1,44 @@
-<script type="text/javascript">
-    function play(elem, id) {
-        $.fancybox({
-            type: 'swf',
-            href: $(elem).attr('href') + '&foo=bar',
-            swf: {'wmode':'transparent'},
-            title: $(elem).attr('title'),
-        });
-        return false;
-    }
-</script>
+{% if media_mp4 or media_ogv %}
+	{% comment %}
+	http://camendesign.com/code/video_for_everybody
+	<!-- first try HTML5 playback: if serving as XML, expand `controls` to `controls="controls"` and autoplay likewise -->
+	<!-- warning: playback does not work on iOS3 if you include the poster attribute! fixed in iOS4.0 -->
+	{% endcomment %}
+	<video width="640" height="360" controls>
+		<!-- MP4 must be first for iPad! -->
+		{% if media_mp4 %}<source src="{{media_mp4}}" type="video/mp4" /><!-- Safari / iOS video    -->{% endif %}
+		{% if media_ogv %}<source src="{{media_ogv}}" type="video/ogg" /><!-- Firefox / Opera / Chrome10 -->{% endif %}
+		<!-- fallback to Flash: -->
+		<object width="640" height="360" type="application/x-shockwave-flash" data="__FLASH__.SWF">
+			<!-- Firefox uses the `data` attribute above, IE/Safari uses the param below -->
+			<param name="movie" value="__FLASH__.SWF" />
+			<param name="flashvars" value="controlbar=over{% if media_jpg %}&amp;image={{media_jpg}}{% endif %}&amp;file={{ media_mp4 }}" />
+			<!-- fallback image. note the title field below, put the title of the video there -->
+			{% if media_jpg %}
+				<img src="{{media_jpg}}" width="640" height="360" alt="Video cannot be played."
+					 title="No video playback capabilities, please download the video below" />
+			{% else %}
+				<p>Video cannot be played.</p>
+			{% endif %}
+		</object>
+	</video>
+{% else %}
+	<div>
+		<a href="#" onclick="$(this).hide(); var player = $(this).siblings('div:first'); player.html(player.text()); player.show(); return false;">
+			<img src="{{media_jpg}}" width="{{width}}" height="{{height}}" alt="Click to play"/>
+		</a>
+		<div style="display: none;">
+			&lt;object width="{{width}}" height="{{height}}" type="video/x-ms-asf" url="{{media_asf}}" data="{{media_asf}}" classid="CLSID:6BF52A52-394A-11d3-B153-00C04F79FAA6">
+			 &lt;param name="url" value="{{media_asf}}">
+			 &lt;param name="filename" value="{{media_asf}}">
+			 &lt;param name="autostart" value="1">
+			 &lt;param name="uiMode" value="full" />
+			 &lt;param name="autosize" value="1">
+			 &lt;param name="playcount" value="1"> 
+			 &lt;embed type="application/x-mplayer2" src="{{media_asf}}" width="{{width}}" height="{{height}}" autostart="true" showcontrols="true" pluginspage="http://www.microsoft.com/Windows/MediaPlayer/">&lt;/embed>
+			 &lt;/object>
+		</div>
+	</div>
 
-<article>
-	<a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1" onclick="return play(this, '{{ box_id }}')" title="{{ video.title }}">
-        {% if video.thumbnail %}
-			<img src="{{video.thumbnail}}"/>
-        {% else %}
-	        <b>NO TUMBNAIL</b>
-		{% endif %}
-	</a>
-	<h4><a href="#">{{ video.source }}</a></h4>
-	<p>&ldquo;{{ video.title }}&rdquo;
-	<span class="date">{{video.published|date:"M j, Y"}}</span>
-	<a>Watch Video</a></p>
-</article>
+{% endif %}
 
-{% comment %}
-{# This is another approach when thumbnail is displayed #}
-{# using the jwplayer instance with small dimensions #}
-<div class="video-thumbnail">
-    <a href="{{ MEDIA_URL }}jwplayer/player.swf?file={{ video.url|urlencode }}&amp;autostart=1"  onmousedown="return play(this, '{{ box_id }}')">
-        <div id="{{ box_id }}"></div>
-        <div class="title">{{ video.title }}</div>
-    </a>
-</div>
-
-<script type="text/javascript">
-    jwplayer("{{ box_id }}").setup({
-        flashplayer: "{{ MEDIA_URL }}jwplayer/player.swf",
-        swf: {'wmode': 'transparent'},
-        file: "{{ video.url }}",
-        width: 200,
-        height: 150,
-        volume: 0,
-        events: {
-            // Then we click on player SWF object
-            // it starts playing so we should stop it
-            // We use this small player only as thumbnail container
-            onPlay: function(){
-                this.stop()
-            }
-        }
-    });
-</script>
-{% endcomment %}

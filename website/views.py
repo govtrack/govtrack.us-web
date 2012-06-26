@@ -215,3 +215,27 @@ def your_docket(request):
 
 from website.api import api_overview
 
+@render_to('website/congress_live.html')
+def congress_live(request):
+
+    from cache_utils.decorators import cached
+    @cached(60*5)
+    def get_loc_streams():
+        # Scrape the LoC for live House committee hearings.
+        
+        import urllib
+        cmtelist = urllib.urlopen("http://thomas.loc.gov/video/house-committee").read()
+        
+        feeds = []
+        for m in re.findall(r'<a href="(/video/house-committee/\S*)" class="committee-links"', cmtelist):
+            cmtepage = urllib.urlopen("http://thomas.loc.gov" + m).read()
+            n = re.search(r'<h3>Live Stream: ([^<]+)</h3><iframe [^>]+src="(http://www.ustream.tv/embed/\d+)"', cmtepage)
+            if n:
+                feeds.append( { "title": n.group(1), "url": "http://thomas.loc.gov" + m } )
+            
+        return feeds
+
+    return {
+        "housecommittees": get_loc_streams,
+    }
+    
