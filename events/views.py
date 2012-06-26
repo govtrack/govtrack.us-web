@@ -114,7 +114,7 @@ def events_list_items(request):
     # idea of how often the events occur in a way that is robust to a few long
     # periods of no events, e.g. which Congress is out of session.
     expected_frequency = None
-    if len(qs) > 5:
+    if len(qs) > 15:
         # Get the time between consecutive events, in days.
         seps = []
         for i in xrange(1, len(qs)):
