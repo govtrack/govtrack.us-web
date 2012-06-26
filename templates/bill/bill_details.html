@@ -85,11 +85,11 @@
 			<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
 			{% endif %}
 			
-			{% if upcoming_meetings|length %}
+			{% if bill.get_upcoming_meetings|length %}
 			<dt>Schedule:</dt>
 			<dd>
 				<div>This {{bill.noun}} is scheduled for the following committee meetings:</div>
-				{% for m in upcoming_meetings %}
+				{% for m in bill.get_upcoming_meetings %}
 					<div>{{m.when}} &mdash; {{m.committee.fullname}}</div>
 				{% endfor %}
 			</dd>
@@ -265,7 +265,7 @@
 							</script>
 						{% endif %}
 				
-						{% with prognosis as p %}
+						{% with bill.get_prognosis as p %}
 						{% if p %}
 						<dt>Prognosis:</dt>
 						<dd>

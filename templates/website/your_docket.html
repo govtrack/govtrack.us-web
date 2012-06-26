@@ -1,0 +1,84 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Your Docket{% endblock %}
+
+{% block summary %}
+<h1>Your Docket</h1>
+
+<p style="margin-top: 1em">Use this page to get the latest information on the bills you are tracking in <a href="/accounts/lists">your lists</a>.</p>
+{% endblock %}
+
+{% block body %}
+	{% for list in lists %}
+		<section style="padding-bottom: 2em">
+	
+		<h2>List #{{forloop.counter}}: {{list.name}}</h2>
+		
+		{% for bill in list.bills %}
+			<div class="tracked_event">
+				<h4 class="event_title"><a href="{{bill.get_absolute_url}}">{{bill}}</a></h4>
+		
+				<div class="event_feed_title">
+					<a href="{{bill.get_absolute_url}}">Status</a>
+					| <a href="{{bill.get_absolute_url}}/text">Full Text</a>
+					| <a href="{{bill.thomas_link}}">THOMAS</a>
+					| <a href="{{bill.popvox_link}}">POPVOX</a>
+				</div>
+				
+				<div class="event_date" title="{{bill.current_status_description}}" style="display: block;">
+					<span>Current Status: </span>
+					{{bill.current_status_date}} &mdash; {{bill.get_current_status_display}}
+				</div>
+				
+				{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
+				<div class="event_date" style="display: block;">
+					<span>Scheduled in House: </span>
+					Posted to calendar on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}}
+				</div>
+				{% endif %}
+				
+				{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
+				<div class="event_date" style="display: block;">
+					<span>Scheduled in Senate: </span>
+					Posted to calendar on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}
+				</div>
+				{% endif %}
+				
+				{% if not bill.docs_house_gov_postdate and not bill.senate_floor_schedule_postdate %}
+				{% with bill.get_prognosis as p %}
+				{% if p %}
+				<div class="event_date" style="display: block;">
+					<span>Prognosis: </span> {{p.prediction|floatformat:0}}%
+				</div>
+				{% endif %}
+				{% endwith %}
+				{% endif %}
+				
+				{% for m in bill.get_upcoming_meetings %}
+					<div class="event_date">
+						<span>Scheduled for Hearing/Markup: </span>
+						{{m.when}} &mdash; {{m.committee.fullname}}
+					</div>
+				{% endfor %}
+			</div>
+		{% empty %}
+		
+			<p>You are not tracking any bills in this list. Start by <a href="/congress/bills/browse">searching for a bill</a>.</p>
+			
+		{% endfor %}
+	
+		</section>
+	{% empty %}
+		<section style="padding-bottom: 2em">
+		<p>You haven&rsquo;t begun tracking any bills!</p>
+		
+		{% if user.is_authenticated %}
+			<p>Start by <a href="/congress/bills">searching for bills</a> that you want to add to your docket. When you find the bill, click its Track button.</p>
+		{% else %}
+			<p><a href="/accounts/login?next=/accounts/docket">Register or log in</a> to begin creating your docket.</p>
+		{% endif %}
+		</section>
+	{% endfor %}
+
+
+{% endblock %}
+

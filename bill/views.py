@@ -14,7 +14,6 @@ from common.pagination import paginate
 from bill.models import Bill, BillType, BillStatus, BillTerm, TermType
 from bill.search import bill_search_manager, parse_bill_number
 from bill.title import get_secondary_bill_title
-from committee.models import CommitteeMeeting
 from committee.util import sort_members
 from person.models import Person
 from events.models import Feed
@@ -38,13 +37,6 @@ def bill_details(request, congress, type_slug, number):
     
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
     
-    def get_prognosis():
-        if bill.congress != CURRENT_CONGRESS: return None
-        import prognosis
-        prog = prognosis.compute_prognosis(bill)
-        prog["congressdates"] = get_congress_dates(prog["congress"])
-        return prog
-        
     def get_reintroductions():
         reintro_prev = None
         reintro_next = None
@@ -58,17 +50,12 @@ def bill_details(request, congress, type_slug, number):
         if m: m.name = m.name.replace(bill.display_number, "it")
         return m
         
-    def get_upcoming_meetings():
-        return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=bill)
-                                                    
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
-        "prognosis": get_prognosis, # defer so we can use template caching
         "reintros": get_reintroductions, # defer so we can use template caching
         "market": get_market,
-        'upcoming_meetings': get_upcoming_meetings,
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         'feed': Feed.BillFeed(bill),
@@ -310,4 +297,4 @@ class sitemap_archive(django.contrib.sitemaps.Sitemap):
     priority = 0.25
     def items(self):
         return Bill.objects.filter(congress__lt=CURRENT_CONGRESS-1)
-    
+

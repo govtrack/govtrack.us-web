@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from common import enum
 from common.fields import JSONField
 
-from committee.models import Committee
+from committee.models import Committee, CommitteeMeeting
 from bill.status import BillStatus
 from bill.title import get_bill_number, get_primary_bill_title
 from bill.billtext import load_bill_text
@@ -193,8 +193,18 @@ class Bill(models.Model):
     	"""Whether the bill was introduced in the current session of Congress and the bill's status is not a final status (i.e. can take no more action like a failed vote)."""
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
 
+    def get_prognosis(self):
+        if self.congress != settings.CURRENT_CONGRESS: return None
+        import prognosis
+        prog = prognosis.compute_prognosis(self)
+        prog["congressdates"] = get_congress_dates(prog["congress"])
+        return prog
+        
     def get_formatted_summary(self):
         return get_formatted_bill_summary(self)
+
+    def get_upcoming_meetings(self):
+        return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=self)
 
     def get_status_text(self, status, date) :
         bill = self
@@ -284,6 +294,11 @@ class Bill(models.Model):
         return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%d:%s%d:" \
             % (self.congress, self.bill_type_slug, self.number)
 
+    def popvox_link(self):
+    	"""Returns the URL for the bill page on POPVOX."""
+        return "https://www.popvox.com/bills/us/%d/%s%d" \
+            % (self.congress, self.bill_type_slug, self.number)
+            
     def create_events(self):
         if self.congress < 111: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event

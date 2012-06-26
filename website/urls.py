@@ -9,5 +9,6 @@ urlpatterns = patterns('website.views',
     url(r'^search$', 'search', name='search'),
     #url(r'^campaigns/bulkdata', 'campaign_bulk_data'),
     url(r'^events/syndication-feed', 'push_to_social_media_rss'),
+    url(r'^accounts/docket', 'your_docket'),
 )
 
