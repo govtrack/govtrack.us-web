@@ -162,27 +162,6 @@ code {
 
 /* General classes ============================== */
 /* ============================================== */
-.track-btn {
-    background: url(../images/btn-sprte-1.png) no-repeat;
-    height: 39px;
-    width: 170px;
-    font-family: CallunaSansRegular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    line-height: 39px;
-    text-align: center;
-    text-transform: uppercase;
-    display: block;
-    color: #fff;
-    text-shadow: 0 1px 1px #3d6410;
-    margin: 0 0 15px;
-	}
-.track-btn:hover {
-	color: #fff;
-    text-decoration: none;
-    background-position: 0 -43px;
-    border-bottom: 0;
-	}
-.track-btn:active { background-position: 0 -86px 	}
 .last { 
 	float: right !important; 
 	margin-right: 0 !important;
@@ -1512,21 +1491,21 @@ aside .download-links { padding: 31px 0 0 	}
     height: 12px;
     margin-right: 5px;
     text-indent: -9999px;
-    background: url(../images/icons.png) left top no-repeat;
+    background: url(../images/icons.png) 0 0 no-repeat;
     color: #666;
 }
 #lists > div.default_list .opts a {
     margin-right: 0;
 }
     #lists > div .opts a.icon.trash {
-        background-position: -12px top;
+        background-position: -12px 0;
         margin-right: 0;
     }
     #lists > div .opts a.icon.edit:hover {
-        background-position: left bottom;
+        background-position: 0 -12px;
     }
     #lists > div .opts a.icon.trash:hover {
-        background-position: -12px bottom;
+        background-position: -12px -12px;
     }
 
 #lists .list_info {
@@ -1716,26 +1695,170 @@ aside .download-links { padding: 31px 0 0 	}
     box-shadow:
         0 2px 5px rgba(0,0,0,.2);
 }
+    #list_trackers li span {
+        display: inline-block;
+        width: 340px;
+    }
 
     #list_trackers li a,
-    #basic_trackers li span {
+    #basic_trackers li span   {
         display: inline-block;
         float: right;
         width: 12px;
         height: 12px;
         margin-top: 6px;
         text-indent: -9999px;
-        background: url(../images/icons.png) -12px top no-repeat;
+        background: url(../images/icons.png) -12px 0 no-repeat;
         color: #666;
     }
         #list_trackers li a:hover,
         #basic_trackers li a:hover span {
-            background-position: -12px bottom;
+            background-position: -12px -12px;
             border-bottom: 0;
         }
-    #basic_trackers li span { background-position: -24px top; }
-    #basic_trackers li a:hover span { background-position: -24px bottom; }
+    #basic_trackers li span { background-position: -24px 0; }
+    #basic_trackers li a:hover span { background-position: -24px -12px; }
 
+
+/* TRACKER WIDGET STYLES ================= */
+/* ======================================= */
+.tracker {
+    position: relative;
+    height: 39px;
+    width: 170px;
+    z-index: 1;
+}
+
+    .track-btn {
+        position: relative;
+        background: url(../images/btn-sprte-1.png) no-repeat;
+        height: 39px;
+        width: 170px;
+        font-family: CallunaSansRegular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 39px;
+        text-align: center;
+        text-transform: uppercase;
+        display: block;
+        color: #fff;
+        text-shadow: 0 1px 1px #3d6410;
+        margin: 0 0 15px;
+        z-index: 100;
+        }
+        .track-btn:hover {
+            color: #fff;
+            text-decoration: none;
+            background-position: 0 -43px;
+            border-bottom: 0;
+            }
+        .track-btn:active { 
+            background-position: 0 -86px;
+        }
+    .tracker_widget {
+        position: absolute;
+        top: 40px;
+        left: -68px;
+        z-index: 5;
+        width: 308px;
+        /*background: #f8f7f7;
+        border-radius: 1px;
+        border: solid #e7e4dc 1px;
+        box-shadow:
+            0 0 0 5px #f9f8f4,
+            0 3px 8px 5px rgba(106,106,106,.4);*/
+        padding-top: 18px;
+        background: url(../images/tracker_widget_top.png) center 0 no-repeat;
+        font-family: 'CallunaRegular';
+    }
+        .widget_content {
+            position: relative;
+            padding: 10px 20px 20px;
+            background: url(../images/tracker_widget_mid.png) center top repeat-y;
+        }
+
+            .tracker_widget h3 {
+                font-size: 1em;
+                color: #40a4bd;
+                text-align: center;
+                margin-bottom: .5em;
+                text-transform: none;
+            }
+            .events_to_track,
+            .list_select {
+                margin-bottom: 20px;
+                border-bottom: solid #dfdbcf 1px;
+            }
+            .events_to_track { padding-bottom: 1em; }
+            .events_to_track li a,
+            .list_select li a {
+                display: block;
+                padding: 0 10px;
+                height: 25px;
+                line-height: 25px;
+                margin-bottom: 10px;
+                background: #fff;
+                border: solid #dcd6c3 1px;
+                border-radius: 5px;
+                moz-border-radius: 5px;
+                webkit-border-radius: 5px;
+                overflow: hidden;
+                font-size: .9em;
+            }
+            .events_to_track li a {
+                background: transparent;
+                border: 0;
+                margin-bottom: 0;
+            }
+            .list_select li.new a {  /* Styles the "Add New List" link */
+                background: transparent;
+                border: 0;
+            }
+            .list_select li.selected a {
+                background: #8e8778;
+                color: #fff;
+            }
+            .list_select li a:hover {
+                box-shadow:
+                    0 2px 5px rgba(0,0,0,.2);
+            }
+            .list_select li.new a:hover {
+                box-shadow: none;
+            }
+                .events_to_track li span,
+                .list_select li span    {
+                    display: inline-block;
+                    float: left;
+                    width: 12px;
+                    height: 12px;
+                    margin-top: 6px;
+                    margin-right: .5em;
+                    text-indent: -9999px;
+                    background: url(../images/icons.png) -36px 0 no-repeat;
+                    color: #666;
+                }
+                .events_to_track li span { background-position: -48px 0; }
+                .events_to_track li:hover span { background-position: -48px -12px; }
+                .events_to_track li.selected span { background-position: -48px -24px; }
+                .list_select li:hover span {
+                    background-position: -36px -12px;
+                }
+                .list_select li.selected span {
+                    background-position: -36px -24px;
+                }
+                .list_select li.new span {
+                    background-position: -24px 0;
+                }
+                .list_select li.new:hover span {
+                    background-position: -24px -12px;
+                }
+            .tracker .tracker_widget .btn {
+                line-height: 24px;
+                margin: 10px auto 0;
+            }
+        .widget_footer {
+            padding-bottom: 15px;
+            background: url(../images/tracker_widget_btm.png) center bottom no-repeat;
+        }
 
 /* Footer Styles ========================= */
 /* ======================================= */
@@ -2278,10 +2401,11 @@ select, input.text {
         background-position: -256px top;
     }
 .advanced-search .row { margin: 0 0 20px    }
-.advanced-search .btn-search {
+.advanced-search .btn-search,
+.tracker .btn {
     background: url(../images/btn-advans-search.png) no-repeat;
     width: 120px;
-    height: 26px;
+    height: 24px;
     display: block;
     overflow: hidden;
     margin: 24px 0 0;
@@ -2294,6 +2418,10 @@ select, input.text {
     text-align: center;
     cursor: pointer;
     color: #fff;
+    }
+    .advanced-search .btn-search:hover,
+    .tracker .btn:hover {
+        background-position: left bottom;
     }
 .advanced-search .btn-search-small {
     background: url(../images/btn-advans-search-small.png) no-repeat;
