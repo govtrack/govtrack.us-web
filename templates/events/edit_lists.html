@@ -28,7 +28,7 @@ function activate_list(elem) {
 		},
 		dataType: "json",
 		success: function(data) {
-			$('#events_header a').attr('href', '/events/events.rss?list_id=' + active_list);
+			$('#events_header a').attr('href', '/events/events.rss?list_id=' + data.list_public_id);
 			
 			$('#items p').toggle(data.list_trackers.length == 0);
 			

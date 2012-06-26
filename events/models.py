@@ -552,9 +552,18 @@ class SubscriptionList(models.Model):
     email = models.IntegerField(default=0, choices=EMAIL_CHOICES)
     last_event_mailed = models.IntegerField(blank=True, null=True) # id of last event
     last_email_sent = models.DateTimeField(blank=True, null=True) # date of last email update sent
+    public_id = models.CharField(max_length=16, blank=True, null=True, db_index=True)
     
     class Meta:
         unique_together = [('user', 'name')]
+
+    def get_public_id(self):
+        if not self.public_id:
+            from random import choice
+            import string
+            self.public_id = ''.join([choice(string.letters + string.digits) for i in range(16)])
+            self.save()
+        return self.public_id
 
     def get_new_events(self):
         feeds = expand_feeds(self.trackers.all())
