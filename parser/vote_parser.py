@@ -46,6 +46,7 @@ class VoteProcessor(Processor):
         'unknown': VoteCategory.unknown,
         'ratification': VoteCategory.ratification,
         'veto-override': VoteCategory.veto_override,
+        'conviction': VoteCategory.conviction,
     }
 
     def category_handler(self, value):
