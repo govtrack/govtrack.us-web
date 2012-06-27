@@ -42,12 +42,6 @@ class BillStatus(enum.Enum):
     # indicates statuses whose descriptions are clear that the bill is no longer active,
     # other statuses are displayed as "Died: " for bills from previous congresses.
     final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)
-    
-    # indicates a bill that is likely to receive further action
-    active_status = (passed_bill, pass_back_senate, pass_back_house, override_pass_over_house, override_pass_over_senate, prov_kill_veto)
-    
-    # indicates a bill that has significant action but that is not active
-    waiting_status = (pass_over_house, pass_over_senate, prov_kill_suspensionfailed, prov_kill_cloturefailed, prov_kill_pingpongfail)
 
     # indicates a bill at the end of its life cycle and passed
     final_status_passed_bill = (enacted_signed, enacted_veto_override)
@@ -60,7 +54,3 @@ class BillStatus(enum.Enum):
     # all final statuses
     final_status = tuple(list(final_status_passed_bill) + list(final_status_passed_resolution) + list(final_status_failed))
 
-    # indicates a bill that has had no significant action
-    inactive_status = (introduced, referred, reported)
-    
-    

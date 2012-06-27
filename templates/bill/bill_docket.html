@@ -42,6 +42,10 @@ $(function() {
 </script>
 {% endblock %}
 
+{% block extra_js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/highcharts.js" ></script>
+{% endblock %}
+
 {% block crumbs %}
 <ul>
 <li><a href="{% url congress_home %}">Congress</a></li>
@@ -66,6 +70,7 @@ $(function() {
 	<li><a href="#">Docket</a></li>
 	<li><a href="#">By Subject</a></li>
 	<li><a href="#">Search and Track</a></li>
+	<li><a href="#">Statistics</a></li>
 </ul>
 
 <div class="panes">
@@ -146,6 +151,116 @@ $(function() {
 			<li><a href="/events/coming-up">Coming Up</a></li>
 		</ul>
 	
+	</div>
+
+	<div>
+		<h2 style="margin: 1em 0 .5em 0">Statistics and Historical Comparison</h2>
+		
+		<p>Here are counts of bills and resolutions by status in the current Congress compared to previous Congresses. Note that the current Congress is not yet finished.</p>
+		
+		<script>
+		function show_stats_style(show_abs, show_pct) {
+			$('#bill_hist_stats .abs').toggle(show_abs);
+			$('#bill_hist_stats .pct').toggle(show_pct);
+			if (show_abs) $('#bill_hist_stats .pct').css({ fontSize: "90%", color: "#777" });
+			else  $('#bill_hist_stats .pct').css({ fontSize: "100%", color: "#000" });
+			return false;
+		}
+		</script>
+		<p style="text-align: center">
+			<a href="#" onclick="return show_stats_style(true, true)">Counts &amp; Percents</a>
+			| <a href="#" onclick="return show_stats_style(true, false)">Counts Only</a>
+			| <a href="#" onclick="return show_stats_style(false, true)">Percents Only</a>
+		</p>
+		
+		<table id="bill_hist_stats">
+		<tr>
+			<th style="padding: 0 1em 1em 0;">Congress</th>
+			{% for grp in groups2 %}
+				<th style="padding: 0 1em 1em 0;" title="{{grp.1}}{{grp.2}}">{{grp.0}}</th>
+			{% endfor %}
+			<th style="padding: 0 0 1em 0;">TOTAL</th>
+		</tr>
+		{% for cong in counts_by_congress %}
+			<tr>
+				<td style="padding: 0 1em 1em 0">
+					<b>{{cong.congress|ordinal}}</b>
+					<div style="font-size: 90%; color: #777"><nobr>{{cong.dates.0|date}}</nobr><br/> <nobr>-{{cong.dates.1|date}}</nobr></div>
+				</td>
+				{% for c in cong.counts %}
+					<td style="padding-right: 1em; text-align: center;">
+						<div class="abs"><a href="{{c.link}}">{{c.count}}</a></div>
+						<div class="pct">{{c.percent}}%</div>
+					</td>
+				{% endfor %}
+				<th><a href="/congress/bills/browse?congress={{cong.congress}}">{{cong.total}}</a></th>
+			</tr>
+		{% endfor %}
+		</table>
+
+		<h2 style="margin-top: 1em">When does Congressional activity occur?</h2>
+		
+		<p>These charts show when during the course of the two-year Congressional sessions activity tends to occur. Note that each Congress starts a few days into January and finishes a few days into January two calendar years later.</p>
+		
+		{% for name, data in activity %}
+			{% if forloop.first %}
+				<p style="padding-bottom: 1em;">This first chart shows when bills and resolutions tend to be introduced. It shows that legislation tends to be introduced early on in the session.</p>
+			{% else %}
+				<p style="padding: 1em 0 1em 0;">This next chart shows when bills and joint resolutions tend to be enacted (either by being signed by the president or by a veto being overridden). It shows that about half of all legislation that will be enacted is enacted only in the final quarter of the session.</p>
+			{% endif %}
+		
+			<div id="activity_by_month_{{forloop.counter}}"> </div>
+			<script>
+			var year_names = ["1st", "2nd", "3rd"];
+			$(document).ready(function() {
+				var chart = new Highcharts.Chart({
+					chart: {
+						renderTo: 'activity_by_month_{{forloop.counter}}',
+						type: 'spline',
+						width: 900,
+						height: 350,
+						marginTop: 5
+					},
+					title: { text: '{{name|escapejs}}' },
+					legend: { enabled: true },
+					credits: { enabled: false },
+					xAxis: {
+						labels: { step: 3 },
+						categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"]
+					},
+					yAxis: [{ min: 0, title: { text: 'Average # of {{name|escapejs}}' } },
+						{ min: 0, max: 100, title: { text: 'Cumulative Percent' }, opposite: true }],
+					tooltip: {
+						formatter: function() {
+							return this.series.name + "<br/>" + this.x + " in the " + year_names[this.point.year] + ' year: ' + this.y
+						}
+					},
+					plotOptions: {
+						spline: {
+							lineWidth: 2,
+							marker: { radius: 3 },
+							states: {
+								hover: { lineWidth: 2 }
+							}
+						}
+					},
+					series: [{
+						name: 'Average Count',
+						data: [{% for month in data %}{ x: {{month.x}}, y: {{month.count}}, year: {{month.year}} }{% if not forloop.last %}, {% endif %}{% endfor %} ]
+					},
+					{
+						name: 'Cumulative Percent',
+						yAxis: 1,
+						data: [{% for month in data %}{ x: {{month.x}}, y: {{month.cumulative_count}}, year: {{month.year}} }{% if not forloop.last %}, {% endif %}{% endfor %} ],
+						color: '#BBB',
+						lineWidth: 1,
+						marker: { radius: 2 }
+					}]
+				});
+			});
+			</script>
+		{% endfor %}
+		<p style="padding: 1em 0 1em 0;">Use the cumulative percent charts to estimate how much has yet to occur in the current session of Congress. For instance, the cumulative percent of bills enacted for December in the first year of a session is 34%, meaning that while the session is half over, only one-third of the number of bills that will be enacted have been enacted by that point.</p>
 	</div>	
 </div>
 
