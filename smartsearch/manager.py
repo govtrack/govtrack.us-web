@@ -14,6 +14,8 @@ import json, urllib
 
 from common.enum import MetaEnum
 
+FACET_CACHE_TIME = 60*60
+
 class SearchManager(object):
     def __init__(self, model, qs=None, connection=None):
         self.model = model
@@ -109,30 +111,97 @@ class SearchManager(object):
         try:
             qs = self.queryset(request)
             
-            if not paginate or paginate(request.POST):
-                page_number = int(request.POST.get("page", "1"))
-                per_page = 20
+            # In order to generate the facets, we will call generate_choices on each
+            # visible search field. When generating facets with the Django ORM, a
+            # separate query is required because only one .annotate() can be used
+            # at a time. However, with Haystack we can facet on multiple fields at
+            # once efficiently.
+            #
+            # Still, the underlying queries are different for fields that have values
+            # chosen by the user. Each facet shows the counts of matched objects
+            # by value, including the filtering set on other fields, but of course not
+            # the filtering set on its own field because then it would return just
+            # one category.
+            #
+            # So optimizing the facet query for Haystack can pre-load only the facets
+            # that have the same underlying query --- i.e. only the facets that have
+            # no value set by the user.
+            loaded_facets = None
+            if hasattr(qs, 'facet'):
+                faceted_qs = qs
+                loadable_facets = []
+                for option in self.options:
+                    if option.field_name in request.POST or option.field_name+"[]" in request.POST: continue
+                    if option.type == "text": continue
+                    if option.type == "select" and request.POST["faceting"]=="false": continue # 2nd phase only
+                    loadable_facets.append(option.field_name)
+                    faceted_qs = faceted_qs.facet(option.field_name)
+                if len(loadable_facets) > 0:
+                    cache_key = self.build_cache_key('bulkfaceting__' + ",".join(loadable_facets), request)
+                    loaded_facets = cache.get(cache_key)
+                    if not loaded_facets:
+                        loaded_facets = faceted_qs.facet_counts()["fields"]
+                        cache.set(cache_key, loaded_facets, FACET_CACHE_TIME)
+
+            cache_key = self.build_cache_key('count', request)
+            qs_count = cache.get(cache_key)
+            if qs_count == None:
+                qs_count = qs.count()
+                cache.set(cache_key, qs_count, FACET_CACHE_TIME)
+                
+            def make_simple_choices(option):
+                return option.type == "select" and not option.choices
+
+            facets = [(
+                option.field_name,
+                option.type,
+                
+                self.generate_choices(request, option, loaded_facets,
+                    # In order to speed up the display of results, we query the facet counts
+                    # in two phases. The facet counts for select-type fields are delayed
+                    # until the second phase (because you can't see them immediately).
+                    # In the first phase, we cheat (to be quick) by not omitting the selected
+                    # value in the facet counting query, which means we only get back the 
+                    # counts for entries that match the currently selected value, which is
+                    # all the user can see in the drop-down before the click the select box
+                    # anyway. If the select field's value is unset (i.e. all), then we load
+                    # all results in both phases.
+                    simple=make_simple_choices(option) and request.POST["faceting"]=="false"),
+                
+                make_simple_choices(option) and request.POST["faceting"]=="false",
+                
+                option.field_name in request.POST or option.field_name+"[]" in request.POST or option.visible_if(request.POST) if option.visible_if else True
+                ) for option in self.options
+                    
+                    # In the second phase, don't generate facets for options we've already
+                    # done in the first phase.
+                    if request.POST["faceting"]=="false" or make_simple_choices(option)
+                ]
+
+            if request.POST["faceting"] == "false":
+                if not paginate or paginate(request.POST):
+                    page_number = int(request.POST.get("page", "1"))
+                    per_page = 20
+                else:
+                    page_number = 1
+                    per_page = qs_count
+                
+                page = Paginator(qs, per_page)
+                obj_list = page.page(page_number).object_list
+            
+                ret = {
+                    "results": self.results(obj_list, request.POST),
+                    "options": facets,
+                    "page": page_number,
+                    "num_pages": page.num_pages,
+                    "per_page": per_page,
+                    "total_this_page": len(obj_list),
+                    "total": qs_count,
+                }
             else:
-                page_number = 1
-                per_page = len(qs)
-            
-            page = Paginator(qs, per_page)
-            obj_list = page.page(page_number).object_list
-            
-            return HttpResponse(json.dumps({
-                "results": self.results(obj_list, request.POST) if request.POST["faceting"]=="false" else None,
-                "options": [(
-                    option.field_name,
-                    option.type,
-                    self.generate_choices(request, option, omit_me=request.POST["faceting"]=="true"),
-                    option.field_name in request.POST or option.field_name+"[]" in request.POST or option.visible_if(request.POST) if option.visible_if else True
-                    ) for option in self.options],
-                "page": page_number,
-                "num_pages": page.num_pages,
-                "per_page": per_page,
-                "total_this_page": len(obj_list),
-                "total": qs.count(),
-                }), content_type='text/json')
+                ret = facets
+
+            return HttpResponse(json.dumps(ret), content_type='text/json')
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -224,24 +293,30 @@ class SearchManager(object):
                     for item in self.qs:
                         yield item.object
             return SR(qs)
-                        
-    def generate_choices(self, request, option, omit_me=True):
-        if option.type == "text":
-            return None
-        if option.type != "select":
-            omit_me = True
-        
+            
+    def build_cache_key(self, prefix, request, omit=None):
         def get_value(f):
             if f in request.POST: return urllib.quote(request.POST[f])
             if f + "[]" in request.POST: return "&".join(urllib.quote(v) for v in sorted(request.POST.getlist(f + "[]")))
             return ""
-        cache_key = "smartsearch_faceting_%s__%s__%s" % (
+        return "smartsearch_%s_%s__%s" % (
             self.model.__name__,
-            option.field_name,
+            prefix,
             "&".join( unicode(k) + "=" + unicode(v) for k, v in self.global_filters.items() )
             + "&&" +
-            "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in request.POST or o.field_name + "[]" in request.POST) and (not omit_me or o != option) ),
-            )
+            "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in request.POST or o.field_name + "[]" in request.POST) and (o != omit) ),
+            )        
+                        
+    def generate_choices(self, request, option, loaded_facets, simple=False):
+        # There are no facets for text-type fields.
+        if option.type == "text":
+            return None
+            
+        # Option is not set and we only want simple results.
+        if simple and not (option.field_name in request.POST or option.field_name+"[]" in request.POST or option.field_name in self.global_filters):
+            return [('__ALL__', 'All', -1, None)]
+
+        cache_key = self.build_cache_key('faceting__' + option.field_name, request, omit=option if not simple else None)
         
         if option.choices:
             if callable(option.choices):
@@ -297,32 +372,38 @@ class SearchManager(object):
                     value = field.rel.to.objects.get(id=value)
                 return unicode(value)
 
-            resp = self.queryset(request, exclude=option if omit_me else None)
-            
             def build_choice(value, count):
                 # (key, label, count, help_text) tuples
                 return (value, nice_name(value, objs), count, getattr(field.choices.by_value(value), "search_help_text", None) if field and field.choices and type(field.choices) == MetaEnum else None)
             
-            if hasattr(resp, 'facet'):
-                # Haystack.
-                resp = resp.facet(option.field_name).facet_counts()
-                if len(resp) == 0:
-                    return []
-                facet_counts = resp["fields"][option.field_name]
+            if loaded_facets and option.field_name in loaded_facets:
+                # Facet counts were already loaded.
+                facet_counts = loaded_facets[option.field_name]
                 objs = get_object_set([opt[0] for opt in facet_counts])
                 counts = [build_choice(opt[0], opt[1]) for opt in facet_counts]
             else:
-                # ORM explanation: do GROUP BY, then COUNT
-                # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
-                resp = resp\
-                           .values(option.field_name)\
-                           .annotate(_count=Count('id'))\
-                           .distinct().order_by()
-                       
-                objs = get_object_set([x[option.field_name] for x in resp if x[option.field_name] != ""])
-                counts = [ 
-                    build_choice(x[option.field_name], x['_count'] if include_counts else None)
-                    for x in resp if x[option.field_name] != ""]
+                resp = self.queryset(request, exclude=option if not simple else None)
+                
+                if hasattr(resp, 'facet'):
+                    # Haystack.
+                    resp = resp.facet(option.field_name).facet_counts()
+                    if len(resp) == 0:
+                        return []
+                    facet_counts = resp["fields"][option.field_name]
+                    objs = get_object_set([opt[0] for opt in facet_counts])
+                    counts = [build_choice(opt[0], opt[1]) for opt in facet_counts]
+                else:
+                    # ORM explanation: do GROUP BY, then COUNT
+                    # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
+                    resp = resp\
+                               .values(option.field_name)\
+                               .annotate(_count=Count('id'))\
+                               .distinct().order_by()
+                           
+                    objs = get_object_set([x[option.field_name] for x in resp if x[option.field_name] != ""])
+                    counts = [ 
+                        build_choice(x[option.field_name], x['_count'] if include_counts else None)
+                        for x in resp if x[option.field_name] != ""]
             
             # Sort by count then by label.
             if option.sort == "COUNT":
@@ -341,7 +422,7 @@ class SearchManager(object):
         if not option.required and counts != "NONE":
             counts.insert(0, ('__ALL__', 'All', -1, None))
             
-        cache.set(cache_key, counts, 60*60) # cache facets for one hour
+        cache.set(cache_key, counts, FACET_CACHE_TIME)
 
         return counts
 
