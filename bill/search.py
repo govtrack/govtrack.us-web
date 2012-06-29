@@ -5,7 +5,6 @@ from smartsearch.manager import SearchManager
 
 from bill.models import Bill, BillTerm, TermType, BillType, BillStatus
 from person.models import Person
-from person.util import load_roles_at_date
 from us import get_congress_dates
 from settings import CURRENT_CONGRESS
 
