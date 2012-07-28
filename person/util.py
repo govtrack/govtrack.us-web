@@ -35,10 +35,10 @@ def load_roles_at_date(persons, when=datetime.now()):
     This method is optimized for bulk operation.
     """
 
-    roles = PersonRole.objects.filter(startdate__lte=when, enddate__gte=when, role_type__in=(RoleType.representative, RoleType.senator)).select_related('person')
+    roles = PersonRole.objects.filter(startdate__lte=when, enddate__gte=when, role_type__in=(RoleType.representative, RoleType.senator), person__in=persons)
     roles_by_person = {}
     for role in roles:
-        roles_by_person[role.person] = role
+        roles_by_person[role.person_id] = role
     for person in persons:
-        person.role = roles_by_person.get(person)
+        person.role = roles_by_person.get(person.id)
     return None 

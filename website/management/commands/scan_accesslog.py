@@ -75,6 +75,9 @@ class Command(BaseCommand):
 			# Filter out other domains if the link has a 'q' argument since it's probs
 			# a search engine.
 			if "q" in qs or "pid" in qs: continue
+			
+			# Filter out common paths for message boards.
+			if "/threads/" in ref or "/forum/" in ref or "viewtopic.php" in ref: continue
 				
 			key = (m.groups(), url)
 			spider[key] = spider.get(key, 0) + 1
@@ -117,7 +120,7 @@ class Command(BaseCommand):
 			
 			# white-list some domains, provided we were able to
 			# get a title
-			if referral_url.hostname in ("en.wikipedia.org", "www.truthorfiction.com", "www.theatlantic.com", "www.snopes.com"):
+			if referral_url.hostname in ("en.wikipedia.org", "www.truthorfiction.com", "www.theatlantic.com", "www.snopes.com", "arstechnica.com"):
 				lnk.approved = True
 			else:
 				if first_print:

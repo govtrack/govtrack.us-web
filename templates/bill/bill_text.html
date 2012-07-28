@@ -29,6 +29,7 @@ h1 {
 }
 
 .bill_text_content h1, .bill_text_content h2, .bill_text_content h3, .bill_text_content h4, .bill_text_content h5 { font-family: serif; text-transform: none; font-weight: bold; color: #000;}
+.bill_text_content h1 span, .bill_text_content h2 span, .bill_text_content h3 span { font-style: normal; }
 .bill_text_content blockquote { margin: 1em; }
 .bill_text_content ul { margin-left: 1em; }
 
@@ -72,6 +73,7 @@ function hide_comparison() {
 function load_comparison(alt_bill, alt_version) {
 	$('#main_text_content').hide();
 	$('#content_loading').show();
+	$('#content_loading').html('<p>Loading...</p>');
 	
 	$.ajax({
 		url: "/congress/bills/_ajax/load_text",
@@ -86,10 +88,55 @@ function load_comparison(alt_bill, alt_version) {
 		dataType: "json",
 		success: function(data) {
 			display_comparison(data.left_text, data.right_text, data.left_meta, data.right_meta);
-		}
+		},
+		xhr: function() {
+			try {
+				var xhr = new window.XMLHttpRequest();
+				xhr.addEventListener("progress", function(evt){
+				  if (evt.lengthComputable) {
+					var percentComplete = Math.round(evt.loaded / evt.total * 100);
+					$('#content_loading').html('<p>Loading... ' + percentComplete + '%...</p>');
+				  }
+				}, false);
+				return xhr;
+			} catch (err) {
+			}
+		},
 	});
 	
 	return false;
+}
+
+var elems_to_fix;
+function align_corresponding_elems(start_at) {
+	for (var i = start_at; i < elems_to_fix.length; i++) {
+		//if(typeof console == "object") console.log(i);
+
+		if (i == start_at + 250) {
+			window.setTimeout("align_corresponding_elems(" + i + ")", 100);
+			return;
+		}
+		
+		var elem = $(elems_to_fix[i]);
+		if (elem.css('display') != 'block') continue;
+		for (var topbot = 0; topbot <= 1; topbot++) {
+			var cr = elem.attr("corresponds_with_" + (topbot == 0 ? "top" : "bottom"));
+			if (!cr) cr = elem.attr("cw_" + (topbot == 0 ? "top" : "bot"));
+			if (!cr) continue;
+			var b = $("#" + cr);
+			if (!b.length) continue;
+			var p = b.offset().top - elem.offset().top;
+			if (topbot == 1) p += b.height() - elem.height(); // compare bottoms
+			if (Math.abs(p) > 20) { // should be at least the total margin
+				var d = $('<div class="spacer"/>').css({ height: Math.abs(p)-20 }); // subtract the total margin
+				d.addClass("tb_" + topbot);
+				if (topbot == 0) // top
+					d.insertBefore(p > 0 ? elem : b);
+				else // bottom
+					d.insertAfter(p > 0 ? elem : b);
+			}
+		}
+	}
 }
 
 function display_comparison(left_text, right_text, left_meta, right_meta) {
@@ -106,24 +153,8 @@ function display_comparison(left_text, right_text, left_meta, right_meta) {
 	align_panels();
 	
 	// Add spacing to create alignments between corresponding paragraphs on each side.
-	$(docs[0]).find("> .body *").each(function() {
-		if ($(this).css('display') != 'block') return;
-		for (var topbot = 0; topbot <= 1; topbot++) {
-			var cr = $(this).attr("corresponds_with_" + (topbot == 0 ? "top" : "bottom"));
-			if (!cr) return;
-			var b = $("#" + cr);
-			if (b.length) {
-				var p = b.offset().top - $(this).offset().top;
-				if (Math.abs(p) > 20) { // should be at least the total margin
-					var d = $('<div class="spacer"/>').css({ height: Math.abs(p)-20 }); // subtract the total margin
-					if (topbot == 0)
-						d.insertBefore(p > 0 ? $(this) : b);
-					else
-						d.insertAfter(p > 0 ? $(this) : b);
-				}
-			}
-		}
-	});
+	elems_to_fix = $(docs[0]).find("> .body *");
+	align_corresponding_elems(0);
 	
 	/*var doc_fixed;
 	var doc_movable;
@@ -174,6 +205,13 @@ function align_panels() {
 	$("#bill_comparison_content .bill_text_content").css({ width: ($(window).width() - 100)/2 });
 }
 $(window).resize(align_panels);
+
+$(function() {
+	var m = /^#compare=(\d+)/.exec(window.location.hash);
+	if (m) {
+		load_comparison(m[1], null);
+	}
+});
 </script>
 {% endblock %}
 
@@ -267,8 +305,8 @@ $(window).resize(align_panels);
 	{% if related_bills %}
 	<p>Compare this bill to another bill:</p>
 	<ul class="bullets">
-		{% for rb in related_bills %}
-			<li><a href="#" onclick="return load_comparison({{rb.id}}, null);">{{rb}}</a></li>
+		{% for rb, bv in related_bills %}
+			<li><a href="#" onclick="return load_comparison({{rb.id}}, '{{bv|escapejs}}');">{{rb}}</a></li>
 		{% endfor %}
 	</ul>
 	{% endif %}

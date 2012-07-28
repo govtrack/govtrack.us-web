@@ -79,6 +79,9 @@ bill_gpo_status_codes = {
     "s_p": "Star Print of an Amendment",
     }
     
+def get_current_version(bill):
+    return load_bill_text(bill, None, mods_only=True)["doc_version"]
+    
 def load_bill_text(bill, version, plain_text=False, mods_only=False):
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
 
@@ -134,7 +137,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         "doc_version_name": doc_version_name,
     }
 
-def compare_xml_text(doc1, doc2):
+def compare_xml_text(doc1, doc2, timelimit=10):
     # Compare the text of two XML documents, marking up each document with new
     # <span> tags. The documents are modified in place.
     
@@ -188,7 +191,7 @@ def compare_xml_text(doc1, doc2):
                 # the total lengths of two hunks ago and the current is creater
                 # than the length of the hunk in the middle...
                 if op in ('-', '+') and prev[0][0] == op and prev[1][0] == '=' \
-                    and prev[0][1] + length > (prev[1][1]-1)**2:
+                    and prev[0][1] + length > (prev[1][1]-1)**1.4:
                     prev.append( (op, prev[0][1] + prev[1][1] + length) )
                     prev.append( ('-' if op == '+' else '+', prev[1][1]) )
                     prev.pop(0)
@@ -196,7 +199,7 @@ def compare_xml_text(doc1, doc2):
                     
                 # If the two hunks differ in op, combine them a different way.
                 elif op in ('-', '+') and prev[0][0] in ('-', '+') and prev[1][0] == '=' \
-                    and prev[0][1] + length > (prev[1][1]-1)**2:
+                    and prev[0][1] + length > (prev[1][1]-1)**1.4:
                     prev.append( (prev[0][0], prev[0][1] + prev[1][1]) )
                     prev.append( (op, prev[1][1] + length) )
                     prev.pop(0)
@@ -233,7 +236,7 @@ def compare_xml_text(doc1, doc2):
        def make_wrapper(label=None):
            wrapper_node = lxml.etree.Element('span')
            wrapper_node.set('class', mode)
-           if label: wrapper_node.set('make_wrapper_label', label)
+           #if label: wrapper_node.set('make_wrapper_label', label)
            return wrapper_node
        for i, (off, offlen, offnode, offtype) in enumerate(offsets):
            # Does the change intersect this span?
@@ -304,7 +307,7 @@ def compare_xml_text(doc1, doc2):
                    w.tail = slice_bytes(offnode.text, (pos-off)+length, offlen)
                    offnode.text = slice_bytes(offnode.text, 0, pos-off)
                else:
-                   if len(make_bytes(offnode.tail)) != offlen: raise Exception(str(len(make_bytes(offnode.tail))) + "/" + str(offlen) + "/" + lxml.etree.tostring(offnode))
+                   #if len(make_bytes(offnode.tail)) != offlen: raise Exception(str(len(make_bytes(offnode.tail))) + "/" + str(offlen) + "/" + lxml.etree.tostring(offnode))
                    w = make_wrapper("H")
                    offtail = offnode.tail # see above
                    offnode.addnext(w) # see above
@@ -336,11 +339,11 @@ def compare_xml_text(doc1, doc2):
     def mark_correspondence(leftnode, rightnode, idx, ab):
         if not leftnode.get("id"): leftnode.set("id", "left_%d%s" % (idx, ab))
         if not rightnode.get("id"): rightnode.set("id", "right_%d%s" % (idx, ab))
-        leftnode.set("corresponds_with_" + ab, rightnode.get("id"))
-        rightnode.set("corresponds_with_" + ab, leftnode.get("id"))
+        leftnode.set("cw_" + ab, rightnode.get("id"))
+        rightnode.set("cw_" + ab, leftnode.get("id"))
            
     import diff_match_patch
-    diff = diff_match_patch.diff(doc1data.text, doc2data.text, timelimit=10)
+    diff = diff_match_patch.diff(doc1data.text, doc2data.text, timelimit=timelimit)
     diff = reformat_diff(simplify_diff(diff))
     idx = 0
     for op, left_pos, left_len, right_pos, right_len in diff:
@@ -349,7 +352,7 @@ def compare_xml_text(doc1, doc2):
         right_nodes = get_bounding_nodes(right_pos, right_len, doc2data.offsets)
         if left_nodes and right_nodes:
             mark_correspondence(left_nodes[0], right_nodes[0], idx, "top")
-            mark_correspondence(left_nodes[1], right_nodes[1], idx, "bottom")
+            mark_correspondence(left_nodes[1], right_nodes[1], idx, "bot")
         
         if op == "=" and doc1data.text[left_pos:left_pos+left_len] == doc2data.text[right_pos:right_pos+right_len]: continue
         if left_len > 0: mark_text(doc1, doc1data.offsets, left_pos, left_len, "del" if right_len == 0 else "change")

@@ -33,7 +33,7 @@ def index(request):
             for item in twitter_feed:
                 item.text = re_url.sub(lambda m : "<a target=\"_blank\" href=\"" + m.group(0) + "\">" + m.group(0) + "</a>", conditional_escape(item.text))
             cache.set("our_twitter_feed", twitter_feed, 60*30) # 30 minutes
-        except IOError:
+        except:
             twitter_feed = []
             cache.set("our_twitter_feed", twitter_feed, 60*2) # 2 minutes
             
