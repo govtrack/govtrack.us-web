@@ -6,29 +6,25 @@
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript" src="http://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
+	<script type="text/javascript" src="http://gis.govtrack.us/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
-		function createDistrictsOverlay(outlines_only, opacity, state, district) {
-			return {
-			  getTileUrl: function(coord, zoom) 
-			  {
-				  return "http://www.govtrack.us/perl/wms/wms.cgi?google_tile_template_values=" + coord.x + "," + coord.y + "," + zoom
-				  	+ "&LAYERS=cd-110" + (outlines_only ? "-outlines" : "")
-					+ (state ? ":http://www.rdfabout.com/rdf/usgov/geo/us/" + state
-						+ (!district ? "%25"
-							: "/cd/110/" + district)
-						: "")
-					+ "&FORMAT=image/png";	
+		function createDistrictsOverlay(state, district) {
+		    var feature = "";
+		    if (state && district) feature = state + "-" + (district < 10 ? "0" : "") + district + "/";
+			return new google.maps.ImageMapType({
+			  getTileUrl: function(coord, zoom) {
+				  return "http://gis.govtrack.us/map/tiles/2010-cd/" + feature + (zoom-1) + "/" + coord.x + "/" + coord.y + ".png?size=512";
 			  },
-			  tileSize: new google.maps.Size(256, 256),
-			  minZoom: 2,
+			  tileSize: new google.maps.Size(512, 512),
+			  isPng: true,
+			  minZoom: 3,
 			  maxZoom: 28,
-			  opacity: opacity,
-			  isPng: true
-			};		
+			  opacity: .85
+			});
 		}
 		
 		var map;
-		var cur_mouse_pos = null;
 		
 		$(function() {
 			var myOptions = {
@@ -45,12 +41,9 @@
 			
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
 			
-			overlayWMS = new google.maps.ImageMapType(createDistrictsOverlay(false, .2, {% if state %}"{{state|lower}}"{% else %}null{% endif %}, {% if district %}"{{district}}"{% else %}null{% endif %}));
+			overlayWMS = createDistrictsOverlay({% if state %}"{{state|lower}}"{% else %}null{% endif %}, {% if district %}"{{district}}"{% else %}null{% endif %});
 			map.overlayMapTypes.insertAt(0, overlayWMS);			
 
-			overlayWMS = new google.maps.ImageMapType(createDistrictsOverlay(true, .7, {% if state %}"{{state|lower}}"{% else %}null{% endif %}, {% if district %}"{{district}}"{% else %}null{% endif %}));
-			map.overlayMapTypes.insertAt(0, overlayWMS);
-			
 			{% if request.GET.marker %}
 				lnglat = "{{request.GET.marker}}".split(":");
 				loc = new google.maps.LatLng(lnglat[1], lnglat[0]);
@@ -67,9 +60,28 @@
 				$("#embedbounds").text(Math.round(b.getSouthWest().lng()*1000)/1000 + "," + Math.round(b.getNorthEast().lat()*1000)/1000 + "," + Math.round(b.getNorthEast().lng()*1000)/1000 + "," + Math.round(b.getSouthWest().lat()*1000)/1000);
 			});
 			
+			function hit(coord, func) {
+				map_hit_test(
+					getTileCoordinate(coord, map),
+					"2010-cd",
+					null,
+					func,
+					"http://gis.govtrack.us");
+			}
+			
 			google.maps.event.addListener(map, "mousemove", function(e) {
-				cur_mouse_pos = e.latLng;
-				setTimeout("doMouseHover(" + e.latLng.lat() + "," + e.latLng.lng() + ")", 1000);
+				var div = $('#map_district_hover_container');
+				var lbl = $('#map_district_hover_label');
+				if (div.is(":visible")) lbl.html("Loading...");
+				hit(e.latLng,
+					function(key, data) {
+						if (data) {
+							lbl.html(data.name);
+							div.show();
+						} else {
+							div.hide();
+						}
+					});
 			});
 			// Create a div to hold the control.
 			var controlDiv = document.createElement('DIV');
@@ -79,6 +91,7 @@
 			controlDiv.style.padding = '5px';
 			// Set CSS for the control border.
 			var controlUI = document.createElement('DIV');
+			controlUI.id = "map_district_hover_container";
 			controlUI.style.backgroundColor = 'white';
 			controlUI.style.borderStyle = 'solid';
 			controlUI.style.borderWidth = '2px';
@@ -96,30 +109,6 @@
 			controlUI.appendChild(controlText);
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
 		});
-		
-		function doMouseHover(lat, lng) {
-			if (!cur_mouse_pos || cur_mouse_pos.lat() != lat || cur_mouse_pos.lng() != lng) return;
-			
-			$.ajax({
-				url: "/congress/members/ajax/district_lookup",
-				data: {
-					lat: lat,
-					lng: lng
-				},
-				dataType: "json",
-				success: function(data) {
-					if (!data.state) {
-						$('#map_district_hover_label').text("");
-					} else {
-						if (data.district) {
-							$('#map_district_hover_label').html("<a href='/congress/members/" + data.state + "/" + data.district + "'>" + data.state + "-" + data.district + "</a>");
-						} else {
-							$('#map_district_hover_label').html("<a href='/congress/members/" + data.state + "'>" + data.state + " At-Large" + "</a>");
-						}
-					}
-				}
-			});
-		}
 		
 		var is_full_screen = false;
 		function doFullScreen() {
