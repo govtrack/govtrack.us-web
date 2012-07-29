@@ -172,7 +172,7 @@ def browsemembersbymap(request, state=None, district=None):
         "center_long": center_long,
         "center_zoom": center_zoom,
         "state": state,
-        "district": district,
+        "district": int(district) if district else None,
         "stateapp": stateapportionment[state] if state != None else None,
         "statename": statenames[state] if state != None else None,
         "statelist": statelist,

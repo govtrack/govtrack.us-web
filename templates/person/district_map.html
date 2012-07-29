@@ -9,12 +9,17 @@
 	<script type="text/javascript" src="http://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
 	<script type="text/javascript" src="http://gis.govtrack.us/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
-		function createDistrictsOverlay(state, district) {
-		    var feature = "";
-		    if (state && district) feature = state + "-" + (district < 10 ? "0" : "") + district + "/";
-			return new google.maps.ImageMapType({
+		var current_layer = null;
+		var first_time_on_redistricting = true;
+		
+		function createDistrictsOverlay(redistricting) {
+			current_layer = (!redistricting ? "2010-cd" : "2012-cd");
+			{% if state and district %}current_layer += "/{{state|lower}}-{{district|stringformat:"02d"}}";
+			{% endif %}
+		    
+			var overlay = new google.maps.ImageMapType({
 			  getTileUrl: function(coord, zoom) {
-				  return "http://gis.govtrack.us/map/tiles/2010-cd/" + feature + (zoom-1) + "/" + coord.x + "/" + coord.y + ".png?size=512";
+				  return "http://gis.govtrack.us/map/tiles/" + current_layer + "/" + (zoom-1) + "/" + coord.x + "/" + coord.y + ".png?size=512";
 			  },
 			  tileSize: new google.maps.Size(512, 512),
 			  isPng: true,
@@ -22,6 +27,9 @@
 			  maxZoom: 28,
 			  opacity: .85
 			});
+			
+			map.overlayMapTypes.clear();
+			map.overlayMapTypes.insertAt(0, overlay);
 		}
 		
 		var map;
@@ -41,8 +49,7 @@
 			
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
 			
-			overlayWMS = createDistrictsOverlay({% if state %}"{{state|lower}}"{% else %}null{% endif %}, {% if district %}"{{district}}"{% else %}null{% endif %});
-			map.overlayMapTypes.insertAt(0, overlayWMS);			
+			createDistrictsOverlay(false);
 
 			{% if request.GET.marker %}
 				lnglat = "{{request.GET.marker}}".split(":");
@@ -63,7 +70,7 @@
 			function hit(coord, func) {
 				map_hit_test(
 					getTileCoordinate(coord, map),
-					"2010-cd",
+					current_layer.split("/")[0], // when looking at a district, still do hit testing on whole country
 					null,
 					func,
 					"http://gis.govtrack.us");
@@ -83,31 +90,19 @@
 						}
 					});
 			});
-			// Create a div to hold the control.
-			var controlDiv = document.createElement('DIV');
-			// Set CSS styles for the DIV containing the control
-			// Setting padding to 5 px will offset the control
-			// from the edge of the map.
-			controlDiv.style.padding = '5px';
-			// Set CSS for the control border.
-			var controlUI = document.createElement('DIV');
-			controlUI.id = "map_district_hover_container";
-			controlUI.style.backgroundColor = 'white';
-			controlUI.style.borderStyle = 'solid';
-			controlUI.style.borderWidth = '2px';
-			controlUI.style.cursor = 'pointer';
-			controlUI.style.textAlign = 'center';
-			controlDiv.appendChild(controlUI);
-			// Set CSS for the control interior.
-			var controlText = document.createElement('DIV');
-			controlText.id = "map_district_hover_label";
-			controlText.style.fontFamily = 'Arial,sans-serif';
-			controlText.style.fontSize = '12px';
-			controlText.style.paddingLeft = '4px';
-			controlText.style.paddingRight = '4px';
-			controlText.innerHTML = '';
-			controlUI.appendChild(controlText);
-			map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv);
+						
+			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#map_controls')[0]);
+			
+			$('#ctrl_layer_2010, #ctrl_layer_2012').click(function() {
+					createDistrictsOverlay(this.id == "ctrl_layer_2012");
+					$('#ctrl_layer_2010, #ctrl_layer_2012').removeClass("active");
+					$(this).addClass("active");
+					if (this.id == "ctrl_layer_2012") {
+						if (first_time_on_redistricting)
+							alert("Please note:\n\n1) Your current Members of Congress are based on the district lines at the time you last voted, in 2010.\n\n2) New district lines are still subject to change before the elections due to ongoing court cases in each state.\n\n3) We don't have Rhode Island's new districts yet, sorry!");
+						first_time_on_redistricting = false;
+					}
+			});
 		});
 		
 		var is_full_screen = false;
@@ -184,6 +179,20 @@
 			return false;
 		}
 	</script>
+	<style>
+	#map_controls > li {
+		float: left;
+		background-color: white;
+		border: 2px solid #777;
+		cursor: pointer;
+		text-align: center;
+		margin: 3px 6px 0 0;
+		padding: 2px 4px 2px 4px;
+	}
+	#map_controls > li.active {
+		background-color: #FFA;
+	}
+	</style>
 {% endblock %}
 {% block style %}
 	#map_canvas { height: 100% }
@@ -211,7 +220,6 @@
 {% block summary %}
 	<h2>Find a Senator <span>or</span> Representative</h2>
 	<p style="margin-top: 1em">Use this page to find current or past Members of Congress.</p>
-	<p style="margin-bottom: 0"><strong>Looking for redistricting maps?</strong> Your current Members of Congress are based on the district lines at the time you last voted. Our maps won't be updated to reflect redistricting until the new Members of Congress elected this year take office in January 2013.</p>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}
@@ -329,6 +337,16 @@
 	
 	<div id="map_container" class="eight columns last">
 		<div id="map_canvas" class="">
+		</div>
+		<div style="display: none">
+			<ul id="map_controls">
+				<li id="map_district_hover_container" style="display: none">
+					<div id="map_district_hover_label">
+					</div>
+				</li>
+				<li id="ctrl_layer_2010" class="active">2010 Districts</li>
+				<li id="ctrl_layer_2012">2012 Districts</li>
+			</ul>
 		</div>
 	</div>
 	
