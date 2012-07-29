@@ -15,24 +15,24 @@
 		
 		<style type="text/css">
 		h1 small { font-size: 60%; }
-		.intro-box .container { overflow: auto; }
-		.intro-box h1 { margin: 30px 0 0 0; }
-		.intro-box p.intro { margin-top: 65px; width: 320px; }
-		.intro-box .block { margin-top: -80px; text-align: left; width: 325px; }
-		.intro-box .block img { float: left; margin-right: 1em; border: 1px solid black; }
-		.intro-box a.alt { text-decoration: none; }
+		#intro-box .container { overflow: auto; }
+		#intro-box h1 { margin: 30px 0 0 0; }
+		#intro-box p.intro { margin-top: 65px; width: 320px; }
+		#intro-box .block { margin-top: -200px; text-align: left; width: 325px; }
+		#intro-box .block img { float: left; margin-right: 1em; border: 1px solid black; }
+		#intro-box a.alt { text-decoration: none; }
 		
-		.info-box .container { padding: 50px 0 50px 0; }
-		.info-box .heading { margin-bottom: 20px; }
-		.info-box p { font-size: 13px; margin-bottom: .9em; }
+		#info-box .heading { margin: 20px 0 20px 0; }
+		#info-box p { font-size: 17px; margin-bottom: .9em; }
 		</style>
 	</head>
 	
 	<body class="homepage">
 		<div id="wrapper">
 			
-			<div id="masthead">
-				<header id="header">
+		<div id="masthead">
+			<div id="header-wrap">
+				<header id="header" class="row">
 					<div id="nav-block">
 						<div class="row">
 							<div class="block">
@@ -48,10 +48,11 @@
 						
 					</div><!-- /nav-block -->
 				</header>
+			</div>
 				
 				
-				<div class="intro-box">
-					<div class="section">
+				<div id="intro-box" class="row">
+					<div class="column twelve">
 						<h1>Civic Impulse<small>, LLC</small></h1>
 						<p class="intro">We build tools that foster civic participation, civc education, and government transparency, and we work with governments on improving government data policy.</p>
 						
@@ -59,7 +60,7 @@
 							<a href="http://www.govtrack.us"><img src="/static/images/govtrack_icon.png" width="78" height="65" alt="GovTrack.us"/></a>
 							<p><a href="http://www.govtrack.us" style="font-weight: bold">GovTrack.us</a> brings open data and Web 2.0 to the U.S. Congress. <a class="alt" href="http://www.govtrack.us/about">About</a> | <a class="alt" href="http://www.govtrack.us/press">Press</a></p>
 							
-							<div style="margin-top: 100px; clear: both;">
+							<div style="margin-top: 60px; clear: both;">
 								<a href="http://razor.occams.info"><img src="/static/images/josh.png" width="78" height="90" alt="Joshua Tauberer"/></a>
 								<p><a href="http://razor.occams.info">Joshua Tauberer</a> is the owner and president of Civic Impulse.</p>
 							</div>
@@ -70,9 +71,9 @@
 						
 			</div><!-- /masthead -->
 			
-			<div class="info-box">
+			<div id="info-box">
 				<div class="holder">
-					<div class="container">
+					<div class="row">
 						<div class="heading">
 							<h2>About the Company</h2>
 						</div>
@@ -101,7 +102,7 @@
 	
 		
 			<footer id="footer">
-				<div class="holder">
+				<div class="holder row">
 					
 					<nav>
 						<ul>
