@@ -11,7 +11,7 @@ from django.core.cache import cache
 from common.decorators import render_to
 from common.pagination import paginate
 
-from bill.models import Bill, BillType, BillStatus, BillTerm, TermType
+from bill.models import Bill, BillType, BillStatus, BillTerm, TermType, BillTextComparison
 from bill.search import bill_search_manager, parse_bill_number
 from bill.title import get_secondary_bill_title
 from committee.util import sort_members
@@ -113,13 +113,22 @@ def bill_text(request, congress, type_slug, number, version=None):
                 alternates.append(load_bill_text(bill, v, mods_only=True))
         alternates.sort(key = lambda mods : mods["docdate"])
 
+    # Get a list of related bills.
+    related_bills = []
+    for rb in list(bill.find_reintroductions()) + [r.related_bill for r in bill.get_related_bills()]:
+        if not (rb, "") in related_bills: related_bills.append((rb, ""))
+    for btc in BillTextComparison.objects.filter(bill1=bill):
+	    if not (btc.bill2, btc.ver2) in related_bills: related_bills.append((btc.bill2, btc.ver2))
+    for btc in BillTextComparison.objects.filter(bill2=bill):
+	    if not (btc.bill1, btc.ver1) in related_bills: related_bills.append((btc.bill1, btc.ver1))
+
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "textdata": textdata,
         "version": version,
         "alternates": alternates,
-        "related_bills": list(bill.find_reintroductions()) + [r.related_bill for r in bill.get_related_bills()],
+        "related_bills": related_bills,
     }
 
 @json_response
@@ -127,30 +136,77 @@ def bill_text_ajax(request):
     for p in ("left_bill", "left_version", "right_bill", "right_version", "mode"):
         if not p in request.GET:
             raise Http404()
+            
+    return load_comparison(request.GET["left_bill"], request.GET["left_version"], request.GET["right_bill"], request.GET["right_version"])
     
-    from billtext import load_bill_text, compare_xml_text
+def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10, force=False):
+    from billtext import load_bill_text, compare_xml_text, get_current_version
     import lxml
     
-    left_bill = Bill.objects.get(id = request.GET["left_bill"])
-    left = load_bill_text(left_bill, request.GET["left_version"], mods_only=True)
+    left_bill = Bill.objects.get(id = left_bill)
+    right_bill = Bill.objects.get(id = right_bill)
     
-    right_bill = Bill.objects.get(id = request.GET["right_bill"])
-    right = load_bill_text(right_bill, request.GET["right_version"], mods_only=True)
+    if left_version == "": left_version = get_current_version(left_bill)
+    if right_version == "": right_version = get_current_version(right_bill)
+    
+    btc = None
+    try:
+        btc = BillTextComparison.objects.get(
+            bill1 = left_bill,
+            ver1 = left_version,
+            bill2 = right_bill,
+            ver2 = right_version)
+        if not force: return btc.data
+    except BillTextComparison.DoesNotExist:
+        pass
+    
+    # Try with the bills swapped.
+    try:
+        btc2 = BillTextComparison.objects.get(
+            bill2 = left_bill,
+            ver2 = left_version,
+            bill1 = right_bill,
+            ver1 = right_version)
+        data = btc2.data
+        return {
+            "left_meta": data["right_meta"],
+            "right_meta": data["left_meta"],
+            "left_text": data["right_text"],
+            "right_text": data["left_text"],
+        }
+    except BillTextComparison.DoesNotExist:
+        pass
+    
+    left = load_bill_text(left_bill, left_version, mods_only=True)
+    right = load_bill_text(right_bill, right_version, mods_only=True)
     
     doc1 = lxml.etree.parse(left["basename"] + ".html")
     doc2 = lxml.etree.parse(right["basename"] + ".html")
-    compare_xml_text(doc1, doc2) # revises DOMs in-place
+    compare_xml_text(doc1, doc2, timelimit=timelimit) # revises DOMs in-place
     
     # dates aren't JSON serializable
     left["docdate"] = left["docdate"].strftime("%x")
     right["docdate"] = right["docdate"].strftime("%x")
     
-    return {
+    ret = {
         "left_meta": left,
         "right_meta": right,
         "left_text": lxml.etree.tostring(doc1),
         "right_text": lxml.etree.tostring(doc2),
     }
+    
+    if not btc:
+        BillTextComparison.objects.create(
+            bill1 = left_bill,
+            ver1 = left_version,
+            bill2 = right_bill,
+            ver2 = right_version,
+            data = ret)
+    else:
+        btc.data = ret
+        btc.save()
+    
+    return ret
 
 def bill_list(request):
     if request.POST.get("allow_redirect", "") == "true":

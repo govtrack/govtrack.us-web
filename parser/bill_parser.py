@@ -337,7 +337,7 @@ def main(options):
             billname = item.xpath("legis-num")[0].text
             m = re.match("\s*(?:Concur in the Senate Amendment to |Senate Amendment to )?("
                 + "|".join(bt_re(bt) for bt in BillType)
-                + ")(\d+)\s*$", billname, re.I)
+                + ")(\d+)\s*(\[Conference Report\]\s*)?$", billname, re.I)
             if not m:
                 log.error('Could not parse legis-num "%s" in docs.house.gov.' % billname)
             else:

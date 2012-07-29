@@ -3,6 +3,7 @@ from datetime import datetime
 from committee.util import sort_members
 from committee.models import CommitteeMemberRole
 from person.models import PersonRole
+from person.types import RoleType
 
 def get_committee_assignments(person):
     """
@@ -29,15 +30,15 @@ def get_committee_assignments(person):
 
 def load_roles_at_date(persons, when=datetime.now()):
     """
-    Find out role of each person at given date.
+    Find out representative/senator role of each person at given date.
 
     This method is optimized for bulk operation.
     """
 
-    roles = PersonRole.objects.filter(startdate__lte=when, enddate__gte=when).select_related('person')
+    roles = PersonRole.objects.filter(startdate__lte=when, enddate__gte=when, role_type__in=(RoleType.representative, RoleType.senator), person__in=persons)
     roles_by_person = {}
     for role in roles:
-        roles_by_person[role.person] = role
+        roles_by_person[role.person_id] = role
     for person in persons:
-        person.role = roles_by_person.get(person)
+        person.role = roles_by_person.get(person.id)
     return None 

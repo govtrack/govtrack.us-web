@@ -751,3 +751,12 @@ class BillLink(models.Model):
     def hostname(self):
         return urlparse.urlparse(self.url).hostname
 
+class BillTextComparison(models.Model):
+    bill1 = models.ForeignKey(Bill, related_name="comparisons1")
+    ver1 = models.CharField(max_length=6)
+    bill2 = models.ForeignKey(Bill, related_name="comparisons2")
+    ver2 = models.CharField(max_length=6)
+    data = JSONField()
+    class Meta:
+        unique_together = ( ('bill1', 'ver1', 'bill2', 'ver2'), )
+

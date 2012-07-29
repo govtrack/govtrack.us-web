@@ -52,7 +52,7 @@ def BT50FileReader(stream, headerstream, encoding, **kwargs):
     stream = removeNulls(stream)
     
     headers = list(csv.reader(headerstream, delimiter='\t'))[0]
-
+    
     csv_reader = csv.reader(stream, **kwargs)
     rownum = 0
     for values in csv_reader:
@@ -93,9 +93,14 @@ def rowbyrow(func):
             delimiter = ',' if fmt == 'csv' else '\t',
             quotechar = '"' if fmt == 'csv' else None):
         
+            # make a hash of the row so we can tell quickly if it's been changed, but
+            # skip the LastUpdated column because it might be spurriously updated and
+            # we don't care if the other fields didn't change anyway.
+            row["_hash"] = hashlib.sha1(repr(sorted(kv for kv in row.items() if kv[0] != 'LastUpdated'))).hexdigest()
+            
             rownum += 1
-            row["_hash"] = hashlib.sha1(repr(sorted(row.items()))).hexdigest()
             progress.tick(x=f.tell(), y=total)
+            
             try:
                 func(row, options, filename, *args, **kwargs)
             except:
