@@ -4,41 +4,6 @@
 {% block title %}GovTrack.us - Data API{% endblock %}
 
 {% block head %}
-<style>
-pre.example {
-	height: 25em;
-	width: 800px;
-	margin: 1em 0 1.5em 16px;
-	border: 1px solid black;
-	overflow: auto;
-}
-
-h4 {
-	margin-left: 16px;
-}
-dl.schema {
-	margin: 1em 0 2em 16px;
-}
-dl.schema > dt {
-	float: left;
-	clear: both;
-	width: 150px;
-	margin-bottom: 1em;
-}
-dl.schema > dd {
-	float: left;
-	width: 450px;
-	margin-bottom: .75em;
-}
-dl.schema > div {
-	border-bottom: 1px solid #DDD;
-	margin-bottom: .75em;
-}
-.example_api_uses a {
-	font-family: monospace;
-	font-size: 85%;
-}
-</style>
 
 <link href="/static/js/prettify.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript" src="/static/js/prettify.js"></script>
@@ -49,14 +14,15 @@ dl.schema > div {
 <ul><li><a href="/developers">Developer Documentation</a></li> <li>Data API</li></ul>
 {% endblock %}
 {% block summary %}
-	{% include "website/developers/menu.html" %}
 	<h1>GovTrack Data API Documentation</h1>
-	
-	<p style="margin-top: 1em">GovTrack&rsquo;s data API provides programmatic access to information about the U.S. Congress.</p>
-	
+	<p>GovTrack&rsquo;s data API provides programmatic access to information about the U.S. Congress.</p>
 {% endblock %}
+{% block links %}
+{% include "website/developers/menu.html" %}
+{% endblock %}
+
 {% block body %}
-<section class="main">
+<section class="main twelve columns">
 
 	<p>The GovTrack API was first released in May 2012. You might consider instead using our <a href="/developers/data">bulk raw data</a> which is the most supported method for accessing our data and the way we&rsquo;ve been making data available since 2005. The API will be playing catch-up over the next few months.</p>
 	

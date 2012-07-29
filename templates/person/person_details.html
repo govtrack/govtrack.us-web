@@ -8,100 +8,96 @@
         {{ role.get_role_type_display }}}{% if role.state %}, {{ role.get_state_display }}{% endif %}
 {% endblock %}
 
-{% block head %}
-<style>
-#missedvotestable { margin-top: 1.5em; margin-left: 3em; }
-#missedvotestable th { padding-right: 1em; }
-</style>
-{% endblock %}
-
 {% block extra_js %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/highcharts.js" ></script>
 {% endblock %}
 
 {% block crumbs %}
 <ul>
-<li><a href="{% url congress_home %}">Congress</a></li>
-<li><a href="/congress/members">Members of Congress</a></li>
-<li>{{person.name_no_details}}</li>
+	<li><a href="{% url congress_home %}">Congress</a></li>
+	<li><a href="/congress/members">Members of Congress</a></li>
+	<li>{{person.name_no_details}}</li>
 </ul>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}
 
 {% block summary %}
-{% cache 600 member_head person.id %}
-<div id="track_panel_base" class="container">
-	<h1>{{person.name_and_title}}</h1>
-	
-	{% if role and not active_role %}
-	<p>Former {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}{% endif %}</p>
-	{% endif %}
-	
-	<div class="info">
-		<dl>
-			{% if role and active_role %}
-			{% if role.state and not role.district %}
-			<dt>State:</dt>
-			<dd>{{role.state_name}}</dd>
-			{% endif %}
+<div class="row group">
+	{% cache 600 member_head person.id %}
+	<div id="track_panel_base" class="eight columns">
+		<h1>{{person.name_and_title}}</h1>
+		
+		{% if role and not active_role %}
+		<p>Former {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}{% endif %}</p>
+		{% endif %}
+		
+		<div class="info">
+			<dl>
+				{% if role and active_role %}
+				{% if role.state and not role.district %}
+				<dt>State:</dt>
+				<dd>{{role.state_name}}</dd>
+				{% endif %}
 
-			{% if role.district > 0 %}
-			<dt>District:</dt>
-			<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a></dd>
-			{% endif %}
-			
-			<dt>Party:</dt>
-			<dd>{{ role.party }}</dd>
-			{% endif %}
-		</dl>
-	</div>
-	
-	<h2>Elected Positions</h2>
-	<table>
-		<tr>
-			<th>Dates</th>
-			<th>Title</th>
-			<th>Representing</th>
-		</tr>
-        {% for role in person.roles_condensed %}
-        <tr>
-            <td>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</td>
-            <td>{{ role.get_role_type_display }}</td>
-            <td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}</td>
-        </tr>
-        {% endfor %}
-	</table>
-</div><!-- /container -->
-{% endcache %}
-
-{% include "events/subscribe_inline.html" %}
-
-{% cache 600 member_aside person.id %}
-<div class="aside">
-	{% if photo %}
-		<div class="photo">
-			<img src="{{ photo }}" alt="Photo" width="100" height="122"/> <!-- 90x112 -->
+				{% if role.district > 0 %}
+				<dt>District:</dt>
+				<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a></dd>
+				{% endif %}
+				
+				<dt>Party:</dt>
+				<dd>{{ role.party }}</dd>
+				{% endif %}
+			</dl>
 		</div>
-	{% endif %}
-	
-	{% if active_role %}
-	<a href="#" class="track-btn" onclick="return show_track_panel();">Track Member</a>
-	
-	{% if role.website %}
-	<div class="article">
-		<strong>Official Website:</strong>
-		<a href="{{role.website}}">{{role.website}}</a>
-	</div>
-	{% endif %}
-	{% endif %}
-</div><!-- /aside -->
-{% endcache %}
+		
+		<h2>Elected Positions</h2>
+		<table>
+			<tr>
+				<th>Dates</th>
+				<th>Title</th>
+				<th>Representing</th>
+			</tr>
+	        {% for role in person.roles_condensed %}
+	        <tr>
+	            <td>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</td>
+	            <td>{{ role.get_role_type_display }}</td>
+	            <td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}</td>
+	        </tr>
+	        {% endfor %}
+		</table>
+	</div><!-- /container -->
+	{% endcache %}
+
+	<div class="aside four columns">
+	{% include "events/subscribe_inline.html" %}
+
+	{% cache 600 member_aside person.id %}
+		{% if photo %}
+			<div class="photo">
+				<img src="{{ photo }}" alt="Photo" width="100" height="122"/> <!-- 90x112 -->
+			</div>
+		{% endif %}
+		
+		{% if active_role %}
+		<a href="#" class="track-btn" onclick="return show_track_panel();">Track Member</a>
+		
+		{% if role.website %}
+		<div class="article">
+			<strong>Official Website:</strong>
+			<a href="{{role.website}}">{{role.website}}</a>
+		</div>
+		{% endif %}
+		{% endif %}
+	{% endcache %}
+	</div><!-- /aside -->
+</div>
 {% endblock %}
 
 {% block body %}
+<div class="row">
 {% cache 600 member_details person.id %}
-<div id="member-details" class="section">
+<div id="member-details" class="eight columns">
 
 	{% if analysis_data.sponsorship %}
 	<section id="sponsorship_analysis">
@@ -392,22 +388,23 @@
 {% endcache %}
 
 {% cache 600 member_news person.id %}
-<div class="tweets section">
-	<div id="happening_now" style="display: none">
-	<h3>Happening Now</h3>
-	
-	<article class="post" id="latest-tweet" style="display: none">
-		<a href="" class="tweetlink photo">
-			<img src="http://twitter-badges.s3.amazonaws.com/t_logo-a.png" border="0" width="20" height="20"/>
-		</a>
-		<div class="article">
-			<h4><a href="#" class="twittername">@XXX</a></h4>
-			<p class="content">YYY</p>
-			<em class="twitterdate">6 hours ago via web</em>
-		</div>
-	</article>
+<div class="tweets four columns">
+	{% comment %}
+	<div id="happening_now">
+		<h3>Happening Now</h3>
+		
+		<article class="post" id="latest-tweet" style="display: none">
+			<a href="" class="tweetlink photo">
+				<img src="http://twitter-badges.s3.amazonaws.com/t_logo-a.png" border="0" width="20" height="20"/>
+			</a>
+			<div class="article">
+				<h4><a href="#" class="twittername">@XXX</a></h4>
+				<p class="content">YYY</p>
+				<em class="twitterdate">6 hours ago via web</em>
+			</div>
+		</article>
 	</div>
-
+	{% endcomment %}
     <script type="text/javascript">
         function renderLatestTweet(username) {
             var url = 'http://twitter.com/statuses/user_timeline/' + username + '.json';
@@ -437,6 +434,6 @@
 	{% include "events/trackedeventspanel.html" %}
 </div>
 {% endcache %}
-
+</div><!-- /.row -->
 {% endblock %}
 

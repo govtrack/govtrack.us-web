@@ -266,16 +266,17 @@ $(function() {
 		create a new list, it should not have any list-specific data hidden away
 		except where we expect that to be{% endcomment %}
 		
-
-		<div class="list {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)" list_email="{{list.email}}">
-			<h3 class="name">{{list.name}}</h3>
-			<div class="options">
-				<span class="opts edit"><a class="icon edit" href="#" onclick="return rename_list(this.parentNode.parentNode.parentNode);">Rename</a></span>
-				<span class="opts no_default_list"><a class="icon trash" href="#" onclick="return delete_list(this.parentNode.parentNode.parentNode);">Delete</a></span>
-			</div>
-			<div class="list_info">
-				<div class="num">{{list.trackers.count}} item{{list.trackers.count|pluralize}}</div>
-				<div class="freq">{% if list.name != "Email Updates" %}Email Updates:{% else %}Frequency:{% endif %} <span class="email_info">{{list.get_email_display}}</span></div>
+		<div class="four columns">
+			<div class="list group {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)" list_email="{{list.email}}">
+				<h3 class="name">{{list.name}}</h3>
+				<div class="options">
+					<span class="opts edit"><a class="icon edit" href="#" onclick="return rename_list(this.parentNode.parentNode.parentNode);">Rename</a></span>
+					<span class="opts no_default_list"><a class="icon trash" href="#" onclick="return delete_list(this.parentNode.parentNode.parentNode);">Delete</a></span>
+				</div>
+				<div class="list_info">
+					<div class="num">{{list.trackers.count}} item{{list.trackers.count|pluralize}}</div>
+					<div class="freq">{% if list.name != "Email Updates" %}Email Updates:{% else %}Frequency:{% endif %} <span class="email_info">{{list.get_email_display}}</span></div>
+				</div>
 			</div>
 		</div>
 
@@ -290,7 +291,7 @@ $(function() {
 
 	<h2>Settings for: <span class="name">List Name Goes Here</span></h2>
 
-	<div id="edit_list" class="col_6">
+	<div id="edit_list" class="six columns">
 		
 		<div id="set_freq" class="control">
 			<h3>How often do you want updates?</h3>
@@ -348,7 +349,7 @@ $(function() {
 
 	</div>
 
-	<div id="events_list" class="col_6">
+	<div id="events_list" class="six columns">
 		<div id="events_header" class="group">
 			<h3>List Feed</h3>
 			<a href="#" class="add_icon rss">Subscribe by RSS</a>

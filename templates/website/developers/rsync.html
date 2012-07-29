@@ -4,14 +4,15 @@
 <ul><li><a href="/developers">Developer Documentation</a></li> <li><a href="/developers/data">Bulk Raw Data</a></li> <li>rsync</li></ul>
 {% endblock %}
 {% block summary %}
-	{% include "website/developers/menu.html" %}
 	<h1>Getting Bulk Raw Data with Rsync</h1>
-	
-	<p style="margin-top: 1em">GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
-	
+	<p>GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
 {% endblock %}
+{% block links %}
+{% include "website/developers/menu.html" %}
+{% endblock %}
+
 {% block body %}
-<section class="main">
+<section class="main twelve columns">
 	<p>To download GovTrack&rsquo;s raw data files in bulk, or if you plan to regularly update the files,
 	you should use the rsync tool. Rsync is good for selecting which directory of data you want and
 	keeping your files up to date by only downloading changes on each update.</p>

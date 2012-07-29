@@ -22,24 +22,23 @@
 {% endblock %}
 
 {% block summary %}
-<div class="right">
+	<h1><span class="stateface stateface-{{state|lower}}">{{state_metadata.legislature_name}}</span></h1>
+	<div id="track_panel_base">
+		<p style="margin: 1em 0 0 0; line-height: 100%"><small><p>State legislative information provided by <a href="http://www.BillTrack50.com">LegiNation, Inc.</a> and <a href="http://www.LegiScan.com">LegiScan, Inc.</a></p></small></p>
+		
+		{% if state == "VA" %}
+			<p>For tracking Virginia state legislation, GovTrack actually recommends using <a href="http://www.richmondsunlight.com/">RichmondSunlight.com</a>.</p>
+		{% endif %}
+	</div>
+{% endblock %}
+
+{% block links %}
 	{% if feed %}
+	{% include "events/subscribe_inline.html" %}
+
 	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this state</a>
 	<p><a href="/events/events.rss?feeds={{feed.feedname|urlencode}}">RSS</a></p>
 	{% endif %}
-</div>
-
-<h1><span class="stateface stateface-{{state|lower}}">{{state_metadata.legislature_name}}</span></h1>
-	
-<div id="track_panel_base" class="container">
-	<p style="margin: 1em 0 0 0; line-height: 100%"><small><p>State legislative information provided by <a href="http://www.BillTrack50.com">LegiNation, Inc.</a> and <a href="http://www.LegiScan.com">LegiScan, Inc.</a></p></small></p>
-	
-	{% if state == "VA" %}
-		<p>For tracking Virginia state legislation, GovTrack actually recommends using <a href="http://www.richmondsunlight.com/">RichmondSunlight.com</a>.</p>
-	{% endif %}
-</div>
-
-{% if feed %}{% include "events/subscribe_inline.html" %}{% endif %}
 {% endblock %}
 
 {% block body %}

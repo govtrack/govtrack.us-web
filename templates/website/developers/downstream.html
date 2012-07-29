@@ -4,17 +4,20 @@
 <ul><li><a href="/developers">Developer Documentation</a></li><li>Data Users</li></ul>
 {% endblock %}
 {% block summary %}
-	{% include "website/developers/menu.html" %}
 	<h1>Other Websites Reusing GovTrack Data</h1>
 	
-	<p>GovTrack isn't <i>just</i> a website. It's a reusable database
+	<p>GovTrack isn&rsquo;t <i>just</i> a website. It&rsquo;s a reusable database
 	of congressional information put out there for anyone to build
 	new tools out of. We support open knowledge to the limit.</p>
 {% endblock %}
+{% block links %}
+{% include "website/developers/menu.html" %}
+{% endblock %}
+
 {% block body %}
-<section class="main">
+<section class="main twelve columns">
 		
-		<p>Here's a list of websites using data assembled by GovTrack</p>
+		<p>Here&rsquo;s a list of websites using data assembled by GovTrack</p>
 		
 		<ul>
 			<li><a href="http://opencongress.org">OpenCongress</a>: Quite like GovTrack with a focus on social networking-type tools.</li>

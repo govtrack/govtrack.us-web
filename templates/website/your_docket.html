@@ -4,12 +4,12 @@
 {% block summary %}
 <h1>Your Docket</h1>
 
-<p style="margin-top: 1em">Use this page to get the latest information on the bills you are tracking in <a href="/accounts/lists">your lists</a>.</p>
+<p>Use this page to get the latest information on the bills you are tracking in <a href="/accounts/lists">your lists</a>.</p>
 {% endblock %}
 
 {% block body %}
 	{% for list in lists %}
-		<section style="padding-bottom: 2em">
+		<section>
 	
 		<h2>List #{{forloop.counter}}: {{list.name}}</h2>
 		
@@ -62,7 +62,7 @@
 			</div>
 		{% empty %}
 		
-			<p>You are not tracking any bills in this list. Start by <a href="/congress/bills/browse">searching for a bill</a>.</p>
+			<p class="no_data">You are not tracking any bills in this list! Start by <a href="/congress/bills/browse">searching for a bill</a>.</p>
 			
 		{% endfor %}
 	

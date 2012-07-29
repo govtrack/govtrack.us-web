@@ -9,35 +9,35 @@
 
 {% block summary %}
     <h1>Congressional Committees</h1>
-    <p style="margin-top: 1em">Most legislative work in Congress occurs within committees. Bills and resolutions are assigned to committees whose most critical function is to decide which bills and resolutions move forward to consideration by the House or Senate as a whole. Committee chairmen have enormous influence over which move foward and how the committee revises the bill or resolution during committee business meetings.</p>
+    <p>Most legislative work in Congress occurs within committees. Bills and resolutions are assigned to committees whose most critical function is to decide which bills and resolutions move forward to consideration by the House or Senate as a whole. Committee chairmen have enormous influence over which move foward and how the committee revises the bill or resolution during committee business meetings.</p>
 {% endblock %}
 
 {% block body_class %}committees{% endblock %}
 
 {% block body %}
-	<div class="col_left">
-    <h2>Senate Committees</h2>
-    <ul>
-        {% for item in senate_committees %}
-        <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
-        {% endfor %}
-    </ul>
+	<div class="six columns">
+        <h2>Senate Committees</h2>
+        <ul>
+            {% for item in senate_committees %}
+            <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+            {% endfor %}
+        </ul>
 
-    <h2>Joint Committees</h2>
-    <ul>
-        {% for item in joint_committees %}
-        <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
-        {% endfor %}
-    </ul>
+        <h2>Joint Committees</h2>
+        <ul>
+            {% for item in joint_committees %}
+            <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
 
-    <div class="col_right">
-    <h2>House Committees</h2>
-    <ul>
-        {% for item in house_committees %}
-        <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
-        {% endfor %}
-    </ul>
+    <div class="six columns">
+        <h2>House Committees</h2>
+        <ul>
+            {% for item in house_committees %}
+            <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
 
 {% endblock %}

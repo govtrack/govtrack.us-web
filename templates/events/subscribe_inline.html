@@ -18,7 +18,7 @@ function show_track_panel() {
 	if (!$('#track_panel').is(":visible")) {
 		var btn = $('.track-btn');
 		$('#track_panel').css({
-			left: btn.position().left + btn.width()/2 - $('#track_panel').width()/2,
+			left: btn.position().left + btn.offsetParent().width()/2 - $('#track_panel').width()/2,
 			top: btn.position().top + btn.height()
 		});
 		$('#track_panel').slideDown();

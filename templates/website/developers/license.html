@@ -4,16 +4,18 @@
 <ul><li><a href="/developers">Developer Documentation</a></li> <li>Data License</li></ul>
 {% endblock %}
 {% block summary %}
-	{% include "website/developers/menu.html" %}
 	<h1>Data License</h1>
 	
 	<p>GovTrack has provided a comprehensive, bulk-access database about the U.S. Congress
 	since 2004. Until we can get Congress to pick up the slack, it is the only free database
 	of this sort of information.</p>
 {% endblock %}
+{% block links %}
+{% include "website/developers/menu.html" %}
+{% endblock %}
 
 {% block body %}
-<section class="main">
+<section class="main twelve columns">
 	<h2>Standard Data License</h2>
 
 	<p>Unless you are interested in a contractual agreement with us to establish a SLA, we&rsquo;ve

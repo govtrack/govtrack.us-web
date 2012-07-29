@@ -9,8 +9,8 @@
     #show_more { text-align: center; border: 1px solid #CB4B16; background-color: #ffcebb; font-weight: bold; }
 </style>
 
-<div class="searching">
-<section>
+<div class="searching row">
+<section class="eight columns">
     <div class="summary" style="display: none">
         <p><span class="total">xxx</span> <span class="noun">things</span> matched your search.</p>
     </div>
@@ -338,7 +338,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 $(function() { update_search(1, null, null, true); });
 </script>
 
-<div class="advanced-search">
+<div class="advanced-search four columns">
     <form id="searchform" onsubmit="update_search(); return false;">
     <fieldset>
     <h3>Search</h3>

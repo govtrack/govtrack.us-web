@@ -6,13 +6,15 @@
 {% block summary %}
 	{% include "website/developers/menu.html" %}
 	<h1>Schema: Roll Call Votes XML</h1>
-	
-	<p style="margin-top: 1em">Roll call votes can be found in directories such as
+	<p>Roll call votes can be found in directories such as
 <a href="/data/us/112/rolls">data/us/112/rolls</a>.</p>
-	
 {% endblock %}
+{% block links %}
+{% include "website/developers/menu.html" %}
+{% endblock %}
+
 {% block body %}
-<section class="main">
+<section class="main twelve columns">
 	
 <h2>File Naming Convention</h2>
 		

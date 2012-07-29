@@ -1,51 +1,46 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Log In{% endblock %}
 
-{% block summary %}
+{% block heading_box %}
+			<header class="heading-box row">
+				<h1>Log In</h1>
+				<form method="post" class="login row">
+					{% csrf_token %}
+					<input type="hidden" name="next" value="{{ next }}" />
 
-<h1>Log In</h1>
+					
+						<div class="signin_social six columns">
+							<h3 style="margin-bottom: 1em">Have one of these?</h3>
+							{% with next as singlesignon_next %}
+								{% include "registration/login_singlesignon.html" %}
+							{% endwith %}
+							<p style="margin-top: 1em">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack.</p>
+						</div>
 
-<form method="post" class="login">
-	{% csrf_token %}
-	<input type="hidden" name="next" value="{{ next }}" />
+						<div id="login_form" class="six columns">
+							<h3 style="margin-bottom: 1em">Use your email and password:</h3>
 
-	
-	<table cols="2" width="100%" style="margin-top: 2em">
-	<tr valign="top">
-		<td width="50%" style="padding-right: 2em">
-			<div class="signin_social">
-				<h3 style="margin-bottom: 1em">Have one of these?</h3>
-				{% with next as singlesignon_next %}
-					{% include "registration/login_singlesignon.html" %}
-				{% endwith %}
-				<p style="margin-top: 1em">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack.</p>
-			</div>
-		</td>
-		<td width="50%" style="padding-right: 2em">
-			<h3 style="margin-bottom: 1em">Use your email and password:</h3>
-
-			{% if errors %}
-				<p class="error">{{errors}} Please try again.</p>
-			{% endif %}
-			
-			<label for="id_email">Email</label> 
-			<input id="id_email" type="text" name="email" maxlength="60" value="{{email}}"/><br /> 
+							{% if errors %}
+								<p class="error">{{errors}} Please try again.</p>
+							{% endif %}
+							
+							<label for="id_email">Email</label> 
+							<input id="id_email" type="text" name="email" maxlength="60" value="{{email}}"/><br /> 
+										
+							<label for="id_password">Password</label> 
+							<input type="password" name="password" id="id_password" value="{{password}}" /><br /> 
+										
+							<p style="margin: 5px 0 15px 80px"><input class="submit" type="submit" value="Login" /></p>
+							
+							<p><a class="forgot" href="{% url registration.views.resetpassword %}">Forgot your password?</p>
 						
-			<label for="id_password">Password</label> 
-			<input type="password" name="password" id="id_password" value="{{password}}" /><br /> 
-						
-			<p style="margin: 5px 0 15px 80px"><input class="submit" type="submit" value="Login" /></p>
-			
-			<p><a class="forgot" href="{% url registration.views.resetpassword %}">Forgot your password?</p>
-		
-			<p><a href="/registration/signup{% if next %}?next={{next|urlencode}}{% endif %}">New here? Create a login.</a></p>
+							<p><a href="/registration/signup{% if next %}?next={{next|urlencode}}{% endif %}">New here? Create a login.</a></p>
 
-			
-		</td>
-	</tr>
-	</table>
-	
-</form>
+						</div>
+					
+				</form>
 
+			</header>
 {% endblock %}
+
 

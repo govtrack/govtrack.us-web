@@ -4,14 +4,17 @@
 <ul><li><a href="/developers">Developer Documentation</a></li> <li><a href="/developers/data">Bulk Raw Data</a></li> <li>people.xml</li></ul>
 {% endblock %}
 {% block summary %}
-	{% include "website/developers/menu.html" %}
 	<h1>Schema: People.xml</h1>
 	
-	<p style="margin-top: 1em"><a href="/data/us/people.xml">data/us/people.xml</a> lists everyone that has ever served in Congress, and U.S. presidents, with their party affiliation, terms in Congress, birthdays, etc. This file is quite large. This file has been put together from a variety of sources and is maintained by hand.</p>
+	<p><a href="/data/us/people.xml">data/us/people.xml</a> lists everyone that has ever served in Congress, and U.S. presidents, with their party affiliation, terms in Congress, birthdays, etc. This file is quite large. This file has been put together from a variety of sources and is maintained by hand.</p>
 	
 {% endblock %}
+{% block links %}
+{% include "website/developers/menu.html" %}
+{% endblock %}
+
 {% block body %}
-<section class="main">
+<section class="main twelve columns">
 	
 <p>Besides the master people.xml file, there is a Congress-specific people.xml file for each recent Congress. For instance, <a href="/data/us/112/people.xml">data/us/112/people.xml</a> mimics the layout of the master people.xml file but only contains those Members of Congress who have or had a role during that particular Congress and the roles they served in that Congress only. Because of resignations and deaths the file contains Members of Congress no longer serving, if they served at some point during the Congress.</p>
 

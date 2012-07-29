@@ -1,19 +1,6 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Research Congress {% endblock %}
 {% block head %}
-<style>
-#categories li {
-	vertical-align: top;
-}
-#categories div {
-	margin-top: 20px;
-	padding: 0 5px 0 5px;
-	text-align: left;
-	text-transform: none;
-	font-size: 10pt;
-	line-height: 140%;
-}
-</style>
 <link media="all" rel="stylesheet" href="{{ MEDIA_URL }}fonts/stateface.css">
 {% endblock %}
 
@@ -24,62 +11,65 @@
 {% block heading_box %}
 {% endblock %}
 
+{% block override_content %}
 {% block body %}
-<div class="info-box">
+<div id="info-box">
 	<div class="holder">
-		<div class="container">
-			<div class="heading">
-				<h2>Federal Legislation</h2>
-				<p style="margin: 1em">Use GovTrack to research and track legislation in the United States Congress, including Members of Congress, bills and resolutions, voting records, and committee activity.</p>
+		<div class="frame">
+			<div class="container row">
+				<div class="heading twelve columns">
+					<h2>Federal Legislation</h2>
+					<p style="margin: 1em">Use GovTrack to research and track legislation in the United States Congress, including Members of Congress, bills and resolutions, voting records, and committee activity.</p>
+				</div>
+				<ul id="categories">
+					<li id="link-members">
+						<a href="{% url person_list %}">
+							Members <span>of</span> Congress
+						</a>
+						<div>
+							<p>Use our Congressional directory to research current senators and representatives and all Members of Congress dating back to the founding of our nation.</p>
+							<p>We also compute statistics such as ideology, leadership, and missed votes.</p>
+						</div>
+					</li>
+					<li id="link-bills">
+						<a href="{% url bill_docket %}">
+							Bills <span>&amp;</span> Resolutions
+						</a>
+						<div>
+							<p>GovTrack follows the status of all bills in Congress from introduction to enactment.</p>
+							<p>Our database of bills goes back to 1979, the 106th Congress. It is updated daily.</p>
+							<p>Read the text of bills and see how bills change through their life cycle.</p>
+						</div>
+					</li>
+					<li id="link-votes">
+						<a href="{% url vote_list %}">
+							Voting Records
+						</a>
+						<div>
+							<p>The votes database tracks the votes of Members of Congress on bills and procedural motions from 1789 to the present.</p>
+						</div>
+					</li>
+					<li id="link-committees">
+						<a href="{% url committee_list %}">
+							Committees
+						</a>
+						<div>
+							<p>Congress divides its work into committees and subcommittees where most of the policymaking process occurs. Use the committees database to see where legislation is being debated.</p>
+						</div>
+					</li>
+				</ul>
 			</div>
-			<ul id="categories">
-				<li id="link-members">
-					<a href="{% url person_list %}">
-						Members <span>of</span> Congress
-					</a>
-					<div>
-						<p>Use our Congressional directory to research current senators and representatives and all Members of Congress dating back to the founding of our nation.</p>
-						<p>We also compute statistics such as ideology, leadership, and missed votes.</p>
-					</div>
-				</li>
-				<li id="link-bills">
-					<a href="{% url bill_docket %}">
-						Bills <span>&amp;</span> Resolutions
-					</a>
-					<div>
-						<p>GovTrack follows the status of all bills in Congress from introduction to enactment.</p>
-						<p>Our database of bills goes back to 1979, the 106th Congress. It is updated daily.</p>
-						<p>Read the text of bills and see how bills change through their life cycle.</p>
-					</div>
-				</li>
-				<li id="link-votes">
-					<a href="{% url vote_list %}">
-						Voting Records
-					</a>
-					<div>
-						<p>The votes database tracks the votes of Members of Congress on bills and procedural motions from 1789 to the present.</p>
-					</div>
-				</li>
-				<li id="link-committees">
-					<a href="{% url committee_list %}">
-						Committees
-					</a>
-					<div>
-						<p>Congress divides its work into committees and subcommittees where most of the policymaking process occurs. Use the committees database to see where legislation is being debated.</p>
-					</div>
-				</li>
-			</ul>
 		</div>
 	</div>
-	
-	<a name="states"> </a>
-	<div class="holder">
-		<div class="container">
-			<div class="heading">
+
+	<div id="content" class="row">
+		<a name="states"> </a>
+		<div id="state_list">
+			<div class="twelve columns">
 				<h2>State Legislation</h2>
 				<p style="margin: 1em">Starting in May 2012 we have been offering experimental state legislative tracking tools.</p>
 			</div>
-			<div style="float: left; width: 400px; margin-top: 40px;">
+			<div class="six columns">
 				<h4>Choose a State</h4>
 				<p>Start tracking legislation in your state:</p>
 				<ul>
@@ -88,18 +78,20 @@
 					{% endfor %}
 				</ul>
 			</div>
-			<div style="float: left; width: 300px; margin-top: 40px;">
-				<h4>50-State Tracking</h4>
-				<p>Or <a href="/states/bills/browse">search bills in all 50 states</a>:</p>
-				
-				<form name="header_search" action="/states/bills/browse" method="GET" class="search-form">
-					<fieldset>
-						<div class="text"><input type="text" defaulttext="Search" name="text"/></div>
-						<input class="btn-search" type="submit" value="Search" />
-					</fieldset>
-				</form>
+				<div class="side-box six columns">
+					<h4>50-State Tracking</h4>
+					<p>Or <a href="/states/bills/browse">search bills in all 50 states</a>:</p>
+					
+					<form name="header_search" action="/states/bills/browse" method="GET" class="search-form">
+						<fieldset>
+							<div class="text"><input type="text" defaulttext="Search" name="text"/></div>
+							<input class="btn-search" type="submit" value="Search" />
+						</fieldset>
+					</form>
+				</div>
 			</div>
 		</div>
-	</div>	
+	</div><!-- /content -->
 </div><!-- /info-box -->
+{% endblock %}
 {% endblock %}

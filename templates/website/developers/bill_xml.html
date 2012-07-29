@@ -4,15 +4,15 @@
 <ul><li><a href="/developers">Developer Documentation</a></li> <li><a href="/developers/data">Bulk Raw Data</a></li> <li>Bill XML</li></ul>
 {% endblock %}
 {% block summary %}
-	{% include "website/developers/menu.html" %}
 	<h1>Schema: Bill XML</h1>
-	
-	<p style="margin-top: 1em">Bills and resolutions can be found in directories such as
-<a href="/data/us/112/bills">data/us/112/bills</a>.</p>
-	
+	<p>Bills and resolutions can be found in directories such as <a href="/data/us/112/bills">data/us/112/bills</a>.</p>
 {% endblock %}
+{% block links %}
+{% include "website/developers/menu.html" %}
+{% endblock %}
+
 {% block body %}
-<section class="main">
+<section class="main twelve columns">
 	
 <h2>File Naming Convention</h2>
 

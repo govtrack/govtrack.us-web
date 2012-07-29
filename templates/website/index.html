@@ -17,35 +17,48 @@
 {% block body_class %}homepage{% endblock %}
 
 {% block override_breadcrumbs %}
-<div class="intro-box">
-	<div class="section">
+<div id="intro-box" class="row">
+	<div class="column twelve">
 		<h1>Easily track the activities <br> of the United States Congress.</h1>
-		<div class="container">
-			<p class="intro">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your life or business.</p>
+		<div class="row">
+			<p id="intro" class="column four">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your life or business.</p>
 			
-			<div class="block">
+			{% comment %}
+			<div id="start_search" class="column four right">
 				
-				<!-- {% if not user.is_authenticated %}
-					<a href="#" class="green-btn">Sign up for updates</a>
+				{% if not user.is_authenticated %}
+				<h2>Get started now!</h2>
+				<form action="/search" method="GET" class="row">
+			        <input type="text" class="eight columns" name="s" placeholder="Find something to track" />
+			        <input class="four columns postfix button" type="submit" value="Search" />
+			    </form>
 					<p>Already have an account? <a href="/accounts/login">Log in</a></p>
-					<p>You don&rsquo;t need an account just to <a href="/overview">browse</a>.</p>
 				{% else %}
-					<p>Welcome back!</p>
-				{% endif %} -->
+
+				<h2>Welcome back!</h2>
+				<form action="/search" method="GET" class="row">
+			        <input type="text" class="eight columns" name="s" placeholder="Find something to track" />
+			        <input class="four columns postfix button" type="submit" value="Search" />
+			    </form>
+				{% endif %}
 				
-			</div>
+			</div><!-- /start-search -->
+			{% endcomment %}
+
 		</div>
 	</div>
 </div><!-- /intro-box -->
 {% endblock %}
 
 {% block override_content %}
-<div class="info-box">
+<div id="info-box">
 	<div class="holder">
-		<div class="container">
+		<div class="row">
+			
 			<div class="heading">
 				<h2><span>find</span> Information</h2>
 			</div>
+			
 			<ul id="categories">
 				<li id="link-members">
 					<a href="{% url person_list %}">
@@ -68,96 +81,100 @@
 					</a>
 				</li>
 			</ul>
-			<p style="margin: 1.5em 2em .3em 0; text-align: right; color: #444;">And now <a href="/overview#states" style="text-transform: uppercase">State Legislation</a>!</p>
+
+			<div class="state">
+				<span>And now <a href="/overview#states">State&nbsp;Legislation</a>!</span>
+			</div>
+
 		</div>
 	</div>
 </div><!-- /info-box -->
 
 
 <div class="entries-box">
-	<div class="entries-holder">
-		<div class="frame">
-			<div class="container">
-				<div class="two-columns">
-					<h2><span>in</span> Congress</h2>
-					{% comment %}
-					<div class="column">
-						<h3><span>congress</span> Happening Now</h3>
-						<div id="currently_in_session" class="widget-session">
-							<h4>Currently <em>in</em> Session:</h4>
-							<div class="block">
-								<div class="senate-area active">
-									<span class="ico-house"></span>
-									<strong><em>the</em> Senate</strong>
-								</div>
-								<div class="house-area active">
-									<span class="ico-senate"></span>
-									<strong><em>the</em> House</strong>
-								</div>
+	<div class="entries-holder row">
+		<!--<div class="frame group">-->
+			<div class="eight columns" id="in-congress">
+				<h2><span>in</span> Congress</h2>
+				{% comment %}
+				<div class="four columns">
+					<h3><span>congress</span> Happening Now</h3>
+					<div id="currently_in_session" class="widget-session">
+						<h4>Currently <em>in</em> Session:</h4>
+						<div class="block">
+							<div class="senate-area active">
+								<span class="ico-house"></span>
+								<strong><em>the</em> Senate</strong>
+							</div>
+							<div class="house-area active">
+								<span class="ico-senate"></span>
+								<strong><em>the</em> House</strong>
 							</div>
 						</div>
-						<section class="congress-tweets">
-							<div class="holder">
-							</div>
-						</section>
 					</div>
-					{% endcomment %}
-				
-					{% comment %}
-					<section class="featured-articles">
-						<div id="from_the_floor">
+					<section class="congress-tweets">
+						<div class="holder">
 						</div>
-						
-						<script>
-						function sunlight_live_callback(data) {
-							if (data && data.floor_updates && data.floor_updates[0] && data.floor_updates[0].events && data.floor_updates[0].events[0]) {
-								var time = new Date(Date.parse(data.floor_updates[0].timestamp));
-								var hr = time.getHours();
-								var am = "am";
-								if (hr == 0) hr = 12;
-								else if (hr == 12) am = "pm";
-								else if (hr > 12) { hr -= 12; am = "pm"; }
-								time = time.toLocaleDateString() + " " + hr + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes() + " " + am;
-								
-								var ev = data.floor_updates[0].events[0];
-								if (ev.length > 160) ev = ev.substring(0, 158) + "...";
-								
-								var n = $("<article class='post'><div class='article'><h4 class='where'/><p><span class='text'/><br/> <span class='date'/></p><div></article>");
-								n.find(".date").text(time);
-								n.find(".where").text("In the " + (data.floor_updates[0].chamber == "senate" ? "Senate" : "House") + " Now");
-								n.find(".text").text(ev);
-								$('#from_the_floor').append(n);
-								
-								if (data.floor_updates[0].events[0].indexOf("do now adjourn") >= 0 || data.floor_updates[0].events[0].indexOf("will next convene") >= 0)
-									$('#currently_in_session .' + data.floor_updates[0].chamber + "-area").removeClass("active");
-							}
-						}
-						</script>
-						<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=senate"></script>
-						<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=house"></script>
-
-						<h3><span>recent</span> Activity</h3>
-						{% endcomment %}
-
-						{% for item in events %}
-						{% with item|render_event:subscription_feeds as event %}
-						<article class="post" style="margin-bottom: .75em">
-							{% comment %}<div class="icon"><img src="images/ico-bill.gif" width="16" height="22" alt="image description"></div>{% endcomment %}
-							<div class="article">
-								<p>{{event.date}} &mdash; {{event.type}}</p>
-								<h4>{{event.title|truncatewords:30}}</h4>
-								<div style="margin-left: 2em; font-size: 95%">
-								{% if event.type == "Vote" %}{{event.body_html|safe}}{% endif %}
-								<p><a href="{{event.url}}">More information...</a></p>
-								</div>
-							</div>
-						</article>
-						{% endwith %}
-						{% endfor %}
 					</section>
 				</div>
-			</div>
-			<div class="aside">
+				{% endcomment %}
+			
+				<section class="featured-articles">
+					{% comment %}
+					<div id="from_the_floor">
+					</div>
+					
+					<script>
+					function sunlight_live_callback(data) {
+						if (data && data.floor_updates && data.floor_updates[0] && data.floor_updates[0].events && data.floor_updates[0].events[0]) {
+							var time = new Date(Date.parse(data.floor_updates[0].timestamp));
+							var hr = time.getHours();
+							var am = "am";
+							if (hr == 0) hr = 12;
+							else if (hr == 12) am = "pm";
+							else if (hr > 12) { hr -= 12; am = "pm"; }
+							time = time.toLocaleDateString() + " " + hr + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes() + " " + am;
+							
+							var ev = data.floor_updates[0].events[0];
+							if (ev.length > 160) ev = ev.substring(0, 158) + "...";
+							
+							var n = $("<article class='post'><div class='article'><h4 class='where'/><p><span class='text'/><br/> <span class='date'/></p><div></article>");
+							n.find(".date").text(time);
+							n.find(".where").text("In the " + (data.floor_updates[0].chamber == "senate" ? "Senate" : "House") + " Now");
+							n.find(".text").text(ev);
+							$('#from_the_floor').append(n);
+							
+							if (data.floor_updates[0].events[0].indexOf("do now adjourn") >= 0 || data.floor_updates[0].events[0].indexOf("will next convene") >= 0)
+								$('#currently_in_session .' + data.floor_updates[0].chamber + "-area").removeClass("active");
+						}
+					}
+					</script>
+					<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=senate"></script>
+					<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=house"></script>
+
+					<h3><span>recent</span> Activity</h3>
+					{% endcomment %}
+
+					{% for item in events %}
+					{% with item|render_event:subscription_feeds as event %}
+					<article class="post {{event.type}}">
+						<div class="event_header">
+							<h4 class="event_title">{{event.title|truncatewords:30}}</h4>
+							<div class="event_date"><span>Date: </span>{{event.date}}</div>
+							<div class="event_type">Type: <span>{{event.type}}</span></div>
+						</div>
+						<div class="event_body">
+							{% if event.type == "Vote" %}{{event.body_html|safe}}{% endif %}
+							<a href="{{event.url}}" class="more">More information...</a>
+						</div>
+					</article>
+					{% endwith %}
+					{% endfor %}
+
+				</section>
+			</div><!-- /in-congress -->
+
+			<div class="aside four columns end">
 				<article class="rss-block">
 					<h3><span>from the</span> GovTrack Blog <!--<a href="/blog"><img src="images/ico-rss.gif" width="9" height="9" alt="image description"></a>--></h3>
 					{% for item in blog %}
@@ -187,7 +204,7 @@
 					<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>			
 				</section>
 			</div>
-		</div>
+		<!-- </div> --><!-- /frame -->
 	</div>
 </div>
 {% endblock %}

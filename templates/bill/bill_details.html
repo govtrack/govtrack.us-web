@@ -32,156 +32,158 @@
 
 {% block crumbs %}
 <ul>
-<li><a href="{% url congress_home %}">Congress</a></li>
-<li><a href="/congress/bills">Bills</a></li>
-<li>{{bill.display_number}}</li>
+	<li><a href="{% url congress_home %}">Congress</a></li>
+	<li><a href="/congress/bills">Bills</a></li>
+	<li>{{bill.display_number}}</li>
 </ul>
 {% endblock %}
 
 {% block body_class %}bill{% endblock %}
 
 {% block summary %}
-
-{% cache 600 billhead bill.id %}
-<h1>{{bill.title|truncatewords:15}}</h1>
-	
-<div id="track_panel_base" class="container">
-	<div class="info">
-		{% if bill.title != bill.title|truncatewords:15 %}
-			{% with bill.title|truncatewords:15|cut:"..." as bt %}
-				<p style="line-height: 130%">...{{bill.title|cut:bt}}</p>
-			{% endwith %}
-		{% endif %}
-	
-		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
+<div class="row">
+	{% cache 600 billhead bill.id %}
+	<h1>{{bill.title|truncatewords:15}}</h1>
 		
-		{% if subtitle %}<p style="line-height: 135%">{{subtitle}}</p>{% endif %}
-		
-		<dl>
-			{% if not bill.is_alive %}
-			<dt>Introduced:</dt>
-			<dd>{{bill.introduced_date}}</dd>
+	<div id="track_panel_base" class="eight columns">
+		<div class="info">
+			{% if bill.title != bill.title|truncatewords:15 %}
+				{% with bill.title|truncatewords:15|cut:"..." as bt %}
+					<p style="line-height: 130%">...{{bill.title|cut:bt}}</p>
+				{% endwith %}
 			{% endif %}
 		
-			<dt>Sponsor:</dt>
-			<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
-		
-			<dt>Status:</dt>
-			<dd>
-			{% if not dead %}
-				{{bill.get_current_status_display}}
-			{% else %}
-				Died ({{bill.get_current_status_display}})
-			{% endif %}
-			</dd>
+			<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
 			
-			{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
-			<dt>Schedule:</dt>
-			<dd>The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</dd>
-			{% endif %}
+			{% if subtitle %}<p class="subtitle">{{subtitle}}</p>{% endif %}
 			
-			{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
-			<dt>Schedule:</dt>
-			<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
-			{% endif %}
+			<dl>
+				{% if not bill.is_alive %}
+				<dt>Introduced:</dt>
+				<dd>{{bill.introduced_date}}</dd>
+				{% endif %}
 			
-			{% if bill.get_upcoming_meetings|length %}
-			<dt>Schedule:</dt>
-			<dd>
-				<div>This {{bill.noun}} is scheduled for the following committee meetings:</div>
-				{% for m in bill.get_upcoming_meetings %}
-					<div>{{m.when}} &mdash; {{m.committee.fullname}}</div>
-				{% endfor %}
-			</dd>
-			{% endif %}
+				<dt>Sponsor:</dt>
+				<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
+			
+				<dt>Status:</dt>
+				<dd>
+				{% if not dead %}
+					{{bill.get_current_status_display}}
+				{% else %}
+					Died ({{bill.get_current_status_display}})
+				{% endif %}
+				</dd>
+				
+				{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
+				<dt>Schedule:</dt>
+				<dd>The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</dd>
+				{% endif %}
+				
+				{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
+				<dt>Schedule:</dt>
+				<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
+				{% endif %}
+				
+				{% if bill.get_upcoming_meetings|length %}
+				<dt>Schedule:</dt>
+				<dd>
+					<div>This {{bill.noun}} is scheduled for the following committee meetings:</div>
+					{% for m in bill.get_upcoming_meetings %}
+						<div>{{m.when}} &mdash; {{m.committee.fullname}}</div>
+					{% endfor %}
+				</dd>
+				{% endif %}
+			
+				{% with reintros.1 as reintro_as %}
+				{% if reintro_as %}
+				<dt>See Instead:</dt>
+				<dd>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
+				{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</dd>
+				{% endif %}
+				{% endwith %}
+			</dl>
 		
-			{% with reintros.1 as reintro_as %}
-			{% if reintro_as %}
-			<dt>See Instead:</dt>
-			<dd>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
-			{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</dd>
-			{% endif %}
-			{% endwith %}
-		</dl>
-	
-	</div><!-- /info -->
-	
-	<p style="margin: 0; line-height: 100%"><small>{{bill.noun|capfirst}} titles {% if subtitle %}and summaries{% endif %} are written by the sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
-</div>
-{% endcache %}
-
-{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
-{% include "events/subscribe_inline.html" %}
-
-<div class="aside">
-	{% if bill.is_alive %}
-	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
-	
-	{% comment %}
-	<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
-	{% endcomment %}
-
-	{% if market %}
-	{% if not user.is_authenticated %}
-	<div id="make_prediction">
-	<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
+		</div><!-- /info -->
+		
+		<p class="helptext" style="clear: both"><small>{{bill.noun|capfirst}} titles {% if subtitle %}and the summary above{% endif %} are written by the sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 	</div>
-	{% else %}
-	<div id="make_prediction">
-	<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>.</p>
-	<p class="youthink" {% if market.user_positions %}style="display: none"{% endif %}>What do you think?</p>
-	<p class="empty" {% if market.user_positions %}style="display: none"{% endif %}>
-		1) <a href="#" prediction="-1">Worse Than {{market.yes_price}}%</a>.<br/>
-		2) <a href="#" prediction="1">Better Than {{market.yes_price}}%</a>.
-	</p>
-	<p class="nonempty" {% if not market.user_positions %}style="display: none"{% endif %}>
-		You bet on <span>{% if market.user_positions.1.shares > 0 %}yes{% else %}no{% endif %}</span>.
-		{% if market.user_profit == 0 %}
-			<a href="#" prediction="0">Clear bet</a>.
-		{% endif %}
-		{% if market.user_profit > 0 %}
-			<a href="#" prediction="0">Cash out</a> for {{market.user_profit|floatformat:0}} points.
-		{% endif %}
-		{% if market.user_profit < 0 %}
-			<a href="#" prediction="0">Take your loss</a> of {{market.user_profit|floatformat:0}} points before it gets worse.
-		{% endif %}
-	</p>
-	</div>
-	<script>
-	$("#make_prediction a").click(function() {
-		var p = this.getAttribute("prediction");
-		$.ajax({
-			url: "/congress/bills/_ajax/market_test_vote",
-			type: "POST",
-			data: {
-				bill: {{bill.id}},
-				prediction: p
-			},
-			dataType: "json",
-			success: function(data) {
-				if (data.vote == 0) {
-					$("#make_prediction .empty").show();
-					$("#make_prediction .nonempty").hide();
-					$("#make_prediction .youthink").show();
-				} else {
-					$("#make_prediction .empty").hide();
-					$("#make_prediction .nonempty").show();
-					$("#make_prediction .nonempty span").text(data.vote == 1 ? "yes" : "no");
-					$("#make_prediction .youthink").hide();
+	{% endcache %}
+
+	
+
+	<div class="aside four columns">
+		{% if bill.is_alive %}
+		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
+		{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
+		{% include "events/subscribe_inline.html" %}
+		
+		{% comment %}
+		<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>
+		{% endcomment %}
+
+		{% if market %}
+		{% if not user.is_authenticated %}
+		<div id="make_prediction">
+		<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
+		</div>
+		{% else %}
+		<div id="make_prediction">
+		<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>.</p>
+		<p class="youthink" {% if market.user_positions %}style="display: none"{% endif %}>What do you think?</p>
+		<p class="empty" {% if market.user_positions %}style="display: none"{% endif %}>
+			1) <a href="#" prediction="-1">Worse Than {{market.yes_price}}%</a>.<br/>
+			2) <a href="#" prediction="1">Better Than {{market.yes_price}}%</a>.
+		</p>
+		<p class="nonempty" {% if not market.user_positions %}style="display: none"{% endif %}>
+			You bet on <span>{% if market.user_positions.1.shares > 0 %}yes{% else %}no{% endif %}</span>.
+			{% if market.user_profit == 0 %}
+				<a href="#" prediction="0">Clear bet</a>.
+			{% endif %}
+			{% if market.user_profit > 0 %}
+				<a href="#" prediction="0">Cash out</a> for {{market.user_profit|floatformat:0}} points.
+			{% endif %}
+			{% if market.user_profit < 0 %}
+				<a href="#" prediction="0">Take your loss</a> of {{market.user_profit|floatformat:0}} points before it gets worse.
+			{% endif %}
+		</p>
+		</div>
+		<script>
+		$("#make_prediction a").click(function() {
+			var p = this.getAttribute("prediction");
+			$.ajax({
+				url: "/congress/bills/_ajax/market_test_vote",
+				type: "POST",
+				data: {
+					bill: {{bill.id}},
+					prediction: p
+				},
+				dataType: "json",
+				success: function(data) {
+					if (data.vote == 0) {
+						$("#make_prediction .empty").show();
+						$("#make_prediction .nonempty").hide();
+						$("#make_prediction .youthink").show();
+					} else {
+						$("#make_prediction .empty").hide();
+						$("#make_prediction .nonempty").show();
+						$("#make_prediction .nonempty span").text(data.vote == 1 ? "yes" : "no");
+						$("#make_prediction .youthink").hide();
+					}
 				}
-			}
-		});	
-		return false;
-	});
-	</script>
-	{% endif %}
-	{% endif %}
-	
-	
-	{% endif %}	
-	
-	<div class="fb-like" data-send="false" data-layout="button_count" data-width="170" data-show-faces="false" style="margin-top: 10px"></div>
-</div><!-- /actions -->
+			});	
+			return false;
+		});
+		</script>
+		{% endif %}
+		{% endif %}
+		
+		
+		{% endif %}	
+		
+		<div class="fb-like" data-send="false" data-layout="button_count" data-width="170" data-show-faces="false" style="margin-top: 10px"></div>
+	</div><!-- /actions -->
+</div>
 {% endblock %}
 
 {% block body %}
@@ -190,7 +192,7 @@
 	
 	<h2>{{bill.noun|capfirst}} Overview</h2>
 		
-	<div class="overview">
+	<div class="overview six columns">
 		<div class="holder">
 			<div class="frame">
 				
@@ -274,7 +276,7 @@
 								{% if forloop.first %}
 									<p>This {{bill.noun}} has a <b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}. The following factors were considered:</p>
 								{% endif %}
-								<p style="margin: 0 0 .5em 1em">{{factor.description}} <small>({% if factor.success_change > 0 %}+{% endif %}{{factor.success_change|floatformat:0}}%)</small></p>
+								<p class="prognosis_item">{{factor.description}} <small>({% if factor.success_change > 0 %}+{% endif %}{{factor.success_change|floatformat:0}}%)</small></p>
 							{% endfor %}
 							<p>{% if 40 > p.overall_success_rate %}Just {% endif %}{{p.overall_success_rate|floatformat:0}}% of all {{bill.bill_type_name}}s {% if not p.is_introduced %}reported favorably by committee{% endif %} in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} <!--(the {{p.congress|ordinal}} Congress)--> were {{p.success_name}}.</p>
 						</dd>
@@ -374,7 +376,7 @@
 		</div><!-- /holder -->
 	</div><!-- /overview -->
 	
-	<div class="overview last">
+	<div class="overview six columns">
 		<div class="holder">
 			<div class="frame">
 				
@@ -404,7 +406,7 @@
 						<dt>Related Bills:</dt>
 						<dd>
 							{% if bill.relatedbills.exists %}
-							<div style="max-height: 15em; overflow: auto">
+							<div>
 							{% for rb in bill.get_related_bills %}
 								<div>{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
 							{% endfor %}
@@ -427,7 +429,7 @@
 						<dt>Subject Areas:</dt>
 						<dd>
 							<p>Use these subject areas to explore related legislation:</p>
-							<div style="max-height: 15em; overflow: auto">
+							<div>
 							{% for term in bill.get_terms_sorted %}
 								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
 							{% endfor %}
@@ -445,8 +447,8 @@
 	{% with bill.get_formatted_summary as summary %}
 	{% if summary %}
 	<section class="clear" style="padding-top: 2em">
-		<h3>Official Summary</h3>
-		<p>The following summary was written by the Congressional Research Service, a nonpartisan arm of the Library of Congress, which serves Congress. GovTrack did not write and has no control over these summaries.</p>
+		<h3 style="margin-bottom: 1em">Official Summary</h3>
+		<p style="font-style: italic">This summary was written by the Congressional Research Service, a nonpartisan arm of the Library of Congress. GovTrack did not write and has no control over these summaries.</p>
 		{{summary|safe}}
 	</section>
 	{% endif %}

@@ -12,34 +12,36 @@
 {% endblock %}
 
 {% block summary %}
-<div id="track_panel_base" class="container">
-	<h1>{{term.name}}</h1>
-	
-	<p>Use this page to browse bills in the U.S. Congress related to the subject {{term.name}}.</p>
-	{% with term.subterms.all as subs %}
-	{% if subs|length > 0 %}
-		<p style="margin: 0">Or drill down to:</p>
-		<ul class="bullets" style="height: 8em; overflow: auto;">
-		{% for sub in subs %}
-			<li style="line-height: normal;"><a href="{{sub.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{sub.name}}</a></li>
-		{% endfor %}
-		</ul>
-	{% endif %}
-	{% endwith %}
-	
-	{% with term.parents.all as parents %}
-	{% if parents|length > 0 %}
-		<p style="margin: 0">Go back up to
-		{% for parent in parents %}
-			<a href="{{parent.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{parent.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
-	{% endif %}
-	{% endwith %}
-</div>
-{% include "events/subscribe_inline.html" %}
+<div class="row">
+	<div id="track_panel_base" class="eight columns">
+		<h1>{{term.name}}</h1>
+		
+		<p>Use this page to browse bills in the U.S. Congress related to the subject {{term.name}}.</p>
+		{% with term.subterms.all as subs %}
+		{% if subs|length > 0 %}
+			<p style="margin: 0">Or drill down to:</p>
+			<ul class="bullets" style="height: 8em; overflow: auto;">
+			{% for sub in subs %}
+				<li style="line-height: normal;"><a href="{{sub.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{sub.name}}</a></li>
+			{% endfor %}
+			</ul>
+		{% endif %}
+		{% endwith %}
+		
+		{% with term.parents.all as parents %}
+		{% if parents|length > 0 %}
+			<p style="margin: 0">Go back up to
+			{% for parent in parents %}
+				<a href="{{parent.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{parent.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+		{% endif %}
+		{% endwith %}
+	</div>
 
-<div class="aside">
-	<a href="#" class="track-btn" onclick="return show_track_panel();">Track this Subject</a>
-</div><!-- /actions -->
+	<div class="aside four columns">
+		{% include "events/subscribe_inline.html" %}
+		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this Subject</a>
+	</div><!-- /actions -->
+</div>
 {% endblock %}
 
 {% block body %}

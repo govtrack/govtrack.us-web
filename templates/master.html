@@ -1,6 +1,9 @@
 {% with "/static/" as MEDIA_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
 <!DOCTYPE html>
-<html>
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>    <html class="lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>    <html class="lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html> <!--<![endif]-->
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
@@ -11,8 +14,9 @@
 
 		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all.css">
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen"/><![endif]-->
-		<meta name="viewport" content="width=1000">
-		
+		<!--<meta name="viewport" content="width=1000">-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
 		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}"></meta>
 		{% if HTTP_HOST == "test.govtrack.us" %}<meta name="robots" content="noindex" />{% endif %} {% comment %}moot because site is currently behind authz {% endcomment %}
@@ -132,73 +136,101 @@
 	<div id="wrapper">
 		
 		<div id="masthead">
-			<header id="header">
-				<a id="logo" href="/" class="{% block logo_class %}{% endblock %}">govtrack.us</a>
-				
-				<div id="nav-block">
-					<div class="row">
-						<div class="block">
-							<ul class="super-nav">
-								{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
-								{% block override_login %}
-								{% if not user.is_authenticated %}
-									<li><a href="/accounts/login">Log In</a></li>
-								{% else %}
-									<li><a href="/accounts/profile">{{user.email}}</a></li>
-									<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
-								{% endif %}
-								{% endblock %}
-							</ul>
-							<form name="header_search" action="/search" method="GET" class="search-form">
-								<fieldset>
-									<div class="text"><input type="text" defaulttext="Search" name="q"/></div>
-									<input class="btn-search" type="submit" value="Search" />
-								</fieldset>
-							</form>
-						</div>
-					</div>
+			<div id="header-wrap">
+				<header id="header" class="row">
 					
-					<nav id="nav">
-						<ul>
-							<li><a href="/">Home</a></li>
-							<li class="dropnav">
-								<a href="/overview">Browse</a>
-								<ul>
-									<li><a href="/congress/members">Members <em>of</em> Congress</a></li>
-									<li><a href="/congress/bills">Bills <em>&amp;</em> Resolutions</a></li>
-									<li><a href="/congress/votes">Voting Records</a></li>
-									<li><a href="/congress/committees">Congressional Committees</a></li>
-									<li><a href="/congress/live">Live Video (Beta)</a></li>
-									<li><a href="/overview#states">State Legislation (Beta)</a></li>
-								</ul>
-							</li>
-							<li>
-								<a href="#" onclick="return false;">Track</a>
-								<ul>
-									{% if user.is_authenticated %}
-									<li><a href="/accounts/lists">Your Lists</a></li>
+					<a id="logo" href="/" class="{% block logo_class %}{% endblock %}">govtrack.us</a>
+					
+					<div id="nav-block">
+						<div class="row">
+							<div class="block right">
+								<ul class="super-nav">
+									{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
+									{% block override_login %}
+									{% if not user.is_authenticated %}
+										<li><a href="/accounts/login">Log In</a></li>
+									{% else %}
+										<li><a href="/accounts/profile">{{user.email}}</a></li>
+										<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
 									{% endif %}
-									<li><a href="/accounts/docket">Your Docket</a></li>
-									<li><a href="/tools">Other Tools</a></li>
+									{% endblock %}
 								</ul>
-							</li>
-							<li><a href="/about">About</a></li>
-							<li><a href="/developers">Use our data</a></li>
-						</ul>
-					</nav>
-					
-				</div><!-- /nav-block -->
-			</header>
+								<form name="header_search" action="/search" method="GET" class="search-form">
+									<fieldset>
+										<div class="text"><input type="text" defaulttext="Search" name="q"/></div>
+										<input class="btn-search" type="submit" value="Search" />
+									</fieldset>
+								</form>
+							</div>
+						</div>
+						
+						<nav id="nav">
+							<ul>
+								<li><a href="/">Home</a></li>
+								<li class="dropnav">
+									<a href="/overview">Browse</a>
+									<ul>
+										<li><a href="/congress/members">Members <em>of</em> Congress</a></li>
+										<li><a href="/congress/bills">Bills <em>&amp;</em> Resolutions</a></li>
+										<li><a href="/congress/votes">Voting Records</a></li>
+										<li><a href="/congress/committees">Committees</a></li>
+										<li><a href="/congress/live">Live Video (Beta)</a></li>
+										<li><a href="/overview#states">State Legislation (Beta)</a></li>
+									</ul>
+								</li>
+								<li class="dropnav">
+									<a href="#" onclick="return false;">Track</a>
+									<ul>
+										{% if user.is_authenticated %}
+										<li><a href="/accounts/lists">Your Lists</a></li>
+										{% endif %}
+										<li><a href="/accounts/docket">Your Docket</a></li>
+										<li><a href="/tools">Other Tools</a></li>
+									</ul>
+								</li>
+								<li><a href="/about">About</a></li>
+								<li><a href="/developers">Use our data</a></li>
+							</ul>
+						</nav>
+
+						<nav id="mobile-nav">
+							<select onclick="window.location = $(this).val();">
+								<option value="/">Home</option>
+								<<optgroup label="Browse">
+									<option value="/congress/members">Members <em>of</em> Congress</option>
+									<option value="/congress/bills">Bills <em>&amp;</em> Resolutions</option>
+									<option value="/congress/votes">Voting Records</option>
+									<option value="/congress/committees">Committees</option>
+									<option value="/congress/live">Live Video (Beta)</option>
+									<option value="/overview#states">State Legislation (Beta)</option>
+								</optgroup>
+								<optgroup label="Track">
+									{% if user.is_authenticated %}
+									<option value="/accounts/lists">Your Lists</option>
+									<option value="/accounts/docket">Your Docket</option>
+									{% endif %}
+									<option><a href="/tools">Other Tools</a></option>
+								</optgroup>
+								<option value="/about">About</option>
+								<option value="/developers">Use our data</option>
+							</select>
+						</nav><!-- /mobile-nav -->
+						
+					</div><!-- /nav-block -->
+				</header>
+			</div><!-- /header-wrap -->
 			
 			{% block override_breadcrumbs %}
-			<div class="breadcrumbs">
-				{% block crumbs %}{% endblock %}
-				{% comment %}
-				<ul>
-					<li><a href="#">Congress</a></li>
-					<li>Bills & Resolutions</li>
-				</ul>
-				{% endcomment %}
+			<div id="breadcrumbs">
+				<div class="row">
+					{% block crumbs %}{% endblock %}
+					{% comment %}
+					<ul class="twelve columns">
+						<li><a href="#">Congress</a></li>
+						<li>Bills & Resolutions</li>
+					</ul>
+					{% endcomment %}
+				</div>
 			</div>
 			{% endblock %}
 			
@@ -207,18 +239,30 @@
 		
 		
 		{% block override_content %}
-		<div id="content">
+		<div id="content" class="row">
 			{% block heading_box %}
+			{% comment %}
 			<header class="heading-box">
 				<div class="holder">
 					<div class="frame">
-						<div class="article-wrapper">
-							<div class="article">
+						<div class="frame2">
+							<div class="article-wrapper row">
 								{% block summary %}
 								{% endblock %}
 							</div>
 						</div>
 					</div>
+				</div>
+			</header>
+			{% endcomment %}
+			<header class="heading-box row">
+				<div class="nine columns">
+					{% block summary %}
+					{% endblock %}
+				</div>
+				<div id="cat-icon" class="three columns">
+					{% block links %}
+					{% endblock %}
 				</div>
 			</header>
 			{% endblock %}
@@ -234,9 +278,9 @@
 		
 		
 		<footer id="footer">
-			<div class="holder">
+			<div class="holder row">
 				
-				<nav>
+				<nav class="two columns">
 					<ul>
 						<li><a href="/">Home</a></li>
 						<li><a href="/congress">Browse</a></li>
@@ -254,21 +298,21 @@
 					</ul>
 				</nav>
 				
-				<section class="social">
+				<section class="six columns offset-by-one">
+					<h4><span>site</span> Information</h4>
+					<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. Read <a href="/about">about GovTrack</a>.</p>
+					<p>Feedback is welcome to <a href="mailto:&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>, but we can&rsquo;t pass on messages to Members of Congress.</p>
+					<p>You are encouraged to reuse any material on this site. GovTrack supports other Congress-tracking websites through our <a href="/developers">open data</a>.</p>
+					{% block footer_extra %}{% endblock %}
+				</section>
+				
+				<section class="two columns social">
 					<h4><span>follow</span> GovTrack</h4>
 					<ul>
 						<li><a href="http://www.facebook.com/pages/Civic-Impulse/312186525430"><img src="{{MEDIA_URL}}images/ico-fb.png" width="16" height="16" alt="image description"><span>Facebook</span></a></li>
 						<li><a href="http://twitter.com/#!/govtrack"><img src="{{MEDIA_URL}}images/ico-tweet.png" width="16" height="16" alt="image description"><span>Twitter</span></a></li>
 						<li><a href="/blog"><span>GovTrack Blog</span></a></li>
 					</ul>
-				</section>
-				
-				<section>
-					<h4><span>site</span> Information</h4>
-					<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. Read <a href="/about">about GovTrack</a>.</p>
-					<p>Feedback is welcome to <a href="mailto:&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>, but we can&rsquo;t pass on messages to Members of Congress.</p>
-					<p>You are encouraged to reuse any material on this site. GovTrack supports other Congress-tracking websites through our <a href="/developers">open data</a>.</p>
-					{% block footer_extra %}{% endblock %}
 				</section>
 				
 			</div>
@@ -285,7 +329,7 @@
 	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=119329904748946";
 	  fjs.parentNode.insertBefore(js, fjs);
 	}(document, 'script', 'facebook-jssdk'));</script>
-
+	
 	{% if not debug %}
 	<!-- Google Analytics -->
 	<script type="text/javascript">

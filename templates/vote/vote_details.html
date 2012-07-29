@@ -5,33 +5,6 @@
 {% block title %}{{ vote.question }} -- GovTrack.us{% endblock %}
 {% block meta_description %}{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}, in the United States Congress.{% endblock %}
 
-{% block head %}
-<style>
-.stats th { cursor: pointer; }
-.stats tbody tr.group td { font-size: 105%; font-weight: bold; text-transform: none; background-color: #FAFAFA; }
-.party_D, .party_I, .party_R {
-    cursor: default;
-    color: white;
-}
-.color_D { background-color: #0041a1; }
-.color_R { background-color: #e60e13; }
-.color_I { background-color: #921b85; }
-.party_D { background-color: #0041a1; }
-.party_R { background-color: #e60e13; }
-.party_I { border: 1px solid black; color: black; }
-
-/* historical parties... the other letters of the alphabet */
-.color_A, .color_B, .color_C, .color_E, .color_F, .color_G, .color_H, .color_J, .color_K, .color_L, .color_M, .color_N, .color_O, .color_P, .color_Q, .color_S, .color_T, .color_U, .color_V, .color_W, .color_X, .color_Y, .color_Z { background-color: #EEE; }
-
-.vote_positive { background-color: #EFE; }
-.vote_negative { background-color: #FEE; }
-
-#dotchart { position: relative; font-size: 11px; margin-bottom: 10px; }
-#dotchart .dot { position: absolute; width: 6px; height: 6px; }
-#dotchart .party_I { width: 4px; height: 4px; }
-
-</style>
-{% endblock %}
 
 {% block extra_js %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
@@ -143,9 +116,9 @@ $(function() {
 
 {% block crumbs %}
 <ul>
-<li><a href="{% url congress_home %}">Congress</a></li>
-<li><a href="/congress/votes">Votes</a></li>
-<li>{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}</li>
+    <li><a href="{% url congress_home %}">Congress</a></li>
+    <li><a href="/congress/votes">Votes</a></li>
+    <li>{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}</li>
 </ul>
 {% endblock %}
 
@@ -191,7 +164,7 @@ $(function() {
 {% block body %}
 
 {% with vote.totals as totals %}
-<div voters_by_district"member-stats" class="section">
+<div voters_by_district"member-stats" class="section row">
     <table class="stats">
         <thead>
             <tr>
@@ -265,7 +238,7 @@ $(function() {
 </div>
 
 {% comment %}
-<div id="vote-infographics" class="section">
+<div id="vote-infographics" class="section row">
     <div class="heading">
         <h2>Vote Visualizations</h2>
         {% if vote.chamber == 1 %}
@@ -300,7 +273,7 @@ $(function() {
     {% vote_totals_pie vote %}
 </div>
 -->
-<div id="vote-details" class="section">
+<div id="vote-details" class="section row">
 <h2>Vote Details</h2>
 
 <div class="details-box">

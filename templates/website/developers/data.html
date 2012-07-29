@@ -4,14 +4,15 @@
 <ul><li><a href="/developers">Developer Documentation</a></li> <li>Bulk Raw Data</li></ul>
 {% endblock %}
 {% block summary %}
-	{% include "website/developers/menu.html" %}
 	<h1>Bulk Raw Data Documentation</h1>
-	
-	<p style="margin-top: 1em">GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
-	
+	<p>GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
 {% endblock %}
+{% block links %}
+{% include "website/developers/menu.html" %}
+{% endblock %}
+
 {% block body %}
-<section class="main">
+<section class="main twelve columns">
 	{% include "website/developers/gettingstarted.html" %}
 
 	<h2>Getting the Data</h2>

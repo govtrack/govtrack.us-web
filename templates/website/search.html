@@ -3,41 +3,47 @@
 {% block style %}
 {% endblock %}
 {% block crumbs %}
-	<h1>Search Congress</h1>
+	<h1>Search Results</h1>
 {% endblock %}
 {% block override_content %}
-<div id="content">
+<div id="content row">
 
-<div class="advanced-search">
-	<form method="get" style="width: auto; border: none; padding: 0;">
-	<fieldset>
-			<label for="search_entry">Search all of GovTrack for...</label>
-			<input id="search_entry" name="q" type="text" class="text" value="{{request.GET.q}}" style="width: 300px"/>
-			<input class="btn-search-small" type="submit" value="Search"/>
-    </fieldset>
-	</form>
-	<p style="margin-top: 1.5em">You can search for bills and resolutions, Members of Congress, Congressional committees, and state legislation.</p>
-	
-	<div style="margin: 1.5em 0 2em 0">
-	{% if request.GET.q %}
-		{% for category, browseurl, more_at, no_match_noun, matches in results %}
-			<div style="float: left; margin: 10px 60px 30px 0; width: 390px;">
-			<h2>{{category}}</h2>
-			{% if not matches %}
-				<p>We couldn&rsquo;t find any {{no_match_noun}} that matched your search. <a href="{{browseurl}}">Browse</a> for more.</p>
-			{% else %}
-				{% for ret in matches %}
-					<div style="margin-bottom: .5em"><a href="{{ret.href}}">{{ret.label}}</a></div>
-				{% endfor %}
-				{% if more_at %}
-					<p style="border-top: 1px solid #FDA"><a href="{{browseurl}}?{{more_at}}={{request.GET.q|urlencode}}">more...</a></p>
+	<div class="advanced-search site-search-results row">
+		<form method="get" id="search-again" class="row group">
+			<h3>Search Congress again</h3>
+			<p class="intro six columns">You can search for bills and resolutions, Members of Congress, Congressional committees, and state legislation.</p>
+			<fieldset class="six columns">
+				<label for="search_entry">Search all of GovTrack for...</label>
+				<input id="search_entry" name="q" type="text" class="text" value="{{request.GET.q}}" />
+				<input id="submit" class="btn-search-small" type="submit" value="Search"/>
+	    	</fieldset>
+		</form>
+		
+
+		
+		<div id="search-results">
+		{% if request.GET.q %}
+			{% for category, browseurl, more_at, no_match_noun, matches in results %}
+				<div class="the-results group">
+					<h3>{{category}}</h3>
+				{% if not matches %}
+					<p class="no_results">We couldn&rsquo;t find any {{no_match_noun}} that matched your search. <a href="{{browseurl}}">Browse</a> for more.</p>
+				{% else %}
+					<ul>
+					{% for ret in matches %}
+						<li><a href="{{ret.href}}">{{ret.label}}</a></li>
+					{% endfor %}
+					</ul>
+					{% if more_at %}
+					<a class="more" href="{{browseurl}}?{{more_at}}={{request.GET.q|urlencode}}">See More &raquo;</a>
+					{% endif %}
 				{% endif %}
-			{% endif %}
-			</div>
-		{% endfor %}
-	{% endif %}
-	</div>
-</div>
+				</div>
+			{% endfor %}
+		{% endif %}
+		</div><!-- /the-results -->
+	</div><!-- /site-search-results -->
+
 </div>
 {% endblock %}
 
