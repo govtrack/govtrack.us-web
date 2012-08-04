@@ -194,7 +194,8 @@
 						</nav>
 
 						<nav id="mobile-nav">
-							<select onclick="window.location = $(this).val();">
+							<select onchange="window.location = $(this).val();">
+								<option value="">Go to...</option>
 								<option value="/">Home</option>
 								<<optgroup label="Browse">
 									<option value="/congress/members">Members <em>of</em> Congress</option>
