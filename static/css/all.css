@@ -1575,33 +1575,6 @@ a.button.prefix, a.button.postfix {
           color: #fff;
           font-family: 'PTSerifItalic', serif;
         }
-.green-btn, .grey-btn {
-    display: block;
-    height: 41px;
-    width: 268px;
-    font-size: 20px;
-    line-height: 38px;
-    text-align: center;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #fff;
-    overflow: hidden;
-    margin: 0 0 8px;
-    text-decoration: none !important;
-    text-shadow: 0 1px 1px #066982;
-	}
-	.green-btn {
-		background: url(../images/btn-sprite.png) no-repeat;
-		}
-	.grey-btn {
-		background: url(../images/btn-sprite-grey.png) no-repeat;
-		}
-.green-btn:hover {
-    text-decoration: none;
-    background-position: 0 -43px;
-    border-bottom: 0;
-	}
-.green-btn:active { background-position: 0 -83px 	}
 
 	
 #info-box {
@@ -2119,7 +2092,7 @@ a.button.prefix, a.button.postfix {
   border-bottom: 0;
 }
     .summary-box .photo img { vertical-align: top 	}
-  .summary-box .track-btn {
+  .summary-box .track-btn, .summary-box .yellow-btn {
     margin: 0 auto;
   }
 .summary-box .aside .article {
@@ -2953,9 +2926,7 @@ aside .download-links { padding: 31px 0 0 	}
 
 /*  Tracker widget styles 
     =========================================================== */
-    .track-btn {
-        position: relative;
-        background: url(../images/btn-sprte-1.png) no-repeat;
+    .track-btn, .green-btn, .grey-btn, .yellow-btn {
         height: 39px;
         width: 170px;
         font-family: OpenSansRegular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -2968,13 +2939,16 @@ aside .download-links { padding: 31px 0 0 	}
         text-shadow: 0 1px 1px #3d6410;
         margin: 0 0 15px;
         }
-        .track-btn:hover {
+        .track-btn, .green-btn { background: url(../images/btn-sprite-green.png) no-repeat; }
+        .grey-btn { background: url(../images/btn-sprite-grey.png) no-repeat; }
+        .yellow-btn { background: url(../images/btn-sprite-yellow.png) no-repeat; }
+        .track-btn:hover, .green-btn:hover, .grey-btn:hover, .yellow-btn:hover {
             color: #fff;
             text-decoration: none;
             background-position: 0 -43px;
             border-bottom: 0;
             }
-        .track-btn:active { 
+        .track-btn:active, .green-btn:active, .grey-btn:active, .yellow-btn:active { 
             background-position: 0 -86px;
         }
     .tracker_widget {

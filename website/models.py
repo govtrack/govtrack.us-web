@@ -43,3 +43,11 @@ class Req(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     request = models.TextField()
 
+from bill.models import Bill
+class CommunityInterest(models.Model):
+    user = models.ForeignKey(User)
+    bill = models.ForeignKey(Bill)
+    methods = models.CharField(max_length=32)
+    class Meta:
+        unique_together = ( ('user', 'bill'), )
+

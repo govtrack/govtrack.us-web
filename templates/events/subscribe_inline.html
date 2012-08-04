@@ -96,31 +96,9 @@ $(function() {
 	
 		<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have a Google, Facebook, or Twitter account, start tracking this {{feed.type_metadata.noun}} by clicking the appropriate icon to register or log in:</p>
 		
-		<div class="signin_social">
-			{% with request.get_full_path|add:"#track" as singlesignon_next %}
-			{% include "registration/login_singlesignon.html" %}
-			{% endwith %}
-		</div>
-
-		<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">Or register a new account:</p>
-		
-		<a href="/registration/signup?next={{request.path|add:"#track"|urlencode}}" class="btn done">Sign Up</a>
-
-		<h3 style="margin-top: 1.5em">Returning User Login</h3>
-
-		<div>
-			<form method="post" class="login" action="/accounts/login">
-			{% csrf_token %}
-			<input type="hidden" name="next" value="{{request.path}}#track" />
-			<input id="id_email" type="text" name="email" maxlength="60" placeholder="email address"/><br /> 
-			<input type="password" name="password" id="id_password"  placeholder="govtrack password" /> 
-			<p style="margin-top: 5px"><input class="submit" type="submit" value="Login" /></p>
-			</form>
-		</div>
-
-		<p style="clear: both; margin-top: 15px; font-size: 90%;">
-			<a class="forgot" href="{% url registration.views.resetpassword %}">Forgot password?</a>
-		</p>
+		{% with "#track" as return_hash %}
+		{% include "events/track_button_login.html" %}
+		{% endwith %}
 
 		{% comment %}<p>You can also track this {{feed.type_metadata.noun}} using the <a href="{{feed.rss_url}}">RSS feed</a> without having to sign up.</p>{% endcomment %}
 	{% else %}

@@ -118,9 +118,9 @@ def bill_text(request, congress, type_slug, number, version=None):
     for rb in list(bill.find_reintroductions()) + [r.related_bill for r in bill.get_related_bills()]:
         if not (rb, "") in related_bills: related_bills.append((rb, ""))
     for btc in BillTextComparison.objects.filter(bill1=bill):
-	    if not (btc.bill2, btc.ver2) in related_bills: related_bills.append((btc.bill2, btc.ver2))
+        if not (btc.bill2, btc.ver2) in related_bills: related_bills.append((btc.bill2, btc.ver2))
     for btc in BillTextComparison.objects.filter(bill2=bill):
-	    if not (btc.bill1, btc.ver1) in related_bills: related_bills.append((btc.bill1, btc.ver1))
+        if not (btc.bill1, btc.ver1) in related_bills: related_bills.append((btc.bill1, btc.ver1))
 
     return {
         'bill': bill,
@@ -401,4 +401,18 @@ class sitemap_archive(django.contrib.sitemaps.Sitemap):
     priority = 0.25
     def items(self):
         return Bill.objects.filter(congress__lt=CURRENT_CONGRESS-1)
+
+@json_response
+@login_required
+def join_community(request):
+    from website.models import CommunityInterest
+    from bill.models import Bill
+    methods = request.POST["methods"].strip()
+    if methods == "":
+        CommunityInterest.objects.filter(user=request.user, bill=request.POST["bill"]).delete()
+    else:
+        c, isnew = CommunityInterest.objects.get_or_create(user=request.user, bill=Bill.objects.get(id=request.POST["bill"]))
+        c.methods = methods
+        c.save()
+    return { "status": "OK" }
 

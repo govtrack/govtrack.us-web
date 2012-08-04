@@ -27,6 +27,13 @@
 .minor_vote {
 	display: none;
 }
+#talk_methods li.halfsize a {
+	width: 130px;
+	float: left;
+}
+#talk_methods li.halfsize.left a {
+	margin-right: 8px;
+}
 </style>
 {% endblock %}
 
@@ -117,6 +124,85 @@
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
 		{% include "events/subscribe_inline.html" %}
+		
+		{% if not 'googlebot(at)googlebot.com' in request.META.HTTP_FROM %}
+		<div style="margin: 1em 0 2em 0">
+			<a href="#" class="yellow-btn" onclick="return show_talk_panel();">Talk About It</a>
+				{% comment %}Google likes to follow the social registration links which generates an error at Twitter that gets sent in an email to the site maintainer.{% endcomment %}
+			<script>
+			function show_talk_panel() {
+				if (!$('#talk_panel').is(":visible")) {
+					var btn = $('.yellow-btn');
+					$('#talk_panel').css({
+						left: btn.position().left + btn.offsetParent().width()/2 - $('#track_panel').width()/2,
+						top: btn.position().top + btn.height()
+					});
+					$('#talk_panel').slideDown();
+				} else {
+					$('#talk_panel').slideUp();
+				}
+				return false;
+			}
+			{% if request.user.is_authenticated %}
+			function do_talk() {
+				show_talk_panel();
+				var methods = Array();
+				$('#talk_methods li.selected').each(function() { methods.push(this.getAttribute("method")); });
+				$.ajax({
+					url: "/congress/bills/_ajax/join_community",
+					type: "POST",
+					data: {
+						methods: methods.join(","),
+						bill: {{bill.id}},
+					},
+					dataType: "json",
+					success: function(data) {
+						// nothing to do
+					}
+				});
+				return false; // cancel click
+			}
+			{% endif %}
+			$(function() {
+				if (window.location.hash == "#talk") {
+					show_talk_panel();
+					window.location.hash = "";
+				}
+			});
+			</script>
+			<div id="talk_panel" style="display: none;" class="tracker_widget">
+				<div class="widget_content">
+				{% if not request.user.is_authenticated %}
+					<h3>Sign Up for GovTrack Communities</h3>
+				
+					<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have a Google, Facebook, or Twitter account, start tracking this {{feed.type_metadata.noun}} by clicking the appropriate icon to register or log in:</p>
+					
+					{% with "#talk" as return_hash %}
+					{% include "events/track_button_login.html" %}
+					{% endwith %}
+			
+					{% comment %}<p>You can also track this {{feed.type_metadata.noun}} using the <a href="{{feed.rss_url}}">RSS feed</a> without having to sign up.</p>{% endcomment %}
+				{% else %}
+					<p>If enough people express interest, we will set up a way for you to discuss this {{bill.noun}}.</p>
+					
+					<div class="list_select" style="border: none;">
+						<h3>What would you join?</h3>
+						<ul id="talk_methods">
+							<li class="halfsize left" method="maillist"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Mail List</span></a></li>
+							<li class="halfsize" method="forum"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Forum</span></a></li>
+							<li class="halfsize left" method="chat"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Chat</span></a></li>
+							<li class="halfsize" method="webinar"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Webinar</span></a></li>
+							<li method="expert"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">I&rsquo;m An Expert</span></a></li>
+							<div style="clear: both"> </div>
+						</ul>
+					</div>				
+					<a href="#" class="btn done" onclick="return do_talk();">Submit</a>
+				{% endif %}
+				</div><!-- /widget_content -->
+				<div class="widget_footer"></div>
+			</div>
+		</div>
+		{% endif %}
 		
 		{% comment %}
 		<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}"> </script>

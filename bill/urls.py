@@ -9,4 +9,5 @@ urlpatterns = patterns('bill.views',
     url(r'^$', 'bill_docket', name='bill_docket'),
     url(r'^_ajax/market_test_vote', 'market_test_vote'),
     url(r'^_ajax/load_text', 'bill_text_ajax'),
+    url(r'^_ajax/join_community', 'join_community'),
 )
