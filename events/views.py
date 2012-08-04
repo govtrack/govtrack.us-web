@@ -32,7 +32,9 @@ def get_feed_list(request):
                 try:
                     feedlist2.append(Feed.from_name(f))
                 except Feed.DoesNotExist:
-                    pass
+                    f = Feed(feedname=f)
+                    if not f.isvalid: raise Http404("Invalid feed name.")
+                    feedlist2.append(f)
             feedlist = feedlist2
             feedtitle = ", ".join(f.title for f in feedlist) + " - Tracked Events from GovTrack.us"
         return feedlist, feedtitle
@@ -207,7 +209,7 @@ def events_rss(request):
     
     class DjangoFeed(django.contrib.syndication.views.Feed):
         title = feedtitle
-        link = "/"
+        link = "/" if len(feedlist) != 1 else feedlist[0].link
         description = "GovTrack tracks the activities of the United States Congress."
         
         def items(self):
@@ -217,7 +219,7 @@ def events_rss(request):
         def item_title(self, item):
             return item["title"]
         def item_description(self, item):
-            return item["body_text"]
+            return item["type"] + ": " + item["body_text"]
         def item_link(self, item):
             return "http://www.govtrack.us" + item["url"] + "?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss"
         def item_guid(self, item):

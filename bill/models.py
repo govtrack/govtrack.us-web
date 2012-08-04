@@ -111,7 +111,7 @@ class Bill(models.Model):
     # indexing
     def get_index_text(self):
         return "\n".join([self.title] + [t[2] for t in self.titles]) \
-        	+ "\n\n" + load_bill_text(self, None, plain_text=True)
+            + "\n\n" + load_bill_text(self, None, plain_text=True)
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date')
     haystack_index_extra = (('proscore', 'Float'),)
     def get_terms_index_list(self):
@@ -140,11 +140,11 @@ class Bill(models.Model):
         
     @property
     def display_number(self):
-    	"""The bill's number, suitable for display, e.g. H.R. 1234. If the bill is for a past session of Congress, includes the Congress number."""
+        """The bill's number, suitable for display, e.g. H.R. 1234. If the bill is for a past session of Congress, includes the Congress number."""
         return get_bill_number(self)
     @property
     def display_number_no_congress_number(self):
-    	"""The bill's number, suitable for display, e.g. H.R. 1234."""
+        """The bill's number, suitable for display, e.g. H.R. 1234."""
         return get_bill_number(self, show_congress_number="NONE")
     @property
     def display_number_with_congress_number(self):
@@ -152,7 +152,7 @@ class Bill(models.Model):
 
     @property
     def title_no_number(self):
-    	"""The title of the bill without the number."""
+        """The title of the bill without the number."""
         return get_primary_bill_title(self, self.titles, with_number=False)
         
     @property
@@ -163,7 +163,7 @@ class Bill(models.Model):
         return BillType.by_value(self.bill_type).full_name
     @property
     def noun(self):
-    	"""The appropriate noun to use to refer to this instance, either 'bill' or 'resolution'."""
+        """The appropriate noun to use to refer to this instance, either 'bill' or 'resolution'."""
         return "bill" if self.bill_type in (BillType.house_bill, BillType.senate_bill) else "resolution"
     @property
     def originating_chamber(self):
@@ -181,16 +181,16 @@ class Bill(models.Model):
 
     @property
     def current_status_description(self):
-    	"""Descriptive text for the bill's current status."""
+        """Descriptive text for the bill's current status."""
         return self.get_status_text(self.current_status, self.current_status_date)
 
     @property
     def is_current(self):
-    	"""Whether the bill was introduced in the current session of Congress."""
+        """Whether the bill was introduced in the current session of Congress."""
         return self.congress == settings.CURRENT_CONGRESS
     @property
     def is_alive(self):
-    	"""Whether the bill was introduced in the current session of Congress and the bill's status is not a final status (i.e. can take no more action like a failed vote)."""
+        """Whether the bill was introduced in the current session of Congress and the bill's status is not a final status (i.e. can take no more action like a failed vote)."""
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
         
     def get_approved_links(self):
@@ -293,12 +293,12 @@ class Bill(models.Model):
         return status % (self.noun, date)
 
     def thomas_link(self):
-    	"""Returns the URL for the bill page on http://thomas.loc.gov."""
+        """Returns the URL for the bill page on http://thomas.loc.gov."""
         return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%d:%s%d:" \
             % (self.congress, self.bill_type_slug, self.number)
 
     def popvox_link(self):
-    	"""Returns the URL for the bill page on POPVOX."""
+        """Returns the URL for the bill page on POPVOX."""
         return "https://www.popvox.com/bills/us/%d/%s%d" \
             % (self.congress, self.bill_type_slug, self.number)
             
@@ -759,4 +759,23 @@ class BillTextComparison(models.Model):
     data = JSONField()
     class Meta:
         unique_together = ( ('bill1', 'ver1', 'bill2', 'ver2'), )
+
+# Bill search tracker.
+from events.models import Feed
+def bill_search_feed_title(q):
+    from search import bill_search_manager
+    return "Bill Search - " + bill_search_manager().describe_qs(q)
+def bill_search_feed_execute(q):
+    from search import bill_search_manager
+    from settings import CURRENT_CONGRESS
+    bills = bill_search_manager().execute_qs(q, overrides={'congress': CURRENT_CONGRESS})
+    def make_feed_name(bill):
+        return "bill:" + BillType.by_value(bill.bill_type).xml_code + str(bill.congress) + "-" + str(bill.number)
+    return Feed.objects.filter(feedname__in=[make_feed_name(bill) for bill in bills]) # batch load
+Feed.register_feed(
+    "billsearch:",
+    title = lambda feed : bill_search_feed_title(feed.feedname.split(":", 1)[1]),
+    link = lambda feed : "/congress/bills/browse?" + feed.feedname.split(":", 1)[1],
+    includes = lambda feed : bill_search_feed_execute(feed.feedname.split(":", 1)[1]),
+    )
 

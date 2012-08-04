@@ -109,7 +109,7 @@ class SearchManager(object):
             return render_to_response(template, c, RequestContext(request))
         
         try:
-            qs = self.queryset(request)
+            qs = self.queryset(request.POST)
             
             # In order to generate the facets, we will call generate_choices on each
             # visible search field. When generating facets with the Django ORM, a
@@ -210,11 +210,11 @@ class SearchManager(object):
                 "stack": traceback.format_exc().split("\n"),
                 }), content_type='text/json')
             
-    def queryset(self, request, exclude=None):
+    def queryset(self, postdata, exclude=None):
         """
         Build the `self.model` queryset limited to selected filters.
         """
-
+        
         if not self.qs:
             #qs = self.model.objects.all().select_related()
             from haystack.query import SearchQuerySet
@@ -233,12 +233,12 @@ class SearchManager(object):
             if option == exclude: continue
             
             # If filter contains valid data, check jQuery style encoding of array params
-            if option.field_name not in request.POST and option.field_name+"[]" not in request.POST: continue
+            if option.field_name not in postdata and option.field_name+"[]" not in postdata: continue
             
             # Do filtering
 
             if option.filter is not None:
-                qs_ = option.filter(qs, request.POST)
+                qs_ = option.filter(qs, postdata)
                 
                 if isinstance(qs_, dict):
                     filters.update(qs_)
@@ -254,7 +254,7 @@ class SearchManager(object):
                             yield False
                         else:                        
                             yield y
-                values = list(clean_values(request.POST.getlist(option.field_name)+request.POST.getlist(option.field_name+"[]")))
+                values = list(clean_values(postdata.getlist(option.field_name)+postdata.getlist(option.field_name+"[]")))
                 # if __ALL__ value presents in filter values
                 # then do not limit queryset
                 if not u'__ALL__' in values:
@@ -267,7 +267,7 @@ class SearchManager(object):
             qs = qs.filter(**filters)
             
         for name, key, default in self.sort_options:
-            if request.POST.get("sort", "") == key:
+            if postdata.get("sort", "") == key:
                 qs = qs.order_by(key)
         
         # Django ORM but not Haystack
@@ -307,6 +307,27 @@ class SearchManager(object):
             "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in request.POST or o.field_name + "[]" in request.POST) and (o != omit) ),
             )        
                         
+    def get_model_field(self, option):
+        include_counts = True
+        choice_label_map = None
+        try:
+            meta = self.model._meta
+            if "__" not in option.field_name:
+                fieldname = option.field_name
+            else:
+                include_counts = False # one-to-many relationships make the aggregation return non-distinct results
+                path = option.field_name.split("__")
+                fieldname = path.pop()
+                for p in path:
+                    meta = [f.model._meta for f in meta.get_all_related_objects() if f.get_accessor_name() == p][0]
+            field = meta.get_field(fieldname)
+            if field.choices:
+                choice_label_map = dict(field.choices)
+        except:
+            # Some fields indexed by Haystack may not be model fields.
+            field = None
+        return include_counts, field, choice_label_map
+                        
     def generate_choices(self, request, option, loaded_facets, simple=False):
         # There are no facets for text-type fields.
         if option.type == "text":
@@ -328,23 +349,7 @@ class SearchManager(object):
             if ret: return ret
            
             # Get the model field metadata object that represents this field. 
-            include_counts = True
-            try:
-                meta = self.model._meta
-                if "__" not in option.field_name:
-                    fieldname = option.field_name
-                else:
-                    include_counts = False # one-to-many relationships make the aggregation return non-distinct results
-                    path = option.field_name.split("__")
-                    fieldname = path.pop()
-                    for p in path:
-                        meta = [f.model._meta for f in meta.get_all_related_objects() if f.get_accessor_name() == p][0]
-                field = meta.get_field(fieldname)
-                if field.choices:
-                    choice_label_map = dict(field.choices)
-            except:
-                # Some fields indexed by Haystack may not be model fields.
-                field = None
+            include_counts, field, choice_label_map = self.get_model_field(option)
             
             # Calculate number of possible results for each option, using the current
             # search terms except for this one.
@@ -382,7 +387,7 @@ class SearchManager(object):
                 objs = get_object_set([opt[0] for opt in facet_counts])
                 counts = [build_choice(opt[0], opt[1]) for opt in facet_counts]
             else:
-                resp = self.queryset(request, exclude=option if not simple else None)
+                resp = self.queryset(request.POST, exclude=option if not simple else None)
                 
                 if hasattr(resp, 'facet'):
                     # Haystack.
@@ -425,6 +430,57 @@ class SearchManager(object):
         cache.set(cache_key, counts, FACET_CACHE_TIME)
 
         return counts
+        
+    def execute_qs(self, qs, defaults=None, overrides=None):
+        from django.http import QueryDict
+        qd = QueryDict(qs).copy() # copy makes mutable
+        if defaults:
+            for k in defaults:
+                qd.setdefault(k, defaults[k])
+        if overrides:
+            for k in overrides:
+                qd[k] = overrides[k]
+        return self.queryset(qd)
+
+    def describe_qs(self, qs):
+        import urlparse
+        qs = urlparse.parse_qs(qs)
+        
+        descr = []
+        for option in self.options:
+            if option.field_name not in qs: continue
+            
+            # Get a function to format the value.
+            include_counts, field, choice_label_map = self.get_model_field(option)
+            if option.type == "text":
+                # Pass through text fields.
+                formatter = lambda v : v
+            elif option.choices or choice_label_map:
+                # If choices are specified on the option or on the ORM field, use that.
+                choices = choice_label_map
+                if option.choices: choices = option.choices
+                choices = dict((str(k), v) for k,v in choices.items()) # make sure keys are strings
+                formatter = lambda v : choices[v]
+            else:
+                def formatter(value):
+                    # If the ORM field is for objects, map ID to an object value, then apply option formatter. 
+                    if field and field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
+                        value = field.rel.to.objects.get(id=v)
+                    if option.formatter: return option.formatter(value)
+                    return unicode(value)
+                
+            vals = []
+            for v in qs[option.field_name]:
+                vals.append(formatter(v))
+            
+            if option.type == "text":
+                descr.append(", ".join(vals))
+            else:
+                label = option.label
+                if not label: label = option.field_name
+                descr.append(label + ": " + ", ".join(vals))
+        
+        return "; ".join(descr)
 
 class Option(object):
     def __init__(self, manager, field_name, type="checkbox", required=False,

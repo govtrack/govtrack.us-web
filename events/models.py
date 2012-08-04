@@ -84,7 +84,7 @@ class Feed(models.Model):
                         
             ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]), reverse=True)
             
-            return ret
+            return ret[0:count]
         
     def get_events(self, count):
         return Feed.get_events_for((self,), count)
@@ -218,7 +218,7 @@ class Feed(models.Model):
             t = self.feedname.split(":")[0]
             if t+":" in Feed.feed_metadata:
                 return Feed.feed_metadata[t+":"]
-        return { }
+        return None
         
     # constructors for feeds
 
@@ -346,6 +346,10 @@ class Feed(models.Model):
     # DistrictFeed?
     
     # accessor methods
+    
+    @property
+    def isvalid(self):
+        return self.type_metadata() != None
     
     @property
     def title(self):
