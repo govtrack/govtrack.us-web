@@ -4,7 +4,7 @@ from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 
 from common import enum
-from common.fields import JSONField
+from jsonfield import JSONField
 
 from django.conf import settings
 
