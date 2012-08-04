@@ -153,6 +153,12 @@ DATE_FORMAT = 'M d, Y'
 SEND_BROKEN_LINK_EMAILS = False
 IGNORABLE_404_ENDS = ('spinner.gif', 'billtext/images/quote.png')
 IGNORABLE_404_STARTS = ('/phpmyadmin/',)
+import re
+IGNORABLE_404_URLS = (
+	re.compile(r'^/phpmyadmin/'),
+	re.compile(r'spinner\.gif'),
+	re.compile(r'billtext/images/quote.png$'),
+	)
 
 CURRENT_CONGRESS = 112
 
