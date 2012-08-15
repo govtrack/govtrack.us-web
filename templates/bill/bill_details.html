@@ -175,7 +175,7 @@
 				{% if not request.user.is_authenticated %}
 					<h3>Sign Up for GovTrack Communities</h3>
 				
-					<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have a Google, Facebook, or Twitter account, start tracking this {{feed.type_metadata.noun}} by clicking the appropriate icon to register or log in:</p>
+					<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have one of these accounts, join this {{feed.type_metadata.noun}}&rsquo;s community by clicking an icon to register or log in:</p>
 					
 					{% with "#talk" as return_hash %}
 					{% include "events/track_button_login.html" %}
@@ -183,20 +183,19 @@
 			
 					{% comment %}<p>You can also track this {{feed.type_metadata.noun}} using the <a href="{{feed.rss_url}}">RSS feed</a> without having to sign up.</p>{% endcomment %}
 				{% else %}
-					<p>If enough people express interest, we will set up a way for you to discuss this {{bill.noun}}.</p>
-					
 					<div class="list_select" style="border: none;">
 						<h3>What would you join?</h3>
 						<ul id="talk_methods">
 							<li class="halfsize left" method="maillist"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Mail List</span></a></li>
-							<li class="halfsize" method="forum"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Forum</span></a></li>
-							<li class="halfsize left" method="chat"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Chat</span></a></li>
-							<li class="halfsize" method="webinar"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Webinar</span></a></li>
-							<li method="expert"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">I&rsquo;m An Expert</span></a></li>
+							<li class="halfsize" method="wiki"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Wiki</span></a></li>
+							<li class="halfsize left" method="forum"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Web Forum</span></a></li>
+							<li class="halfsize" method="expert"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">I&rsquo;m An Expert</span></a></li>
 							<div style="clear: both"> </div>
 						</ul>
 					</div>				
 					<a href="#" class="btn done" onclick="return do_talk();">Submit</a>
+					
+					<p style="margin-top: 1em">If enough people express interest, we will set up a way for you to discuss this {{bill.noun}}.</p>
 				{% endif %}
 				</div><!-- /widget_content -->
 				<div class="widget_footer"></div>
@@ -463,7 +462,8 @@
 		</div><!-- /holder -->
 	</div><!-- /overview -->
 	
-	<div class="overview six columns">
+	<div class="six columns">
+	<div class="overview">
 		<div class="holder">
 			<div class="frame">
 				
@@ -525,11 +525,25 @@
 					</dl>
 				</div>
 				{% endif %}
-			
-
+		
 			</div>
 		</div>
 	</div><!-- /overview -->
+		
+		{% if bill.terms.exists %}
+		<div style="padding-top: 30px; width: 340px; margin: 0 auto;">
+		<script type="text/javascript"><!--
+		google_ad_client = "ca-pub-3418906291605762";
+		/* GT Secondary */
+		google_ad_slot = "8748660262";
+		google_ad_width = 336;
+		google_ad_height = 280;
+		//-->
+		</script>
+		<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"> </script>		
+		</div>
+		{% endif %}
+	</div> <!-- six cols -->
 	
 	{% with bill.get_formatted_summary as summary %}
 	{% if summary %}

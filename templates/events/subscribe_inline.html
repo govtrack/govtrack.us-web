@@ -94,7 +94,7 @@ $(function() {
 	{% if not request.user.is_authenticated %}
 		<h3>Sign Up for Tracking</h3>
 	
-		<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have a Google, Facebook, or Twitter account, start tracking this {{feed.type_metadata.noun}} by clicking the appropriate icon to register or log in:</p>
+		<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have one of these accounts, start tracking this {{feed.type_metadata.noun}} by clicking an icon to register or log in:</p>
 		
 		{% with "#track" as return_hash %}
 		{% include "events/track_button_login.html" %}

@@ -3,7 +3,7 @@ export RELEASE=1
 ./parse.py -l ERROR committee
 ./parse.py -l ERROR --congress=112 bill
 ./parse.py -l ERROR --congress=112 vote
-./parse.py -l ERROR states
+#./parse.py -l ERROR states
 ./manage.py update_index person
 
 # bills are indexed as they are parsed

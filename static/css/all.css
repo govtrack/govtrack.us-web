@@ -4142,6 +4142,9 @@ ul.bullets li, .postcontent ul li {
         #sitenews > div:first-of-type a:hover {
             border-bottom: 0;
         }
+	#sitenews a {
+		border-bottom: 1px dotted #CB4B16;
+	}
 
 #logo.states {
 	background: url(../images/logo_states.png) no-repeat;
