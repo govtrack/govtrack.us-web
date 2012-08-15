@@ -198,6 +198,12 @@ class SearchManager(object):
                     "total_this_page": len(obj_list),
                     "total": qs_count,
                 }
+                
+                try:
+                    ret["description"] = self.describe(dict(request.POST.iterlists()))
+                except:
+                    pass # self.describe is untested
+
             else:
                 ret = facets
 
@@ -444,8 +450,9 @@ class SearchManager(object):
 
     def describe_qs(self, qs):
         import urlparse
-        qs = urlparse.parse_qs(qs)
+        return self.describe(urlparse.parse_qs(qs))
         
+    def describe(self, qs): # qs is a dict from field names to a list of values, like request.POST
         descr = []
         for option in self.options:
             if option.field_name not in qs: continue
@@ -459,7 +466,7 @@ class SearchManager(object):
                 # If choices are specified on the option or on the ORM field, use that.
                 choices = choice_label_map
                 if option.choices: choices = option.choices
-                choices = dict((str(k), v) for k,v in choices.items()) # make sure keys are strings
+                choices = dict((str(k), v) for k,v in choices) # make sure keys are strings
                 formatter = lambda v : choices[v]
             else:
                 def formatter(value):

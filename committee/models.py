@@ -45,7 +45,11 @@ class Committee(models.Model):
             return self.name
         else:
             return self.committee.name + ": Subcommittee on " + self.name
-            
+
+    @property
+    def shortname(self):
+	    return self.fullname.replace("Committee on the ", "").replace("Committee on ", "")
+
     def committee_type_abbrev(self):
         return CommitteeType.by_value(self.committee_type).abbrev
     

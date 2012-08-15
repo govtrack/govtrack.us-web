@@ -112,10 +112,14 @@ class Bill(models.Model):
     def get_index_text(self):
         return "\n".join([self.title] + [t[2] for t in self.titles]) \
             + "\n\n" + load_bill_text(self, None, plain_text=True)
-    haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date')
+    haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
     haystack_index_extra = (('proscore', 'Float'),)
     def get_terms_index_list(self):
         return [t.id for t in self.terms.all().distinct()]
+    def get_committees_index_list(self):
+        return [c.id for c in self.committees.all()]
+    def get_cosponsors_index_list(self):
+        return [c.id for c in self.cosponsors.all()]
     def proscore(self):
         """A modified prognosis score that omits factors associated with uninteresting bills, such as naming post offices. Only truly valid for current bills, and useless to compare across Congresses, but returns a value for all bills."""
         # To aid search, especially for non-current bills, add in something to give most recently active bills a boost.
