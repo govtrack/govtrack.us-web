@@ -406,12 +406,20 @@ class XapianSearchBackend(BaseSearchBackend):
             enquire.set_weighting_scheme(xapian.BM25Weight(*settings.HAYSTACK_XAPIAN_WEIGHTING_SCHEME))
         enquire.set_query(query)
         
+        # Construct ValueMatchSpy objects for regular field facets, and make a list
+        # of facets over multi-value fields which Xapian doesn't support faceting for.
+        facets_singlevalued = []
         facet_counters = []
+        facets_multivalued = []
         if facets:
             for f in facets:
-                ctr = xapian.ValueCountMatchSpy(self._value_column(f))
-                enquire.add_matchspy(ctr)
-                facet_counters.append(ctr)
+                if not self._multi_value_field(f):
+                    ctr = xapian.ValueCountMatchSpy(self._value_column(f))
+                    enquire.add_matchspy(ctr)
+                    facets_singlevalued.append(f)
+                    facet_counters.append(ctr)
+                else:
+                    facets_multivalued.append(f)
                 
         if sort_by and not facets:
             sorter = xapian.MultiValueSorter()
@@ -456,17 +464,34 @@ class XapianSearchBackend(BaseSearchBackend):
 
         if facets:
             facets_dict['fields'] = { }
-            for i in xrange(len(facets)):
+            
+            # Use the spy object to get the facet counts for single-value fields.
+            for i in xrange(len(facets_singlevalued)):
                 is_numeric = False
                 for field in self.schema:
-                    if field['field_name'] == facets[i]:
+                    if field['field_name'] == facets_singlevalued[i]:
                         if field['type'] == 'long':
                             is_numeric = True
                         
                 itr = facet_counters[i].values()
-                facets_dict['fields'][facets[i]] = [
+                facets_dict['fields'][facets_singlevalued[i]] = [
                     (long(t.term) if is_numeric else t.term, t.termfreq)
                     for t in itr ]
+                    
+            if len(facets_multivalued) > 0:
+                # Loop through the result set to query multi-valued facet fields.
+                for f in facets_multivalued:
+                    facets_dict["fields"][f] = { }
+                for match in matches:
+                    app_label, module_name, pk, model_data = pickle.loads(self._get_document_data(database, match.document))
+                    for f in facets_multivalued:
+                        fv = facets_dict["fields"][f]
+                        for item in model_data[f]:
+                            fv[item] = fv.get(item, 0) + 1
+                for f in facets_multivalued:
+                    facets_dict["fields"][f] = facets_dict["fields"][f].items()
+                # really slow:
+                #facets_dict["fields"].update(self._do_field_facets(results, facets_multivalued))
                     
         if date_facets:
             facets_dict['dates'] = self._do_date_facets(results, date_facets)

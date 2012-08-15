@@ -78,6 +78,8 @@ def bill_search_manager():
     sm.add_option('congress', type="select", formatter=format_congress_number, sort="KEY-REVERSE")
     sm.add_option('sponsor', type="select", sort="LABEL", formatter=lambda p : p.sortname)
     sm.add_option('current_status', label="current status", sort=lambda s : BillStatus.by_value(s).sort_order)
+    sm.add_option('cosponsors', label="cosponsor", type="select", sort="LABEL", formatter=lambda p : p.sortname)
+    sm.add_option('committees', label="committee", type="select", sort="LABEL", formatter=lambda c : c.shortname)
     sm.add_option('terms', type="select", label="subject", choices=get_terms(BillTerm.objects.exclude(parents__id__gt=0)))
     sm.add_option('terms2', type="select", label="subject 2", choices=sub_terms, visible_if=lambda post:"terms" in post, filter=sub_term_filter)
     sm.add_option('bill_type', label="bill or resolution type")

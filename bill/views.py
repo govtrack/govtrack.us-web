@@ -137,7 +137,10 @@ def bill_text_ajax(request):
         if not p in request.GET:
             raise Http404()
             
-    return load_comparison(request.GET["left_bill"], request.GET["left_version"], request.GET["right_bill"], request.GET["right_version"])
+    try:
+        return load_comparison(request.GET["left_bill"], request.GET["left_version"], request.GET["right_bill"], request.GET["right_version"])
+    except IOError:
+        return { "error": "Bill text is not available for those bills." }
     
 def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10, force=False):
     from billtext import load_bill_text, compare_xml_text, get_current_version

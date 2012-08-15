@@ -12,7 +12,7 @@
 <div class="searching row">
 <section class="eight columns">
     <div class="summary" style="display: none">
-        <p><span class="total">xxx</span> <span class="noun">things</span> matched your search.</p>
+        <p><span class="total">xxx</span> <span class="noun">things</span> matched your search<span class="searchdescr"></span>.</p>
     </div>
     
     <table class="results" style="display: none;">
@@ -262,6 +262,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                     $('.summary').show();
                     $('.summary .total').text(addCommas(res.total));
                     $('.summary .noun').text(res.total == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}");
+                    $('.summary .searchdescr').text(res.description ? " for " + res.description : "");
 
 					$("#loading_status").hide();
 					$("#show_more").toggle(res.page < res.num_pages);
