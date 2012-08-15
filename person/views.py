@@ -60,12 +60,18 @@ def person_details(request, pk):
             photo = None
     
         analysis_data = analysis.load_data(person)
+        
+        links = []
+        if person.osid: links.append(("OpenSecrets.org", "http://www.opensecrets.org/politicians/summary.php?cid=" + person.osid))
+        if person.pvsid: links.append(("VoteSmart.org", "http://votesmart.org/candidate/" + person.pvsid))
+        if person.bioguideid: links.append(("Congress.gov", "http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + person.bioguideid))
     
         return {'person': person,
                 'role': role,
                 'active_role': active_role,
                 'photo': photo,
                 'photo_credit': photo_credit,
+                'links': links,
                 'analysis_data': analysis_data,
                 'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
                 'committeeassignments': get_committee_assignments(person),

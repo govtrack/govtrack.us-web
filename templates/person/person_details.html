@@ -64,6 +64,15 @@
 	        </tr>
 	        {% endfor %}
 		</table>
+		
+		{% if links %}
+			<p style="margin-top: 1em"><small>See Also:
+			{% for label, link in links %}
+				{% if not forloop.first %} | {% endif %}
+				<a href="{{link}}" target="_blank">{{label}}</a>
+			{% endfor %}
+			</small></p>
+		{% endif %}
 	</div><!-- /container -->
 	{% endcache %}
 
@@ -83,7 +92,8 @@
 		{% if role.website %}
 		<div class="article">
 			<strong>Official Website:</strong>
-			<a href="{{role.website}}">{{role.website}}</a>
+			<a href="{{role.website}}" target="_blank">{{role.website}}</a>
+			{% if person.twitterid %}<br/><a href="http://twitter.com/{{person.twitterid}}" target="_blank">@{{person.twitterid}}</a>{% endif %}
 		</div>
 		{% endif %}
 		{% endif %}
