@@ -67,6 +67,7 @@ class BillTerm(models.Model):
 
 class Cosponsor(models.Model):
     person = models.ForeignKey('person.Person')
+    role = models.ForeignKey('person.PersonRole')
     bill = models.ForeignKey('bill.Bill')
     joined = models.DateField()
     withdrawn = models.DateField(blank=True, null=True)
@@ -78,15 +79,23 @@ class Cosponsor(models.Model):
         if not self._role:
             self._role = self.person.get_role_at_date(self.joined)
         return self._role
-
+        
+    # role is a new field which I added with (does not take into account people with overlapping roles such as going from House to Senate on the same day):
+    #for role in PersonRole.objects.filter(startdate__lte="1970-01-01", startdate__gt="1960-01-01"):
+    #	Cosponsor.objects.filter(
+    #		person=role.person_id,
+    #		joined__gte=role.startdate,
+    #		joined__lte=role.enddate).update(role = role)
+    		
 class Bill(models.Model):
     title = models.CharField(max_length=255, help_text="The bill's primary display title, including its number.")
-    titles = JSONField() # serialized list of all bill titles as (type, as_of, text)
+    titles = JSONField(default=None) # serialized list of all bill titles as (type, as_of, text)
     bill_type = models.IntegerField(choices=BillType, help_text="The bill's type (e.g. H.R., S., H.J.Res. etc.)")
     congress = models.IntegerField(help_text="The number of the Congress in which the bill was introduced. The current Congress is %d." % settings.CURRENT_CONGRESS)
     number = models.IntegerField(help_text="The bill's number (just the integer part).")
     sponsor = models.ForeignKey('person.Person', blank=True, null=True,
                                 related_name='sponsored_bills', help_text="The primary sponsor of the bill.")
+    sponsor_role = models.ForeignKey('person.PersonRole', blank=True, null=True, help_text="The role of the primary sponsor of the bill at the time the bill was introduced.")
     committees = models.ManyToManyField(Committee, related_name='bills')
     terms = models.ManyToManyField(BillTerm, related_name='bills')
     current_status = models.IntegerField(choices=BillStatus, help_text="The current status of the bill.")
@@ -95,8 +104,15 @@ class Bill(models.Model):
     cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor', help_text="The bill's cosponsors.")
     docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
     senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
-    major_actions = JSONField() # serialized list of all major actions (date/datetime, BillStatus, description)
-
+    major_actions = JSONField(default=[]) # serialized list of all major actions (date/datetime, BillStatus, description)
+    
+    # role is a new field added with, but might not be perfect for overlapping roles (see Cosponsor)
+	#for role in PersonRole.objects.filter(startdate__gt="1960-01-01"):
+	#	Bill.objects.filter(
+	#		sponsor=role.person_id,
+	#		introduced_date__gte=role.startdate,
+	#		introduced_date__lte=role.enddate).update(sponsor_role = role)
+	
     class Meta:
         ordering = ('congress', 'bill_type', 'number')
         unique_together = ('congress', 'bill_type', 'number')

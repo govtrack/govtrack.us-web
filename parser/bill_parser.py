@@ -65,8 +65,8 @@ class BillProcessor(Processor):
     def process(self, obj, node):
         obj = super(BillProcessor, self).process(obj, node)
         self.process_titles(obj, node)
-        self.process_sponsor(obj, node)
         self.process_introduced(obj, node)
+        self.process_sponsor(obj, node)
         self.process_current_status(obj, node)
 
         # update existing bill record if one exists, otherwise create a new one on save()
@@ -102,6 +102,7 @@ class BillProcessor(Processor):
     def process_sponsor(self, obj, node):
         try:
             obj.sponsor = get_person(node.xpath('./sponsor')[0].get('id'))
+            obj.sponsor_role = obj.sponsor.get_role_at_date(obj.introduced_date)
         except IndexError: # no sponsor node
             obj.sponsor = None
         except TypeError: # no id attribute
@@ -118,7 +119,14 @@ class BillProcessor(Processor):
 
                 value = subnode.get('withdrawn')
                 withdrawn = self.parse_datetime(value) if value else None
-                ob, isnew = Cosponsor.objects.get_or_create(person=person, bill=obj, defaults={"joined": joined, "withdrawn": withdrawn})
+                ob, isnew = Cosponsor.objects.get_or_create(
+                	person=person,
+                	bill=obj,
+                	defaults={
+                		"joined": joined,
+                		"withdrawn": withdrawn,
+                		"role": person.get_role_at_date(joined)
+                	})
                 if ob.joined != joined or ob.withdrawn != withdrawn:
                     ob.joined = joined
                     ob.withdrawn = withdrawn
