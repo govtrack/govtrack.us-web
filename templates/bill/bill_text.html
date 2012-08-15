@@ -87,6 +87,10 @@ function load_comparison(alt_bill, alt_version) {
 		},
 		dataType: "json",
 		success: function(data) {
+			if (data.error) {
+				$('#content_loading').html($('<p></p>').text(data.error));
+				return;
+			}
 			display_comparison(data.left_text, data.right_text, data.left_meta, data.right_meta);
 		},
 		xhr: function() {
@@ -274,6 +278,8 @@ $(function() {
 </div>
 
 <div id="sidebar">
+	{% if textdata.text_html %}
+	
 	{% if bill.is_alive and not version %}
 	<p>You are reading the latest text of the {{bill.noun}}. The text of a {{bill.noun}} may change in committee or through the amendment process.</p>
 	{% endif %}
@@ -311,9 +317,9 @@ $(function() {
 	</ul>
 	{% endif %}
 
+	{% endif %}
 
-	{% comment %}
-	<div style="float: right; width: 120px;">
+	<div style="margin: 5em auto; width: 120px;">
 		<script type="text/javascript"><!--
 		google_ad_client = "ca-pub-3418906291605762";
 		/* GT Vertical 120x600, created 8/17/08 */
@@ -325,8 +331,8 @@ $(function() {
 		<script type="text/javascript"
 		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 		</script>
+		<div style="font-size: 90%; text-align: center"><a href="/ads">About Ads</a></div>
 	</div>
-	{% endcomment %}
 </div>
 	
 {% endblock %}
