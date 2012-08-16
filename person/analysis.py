@@ -4,6 +4,8 @@ from us import parse_govtrack_date
 from types import RoleType
 from models import Person
 
+from settings import CURRENT_CONGRESS
+
 def load_data(person):
     return {
         "sponsorship": load_sponsorship_analysis(person),
@@ -12,13 +14,13 @@ def load_data(person):
     }
     
 def load_sponsorship_analysis(person):
-    role = person.get_most_recent_congress_role()
+    role = person.get_most_recent_congress_role(excl_trivial=True)
     if not role: return None
     
     congressnumber = role.most_recent_congress_number()
     if not congressnumber: return None
     
-    data = { }
+    data = { "congress": congressnumber, "current": congressnumber == CURRENT_CONGRESS }
     
     fname = 'data/us/%d/stats/sponsorshipanalysis' % congressnumber
     if role.role_type == RoleType.senator:

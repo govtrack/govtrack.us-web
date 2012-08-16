@@ -154,11 +154,11 @@ class Person(models.Model):
             return self.roles.order_by('-startdate')[0]
         except IndexError:
             return None
-    def get_most_recent_congress_role(self):
-        try:
-            return self.roles.filter(role_type__in=(RoleType.senator, RoleType.representative)).order_by('-startdate')[0]
-        except IndexError:
-            return None
+    def get_most_recent_congress_role(self, excl_trivial=False):
+        for r in self.roles.filter(role_type__in=(RoleType.senator, RoleType.representative)).order_by('-startdate'):
+            if excl_trivial and (r.enddate-r.startdate).days < 100: continue
+            return r
+        return None
 
     def get_most_recent_role_field(self, fieldname, current=False):
         if not current:

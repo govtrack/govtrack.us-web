@@ -111,7 +111,10 @@
 	<section id="sponsorship_analysis">
 		<h3>Sponsorship Analysis</h3>
         
-		<p>{{ person.lastname }} is a {{ analysis_data.sponsorship.description }} according to GovTrack's own analysis of bill sponsorship. Use this chart to compare {{ person.lastname }} to other members of the {{analysis_data.sponsorship.chamber}} on leadership and ideology.</p>
+		<p>{{ person.lastname }} {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a {{ analysis_data.sponsorship.description }} according to
+		GovTrack's own analysis of bill sponsorship{% if not analysis_data.sponsorship.current %} from {{ person.lastname }}&rsquo;s time serving in the
+		{{analysis_data.sponsorship.chamber}}{% endif %}.</p>
+		<p>Use this chart to compare {{ person.lastname }} to other members of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %} in the {{analysis_data.sponsorship.congress|ordinal}} Congress{% endif %} on leadership and ideology.</p>
 
 		<div id="sponsorship_analysis_chart"> </div>
 		<script>
