@@ -235,7 +235,7 @@ code {
   text-align: right;
 }
 .text-center {
-  text-align: center;
+  text-align: center !important;
 }
 .hide {
   display: none;
@@ -266,12 +266,21 @@ code {
 	text-indent: -9999px;
 	background: url(../images/pv-speakup.png) left top no-repeat;
 	}
+
 .note {
-	font-size: 12px;
+	font-size: .9em;
 	line-height: 18px;
 	font-family: PTSerifItalic;
     }
-.box {
+    .note strong {
+      font-family: PTSerifBoldItalic;
+    }
+    .note em {
+      font-family: PTSerifRegular;
+      font-style: normal;
+    }
+.box,
+.topbox {
     background: #f3f1e9 url(../images/bg-paper.jpg);
     border: solid #e7e4dc 1px;
     -moz-box-shadow:
@@ -284,9 +293,13 @@ code {
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
 }
-.lt-ie9 .box {
+.lt-ie9 .box,
+.lt-ie9 .topbox {
     box-shadow: none;
     outline: solid #f9f8f4 5px;
+}
+.topbox {
+  margin: 15px 6px 30px;
 }
 
 .flag {
@@ -463,6 +476,9 @@ code {
   margin: 0 auto;
 }
 
+.fat {
+  padding: 0 20px;
+}
 
 [class*="column"] + [class*="column"]:last-child {
   float: right;
@@ -2790,6 +2806,7 @@ aside .download-links { padding: 31px 0 0 	}
                 float: left;
                 font-size: 1.25em;
             }
+            #events_header h4 { float: left; }
             #events_header a {
                 display: block;
                 float: right;
@@ -2798,7 +2815,8 @@ aside .download-links { padding: 31px 0 0 	}
                 background: url(../images/icon_rss.png) right top no-repeat;
             }
             #events_header a:hover {
-                background-position: right bottom;
+                background-position: right -16px;
+                border-bottom: none;
             }
 
 /*  Event styles for global use
@@ -3087,6 +3105,62 @@ aside .download-links { padding: 31px 0 0 	}
             padding-bottom: 15px;
             background: url(../images/tracker_widget_btm.png) center bottom no-repeat;
         }
+
+/* Create a Tracker Wizard styles 
+   ============================================================== */
+#tracker_wizard {
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 1px solid #ddc;
+    border-top: none;
+    background: #fdfdfd url(../3images/bg-entries-box-brown.jpg);
+    -webkit-box-shadow: 0px 5px 5px 0px #bbb;
+            box-shadow: 0px 5px 5px 0px #bbb;
+
+  }
+  #tracker_wizard .panel {
+  }
+  #tracker_wizard .panel+.panel {
+    margin-top: 50px;
+  }
+  #tracker_wizard #tracker_search {
+  }
+
+  #tracker_wizard h2 {
+    font-size: 1.75em;
+    color: #40A4BD;
+    text-transform: none;
+    padding-bottom: 1em;
+  }
+
+  #tracker_wizard h3 {
+    text-transform: none;
+    padding-bottom: 1em;
+    color: #40a4bd;
+  }
+
+  #tracker_search label {
+  }
+
+  #tracker_wizard form .box {
+    padding: 20px;
+    margin-bottom: 40px;
+  }
+  #tracker_wizard .row+.note {
+    margin-top: 15px;
+  }
+
+  #tracker_wizard #events_list {
+    width: auto;
+    padding: 0;
+    border-left: none;
+  }
+
+#tracker_wizard #keyword_results {
+  border-right: #ddd 1px solid;
+}
+
+
 
 /*  Footer Styles 
     ======================================================== */
@@ -3785,8 +3859,9 @@ select, input.text {
 
 /*  Search results page
     ==================================== */
-    #content div.site-search-results form {
-        width: 896px;
+    #content div.site-search-results form,
+    #content div.advanced-search form {
+        /*width: 896px;
         background: #f8f7f7;
         -moz-border-radius: 1px;
         -webkit-border-radius: 1px;
@@ -3798,11 +3873,11 @@ select, input.text {
         box-shadow:
             0 0 0 5px #f9f8f4,
             0 1px 2px 5px rgba(106,106,106,.4);
-        padding: 15px;
+        padding: 15px;*/
         margin: 15px 6px 50px;
-        /*behavior: url(/static/js/PIE.htc);*/
     }
-        #content .site-search-results form h3 {
+        #content .site-search-results form h3,
+        form.topbox h3 {
             width: auto;
             text-align: left;
             font-size: 1.3em;
@@ -3811,20 +3886,24 @@ select, input.text {
             line-height: 1em;
             padding-bottom: 1em;
         }
-        .site-search-results form p.intro {
+        .site-search-results form p.intro,
+        form.topbox p.intro {
             width: 436px;
             float: left;
             padding-top: 1em;
             font-family: 'PTSerifRegular';
         }
-        .site-search-results form fieldset {
+        .site-search-results form fieldset,
+        form.topbox fieldset {
             width: 436px;
             float: right;
         }
-        .site-search-results form fieldset #search_entry {
+        .site-search-results form fieldset #search_entry,
+        form.topbox fieldset #search_entry {
             width: 78%;
         }
-        .site-search-results form fieldset #submit {
+        .site-search-results form fieldset #submit,
+        form.topbox fieldset #submit {
             margin-top: 2px;
             float: right;
         }
@@ -3845,7 +3924,8 @@ select, input.text {
             border-top: 1px solid #eee;
             border-left: 2px solid #40A4BD
         }
-        #search-results .the-results h3 { 
+        #search-results .the-results h3,
+        #search-results .the-results h4 { 
             text-align: left; 
             width: auto; 
             color: #40A4BD;
@@ -3853,6 +3933,7 @@ select, input.text {
             padding-left: 20px;
             padding-bottom: 1em;
             margin-bottom: 1em;
+            text-transform: uppercase;
         }
         #search-results .the-results p.no_results { margin: 0 20px; }
         #search-results .the-results ul li {

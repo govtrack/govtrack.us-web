@@ -38,7 +38,7 @@
 	</div>
 {% endwith %}
 {% empty %}
-<p>No events are tracked by the selected list.</p>
+<p>No events are tracked by the selected {% if list %}list{% else %}tracker{% endif %}.</p>
 {% endfor %}
 {% comment %}{% include "pagination.html" %}{% endcomment %}
 

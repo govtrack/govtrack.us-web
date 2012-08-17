@@ -62,7 +62,9 @@ Feed.register_feed(
 	"states_allbills",
 	title = "State Legislation: All Activity",
 	slug = "states_bills",
-	intro_html = """Use this feed to track all legislative events in all United States state legislatures."""
+	intro_html = """Use this feed to track all legislative events in all United States state legislatures.""",
+	simple = True,
+	sort_order = 200
 	)
 for st in us.stateabbrs:
 	Feed.register_feed(

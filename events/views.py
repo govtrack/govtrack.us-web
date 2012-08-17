@@ -42,13 +42,8 @@ def get_feed_list(request):
 @login_required
 @render_to('events/edit_lists.html')
 def edit_subscription_lists(request):
-    no_arg_feeds = [Feed.IntroducedBillsFeed(), Feed.EnactedBillsFeed(), Feed.ActiveBillsFeed(),  Feed.ActiveBillsExceptIntroductionsFeed(), Feed.ComingUpFeed(), Feed.AllVotesFeed(), Feed.AllCommitteesFeed()]
-    
-    from bill.search import subject_choices
-    
     return {
-        'no_arg_feeds': no_arg_feeds,
-        'subject_choices': subject_choices(),
+        'no_arg_feeds': Feed.get_simple_feeds(),
             }
             
 @login_required
@@ -99,12 +94,17 @@ def edit_subscription_list(request):
 
 @render_to('events/events_list_items.html')
 def events_list_items(request):
-    if "listid" not in request.POST: raise Http404()
-    sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.POST["listid"])
+    if "listid" in request.POST:
+        sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.POST["listid"])
+        feedlist = sublist.trackers.all()
+        show_empty = False
+    elif "feed" in request.POST:
+        sublist = None
+        feedlist = [Feed.from_name(request.POST["feed"], must_exist=False)]
+        show_empty = True
+    else:
+        raise Http404()
         
-    feedlist = sublist.trackers.all()
-    show_empty = False
-      
     if len(feedlist) > 0 or show_empty:
         qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, 100) # get all events
     else:
@@ -133,7 +133,7 @@ def events_list_items(request):
             seps.sort()
             days_between_events = seps[len(seps)/2]
         
-        if sublist.email == 0:
+        if not sublist or sublist.email == 0:
             if days_between_events < 1:
                 expected_frequency = "Turn on daily email updates if you would like to get these events sent to you each day."
             elif days_between_events < 7:
@@ -161,46 +161,7 @@ def events_list_items(request):
         'feeds': feedlist,
         'expected_frequency': expected_frequency,
             }
-
-def search_feeds(request):
-    if "type" not in request.REQUEST:
-        return HttpResponse(simplejson.dumps({
-            "status": "fail",
-            }), mimetype="text/json")
-
-    if request.REQUEST["type"] == "person":
-        from person.models import Person
-        feedlist = [
-            Feed.PersonFeed(p.id)
-            for p in Person.objects.filter(lastname__icontains=request.REQUEST["q"])
-            if p.get_current_role() != None]
             
-        import us
-        for s in us.statenames:
-            if us.statenames[s].lower().startswith(request.REQUEST["q"].lower()):
-                feedlist.extend([
-                    Feed.PersonFeed(p)
-                    for p in Person.objects.filter(roles__current=True, roles__state=s)])
-                
-    if request.REQUEST["type"] == "bill":
-        from haystack.query import SearchQuerySet
-        feedlist = [
-            Feed.BillFeed(b.object)
-            for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], congress__in=[CURRENT_CONGRESS], content=request.REQUEST["q"])[0:10]]
-    
-    if request.REQUEST["type"] == "committee":
-        from committee.models import Committee
-        feedlist = [
-            Feed.CommitteeFeed(c)
-            for c in Committee.objects.filter(name__icontains=request.REQUEST["q"], obsolete=False).order_by("committee__name", "name")[0:10]]
-                
-    def feedinfo(f):
-        return { "name": f.feedname, "title": f.title }
-    return HttpResponse(simplejson.dumps({
-        "status": "success",
-        "feeds": [feedinfo(f) for f in feedlist],
-        }), mimetype="text/json")
-   
 def events_rss(request):
     import django.contrib.syndication.views
     import urllib
@@ -244,3 +205,34 @@ def events_show_feed(request, feedslug):
         "meta":  feedmeta,
     }
 
+@render_to('events/add_tracker.html')
+def events_add_tracker(request):
+    return {
+        'no_arg_feeds': Feed.get_simple_feeds(),
+    }
+    
+@json_response
+def start_search(request):
+    # Do a site search to find relevant trackers.
+    
+    from website.views import do_site_search
+    ret = []
+    for grp in do_site_search(request.GET.get("q", "")):
+        feeds = [{
+            "name": r["feed"].feedname,
+            "title": r["label"],
+            "subfeeds": [{
+                    "name": f.feedname,
+                    "title": f.scoped_title,
+                }
+                for f in r["feed"].includes_feeds()],
+            }
+            for r in grp["results"] if "feed" in r]
+        ret.append({
+            "title": grp["title"],
+            "href": grp["href"],
+            "qsarg": grp.get("qsarg", None),
+            "feeds": feeds
+        })
+    return ret
+    

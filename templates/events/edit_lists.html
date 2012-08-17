@@ -14,9 +14,6 @@ function activate_list(elem) {
 	$('#basic_trackers input').prop('checked', false);
 	$("#list_trackers").text("");
 
-	$('#search_trackers input').val("");
-	$('#search_trackers .results').html("");
-	
 	$('#email_frequency').val($(elem).attr('list_email'));
 	
 	$.ajax({
@@ -209,33 +206,6 @@ function new_list(node) {
 		}
 	});
 	return false;
-}
-
-function search_feeds(type) {
-	var q = $('#track_' + type + '_input').val();
-	if (q.replace(/\s/g,"") == "") {
-		$('#track_' + type + '_results').text("");
-		return;
-	}
-	
-	$('#track_' + type + '_results').text("Loading...");
-	ajax("/events/search_feeds", { "type": type, "q": q }, {
-			success: function(res) {
-				$('#track_' + type + '_results').html("");
-				var html = $("<ul/>");
-				for (feed in res.feeds) {
-					var li = $("<li/>");
-					html.append(li);
-					
-					var a = $("<a href='#' onclick='return false'/>");
-					li.append(a);
-					a.text(res.feeds[feed].title);
-					a.attr("feedname", res.feeds[feed].name);
-					a.click(function() { toggle_list_item(this, true); });
-				}
-				$('#track_' + type + '_results').append(html);
-			}
-	});		
 }
 
 $(function() {

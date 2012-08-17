@@ -1,0 +1,243 @@
+{% extends 'master.html' %}
+{% block title %}Track Something New -- GovTrack.us{% endblock %}
+
+{% block head %}
+<script>
+function select_feed(ev) {
+	var feed = $(ev.target).attr("feedname");
+	var descr = $(ev.target).attr("title");
+	if (!descr) descr = $(ev.target).text();
+
+	$('#step1a').hide();
+	$('#step1b').hide();
+	$('#step2').show();
+	
+	$('#step2 h3 span').text(descr);
+
+	$('#events_preview_2').html("<p class='error'>Loading...</p>");
+	$.ajax({
+		url: "/events/_load_events",
+		type: "POST",
+		data: { feed: feed },
+		dataType: "html",
+		success: function(data) {
+			$('#events_preview_2').html(data);
+		}
+	});	
+	
+	return false;
+}
+
+function do_search(form) {
+	var qq = $(form).find('input[type=text]').val();
+	
+	$('#search-results').html("<p class='error'>Loading...</p>");
+	
+	$.ajax('/events/_ajax/start/search', {
+		data: { q: qq },
+		success: function(res) {
+			$('#step1a').hide();
+			$('#step2').hide();
+			$('#step1b').show();
+			$('#your_search_term').text(qq);
+			$('#search_entry_again').val(qq);
+
+			var search_tracker_name = "billsearch:text=" + escape(qq);
+			$('#events_preview_1').html("<p class='error'>Loading...</p>");
+			$.ajax({
+				url: "/events/_load_events",
+				type: "POST",
+				data: { feed: search_tracker_name },
+				dataType: "html",
+				success: function(data) {
+					$('#events_preview_1').html(data);
+				}
+			});	
+			
+			if (res.length == 0) {
+				$('#search-results').html("<p class='error'>We couldn't find anything that matched your search.</p>");
+				return;
+			}
+			
+			$('#search-results').html('');
+			for (var i = 0; i < res.length; i++) {
+				var div = $("<div class='the-results group'><h4/><ul/></div>");
+				$('#search-results').append(div);
+				
+				div.find('h4').text(res[i].title);
+				
+				if (res[i].feeds.length == 0) {
+					var p = $("<p class='no_results'>We couldn't find any committees in Congress that matched your search. <a>Browse</a> for more.</p>");
+					p.find('a').attr('href', res[i].href);
+					div.append(p);
+				} else {
+					for (var j = 0; j < res[i].feeds.length; j++) {
+						var x = $("<li><a href='#'> </a></li>");
+						x.find("a").attr('feedname', res[i].feeds[j].name);
+						x.find("a").text(res[i].feeds[j].title);
+						x.find("a").click(select_feed);
+						div.find('ul').append(x);
+						if (res[i].feeds[j].subfeeds.length > 0) {
+							var sf = $("<ul/>");
+							x.append(sf);
+							for (var k = 0; k < res[i].feeds[j].subfeeds.length; k++) {
+								var y = $("<li><a href='#'> </a></li>");
+								y.find("a").attr('feedname', res[i].feeds[j].subfeeds[k].name);
+								y.find("a").text(res[i].feeds[j].subfeeds[k].title)
+								y.find("a").click(select_feed);
+								sf.append(y);
+							}
+						}
+					}
+					
+					var a = $("<a class='more'>See More &raquo;</a>");
+					if (!res[i].qsarg)
+						a.attr('href', res[i].href);
+					else
+						a.attr('href', res[i].href + "?" + res[i].qsarg + "=" + escape(qq));
+					div.append(a);
+				}
+			}
+		}
+	});
+	return false;
+}
+</script>
+{% endblock %}
+
+{% block crumbs %}
+<h1>Start Tracking</h1>
+{% endblock %}
+
+{% block heading_box %}
+{% endblock %}
+
+{% block body %}
+<ul class="tabs steps three-up">
+	<li><a  class="current" href="#"><span>1.</span> Find Items to Track</a></li>
+	<li><a href="#"><span>2.</span> Set Up Your Updates</a></li>
+	<li><a href="#"><span>3.</span> Save Your Tracker</a></li>
+</ul>
+
+<div id="tracker_wizard" class="panels">
+
+
+	<div id="step1a" class="panel">
+			<div class="row">
+				<form id="tracker_search" class="group ten columns centered" onsubmit="return do_search(this);">
+					<h2>Search for Bills &amp; Legislation, Members of Congress, or Committees:</h2>
+					<fieldset class="box">
+							<label for="search_entry">Search all of GovTrack for...</label>
+							<input id="search_entry" name="q" type="text" class="text" value="{{request.GET.q}}" />
+							<input id="submit" class="btn-search-small" type="submit" value="Search"/>
+							<p class="note">You can search for legislation by keywords, names, or bill numbers, (<em>"fossil fuels"</em>, "<em>End Big Oil</em>", or "<em>H.R. 601</em>"); you can search for members by name or state, or even put in your street address to find your area representatives.</p>
+			    	</fieldset>
+				</form>
+			</div>
+
+			<div class="row">
+				<div id="suggested" class="ten columns centered control">
+					<h2>Or, choose to track a suggested item:</h2>
+					<ul id="basic_trackers">
+						{% for tracker in no_arg_feeds %}
+						<li><a href="#" feedname="{{tracker.feedname}}" onclick="return select_feed({target: this});" title="{{tracker.title}}">{{tracker.title}} <span>Add</span></a></li>
+						{% endfor %}
+					</ul>
+				</div><!-- /suggested -->
+			</div>
+	</div><!-- /panel -->
+
+
+	<div id="step1b" class="panel row" style="display: none">
+		<div class="row">
+			<h2 class="eight columns">You Searched for &ldquo;<span id="your_search_term"> </span>&rdquo;</h2>
+			<form id="tracker_search" class="group four columns" onsubmit="return do_search(this);">
+				<fieldset>
+					<label for="search_entry_again">Search again</label>
+					<input id="search_entry_again" name="q" type="text" class="text" />
+					<input id="submit_again" class="btn-search-small" type="submit" value="Search"/>
+		    	</fieldset>
+			</form>
+		</div>
+
+		<div id="tracker_choices" class="row">
+
+			<div id="keyword_results" class="six columns fat">
+				<h3>You can track this keyword search, which will update you on all activity on related federal bills.</h3>
+
+
+				<div id="events_list">
+					<div id="events_header" class="group">
+						<h4>This Tracker Preview</h4>
+					</div>
+
+					<div id="events_preview_1">
+					</div><!-- /events -->
+
+				</div><!-- /event_list -->
+			</div><!-- /keyword_results -->
+
+
+
+			<div id="related_results" class="six columns fat">
+				<h3>Or, you can track one of these related items:</h3>
+
+				<div id="search-results">
+		
+				</div><!-- /the-results -->
+			</div>
+
+		</div>
+
+	</div><!-- /panel -->
+
+
+	<div id="step2" class="panel row" style="display: none">
+		<h3>You are tracking <span> </span></h3>
+
+		<div id="keyword_results" class="eight columns fat">
+			<div id="events_list">
+				<div id="events_header" class="group">
+					<h4>Your Tracker Preview:</h4>
+					
+					{% comment %}
+					can't do RSS here because they have to make a list first
+					<a href="/events/events.rss?list_id=72J8C22VjAc8pjhH" class="add_icon rss">Subscribe by RSS</a>
+					{% endcomment %}
+				</div>
+
+				<div id="events_preview_2">
+				</div><!-- /events -->
+
+			</div><!-- /event_list -->
+		</div><!-- /keyword_results -->
+
+
+		<div id="edit_list" class="four columns fat">
+	
+			<div id="set_freq" class="control">
+				<h3>How often do you want updates?</h3>
+				<div class="row">
+					<label for="email_frequency">Send update emails</label>
+					<select id="email_frequency" name="email_frequency" onchange="change_email_options();">
+						<option value="0">Don’t Send Emails</option>
+						<option value="1">Daily</option>
+						<option value="2">Weekly</option>
+					</select>
+				</div>
+			</div><!-- /set_freq -->
+				<div class="row">
+					<a class="button" href="#">Save This Tracker</a>
+				</div>
+		</div><!-- /edit_list -->
+
+	</div><!-- /panel -->
+
+
+	<div id="step3" class="panel" style="display: none">
+		<h3>Save Your Tracker</h3>
+
+	</div><!-- /panel -->
+</div>
+
+{% endblock %}

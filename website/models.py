@@ -48,6 +48,7 @@ class CommunityInterest(models.Model):
     user = models.ForeignKey(User)
     bill = models.ForeignKey(Bill)
     methods = models.CharField(max_length=32)
+    created = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ( ('user', 'bill'), )
 

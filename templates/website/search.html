@@ -23,19 +23,19 @@
 		
 		<div id="search-results">
 		{% if request.GET.q %}
-			{% for category, browseurl, more_at, no_match_noun, matches in results %}
+			{% for grp in results %}
 				<div class="the-results group">
-					<h3>{{category}}</h3>
-				{% if not matches %}
-					<p class="no_results">We couldn&rsquo;t find any {{no_match_noun}} that matched your search. <a href="{{browseurl}}">Browse</a> for more.</p>
+					<h3>{{grp.title}}</h3>
+				{% if not grp.results %}
+					<p class="no_results">We couldn&rsquo;t find any {{grp.noun}} that matched your search. <a href="{{grp.href}}">Browse</a> for more.</p>
 				{% else %}
 					<ul>
-					{% for ret in matches %}
+					{% for ret in grp.results %}
 						<li><a href="{{ret.href}}">{{ret.label}}</a></li>
 					{% endfor %}
 					</ul>
-					{% if more_at %}
-					<a class="more" href="{{browseurl}}?{{more_at}}={{request.GET.q|urlencode}}">See More &raquo;</a>
+					{% if grp.qsarg %}
+					<a class="more" href="{{grp.href}}?{{grp.qsarg}}={{request.GET.q|urlencode}}">See More &raquo;</a>
 					{% endif %}
 				{% endif %}
 				</div>
