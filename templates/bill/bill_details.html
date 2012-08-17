@@ -71,7 +71,11 @@
 				{% endif %}
 			
 				<dt>Sponsor:</dt>
-				<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor}}</a></dd>
+				{% if bill.sponsor %}
+					<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{sponsor_name}}</a></dd>
+				{% else %}
+					<dd>(bill introduced by rule or other special circumstance)</dd>
+				{% endif %}
 			
 				<dt>Status:</dt>
 				<dd>
@@ -394,7 +398,14 @@
 								<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show cosponsors ({{bill.cosponsor_count}})</a>
 								<div id="cosponsors" style="display: none">
 									{% for cosp in bill.cosponsor_records %}
-									<div><a href="{{cosp.person.get_absolute_url}}">{{cosp.person}}</a> {% if cosp.joined != bill.introduced_date %}(joined {{cosp.joined}}{% if cosp.withdrawn %}; withdrawn {{cosp.withdrawn}}{% endif %}){% else %}{% if cosp.withdrawn %}  (withdrawn {{cosp.withdrawn}}){% endif %}{% endif %}</div>
+									<div><a href="{{cosp.person.get_absolute_url}}">{{cosp.person_name}}</a></div>
+									{% if cosp.joined != bill.introduced_date %}
+										<div style="margin-left: 1.5em; font-size: 85%">(joined {{cosp.joined}}{% if cosp.withdrawn %}; withdrawn {{cosp.withdrawn}}{% endif %})</div>
+									{% else %}
+										{% if cosp.withdrawn %} 
+											<div style="margin-left: 1.5em; font-size: 85%">(withdrawn {{cosp.withdrawn}})</div>
+										{% endif %}
+									{% endif %}
 									{% endfor %}
 								</div>
 							{% endif %}

@@ -37,6 +37,10 @@ def bill_details(request, congress, type_slug, number):
     
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
     
+    from person.name import get_person_name
+    sponsor_name = None if not bill.sponsor else \
+        get_person_name(bill.sponsor, role_date=bill.introduced_date, firstname_position='before', show_suffix=True)
+    
     def get_reintroductions():
         reintro_prev = None
         reintro_next = None
@@ -54,6 +58,7 @@ def bill_details(request, congress, type_slug, number):
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
+        "sponsor_name": sponsor_name,
         "reintros": get_reintroductions, # defer so we can use template caching
         "market": get_market,
         "current": bill.congress == CURRENT_CONGRESS,

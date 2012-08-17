@@ -254,9 +254,9 @@ class Voter(models.Model):
     voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President (in which case, the person field is null).")
     option = models.ForeignKey('vote.VoteOption', help_text="How the person voted.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.") # equal to vote.created
-
+    
     def __unicode__(self):
-        return '%s: %s' % (self.person, self.vote)
+        return '%s /%s/ %s' % (self.person, self.option.key, self.vote)
         
     def voter_type_is_member(self):
         return self.voter_type == VoterType.member

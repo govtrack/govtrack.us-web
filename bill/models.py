@@ -73,12 +73,12 @@ class Cosponsor(models.Model):
     withdrawn = models.DateField(blank=True, null=True)
     class Meta:
         unique_together = [("bill", "person"),]
-        
-    _role = None
-    def get_person_role(self):
-        if not self._role:
-            self._role = self.person.get_role_at_date(self.joined)
-        return self._role
+
+    @property
+    def person_name(self):
+        # don't need title because it's implicit from the bill type
+        from person.name import get_person_name
+        return get_person_name(self.person, role_date=self.joined, firstname_position="after", show_title=False)
         
     # role is a new field which I added with (does not take into account people with overlapping roles such as going from House to Senate on the same day):
     #for role in PersonRole.objects.filter(startdate__lte="1970-01-01", startdate__gt="1960-01-01"):
@@ -655,6 +655,12 @@ class Bill(models.Model):
             seq.append(label)
             
         return seq
+        
+    def get_top_term(self):
+        try:
+            return [t for t in self.terms.all() if t.is_top_term()][0]
+        except IndexError:
+            return None
         
     def get_terms_sorted(self):
         terms = list(self.terms.all())

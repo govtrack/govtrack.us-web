@@ -152,7 +152,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	# do we have cosponsors on both parties?
 	num_cosp_majority = 0
 	for cosponsor in cosponsors:
-		if cosponsor.get_person_role().party == maj_party:
+		if cosponsor.role.party == maj_party:
 			num_cosp_majority += 1
 	if bill.sponsor and sponsor_party == maj_party and len(cosponsors) >= 6 and num_cosp_majority < 2.0*len(cosponsors)/3:
 		factors.append(("cosponsors_bipartisan", "The sponsor is in the majority party and at least one third of the %s's cosponsors are from the minority party." % bill.noun))
@@ -161,7 +161,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 
 	for is_majority in (False, True):
 		for cosponsor in cosponsors:
-			if (cosponsor.get_person_role().party == maj_party) != is_majority: continue
+			if (cosponsor.role.party == maj_party) != is_majority: continue
 			if get_leadership_score(cosponsor.person) > .85:
 				if is_majority:
 					factors.append(("cosponsor_leader_majority", "A cosponsor in the majority party has a high leadership score."))
