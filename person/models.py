@@ -149,9 +149,13 @@ class Person(models.Model):
         except IndexError:
             return None
             
+    _most_recent_role = None
     def get_most_recent_role(self):
+        if self._most_recent_role: return self._most_recent_role
         try:
-            return self.roles.order_by('-startdate')[0]
+            r = self.roles.order_by('-startdate')[0]
+            self._most_recent_role = r
+            return r
         except IndexError:
             return None
     def get_most_recent_congress_role(self, excl_trivial=False):
@@ -182,10 +186,13 @@ class Person(models.Model):
     def most_recent_role_congress(self):
         return self.get_most_recent_role_field('most_recent_congress_number')
     def was_moc(self):
+        if self.is_currently_moc(): return True # good for caching
         return self.roles.filter(role_type__in=(RoleType.representative, RoleType.senator)).exists() # ability to exclude people who only were president
     def is_currently_moc(self):
-        return self.roles.filter(current=True, role_type__in=(RoleType.representative, RoleType.senator)).exists()
-
+        r = self.get_most_recent_role() # good for caching
+        if not r: return False # not even one role?
+        return r.current and r.role_type in (RoleType.representative, RoleType.senator)
+        
     def get_photo_url(self):
         """
         Return URL of 100px photo.
