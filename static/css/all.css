@@ -4224,7 +4224,8 @@ ul.bullets li, .postcontent ul li {
             border-bottom: 0;
         }
 	#sitenews a {
-		border-bottom: 1px dotted #CB4B16;
+		/* incredibly, this causes IE9 to freeze -- border-bottom: 1px dotted #CB4B16; */
+		text-decoration: underline;
 	}
 
 #logo.states {
