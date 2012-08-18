@@ -2,7 +2,7 @@
 ENV=.env
 
 echo Creating virtual environment
-virtualenv $ENV
+virtualenv --system-site-packages $ENV
 
 echo Install PIP inside virtual environment
 $ENV/bin/easy_install pip

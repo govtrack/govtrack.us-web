@@ -1,32 +1,31 @@
+GovTrack website frontend
+
+This repo contains the source code of the front-end for www.GovTrack.us.
+The data-gathering scripts are elsewhere.
+
 Installation
 ============
 
-* Create database and write access credentials to settings_local.py
+* Create a database make a settings_local.py based on settings_local.example.py.
+
 * Install dependencies via OS package manager:
-   * python-virtualenv
-   * python-lxml
-   * python-openid
-   * python-oauth2
-   * python-iso8601
-* Run build/rsync.sh (run it from the main directory, rather than from within build).
-* Run `build/buildenv.sh`
-* Run `reset.sh parse`
-* Run 'python manage.py rebuild_index' to reindex the text search xapian.
 
-reset.sh utility
-================
+  apt-get install python-virtualenv python-lxml python-openid python-oauth2 \
+     python-iso8601 python-numpy openjdk-7-jre
+     
+* Install additional dependencies into a virtualenv using `build/buildenv.sh`.
+     
+* For search, install elasticsearch:
 
-Run `reset.sh` to recreate the database
-Run `reset.sh parse` to recreate the database and execute all parsers
+  wget https://github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.19.8.deb
+  dpkg -i elasticsearch-0.19.8.deb
 
+* Initialize the database and check the site works.
 
-How to use parsers
-==================
+  ./manage.py syncdb
+  ./manage.py runserver
+  
+* Get the data files by running `build/rsync.sh` (run it from the main directory, rather than from within build).
 
-Run ./parse.py <thing>
-Available parsers (to be run in this order):
- * person - Person and PersonRole objects
- * committee - Committee, CommitteeMember, CommitteeMeeting objects
- * bill - BillTerm, Bill objects (--congress NNN is a good idea)
- * vote - Vote objects (--congress NNN is a good idea)
- 
+* Load the data by running `./run_parsers.sh`
+

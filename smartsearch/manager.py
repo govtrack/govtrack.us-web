@@ -365,8 +365,19 @@ class SearchManager(object):
                 if not field: return None
                 if field.choices: return None
                 if field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
-                    # values+annotate makes the db return an integer rather than an object
-                    return field.rel.to.objects.in_bulk(ids)
+                    # values+annotate makes the db return an integer rather than an object,
+                    # and Haystack always returns integers rather than objects
+                    ret = field.rel.to.objects.in_bulk(ids)
+                    
+                    # elasticsearch returns facet values as strings when they should be
+                    # integers. let the mapping work later by also allowing ints....
+                    try:
+                        for id in ids:
+                    	    if type(id) == str and int(id) in ret:
+                    		    ret[id] = ret[int(id)]
+                    except ValueError:
+                        pass
+                    return ret
                 return None
 
             def nice_name(value, objs):

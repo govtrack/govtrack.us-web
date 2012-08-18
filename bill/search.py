@@ -73,7 +73,7 @@ def parse_bill_number(q, congress=None):
         return None
 
 def bill_search_manager():
-    sm = SearchManager(Bill)
+    sm = SearchManager(Bill, connection="bill")
     sm.add_option('text', label='search title & full text', type="text", choices="NONE")
     sm.add_option('congress', type="select", formatter=format_congress_number, sort="KEY-REVERSE")
     sm.add_option('sponsor', type="select", sort="LABEL", formatter=lambda p : p.sortname)

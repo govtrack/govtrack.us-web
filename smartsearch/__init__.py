@@ -28,13 +28,13 @@ def build_haystack_index(model):
 		else:
 			raise ValueError("Model %s field %s in haystack_index is of a type I don't know how to index: %s." % (model.__name__, fieldname, clz))
 		
-		I.fields[fieldname] = index_class(model_attr=model_value, faceted=True, index_fieldname=fieldname, null=True) # stored=True, indexed=True,
+		I.fields[fieldname] = index_class(model_attr=model_value, faceted=True, index_fieldname=fieldname, null=True, indexed=False) # with elasticsearch, indexed=False turns off language analysis
 			
 	for index_field in getattr(model, "haystack_index", []):
 		build_field(index_field)
 	
 	for fieldname, fieldtype in getattr(model, "haystack_index_extra", []):
 		index_class = getattr(indexes, fieldtype + "Field")
-		I.fields[fieldname] = index_class(model_attr=fieldname, faceted=True, index_fieldname=fieldname, null=True)
+		I.fields[fieldname] = index_class(model_attr=fieldname, faceted=True, index_fieldname=fieldname, null=True, indexed=False) # with elasticsearch, indexed=False turns off language analysis
 		
 	return I
