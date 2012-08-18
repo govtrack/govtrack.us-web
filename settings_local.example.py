@@ -1,0 +1,39 @@
+import os.path
+
+DATABASES = {
+	'default': {
+        'NAME': os.path.dirname(__file__) + '/database.sqlite',
+        'ENGINE': 'django.db.backends.sqlite3',
+   	}
+}
+
+CACHES = {
+	'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'opendataiscool'
+	}
+}
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        #'ENGINE': 'xapian_backend.XapianEngine',
+        #'PATH': os.path.join(os.path.dirname(__file__), '../xapian_index'),
+    },
+}
+
+
+SECRET_KEY = 'fill this in'
+
+SUNLIGHTLABS_API_KEY = 'fill this in'
+YOUTUBE_API_KEY = 'fill this in'
+
+# for registration
+RECAPTCHA_PUBLIC_KEY = "fill this in"
+RECAPTCHA_PRIVATE_KEY = "fill this in"
+TWITTER_OAUTH_TOKEN = "fill this in"
+TWITTER_OAUTH_TOKEN_SECRET = "fill this in"
+FACEBOOK_APP_ID = "fill this in"
+FACEBOOK_APP_SECRET = "fill this in"
+FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
+
+
