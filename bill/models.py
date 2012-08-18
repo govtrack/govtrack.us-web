@@ -131,7 +131,7 @@ class Bill(models.Model):
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
     haystack_index_extra = (('proscore', 'Float'),)
     def get_terms_index_list(self):
-        return [t.id for t in self.terms.all().distinct()]
+        return set([t.id for t in self.terms.all()])
     def get_committees_index_list(self):
         return [c.id for c in self.committees.all()]
     def get_cosponsors_index_list(self):
