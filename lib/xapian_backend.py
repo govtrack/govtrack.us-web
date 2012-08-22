@@ -370,7 +370,7 @@ class XapianSearchBackend(BaseSearchBackend):
                 'results': [],
                 'hits': 0,
             }
-
+            
         database = self._database()
 
         if result_class is None:
@@ -1024,6 +1024,16 @@ class XapianSearchQuery(BaseSearchQuery):
                     term = [_marshal_term(t) for t in term]
                 else:
                     term = _marshal_term(term)
+
+                # We'll always get no results if there is punctuation in the query, since
+                # punctuation is not indexed. Should Xapian handle that??
+                if isinstance(term, unicode):
+                    from unicodedata import category
+                    term = ''.join(ch if category(ch)[0] != 'P' else " " for ch in term)
+                    term = re.sub(r"\s+", " ", term) # collapse multiple adjacent spaces?
+                elif isinstance(term, str):
+                    import string
+                    term = re.sub('[ %s]+' % re.escape(string.punctuation), ' ', term)
 
                 if field == 'content':
                     query_list.append(self._content_field(term, is_not))
