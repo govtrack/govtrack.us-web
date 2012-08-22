@@ -174,6 +174,14 @@ class PersonModel(GBaseModel):
 		}
 	roles = fields.ToManyField('website.api.PersonRoleModel', 'roles', help_text="A list of terms in Congress or as President that this person has been elected to. A list of API resources to query for more information.")
 	current_role = fields.ToOneField('website.api.PersonRoleModel', 'current_role', null=True, full=True, help_text="The current term in Congress or as President that this person is currently serving, or null if none.")
+
+class PersonModelSimple(PersonModel):
+	# Based on the PersonModel, but avoid fields that require another database call.
+	class Meta(PersonModel.Meta):
+		additional_properties = {
+			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+		}
+		excludes = ["roles", "current_role"]
 	
 class PersonRoleModel(GBaseModel):
 	"""Terms held in office by Members of Congress and U.S. Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President four years, and in the Senate six years (three 'Congresses')."""
@@ -206,19 +214,20 @@ class BillModel(GBaseModel):
 	canonical_example = 76416
 	
 	class Meta(GBaseModel.BaseMeta):
-		queryset = Bill.objects.all()
+		queryset = Bill.objects.all().prefetch_related("sponsor", "sponsor_role")
 		resource_name = 'bill'
 		filtering = {
 			"bill_type": ('exact',),
 			"congress": ALL,
 			"number": ALL,
 			"sponsor": ALL_WITH_RELATIONS,
+			"sponsor_role": ALL_WITH_RELATIONS,
 			"committees": ALL_WITH_RELATIONS,
 			"terms": ALL_WITH_RELATIONS,
 			"current_status": ALL,
 			"current_status_date": ALL,
 			"introduced_date": ALL,
-			"cosponsors": ALL_WITH_RELATIONS,
+			#"cosponsors": ALL_WITH_RELATIONS,
 			"docs_house_gov_postdate": ALL,
 			"senate_floor_schedule_postdate": ALL,
 		}
@@ -234,9 +243,28 @@ class BillModel(GBaseModel):
 			"is_alive": "is_alive",
 			"thomas_link": "thomas_link",
 		}
-	sponsor = fields.ToOneField('website.api.PersonModel', 'sponsor', null=True, full=True, help_text="The primary sponsor of the bill (optional).")
-	cosponsors = fields.ToManyField('website.api.PersonModel', 'cosponsors', help_text="A list of cosponsors of the bill. A list of API resources to query for more information.")
+	sponsor = fields.ToOneField('website.api.PersonModelSimple', 'sponsor', null=True, full=True, help_text="The primary sponsor of the bill (optional).")
+	sponsor_role = fields.ToOneField('website.api.PersonRoleModel', 'sponsor_role', null=True, full=True, help_text="The role of the primary sponsor of the bill at the time he/she introduced the bill (optional).")
+	#cosponsors = fields.ToManyField('website.api.PersonModelSimple', 'cosponsors', help_text="A list of cosponsors of the bill. A list of API resources to query for more information.")
 	# missing: terms, committees
+ 
+from bill.models import Cosponsor
+class BillCosponsorModel(GBaseModel):
+	"""A (bill, person) pair indicating cosponsorship, with join and withdrawn dates."""
+	
+	canonical_example = 402
+	
+	class Meta(GBaseModel.BaseMeta):
+		queryset = Cosponsor.objects.all().prefetch_related("bill", "person", "role", "bill__sponsor", "bill__sponsor_role")
+		resource_name = 'cosponsorship'
+		filtering = {
+			"bill": ALL_WITH_RELATIONS,
+			"cosponsor": ALL_WITH_RELATIONS,
+			"cosponsor_role": ALL_WITH_RELATIONS,
+		}
+	bill = fields.ToOneField('website.api.BillModel', 'bill', full=True, help_text="The bill.")
+	cosponsor = fields.ToOneField('website.api.PersonModelSimple', 'person', full=True, help_text="The cosponsor.")
+	cosponsor_role = fields.ToOneField('website.api.PersonRoleModel', 'role', full=True, help_text="The role of the cosponsor at the time he/she became a cosponsor of the bill.")
 
 from vote.models import Vote
 class VoteModel(GBaseModel):
@@ -305,6 +333,7 @@ v1_api = Api(api_name='v1')
 v1_api.register(PersonModel())
 v1_api.register(PersonRoleModel())
 v1_api.register(BillModel())
+v1_api.register(BillCosponsorModel())
 v1_api.register(VoteModel())
 v1_api.register(VoteVoterModel())
 
