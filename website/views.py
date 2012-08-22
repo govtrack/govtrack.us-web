@@ -88,7 +88,7 @@ def congress_home(request):
 
 def do_site_search(q, allow_redirect=False):
     if q.strip() == "":
-        return { "results": [] }
+        return []
     
     results = []
     
@@ -184,7 +184,9 @@ def do_site_search(q, allow_redirect=False):
 
 @render_to('website/search.html')
 def search(request):
-    return { "results": do_site_search(request.REQUEST.get("q", ""), allow_redirect=True) }
+    r = do_site_search(request.REQUEST.get("q", ""), allow_redirect=True)
+    if not isinstance(r, list): return r
+    return { "results": r }
 
 @cache_page(60 * 15)
 @render_to('website/campaigns/bulkdata2.html')
