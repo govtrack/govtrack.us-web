@@ -11,15 +11,19 @@ Installation
 * Install dependencies via OS package manager:
 
   apt-get install python-virtualenv python-lxml python-openid python-oauth2 \
-     python-iso8601 python-numpy openjdk-7-jre
+     python-iso8601 python-numpy
      
 * Install additional dependencies into a virtualenv using `build/buildenv.sh`.
      
-* For search, install elasticsearch:
+* For search, install Solr:
 
-  wget https://github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.19.8.deb
-  dpkg -i elasticsearch-0.19.8.deb
+  apt-get install openjdk-7-jre jetty
+  
+  Follow the instructions at:
+  http://django-haystack.readthedocs.org/en/latest/installing_search_engines.html#solr
 
+  Symlink bill/solr_schema.xml into solr/conf/schema.xml
+  
 * Initialize the database and check the site works.
 
   ./manage.py syncdb

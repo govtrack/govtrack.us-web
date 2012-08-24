@@ -9,7 +9,7 @@ django-tastypie
 jsonfield
 beautifulsoup
 feedparser
-requests
+pysolr
 flup
 recaptcha-client
 
