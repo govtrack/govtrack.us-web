@@ -33,13 +33,13 @@ def build_haystack_index(model):
 		else:
 			raise ValueError("Model %s field %s in haystack_index is of a type I don't know how to index: %s." % (model.__name__, fieldname, clz))
 		
-		I.fields[fieldname] = index_class(model_attr=model_value, faceted=True, index_fieldname=fieldname, null=True, indexed=False) # with elasticsearch, indexed=False turns off language analysis
+		I.fields[fieldname] = index_class(model_attr=model_value, faceted=True, index_fieldname=fieldname, null=True, indexed=True) # xapian requires indexed=True, elasticsearch requires indexed=False to turn off language analysis, and Solr seems to ignore
 			
 	for index_field in getattr(model, "haystack_index", []):
 		build_field(index_field)
 	
 	for fieldname, fieldtype in getattr(model, "haystack_index_extra", []):
 		index_class = getattr(indexes, fieldtype + "Field")
-		I.fields[fieldname] = index_class(model_attr=fieldname, faceted=True, index_fieldname=fieldname, null=True, indexed=False) # with elasticsearch, indexed=False turns off language analysis
+		I.fields[fieldname] = index_class(model_attr=fieldname, faceted=True, index_fieldname=fieldname, null=True, indexed=True) # see note above about indexed
 		
 	return I
