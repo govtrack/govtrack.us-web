@@ -72,8 +72,18 @@ def parse_bill_number(q, congress=None):
     except Bill.DoesNotExist:
         return None
 
+def similar_to(qs, form):
+	if form.get("similar_to", "").strip() != "":
+		b = parse_bill_number(form["similar_to"])
+		if b:
+			return qs.more_like_this(b)
+	return None
+
 def bill_search_manager():
     sm = SearchManager(Bill, connection="bill")
+    
+    sm.add_option('similar_to', type="text", label="similar to (enter bill number)", visible_if=lambda form : False, filter=similar_to)
+    
     sm.add_option('text', label='search title & full text', type="text", choices="NONE")
     sm.add_option('congress', type="select", formatter=format_congress_number, sort="KEY-REVERSE")
     sm.add_option('sponsor', type="select", sort="LABEL", formatter=lambda p : p.sortname)
