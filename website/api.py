@@ -167,9 +167,7 @@ class PersonModel(GBaseModel):
 			"roles": ALL_WITH_RELATIONS,
 		}
 		additional_properties = {
-			"name": "name",
 			"name_no_details": "name_no_details",
-			"name_sortable": "sortname",
 			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
 		}
 	roles = fields.ToManyField('website.api.PersonRoleModel', 'roles', help_text="A list of terms in Congress or as President that this person has been elected to. A list of API resources to query for more information.")
@@ -348,7 +346,7 @@ def api_overview(request):
 		# wrapped in a function so it is cachable at the template level
 		resources = sorted(v1_api._registry.items())
 		for ep, r in resources:
-			r.example_content = r.dispatch_list(request, congress=112, current=True, roles__current=True).content
+			r.example_content = r.dispatch_list(request, congress=112, current=True, roles__current=True, limit=1).content
 			r.fields_list = sorted((k, k.replace("_", u"_\u00AD"), v) for (k, v) in r.build_schema()["fields"].items())
 		return resources
 	

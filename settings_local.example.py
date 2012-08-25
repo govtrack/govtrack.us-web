@@ -15,11 +15,19 @@ CACHES = {
 }
 
 HAYSTACK_CONNECTIONS = {
-    'default': {
-        #'ENGINE': 'xapian_backend.XapianEngine',
-        #'PATH': os.path.join(os.path.dirname(__file__), '../xapian_index'),
+    'default': { # required but not used
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
     },
-}
+    'person': {
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine', # replace this
+    },
+    'bill': {
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine', # replace this
+    },
+    'states': {
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine', # replace this
+    },
+}                   
 
 
 SECRET_KEY = 'fill this in'
