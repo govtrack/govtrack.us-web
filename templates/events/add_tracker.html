@@ -126,11 +126,17 @@ function do_search(form) {
 			<div class="row">
 				<form id="tracker_search" class="group ten columns centered" onsubmit="return do_search(this);">
 					<h2>Search for Bills &amp; Legislation, Members of Congress, or Committees:</h2>
-					<fieldset class="box">
-							<label for="search_entry">Search all of GovTrack for...</label>
-							<input id="search_entry" name="q" type="text" class="text" value="{{request.GET.q}}" />
-							<input id="submit" class="btn-search-small" type="submit" value="Search"/>
+					<fieldset class="box row">
+						
+						<label for="search_entry">Search all of GovTrack for...</label>
+						<input id="search_entry" name="q" type="text" class="text" value="{{request.GET.q}}" />
+						<input id="submit" class="btn-search large" type="submit" value="Search"/>
+						
+						<div class="notebox">
+							<h4>Tip:</h4>
 							<p class="note">You can search for legislation by keywords, names, or bill numbers, (<em>"fossil fuels"</em>, "<em>End Big Oil</em>", or "<em>H.R. 601</em>"); you can search for members by name or state, or even put in your street address to find your area representatives.</p>
+						</div>
+
 			    	</fieldset>
 				</form>
 			</div>

@@ -106,7 +106,7 @@ def do_site_search(q, allow_redirect=False):
              "obj": p.object,
              "feed": Feed.PersonFeed(p.object),
              "secondary": p.object.get_current_role() == None }
-            for p in SearchQuerySet().filter(indexed_model_name__in=["Person"], content=q)[0:9]]
+            for p in SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q)[0:9]]
         })
        
     # Skipping states for now because we might want to go to the district maps or to
@@ -142,7 +142,7 @@ def do_site_search(q, allow_redirect=False):
              "obj": b.object,
              "feed": Feed.BillFeed(b.object),
              "secondary": b.object.congress != CURRENT_CONGRESS }
-            for b in SearchQuerySet().filter(indexed_model_name__in=["Bill"], content=q).order_by('-current_status_date')[0:9]]
+            for b in SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], content=q).order_by('-current_status_date')[0:9]]
     else:
         #bills = [{"href": bill.get_absolute_url(), "label": bill.title, "obj": bill, "secondary": bill.congress != CURRENT_CONGRESS }]
         return HttpResponseRedirect(bill.get_absolute_url())

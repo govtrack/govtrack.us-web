@@ -4,9 +4,14 @@ export RELEASE=1
 ./parse.py -l ERROR --congress=112 bill
 ./parse.py -l ERROR --congress=112 vote
 #./parse.py -l ERROR states
-./manage.py update_index person
 
-# bills are indexed as they are parsed
-#
-# state bills are indexed in a separate index, so for maintenance:
-# ./manage.py update_index states --using states
+# -v 0 sets low verbosity
+./manage.py update_index -v 0 -u person person
+
+# bills and state bills are indexed as they are parsed, but to
+# freshen the index. Because bills index full text and so
+# indexing each time is substantial, set the TIMEOUT and
+# BATCH_SIZE options in the haystack connections appropriately.
+# ./manage.py update_index -v 2 -u bill bill
+# ./manage.py update_index -v 2 -u states states
+

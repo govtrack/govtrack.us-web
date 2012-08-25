@@ -5,9 +5,12 @@ python-dateutil
 django-cache-utils
 django-debug-toolbar
 django-picklefield
+django-tastypie
+jsonfield
 beautifulsoup
 feedparser
 xapian-haystack
+pysolr
 flup
-django-tastypie
+recaptcha-client
 

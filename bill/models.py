@@ -131,7 +131,7 @@ class Bill(models.Model):
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
     haystack_index_extra = (('proscore', 'Float'),)
     def get_terms_index_list(self):
-        return [t.id for t in self.terms.all().distinct()]
+        return set([t.id for t in self.terms.all()])
     def get_committees_index_list(self):
         return [c.id for c in self.committees.all()]
     def get_cosponsors_index_list(self):
@@ -794,7 +794,9 @@ def bill_search_feed_title(q):
 def bill_search_feed_execute(q):
     from search import bill_search_manager
     from settings import CURRENT_CONGRESS
-    bills = bill_search_manager().execute_qs(q, overrides={'congress': CURRENT_CONGRESS})
+    
+    bills = bill_search_manager().execute_qs(q, overrides={'congress': CURRENT_CONGRESS}).order_by("-current_status_date")[0:100] # we have to limit to make this reasonably fast
+    
     def make_feed_name(bill):
         return "bill:" + BillType.by_value(bill.bill_type).xml_code + str(bill.congress) + "-" + str(bill.number)
     return Feed.objects.filter(feedname__in=[make_feed_name(bill) for bill in bills]) # batch load

@@ -48,6 +48,7 @@
 {% block body_class %}bill{% endblock %}
 
 {% block summary %}
+
 <div class="row">
 	{% cache 600 billhead bill.id %}
 	<h1>{{bill.title|truncatewords:15}}</h1>
@@ -498,7 +499,6 @@
 				{% endwith %}
 			
 				{% with reintros.0 as reintro_from %}
-				{% if bill.relatedbills.exists or reintro_from %}
 				<div class="container">
 					<dl style="margin-top: 1em">
 						<dt>Related Bills:</dt>
@@ -506,7 +506,7 @@
 							{% if bill.relatedbills.exists %}
 							<div>
 							{% for rb in bill.get_related_bills %}
-								<div>{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
+								<div style="margin-bottom: .25em">{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
 							{% endfor %}
 							</div>
 							<p><small>Related bills above are identified by the Congressional Research Service.</small></p>
@@ -515,10 +515,11 @@
 							{% if reintro_from %}
 							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
 							{% endif %}
+							
+							<p>Search for <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
 						</dd>
 					</dl>
 				</div>
-				{% endif %}
 				{% endwith %}
 					
 				{% if bill.terms.exists %}

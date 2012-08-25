@@ -15,6 +15,7 @@ import json, urllib
 from common.enum import MetaEnum
 
 FACET_CACHE_TIME = 60*60
+FACET_OPTIONS = { "limit": -1, "sort": "count" } # limits cause problems because the selected option can dissapear!
 
 class SearchManager(object):
     def __init__(self, model, qs=None, connection=None):
@@ -131,17 +132,20 @@ class SearchManager(object):
                 faceted_qs = qs
                 loadable_facets = []
                 for option in self.options:
+                    if option.filter: continue
                     if option.field_name in request.POST or option.field_name+"[]" in request.POST: continue
                     if option.type == "text": continue
                     if option.type == "select" and request.POST["faceting"]=="false": continue # 2nd phase only
                     loadable_facets.append(option.field_name)
-                    faceted_qs = faceted_qs.facet(option.field_name)
+                    faceted_qs = faceted_qs.facet(option.field_name, **FACET_OPTIONS)
                 if len(loadable_facets) > 0:
                     cache_key = self.build_cache_key('bulkfaceting__' + ",".join(loadable_facets), request)
                     loaded_facets = cache.get(cache_key)
                     if not loaded_facets:
-                        loaded_facets = faceted_qs.facet_counts()["fields"]
-                        cache.set(cache_key, loaded_facets, FACET_CACHE_TIME)
+                        fq = faceted_qs.facet_counts()
+                        if "fields" in fq: # don't know why it sometimes gives nothing
+                            loaded_facets = fq["fields"]
+                            cache.set(cache_key, loaded_facets, FACET_CACHE_TIME)
 
             cache_key = self.build_cache_key('count', request)
             qs_count = cache.get(cache_key)
@@ -261,10 +265,14 @@ class SearchManager(object):
                         else:                        
                             yield y
                 values = list(clean_values(postdata.getlist(option.field_name)+postdata.getlist(option.field_name+"[]")))
-                # if __ALL__ value presents in filter values
-                # then do not limit queryset
-                if not u'__ALL__' in values:
-                    filters.update({'%s__in' % option.field_name: values})
+                if option.type == "text":
+                	# For full-text searching, don't use __in so that the search
+                	# backend does its usual query operation.
+                	filters[option.field_name] = " ".join(values)
+                elif not u'__ALL__' in values:
+					# if __ALL__ value presents in filter values
+					# then do not limit queryset
+                    filters['%s__in' % option.field_name] = values
 
         # apply filters simultaneously so that filters on related objects are applied
         # to the same related object. if they were applied chained (i.e. filter().filter())
@@ -287,13 +295,15 @@ class SearchManager(object):
             class SR:
                 def __init__(self, qs):
                     self.qs = qs
-                def facet(self, field):
-                    return self.qs.facet(field)
+                def facet(self, field, **kwargs):
+                    return self.qs.facet(field, **kwargs)
                 def count(self):
                     return len(self.qs)
+                def order_by(self, field):
+                    return SR(self.qs.order_by(field))
                 def __len__(self):
                     return len(self.qs)
-                def __getitem__(self, index):
+                def __getitem__(self, index): # slices too
                     return SR(self.qs[index])
                 def __iter__(self):
                     for item in self.qs:
@@ -365,7 +375,8 @@ class SearchManager(object):
                 if not field: return None
                 if field.choices: return None
                 if field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
-                    # values+annotate makes the db return an integer rather than an object
+                    # values+annotate makes the db return an integer rather than an object,
+                    # and Haystack always returns integers rather than objects
                     return field.rel.to.objects.in_bulk(ids)
                 return None
 
@@ -382,10 +393,22 @@ class SearchManager(object):
                         return unicode(objs[value])
                     value = field.rel.to.objects.get(id=value)
                 return unicode(value)
+            
+            def fix_value_type(value):
+                # Solr and ElasticSearch return strings on integer data types.
+                if isinstance(value, (str, unicode)) and field.__class__.__name__ in ('IntegerField', 'ForeignKey', 'ManyToManyField'):
+                    return int(value)
+                return value
 
             def build_choice(value, count):
                 # (key, label, count, help_text) tuples
-                return (value, nice_name(value, objs), count, getattr(field.choices.by_value(value), "search_help_text", None) if field and field.choices and type(field.choices) == MetaEnum else None)
+                value = fix_value_type(value)
+                return (
+                	value,
+                	nice_name(value, objs),
+                	count,
+                	getattr(field.choices.by_value(value), "search_help_text", None)
+                		if field and field.choices and type(field.choices) == MetaEnum else None)
             
             if loaded_facets and option.field_name in loaded_facets:
                 # Facet counts were already loaded.
@@ -397,7 +420,7 @@ class SearchManager(object):
                 
                 if hasattr(resp, 'facet'):
                     # Haystack.
-                    resp = resp.facet(option.field_name).facet_counts()
+                    resp = resp.facet(option.field_name, **FACET_OPTIONS).facet_counts()
                     if len(resp) == 0:
                         return []
                     facet_counts = resp["fields"][option.field_name]
@@ -415,6 +438,10 @@ class SearchManager(object):
                     counts = [ 
                         build_choice(x[option.field_name], x['_count'] if include_counts else None)
                         for x in resp if x[option.field_name] != ""]
+                        
+            ## Stock Solr returns facets that have 0 count. Filter those out.
+            ## Except we're using my fork to unset the facet limit.
+            #counts = [c for c in counts if c[2] > 0]
             
             # Sort by count then by label.
             if option.sort == "COUNT":

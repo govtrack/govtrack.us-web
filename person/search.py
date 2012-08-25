@@ -65,7 +65,7 @@ def bottom_content(obj, form):
         return ""
 
 def person_search_manager():
-    sm = SearchManager(Person)
+    sm = SearchManager(Person, connection="person")
     
     sm.add_filter("was_moc__in", [True]) # exclude presidents
     

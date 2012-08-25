@@ -46,6 +46,11 @@ class Person(models.Model):
     metavidid = models.CharField(max_length=255, blank=True, help_text="The person's ID on metavid.org, if known.")
     youtubeid = models.CharField(max_length=255, blank=True, help_text="The name of the person's official YouTube channel, if known.")
     twitterid = models.CharField(max_length=50, blank=True, help_text="The name of the person's official Twitter handle, if known.")
+    
+    # cached name info
+    name = models.CharField(max_length=96, help_text="The person's full name with title, district, and party information for current Members of Congress, in a typical display format.")
+    sortname = models.CharField(max_length=64, help_text="The person's name suitable for sorting lexicographically by last name or for display in a sorted list of names. Title, district, and party information are included for current Members of Congress.")
+    
 
     # indexing
     def get_index_text(self):
@@ -60,12 +65,6 @@ class Person(models.Model):
     @property
     def fullname(self):
         return u'%s %s' % (self.firstname, self.lastname)
-
-    @property
-    @cache_result
-    def name(self):
-    	"""The person's full name with title, district, and party information for current Members of Congress."""
-        return get_person_name(self, firstname_position='before', role_recent=True)
 
     @cache_result
     def name_no_district(self):
@@ -84,11 +83,10 @@ class Person(models.Model):
     def name_and_title(self):
         return get_person_name(self, firstname_position='before', role_recent=True, show_party=False, show_district=False)
        
-    @property
-    @cache_result
-    def sortname(self):
-    	"""The person's name suitable for sorting lexicographically by last name or for display in a sorted list of names. Title, district, and party information are included for current Members of Congress."""
-        return get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
+    def set_names(self):
+        self.sortname = get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
+        self.name = get_person_name(self, firstname_position='before', role_recent=True)
+
         
     @property
     def current_role(self):

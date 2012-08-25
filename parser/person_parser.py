@@ -109,6 +109,9 @@ def main(options):
         # then other nodes could be parsed
         try:
             person = person_processor.process(Person(), node)
+            
+            # Create cached name strings.
+            person.set_names()
 
             # Now try to load the person with such ID from
             # database. If found it then just update it
