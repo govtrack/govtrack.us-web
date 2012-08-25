@@ -19,7 +19,6 @@ from us import statelist, statenames, stateapportionment, state_abbr_from_name, 
 from person.models import Person, PersonRole
 from person import analysis
 from person.types import RoleType
-from person.video import get_youtube_videos, get_sunlightlabs_videos
 from person.util import get_committee_assignments
 
 from events.models import Feed

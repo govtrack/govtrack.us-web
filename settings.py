@@ -111,7 +111,6 @@ INSTALLED_APPS = (
     'common',
     'django_extensions',
     #'south',
-    'GChartWrapper.charts',
     'debug_toolbar',
     
     'haystack',
@@ -160,8 +159,6 @@ IGNORABLE_404_URLS = (
 	)
 
 CURRENT_CONGRESS = 112
-
-#HAYSTACK_ROUTERS = ['states.search_indexes.MyRouter', 'haystack.routers.DefaultRouter'] # causes weird import error
 
 PREDICTIONMARKET_SEED_MONEY = 1000
 PREDICTIONMARKET_BANK_UID = 136196

@@ -1,5 +1,5 @@
 from models import Req
-from settings import WMATA_API_KEY
+#from settings import WMATA_API_KEY
 from django.core.cache import cache
  
 import urllib, json, datetime
