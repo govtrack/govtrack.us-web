@@ -1,0 +1,2 @@
+#!/bin/sh
+RELEASE=1 DJANGO_SETTINGS_MODULE=settings PYTHONPATH=. .env/bin/python -u $@
