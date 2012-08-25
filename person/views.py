@@ -33,10 +33,6 @@ def person_details(request, pk):
     def build_info():
         person = get_object_or_404(Person, pk=pk)
         
-        # redirect to canonical URL
-        if request.path != person.get_absolute_url():
-            return redirect(person.get_absolute_url(), permanent=True)
-           
         # current role
         role = person.get_current_role()
         if role:
@@ -82,6 +78,11 @@ def person_details(request, pk):
     if not ret:
         ret = build_info()
         cache.set(ck, ret, 600)
+
+    # redirect to canonical URL
+    if request.path != ret["person"].get_absolute_url():
+        return redirect(ret["person"].get_absolute_url(), permanent=True)
+           
     return ret
 
 def searchmembers(request, initial_mode=None):

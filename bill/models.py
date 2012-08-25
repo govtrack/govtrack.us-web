@@ -69,8 +69,8 @@ class Cosponsor(models.Model):
     person = models.ForeignKey('person.Person')
     role = models.ForeignKey('person.PersonRole')
     bill = models.ForeignKey('bill.Bill')
-    joined = models.DateField()
-    withdrawn = models.DateField(blank=True, null=True)
+    joined = models.DateField(help_text="The date the cosponsor was added. It is always greater than or equal to the bill's introduced_date.")
+    withdrawn = models.DateField(blank=True, null=True, help_text="If the cosponsor withdrew his/her support, the date of withdrawl. Otherwise empty.")
     class Meta:
         unique_together = [("bill", "person"),]
 

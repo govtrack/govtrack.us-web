@@ -100,7 +100,7 @@ class Person(models.Model):
         return self.roles.filter(current=True).exists()
 
     def get_absolute_url(self):
-        name = slugify('%s %s' % (self.firstname, self.lastname))
+        name = slugify('%s %s' % (self.firstname if not self.firstname.endswith(".") else self.middlename, self.lastname))
         name = name.replace('-', '_')
         return '/congress/members/%s/%d' % (name, self.pk)
 
