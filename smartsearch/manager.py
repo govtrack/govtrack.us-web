@@ -299,9 +299,11 @@ class SearchManager(object):
                     return self.qs.facet(field, **kwargs)
                 def count(self):
                     return len(self.qs)
+                def order_by(self, field):
+                    return SR(self.qs.order_by(field))
                 def __len__(self):
                     return len(self.qs)
-                def __getitem__(self, index):
+                def __getitem__(self, index): # slices too
                     return SR(self.qs[index])
                 def __iter__(self):
                     for item in self.qs:
@@ -394,7 +396,7 @@ class SearchManager(object):
             
             def fix_value_type(value):
                 # Solr and ElasticSearch return strings on integer data types.
-                if field.__class__.__name__ in ('IntegerField', 'ForeignKey', 'ManyToManyField'):
+                if isinstance(value, (str, unicode)) and field.__class__.__name__ in ('IntegerField', 'ForeignKey', 'ManyToManyField'):
                     return int(value)
                 return value
 
