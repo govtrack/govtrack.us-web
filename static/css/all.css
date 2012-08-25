@@ -20,7 +20,7 @@
          url('../fonts/PTF56F-webfont.ttf') format('truetype'),
          url('../fonts/PTF56F-webfont.svg#PTSerifItalic') format('svg');
     font-weight: normal;
-    font-style: normal;
+    font-style: italic;
 
 }
 
@@ -31,7 +31,7 @@
          url('../fonts/PTF75F-webfont.woff') format('woff'),
          url('../fonts/PTF75F-webfont.ttf') format('truetype'),
          url('../fonts/PTF75F-webfont.svg#PTSerifBold') format('svg');
-    font-weight: normal;
+    font-weight: bold;
     font-style: normal;
 
 }
@@ -43,8 +43,8 @@
          url('../fonts/PTF76F-webfont.woff') format('woff'),
          url('../fonts/PTF76F-webfont.ttf') format('truetype'),
          url('../fonts/PTF76F-webfont.svg#PTSerifBoldItalic') format('svg');
-    font-weight: normal;
-    font-style: normal;
+    font-weight: bold;
+    font-style: italic;
 
 }
 
@@ -68,7 +68,7 @@
          url('../fonts/OpenSans-Italic-webfont.ttf') format('truetype'),
          url('../fonts/OpenSans-Italic-webfont.svg#OpenSansItalic') format('svg');
     font-weight: normal;
-    font-style: normal;
+    font-style: italic;
 
 }
 
@@ -79,7 +79,7 @@
          url('../fonts/OpenSans-Bold-webfont.woff') format('woff'),
          url('../fonts/OpenSans-Bold-webfont.ttf') format('truetype'),
          url('../fonts/OpenSans-Bold-webfont.svg#OpenSansBold') format('svg');
-    font-weight: normal;
+    font-weight: bold;
     font-style: normal;
 
 }
@@ -91,8 +91,8 @@
          url('../fonts/OpenSans-BoldItalic-webfont.woff') format('woff'),
          url('../fonts/OpenSans-BoldItalic-webfont.ttf') format('truetype'),
          url('../fonts/OpenSans-BoldItalic-webfont.svg#OpenSansBoldItalic') format('svg');
-    font-weight: normal;
-    font-style: normal;
+    font-weight: bold;
+    font-style: italic;
 
 }
 
@@ -201,6 +201,8 @@ pre+h2 {
 	margin-bottom: 1em;
 }
 
+em { font-style: italic; }
+strong { font-style: bold; }
 
 pre {
     margin: 0 0 1em 16px;
@@ -267,18 +269,7 @@ code {
 	background: url(../images/pv-speakup.png) left top no-repeat;
 	}
 
-.note {
-	font-size: .9em;
-	line-height: 18px;
-	font-family: PTSerifItalic;
-    }
-    .note strong {
-      font-family: PTSerifBoldItalic;
-    }
-    .note em {
-      font-family: PTSerifRegular;
-      font-style: normal;
-    }
+
 .box,
 .topbox {
     background: #f3f1e9 url(../images/bg-paper.jpg);
@@ -293,6 +284,37 @@ code {
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
 }
+
+.notebox {
+  background: #fffbf0;
+  border: solid #fcf3d0 1px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 20px;
+  font-family: PTSerifRegular;
+}
+  .notebox h4 {
+    font-size: 1.25em;
+    font-family: OpenSansBold;
+    color: #d5bb55;
+    float: left;
+    padding: 20px 20px 20px 0;
+    margin-right: 10px;
+    border-right: solid #d5bb55 2px;
+  }
+.note {
+  font-size: .9em;
+  line-height: 18px;
+  font-style: italic;
+    }
+    .note strong {
+      
+    }
+    .note em {
+      font-style: normal
+    }
+
 .lt-ie9 .box,
 .lt-ie9 .topbox {
     box-shadow: none;
@@ -3142,6 +3164,10 @@ aside .download-links { padding: 31px 0 0 	}
   #tracker_search label {
   }
 
+  #tracker_search input.text {
+    height: 40px;
+  }
+
   #tracker_wizard form .box {
     padding: 20px;
     margin-bottom: 40px;
@@ -3328,40 +3354,43 @@ input[type="button"] {
   -ms-background-clip: padding-box;
   -o-background-clip: padding-box;
   background-clip: padding-box;
-  background: #dddddd url('../images/button.png?1298351022') repeat-x;
-  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(100%, #dddddd));
-  background-image: -webkit-linear-gradient(#ffffff, #dddddd);
-  background-image: -moz-linear-gradient(#ffffff, #dddddd);
-  background-image: -o-linear-gradient(#ffffff, #dddddd);
-  background-image: -ms-linear-gradient(#ffffff, #dddddd);
-  background-image: linear-gradient(#ffffff, #dddddd);
+  background: #9cc176 url('../images/button-green.png') repeat-x; /* Old browsers */
+  background: -moz-linear-gradient(top,  #9cc176 0%, #80a75a 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#9cc176), color-stop(100%,#80a75a)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  #9cc176 0%,#80a75a 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  #9cc176 0%,#80a75a 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  #9cc176 0%,#80a75a 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #9cc176 0%,#80a75a 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9cc176', endColorstr='#80a75a',GradientType=0 ); /* IE6-9 */
   border: 1px solid;
-  border-color: #dddddd #bbbbbb #999999;
+  border-color: #c1dca7 #7da358 #658447;
   cursor: pointer;
-  color: #333333;
-  /*font: bold 12px/1.3 "Helvetica Neue", Arial, "Liberation Sans", FreeSans, sans-serif;*/
+  color: #ffffff;
+  text-shadow: 0 -1px 1px #70944c;
+  font-size: 1em;
   outline: 0;
   overflow: visible;
   margin: 0;
   padding: 3px 10px;
-  /*text-shadow: white 0 1px 1px;*/
   vertical-align: top;
   width: auto;
   *padding-top: 2px;
   *padding-bottom: 0;
-  /*behavior: url(/static/js/PIE.htc);*/
 }
-/*button:hover,
+button:hover,
 input[type="reset"]:hover,
 input[type="submit"]:hover,
 input[type="button"]:hover {
-  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(1px, #eeeeee), color-stop(100%, #cccccc));
-  background-image: -webkit-linear-gradient(#ffffff, #eeeeee 1px, #cccccc);
-  background-image: -moz-linear-gradient(#ffffff, #eeeeee 1px, #cccccc);
-  background-image: -o-linear-gradient(#ffffff, #eeeeee 1px, #cccccc);
-  background-image: -ms-linear-gradient(#ffffff, #eeeeee 1px, #cccccc);
-  background-image: linear-gradient(#ffffff, #eeeeee 1px, #cccccc);
-}*/
+
+  background: #85b357; /* Old browsers */
+  background: -moz-linear-gradient(top,  #85b357 0%, #6e904c 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#85b357), color-stop(100%,#6e904c)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  #85b357 0%,#6e904c 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  #85b357 0%,#6e904c 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  #85b357 0%,#6e904c 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #85b357 0%,#6e904c 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#85b357', endColorstr='#6e904c',GradientType=0 ); /* IE6-9 */
+}
 button:active,
 input[type="reset"]:active,
 input[type="submit"]:active,
