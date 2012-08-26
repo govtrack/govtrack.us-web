@@ -299,7 +299,7 @@ class Bill(models.Model):
             status = "After passing in the Senate, this %s failed in the House on %s."
         elif status == "FAIL:SECOND:SENATE":
             status = "After passing in the House, this %s failed in the Senate on %s."
-        elif status == "VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE" or status == "VETOED_OVERRIDE_FAIL_SECOND:HOUSE":
+        elif status == "VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE" or status == "VETOED:OVERRIDE_FAIL_SECOND:HOUSE":
             status = "This %s was vetoed. The House attempted to override the veto on %s but failed."
         elif status == "VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE" or status == "VETOED:OVERRIDE_FAIL_SECOND:SENATE":
             status = "This %s was vetoed. The Senate attempted to override the veto on %s but failed."
