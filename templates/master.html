@@ -338,8 +338,11 @@
 	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 	</script>
 	<script type="text/javascript">
-	try { var pageTracker = _gat._getTracker("UA-1190841-1"); pageTracker._trackPageview(); }
-	catch(err) {}
+	try {
+	 var pageTracker = _gat._getTracker("UA-1190841-1");
+	 pageTracker._setCustomVar(1, "Login Type", "{% if request.user.is_authenticated %}Logged In{% else %}Anonymous{% endif %}", 2);
+	 pageTracker._trackPageview();
+	} catch(err) {}
 	</script>
 	{% endif %}
 	
