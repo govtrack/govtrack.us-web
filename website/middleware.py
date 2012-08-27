@@ -1,5 +1,4 @@
 from models import Req
-#from settings import WMATA_API_KEY
 from django.core.cache import cache
  
 import urllib, json, datetime
@@ -44,23 +43,8 @@ def template_context_processor(request):
     except:
         pass
     
-    # Get WMATA train status at Capitol South and Union Station.
-    def wmata_info():
-        if datetime.datetime.now().hour < 16: return { }
-        ret = cache.get("hill_wmata_info")
-        if ret: return ret
-        ret = { }
-        try:
-            ret.update( json.loads(urllib.urlopen("http://api.wmata.com/StationPrediction.svc/json/GetPrediction/B03,D05?api_key=" + WMATA_API_KEY).read()) )
-            ret.update( json.loads(urllib.urlopen("http://api.wmata.com/Incidents.svc/json/Incidents?api_key=" + WMATA_API_KEY).read()) )
-            ret["Trains"] = [t for t in ret["Trains"] if t["Line"] in ("RD", "BL", "OR")] # exclude no passengers
-            for inc in ret["Incidents"]:
-                inc["LinesAffected"] = [t for t in inc.get("LinesAffected", "").split(";") if t != ""]
-        except:
-            pass
-        cache.set("hill_wmata_info", ret, 15) # 15 seconds
-        return ret
-    context["wmata_info"] = wmata_info
+    from random import choice
+    context["random_ad"] = choice(xrange(2))
     
     return context
     
