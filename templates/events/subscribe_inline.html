@@ -1,3 +1,5 @@
+{% load govtrack_utils %}
+
 {% if not 'googlebot(at)googlebot.com' in request.META.HTTP_FROM %}
 	{% comment %}Google likes to follow the social registration links which generates an error at Twitter that gets sent in an email to the site maintainer.{% endcomment %}
 
@@ -7,6 +9,16 @@
 }
 </style>
 <script>
+// set up experiment
+var exp_cond = {% randint 0 4 %};
+if (exp_cond == 1) { $('.track-btn').text("Get Alerts"); }
+if (exp_cond == 2) { $('.track-btn').text("Create Alert"); }
+if (exp_cond == 3) { $('.track-btn').text("Alert Me"); }
+if (exp_cond == 4) { $('.track-btn').html("<img src='/static/images/ico-mail.png' style='padding-right: 8px; vertical-align: middle'/> <span style='padding-right: 8px'>Alert Me</span>"); }
+var exp_lbl = exp_cond + ":" + $('.track-btn').text();
+var exp_done = false;
+// =================
+
 var feed_cur_feed = "{{feed.feedname|escapejs}}";
 var feed_list_state = {{% for f in feed.includes_feeds_and_self %}
 	"{{f.feedname|escapejs}}": {
@@ -15,6 +27,13 @@ var feed_list_state = {{% for f in feed.includes_feeds_and_self %}
 };
 
 function show_track_panel() {
+    // record event
+	if (!exp_done) {
+		pageTracker._trackEvent("Track Button", "Click", exp_lbl, null, false);
+		exp_done = true;
+	}
+    // ============
+
 	if (!$('#track_panel').is(":visible")) {
 		var btn = $('.track-btn');
 		$('#track_panel').css({
@@ -82,6 +101,10 @@ function selected_feed_changed(new_feed) {
 }
 {% endif %}
 $(function() {
+    // record event
+	pageTracker._trackEvent("Track Button", "Shown", exp_lbl, null, true);
+    // ============
+
 	if (window.location.hash == "#track") {
 		show_track_panel();
 		window.location.hash = "";
