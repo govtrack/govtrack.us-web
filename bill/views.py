@@ -384,7 +384,7 @@ def bill_docket(request):
     return ret
     
 def subject(request, sluggedname, termid):
-    ix = BillTerm.objects.get(id=termid)
+    ix = get_object_or_404(BillTerm, id=termid)
     if ix.parents.all().count() == 0:
         ix1 = ix
         ix2 = None
