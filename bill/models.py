@@ -438,7 +438,7 @@ class Bill(models.Model):
         return {
             "type": status.label,
             "date": date,
-            "date_has_no_time": isinstance(date, datetime.date),
+            "date_has_no_time": isinstance(date, datetime.date) or date.time() == datetime.time.min,
             "title": self.title,
             "url": self.get_absolute_url(),
             "body_text_template":

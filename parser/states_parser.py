@@ -152,7 +152,7 @@ def process_subjects(row, options, filename):
     s.save()
 
 # TODO: unicameral?
-chamber_map = { "Lower": StateChamberEnum.lower, "Upper": StateChamberEnum.upper, "": StateChamberEnum.unknown }
+chamber_map = { "lower": StateChamberEnum.lower, "upper": StateChamberEnum.upper, "": StateChamberEnum.unknown }
 
 @iffilechanged
 @rowbyrow
@@ -180,7 +180,7 @@ def process_bills(row, options, filename, haystack_index):
         })
     b.state_session = session
     b.bill_number = row["StateBillID"]
-    b.chamber = chamber_map[row["IntroducedChamber"]]
+    b.chamber = chamber_map[row["IntroducedChamber"].lower()]
     if row["StateCode"] in ("NE", "DC"): b.chamber = StateChamberEnum.unicameral # DC not in yet, but later?
     
     b.short_title = row["ShortBillName"]

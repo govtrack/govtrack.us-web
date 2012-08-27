@@ -160,7 +160,7 @@
 					<article class="post {{event.type}}">
 						<div class="event_header">
 							<h4 class="event_title">{{event.title|truncatewords:30}}</h4>
-							<div class="event_date"><span>Date: </span>{{event.date}}</div>
+							<div class="event_date"><span>Date: </span>{% if not item.date_has_no_time %}{{item.when}}{% else %}{{item.when|date}}{% endif %}</div>
 							<div class="event_type">Type: <span>{{event.type}}</span></div>
 						</div>
 						<div class="event_body">
