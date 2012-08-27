@@ -1,7 +1,9 @@
 from models import Req
 from django.core.cache import cache
+from django.conf import settings
  
 import urllib, json, datetime
+
 
 # http://whois.arin.net/rest/org/ISUHR/nets
 HOUSE_NET_RANGES = (
@@ -18,7 +20,9 @@ SENATE_NET_RANGES = (
     )
 
 def template_context_processor(request):
-    context = { }
+    context = {
+    	"GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY
+    }
     
     # Add context variables for whether the user is in the
     # House or Senate netblocks.

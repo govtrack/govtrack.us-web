@@ -343,7 +343,7 @@
 	</script>
 	<script type="text/javascript">
 	try {
-	 pageTracker = _gat._getTracker("UA-1190841-1");
+	 pageTracker = _gat._getTracker("{{GOOGLE_ANALYTICS_KEY|escapejs}}");
 	 pageTracker._setCustomVar(1, "Login Type", "{% if request.user.is_authenticated %}Logged In{% else %}Anonymous{% endif %}", 2);
 	 pageTracker._trackPageview();
 	} catch(err) {}

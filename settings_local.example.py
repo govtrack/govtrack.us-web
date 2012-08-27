@@ -32,6 +32,8 @@ HAYSTACK_CONNECTIONS = {
 
 SECRET_KEY = 'fill this in'
 
+GOOGLE_ANALYTICS_KEY = 'fill this in' 
+
 SUNLIGHTLABS_API_KEY = 'fill this in'
 YOUTUBE_API_KEY = 'fill this in'
 
