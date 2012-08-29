@@ -10,12 +10,8 @@
 </style>
 <script>
 // set up experiment
-var exp_cond = {% randint 0 4 %};
-if (exp_cond == 1) { $('.track-btn').text("Get Alerts"); }
-if (exp_cond == 2) { $('.track-btn').text("Create Alert"); }
-if (exp_cond == 3) { $('.track-btn').text("Alert Me"); }
-if (exp_cond == 4) { $('.track-btn').html("<img src='/static/images/ico-mail.png' style='padding-right: 8px; vertical-align: middle'/> <span style='padding-right: 8px'>Alert Me</span>"); }
-var exp_lbl = exp_cond + ":" + $('.track-btn').text();
+var exp_cond = -1;
+var exp_lbl = "null";
 var exp_done = false;
 // =================
 
@@ -102,6 +98,12 @@ function selected_feed_changed(new_feed) {
 {% endif %}
 $(function() {
     // record event
+	exp_cond = {% randint 0 4 %};
+	if (exp_cond == 1) { $('.track-btn').html("<img src='/static/images/ico-mail.png' style='padding-right: 8px; vertical-align: middle'/> <span style='padding-right: 8px'>" + $('.track-btn').text() + "</span>"); }
+	if (exp_cond == 2) { exp_cond++; }
+	if (exp_cond == 3) { $('.track-btn').text("Alert Me"); }
+	if (exp_cond == 4) { $('.track-btn').html("<img src='/static/images/ico-mail.png' style='padding-right: 8px; vertical-align: middle'/> <span style='padding-right: 8px'>Alert Me</span>"); }
+	exp_lbl = exp_cond + ":" + $('.track-btn').text();
 	pageTracker._trackEvent("Track Button", "Shown", exp_lbl, null, true);
     // ============
 
