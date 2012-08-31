@@ -87,7 +87,7 @@
 		{% endif %}
 		
 		{% if active_role %}
-		<a href="#" class="track-btn" onclick="return show_track_panel();">Track Member</a>
+		<a href="#" class="track-btn" onclick="return show_track_panel();">Track {% if person.gender == 1 %}Him{% elif person.gender == 2 %}Her{% else %}Member{% endif %}</a>
 		
 		{% if role.website %}
 		<div class="article">
