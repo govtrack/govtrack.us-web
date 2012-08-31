@@ -410,6 +410,15 @@ class sitemap_archive(django.contrib.sitemaps.Sitemap):
     def items(self):
         return Bill.objects.filter(congress__lt=CURRENT_CONGRESS-1)
 
+@render_to('bill/bill_advocacy_tips.html')
+def bill_advocacy_tips(request, congress, type_slug, number):
+    try:
+        bill_type = BillType.by_slug(type_slug)
+    except BillType.NotFound:
+        raise Http404("Invalid bill type: " + type_slug)
+    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    return { "bill": bill }
+
 @json_response
 @login_required
 def join_community(request):

@@ -2163,7 +2163,7 @@ a.button.prefix, a.button.postfix {
     box-shadow:
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
-    padding: 20px;
+    padding: 18px;
     color: #545454;
 	}
 
@@ -2182,8 +2182,11 @@ a.button.prefix, a.button.postfix {
     
     /* Category page icons */
   .heading-box #cat-icon {
-    min-height: 145px;
+    min-height: 146px;
   }
+	body.bills .heading-box #cat-icon {
+		min-height: 100px;
+	  }  
     .search .heading-box #cat-icon { 
     	background: url(../images/cat-search.png) right center no-repeat;
 		}

@@ -1,0 +1,173 @@
+{% extends 'master.html' %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}Advocacy tips for {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}Write a letter to Congress about {{bill}}{% endblock %}
+
+{% block head %}
+<style>
+#talk_methods li.halfsize a {
+	width: 130px;
+	float: left;
+}
+#talk_methods li.halfsize.left a {
+	margin-right: 8px;
+}
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li><a href="{% url congress_home %}">Congress</a></li>
+	<li><a href="/congress/bills">Bills</a></li>
+	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
+	<li>Advocacy Tips</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+<h1>How to Support or Oppose {{bill.display_number}}</h1>
+
+<p>So you want to take a side? Here are some tips on how to be an effective advocate for your issue.</p>
+{% endblock %}
+
+{% block body %}
+
+<div class="row">
+	<section class="seven columns">
+		<h2>Write a Letter</h2>
+
+		<p>Start by writing a letter to Congress using the <a href="http://www.popvox.com/bills/us/{{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}" style="font-weight: bold">POPVOX</a> website. Click the button on the right to get started.</p>
+		
+		<p>Does this work? Well keep in mind you are one of around 700,000 residents in your district, many of whom are writing letters just like you are. Congressional offices receive hundreds to thousands of letters each day.</p>
+		
+		<p>Your representatives <i>want</i> to hear from you (after all, they want to know how to keep your vote next election!). Just keep in mind they couldn&rsquo;t possibly respond to everyone personally.</p>
+		
+		<p>POPVOX was co-created by the same guy behind GovTrack and is the most effective way to get your message to your representative and senators.</p>
+	</section>
+	<section class="five columns">
+		<div style="padding: 3em 0 0 3em">
+			<script src="https://www.popvox.com/widgets/js/bill.js?bill={{bill.congress}}/{{bill.bill_type_slug}}{{bill.number}}&title=1"> </script>
+		</div>
+	</section>
+</div>
+<div class="row">
+	<section class="seven columns">
+		<h2 style="margin-top: 1em">Band Together</h2>
+		
+		<p>Strength does come in numbers. Find others who are advocating on the same issue as you, and work with them to send a clear message to Congress.</p>
+		
+		<p>We can help you find others interested in {{bill.display_number}}. Tell us you want to create a group for this bill by cliking the button on the right.</p>
+	</section>
+	<section class="five columns">
+		<div style="padding: 4em 0 0 1em">
+		{% if not 'googlebot(at)googlebot.com' in request.META.HTTP_FROM %}
+		<div style="margin: 1em 0 1.5em 2em">
+			<a href="#" class="yellow-btn" onclick="return show_talk_panel();">Create a Group</a>
+				{% comment %}Google likes to follow the social registration links which generates an error at Twitter that gets sent in an email to the site maintainer.{% endcomment %}
+			<script>
+			function show_talk_panel() {
+				if (!$('#talk_panel').is(":visible")) {
+					var btn = $('.yellow-btn');
+					$('#talk_panel').css({
+						left: btn.position().left + btn.width()/2 - $('#talk_panel').width()/2,
+						top: btn.position().top + btn.height()
+					});
+					$('#talk_panel').slideDown();
+				} else {
+					$('#talk_panel').slideUp();
+				}
+				return false;
+			}
+			{% if request.user.is_authenticated %}
+			function do_talk() {
+				show_talk_panel();
+				var methods = Array();
+				$('#talk_methods li.selected').each(function() { methods.push(this.getAttribute("method")); });
+				$.ajax({
+					url: "/congress/bills/_ajax/join_community",
+					type: "POST",
+					data: {
+						methods: methods.join(","),
+						bill: {{bill.id}},
+					},
+					dataType: "json",
+					success: function(data) {
+						// nothing to do
+					}
+				});
+				return false; // cancel click
+			}
+			{% endif %}
+			$(function() {
+				if (window.location.hash == "#talk") {
+					show_talk_panel();
+					window.location.hash = "";
+				}
+			});
+			</script>
+			<div id="talk_panel" style="display: none;" class="tracker_widget">
+				<div class="widget_content">
+				{% if not request.user.is_authenticated %}
+					<h3>Sign Up for GovTrack Communities</h3>
+				
+					<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have one of these accounts, join this {{bill.noun}}&rsquo;s community by clicking an icon to register or log in:</p>
+					
+					{% with "#talk" as return_hash %}
+					{% include "events/track_button_login.html" %}
+					{% endwith %}
+				{% else %}
+					<div class="list_select" style="border: none;">
+						<h3>What would you join?</h3>
+						<ul id="talk_methods">
+							<li class="halfsize left" method="maillist"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Mail List</span></a></li>
+							<li class="halfsize" method="wiki"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Wiki</span></a></li>
+							<li class="halfsize left" method="forum"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">Web Forum</span></a></li>
+							<li class="halfsize" method="expert"><a href="#" onclick="$(this.parentNode).toggleClass('selected'); return false;"><span class="icon"></span> <span class="name">I&rsquo;m An Expert</span></a></li>
+							<div style="clear: both"> </div>
+						</ul>
+					</div>				
+					<a href="#" class="btn done" onclick="return do_talk();">Submit</a>
+					
+					<p style="margin-top: 1em">If enough people express interest, we will set up a way for you to discuss this {{bill.noun}}.</p>
+				{% endif %}
+				</div><!-- /widget_content -->
+				<div class="widget_footer"></div>
+			</div>
+		</div>
+		{% endif %}
+	</section>
+</div>
+<div class="row">
+	<section class="seven columns">
+		<h2 style="margin-top: 1em">Be an Information Leader</h2>
+
+		<p>One of the hardest parts about advocacy is just finding out what is happening in Congress. Leg work pays off. Here are some starting points:</p>
+		<ul class="bullets">
+			<li>Call up the office of the sponsor of the bill and ask about the latest status of the bill, including what committees are considering the bill and if there are any hearings or &ldquo;markup&rdquo; meetings scheduled.</li>
+			<li>Check out who is cosponsoring the bill. Does it have cosponsors on the committees it is assigned to? Does it have cosponsors in the majority party?</li>
+			<li>Read the bill. You will probably have questions about it. Find experts such as academic researchers or lobbyists at nonprofits who can help you wade through the language of the bill.</li>
+			<li>Tell others about what you find. They&rsquo;ll appreciate that you took the time to help others understand their government.</li>
+		</ul>
+	</section>
+	<section class="five columns">
+		<div style="float: right; margin-top: 5em; text-align: center;">
+		<script type="text/javascript"><!--
+		google_ad_client = "ca-pub-3418906291605762";
+		/* GT title square */
+		google_ad_slot = "6503428641";
+		google_ad_width = 300;
+		google_ad_height = 250;
+		//-->
+		</script>
+		<script type="text/javascript"
+		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+		</script>
+		<div class="explainer"><a href="/advertising">(About Ads | Advertise Here)</a></div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
