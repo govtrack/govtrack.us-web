@@ -87,6 +87,34 @@ class GBaseModel(ModelResource):
 			return "application/json"
 		return super(GBaseModel, self).determine_format(request)
 	
+	def find_field(self, path):
+		from tastypie.fields import RelatedField
+		if len(path) == 0: raise ValueError("No field specified.") 
+		if not path[0] in self.fields: raise ValueError("Invalid field '%s' on model '%s'." % (path[0], self.Meta.queryset.model))
+		field = self.fields[path[0]]
+		if len(path) == 1:
+			return (self, field.attribute)
+		if not isinstance(field, RelatedField):
+			raise ValueError("Trying to span a relationship that cannot be spanned ('%s')." % (path[0] + LOOKUP_SEP + path[1]))
+		if not isinstance(field.to_class(), GBaseModel):
+			return None, None
+		return field.to_class().find_field(path[1:]) 
+	
+	def apply_filters(self, request, applicable_filters):
+		# Replace enumeration keys with the right values.
+		from django.db.models.sql.constants import QUERY_TERMS, LOOKUP_SEP
+		f = { }
+		for k, v in applicable_filters.items():
+			path = k.split(LOOKUP_SEP)
+			if len(path) and path[-1] in QUERY_TERMS.keys(): path.pop()
+			model, field = self.find_field(path)
+			if model:
+				enum = model.Meta.queryset.model._meta.get_field(field).choices
+				if enum and issubclass(enum, enummodule.Enum):
+					v = int(enum.by_key(v))
+			f[k] = v
+		return super(GBaseModel, self).apply_filters(request, f)
+	
 	def dehydrate(self, bundle):
 		# Add additional properties.
 		for name, attr in getattr(self.__class__.Meta, "additional_properties", {}).items():
@@ -100,7 +128,7 @@ class GBaseModel(ModelResource):
 		# Replace integer values with their enumeration keys.
 		for field in list(bundle.data): # clone the keys before we change the dict
 			try:
-				enum = bundle.obj._meta.get_field(field).choices
+				enum = self.Meta.queryset.model._meta.get_field(self.fields[field].attribute).choices
 				if issubclass(enum, enummodule.Enum):
 					val = enum.by_value(bundle.data[field])
 					bundle.data[field] = val.key
