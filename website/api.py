@@ -100,6 +100,11 @@ class GBaseModel(ModelResource):
 			return None, None
 		return field.to_class().find_field(path[1:]) 
 	
+	@staticmethod
+	def is_enum(obj):
+		import inspect
+		return inspect.isclass(obj) and issubclass(obj, enummodule.Enum)
+	
 	def apply_filters(self, request, applicable_filters):
 		# Replace enumeration keys with the right values.
 		from django.db.models.sql.constants import QUERY_TERMS, LOOKUP_SEP
@@ -110,7 +115,7 @@ class GBaseModel(ModelResource):
 			model, field = self.find_field(path)
 			if model:
 				enum = model.Meta.queryset.model._meta.get_field(field).choices
-				if enum and issubclass(enum, enummodule.Enum):
+				if GBaseModel.is_enum(enum):
 					v = int(enum.by_key(v))
 			f[k] = v
 		return super(GBaseModel, self).apply_filters(request, f)
@@ -129,7 +134,7 @@ class GBaseModel(ModelResource):
 		for field in list(bundle.data): # clone the keys before we change the dict
 			try:
 				enum = self.Meta.queryset.model._meta.get_field(self.fields[field].attribute).choices
-				if issubclass(enum, enummodule.Enum):
+				if GBaseModel.is_enum(enum):
 					val = enum.by_value(bundle.data[field])
 					bundle.data[field] = val.key
 					bundle.data[field + "_label"] = val.label
