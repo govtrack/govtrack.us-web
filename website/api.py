@@ -105,11 +105,12 @@ class GBaseModel(ModelResource):
 		import inspect
 		return inspect.isclass(obj) and issubclass(obj, enummodule.Enum)
 	
-	def apply_filters(self, request, applicable_filters):
+	def build_filters(self, filters=None):
+		if not filters: return { }
 		# Replace enumeration keys with the right values.
 		from django.db.models.sql.constants import QUERY_TERMS, LOOKUP_SEP
 		f = { }
-		for k, v in applicable_filters.items():
+		for k, v in filters.items():
 			path = k.split(LOOKUP_SEP)
 			if len(path) and path[-1] in QUERY_TERMS.keys(): path.pop()
 			model, field = self.find_field(path)
@@ -118,7 +119,7 @@ class GBaseModel(ModelResource):
 				if GBaseModel.is_enum(enum):
 					v = int(enum.by_key(v))
 			f[k] = v
-		return super(GBaseModel, self).apply_filters(request, f)
+		return super(GBaseModel, self).build_filters(f)
 	
 	def dehydrate(self, bundle):
 		# Add additional properties.
@@ -354,10 +355,12 @@ class VoteVoterModel(GBaseModel):
 		# So that we don't have to create a model for the options, we rewrite
 		# the output "option" key with the option's... key. To make it filterable,
 		# we have to do a rewrite on the other end (this part).
-		orm_filters = super(VoteVoterModel, self).build_filters(filters)
+		extra_filters = { }
 		if filters and "option" in filters:
-			orm_filters["option__key"] = filters["option"]
-		return orm_filters	
+			extra_filters["option__key"] = filters["option"]
+			del filters["option"]
+		orm_filters = super(VoteVoterModel, self).build_filters(filters)
+		orm_filters.update(extra_filters)
 
 v1_api = Api(api_name='v1')
 
