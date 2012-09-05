@@ -90,12 +90,13 @@ class GBaseModel(ModelResource):
 	def find_field(self, path):
 		from tastypie.fields import RelatedField
 		if len(path) == 0: raise ValueError("No field specified.") 
-		if not path[0] in self.fields: raise ValueError("Invalid field '%s' on model '%s'." % (path[0], self.Meta.queryset.model))
+		if not path[0] in self.fields: return None, None #raise ValueError("Invalid field '%s' on model '%s'." % (path[0], self.Meta.queryset.model))
 		field = self.fields[path[0]]
 		if len(path) == 1:
 			return (self, field.attribute)
 		if not isinstance(field, RelatedField):
-			raise ValueError("Trying to span a relationship that cannot be spanned ('%s')." % (path[0] + LOOKUP_SEP + path[1]))
+			return None, None
+			#raise ValueError("Trying to span a relationship that cannot be spanned ('%s')." % (path[0] + LOOKUP_SEP + path[1]))
 		if not isinstance(field.to_class(), GBaseModel):
 			return None, None
 		return field.to_class().find_field(path[1:]) 
@@ -119,7 +120,7 @@ class GBaseModel(ModelResource):
 				if GBaseModel.is_enum(enum):
 					v = int(enum.by_key(v))
 			f[k] = v
-		return super(GBaseModel, self).build_filters(f)
+		return super(GBaseModel, self).build_filters(filters=f)
 	
 	def dehydrate(self, bundle):
 		# Add additional properties.
@@ -359,8 +360,9 @@ class VoteVoterModel(GBaseModel):
 		if filters and "option" in filters:
 			extra_filters["option__key"] = filters["option"]
 			del filters["option"]
-		orm_filters = super(VoteVoterModel, self).build_filters(filters)
+		orm_filters = super(VoteVoterModel, self).build_filters(filters=filters)
 		orm_filters.update(extra_filters)
+		return orm_filters
 
 v1_api = Api(api_name='v1')
 
