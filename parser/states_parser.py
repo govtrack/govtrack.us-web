@@ -120,8 +120,15 @@ def process_legislators(row, options, filename):
         p = StateLegislator()
         p.bt50id = row["LegislatorID"]
         
-    #if row["SunlightLegislatorID"] not in ("", "0"): p.openstatesid = row["SunlightLegislatorID"] # causing uniqueness violation
-    if row["LegiScanLegislatorID"] != "": p.legiscanid = row["LegiScanLegislatorID"]
+    if row["SunlightLegislatorID"] not in ("", "0"):
+        p.openstatesid = row["SunlightLegislatorID"] # causing uniqueness violation
+        StateLegislator.objects.filter(openstatesid=p.openstatesid).update(openstatesid=None)
+    else:
+        p.openstatesid = None
+    if row["LegiScanLegislatorID"] not in ("", "0"):
+    	p.legiscanid = row["LegiScanLegislatorID"]
+    else:
+   	    p.legiscanid = None
     
     p.state = row["StateCode"]
     p.firstname = row["FirstName"]
@@ -152,7 +159,9 @@ def process_subjects(row, options, filename):
     s.save()
 
 # TODO: unicameral?
-chamber_map = { "lower": StateChamberEnum.lower, "upper": StateChamberEnum.upper, "": StateChamberEnum.unknown }
+chamber_map = { "lower": StateChamberEnum.lower, "upper": StateChamberEnum.upper,
+	"": StateChamberEnum.unknown, "none": StateChamberEnum.unknown,
+	"a": StateChamberEnum.unknown, }
 
 @iffilechanged
 @rowbyrow
@@ -169,8 +178,14 @@ def process_bills(row, options, filename, haystack_index):
         b = StateBill()
         b.bt50id = row["BillID"]
     
-    if row["SunlightBillID"] != "": b.openstatesid = row["SunlightBillID"]
-    if row["LegiScanBillID"] != "": b.legiscanid = row["LegiScanBillID"]
+    if row["SunlightBillID"] not in ("", "0"):
+        b.openstatesid = row["SunlightBillID"]
+    else:
+        b.openstatesid = None
+    if row["LegiScanBillID"] not in ("", "0"):
+        b.legiscanid = row["LegiScanBillID"]
+    else:
+        b.legiscanid = None
     
     session, isnew = StateSession.objects.get_or_create(
         state=row["StateCode"],
