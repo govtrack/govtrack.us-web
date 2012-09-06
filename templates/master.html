@@ -52,13 +52,17 @@
 
 
 	{% if 1 and pagename != "blog_template" %}
-	<div id="sitenewscontainer" style="display: none" seq="18">
+	<div id="sitenewscontainer" style="display: none" seq="19">
 		<div id="sitenews">
-			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
+			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><!--<a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a>--></div>
 			<div style="float: right; width: 500px; padding: 8px;">
+				{% if not is_dc_local %}
 				{% randint 0 1 as randomnews %}
 				{% if randomnews == 0 %}<div>You&rsquo;re <a href="http://www.google.com/elections/ed/us/vote">registered to vote</a>, right? It matters.</div>{% endif %}
 				{% if randomnews == 1 %}<div>New: Search for similar bills. That and other site updates are described <a href="http://www.govtrack.us/blog/2012/08/28/summer-2012-updates-2-august-edition/">on our blog</a>.</div>{% endif %}
+				{% else %}
+					<div>Live or work in DC? <a href="http://www.kickstarter.com/projects/1368665357/a-one-year-student-reporting-lab-within-homicide-w">Homicide Watch</a> needs your help to stay running another year. We&rsquo;re in for $125. You?</div>
+				{% endif %}
 			</div>
 			<div style="clear: both"> </div>
 		</div>
@@ -275,6 +279,7 @@
 	try {
 	 pageTracker = _gat._getTracker("{{GOOGLE_ANALYTICS_KEY|escapejs}}");
 	 pageTracker._setCustomVar(1, "Login Type", "{% if request.user.is_authenticated %}Logged In{% else %}Anonymous{% endif %}", 2);
+	 pageTracker._setCustomVar(2, "MySegment", "{% if remote_net_house %}House{% elif remote_net_senate %}Senate{% elif is_dc_local %}DC{% else %}Other{% endif %}", 1);
 	 pageTracker._trackPageview();
 	} catch(err) {}
 	</script>

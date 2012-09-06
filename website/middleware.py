@@ -4,6 +4,9 @@ from django.conf import settings
  
 import urllib, json, datetime
 
+from django.contrib.gis.geoip import GeoIP
+geo_ip_db = GeoIP("/home/govtrack/extdata")
+washington_dc = geo_ip_db.geos("69.255.139.56")
 
 # http://whois.arin.net/rest/org/ISUHR/nets
 HOUSE_NET_RANGES = (
@@ -44,6 +47,8 @@ def template_context_processor(request):
             context["remote_net_house"] = True
         if is_ip_in_any_range(request.META["REMOTE_ADDR"], SENATE_NET_RANGES):
             context["remote_net_senate"] = True
+            
+        context["is_dc_local"] = geo_ip_db.geos(request.META["REMOTE_ADDR"]).distance(washington_dc) < .25
     except:
         pass
     
