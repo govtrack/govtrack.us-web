@@ -48,7 +48,7 @@ def template_context_processor(request):
         if is_ip_in_any_range(request.META["REMOTE_ADDR"], SENATE_NET_RANGES):
             context["remote_net_senate"] = True
             
-        context["is_dc_local"] = geo_ip_db.geos(request.META["REMOTE_ADDR"]).distance(washington_dc) < .25
+        context["is_dc_local"] = geo_ip_db.geos(request.META["REMOTE_ADDR"]).distance(washington_dc) < .5
     except:
         pass
     
