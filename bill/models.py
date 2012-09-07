@@ -129,7 +129,7 @@ class Bill(models.Model):
         return "\n".join([self.title] + [t[2] for t in self.titles]) \
             + "\n\n" + load_bill_text(self, None, plain_text=True)
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
-    haystack_index_extra = (('proscore', 'Float'),)
+    haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'))
     def get_terms_index_list(self):
         return set([t.id for t in self.terms.all()])
     def get_committees_index_list(self):
@@ -156,7 +156,16 @@ class Bill(models.Model):
             r += compute_prognosis(self, proscore=True)["prediction"]
         r *= type_boost[self.bill_type]
         return r
-
+    def sponsor_party(self):
+        if not self.sponsor_role: return None
+        mp = getattr(Bill, "_majority_party", { })
+        if self.congress not in mp:
+            from prognosis import load_majority_party
+            mp[self.congress] = load_majority_party(self.congress)
+            Bill._majority_party = mp
+            print mp
+        p = self.sponsor_role.party
+        return (p, "Majority Party" if p == mp[self.congress][self.bill_type] else "Minority Party")
         
     @property
     def display_number(self):
