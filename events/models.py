@@ -376,7 +376,7 @@ class Feed(models.Model):
         ret = []
         for fname, fmeta in Feed.feed_metadata.items():
             if fmeta.get("simple", False) == True:
-                ret.append((fmeta.get("sort_order", 99999), Feed(feedname=fname)))
+                ret.append((fmeta.get("sort_order", 99999), Feed.objects.get(feedname=fname)))
         ret.sort(key = lambda x : x[0])
         return [r[1] for r in ret]
     

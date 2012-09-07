@@ -172,6 +172,7 @@
 
     <field name="proscore" type="float" indexed="true" stored="true" multiValued="false" />
 
+    <field name="sponsor_party" type="string" indexed="true" stored="true" multiValued="true" />
   </fields>
 
   <!-- field to use to determine and enforce document uniqueness. -->
