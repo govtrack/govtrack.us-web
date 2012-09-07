@@ -115,7 +115,13 @@ _states_with_data = None
 def states_with_data():
 	global _states_with_data
 	if not _states_with_data:
-		from haystack.query import SearchQuerySet
-		_states_with_data = sorted([s[0].upper() for s in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"]).facet('state').facet_counts()['fields']['state']])
+		from states.models import StateSession
+		_states_with_data = sorted(set(StateSession.objects.values_list("state", flat=True)))
+		#from haystack.query import SearchQuerySet
+		#_states_with_data = sorted([
+		#	s[0].upper()
+		#	for s in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"]).facet('state').facet_counts()['fields']['state']
+		#	if s[0].upper() in us.statenames
+		#	])
 	return _states_with_data
 
