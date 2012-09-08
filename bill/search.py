@@ -92,6 +92,7 @@ def bill_search_manager():
     sm.add_option('committees', label="committee", type="select", sort="LABEL", formatter=lambda c : c.shortname)
     sm.add_option('terms', type="select", label="subject", choices=get_terms(BillTerm.objects.exclude(parents__id__gt=0)))
     sm.add_option('terms2', type="select", label="subject 2", choices=sub_terms, visible_if=lambda post:"terms" in post, filter=sub_term_filter)
+    sm.add_option('sponsor_party', label="party of sponsor", type="select")
     sm.add_option('bill_type', label="bill or resolution type")
     
     #sm.add_sort("Popularity", "-total_bets", default=True)
