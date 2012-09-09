@@ -52,9 +52,6 @@ def template_context_processor(request):
     except:
         pass
     
-    from random import choice
-    context["random_ad"] = choice(xrange(2))
-    
     return context
     
 class DebugMiddleware:

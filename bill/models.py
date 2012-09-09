@@ -163,7 +163,6 @@ class Bill(models.Model):
             from prognosis import load_majority_party
             mp[self.congress] = load_majority_party(self.congress)
             Bill._majority_party = mp
-            print mp
         p = self.sponsor_role.party
         return (p, "Majority Party" if p == mp[self.congress][self.bill_type] else "Minority Party")
         
