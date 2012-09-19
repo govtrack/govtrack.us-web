@@ -43,7 +43,53 @@
 				zoomControl: true,
 				mapTypeControl: false,
 				scaleControl: true,
-				streetViewControl: false
+				streetViewControl: false,
+				styles: 			
+					[
+					  {
+						"featureType": "water",
+						"stylers": [
+						  { "visibility": "simplified" }
+						]
+					  },{
+						"featureType": "transit.station.bus",
+						"stylers": [
+						  { "visibility": "off" }
+						]
+					  },{
+						"featureType": "poi.business",
+						"stylers": [
+						  { "visibility": "off" }
+						]
+					  },{
+						"featureType": "landscape.man_made",
+						"stylers": [
+						  { "visibility": "off" }
+						]
+					  },{
+						"featureType": "landscape.natural",
+						"stylers": [
+						  { "lightness": 100 }
+						]
+					  },{
+						"featureType": "administrative.province",
+						"elementType": "geometry.stroke",
+						"stylers": [
+						  { "invert_lightness": true }
+						]
+					  },{
+						"featureType": "road.local",
+						"stylers": [
+						  { "lightness": -100 }
+						]
+					  },{
+						"featureType": "poi.park",
+						"elementType": "geometry.fill",
+						"stylers": [
+						  { "visibility": "off" }
+						]
+					  }
+					]			
 				};
 			map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 			
