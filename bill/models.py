@@ -322,7 +322,7 @@ class Bill(models.Model):
 
     def thomas_link(self):
         """Returns the URL for the bill page on http://thomas.loc.gov."""
-        return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%d:%s%d:" \
+        return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%03d:%s%d:" \
             % (self.congress, self.bill_type_slug, self.number)
 
     def popvox_link(self):

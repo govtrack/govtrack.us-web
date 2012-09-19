@@ -264,7 +264,9 @@
 		<h3>Voting Record</h3>
 		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed}} of {{analysis_data.missedvotes.total}} recorded or roll call votes, which is {{analysis_data.missedvotes.percent}}%.
 		{% if active_role %} {% comment %}Median only makes sense for people currently serving. {% endcomment %}
-		{% if analysis_data.missedvotes.percent < 2.4 %}This is better than the median of 2.4%.{% else %}This is worse than the median of 2.4%.{% endif %}
+		{% if analysis_data.missedvotes.percent < 2.4 %}This is better than the median of 2.5%.
+		{% elif analysis_data.missedvotes.percent > 2.6 %}This is worse than the median of 2.5%.
+		{% else %}This is right at the median, which is 2.5%.{% endif %}
 		{% endif %}
 		The chart below reports missed votes by calendar quarter (every three months).</p>
 		<div id="voting_record_chart"> </div>

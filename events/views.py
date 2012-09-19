@@ -52,7 +52,9 @@ def edit_subscription_list(request):
     if not request.user.is_authenticated():
         return { "error": "not logged in" }
         
-    if request.POST["listid"] != "_new_list":
+    if not "listid" in request.POST:
+        return { "error": "missing parameter" }
+    elif request.POST["listid"] != "_new_list":
         sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.POST["listid"])
     else:
         sublist = None

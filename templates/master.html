@@ -52,17 +52,11 @@
 
 
 	{% if 1 and pagename != "blog_template" %}
-	<div id="sitenewscontainer" style="display: none" seq="19">
+	<div id="sitenewscontainer" style="display: none" seq="20">
 		<div id="sitenews">
-			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><!--<a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a>--></div>
+			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
 			<div style="float: right; width: 500px; padding: 8px;">
-				{% if not is_dc_local %}
-				{% randint 0 1 as randomnews %}
-				{% if randomnews == 0 %}<div>You&rsquo;re <a href="http://www.google.com/elections/ed/us/vote">registered to vote</a>, right? It matters.</div>{% endif %}
-				{% if randomnews == 1 %}<div>New: Search for similar bills. That and other site updates are described <a href="http://www.govtrack.us/blog/2012/08/28/summer-2012-updates-2-august-edition/">on our blog</a>.</div>{% endif %}
-				{% else %}
-					<div>Live or work in DC? <a href="http://www.kickstarter.com/projects/1368665357/a-one-year-student-reporting-lab-within-homicide-w">Homicide Watch</a> needs your help to stay running another year. We&rsquo;re in for $125. You?</div>
-				{% endif %}
+				<div>Is your congressional district changing? Find out on <a href="http://my2012district.com">My2012District.com</a> (brought to you by us).</div>
 			</div>
 			<div style="clear: both"> </div>
 		</div>
