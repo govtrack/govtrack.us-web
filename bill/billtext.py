@@ -117,7 +117,8 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     mods = lxml.etree.parse(basename + ".mods.xml")
     ns = { "mods": "http://www.loc.gov/mods/v3" }
     docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
-    gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
+    gpo_url = "http://www.gpo.gov/fdsys/search/pagedetails.action?packageId=" + mods.xpath("string(mods:recordInfo/mods:recordIdentifier[@source='DGPO'])", namespaces=ns)
+    #gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
     gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
     doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
     
