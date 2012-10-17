@@ -12,6 +12,9 @@
 		var current_layer = null;
 		var first_time_on_redistricting = true;
 		
+		var tileimgformat = 'png';
+		if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
+		
 		function createDistrictsOverlay(redistricting) {
 			current_layer = (!redistricting ? "2010-cd" : "2012-cd");
 			{% if state and district %}current_layer += "/{{state|lower}}-{{district|stringformat:"02d"}}";
@@ -19,13 +22,13 @@
 		    
 			var overlay = new google.maps.ImageMapType({
 			  getTileUrl: function(coord, zoom) {
-				  return "http://gis.govtrack.us/map/tiles/" + current_layer + "/" + (zoom-1) + "/" + coord.x + "/" + coord.y + ".png?size=512";
+				  return "http://gis.govtrack.us/map/tiles/" + current_layer + "/" + (zoom-1) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=512";
 			  },
 			  tileSize: new google.maps.Size(512, 512),
-			  isPng: true,
+			  isPng: tileimgformat == "png",
 			  minZoom: 3,
 			  maxZoom: 28,
-			  opacity: .85
+			  opacity: tileimgformat == "png" ? .85 : .25
 			});
 			
 			map.overlayMapTypes.clear();
