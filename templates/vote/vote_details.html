@@ -1,5 +1,4 @@
 {% extends 'master_a.html' %}
-{% load vote_tags %}
 {% load humanize %}
 
 {% block title %}{{ vote.question }} -- GovTrack.us{% endblock %}
@@ -223,7 +222,6 @@ $(function() {
             <tr class="gradient">
                 <td class="empty" colspan="3"></td>
                 {% for count in totals.party_counts %}
-                <td>{% vote_pie count.yes count.no count.other %}</td> 
                 {% endfor %}
             </tr>
             {% endcomment %}
@@ -268,11 +266,6 @@ $(function() {
 </div>
 {% endcomment %}
 
-<!--
-<div style="float: right; width: 300px">
-    {% vote_totals_pie vote %}
-</div>
--->
 <div id="vote-details" class="section row">
 <h2>Vote Details</h2>
 
