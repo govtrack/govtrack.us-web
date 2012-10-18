@@ -22,7 +22,7 @@ from lxml import etree
 class BillType(enum.Enum):
     # slug must match regex for parse_bill_number
     senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s', full_name="Senate bill", search_help_text="Senate bills")
-    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h', full_name="House bill", search_help_text="House bills")
+    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h', full_name="House of Representatives bill", search_help_text="House bills")
     senate_resolution = enum.Item(4, 'S.Res.', slug='sres', xml_code='sr', full_name="Senate simple resolution", search_help_text="Senate simple resolutions, which do not have the force of law")
     house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr', full_name="House simple resolution", search_help_text="House simple resolutions, which do not have the force of law")
     senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sconres', full_name="Senate concurrent resolution", xml_code='sc', search_help_text="Concurrent resolutions originating in the Senate, which do not have the force of law")
