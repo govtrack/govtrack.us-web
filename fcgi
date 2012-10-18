@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Start, stop, restart, or graceful restart the Python backend.
+# Start, stop, restart, or graceful restart the FastCGI server.
 # With no arguments, stops any executing instance and then
 # starts a new one. With the argument 'stop', stops all executing
 # instances but does not start a new one. With the argument
@@ -18,21 +18,26 @@ if [ "$USER" = "" ]; then
 	exit;
 fi
 
+# Load settings.
+PORT=`echo 1000+$UID*2|bc`
+if [ -f fcgi.conf ]; then
+	. fcgi.conf
+fi
+if [ "$NAME" = "" ]; then NAME=$PORT; fi
+if [ "$INSTANCES" = "" ]; then INSTANCES=6; fi
+
+
 if [ "$1" = "" ]; then
 	# Hard restart: Do a stop first. The rest of this script
 	# will start a new instance on the default port.
 	./fcgi stop
 fi
 
-if [ -f PORT ]; then
-	NAME=-`cat PORT`
-fi
-
 HOSTNAME=`hostname -I | tr -d ' '` # assumes only one interface
 HOSTNAME=127.0.0.1
 
 # Get the CURPID, CURPIDFILE, and CURPORT of the running instance.
-for CURPIDFILE in `ls /tmp | egrep "django-fcgi-$USER$NAME(-.*)?.pid"`
+for CURPIDFILE in `ls /tmp | egrep "django-fcgi-$NAME(-.*)?.pid"`
 do
     CURPID=`cat -- /tmp/$CURPIDFILE`;
     CURPORT=`echo $CURPIDFILE | sed "s/.*-\([0-9]*\).pid/\1/"`;
@@ -68,13 +73,6 @@ if [ "$1" = "stop" ]; then
     exit;
 fi
 
-# Select a port for the new instance.
-if [ -f PORT ]; then
-	PORT=`cat PORT`
-else
-	PORT=`echo 1000+$UID*2|bc`
-fi
-
 # If it is the same as the running instance's port in a
 # graceful restart, add 1.
 if [ "$PORT" = "$CURPORT" ]; then
@@ -94,13 +92,12 @@ while [ "`netstat -tln |grep $PORT`" != "" ]; do
 	sleep 1;
 done
 
-INSTANCES=20
-
-echo "Starting $USER$NAME $HOSTNAME:$PORT x $INSTANCES...";
+echo "Starting $NAME $HOSTNAME:$PORT x $INSTANCES...";
 
 # select a PIDFILE
-PIDFILE=/tmp/django-fcgi-$USER$NAME-$PORT.pid
+PIDFILE=/tmp/django-fcgi-$NAME-$PORT.pid
 
+export NAME=$NAME
 PYTHONPATH=.. ./manage.py runfcgi host=$HOSTNAME port=$PORT pidfile=$PIDFILE \
                  workdir=$MYDIR umask=0002 debug=1 \
                  maxchildren=$INSTANCES maxspare=$INSTANCES \
