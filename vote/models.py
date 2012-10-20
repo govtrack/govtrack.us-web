@@ -65,6 +65,7 @@ class Vote(models.Model):
     class Meta:
         # The ordering makes sure votes are in the right order on bill pages.
         ordering = ["created", "chamber", "number"]
+        unique_together = (('congress', 'chamber', 'session', 'number'),)
 
     def __unicode__(self):
         return self.question
