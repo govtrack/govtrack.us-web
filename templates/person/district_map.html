@@ -16,7 +16,7 @@
 		if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
 		
 		function createDistrictsOverlay(redistricting) {
-			current_layer = (!redistricting ? "2010-cd" : "2012-cd");
+			current_layer = (!redistricting ? "2010-cd" : "cd-2012");
 			{% if state and district %}current_layer += "/{{state|lower}}-{{district|stringformat:"02d"}}";
 			{% endif %}
 		    
@@ -143,7 +143,7 @@
 					$(this).addClass("active");
 					if (this.id == "ctrl_layer_2012") {
 						if (first_time_on_redistricting)
-							alert("Please note:\n\n1) Your current Members of Congress are based on the district lines at the time you last voted, in 2010.\n\n2) New district lines are still subject to change before the elections due to ongoing court cases in each state.\n\n3) We don't have Rhode Island's new districts yet, sorry!");
+							alert("Please note:\n\n1) Your current Members of Congress are based on the district lines at the time you last voted, in 2010.\n\n2) Check your voter registration information before voting to be sure you have the most accurate information.");
 						first_time_on_redistricting = false;
 					}
 			});
