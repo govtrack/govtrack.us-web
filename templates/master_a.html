@@ -7,9 +7,9 @@
 	</div><!-- /summary-box -->
 	
 	<div class="ads square four columns">
-		{% if remote_net_house or remote_net_senate or request.user.username == "admin" %}
+		{% comment %} if remote_net_house or remote_net_senate or request.user.username == "admin" %}
 			<a href="mailto:operations+love@govtrack.us"><img src="/static/funnies/322Heart_02.png"/></a>
-		{% else %}
+		{% endcomment %}
 		<script type="text/javascript"><!--
 		google_ad_client = "ca-pub-3418906291605762";
 		/* GT title square */
@@ -21,7 +21,6 @@
 		<script type="text/javascript"
 		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 		</script>
-		{% endif %}
 		<div class="explainer"><a href="/advertising">(About Ads | Advertise Here)</a></div>
 	</div>
 </div>
