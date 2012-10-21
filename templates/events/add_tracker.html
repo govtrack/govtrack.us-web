@@ -18,7 +18,7 @@ function select_feed(ev) {
 	$.ajax({
 		url: "/events/_load_events",
 		type: "POST",
-		data: { feed: feed },
+		data: { feed: feed, count: 10 },
 		dataType: "html",
 		success: function(data) {
 			$('#events_preview_2').html(data);
@@ -67,7 +67,7 @@ function do_search(form) {
 				div.find('h4').text(res[i].title);
 				
 				if (res[i].feeds.length == 0) {
-					var p = $("<p class='no_results'>We couldn't find any committees in Congress that matched your search. <a>Browse</a> for more.</p>");
+					var p = $("<p class='no_results'>We couldn't find any " + res[i].noun + " that matched your search. <a>Browse</a> for more.</p>");
 					p.find('a').attr('href', res[i].href);
 					div.append(p);
 				} else {
@@ -90,7 +90,7 @@ function do_search(form) {
 						}
 					}
 					
-					var a = $("<a class='more'>See More &raquo;</a>");
+					var a = $("<a class='more'>More Search Results &raquo;</a>");
 					if (!res[i].qsarg)
 						a.attr('href', res[i].href);
 					else
@@ -102,6 +102,7 @@ function do_search(form) {
 	});
 	return false;
 }
+{% if request.GET.q %}$(function() { do_search("#tracker_search"); });{% endif %}
 </script>
 {% endblock %}
 
@@ -122,23 +123,38 @@ function do_search(form) {
 <div id="tracker_wizard" class="panels">
 
 
-	<div id="step1a" class="panel">
+	<div id="step1a" class="panel row" style="display: {% if not request.GET.q %}block{% else %}none{% endif %};">
 			<div class="row">
-				<form id="tracker_search" class="group ten columns centered" onsubmit="return do_search(this);">
+				<h1 class="twelve columns"><span class="marker">1</span>Find items to track</h1>
+			</div>
+			<div class="row">
+				<div class="group ten columns centered">
 					<h2>Search for Bills &amp; Legislation, Members of Congress, or Committees:</h2>
-					<fieldset class="box row">
+					<form id="tracker_search" onsubmit="return do_search(this);">
 						
-						<label for="search_entry">Search all of GovTrack for...</label>
-						<input id="search_entry" name="q" type="text" class="text" value="{{request.GET.q}}" />
-						<input id="submit" class="btn-search large" type="submit" value="Search"/>
-						
-						<div class="notebox">
-							<h4>Tip:</h4>
-							<p class="note">You can search for legislation by keywords, names, or bill numbers, (<em>"fossil fuels"</em>, "<em>End Big Oil</em>", or "<em>H.R. 601</em>"); you can search for members by name or state, or even put in your street address to find your area representatives.</p>
-						</div>
+						<fieldset class="box row">
+							<div class="group">
+								<label class="six columns" for="search_entry">Search all of GovTrack for...</label>
+								<div class="six columns">
+									<div class="row collapse">
+										<div class="eight mobile-three columns">
+											<input type="text" value="{{request.GET.q}}"/>
+										</div>
+										<div class="four mobile-one columns">
+											<a href="#" class="postfix button expand" onclick="return do_search('#tracker_search');">Search</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							<div class="notebox">
+								<h4>Tip:</h4>
+								<p class="note">You can search for legislation by keywords, names, or bill numbers, (<em>"fossil fuels"</em>, "<em>End Big Oil</em>", or "<em>H.R. 601</em>"); you can search for members by name or state, or even put in your street address to find your area representatives.</p>
+							</div>
 
-			    	</fieldset>
-				</form>
+				    	</fieldset>
+					</form>
+				</div>
 			</div>
 
 			<div class="row">
@@ -154,14 +170,26 @@ function do_search(form) {
 	</div><!-- /panel -->
 
 
-	<div id="step1b" class="panel row" style="display: none">
+	<div id="step1b" class="panel row" style="display: {% if request.GET.q %}block{% else %}none{% endif %}">
 		<div class="row">
-			<h2 class="eight columns">You Searched for &ldquo;<span id="your_search_term"> </span>&rdquo;</h2>
-			<form id="tracker_search" class="group four columns" onsubmit="return do_search(this);">
-				<fieldset>
-					<label for="search_entry_again">Search again</label>
-					<input id="search_entry_again" name="q" type="text" class="text" />
-					<input id="submit_again" class="btn-search-small" type="submit" value="Search"/>
+			<h1 class="twelve columns"><span class="marker">1</span>Find items to track</h1>
+		</div>
+		<div class="row">
+			<h2 class="six columns">You Searched for &ldquo;<span id="your_search_term"> </span>&rdquo;</h2>
+			<form id="tracker_search_2" class="small group six columns" onsubmit="return do_search(this);">
+				<fieldset class="row">
+					<label class="three columns" for="search_entry_again">Search again</label>
+					<div class="eight columns">
+						<div class="row collapse">
+							<div class="ten mobile-three columns">
+								<input id="search_entry_again" name="q" type="text" class="text" />
+							</div>
+							<div class="two mobile-one columns">
+								<a href="#" id="submit_again" class="postfix button expand" onclick="return do_search('#tracker_search');"><span class="icon-search"></a>
+							</div>
+						</div>
+					</div>
+
 		    	</fieldset>
 			</form>
 		</div>
@@ -174,7 +202,7 @@ function do_search(form) {
 
 				<div id="events_list">
 					<div id="events_header" class="group">
-						<h4>This Tracker Preview</h4>
+						<h4>Tracker preview:</h4>
 					</div>
 
 					<div id="events_preview_1">
@@ -199,17 +227,17 @@ function do_search(form) {
 
 
 	<div id="step2" class="panel row" style="display: none">
+		<div class="row">
+			<h1 class="twelve columns"><span class="marker">2</span>Set up your updates</h1>
+		</div>
+
 		<h3>You are tracking <span> </span></h3>
 
 		<div id="keyword_results" class="eight columns fat">
 			<div id="events_list">
 				<div id="events_header" class="group">
-					<h4>Your Tracker Preview:</h4>
+					<h4>Tracker preview:</h4>
 					
-					{% comment %}
-					can't do RSS here because they have to make a list first
-					<a href="/events/events.rss?list_id=72J8C22VjAc8pjhH" class="add_icon rss">Subscribe by RSS</a>
-					{% endcomment %}
 				</div>
 
 				<div id="events_preview_2">
@@ -222,26 +250,64 @@ function do_search(form) {
 		<div id="edit_list" class="four columns fat">
 	
 			<div id="set_freq" class="control">
-				<h3>How often do you want updates?</h3>
+				<h3>We can send these updates to you by email.</h3>
 				<div class="row">
-					<label for="email_frequency">Send update emails</label>
+					<label for="email_frequency">How often would you like updates?</label>
 					<select id="email_frequency" name="email_frequency" onchange="change_email_options();">
-						<option value="0">Don’t Send Emails</option>
-						<option value="1">Daily</option>
-						<option value="2">Weekly</option>
+						<option value="0">No Email - I&rsquo;ll come back on my own.</option>
+						<option value="1" selected>Daily Emails</option>
+						<option value="2">Weekly Emails</option>
 					</select>
 				</div>
 			</div><!-- /set_freq -->
-				<div class="row">
-					<a class="button" href="#">Save This Tracker</a>
-				</div>
+			<div class="row">
+				<a class="button" href="#">Save This Tracker</a>
+			</div>
 		</div><!-- /edit_list -->
 
 	</div><!-- /panel -->
 
 
-	<div id="step3" class="panel" style="display: none">
-		<h3>Save Your Tracker</h3>
+	<div id="step3" class="panel" style="display: block">
+		<div class="row">
+			<h1 class="twelve columns"><span class="marker">3</span>Save your tracker</h1>
+		</div>
+
+		<form method="post" class="login row">
+			{% csrf_token %}
+			<input type="hidden" name="next" value="{{ next }}" />
+
+			
+				<div class="signin_social six columns">
+					<h3 style="margin-bottom: 1em">Have one of these?</h3>
+					{% with next as singlesignon_next %}
+						{% include "registration/login_singlesignon.html" %}
+					{% endwith %}
+					<p style="margin-top: 1em">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack.</p>
+				</div>
+
+				<div id="login_form" class="six columns">
+					<h3 style="margin-bottom: 1em">Use your email and password:</h3>
+
+					{% if errors %}
+						<p class="error">{{errors}} Please try again.</p>
+					{% endif %}
+
+					<label class="large" for="id_email">Email</label>
+					<input type="text" maxlength="60" id="id_email" name="Email" value="{{email}}" class="input-text large oversize" />
+					
+					<label class="large" for="id_password">Password</label>
+					<input type="password" name="password" id="id_password" name="Password" class="input-text large oversize" value="{{password}}" />
+					
+					<input type="submit" value="Log in" class="radius button green" />
+
+					<p><a class="forgot" href="{% url registration.views.resetpassword %}">Forgot your password?</a></p>
+				
+					<p><a href="/registration/signup{% if next %}?next={{next|urlencode}}{% endif %}">New here? Create a login.</a></p>
+
+				</div>
+			
+		</form>
 
 	</div><!-- /panel -->
 </div>

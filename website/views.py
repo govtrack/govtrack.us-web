@@ -140,7 +140,7 @@ def do_site_search(q, allow_redirect=False):
             {"href": b.object.get_absolute_url(),
              "label": b.object.title,
              "obj": b.object,
-             "feed": Feed.BillFeed(b.object),
+             "feed": Feed.BillFeed(b.object) if b.object.is_alive else None,
              "secondary": b.object.congress != CURRENT_CONGRESS }
             for b in SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], content=q).order_by('-current_status_date')[0:9]]
     else:

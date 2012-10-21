@@ -26,20 +26,23 @@
 			{% comment %}
 			<div id="start_search" class="column four right">
 				
+				<form id="start_tracking" action="/start" method="GET" class="row">
+					<div class="row">
+					  <div class="eleven columns offset-by-one">
+						<h2>Start tracking now!</h2>
+					    <div class="row collapse">
+					      <div class="eight mobile-three columns">
+					        <input name="q" type="text" placeholder="Find something to track" />
+					      </div>
+					      <div class="four mobile-one columns">
+					        <a href="#" class="postfix button expand" onclick="$('#start_tracking')[0].submit(); return false;"><span class="icon-search">Search</span></a>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+			    </form>
 				{% if not user.is_authenticated %}
-				<h2>Get started now!</h2>
-				<form action="/search" method="GET" class="row">
-			        <input type="text" class="eight columns" name="s" placeholder="Find something to track" />
-			        <input class="four columns postfix button" type="submit" value="Search" />
-			    </form>
-					<p>Already have an account? <a href="/accounts/login">Log in</a></p>
-				{% else %}
-
-				<h2>Welcome back!</h2>
-				<form action="/search" method="GET" class="row">
-			        <input type="text" class="eight columns" name="s" placeholder="Find something to track" />
-			        <input class="four columns postfix button" type="submit" value="Search" />
-			    </form>
+				<p id="have_account">Already have an account? <a href="/accounts/login">Log in</a></p>
 				{% endif %}
 				
 			</div><!-- /start-search -->

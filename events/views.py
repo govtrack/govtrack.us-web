@@ -102,13 +102,16 @@ def events_list_items(request):
         show_empty = False
     elif "feed" in request.POST:
         sublist = None
-        feedlist = [Feed.from_name(request.POST["feed"], must_exist=False)]
+        try:
+            feedlist = [Feed.from_name(request.POST["feed"])]
+        except Feed.DoesNotExist:
+            feedlist = []
         show_empty = True
     else:
         raise Http404()
         
     if len(feedlist) > 0 or show_empty:
-        qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, 100) # get all events
+        qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, int(request.POST.get('count', '100'))) # get all events
     else:
         qs = []
     page = paginate(qs, request, per_page=50)
@@ -229,10 +232,11 @@ def start_search(request):
                 }
                 for f in r["feed"].includes_feeds()],
             }
-            for r in grp["results"] if "feed" in r]
+            for r in grp["results"] if r.get("feed", None) != None]
         ret.append({
             "title": grp["title"],
             "href": grp["href"],
+            "noun": grp["noun"],
             "qsarg": grp.get("qsarg", None),
             "feeds": feeds
         })
