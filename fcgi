@@ -25,7 +25,9 @@ if [ -f fcgi.conf ]; then
 fi
 if [ "$NAME" = "" ]; then NAME=$PORT; fi
 if [ "$INSTANCES" = "" ]; then INSTANCES=6; fi
-
+if [ "$INSTANCES_MIN" = "" ]; then INSTANCES_MIN=$INSTANCES; fi
+if [ "$INSTANCES_MAX" = "" ]; then INSTANCES_MAX=$INSTANCES; fi
+if [ "$INSTANCE_MAX_REQUESTS" = "" ]; then INSTANCE_MAX_REQUESTS=1000; fi
 
 if [ "$1" = "" ]; then
 	# Hard restart: Do a stop first. The rest of this script
@@ -100,7 +102,8 @@ PIDFILE=/tmp/django-fcgi-$NAME-$PORT.pid
 export NAME=$NAME
 PYTHONPATH=.. ./manage.py runfcgi host=$HOSTNAME port=$PORT pidfile=$PIDFILE \
                  workdir=$MYDIR umask=0002 debug=1 \
-                 maxchildren=$INSTANCES maxspare=$INSTANCES \
+                 maxchildren=$INSTANCES_MAX minspare=$INSTANCES_MIN maxspare=$INSTANCES_MAX \
+                 maxrequests=$INSTANCE_MAX_REQUESTS \
                  timeout=25 \
                  outlog=~/logs/django_output_log errlog=~/logs/django_error_log ;
 
