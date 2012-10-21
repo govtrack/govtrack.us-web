@@ -128,7 +128,17 @@ def main(options):
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
 
+    def log_delete_qs(qs):
+        if qs.count() > 0:
+            try:
+                print "Deleting: ", qs
+            except Exception as e:
+                print "Deleting [%s]..." % str(e)
+            print "Delete skipped..."
+            #qs.delete()
+
     seen_obj_ids = set()
+    had_error = False
 
     for fname in files:
         progress.tick()
@@ -143,10 +153,23 @@ def main(options):
         if not File.objects.is_changed(fname) and not options.force and existing_vote != None and not existing_vote.missing_data:
             seen_obj_ids.add(existing_vote.id)
             continue
-        
+            
         try:
             tree = etree.parse(fname)
-
+            
+            # I corrupted the database by running the parser twice concurrently (bad cron,
+            # now prevented in parse.py with a file lock). To fix this, scan through votes
+            # to find ones that have the wrong number of voter records, or multiple Voter
+            # records for the same individual.
+            #if existing_vote:
+            #    if existing_vote.voters.all().count() == len(tree.xpath("/roll/voter")):
+            #        from django.db.models import Count
+            #        counts = existing_vote.voters.all().values("person").annotate(count=Count("person"))
+            #        if len([p for p in counts if p["person"] in (None, 0) or p['count'] != 1]) == 0:
+            #            seen_obj_ids.add(existing_vote.id)
+            #            continue
+            #    print existing_vote, existing_vote.voters.all().count(), len(tree.xpath("/roll/voter"))
+            
             # Process role object
             for roll_node in tree.xpath('/roll'):
                 vote = vote_processor.process(Vote(), roll_node)
@@ -175,39 +198,59 @@ def main(options):
                 
                 seen_obj_ids.add(vote.id) # don't delete me later
                 
-                # Process roll options
+                # Process roll options, overwrite existing options where possible.
+                seen_option_ids = set()
                 roll_options = {}
-                VoteOption.objects.filter(vote=vote).delete()
                 for option_node in roll_node.xpath('./option'):
                     option = option_processor.process(VoteOption(), option_node)
                     option.vote = vote
+                    if existing_vote:
+                        try:
+                            option.id = VoteOption.objects.filter(vote=vote, key=option.key)[0].id # get is better, but I had the database corruption problem
+                        except IndexError:
+                            pass
                     option.save()
                     roll_options[option.key] = option
+                    seen_option_ids.add(option.id)
+                log_delete_qs(VoteOption.objects.filter(vote=vote).exclude(id__in=seen_option_ids)) # may cascade and delete the Voters too?
 
-                # Process roll voters
-                Voter.objects.filter(vote=vote).delete()
+                # Process roll voters, overwriting existing voters where possible.
+                if existing_vote:
+                    existing_voters = dict(Voter.objects.filter(vote=vote).values_list("person", "id"))
+                seen_voter_ids = set()
                 for voter_node in roll_node.xpath('./voter'):
                     voter = voter_processor.process(roll_options, Voter(), voter_node)
                     voter.vote = vote
                     voter.created = vote.created
+                    if existing_vote and voter.person:
+                        try:
+                            voter.id = existing_voters[voter.person.id]
+                        except KeyError:
+                            pass
                     voter.save()
-                    if voter.voter_type == VoterType.unknown:
+                    
+                    if voter.voter_type == VoterType.unknown and not vote.missing_data:
                         vote.missing_data = True
-                        vote.save() # not good to do it a lot, but shouldn't occur often
+                        vote.save()
+                        
+                    seen_voter_ids.add(voter.id)
+                    
+                log_delete_qs(Voter.objects.filter(vote=vote).exclude(id__in=seen_voter_ids)) # possibly already deleted by cascade above
 
                 vote.calculate_totals()
 
                 if not options.disable_events:
                     vote.create_event()
+                    
+            File.objects.save_file(fname)
 
         except Exception, ex:
             log.error('Error in processing %s' % fname, exc_info=ex)
-
-        File.objects.save_file(fname)
+            had_error = True
         
     # delete vote objects that are no longer represented on disk
-    if options.congress:
-    	Vote.objects.filter(congress=options.congress).exclude(id__in = seen_obj_ids).delete()
+    if options.congress and not had_error:
+        log_delete_qs(Vote.objects.filter(congress=options.congress).exclude(id__in = seen_obj_ids))
 
 if __name__ == '__main__':
     main()
