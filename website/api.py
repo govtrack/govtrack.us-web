@@ -13,8 +13,9 @@ import csv, json, StringIO
 class MySerializer(Serializer):
     def __init__(self, *args, **kwargs):
         Serializer.__init__(self, *args, **kwargs)
-        self.formats += ['csv']
-        self.content_types['csv'] = 'text/csv'
+        self.formats += ['csv', 'debug_sql']
+        self.content_types['csv'] = 'text/html'
+        self.content_types['debug_sql'] = 'text/plain'
     
 	# Make JSON output pretty.
     json_indent = 2
@@ -74,6 +75,15 @@ class MySerializer(Serializer):
             
         return raw_data.getvalue()
 
+    def to_debug_sql(self, data, options=None):
+        ret = StringIO.StringIO()
+        ret.write("connection\ttime\tquery\n")
+        from django.db import connections
+        for con in connections:
+            for q in connections[con].queries:
+                ret.write("%s\t%s\t%s\n" % (con, q["time"], q["sql"]))
+        return ret.getvalue()
+    	
 class GBaseModel(ModelResource):
 	
 	# Base options.
