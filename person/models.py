@@ -204,7 +204,7 @@ class Person(models.Model):
         return '/data/photos/%d-100px.jpeg' % self.pk
 
     class Meta:
-        ordering = ['lastname', 'firstname']
+        pass # ordering = ['lastname', 'firstname'] # causes prefetch related to be slow
 
     def vote_sources(self):
         from vote.models import Vote
@@ -231,7 +231,7 @@ class PersonRole(models.Model):
     website = models.CharField(max_length=255, blank=True, help_text="The URL to the official website of the person during this role, if known.")
 
     class Meta:
-        ordering = ['startdate']
+        pass # ordering = ['startdate'] # causes prefetch_related to be slow
 
     def __unicode__(self):
         return '%s / %s to %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display())
