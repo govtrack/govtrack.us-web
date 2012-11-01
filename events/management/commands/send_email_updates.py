@@ -76,8 +76,12 @@ class Command(BaseCommand):
 def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events):
 	global now
 	
+	# get the email's From: header and return path
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
 			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
+	emailreturnpath = emailfromaddr
+	if hasattr(settings, 'EMAIL_UPDATES_RETURN_PATH'):
+		emailreturnpath = (settings.EMAIL_UPDATES_RETURN_PATH % user.id)
 		
 	emailsubject = "GovTrack.us Email Update for %s" % datetime.now().strftime("%x")
 
@@ -122,7 +126,8 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 		"emailpingurl": emailpingurl,
 	})
 	
-	email = EmailMultiAlternatives(emailsubject, templ_txt.render(ctx), emailfromaddr, [user.email])
+	email = EmailMultiAlternatives(emailsubject, templ_txt.render(ctx), emailreturnpath, [user.email],
+		headers = { 'From': emailfromaddr })
 	email.attach_alternative(templ_html.render(ctx), "text/html")
 	
 	try:
