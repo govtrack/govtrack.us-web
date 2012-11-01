@@ -39,7 +39,7 @@ HOSTNAME=`hostname -I | tr -d ' '` # assumes only one interface
 HOSTNAME=127.0.0.1
 
 # Get the CURPID, CURPIDFILE, and CURPORT of the running instance.
-for CURPIDFILE in `ls /tmp | egrep "django-fcgi-$NAME(-.*)?.pid"`
+for CURPIDFILE in `ls /tmp | egrep "django-fcgi-$NAME-$PORT.pid"`
 do
     CURPID=`cat -- /tmp/$CURPIDFILE`;
     CURPORT=`echo $CURPIDFILE | sed "s/.*-\([0-9]*\).pid/\1/"`;
