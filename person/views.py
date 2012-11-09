@@ -6,6 +6,7 @@ from math import log, sqrt
 from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.db import connection
+from django.db.models import Count
 from django.http import Http404
 from django.core.cache import cache
 
@@ -14,7 +15,7 @@ from common.pagination import paginate
 
 import json, cPickle, base64
 
-from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs
+from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs, get_all_sessions
 
 from person.models import Person, PersonRole
 from person import analysis
@@ -184,6 +185,39 @@ def browsemembersbymap(request, state=None, district=None):
         "statelist": statelist,
         "senators": sens,
         "reps": reps,
+    }
+    
+@render_to('person/overview.html')
+def membersoverview(request):
+    def get_current_members(role_type, delegates, by_party):
+        qs = PersonRole.objects.filter(
+            role_type=role_type,
+            startdate__lte=datetime.now(), enddate__gte=datetime.now(),
+            state__in=set(s for s, t in stateapportionment.items() if (t != "T") ^ delegates)
+            )
+        if by_party:
+            return qs.values('party').annotate(count=Count('party')).order_by('-count')
+        else:
+            return qs.count()
+    
+    congress_current = None
+    congress_previous = None
+    for cong, sess, sdate, edate in reversed(get_all_sessions()):
+        if congress_current == None or congress_current[0] == cong: # multiple sessions per congress
+            congress_current = (cong, sdate)
+        elif congress_current != None and cong < congress_current:
+            congress_previous = (cong, edate)
+            break
+            
+    return {
+        "statelist": statelist,
+        "senate_by_party": get_current_members(RoleType.senator, False, True),
+        "senate_vacancies": 100-get_current_members(RoleType.senator, False, False),
+        "house_by_party": get_current_members(RoleType.representative, False, True),
+        "house_vacancies": 435-get_current_members(RoleType.representative, False, False),
+        "house_delegate_vacancies": 6-get_current_members(RoleType.representative, True, False),
+        "congress_current": congress_current,
+        "congress_previous": congress_previous,
     }
 
 @render_to('person/district_map_embed.html')

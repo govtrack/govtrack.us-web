@@ -247,10 +247,11 @@
 {% block crumbs %}
 <ul>
 	<li><a href="/congress">Congress</a></li>
-	{% if not state %}
-	<li>Members of Congress</li>
-	{% else %}
 	<li><a href="/congress/members">Members of Congress</a></li>
+	{% if not state %}
+	<li>Map</li>
+	{% else %}
+	<li><a href="/congress/members/map">Map</a></li>
 		{% if not district %}
 		<li>{{statename}}</li>
 		{% else %}
@@ -263,7 +264,15 @@
 
 {% block summary %}
 	<h2>Find a Senator <span>or</span> Representative</h2>
-	<p style="margin-top: 1em">Use this page to find current or past Members of Congress.</p>
+	{% if not state %}
+		<p style="margin-top: 1em">Use this page to find current or past Members of Congress.</p>
+	{% else %}
+		{% if stateapp != "T" %}
+			<p style="margin-top: 1em">This page lists the senators and representatives for {{statename}}.</p>
+		{% else %}
+			<p style="margin-top: 1em">This page lists the delegate from {{statename}}.</p>
+		{% endif %}
+	{% endif %}
 {% endblock %}
 
 {% block body_class %}member{% endblock %}

@@ -261,7 +261,7 @@ class PersonRole(models.Model):
             if not self.state in stateapportionment:
                 return 'Del.' if short else 'Delegate'
             if self.state == 'PR':
-                return 'Res.Com.' if short else 'Resident Commissioner'
+                return 'Commish.' if short else 'Resident Commissioner'
             if stateapportionment[self.state] == 'T':
                 return 'Del.' if short else 'Delegate'
             return 'Rep.' if short else 'Representative'

@@ -3,7 +3,8 @@ from django.conf.urls.defaults import *
 from bill.views import bill_details
 
 urlpatterns = patterns('person.views',
-    url(r'^$', 'browsemembersbymap', name="person_list"),
+    url(r'^$', 'membersoverview'),
+    url(r'^map$', 'browsemembersbymap', name="person_list"),
 	url(r'^(current|all)$', 'searchmembers', name="person_search"),
 
     url(r'^(?:([A-Za-z]+)(?:/(\d{1,2}))?)?/?$', 'browsemembersbymap'), # Wikipedia has bad links using state names instead of abbrs, so we support it
