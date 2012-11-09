@@ -144,6 +144,8 @@ def browsemembersbymap(request, state=None, district=None):
             except Person.DoesNotExist:
                 reps.append((i, None))
 
+        zoom_info_cache_key = "map_zoom_%s-%s" % (state, "" if not district else district)
+
         if state == "MP":
             center_long, center_lat, center_zoom = (145.7, 15.1, 11.0)
         elif state == "AS":
@@ -155,13 +157,18 @@ def browsemembersbymap(request, state=None, district=None):
             # the coordinates manually than to figure out generically how to do the math
             # of taking the average of the bounding box coordinates.
             center_long, center_lat, center_zoom = (-150, 63, 4.0)
+        elif cache.get(zoom_info_cache_key):
+            center_lat, center_long, center_zoom = cache.get(zoom_info_cache_key)
         else:
             def get_coords(state, distr):
-                cursor = connection.cursor()
-                cursor.execute("SELECT MIN(X(PointN(ExteriorRing(bbox), 1))), MIN(Y(PointN(ExteriorRing(bbox), 1))), MAX(X(PointN(ExteriorRing(bbox), 3))), MAX(Y(PointN(ExteriorRing(bbox), 3))), SUM(Area(bbox)) FROM districtpolygons WHERE state='" + state + "'" + ("" if not distr else " AND district=" + distr))
-                rows = cursor.fetchall()
-                
-                sw_lng, sw_lat, ne_lng, ne_lat, area = rows[0]
+                import urllib, json
+                if not distr:
+                    url = "http://gis.govtrack.us/boundaries/2012-states/%s/?format=json" % state.lower()
+                else:
+                    url = "http://gis.govtrack.us/boundaries/2010-cd/%s-%02d/?format=json" % (state.lower(), int(distr))
+                resp = json.load(urllib.urlopen(url))
+                sw_lng, sw_lat, ne_lng, ne_lat = resp["extent"]
+                area = (ne_lng-sw_lng)*(ne_lat-sw_lat)
                 center_long, center_lat = (sw_lng+ne_lng)/2.0, (sw_lat+ne_lat)/2.0
                 center_zoom = round(1.0 - log(sqrt(area)/1000.0))
                 return center_lat, center_long, center_zoom
@@ -173,6 +180,8 @@ def browsemembersbymap(request, state=None, district=None):
                 distr_center_lat, district_center_long, district_center_zoom = get_coords(state, district)
                 if district_center_zoom > center_zoom + 1:
                     center_lat, center_long, center_zoom = distr_center_lat, district_center_long, district_center_zoom
+                    
+            cache.set(zoom_info_cache_key, (center_lat, center_long, center_zoom) )
     
     return {
         "center_lat": center_lat,
