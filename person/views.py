@@ -235,36 +235,22 @@ def district_lookup(request):
     return do_district_lookup(lng, lat)
 
 def do_district_lookup(lng, lat):
-    # Query based on bounding box.
-    cursor = connection.cursor()
-    cursor.execute("SELECT state, district, pointspickle FROM districtpolygons WHERE MBRContains(bbox, GeomFromText('Point(%s %s)'))", [lng, lat])
-    rows = cursor.fetchall()
+    import urllib, json
+    url = "http://gis.govtrack.us/boundaries/2010-cd/?contains=%f,%f&format=json" % (lat, lng)
+    try:
+        resp = json.load(urllib.urlopen(url))
+    except Exception as e:
+        return { "error": "error loading district data (%s)" % str(e) }
     
-    # Do a point-in-polygon test for each polygon.
-    for row in rows:
-        poly = cPickle.loads(base64.b64decode(row[2]))
-        if point_in_poly(lng, lat, poly):
-            return { "state": row[0], "district": row[1] }
+    if len(resp["objects"]) == 0:
+        return { "error": "point is not within a district" }
 
-    return { "error": "point is not within a district" }
+    if len(resp["objects"]) > 1:
+        return { "error": "point is within multiple districts!" }
+        
+    d = resp["objects"][0]["slug"].split("-")
+    return { "state": d[0].upper(), "district": int(d[1]) }
 
-def point_in_poly(x, y, poly):
-    # ray casting method
-    n = len(poly)
-    inside = False
-    p1x, p1y = poly[0]
-    for i in xrange(n+1):
-        p2x, p2y = poly[i % n]
-        if y > min(p1y, p2y):
-            if y <= max(p1y, p2y):
-                if x <= max(p1x, p2x):
-                    if p1y != p2y:
-                        xinters = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
-                    if p1x == p2x or x <= xinters:
-                        inside = not inside
-        p1x, p1y = p2x, p2y
-    return inside
-    
 @render_to('congress/political_spectrum.html')
 def political_spectrum(request):
     rows = []
