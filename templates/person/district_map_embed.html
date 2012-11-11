@@ -8,28 +8,8 @@
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
 	<script type="text/javascript">
 		var state = {% if not demo %}"{{state|escapejs}}"{% else %}"ne"{% endif %};
-		var district = {% if not demo %}"{{district|escapejs}}"{% else %}3{% endif %};
+		var district = {% if not demo %}"{{district|escapejs}}"{% else %}"3"{% endif %};
 	
-		function createDistrictsOverlay(outlines_only, opacity, state, district) {
-			return {
-			  getTileUrl: function(coord, zoom) 
-			  {
-				  return "http://www.govtrack.us/perl/wms/wms.cgi?google_tile_template_values=" + coord.x + "," + coord.y + "," + zoom
-				  	+ "&LAYERS=cd-110" + (outlines_only ? "-outlines" : "")
-					+ (state ? ":http://www.rdfabout.com/rdf/usgov/geo/us/" + state
-						+ (!district ? "%25"
-							: "/cd/110/" + district)
-						: "")
-					+ "&FORMAT=image/png";	
-			  },
-			  tileSize: new google.maps.Size(256, 256),
-			  minZoom: 2,
-			  maxZoom: 28,
-			  opacity: opacity,
-			  isPng: true
-			};		
-		}
-		
 		var map;
 		
 		function initialize() {
@@ -41,10 +21,51 @@
 				zoomControl: true,
 				mapTypeControl: false,
 				scaleControl: true,
-				streetViewControl: false
+				streetViewControl: false,
+				styles: 			
+					[
+					  {
+						"featureType": "water",
+						"stylers": [
+						  { "visibility": "simplified" }
+						]
+					  },{
+						"featureType": "transit.station.bus",
+						"stylers": [
+						  { "visibility": "off" }
+						]
+					  },{
+						"featureType": "poi.business",
+						"stylers": [
+						  { "visibility": "off" }
+						]
+					  },{
+						"featureType": "landscape.man_made",
+						"stylers": [
+						  { "visibility": "off" }
+						]
+					  },{
+						"featureType": "landscape.natural",
+						"stylers": [
+						  { "lightness": 100 }
+						]
+					  },{
+						"featureType": "administrative.province",
+						"elementType": "geometry.stroke",
+						"stylers": [
+						  { "invert_lightness": true }
+						]
+					  },{
+						"featureType": "poi.park",
+						"elementType": "geometry.fill",
+						"stylers": [
+						  { "visibility": "off" }
+						]
+					  }
+					]			
 				};
-			map = new google.maps.Map(document.getElementById("map_canvas"),
-			myOptions);
+				
+			map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);				
 			
 			{% if bounds %}
 			var bounds = "{{bounds|escapejs}}".split(',');
@@ -52,11 +73,23 @@
 				map.fitBounds(bounds);
 			{% endif %}
 			
-			overlayWMS = new google.maps.ImageMapType(createDistrictsOverlay(false, .2, state, district));
-			map.overlayMapTypes.insertAt(0, overlayWMS);			
-
-			overlayWMS = new google.maps.ImageMapType(createDistrictsOverlay(true, .7, state, district));
-			map.overlayMapTypes.insertAt(0, overlayWMS);
+			var tileimgformat = 'png';
+			if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
+			var overlay = new google.maps.ImageMapType({
+			  getTileUrl: function(coord, zoom) {
+				  return "http://gis.govtrack.us/map/tiles/2010-cd/"
+				  + ((state && district) ? (state.toLowerCase() + "-" + (district.length < 2 ? "0" : "") + district) + "/" : "")
+				  + (zoom-1) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=512";
+			  },
+			  tileSize: new google.maps.Size(512, 512),
+			  isPng: tileimgformat == "png",
+			  minZoom: 3,
+			  maxZoom: 28,
+			  opacity: tileimgformat == "png" ? .85 : .25
+			});
+			
+			map.overlayMapTypes.clear();
+			map.overlayMapTypes.insertAt(0, overlay);
 			
 			{% if not demo %}
 			var mh = document.getElementById("map_canvas").offsetHeight;
