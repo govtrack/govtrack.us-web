@@ -38,6 +38,7 @@
 		var map;
 		
 		$(function() {
+			//$('#cat-icon').hide();
 			var myOptions = {
 				zoom: {{center_zoom}},
 				center: new google.maps.LatLng({{center_lat}}, {{center_long}}),
@@ -143,7 +144,7 @@
 					$(this).addClass("active");
 					if (this.id == "ctrl_layer_2012") {
 						if (first_time_on_redistricting)
-							alert("Please note:\n\n1) Your current Members of Congress are based on the district lines at the time you last voted, in 2010.\n\n2) Check your voter registration information before voting to be sure you have the most accurate information.");
+							alert("Please note:\n\nNew Members of Congress take office in early January. Your current Members of Congress are still based on the 2010 district lines.");
 						first_time_on_redistricting = false;
 					}
 			});
@@ -265,7 +266,7 @@
 {% block summary %}
 	<h2>Find a Senator <span>or</span> Representative</h2>
 	{% if not state %}
-		<p style="margin-top: 1em">Use this page to find current or past Members of Congress.</p>
+		<p style="margin-top: 1em">Use this page to find current Members of Congress.</p>
 	{% else %}
 		{% if stateapp != "T" %}
 			<p style="margin-top: 1em">This page lists the senators and representatives for {{statename}}.</p>
@@ -273,11 +274,19 @@
 			<p style="margin-top: 1em">This page lists the delegate from {{statename}}.</p>
 		{% endif %}
 	{% endif %}
+	
+	<p style="margin-bottom: 0"><b>NOTE:</b> New Members of Congress take office in early January. That means that the list of districts, representatives, and senators remain as they were through the remainder of the year. Continue to use the &ldquo;2010 districts&rdquo; for determining your current representative until then.</p>
+
 {% endblock %}
 
 {% block body_class %}member{% endblock %}
 
 {% block body %}
+
+{% comment %}
+{% include "ad_footer_leaderboard.html" %}
+{% endcomment %}
+
 <div id="search-members" class="section box row">
 	<div class="advanced-search four columns">
 		{% if not state %}
