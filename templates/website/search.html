@@ -24,7 +24,7 @@
 		<div id="search-results">
 		{% if request.GET.q %}
 			{% for grp in results %}
-				<div class="the-results group">
+				<div class="results-group group">
 					<h3>{{grp.title}}</h3>
 				{% if not grp.results %}
 					<p class="no_results">We couldn&rsquo;t find any {{grp.noun}} that matched your search. <a href="{{grp.href}}">Browse</a> for more.</p>
@@ -41,7 +41,7 @@
 				</div>
 			{% endfor %}
 		{% endif %}
-		</div><!-- /the-results -->
+		</div><!-- /results-group -->
 	</div><!-- /site-search-results -->
 
 </div>
