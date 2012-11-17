@@ -64,7 +64,7 @@
 			
 			<ul id="categories">
 				<li id="link-members">
-					<a href="{% url person_list %}">
+					<a href="/congress/members">
 						Members <span>of</span> Congress
 					</a>
 				</li>
@@ -162,9 +162,10 @@
 					{% with item|render_event:subscription_feeds as event %}
 					<article class="post {{event.type}}">
 						<div class="event_header">
-							<h4 class="event_title">{{event.title|truncatewords:30}}</h4>
-							<div class="event_date"><span>Date: </span>{% if not item.date_has_no_time %}{{item.when}}{% else %}{{item.when|date}}{% endif %}</div>
-							<div class="event_type">Type: <span>{{event.type}}</span></div>
+							<div class="event_type">Date: <span>{% if not event.date_has_no_time %}{{item.when}}{% else %}{{item.when|date}}{% endif %}</span></div>
+							<h4 class="event_title">{{event.type}}</h4>
+							<!--<div class="event_date"><span>Date: </span>{% if not event.date_has_no_time %}{{item.when}}{% else %}{{item.when|date}}{% endif %}</div>-->
+							<p>{{event.title|truncatewords:30}}</p>
 						</div>
 						<div class="event_body">
 							{% if event.type == "Vote" %}{{event.body_html|safe}}{% endif %}
