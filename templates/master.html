@@ -121,10 +121,13 @@
 									</ul>
 								</li>
 								<li class="dropnav">
-									<a href="#" onclick="return false;">Track</a>
+									<a href="/start">Track</a>
 									<ul>
 										{% if user.is_authenticated %}
+										<li><a href="/start">Add a Tracker</a></li>
 										<li><a href="/accounts/lists">Your Lists</a></li>
+										{% else %}
+										<li><a href="/start">Start Tracking</a></li>
 										{% endif %}
 										<li><a href="/accounts/docket">Your Docket</a></li>
 										<li><a href="/tools">Other Tools</a></li>

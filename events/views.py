@@ -47,13 +47,18 @@ def edit_subscription_lists(request):
     if "add" in request.GET:
         # This is a redirect from the add tracker page.
         sublist = request.user.userprofile().lists().filter(is_default=True).get()
-        
+
+        sublist.email = int(request.GET["emailupdates"])
+        if sublist.email == 0 and sublist.trackers.count() == 0:
+            # When creating a new list, if the user chose no email updates, change
+            # the name of the default list so it is not Email Updates.
+            sublist.name = "My List"
+
         feed = Feed.from_name(request.GET["add"])
         # for 'meta' feeds like bill search, we may get back a feed not in the db
         if not feed.id: feed.save()
         
         if not feed in sublist.trackers.all(): sublist.trackers.add(feed)
-        sublist.email = int(request.GET["emailupdates"])
         sublist.save()
         
         message = feed.title + " was added to your list " + sublist.name + "."
