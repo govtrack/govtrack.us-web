@@ -134,8 +134,8 @@ def main(options):
                 print "Deleting: ", qs
             except Exception as e:
                 print "Deleting [%s]..." % str(e)
-            print "Delete skipped..."
-            #qs.delete()
+            #print "Delete skipped..."
+            qs.delete()
 
     seen_obj_ids = set()
     had_error = False
