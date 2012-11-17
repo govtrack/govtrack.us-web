@@ -228,6 +228,11 @@ $(function() {
 {% endblock %}
 
 {% block body %}
+
+{% if message %}
+<div style="text-align: center; margin: 2em; font-size: 120%; font-weight: bold;">{{message}}</div>
+{% endif %}
+
 <section class="group">
 	<div id="lists">
 	<h3>Select a list to manage</h3>
@@ -309,8 +314,9 @@ $(function() {
 		{% endcomment %}
 
 		<div id="suggested" class="control">
-			<h3>Suggested Items <span>to</span> Track</h3>
+			<h3>Track More</h3>
 			<ul id="basic_trackers">
+				<li><a href="/start">Search for more to track... <span>Add</span></a></li>
 				{% for feed in no_arg_feeds %}
 					<li><a href="#" onclick="return add_tracker({{feed.id}}, '{{feed.feedname|escapejs}}', '{{feed.title|escapejs}}', '{{feed.link|escapejs}}', true);">{{feed.title}} <span>Add</span></a></li>
 				{% endfor %}

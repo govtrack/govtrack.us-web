@@ -20,8 +20,17 @@ class Feed(models.Model):
     @staticmethod
     def from_name(feedname, must_exist=True):
         if not must_exist:
+            # Return fast.
             return Feed(feedname=feedname)
-        return Feed.objects.get(feedname=feedname)
+                
+        try:
+            return Feed.objects.get(feedname=feedname)
+        except Feed.DoesNotExist:
+            # Certain feeds aren't in the db. Try a db lookup first, then...
+            for feedname2, feedmeta in Feed.feed_metadata.items():
+                if feedname.startswith(feedname2) and feedmeta.get("meta", False):
+                    return Feed(feedname=feedname)
+            raise
 
     @staticmethod
     def get_events_for(feeds, count):
@@ -31,6 +40,10 @@ class Feed(models.Model):
         
         if feeds != None:
             feeds = expand_feeds(feeds)
+            feeds = [f for f in feeds if f.id] # filter out only feeds that are in the database
+            
+            if len(feeds) == 0:
+                return []
         
         from django.db import connection, transaction
         cursor = connection.cursor()
@@ -45,7 +58,7 @@ class Feed(models.Model):
         # In that case, we take a different code path and find 'count' events from each feed,
         # then put them together, sort, distinct, and take the most recent 'count' items.
 
-        if not feeds or len(feeds) == 0:
+        if feeds == None:
             # pull events in batches, eliminating duplicate results (events in multiple feeds),
             # which is done faster here than in MySQL.
             start = 0
@@ -104,57 +117,61 @@ class Feed(models.Model):
             "slug": "bill-activity",
             "intro_html": """<p>This feed tracks all major activity on legislation, including newly introduced bills and resolutions, votes on bills and resolutions, enacted bills, and other such events.</p> <p>To exclude newly introduced bills and resolutions, use the <a href="/events/major-bill-activity">Major Activity on All Legislation Except New Introductions</a> feed.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
-        	"simple": True,
-        	"sort_order": 100,
+            "simple": True,
+            "sort_order": 100,
         },
         "misc:enactedbills": {
             "title": "Enacted Bills",
             "slug": "enacted-bills",
             "intro_html": """<p>This feed tracks the enactment of bills either by the the signature of the president or a veto override.</p> <p>You can also <a href="/congress/bills/browse?status=28,29">browse enacted bills</a> using advanced bill search.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
-        	"simple": True,
-        	"sort_order": 101,
+            "simple": True,
+            "single_event_type": True,
+            "sort_order": 101,
         },
         "misc:introducedbills": {
-        	"simple": True,
+            "simple": True,
             "title": "Introduced Bills and Resolutions",
             "slug": "introduced-bills",
             "intro_html": """<p>This feed tracks newly introduced bills and resolutions.</p> <p>You can also <a href="/congress/bills/browse?sort=-introduced_date">browse introduced bills</a> using advanced bill search.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
-        	"simple": True,
-        	"sort_order": 104,
+            "simple": True,
+            "single_event_type": True,
+            "sort_order": 104,
         },
         "misc:activebills2": {
-        	"simple": True,
+            "simple": True,
             "title": "Major Activity on All Legislation Except New Introductions",
             "slug": "major-bill-activity",
             "intro_html": """<p>This feed tracks major activity on legislation, including votes on bills and resolutions, enacted bills, and other such events.</p> <p>This feed includes all of the same events as the <a href="/events/bill-activity">Major Activity on All Legislation</a> feed except newly introduced bills and resolutions.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
-        	"simple": True,
-        	"sort_order": 105,
+            "simple": True,
+            "sort_order": 105,
         },
         "misc:comingup": {
-        	"simple": True,
+            "simple": True,
             "title": "Legislation Coming Up",
             "slug": "coming-up",
             "intro_html": """<p>This feed tracks legislation posted on the House Majority Leader&rsquo;s week-ahead website at <a href="http://docs.house.gov">docs.house.gov</a> and the <a href="http://www.senate.gov/pagelayout/legislative/d_three_sections_with_teasers/calendars.htm">Senate Floor Schedule</a> which gives rough one-day-ahead notice.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
-        	"simple": True,
-        	"sort_order": 102,
+            "simple": True,
+            "single_event_type": True,
+            "sort_order": 102,
         },
         "misc:allcommittee": {
-        	"simple": True,
+            "simple": True,
             "title": "Committee Meetings",
             "link": "/congress/committees",
-        	"simple": True,
-        	"sort_order": 106,
+            "simple": True,
+            "sort_order": 106,
         },
         "misc:allvotes": {
-        	"simple": True,
+            "simple": True,
             "title": "Roll Call Votes",
             "link": "/congress/votes",
-        	"simple": True,
-        	"sort_order": 103,
+            "simple": True,
+            "single_event_type": True,
+            "sort_order": 103,
         },
         "bill:": {
             "title": lambda self : truncate_words(self.bill().title, 12),
@@ -179,6 +196,7 @@ class Feed(models.Model):
             "noun": "person",
             "link": lambda self: self.person().get_absolute_url(),
             "scoped_title": lambda self : self.person().lastname + "'s Voting Record",
+            "single_event_type": True,
         },
         "committee:": {
             "title": lambda self : truncate_words(self.committee().fullname, 12),
@@ -198,6 +216,7 @@ class Feed(models.Model):
             "noun": "committee",
             "link": lambda self: self.committee().get_absolute_url(),
             "scoped_title": lambda self : "This Committee's Hearings and Markups",
+            "single_event_type": True,
         },
         "crs:": {
             "title": lambda self : self.issue().name,
@@ -230,9 +249,20 @@ class Feed(models.Model):
               breadcrumbs = list of tuples of (link, text)
               
               simple = True
-              	     Whether this feed's name is exactly the prefix as given (i.e.
-              	     it has no internal arguments) and should be included in any
-              	     list of suggested simple trackers.
+                       Whether this feed's name is exactly the prefix as given (i.e.
+                       it has no internal arguments) and should be included in any
+                       list of suggested simple trackers.
+                       
+               includes = function
+                        A function from the feed object to an iterable of Feed objects
+                        that should also be queried for the events in this feed instead.
+                       
+               meta = True
+                       Set to True if no events are stored in the database for this
+                       feeed. It may have an 'includes' to slurp in other feeeds.
+                       
+               single_event_type = True
+                        Set to True if the feed only has events of a single type.
         """
         Feed.feed_metadata[prefix] = metadata
      
@@ -427,6 +457,11 @@ class Feed(models.Model):
 
     def includes_feeds_and_self(self):
         return [self] + self.includes_feeds()
+        
+    @property
+    def single_event_type(self):
+        m = self.type_metadata()
+        return m.get("single_event_type", False)
 
     def bill(self):
          if not hasattr(self, "_ref"):
@@ -671,9 +706,7 @@ def expand_feeds(feeds):
     feeds = [f if isinstance(f, Feed) else Feed.objects.get(feedname=f) for f in feeds]
     i = 0
     while i < len(feeds):
-        meta = feeds[i].type_metadata()
-        if "includes" in meta:
-            feeds.extend(meta["includes"](feeds[i]))
+        feeds.extend(feeds[i].includes_feeds())
         i += 1
     return feeds
 

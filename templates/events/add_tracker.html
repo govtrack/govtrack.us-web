@@ -3,51 +3,82 @@
 
 {% block head %}
 <script>
-function select_feed(ev) {
-	var feed = $(ev.target).attr("feedname");
-	var descr = $(ev.target).attr("title");
-	if (!descr) descr = $(ev.target).text();
+function back_to_start() {
+	$('#step1a').show();
+	$('#step1b').hide();
+	$('#step2').hide();
+	return false;
+}
 
+var selected_feed;
+var selected_feed_descr;
+
+function select_feed(ev) {
+	selected_feed = $(ev.target).attr("feedname");
+	selected_feed_descr = $(ev.target).attr("title");
+	if (!selected_feed_descr) selected_feed_descr = $(ev.target).text();
+	return show_feed();
+}
+
+function show_feed() {
 	$('#step1a').hide();
 	$('#step1b').hide();
 	$('#step2').show();
 	
-	$('#step2 h3 span').text(descr);
+	$('#step2 h3 span').text(selected_feed_descr);
 
 	$('#events_preview_2').html("<p class='error'>Loading...</p>");
 	$.ajax({
 		url: "/events/_load_events",
 		type: "POST",
-		data: { feed: feed, count: 10 },
+		data: { feed: selected_feed, count: 10, newtab: 1 },
 		dataType: "html",
 		success: function(data) {
 			$('#events_preview_2').html(data);
 		}
-	});	
+	});
+
+	update_login_links();
 	
 	return false;
 }
 
+function update_login_links() {
+	// update login/registration links
+	var qs = "add=" + encodeURIComponent(selected_feed) + "&emailupdates=" + $('#email_frequency').val();
+	
+	$('a').each(function() {
+		var href = this.getAttribute("href_original");
+		if (!href) {
+			href = this.getAttribute("href");
+			if (!href) return;
+			this.setAttribute("href_original", href);
+		}
+		this.setAttribute("href", href.replace("REPLACE_FEED_HERE", (href.indexOf("next=") >= 0) ? encodeURIComponent(qs) : qs));
+	});
+}
+
 function do_search(form) {
 	var qq = $(form).find('input[type=text]').val();
+
+	$('#step1a').hide();
+	$('#step2').hide();
+	$('#step1b').show();
+	$('#your_search_term').text(qq);
+	$('#search_entry_again').val(qq);
 	
 	$('#search-results').html("<p class='error'>Loading...</p>");
 	
 	$.ajax('/events/_ajax/start/search', {
 		data: { q: qq },
 		success: function(res) {
-			$('#step1a').hide();
-			$('#step2').hide();
-			$('#step1b').show();
-			$('#your_search_term').text(qq);
-			$('#search_entry_again').val(qq);
-
-			var search_tracker_name = "billsearch:text=" + escape(qq);
+			selected_feed = "billsearch:text=" + escape(qq);
+			selected_feed_descr = "Search for \"" + qq + "\"";
 			$('#events_preview_1').html("<p class='error'>Loading...</p>");
 			$.ajax({
 				url: "/events/_load_events",
 				type: "POST",
-				data: { feed: search_tracker_name },
+				data: { feed: selected_feed, count: 10, newtab: 1 },
 				dataType: "html",
 				success: function(data) {
 					$('#events_preview_1').html(data);
@@ -61,10 +92,11 @@ function do_search(form) {
 			
 			$('#search-results').html('');
 			for (var i = 0; i < res.length; i++) {
-				var div = $("<div class='the-results group'><h4/><ul/></div>");
+				var div = $("<div class='results-group group'><h4/><ul/></div>");
 				$('#search-results').append(div);
 				
 				div.find('h4').text(res[i].title);
+				var ul = div.find('ul');
 				
 				if (res[i].feeds.length == 0) {
 					var p = $("<p class='no_results'>We couldn't find any " + res[i].noun + " that matched your search. <a>Browse</a> for more.</p>");
@@ -76,8 +108,8 @@ function do_search(form) {
 						x.find("a").attr('feedname', res[i].feeds[j].name);
 						x.find("a").text(res[i].feeds[j].title);
 						x.find("a").click(select_feed);
-						div.find('ul').append(x);
-						if (res[i].feeds[j].subfeeds.length > 0) {
+						ul.append(x);
+						if (res[i].feeds[j].subfeeds.length > 0 && 0) {
 							var sf = $("<ul/>");
 							x.append(sf);
 							for (var k = 0; k < res[i].feeds[j].subfeeds.length; k++) {
@@ -90,7 +122,7 @@ function do_search(form) {
 						}
 					}
 					
-					var a = $("<a class='more'>More Search Results &raquo;</a>");
+					var a = $("<a class='more'>More " + res[i].noun + " &raquo;</a>");
 					if (!res[i].qsarg)
 						a.attr('href', res[i].href);
 					else
@@ -114,95 +146,74 @@ function do_search(form) {
 {% endblock %}
 
 {% block body %}
-<ul class="tabs steps three-up">
-	<li><a  class="current" href="#"><span>1.</span> Find Items to Track</a></li>
-	<li><a href="#"><span>2.</span> Set Up Your Updates</a></li>
-	<li><a href="#"><span>3.</span> Save Your Tracker</a></li>
-</ul>
-
-<div id="tracker_wizard" class="panels">
-
+<div id="tracker_wizard">
 
 	<div id="step1a" class="panel row" style="display: {% if not request.GET.q %}block{% else %}none{% endif %};">
 			<div class="row">
-				<h1 class="twelve columns"><span class="marker">1</span>Find items to track</h1>
-			</div>
-			<div class="row">
-				<div class="group ten columns centered">
-					<h2>Search for Bills &amp; Legislation, Members of Congress, or Committees:</h2>
+				<div class="six columns">
+					<h2 class="has_marker"><span>A</span>Start with a Search</h2>
+					
 					<form id="tracker_search" onsubmit="return do_search(this);">
-						
-						<fieldset class="box row">
-							<div class="group">
-								<label class="six columns" for="search_entry">Search all of GovTrack for...</label>
-								<div class="six columns">
-									<div class="row collapse">
-										<div class="eight mobile-three columns">
-											<input type="text" value="{{request.GET.q}}"/>
-										</div>
-										<div class="four mobile-one columns">
-											<a href="#" class="postfix button expand" onclick="return do_search('#tracker_search');">Search</a>
-										</div>
-									</div>
+							<p>GovTrack tracks the activities of the United States Congress and legislation in the 50 states.
+							Get started by typing what you want to track. Then click Search.</p>
+					
+							<div class="row collapse">
+								<div class="eight mobile-three columns">
+									<input type="text" value="{{request.GET.q}}"/>
+								</div>
+								<div class="four mobile-one columns">
+									<a href="#" class="postfix button expand" onclick="return do_search('#tracker_search');">Search</a>
 								</div>
 							</div>
 							
 							<div class="notebox">
-								<h4>Tip:</h4>
-								<p class="note">You can search for legislation by keywords, names, or bill numbers, (<em>"fossil fuels"</em>, "<em>End Big Oil</em>", or "<em>H.R. 601</em>"); you can search for members by name or state, or even put in your street address to find your area representatives.</p>
+								<h4>Tips:</h4>
+								<p class="note">Use keywords <em>(&ldquo;agriculture&rdquo;)</em>, bill numbers <em>(&ldquo;H.R. 1234&rdquo;)</em>, or names <em>(&ldquo;Boehner&rdquo;)</em>. Or try <a href="/overview">browsing the rest of the site</a>.</p>
 							</div>
 
 				    	</fieldset>
 					</form>
 				</div>
-			</div>
 
-			<div class="row">
-				<div id="suggested" class="ten columns centered control">
-					<h2>Or, choose to track a suggested item:</h2>
+				<div class="six columns">
+					<h2 class="has_marker"><span>B</span>Use a Pre-set Tracker</h2>
 					<ul id="basic_trackers">
 						{% for tracker in no_arg_feeds %}
 						<li><a href="#" feedname="{{tracker.feedname}}" onclick="return select_feed({target: this});" title="{{tracker.title}}">{{tracker.title}} <span>Add</span></a></li>
 						{% endfor %}
 					</ul>
+					
+					<p>You can also <a href="/congress/bills">browse bills and subjects</a>, <a href="/congress/members">find your Members of Congress</a>, or <a href="/overview">look at an overview of what&rsquo;s on GovTrack</a>.</p>
 				</div><!-- /suggested -->
 			</div>
 	</div><!-- /panel -->
 
 
 	<div id="step1b" class="panel row" style="display: {% if request.GET.q %}block{% else %}none{% endif %}">
-		<div class="row">
-			<h1 class="twelve columns"><span class="marker">1</span>Find items to track</h1>
-		</div>
-		<div class="row">
-			<h2 class="six columns">You Searched for &ldquo;<span id="your_search_term"> </span>&rdquo;</h2>
-			<form id="tracker_search_2" class="small group six columns" onsubmit="return do_search(this);">
-				<fieldset class="row">
-					<label class="three columns" for="search_entry_again">Search again</label>
-					<div class="eight columns">
-						<div class="row collapse">
-							<div class="ten mobile-three columns">
-								<input id="search_entry_again" name="q" type="text" class="text" />
-							</div>
-							<div class="two mobile-one columns">
-								<a href="#" id="submit_again" class="postfix button expand" onclick="return do_search('#tracker_search');"><span class="icon-search"></a>
-							</div>
-						</div>
-					</div>
-
-		    	</fieldset>
-			</form>
+		<div class="row" style="margin-top: 10px">
+			<h1 class="twelve columns">You Searched for &ldquo;<span id="your_search_term"> </span>&rdquo;, but you have a choice...</h1>
+			<div class="select_another" style="margin-bottom: 2em"><a href="#" onclick="return back_to_start();">Search for something else?</a></div>
 		</div>
 
 		<div id="tracker_choices" class="row">
+			<div id="related_results" class="six columns">
+				<h2>Track One of These?</h2>
 
+				<div id="search-results">
+		
+				</div><!-- /the-results -->
+			</div>
+			
 			<div id="keyword_results" class="six columns fat">
-				<h3>You can track this keyword search, which will update you on all activity on related federal bills.</h3>
+				<h2>Or Track This Keyword Search?</h2>
+				
+				<p>Get updates on all activity on federal bills related to your search. Check the preview below to see if this is what you want.</h3>
 
+				<a href="#" class="track-btn" onclick="return show_feed();" style="margin: 1em auto;">Next &raquo;</a>
 
 				<div id="events_list">
 					<div id="events_header" class="group">
-						<h4>Tracker preview:</h4>
+						<h4>Preview:</h4>
 					</div>
 
 					<div id="events_preview_1">
@@ -211,33 +222,51 @@ function do_search(form) {
 				</div><!-- /event_list -->
 			</div><!-- /keyword_results -->
 
-
-
-			<div id="related_results" class="six columns fat">
-				<h3>Or, you can track one of these related items:</h3>
-
-				<div id="search-results">
-		
-				</div><!-- /the-results -->
-			</div>
-
 		</div>
 
 	</div><!-- /panel -->
 
 
 	<div id="step2" class="panel row" style="display: none">
-		<div class="row">
-			<h1 class="twelve columns"><span class="marker">2</span>Set up your updates</h1>
-		</div>
-
-		<h3>You are tracking <span> </span></h3>
-
+		<div id="edit_list" class="four columns fat">
+			<div id="set_freq" class="control">
+				<h3>You Selected: <span> </span></h3>
+				<div>
+					<p>We can send these updates to you by email. </p>
+					<label for="email_frequency">How often would you like updates?</label>
+					<select id="email_frequency" name="email_frequency" onchange="update_login_links();">
+						<option value="0">No Email - I&rsquo;ll come back on my own.</option>
+						<option value="1" selected>Daily Emails</option>
+						<option value="2">Weekly Emails</option>
+					</select>
+				</div>
+				<div class="select_another">Or <a href="#" onclick="return back_to_start();">choose something else</a>.</div>
+			</div><!-- /set_freq -->
+			<div class="">
+				{% if not request.user.is_authenticated %}
+			
+				<div class="signin_social">
+					<h3 style="margin-bottom: 1em">Save To Your Docket</h3>
+					{% with "/accounts/lists?"|add:"REPLACE_FEED_HERE" as singlesignon_next %}
+						{% include "registration/login_singlesignon.html" %}
+					{% endwith %}
+					<p style="margin: .5em 0 1em 0; font-size: 90%;">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack. Just click the appropriate button above. Or register the simple way by clicking the Register button below.</p>
+				</div>
+				<div style="clear: both"> </div>
+			
+				<a class="button" href="/registration/signup?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}">Register a New Account</a>
+				<a class="button" href="/accounts/login?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}">Existing User Log In</a>
+				
+				{% else %}
+					<a class="button" href="/accounts/lists?REPLACE_FEED_HERE">Save</a>
+				{% endif %}
+			</div>
+		</div><!-- /edit_list -->
+		
 		<div id="keyword_results" class="eight columns fat">
 			<div id="events_list">
 				<div id="events_header" class="group">
-					<h4>Tracker preview:</h4>
-					
+					<h4>Preview:</h4>
 				</div>
 
 				<div id="events_preview_2">
@@ -247,69 +276,7 @@ function do_search(form) {
 		</div><!-- /keyword_results -->
 
 
-		<div id="edit_list" class="four columns fat">
-	
-			<div id="set_freq" class="control">
-				<h3>We can send these updates to you by email.</h3>
-				<div class="row">
-					<label for="email_frequency">How often would you like updates?</label>
-					<select id="email_frequency" name="email_frequency" onchange="change_email_options();">
-						<option value="0">No Email - I&rsquo;ll come back on my own.</option>
-						<option value="1" selected>Daily Emails</option>
-						<option value="2">Weekly Emails</option>
-					</select>
-				</div>
-			</div><!-- /set_freq -->
-			<div class="row">
-				<a class="button" href="#">Save This Tracker</a>
-			</div>
-		</div><!-- /edit_list -->
-
 	</div><!-- /panel -->
 
-
-	<div id="step3" class="panel" style="display: block">
-		<div class="row">
-			<h1 class="twelve columns"><span class="marker">3</span>Save your tracker</h1>
-		</div>
-
-		<form method="post" class="login row">
-			{% csrf_token %}
-			<input type="hidden" name="next" value="{{ next }}" />
-
-			
-				<div class="signin_social six columns">
-					<h3 style="margin-bottom: 1em">Have one of these?</h3>
-					{% with next as singlesignon_next %}
-						{% include "registration/login_singlesignon.html" %}
-					{% endwith %}
-					<p style="margin-top: 1em">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack.</p>
-				</div>
-
-				<div id="login_form" class="six columns">
-					<h3 style="margin-bottom: 1em">Use your email and password:</h3>
-
-					{% if errors %}
-						<p class="error">{{errors}} Please try again.</p>
-					{% endif %}
-
-					<label class="large" for="id_email">Email</label>
-					<input type="text" maxlength="60" id="id_email" name="Email" value="{{email}}" class="input-text large oversize" />
-					
-					<label class="large" for="id_password">Password</label>
-					<input type="password" name="password" id="id_password" name="Password" class="input-text large oversize" value="{{password}}" />
-					
-					<input type="submit" value="Log in" class="radius button green" />
-
-					<p><a class="forgot" href="{% url registration.views.resetpassword %}">Forgot your password?</a></p>
-				
-					<p><a href="/registration/signup{% if next %}?next={{next|urlencode}}{% endif %}">New here? Create a login.</a></p>
-
-				</div>
-			
-		</form>
-
-	</div><!-- /panel -->
-</div>
-
+</div> <!-- /#tracker_wizard -->
 {% endblock %}

@@ -9,9 +9,15 @@
 {% for event in page.object_list %}
 {% with event|render_event:feeds as meta %}
 	<div class="tracked_event">
-		<h4 class="event_title"><a href="{{meta.url}}">{{meta.title}}</a></h4>
-
-		<div class="event_type">Type: <span>{{meta.type}}</span></div>
+		{% if simple_mode %}
+			<h4 class="event_title simple"><a href="{{meta.url}}" {% if request.POST.newtab == '1' %}target="_blank"{% endif %}>{{meta.title}}</a></h4>
+			<div class="event_type">Type: <span>{{meta.type}}</span></div>
+		{% else %}
+			<h4 class="event_title">{{meta.type}}</h4>
+			<div class="event_body">
+				<p><a href="{{meta.url}}" {% if request.POST.newtab == '1' %}target="_blank"{% endif %}>{{meta.title}}</a></p>
+			</div>
+		{% endif %}
 
 		<div class="event_date">
 			<span>Date: </span>
@@ -22,7 +28,7 @@
 			{% endif %}
 		</div>
 
-		{% if event.feeds|length > 0 %}
+		{% if feeds|length != 1 and event.feeds|length > 0 %}
 			<div class="event_feed_title">From feed: <small>
 				{% for feed in event.feeds %}
 					{% if not forloop.first %}, {% endif %}
@@ -32,7 +38,10 @@
 		{% endif %}
 		
 		<div class="event_body">
+			{% if feeds|length != 1 and event.feeds|length > 0 %}
 			<h5>Activity: </h5>
+			{% endif %}
+			
 			{{meta.body_html|safe}}
 		</div>
 	</div>

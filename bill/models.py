@@ -403,7 +403,7 @@ class Bill(models.Model):
         action_type = None
        
         if status == BillStatus.introduced:
-            action_type = "Introduced"
+            action_type = "introduced"
         else:
             for datestr, st, text in self.major_actions:
                 if st == status:
@@ -413,36 +413,6 @@ class Bill(models.Model):
             else:
                 raise Exception("Invalid event.")
                 
-            if status not in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
-                from lxml import etree
-                from parser.bill_parser import BillProcessor
-                
-                xml = etree.parse("data/us/%s/bills/%s%d.xml" % (self.congress, BillType.by_value(self.bill_type).xml_code, self.number))
-                node = xml.xpath("actions/*[@state='%s']" % status.xml_code)[0]
-                
-                if node.tag in ("vote", "vote-aux") and node.get("how") == "roll":
-                    from vote.models import Vote, VoteCategory, CongressChamber
-                    from us import get_session_from_date
-                    try:
-                        cn, sn = get_session_from_date(date)
-                        vote = Vote.objects.get(congress=cn, session=sn, chamber=CongressChamber.house if node.get("where")=="h" else CongressChamber.senate, number=int(node.get("roll")))
-                        cat = VoteCategory.by_value(int(vote.category))
-                        if cat == VoteCategory.passage:
-                            action = ""
-                            second = ""
-                        elif cat == VoteCategory.passage_suspension:
-                            action = ""
-                            second = " under \"suspension of the rules\""
-                        else:
-                            action = vote.question + ": "
-                            second = ""
-                        req = vote.required
-                        if req == "1/2": req = "simple majority"
-                        action += vote.result + " " + "%d/%d"%(vote.total_plus,vote.total_minus) + ", " + req + " required" + second + "."
-                    except Vote.DoesNotExist:
-                        pass
-        
-
         return {
             "type": status.label,
             "date": date,
@@ -450,17 +420,18 @@ class Bill(models.Model):
             "title": self.title,
             "url": self.get_absolute_url(),
             "body_text_template":
-"""{% if sponsor %}Sponsor: {{sponsor|safe}}{% endif %}
-{% if action %}{{action|safe}}{% endif %}
-{{summary|safe}}""",
+"""{% if sponsor and action_type == 'introduced' %}Sponsor: {{sponsor|safe}}{% endif %}
+{% if action %}Last Action: {{action|safe}}{% endif %}
+{% if action %}Explanation: {% endif %}{{summary|safe}}""",
             "body_html_template":
-"""{% if sponsor %}<p>Sponsor: <a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a></p>{% endif %}
-{% if action %}<p>{{action}}</p>{% endif %}
-<p>{{summary}}</p>
+"""{% if sponsor and action_type == 'introduced' %}<p>Sponsor: <a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a></p>{% endif %}
+{% if action %}<p>Last Action: {{action}}</p>{% endif %}
+<p>{% if action %}Explanation: {% endif %}{{summary}}</p>
 """,
             "context": {
                 "sponsor": self.sponsor,
                 "action": action,
+                "action_type": action_type,
                 "summary": self.get_status_text(status, date),
                 }
             }
@@ -488,9 +459,9 @@ class Bill(models.Model):
             "title": self.title,
             "url": self.get_absolute_url(),
             "body_text_template":
-"""{% for p in cosponsors %}{{ p.person.name }}
+"""{% for p in cosponsors %}New Cosponsor: {{ p.person.name }}
 {% endfor %}""",
-            "body_html_template": """{% for p in cosponsors %}<p><a href="{{SITE_ROOT}}{{p.person.get_absolute_url}}">{{ p.person.name }}</a></p>{% endfor %}""",
+            "body_html_template": """{% for p in cosponsors %}<p>New Cosponsor: <a href="{{SITE_ROOT}}{{p.person.get_absolute_url}}">{{ p.person.name }}</a></p>{% endfor %}""",
             "context": {
                 "cosponsors": cosp,
                 }
@@ -503,8 +474,8 @@ class Bill(models.Model):
             "date_has_no_time": False,
             "title": self.title,
             "url": self.get_absolute_url(),
-            "body_text_template": """This {{noun}} has been added to the House's schedule for the coming week, according to the House Majority Leader. More information can be found at http://docs.house.gov.\n\n{{current_status}}""",
-            "body_html_template": """<p>This {{noun}} has been added to the House&rsquo;s schedule for the coming week, according to the House Majority Leader. See <a href="http://docs.house.gov">the week ahead</a>.</p><p>{{current_status}}</p>""",
+            "body_text_template": """This {{noun}} has been added to the House's schedule for the coming week, according to the House Majority Leader. More information can be found at http://docs.house.gov.\n\nLast Action: {{current_status}}""",
+            "body_html_template": """<p>This {{noun}} has been added to the House&rsquo;s schedule for the coming week, according to the House Majority Leader. See <a href="http://docs.house.gov">the week ahead</a>.</p><p>Last Action: {{current_status}}</p>""",
             "context": { "noun": self.noun, "current_status": self.current_status_description },
             }
     def render_event_sfs(self, feeds):
@@ -514,8 +485,8 @@ class Bill(models.Model):
             "date_has_no_time": False,
             "title": self.title,
             "url": self.get_absolute_url(),
-            "body_text_template": """This {{noun}} has been added to the Senate's floor schedule for the next legislative day.\n\n{{current_status}}""",
-            "body_html_template": """<p>This {{noun}} has been added to the Senate&rsquo;s floor schedule for the next legislative day.</p><p>{{current_status}}</p>""",
+            "body_text_template": """This {{noun}} has been added to the Senate's floor schedule for the next legislative day.\n\nnLast Action: {{current_status}}""",
+            "body_html_template": """<p>This {{noun}} has been added to the Senate&rsquo;s floor schedule for the next legislative day.</p><p>Last Action: {{current_status}}</p>""",
             "context": { "noun": self.noun, "current_status": self.current_status_description },
             }
         
@@ -813,5 +784,6 @@ Feed.register_feed(
     title = lambda feed : bill_search_feed_title(feed.feedname.split(":", 1)[1]),
     link = lambda feed : "/congress/bills/browse?" + feed.feedname.split(":", 1)[1],
     includes = lambda feed : bill_search_feed_execute(feed.feedname.split(":", 1)[1]),
+    meta = True,
     )
 

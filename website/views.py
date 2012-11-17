@@ -127,8 +127,9 @@ def do_site_search(q, allow_redirect=False):
             {"href": c.get_absolute_url(),
              "label": c.fullname,
              "feed": Feed.CommitteeFeed(c),
-             "obj": c }
-            for c in Committee.objects.filter(name__contains=q, obsolete=False)
+             "obj": c,
+             "secondary": c.committee != None}
+            for c in Committee.objects.filter(name__icontains=q, obsolete=False)
             ], key=lambda c : c["label"])
         })
        
@@ -168,6 +169,22 @@ def do_site_search(q, allow_redirect=False):
             for p in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"], content=q)[0:9]]
             })
 
+	# subject terms, but exclude subject terms that look like committee names because
+	# that is confusing to also see with committee results
+    from bill.models import BillTerm, TermType
+    results.append({
+        "title": "Subject Areas (Federal Legislation)",
+        "href": "/congress/bills",
+        "noun": "subject areas",
+        "results": [
+            {"href": p.get_absolute_url(),
+             "label": p.name,
+             "obj": p,
+             "feed": Feed.IssueFeed(p),
+             "secondary": not p.is_top_term() }
+            for p in BillTerm.objects.filter(name__icontains=q, term_type=TermType.new).exclude(name__contains=" Committee on ")[0:9]]
+        })
+    
     # in each group, make sure the secondary results are placed last, but otherwise preserve order
     for grp in results:
         for i, obj in enumerate(grp["results"]):

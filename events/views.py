@@ -42,7 +42,24 @@ def get_feed_list(request):
 @login_required
 @render_to('events/edit_lists.html')
 def edit_subscription_lists(request):
+    message = None
+    
+    if "add" in request.GET:
+        # This is a redirect from the add tracker page.
+        sublist = request.user.userprofile().lists().filter(is_default=True).get()
+        
+        feed = Feed.from_name(request.GET["add"])
+        # for 'meta' feeds like bill search, we may get back a feed not in the db
+        if not feed.id: feed.save()
+        
+        if not feed in sublist.trackers.all(): sublist.trackers.add(feed)
+        sublist.email = int(request.GET["emailupdates"])
+        sublist.save()
+        
+        message = feed.title + " was added to your list " + sublist.name + "."
+    
     return {
+        'message': message,
         'no_arg_feeds': Feed.get_simple_feeds(),
             }
             
@@ -104,9 +121,10 @@ def events_list_items(request):
         sublist = None
         try:
             feedlist = [Feed.from_name(request.POST["feed"])]
+            show_empty = True
         except Feed.DoesNotExist:
             feedlist = []
-        show_empty = True
+            show_empty = False
     else:
         raise Http404()
         
@@ -165,6 +183,7 @@ def events_list_items(request):
         'list': sublist,
         'feeds': feedlist,
         'expected_frequency': expected_frequency,
+        'simple_mode': len(feedlist) == 1 and feedlist[0].single_event_type,
             }
             
 def events_rss(request):
