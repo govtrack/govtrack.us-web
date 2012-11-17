@@ -92,6 +92,24 @@ def do_site_search(q, allow_redirect=False):
     
     results = []
     
+    from events.models import Feed
+    if "pass" in q or "fail" in q or "vote" in q:
+        results.append({
+            "title": "Tracking Federal Legislation",
+            "href": "/start",
+            "noun": "feeds",
+            "results": [
+                {"href": f.link,
+                 "label": f.title,
+                 "obj": f,
+                 "feed": f,
+                 "secondary": False }
+                for f in (
+                    Feed.EnactedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.ComingUpFeed(), Feed.AllVotesFeed(),
+                    )
+                ]
+            })
+    
     from haystack.query import SearchQuerySet
     from events.models import Feed
     
