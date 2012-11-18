@@ -38,10 +38,10 @@ class Feed(models.Model):
         # or all events if feeds is None. Feeds is an iterable of Feed objects
         # or str's of Feed feednames, which must exist.
         
+        source_feed_map = { }
         if feeds != None:
-            feeds = expand_feeds(feeds)
+            feeds, source_feed_map = expand_feeds(feeds)
             feeds = [f for f in feeds if f.id] # filter out only feeds that are in the database
-            
             if len(feeds) == 0:
                 return []
         
@@ -95,7 +95,7 @@ class Feed(models.Model):
                         v = { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3], "seq": b[4], "feeds": set() }
                         ret.append(v)
                         seen[key] = v
-                    seen[key]["feeds"].add(feed)
+                    seen[key]["feeds"].add(source_feed_map.get(feed, feed))
                         
             ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]), reverse=True)
             
@@ -654,7 +654,7 @@ class SubscriptionList(models.Model):
         return self.public_id
 
     def get_new_events(self):
-        feeds = expand_feeds(self.trackers.all())
+        feeds, source_feed_map = expand_feeds(self.trackers.all())
         if len(feeds) == 0: return None, []
         
         from django.db import connection, transaction
@@ -682,7 +682,7 @@ class SubscriptionList(models.Model):
         max_id = None
         ret = []
         seen = { } # uniqify because events are duped for each feed they are in, but track which feeds generated the events
-        feedmap = dict((f.id, f) for f in feeds)
+        feedmap = dict((f.id, source_feed_map.get(f, f)) for f in feeds)
         batch = cursor.fetchall()
         for b in batch:
             key = b[1:3] # get the part that uniquely identifies the event, across feeds
@@ -704,9 +704,13 @@ def expand_feeds(feeds):
     # Some feeds include the events of other feeds.
     # Tail-recursively expand the feeds.
     feeds = [f if isinstance(f, Feed) else Feed.objects.get(feedname=f) for f in feeds]
+    map_to_source = { }
     i = 0
     while i < len(feeds):
-        feeds.extend(feeds[i].includes_feeds())
+        for f in feeds[i].includes_feeds():
+            if f not in feeds: # don't include a feed already included, and don't add a mapping for it in map_to_source
+                map_to_source[f] = feeds[i]
+                feeds.append(f)
         i += 1
-    return feeds
+    return feeds, map_to_source
 
