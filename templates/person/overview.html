@@ -62,18 +62,18 @@
 	
 	<p>The United States Congress has an upper chamber called the Senate and a lower chamber called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process.</p>
 	
-	<p>Within each chamber, day-to-day activities are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&ldquo;</p>
-	
 	<h2>The 2012 Election</h2>
 	
 	<p>NOTE: The new Members of Congress just elected take office in early January. You won&rsquo;t see any changes due to the elections on GovTrack until then.</p>
 	
 	<h2>The Senate</h2>
 	
-	<p>The 50 states elect 2 senators each for staggered 6-year terms. A senator represents between 1 and 37 million people, depending on their state&rsquo;s population.  Here is a count of senators by party:</p>
+	<p>The 50 states elect 2 senators each for staggered 6-year terms. A senator represents between 1 and 37 million people, depending on their state&rsquo;s population.</p>
 	
+	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of senators by party:</p>
+		
 	<div style="float: right; width: 260px; margin-top: 1em;">
-		<label for="state">Find Members of Congress by State:</label>
+		<label for="state">Find Senators by State:</label>
 		<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value">
 			<option value="">(Select State)</option>
 			{% for abbr, name in statelist %}
@@ -85,7 +85,7 @@
 	
 	<table style="width: 15em">
 	{% for p in senate_by_party %}
-	<tr><th>{{p.party}}</th> <td>{{p.count}}</td></tr>
+	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}
 	{% if senate_vacancies > 0 %}<tr><th>Vacancies</th> <td>{{senate_vacancies}}</td></tr>{% endif %}
 	<tr><th>Total</th> <td>100</td></tr>
@@ -94,6 +94,8 @@
 	<h2 style="margin-top: 1em">The House of Representatives</h2>
 	
 	<p>The country is also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative (aka congressperson) to the House for a 2-year term. Here is a count of representatives by party:</p>
+
+	<p>As in the Senate, the day-to-day activities of the House are controlled by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of congresspeople by party:</p>
 	
 	<div style="float: right; width: 260px; margin-top: 0;" class="search-form">
 		<form action="#" onsubmit="return doform();">
@@ -108,13 +110,13 @@
 	
 	<table style="width: 15em">
 	{% for p in house_by_party %}
-	<tr><th>{{p.party}}</th> <td>{{p.count}}</td></tr>
+	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}
 	{% if house_vacancies > 0 %}<tr><th>Vacancies</th> <td>{{house_vacancies}}</td></tr>{% endif %}
 	<tr><th>Total</th> <td>435</td></tr>
 	</table>
 	
-	<p style="margin-top: .5em">In addition, the District of Columbia and the U.S.&rsquo;s island territories elect a total of 5 delegates to the House with limited voting privileges. Puerto Rico additionally elects a delegate called a Resident Commissioner.</p>
+	<p style="margin-top: .5em">In addition, the District of Columbia and the U.S.&rsquo;s island territories elect a total of 6 delegates to the House with limited voting privileges. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
 	
 	<h2 style="margin-top: 1em">Congressional Sessions</h2>
 	
