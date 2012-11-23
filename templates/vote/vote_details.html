@@ -324,7 +324,7 @@ $(function() {
                         The Vice President
                     {% endif %}
                     {% if voter.voter_type == 3 %}
-                        <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444">{{ voter.person.name_no_details_lastfirst }}</a>
+                        <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444">{{ voter.person.name_lastfirst_short }}</a>
                     {% endif %}
                 </td>
                 <td>
