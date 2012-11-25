@@ -262,13 +262,8 @@
 	{% if analysis_data.missedvotes %}
 	<section id="voting-record">
 		<h3>Voting Record</h3>
-		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed}} of {{analysis_data.missedvotes.total}} recorded or roll call votes, which is {{analysis_data.missedvotes.percent}}%.
-		{% if active_role %} {% comment %}Median only makes sense for people currently serving. {% endcomment %}
-		{% if analysis_data.missedvotes.percent < 2.4 %}This is better than the median of 2.5%.
-		{% elif analysis_data.missedvotes.percent > 2.6 %}This is worse than the median of 2.5%.
-		{% else %}This is right at the median, which is 2.5%.{% endif %}
-		{% endif %}
-		The chart below reports missed votes by calendar quarter (every three months).</p>
+		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed|intcomma}} of {{analysis_data.missedvotes.total|intcomma}} roll call votes, which is {{analysis_data.missedvotes.percent}}%. This is {% if analysis_data.missedvotes.percent <= analysis_data.missedvotes.pctile50 %}better{% else %}worse{% endif %} than the median of {{analysis_data.missedvotes.pctile50|floatformat:1}}% among the lifetime records of {% if analysis_data.missedvotes.chamber == 's' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
+		The chart below reports missed votes over time.</p>
 		<div id="voting_record_chart"> </div>
 		<script>
 		$(document).ready(function() {
@@ -284,7 +279,7 @@
 				credits: { enabled: false },
 				xAxis: {
 					labels: { rotation: -90, align: "right" {% if analysis_data.missedvotes.data|length > 20 and analysis_data.missedvotes.data|length < 40 %}, step: 2{% endif %} {% if analysis_data.missedvotes.data|length >= 40 %}, step: 4{% endif %} },
-					categories: [{% for time, value in analysis_data.missedvotes.data %}"{{time|escapejs}}"{% if not forloop.last %}, {% endif %}{% endfor %} ]
+					categories: [{% for rec in analysis_data.missedvotes.data %}"{{rec.time|escapejs}}"{% if not forloop.last %}, {% endif %}{% endfor %} ]
 				},
 				yAxis: {
 					title: {
@@ -296,34 +291,38 @@
 					alternateGridColor: null,
 					plotBands: [{
 						from: 0,
-						to: 1.22,
+						to: {{analysis_data.missedvotes.pctile25}},
 						color: 'rgba(68, 170, 213, 0.1)',
 						label: {
 							text: '25th Percentile',
+							verticalAlign: 'top',
 							style: { color: '#606060' }
 						}
 					}, {
-						from: 1.22,
-						to: 2.36,
+						from: {{analysis_data.missedvotes.pctile25}},
+						to: {{analysis_data.missedvotes.pctile50}},
 						color: 'rgba(68, 170, 213, 0.3)',
 						label: {
 							text: 'Median',
+							verticalAlign: 'top',
 							style: { color: '#606060' }
 						}
 					}, {
-						from: 2.36,
-						to: 4.12,
+						from: {{analysis_data.missedvotes.pctile50}},
+						to: {{analysis_data.missedvotes.pctile75}},
 						color: 'rgba(68, 170, 213, 0.1)',
 						label: {
 							text: '75th Percentile',
+							verticalAlign: 'top',
 							style: { color: '#606060' }
 						}
 					}, {
-						from: 4.12,
-						to: 5.98,
+						from: {{analysis_data.missedvotes.pctile75}},
+						to: {{analysis_data.missedvotes.pctile90}},
 						color: 'rgba(68, 170, 213, 0.3)',
 						label: {
 							text: '90th Percentile',
+							verticalAlign: 'top',
 							style: { color: '#606060' }
 						}
 					}]
@@ -348,7 +347,7 @@
 				},
 				series: [{
 					name: '{{person.lastname|escapejs }} - Missed Votes %',
-					data: [{% for time, value in analysis_data.missedvotes.data %}{{value}}{% if not forloop.last %}, {% endif %}{% endfor %} ]
+					data: [{% for rec in analysis_data.missedvotes.data %}{{rec.percent}}{% if not forloop.last %}, {% endif %}{% endfor %} ]
 		
 				}],
 				navigation: {
@@ -362,9 +361,9 @@
 		
 		<p style="text-align: center; margin-top: .5em; font-size: 90%;"><a href="#" onclick="$('#missedvotestable').slideDown(); $(this).hide(); return false;">Show the numbers...</a></p>
 		<table id="missedvotestable" style="display: none">
-			<tr> <th>Time Period</th> <th>Votes Elligible</th> <th>Missed Votes</th> <th>Percent</th> </tr>
-			{% for time, pct, novote, numvote in analysis_data.missedvotes.data %}
-				<tr><td>{{time}}</td> <td>{{numvote}}</td> <td>{{novote}}</td> <td>{{pct}}%</td></tr>
+			<tr> <th>Time Period</th> <th>Votes Elligible</th> <th>Missed Votes</th> <th>Percent</th> <th>Percentile</th> </tr>
+			{% for rec in analysis_data.missedvotes.data %}
+				<tr><td>{{rec.time}}</td> <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinal}}</td></tr>
 			{% endfor %}
 		</table>
 

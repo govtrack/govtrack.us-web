@@ -53,6 +53,9 @@ def get_person_name(person,
  
     if show_type:
         name += " (%s)" % role.get_title_abbreviated()
+        
+    if role and role.role_type == RoleType.president:
+        show_district = False
  
     if show_party or show_district:
         name += ' ['

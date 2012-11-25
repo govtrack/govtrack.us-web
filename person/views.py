@@ -65,6 +65,7 @@ def person_details(request, pk):
         return {'person': person,
                 'role': role,
                 'active_role': active_role,
+                'active_congressional_role': active_role and role.role_type in (RoleType.senator, RoleType.representative),
                 'photo': photo,
                 'photo_credit': photo_credit,
                 'links': links,

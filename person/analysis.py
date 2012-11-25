@@ -1,5 +1,5 @@
 import os
-from lxml import etree
+import csv
 from us import parse_govtrack_date
 from types import RoleType
 from models import Person
@@ -68,18 +68,49 @@ def load_votes_analysis(person):
     congressnumber = role.most_recent_congress_number()
     if not congressnumber: return None
     
-    fn = 'data/us/%d/repstats.person/%d.xml' % (congressnumber, person.pk)
+    fn = 'data/us/%d/stats/person/missedvotes/%d.csv' % (congressnumber, person.pk)
     if not os.path.exists(fn): return None
     
-    dom = etree.parse(fn)
+    lifetime_rec = None
+    time_recs = []
+    for rec in csv.DictReader(open(fn)):
+        # normalize the string CSV fields as we need them for display
+        rec = {
+            "congress": rec["congress"],
+            "session": rec["session"],
+            "chamber": rec["chamber"],
+            "period": rec["period"],
+            "total": int(rec["total_votes"]),
+            "missed": int(rec["missed_votes"]),
+            "percent": round(float(rec["percent"]), 1),
+            "percentile": int(round(float(rec["percentile"]))),
+            "firstdate": parse_govtrack_date(rec["period_start"]),
+            "lastdate": parse_govtrack_date(rec["period_end"]),
+            "pctile25": float(rec["pctile25"]),
+            "pctile50": float(rec["pctile50"]),
+            "pctile75": float(rec["pctile75"]),
+            "pctile90": float(rec["pctile90"]),
+        }
+        if rec["firstdate"].year != rec["lastdate"].year:
+            rec["time"] = rec["firstdate"].replace(1900).strftime("%b") + " " + str(rec["firstdate"].year) + "-" + rec["lastdate"].replace(1900).strftime("%b") + " " + str(rec["lastdate"].year)
+        else:
+            rec["time"] = str(rec["firstdate"].year) + " " + rec["firstdate"].replace(1900).strftime("%b-") + rec["lastdate"].replace(1900).strftime("%b")
+        
+        if rec["congress"] == "lifetime":
+            # Take the "lifetime" record with the most recent period_start, since there may be one
+            # record for the House and one record for the Senate.
+            if lifetime_rec == None or lifetime_rec["period_start"] < rec["period_start"]:
+                lifetime_rec = rec
+        else:
+            time_recs.append(rec)
+            
+    if lifetime_rec == None: return None
+            
+    # It's confusing to take records from two chambers, so filter by chamber.
+    time_recs = [rec for rec in time_recs if rec["chamber"] == lifetime_rec["chamber"]]
     
-    return {
-        "total": dom.xpath("novote")[0].get("NumVote"),
-        "missed": dom.xpath("novote")[0].get("NoVote"),
-        "percent": round(100*float(dom.xpath("novote")[0].get("NoVotePct"))),
-        "firstdate": parse_govtrack_date(dom.xpath("novote")[0].get("FirstVoteDate")),
-        "lastdate": parse_govtrack_date(dom.xpath("novote")[0].get("LastVoteDate")),
-        "data": [(node.get("time"), round(100.0*float(node.get("NoVotePct")), 1), node.get("NoVote"), node.get("NumVote")) for node in dom.xpath("novote/hist-stat") ] }
+    lifetime_rec["data"] = time_recs
+    return lifetime_rec
 
 def load_influence_analysis(person):
     influencers = []
