@@ -91,10 +91,12 @@ def load_votes_analysis(person):
             "pctile75": float(rec["pctile75"]),
             "pctile90": float(rec["pctile90"]),
         }
+        # for historical data, the year is out of range for strftime. but if we replace the year we also have to
+        # replace the month because a day may be out of range in Feburary depending on the day.
         if rec["firstdate"].year != rec["lastdate"].year:
-            rec["time"] = rec["firstdate"].replace(1900).strftime("%b") + " " + str(rec["firstdate"].year) + "-" + rec["lastdate"].replace(1900).strftime("%b") + " " + str(rec["lastdate"].year)
+            rec["time"] = rec["firstdate"].replace(year=1900, day=1).strftime("%b") + " " + str(rec["firstdate"].year) + "-" + rec["lastdate"].replace(year=1900, day=1).strftime("%b") + " " + str(rec["lastdate"].year)
         else:
-            rec["time"] = str(rec["firstdate"].year) + " " + rec["firstdate"].replace(1900).strftime("%b-") + rec["lastdate"].replace(1900).strftime("%b")
+            rec["time"] = str(rec["firstdate"].year) + " " + rec["firstdate"].replace(year=1900, day=1).strftime("%b-") + rec["lastdate"].replace(year=1900, day=1).strftime("%b")
         
         if rec["congress"] == "lifetime":
             # Take the "lifetime" record with the most recent period_start, since there may be one
