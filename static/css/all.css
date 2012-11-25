@@ -4085,11 +4085,20 @@ small {
 	font-size: 80%;
 	}
 	
-ul.bullets, .postcontent ul {
+ul.bullets, .postcontent ul { /* postcontent is the blog */
 	list-style: circle;
 	margin-left: 1.75em;
+	margin-bottom: .75em;
 	}
 ul.bullets li, .postcontent ul li {
+	margin: .25em 0 .25em 0;
+	}
+.postcontent ol { /* postcontent is the blog */
+	list-style: decimal;
+	margin-left: 1.75em;
+	margin-bottom: .75em;
+	}
+.postcontent ol li {
 	margin: .25em 0 .25em 0;
 	}
 	
