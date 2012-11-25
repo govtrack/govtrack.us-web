@@ -101,7 +101,7 @@ def load_votes_analysis(person):
         if rec["congress"] == "lifetime":
             # Take the "lifetime" record with the most recent period_start, since there may be one
             # record for the House and one record for the Senate.
-            if lifetime_rec == None or lifetime_rec["period_start"] < rec["period_start"]:
+            if lifetime_rec == None or lifetime_rec["firstdate"] < rec["firstdate"]:
                 lifetime_rec = rec
         else:
             time_recs.append(rec)
