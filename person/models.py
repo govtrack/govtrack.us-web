@@ -73,20 +73,24 @@ class Person(models.Model):
 
     @cache_result
     def name_no_district(self):
-        return get_person_name(self, firstname_position='before', role_recent=True, show_district=False)
+        return get_person_name(self, firstname_position='before', show_suffix=True, role_recent=True, show_district=False)
 
     @cache_result
     def name_no_details(self):
     	"""The person's full name (excluding all title details)."""
-        return get_person_name(self, firstname_position='before')
+        return get_person_name(self, firstname_position='before', show_suffix=True)
         
     @cache_result
     def name_no_details_lastfirst(self):
         return get_person_name(self, firstname_position='after')
             
     @cache_result
+    def name_lastfirst_short(self):
+        return get_person_name(self, firstname_position='after', firstname_style="nickname")
+            
+    @cache_result
     def name_and_title(self):
-        return get_person_name(self, firstname_position='before', role_recent=True, show_party=False, show_district=False)
+        return get_person_name(self, firstname_position='before', show_suffix=True, role_recent=True, show_party=False, show_district=False)
        
     def set_names(self):
         self.sortname = get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)

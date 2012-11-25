@@ -3,7 +3,7 @@ from datetime import datetime
 from person.models import RoleType
 
 def get_person_name(person,
-				firstname_position=None, show_suffix=False,
+				firstname_position=None, show_suffix=False, firstname_style=None,
 				role_date=None, role_congress=None, role_recent=None, role_year=None,
                 show_title=True, show_party=True, show_district=True, show_type=False):
     """
@@ -18,7 +18,10 @@ def get_person_name(person,
         firstname = person.middlename
         
     if person.nickname:
-        firstname += u" \u201c%s\u201d" % person.nickname
+        if firstname_style == None:
+            firstname += u" \u201c%s\u201d" % person.nickname
+        elif firstname_style == "nickname" and len(person.nickname) < len(firstname):
+            firstname = person.nickname
  
     if firstname_position == 'before':
         name = firstname + ' ' + person.lastname
