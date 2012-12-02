@@ -1,0 +1,5 @@
+#!/bin/bash
+pushd ../extdata/billtrack50
+./fetch
+popd
+./parse.py -l ERROR states

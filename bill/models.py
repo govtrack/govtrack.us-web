@@ -49,7 +49,7 @@ class BillTerm(models.Model):
     """
     term_type = models.IntegerField(choices=TermType)
     name = models.CharField(max_length=255)
-    subterms = models.ManyToManyField('self', related_name="parents", symmetrical=False)
+    subterms = models.ManyToManyField('self', related_name="parents", symmetrical=False, blank=True)
 
     def __unicode__(self):
         return self.name
