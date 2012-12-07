@@ -615,6 +615,26 @@ class Bill(models.Model):
                     m.user_positions[outcome.owner_key] = positions[outcome]
         return m
             
+    def get_gop_summary(self):
+        import urllib, StringIO
+        try:
+            from django.utils.safestring import mark_safe
+            dom = etree.parse(urllib.urlopen("http://www.gop.gov/api/bills.get?congress=%d&number=%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, self.number)))
+        except:
+            return None
+        if dom.getroot().tag == '{http://www.w3.org/1999/xhtml}html': return None
+        def sanitize(s):
+            return mark_safe("".join(
+                etree.tostring(n)
+                for n
+                in etree.parse(StringIO.StringIO(s), etree.HTMLParser(remove_comments=True, remove_pis=True)).xpath("body")[0]))
+        return {
+            "link": unicode(dom.xpath("string(bill/permalink)")),
+            "summary": sanitize(dom.xpath("string(bill/analysis/bill-summary)")),
+            "background": sanitize(dom.xpath("string(bill/analysis/background)")),
+        }
+        # floor-situation is also interesting but largely redundant with what we already know
+            
 class RelatedBill(models.Model):
     bill = models.ForeignKey(Bill, related_name="relatedbills")
     related_bill = models.ForeignKey(Bill, related_name="relatedtobills")
