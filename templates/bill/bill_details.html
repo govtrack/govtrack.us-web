@@ -46,8 +46,8 @@
 	{% cache 600 billhead bill.id %}
 	<h1>{{bill.title|truncatewords:15}}</h1>
 		
-	<div id="track_panel_base" class="eight columns">
-		<div class="info">
+	<div id="track_panel_base" class="{% if bill.is_alive %}eight{% else %}twelve{% endif %} columns">
+		<div class="info" {% if not bill.is_alive %}style="width: auto;"{% endif %}>
 			{% if bill.title != bill.title|truncatewords:15 %}
 				{% with bill.title|truncatewords:15|cut:"..." as bt %}
 					<p style="line-height: 130%">...{{bill.title|cut:bt}}</p>
@@ -111,14 +111,13 @@
 		
 		</div><!-- /info -->
 		
-		<p class="helptext" style="clear: both; line-height: 110%;"><small>The {{bill.noun}}&rsquo;s title {% if subtitle %}and summary above were{% else %}was{% endif %} written by the {{bill.noun}}&rsquo;s sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
+		<p class="helptext" style="clear: both; line-height: 110%; margin: 0;"><small>The {{bill.noun}}&rsquo;s title {% if subtitle %}and summary above were{% else %}was{% endif %} written by the {{bill.noun}}&rsquo;s sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 	</div>
 	{% endcache %}
 
 	
-
+	{% if bill.is_alive %}
 	<div class="aside four columns">
-		{% if bill.is_alive %}
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
 		{% include "events/subscribe_inline.html" %}
@@ -186,11 +185,9 @@
 
 		{% endcomment %}
 		
-		
-		{% endif %}	
-		
 		<div class="fb-like" data-send="false" data-layout="button_count" data-width="170" data-show-faces="false" style="margin-top: 10px"></div>
 	</div><!-- /actions -->
+	{% endif %}	
 </div>
 {% endblock %}
 
