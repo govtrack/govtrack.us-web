@@ -111,7 +111,7 @@
 		
 		</div><!-- /info -->
 		
-		<p class="helptext" style="clear: both"><small>{{bill.noun|capfirst}} titles {% if subtitle %}and the summary above{% endif %} are written by the sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
+		<p class="helptext" style="clear: both; line-height: 110%;"><small>The {{bill.noun}}&rsquo;s title {% if subtitle %}and summary above were{% else %}was{% endif %} written by the {{bill.noun}}&rsquo;s sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 	</div>
 	{% endcache %}
 
@@ -225,7 +225,7 @@
 								{% endfor %}
 								{% endif %}
 								
-								<tr><td colspan="2" style="padding-top: 5px">
+								<tr><td colspan="2" style="padding-top: 5px; line-height: normal;">
 								{% if not died %}
 									{{bill.current_status_description}}
 								{% else %}
