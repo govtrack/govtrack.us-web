@@ -190,6 +190,9 @@ class Bill(models.Model):
     def bill_type_name(self):
         return BillType.by_value(self.bill_type).full_name
     @property
+    def bill_type_name_short(self):
+        return self.bill_type_name.replace(" of Representatives", "")
+    @property
     def noun(self):
         """The appropriate noun to use to refer to this instance, either 'bill' or 'resolution'."""
         return "bill" if self.bill_type in (BillType.house_bill, BillType.senate_bill) else "resolution"
