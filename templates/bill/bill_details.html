@@ -111,7 +111,7 @@
 		
 		</div><!-- /info -->
 		
-		<p class="helptext" style="clear: both"><small>{{bill.noun|capfirst}} titles {% if subtitle %}and the summary above{% endif %} are written by the sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
+		<p class="helptext" style="clear: both; line-height: 110%;"><small>The {{bill.noun}}&rsquo;s title {% if subtitle %}and summary above were{% else %}was{% endif %} written by the {{bill.noun}}&rsquo;s sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 	</div>
 	{% endcache %}
 
@@ -225,7 +225,7 @@
 								{% endfor %}
 								{% endif %}
 								
-								<tr><td colspan="2" style="padding-top: 5px">
+								<tr><td colspan="2" style="padding-top: 5px; line-height: normal;">
 								{% if not died %}
 									{{bill.current_status_description}}
 								{% else %}
@@ -280,13 +280,49 @@
 						{% if p %}
 						<dt>Prognosis:</dt>
 						<dd>
-							{% for factor in p.factors %}
-								{% if forloop.first %}
-									<p>This {{bill.noun}} has a <b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}. The following factors were considered:</p>
-								{% endif %}
-								<p class="prognosis_item">{{factor.description}} <small>({% if factor.success_change > 0 %}+{% endif %}{{factor.success_change|floatformat:0}}%)</small></p>
+							{% if p.is_introduced %}
+								<p><b>
+								{{p.prediction_1|floatformat:0}}%</b> chance of getting passed committee.<br/>
+								<b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
+								<p class="prognosis_item">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{bill.bill_type_name_short}}s made it passed committee
+								and {% if 40 > p.success_rate %}only {% endif %} {{p.success_rate|floatformat:0}}% were {{p.success_name_2}}
+								in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}}.
+							{% else %}
+								<p><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
+								<p class="prognosis_item">{% if 40 > p.success_rate_2 %}Only {% endif %}{{p.success_rate_2|floatformat:0}}% of {{bill.bill_type_name_short}}s that made it passed committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
+							{% endif %}
+							{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}<a href="#" onclick="$('#prognosis_factors').slideToggle(); return false;">show factors</a>{% endif %}
+							</small></p>
+							
+							<div id="prognosis_factors" style="display: none">
+							{% if p.factors_help_help %}
+							<p>The following factors helped this {{bill.noun}}:</p>
+							{% for factor in p.factors_help_help %}
+								<p class="prognosis_item">{{factor}}</p>
 							{% endfor %}
-							<p>{% if 40 > p.overall_success_rate %}Just {% endif %}{{p.overall_success_rate|floatformat:0}}% of all {{bill.bill_type_name}}s {% if not p.is_introduced %}reported favorably by committee{% endif %} in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} <!--(the {{p.congress|ordinal}} Congress)--> were {{p.success_name}}.</p>
+							{% endif %}
+							
+							{% if p.factors_hurt_hurt %}
+							<p>The following factors hurt this {{bill.noun}}:</p>
+							{% for factor in p.factors_hurt_hurt %}
+								<p class="prognosis_item">{{factor}}</p>
+							{% endfor %}
+							{% endif %}
+							
+							{% if p.factors_help_hurt %}
+							<p>The following factors help this {{bill.noun}} get passed committee but hurt it on the floor:</p>
+							{% for factor in p.factors_help_hurt %}
+								<p class="prognosis_item">{{factor}}</p>
+							{% endfor %}
+							{% endif %}
+							
+							{% if p.factors_hurt_help %}
+							<p>The following factors hurt this {{bill.noun}} in getting passed committee but help it on the floor:</p>
+							{% for factor in p.factors_hurt_help %}
+								<p class="prognosis_item">{{factor}}</p>
+							{% endfor %}
+							{% endif %}
+							</div>
 						</dd>
 						{% endif %}
 						{% endwith %}

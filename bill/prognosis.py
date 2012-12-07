@@ -94,6 +94,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	factors = list()
 	
 	# introduced date (idea from Yano, Smith and Wilkerson 2012 paper)
+<<<<<<< local
 	idate = bill.introduced_date
 	if hasattr(idate, 'date'): idate = idate.date() # not sure how this is possible
 	if (idate - get_congress_dates(bill.congress)[0].date()).days < 90:
@@ -102,6 +103,14 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Cogress." % bill.noun))
 	if (get_congress_dates(bill.congress)[1].date() - idate).days < 90:
 		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Cogress." % bill.noun))
+=======
+	if (bill.introduced_date - get_congress_dates(bill.congress)[0].date()).days < 90:
+		factors.append(("introduced_first90days", "The %s was introduced in the first 90 days of the Congress." % bill.noun))
+	if (bill.introduced_date - get_congress_dates(bill.congress)[0].date()).days < 365:
+		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Congress." % bill.noun))
+	if (get_congress_dates(bill.congress)[1].date() - bill.introduced_date).days < 90:
+		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Congress." % bill.noun))
+>>>>>>> other
 	
 	# does the bill's title start with a common prefix?
 	for prefix in pop_title_prefixes:
@@ -116,9 +125,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	if bill.sponsor:
 		# party of the sponsor
 		sponsor_party = bill.sponsor.get_role_at_date(bill.introduced_date).party
-		if sponsor_party == maj_party:
-			factors.append( ("sponsor_majority", "The sponsor is a member of the majority party.") )
-		elif sponsor_party != "Independent": # ease of explanation
+		if sponsor_party != maj_party:
 			factors.append( ("sponsor_minority", "The sponsor is a member of the minority party.") )
 	
 		# is the sponsor a member/chair of a committee to which the bill has
@@ -230,10 +237,10 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 def build_model(congress):
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
-	lobbying_data = load_lobbying_data(congress)
+	lobbying_data = None #load_lobbying_data(congress)
 	
 	# universe
-	BILLS = Bill.objects.filter(congress=congress).select_related("sponsor")
+	BILLS = Bill.objects.filter(congress=congress).prefetch_related()
 	
 	# compute the most frequent first few words of bills. slurp in all of the titles,
 	# record the counts of all of the prefixes of the titles, and then take the top few,
@@ -262,9 +269,12 @@ def build_model(congress):
 	# and by whether the bill is introduced/referred or has been reported or more.
 	# Once a bill has been reported by committee it's chances of success are
 	# of course much higher, since the bills that have not been reported by committee
-	# in historical data are necessarily failed bills.
+	# in historical data are necessarily failed bills. Also the models change
+	# substantially.
 		
 	MODEL = dict()
+	
+	introduced_statuses = (BillStatus.introduced, BillStatus.referred)
 	
 	for (bill_type, bill_type_descr), is_introduced in itertools.product(BillType, (True, False)):
 		#if bill_type != BillType.house_bill: continue
@@ -278,12 +288,20 @@ def build_model(congress):
 			# failed bills, which defeats the purpose. When is_introduced is False, we
 			# only look at bills that have at least gotten reported so that we can see
 			# of reported bills which make it to success.
-			bills = bills.exclude(current_status__in=(BillStatus.introduced, BillStatus.referred))
+			bills = bills.exclude(current_status__in=introduced_statuses)
 
 		print bill_type_descr, "introduced" if is_introduced else "reported"
+		
 		total = bills.count()
-		passed = bills.filter(current_status__in=BillStatus.final_status_passed).count()
-		print "\toverall", int(round(100.0*passed/total)), "%; N=", total
+		
+		if is_introduced:
+			# for the introduced model, success is getting out of committee
+			total_success = bills.exclude(current_status__in=introduced_statuses).count()
+		else:
+			# for the reported model, success is being enacted (or whatever final status as appropriate for the bill type)
+			total_success = bills.filter(current_status__in=BillStatus.final_status_passed).count()
+			
+		print "\toverall", int(round(100.0*total_success/total)), "%; N=", total
 		
 		sorted_bills = { }
 		regression_outcomes = [ ]
@@ -294,8 +312,12 @@ def build_model(congress):
 			
 			# What's the measured binary outcome for this bill? Check if the bill
 			# ended in a success state.
-			success = bill.current_status in BillStatus.final_status_passed
+			if is_introduced:
+				success = bill.current_status not in introduced_statuses
+			else:
+				success = bill.current_status in BillStatus.final_status_passed
 			
+			# Get the binary factors that apply to this bill.
 			factors = get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data)
 			
 			# maintain a simple list of success percent rates for each factor individually
@@ -306,7 +328,7 @@ def build_model(congress):
 				
 			# build data for a regression
 			regression_outcomes.append(1.0 if success else 0.0)
-			regression_predictors.append(factors)
+			regression_predictors.append(set( f[0] for f in factors )) # extract just the key from the (key, descr) tuple
 			
 		# check which factors were useful
 		significant_factors = dict()
@@ -316,7 +338,7 @@ def build_model(congress):
 			# within this subset (key) that are passed, and see if it is statistically
 			# different from the overall count. only include statistical differences.
 			if bill_counts[0] < 15: continue
-			distr = scipy.stats.binom(bill_counts[0], float(passed)/float(total))
+			distr = scipy.stats.binom(bill_counts[0], float(total_success)/float(total))
 			pless = distr.cdf(bill_counts[1])
 			pmore = 1.0-distr.cdf(bill_counts[1])
 			if pless < .015 or pmore < .015 or (total < 100 and (pless < .05 or pmore < .05)):
@@ -330,9 +352,8 @@ def build_model(congress):
 			regression_predictors_map = dict(reversed(e) for e in enumerate(significant_factors))
 			regression_predictors_2 = [ [] for f in regression_predictors_map ]
 			for factors in regression_predictors:
-				factors2 = set(f[0] for f in factors) # factors is (name, descr) tuples, extract just the names
 				for fname, findex in regression_predictors_map.items():
-					regression_predictors_2[findex].append(1.0 if fname in factors2 else 0.0)
+					regression_predictors_2[findex].append(1.0 if fname in factors else 0.0)
 			regression_predictors_2 = numpy.array(regression_predictors_2)
 			regression_outcomes = numpy.array(regression_outcomes)
 			regression_beta, J_bar, l = logistic_regression(regression_predictors_2, regression_outcomes)
@@ -340,14 +361,17 @@ def build_model(congress):
 		# Generate the model for output.
 		model = dict()
 		MODEL[(bill_type,is_introduced)] = model
-		if bill_type in (BillType.senate_bill, BillType.house_bill):
-			model["success_name"] = "enacted"
-		elif bill_type in (BillType.senate_joint_resolution, BillType.house_joint_resolution):
-			model["success_name"] = "enacted or passed"
+		if is_introduced:
+			model["success_name"] = "sent out of committee to the floor"
 		else:
-			model["success_name"] = "agreed to"
+			if bill_type in (BillType.senate_bill, BillType.house_bill):
+				model["success_name"] = "enacted"
+			elif bill_type in (BillType.senate_joint_resolution, BillType.house_joint_resolution):
+				model["success_name"] = "enacted or passed"
+			else:
+				model["success_name"] = "agreed to"
 		model["count"] = total
-		model["success_rate"] = 100.0*passed/total
+		model["success_rate"] = 100.0*total_success/total
 		model["regression_predictors_map"] = regression_predictors_map
 		model["regression_beta"] = list(regression_beta) if regression_beta != None else None
 		model_factors = dict()
@@ -377,42 +401,64 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 	# this bill. use the model to convert these tuples into %'s and descr's.
 	factors = get_bill_factors(bill, prognosis_model.pop_title_prefixes, committee_membership, majority_party, lobbying_data)
 	
-	is_introduced = bill.current_status in (BillStatus.introduced, BillStatus.referred)
+	# There are two models for every bill, one from introduced to reported
+	# and the other from reported to success.
 	
-	model = prognosis_model.factors[(bill.bill_type, is_introduced)]
+	model_1 = prognosis_model.factors[(bill.bill_type, True)]
+	model_2 = prognosis_model.factors[(bill.bill_type, False)]
+	
+	# Eliminate factors that are not used in either model.
+	factors = [f for f in factors if f[0] in model_1["factors"] or f[0] in model_2["factors"]]
 	
 	# If we are doing a "proscore", remove any startswith factors that increase
 	# a bill's prognosis. These are usually indicative of boring bills like renaming a
 	# post office. Startswith factors that decrease a bill's prognosis are still good
 	# to include.
 	if proscore:
-		factors = [(key, decr) for (key, decr) in factors if key in model["factors"] and (not key.startswith("startswith:") or model["factors"][key]["regression_beta"] < 0)]
+		factors = [(key, decr) for (key, decr) in factors if 
+			not key.startswith("startswith:")
+			or (key in model_1["factors"] and model_1["factors"][key]["regression_beta"] < 0)
+			or (key in model_2["factors"] and model_2["factors"][key]["regression_beta"] < 0)]
+
+	def eval_model(model):
+		# make a prediction using the logistic regression model
+		if model["regression_beta"] == None:
+			return model["success_rate"]
+		else:
+			factor_keys = set(f[0] for f in factors)
+			predictors = [0.0 for f in xrange(len(model["regression_beta"])-1)] # remove the intercept
+			for key, index in model["regression_predictors_map"].items():
+				predictors[index] = 1.0 if key in factor_keys else 0.0
+			return float(calcprob(model["regression_beta"], numpy.transpose(numpy.array([predictors]))))
+			
+	prediction_1 = eval_model(model_1)
+	prediction_2 = eval_model(model_2)
 	
-	factors_list = [{ "description": descr, "count": model["factors"][key]["count"], "success_rate": model["factors"][key]["success_rate"], "success_change": model["factors"][key]["success_rate"]-model["success_rate"] } for key, descr in factors if key in model["factors"]]
-	factors_list.sort(key = lambda x : x["success_rate"], reverse=True)
+	is_introduced = bill.current_status in (BillStatus.introduced, BillStatus.referred)
 	
-	# if there is a factor that decreases the bill's chances of passing relative
-	# to the overall mean, then reverse the order to highlight that.
-	if len(factors_list) > 0 and factors_list[-1]["success_rate"] < model["success_rate"]:
-		factors_list.reverse()
-	
-	# make a prediction using the logistic regression model
-	if model["regression_beta"] == None:
-		prediction = model["success_rate"]
-	else:
-		factor_keys = set(f[0] for f in factors)
-		predictors = [0.0 for f in xrange(len(model["regression_beta"])-1)] # remove the intercept
-		for key, index in model["regression_predictors_map"].items():
-			predictors[index] = 1.0 if key in factor_keys else 0.0
-		prediction = calcprob(model["regression_beta"], numpy.transpose(numpy.array([predictors])))
+	def helps(factor, state1, state2):
+		a = model_1["factors"][factor]["regression_beta"] >= 0 if factor in model_1["factors"] else model_2["factors"][factor]["regression_beta"] >= 0
+		b = model_2["factors"][factor]["regression_beta"] >= 0 if factor in model_2["factors"] else model_1["factors"][factor]["regression_beta"] >= 0
+		return (a==state1) and (b==state2)
 	
 	return {
-		"success_name": model["success_name"],
 		"is_introduced": is_introduced,
-		"overall_count": model["count"],
-		"overall_success_rate": model["success_rate"],
-		"prediction": float(prediction),
-		"factors": factors_list,
+		
+		"success_name_1": model_1["success_name"],
+		"success_name_2": model_2["success_name"],
+		"success_rate_1": model_1["success_rate"],
+		"success_rate_2": model_2["success_rate"],
+		"success_rate": model_1["success_rate"] * model_2["success_rate"] / 100.0,
+		
+		"prediction_1": prediction_1,
+		"prediction_2": prediction_2,
+		"prediction": (prediction_1 * prediction_2 / 100.0) if is_introduced else prediction_2,
+		"success_name": model_2["success_name"],
+		
+		"factors_help_help": [descr for key, descr in factors if helps(key, True, True)],
+		"factors_hurt_hurt": [descr for key, descr in factors if helps(key, False, False)],
+		"factors_help_hurt": [descr for key, descr in factors if helps(key, True, False)],
+		"factors_hurt_help": [descr for key, descr in factors if helps(key, False, True)],
 	}
 
 def compute_prognosis(bill, proscore=False):
