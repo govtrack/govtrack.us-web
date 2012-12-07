@@ -4,6 +4,8 @@ from django.conf import settings
  
 import urllib, json, datetime
 
+from emailverification.models import BouncedEmail
+
 from django.contrib.gis.geoip import GeoIP
 geo_ip_db = GeoIP("/home/govtrack/extdata")
 washington_dc = geo_ip_db.geos("69.255.139.56")
@@ -26,6 +28,8 @@ def template_context_processor(request):
     context = {
     	"GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY
     }
+    
+    if request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
     
     # Add context variables for whether the user is in the
     # House or Senate netblocks.

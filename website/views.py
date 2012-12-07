@@ -115,7 +115,7 @@ def do_site_search(q, allow_redirect=False):
     
     results.append({
         "title": "Members of Congress and Presidents",
-        "href": "/congress/members",
+        "href": "/congress/members/all",
         "qsarg": "name",
         "noun": "Members of Congress or presidents",
         "results": [

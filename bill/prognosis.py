@@ -94,11 +94,13 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	factors = list()
 	
 	# introduced date (idea from Yano, Smith and Wilkerson 2012 paper)
-	if (bill.introduced_date - get_congress_dates(bill.congress)[0].date()).days < 90:
+	idate = bill.introduced_date
+	if hasattr(idate, 'date'): idate = idate.date() # not sure how this is possible
+	if (idate - get_congress_dates(bill.congress)[0].date()).days < 90:
 		factors.append(("introduced_first90days", "The %s was introduced in the first 90 days of the Congress." % bill.noun))
-	if (bill.introduced_date - get_congress_dates(bill.congress)[0].date()).days < 365:
+	if (idate - get_congress_dates(bill.congress)[0].date()).days < 365:
 		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Congress." % bill.noun))
-	if (get_congress_dates(bill.congress)[1].date() - bill.introduced_date).days < 90:
+	if (get_congress_dates(bill.congress)[1].date() - idate).days < 90:
 		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Congress." % bill.noun))
 	
 	# does the bill's title start with a common prefix?

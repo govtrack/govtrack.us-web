@@ -9,6 +9,7 @@ from django.conf import settings
 from optparse import make_option
 
 from events.models import *
+from emailverification.models import Ping, BouncedEmail
 
 from datetime import datetime, timedelta
 
@@ -55,11 +56,16 @@ class Command(BaseCommand):
 			# updates turned on to the right daily/weekly setting.
 			users = User.objects.filter(subscription_lists__email__in = list_email_freq).distinct()
 			
-		#users=users.filter(id__gt=113315)
-
 		total_emails_sent = 0
 		total_events_sent = 0
+		total_users_skipped = 0
 		for user in list(users.order_by('id')): # clone up front to avoid holding the cursor (?)
+			if user.last_login < datetime.now() - timedelta(days=3) \
+				and not Ping.objects.filter(user=user, pingtime__gt=datetime.now() - timedelta(days=20)).exists() \
+				and BouncedEmail.objects.filter(user=user).exists():
+				total_users_skipped += 1
+				continue
+			
 			events_sent = send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events)
 			if events_sent != None:
 				total_emails_sent += 1
@@ -72,6 +78,7 @@ class Command(BaseCommand):
 			db.reset_queries()
 				
 		print "Sent" if send_mail else "Would send", total_emails_sent, "emails and", total_events_sent, "events"
+		print total_users_skipped, "users skipped because of a bounced email"
 			
 def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events):
 	global now
@@ -113,7 +120,6 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 	# email addresses are still valid, for folks that have not logged in recently
 	# and did not successfully recently ping back.
 	emailpingurl = None
-	from emailverification.models import Ping
 	if user.last_login < datetime.now() - timedelta(days=60) \
 		and not Ping.objects.filter(user=user, pingtime__gt=datetime.now() - timedelta(days=60)).exists():
 		emailpingurl = Ping.get_ping_url(user)

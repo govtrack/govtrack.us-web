@@ -14,7 +14,7 @@ class CosponsorInline(admin.TabularInline):
 
 class BillAdmin(admin.ModelAdmin):
     list_display = ['title', 'congress', 'number']
-    raw_id_fields = ['sponsor']
+    raw_id_fields = ['sponsor', 'cosponsors', 'sponsor_role', 'committees', 'terms']
     inlines = (CosponsorInline,)
 
 class BillLinkAdmin(admin.ModelAdmin):

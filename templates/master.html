@@ -51,7 +51,7 @@
 	{% endcomment %}
 
 
-	{% if 0 and pagename != "blog_template" %}
+	{% if 0 and pagename != "blog_template" and not user_has_bounced_mail %}
 	<div id="sitenewscontainer" style="display: none" seq="22">
 		<div id="sitenews">
 			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
@@ -74,7 +74,19 @@
 	});
 	</script>
 	{% endif %}
-				
+
+	{% if user_has_bounced_mail %}
+	<div id="sitenewscontainer">
+		<div id="sitenews">
+			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"> </div>
+			<div style="float: right; width: 500px; padding: 8px;">
+				<div>An email update to you bounced. We have turned off your email updates. Please contact the website administrator to reactivate email updates.</div>
+			</div>
+			<div style="clear: both"> </div>
+		</div>
+	</div>
+	{% endif %}
+
 	<div id="wrapper">
 		
 		<div id="masthead">
