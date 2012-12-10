@@ -121,6 +121,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     #gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
     gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
     doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
+    numpages = mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
     
     docdate = datetime.date(*(int(d) for d in docdate.split("-")))
     
@@ -136,6 +137,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         "gpo_pdf_url": gpo_pdf_url,
         "doc_version": doc_version,
         "doc_version_name": doc_version_name,
+        "numpages": numpages,
     }
 
 def compare_xml_text(doc1, doc2, timelimit=10):

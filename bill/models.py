@@ -209,6 +209,14 @@ class Bill(models.Model):
     @property
     def cosponsor_records(self):
         return Cosponsor.objects.filter(bill=self).order_by('joined', 'person__lastname', 'person__firstname')
+    @property
+    def cosponsor_counts_by_party(self):
+        counts = { }
+        for p in self.cosponsor_records.filter(withdrawn=None).select_related("role").values_list("role__party", flat=True):
+            p = p[0] # just first letter
+            counts[p] = counts.get(p, 0) + 1
+        counts = sorted(list(counts.items()), key=lambda kv : -kv[1])
+        return counts
 
     @property
     def current_status_description(self):
@@ -235,7 +243,10 @@ class Bill(models.Model):
         return prog
         
     def get_formatted_summary(self):
-        return get_formatted_bill_summary(self)
+        s = get_formatted_bill_summary(self)
+        # this cleanup doesn't always work because sometimes the line is split between <divs>
+        s = re.sub(r"(\d+/\d+/\d\d\d\d)--[^\.]+.\s*(\(This measure has not been amended since it was .*\. The summary of that version is repeated here\.\)\s*)?(" + "|".join(re.escape(t[2]) for t in self.titles) + r")\s*-\s*", lambda m : m.group(1) + ". ", s)
+        return s
 
     def get_upcoming_meetings(self):
         return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=self)
@@ -623,17 +634,25 @@ class Bill(models.Model):
         except:
             return None
         if dom.getroot().tag == '{http://www.w3.org/1999/xhtml}html': return None
-        def sanitize(s):
+        def sanitize(s, as_text=False):
+            if s.strip() == "": return None
             return mark_safe("".join(
-                etree.tostring(n)
+                etree.tostring(n, method="html" if not as_text else "text", encoding=unicode)
                 for n
                 in etree.parse(StringIO.StringIO(s), etree.HTMLParser(remove_comments=True, remove_pis=True)).xpath("body")[0]))
-        return {
+        ret = {
             "link": unicode(dom.xpath("string(bill/permalink)")),
             "summary": sanitize(dom.xpath("string(bill/analysis/bill-summary)")),
             "background": sanitize(dom.xpath("string(bill/analysis/background)")),
+            "cost": sanitize(dom.xpath("string(bill/analysis/cost)")),
         }
+        if ret["cost"] and "was not available as of press time" in ret["cost"]: ret["cost"] = None
         # floor-situation is also interesting but largely redundant with what we already know
+        # take the first of background and bill-summary and make a text-only version
+        for f in ("background", "bill-summary"):
+			ret["text"] = sanitize(dom.xpath("string(bill/analysis/%s)" % f), as_text=True)
+			if ret["text"]: break
+        return ret
             
 class RelatedBill(models.Model):
     bill = models.ForeignKey(Bill, related_name="relatedbills")
@@ -684,8 +703,8 @@ def get_formatted_bill_summary(bill):
     </xsl:template>
 </xsl:stylesheet>''')
     transform = etree.XSLT(xslt_root)
-    summary = transform(dom)
-    if unicode(summary).strip() == "":
+    summary = unicode(transform(dom))
+    if summary.strip() == "":
         return None
     return summary
 

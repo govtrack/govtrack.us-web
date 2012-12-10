@@ -56,7 +56,7 @@
 		
 			<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
 			
-			{% if subtitle %}<p class="subtitle">{{subtitle}}</p>{% endif %}
+			{%comment%}{% if subtitle %}<p class="subtitle">{{subtitle}}</p>{% endif %}{% endcomment %}
 			
 			<dl>
 				{% if not bill.is_alive %}
@@ -111,7 +111,7 @@
 		
 		</div><!-- /info -->
 		
-		<p class="helptext" style="clear: both; line-height: 110%; margin: 0;"><small>The {{bill.noun}}&rsquo;s title {% if subtitle %}and summary above were{% else %}was{% endif %} written by the {{bill.noun}}&rsquo;s sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
+		<p class="helptext" style="clear: both; line-height: 110%; margin: 0;"><small>The {{bill.noun}}&rsquo;s title was written by the {{bill.noun}}&rsquo;s sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 	</div>
 	{% endcache %}
 
@@ -193,17 +193,35 @@
 
 {% block body %}
 {% cache 600 billoverview bill.id %}
-<div id="bill-overview" class="section">
-	
-	<h2>{{bill.noun|capfirst}} Overview</h2>
+
+<div style="margin-left: -15px">
+<ul class="tabs four-up">
+	<li><a href="#overview">Overview</a></li>
+	<li><a href="#summary">Summary</a></li>
+	<li><a href="#related">Related</a></li>
+</ul>
+
+<div class="panes">
+	<div id="overview"> <!-- overview pane -->
 		
-	<div class="overview six columns">
-		<div class="holder">
-			<div class="frame">
-				
+		<div class="six columns" style="padding: 0">
+			<div class="metadata-table">
+			  <div class="holder">
+			  <div class="frame">
 				<div class="container">
 					<dl>
-						<dt>Status:</dt>
+						<dt>Status</dt>
+						<dd>
+							<p style="line-height: normal;">
+								{% if not died %}
+									{{bill.current_status_description}}
+								{% else %}
+									This {{bill.noun}} died in a previous session of Congress.
+								{% endif %}
+							</p>
+						</dd>
+						
+						<dt>Progress</dt>
 						<dd>
 							<table>
 								{% for item in bill.get_major_events %}
@@ -217,29 +235,23 @@
 								{% for item in bill.get_future_events %}
 								<tr>
 									<td class="pending">{{item}}</td>
-									<td>(not yet occurred)</td>
+									<td>...</td>
 								</tr>
 								{% endfor %}
 								{% endif %}
-								
-								<tr><td colspan="2" style="padding-top: 5px; line-height: normal;">
-								{% if not died %}
-									{{bill.current_status_description}}
-								{% else %}
-									This {{bill.noun}} died in a previous session of Congress.
-								{% endif %}
-								</td></tr>
 							</table>
 
 						</dd>
 						
 						{% if bill.votes.exists %}
-							<dt>Votes:</dt>
+							<dt>Votes</dt>
 							<dd>
 								{% for v in bill.votes.all %}
 								<p class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote">
 									<a href="{{v.get_absolute_url}}">
-										{% if v.is_major %}
+										{% if v.is_on_passage %}
+											{{v.get_chamber_display}} Vote on Passage
+										{% elif v.is_major %}
 											{{v.get_chamber_display}}: {{v.vote_type}}
 										{% else %}
 											{{v}}
@@ -275,18 +287,18 @@
 				
 						{% with bill.get_prognosis as p %}
 						{% if p %}
-						<dt>Prognosis:</dt>
+						<dt>Prognosis</dt>
 						<dd>
 							{% if p.is_introduced %}
 								<p><b>
 								{{p.prediction_1|floatformat:0}}%</b> chance of getting past committee.<br/>
 								<b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-								<p class="prognosis_item">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{bill.bill_type_name_short}}s made it past committee
+								<p class="small">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{bill.bill_type_name_short}}s made it past committee
 								and {% if 40 > p.success_rate %}only {% endif %} {{p.success_rate|floatformat:0}}% were {{p.success_name_2}}
 								in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}}.
 							{% else %}
 								<p><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-								<p class="prognosis_item">{% if 40 > p.success_rate_2 %}Only {% endif %}{{p.success_rate_2|floatformat:0}}% of {{bill.bill_type_name_short}}s that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
+								<p class="small">{% if 40 > p.success_rate_2 %}Only {% endif %}{{p.success_rate_2|floatformat:0}}% of {{bill.bill_type_name_short}}s that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
 							{% endif %}
 							{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}<a href="#" onclick="$('#prognosis_factors').slideToggle(); return false;">show factors</a>{% endif %}
 							</small></p>
@@ -295,28 +307,28 @@
 							{% if p.factors_help_help %}
 							<p>The following factors helped this {{bill.noun}}:</p>
 							{% for factor in p.factors_help_help %}
-								<p class="prognosis_item">{{factor}}</p>
+								<p class="small" style="margin-left: 1em">{{factor}}</p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_hurt_hurt %}
 							<p>The following factors hurt this {{bill.noun}}:</p>
 							{% for factor in p.factors_hurt_hurt %}
-								<p class="prognosis_item">{{factor}}</p>
+								<p class="small" style="margin-left: 1em">{{factor}}</p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_help_hurt %}
 							<p>The following factors help this {{bill.noun}} get past committee but hurt it on the floor:</p>
 							{% for factor in p.factors_help_hurt %}
-								<p class="prognosis_item">{{factor}}</p>
+								<p class="small" style="margin-left: 1em">{{factor}}</p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_hurt_help %}
 							<p>The following factors hurt this {{bill.noun}} in getting past committee but help it on the floor:</p>
 							{% for factor in p.factors_hurt_help %}
-								<p class="prognosis_item">{{factor}}</p>
+								<p class="small" style="margin-left: 1em">{{factor}}</p>
 							{% endfor %}
 							{% endif %}
 							</div>
@@ -328,25 +340,14 @@
 				</div><!-- /container -->
 				
 				<div class="container">
-					<dl>
-						<dt>Text:</dt>
-						<dd>
-							<ul class="text-view">
-								<!--<li><a href="#">Summary</a></li>-->
-								<li><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text</a></li>
-							</ul>
-						</dd>
-					</dl>
-				</div><!-- /container -->
-				
-				<div class="container">
 					<dl class="heading">
-						<dt>Cosponsors:</dt>
+						<dt>Cosponsors</dt>
 						<dd>
-							{% if bill.cosponsors.all|length == 0 %}
+							{% if bill.cosponsor_count == 0 %}
 								none
 							{% else %}
-								<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show cosponsors ({{bill.cosponsor_count}})</a>
+								{{bill.cosponsor_count}} cosponsors ({% for party, count in bill.cosponsor_counts_by_party %}{{count}}{{party}}{% if not forloop.last %}, {% endif %}{% endfor %})
+								(<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show</a>)
 								<div id="cosponsors" style="display: none">
 									{% for cosp in bill.cosponsor_records %}
 									<div><a href="{{cosp.person.get_absolute_url}}">{{cosp.person_name}}</a></div>
@@ -361,15 +362,15 @@
 								</div>
 							{% endif %}
 						</dd>
-						</dl>
+					</dl>
 
 					{% if bill.committees.exists %}
 					<dl class="heading">
-						<dt>Committees:</dt>
+						<dt>Committees</dt>
 						<dd>
 							{% for c in bill.committees.all %}
 								{% if not c.committee %}
-									<p><a href="{{c.get_absolute_url}}">{{c}}</a></p>
+									<p style="margin: 0"><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on"}}</a></p>
 									{% for s in bill.committees.all %}
 										{% if s.committee == c %}
 											<p style="margin-left: 2em"><a href="{{s.get_absolute_url}}">{{s}}</a></p>
@@ -377,18 +378,67 @@
 									{% endfor %}
 								{% endif %}
 							{% endfor %}
-							<p>The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
+							<p class="small" style="margin: 1em 0 0 0">The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
 						</dd>
 					</dl>
 					{% endif %}
-					</div> <!-- ?? -->
-				</dv> <!-- /container -->
+				</div> <!-- /container -->
 
+			  </div> <!-- /frame -->
+			  </div> <!-- /holder -->
+			</div><!-- /metadata-table -->
+		</div> <!-- /six columns -->
+			
+		<div class="six columns last" style="padding: 0">
+			<div class="metadata-table">
+			  <div class="holder">
+			  <div class="frame">
+			  	{% if subtitle %}
+				<div class="container">
+					<dl>
+						<dt>Full Title</dt>
+						<dd><p style="line-height: normal">{{subtitle}}</p></dd>
+					</dl>
+				</div>
+			  	{% endif %}
+			  
+				<div class="container">
+					<dl>
+						<dt>Text</dt>
+						<dd>
+							{% with text as text_info %}
+								{% if not text_info %}
+									<p>Text not yet available.</p>
+								{% else %}
+									{% if bill.congress >= 112 %}
+									<a href="{{bill.get_absolute_url}}/text">
+										<img src="http://www.govtrack.us/{{text_info.basename}}-thumb200.png" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>
+									</a>
+									{% endif %}
+									<p><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text &raquo;</a></p>
+									<p class="small">Last updated {{text_info.docdate}}.<br/>{{text_info.numpages}}</p>
+								{% endif %}
+							{% endwith %}
+						</dd>
+					</dl>
+				</div><!-- /container -->
+				
+				<div class="container">
+					<dl>
+						<dt>Summary</dt>
+						<dd>
+							<p id="summary_preview_loc"></p>
+							<p style="margin: 0"><a href="#summary">View All &raquo;</a></p>
+						</dd>
+					</dl>
+				</div><!-- /container -->
+				
 				<div class="container">
 					<dl>
 						<dt>Primary Source</dt>
 						<dd>
-							<p><a href="{{bill.thomas_link}}">THOMAS (The Library of Congress)</a><br/>THOMAS is updated generally one day after events occur and events since the last update may not be reflected here.</p>
+							<p style="margin:0"><a href="{{bill.thomas_link}}">View on THOMAS (The Library of Congress)</a></p>
+							<p class="small">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here.</p>
 						</dd>
 						<dt>Citation</dt>
 						<dd>
@@ -398,11 +448,12 @@
 								if (!v) $("#cite_" + fmt).slideDown();
 								return false;
 							}</script>
-							<p>This page can be cited in one of these formats (click for details):
-								<a href="#" onclick="return show_cite('apa')">APA</a>,
-								<a href="#" onclick="return show_cite('mla')">MLA</a>,
-								<a href="#" onclick="return show_cite('wikipedia')">Wikipedia Template</a>.
-							</p>
+							<p style="margin: 0">Click a format for a citation suggestion:</p>
+							<ul class="horz-options">
+								<li><a href="#" onclick="return show_cite('apa')">APA</a></li>
+								<li><a href="#" onclick="return show_cite('mla')">MLA</a></li>
+								<li><a href="#" onclick="return show_cite('wikipedia')">Wikipedia Template</a></li>
+							</ul>
 							<p id="cite_apa" style="display: none">{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}. ({{bill.introduced_date|date:"Y"}}). In GovTrack.us (database of federal legislation). Retrieved {% now "F j, Y" %}, from {{request.build_absolute_uri}}</p>
 
 							<p id="cite_mla" style="display: none">&ldquo;{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number}}.&rdquo; GovTrack.us (database of federal legislation). {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
@@ -419,17 +470,35 @@
 							}}</p>
 						</dd>
 					</dl>
-				</div>				
-			</div><!-- /frame -->
-		</div><!-- /holder -->
-	</div><!-- /overview -->
-	
-	<div class="six columns">
-	<div class="overview">
-		<div class="holder">
-			<div class="frame">
+				</div> <!-- /container -->				
 				
-			
+			   </div><!-- /frame -->
+			   </div><!-- /holder -->
+			</div><!-- /metadata-table -->
+		</div><!-- /six columns last -->
+	</div>  <!-- /overview pane -->
+	
+	<div id="summary"> <!-- summary pane -->
+			<div>
+				<h3 style="margin-bottom: 1em">Library of Congress Summary</h3>
+				<p style="font-style: italic">The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress. GovTrack has no control over these summaries.</p>
+				{% with bill.get_formatted_summary as summary %}
+				{{summary|safe}}
+				{% if not summary %}
+					<p>No summary available.</p>
+					<script>$('#summary_preview_loc').text("{{summary|striptags|truncatewords:30|escapejs}}");</script>
+				{% else %}
+				<script>$('#summary_preview_loc').text("No summary available.");</script>
+				{% endif %}
+				{% endwith %}
+			</div>
+
+	</div> <!-- /summary pane -->
+	
+	<div id="related"> <!-- related pane -->
+			<div class="metadata-table">
+				<div class="holder">
+				<div class="frame">
 				{% with bill.get_approved_links as links %}
 				{% if links|length > 0 %}
 				<div class="container">
@@ -448,10 +517,9 @@
 				{% endif %}
 				{% endwith %}
 			
-				{% with reintros.0 as reintro_from %}
 				<div class="container">
 					<dl style="margin-top: 1em">
-						<dt>Related Bills:</dt>
+						<dt>Related Bills</dt>
 						<dd>
 							{% if bill.relatedbills.exists %}
 							<div>
@@ -459,64 +527,54 @@
 								<div style="margin-bottom: .25em">{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
 							{% endfor %}
 							</div>
-							<p><small>Related bills above are identified by the Congressional Research Service.</small></p>
+							<p class="small">As identified by the Library of Congress.</p>
 							{% endif %}
 							
-							{% if reintro_from %}
-							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
-							{% endif %}
-							
-							<p>Search for <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
+							<p>Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
 						</dd>
 					</dl>
 				</div>
+				
+				{% with reintros.0 as reintro_from %}
+				{% if reintro_from %}
+				<div class="container">
+					<dl style="margin-top: 1em">
+						<dt>Supersedes</dt>
+						<dd>
+							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
+						</dd>
+					</dl>
+				</div>
+				{% endif %}
 				{% endwith %}
 					
-				{% if bill.terms.exists %}
 				<div class="container">
 					<dl style="margin-top: 1em">
 						<dt>Subject Areas:</dt>
 						<dd>
+							{% if bill.terms.exists %}
+								<p>None known at this time.</p>
+							{% else %}
 							<p>Use these subject areas to explore related legislation:</p>
 							<div>
 							{% for term in bill.get_terms_sorted %}
 								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
 							{% endfor %}
 							</div>
+							{% endif %}
 						</dd>
 					</dl>
 				</div>
-				{% endif %}
-		
-			</div>
-		</div>
-	</div><!-- /overview -->
-		
-		{% if bill.terms.exists %}
-		<div style="padding-top: 30px; width: 340px; margin: 0 auto;">
-		<script type="text/javascript"><!--
-		google_ad_client = "ca-pub-3418906291605762";
-		/* GT Secondary */
-		google_ad_slot = "8748660262";
-		google_ad_width = 336;
-		google_ad_height = 280;
-		//-->
-		</script>
-		<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"> </script>		
-		</div>
-		{% endif %}
-	</div> <!-- six cols -->
+				
+				</div>
+				</div>
+			</div><!-- /metadata-table -->
+	</div> <!-- /related pane -->
+</div>
+</div>
 	
-	{% with bill.get_formatted_summary as summary %}
-	{% if summary %}
-	<section class="clear" style="padding-top: 2em">
-		<h3 style="margin-bottom: 1em">Official Summary</h3>
-		<p style="font-style: italic">This summary was written by the Congressional Research Service, a nonpartisan arm of the Library of Congress. GovTrack did not write and has no control over these summaries.</p>
-		{{summary|safe}}
-	</section>
-	{% endif %}
-	{% endwith %}
-</div><!-- /container -->
-
 {% endcache %}
+
+<script>$("ul.tabs").tabs("div.panes > div");</script>
+
 {% endblock %}
