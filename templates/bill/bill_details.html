@@ -486,9 +486,9 @@
 				{{summary|safe}}
 				{% if not summary %}
 					<p>No summary available.</p>
-					<script>$('#summary_preview_loc').text("{{summary|striptags|truncatewords:30|escapejs}}");</script>
+					<script>$('#summary_preview_loc').text("No summary available.");</script>
 				{% else %}
-				<script>$('#summary_preview_loc').text("No summary available.");</script>
+					<script>$('#summary_preview_loc').text("{{summary|striptags|truncatewords:30|escapejs}}");</script>
 				{% endif %}
 				{% endwith %}
 			</div>
