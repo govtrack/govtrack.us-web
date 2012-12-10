@@ -3972,7 +3972,7 @@ ul.tabs a:hover {
 }
 
 /* selected tab */
-ul.tabs a.current {
+ul.tabs a.active {
     border: 1px solid #ddc;
     border-bottom:0;
     color:#000;
@@ -4032,11 +4032,7 @@ ul.tabs.five-up li {
  ******************************/
 /* root element for tabs  */
 ul.left-tabs {
-	width: 20%;
-    margin:0 !important;
-    padding:0;
     border:1px solid #DDC;
-    float: left;
 }
 
 /* single tab */
@@ -4069,7 +4065,7 @@ ul.left-tabs a:hover {
 }
 
 /* selected tab */
-ul.left-tabs a.current {
+ul.left-tabs a.active {
     border: 1px solid #F3F1E9;
     border-bottom: 1px solid #ffffff;
     color:#000;

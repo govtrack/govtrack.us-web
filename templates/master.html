@@ -24,12 +24,12 @@
 		
 		{% block extra_css %}{% endblock %}
 		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/main.js" ></script>
-		{% comment %}<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>{% endcomment %}
-		<script src="http://cdn.jquerytools.org/1.2.7/jquery.tools.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/modernize.js" ></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/ajaxforms.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"> </script>
+		<script src="{{ MEDIA_URL }}js/jquery.ba-bbq.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-utils.js"></script>
 		{% block extra_js %}{% endblock %}
 		
 		{% block head %}{% endblock %}

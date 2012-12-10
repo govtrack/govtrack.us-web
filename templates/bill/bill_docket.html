@@ -67,14 +67,14 @@ $(function() {
 {% block body %}
 
 <ul class="tabs four-up">
-	<li><a href="#">Docket</a></li>
-	<li><a href="#">By Subject</a></li>
-	<li><a href="#">Search and Track</a></li>
-	<li><a href="#">Statistics</a></li>
+	<li><a href="#docket">Docket</a></li>
+	<li><a href="#subjects">By Subject</a></li>
+	<li><a href="#search">Search and Track</a></li>
+	<li><a href="#statistics">Statistics</a></li>
 </ul>
 
 <div class="panes">
-	<div>
+	<div id="docket">
 		<h2 style="margin: 1em 0 1em 0">Congress&rsquo;s Docket</h2>
 		
 		<div class="col_6" style="margin-right: 40px; padding-right: 40px; border-right: 1px solid #EEE;">
@@ -120,7 +120,7 @@ $(function() {
 		</div>		
 	</div>
 	
-	<div>
+	<div id="subjects">
 		<h2 style="margin: 1em 0 .5em 0">Browse Bills by Subject</h2>
 		<p>Use the Library of Congress&rsquo;s subject categorization of bills and resolutions to explore pending legislation in Congress.</p>
 		<ul id="subject_list">
@@ -137,7 +137,7 @@ $(function() {
 		</ul>
 	</div>
 	
-	<div>
+	<div id="search">
 		<h2 style="margin: 1em 0 .5em 0">Search Bills and Resolutions</h2>
 		<p style="width: 600px">Search for bills using the search box at the top right of every page, or use the <a href="/congress/bills/browse">advanced search</a> to screen by status, subject, and other factors.</p>
 		
@@ -153,7 +153,7 @@ $(function() {
 	
 	</div>
 
-	<div>
+	<div id="statistics">
 		<h2 style="margin: 1em 0 .5em 0">Statistics and Historical Comparison</h2>
 		
 		<p>Here are counts of bills and resolutions by status in the current Congress compared to previous Congresses. Note that the current Congress is not yet finished.</p>
@@ -264,6 +264,6 @@ $(function() {
 	</div>	
 </div>
 
-<script>$("ul.tabs").tabs("div.panes > div");</script>
+<script>$("ul.tabs a").tabs("div.panes > div");</script>
 
 {% endblock %}

@@ -197,7 +197,7 @@
 <div style="margin-left: -15px">
 <ul class="tabs four-up">
 	<li><a href="#overview">Overview</a></li>
-	<li><a href="#summary">Summary</a></li>
+	<li><a href="#summary">Summaries</a></li>
 	<li><a href="#related">Related</a></li>
 </ul>
 
@@ -426,9 +426,8 @@
 				<div class="container">
 					<dl>
 						<dt>Summary</dt>
-						<dd>
-							<p id="summary_preview_loc"></p>
-							<p style="margin: 0"><a href="#summary">View All &raquo;</a></p>
+						<dd id="summaries">
+							<p>No summaries available.</p>
 						</dd>
 					</dl>
 				</div><!-- /container -->
@@ -479,20 +478,86 @@
 	</div>  <!-- /overview pane -->
 	
 	<div id="summary"> <!-- summary pane -->
-			<div>
+		<div class="three columns">
+			<ul id="summary_tabs" class="left-tabs">
+				<li><a href="#summary/libraryofcongress">Library of Congress</a></li>
+				<li><a href="#summary/houserepublicans">House Republicans</a></li>
+				<li><a href="#summary/housedemocrats">House Democrats</a></li>
+			</ul>
+		</div>
+	
+		<div class="nine columns">
+			<script>
+			var first_summary = true;
+			function add_summary(name, href, html) {
+				var n = $('#summaries');
+				if (first_summary) {
+					n.text('');
+					first_summary = false;
+				}
+				
+				var p1 = $('<p style="margin: 0"><a/></p>');
+				p1.find('a').text(name + " »");
+				p1.find('a').attr('href', '#summary/' + href);
+				n.append(p1)
+				
+				var p2 = $('<p class="small" style="margin-bottom: .5em"/>');
+				p2.html(html);
+				n.append(p2)
+			}
+			</script>
+			
+			<div id="libraryofcongress">
 				<h3 style="margin-bottom: 1em">Library of Congress Summary</h3>
-				<p style="font-style: italic">The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress. GovTrack has no control over these summaries.</p>
+				<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress. GovTrack has no control over these summaries.</p>
+				<hr/>
 				{% with bill.get_formatted_summary as summary %}
-				{{summary|safe}}
 				{% if not summary %}
 					<p>No summary available.</p>
-					<script>$('#summary_preview_loc').text("No summary available.");</script>
 				{% else %}
-					<script>$('#summary_preview_loc').text("{{summary|striptags|truncatewords:30|escapejs}}");</script>
+					{{summary|safe}}
+					<script>add_summary("Library of Congress", "libraryofcongress", "{{summary|striptags|truncatewords:30|escapejs}}");</script>
 				{% endif %}
 				{% endwith %}
 			</div>
-
+			
+			<div id="houserepublicans">
+				<h3 style="margin-bottom: 1em">House Republican Conference Summary</h3>
+				<p>The summary below was written by the <a href="http://www.gop.gov">House Republican Conference</a>, which is the caucus of Republicans in the House of Representatives. Their summaries are, of course, from the point of view of the Republican party leadership in the House.</p>
+				<hr/>
+				{% with bill.get_gop_summary as gopsummary %}
+					{% if not gopsummary %}
+						<p>No summary available.</p>
+					{% else %}
+						<p>This summary can be found at <a href="{{gopsummary.link}}">{{gopsummary.link}}</a>.</p>
+					
+						{% if gopsummary.background %}
+						<h4>Background</h4>
+						{{gopsummary.background}}
+						{% endif %}
+						
+						{% if gopsummary.summary %}
+						<h4>Summary</h4>
+						{{gopsummary.summary}}
+						{% endif %}
+						
+						{% if gopsummary.cost %}
+						<h4>Cost</h4>
+						{{gopsummary.cost}}
+						{% endif %}
+						
+						<script>add_summary("House Republicans", "houserepublicans", "{{gopsummary.text|truncatewords:30|escapejs}}");</script>
+					{% endif %}
+				{% endwith %}
+			</div>
+			
+			<div id="housedemocrats">
+				<h3 style="margin-bottom: 1em">House Democratic Caucus Summary</h3>
+				<p>The <a href="http://www.dems.gov/">House Democratic Caucus</a> does not provide summaries of bills.</p>
+				<p>So, yes, we display the House Republican Conference&rsquo;s summaries when available even if we do not have a Democratic summary available. That&rsquo;s because we feel it is better to give you as much information as possible, even if we cannot provide every viewpoint.</p>
+				<p>We&rsquo;ll be looking for a source of summaries from the other side in the meanwhile.</p>
+			</div>
+		</div>
 	</div> <!-- /summary pane -->
 	
 	<div id="related"> <!-- related pane -->
@@ -575,6 +640,7 @@
 	
 {% endcache %}
 
-<script>$("ul.tabs").tabs("div.panes > div");</script>
+<script>$("ul.tabs a").tabs("div.panes > div");</script>
+<script>$("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
 
 {% endblock %}
