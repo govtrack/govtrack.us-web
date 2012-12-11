@@ -100,12 +100,26 @@
 				</dd>
 				{% endif %}
 			
-				{% with reintros.1 as reintro_as %}
+				{% with reintro_as=reintros.1 related_newer=bill.get_related_bills_newer %}
+					
 				{% if reintro_as %}
-				<dt>See Instead:</dt>
-				<dd>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
-				{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</dd>
+					<dt>See Instead:</dt>
+					<dd>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
+					{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</dd>
+					
+				{% elif related_newer %}
+					<dt>See Instead:</dt>
+					<dd>
+					{% for rb in related_newer %}
+						<p style="margin-bottom: .25em">
+							<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill.display_number_no_congress_number}}</a>
+							(same title)
+							<br/>{{rb.related_bill.get_current_status_display}} &mdash; {{rb.related_bill.current_status_date|date}}
+						</p>
+					{% endfor %}
+					</dd>
 				{% endif %}
+				
 				{% endwith %}
 			</dl>
 		
@@ -590,10 +604,18 @@
 							{% if bill.relatedbills.exists %}
 							<div>
 							{% for rb in bill.get_related_bills %}
-								<div style="margin-bottom: .25em">{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill}}</a></div>
+								<p style="margin-bottom: .25em; line-height: normal;">
+									{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">
+										{{rb.related_bill.display_number_no_congress_number}}: {{rb.related_bill.title_no_number|truncatewords:15}}
+									</a>
+								</p>
+								<p class="small" style="margin-bottom: .75em; line-height: normal;">
+									{{rb.related_bill.get_current_status_display}}<br/>
+									Last Action: {{rb.related_bill.current_status_date|date}}
+								</p>
 							{% endfor %}
 							</div>
-							<p class="small">As identified by the Library of Congress.</p>
+							<p class="small">Related bills are identified by the Library of Congress.</p>
 							{% endif %}
 							
 							<p>Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>

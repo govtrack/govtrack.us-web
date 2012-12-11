@@ -584,15 +584,26 @@ class Bill(models.Model):
         return terms
         
     def get_related_bills(self):
+        # Gets a unqie list of related bills, sorted by the relation type, whether the titles are
+        # the same, and the last action date.
         ret = []
         seen = set()
         bills = list(self.relatedbills.all().select_related("related_bill"))
-        bills.sort(key = lambda rb : RelatedBill.relation_sort_order.get(rb.relation, 999))
+        bills.sort(key = lambda rb : (
+            -RelatedBill.relation_sort_order.get(rb.relation, 999),
+            self.title_no_number==rb.related_bill.title_no_number,
+            rb.related_bill.current_status_date
+            ), reverse=True)
         for rb in bills:
             if not rb.related_bill in seen:
                 ret.append(rb)
                 seen.add(rb.related_bill)
         return ret
+        
+    def get_related_bills_newer(self):
+        return [rb for rb in self.get_related_bills()
+            if self.title_no_number == rb.related_bill.title_no_number 
+            and rb.related_bill.current_status_date > self.current_status_date]
 
     def find_reintroductions(self):
         def normalize_title(title): # remove anything that looks like a year
