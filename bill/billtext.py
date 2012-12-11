@@ -6,7 +6,7 @@ if __name__ == "__main__":
     sys.path.insert(0, ".env/lib/python2.7/site-packages")
     os.environ["DJANGO_SETTINGS_MODULE"] = 'settings'
 
-import datetime, lxml, os.path
+import datetime, lxml, os.path, re
 
 bill_gpo_status_codes = {
     "ah": "Amendment",
@@ -122,6 +122,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
     doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
     numpages = mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
+    if numpages: numpages = re.sub(r" p\.$", " pages", numpages)
     
     docdate = datetime.date(*(int(d) for d in docdate.split("-")))
     
