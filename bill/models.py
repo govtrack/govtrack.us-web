@@ -369,7 +369,7 @@ class Bill(models.Model):
             # TODO test this.
             return {
                 "type": "New Cosponsors",
-                "date": datetime.date(*ev_code.split('-')),
+                "date": datetime.date(*[int(k) for k in ev_code.split('-')]),
                 "date_has_no_time": True,
                 "title": self.title,
                 "url": self.get_absolute_url(),
