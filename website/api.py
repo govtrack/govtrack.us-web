@@ -14,7 +14,7 @@ class MySerializer(Serializer):
     def __init__(self, *args, **kwargs):
         Serializer.__init__(self, *args, **kwargs)
         self.formats += ['csv', 'debug_sql']
-        self.content_types['csv'] = 'text/html'
+        self.content_types['csv'] = 'text/csv'
         self.content_types['debug_sql'] = 'text/plain'
     
 	# Make JSON output pretty.

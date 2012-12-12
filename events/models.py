@@ -204,6 +204,7 @@ class Feed(models.Model):
             "includes": lambda self : [Feed.CommitteeBillsFeed(self.committee()), Feed.CommitteeMeetingsFeed(self.committee())],
             "link": lambda self: self.committee().get_absolute_url(),
             "scoped_title": lambda self : "All Events for This Committee",
+            "is_valid": lambda self : self.committee(test=True),
         },
         "committeebills:": {
             "title": lambda self : "Bills in " + truncate_words(self.committee().fullname, 12),
@@ -222,6 +223,7 @@ class Feed(models.Model):
             "title": lambda self : self.issue().name,
             "noun": "subject area",
             "link": lambda self: self.issue().get_absolute_url(),
+            "is_valid": lambda self : self.issue(test=True),
         }
     }
     
@@ -414,7 +416,10 @@ class Feed(models.Model):
     
     @property
     def isvalid(self):
-        return self.type_metadata() != None
+        m = self.type_metadata()
+        if m == None: return False
+        if "is_valid" not in m: return True
+        return m["is_valid"](self)
     
     @property
     def title(self):
@@ -483,20 +488,35 @@ class Feed(models.Model):
                     self._ref = None
          return self._ref
          
-    def committee(self):
+    def committee(self, test=False):
          if not hasattr(self, "_ref"):
                if ":" in self.feedname and self.feedname.split(":")[0] in ("committee", "committeebills", "committeemeetings"):
                     import committee.models
-                    return committee.models.Committee.objects.get(code=self.feedname.split(":")[1])
+                    try:
+                        return committee.models.Committee.objects.get(code=self.feedname.split(":")[1])
+                    except:
+                        if test: return False
+                        raise
                else:
                     self._ref = None
          return self._ref
          
-    def issue(self):
+    def issue(self, test=False):
          if not hasattr(self, "_ref"):
                if ":" in self.feedname and self.feedname.split(":")[0] in ("crs",):
-                    import bill.models
-                    return bill.models.BillTerm.objects.get(id=self.feedname.split(":")[1])
+                   import bill.models
+                   try:
+                       return bill.models.BillTerm.objects.get(id=self.feedname.split(":")[1])
+                   except:
+                       # For legacy calls to RSS feeds, try to map subject name to object.
+                       # Many subject names have changed, so this is the best we can do.
+                       # Only test against new-style subject terms since we don't generate
+                       # events for old bills with old subject terms.
+                       try:
+                           return bill.models.BillTerm.objects.get(name=self.feedname.split(":")[1], term_type=bill.models.TermType.new)
+                       except bill.models.BillTerm.DoesNotExist:
+                           if test: return False
+                           raise
                else:
                     self._ref = None
          return self._ref

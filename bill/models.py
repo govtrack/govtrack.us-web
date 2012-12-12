@@ -704,7 +704,7 @@ def bill_search_feed_execute(q):
     
     def make_feed_name(bill):
         return "bill:" + BillType.by_value(bill.bill_type).xml_code + str(bill.congress) + "-" + str(bill.number)
-    return Feed.objects.filter(feedname__in=[make_feed_name(bill) for bill in bills]) # batch load
+    return Feed.objects.filter(feedname__in=[make_feed_name(bill) for bill in bills if bill != None]) # batch load
 Feed.register_feed(
     "billsearch:",
     title = lambda feed : bill_search_feed_title(feed.feedname.split(":", 1)[1]),
