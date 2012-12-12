@@ -235,6 +235,7 @@
 							</p>
 						</dd>
 						
+						{% if current or bill.get_major_events|length > 0 %}
 						<dt>Progress</dt>
 						<dd>
 							<table>
@@ -254,8 +255,8 @@
 								{% endfor %}
 								{% endif %}
 							</table>
-
 						</dd>
+						{% endif %}
 						
 						{% if bill.votes.exists %}
 							<dt>Votes</dt>
@@ -661,7 +662,7 @@
 	</div> <!-- /related pane -->
 </div>
 </div>
-	
+
 {% endcache %}
 
 <script>$("ul.tabs a").tabs("div.panes > div");</script>

@@ -471,7 +471,10 @@ class Bill(models.Model):
         
         if self.docs_house_gov_postdate: ret.append({ "label": "On House Schedule", "date": self.docs_house_gov_postdate })
         if self.senate_floor_schedule_postdate: ret.append({ "label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate })
-        ret.sort(key = lambda x : x["date"]) # only needed because of the previous two
+        def as_dt(x):
+        	if isinstance(x, datetime.datetime): return x
+        	return datetime.datetime.combine(x, datetime.time.min)
+        ret.sort(key = lambda x : as_dt(x["date"])) # only needed because of the previous two
         
         return ret
     

@@ -450,10 +450,10 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 		"prediction": (prediction_1 * prediction_2 / 100.0) if is_introduced else prediction_2,
 		"success_name": model_2["success_name"],
 		
-		"factors_help_help": [descr for key, descr in factors if helps(key, True, True)],
-		"factors_hurt_hurt": [descr for key, descr in factors if helps(key, False, False)],
-		"factors_help_hurt": [descr for key, descr in factors if helps(key, True, False)],
-		"factors_hurt_help": [descr for key, descr in factors if helps(key, False, True)],
+		"factors_help_help": [descr for key, descr, gen_descr in factors if helps(key, True, True)],
+		"factors_hurt_hurt": [descr for key, descr, gen_descr in factors if helps(key, False, False)],
+		"factors_help_hurt": [descr for key, descr, gen_descr in factors if helps(key, True, False)],
+		"factors_hurt_help": [descr for key, descr, gen_descr in factors if helps(key, False, True)],
 	}
 
 def compute_prognosis(bill, proscore=False):
