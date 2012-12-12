@@ -1,5 +1,5 @@
 import os
-import csv
+import csv, json
 from us import parse_govtrack_date
 from types import RoleType
 from models import Person
@@ -20,13 +20,16 @@ def load_sponsorship_analysis(person):
     congressnumber = role.most_recent_congress_number()
     if not congressnumber: return None
     
+    return load_sponsorship_analysis2(congressnumber, role.role_type, person)
+    
+def load_sponsorship_analysis2(congressnumber, role_type, person):
     data = { "congress": congressnumber, "current": congressnumber == CURRENT_CONGRESS }
     
     fname = 'data/us/%d/stats/sponsorshipanalysis' % congressnumber
-    if role.role_type == RoleType.senator:
+    if role_type == RoleType.senator:
         fname += "_s.txt"
         data["chamber"] = "Senate"
-    elif role.role_type == RoleType.representative:
+    elif role_type == RoleType.representative:
         fname += "_h.txt"
         data["chamber"] = "House of Representatives"
     else:
@@ -50,7 +53,7 @@ def load_sponsorship_analysis(person):
         
         if chunks[4] == "": continue # empty party means... not in office?
         
-        if chunks[0] == str(person.pk):
+        if person and chunks[0] == str(person.pk):
             data.update(pt)
         else:
             all_points.append(pt)
@@ -58,7 +61,13 @@ def load_sponsorship_analysis(person):
     # sort, required by regroup tag
     all_points.sort(key = lambda item : item["party"])
             
-    if not "ideology" in data: return None
+    if person and not "ideology" in data: return None
+    
+    try:
+        data.update(json.load(open(fname.replace(".txt", "_meta.txt"))))
+    except IOError:
+        pass # doesn't exist for past congresses
+    
     return data
     
 def load_votes_analysis(person):
