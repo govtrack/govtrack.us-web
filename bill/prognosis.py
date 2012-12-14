@@ -97,11 +97,11 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	idate = bill.introduced_date
 	if hasattr(idate, 'date'): idate = idate.date() # not sure how this is possible
 	if (idate - get_congress_dates(bill.congress)[0].date()).days < 90:
-		factors.append(("introduced_first90days", "The %s was introduced in the first 90 days of the Congress." % bill.noun, "Introduced in the first 90 days of the Congress."))
+		factors.append(("introduced_first90days", "The %s was introduced in the first 90 days of the Congress." % bill.noun, "Introduced in the first 90 days of the Congress (incl. companion bills)."))
 	if (idate - get_congress_dates(bill.congress)[0].date()).days < 365:
-		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Congress." % bill.noun, "Introduced in the first year of the Congress."))
+		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Congress." % bill.noun, "Introduced in the first year of the Congress (incl. companion bills)."))
 	if (get_congress_dates(bill.congress)[1].date() - idate).days < 90:
-		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Congress." % bill.noun, "Introduced in the last 90 days of the Congress."))
+		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Congress." % bill.noun, "Introduced in the last 90 days of the Congress (incl. companion bills)."))
 	
 	# does the bill's title start with a common prefix?
 	for prefix in pop_title_prefixes:
@@ -113,9 +113,9 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	
 	maj_party = majority_party[bill.bill_type]
 	
-	if bill.sponsor:
+	if bill.sponsor_role:
 		# party of the sponsor
-		sponsor_party = bill.sponsor.get_role_at_date(bill.introduced_date).party
+		sponsor_party = bill.sponsor_role.party
 		if sponsor_party != maj_party:
 			factors.append( ("sponsor_minority", "The sponsor is a member of the minority party.", "Sponsor is a member of the minority party.") )
 	
@@ -192,12 +192,30 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 				break
 
 	if include_related_bills: # prevent infinite recursion
-		# Add factors from any CRS-identified identical bill, changing each factor's
+		# Add factors from any CRS-identified identical bill, changing most factors'
 		# key into companion_KEY so that they become separate factors to consider.
-		for rb in RelatedBill.objects.filter(bill=bill, relation="identical").select_related("related_bill"):
+		# For some specific factors, lump them in with the factor for the bill itself.
+		for rb in RelatedBill.objects.filter(bill=bill, relation="identical").select_related("related_bill", "related_bill__sponsor_role"):
+			# has a companion
+			factors.append(("companion", "The %s has been introduced in both chambers (the other is %s)." % (bill.noun, rb.related_bill.display_number), "Has a companion bill in the other chamber."))
+			
+			# companion sponsor's party
+			if bill.sponsor_role and rb.related_bill.sponsor_role:
+				if bill.sponsor_role.party != rb.related_bill.sponsor_role.party:
+					factors.append(("companion_bipartisan", "The %s's companion %s was sponsored by a member of the other party." % (bill.noun, rb.related_bill.display_number), "Has a companion bill sponsored by the other party."))
+			
 			for f in get_bill_factors(rb.related_bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data, include_related_bills=False):
 				if "startswith" in f[0]: continue # don't include title factors because the title is probs the same
-				f = ("companion_" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1], "On a companion bill: " + f[2])
+				if f[0] in ("introduced_first90days", "introduced_last90days", "introduced_firstyear", "reintroduced_of_reported", "reintroduced"):
+					f = (f[0], "%s (on companion bill %s)" % (f[1], rb.related_bill.display_number), f[2])
+				else:
+					f = ("companion__" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1], "On a companion bill: " + f[2])
+					
+				# Make sure not to duplicate any factors, especially if we are promoting the companion
+				# bill factor to a main factor, we don't want to double count or override the description
+				# on the main bill.
+				if f[0] in set(k[0] for k in factors): continue
+				
 				factors.append(f)
 
 	# Are lobbyists registering that they are lobbying on this bill? Does this bill

@@ -362,8 +362,10 @@
 							{% if bill.cosponsor_count == 0 %}
 								none
 							{% else %}
-								{{bill.cosponsor_count}} cosponsors ({% for party, count in bill.cosponsor_counts_by_party %}{{count}}{{party}}{% if not forloop.last %}, {% endif %}{% endfor %})
+								<div title="{% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}s{% if not forloop.last %}, {% endif %}{% endfor %}">
+								{{bill.cosponsor_count}} cosponsors ({% for party, count in bill.cosponsor_counts_by_party %}{{count}}{{party.0}}{% if not forloop.last %}, {% endif %}{% endfor %})
 								(<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show</a>)
+								</div>
 								<div id="cosponsors" style="display: none">
 									{% for cosp in bill.cosponsor_records %}
 									<div><a href="{{cosp.person.get_absolute_url}}">{{cosp.person_name}}</a></div>

@@ -213,7 +213,6 @@ class Bill(models.Model):
     def cosponsor_counts_by_party(self):
         counts = { }
         for p in self.cosponsor_records.filter(withdrawn=None).select_related("role").values_list("role__party", flat=True):
-            p = p[0] # just first letter
             counts[p] = counts.get(p, 0) + 1
         counts = sorted(list(counts.items()), key=lambda kv : -kv[1])
         return counts
