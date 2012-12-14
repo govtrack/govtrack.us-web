@@ -84,7 +84,7 @@ jQuery.fn.keydown_enter = function(callback) {
 
 // Tabs that work via the window hash. Call this method over a node set
 // of <a href="#tabname"> elements, and have corresponding <div id="tabname">
-// elements.
+// elements. Requires jquery.ba-bbq.min.js.
 jQuery.fn.tabs = function(panes, subordinate_to) {
 	var tabs = this;
 	var default_tab = tabs[0].getAttribute('href');
@@ -100,6 +100,8 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 	else
 		subordinate_to = "";
 	
+	var current_tab = null;
+	
 	// What happens when the page hash changes?
 	function activate_tab(is_initial) {
 		var p = location.hash;
@@ -109,14 +111,29 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 		
 		if (!(p in tab_links)) p = default_tab;
 		
+		// the event fires twice?
+		if (p == current_tab) return;
+		current_tab = p;
+		
+		// get the height of the current tab
+		var cur_height = panes.filter(":visible").height();
+		
 		// activate the new tab pane
 		panes.each(function() {
 			if ("#" + subordinate_to + this.getAttribute('id') == p) {
+				// Show it immediately if this is on page load, otherwise fade it in fast.
 				if (is_initial) $(this).show(); else $(this).fadeIn("fast");
+				
+				// Set a min-height so that the window height doesn't go down,
+				// which can cause the page to scroll up and confuse the user.
+				if (cur_height) $(this).css({ "min-height": cur_height + "px" });
 			}
 		});
 
-		// hide the old tab pane -- do this after to prevent scroll due to page height change
+		// hide the old tab pane
+		// Do this after showing the new pane to prevent the window
+		// height from decreasing (because no tabs are shown) which
+		// could cause the page to scroll up, which would confuse the user.
 		panes.each(function() {
 			if ("#" + subordinate_to + this.getAttribute('id') != p) {
 				$(this).hide();

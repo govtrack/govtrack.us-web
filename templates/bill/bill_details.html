@@ -494,6 +494,7 @@
 	</div>  <!-- /overview pane -->
 	
 	<div id="summary"> <!-- summary pane -->
+		<div class="row">
 		<div class="three columns">
 			<ul id="summary_tabs" class="left-tabs">
 				<li><a href="#summary/libraryofcongress">Library of Congress</a></li>
@@ -525,7 +526,7 @@
 			
 			<div id="libraryofcongress">
 				<h3 style="margin-bottom: 1em">Library of Congress Summary</h3>
-				<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress. GovTrack has no control over these summaries.</p>
+				<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress.</p>
 				<hr/>
 				{% with bill.get_formatted_summary as summary %}
 				{% if not summary %}
@@ -539,7 +540,7 @@
 			
 			<div id="houserepublicans">
 				<h3 style="margin-bottom: 1em">House Republican Conference Summary</h3>
-				<p>The summary below was written by the <a href="http://www.gop.gov">House Republican Conference</a>, which is the caucus of Republicans in the House of Representatives. Their summaries are, of course, from the point of view of the Republican party leadership in the House.</p>
+				<p>The summary below was written by the <a href="http://www.gop.gov">House Republican Conference</a>, which is the caucus of Republicans in the House of Representatives.</p>
 				<hr/>
 				{% with bill.get_gop_summary as gopsummary %}
 					{% if not gopsummary %}
@@ -574,6 +575,7 @@
 				<p>So, yes, we display the House Republican Conference&rsquo;s summaries when available even if we do not have a Democratic summary available. That&rsquo;s because we feel it is better to give you as much information as possible, even if we cannot provide every viewpoint.</p>
 				<p>We&rsquo;ll be looking for a source of summaries from the other side in the meanwhile.</p>
 			</div>
+		</div>
 		</div>
 	</div> <!-- /summary pane -->
 	
