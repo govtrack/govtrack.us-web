@@ -1,6 +1,7 @@
 {% extends "master_a.html" %}
 {% load humanize %}
 {% load cache %}
+{% load govtrack_utils %}
 
 {% block title %}{{bill.title_no_number}} ({% if not bill.is_current %}{{bill.current_status_date|date:"Y"}}; {{bill.congress|ordinal}} Congress {% endif %}{{bill.display_number_no_congress_number}}) - GovTrack.us{% endblock %}
 
@@ -44,7 +45,7 @@
 
 <div class="row">
 	{% cache 600 billhead bill.id %}
-	<h1>{{bill.title|truncatewords:17}}</h1>
+	<h1>{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number|truncatewords:17}}</h1>
 		
 	<div id="track_panel_base" class="{% if bill.is_alive %}eight{% else %}twelve{% endif %} columns">
 		<div class="info" {% if not bill.is_alive %}style="width: auto;"{% endif %}>
@@ -54,15 +55,13 @@
 				{% endwith %}
 			{% endif %}
 		
-			<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}</p>
-			
-			{%comment%}{% if subtitle %}<p class="subtitle">{{subtitle}}</p>{% endif %}{% endcomment %}
+			{% comment %}
+			<p class="date"></p>
+			{% if subtitle %}<p class="subtitle">{{subtitle}}</p>{% endif %}{% endcomment %}
 			
 			<dl>
-				{% if not bill.is_alive %}
 				<dt>Introduced:</dt>
-				<dd>{{bill.introduced_date}}</dd>
-				{% endif %}
+				<dd>{{bill.introduced_date}} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
 			
 				<dt>Sponsor:</dt>
 				{% if bill.sponsor %}
@@ -217,8 +216,8 @@
 
 <div class="panes">
 	<div id="overview"> <!-- overview pane -->
-		
-		<div class="six columns" style="padding: 0">
+		<div class="row">
+		<div class="six columns">
 			<div class="metadata-table">
 			  <div class="holder">
 			  <div class="frame">
@@ -388,7 +387,7 @@
 						<dd>
 							{% for c in bill.committees.all %}
 								{% if not c.committee %}
-									<p style="margin: 0"><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on"}}</a></p>
+									<p style="margin: 0"><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on the "|cut:"Committee on "}}</a></p>
 									{% for s in bill.committees.all %}
 										{% if s.committee == c %}
 											<p style="margin-left: 2em"><a href="{{s.get_absolute_url}}">{{s}}</a></p>
@@ -493,6 +492,7 @@
 			   </div><!-- /holder -->
 			</div><!-- /metadata-table -->
 		</div><!-- /six columns last -->
+		</div> <!-- row -->
 	</div>  <!-- /overview pane -->
 	
 	<div id="summary"> <!-- summary pane -->

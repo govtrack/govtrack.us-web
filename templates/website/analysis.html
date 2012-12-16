@@ -1,5 +1,6 @@
 {% extends "master.html" %}
 {% load cache humanize %}
+{% load govtrack_utils %}
 
 {% block title %}GovTrack.us Analysis Methodology{% endblock %}
 
@@ -208,7 +209,7 @@ def onenorm(u): return sum(abs(u))</pre>
 			
 			<h3>Overview</h3>
 			
-			<p>The data that goes into this analysis are factors that we compute for bills, such as whether the sponsor is a committee chair (see right for a full list). We &ldquo;train&rdquo; the model on bills from the {{prognosis_training_congress|ordinal}} Congress ({{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}}) using the factors and whether a) the bill made it out of committee and b) was enacted, and we use that to compute probabilities for bills in the current Congress.</p>
+			<p>The data that goes into this analysis are factors that we compute for bills, such as whether the sponsor is a committee chair (see right for a full list). We &ldquo;train&rdquo; the model on bills from the {{prognosis_training_congress|ordinalhtml}} Congress ({{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}}) using the factors and whether a) the bill made it out of committee and b) was enacted, and we use that to compute probabilities for bills in the current Congress.</p>
 			
 			<p>We first began publishing leadership scores in 2012. As far as we know, we were the first to apply this analysis to Congressional bills.</p>
 			
@@ -216,7 +217,7 @@ def onenorm(u): return sum(abs(u))</pre>
 			
 			<p>This analysis is based on a logistic regression. Logistic regression is similar to simple linear regression but it is more appropriate when modeling probabilities.</p>
 			
-			<p>The model is trained on bills from the {{prognosis_training_congress|ordinal}} Congress ({{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}}). The explanatory variables are the binary factors mentioned above and listed at right. We create sixteen separate models. For each chamber (House and Senate), and for each of the four types of bills and resolutions in that chamber, we compute one model that predicts whether a bill will get out of committee and a separate model that computes, for bills out of committee, whether the bill will be enacted (or for resolutions, agreed to).</p>
+			<p>The model is trained on bills from the {{prognosis_training_congress|ordinalhtml}} Congress ({{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}}). The explanatory variables are the binary factors mentioned above and listed at right. We create sixteen separate models. For each chamber (House and Senate), and for each of the four types of bills and resolutions in that chamber, we compute one model that predicts whether a bill will get out of committee and a separate model that computes, for bills out of committee, whether the bill will be enacted (or for resolutions, agreed to).</p>
 			
 			<p>In choosing factors for each of the sixteen models, we select from a large set of plausible factors those which appear to be statistically significant comparing the mean success rate overall to those bill that have that factor, using a binomial distribution. Because of interactions between factors, not all factors that pass that test are truly significant but they remain interesting.</p>
 			

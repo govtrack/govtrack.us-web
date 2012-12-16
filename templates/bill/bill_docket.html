@@ -1,5 +1,5 @@
 {% extends "master.html" %}
-{% load humanize %}
+{% load humanize govtrack_utils %}
 
 {% block title %}Bills and Resolutions -- GovTrack.us{% endblock %}
 
@@ -184,7 +184,7 @@ $(function() {
 		{% for cong in counts_by_congress %}
 			<tr>
 				<td style="padding: 0 1em 1em 0">
-					<b>{{cong.congress|ordinal}}</b>
+					<b>{{cong.congress|ordinalhtml}}</b>
 					<div style="font-size: 90%; color: #777"><nobr>{{cong.dates.0|date}}</nobr><br/> <nobr>-{{cong.dates.1|date}}</nobr></div>
 				</td>
 				{% for c in cong.counts %}

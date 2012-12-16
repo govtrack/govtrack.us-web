@@ -1,5 +1,5 @@
 {% extends 'master_a.html' %}
-{% load humanize %}
+{% load humanize govtrack_utils %}
 
 {% block title %}{{ vote.question }} -- GovTrack.us{% endblock %}
 {% block meta_description %}{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}, in the United States Congress.{% endblock %}
@@ -128,7 +128,7 @@ $(function() {
     <dt>Number:</dt>
     <dd>{{ vote.get_chamber_display }} Vote #{{ vote.number }} [primary source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>]</dd>
     <dt>Date:</dt>
-    <dd>{{ vote.created|date:"DATE_FORMAT" }} ({{ vote.congress|ordinal }} Congress)</dd>
+    <dd>{{ vote.created|date:"DATE_FORMAT" }} ({{ vote.congress|ordinalhtml }} Congress)</dd>
     <dt>Result:</dt>
     <dd>{{ vote.result }}</dd>
     {% if vote.related_bill %}
@@ -329,7 +329,7 @@ $(function() {
                 </td>
                 <td>
                     {% if voter.voter_type_is_member %}
-                        {{ voter.person.role.state }}{% if voter.person.role.district %} {{ voter.person.role.district|ordinal|rjust:5 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
+                        {{ voter.person.role.state }}{% if voter.person.role.district %} {{ voter.person.role.district|ordinalhtml|rjust:15 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
                     {% else %}
                      -
                     {% endif %}

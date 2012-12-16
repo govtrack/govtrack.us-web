@@ -233,6 +233,12 @@ code {
     font-family: 'Droid Sans Mono', Monaco, "Courier New", Courier, monospace;
 }
 
+sup {
+	vertical-align: super;
+	font-size: 75%;
+	font-style: italic;
+}
+
 /* General classes ============================== */
 /* ============================================== */
 .left {
@@ -2174,6 +2180,10 @@ a.button.prefix, a.button.postfix {
         background: url(../images/divider-4.gif) repeat-x 0 100%;
         padding: 0 0 .5em;
         margin: 0 0 .5em;
+    	}
+    	.summary-box h1 sup {
+    		vertical-align: super;
+    		font-size: 65%;
     	}
     .summary-box .info {
         background: url(../images/divider-4.gif) repeat-x 0 100%;
