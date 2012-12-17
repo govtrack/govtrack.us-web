@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 from django.contrib.humanize.templatetags.humanize import ordinal
+from django.template import Context
 
 from smartsearch.manager import SearchManager
 
@@ -44,25 +45,20 @@ def sort_filter(qs, form):
         qs = qs.order_by('roles__state', 'roles__district', 'roles__startdate', 'lastname', 'firstname')
     return qs
 
-def cell_content(obj, form):
-    return obj.name_no_details_lastfirst()
-
-def left_content(obj, form):
-    if not os.path.exists("data/photos/%d.jpeg" % obj.id): return mark_safe("<div style=\"border: 1px solid black; width: 50px; height: 60px;\"/>")
-    return mark_safe("<img src=\"/data/photos/%d-50px.jpeg\" width=\"50\" height=\"60\"/>" % obj.id)
-        
-def bottom_content(obj, form):
+def template_get_context(obj, form):
+    c = Context({ "object": obj, "form": form })
     try:
         if "roles__year" in form:
-            return obj.get_role_at_year(int(form["roles__year"])).get_description()
+            c["description"] = obj.get_role_at_year(int(form["roles__year"])).get_description()
         elif form.get("roles__current", "__ALL__") == "true":
-            return obj.get_current_role().get_description()
+            c["description"] = obj.get_current_role().get_description()
         else:
             role = obj.get_most_recent_role()
             a, b = role.logical_dates()
-            return role.get_description() + ", %d-%d" % (a.year, b.year)
+            c["description"] = role.get_description() + ", %d-%d" % (a.year, b.year)
     except Exception as e:
-        return ""
+        pass
+    return c
 
 def person_search_manager():
     sm = SearchManager(Person, connection="person")
@@ -87,9 +83,18 @@ def person_search_manager():
     # sm.add_option('gender')
     # sm.add_option('sort', label='sort by', choices=[('name', 'name'), ('district', 'state/district, then year')], filter=sort_filter, type="radio", required=True)
     
-    sm.add_column("Name", cell_content)
-    sm.add_bottom_column(bottom_content)
-    sm.add_left_column("", left_content)
+    sm.set_template("""
+    	<div style="float: left; margin-right: 1.5em">
+			{% if object.has_photo %}
+				<img src="{{object.get_photo_url_50}}" width="50" height="60"/>
+			{% else %}
+				<div style="border: 1px solid black; width: 50px; height: 60px;"/>
+			{% endif %}
+		</div>
+    	<a href="{{object.get_absolute_url}}" style="margin-top: 4px">{{object.name_no_details_lastfirst}}</a>
+    	<div>{{description}}</div>
+	""")
+    sm.set_template_context_func(template_get_context)
 
     return sm
     

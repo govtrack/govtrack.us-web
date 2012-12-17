@@ -2336,6 +2336,7 @@ a.button.prefix, a.button.postfix {
     .member .heading-box #cat-icon,
     .search.member .heading-box #cat-icon {
     	background: url(../images/img-congress-members.png) right center no-repeat;
+    	min-height: 130px;
     	}
     .committees .heading-box #cat-icon,
     .search.committees .heading-box #cat-icon {
@@ -3212,7 +3213,7 @@ aside .download-links { padding: 31px 0 0 	}
                 display: inline-block;
                 background: transparent;
                 border: 0;
-                width: auto;
+                width: 120px;
                 color: rgb(230, 105, 55);
                 font-size: 95%;
             }
@@ -3612,39 +3613,29 @@ form.custom .custom.disabled { background-color: #ddd; }
           font-family: PTSerifBold;
           color: #444;      
         }
-    .searching .results {
-        font-size: 15px;
-        line-height: 18px;
-        margin: 0 0 42px;
-      }
-        .searching .results p { margin: 0 0 5px   }
-        .searching .results ul { margin: 0 0 0 5px  }
-        .searching .results li {
-            border-bottom: 1px solid #dae2df;
-            padding: 15px 10px 17px 18px;
-          }
-    .searching .results .rowbottom {
-      font-size: 95%;
-          }
-    .searching .details {
-        font-size: 12px;
-        line-height: 18px;
-      }
-        .searching .details dl {
-            display: inline;
-            padding: 0 30px 0 0;
-          }
-        .searching .details dt {
-            color: #878787;
-            display: inline;
-            font-family: PTSerifItalic, serif;
-          }
-        .searching .details dd {
-            display: inline;
-            color: #444;
-          }
-   
-
+    .searching #loading_status { text-align: center; border: 1px solid #AAA; background-color: #EEE; }
+    .searching  #show_more { text-align: center; border: 1px solid #CB4B16; background-color: #ffcebb; font-weight: bold; display: block; }
+	.searching .results {
+		margin-bottom: 15px;
+	}
+  .searching .results .result_item {
+  	  padding: .5em 0;
+  }
+	  .searching .results .result_item:after {
+		content: '';
+		display: block;
+		clear: both;
+	  }
+	  .searching .results .result_item > a {
+	  	display: block;
+		font: normal normal normal 1.2em/1.5em PTSerifBold, 'Pallatino Linotype', Georgia, 'Times New Roman', serif;
+		line-height: 130%;
+	  }
+	  	.searching .results .result_item > a:hover {
+	  		border: none;
+	  		text-decoration: underline;
+	  	}
+	  
 
 /* Main Form styles =========================== */
 /* ============================================ */
@@ -3666,7 +3657,7 @@ form.custom .custom.disabled { background-color: #ddd; }
             margin: 0;
             float: left;
             }
-    .search-form .btn-search {
+    .search-form .btn-search, .btn-search-small2 {
         background: url(../images/btn-search.gif) no-repeat;
         width: 25px;
         height: 25px;
@@ -3755,7 +3746,7 @@ select, input.text {
 .advanced-search select {
     width: 120px;
     height: 30px;
-    background: #fff url('../images/select_field.png') right top no-repeat;
+    background: #fff /*url('../images/select_field.png') right top no-repeat*/;
     }
 .advanced-search input.text {
     /*width: 260px;*/
@@ -3763,6 +3754,9 @@ select, input.text {
     }
     .advanced-search input.text.with_search_button {
     	width: 180px;
+    	height: 24px;
+    	float: left;
+    	margin-right: 2px;
     }
     #search-members ul input.text {
         width: 102px;

@@ -101,12 +101,14 @@ def bill_search_manager():
     sm.add_sort("Introduced Date (Oldest First)", "introduced_date")
     sm.add_sort("Last Major Action (Recent First)", "-current_status_date")
 
-    def safe_strftime(date, format):
-        return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
+    #def safe_strftime(date, format):
+    #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
     
-    sm.add_bottom_column(lambda bill, form :
-            "Sponsor: " + unicode(bill.sponsor) + "\n" +
-            "Introduced: " + safe_strftime(bill.introduced_date, "%b %d, %Y") + "\n" +
-            ((bill.get_current_status_display() + ": " + safe_strftime(bill.current_status_date, "%b %d, %Y")) if bill.current_status != BillStatus.introduced else ""))
+    sm.set_template("""
+    	<a href="{{object.get_absolute_url}}" style="font-size: 15px">{{object|truncatewords_html:50}}</a>
+    	<div>Sponsor: {{object.sponsor}}</div>
+    	<div>Introduced: {{object.introduced_date}}</div>
+    	<div>{{object.get_current_status_display}}: {{object.current_status_date}}</div>
+	""")
     
     return sm
