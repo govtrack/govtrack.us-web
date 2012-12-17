@@ -66,22 +66,43 @@
 	
 	<p>NOTE: The new Members of Congress just elected take office in early January. You won&rsquo;t see any changes due to the elections on GovTrack until then.</p>
 	
+	<div style="padding: 1em 2em">
+	<div class="row">
+		<div class="six columns">
+			<a href="/congress/members/map" class="green-btn">View District Maps</a>
+		</div>
+		<div class="six columns last">
+			<a href="/congress/members/current#most_recent_role_type=senator" class="green-btn">List Senators</a>
+		</div>
+	</div>
+	<div class="row" style="margin-top: .5em">
+		<div class="six columns">
+			<form action="#" onsubmit="return doform();">
+				<label for="address">Enter your address:</label>
+				<input id="address" class="text" type="text" value="" style="width: 210px; height: 26px; float: left;"/>
+				<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
+				<input class="btn-search-small2" type="submit" value="Search"  />
+			</form>
+		</div>
+		<div class="six columns last">
+			<label for="state">Or select a state:</label>
+			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value">
+				<option value="">(Select State)</option>
+				{% for abbr, name in statelist %}
+				<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
+				{% endfor %}								
+			</select>
+		</div>
+	</div>
+	</div>
+	
+	<hr style="margin: 1em 1em 2em 1em"/>
+	
 	<h2>The Senate</h2>
 	
 	<p>The 50 states elect 2 senators each for staggered 6-year terms. A senator represents between 1 and 37 million people, depending on their state&rsquo;s population.</p>
 	
 	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of senators by party:</p>
-		
-	<div style="float: right; width: 260px; margin-top: 1em;">
-		<label for="state">Find Senators by State:</label>
-		<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value">
-			<option value="">(Select State)</option>
-			{% for abbr, name in statelist %}
-			<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
-			{% endfor %}								
-		</select>
-		<p style="margin-top: .5em">Show a <a href="/congress/members/current#most_recent_role_type=senator">list of current senators</a>.</p>
-	</div>
 	
 	<table style="width: 15em">
 	{% for p in senate_by_party %}
@@ -93,20 +114,9 @@
 	
 	<h2 style="margin-top: 1em">The House of Representatives</h2>
 	
-	<p>The country is also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative (aka congressperson) to the House for a 2-year term. Here is a count of representatives by party:</p>
+	<p>The country is also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative (aka congressperson) to the House for a 2-year term.</p>
 
 	<p>As in the Senate, the day-to-day activities of the House are controlled by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of congresspeople by party:</p>
-	
-	<div style="float: right; width: 260px; margin-top: 0;" class="search-form">
-		<form action="#" onsubmit="return doform();">
-			<label for="address">Find Your Representative by Address:</label>
-			<input id="address" class="text" type="text" value="" style="width: 210px;"/>
-			<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
-			<input class="btn-search" type="submit" value="Search"  />
-		</form>
-		<p style="clear: both; margin-top: .5em; margin-bottom: .25em;">View <a href="/congress/members/map">districts on a map</a>.</p>
-		<p>Show a <a href="/congress/members/current#most_recent_role_type=representative">list of current representatives</a>.</p>
-	</div>
 	
 	<table style="width: 15em">
 	{% for p in house_by_party %}
