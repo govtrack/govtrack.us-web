@@ -11,12 +11,15 @@ from common.pagination import paginate
 
 from cache_utils.decorators import cached
 
+from twostream.decorators import anonymous_view
+
 from events.models import Feed
 import us
 
 import re
 from datetime import datetime, timedelta
 
+@anonymous_view
 @render_to('website/index.html')
 def index(request):
     twitter_feed = cache.get("our_twitter_feed")
@@ -53,7 +56,8 @@ def index(request):
         'tweets': twitter_feed,
         'blog': blog_feed,
         }
-          
+	  
+@anonymous_view
 def staticpage(request, pagename):
     if pagename == "developers": pagename = "developers/index"
     

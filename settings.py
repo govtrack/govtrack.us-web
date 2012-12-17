@@ -112,6 +112,7 @@ INSTALLED_APPS = (
     'tastypie',
     
     # project modules
+    'twostream',
     'person',
     'committee',
     'website',

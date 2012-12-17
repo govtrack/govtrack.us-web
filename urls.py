@@ -42,6 +42,8 @@ urlpatterns = patterns('',
     url(r'', include('events.urls')),
     url(r'^market/', include('predictionmarket.urls')),
     url(r'^states(/|$)', include('states.urls')),
+    
+    url(r'^_twostream', include('twostream.urls')),
 
     # django-registration-pv
     (r'^emailverif/', include('emailverification.urls')),
