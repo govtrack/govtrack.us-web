@@ -15,7 +15,6 @@
 
 		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css">
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen"/><![endif]-->
-		<!--<meta name="viewport" content="width=1000">-->
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
@@ -24,7 +23,7 @@
 		
 		{% block extra_css %}{% endblock %}
 		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/modernize.js" ></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/modernizr.js"> </script> {% comment %}html5shiv{% endcomment %}
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		{% if not request.anonymous %}
 			<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->

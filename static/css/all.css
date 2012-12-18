@@ -262,16 +262,7 @@ sup {
 .highlight {
   background: #ffff99;
 }
-#googlemap img, object, embed {
-  max-width: none;
-}
-#map_canvas embed {
-  max-width: none;
-}
-#map_canvas img {
-  max-width: none;
-}
-#map_canvas object {
+.lt-ie9 img, object, embed {
   max-width: none;
 }
 .last { 
