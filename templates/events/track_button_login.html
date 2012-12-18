@@ -4,22 +4,23 @@
 	{% endwith %}
 </div>
 
-<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">Or register a new account:</p>
+<!--<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">Or register a new account:</p>-->
 
 <a href="/registration/signup?next={{request.path|add:return_hash|urlencode}}" class="btn done">Sign Up</a>
 
 <h3 style="margin-top: 1.5em">Returning User Login</h3>
 
 <div>
-	<form method="post" class="login" action="/accounts/login">
+	<form method="post" class="login" action="/accounts/login" style="margin: 0">
 	{% csrf_token %}
 	<input type="hidden" name="next" value="{{request.path}}{{return_hash}}" />
-	<input id="id_email" type="text" name="email" maxlength="60" placeholder="email address"/><br /> 
-	<input type="password" name="password" id="id_password"  placeholder="govtrack password" /> 
-	<p style="margin-top: 5px"><input class="submit" type="submit" value="Login" /></p>
+	
+	<label for="id_email" style="width: auto">Email Address:</label>
+	<input id="id_email" type="text" name="email" maxlength="60" placeholder="you@yourcompany.com" style="margin: 0"/><br />
+	
+	<label for="id_password" style="width: auto">GovTrack Password: (<a class="forgot" href="{% url registration.views.resetpassword %}">Forgot password?</a>)</label>
+	<input type="password" name="password" id="id_password" /> 
+	<div style="margin-top: 5px"><input class="submit btn done" type="submit" value="Login" /></div>
 	</form>
 </div>
 
-<p style="clear: both; margin-top: 15px; font-size: 90%;">
-	<a class="forgot" href="{% url registration.views.resetpassword %}">Forgot password?</a>
-</p>
