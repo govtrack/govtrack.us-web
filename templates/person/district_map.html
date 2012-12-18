@@ -11,34 +11,62 @@
 	<script type="text/javascript">
 		var current_layer = null;
 		var first_time_on_redistricting = true;
-		
-		var tileimgformat = 'png';
-		if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
-		
-		function createDistrictsOverlay(redistricting) {
+		function showOverlay(redistricting) {
 			current_layer = (!redistricting ? "2010-cd" : "cd-2012");
 			{% if state and district %}current_layer += "/{{state|lower}}-{{district|stringformat:"02d"}}";
 			{% endif %}
-		    
+			createDistrictsOverlay(current_layer);
+		}
+		
+		/**************************************/
+		var tilesizeshift = 1; // 0=256, 1=use 512px tiles instead of 256
+		
+		// Use PNG or GIF tiles? IE8 and earlier don't support transparent PNGs properly,
+		// so use opaque GIF tiles but set the transparency on the map layer appropriately.
+		var tileimgformat = 'png';
+		if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
+		
+		function createDistrictsOverlay(layer) {
+			var tileimgsize = 256 << tilesizeshift;
+		
+			// Apply the map layer.
 			var overlay = new google.maps.ImageMapType({
 			  getTileUrl: function(coord, zoom) {
-				  return "http://gis.govtrack.us/map/tiles/" + current_layer + "/" + (zoom-1) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=512";
+				  return "http://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
 			  },
-			  tileSize: new google.maps.Size(512, 512),
+			  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
 			  isPng: tileimgformat == "png",
 			  minZoom: 3,
 			  maxZoom: 28,
-			  opacity: tileimgformat == "png" ? .85 : .25
+			  opacity: tileimgformat == "png" ? .85 : .65
 			});
 			
 			map.overlayMapTypes.clear();
 			map.overlayMapTypes.insertAt(0, overlay);
+			
+			// For IE8 and earlier, the layer above only applies outlines and labels --- at high opacity.
+			// Apply a second layer for the boundary fill color --- at low opacity.
+			if (tileimgformat != "png") {
+				var overlay2 = new google.maps.ImageMapType({
+				  getTileUrl: function(coord, zoom) {
+					  return "http://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=fill");
+				  },
+				  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
+				  isPng: false,
+				  minZoom: 3,
+				  maxZoom: 28,
+				  opacity: .15
+				});
+				
+				map.overlayMapTypes.insertAt(0, overlay2);
+			}
 		}
+		/**************************************/
 		
 		var map;
 		
 		$(function() {
-			//$('#cat-icon').hide();
+			// Pretty general Google Maps API v3 map options.
 			var myOptions = {
 				zoom: {{center_zoom}},
 				center: new google.maps.LatLng({{center_lat}}, {{center_long}}),
@@ -94,7 +122,7 @@
 			
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
 			
-			createDistrictsOverlay(false);
+			showOverlay(false);
 
 			{% if request.GET.marker %}
 				lnglat = "{{request.GET.marker}}".split(":");
@@ -139,7 +167,7 @@
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#map_controls')[0]);
 			
 			$('#ctrl_layer_2010, #ctrl_layer_2012').click(function() {
-					createDistrictsOverlay(this.id == "ctrl_layer_2012");
+					showOverlay(this.id == "ctrl_layer_2012");
 					$('#ctrl_layer_2010, #ctrl_layer_2012').removeClass("active");
 					$(this).addClass("active");
 					if (this.id == "ctrl_layer_2012") {
