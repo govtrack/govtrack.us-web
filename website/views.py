@@ -11,12 +11,15 @@ from common.pagination import paginate
 
 from cache_utils.decorators import cached
 
+from twostream.decorators import anonymous_view
+
 from events.models import Feed
 import us
 
 import re
 from datetime import datetime, timedelta
 
+@anonymous_view
 @render_to('website/index.html')
 def index(request):
     twitter_feed = cache.get("our_twitter_feed")
@@ -53,7 +56,8 @@ def index(request):
         'tweets': twitter_feed,
         'blog': blog_feed,
         }
-          
+	  
+@anonymous_view
 def staticpage(request, pagename):
     if pagename == "developers": pagename = "developers/index"
     
@@ -325,5 +329,57 @@ def congress_live(request):
 
     return {
         "housecommittees": get_loc_streams,
+    }
+    
+@render_to('website/analysis.html')
+def analysis_methodology(request):
+    from settings import CURRENT_CONGRESS
+    from person.models import RoleType
+    from person.analysis import load_sponsorship_analysis2
+    import bill.prognosis_model
+    from bill.models import BillType
+    from us import get_congress_dates
+    import json
+    
+    def make_chart_series(role_type):
+        data = load_sponsorship_analysis2(CURRENT_CONGRESS, role_type, None)
+        if not data: return None
+        
+        ret = { }
+        for p in data["all"]:
+            ret.setdefault(p["party"], {
+                "type": "party",
+                "party": p["party"],
+                "data": [],
+            })["data"].append({
+                "x": float(p["ideology"]),
+                "y": float(p["leadership"]),
+                "name": p["name"],
+            })
+        ret = list(ret.values())
+        ret.sort(key = lambda s : len(s["data"]), reverse=True)
+        
+        data = dict(data) # clone before modifying, just in case
+        data["series"] = json.dumps(ret)
+        
+        return data
+        
+    prognosis_factors = list((k, dict(v)) for k, v in bill.prognosis_model.factors.items()) # clone
+    for k, v in prognosis_factors:
+        v["bill_type"] = BillType.by_value(k[0])
+        v["is_introduced_model"] = k[1]
+        v["factors"] = sorted(v["factors"].values(), key = lambda f : f["regression_beta"], reverse=True)
+    prognosis_factors = [kv[1] for kv in prognosis_factors]
+    prognosis_factors.sort(key = lambda m : m["count"], reverse=True)
+    
+    return {
+        "ideology": lambda : { # defer until cache miss
+            "house": make_chart_series(RoleType.representative), 
+            "senate": make_chart_series(RoleType.senator),
+        },
+        "current_congress": CURRENT_CONGRESS,
+        "prognosis_training_congress": bill.prognosis_model.congress,
+        "prognosis_training_congress_dates": get_congress_dates(bill.prognosis_model.congress),
+        "prognosis_factors": prognosis_factors,
     }
     

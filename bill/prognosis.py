@@ -97,27 +97,27 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	idate = bill.introduced_date
 	if hasattr(idate, 'date'): idate = idate.date() # not sure how this is possible
 	if (idate - get_congress_dates(bill.congress)[0].date()).days < 90:
-		factors.append(("introduced_first90days", "The %s was introduced in the first 90 days of the Congress." % bill.noun))
+		factors.append(("introduced_first90days", "The %s was introduced in the first 90 days of the Congress." % bill.noun, "Introduced in the first 90 days of the Congress (incl. companion bills)."))
 	if (idate - get_congress_dates(bill.congress)[0].date()).days < 365:
-		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Congress." % bill.noun))
+		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Congress." % bill.noun, "Introduced in the first year of the Congress (incl. companion bills)."))
 	if (get_congress_dates(bill.congress)[1].date() - idate).days < 90:
-		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Congress." % bill.noun))
+		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Congress." % bill.noun, "Introduced in the last 90 days of the Congress (incl. companion bills)."))
 	
 	# does the bill's title start with a common prefix?
 	for prefix in pop_title_prefixes:
 		if bill.title_no_number.startswith(prefix + " "):
-			factors.append(("startswith:" + prefix, "The %s's title starts with \"%s.\"" % (bill.noun, prefix)))
+			factors.append(("startswith:" + prefix, "The %s's title starts with \"%s.\"" % (bill.noun, prefix), "Title starts with \"%s\"." % prefix))
 	
 	cosponsors = list(Cosponsor.objects.filter(bill=bill, withdrawn=None).select_related("person"))
 	committees = list(bill.committees.all())
 	
 	maj_party = majority_party[bill.bill_type]
 	
-	if bill.sponsor:
+	if bill.sponsor_role:
 		# party of the sponsor
-		sponsor_party = bill.sponsor.get_role_at_date(bill.introduced_date).party
+		sponsor_party = bill.sponsor_role.party
 		if sponsor_party != maj_party:
-			factors.append( ("sponsor_minority", "The sponsor is a member of the minority party.") )
+			factors.append( ("sponsor_minority", "The sponsor is a member of the minority party.", "Sponsor is a member of the minority party.") )
 	
 		# is the sponsor a member/chair of a committee to which the bill has
 		# been referred?
@@ -125,17 +125,17 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 			for committee in committees:
 				if committee_membership.get(bill.sponsor_id, {}).get(committee.code) ==  rvalue:
 					if rvalue != CommitteeMemberRole.member:
-						factors.append(("sponsor_committee_%s" % rname, "The sponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun)))
+						factors.append(("sponsor_committee_%s" % rname, "The sponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun), "Sponsor is a relevant committee %s." % CommitteeMemberRole.by_value(rvalue).label.lower()))
 					elif sponsor_party == maj_party:
-						factors.append(("sponsor_committee_member_majority", "The sponsor is on a committee to which the %s has been referred, and the sponsor is a member of the majority party." % bill.noun))
+						factors.append(("sponsor_committee_member_majority", "The sponsor is on a committee to which the %s has been referred, and the sponsor is a member of the majority party." % bill.noun, "Sponsor is on a relevant committee & in majority party."))
 						
 		# leadership score of the sponsor, doesn't actually seem to be helpful,
 		# even though leadership score of cosponsors is.
 		if get_leadership_score(bill.sponsor) > .8:
 			if sponsor_party == maj_party:
-				factors.append(("sponsor_leader_majority", "The sponsor is in the majority party and has a high leadership score."))
+				factors.append(("sponsor_leader_majority", "The sponsor is in the majority party and has a high leadership score.", "Sponsor has a high leadership score (majority party)."))
 			else:
-				factors.append(("sponsor_leader_minority", "The sponsor has a high leadership score but is not in the majority party."))
+				factors.append(("sponsor_leader_minority", "The sponsor has a high leadership score but is not in the majority party.", "Sponsor has a high leadership score (minority party)."))
 					
 	# count cosponsor assignments to committees by committee role and Member party
 	for rname, rvalue in (("committeemember", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("vicechair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
@@ -153,9 +153,10 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 				num_cosp = "3-5"
 			else:
 				num_cosp = "6+"
-			factors.append( ("cosponsor_%s_%s" % (rname, num_cosp), "%s cosponsors serve on a committee to which the %s has been referred." % (num_cosp, bill.noun)) )
+			factors.append( ("cosponsor_%s_%s" % (rname, num_cosp), "%s cosponsors serve on a committee to which the %s has been referred." % (num_cosp, bill.noun), "%s cosponsors are on a relevant committee." % num_cosp) )
 		elif num_cosp > 0:
-			factors.append( ("cosponsor_%s" % rname, "A cosponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun)))
+			rname2 = CommitteeMemberRole.by_value(rvalue).label.lower()
+			factors.append( ("cosponsor_%s" % rname, "A cosponsor is the %s of a committee to which the %s has been referred." % (rname2, bill.noun), "A cosponsor is a relevant committee %s." % rname2))
 
 	# do we have cosponsors on both parties?
 	num_cosp_majority = 0
@@ -163,18 +164,18 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		if cosponsor.role.party == maj_party:
 			num_cosp_majority += 1
 	if bill.sponsor and sponsor_party == maj_party and len(cosponsors) >= 6 and num_cosp_majority < 2.0*len(cosponsors)/3:
-		factors.append(("cosponsors_bipartisan", "The sponsor is in the majority party and at least one third of the %s's cosponsors are from the minority party." % bill.noun))
+		factors.append(("cosponsors_bipartisan", "The sponsor is in the majority party and at least one third of the %s's cosponsors are from the minority party." % bill.noun, "Sponsor is in majority party and 1/3rd+ of cosponsors are in minority party."))
 	elif num_cosp_majority > 0 and num_cosp_majority < len(cosponsors):
-		factors.append(("cosponsors_crosspartisan", "There is at least one cosponsor from the majority party and one cosponsor outside of the majority party."))
+		factors.append(("cosponsors_crosspartisan", "There is at least one cosponsor from the majority party and one cosponsor outside of the majority party.", "Has cosponsors from both parties."))
 
 	for is_majority in (False, True):
 		for cosponsor in cosponsors:
 			if (cosponsor.role.party == maj_party) != is_majority: continue
 			if get_leadership_score(cosponsor.person) > .85:
 				if is_majority:
-					factors.append(("cosponsor_leader_majority", "A cosponsor in the majority party has a high leadership score."))
+					factors.append(("cosponsor_leader_majority", "A cosponsor in the majority party has a high leadership score.", "Cosponsor has high leadership score (majority party)."))
 				else:
-					factors.append(("cosponsor_leader_minority", "A cosponsor in the minority party has a high leadership score."))
+					factors.append(("cosponsor_leader_minority", "A cosponsor in the minority party has a high leadership score.", "Cosponsor has high leadership score (minority party)."))
 				break
 
 	# Is this bill a re-intro from last Congress, and if so was that bill reported by committee?
@@ -185,18 +186,36 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		for reintro in Bill.objects.filter(congress=bill.congress-1, sponsor=bill.sponsor):
 			if normalize_title(bill.title_no_number) == normalize_title(reintro.title_no_number):
 				if reintro.current_status not in (BillStatus.introduced, BillStatus.referred):
-					factors.append(("reintroduced_of_reported", "This %s was reported by committee as %s in the previous session of Congress." % (bill.noun, reintro.display_number)))
+					factors.append(("reintroduced_of_reported", "This %s was reported by committee as %s in the previous session of Congress." % (bill.noun, reintro.display_number), "Got past committee in a previous Congress."))
 				else:
-					factors.append(("reintroduced", "This %s was a re-introduction of %s from the previous session of Congress." % (bill.noun, reintro.display_number)))
+					factors.append(("reintroduced", "This %s was a re-introduction of %s from the previous session of Congress." % (bill.noun, reintro.display_number), "Is a bill reintroduced from a previous Congress."))
 				break
 
 	if include_related_bills: # prevent infinite recursion
-		# Add factors from any CRS-identified identical bill, changing each factor's
+		# Add factors from any CRS-identified identical bill, changing most factors'
 		# key into companion_KEY so that they become separate factors to consider.
-		for rb in RelatedBill.objects.filter(bill=bill, relation="identical").select_related("related_bill"):
+		# For some specific factors, lump them in with the factor for the bill itself.
+		for rb in RelatedBill.objects.filter(bill=bill, relation="identical").select_related("related_bill", "related_bill__sponsor_role"):
+			# has a companion
+			factors.append(("companion", "The %s has been introduced in both chambers (the other is %s)." % (bill.noun, rb.related_bill.display_number), "Has a companion bill in the other chamber."))
+			
+			# companion sponsor's party
+			if bill.sponsor_role and rb.related_bill.sponsor_role:
+				if bill.sponsor_role.party != rb.related_bill.sponsor_role.party:
+					factors.append(("companion_bipartisan", "The %s's companion %s was sponsored by a member of the other party." % (bill.noun, rb.related_bill.display_number), "Has a companion bill sponsored by the other party."))
+			
 			for f in get_bill_factors(rb.related_bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data, include_related_bills=False):
 				if "startswith" in f[0]: continue # don't include title factors because the title is probs the same
-				f = ("companion_" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1])
+				if f[0] in ("introduced_first90days", "introduced_last90days", "introduced_firstyear", "reintroduced_of_reported", "reintroduced"):
+					f = (f[0], "%s (on companion bill %s)" % (f[1], rb.related_bill.display_number), f[2])
+				else:
+					f = ("companion__" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1], "On a companion bill: " + f[2])
+					
+				# Make sure not to duplicate any factors, especially if we are promoting the companion
+				# bill factor to a main factor, we don't want to double count or override the description
+				# on the main bill.
+				if f[0] in set(k[0] for k in factors): continue
+				
 				factors.append(f)
 
 	# Are lobbyists registering that they are lobbying on this bill? Does this bill
@@ -219,9 +238,9 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	# so it would be impossible to factor out "hard bills" entirely.
 	if False:
 		if lobbying_data["counts"].get( (bill.bill_type, bill.number), 0 ) > lobbying_data["median"]:
-			factors.append( ("crp-lobby-many", "The Center for Responsive Politics reports that a large number of organizations are lobbying on this %s." % bill.noun) )
+			factors.append( ("crp-lobby-many", "The Center for Responsive Politics reports that a large number of organizations are lobbying on this %s." % bill.noun, "Has many lobbyists.") )
 		elif lobbying_data["counts"].get( (bill.bill_type, bill.number), 0 ) > 0:
-			factors.append( ("crp-lobby", "The Center for Responsive Politics reports that organizations are lobbying on this %s." % bill.noun) )
+			factors.append( ("crp-lobby", "The Center for Responsive Politics reports that organizations are lobbying on this %s." % bill.noun, "Has lobbyists.") )
 
 	return factors
 
@@ -297,6 +316,7 @@ def build_model(congress):
 		sorted_bills = { }
 		regression_outcomes = [ ]
 		regression_predictors = [ ]
+		factor_descriptions = { }
 		for bill in bills:
 			#import random # speed this up?
 			#if random.random() < .7: continue
@@ -312,10 +332,11 @@ def build_model(congress):
 			factors = get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data)
 			
 			# maintain a simple list of success percent rates for each factor individually
-			for key, descr in factors:
+			for key, descr, general_descr in factors:
 				if not key in sorted_bills: sorted_bills[key] = [0, 0] # count of total, successful
 				sorted_bills[key][0] += 1
 				if success: sorted_bills[key][1] += 1
+				factor_descriptions[key] = general_descr
 				
 			# build data for a regression
 			regression_outcomes.append(1.0 if success else 0.0)
@@ -375,6 +396,7 @@ def build_model(congress):
 			model_factors[key]["count"] = bill_counts[0]
 			model_factors[key]["success_rate"] = 100.0*bill_counts[1]/bill_counts[0]
 			model_factors[key]["regression_beta"] = regression_beta[regression_predictors_map[key]+1]
+			model_factors[key]["description"] = factor_descriptions[key]
 			
 	with open("bill/prognosis_model.py", "w") as modelfile:
 		modelfile.write("# this file was automatically generated by prognosis.py\n")
@@ -446,10 +468,10 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 		"prediction": (prediction_1 * prediction_2 / 100.0) if is_introduced else prediction_2,
 		"success_name": model_2["success_name"],
 		
-		"factors_help_help": [descr for key, descr in factors if helps(key, True, True)],
-		"factors_hurt_hurt": [descr for key, descr in factors if helps(key, False, False)],
-		"factors_help_hurt": [descr for key, descr in factors if helps(key, True, False)],
-		"factors_hurt_help": [descr for key, descr in factors if helps(key, False, True)],
+		"factors_help_help": [descr for key, descr, gen_descr in factors if helps(key, True, True)],
+		"factors_hurt_hurt": [descr for key, descr, gen_descr in factors if helps(key, False, False)],
+		"factors_help_hurt": [descr for key, descr, gen_descr in factors if helps(key, True, False)],
+		"factors_hurt_help": [descr for key, descr, gen_descr in factors if helps(key, False, True)],
 	}
 
 def compute_prognosis(bill, proscore=False):

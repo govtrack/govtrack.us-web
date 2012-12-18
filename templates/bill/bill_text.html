@@ -1,5 +1,5 @@
 {% extends 'master.html' %}
-{% load humanize %}
+{% load humanize govtrack_utils %}
 
 {% block body_class %}bills{% endblock %}
 
@@ -237,7 +237,7 @@ $(function() {
 	{% endif %}
 
 	<div class="info">
-		<p class="date">{{bill.congress|ordinal}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}. Text as of {{textdata.docdate}} ({{textdata.doc_version_name}}).</p>
+		<p class="date">{{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}. Text as of {{textdata.docdate}} ({{textdata.doc_version_name}}).</p>
 		
 		<p><a href="{{bill.get_absolute_url}}">Status &amp; Summary</a>
 		| <a href="{{textdata.gpo_pdf_url}}">PDF</a>

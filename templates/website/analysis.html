@@ -1,0 +1,272 @@
+{% extends "master.html" %}
+{% load cache humanize %}
+{% load govtrack_utils %}
+
+{% block title %}GovTrack.us Analysis Methodology{% endblock %}
+
+{% block crumbs %}
+<ul><li><a href="/about">About GovTrack</a></li><li>Analysis</li></ul>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/highcharts.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/charts.js"></script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+h3 { margin: 1em 0; }
+</style>
+{% endblock %}
+
+{% block summary %}
+	<h1>Analysis Methodology</h1>
+	<p>Statistical analyses of legislation and legislators provide context for the legislative process.
+	Of all of the 10,000+ bills pending at any given time, our unique analyses help GovTrack visitors know
+	what is relevant and what to pay attention to.</p>
+{% endblock %}
+
+{% block body %}
+
+<ul class="tabs four-up">
+	<li><a href="#overview">Overview</a></li>
+	<li><a href="#ideology">Ideology</a></li>
+	<li><a href="#leadership">Leadership</a></li>
+	<li><a href="#prognosis">Prognosis</a></li>
+</ul>
+
+<div class="panes">
+	<div id="overview" style="margin-top: 1em">
+		<div class="row">
+		<div class="six columns">
+			<h2>Ideology</h2>
+			<p>The <a href="#ideology">Ideology Analysis</a> compares the sponsorship and cosponsorship patterns of Members of Congress to put them on a scale roughly from liberal to conservative. <a href="#ideology">Read More &raquo;</a></p>
+		</div>
+	
+		<div class="six columns last">
+			<h2>Prognosis</h2>
+			<p>The <a href="#prognosis">Prognosis Analysis</a> looks at the factors that help or hurt a bill&rsquo;s chance of getting out of committee and being enacted. It is based on a regression model. <a href="#prognosis">Read More &raquo;</a></p>
+		</div>
+		</div>
+		<div class="row">
+		<div class="six columns">
+			<h2>Leadership</h2>
+			<p>The <a href="#leadership">Leadership Analysis</a> looks at who is cosponsoring whose bills to see who the legislative leaders are. It&rsquo;s a little like if you scratch my back will I scratch yours? The analysis is based on Google PageRank, the algorithm Google uses to order search results. <a href="#leadership">Read More &raquo;</a></p>
+		</div>
+		</div>
+	</div> <!-- /overview pane -->
+	
+	<div id="ideology">
+		<h2>Ideology Analysis of Members of Congress</h2>
+		
+		<div class="row">
+		<div class="six columns">
+			<p>The ideology analysis assigns a liberal&ndash;conservative score to each Member of Congress based on his or her pattern of cosponsorship.</p>
+			
+			<p>In a nutshell, Members of Congress who cosponsor similar sets of bills will get scores close together, while Members of Congress who sponsor different sets of bills will have scores far apart. Members of Congress with similar political views will tend to cosponsor the same set of bills, or bills by the same set of authors, and inversely Members of Congress with different political views will tend to cosponsor other congressmen’s bills.</p>
+			
+			<p>You can find this analysis on the pages for current Members of Congress.</p>
+			
+			<p>The charts to the right plot the ideology score on the horizontal axis and the <a href="#leadership">leadership</a> score on the vertical axis. Look at the extremes. It shows Reps. <a href="http://www.govtrack.us/congress/members/fortney_stark/400387">Pete Stark</a> and <a href="http://test.govtrack.us/congress/members/doug_lamborn/412191">Doug Lamborn</a> at the far edges of their parties. They’re both known for being extreme. In February 2010, The National Journal named Lamborn the most conservative member of the House. The Democrat closest to the Republican side is Rep. <a href="http://test.govtrack.us/congress/members/dan_boren/400645">Dan Boren</a>, from Oklahoma. According to Wikipedia, he serves on the board of directors of the NRA and he voted against Obamacare, so by these measures he is, indeed, pretty conservative for a Democrat.</p>
+			
+			<h3>Overview</h3>
+			
+			<p>The data that goes into this analysis is a list of who sponsored or cosponsored which bills. The process doesn’t look at the content of the bills or the party affiliation or anything else about the Members of Congress, but it is able to infer underlying behavioral patterns, some of which correspond to real-world concepts like left-right ideology.</p>
+			
+			<p>You’ll see in the charts on the right that the ideology analysis does a good job at separating the Democrats from the Republicans, and within each party the moderates from the extremes. If you wanted to know how your representatives stood in relation to their peers ideologically, this chart is a good place to start.</p>
+			
+			<p>We first began publishing this analysis in 2004, then calling it a political spectrum. A similar analysis by <a href="http://pooleandrosenthal.com/recentpolitics.htm">Professor Keith Poole</a> using voting records rather than cosponsorship produces similar results: see <a href="http://www.voteview.com">voteview.com</a>. (As far as we know, we were the first to apply this sort of analysis to cosponsorship behavior.)</p>
+			
+			<h3>Methodology</h3>
+			
+			<p>The statistical method behind this analysis is Principal Components Analysis, also known as dimensionality reduction. Principal Components Analysis is a statistical technique that reveals underlying patterns in data.</p>
+			
+			<p>Here&rsquo;s how it works: Form a matrix (a grid of numbers) with columns representing Members of Congress and rows also representing Members of Congress. Do this for the House and Senate separately. We include (co)sponsorship from the current and previous two Congresses, so between four and six years of data. For the Senate, you have a 100x100 table. In each cell of the table, put the number of times the senator for the row cosponsored a bill introduced by the senator for the column. Or if it's the same senator in the row and column, put in the number of bills he or she introduced. Then compute the singular value decomposition of the matrix (which is how Principal Components Analysis is often done).</p>
+			
+			<p>Every square matrix has a singular value decomposition. The magic is in how you interpret it. The singular value decomposition takes one matrix and gives you back three: called u, s, and v-transpose. V-transpose can be interpreted as a <i>set</i> of scores for each Member of Congress on a new set of dimensions. The dimensions are ranked in order by how much of the original data they explain. We have found that the <i>second</i> dimension best corresponds with ideology. We use the scores from that dimension in our charts.</p>
+			
+			<p>Each score is a number. It’s entirely arbitrary whether liberal or conservative is positive or negative &mdash; the original matrix is blind to actual information like that. In fact, there’s no guarantee that these numbers even have anything to do with liberal- and conversative-ness. All it tells us is how to separate Members of Congress into two groups, or more precisely how to spread them out along a spectrum in a way that explains their record of cosponsorship. But in practice it captures ideology very well.</p>
+			
+			<p>(In the original version of this analysis called the political spectrum, the rows were Members of Congress and the columns were bills. That is, form a matrix with a 1 in each cell where the Member of Congress corresponding to the row sponsored or cosponsored the bill corresponding to the column. The change was made only to reuse the source code with the leadership analysis, which needs a member-member matrix.)</p>
+	
+			<h3>Data</h3>
+			
+			<p>The ideology scores can be found in two CSV files sponsorshipanalysis_h.txt and sponsorshipanalysis_s.txt (House and Senate) over <a href="http://www.govtrack.us/data/us/{{current_congress}}/stats/">here</a>.</p>
+			
+			<h3>Source Code</h3>
+			
+			<p>Running this analysis is pretty simple in Python. It is literally two lines. Assuming you have the cosponsorship matrix in <tt>P</tt>:</p>
+			
+			<pre class="code">u, s, vT = numpy.linalg.svd(P)
+ideology = vT[1,:]</pre>
+	
+			<p>The full source code for this analysis can be found in our <a href="https://bitbucket.org/tauberer/govtrack/src">bitbucket</a> account under <tt>analysis/sponsorshipanalysis.py</tt>.</p>
+	
+			<h3>References</h3>
+			
+			<p>For more on how to use singular value decomposition, check out:</p>
+			
+			<p>Wall, Rechtsteiner, and Rocha. &ldquo;<a href="http://public.lanl.gov/mewall/kluwer2002.html">Singular value decomposition and principal component analysis</a>.&rdquo; in A Practical Approach to Microarray Data Analysis. D.P. Berrar, W. Dubitzky, M. Granzow, eds. pp. 91-109, Kluwer: Norwell, MA (2003). LANL LA-UR-02-4001.</p>
+		</div>
+		
+		<div class="six columns last">
+		<div id="sponsorship_analysis_chart_senate"> </div>
+		<div id="sponsorship_analysis_chart_house"> </div>
+		<script>
+		$(document).ready(function() {
+			{% cache 12000 analysis_methods_ideology %}
+			make_sponsorship_chart("sponsorship_analysis_chart_senate", 'Senate ({{ideology.senate.start_date|escapejs}} to {{ideology.senate.end_date|escapejs}})', {{ideology.senate.series|safe}}, false);
+			make_sponsorship_chart("sponsorship_analysis_chart_house", 'House ({{ideology.house.start_date|escapejs}} to {{ideology.house.end_date|escapejs}})', {{ideology.house.series|safe}}, false);
+			{% endcache %}
+		});
+		</script>
+		</div>
+		</div>
+	</div> <!-- /ideology pane -->
+	
+	<div id="leadership">
+		<h2>Leadership Analysis of Members of Congress</h2>
+		
+		<div class="row">
+		<div class="six columns">
+			<p>A leadership score is computed for each Member of Congress by looking at how often other Members of Congress cosponsor their bills &mdash; more or less. The analysis is based on PageRank, Google&rsquo;s algorithm for ranking pages on the web.</p>
+			
+			<p>The idea behind a leadership score is that if X cosponsors Y&rsquo;s bills but Y does not cosponsor X&rsquo;s bills, then X is a follower relative to Y being a leader. </p>
+			
+			<p>You can find this analysis on the pages for current Members of Congress.</p>
+			
+			<p>The charts to the right plot the leadership score on the vertical axis and the <a href="#ideology">ideology</a> score on the horizontal axis.</p>
+			
+			<p>There are some interesting things in this chart. There’s a distinct V-shape. Congressional leaders appear to be more extreme. There are some confounding effects to consider here. Leaders tend to be more senior members of Congress, they tend to be older, and they have had more time to participate in legislating. But somewhere among those factors there’s an interesting correlation to having an extreme political ideology.</p>
+			
+			<p>These leadership and ideology scores give us a view into Congress that is normally hidden to us. We can’t observe leadership. We’re not there, in Congress, to see it. We’re not in the meetings where you can see relationships form. But those relationships are known to the congressmen and senators. It’s obvious to them. They know whether they lead or follow. Their staff know. This is a sort of social knowledge that is locked within the institution of Congress, unless we get a little creative with how we try to observe it.</p>
+			
+		
+			<h3>Overview</h3>
+			
+			<p>The data that goes into this analysis is a list of who sponsored or cosponsored which bills. The process doesn’t look at the content of the bills or anything else about the Members of Congress, but it is able to infer underlying behavioral patterns, some of which correspond to real-world concepts like leadership.</p>
+			
+			<p>We first began publishing leadership scores in 2010. As far as we know, this analysis is unique to GovTrack.</p>
+			
+
+			<h3>Methodology</h3>
+			
+			<p>The inspiration for this analysis comes from Google’s PageRank algorithm, which governs how Google ranks the order of pages in its search results. Google’s method is widely known: the more links you get to your website from other websites, and the more links those other websites have, the higher your PageRank and the higher up in search results you appear.</p>
+			
+			<p>Here&rsquo;s how we apply it to Congress: the more Members of Congress that cosponsor Member X&rsquo;s bills, and the more cosponsors those other Members of Congress have, the higher X&rsquo;s leadership score.</p>
+			
+			<p>We start by forming a matrix (a grid of numbers) with cosponsorship data. It is the same matrix as in the <a href="#ideology">ideology analysis</a>, so see the methodology section there for details. Then we run the PageRank algorithm on the matrix, which yields a new number for each Member of Congress. That is the leadership score.</p>
+			
+			<p>This analysis came from a suggestion from <a href="http://www.linkedin.com/in/barillari">Joseph Barillari</a> (who GovTrack&rsquo;s creator knew in college). (The original formulation of the score for Member of Congress X was the mean across all other Members of Congress Y of the log of the number of bills sponsored by X and cosponsored by Y divided by the number of bills sponsored by Y and cosponsored by X.)</p>
+			
+			<h3>Data</h3>
+			
+			<p>The leadership scores can be found in two CSV files sponsorshipanalysis_h.txt and sponsorshipanalysis_s.txt (House and Senate) over <a href="http://www.govtrack.us/data/us/{{current_congress}}/stats/">here</a>.</p>
+	
+			<h3>Source Code</h3>
+			
+			<p>Here is pseudo-code in Python. Assuming you have the cosponsorship matrix in <tt>P</tt>:</p>
+			
+			<pre class="code">x = numpy.ones( (N, 1) ) / float(N)
+while True:
+    y = numpy.dot(P, x)
+    if onenorm(y-x) &lt; .00000000001: break
+    x = y
+def onenorm(u): return sum(abs(u))</pre>
+	
+			<p>The full source code for this analysis can be found in our <a href="https://bitbucket.org/tauberer/govtrack/src">bitbucket</a> account under <tt>analysis/sponsorshipanalysis.py</tt>.</p>
+	
+			<h3>References</h3>
+			
+			<p>Kamvar, Sep. 2010. Numerical algorithms for personalized search in self-organizing information networks. Princeton University Press.</p>
+		</div>
+		
+		<div class="six columns last">
+		<div id="sponsorship_analysis_chart_senate2"> </div>
+		<div id="sponsorship_analysis_chart_house2"> </div>
+		<script>
+		$(document).ready(function() {
+			{% cache 12000 analysis_methods_leadership %}
+			make_sponsorship_chart("sponsorship_analysis_chart_senate2", 'Senate ({{ideology.senate.start_date|escapejs}} to {{ideology.senate.end_date|escapejs}})', {{ideology.senate.series|safe}}, false);
+			make_sponsorship_chart("sponsorship_analysis_chart_house2", 'House ({{ideology.house.start_date|escapejs}} to {{ideology.house.end_date|escapejs}})', {{ideology.house.series|safe}}, false);
+			{% endcache %}
+		});
+		</script>
+		</div>
+		</div>
+	</div> <!-- /leadership pane -->
+	
+	<div id="prognosis">
+		<h2>Bill Prognosis Analysis</h2>
+		
+		<div class="row">
+		<div class="six columns">
+			<p>GovTrack computes a prognosis for each bill, which is the probability that the bill will be enacted. Our computation is based on factors that are correlated with successful or failed bills in the past, such as whether the sponsor is a committee chair.</p>
+			
+			<p>More than 10,000 bills will be considered by each Congress. About 4% will become law. Which ones should we focus on? Congressmen and senators know. Staff know. Lobbyists know. They have the institutional knowledge to recognize the needles from the haystack. We’re at an enormous disadvantage on the outside. We don’t know any of that. And as a result, we face a serious information overload.</p>
+			
+			<p>The prognosis scores can be found on the pages for bills throughout the site.</p>
+			
+			<h3>Overview</h3>
+			
+			<p>The data that goes into this analysis are factors that we compute for bills, such as whether the sponsor is a committee chair (see right for a full list). We &ldquo;train&rdquo; the model on bills from the {{prognosis_training_congress|ordinalhtml}} Congress ({{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}}) using the factors and whether a) the bill made it out of committee and b) was enacted, and we use that to compute probabilities for bills in the current Congress.</p>
+			
+			<p>We first began publishing leadership scores in 2012. As far as we know, we were the first to apply this analysis to Congressional bills.</p>
+			
+			<h3>Methodology</h3>
+			
+			<p>This analysis is based on a logistic regression. Logistic regression is similar to simple linear regression but it is more appropriate when modeling probabilities.</p>
+			
+			<p>The model is trained on bills from the {{prognosis_training_congress|ordinalhtml}} Congress ({{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}}). The explanatory variables are the binary factors mentioned above and listed at right. We create sixteen separate models. For each chamber (House and Senate), and for each of the four types of bills and resolutions in that chamber, we compute one model that predicts whether a bill will get out of committee and a separate model that computes, for bills out of committee, whether the bill will be enacted (or for resolutions, agreed to).</p>
+			
+			<p>In choosing factors for each of the sixteen models, we select from a large set of plausible factors those which appear to be statistically significant comparing the mean success rate overall to those bill that have that factor, using a binomial distribution. Because of interactions between factors, not all factors that pass that test are truly significant but they remain interesting.</p>
+			
+			<p>The output of the logistic regression models are weights assigned to the factors. The weights are hard to interpret on their own, except that positive increases the final probability and negative decreases the final probability.</p>
+			
+			<p>The prognosis scores for a bill are computed simply by feeding in the factors for that bill into the two logistic regression models for the bill&rsquo;s chamber and type. The predicted y values are interpreted as the prognosis probabilities.</p>
+
+			<h3>References</h3>
+			
+			<p>Here is some academic work on the same subject:</p>
+			
+			<p>Tae Yano, Noah A. Smith, and John D. Wilkerson. "<a href="http://projects.iq.harvard.edu/ptr/files/yanosmithwilkersonbillsurvival.pdf">Textual Predictors of Bill Survival in Congressional Committees</a>," at New Directions in Analyzing Text as Data 2012, 5-6 October at Harvard.</p>
+			
+		</div>
+		
+		<div class="six columns last">
+			<h3 style="margin-bottom: 1em">Results</h3>
+			
+			<p>The following tables show how various factors help or hurt a bill or resolution&rsquo;s chance of making it out of committee and getting enacted (or agreed to). Two tables are given for each of the eight bill types.</p>
+			
+			<p>In the tables, <b>N</b> is the number of bills/resolutions that had the indicated factor in the training corpus; <b>%S</b> is of bills with this factor, the percent that were successful (past committee or enacted); and <b>&beta;</b> is the regression coefficient (weight) from the prognosis analysis. Higher weights increase the bill or resolution&rsquo;s probability of success.</p>
+			
+			{% for m in prognosis_factors %}
+				<h4 style="margin: 1.25em 0 .5em 0;">{{m.bill_type.full_name}}s ({{m.bill_type.label}}) &mdash; {{m.success_name}}</h4>
+				
+				<p>Overall, {{m.success_rate|floatformat:0}}% of the {{m.count|intcomma}} {{m.bill_type.full_name}}s {% if not m.is_introduced_model %}that got past committee{% endif %} in {{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}} were {{m.success_name}}. The following factors help or hurt that:</p>
+				
+				{% if m.factors %}
+					<table style="margin: 1em 0 1em 1em; font-size: 85%;">
+						<tr><th>N</th> <th>%S</th> <th>&beta;</th> <th>Factor</th></tr>
+						{% for f in m.factors %}
+							<tr>
+								<td style="padding: .2em .5em; text-align: center;">{{f.count|intcomma}}</td>
+								<td style="padding: .2em .5em; text-align: center;">{{f.success_rate|floatformat:0}}%</td>
+								<td style="padding: .2em .5em; text-align: center;">{{f.regression_beta|floatformat:1}}</td>
+								<td style="padding: .2em .5em">{{f.description}}</td>
+							</tr>
+						{% endfor %}
+					</table>
+				{% else %}
+					<p>There were no statistically significant factors in the model.</p>
+				{% endif %}
+			{% endfor %}
+		</div>
+		</div>
+	</div> <!-- /prognosis pane -->
+</div>
+
+<script>$("ul.tabs a").tabs("div.panes > div");</script>
+
+{% endblock %}
+

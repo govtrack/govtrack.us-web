@@ -49,6 +49,19 @@
 				<dd>{{bill.last_action_date|date}}<br/>{{bill.last_action_text}}</dd>
 				{% endif %}
 			</dl>
+			
+			<dl>
+				{% for source in openstates_api_info.sources %}
+					{% if forloop.first %}
+					<dt>Official Source</dt>
+					<dd>
+					{% endif %}
+						<div><a href="{{source.url}}">{{source.url|truncatechars:35}}</a></div>
+					{% if forloop.last %}
+					</dd>
+					{% endif %}				
+				{% endfor %}
+			</dl>
 		</div>
 		
 		<p style="margin: 0; line-height: 100%"><small>State legislative information provided by <a href="http://www.BillTrack50.com">LegiNation, Inc.</a> and <a href="http://www.LegiScan.com">LegiScan, Inc.</a> Some information also from <a href="http://openstates.org/">Open States</a>.</small></p>
@@ -71,102 +84,21 @@
 {% block body %}
 <div id="bill-overview" class="section">
 	
-	<div class="overview">
-		<div class="holder">
-			<div class="frame">
-				
-				<div class="container">
-					<dl>
-						{% comment %}
-						{% for doc in openstates_api_info.versions %}
-							{% if forloop.first %}
-							<dt>Full Text</dt>
-							<dd>
-							{% endif %}
-							<div><a href="{{doc.url}}">{{doc.name}} {% if doc.mimetype == "application/pdf" %}(PDF){% endif %}{% if doc.mimetype == "application/msword" %}(Word){% endif %}</a></div>
-							{% if forloop.last %}
-							</dd>
-							{% endif %}
-						{% endfor %}
-						{% endcomment %}
-						
-						{% for doc in bill.documents.all %}
-							{% if forloop.first %}
-							<dt>Documents</dt>
-							<dd>
-							{% endif %}
-							<div><a href="{{doc.url}}">{{doc.type}}</a></div>
-							{% if forloop.last %}
-							</dd>
-							{% endif %}
-						{% endfor %}
-						
-					</dl>
-				</div>
-				
-				{% for action in bill.actions.all %}
-					{% if forloop.first %}
-					<div class="container">
-						<dl>
-							<dt>History</dt>
-							<dd>
-								<table>
-					{% endif %}
-					<tr valign="top"><td style="width: 6em;">{{action.date|date}}</td> <td>{{action.text}}</td></tr>
-					{% if forloop.last %}
-								</table>
-							</dd>
-						</dl>
-					</div>
-					{% endif %}
-				{% endfor %}
-			</div>
-		</div>
+	<div class="six columns">
+		<h2>History</h2>
+		{% for action in bill.actions.all %}
+			<p>{{action.date|date}}: {{action.text}}</p>
+		{% endfor %}
 	</div>
 	
-	<div class="overview last">
-		<div class="holder">
-			<div class="frame">
-				
-				<div class="container">
-					<dl>
-						{% comment %}
-						{% for doc in openstates_api_info.documents %}
-							{% if forloop.first %}
-							<dt>Related Documents</dt>
-							<dd>
-							{% endif %}
-							<div><a href="{{doc.url}}">{{doc.name}} {% if doc.mimetype == "application/pdf" %}(PDF){% endif %}{% if doc.mimetype == "application/msword" %}(Word){% endif %}</a></div>
-							{% if forloop.last %}
-							</dd>
-							{% endif %}
-						{% endfor %}
-						{% endcomment %}
-						
-						{% for source in openstates_api_info.sources %}
-							{% if forloop.first %}
-							<dt>Official Source</dt>
-							<dd>
-							{% endif %}
-								<div><a href="{{source.url}}">{{source.url}}</a></div>
-							{% if forloop.last %}
-							</dd>
-							{% endif %}				
-						{% endfor %}
-						
-					</dl>
-				</div>
-			</div>
-		</div>
+	<div class="six columns last">
+		{% if bill.summary %}
+		<h2>Summary</h2>
+		{{bill.summary}}
+		{% endif %}
 	</div>
 </div>
 					
-{% if bill.summary %}
-<section class="clear" style="padding-top: 2em">
-	<h3>Summary</h3>
-	{{bill.summary}}
-</section>
-{% endif %}
 
 {% endblock %}
 

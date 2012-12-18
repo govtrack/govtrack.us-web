@@ -13,6 +13,22 @@
 
 {% block body %}
 <section class="main twelve columns">
+	<h2>What Data Is Available</h2>
+	
+	<p>...And where to get it:</p>
+	
+	<ul class="bullets">
+		<li><b>Members of Congress &amp; Committees</b>: The roster of Members of Congress, brief biographical data, social media accounts, committees, committee assignments, and historical data can be found in the new github project <a href="https://github.com/unitedstates/congress-legislators">unitedstates/congress-legislators</a>. This is a new community project seeded from GovTrack&rsquo;s people database.</li>
+		
+		<li><b>Bills and Resolutions</b>: Our database contains metadata about bills and resolutions (title, status, actions, etc.) from the 96th Congress through the present. Starting with the 113th Congress (2013-2014), the data files are scraped using the <a href="https://github.com/unitedstates/congress">unitedstates/congress</a> project, a community project. See below for how to download the data.</li>
+		
+		<li><b>Roll Call Votes</b>: Our database contains roll call votes from the founding of the nation. See below.</li>
+		
+		<li><b>Other Data</b>: See below for session dates, bill text, and photos of Members of Congress.</li>
+	</ul>
+	
+	
+
 	{% include "website/developers/gettingstarted.html" %}
 
 	<h2>Getting the Data</h2>
@@ -43,22 +59,7 @@
 	<tt>data/us/110</tt>, etc. We have roll call data going back to the first
 	Congress, so we have data going back to the directory <tt>data/us/1</tt>.</p>
 	
-	<h3>Important Files</h3>
-	
-	<ul>
-	<li><a href="/data/us/people.xml">data/us/people.xml</a>:
-	This file contains everyone that has ever served in Congress, and U.S. presidents, with their party
-	affiliation, terms in Congress, birthdays, etc.
-	This file is quite large... best not to open it in your browser.
-	This file has been put together from a variety of sources and is
-	maintained by hand. <a href="/developers/people_xml">People.xml Schema &gt;</a></li>
-
-	<li><a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>
-	gives the start and end date of each session (typically one year) and 
-	Congress (typically two years).</li>
-	</ul>
-	
-	<h3>Other Schemas</h3>
+	<h3>Schemas</h3>
 
 	<ul>
 
@@ -72,6 +73,10 @@
 	<h3>Other Files</h3>
 	
 	<ul>
+	<li><a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>
+	gives the start and end date of each session (typically one year) and 
+	Congress (typically two years).</li>
+
 	<li>The <a href="/data/photos">data/photos</a> directory 
 	contains jpeg images of Members of Congress, past and present. 
 	Not all MoC's have photos. The name of the photo is the GovTrack 
@@ -84,6 +89,12 @@
 	<li>The <a href="/data/us/bills.text">data/us/bills.text</a> directory includes the text of legislation in PDF, XML, and text format (from GPO) and in HTML format (from THOMAS). It is organzized by Congress, bill type, and GPO bill status code.
 	See <a href="http://www.gpo.gov/help/index.html#about_congressional_bills.htm">GPO's documentation on bill text status</a>.</li>
 	
+	<li><b>DEPRECATED AS OF 1/3/2013 &mdash;</b> <a href="/data/us/people.xml">data/us/people.xml</a>:
+	This file contains everyone that has ever served in Congress, and U.S. presidents, with their party
+	affiliation, terms in Congress, birthdays, etc.
+	This file is quite large... best not to open it in your browser.
+	This file has been put together from a variety of sources and is
+	maintained by hand. <a href="/developers/people_xml">People.xml Schema &gt;</a></li>
 	</ul>
 	
 

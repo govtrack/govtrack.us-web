@@ -55,7 +55,7 @@ class StateSession(models.Model):
 		unique_together = [('state', 'name'), ('state', 'slug')]
 
 	def __unicode__(self):
-		return self.state + " " + self.name
+		return us.statenames[self.state] + " " + self.name
 
 from events.models import Feed
 Feed.register_feed(

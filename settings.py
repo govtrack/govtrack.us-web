@@ -83,6 +83,7 @@ MIDDLEWARE_CLASSES = (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'twostream.middleware.CacheLogic',
 )
 
 ROOT_URLCONF = 'urls'
@@ -112,6 +113,7 @@ INSTALLED_APPS = (
     'tastypie',
     
     # project modules
+    'twostream',
     'person',
     'committee',
     'website',

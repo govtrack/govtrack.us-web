@@ -209,6 +209,13 @@ class Bill(models.Model):
     @property
     def cosponsor_records(self):
         return Cosponsor.objects.filter(bill=self).order_by('joined', 'person__lastname', 'person__firstname')
+    @property
+    def cosponsor_counts_by_party(self):
+        counts = { }
+        for p in self.cosponsor_records.filter(withdrawn=None).select_related("role").values_list("role__party", flat=True):
+            counts[p] = counts.get(p, 0) + 1
+        counts = sorted(list(counts.items()), key=lambda kv : -kv[1])
+        return counts
 
     @property
     def current_status_description(self):
@@ -235,7 +242,10 @@ class Bill(models.Model):
         return prog
         
     def get_formatted_summary(self):
-        return get_formatted_bill_summary(self)
+        s = get_formatted_bill_summary(self)
+        # this cleanup doesn't always work because sometimes the line is split between <divs>
+        s = re.sub(r"(\d+/\d+/\d\d\d\d)--[^\.]+.\s*(\(This measure has not been amended since it was .*\. The summary of that version is repeated here\.\)\s*)?(" + "|".join(re.escape(t[2]) for t in self.titles) + r")\s*-\s*", lambda m : m.group(1) + ". ", s)
+        return s
 
     def get_upcoming_meetings(self):
         return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=self)
@@ -457,6 +467,14 @@ class Bill(models.Model):
                 "extra": text,
             })
         if not saw_intro: ret.insert(0, { "label": "Introduced", "date": self.introduced_date })
+        
+        if self.docs_house_gov_postdate: ret.append({ "label": "On House Schedule", "date": self.docs_house_gov_postdate })
+        if self.senate_floor_schedule_postdate: ret.append({ "label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate })
+        def as_dt(x):
+        	if isinstance(x, datetime.datetime): return x
+        	return datetime.datetime.combine(x, datetime.time.min)
+        ret.sort(key = lambda x : as_dt(x["date"])) # only needed because of the previous two
+        
         return ret
     
     def get_future_events(self):
@@ -573,15 +591,26 @@ class Bill(models.Model):
         return terms
         
     def get_related_bills(self):
+        # Gets a unqie list of related bills, sorted by the relation type, whether the titles are
+        # the same, and the last action date.
         ret = []
         seen = set()
         bills = list(self.relatedbills.all().select_related("related_bill"))
-        bills.sort(key = lambda rb : RelatedBill.relation_sort_order.get(rb.relation, 999))
+        bills.sort(key = lambda rb : (
+            -RelatedBill.relation_sort_order.get(rb.relation, 999),
+            self.title_no_number==rb.related_bill.title_no_number,
+            rb.related_bill.current_status_date
+            ), reverse=True)
         for rb in bills:
             if not rb.related_bill in seen:
                 ret.append(rb)
                 seen.add(rb.related_bill)
         return ret
+        
+    def get_related_bills_newer(self):
+        return [rb for rb in self.get_related_bills()
+            if self.title_no_number == rb.related_bill.title_no_number 
+            and rb.related_bill.current_status_date > self.current_status_date]
 
     def find_reintroductions(self):
         def normalize_title(title): # remove anything that looks like a year
@@ -614,6 +643,34 @@ class Bill(models.Model):
                 for outcome in positions:
                     m.user_positions[outcome.owner_key] = positions[outcome]
         return m
+            
+    def get_gop_summary(self):
+        import urllib, StringIO
+        try:
+            from django.utils.safestring import mark_safe
+            dom = etree.parse(urllib.urlopen("http://www.gop.gov/api/bills.get?congress=%d&number=%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, self.number)))
+        except:
+            return None
+        if dom.getroot().tag == '{http://www.w3.org/1999/xhtml}html': return None
+        def sanitize(s, as_text=False):
+            if s.strip() == "": return None
+            return mark_safe("".join(
+                etree.tostring(n, method="html" if not as_text else "text", encoding=unicode)
+                for n
+                in etree.parse(StringIO.StringIO(s), etree.HTMLParser(remove_comments=True, remove_pis=True)).xpath("body")[0]))
+        ret = {
+            "link": unicode(dom.xpath("string(bill/permalink)")),
+            "summary": sanitize(dom.xpath("string(bill/analysis/bill-summary)")),
+            "background": sanitize(dom.xpath("string(bill/analysis/background)")),
+            "cost": sanitize(dom.xpath("string(bill/analysis/cost)")),
+        }
+        if ret["cost"] and "was not available as of press time" in ret["cost"]: ret["cost"] = None
+        # floor-situation is also interesting but largely redundant with what we already know
+        # take the first of background and bill-summary and make a text-only version
+        for f in ("background", "bill-summary"):
+			ret["text"] = sanitize(dom.xpath("string(bill/analysis/%s)" % f), as_text=True)
+			if ret["text"]: break
+        return ret
             
 class RelatedBill(models.Model):
     bill = models.ForeignKey(Bill, related_name="relatedbills")
@@ -664,8 +721,8 @@ def get_formatted_bill_summary(bill):
     </xsl:template>
 </xsl:stylesheet>''')
     transform = etree.XSLT(xslt_root)
-    summary = transform(dom)
-    if unicode(summary).strip() == "":
+    summary = unicode(transform(dom))
+    if summary.strip() == "":
         return None
     return summary
 

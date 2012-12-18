@@ -25,6 +25,10 @@ SENATE_NET_RANGES = (
     )
 
 def template_context_processor(request):
+	# These are good to have in a context processor and not middleware
+	# because they won't be evaluated until template evaluation, which
+	# might have user-info blocked already for caching (a good thing).
+	
     context = {
     	"GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY
     }
@@ -47,12 +51,15 @@ def template_context_processor(request):
        return False
     
     try:
-        if is_ip_in_any_range(request.META["REMOTE_ADDR"], HOUSE_NET_RANGES):
+        ip = request.META["REMOTE_ADDR"]
+        ip = ip.replace("::ffff:", "") # ipv6 wrapping ipv4
+    	
+        if is_ip_in_any_range(ip, HOUSE_NET_RANGES):
             context["remote_net_house"] = True
-        if is_ip_in_any_range(request.META["REMOTE_ADDR"], SENATE_NET_RANGES):
+        if is_ip_in_any_range(ip, SENATE_NET_RANGES):
             context["remote_net_senate"] = True
             
-        context["is_dc_local"] = geo_ip_db.geos(request.META["REMOTE_ADDR"]).distance(washington_dc) < .5
+        context["is_dc_local"] = geo_ip_db.geos(ip).distance(washington_dc) < .5
     except:
         pass
     

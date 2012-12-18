@@ -1,34 +1,16 @@
 <script src="/static/js/jquery.ba-bbq.min.js"> </script>
 
-<style>
-    .rowtop { padding-top: 8px; }
-    .col0 { border-bottom: none;  }
-    .rowleft { padding: 4px 12px 6px 0px; }
-    .rowbottom { padding: 6px 0 6px 0; }
-    #loading_status { text-align: center; border: 1px solid #AAA; background-color: #EEE; }
-    #show_more { text-align: center; border: 1px solid #CB4B16; background-color: #ffcebb; font-weight: bold; }
-</style>
-
 <div class="searching row">
 <section class="eight columns">
     <div class="summary" style="display: none">
         <p><span class="total">xxx</span> <span class="noun">things</span> matched your search<span class="searchdescr"></span>.</p>
     </div>
     
-    <table class="results" style="display: none;">
-        <thead>
-            <tr>
-                {% for col in column_headers %}
-                    <th>{% if col %}{{col}}{% endif %}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div class="results" style="display: none;">
+    </div>
     
     <div id="loading_status" style="display: none;">Loading...</div>
-    <div id="show_more" style="display: none;"><a href="#" onclick="return update_search(null, 1)">Show More Results</a></div>
+    <a id="show_more" style="display: none;" href="#" onclick="return update_search(null, 1)">Show More Results</a>
 </section>
 <script>
 function addCommas(nStr)
@@ -238,7 +220,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     $("#show_more").hide();
     if (postdata.page == 1) {
     	$('.summary').hide();
-    	$('.results tbody').html("");
+    	$('.results').html("");
     }
 
     $.ajax(
@@ -256,7 +238,12 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                 	return;
                 } else {
                     // Display results.
-                   	$('.results tbody').append($(res.results));
+                    for (var i = 0; i < res.results.length; i++) {
+                    	var n = $("<div class='result_item'/>");
+                    	n.html(res.results[i]);
+                    	$('.results').append(n);
+                    }
+                   	
                     $('#searcherror').text('');
                     
                     $('.summary').show();
@@ -324,7 +311,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                 $('#searchform input').prop('disabled', false);
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                $('.results tbody').html("");
+                $('.results').html("");
                 $('#searchform').text("Search is not currently operational: " + textStatus);
                 update_search_lock = false;
                 $('#searchform input').prop('disabled', false);
