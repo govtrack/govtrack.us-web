@@ -585,6 +585,8 @@
 			<div class="metadata-table">
 				<div class="holder">
 				<div class="frame">
+
+				{% comment %}
 				{% with bill.get_approved_links as links %}
 				{% if links|length > 0 %}
 				<div class="container">
@@ -602,6 +604,7 @@
 				</div>
 				{% endif %}
 				{% endwith %}
+				{% endcomment %}
 			
 				<div class="container">
 					<dl style="margin-top: 1em">
@@ -646,7 +649,7 @@
 					<dl style="margin-top: 1em">
 						<dt>Subject Areas:</dt>
 						<dd>
-							{% if bill.terms.exists %}
+							{% if bill.get_terms_sorted|length = 0 %}
 								<p>None known at this time.</p>
 							{% else %}
 							<p>Use these subject areas to explore related legislation:</p>
