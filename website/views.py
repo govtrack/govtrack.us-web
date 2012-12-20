@@ -335,12 +335,11 @@ def congress_live(request):
 def analysis_methodology(request):
     from settings import CURRENT_CONGRESS
     from person.models import RoleType
-    from person.analysis import load_sponsorship_analysis2
-    import bill.prognosis_model
     from bill.models import BillType
     from us import get_congress_dates
     import json
     
+    from person.analysis import load_sponsorship_analysis2
     def make_chart_series(role_type):
         data = load_sponsorship_analysis2(CURRENT_CONGRESS, role_type, None)
         if not data: return None
@@ -364,13 +363,22 @@ def analysis_methodology(request):
         
         return data
         
+    import bill.prognosis_model
+    import bill.prognosis_model_test
     prognosis_factors = list((k, dict(v)) for k, v in bill.prognosis_model.factors.items()) # clone
     for k, v in prognosis_factors:
         v["bill_type"] = BillType.by_value(k[0])
         v["is_introduced_model"] = k[1]
         v["factors"] = sorted(v["factors"].values(), key = lambda f : f["regression_beta"], reverse=True)
     prognosis_factors = [kv[1] for kv in prognosis_factors]
-    prognosis_factors.sort(key = lambda m : m["count"], reverse=True)
+    prognosis_factors.sort(key = lambda m : (m["bill_type"] in (BillType.house_bill, BillType.senate_bill), m["count"]), reverse=True)
+    prognosis_test = list(bill.prognosis_model_test.model_test_results.items()) # clone
+    for k, v in prognosis_test:
+        v["bill_type"] = BillType.by_value(k[0])
+        v["is_introduced_model"] = (k[1] == 0)
+        v["success_name"] = bill.prognosis_model.factors[(k[0], (k[1] == 0))]["success_name"]
+    prognosis_test.sort(key = lambda kv : (kv[0][0] in (BillType.house_bill, BillType.senate_bill), bill.prognosis_model.factors[kv[0]]["count"]), reverse=True)
+    prognosis_test = [kv[1] for kv in prognosis_test]
     
     return {
         "ideology": lambda : { # defer until cache miss
@@ -381,5 +389,7 @@ def analysis_methodology(request):
         "prognosis_training_congress": bill.prognosis_model.congress,
         "prognosis_training_congress_dates": get_congress_dates(bill.prognosis_model.congress),
         "prognosis_factors": prognosis_factors,
+        "prognosis_test": prognosis_test,
+        "prognosis_testing_congress": bill.prognosis_model_test.congress,
     }
     

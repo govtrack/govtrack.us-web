@@ -244,6 +244,12 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 
 	return factors
 
+def is_success(bill, model_type):
+	if model_type == 0:
+		return bill.current_status not in BillStatus.introduced_statuses
+	else:
+		return bill.current_status in BillStatus.final_status_passed
+
 def build_model(congress):
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
@@ -284,29 +290,27 @@ def build_model(congress):
 		
 	MODEL = dict()
 	
-	introduced_statuses = (BillStatus.introduced, BillStatus.referred)
-	
-	for (bill_type, bill_type_descr), is_introduced in itertools.product(BillType, (True, False)):
+	for (bill_type, bill_type_descr), model_type in itertools.product(BillType, (0, 1)):
 		#if bill_type != BillType.house_bill: continue
 		#if bill_type not in (BillType.house_joint_resolution, BillType.senate_joint_resolution): continue
 		
 		bills = BILLS.filter(bill_type=bill_type)
-		if not is_introduced:
-			# When is_introduced is True, we scan across all bills, because all bills were
+		if model_type == 1:
+			# In model 0, we scan across all bills, because all bills were
 			# in the introduced/referred status at one point. If we filter it to bills whose
 			# current status is introduced/referred, obviously they will all have been
-			# failed bills, which defeats the purpose. When is_introduced is False, we
+			# failed bills, which defeats the purpose. In model 1, we
 			# only look at bills that have at least gotten reported so that we can see
 			# of reported bills which make it to success.
-			bills = bills.exclude(current_status__in=introduced_statuses)
+			bills = bills.exclude(current_status__in=BillStatus.introduced_statuses)
 
-		print bill_type_descr, "introduced" if is_introduced else "reported"
+		print bill_type_descr, model_type
 		
 		total = bills.count()
 		
-		if is_introduced:
+		if model_type == 0:
 			# for the introduced model, success is getting out of committee
-			total_success = bills.exclude(current_status__in=introduced_statuses).count()
+			total_success = bills.exclude(current_status__in=BillStatus.introduced_statuses).count()
 		else:
 			# for the reported model, success is being enacted (or whatever final status as appropriate for the bill type)
 			total_success = bills.filter(current_status__in=BillStatus.final_status_passed).count()
@@ -323,10 +327,7 @@ def build_model(congress):
 			
 			# What's the measured binary outcome for this bill? Check if the bill
 			# ended in a success state.
-			if is_introduced:
-				success = bill.current_status not in introduced_statuses
-			else:
-				success = bill.current_status in BillStatus.final_status_passed
+			success = is_success(bill, model_type)
 			
 			# Get the binary factors that apply to this bill.
 			factors = get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data)
@@ -372,8 +373,8 @@ def build_model(congress):
 			
 		# Generate the model for output.
 		model = dict()
-		MODEL[(bill_type,is_introduced)] = model
-		if is_introduced:
+		MODEL[(bill_type,model_type == 0)] = model
+		if model_type == 0:
 			model["success_name"] = "sent out of committee to the floor"
 		else:
 			if bill_type in (BillType.senate_bill, BillType.house_bill):
@@ -447,7 +448,7 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 	prediction_1 = eval_model(model_1)
 	prediction_2 = eval_model(model_2)
 	
-	is_introduced = bill.current_status in (BillStatus.introduced, BillStatus.referred)
+	is_introduced = bill.current_status in BillStatus.introduced_statuses
 	
 	def helps(factor, state1, state2):
 		a = model_1["factors"][factor]["regression_beta"] >= 0 if factor in model_1["factors"] else model_2["factors"][factor]["regression_beta"] >= 0
@@ -483,13 +484,101 @@ def compute_prognosis(bill, proscore=False):
 	return prog
 		
 def test_prognosis(congress):
+	from math import exp
+	from numpy import mean, std, digitize, percentile, fmin
+	
+	import prognosis_model
+	
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
-	for bill in Bill.objects.filter(congress=congress, bill_type=BillType.house_bill):
-		print bill
-		print compute_prognosis_2(bill, committee_membership, majority_party)
-		print
 	
+	test_results = { }
+	
+	for model_type in (0, 1):
+		for bt, blabel in list(BillType):
+			# What was the success rate in the training data?
+			model_1 = prognosis_model.factors[(bt, model_type==0)]
+			if model_type == 0:
+				sr = model_1["success_rate"]
+				if len(model_1["factors"]) == 0: continue # nothing interesting to test
+			else:
+				model_2 = prognosis_model.factors[(bt, model_type==0)]
+				sr = model_1["success_rate"] * model_2["success_rate"] / 100.0
+				if len(model_1["factors"])+len(model_2["factors"]) == 0: continue # nothing interesting to test
+			
+			# store output....
+			model_result = { }
+			test_results[(bt, model_type)] = model_result
+			
+			# Pull in the data as tuples of (prediction float [0,1], success True/False)
+			data = []
+			for bill in Bill.objects.filter(congress=congress, bill_type=bt).prefetch_related():
+				x = compute_prognosis_2(bill, committee_membership, majority_party, None, proscore=False)
+				if model_type == 0:
+					x = x["prediction_1"]
+				else:
+					x = x["prediction_1"] * x["prediction_2"] / 100.0
+				y = is_success(bill, model_type)
+				data.append((x, y))
+			xdata = [x[0] for x in data]
+			
+			# Compute %-success for bins each having 10% of the data, to show that as
+			# prognosis increases, the %-success increases.
+			model_result["bins"] = []
+			bins = []
+			for p in xrange(0, 100+10, 10):
+				b = percentile(xdata, p)
+				if len(bins) == 0 or b > bins[-1]:
+					bins.append(b)
+			bindices = digitize(xdata, bins)
+			for b in xrange(len(bins)-1):
+				bindata = [data[i] for i in xrange(len(data)) if bindices[i] == b]
+				if len(bindata) == 0: continue
+				model_result["bins"].append( (bins[b], bins[b+1], len(bindata), sum(1 for x,y in bindata if y)/float(len(bindata))) )
+			
+			# We don't know a priori what the prediction threshold is above which we
+			# should score a success, so find the threshold that maximizes the f2 score,
+			# which is like the f-score but weighs the precision more.
+			def compute_scores(T):
+				true_pos = sum(1 for (x,y) in data if (x >= T) and y)
+				false_pos = sum(1 for (x,y) in data if (x >= T) and not y)
+				true_neg = sum(1 for (x,y) in data if (x < T) and not y)
+				false_neg = sum(1 for (x,y) in data if (x < T) and y)
+				precision = float(true_pos)/(true_pos + false_pos) if (true_pos + false_pos) > 0 else 1.0
+				recall = float(true_pos)/(true_pos + false_neg) if (true_pos + false_neg) > 0 else 1.0
+				accuracy = float(true_pos + true_neg)/len(data)
+				beta = .5 # 1=standard f-score, .5 weighs precision higher than recall
+				fscore = ((1 + beta**2) * (precision * recall) / ((precision * beta**2) + recall)) if precision+recall > 0 else 0
+				return {
+					"threshold": T,
+					"table": { "tp": true_pos, "fp": false_pos, "tn": true_neg, "fn": false_neg },
+					"precision": precision,
+					"recall": recall,
+					"accuracy": accuracy,
+					"fscore_beta": beta,
+					"fscore": fscore,
+				}
+			def compute_neg_f2(T):
+				return -compute_scores(T)["fscore"]
+			best_threshold = float(fmin(compute_neg_f2, sr))
+			model_result["max_fscore"] = compute_scores(best_threshold)
+			
+			# And also make a precision-recall chart.
+			model_result["precision_recall"] = []
+			for i in range(-18, 0):
+				T = 100 * exp(i / 5.0) # threshold data points on a logarithmic scale
+				cs = compute_scores(T)
+				if cs["fscore"] == 0: continue # causes weirdness in charts
+				model_result["precision_recall"].append(cs)
+			
+
+	with open("bill/prognosis_model_test.py", "w") as modelfile:
+		modelfile.write("# this file was automatically generated by prognosis.py\n")
+		modelfile.write("congress = %d\n" % congress)
+		from pprint import pprint
+		modelfile.write("model_test_results = ")
+		pprint(test_results, modelfile)
+
 def top_prognosis(congress, bill_type):
 	max_p = None
 	max_b = None
@@ -503,10 +592,9 @@ def top_prognosis(congress, bill_type):
 	print max_p, max_b
 	
 if __name__ == "__main__":
-	build_model(111)
-	#test_prognosis(112)
-	#print compute_prognosis(Bill.objects.get(congress=112, bill_type=BillType.house_bill, number=1125))
-	#print top_prognosis(112, BillType.house_bill)
-	#print top_prognosis(112, BillType.senate_bill)
-	
+	import sys
+	if sys.argv[-1] != "test":
+		build_model(111)
+	else:
+		test_prognosis(112)
 

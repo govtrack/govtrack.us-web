@@ -132,7 +132,7 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 		
 		// activate the new tab pane
 		panes.each(function() {
-			if ("#" + subordinate_to + this.getAttribute('id') == p) {
+			if ("#" + subordinate_to + this.getAttribute('id') == p || "#" + this.getAttribute('tab') == p) {
 				// Show it immediately if this is on page load, otherwise fade it in fast.
 				if (is_initial) $(this).show(); else $(this).fadeIn("fast");
 				
@@ -147,7 +147,7 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 		// height from decreasing (because no tabs are shown) which
 		// could cause the page to scroll up, which would confuse the user.
 		panes.each(function() {
-			if ("#" + subordinate_to + this.getAttribute('id') != p) {
+			if (!("#" + subordinate_to + this.getAttribute('id') == p || "#" + this.getAttribute('tab') == p)) {
 				$(this).hide();
 			}
 		});

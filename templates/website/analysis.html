@@ -109,6 +109,7 @@ ideology = vT[1,:]</pre>
 			<p>Wall, Rechtsteiner, and Rocha. &ldquo;<a href="http://public.lanl.gov/mewall/kluwer2002.html">Singular value decomposition and principal component analysis</a>.&rdquo; in A Practical Approach to Microarray Data Analysis. D.P. Berrar, W. Dubitzky, M. Granzow, eds. pp. 91-109, Kluwer: Norwell, MA (2003). LANL LA-UR-02-4001.</p>
 		</div>
 		
+		{% if ideology.senate or ideology.house %}
 		<div class="six columns last">
 		<div id="sponsorship_analysis_chart_senate"> </div>
 		<div id="sponsorship_analysis_chart_house"> </div>
@@ -121,6 +122,7 @@ ideology = vT[1,:]</pre>
 		});
 		</script>
 		</div>
+		{% endif %}
 		</div>
 	</div> <!-- /ideology pane -->
 	
@@ -181,6 +183,7 @@ def onenorm(u): return sum(abs(u))</pre>
 			<p>Kamvar, Sep. 2010. Numerical algorithms for personalized search in self-organizing information networks. Princeton University Press.</p>
 		</div>
 		
+		{% if ideology.senate or ideology.house %}
 		<div class="six columns last">
 		<div id="sponsorship_analysis_chart_senate2"> </div>
 		<div id="sponsorship_analysis_chart_house2"> </div>
@@ -193,6 +196,7 @@ def onenorm(u): return sum(abs(u))</pre>
 		});
 		</script>
 		</div>
+		{% endif %}
 		</div>
 	</div> <!-- /leadership pane -->
 	
@@ -203,7 +207,12 @@ def onenorm(u): return sum(abs(u))</pre>
 		<div class="six columns">
 			<p>GovTrack computes a prognosis for each bill, which is the probability that the bill will be enacted. Our computation is based on factors that are correlated with successful or failed bills in the past, such as whether the sponsor is a committee chair.</p>
 			
-			<p>More than 10,000 bills will be considered by each Congress. About 4% will become law. Which ones should we focus on? Congressmen and senators know. Staff know. Lobbyists know. They have the institutional knowledge to recognize the needles from the haystack. We’re at an enormous disadvantage on the outside. We don’t know any of that. And as a result, we face a serious information overload.</p>
+			<p>What is the point of this?</p>
+			
+			<ul class="bullets">
+			<li>More than 10,000 bills will be considered by each Congress. About 4% will become law. <b>Which bills should we focus on?</b></li>
+			<li>Congressmen and senators, their staff, and lobbyists all know what bills are important because they have the institutional knowledge of what makes a bill important. The prognosis highlights the <b>factors that make a bill successful</b>.</li>
+			</ul>
 			
 			<p>The prognosis scores can be found on the pages for bills throughout the site.</p>
 			
@@ -236,37 +245,112 @@ def onenorm(u): return sum(abs(u))</pre>
 		<div class="six columns last">
 			<h3 style="margin-bottom: 1em">Results</h3>
 			
-			<p>The following tables show how various factors help or hurt a bill or resolution&rsquo;s chance of making it out of committee and getting enacted (or agreed to). Two tables are given for each of the eight bill types.</p>
+			<ul id="prognosis_results_tabs" class="tabs three-up">
+				<li><a href="#prognosis/factors">Factors</a></li>
+				<li><a href="#prognosis/accuracy">Accuracy</a></li>
+				<li><a href="#prognosis/other">Other Charts</a></li>
+			</ul>
 			
-			<p>In the tables, <b>N</b> is the number of bills/resolutions that had the indicated factor in the training corpus; <b>%S</b> is of bills with this factor, the percent that were successful (past committee or enacted); and <b>&beta;</b> is the regression coefficient (weight) from the prognosis analysis. Higher weights increase the bill or resolution&rsquo;s probability of success.</p>
+			<div id="prognosis_results_panes" style="margin-top: 1em">
 			
-			{% for m in prognosis_factors %}
-				<h4 style="margin: 1.25em 0 .5em 0;">{{m.bill_type.full_name}}s ({{m.bill_type.label}}) &mdash; {{m.success_name}}</h4>
+			<div tab="prognosis/factors">
+				<p>The following tables show how various factors help or hurt a bill or resolution&rsquo;s chance of making it out of committee and getting enacted (or agreed to). Two tables are given for each of the eight bill types.</p>
 				
-				<p>Overall, {{m.success_rate|floatformat:0}}% of the {{m.count|intcomma}} {{m.bill_type.full_name}}s {% if not m.is_introduced_model %}that got past committee{% endif %} in {{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}} were {{m.success_name}}. The following factors help or hurt that:</p>
+				<p>In the tables, <b>N</b> is the number of bills/resolutions that had the indicated factor in the training corpus; <b>%S</b> is of bills with this factor, the percent that were successful (past committee or enacted); and <b>&beta;</b> is the regression coefficient (weight) from the prognosis analysis. Higher weights increase the bill or resolution&rsquo;s probability of success.</p>
 				
-				{% if m.factors %}
-					<table style="margin: 1em 0 1em 1em; font-size: 85%;">
-						<tr><th>N</th> <th>%S</th> <th>&beta;</th> <th>Factor</th></tr>
-						{% for f in m.factors %}
-							<tr>
-								<td style="padding: .2em .5em; text-align: center;">{{f.count|intcomma}}</td>
-								<td style="padding: .2em .5em; text-align: center;">{{f.success_rate|floatformat:0}}%</td>
-								<td style="padding: .2em .5em; text-align: center;">{{f.regression_beta|floatformat:1}}</td>
-								<td style="padding: .2em .5em">{{f.description}}</td>
-							</tr>
-						{% endfor %}
-					</table>
-				{% else %}
-					<p>There were no statistically significant factors in the model.</p>
-				{% endif %}
-			{% endfor %}
+				{% for m in prognosis_factors %}
+					<h5 style="margin: 1.25em 0 .5em 0;">{{m.bill_type.full_name}}s ({{m.bill_type.label}}) &mdash; {{m.success_name}}</h5>
+					
+					<p>Overall, {{m.success_rate|floatformat:0}}% of the {{m.count|intcomma}} {{m.bill_type.full_name}}s {% if not m.is_introduced_model %}that got past committee{% endif %} in {{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}} were {{m.success_name}}. The following factors help or hurt that:</p>
+					
+					{% if m.factors %}
+						<table style="margin: 1em 0 1em 1em; font-size: 85%;">
+							<tr><th>N</th> <th>%S</th> <th>&beta;</th> <th>Factor</th></tr>
+							{% for f in m.factors %}
+								<tr>
+									<td style="padding: .2em .5em; text-align: center;">{{f.count|intcomma}}</td>
+									<td style="padding: .2em .5em; text-align: center;">{{f.success_rate|floatformat:0}}%</td>
+									<td style="padding: .2em .5em; text-align: center;">{{f.regression_beta|floatformat:1}}</td>
+									<td style="padding: .2em .5em">{{f.description}}</td>
+								</tr>
+							{% endfor %}
+						</table>
+					{% else %}
+						<p>There were no statistically significant factors in the model.</p>
+					{% endif %}
+				{% endfor %}
+			</div> <!-- /prognosis factors pane -->
+			
+			<div tab="prognosis/accuracy">
+				<p>Did it work? The following charts compare the prognoses computed for bills in the {{prognosis_testing_congress|ordinalhtml}} Congress to the actual rates of success.</p>
+				
+				<p>For each regression model, the bills are divided into 10 bins. The median prognosis is plotted on the horizontal axis and the percentage of successful bills in the bin is plotted on the vertical axis.</p> 
+				
+				<p>You can see that the prognosis overestimated the actual chances of success, but the
+				rough upward slope of the charts shows that the prognosis was predictive of a bill&rsquo;s
+				future.</p>
+			
+				{% for m in prognosis_test %}
+					<h5 style="margin: 1.25em 0 .5em 0;">{{m.bill_type.full_name}}s ({{m.bill_type.label}}) &mdash; {{m.success_name}}</h5>
+					
+					<div id="prognosis_accuracy_{{m.bill_type}}_{{m.is_introduced_model}}"> </div>
+					
+					<script>
+					make_line_chart("prognosis_accuracy_{{m.bill_type}}_{{m.is_introduced_model}}",
+						null,
+						"Prognosis",
+						"% {% if m.is_introduced_model %}out of committee{% else %}{{m.success_name}}{% endif %}",
+						[{ data: [{% for bin1, bin2, n, success in m.bins %}{ x: Math.round(({{bin1|floatformat:2}}+{{bin2|floatformat:2}})/2*10)/10, y: Math.round({{success|floatformat:3}}*1000)/10 }{% if not forloop.last %}, {% endif %}{% endfor %} ]}],
+						{
+							width: 400,
+							height: 250,
+							ymin: 0,
+							xunit: "% Prognosis",
+							yunit: "% Successful",
+						});
+					</script>
+				{% endfor %}
+			</div> <!-- /prognosis accuracy pane -->
+					
+			<div tab="prognosis/other">
+				<p>Here are some additional charts for machine learning researchers.</p>
+				
+				<p>The charts below show precision vs. recall plotted for various values of <i>t</i>,
+				a prognosis threshold. Bills with prognosis above the threshold are predicted
+				successes for the purposes of these charts.</p>
+				
+				{% for m in prognosis_test %}
+					<h5 style="margin: 1.25em 0 .5em 0;">{{m.bill_type.full_name}}s ({{m.bill_type.label}}) &mdash; {{m.success_name}}</h5>
+					
+					<div id="prognosis_precisionrecall_{{m.bill_type}}_{{m.is_introduced_model}}"> </div>
+					
+					<script>
+					make_line_chart("prognosis_precisionrecall_{{m.bill_type}}_{{m.is_introduced_model}}",
+						null,
+						"Precision (%)",
+						"Recall (%)",
+						[{ data: [{% for pt in m.precision_recall %}{ t: Math.round({{pt.threshold|floatformat:1}}*10)/10, x: Math.round({{pt.precision|floatformat:3}}*1000)/10, y: Math.round({{pt.recall|floatformat:3}}*1000)/10 }{% if not forloop.last %}, {% endif %}{% endfor %} ]}],
+						{
+							width: 400,
+							height: 250,
+							ymin: 0,
+							ymax: 100,
+							xmin: 0,
+							xmax: 100,
+							xunit: "% Precision",
+							yunit: "% Recall",
+							tooltip: function() { return "t=" + this.point.t + "%: " + this.point.x + "% Precision, " + this.point.y + "% Recall"; }
+						});
+					</script>
+				{% endfor %}
+			</div> <!-- /prognosis other pane -->
+			</div> <!-- /prognosis results panes -->
 		</div>
 		</div>
 	</div> <!-- /prognosis pane -->
 </div>
 
 <script>$("ul.tabs a").tabs("div.panes > div");</script>
-
+<script>$("#prognosis_results_tabs a").tabs("#prognosis_results_panes > div", "prognosis");</script>
 {% endblock %}
 
