@@ -46,8 +46,8 @@ def get_congress_dates(congressnumber):
                 continue
             cn = int(cn)
             if not cn in cd:
-                cd[cn] = [parse_govtrack_date(startdate), None]
-            cd[cn][1] = parse_govtrack_date(enddate)
+                cd[cn] = [parse_govtrack_date(startdate, as_date=True), None]
+            cd[cn][1] = parse_govtrack_date(enddate, as_date=True)
         CONGRESS_DATES.update(cd)
     return CONGRESS_DATES[congressnumber]
 

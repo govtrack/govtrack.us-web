@@ -150,7 +150,7 @@ class Bill(models.Model):
         cstart, cend = get_congress_dates(self.congress)
         csd = self.current_status_date
         if hasattr(csd, 'date'): csd = csd.date()
-        r = (csd - cstart.date()).days / 365.0 # ranges from 0.0 to about 2.0.
+        r = (csd - cstart).days / 365.0 # ranges from 0.0 to about 2.0.
         if self.is_current:
             from prognosis import compute_prognosis
             r += compute_prognosis(self, proscore=True)["prediction"]
