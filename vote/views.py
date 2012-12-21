@@ -22,8 +22,16 @@ from settings import CURRENT_CONGRESS
 ideology_scores = { }
 
 def vote_list(request):
+    # Get the default session to show. We may have sessions listed that are
+    # in the future, during a transition, so take the most recent that at
+    # least has started.
+    default_session = None
+    for i, (cn, sn, sd, ed) in enumerate(get_all_sessions()):
+        if sd > datetime.now().date(): break
+        default_session = i
+    
     return vote_search_manager().view(request, "vote/vote_list.html",
-        defaults = { "session": len(get_all_sessions())-1 },
+        defaults = { "session": default_session },
         paginate = lambda form : "session" not in form ) # people like to see all votes for a year on one page
 
 def load_vote(congress, session, chamber_code, number):
