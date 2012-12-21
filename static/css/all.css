@@ -3716,6 +3716,9 @@ form.custom .custom.disabled { background-color: #ddd; }
     .advanced-search form li.wide {
         width: 250px;
         }
+        	.advanced-search form li.wide select {
+        		width: auto;
+        	}
 .advanced-search label {
     font-size: .8em;
     line-height: 24px;

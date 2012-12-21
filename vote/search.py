@@ -48,7 +48,7 @@ def vote_search_manager():
     		else:
     			return str(s[2].year) + "-" + str(s[3].year) + " (" + ordinal(s[0]) + " Congress)"
     	
-    session_choices = reversed([(i, format_session(cs)) for (i,cs) in enumerate(get_all_sessions())])
+    session_choices = reversed([(i, format_session(cs)) for (i,cs) in enumerate(get_all_sessions()) if cs[2] < datetime.now().date()])
     
     sm.add_option('session', type="select", choices=session_choices, filter=session_filter, help="Note: Even-year sessions extend a few days into the next year.")
     sm.add_option('chamber')
