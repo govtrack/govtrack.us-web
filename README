@@ -24,10 +24,11 @@ Installation
 
   Symlink bill/solr_schema.xml into solr/conf/schema.xml
   
-* Initialize the database and check the site works.
+* Initialize the database, minify some files, and check the site works.
 
   ./manage.py syncdb
   ./manage.py runserver
+  ./minify
   
 * Get the data files by running `build/rsync.sh` (run it from the main directory, rather than from within build).
 
