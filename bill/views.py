@@ -339,6 +339,7 @@ def bill_docket(request):
         counts_by_congress = []
         for c in xrange(96, CURRENT_CONGRESS+1):
             total = Bill.objects.filter(congress=c).count()
+            if total == 0: continue # during transitions between Congresses
             counts_by_congress.append({
                 "congress": c,
                 "dates": get_congress_dates(c),
