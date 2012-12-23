@@ -120,13 +120,13 @@ class BillProcessor(Processor):
                 value = subnode.get('withdrawn')
                 withdrawn = self.parse_datetime(value) if value else None
                 ob, isnew = Cosponsor.objects.get_or_create(
-                	person=person,
-                	bill=obj,
-                	defaults={
-                		"joined": joined,
-                		"withdrawn": withdrawn,
-                		"role": person.get_role_at_date(joined)
-                	})
+                    person=person,
+                    bill=obj,
+                    defaults={
+                        "joined": joined,
+                        "withdrawn": withdrawn,
+                        "role": person.get_role_at_date(joined)
+                    })
                 if ob.joined != joined or ob.withdrawn != withdrawn:
                     ob.joined = joined
                     ob.withdrawn = withdrawn
@@ -288,19 +288,19 @@ def main(options):
             m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
 
             try:
-				b = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
-				seen_bill_ids.append(b.id)
-				
-				# Update the index/events for any bill with recently changed text
-				textfile = "data/us/bills.text/%s/%s/%s%s.txt" % (m.group(1), m.group(2), m.group(2), m.group(3))
-				if (bill_index and not options.disable_events) and os.path.exists(textfile) and File.objects.is_changed(textfile):
-					bill_index.update_object(b, using="bill") # index the full text
-					b.create_events() # events for new bill text documents
-					File.objects.save_file(textfile)
-					
-				continue
+                b = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
+                seen_bill_ids.append(b.id)
+                
+                # Update the index/events for any bill with recently changed text
+                textfile = "data/us/bills.text/%s/%s/%s%s.txt" % (m.group(1), m.group(2), m.group(2), m.group(3))
+                if (bill_index and not options.disable_events) and os.path.exists(textfile) and File.objects.is_changed(textfile):
+                    bill_index.update_object(b, using="bill") # index the full text
+                    b.create_events() # events for new bill text documents
+                    File.objects.save_file(textfile)
+                    
+                continue
             except Bill.DoesNotExist:
-			    pass # just parse as normal
+                pass # just parse as normal
             
         if options.slow:
             time.sleep(1)
@@ -343,7 +343,11 @@ def main(options):
         log.error('No docs.house.gov download link found at http://docs.house.gov.')
     else:
         def bt_re(bt): return re.escape(bt[1]).replace(r"\.", "\.?\s*")
-        dhg = etree.parse(urllib.urlopen("http://docs.house.gov/" + m.group(1))).getroot()
+        try:
+            dhg = etree.parse(urllib.urlopen("http://docs.house.gov/floor/" + m.group(1))).getroot()
+        except:
+            print "http://docs.house.gov/" + m.group(1)
+            raise
         # iso8601.parse_date(dhg.get("week-date")+"T00:00:00").date()
         for item in dhg.xpath("category/floor-items/floor-item"):
             billname = item.xpath("legis-num")[0].text
