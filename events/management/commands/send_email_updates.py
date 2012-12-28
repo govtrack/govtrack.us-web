@@ -58,12 +58,24 @@ class Command(BaseCommand):
 			
 		total_emails_sent = 0
 		total_events_sent = 0
-		total_users_skipped = 0
+		total_users_skipped_stale = 0
+		total_users_skipped_bounced = 0
 		for user in list(users.order_by('id')): # clone up front to avoid holding the cursor (?)
-			if user.last_login < datetime.now() - timedelta(days=3) \
-				and not Ping.objects.filter(user=user, pingtime__gt=datetime.now() - timedelta(days=20)).exists() \
+			# Check pingback status.
+			try:
+				p = Ping.objects.get(user=user)
+			except Ping.DoesNotExist:
+				p = None
+				
+			if user.last_login < datetime(2009, 4, 1) and p == None:
+				# We warned these people on 2012-04-17 that if they didn't log in
+				# they might stop getting email updates.
+				total_users_skipped_stale += 1
+				continue
+			elif user.last_login < datetime.now() - timedelta(days=3) \
+				and (not p or not p.pingtime or p.pingtime < datetime.now() - timedelta(days=20)) \
 				and BouncedEmail.objects.filter(user=user).exists():
-				total_users_skipped += 1
+				total_users_skipped_bounced += 1
 				continue
 			
 			events_sent = send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events)
@@ -78,7 +90,8 @@ class Command(BaseCommand):
 			db.reset_queries()
 				
 		print "Sent" if send_mail else "Would send", total_emails_sent, "emails and", total_events_sent, "events"
-		print total_users_skipped, "users skipped because of a bounced email"
+		print total_users_skipped_stale, "users skipped because they are stale"
+		print total_users_skipped_bounced, "users skipped because of a bounced email"
 			
 def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events):
 	global now
