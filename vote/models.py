@@ -59,7 +59,7 @@ class Vote(models.Model):
     total_minus = models.IntegerField(blank=True, default=0, help_text="The count of negative votes (nay/no).")
     total_other = models.IntegerField(blank=True, default=0, help_text="The count of abstain or absent voters.")
     
-    related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.")
+    related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.", on_delete=models.PROTECT)
     missing_data = models.BooleanField(default=False, help_text="If something in the source could be parsed and we should revisit the file.")
     
     class Meta:
@@ -255,7 +255,7 @@ class VoteOption(models.Model):
 
 class Voter(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='voters')
-    person = models.ForeignKey('person.Person', null=True)
+    person = models.ForeignKey('person.Person', null=True, on_delete=models.PROTECT)
     voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President (in which case, the person field is null).")
     option = models.ForeignKey('vote.VoteOption', help_text="How the person voted.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.") # equal to vote.created

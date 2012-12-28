@@ -24,7 +24,7 @@ class Committee(models.Model):
     url = models.CharField(max_length=255, blank=True)
     abbrev = models.CharField(max_length=255, blank=True)
     obsolete = models.BooleanField(blank=True, default=False)
-    committee = models.ForeignKey('self', blank=True, null=True, related_name='subcommittees')
+    committee = models.ForeignKey('self', blank=True, null=True, related_name='subcommittees', on_delete=models.PROTECT)
 
     def __unicode__(self):
         return self.name

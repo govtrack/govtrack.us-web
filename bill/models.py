@@ -66,8 +66,8 @@ class BillTerm(models.Model):
         return "/congress/bills/subjects/%s/%d" % (slugify(self.name).replace('-', '_'), self.id)
 
 class Cosponsor(models.Model):
-    person = models.ForeignKey('person.Person')
-    role = models.ForeignKey('person.PersonRole')
+    person = models.ForeignKey('person.Person', on_delete=models.PROTECT)
+    role = models.ForeignKey('person.PersonRole', on_delete=models.PROTECT)
     bill = models.ForeignKey('bill.Bill')
     joined = models.DateField(help_text="The date the cosponsor was added. It is always greater than or equal to the bill's introduced_date.")
     withdrawn = models.DateField(blank=True, null=True, help_text="If the cosponsor withdrew his/her support, the date of withdrawl. Otherwise empty.")
@@ -94,8 +94,8 @@ class Bill(models.Model):
     congress = models.IntegerField(help_text="The number of the Congress in which the bill was introduced. The current Congress is %d." % settings.CURRENT_CONGRESS)
     number = models.IntegerField(help_text="The bill's number (just the integer part).")
     sponsor = models.ForeignKey('person.Person', blank=True, null=True,
-                                related_name='sponsored_bills', help_text="The primary sponsor of the bill.")
-    sponsor_role = models.ForeignKey('person.PersonRole', blank=True, null=True, help_text="The role of the primary sponsor of the bill at the time the bill was introduced.")
+                                related_name='sponsored_bills', help_text="The primary sponsor of the bill.", on_delete=models.PROTECT)
+    sponsor_role = models.ForeignKey('person.PersonRole', blank=True, null=True, help_text="The role of the primary sponsor of the bill at the time the bill was introduced.", on_delete=models.PROTECT)
     committees = models.ManyToManyField(Committee, related_name='bills')
     terms = models.ManyToManyField(BillTerm, related_name='bills')
     current_status = models.IntegerField(choices=BillStatus, help_text="The current status of the bill.")
@@ -670,7 +670,7 @@ def get_formatted_bill_summary(bill):
     return summary
 
 class BillLink(models.Model):
-    bill = models.ForeignKey(Bill, db_index=True, related_name="links")
+    bill = models.ForeignKey(Bill, db_index=True, related_name="links", on_delete=models.PROTECT)
     url = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
     created = models.DateTimeField(auto_now_add=True)
