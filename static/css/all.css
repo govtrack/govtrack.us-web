@@ -233,10 +233,21 @@ code {
     font-family: 'Droid Sans Mono', Monaco, "Courier New", Courier, monospace;
 }
 
-sup {
-	vertical-align: super;
+sup,
+sub { /* http://www.adobe.com/cfusion/communityengine/index.cfm?event=showdetails&postId=5341&productId=1 */
+	height: 0;
+	line-height: 1;
+	vertical-align: baseline;
+	_vertical-align: bottom; /* IE 6 and below */
+	position: relative;
 	font-size: 75%;
 	font-style: italic;
+}
+sup {
+	bottom: 1ex;
+}
+sub {
+	top: .5ex;
 }
 
 /* General classes ============================== */
@@ -2173,7 +2184,6 @@ a.button.prefix, a.button.postfix {
         margin: 0 0 .5em;
     	}
     	.summary-box h1 sup {
-    		vertical-align: super;
     		font-size: 65%;
     	}
     .summary-box .info {
