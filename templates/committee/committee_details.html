@@ -10,9 +10,9 @@
 <li><a href="/congress/committees">Committees</a></li>
 {% if parent %}
 	<li><a href="{{ parent.get_absolute_url }}">{% if parent.abbrev %}{{parent.committee_type_abbrev}}.{{parent.abbrev}}.{% else %}{{parent|truncatewords:3}}{% endif %}</a></li>
-	<li>{% if committee.abbrev %}{{committee.abbrev}}{% else %}{{committee|truncatewords:3}}{% endif %}</li>
+	<li>{% if committee.abbrev %}{{committee.abbrev}}{% else %}{{committee|cut:"Committee on the "|cut:"Committee on "|truncatewords:3}}{% endif %}</li>
 {% else %}
-	<li>{{committee|truncatewords:5}}</li>
+	<li>{{committee|cut:"Committee on the "|cut:"Committee on "|truncatewords:5}}</li>
 {% endif %}
 </ul>
 {% endblock %}
@@ -60,13 +60,13 @@
 {% block body %}
 <div class="twelve columns">
 	<ul class="tabs three-up">
-		<li><a href="#">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
-		<li><a href="#">Committee Activity</a></li>
-		{% if subcommittees %}<li><a href="#">Subcommittees</a></li>{% endif %}
+		<li><a href="#members">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
+		<li><a href="#activity">Committee Activity</a></li>
+		{% if subcommittees %}<li><a href="#subcommittees">Subcommittees</a></li>{% endif %}
 	</ul>
 
 	<div class="panes">
-		<div id="members_grid" class="row">
+		<div id="members" class="committee-members-grid row">
 			<h2 style="margin: 1em 0 1em 0">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</h2>
 				
 		    <div class="row">
@@ -120,7 +120,7 @@
 		        {% endfor %}
 		    </div>
 		</div>
-		<div>
+		<div id="activity">
 			<h2 style="margin: 1em 0 1em 0">Committee Activity</h3>
 			
 		    <div class="col_left tweets">	
@@ -128,7 +128,7 @@
 			</div>
 		</div>
 		{% if subcommittees %}
-		<div>
+		<div id="subcommittees">
 		    <h2 style="margin: 1em 0 1em 0">Subcommittees</h2>
 				<ul class="bullets">
 					{% for item in subcommittees %}
@@ -140,7 +140,7 @@
 	</div><!-- /panes -->
 </div><!-- /.twelve.columns -->
 
-<script>$("ul.tabs").tabs("div.panes > div");</script>
+<script>$("ul.tabs li a").tabs("div.panes > div");</script>
 
 {% endblock %}
 

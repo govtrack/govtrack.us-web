@@ -925,7 +925,7 @@ img {
     float: none;
   }
 
-  #members_grid .columns:last-child {
+  .committee-members-grid .columns:last-child {
     float: none !important;
   }
 
@@ -2407,24 +2407,24 @@ a.button.prefix, a.button.postfix {
 	#member-details ul ul {
 		margin-bottom: 0;
 	}
-  #members_grid .member {
+  .committee-members-grid .member {
     position: relative;
     text-align: center;
     margin-bottom: 30px;
   }
-  #members_grid .member .flag{
+  .committee-members-grid .member .flag{
     width: 122px;
     margin-top: -25px;
     margin-bottom: 26px;
     left: -4px;
   }
-  #members_grid .member .flag:before {
+  .committee-members-grid .member .flag:before {
     top: -10px;
   }
-  #members_grid .member .photo {
+  .committee-members-grid .member .photo {
     margin: 0 auto;
   }
-  #members_grid .columns:last-child { float: left; }
+  .committee-members-grid .columns:last-child { float: left; }
 
 
 /* Vote Statistics styles =========================== */
