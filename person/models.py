@@ -63,6 +63,9 @@ class Person(models.Model):
     haystack_index = ('lastname', 'gender')
     haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'), ('was_moc', 'Boolean'), ('is_currently_moc', 'Boolean'))
     #######
+    # api
+    api_recurse_on_single = ('roles', 'committeeassignments')
+    #######
 
     def __unicode__(self):
         return self.name
@@ -102,8 +105,11 @@ class Person(models.Model):
         return self.get_current_role()
     def get_current_role(self):
         try:
-            return self.roles.get(current=True)
-        except PersonRole.DoesNotExist:
+            if not self.roles.all()._result_cache: # if this has already been feteched by prefetch_related
+                return self.roles.get(current=True)
+            else:
+            	return [r for r in self.roles.all() if r.current][0]
+        except (PersonRole.DoesNotExist, IndexError):
             return None
     def is_currently_serving(self):
         return self.roles.filter(current=True).exists()
@@ -160,7 +166,10 @@ class Person(models.Model):
     def get_most_recent_role(self):
         if self._most_recent_role: return self._most_recent_role
         try:
-            r = self.roles.order_by('-startdate')[0]
+            if not self.roles.all()._result_cache: # if this has already been feteched by prefetch_related
+                r = self.roles.order_by('-startdate')[0]
+            else:
+                r = sorted(self.roles.all(), key=lambda r : r.startdate, reverse=True)[0]
             self._most_recent_role = r
             return r
         except IndexError:
@@ -194,7 +203,11 @@ class Person(models.Model):
         return self.get_most_recent_role_field('most_recent_congress_number')
     def was_moc(self):
         if self.is_currently_moc(): return True # good for caching
-        return self.roles.filter(role_type__in=(RoleType.representative, RoleType.senator)).exists() # ability to exclude people who only were president
+        if not self.roles.all()._result_cache: # if this has already been feteched by prefetch_related
+            return self.roles.filter(role_type__in=(RoleType.representative, RoleType.senator)).exists() # ability to exclude people who only were president
+        else:
+            return len([r for r in self.roles.all() if r.role_type in (RoleType.representative, RoleType.senator)])
+        
     def is_currently_moc(self):
         r = self.get_most_recent_role() # good for caching
         if not r: return False # not even one role?

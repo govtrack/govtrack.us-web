@@ -166,6 +166,10 @@ class Bill(models.Model):
         p = self.sponsor_role.party
         return (p, "Majority Party" if p == mp[self.congress][self.bill_type] else "Minority Party")
         
+    # api
+    api_recurse_on = ("sponsor", "sponsor_role")
+    api_recurse_on_single = ("committees", "cosponsors", "terms")
+        
     @property
     def display_number(self):
         """The bill's number, suitable for display, e.g. H.R. 1234. If the bill is for a past session of Congress, includes the Congress number."""
