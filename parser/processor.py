@@ -78,15 +78,21 @@ class Processor(object):
             except ValueError:
                 return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00')
                 
+    def is_model_field(self, obj, fieldname):
+        from django.db.models import FieldDoesNotExist
+        try:
+            return obj._meta.get_field(fieldname) is not None # =! None breaks because of operator overloading
+        except FieldDoesNotExist:
+            return False
+                
     def changed(self, old_value, new_value):
         # Since new_value hasn't been touched except for the fields we've set on it,
         # we can use its __dict__, except Django ORM's _state field, to check if any
         # fields have changed.
         new_value.clean_fields() # normalize field values, like DateTimes that get reduced to Dates
         for k in new_value.__dict__:
-            if k in ("id", "_state") or k.endswith("_cache"):
-                continue
-            if not hasattr(old_value, k) or getattr(old_value, k) != getattr(new_value, k):
-                return True
+            if k != "id" and self.is_model_field(old_value, k):
+                if not hasattr(old_value, k) or getattr(old_value, k) != getattr(new_value, k):
+                    return True
         return False
         
