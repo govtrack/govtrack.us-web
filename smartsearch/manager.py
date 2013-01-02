@@ -108,7 +108,15 @@ class SearchManager(object):
                 }
             c.update(context)
             return render_to_response(template, c, RequestContext(request))
-        
+
+        # Although we cache some facet queries, also cache the final response.
+        cachekey = self.build_cache_key('response' + ("_F" if request.POST["faceting"] != "false" else ""), request)
+        resp = cache.get(cachekey)
+        if resp:
+            resp = HttpResponse(resp, content_type='text/json')
+            resp["X-Cached"] = "True"
+            return resp
+
         try:
             qs = self.queryset(request.POST)
             
@@ -147,11 +155,13 @@ class SearchManager(object):
                             loaded_facets = fq["fields"]
                             cache.set(cache_key, loaded_facets, FACET_CACHE_TIME)
 
-            cache_key = self.build_cache_key('count', request)
-            qs_count = cache.get(cache_key)
-            if qs_count == None:
-                qs_count = qs.count()
-                cache.set(cache_key, qs_count, FACET_CACHE_TIME)
+            # At the moment there's no need to cache the count because we also cache the final response.
+            #cache_key = self.build_cache_key('count', request)
+            #qs_count = cache.get(cache_key)
+            #if qs_count == None:
+            #    qs_count = qs.count()
+            #    cache.set(cache_key, qs_count, FACET_CACHE_TIME)
+            qs_count = qs.count()
                 
             def make_simple_choices(option):
                 return option.type == "select" and not option.choices
@@ -211,7 +221,10 @@ class SearchManager(object):
             else:
                 ret = facets
 
-            return HttpResponse(json.dumps(ret), content_type='text/json')
+            # Cache the final response for 5 minutes.
+            ret = json.dumps(ret)
+            cache.set(cachekey, ret, 60*5)
+            return HttpResponse(ret, content_type='text/json')
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -266,12 +279,12 @@ class SearchManager(object):
                             yield y
                 values = list(clean_values(postdata.getlist(option.field_name)+postdata.getlist(option.field_name+"[]")))
                 if option.type == "text":
-                	# For full-text searching, don't use __in so that the search
-                	# backend does its usual query operation.
-                	filters[option.field_name] = " ".join(values)
+                    # For full-text searching, don't use __in so that the search
+                    # backend does its usual query operation.
+                    filters[option.field_name] = " ".join(values)
                 elif not u'__ALL__' in values:
-					# if __ALL__ value presents in filter values
-					# then do not limit queryset
+                    # if __ALL__ value presents in filter values
+                    # then do not limit queryset
                     filters['%s__in' % option.field_name] = values
 
         # apply filters simultaneously so that filters on related objects are applied
@@ -404,11 +417,11 @@ class SearchManager(object):
                 # (key, label, count, help_text) tuples
                 value = fix_value_type(value)
                 return (
-                	value,
-                	nice_name(value, objs),
-                	count,
-                	getattr(field.choices.by_value(value), "search_help_text", None)
-                		if field and field.choices and type(field.choices) == MetaEnum else None)
+                    value,
+                    nice_name(value, objs),
+                    count,
+                    getattr(field.choices.by_value(value), "search_help_text", None)
+                        if field and field.choices and type(field.choices) == MetaEnum else None)
             
             if loaded_facets and option.field_name in loaded_facets:
                 # Facet counts were already loaded.
