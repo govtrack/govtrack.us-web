@@ -1,7 +1,9 @@
 {% load events_utils %}GovTrack Email Update
 =====================
 
+{% comment %}
 ----- Have you tried our new full text keyword search trackers? Check out what's new on GovTrack: http://www.govtrack.us/blog/2012/11/25/site-updates-fall-2012.
+{% endcomment %}
 
 This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to http://www.govtrack.us/accounts/lists.
 
