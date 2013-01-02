@@ -30,9 +30,23 @@ def vote_list(request):
         if sd > datetime.now().date(): break
         default_session = i
     
-    return vote_search_manager().view(request, "vote/vote_list.html",
+    # The votes database is really slow. Although we cache facet results,
+    # we seem not to cache the results themselves. Cache the response here.
+    cachekey = None
+    if request.META["REQUEST_METHOD"] == "POST":
+        from django.core.cache import cache
+        cachekey = "vote-search-" + request.POST.urlencode()
+        resp = cache.get(cachekey)
+        if resp: return resp
+    
+    resp = vote_search_manager().view(request, "vote/vote_list.html",
         defaults = { "session": default_session },
         paginate = lambda form : "session" not in form ) # people like to see all votes for a year on one page
+        
+    if cachekey:
+        cache.set(cachekey, resp, 60*4)
+
+    return resp
 
 def load_vote(congress, session, chamber_code, number):
     """
