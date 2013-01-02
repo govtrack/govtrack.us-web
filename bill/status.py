@@ -54,6 +54,9 @@ class BillStatus(enum.Enum):
     # all final statuses
     final_status = tuple(list(final_status_passed_bill) + list(final_status_passed_resolution) + list(final_status_failed))
 
+	# the statuses that are basically just introduction
+    introduced_statuses = (introduced, referred)
+
 def get_bill_status_string(is_current, status):
     # Returns a string with two %'s in it, one for the bill noun ("bill"/"resolution")
     # and one for the status date.

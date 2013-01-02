@@ -1,5 +1,5 @@
 {% extends "master_a.html" %}
-{% load humanize persontags cache %}
+{% load humanize persontags cache govtrack_utils %}
 
 {% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}{{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district %}'s {{role.district|ordinal}} District{% endif %}{% endif %} - GovTrack.us{% endblock %}
 
@@ -27,7 +27,7 @@
 		<h1>{{person.name_and_title}}</h1>
 		
 		{% if role and not active_role %}
-		<p>Former {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}{% endif %}</p>
+		<p>Former {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}{% endif %}</p>
 		{% endif %}
 		
 		<div class="info">
@@ -60,7 +60,7 @@
 	        <tr>
 	            <td>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</td>
 	            <td>{{ role.get_role_type_display }}</td>
-	            <td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinal}} District {% endif %}</td>
+	            <td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}</td>
 	        </tr>
 	        {% endfor %}
 		</table>
@@ -114,7 +114,7 @@
 		<p>{{ person.lastname }} {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a {{ analysis_data.sponsorship.description }} according to
 		GovTrack's own analysis of bill sponsorship{% if not analysis_data.sponsorship.current %} from {{ person.lastname }}&rsquo;s time serving in the
 		{{analysis_data.sponsorship.chamber}}{% endif %}.</p>
-		<p>Use this chart to compare {{ person.lastname }} to other members of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %} in the {{analysis_data.sponsorship.congress|ordinal}} Congress{% endif %} on leadership and ideology.</p>
+		<p>Use this chart to compare {{ person.lastname }} to other members of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %} in the {{analysis_data.sponsorship.congress|ordinalhtml}} Congress{% endif %} on leadership and ideology.</p>
 
 		<div id="sponsorship_analysis_chart"> </div>
 		<script>
@@ -216,7 +216,7 @@
 		{% if analysis_data.influence.influencees|length > 0 %}
 			<p>Influences: {% for p in analysis_data.influence.influencees.values %}<a href="{{p.get_absolute_url}}">{{p.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
 		{% endif %}
-		<p><small>This chart is based on principal components analysis for ideology, PageRank for leadership, and network inference for influence. See <a href="http://www.govtrack.us/blog/2010/12/26/repstats/">analysis details</a>.</small></p>
+		<p><small>This chart is based on principal components analysis for ideology, PageRank for leadership, and network inference for influence. See <a href="/about/analysis">analysis methodology</a>.</small></p>
 		</div>
 	</section><!-- /analysis -->
     {% endif %}
@@ -363,7 +363,7 @@
 		<table id="missedvotestable" style="display: none">
 			<tr> <th>Time Period</th> <th>Votes Elligible</th> <th>Missed Votes</th> <th>Percent</th> <th>Percentile</th> </tr>
 			{% for rec in analysis_data.missedvotes.data %}
-				<tr><td>{{rec.time}}</td> <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinal}}</td></tr>
+				<tr><td>{{rec.time}}</td> <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinalhtml}}</td></tr>
 			{% endfor %}
 		</table>
 

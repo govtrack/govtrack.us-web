@@ -15,7 +15,7 @@ from common.pagination import paginate
 
 import json, cPickle, base64
 
-from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs, get_all_sessions
+from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs, get_all_sessions, get_congress_dates
 
 from person.models import Person, PersonRole
 from person import analysis
@@ -28,6 +28,8 @@ from smartsearch.manager import SearchManager
 from search import person_search_manager
 
 from registration.helpers import json_response
+
+from settings import CURRENT_CONGRESS
 
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -166,7 +168,7 @@ def browsemembersbymap(request, state=None, district=None):
                 if not distr:
                     url = "http://gis.govtrack.us/boundaries/2012-states/%s/?format=json" % state.lower()
                 else:
-                    url = "http://gis.govtrack.us/boundaries/2010-cd/%s-%02d/?format=json" % (state.lower(), int(distr))
+                    url = "http://gis.govtrack.us/boundaries/cd-2012/%s-%02d/?format=json" % (state.lower(), int(distr))
                 resp = json.load(urllib.urlopen(url))
                 sw_lng, sw_lat, ne_lng, ne_lat = resp["extent"]
                 area = (ne_lng-sw_lng)*(ne_lat-sw_lat)
@@ -200,9 +202,14 @@ def browsemembersbymap(request, state=None, district=None):
 @render_to('person/overview.html')
 def membersoverview(request):
     def get_current_members(role_type, delegates, by_party):
+    	# get Membership as of the start of the CURRENT_CONGRESS
+    	# or right now, whichever is later.
+        d = get_congress_dates(CURRENT_CONGRESS)[0]
+        if datetime.now().date() > d: d = datetime.now()
+                
         qs = PersonRole.objects.filter(
             role_type=role_type,
-            startdate__lte=datetime.now(), enddate__gte=datetime.now(),
+            startdate__lte=d, enddate__gte=d,
             state__in=set(s for s, t in stateapportionment.items() if (t != "T") ^ delegates)
             )
         if by_party:
@@ -246,7 +253,7 @@ def district_lookup(request):
 
 def do_district_lookup(lng, lat):
     import urllib, json
-    url = "http://gis.govtrack.us/boundaries/2010-cd/?contains=%f,%f&format=json" % (lat, lng)
+    url = "http://gis.govtrack.us/boundaries/cd-2012/?contains=%f,%f&format=json" % (lat, lng)
     try:
         resp = json.load(urllib.urlopen(url))
     except Exception as e:
@@ -260,43 +267,6 @@ def do_district_lookup(lng, lat):
         
     d = resp["objects"][0]["slug"].split("-")
     return { "state": d[0].upper(), "district": int(d[1]) }
-
-@render_to('congress/political_spectrum.html')
-def political_spectrum(request):
-    rows = []
-    fnames = [
-        'data/us/112/stats/sponsorshipanalysis_h.txt',
-        'data/us/112/stats/sponsorshipanalysis_s.txt',
-    ]
-    alldata = open(fnames[0]).read() + open(fnames[1]).read()
-    for line in alldata.splitlines():
-        chunks = [x.strip() for x in line.strip().split(',')]
-        if chunks[0] == "ID":
-            continue
-        
-        data = { }
-        data['id'] = chunks[0]
-        data['x'] = float(chunks[1])
-        data['y'] = float(chunks[2])
-        
-        p = Person.objects.get(id=chunks[0])
-        data['label'] = p.lastname
-        if p.birthday: data['age'] = (datetime.now().date() - p.birthday).days / 365.25
-        data['gender'] = p.gender
-        
-        r = p.get_last_role_at_congress(112)
-        data['type'] = r.role_type
-        data['party'] = r.party
-        data['years_in_congress'] = (min(datetime.now().date(),r.enddate) - p.roles.filter(startdate__lte=r.startdate).order_by('startdate')[0].startdate).days / 365.25
-        
-        rows.append(data)
-        
-    years_in_congress_max = max([data['years_in_congress'] for data in rows])
-    
-    return {
-        "data": json.dumps(rows),
-        "years_in_congress_max": years_in_congress_max,
-        }
 
 import django.contrib.sitemaps
 class sitemap_current(django.contrib.sitemaps.Sitemap):

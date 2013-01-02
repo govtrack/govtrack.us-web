@@ -96,28 +96,28 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	# introduced date (idea from Yano, Smith and Wilkerson 2012 paper)
 	idate = bill.introduced_date
 	if hasattr(idate, 'date'): idate = idate.date() # not sure how this is possible
-	if (idate - get_congress_dates(bill.congress)[0].date()).days < 90:
-		factors.append(("introduced_first90days", "The %s was introduced in the first 90 days of the Congress." % bill.noun))
-	if (idate - get_congress_dates(bill.congress)[0].date()).days < 365:
-		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Congress." % bill.noun))
-	if (get_congress_dates(bill.congress)[1].date() - idate).days < 90:
-		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Congress." % bill.noun))
+	if (idate - get_congress_dates(bill.congress)[0]).days < 90:
+		factors.append(("introduced_first90days", "The %s was introduced in the first 90 days of the Congress." % bill.noun, "Introduced in the first 90 days of the Congress (incl. companion bills)."))
+	if (idate - get_congress_dates(bill.congress)[0]).days < 365:
+		factors.append(("introduced_firstyear", "The %s was introduced in the first year of the Congress." % bill.noun, "Introduced in the first year of the Congress (incl. companion bills)."))
+	if (get_congress_dates(bill.congress)[1] - idate).days < 90:
+		factors.append(("introduced_last90days", "The %s was introduced in the last 90 days of the Congress." % bill.noun, "Introduced in the last 90 days of the Congress (incl. companion bills)."))
 	
 	# does the bill's title start with a common prefix?
 	for prefix in pop_title_prefixes:
 		if bill.title_no_number.startswith(prefix + " "):
-			factors.append(("startswith:" + prefix, "The %s's title starts with \"%s.\"" % (bill.noun, prefix)))
+			factors.append(("startswith:" + prefix, "The %s's title starts with \"%s.\"" % (bill.noun, prefix), "Title starts with \"%s\"." % prefix))
 	
 	cosponsors = list(Cosponsor.objects.filter(bill=bill, withdrawn=None).select_related("person"))
 	committees = list(bill.committees.all())
 	
 	maj_party = majority_party[bill.bill_type]
 	
-	if bill.sponsor:
+	if bill.sponsor_role:
 		# party of the sponsor
-		sponsor_party = bill.sponsor.get_role_at_date(bill.introduced_date).party
+		sponsor_party = bill.sponsor_role.party
 		if sponsor_party != maj_party:
-			factors.append( ("sponsor_minority", "The sponsor is a member of the minority party.") )
+			factors.append( ("sponsor_minority", "The sponsor is a member of the minority party.", "Sponsor is a member of the minority party.") )
 	
 		# is the sponsor a member/chair of a committee to which the bill has
 		# been referred?
@@ -125,17 +125,17 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 			for committee in committees:
 				if committee_membership.get(bill.sponsor_id, {}).get(committee.code) ==  rvalue:
 					if rvalue != CommitteeMemberRole.member:
-						factors.append(("sponsor_committee_%s" % rname, "The sponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun)))
+						factors.append(("sponsor_committee_%s" % rname, "The sponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun), "Sponsor is a relevant committee %s." % CommitteeMemberRole.by_value(rvalue).label.lower()))
 					elif sponsor_party == maj_party:
-						factors.append(("sponsor_committee_member_majority", "The sponsor is on a committee to which the %s has been referred, and the sponsor is a member of the majority party." % bill.noun))
+						factors.append(("sponsor_committee_member_majority", "The sponsor is on a committee to which the %s has been referred, and the sponsor is a member of the majority party." % bill.noun, "Sponsor is on a relevant committee & in majority party."))
 						
 		# leadership score of the sponsor, doesn't actually seem to be helpful,
 		# even though leadership score of cosponsors is.
 		if get_leadership_score(bill.sponsor) > .8:
 			if sponsor_party == maj_party:
-				factors.append(("sponsor_leader_majority", "The sponsor is in the majority party and has a high leadership score."))
+				factors.append(("sponsor_leader_majority", "The sponsor is in the majority party and has a high leadership score.", "Sponsor has a high leadership score (majority party)."))
 			else:
-				factors.append(("sponsor_leader_minority", "The sponsor has a high leadership score but is not in the majority party."))
+				factors.append(("sponsor_leader_minority", "The sponsor has a high leadership score but is not in the majority party.", "Sponsor has a high leadership score (minority party)."))
 					
 	# count cosponsor assignments to committees by committee role and Member party
 	for rname, rvalue in (("committeemember", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("vicechair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
@@ -153,9 +153,10 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 				num_cosp = "3-5"
 			else:
 				num_cosp = "6+"
-			factors.append( ("cosponsor_%s_%s" % (rname, num_cosp), "%s cosponsors serve on a committee to which the %s has been referred." % (num_cosp, bill.noun)) )
+			factors.append( ("cosponsor_%s_%s" % (rname, num_cosp), "%s cosponsors serve on a committee to which the %s has been referred." % (num_cosp, bill.noun), "%s cosponsors are on a relevant committee." % num_cosp) )
 		elif num_cosp > 0:
-			factors.append( ("cosponsor_%s" % rname, "A cosponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun)))
+			rname2 = CommitteeMemberRole.by_value(rvalue).label.lower()
+			factors.append( ("cosponsor_%s" % rname, "A cosponsor is the %s of a committee to which the %s has been referred." % (rname2, bill.noun), "A cosponsor is a relevant committee %s." % rname2))
 
 	# do we have cosponsors on both parties?
 	num_cosp_majority = 0
@@ -163,18 +164,18 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		if cosponsor.role.party == maj_party:
 			num_cosp_majority += 1
 	if bill.sponsor and sponsor_party == maj_party and len(cosponsors) >= 6 and num_cosp_majority < 2.0*len(cosponsors)/3:
-		factors.append(("cosponsors_bipartisan", "The sponsor is in the majority party and at least one third of the %s's cosponsors are from the minority party." % bill.noun))
+		factors.append(("cosponsors_bipartisan", "The sponsor is in the majority party and at least one third of the %s's cosponsors are from the minority party." % bill.noun, "Sponsor is in majority party and 1/3rd+ of cosponsors are in minority party."))
 	elif num_cosp_majority > 0 and num_cosp_majority < len(cosponsors):
-		factors.append(("cosponsors_crosspartisan", "There is at least one cosponsor from the majority party and one cosponsor outside of the majority party."))
+		factors.append(("cosponsors_crosspartisan", "There is at least one cosponsor from the majority party and one cosponsor outside of the majority party.", "Has cosponsors from both parties."))
 
 	for is_majority in (False, True):
 		for cosponsor in cosponsors:
 			if (cosponsor.role.party == maj_party) != is_majority: continue
 			if get_leadership_score(cosponsor.person) > .85:
 				if is_majority:
-					factors.append(("cosponsor_leader_majority", "A cosponsor in the majority party has a high leadership score."))
+					factors.append(("cosponsor_leader_majority", "A cosponsor in the majority party has a high leadership score.", "Cosponsor has high leadership score (majority party)."))
 				else:
-					factors.append(("cosponsor_leader_minority", "A cosponsor in the minority party has a high leadership score."))
+					factors.append(("cosponsor_leader_minority", "A cosponsor in the minority party has a high leadership score.", "Cosponsor has high leadership score (minority party)."))
 				break
 
 	# Is this bill a re-intro from last Congress, and if so was that bill reported by committee?
@@ -185,18 +186,36 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		for reintro in Bill.objects.filter(congress=bill.congress-1, sponsor=bill.sponsor):
 			if normalize_title(bill.title_no_number) == normalize_title(reintro.title_no_number):
 				if reintro.current_status not in (BillStatus.introduced, BillStatus.referred):
-					factors.append(("reintroduced_of_reported", "This %s was reported by committee as %s in the previous session of Congress." % (bill.noun, reintro.display_number)))
+					factors.append(("reintroduced_of_reported", "This %s was reported by committee as %s in the previous session of Congress." % (bill.noun, reintro.display_number), "Got past committee in a previous Congress."))
 				else:
-					factors.append(("reintroduced", "This %s was a re-introduction of %s from the previous session of Congress." % (bill.noun, reintro.display_number)))
+					factors.append(("reintroduced", "This %s was a re-introduction of %s from the previous session of Congress." % (bill.noun, reintro.display_number), "Is a bill reintroduced from a previous Congress."))
 				break
 
 	if include_related_bills: # prevent infinite recursion
-		# Add factors from any CRS-identified identical bill, changing each factor's
+		# Add factors from any CRS-identified identical bill, changing most factors'
 		# key into companion_KEY so that they become separate factors to consider.
-		for rb in RelatedBill.objects.filter(bill=bill, relation="identical").select_related("related_bill"):
+		# For some specific factors, lump them in with the factor for the bill itself.
+		for rb in RelatedBill.objects.filter(bill=bill, relation="identical").select_related("related_bill", "related_bill__sponsor_role"):
+			# has a companion
+			factors.append(("companion", "The %s has been introduced in both chambers (the other is %s)." % (bill.noun, rb.related_bill.display_number), "Has a companion bill in the other chamber."))
+			
+			# companion sponsor's party
+			if bill.sponsor_role and rb.related_bill.sponsor_role:
+				if bill.sponsor_role.party != rb.related_bill.sponsor_role.party:
+					factors.append(("companion_bipartisan", "The %s's companion %s was sponsored by a member of the other party." % (bill.noun, rb.related_bill.display_number), "Has a companion bill sponsored by the other party."))
+			
 			for f in get_bill_factors(rb.related_bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data, include_related_bills=False):
 				if "startswith" in f[0]: continue # don't include title factors because the title is probs the same
-				f = ("companion_" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1])
+				if f[0] in ("introduced_first90days", "introduced_last90days", "introduced_firstyear", "reintroduced_of_reported", "reintroduced"):
+					f = (f[0], "%s (on companion bill %s)" % (f[1], rb.related_bill.display_number), f[2])
+				else:
+					f = ("companion__" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1], "On a companion bill: " + f[2])
+					
+				# Make sure not to duplicate any factors, especially if we are promoting the companion
+				# bill factor to a main factor, we don't want to double count or override the description
+				# on the main bill.
+				if f[0] in set(k[0] for k in factors): continue
+				
 				factors.append(f)
 
 	# Are lobbyists registering that they are lobbying on this bill? Does this bill
@@ -219,11 +238,17 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	# so it would be impossible to factor out "hard bills" entirely.
 	if False:
 		if lobbying_data["counts"].get( (bill.bill_type, bill.number), 0 ) > lobbying_data["median"]:
-			factors.append( ("crp-lobby-many", "The Center for Responsive Politics reports that a large number of organizations are lobbying on this %s." % bill.noun) )
+			factors.append( ("crp-lobby-many", "The Center for Responsive Politics reports that a large number of organizations are lobbying on this %s." % bill.noun, "Has many lobbyists.") )
 		elif lobbying_data["counts"].get( (bill.bill_type, bill.number), 0 ) > 0:
-			factors.append( ("crp-lobby", "The Center for Responsive Politics reports that organizations are lobbying on this %s." % bill.noun) )
+			factors.append( ("crp-lobby", "The Center for Responsive Politics reports that organizations are lobbying on this %s." % bill.noun, "Has lobbyists.") )
 
 	return factors
+
+def is_success(bill, model_type):
+	if model_type == 0:
+		return bill.current_status not in BillStatus.introduced_statuses
+	else:
+		return bill.current_status in BillStatus.final_status_passed
 
 def build_model(congress):
 	majority_party = load_majority_party(congress)
@@ -265,29 +290,27 @@ def build_model(congress):
 		
 	MODEL = dict()
 	
-	introduced_statuses = (BillStatus.introduced, BillStatus.referred)
-	
-	for (bill_type, bill_type_descr), is_introduced in itertools.product(BillType, (True, False)):
+	for (bill_type, bill_type_descr), model_type in itertools.product(BillType, (0, 1)):
 		#if bill_type != BillType.house_bill: continue
 		#if bill_type not in (BillType.house_joint_resolution, BillType.senate_joint_resolution): continue
 		
 		bills = BILLS.filter(bill_type=bill_type)
-		if not is_introduced:
-			# When is_introduced is True, we scan across all bills, because all bills were
+		if model_type == 1:
+			# In model 0, we scan across all bills, because all bills were
 			# in the introduced/referred status at one point. If we filter it to bills whose
 			# current status is introduced/referred, obviously they will all have been
-			# failed bills, which defeats the purpose. When is_introduced is False, we
+			# failed bills, which defeats the purpose. In model 1, we
 			# only look at bills that have at least gotten reported so that we can see
 			# of reported bills which make it to success.
-			bills = bills.exclude(current_status__in=introduced_statuses)
+			bills = bills.exclude(current_status__in=BillStatus.introduced_statuses)
 
-		print bill_type_descr, "introduced" if is_introduced else "reported"
+		print bill_type_descr, model_type
 		
 		total = bills.count()
 		
-		if is_introduced:
+		if model_type == 0:
 			# for the introduced model, success is getting out of committee
-			total_success = bills.exclude(current_status__in=introduced_statuses).count()
+			total_success = bills.exclude(current_status__in=BillStatus.introduced_statuses).count()
 		else:
 			# for the reported model, success is being enacted (or whatever final status as appropriate for the bill type)
 			total_success = bills.filter(current_status__in=BillStatus.final_status_passed).count()
@@ -297,25 +320,24 @@ def build_model(congress):
 		sorted_bills = { }
 		regression_outcomes = [ ]
 		regression_predictors = [ ]
+		factor_descriptions = { }
 		for bill in bills:
 			#import random # speed this up?
 			#if random.random() < .7: continue
 			
 			# What's the measured binary outcome for this bill? Check if the bill
 			# ended in a success state.
-			if is_introduced:
-				success = bill.current_status not in introduced_statuses
-			else:
-				success = bill.current_status in BillStatus.final_status_passed
+			success = is_success(bill, model_type)
 			
 			# Get the binary factors that apply to this bill.
 			factors = get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data)
 			
 			# maintain a simple list of success percent rates for each factor individually
-			for key, descr in factors:
+			for key, descr, general_descr in factors:
 				if not key in sorted_bills: sorted_bills[key] = [0, 0] # count of total, successful
 				sorted_bills[key][0] += 1
 				if success: sorted_bills[key][1] += 1
+				factor_descriptions[key] = general_descr
 				
 			# build data for a regression
 			regression_outcomes.append(1.0 if success else 0.0)
@@ -351,8 +373,8 @@ def build_model(congress):
 			
 		# Generate the model for output.
 		model = dict()
-		MODEL[(bill_type,is_introduced)] = model
-		if is_introduced:
+		MODEL[(bill_type,model_type == 0)] = model
+		if model_type == 0:
 			model["success_name"] = "sent out of committee to the floor"
 		else:
 			if bill_type in (BillType.senate_bill, BillType.house_bill):
@@ -375,6 +397,7 @@ def build_model(congress):
 			model_factors[key]["count"] = bill_counts[0]
 			model_factors[key]["success_rate"] = 100.0*bill_counts[1]/bill_counts[0]
 			model_factors[key]["regression_beta"] = regression_beta[regression_predictors_map[key]+1]
+			model_factors[key]["description"] = factor_descriptions[key]
 			
 	with open("bill/prognosis_model.py", "w") as modelfile:
 		modelfile.write("# this file was automatically generated by prognosis.py\n")
@@ -425,7 +448,7 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 	prediction_1 = eval_model(model_1)
 	prediction_2 = eval_model(model_2)
 	
-	is_introduced = bill.current_status in (BillStatus.introduced, BillStatus.referred)
+	is_introduced = bill.current_status in BillStatus.introduced_statuses
 	
 	def helps(factor, state1, state2):
 		a = model_1["factors"][factor]["regression_beta"] >= 0 if factor in model_1["factors"] else model_2["factors"][factor]["regression_beta"] >= 0
@@ -446,10 +469,10 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 		"prediction": (prediction_1 * prediction_2 / 100.0) if is_introduced else prediction_2,
 		"success_name": model_2["success_name"],
 		
-		"factors_help_help": [descr for key, descr in factors if helps(key, True, True)],
-		"factors_hurt_hurt": [descr for key, descr in factors if helps(key, False, False)],
-		"factors_help_hurt": [descr for key, descr in factors if helps(key, True, False)],
-		"factors_hurt_help": [descr for key, descr in factors if helps(key, False, True)],
+		"factors_help_help": [descr for key, descr, gen_descr in factors if helps(key, True, True)],
+		"factors_hurt_hurt": [descr for key, descr, gen_descr in factors if helps(key, False, False)],
+		"factors_help_hurt": [descr for key, descr, gen_descr in factors if helps(key, True, False)],
+		"factors_hurt_help": [descr for key, descr, gen_descr in factors if helps(key, False, True)],
 	}
 
 def compute_prognosis(bill, proscore=False):
@@ -461,13 +484,101 @@ def compute_prognosis(bill, proscore=False):
 	return prog
 		
 def test_prognosis(congress):
+	from math import exp
+	from numpy import mean, std, digitize, percentile, fmin
+	
+	import prognosis_model
+	
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
-	for bill in Bill.objects.filter(congress=congress, bill_type=BillType.house_bill):
-		print bill
-		print compute_prognosis_2(bill, committee_membership, majority_party)
-		print
 	
+	test_results = { }
+	
+	for model_type in (0, 1):
+		for bt, blabel in list(BillType):
+			# What was the success rate in the training data?
+			model_1 = prognosis_model.factors[(bt, model_type==0)]
+			if model_type == 0:
+				sr = model_1["success_rate"]
+				if len(model_1["factors"]) == 0: continue # nothing interesting to test
+			else:
+				model_2 = prognosis_model.factors[(bt, model_type==0)]
+				sr = model_1["success_rate"] * model_2["success_rate"] / 100.0
+				if len(model_1["factors"])+len(model_2["factors"]) == 0: continue # nothing interesting to test
+			
+			# store output....
+			model_result = { }
+			test_results[(bt, model_type)] = model_result
+			
+			# Pull in the data as tuples of (prediction float [0,1], success True/False)
+			data = []
+			for bill in Bill.objects.filter(congress=congress, bill_type=bt).prefetch_related():
+				x = compute_prognosis_2(bill, committee_membership, majority_party, None, proscore=False)
+				if model_type == 0:
+					x = x["prediction_1"]
+				else:
+					x = x["prediction_1"] * x["prediction_2"] / 100.0
+				y = is_success(bill, model_type)
+				data.append((x, y))
+			xdata = [x[0] for x in data]
+			
+			# Compute %-success for bins each having 10% of the data, to show that as
+			# prognosis increases, the %-success increases.
+			model_result["bins"] = []
+			bins = []
+			for p in xrange(0, 100+10, 10):
+				b = percentile(xdata, p)
+				if len(bins) == 0 or b > bins[-1]:
+					bins.append(b)
+			bindices = digitize(xdata, bins)
+			for b in xrange(len(bins)-1):
+				bindata = [data[i] for i in xrange(len(data)) if bindices[i] == b]
+				if len(bindata) == 0: continue
+				model_result["bins"].append( (bins[b], bins[b+1], len(bindata), sum(1 for x,y in bindata if y)/float(len(bindata))) )
+			
+			# We don't know a priori what the prediction threshold is above which we
+			# should score a success, so find the threshold that maximizes the f2 score,
+			# which is like the f-score but weighs the precision more.
+			def compute_scores(T):
+				true_pos = sum(1 for (x,y) in data if (x >= T) and y)
+				false_pos = sum(1 for (x,y) in data if (x >= T) and not y)
+				true_neg = sum(1 for (x,y) in data if (x < T) and not y)
+				false_neg = sum(1 for (x,y) in data if (x < T) and y)
+				precision = float(true_pos)/(true_pos + false_pos) if (true_pos + false_pos) > 0 else 1.0
+				recall = float(true_pos)/(true_pos + false_neg) if (true_pos + false_neg) > 0 else 1.0
+				accuracy = float(true_pos + true_neg)/len(data)
+				beta = .5 # 1=standard f-score, .5 weighs precision higher than recall
+				fscore = ((1 + beta**2) * (precision * recall) / ((precision * beta**2) + recall)) if precision+recall > 0 else 0
+				return {
+					"threshold": T,
+					"table": { "tp": true_pos, "fp": false_pos, "tn": true_neg, "fn": false_neg },
+					"precision": precision,
+					"recall": recall,
+					"accuracy": accuracy,
+					"fscore_beta": beta,
+					"fscore": fscore,
+				}
+			def compute_neg_f2(T):
+				return -compute_scores(T)["fscore"]
+			best_threshold = float(fmin(compute_neg_f2, sr))
+			model_result["max_fscore"] = compute_scores(best_threshold)
+			
+			# And also make a precision-recall chart.
+			model_result["precision_recall"] = []
+			for i in range(-18, 0):
+				T = 100 * exp(i / 5.0) # threshold data points on a logarithmic scale
+				cs = compute_scores(T)
+				if cs["fscore"] == 0: continue # causes weirdness in charts
+				model_result["precision_recall"].append(cs)
+			
+
+	with open("bill/prognosis_model_test.py", "w") as modelfile:
+		modelfile.write("# this file was automatically generated by prognosis.py\n")
+		modelfile.write("congress = %d\n" % congress)
+		from pprint import pprint
+		modelfile.write("model_test_results = ")
+		pprint(test_results, modelfile)
+
 def top_prognosis(congress, bill_type):
 	max_p = None
 	max_b = None
@@ -481,10 +592,9 @@ def top_prognosis(congress, bill_type):
 	print max_p, max_b
 	
 if __name__ == "__main__":
-	build_model(111)
-	#test_prognosis(112)
-	#print compute_prognosis(Bill.objects.get(congress=112, bill_type=BillType.house_bill, number=1125))
-	#print top_prognosis(112, BillType.house_bill)
-	#print top_prognosis(112, BillType.senate_bill)
-	
+	import sys
+	if sys.argv[-1] != "test":
+		build_model(111)
+	else:
+		test_prognosis(112)
 

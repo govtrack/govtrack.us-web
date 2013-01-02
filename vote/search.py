@@ -54,15 +54,14 @@ def vote_search_manager():
     sm.add_option('chamber')
     sm.add_option('category')
     
-    def truncate(name):
-        if len(name) < 130: return name
-        return name[0:127] + "..."
-    
-    def safe_strftime(date, format):
-        return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
+    #def safe_strftime(date, format):
+    #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
 
-    sm.add_left_column("Vote and Date", lambda vote, form : conditional_escape(vote.name()) + mark_safe("<br/>") + conditional_escape(safe_strftime(vote.created, "%b %d, %Y %I:%M%p")))
-    sm.add_bottom_column(lambda vote, form : vote.summary())
-    sm.add_column("Description and Result", lambda vote, form : truncate(vote.question))
-    
+    sm.set_template("""
+    	<div><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
+		<div>{{object.name}}</div>
+		<div>{{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
+    	<div>{{object.summary}}</div>
+	""")
+
     return sm

@@ -53,7 +53,14 @@ def bill_details(request, congress, type_slug, number):
         m = bill.get_open_market(request.user)
         if m: m.name = m.name.replace(bill.display_number, "it")
         return m
-        
+
+    def get_text_info():
+        from billtext import load_bill_text
+        try:
+            return load_bill_text(bill, None, mods_only=True)
+        except IOError:
+            return None
+
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
@@ -63,7 +70,8 @@ def bill_details(request, congress, type_slug, number):
         "market": get_market,
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
-        'feed': Feed.BillFeed(bill),
+        "feed": Feed.BillFeed(bill),
+        "text": get_text_info,
     }
 
 @json_response
@@ -331,6 +339,7 @@ def bill_docket(request):
         counts_by_congress = []
         for c in xrange(96, CURRENT_CONGRESS+1):
             total = Bill.objects.filter(congress=c).count()
+            if total == 0: continue # during transitions between Congresses
             counts_by_congress.append({
                 "congress": c,
                 "dates": get_congress_dates(c),

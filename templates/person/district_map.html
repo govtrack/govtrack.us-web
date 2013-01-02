@@ -1,5 +1,5 @@
 {% extends "master.html" %}
-{% load humanize %}
+{% load humanize govtrack_utils %}
 {% block title %}{% if not state %}Members of Congress &amp; Congressional District Maps{% endif %}{% if state and not district %}{{statename}}&rsquo;s Members of Congress &amp; Congressional District Map{% endif %}{% if state and district %}{{statename}}&rsquo;s {{district|ordinal}} Congressional District - Representatives &amp; District Map{% endif %} - GovTrack.us{% endblock %}
 {% block meta_description %}{% if not state %}What congressional district are you in?{% endif %} Find your U.S. Congress senators and representative {% if state and not district %}in {{statename}}{% endif %}{% if state and district %}in {{statename}}&rsquo;s {{district|ordinal}} Congressional District{% endif %} using a map.{% endblock %}
 {% block meta_keywords %}U.S. Congress,congressional districts,map,senators,representatives,congressmen,House of Representatives,Senate{% endblock %}
@@ -10,35 +10,62 @@
 	<script type="text/javascript" src="http://gis.govtrack.us/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
 		var current_layer = null;
-		var first_time_on_redistricting = true;
+		function showOverlay() {
+			current_layer = "cd-2012";
+			{% if state and district %}current_layer += "/{{state|lower}}-{{district|stringformat:"02d"}}";
+			{% endif %}
+			createDistrictsOverlay(current_layer);
+		}
 		
+		/**************************************/
+		var tilesizeshift = 1; // 0=256, 1=use 512px tiles instead of 256
+		
+		// Use PNG or GIF tiles? IE8 and earlier don't support transparent PNGs properly,
+		// so use opaque GIF tiles but set the transparency on the map layer appropriately.
 		var tileimgformat = 'png';
 		if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
 		
-		function createDistrictsOverlay(redistricting) {
-			current_layer = (!redistricting ? "2010-cd" : "cd-2012");
-			{% if state and district %}current_layer += "/{{state|lower}}-{{district|stringformat:"02d"}}";
-			{% endif %}
-		    
+		function createDistrictsOverlay(layer) {
+			var tileimgsize = 256 << tilesizeshift;
+		
+			// Apply the map layer.
 			var overlay = new google.maps.ImageMapType({
 			  getTileUrl: function(coord, zoom) {
-				  return "http://gis.govtrack.us/map/tiles/" + current_layer + "/" + (zoom-1) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=512";
+				  return "http://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
 			  },
-			  tileSize: new google.maps.Size(512, 512),
+			  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
 			  isPng: tileimgformat == "png",
 			  minZoom: 3,
 			  maxZoom: 28,
-			  opacity: tileimgformat == "png" ? .85 : .25
+			  opacity: tileimgformat == "png" ? .85 : .65
 			});
 			
 			map.overlayMapTypes.clear();
 			map.overlayMapTypes.insertAt(0, overlay);
+			
+			// For IE8 and earlier, the layer above only applies outlines and labels --- at high opacity.
+			// Apply a second layer for the boundary fill color --- at low opacity.
+			if (tileimgformat != "png") {
+				var overlay2 = new google.maps.ImageMapType({
+				  getTileUrl: function(coord, zoom) {
+					  return "http://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=fill");
+				  },
+				  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
+				  isPng: false,
+				  minZoom: 3,
+				  maxZoom: 28,
+				  opacity: .15
+				});
+				
+				map.overlayMapTypes.insertAt(0, overlay2);
+			}
 		}
+		/**************************************/
 		
 		var map;
 		
 		$(function() {
-			//$('#cat-icon').hide();
+			// Pretty general Google Maps API v3 map options.
 			var myOptions = {
 				zoom: {{center_zoom}},
 				center: new google.maps.LatLng({{center_lat}}, {{center_long}}),
@@ -94,7 +121,7 @@
 			
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
 			
-			createDistrictsOverlay(false);
+			showOverlay(false);
 
 			{% if request.GET.marker %}
 				lnglat = "{{request.GET.marker}}".split(":");
@@ -138,8 +165,8 @@
 						
 			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#map_controls')[0]);
 			
-			$('#ctrl_layer_2010, #ctrl_layer_2012').click(function() {
-					createDistrictsOverlay(this.id == "ctrl_layer_2012");
+			/*$('#ctrl_layer_2010, #ctrl_layer_2012').click(function() {
+					showOverlay(this.id == "ctrl_layer_2012");
 					$('#ctrl_layer_2010, #ctrl_layer_2012').removeClass("active");
 					$(this).addClass("active");
 					if (this.id == "ctrl_layer_2012") {
@@ -147,7 +174,7 @@
 							alert("Please note:\n\nNew Members of Congress take office in early January. Your current Members of Congress are still based on the 2010 district lines.");
 						first_time_on_redistricting = false;
 					}
-			});
+			});*/
 		});
 		
 		var is_full_screen = false;
@@ -257,7 +284,7 @@
 		<li>{{statename}}</li>
 		{% else %}
 		<li><a href="/congress/members/{{state}}">{{statename}}</a></li>
-		<li>{{district|ordinal}}</li>
+		<li>{{district|ordinalhtml}}</li>
 		{% endif %}
 	{% endif %}
 </ul>
@@ -275,7 +302,7 @@
 		{% endif %}
 	{% endif %}
 	
-	<p style="margin-bottom: 0"><b>NOTE:</b> New Members of Congress take office in early January. That means that the list of districts, representatives, and senators remain as they were through the remainder of the year. Continue to use the &ldquo;2010 districts&rdquo; for determining your current representative until then.</p>
+	<p style="margin-bottom: 0"><b>NOTE:</b> The map below reflects 2012 redistricting and the new roster for Congress beginning January 3, 2013.</p>
 
 {% endblock %}
 
@@ -362,24 +389,23 @@
 			
 			{% if not district %}
 			<h3>Representative{{reps|pluralize}}</h3>
+			<p>By congressional district.</p>
 			{% else %}
-			<h3>{{district|ordinal}} Congressional District</h3>
+			<h3>{{district|ordinalhtml}} Congressional District</h3>
 			{% endif %}
 			<ul style="height: 300px; width: 250px; overflow: auto;">
 				{% for dist, rep in reps %}
 					<li style="margin-bottom: .5em">
 						{% if not district %}
 						{% if reps|length > 1 or dist > 0 %}
-						<div><a href="/congress/members/{{state}}/{{dist}}"><strong>{{dist|ordinal}} District</strong></a> <span style="color: #777">(map)</span></div>
+						<a href="/congress/members/{{state}}/{{dist}}" title="View District Map"><strong>{{dist|ordinalhtml}}</strong> </a> &mdash;
 						{% endif %}
 						{% endif %}
-						<div>
 						{% if rep %}
 							<a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a>
 						{% else %}
 							<em>Vacant</em>
 						{% endif %}
-						</div>
 					</li>
 				{% endfor %}
 			</ul>
@@ -406,8 +432,8 @@
 					<div id="map_district_hover_label">
 					</div>
 				</li>
-				<li id="ctrl_layer_2010" class="active">2010 Districts</li>
-				<li id="ctrl_layer_2012">2012 Districts</li>
+				<!--<li id="ctrl_layer_2010" class="active">2010 Districts</li>
+				<li id="ctrl_layer_2012">2012 Districts</li>-->
 			</ul>
 		</div>
 	</div>

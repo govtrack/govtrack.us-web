@@ -2,10 +2,9 @@
 """
 from django import forms
 from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.template import Template, Context, RequestContext
+from django.template.loader import get_template
 from django.db.models import Count
-from django.utils.html import conditional_escape
-from django.utils.safestring import mark_safe
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.core.cache import cache
@@ -31,6 +30,8 @@ class SearchManager(object):
         self.sort_options = []
         self.global_filters = { }
         self.connection = connection
+        self.template = None
+        self.template_context_func = None
 
     def add_option(self, *args, **kwargs):
         Option(self, *args, **kwargs)
@@ -41,67 +42,25 @@ class SearchManager(object):
     def add_filter(self, key, value):
         self.global_filters[key] = value
         
-    def add_left_column(self, title, func):
-        self.col_left = func
-        self.col_left_name = title
-    def add_bottom_column(self, func):
-        self.col_bottom = func
-    def add_column(self, title, func):
-        self.cols.append(func)
-        self.colnames.append(title)
-
-    def get_left_info(self, obj, form):
-        if self.col_left == None:
-            return ""
-        else:
-            return conditional_escape(self.col_left(obj, form))
+    def set_template(self, template_data):
+        self.template = Template(template_data)
+    def set_template_file(self, template_file_name):
+        self.template = get_template(template_file_name)
+    def set_template_context_func(self, func):
+        self.template_context_func = func
         
-    def get_column_headers(self):
-        return [self.col_left_name] + self.colnames
-        
-    def get_columns(self, obj, form):
-        if len(self.cols) == 0:
-            cols = [unicode(obj)]
-        else:
-            cols = [c(obj, form) for c in self.cols]
-        cols[0] = mark_safe(
-            "<a href=\"" + conditional_escape(obj.get_absolute_url()) + "\">"
-            + conditional_escape(cols[0])
-            + "</a>"
-            )
-        
-        return cols
-        
-    def get_bottom_info(self, obj, form):
-        if self.col_bottom == None:
-            return ""
-        else:
-            return mark_safe("".join(["<div>" + conditional_escape(line) + "</div>" for line in self.col_bottom(obj, form).split("\n")]))
-        
-    def make_result(self, obj, form):
-        left = self.get_left_info(obj, form)
-        cols = self.get_columns(obj, form)
-        bottom = self.get_bottom_info(obj, form)
-        
-        return mark_safe(
-            "<tr valign='top'>"
-            + ("<td rowspan='2' class='rowtop rowleft'>%s</td>" % conditional_escape(left))
-            + " ".join(
-                [("<td class='rowtop col%d'>%s</td>" % (i, conditional_escape(col))) for i, col in enumerate(cols)]
-                )
-            + "</tr>"
-            + ("<tr><td colspan='%d' style='vertical-align: top' class='rowbottom'>%s</td></tr>" % (len(cols), conditional_escape(bottom)))
-            )
-               
     def results(self, objects, form):
-        return "".join([self.make_result(obj, form) for obj in objects])
+        if not self.template:
+            self.template = get_template("smartsearch/search-result-item.html")
+        if not self.template_context_func:
+            self.template_context_func = lambda obj, form : Context({ "object": obj, "form": form })
+        return [self.template.render(self.template_context_func(obj, form)) for obj in objects]
         
     def view(self, request, template, defaults={}, noun=("item", "items"), context={}, paginate=None):
         if request.META["REQUEST_METHOD"] == "GET":
             c = {
                 'form': self.options,
                 'sort_options': [(name, key, isdefault if defaults.get("sort", None) == None else defaults.get("sort", None) == key) for name, key, isdefault in self.sort_options],
-                'column_headers': self.get_column_headers(),
                 'defaults': defaults,
                 'noun_singular': noun[0],
                 'noun_plural': noun[1],

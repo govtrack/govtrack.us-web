@@ -42,6 +42,7 @@
 			    </form>
 				{% if not user.is_authenticated %}
 				<p id="have_account">Already have an account? <a href="/accounts/login">Log in</a></p>
+				{% if request.anonymous %}<script>if (the_user) $('#have_account').hide();</script>{% endif %}
 				{% endif %}
 				
 			</div><!-- /start-search -->

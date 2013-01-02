@@ -15,7 +15,6 @@
 
 		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css">
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen"/><![endif]-->
-		<!--<meta name="viewport" content="width=1000">-->
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
@@ -24,12 +23,16 @@
 		
 		{% block extra_css %}{% endblock %}
 		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/main.js" ></script>
-		{% comment %}<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>{% endcomment %}
-		<script src="http://cdn.jquerytools.org/1.2.7/jquery.tools.min.js"></script>
-		<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/ajaxforms.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/modernizr.js"> </script> {% comment %}html5shiv{% endcomment %}
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		{% if not request.anonymous %}
+			<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
+		{% else %}
+			  <script type="text/javascript" src="{% url twostream-views-user-head %}?view={{request.path|urlencode}}"> </script>
+		{% endif %}
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"> </script>
+		<script src="{{ MEDIA_URL }}js/jquery.ba-bbq.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-utils.js"></script>
 		{% block extra_js %}{% endblock %}
 		
 		{% block head %}{% endblock %}
@@ -40,7 +43,8 @@
 	</head>
 	
 <body class="{% block body_class %}{% endblock %}">
-	{% comment %}
+
+  	{% comment %}
 	<!-- Bulk Data Campaign -->
 	<div style="position: absolute; top: 0; left: 0; width: 100%; height: 1em; z-index: 10;">
 		<div style="margin: 0 auto; width: 960px; height: 1em; margin-top: .5em; text-align: center; font-weight: bold;">
@@ -102,13 +106,20 @@
 									{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
 									{% block override_login %}
 									{% if not user.is_authenticated %}
-										<li><a href="/accounts/login">Log In</a></li>
+										<li id="nav_login"><a href="/accounts/login">Log In</a></li>
+										{% if request.anonymous %}<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>{% endif %}
 									{% else %}
 										<li><a href="/accounts/profile">{{user.email}}</a></li>
 										<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
 									{% endif %}
 									{% endblock %}
 								</ul>
+								{% if request.anonymous %}
+									<script>if (the_user) {
+										$('#nav_login').find('a').text(the_user.email).attr('href', '/accounts/profile');
+										$('#nav_logout').show();
+									}</script>
+								{% endif %}
 								<form name="header_search" action="/search" method="GET" class="search-form">
 									<fieldset>
 										<div class="text"><input type="text" defaulttext="Search" name="q"/></div>
@@ -287,8 +298,8 @@
 	<script type="text/javascript">
 	try {
 	 pageTracker = _gat._getTracker("{{GOOGLE_ANALYTICS_KEY|escapejs}}");
-	 pageTracker._setCustomVar(1, "Login Type", "{% if request.user.is_authenticated %}Logged In{% else %}Anonymous{% endif %}", 2);
-	 pageTracker._setCustomVar(2, "MySegment", "{% if remote_net_house %}House{% elif remote_net_senate %}Senate{% elif is_dc_local %}DC{% else %}Other{% endif %}", 1);
+	 pageTracker._setCustomVar(1, "Login Type", {% if request.user.is_authenticated %}"Logged In"{% elif request.anonymous %}the_user ? "Logged In" : "Anonymous"{% else %}"Anonymous"{% endif %}, 2);
+	 pageTracker._setCustomVar(2, "MySegment", {% if not request.anonymous %}"{% if remote_net_house %}House{% elif remote_net_senate %}Senate{% elif is_dc_local %}DC{% else %}Other{% endif %}"{% else %}the_segment{% endif %}, 1);
 	 pageTracker._trackPageview();
 	} catch(err) {}
 	</script>

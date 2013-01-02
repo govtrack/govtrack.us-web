@@ -404,3 +404,29 @@ def api_overview(request):
 		},
 		RequestContext(request))
 
+#### V2 ####
+
+from simplegetapi.views import do_api_call
+
+def get_haystack_query_set(model, connection):
+	from haystack.query import SearchQuerySet
+	return SearchQuerySet().using(connection).filter(indexed_model_name__in=[model.__name__])
+
+def apiv2(request, model, id):
+	if model == "bill":
+		model = Bill
+		qs = get_haystack_query_set(model, "bill")
+	elif model == "person":
+		model = Person
+		qs = get_haystack_query_set(model, "person")
+	elif model == "vote":
+		model = Vote
+		qs = Vote.objects.all()
+	elif model == "voter":
+		model = Voter
+		qs = Voter.objects.all()
+	else:
+		raise Http404()
+	
+	return do_api_call(request, model, qs, id)
+	

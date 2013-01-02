@@ -73,23 +73,7 @@
 				map.fitBounds(bounds);
 			{% endif %}
 			
-			var tileimgformat = 'png';
-			if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
-			var overlay = new google.maps.ImageMapType({
-			  getTileUrl: function(coord, zoom) {
-				  return "http://gis.govtrack.us/map/tiles/2010-cd/"
-				  + ((state && district) ? (state.toLowerCase() + "-" + (district.length < 2 ? "0" : "") + district) + "/" : "")
-				  + (zoom-1) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=512";
-			  },
-			  tileSize: new google.maps.Size(512, 512),
-			  isPng: tileimgformat == "png",
-			  minZoom: 3,
-			  maxZoom: 28,
-			  opacity: tileimgformat == "png" ? .85 : .25
-			});
-			
-			map.overlayMapTypes.clear();
-			map.overlayMapTypes.insertAt(0, overlay);
+			createDistrictsOverlay("cd-2012");
 			
 			{% if not demo %}
 			var mh = document.getElementById("map_canvas").offsetHeight;
@@ -97,6 +81,49 @@
 			document.getElementById("map_canvas").style.height = (mh-fh)  + "px";
 			{% endif %}
 		};
+		
+		var tilesizeshift = 0; // 0=256, 1=use 512px tiles instead of 256
+		
+		// Use PNG or GIF tiles? IE8 and earlier don't support transparent PNGs properly,
+		// so use opaque GIF tiles but set the transparency on the map layer appropriately.
+		var tileimgformat = 'png';
+		if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
+		
+		function createDistrictsOverlay(layer) {
+			var tileimgsize = 256 << tilesizeshift;
+		
+			// Apply the map layer.
+			var overlay = new google.maps.ImageMapType({
+			  getTileUrl: function(coord, zoom) {
+				  return "http://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
+			  },
+			  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
+			  isPng: tileimgformat == "png",
+			  minZoom: 3,
+			  maxZoom: 28,
+			  opacity: tileimgformat == "png" ? .85 : .65
+			});
+			
+			map.overlayMapTypes.clear();
+			map.overlayMapTypes.insertAt(0, overlay);
+			
+			// For IE8 and earlier, the layer above only applies outlines and labels --- at high opacity.
+			// Apply a second layer for the boundary fill color --- at low opacity.
+			if (tileimgformat != "png") {
+				var overlay2 = new google.maps.ImageMapType({
+				  getTileUrl: function(coord, zoom) {
+					  return "http://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=fill");
+				  },
+				  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
+				  isPng: false,
+				  minZoom: 3,
+				  maxZoom: 28,
+				  opacity: .15
+				});
+				
+				map.overlayMapTypes.insertAt(0, overlay2);
+			}
+		}
 	</script>
 </head>
 <body onload="initialize()">

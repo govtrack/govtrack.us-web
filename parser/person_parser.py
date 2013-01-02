@@ -178,6 +178,7 @@ def main(options):
     # Remove person which were not found in XML file
     removed_persons = existing_persons - processed_persons
     for pk in removed_persons:
+    	raise Exception()
         p = Person.objects.get(pk=pk)
         log.debug("Deleted %s" % p)
         p.delete()

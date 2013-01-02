@@ -233,6 +233,23 @@ code {
     font-family: 'Droid Sans Mono', Monaco, "Courier New", Courier, monospace;
 }
 
+sup,
+sub { /* http://www.adobe.com/cfusion/communityengine/index.cfm?event=showdetails&postId=5341&productId=1 */
+	height: 0;
+	line-height: 1;
+	vertical-align: baseline;
+	_vertical-align: bottom; /* IE 6 and below */
+	position: relative;
+	font-size: 75%;
+	font-style: italic;
+}
+sup {
+	bottom: 1ex;
+}
+sub {
+	top: .5ex;
+}
+
 /* General classes ============================== */
 /* ============================================== */
 .left {
@@ -256,16 +273,7 @@ code {
 .highlight {
   background: #ffff99;
 }
-#googlemap img, object, embed {
-  max-width: none;
-}
-#map_canvas embed {
-  max-width: none;
-}
-#map_canvas img {
-  max-width: none;
-}
-#map_canvas object {
+.lt-ie9 img, object, embed {
   max-width: none;
 }
 .last { 
@@ -917,7 +925,7 @@ img {
     float: none;
   }
 
-  #members_grid .columns:last-child {
+  .committee-members-grid .columns:last-child {
     float: none !important;
   }
 
@@ -2175,6 +2183,9 @@ a.button.prefix, a.button.postfix {
         padding: 0 0 .5em;
         margin: 0 0 .5em;
     	}
+    	.summary-box h1 sup {
+    		font-size: 65%;
+    	}
     .summary-box .info {
         background: url(../images/divider-4.gif) repeat-x 0 100%;
         padding: 0 0 18px;
@@ -2192,7 +2203,7 @@ a.button.prefix, a.button.postfix {
         font-family: PTSerifBold;
         float: left;
         clear: left;
-        width: 80px;
+        width: 90px;
     	}
     .summary-box dl.wide dt {
         width: 130px;
@@ -2326,6 +2337,7 @@ a.button.prefix, a.button.postfix {
     .member .heading-box #cat-icon,
     .search.member .heading-box #cat-icon {
     	background: url(../images/img-congress-members.png) right center no-repeat;
+    	min-height: 130px;
     	}
     .committees .heading-box #cat-icon,
     .search.committees .heading-box #cat-icon {
@@ -2395,24 +2407,24 @@ a.button.prefix, a.button.postfix {
 	#member-details ul ul {
 		margin-bottom: 0;
 	}
-  #members_grid .member {
+  .committee-members-grid .member {
     position: relative;
     text-align: center;
     margin-bottom: 30px;
   }
-  #members_grid .member .flag{
+  .committee-members-grid .member .flag{
     width: 122px;
     margin-top: -25px;
     margin-bottom: 26px;
     left: -4px;
   }
-  #members_grid .member .flag:before {
+  .committee-members-grid .member .flag:before {
     top: -10px;
   }
-  #members_grid .member .photo {
+  .committee-members-grid .member .photo {
     margin: 0 auto;
   }
-  #members_grid .columns:last-child { float: left; }
+  .committee-members-grid .columns:last-child { float: left; }
 
 
 /* Vote Statistics styles =========================== */
@@ -2501,76 +2513,79 @@ aside .download-links { padding: 31px 0 0 	}
 
 /* Bill overview styles =============================== */
 /* ==================================================== */
-.two-columns {
-    width: 960px;
-    overflow: hidden;
-	}
-.overview {
+.metadata-table {
     background: url(../images/bg-grey-box.png) repeat-y;
-    /*font: 1em/18px Georgia, 'Times New Roman', Times, serif;*/
-    font-family: 'PTSerifRegular';
     max-width: 480px;
 	}
-    .overview .holder { background: url(../images/bg-grey-box.png) no-repeat -478px 0 	}
-    .overview .frame {
+	.metadata-table .holder { background: url(../images/bg-grey-box.png) no-repeat -478px 0  }
+    .metadata-table .frame {
         background: url(../images/bg-grey-box.png) no-repeat -956px 100%;
         padding: 10px 14px 25px 15px;
         overflow: hidden;
-    	}
-    .overview .container {
+    }
+    .metadata-table .container {
         background: url(../images/bg-grey-box-section.gif) repeat-x;
-        padding: 15px 11px 12px 13px;
+        padding: 20px 22px 17px 3px;
     	}
-        .overview .container > dl > dt {
+        .metadata-table .container > dl > dt {
             width: 87px;
             float: left;
             clear: left;
             font-size: 12px;
-            font-family: PTSerifBold;
-            color: #666;
+            line-height: normal;
+            text-align: right;
+            padding-top: 3px;
+            color: #444;
+            font-weight: bold;
             text-transform: uppercase;
         	}
-    .overview dl.heading {
+    .metadata-table dl.heading {
         margin: 0 0 24px;
         text-align: left;
     	}
-    .overview .container dd {
+    .metadata-table .container dd {
         overflow: hidden;
         padding: 0 0 0 19px;
         font-family: OpenSansRegular;
     	}
-    .overview .text-view li {
+    .metadata-table .horz-options li {
         display: inline;
         background: url(../images/separator-1.gif) no-repeat 0 2px;
         padding: 0 8px 0 11px;
     	}
-    .overview .text-view li:first-child {
+    .metadata-table .horz-options li:first-child {
         background: none;
         padding-left: 0;
     	}
-    .overview p { 	}
-    .overview table {
+    .metadata-table p { 	}
+	.metadata-table p.small {
+		font-size: 12px;
+		line-height: 15px;
+		margin: 0 0 .2em 0;
+	}    
+    .metadata-table table {
         width: 100%;
         margin: 0 0 14px;
-        font-size: 12px;
+        font-size: 13px;
         position: relative;
     	}
-        .overview table td {
+        .metadata-table table td {
             padding: 0 2px 0 8px;
             vertical-align: middle;
         	}
-        .overview table td.done {
+        .metadata-table table td.done {
             padding-left: 28px;
             background: url('../images/ico-checked.gif') 8px center no-repeat;
         	}
-        .overview table td.pending {
+        .metadata-table table td.pending {
             padding-left: 28px;
             background: url('../images/ico-unchecked.gif') 8px center no-repeat;
         	}
-        .overview table .odd.done td { background: #e4e9e8 url('../images/ico-checked.gif') 8px center no-repeat; 	}
-        .overview table .odd.pending td { background: #e4e9e8 url('../images/ico-unchecked.gif') 8px center no-repeat; 	}
+        .metadata-table table .odd.done td { background: #e4e9e8 url('../images/ico-checked.gif') 8px center no-repeat; 	}
+        .metadata-table table .odd.pending td { background: #e4e9e8 url('../images/ico-unchecked.gif') 8px center no-repeat; 	}
+        .metadata-table tr.highlight td { font-weight: bold; }
         
-    .overview .download-links {
+    .metadata-table .download-links {
         padding: 10px 0 0 107px;
         margin: 0 0 -15px;
         font-family: 'OpenSansRegular', Arial, Helvetica, sans-serif;
@@ -3199,7 +3214,7 @@ aside .download-links { padding: 31px 0 0 	}
                 display: inline-block;
                 background: transparent;
                 border: 0;
-                width: auto;
+                width: 120px;
                 color: rgb(230, 105, 55);
                 font-size: 95%;
             }
@@ -3599,39 +3614,29 @@ form.custom .custom.disabled { background-color: #ddd; }
           font-family: PTSerifBold;
           color: #444;      
         }
-    .searching .results {
-        font-size: 15px;
-        line-height: 18px;
-        margin: 0 0 42px;
-      }
-        .searching .results p { margin: 0 0 5px   }
-        .searching .results ul { margin: 0 0 0 5px  }
-        .searching .results li {
-            border-bottom: 1px solid #dae2df;
-            padding: 15px 10px 17px 18px;
-          }
-    .searching .results .rowbottom {
-      font-size: 95%;
-          }
-    .searching .details {
-        font-size: 12px;
-        line-height: 18px;
-      }
-        .searching .details dl {
-            display: inline;
-            padding: 0 30px 0 0;
-          }
-        .searching .details dt {
-            color: #878787;
-            display: inline;
-            font-family: PTSerifItalic, serif;
-          }
-        .searching .details dd {
-            display: inline;
-            color: #444;
-          }
-   
-
+    .searching #loading_status { text-align: center; border: 1px solid #AAA; background-color: #EEE; }
+    .searching  #show_more { text-align: center; border: 1px solid #CB4B16; background-color: #ffcebb; font-weight: bold; display: block; }
+	.searching .results {
+		margin-bottom: 15px;
+	}
+  .searching .results .result_item {
+  	  padding: .5em 0;
+  }
+	  .searching .results .result_item:after {
+		content: '';
+		display: block;
+		clear: both;
+	  }
+	  .searching .results .result_item > a {
+	  	display: block;
+		font: normal normal normal 1.2em/1.5em PTSerifBold, 'Pallatino Linotype', Georgia, 'Times New Roman', serif;
+		line-height: 130%;
+	  }
+	  	.searching .results .result_item > a:hover {
+	  		border: none;
+	  		text-decoration: underline;
+	  	}
+	  
 
 /* Main Form styles =========================== */
 /* ============================================ */
@@ -3653,7 +3658,7 @@ form.custom .custom.disabled { background-color: #ddd; }
             margin: 0;
             float: left;
             }
-    .search-form .btn-search {
+    .search-form .btn-search, .btn-search-small2 {
         background: url(../images/btn-search.gif) no-repeat;
         width: 25px;
         height: 25px;
@@ -3745,7 +3750,7 @@ select, input.text {
 .advanced-search select {
     width: 120px;
     height: 30px;
-    background: #fff url('../images/select_field.png') right top no-repeat;
+    background: #fff /*url('../images/select_field.png') right top no-repeat*/;
     }
 .advanced-search input.text {
     /*width: 260px;*/
@@ -3753,6 +3758,9 @@ select, input.text {
     }
     .advanced-search input.text.with_search_button {
     	width: 180px;
+    	height: 24px;
+    	float: left;
+    	margin-right: 2px;
     }
     #search-members ul input.text {
         width: 102px;
@@ -3953,7 +3961,7 @@ ul.tabs a {
     padding: 0 23.8px;
     border: 1px solid #DDC;
     background-color: #F3F1E9;
-    color:#444;
+    color:#555;
     line-height: 40px;
     text-decoration: none;
     font-family: 'PTSerifRegular', serif;
@@ -3972,7 +3980,7 @@ ul.tabs a:hover {
 }
 
 /* selected tab */
-ul.tabs a.current {
+ul.tabs a.active {
     border: 1px solid #ddc;
     border-bottom:0;
     color:#000;
@@ -4027,6 +4035,68 @@ ul.tabs.five-up li {
 }
 
 
+/******************************
+ LEFT-SIDE TABS
+ ******************************/
+/* root element for tabs  */
+ul.left-tabs {
+    border:1px solid #DDC;
+}
+
+/* single tab */
+ul.left-tabs li {
+    padding:0;
+    margin:0;
+    list-style-type:none;
+}
+
+/* link inside the tab. uses a background image */
+ul.left-tabs a {
+    display: block;
+    width: 100%;
+    padding: 15px 15px;
+    border: 1px solid #F3F1E9;
+    background-color: #FCFAF5;
+    color:#777;
+    line-height: normal;
+    text-decoration: none;
+    font-family: 'PTSerifRegular', serif;
+    outline:0;
+    -webkit-border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
+}
+
+ul.left-tabs a:hover {
+    background-color:#F7F7F7;
+    color:#333;
+}
+
+/* selected tab */
+ul.left-tabs a.active {
+    border: 1px solid #F3F1E9;
+    border-bottom: 1px solid #ffffff;
+    color:#000;
+    cursor:default;
+    background: #f0e9e0; /* Old browsers */
+    background: -moz-linear-gradient(top,  #edd 1%, #ffffff 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#edd), color-stop(100%,#ffffff)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #edd 1%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #edd 1%,#ffffff 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #edd 1%,#ffffff 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #edd 1%,#ffffff 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#edd', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+}
+
+.left-tabs-panes {
+	float: left;
+	width: 80%;
+}
+	.left-tabs-panes > div {
+		padding-left: 25px;
+	}
+
+/*********************************************/
 
 /* Developer Documentation styles */
 pre.example {
@@ -4088,20 +4158,11 @@ small {
 	font-size: 80%;
 	}
 	
-ul.bullets, .postcontent ul { /* postcontent is the blog */
+ul.bullets, .postcontent ul {
 	list-style: circle;
 	margin-left: 1.75em;
-	margin-bottom: .75em;
 	}
 ul.bullets li, .postcontent ul li {
-	margin: .25em 0 .25em 0;
-	}
-.postcontent ol { /* postcontent is the blog */
-	list-style: decimal;
-	margin-left: 1.75em;
-	margin-bottom: .75em;
-	}
-.postcontent ol li {
 	margin: .25em 0 .25em 0;
 	}
 	
@@ -4197,8 +4258,4 @@ ul.bullets li, .postcontent ul li {
 #missedvotestable { margin-top: 1.5em; margin-left: 3em; }
 #missedvotestable th { padding-right: 1em; }
 
-.prognosis_item {
-	font-size: 12px;
-	line-height: 15px;
-	margin: 0 0 .2em 1em
-}
+
