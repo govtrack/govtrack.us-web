@@ -16,6 +16,8 @@ from parser.processor import Processor
 from parser.models import File
 from person.models import Person, PersonRole, Gender, RoleType, SenatorClass
 
+from settings import CURRENT_CONGRESS
+
 log = logging.getLogger('parser.person_parser')
 
 class PersonProcessor(Processor):
@@ -90,6 +92,8 @@ def main(options):
     if not File.objects.is_changed(XML_FILE, content=content) and not options.force:
         log.info('File %s was not changed' % XML_FILE)
         return
+        
+    had_error = False
 
     person_processor = PersonProcessor()
     role_processor = PersonRoleProcessor()
@@ -110,7 +114,8 @@ def main(options):
         try:
             person = person_processor.process(Person(), node)
             
-            # Create cached name strings.
+            # Create cached name strings. This is done again later
+            # after the roles are updated.
             person.set_names()
 
             # Now try to load the person with such ID from
@@ -122,36 +127,73 @@ def main(options):
                     # If the person has PK of existing record
                     # then Django ORM will update existing record
                     if not options.force:
-                        log.debug("Updated %s" % person)
+                        log.warn("Updated %s" % person)
                     person.save()
                     
             except Person.DoesNotExist:
                 created_persons.add(person.pk)
                 person.save()
-                log.debug("Created %s" % person)
+                log.warn("Created %s" % person)
 
             processed_persons.add(person.pk)
 
             # Process roles of the person
+            roles = list(PersonRole.objects.filter(person=person))
             existing_roles = set(PersonRole.objects.filter(person=person).values_list('pk', flat=True))
             processed_roles = set()
             role_list = []
             for role in node.xpath('./role'):
                 role = role_processor.process(PersonRole(), role)
                 role.person = person
-                role_list.append(role)
-                # Overwrite an existing role if there is one that is different.
-                try:
-                    ex_role = PersonRole.objects.get(person=person, role_type=role.role_type, startdate=role.startdate, enddate=role.enddate)
+                
+                # Override what we consider current.
+                if role.congress_numbers() != None:
+                    role.current = role.startdate <= datetime.now().date() and role.enddate >= datetime.now().date() \
+                        and CURRENT_CONGRESS in role.congress_numbers()
+                
+                # Overwrite an existing role if there is one that is for the same period
+                # of time and role type.
+                ex_role = None
+                
+                for r in roles:
+                    if role.role_type == r.role_type and r.startdate == role.startdate and r.enddate == role.enddate:
+                        ex_role = r
+                        break
+                        
+                if not ex_role:
+                    # .congress_numbers() is flaky on some historical data because start/end
+                    # dates don't line up nicely with session numbers. So we try to match
+                    # on exact dates first, and if we can match that don't bother using
+                    # congress_numbers.
+                    for r in roles:
+                        if role.role_type == r.role_type and (len(set(role.congress_numbers()) & set(r.congress_numbers())) > 0):
+                            ex_role = r
+                            break
+                    
+                if ex_role:    
+                    # These roles correspond.
+                    if not (ex_role.startdate == role.startdate and ex_role.enddate == role.enddate) and role_processor.changed(ex_role, role):
+                        print ex_role
+                        print role
+                        raise Exception("?")
                     processed_roles.add(ex_role.id)
                     role.id = ex_role.id
                     if role_processor.changed(ex_role, role) or options.force:
                         role.save()
+                        role_list.append(role)
                         if not options.force:
-                            log.debug("Updated %s" % role)
-                except PersonRole.DoesNotExist:
-                    log.debug("Created %s" % role)
+                            log.warn("Updated %s" % role)
+                    roles.remove(ex_role) # don't need to try matching this to any other node
+                else:
+                    # Didn't find a matching role.
+                    if len(roles) > 0:
+                        print role, role.congress_numbers(), "is one of these?"
+                        for ex_role in roles:
+                            print "\t", ex_role, ex_role.congress_numbers()
+                        raise Exception("There is an unmatched role.")
+                    log.warn("Created %s" % role)
                     role.save()
+                    role_list.append(role)
                         
             # create the events for the roles after all have been loaded
             # because we don't create events for ends of terms and
@@ -163,31 +205,44 @@ def main(options):
                         role_list[i+1] if i < len(role_list)-1 else None
                         )
             
+            removed_roles = existing_roles - processed_roles
+            for pk in removed_roles:
+                pr = PersonRole.objects.get(pk=pk)
+                print pr.person.id, pr
+                raise ValueError("Deleted role??")
+                log.warn("Deleted %s" % pr)
+                pr.delete()
+            
+            # The name can't be determined until all of the roles are set. If
+            # it changes, re-save.
+            nn = (person.name, person.sortname)
+            person.set_names()
+            if nn != (person.name, person.sortname):
+                log.warn("%s is now %s." % (nn[0], person.name)
+                    person.save()
+            
         except Exception, ex:
             # Catch unexpected exceptions and log them
-            log.error('', exc_info=ex)
+            log.error('person %d' % person.id, exc_info=ex)
+            had_error = True
 
-        removed_roles = existing_roles - processed_roles
-        for pk in removed_roles:
-            pr = PersonRole.objects.get(pk=pk)
-            log.debug("Deleted %s" % pr)
-            pr.delete()
-            
         progress.tick()
 
-    # Remove person which were not found in XML file
-    removed_persons = existing_persons - processed_persons
-    for pk in removed_persons:
-    	raise Exception()
-        p = Person.objects.get(pk=pk)
-        log.debug("Deleted %s" % p)
-        p.delete()
-
-    log.info('Removed persons: %d' % len(removed_persons))
     log.info('Processed persons: %d' % len(processed_persons))
     log.info('Created persons: %d' % len(created_persons))
-
-    File.objects.save_file(XML_FILE, content)
+    
+    if not had_error:
+        # Remove person which were not found in XML file
+        removed_persons = existing_persons - processed_persons
+        for pk in removed_persons:
+            raise Exception("A person was deleted?")
+            p = Person.objects.get(pk=pk)
+            log.warn("Deleted %s" % p)
+            p.delete()
+        log.info('Removed persons: %d' % len(removed_persons))
+    
+        # Mark the file as processed.
+        File.objects.save_file(XML_FILE, content)
 
 
 if __name__ == '__main__':

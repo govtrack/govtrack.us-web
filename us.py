@@ -52,7 +52,7 @@ def get_congress_dates(congressnumber):
         CONGRESS_DATES.update(cd)
     return CONGRESS_DATES[congressnumber]
 
-def get_session_from_date(when):
+def get_session_from_date(when, allow_start_date=True, allow_end_date=True):
     global SESSION_DATES
     if SESSION_DATES == [ ]:
         sd = []
@@ -70,7 +70,7 @@ def get_session_from_date(when):
         when = when.date()
     
     for c, s, sd, ed in SESSION_DATES:
-        if sd <= when and when <= ed:
+        if (sd < when or (allow_start_date and sd == when)) and (when < ed or (allow_end_date and when == ed)):
             return (c, s)
             
     return None
