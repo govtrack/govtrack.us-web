@@ -15,7 +15,7 @@ from common.pagination import paginate
 
 import json, cPickle, base64
 
-from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs, get_all_sessions, get_congress_dates
+from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs, get_congress_dates
 
 from person.models import Person, PersonRole
 from person import analysis
@@ -217,14 +217,8 @@ def membersoverview(request):
         else:
             return qs.count()
     
-    congress_current = None
-    congress_previous = None
-    for cong, sess, sdate, edate in reversed(get_all_sessions()):
-        if congress_current == None or congress_current[0] == cong: # multiple sessions per congress
-            congress_current = (cong, sdate)
-        elif congress_current != None and cong < congress_current:
-            congress_previous = (cong, edate)
-            break
+    congress_current = (CURRENT_CONGRESS, get_congress_dates(CURRENT_CONGRESS)[0])
+    congress_previous = (CURRENT_CONGRESS-1, get_congress_dates(CURRENT_CONGRESS-1)[1])
             
     return {
         "statelist": statelist,
