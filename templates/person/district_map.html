@@ -373,8 +373,10 @@
 			<p>(<a href="/congress/members/map">Back to U.S. Map</a>)</small></p>
 			
 			<h3>Senators</h3>
-			{% if stateapp == "T" %}
-				<p>{{statename}} is a U.S. territory and so does not have any senators.</p>
+			{% if state == "DC" %}
+				<p>The District of Columbia does not elect senators.</p>
+			{% elif stateapp == "T" %}
+				<p>{% if state == "VI" %}The {% endif %}{{statename}} is a U.S. territory and so does not have any senators.</p>
 			{% else %}
 				<ul>
 					{% for rep in senators %}
@@ -389,7 +391,11 @@
 			
 			{% if not district %}
 			<h3>Representative{{reps|pluralize}}</h3>
-			<p>By congressional district.</p>
+				{% if stateapp != "T" %}
+					<p>By congressional district:</p>
+				{% else %}
+					<p>{% if state == "DC" or state == "VI" %}The {% endif %}{{statename}} elects a delegate to the House of Representatives with limited voting privileges:</p>
+				{% endif %}
 			{% else %}
 			<h3>{{district|ordinalhtml}} Congressional District</h3>
 			{% endif %}
