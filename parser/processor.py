@@ -92,7 +92,8 @@ class Processor(object):
         new_value.clean_fields() # normalize field values, like DateTimes that get reduced to Dates
         for k in new_value.__dict__:
             if k != "id" and self.is_model_field(old_value, k):
-                if not hasattr(old_value, k) or getattr(old_value, k) != getattr(new_value, k):
+                if getattr(old_value, k) != getattr(new_value, k):
+                    print "Change in", k, "value of", unicode(old_value).encode("utf8"), ":", unicode(getattr(old_value, k)).encode("utf8"), "=>", unicode(getattr(new_value, k)).encode("utf8")
                     return True
         return False
         
