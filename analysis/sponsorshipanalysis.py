@@ -61,21 +61,28 @@ def rescale(u, log=False):
 os.system("mkdir -p " + datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis")
 
 # Load up the session people file. We'll need some of this info later.
+# Put each person only in the House or Senate output, even if they served in both,
+# according to their most recent role.
 people = { }
+people_list = { 'h': set(), 's': set() }
 peoplexml = lxml.parse(datadir + "/us/" + str(congressnumber) + "/people.xml")
 for person in peoplexml.xpath("person"):
 	people[int(person.get('id'))] = person
-
-start_date = None
-end_date = None
+	roletype = person.xpath("role")[-1].get("type")
+	people_list["h" if roletype == "rep" else "s"].add( int(person.get('id')) )
 
 # Perform analysis totally separately for each chamber.
 for house_or_senate in ('h', 's'):
+	start_date = None
+	end_date = None
+	
 	# Map GovTrack person IDs to rows (or columns) of the matrix.
 	rep_to_row = { }
+	row_to_rep = { }
 	def rownum(id):
 		if not id in rep_to_row:
 			rep_to_row[id] = len(rep_to_row)
+			row_to_rep[rep_to_row[id]] = people[id]
 		return rep_to_row[id]
 		
 	# Store a flat (i.e. sparse) list of all cells that have the value 1. Note that
@@ -93,20 +100,19 @@ for house_or_senate in ('h', 's'):
 			spx = xml.xpath("sponsor/@id")
 			if len(spx) == 0: # e.g. debt limit with no sponsor
 				continue
-			if not int(spx[0]) in people:
+			if not int(spx[0]) in people_list[house_or_senate]:
 				continue
 			sponsor = rownum(int(spx[0]))
 			for cosponsor_str in xml.xpath("cosponsors/cosponsor/@id"):
-				if not int(cosponsor_str) in people:
+				if int(cosponsor_str) not in people_list[house_or_senate]:
 					continue
 				cosponsor = rownum(int(cosponsor_str))
 				cells.append( (sponsor, cosponsor) )
 	
 	# In the event a member of congress neither sponsored nor cosponsored
 	# a bill, just give them an empty slot.
-	tp = "rep" if house_or_senate == "h" else "sen"
-	for person in peoplexml.xpath("person[role[@type='" + tp + "']]"):
-		rownum(int(person.get('id')))
+	for person in people_list[house_or_senate]:
+		rownum(person)
 
 	# Get total number of members of congress seen.
 	nreps = len(rep_to_row)
@@ -152,12 +158,18 @@ for house_or_senate in ('h', 's'):
 	# "PageRank" Leadership
 	###############
 
-	# For each column, normalize so the sum is one.... or zero if this representative
-	# didn't cosponsor anyone else's bills. That gets fixed later.
+	# For each column, normalize so the sum is one. We started with an
+	# identity matrix so even MoCs that only cosponsor their own bills
+	# have some data. But if they have so little data, we should fudge
+	# it because if they only 'cosponsor' their own bills they will get
+	# leadership scores of 0.5.
 	for col in xrange(nreps):
 		s = sum(P[:,col])
-		if s > 0:
-			P[:,col] = P[:,col] / s
+		if s == 0: raise ValueError()
+		if s < 10: # min number of cosponsorship data per person
+			P[:,col] += (10.0-s)/nreps
+			s = 10
+		P[:,col] = P[:,col] / s
 		
 	# Create a random transition vector.
 	v = numpy.ones( (nreps, 1) ) / float(nreps)
