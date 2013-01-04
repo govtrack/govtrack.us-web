@@ -53,7 +53,7 @@ class PersonRoleProcessor(Processor):
 
     REQUIRED_ATTRIBUTES = ['type', 'startdate', 'enddate']
     ATTRIBUTES = [
-        'type', 'current', 'startdate', 'enddate', 'senator_class',
+        'type', 'current', 'startdate', 'enddate', 'class',
         'district', 'state', 'party', 'url'
     ]
     FIELD_MAPPING = {'type': 'role_type', 'class': 'senator_class', 'url': 'website'}
@@ -175,7 +175,7 @@ def main(options):
                     if not (ex_role.startdate == role.startdate and ex_role.enddate == role.enddate) and role_processor.changed(ex_role, role):
                         print ex_role
                         print role
-                        raise Exception("?")
+                        raise Exception("Do we really want to update this role?")
                     processed_roles.add(ex_role.id)
                     role.id = ex_role.id
                     if role_processor.changed(ex_role, role) or options.force:
@@ -214,12 +214,13 @@ def main(options):
                 pr.delete()
             
             # The name can't be determined until all of the roles are set. If
-            # it changes, re-save.
+            # it changes, re-save. Unfortunately roles are cached so this actually
+            # doesn't work yet. Re-run the parser to fix names.
             nn = (person.name, person.sortname)
             person.set_names()
             if nn != (person.name, person.sortname):
-                log.warn("%s is now %s." % (nn[0], person.name)
-                    person.save()
+                log.warn("%s is now %s." % (nn[0], person.name))
+                person.save()
             
         except Exception, ex:
             # Catch unexpected exceptions and log them

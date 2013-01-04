@@ -1,8 +1,8 @@
 export RELEASE=1
 ./parse.py -l ERROR person
 ./parse.py -l ERROR committee
-./parse.py -l ERROR --congress=112 bill
-./parse.py -l ERROR --congress=112 vote
+./parse.py -l ERROR --congress=113 bill
+./parse.py -l ERROR --congress=113 vote
 #./parse.py -l ERROR states
 
 # -v 0 sets low verbosity

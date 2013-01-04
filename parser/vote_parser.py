@@ -47,6 +47,9 @@ class VoteProcessor(Processor):
         'ratification': VoteCategory.ratification,
         'veto-override': VoteCategory.veto_override,
         'conviction': VoteCategory.conviction,
+        'quorum': VoteCategory.procedural,
+        'leadership': VoteCategory.procedural,
+        'recommit': VoteCategory.procedural,
     }
 
     def category_handler(self, value):

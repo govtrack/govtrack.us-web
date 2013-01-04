@@ -337,8 +337,9 @@ def main(options):
         
     # Parse docs.house.gov for what might be coming up this week.
     import iso8601
-    dhg_html = urllib.urlopen("http://docs.house.gov/").read()
+    dhg_html = urllib.urlopen("http://docs.house.gov/floor/").read()
     m = re.search(r"class=\"downloadXML\" href=\"(Download.aspx\?file=.*?)\"", dhg_html)
+    m = None # temporarily disable because schedule has 112th C. bills
     if not m:
         log.error('No docs.house.gov download link found at http://docs.house.gov.')
     else:
