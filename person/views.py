@@ -202,14 +202,9 @@ def browsemembersbymap(request, state=None, district=None):
 @render_to('person/overview.html')
 def membersoverview(request):
     def get_current_members(role_type, delegates, by_party):
-    	# get Membership as of the start of the CURRENT_CONGRESS
-    	# or right now, whichever is later.
-        d = get_congress_dates(CURRENT_CONGRESS)[0]
-        if datetime.now().date() > d: d = datetime.now()
-                
         qs = PersonRole.objects.filter(
             role_type=role_type,
-            startdate__lte=d, enddate__gte=d,
+            current=True,
             state__in=set(s for s, t in stateapportionment.items() if (t != "T") ^ delegates)
             )
         if by_party:
