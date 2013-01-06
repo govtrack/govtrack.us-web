@@ -37,6 +37,7 @@ def load_majority_party(congress):
 	return majority_party
 
 def load_committee_membership(congress):
+	if congress == 113: return { } # no data yet!
 	# load archival committee data
 	ROLE_MAPPING = { # from the committee parser
 		'Ex Officio': CommitteeMemberRole.exofficio,
@@ -123,7 +124,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		# been referred?
 		for rname, rvalue in (("member", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("vicechair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
 			for committee in committees:
-				if committee_membership.get(bill.sponsor_id, {}).get(committee.code) ==  rvalue:
+				if committee_membership.get(bill.sponsor_id, {}).get(committee.code) == rvalue:
 					if rvalue != CommitteeMemberRole.member:
 						factors.append(("sponsor_committee_%s" % rname, "The sponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun), "Sponsor is a relevant committee %s." % CommitteeMemberRole.by_value(rvalue).label.lower()))
 					elif sponsor_party == maj_party:
@@ -143,7 +144,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		for cosponsor in cosponsors:
 			for committee in committees:
 				cvalue = committee_membership.get(cosponsor.person.id, {}).get(committee.code)
-				if cvalue ==  rvalue or (rvalue==CommitteeMemberRole.member and cvalue != None):
+				if cvalue == rvalue or (rvalue==CommitteeMemberRole.member and cvalue != None):
 					num_cosp += 1
 					break
 		if rvalue == CommitteeMemberRole.member:
@@ -429,7 +430,7 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 	# post office. Startswith factors that decrease a bill's prognosis are still good
 	# to include.
 	if proscore:
-		factors = [(key, decr) for (key, decr) in factors if 
+		factors = [(key, decr, longdescr) for (key, decr, longdescr) in factors if 
 			not key.startswith("startswith:")
 			or (key in model_1["factors"] and model_1["factors"][key]["regression_beta"] < 0)
 			or (key in model_2["factors"] and model_2["factors"][key]["regression_beta"] < 0)]
