@@ -41,7 +41,7 @@ class BillStatus(enum.Enum):
 
     # indicates statuses whose descriptions are clear that the bill is no longer active,
     # other statuses are displayed as "Died: " for bills from previous congresses.
-    final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)
+    final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate, passed_bill)
 
     # indicates a bill at the end of its life cycle and passed
     final_status_passed_bill = (enacted_signed, enacted_veto_override)
@@ -100,7 +100,7 @@ def get_bill_status_string(is_current, status):
         elif status == "PASS_OVER:SENATE":
             status = "This %s was introduced in a previous session of Congress and was passed by the Senate on %s but was never passed by the House."
         elif status == "PASSED:BILL":
-            status = "This %s was passed by Congress on %s but was not enacted before the end of its Congressional session."
+            status = "This %s was passed by Congress on %s but was not enacted before the end of its Congressional session. (It is possible this bill is waiting for the signature of the President.)"
         elif status == "PASS_BACK:HOUSE" or status == "PASS_BACK:SENATE":
             status = "This %s was introduced in a previous session of Congress and though it was passed by both chambers on %s it was passed in non-identical forms and the differences were never resolved."
         elif status == "PROV_KILL:SUSPENSIONFAILED" or status == "PROV_KILL:CLOTUREFAILED" or status == "PROV_KILL:PINGPONGFAIL":
