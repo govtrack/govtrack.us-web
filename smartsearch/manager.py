@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.core.cache import cache
 
-import json, urllib
+import json, urllib, hashlib
 
 from common.enum import MetaEnum
 
@@ -69,7 +69,9 @@ class SearchManager(object):
             return render_to_response(template, c, RequestContext(request))
 
         # Although we cache some facet queries, also cache the final response.
-        cachekey = self.build_cache_key('response' + ("_F" if request.POST["faceting"] != "false" else ""), request)
+        m = hashlib.md5()
+        m.update(self.model.__name__ + "|" + request.POST.urlencode())
+        cachekey = "smartsearch__response__" + m.hexdigest()
         resp = cache.get(cachekey)
         if resp:
             resp = HttpResponse(resp, content_type='text/json')
