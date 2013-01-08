@@ -12,7 +12,7 @@ from datetime import datetime
 import logging
 
 from parser.progress import Progress
-from parser.processor import Processor
+from parser.processor import XmlProcessor
 from parser.models import File
 from person.models import Person, PersonRole, Gender, RoleType, SenatorClass
 
@@ -20,7 +20,7 @@ from settings import CURRENT_CONGRESS
 
 log = logging.getLogger('parser.person_parser')
 
-class PersonProcessor(Processor):
+class PersonProcessor(XmlProcessor):
     """
     Person model contains data about all people which were
     a member of Congress at least one time.
@@ -46,7 +46,7 @@ class PersonProcessor(Processor):
         return int(value)
 
 
-class PersonRoleProcessor(Processor):
+class PersonRoleProcessor(XmlProcessor):
     """
     PersonRole contains data about role of current congress members.
     """

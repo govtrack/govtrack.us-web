@@ -7,7 +7,7 @@ from datetime import datetime
 import logging
 
 from parser.progress import Progress
-from parser.processor import Processor
+from parser.processor import XmlProcessor
 from parser.models import File
 from committee.models import (Committee, CommitteeType, CommitteeMember,
                               CommitteeMemberRole, CommitteeMeeting)
@@ -16,7 +16,7 @@ from bill.models import Bill, BillType
 
 log = logging.getLogger('parser.committee_parser')
 
-class CommitteeProcessor(Processor):
+class CommitteeProcessor(XmlProcessor):
     """
     Parser of /committees/committe record.
     """
@@ -32,7 +32,7 @@ class CommitteeProcessor(Processor):
         return self.TYPE_MAPPING[value]
 
 
-class SubcommitteeProcessor(Processor):
+class SubcommitteeProcessor(XmlProcessor):
     """
     Parser of /committees/committee/subcommittee records.
     """
@@ -42,7 +42,7 @@ class SubcommitteeProcessor(Processor):
     FIELD_MAPPING = {'displayname': 'name'}
 
 
-class CommitteeMemberProcessor(Processor):
+class CommitteeMemberProcessor(XmlProcessor):
     """
     Parser of /committee/member.
     """
@@ -72,7 +72,7 @@ class CommitteeMemberProcessor(Processor):
     def role_handler(self, value):
         return self.ROLE_MAPPING[value]
 
-class CommitteeMeetingProcessor(Processor):
+class CommitteeMeetingProcessor(XmlProcessor):
     """
     Parser of committeeschedule.xml.
     """
