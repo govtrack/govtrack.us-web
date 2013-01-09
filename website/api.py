@@ -201,7 +201,6 @@ class PersonModel(GBaseModel):
 			"firstname": ('exact,'),
 			"gender": ALL,
 			"lastname": ('exact,'),
-			"metavidid": ALL,
 			"middlename": ('exact,'),
 			"namemod": ('exact,'),
 			"nickname": ('exact,'),

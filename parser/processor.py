@@ -91,8 +91,10 @@ class Processor(object):
         new_value.clean_fields() # normalize field values, like DateTimes that get reduced to Dates
         for k in new_value.__dict__:
             if k != "id" and self.is_model_field(old_value, k):
-                if getattr(old_value, k) != getattr(new_value, k):
-                    print "Change in", k, "value of", unicode(old_value).encode("utf8"), ":", unicode(getattr(old_value, k)).encode("utf8"), "=>", unicode(getattr(new_value, k)).encode("utf8")
+                v1 = getattr(old_value, k)
+                v2 = getattr(new_value, k)
+                if v1 != v2:
+                    print "Change in", k, "value of", unicode(old_value).encode("utf8"), ":", unicode(v1).encode("utf8"), "=>", unicode(v2).encode("utf8")
                     return True
         return False
         
@@ -112,9 +114,43 @@ class YamlProcessor(Processor):
     def display_node(self, node):
         return pformat(node)
     def get_node_attribute_keys(self, node):
-        return node.keys()
+        # handle a_b path names by scanning node recursively
+        ret = set()
+        for k, v in node.items():
+            ret.add(k)
+            if isinstance(v, dict):
+                for k2 in self.get_node_attribute_keys(v):
+                    ret.add(k + '_' + k2)
+        return ret
     def get_node_attribute_value(self, node, attr):
-        return node.get(attr, None)
+        for k in attr.split('_'):
+            node = node.get(k, None)
+        return node
     def get_node_child(self, node, name):
         raise Exception("Not available for YAML files.")
+
+def yaml_load(path):
+    # Loading YAML is ridiculously slow. In congress-legislators's
+    # utils, we cache the YAML in a pickled file which is a lot
+    # faster. This has to match the utils file there since we'll
+    # overwrite their file when we save the pickle cache...
+
+    import cPickle as pickle, os.path, hashlib
+    import yaml
+
+    # Check if the .pickle file exists and a hash stored inside it
+    # matches the hash of the YAML file, and if so unpickle it.
+    h = hashlib.sha1(open(path).read()).hexdigest()
+    if os.path.exists(path + ".pickle"):
+        store = pickle.load(open(path + ".pickle"))
+        if store["hash"] == h:
+            return store["data"]
+	
+	# No cached pickled data exists, so load the YAML file.
+    data = yaml.load(open(path))
+    
+    # Store in a pickled file for fast access later.
+    pickle.dump({ "hash": h, "data": data }, open(path+".pickle", "w"))
+    
+    return data
 
