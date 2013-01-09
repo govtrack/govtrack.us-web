@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# ./run_scrapers.py bills votes text amendments
+
 import os, os.path, glob, re, hashlib, shutil, sys
 
 CONGRESS = 113
@@ -34,6 +36,7 @@ def copy(fn1, fn2, modulo):
 # MAIN
 
 # Prepare Paths
+mkdir("data/us/%d" % CONGRESS)
 mkdir("data/us/%d/bills" % CONGRESS)
 mkdir("data/us/%d/rolls" % CONGRESS)
 
@@ -46,6 +49,12 @@ if "CACHE" in os.environ:
 	fetch_mode = ""
 	
 # Run scrapers and parsers.
+
+if "people" in sys.argv:
+	# Convert people YAML into the legacy format.
+	if CONGRESS != 113: raise ValueErrror()
+	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/people.xml 0" % SCRAPER_PATH)
+	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
 
 if "bills" in sys.argv:
 	# Scrape.
