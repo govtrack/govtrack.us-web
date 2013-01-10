@@ -34,19 +34,19 @@ class PersonProcessor(YamlProcessor):
     ]
     GENDER_MAPPING = {'M': Gender.male, 'F': Gender.female}
     FIELD_MAPPING = {
-    	'id_govtrack': 'id',
-    	'id_bioguide': 'bioguideid',
-    	'id_votesmart': 'pvsid',
-    	'id_opensecrets': 'osid',
-    	'social_youtube': 'youtubeid',
-    	'social_twitter': 'twitterid',
-    	'name_first': 'firstname',
-    	'name_last': 'lastname',
-    	'bio_birthday': 'birthday',
-    	'bio_gender': 'gender',
-    	'name_middle': 'middlename',
-    	'name_suffix': 'namemod',
-    	'name_nickname': 'nickname',
+        'id_govtrack': 'id',
+        'id_bioguide': 'bioguideid',
+        'id_votesmart': 'pvsid',
+        'id_opensecrets': 'osid',
+        'social_youtube': 'youtubeid',
+        'social_twitter': 'twitterid',
+        'name_first': 'firstname',
+        'name_last': 'lastname',
+        'bio_birthday': 'birthday',
+        'bio_gender': 'gender',
+        'name_middle': 'middlename',
+        'name_suffix': 'namemod',
+        'name_nickname': 'nickname',
     }
 
     def bio_gender_handler(self, value):
@@ -70,11 +70,11 @@ class PersonRoleProcessor(YamlProcessor):
         'district', 'state', 'party', 'url'
     ]
     FIELD_MAPPING = {
-    	'type': 'role_type',
-    	'start': 'startdate',
-    	'end': 'enddate',
-    	'class': 'senator_class',
-    	'url': 'website'
+        'type': 'role_type',
+        'start': 'startdate',
+        'end': 'enddate',
+        'class': 'senator_class',
+        'url': 'website'
     }
     ROLE_TYPE_MAPPING = {'rep': RoleType.representative, 'sen': RoleType.senator,
                          'prez': RoleType.president}
@@ -102,7 +102,8 @@ def main(options):
     which have been changed.
     """
 
-    BASE_PATH = '../scripts/congress-legislators/'
+    #BASE_PATH = '../scripts/congress-legislators/'
+    BASE_PATH = '../scripts/congress/cache/congress-legislators/'
     SRC_FILES = ['legislators-current', 'legislators-historical', 'legislators-social-media', 'executive'] # order matters
 
     for p in SRC_FILES:
@@ -122,22 +123,38 @@ def main(options):
 
     # Get combined data.
     legislator_data = { }
+    leg_id_map = { }
     for p in SRC_FILES:
         log.info('Opening %s...' % p)
         f = BASE_PATH + p + ".yaml"
         y = yaml_load(f)
         for m in y:
-            if "govtrack" not in m["id"]:
+            if p != 'legislators-social-media':
+                govtrack_id = m["id"].get("govtrack")
+                
+                # For the benefit of the social media file, make a mapping of IDs.
+                for k, v in m["id"].items():
+                    if type(v) != list:
+                        leg_id_map[(k,v)] = govtrack_id
+            else:
+                # GovTrack IDs are not always listed in this file.
+                for k, v in m["id"].items():
+                    if type(v) != list and (k, v) in leg_id_map:
+                        govtrack_id = leg_id_map[(k,v)]
+                        break
+            
+            if not govtrack_id:
                 print "No GovTrack ID:"
                 pprint.pprint(m)
                 had_error = True
                 continue
-            if m["id"]["govtrack"] not in legislator_data:
-                legislator_data[m["id"]["govtrack"]] = m
+                
+            if govtrack_id not in legislator_data:
+                legislator_data[govtrack_id] = m
             elif p == "legislators-social-media":
-                legislator_data[m["id"]["govtrack"]]["social"] = m["social"]
+                legislator_data[govtrack_id]["social"] = m["social"]
             elif p == "executive":
-                legislator_data[m["id"]["govtrack"]]["terms"].extend( m["terms"] )
+                legislator_data[govtrack_id]["terms"].extend( m["terms"] )
             else:
                 raise ValueError("Duplication in an unexpected way.")
     
