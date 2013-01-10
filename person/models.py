@@ -12,6 +12,7 @@ from person.types import Gender, RoleType, SenatorClass, State
 from name import get_person_name
 
 from us import stateapportionment, get_congress_dates, statenames, get_congress_from_date
+from settings import CURRENT_CONGRESS
 
 import functools
 def cache_result(f):
@@ -314,7 +315,9 @@ class PersonRole(models.Model):
     def most_recent_congress_number(self):
         n = self.congress_numbers()
         if not n: return None
-        return n[-1]
+        n = n[-1]
+        if n > CURRENT_CONGRESS: n = CURRENT_CONGRESS # we don't ever mean to ask for a future one (senators, PR res com)
+        return n
 
     def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()
