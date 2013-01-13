@@ -271,7 +271,7 @@ class Bill(models.Model):
             % (self.congress, self.bill_type_slug, self.number)
             
     def create_events(self):
-        if self.congress < 111: return # not interested, creates too much useless data and slow to load
+        if self.congress < 112: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
         with Event.update(self) as E:
             # collect the feeds that we'll add major actions to
@@ -281,6 +281,13 @@ class Bill(models.Model):
                 index_feeds.append(Feed.PersonSponsorshipFeed(self.sponsor))
             index_feeds.extend([Feed.IssueFeed(ix) for ix in self.terms.all()])
             index_feeds.extend([Feed.CommitteeBillsFeed(cx) for cx in self.committees.all()])
+            
+            # also index into feeds for any related bills and previous versions of this bill
+            # that people may still be tracking
+            for rb in self.get_related_bills():
+                index_feeds.append(Feed.BillFeed(rb.related_bill))
+            for b in self.find_reintroductions():
+                index_feeds.append(Feed.BillFeed(b))
             
             # generate events for major actions
             E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
