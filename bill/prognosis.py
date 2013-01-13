@@ -282,7 +282,6 @@ def build_model(congress):
 		pop_title_prefixes.append(t)
 		if len(pop_title_prefixes) == 40: break
 	pop_title_prefixes.append("A joint resolution proposing an amendment to the Constitution")
-	pop_title_prefixes.append("Proposing an amendment to the Constitution of the United States")
 	pop_title_prefixes.append("Providing for consideration of")
 		
 	# We create separate models for bills by the bill type (H.R., S., H.Res., etc.)
