@@ -146,11 +146,20 @@
 								<li class="dropnav">
 									<a href="/start">Track</a>
 									<ul>
-										{% if user.is_authenticated %}
-										<li><a href="/start">Add a Tracker</a></li>
-										<li><a href="/accounts/lists">Your Lists</a></li>
+										{% if request.anonymous %}
+											<li id="nav_track_start"><a href="/start">Start Tracking</a></li>
+											<li id="nav_track_lists" style="display: none"><a href="/accounts/lists">Your Lists</a></li>
+											<script>if (the_user) {
+												$('#nav_track_start').find('a').text("Add a Tracker");
+												$('#nav_track_lists').show();
+											}</script>
 										{% else %}
-										<li><a href="/start">Start Tracking</a></li>
+											{% if user.is_authenticated %}
+											<li><a href="/start">Add a Tracker</a></li>
+											<li><a href="/accounts/lists">Your Lists</a></li>
+											{% else %}
+											<li><a href="/start">Start Tracking</a></li>
+											{% endif %}
 										{% endif %}
 										<li><a href="/accounts/docket">Your Docket</a></li>
 										<li><a href="/tools">Other Tools</a></li>
