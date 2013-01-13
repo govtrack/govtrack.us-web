@@ -339,7 +339,6 @@ def main(options):
     import iso8601
     dhg_html = urllib.urlopen("http://docs.house.gov/floor/").read()
     m = re.search(r"class=\"downloadXML\" href=\"(Download.aspx\?file=.*?)\"", dhg_html)
-    m = None # temporarily disable because schedule has 112th C. bills
     if not m:
         log.error('No docs.house.gov download link found at http://docs.house.gov.')
     else:
@@ -356,7 +355,8 @@ def main(options):
                 + "|".join(bt_re(bt) for bt in BillType)
                 + ")(\d+)\s*(\[Conference Report\]\s*)?$", billname, re.I)
             if not m:
-                log.error('Could not parse legis-num "%s" in docs.house.gov.' % billname)
+                if billname.strip() != "H.R. __":
+                    log.error('Could not parse legis-num "%s" in docs.house.gov.' % billname)
             else:
                 for bt in BillType:
                     if re.match(bt_re(bt) + "$", m.group(1)):
