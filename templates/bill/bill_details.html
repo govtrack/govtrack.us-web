@@ -129,11 +129,16 @@
 	{% endcache %}
 
 	
-	{% if bill.is_alive %}
+	{% if bill.is_alive or request.user.is_superuser %}
 	<div class="aside four columns">
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
 		{% include "events/subscribe_inline.html" %}
+		
+		{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
+		{% if request.user.is_superuser %}
+		<p>Tracked by {{feed.tracked_in_lists.count|intcomma}} users.</p>
+		{% endif %}
 		
 		<div style="margin: 1em 0">
 			<a href="{{bill.get_absolute_url}}/advocacy" class="yellow-btn">Take a Position</a>
