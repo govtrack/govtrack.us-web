@@ -655,7 +655,7 @@ class SubscriptionList(models.Model):
     
     user = models.ForeignKey(User, db_index=True, related_name="subscription_lists")
     name = models.CharField(max_length=64)
-    trackers = models.ManyToManyField(Feed)
+    trackers = models.ManyToManyField(Feed, related_name="tracked_in_lists")
     is_default = models.BooleanField(default=False)
     email = models.IntegerField(default=0, choices=EMAIL_CHOICES)
     last_event_mailed = models.IntegerField(blank=True, null=True) # id of last event
