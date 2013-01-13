@@ -282,12 +282,13 @@ def onenorm(u): return sum(abs(u))</pre>
 			</div> <!-- /prognosis factors pane -->
 			
 			<div tab="prognosis/accuracy">
-				<p>Did it work? The following charts compare the prognoses computed for bills in the {{prognosis_testing_congress|ordinalhtml}} Congress to the actual rates of success.</p>
+				<p>Did it work? The following charts compare the prognoses computed for bills to their actual
+				rate of success. The prognosis model for these charts was trained on the {{prognosis_testing_traincongress|ordinalhtml}} Congress and tested on the {{prognosis_testing_testcongress|ordinalhtml}} Congress.</p>
 				
-				<p>For each regression model, the bills are divided into 10 bins. The median prognosis is plotted on the horizontal axis and the percentage of successful bills in the bin is plotted on the vertical axis.</p> 
+				<p>For each regression model, the bills are divided into 10 bins by prognosis. The median prognosis is plotted on the horizontal axis and the percentage of successful bills in the bin is plotted on the vertical axis.</p> 
 				
 				<p>You can see that the prognosis overestimated the actual chances of success, but the
-				rough upward slope of the charts shows that the prognosis was predictive of a bill&rsquo;s
+				rough upward slope in most of the charts shows that the prognosis was often predictive of a bill&rsquo;s
 				future.</p>
 			
 				{% for m in prognosis_test %}
@@ -315,9 +316,9 @@ def onenorm(u): return sum(abs(u))</pre>
 			<div tab="prognosis/other">
 				<p>Here are some additional charts for machine learning researchers.</p>
 				
-				<p>The charts below show precision vs. recall plotted for various values of <i>t</i>,
-				a prognosis threshold. Bills with prognosis above the threshold are predicted
-				successes for the purposes of these charts.</p>
+				<p>The charts below show precision vs. recall plotted parametrically for various values of
+				a success-fail threshold <i>t</i>. Bills with prognosis above <t>t</t> are predicted
+				successes for the purposes of these charts. The prognosis model for these charts was trained on the {{prognosis_testing_traincongress|ordinalhtml}} Congress and tested on the {{prognosis_testing_testcongress|ordinalhtml}} Congress.</p>	
 				
 				{% for m in prognosis_test %}
 					<h5 style="margin: 1.25em 0 .5em 0;">{{m.bill_type.full_name}}s ({{m.bill_type.label}}) &mdash; {{m.success_name}}</h5>
