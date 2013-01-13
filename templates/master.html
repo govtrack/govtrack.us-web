@@ -13,7 +13,7 @@
 		
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
-		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css">
+		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css?20130107">
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen"/><![endif]-->
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -55,7 +55,7 @@
 	{% endcomment %}
 
 
-	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
+	{% if 0 and pagename != "blog_template" and not user_has_bounced_mail %}
 	<div id="sitenewscontainer" style="display: none" seq="25">
 		<div id="sitenews">
 			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>

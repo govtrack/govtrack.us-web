@@ -51,11 +51,26 @@ if "CACHE" in os.environ:
 # Run scrapers and parsers.
 
 if "people" in sys.argv:
-	# Convert people YAML into the legacy format.
 	if CONGRESS != 113: raise ValueErrror()
+	
+	# Pull latest poeple YAML.
+	os.system("cd %s/cache/congress-legislators; git fetch -pq" % SCRAPER_PATH)
+	os.system("cd %s/cache/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
+	
+	# Convert people YAML into the legacy format.
 	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/people.xml 0" % SCRAPER_PATH)
 	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
+	
+	# Load YAML (directly) into db.
+	os.system("./parse.py person") #  -l ERROR
 
+if "text" in sys.argv:
+	# Scrape with legacy scraper.
+	# Do this before bills because the process of loading into the db checks for new
+	# bill text and generates feed events for text availability.
+	os.system("cd ../scripts/gather; perl fetchbilltext.pl FULLTEXT %d" % CONGRESS)
+	os.system("cd ../scripts/gather; perl fetchbilltext.pl GENERATE %d" % CONGRESS)
+	
 if "bills" in sys.argv:
 	# Scrape.
 	os.system("cd %s; . .env/bin/activate; ./run bills --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
@@ -86,8 +101,5 @@ if "votes" in sys.argv:
 	# Load into db.
 	os.system("./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
 
-if "text" in sys.argv:
-	# Scrape with legacy scraper.
-	os.system("cd ../scripts/gather; perl fetchbilltext.pl FULLTEXT %d" % CONGRESS)
-	os.system("cd ../scripts/gather; perl fetchbilltext.pl GENERATE %d" % CONGRESS)
-	
+# TODO: Committee metadata and meetings.
+
