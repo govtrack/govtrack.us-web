@@ -11,7 +11,8 @@ from common import enum
 from person.types import Gender, RoleType, SenatorClass, State
 from name import get_person_name
 
-from us import stateapportionment, get_congress_dates, statenames, get_session_from_date
+from us import stateapportionment, get_congress_dates, statenames, get_congress_from_date
+from settings import CURRENT_CONGRESS
 
 import functools
 def cache_result(f):
@@ -43,7 +44,6 @@ class Person(models.Model):
     bioguideid = models.CharField(max_length=255, blank=True, null=True, help_text="The person's ID on bioguide.congress.gov. May be null if the person served only as a president and not in Congress.")
     pvsid = models.CharField(max_length=255, blank=True, help_text="The person's ID on vote-smart.org (Project Vote Smart), if known.")
     osid = models.CharField(max_length=255, blank=True, help_text="The person's ID on opensecrets.org (The Center for Responsive Politics), if known.")
-    metavidid = models.CharField(max_length=255, blank=True, help_text="The person's ID on metavid.org, if known.")
     youtubeid = models.CharField(max_length=255, blank=True, help_text="The name of the person's official YouTube channel, if known.")
     twitterid = models.CharField(max_length=50, blank=True, help_text="The name of the person's official Twitter handle, if known.")
     
@@ -308,14 +308,16 @@ class PersonRole(models.Model):
     def congress_numbers(self):
     	"""The Congressional sessions (Congress numbers) that this role spans, as a list from the starting Congress number through consecutive numbers to the ending Congress number."""
         # Senators can span Congresses, so return a range.
-        cs1 = get_session_from_date(self.startdate, allow_end_date=False)
-        cs2 = get_session_from_date(self.enddate, allow_start_date=False)
-        if not cs1 or not cs2: return None
-        return range(cs1[0], cs2[0]+1) # congress number only, not session
+        c1 = get_congress_from_date(self.startdate, allow_end_date=False)
+        c2 = get_congress_from_date(self.enddate, allow_start_date=False)
+        if not c1 or not c2: return None
+        return range(c1, c2+1) # congress number only, not session
     def most_recent_congress_number(self):
         n = self.congress_numbers()
         if not n: return None
-        return n[-1]
+        n = n[-1]
+        if n > CURRENT_CONGRESS: n = CURRENT_CONGRESS # we don't ever mean to ask for a future one (senators, PR res com)
+        return n
 
     def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()
@@ -355,5 +357,6 @@ class PersonRole(models.Model):
             prev_role = role
             if role.id == self.id:
                 found_me = True
+        if not found_me: raise Exception("Didn't find myself?!")
         return (startdate, enddate)
 

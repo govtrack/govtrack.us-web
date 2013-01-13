@@ -28,11 +28,11 @@ function addCommas(nStr)
 function show_facets(postdata, options, isinitial) {
     // Display options.
     for (var k in options) {
-        field = options[k][0];
-        type = options[k][1];
-        values = options[k][2];
-        is_simple = options[k][3];
-        visible = options[k][4];
+        var field = options[k][0];
+        var type = options[k][1];
+        var values = options[k][2];
+        var is_simple = options[k][3];
+        var visible = options[k][4];
         
         $('#searchform_field_' + field + "_container").toggle(visible);
         
@@ -261,7 +261,30 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 						// We got here because the user did a free-form text search that
 						// resulted in no answers. In this case, show the facets from the
 						// last successful search.
+						
+						if (isinitial) {
+							// If we failed even on the initial search, either the fragment
+							// parameters or the query string parameters (=> default_search)
+							// may have yielded no results. Back off to all filters off.
+							prev_search = { };
+						}
+						
 						prev_search.page = 1;
+						
+						// Call the search twice, because we get facets in two parts.
+						
+						prev_search.faceting = "false";
+						$.ajax({
+								url: document.location.pathname,
+								type: "POST",
+								dataType: "json",
+								data: prev_search,
+								success: function(res) {
+									if (res.error) return;
+									show_facets(postdata, res.options, isinitial);
+								}
+							});
+							
 						prev_search.faceting = "true";
 						$.ajax({
 								url: document.location.pathname,
@@ -273,6 +296,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 									show_facets(postdata, res, isinitial);
 								}
 							});
+							
                     } else {
 						// Updates checkboxes and radio buttons and the current values
 						// for selects, but in order to be fast we were not returned

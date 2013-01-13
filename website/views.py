@@ -390,6 +390,7 @@ def analysis_methodology(request):
         "prognosis_training_congress_dates": get_congress_dates(bill.prognosis_model.congress),
         "prognosis_factors": prognosis_factors,
         "prognosis_test": prognosis_test,
-        "prognosis_testing_congress": bill.prognosis_model_test.congress,
+        "prognosis_testing_traincongress": bill.prognosis_model_test.train_congress,
+        "prognosis_testing_testcongress": bill.prognosis_model_test.test_congress,
     }
     

@@ -7,12 +7,11 @@ a membe of Congress at least one time.
 
 PersonRole contains data about role of current congress members.
 """
-from lxml import etree
 from datetime import datetime
-import logging
+import logging, pprint
 
 from parser.progress import Progress
-from parser.processor import Processor
+from parser.processor import YamlProcessor, yaml_load
 from parser.models import File
 from person.models import Person, PersonRole, Gender, RoleType, SenatorClass
 
@@ -20,59 +19,76 @@ from settings import CURRENT_CONGRESS
 
 log = logging.getLogger('parser.person_parser')
 
-class PersonProcessor(Processor):
+class PersonProcessor(YamlProcessor):
     """
     Person model contains data about all people which were
     a member of Congress at least one time.
     """
 
-    REQUIRED_ATTRIBUTES = ['id', 'firstname', 'lastname']
+    REQUIRED_ATTRIBUTES = ['id_govtrack', 'name_first', 'name_last']
     ATTRIBUTES = [
-        'id', 'firstname', 'lastname', 'bioguideid',
-        'metavidid', 'pvsid', 'osid', 'youtubeid', 'gender',
-        'birthday', 'middlename',
-        'namemod', 'nickname', 'twitterid',
+        'id_govtrack', 'name_first', 'name_last',
+        'name_middle', 'name_suffix', 'name_nickname',
+        'id_bioguide', 'id_votesmart', 'id_opensecrets', 'social_youtube', 'social_twitter',
+        'bio_birthday', 'bio_gender',
     ]
     GENDER_MAPPING = {'M': Gender.male, 'F': Gender.female}
-    FIELD_MAPPING = {'id': 'pk'}
+    FIELD_MAPPING = {
+        'id_govtrack': 'id',
+        'id_bioguide': 'bioguideid',
+        'id_votesmart': 'pvsid',
+        'id_opensecrets': 'osid',
+        'social_youtube': 'youtubeid',
+        'social_twitter': 'twitterid',
+        'name_first': 'firstname',
+        'name_last': 'lastname',
+        'bio_birthday': 'birthday',
+        'bio_gender': 'gender',
+        'name_middle': 'middlename',
+        'name_suffix': 'namemod',
+        'name_nickname': 'nickname',
+    }
 
-    def gender_handler(self, value):
+    def bio_gender_handler(self, value):
         return self.GENDER_MAPPING[value]
 
-    def birthday_handler(self, value):
+    def bio_birthday_handler(self, value):
         return datetime.strptime(value, '%Y-%m-%d')
 
     def id_handler(self, value):
         return int(value)
 
 
-class PersonRoleProcessor(Processor):
+class PersonRoleProcessor(YamlProcessor):
     """
     PersonRole contains data about role of current congress members.
     """
 
-    REQUIRED_ATTRIBUTES = ['type', 'startdate', 'enddate']
+    REQUIRED_ATTRIBUTES = ['type', 'start', 'end']
     ATTRIBUTES = [
-        'type', 'current', 'startdate', 'enddate', 'class',
+        'type', 'start', 'end', 'class',
         'district', 'state', 'party', 'url'
     ]
-    FIELD_MAPPING = {'type': 'role_type', 'class': 'senator_class', 'url': 'website'}
+    FIELD_MAPPING = {
+        'type': 'role_type',
+        'start': 'startdate',
+        'end': 'enddate',
+        'class': 'senator_class',
+        'url': 'website'
+    }
     ROLE_TYPE_MAPPING = {'rep': RoleType.representative, 'sen': RoleType.senator,
                          'prez': RoleType.president}
-    SENATOR_CLASS_MAPPING = {'1': SenatorClass.class1, '2': SenatorClass.class2,
-                             '3': SenatorClass.class3}
+    SENATOR_CLASS_MAPPING = {1: SenatorClass.class1, 2: SenatorClass.class2,
+                             3: SenatorClass.class3}
 
     def type_handler(self, value):
         return self.ROLE_TYPE_MAPPING[value]
 
-    def startdate_handler(self, value):
+    def start_handler(self, value):
         return datetime.strptime(value, '%Y-%m-%d').date()
 
-    def enddate_handler(self, value):
+    def end_handler(self, value):
         return datetime.strptime(value, '%Y-%m-%d').date()
-
-    def current_handler(self, value):
-        return value == '1'
 
     def class_handler(self, value):
         return self.SENATOR_CLASS_MAPPING[value]
@@ -86,15 +102,62 @@ def main(options):
     which have been changed.
     """
 
-    XML_FILE = 'data/us/people.xml'
-    content = open(XML_FILE).read()
+    #BASE_PATH = '../scripts/congress-legislators/'
+    BASE_PATH = '../scripts/congress/cache/congress-legislators/'
+    SRC_FILES = ['legislators-current', 'legislators-historical', 'legislators-social-media', 'executive'] # order matters
 
-    if not File.objects.is_changed(XML_FILE, content=content) and not options.force:
-        log.info('File %s was not changed' % XML_FILE)
+    for p in SRC_FILES:
+        f = BASE_PATH + p + ".yaml"
+        if not File.objects.is_changed(f) and not options.force:
+            log.info('File %s was not changed' % f)
+        else:
+            # file modified...
+            break
+    else:
+        # no 'break' ==> no files modified
         return
-        
+
+    # Start parsing.
+    
     had_error = False
 
+    # Get combined data.
+    legislator_data = { }
+    leg_id_map = { }
+    for p in SRC_FILES:
+        log.info('Opening %s...' % p)
+        f = BASE_PATH + p + ".yaml"
+        y = yaml_load(f)
+        for m in y:
+            if p != 'legislators-social-media':
+                govtrack_id = m["id"].get("govtrack")
+                
+                # For the benefit of the social media file, make a mapping of IDs.
+                for k, v in m["id"].items():
+                    if type(v) != list:
+                        leg_id_map[(k,v)] = govtrack_id
+            else:
+                # GovTrack IDs are not always listed in this file.
+                for k, v in m["id"].items():
+                    if type(v) != list and (k, v) in leg_id_map:
+                        govtrack_id = leg_id_map[(k,v)]
+                        break
+            
+            if not govtrack_id:
+                print "No GovTrack ID:"
+                pprint.pprint(m)
+                had_error = True
+                continue
+                
+            if govtrack_id not in legislator_data:
+                legislator_data[govtrack_id] = m
+            elif p == "legislators-social-media":
+                legislator_data[govtrack_id]["social"] = m["social"]
+            elif p == "executive":
+                legislator_data[govtrack_id]["terms"].extend( m["terms"] )
+            else:
+                raise ValueError("Duplication in an unexpected way.")
+    
     person_processor = PersonProcessor()
     role_processor = PersonRoleProcessor()
 
@@ -102,12 +165,10 @@ def main(options):
     processed_persons = set()
     created_persons = set()
 
-    tree = etree.parse(XML_FILE)
-    total = len(tree.xpath('/people/person'))
-    progress = Progress(total=total)
+    progress = Progress(total=len(legislator_data))
     log.info('Processing persons')
 
-    for node in tree.xpath('/people/person'):
+    for node in legislator_data.values():
         # Wrap each iteration in try/except
         # so that if some node breaks the parsing process
         # then other nodes could be parsed
@@ -124,13 +185,15 @@ def main(options):
             try:
                 ex_person = Person.objects.get(pk=person.pk)
                 if person_processor.changed(ex_person, person) or options.force:
-                    # If the person has PK of existing record
+                    # If the person has PK of existing record,
+                    # coming in via the YAML-specified GovTrack ID,
                     # then Django ORM will update existing record
                     if not options.force:
                         log.warn("Updated %s" % person)
                     person.save()
                     
             except Person.DoesNotExist:
+                raise ValueError("creating!")
                 created_persons.add(person.pk)
                 person.save()
                 log.warn("Created %s" % person)
@@ -142,14 +205,12 @@ def main(options):
             existing_roles = set(PersonRole.objects.filter(person=person).values_list('pk', flat=True))
             processed_roles = set()
             role_list = []
-            for role in node.xpath('./role'):
+            for role in node['terms']:
                 role = role_processor.process(PersonRole(), role)
                 role.person = person
                 
-                # Override what we consider current.
-                if role.congress_numbers() != None:
-                    role.current = role.startdate <= datetime.now().date() and role.enddate >= datetime.now().date() \
-                        and CURRENT_CONGRESS in role.congress_numbers()
+                role.current = role.startdate <= datetime.now().date() and role.enddate >= datetime.now().date() # \
+                        #and CURRENT_CONGRESS in role.congress_numbers()
                 
                 # Overwrite an existing role if there is one that is for the same period
                 # of time and role type.
@@ -161,21 +222,31 @@ def main(options):
                         break
                         
                 if not ex_role:
+                    for r in roles:
+                        if role.role_type == r.role_type and r.startdate == role.startdate:
+                            ex_role = r
+                            break
+                        
+                if not ex_role:
+                    if role.congress_numbers() == None:
+                        print "Can't identify conress_numbers of db role", person.id, role
                     # .congress_numbers() is flaky on some historical data because start/end
                     # dates don't line up nicely with session numbers. So we try to match
                     # on exact dates first, and if we can match that don't bother using
                     # congress_numbers.
                     for r in roles:
+                        if r.congress_numbers() == None:
+                            print "Can't identify conress_numbers of yaml role", person.id, r
                         if role.role_type == r.role_type and (len(set(role.congress_numbers()) & set(r.congress_numbers())) > 0):
                             ex_role = r
                             break
                     
                 if ex_role:    
                     # These roles correspond.
-                    if not (ex_role.startdate == role.startdate and ex_role.enddate == role.enddate) and role_processor.changed(ex_role, role):
-                        print ex_role
-                        print role
-                        raise Exception("Do we really want to update this role?")
+                    #if not (ex_role.startdate == role.startdate and ex_role.enddate == role.enddate) and role_processor.changed(ex_role, role):
+                    #    print ex_role
+                    #    print role
+                    #    raise Exception("Do we really want to update this role?")
                     processed_roles.add(ex_role.id)
                     role.id = ex_role.id
                     if role_processor.changed(ex_role, role) or options.force:
@@ -217,14 +288,17 @@ def main(options):
             # it changes, re-save. Unfortunately roles are cached so this actually
             # doesn't work yet. Re-run the parser to fix names.
             nn = (person.name, person.sortname)
+            if hasattr(person, "role"): delattr(person, "role") # clear the cached info
             person.set_names()
             if nn != (person.name, person.sortname):
                 log.warn("%s is now %s." % (nn[0], person.name))
+                raise ValueError("re-saving!")
                 person.save()
             
         except Exception, ex:
             # Catch unexpected exceptions and log them
-            log.error('person %d' % person.id, exc_info=ex)
+            pprint.pprint(node)
+            log.error('', exc_info=ex)
             had_error = True
 
         progress.tick()
@@ -236,14 +310,19 @@ def main(options):
         # Remove person which were not found in XML file
         removed_persons = existing_persons - processed_persons
         for pk in removed_persons:
-            raise Exception("A person was deleted?")
             p = Person.objects.get(pk=pk)
-            log.warn("Deleted %s" % p)
-            p.delete()
-        log.info('Removed persons: %d' % len(removed_persons))
+            if p.roles.all().count() > 0:
+                log.warn("Missing? Deleted? %d: %s" % (p.id, p))
+            else:
+                log.warn("Deleting... %d: %s (remember to prune_index!)" % (p.id, p))
+                raise Exception("Won't delete!")
+                p.delete()
+        log.info('Missing/deleted persons: %d' % len(removed_persons))
     
-        # Mark the file as processed.
-        File.objects.save_file(XML_FILE, content)
+        # Mark the files as processed.
+        for p in SRC_FILES:
+            f = BASE_PATH + p + ".yaml"
+            File.objects.save_file(f)
 
 
 if __name__ == '__main__':

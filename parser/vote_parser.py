@@ -7,7 +7,7 @@ import re
 import logging
 
 from parser.progress import Progress
-from parser.processor import Processor
+from parser.processor import XmlProcessor
 from person.models import Person
 from parser.models import File
 from bill.models import Bill, BillType
@@ -18,7 +18,7 @@ from django.template.defaultfilters import truncatewords
 
 log = logging.getLogger('parser.vote_parser')
 
-class VoteProcessor(Processor):
+class VoteProcessor(XmlProcessor):
     """
     Parser of /roll records.
     """
@@ -61,7 +61,7 @@ class VoteProcessor(Processor):
     def datetime_handler(self, value):
         return self.parse_datetime(value)
 
-class VoteOptionProcessor(Processor):
+class VoteOptionProcessor(XmlProcessor):
     "Parser of /roll/option nodes"
 
     REQUIRED_ATTRIBUTES = ['key']
@@ -71,7 +71,7 @@ class VoteOptionProcessor(Processor):
         obj.value = node.text
 
 
-class VoterProcessor(Processor):
+class VoterProcessor(XmlProcessor):
     "Parser of /roll/voter nodes"
 
     REQUIRED_ATTRIBUTES = ['id', 'vote']

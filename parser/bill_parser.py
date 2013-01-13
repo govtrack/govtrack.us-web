@@ -14,7 +14,7 @@ import os.path
 from datetime import datetime, timedelta
 
 from parser.progress import Progress
-from parser.processor import Processor
+from parser.processor import XmlProcessor
 from parser.models import File
 from bill.models import BillTerm, TermType, BillType, Bill, Cosponsor, BillStatus, RelatedBill
 from person.models import Person
@@ -48,13 +48,13 @@ def get_term(name, congress):
             TERM_CACHE[(term.term_type, normalize_name(term.name))] = term
     return TERM_CACHE[(TermType.new if congress >= 111 else TermType.old, normalize_name(name))]
 
-class TermProcessor(Processor):
+class TermProcessor(XmlProcessor):
     REQUIRED_ATTRIBUTES = ['value']
     ATTRIBUTES = ['value']
     FIELD_MAPPING = {'value': 'name'}
     
 
-class BillProcessor(Processor):
+class BillProcessor(XmlProcessor):
     REQUIRED_ATTRIBUTES = ['type', 'session', 'number']
     ATTRIBUTES = ['type', 'session', 'number']
     FIELD_MAPPING = {'type': 'bill_type', 'session': 'congress'}
