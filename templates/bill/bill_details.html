@@ -8,7 +8,16 @@
 {% block meta_description %}{% if not bill.is_current %}{{bill.current_status_date}}. {% endif %}{{bill.display_number}}. {% if subtitle %}{{subtitle}}{% endif %} In GovTrack.us, a database of bills in the U.S. Congress.{% endblock %}
 {% block meta_keywords %}U.S. Congress,Congress,legislation,bill{% for term in bill.terms.all %}{% if 10 > forloop.counter %},{{term}}{% endif %}{% endfor %},law{% endblock %}
 
-{% block extra_js %}
+{% block head %}
+	{% cache 1200 billmeta bill.id %}
+	{% if bill.congress >= 112 %}
+		{% with text as text_info %}
+			{% if text_info %}
+				<meta property="og:image" content="http://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
+			{% endif %}
+		{% endwith %}
+	{% endif %}
+	{% endcache %}
 {% endblock %}
 
 {% block extra_css %}

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# ./run_scrapers.py bills votes text amendments
+# ./run_scrapers.py text bills votes amendments
 
 import os, os.path, glob, re, hashlib, shutil, sys
 
@@ -35,11 +35,6 @@ def copy(fn1, fn2, modulo):
 
 # MAIN
 
-# Prepare Paths
-mkdir("data/us/%d" % CONGRESS)
-mkdir("data/us/%d/bills" % CONGRESS)
-mkdir("data/us/%d/rolls" % CONGRESS)
-
 # Set options.
 
 fetch_mode = "--force"
@@ -58,6 +53,7 @@ if "people" in sys.argv:
 	os.system("cd %s/cache/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
 	# Convert people YAML into the legacy format.
+	mkdir("data/us/%d" % CONGRESS)
 	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/people.xml 0" % SCRAPER_PATH)
 	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
 	
@@ -68,6 +64,7 @@ if "text" in sys.argv:
 	# Scrape with legacy scraper.
 	# Do this before bills because the process of loading into the db checks for new
 	# bill text and generates feed events for text availability.
+	mkdir("data/us/bills.text/%d" % CONGRESS)
 	os.system("cd ../scripts/gather; perl fetchbilltext.pl FULLTEXT %d" % CONGRESS)
 	os.system("cd ../scripts/gather; perl fetchbilltext.pl GENERATE %d" % CONGRESS)
 	
@@ -76,6 +73,7 @@ if "bills" in sys.argv:
 	os.system("cd %s; . .env/bin/activate; ./run bills --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
 
 	# Copy files into legacy location.
+	mkdir("data/us/%d/bills" % CONGRESS)
 	bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }
 	for fn in glob.glob("%s/data/%d/bills/*/*/data.xml" % (SCRAPER_PATH, CONGRESS)):
 		congress, bill_type, number = re.match(r".*congress/data/(\d+)/bills/([a-z]+)/(?:[a-z]+)(\d+)/data.xml$", fn).groups()
@@ -86,12 +84,27 @@ if "bills" in sys.argv:
 
 	# Load into db.
 	os.system("./parse.py --congress=%d bill" % CONGRESS) #  -l ERROR
-	
+
+if "amendments" in sys.argv:
+	# Scrape.
+	# TODO: GovTrack-style output is not implemented yet.
+	os.system("cd %s; . .env/bin/activate; ./run amendments --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
+
+	# Copy files into legacy location.
+	mkdir("data/us/%d/bills.amdt" % CONGRESS)
+	for fn in glob.glob("%s/data/%d/amendments/*/*/data.xml" % (SCRAPER_PATH, CONGRESS)):
+		congress, chamber, number = re.match(r".*congress/data/(\d+)/amendments/([hs])amdt/(?:[hs])amdt(\d+)/data.xml$", fn).groups()
+		if int(congress) != CONGRESS: raise ValueError()
+		fn2 = "data/us/%d/bills.amdt/%s%d.xml" % (CONGRESS, chamber, int(number))
+		print fn, fn2
+		#copy(fn, fn2, r'updated="[^"]+"')
+
 if "votes" in sys.argv:
 	# Scrape.
 	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
 	
 	# Copy files into legacy location.
+	mkdir("data/us/%d/rolls" % CONGRESS)
 	for fn in glob.glob("%s/data/%d/votes/*/*/data.xml" % (SCRAPER_PATH, CONGRESS)):
 		congress, session, chamber, number = re.match(r".*congress/data/(\d+)/votes/(\d+)/([hs])(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
