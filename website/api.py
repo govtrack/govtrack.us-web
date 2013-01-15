@@ -359,7 +359,7 @@ class VoteVoterModel(GBaseModel):
 		}
 		ordering = ['created']
 	vote = fields.ToOneField('website.api.VoteModel', 'vote', help_text="The vote that this was a part of.")
-	person = fields.ToOneField('website.api.PersonModel', 'person', help_text="The person making this vote.")
+	person = fields.ToOneField('website.api.PersonModel', 'person', help_text="The person making this vote.", blank=True, null=True)
 	
 	def build_filters(self, filters=None):
 		# So that we don't have to create a model for the options, we rewrite

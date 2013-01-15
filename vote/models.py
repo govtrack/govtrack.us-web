@@ -261,7 +261,7 @@ class VoteOption(models.Model):
 
 class Voter(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='voters')
-    person = models.ForeignKey('person.Person', null=True, on_delete=models.PROTECT, related_name='votes')
+    person = models.ForeignKey('person.Person', blank=True, null=True, on_delete=models.PROTECT, related_name='votes')
     voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President (in which case, the person field is null).")
     option = models.ForeignKey('vote.VoteOption', help_text="How the person voted.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.") # equal to vote.created
