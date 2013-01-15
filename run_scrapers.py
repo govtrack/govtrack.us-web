@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# ./run_scrapers.py text bills votes amendments
+# ./run_scrapers.py text bills votes
 
 import os, os.path, glob, re, hashlib, shutil, sys
 
@@ -19,14 +19,18 @@ def md5(fn, modulo):
 	# differences.
 	
 	data = open(fn).read()
-	data = re.sub(modulo, data, "--")
+	data = re.sub(modulo, "--", data)
 	
 	md5 = hashlib.md5()
 	md5.update(data)
 	return md5.digest()
 
 def copy(fn1, fn2, modulo):
-	# Don't copy unchanged files so that we don't touch file modification times.
+	# Don't copy true unchanged files because we want to keep
+	# file contents the same so long as no real data changed.
+	# When we load into our db, we use hashes to check if we
+	# need to process a file. And for rsync users, don't make
+	# them re-download files that have no real changes.
 	if os.path.exists(fn2):
 		if md5(fn1, modulo) == md5(fn2, modulo):
 			return
@@ -38,7 +42,7 @@ def copy(fn1, fn2, modulo):
 # Set options.
 
 fetch_mode = "--force"
-log_level = "info"
+log_level = "warn"
 
 if "CACHE" in os.environ:
 	fetch_mode = ""
@@ -58,7 +62,8 @@ if "people" in sys.argv:
 	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
 	
 	# Load YAML (directly) into db.
-	os.system("./parse.py person") #  -l ERROR
+	os.system("RELEASE=1 ./parse.py person") #  -l ERROR
+	os.system("RELEASE=1 ./manage.py update_index -v 0 -u person person")
 
 if "text" in sys.argv:
 	# Scrape with legacy scraper.
@@ -70,7 +75,7 @@ if "text" in sys.argv:
 	
 if "bills" in sys.argv:
 	# Scrape.
-	os.system("cd %s; . .env/bin/activate; ./run bills --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run bills --govtrack %s --fast --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
 	
 	# Copy files into legacy location.
 	mkdir("data/us/%d/bills" % CONGRESS)
@@ -83,7 +88,7 @@ if "bills" in sys.argv:
 		copy(fn, fn2, r'updated="[^"]+"')
 
 	# Load into db.
-	os.system("./parse.py --congress=%d bill" % CONGRESS) #  -l ERROR
+	os.system("RELEASE=1 ./parse.py --congress=%d bill" % CONGRESS) #  -l ERROR
 
 if "amendments" in sys.argv:
 	# Scrape.
@@ -101,7 +106,7 @@ if "amendments" in sys.argv:
 
 if "votes" in sys.argv:
 	# Scrape.
-	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --fast --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
 	
 	# Copy files into legacy location.
 	mkdir("data/us/%d/rolls" % CONGRESS)
@@ -112,7 +117,7 @@ if "votes" in sys.argv:
 		copy(fn, fn2, r'updated="[^"]+"')
 		
 	# Load into db.
-	os.system("./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
+	os.system("RELEASE=1 ./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
 
 # TODO: Committee metadata and meetings.
 
