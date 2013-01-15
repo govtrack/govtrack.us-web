@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# ./run_scrapers.py text bills votes
+# ./run_scrapers.py text bills votes stats
 
 import os, os.path, glob, re, hashlib, shutil, sys
 
@@ -41,7 +41,7 @@ def copy(fn1, fn2, modulo):
 
 # Set options.
 
-fetch_mode = "--force"
+fetch_mode = "--force --fast"
 log_level = "warn"
 
 if "CACHE" in os.environ:
@@ -75,7 +75,7 @@ if "text" in sys.argv:
 	
 if "bills" in sys.argv:
 	# Scrape.
-	os.system("cd %s; . .env/bin/activate; ./run bills --govtrack %s --fast --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run bills --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
 	
 	# Copy files into legacy location.
 	mkdir("data/us/%d/bills" % CONGRESS)
@@ -106,7 +106,7 @@ if "amendments" in sys.argv:
 
 if "votes" in sys.argv:
 	# Scrape.
-	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --fast --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
 	
 	# Copy files into legacy location.
 	mkdir("data/us/%d/rolls" % CONGRESS)
@@ -121,3 +121,7 @@ if "votes" in sys.argv:
 
 # TODO: Committee metadata and meetings.
 
+if "stats" in sys.argv:
+	os.system("cd analysis; python sponsorship_analysis.py %d" % CONGRESS)
+	os.system("cd analysis; python missed_votes.py %d" % CONGRESS)
+	
