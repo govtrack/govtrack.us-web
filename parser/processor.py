@@ -105,7 +105,7 @@ class XmlProcessor(Processor):
         return node.attrib
     def get_node_attribute_value(self, node, attr):
         return node.get(attr)
-    def get_node_child(self, node, name):
+    def get_node_child_value(self, node, name):
         # raise IndexError on failure
         subnode = node.xpath('./%s' % name)[0]
         return unicode(subnode.text)
@@ -126,7 +126,7 @@ class YamlProcessor(Processor):
         for k in attr.split('_'):
             node = node.get(k, None)
         return node
-    def get_node_child(self, node, name):
+    def get_node_child_value(self, node, name):
         raise Exception("Not available for YAML files.")
 
 def yaml_load(path):

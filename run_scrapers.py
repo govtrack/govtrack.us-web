@@ -38,7 +38,7 @@ def copy(fn1, fn2, modulo):
 # Set options.
 
 fetch_mode = "--force"
-log_level = "error"
+log_level = "info"
 
 if "CACHE" in os.environ:
 	fetch_mode = ""
@@ -71,7 +71,7 @@ if "text" in sys.argv:
 if "bills" in sys.argv:
 	# Scrape.
 	os.system("cd %s; . .env/bin/activate; ./run bills --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
-
+	
 	# Copy files into legacy location.
 	mkdir("data/us/%d/bills" % CONGRESS)
 	bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }

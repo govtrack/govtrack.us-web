@@ -107,7 +107,7 @@ def main(options):
     """
     Parse rolls.
     """
-
+    
     # Setup XML processors
     vote_processor = VoteProcessor()
     option_processor = VoteOptionProcessor()
@@ -122,7 +122,10 @@ def main(options):
     chamber_mapping = {'s': CongressChamber.senate,
                        'h': CongressChamber.house}
 
-    if options.congress:
+    if options.filter:
+        files = glob.glob(options.filter)
+        log.info('Parsing rolls matching %s' % options.filter)
+    elif options.congress:
         files = glob.glob('data/us/%s/rolls/*.xml' % options.congress)
         log.info('Parsing rolls of only congress#%s' % options.congress)
     else:
