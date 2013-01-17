@@ -33,16 +33,17 @@ def copy(fn1, fn2, modulo):
 	# them re-download files that have no real changes.
 	if os.path.exists(fn2):
 		if md5(fn1, modulo) == md5(fn2, modulo):
-			return
+			return False
 	print fn2
 	shutil.copyfile(fn1, fn2)
+	return True
 
 # MAIN
 
 # Set options.
 
 fetch_mode = "--force --fast"
-log_level = "warn"
+log_level = "error"
 
 if "CACHE" in os.environ:
 	fetch_mode = ""
@@ -65,6 +66,8 @@ if "people" in sys.argv:
 	os.system("RELEASE=1 ./parse.py person") #  -l ERROR
 	os.system("RELEASE=1 ./manage.py update_index -v 0 -u person person")
 
+do_bill_parse = False
+
 if "text" in sys.argv:
 	# Scrape with legacy scraper.
 	# Do this before bills because the process of loading into the db checks for new
@@ -72,6 +75,7 @@ if "text" in sys.argv:
 	mkdir("data/us/bills.text/%d" % CONGRESS)
 	os.system("cd ../scripts/gather; perl fetchbilltext.pl FULLTEXT %d" % CONGRESS)
 	os.system("cd ../scripts/gather; perl fetchbilltext.pl GENERATE %d" % CONGRESS)
+	do_bill_parse = True # don't know if we got any new files
 	
 if "bills" in sys.argv:
 	# Scrape.
@@ -85,14 +89,18 @@ if "bills" in sys.argv:
 		if int(congress) != CONGRESS: raise ValueError()
 		if bill_type not in bill_type_map: raise ValueError()
 		fn2 = "data/us/%d/bills/%s%d.xml" % (CONGRESS, bill_type_map[bill_type], int(number))
-		copy(fn, fn2, r'updated="[^"]+"')
+		do_bill_parse |= copy(fn, fn2, r'updated="[^"]+"')
+		
+	# TODO: Even if we didn't get any new files, the bills parser also
+	# scrapes docs.house.gov and the Senate floor schedule, so we should
+	# also periodically make sure we run the scraper for that too.
 
+if do_bill_parse:
 	# Load into db.
 	os.system("RELEASE=1 ./parse.py --congress=%d bill" % CONGRESS) #  -l ERROR
 
 if "amendments" in sys.argv:
 	# Scrape.
-	# TODO: GovTrack-style output is not implemented yet.
 	os.system("cd %s; . .env/bin/activate; ./run amendments --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
 
 	# Copy files into legacy location.
@@ -101,23 +109,26 @@ if "amendments" in sys.argv:
 		congress, chamber, number = re.match(r".*congress/data/(\d+)/amendments/([hs])amdt/(?:[hs])amdt(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
 		fn2 = "data/us/%d/bills.amdt/%s%d.xml" % (CONGRESS, chamber, int(number))
-		print fn, fn2
-		#copy(fn, fn2, r'updated="[^"]+"')
+		copy(fn, fn2, r'updated="[^"]+"')
+		
+	# TODO: Load into db when we have a modle for it?
 
 if "votes" in sys.argv:
 	# Scrape.
 	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
 	
 	# Copy files into legacy location.
+	did_any_file_change = False
 	mkdir("data/us/%d/rolls" % CONGRESS)
 	for fn in glob.glob("%s/data/%d/votes/*/*/data.xml" % (SCRAPER_PATH, CONGRESS)):
 		congress, session, chamber, number = re.match(r".*congress/data/(\d+)/votes/(\d+)/([hs])(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
 		fn2 = "data/us/%d/rolls/%s%s-%d.xml" % (CONGRESS, chamber, session, int(number))
-		copy(fn, fn2, r'updated="[^"]+"')
+		did_any_file_change |= copy(fn, fn2, r'updated="[^"]+"')
 		
 	# Load into db.
-	os.system("RELEASE=1 ./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
+	if did_any_file_change:
+		os.system("RELEASE=1 ./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
 
 # TODO: Committee metadata and meetings.
 
