@@ -29,7 +29,8 @@ class PersonProcessor(YamlProcessor):
     ATTRIBUTES = [
         'id_govtrack', 'name_first', 'name_last',
         'name_middle', 'name_suffix', 'name_nickname',
-        'id_bioguide', 'id_votesmart', 'id_opensecrets', 'social_youtube', 'social_twitter',
+        'id_bioguide', 'id_votesmart', 'id_opensecrets', 'id_cspan',
+        'social_youtube', 'social_twitter',
         'bio_birthday', 'bio_gender',
     ]
     GENDER_MAPPING = {'M': Gender.male, 'F': Gender.female}
@@ -38,6 +39,7 @@ class PersonProcessor(YamlProcessor):
         'id_bioguide': 'bioguideid',
         'id_votesmart': 'pvsid',
         'id_opensecrets': 'osid',
+        'id_cspan': 'cspanid',
         'social_youtube': 'youtubeid',
         'social_twitter': 'twitterid',
         'name_first': 'firstname',

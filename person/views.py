@@ -63,6 +63,7 @@ def person_details(request, pk):
         if person.osid: links.append(("OpenSecrets.org", "http://www.opensecrets.org/politicians/summary.php?cid=" + person.osid))
         if person.pvsid: links.append(("VoteSmart.org", "http://votesmart.org/candidate/" + person.pvsid))
         if person.bioguideid: links.append(("Congress.gov", "http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + person.bioguideid))
+        if person.cspanid: links.append(("C-SPAN Video", "http://www.c-spanvideo.org/person/" + str(person.cspanid)))
     
         return {'person': person,
                 'role': role,
