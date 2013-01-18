@@ -21,6 +21,10 @@
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}"></meta>
 		{% if HTTP_HOST == "test.govtrack.us" %}<meta name="robots" content="noindex" />{% endif %} {% comment %}moot because site is currently behind authz {% endcomment %}
 		
+		{% comment %}<meta property="fb:admins" content="620474" />{% endcomment %}  
+		<meta property="fb:app_id" content="119329904748946" />
+		<meta property="og:site_name" content="GovTrack.us"/> 
+		
 		{% block extra_css %}{% endblock %}
 		
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/modernizr.js"> </script> {% comment %}html5shiv{% endcomment %}

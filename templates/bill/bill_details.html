@@ -9,13 +9,22 @@
 {% block meta_keywords %}U.S. Congress,Congress,legislation,bill{% for term in bill.terms.all %}{% if 10 > forloop.counter %},{{term}}{% endif %}{% endfor %},law{% endblock %}
 
 {% block head %}
+	<meta property="og:title" content="{{bill.title_no_number}} ({% if not bill.is_current %}{{bill.current_status_date|date:"Y"}}{% endif %}{{bill.display_number_no_congress_number}})" />
+	<meta property="og:description" content="{% if subtitle %}{{subtitle}}{% else %}A {{bill.noun}} in the U.S. Congress.{% endif %}" />
+	<meta property="og:url" content="http://www.govtrack.us{{bill.get_absolute_url}}" />
+	<meta property="og:type" content="og_govtrack:bill">
+
 	{% cache 1200 billmeta bill.id %}
 	{% if bill.congress >= 112 %}
 		{% with text as text_info %}
 			{% if text_info %}
 				<meta property="og:image" content="http://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
+			{% else %}
+				<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
 			{% endif %}
 		{% endwith %}
+	{% else %}
+		<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
 	{% endif %}
 	{% endcache %}
 {% endblock %}
@@ -212,7 +221,7 @@
 
 		{% endcomment %}
 		
-		<div class="fb-like" data-send="false" data-layout="button_count" data-width="170" data-show-faces="false" style="margin-top: 10px"></div>
+		<div class="fb-like" data-send="true" data-layout="button_count" data-width="170" data-show-faces="false" data-font="arial" style="margin-top: 10px"></div>
 	</div><!-- /actions -->
 	{% endif %}	
 </div>
