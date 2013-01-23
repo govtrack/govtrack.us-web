@@ -173,6 +173,17 @@ class Bill(models.Model):
     # api
     api_recurse_on = ("sponsor", "sponsor_role")
     api_recurse_on_single = ("committees", "cosponsors", "terms")
+    api_additional_fields = {
+        "link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+        "display_number": "display_number_no_congress_number",
+        "title_without_number": "title_no_number",
+        "bill_resolution_type": "noun",
+        "current_status_description": "current_status_description",
+        "is_current": "is_current",
+        "is_alive": "is_alive",
+        "thomas_link": "thomas_link",
+        "noun": "noun",
+    }
         
     @property
     def display_number(self):
