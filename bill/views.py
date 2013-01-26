@@ -247,7 +247,7 @@ def bill_list(request):
 def show_bill_browse(template, request, ix1, ix2, context):
     return bill_search_manager().view(request, template,
         defaults={
-            "congress": request.GET["congress"] if "congress" in request.GET else (CURRENT_CONGRESS if "sponsor" not in request.GET else Person.objects.get(id=request.GET["sponsor"]).most_recent_role_congress()),
+            "congress": request.GET["congress"] if "congress" in request.GET else (CURRENT_CONGRESS if "sponsor" not in request.GET else None), # was Person.objects.get(id=request.GET["sponsor"]).most_recent_role_congress(), but we can just display the whole history which is better at the beginning of a Congress when there are no bills
             "sponsor": request.GET.get("sponsor", None),
             "terms": ix1.id if ix1 else None,
             "terms2": ix2.id if ix2 else None,
