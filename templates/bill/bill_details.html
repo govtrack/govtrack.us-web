@@ -35,6 +35,10 @@
 		function fb_get_recorded_actions(){
 			fb_actions = { };
 			FB.getLoginStatus(function(response) {
+				// firefox doesn't do anything unless we do something here??
+				function blah() { }
+				blah(response.status);
+				
 				if (response.status != "connected") {
 					update_fb_action_status();
 				} else {
