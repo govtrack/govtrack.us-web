@@ -27,6 +27,104 @@
 		<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
 	{% endif %}
 	{% endcache %}
+	
+	<script>
+		// Handle click on a Facebook action link.
+		var fb_action_target_url = "http://www.govtrack.us{{bill.get_absolute_url|escapejs}}";
+		var fb_actions = null;
+		function fb_get_recorded_actions(){
+			fb_actions = { };
+			FB.getLoginStatus(function(response) {
+				if (response.status != "connected") {
+					update_fb_action_status();
+				} else {
+					fb_get_recorded_actions2("track");
+					fb_get_recorded_actions2("support");
+					fb_get_recorded_actions2("oppose");
+				}
+			});
+		}
+		function fb_get_recorded_actions2(action_name){
+			FB.api(
+			  '/me/og_govtrack:' + action_name,
+			  'get',
+			  function(response) {
+				fb_actions[action_name] = null;
+				for (var i = 0; i < response.data.length; i++) {
+					if (response.data[i].data.bill.url == fb_action_target_url)
+						fb_actions[action_name] = response.data[i].id;
+				}
+				if ("track" in fb_actions && "support" in fb_actions && "oppose" in fb_actions) {
+					// all three queries are completed
+					update_fb_action_status();
+				}
+			  }
+			);
+		}
+		function update_fb_action_status() {
+			$('.share-on-fb').show();
+			for (var ax in fb_actions) {
+				if (!fb_actions[ax]) continue;
+				$('.share-on-fb-new').hide();
+				$('.share-on-fb-existing').show();
+				if (ax == "track") ax = "are tracking";
+				$('.share-on-fb-existing span').text("You " + ax + " this {{bill.noun}}.")
+				return;
+			}
+			$('.share-on-fb-new').show();
+			$('.share-on-fb-existing').hide();
+			$('.fb-like').hide(); // remove me later
+		}
+		
+		function fb_unshare() {
+			for (var ax in fb_actions) {
+				if (fb_actions[ax]) {
+					FB.api(
+					  '/' + fb_actions[ax],
+					  'delete',
+					  function(response) { }
+					);
+					fb_actions[ax] = null; // clear now so it's not async with the post below					
+				}
+			}
+			update_fb_action_status();
+			return false;
+		}
+		
+		function fb_share(action_name) {
+			if (!fb_actions) return false; // not initialized
+			if (fb_actions[action_name]) return false; // already did this
+			
+			// delete existing actions on this bill
+			fb_unshare();
+			
+			// make sure we have permission (w/ correct scope) to post the action first...
+			FB.login(function(response) {
+				// post new action
+				FB.api(
+				  '/me/og_govtrack:' + action_name,
+				  'post',
+				  {
+					bill: fb_action_target_url
+					//messge: ...
+				  },
+				  function(response) {
+					fb_actions[action_name] = response.id;
+					update_fb_action_status();
+				  }
+				);			
+			 }, {scope: 'publish_actions'});
+ 
+			return false;
+		}
+	</script>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+	if (window.location.hash == "#fb-staging")
+		fbAsyncInitFuncs.push(fb_get_recorded_actions);
+</script>
 {% endblock %}
 
 {% block extra_css %}
@@ -221,7 +319,24 @@
 
 		{% endcomment %}
 		
+		<div class="share-on-fb" style="display: none">
+			<div><b>Share on Facebook:</b></div>
+			<div class="share-on-fb-new">
+				<div>I
+					<a href="#" onclick="return fb_share('support');">support</a>
+					| <a href="#" onclick="return fb_share('oppose');">oppose</a>
+					| <a href="#" onclick="return fb_share('track');">am tracking</a>
+					this {{bill.noun}}.
+				</div>
+			</div>
+			<div class="share-on-fb-existing">
+				<span> </span> [<a href="#" onclick="return fb_unshare();">X</a>]
+			</div>
+		</div>
+		
 		<div class="fb-like" data-send="true" data-layout="button_count" data-width="170" data-show-faces="false" data-font="arial" style="margin-top: 10px"></div>
+		{% comment %}
+		{% endcomment %}
 	</div><!-- /actions -->
 	{% endif %}	
 </div>
