@@ -113,19 +113,25 @@ class BillProcessor(XmlProcessor):
             try:
                 person = get_person(subnode.get('id'))
             except IndexError:
-                pass
+                log.error('Could not find cosponsor %s' % subnode.get('id'))
             else:
                 joined = self.parse_datetime(subnode.get('joined'))
+                
+                role = person.get_role_at_date(joined)
+                if not role:
+                    log.error('Cosponsor %s did not have a role on %s' % (unicode(person), subnode.get('joined')))
+                    continue
 
                 value = subnode.get('withdrawn')
                 withdrawn = self.parse_datetime(value) if value else None
+                
                 ob, isnew = Cosponsor.objects.get_or_create(
                     person=person,
                     bill=obj,
                     defaults={
                         "joined": joined,
                         "withdrawn": withdrawn,
-                        "role": person.get_role_at_date(joined)
+                        "role": role
                     })
                 if ob.joined != joined or ob.withdrawn != withdrawn:
                     ob.joined = joined
@@ -310,7 +316,11 @@ def main(options):
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
             if not skip_stuff:
-                bill = bill_processor.process(Bill(), node)
+            	try:
+            		bill = bill_processor.process(Bill(), node)
+            	except:
+            		print fname
+            		raise
             else:
                 m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
                 bill = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
