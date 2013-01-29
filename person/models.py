@@ -46,7 +46,7 @@ class Person(models.Model):
     osid = models.CharField(max_length=255, blank=True, null=True, help_text="The person's ID on opensecrets.org (The Center for Responsive Politics), if known.")
     youtubeid = models.CharField(max_length=255, blank=True, null=True, help_text="The name of the person's official YouTube channel, if known.")
     twitterid = models.CharField(max_length=50, blank=True, null=True, help_text="The name of the person's official Twitter handle, if known.")
-    cspanid = models.CharField(max_length=50, blank=True, null=True, help_text="The ID of the person on CSPAN websites, if known.")
+    cspanid = models.IntegerField(blank=True, null=True, help_text="The ID of the person on CSPAN websites, if known.")
     
     # cached name info
     name = models.CharField(max_length=96, help_text="The person's full name with title, district, and party information for current Members of Congress, in a typical display format.")

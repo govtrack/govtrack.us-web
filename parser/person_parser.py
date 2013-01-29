@@ -59,6 +59,8 @@ class PersonProcessor(YamlProcessor):
 
     def id_handler(self, value):
         return int(value)
+    def cspanid_handler(self, value):
+        return int(value)
 
 
 class PersonRoleProcessor(YamlProcessor):
