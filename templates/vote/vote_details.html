@@ -4,7 +4,11 @@
 {% block title %}{{ vote.question }} -- GovTrack.us{% endblock %}
 {% block meta_description %}{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}, in the United States Congress.{% endblock %}
 
-
+{% block head %}
+	<meta property="og:title" content="{{ vote.question|truncatewords:10 }} -- {{ vote.get_chamber_display }} Vote #{{ vote.number }} -- {{ vote.created|date:"DATE_FORMAT" }}" />
+	<meta property="og:image" content="http://www.govtrack.us{{vote.get_absolute_url}}/thumbnail"/>
+{% endblock %}
+	
 {% block extra_js %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
