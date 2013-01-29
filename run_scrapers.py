@@ -84,7 +84,7 @@ if "bills" in sys.argv:
 	# Copy files into legacy location.
 	mkdir("data/us/%d/bills" % CONGRESS)
 	bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }
-	for fn in glob.glob("%s/data/%d/bills/*/*/data.xml" % (SCRAPER_PATH, CONGRESS)):
+	for fn in sorted(glob.glob("%s/data/%d/bills/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
 		congress, bill_type, number = re.match(r".*congress/data/(\d+)/bills/([a-z]+)/(?:[a-z]+)(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
 		if bill_type not in bill_type_map: raise ValueError()
@@ -105,7 +105,7 @@ if "amendments" in sys.argv:
 
 	# Copy files into legacy location.
 	mkdir("data/us/%d/bills.amdt" % CONGRESS)
-	for fn in glob.glob("%s/data/%d/amendments/*/*/data.xml" % (SCRAPER_PATH, CONGRESS)):
+	for fn in sorted(glob.glob("%s/data/%d/amendments/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
 		congress, chamber, number = re.match(r".*congress/data/(\d+)/amendments/([hs])amdt/(?:[hs])amdt(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
 		fn2 = "data/us/%d/bills.amdt/%s%d.xml" % (CONGRESS, chamber, int(number))
@@ -120,7 +120,7 @@ if "votes" in sys.argv:
 	# Copy files into legacy location.
 	did_any_file_change = False
 	mkdir("data/us/%d/rolls" % CONGRESS)
-	for fn in glob.glob("%s/data/%d/votes/*/*/data.xml" % (SCRAPER_PATH, CONGRESS)):
+	for fn in sorted(glob.glob("%s/data/%d/votes/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
 		congress, session, chamber, number = re.match(r".*congress/data/(\d+)/votes/(\d+)/([hs])(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
 		fn2 = "data/us/%d/rolls/%s%s-%d.xml" % (CONGRESS, chamber, session, int(number))
@@ -136,3 +136,25 @@ if "stats" in sys.argv:
 	os.system("cd analysis; python sponsorship_analysis.py %d" % CONGRESS)
 	os.system("cd analysis; python missed_votes.py %d" % CONGRESS)
 	
+if "historical_bills" in sys.argv:
+	# Pull in statutes from the 85th-92nd Congress
+	# via the GPO's Statutes at Large.
+	
+	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=STATUTE --store=mods --log=%s" % (SCRAPER_PATH, "warn")) # log_level
+	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=65-86 --log=%s" % (SCRAPER_PATH, "warn")) # log_level
+	
+	for congress in xrange(85, 85+1): #92+1):
+		print congress, "..."
+		
+		# Copy files into legacy location.
+		mkdir("data/us/%d/bills" % congress)
+		bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }
+		for fn in sorted(glob.glob("%s/data/%d/bills/*/*/data.xml" % (SCRAPER_PATH, congress))):
+			bill_type, number = re.match(r".*congress/data/\d+/bills/([a-z]+)/(?:[a-z]+)(\d+)/data.xml$", fn).groups()
+			if bill_type not in bill_type_map: raise ValueError()
+			fn2 = "data/us/%d/bills/%s%d.xml" % (congress, bill_type_map[bill_type], int(number))
+			copy(fn, fn2, r'updated="[^"]+"')
+			
+		# Load into db.
+		os.system("RELEASE=1 ./parse.py --congress=%d bill" % congress) #  -l ERROR
+		

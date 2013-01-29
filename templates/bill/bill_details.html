@@ -77,6 +77,7 @@
 			<p class="date"></p>
 			{% if subtitle %}<p class="subtitle">{{subtitle}}</p>{% endif %}{% endcomment %}
 			
+			{% if bill.congress >= 93 %}
 			<dl>
 				<dt>Introduced:</dt>
 				<dd>{{bill.introduced_date}} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
@@ -139,6 +140,16 @@
 				
 				{% endwith %}
 			</dl>
+			{% else %}
+			<dl>
+				<dt>Introduced:</dt>
+				<dd>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
+			
+				<dt>Status:</dt>
+				<dd>{{bill.get_current_status_display}}<br/>{{bill.current_status_date}}</dd>
+			</dl>
+			<p>Limited information is available for bills and resolutions from 1957-1972.</p>
+			{% endif %}
 		
 		</div><!-- /info -->
 		
@@ -377,6 +388,7 @@
 					</dl>
 				</div><!-- /container -->
 				
+				{% if bill.congress >= 93 %}
 				<div class="container">
 					<dl class="heading">
 						<dt>Cosponsors</dt>
@@ -423,6 +435,7 @@
 					</dl>
 					{% endif %}
 				</div> <!-- /container -->
+				{% endif %}
 
 			  </div> <!-- /frame -->
 			  </div> <!-- /holder -->
@@ -475,10 +488,18 @@
 				<div class="container">
 					<dl>
 						<dt>Primary Source</dt>
+						{% if bill.congress >= 93 %}
 						<dd>
 							<p style="margin:0"><a href="{{bill.thomas_link}}">View on THOMAS (The Library of Congress)</a></p>
 							<p class="small">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here.</p>
 						</dd>
+						{% else %}
+						<dd>
+							<p style="margin:0"><a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO FDSys &ndash; United States Statutes at Large</a></p>
+							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Printing Office&rsquo;s United States Statutes at Large publication.</p>
+						</dd>
+						{% endif %}
+						
 						<dt>Citation</dt>
 						<dd>
 							<script>function show_cite(fmt) {

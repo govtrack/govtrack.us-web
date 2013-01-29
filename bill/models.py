@@ -476,6 +476,7 @@ class Bill(models.Model):
             }
         
     def get_major_events(self):
+        if self.congress < 93: return []
         ret = []
         saw_intro = False
         for datestr, st, text in self.major_actions:
