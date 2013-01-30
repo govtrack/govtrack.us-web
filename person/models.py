@@ -55,12 +55,12 @@ class Person(models.Model):
 
     # indexing
     def get_index_text(self):
-    	# We need to index the name, and also the name without
-    	# hard-to-type characters.
-    	import unicodedata
+        # We need to index the name, and also the name without
+        # hard-to-type characters.
+        import unicodedata
         return self.name_no_details() + "\n" + \
-        	u"".join(c for c in unicodedata.normalize('NFKD', self.name_no_details())
-        		if not unicodedata.combining(c))
+            u"".join(c for c in unicodedata.normalize('NFKD', self.name_no_details())
+                if not unicodedata.combining(c))
     haystack_index = ('lastname', 'gender')
     haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'), ('was_moc', 'Boolean'), ('is_currently_moc', 'Boolean'))
     #######
@@ -81,7 +81,7 @@ class Person(models.Model):
 
     @cache_result
     def name_no_details(self):
-    	"""The person's full name (excluding all title details)."""
+        """The person's full name (excluding all title details)."""
         return get_person_name(self, firstname_position='before', show_suffix=True)
         
     @cache_result
@@ -109,7 +109,7 @@ class Person(models.Model):
             if not self.roles.all()._result_cache: # if this has already been feteched by prefetch_related
                 return self.roles.get(current=True)
             else:
-            	return [r for r in self.roles.all() if r.current][0]
+                return [r for r in self.roles.all() if r.current][0]
         except (PersonRole.DoesNotExist, IndexError):
             return None
     def is_currently_serving(self):
@@ -238,17 +238,26 @@ class Person(models.Model):
 
 class PersonRole(models.Model):
     person = models.ForeignKey('person.Person', related_name='roles')
-    role_type = models.IntegerField(choices=RoleType, help_text="The type of this role: a U.S. senator, a U.S. congressperson, or a U.S. president.")
-    current = models.BooleanField(default=False, choices=[(False, "No"), (True, "Yes")], help_text="Whether the role is currently held, or if this is archival information.")
+    role_type = models.IntegerField(choices=RoleType, db_index=True, help_text="The type of this role: a U.S. senator, a U.S. congressperson, or a U.S. president.")
+    current = models.BooleanField(default=False, choices=[(False, "No"), (True, "Yes")], db_index=True, help_text="Whether the role is currently held, or if this is archival information.")
     startdate = models.DateField(db_index=True, help_text="The date the role began (when the person took office).")
     enddate = models.DateField(db_index=True, help_text="The date the role ended (when the person resigned, died, etc.)")
     # http://en.wikipedia.org/wiki/Classes_of_United_States_Senators
-    senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True, help_text="For senators, their election class, which determines which years they are up for election. (It has nothing to do with seniority.)") # None for representatives
+    senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True, db_index=True, help_text="For senators, their election class, which determines which years they are up for election. (It has nothing to do with seniority.)") # None for representatives
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts
-    district = models.IntegerField(blank=True, null=True, help_text="For representatives, the number of their congressional district. 0 for at-large districts, -1 in historical data if the district is not known.") # None for senators/presidents
-    state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True, help_text="For senators and representatives, the two-letter USPS abbrevation for the state or territory they are serving. Values are the abbreviations for the 50 states (each of which have at least one representative and two senators, assuming no vacancies) plus DC, PR, and the island territories AS, GU, MP, and VI (all of which have a non-voting delegate), and for really old historical data you will also find PI (Philippines, 1907-1946), DK (Dakota Territory, 1861-1889), and OR (Orleans Territory, 1806-1811) for non-voting delegates.")
-    party = models.CharField(max_length=255, blank=True, null=True, help_text="The political party of the person. If the person changes party, it is usually the most recent party during this role.")
+    district = models.IntegerField(blank=True, null=True, db_index=True, help_text="For representatives, the number of their congressional district. 0 for at-large districts, -1 in historical data if the district is not known.") # None for senators/presidents
+    state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True, db_index=True, help_text="For senators and representatives, the two-letter USPS abbrevation for the state or territory they are serving. Values are the abbreviations for the 50 states (each of which have at least one representative and two senators, assuming no vacancies) plus DC, PR, and the island territories AS, GU, MP, and VI (all of which have a non-voting delegate), and for really old historical data you will also find PI (Philippines, 1907-1946), DK (Dakota Territory, 1861-1889), and OR (Orleans Territory, 1806-1811) for non-voting delegates.")
+    party = models.CharField(max_length=255, blank=True, null=True, db_index=True, help_text="The political party of the person. If the person changes party, it is usually the most recent party during this role.")
     website = models.CharField(max_length=255, blank=True, help_text="The URL to the official website of the person during this role, if known.")
+
+    # API
+    api_recurse_on = ('person',)
+    api_additional_fields = {
+        "title": "get_title_abbreviated",
+        "title_long": "get_title",
+        "description": "get_description",
+        "congress_numbers": "congress_numbers",
+    }
 
     class Meta:
         pass # ordering = ['startdate'] # causes prefetch_related to be slow
@@ -265,11 +274,11 @@ class PersonRole(models.Model):
         return True
 
     def get_title(self):
-    	"""The long form of the title used to prefix the names of people with this role: Representative, Senator, President, Delegate, or Resident Commissioner."""
+        """The long form of the title used to prefix the names of people with this role: Representative, Senator, President, Delegate, or Resident Commissioner."""
         return self.get_title_name(short=False)
 
     def get_title_abbreviated(self):
-    	"""The title used to prefix the names of people with this role: Rep., Sen., President, Del. (delegate), or Res.Com. (resident commissioner)."""
+        """The title used to prefix the names of people with this role: Rep., Sen., President, Del. (delegate), or Res.Com. (resident commissioner)."""
         return self.get_title_name(short=True)
 
     def get_title_name(self, short):
@@ -290,8 +299,8 @@ class PersonRole(models.Model):
         return State.by_value(self.state).label
             
     def get_description(self):
-    	"""A description of this role, e.g. Delegate for District of Columbia At Large."""
-    	
+        """A description of this role, e.g. Delegate for District of Columbia At Large."""
+        
         from django.contrib.humanize.templatetags.humanize import ordinal
         
         if self.role_type == RoleType.president:
@@ -307,7 +316,7 @@ class PersonRole(models.Model):
                 return self.get_title_name(False) + " for " + statenames[self.state] + "'s " + ordinal(self.district) + " congressional district"
 
     def congress_numbers(self):
-    	"""The Congressional sessions (Congress numbers) that this role spans, as a list from the starting Congress number through consecutive numbers to the ending Congress number."""
+        """The Congressional sessions (Congress numbers) that this role spans, as a list from the starting Congress number through consecutive numbers to the ending Congress number."""
         # Senators can span Congresses, so return a range.
         c1 = get_congress_from_date(self.startdate, allow_end_date=False)
         c2 = get_congress_from_date(self.enddate, allow_start_date=False)

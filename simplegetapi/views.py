@@ -105,13 +105,11 @@ def do_api_call(request, model, qs, id):
         # Apply filters.
         
         if type(qs).__name__ == "QuerySet":
-            # Allow filtering on all Django ORM fields since we don't know what
-            # is efficient and what isn't. db_index on the field helps, but
-            # complex indices in the database makes this hard to do.
-            #fields = [f.name for f in model._meta.fields if f.name == 'id' or f.db_index]
-            fields = getattr(model, "api_allowed_filters", None)
-            if fields is not None: fields = set(fields)
-            def is_filterable_field(f): return fields is None or f in fields
+            # Allow filtering on all Django ORM fields with db_index=True
+            # by default, unless api_allowed_filters is specified.
+            default_filterable_fields = [f.name for f in model._meta.fields if f.name == 'id' or f.db_index]
+            fields = set(getattr(model, "api_allowed_filters", default_filterable_fields))
+            def is_filterable_field(f): return f in fields
             is_sortable_field = is_filterable_field
         else:
             # Allow filtering on fields indexed in Haystack.
@@ -143,7 +141,7 @@ def do_api_call(request, model, qs, id):
                 # split fieldname__operator into parts
                 arg_parts = arg.rsplit("__", 1)
                 
-                if len(arg_parts) == 2 and arg_parts[1]    not in ("contains", "exact", "gt", "gte", "lt", "lte", "in", "startswith", "range"):
+                if len(arg_parts) == 2 and arg_parts[1] not in ("contains", "exact", "gt", "gte", "lt", "lte", "in", "startswith", "range"):
                     # e.g. field1__field2 => ('field1__field12', 'exact')
                     arg_parts[0] += "__" + arg_parts[1]
                     arg_parts.pop()
@@ -152,7 +150,7 @@ def do_api_call(request, model, qs, id):
                 fieldname, matchoperator = arg_parts
                 
                 if not is_filterable_field(fieldname):
-                    return HttpResponseBadRequest("Invalid field name: %s" % fieldname)
+                    return HttpResponseBadRequest("Invalid field name for filter: %s" % fieldname)
                     
                 # For enum fields, convert key to integer value.
                 try:
@@ -171,7 +169,7 @@ def do_api_call(request, model, qs, id):
                     else:
                         # Multi-value operators.
                         qs = qs.filter(**{ fieldname + "__" + matchoperator: vals })
-                except ValueError as e:
+                except Exception as e:
                     return HttpResponseBadRequest("Invalid filter: %s" % repr(e))
         
         # Get total count before applying offset/limit.

@@ -405,6 +405,7 @@ def api_overview(request):
 
 #### V2 ####
 
+from django.http import Http404
 from simplegetapi.views import do_api_call
 
 def get_haystack_query_set(model, connection):
@@ -418,6 +419,9 @@ def apiv2(request, model, id):
 	elif model == "person":
 		model = Person
 		qs = get_haystack_query_set(model, "person")
+	elif model == "role":
+		model = PersonRole
+		qs = PersonRole.objects.all()
 	elif model == "vote":
 		model = Vote
 		qs = Vote.objects.all()
