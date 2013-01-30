@@ -111,6 +111,7 @@ INSTALLED_APPS = (
     
     'haystack',
     'tastypie',
+    'django_wysiwyg',
     
     # project modules
     'twostream',

@@ -82,11 +82,11 @@ class Cosponsor(models.Model):
         
     # role is a new field which I added with (does not take into account people with overlapping roles such as going from House to Senate on the same day):
     #for role in PersonRole.objects.filter(startdate__lte="1970-01-01", startdate__gt="1960-01-01"):
-    #	Cosponsor.objects.filter(
-    #		person=role.person_id,
-    #		joined__gte=role.startdate,
-    #		joined__lte=role.enddate).update(role = role)
-    		
+    #    Cosponsor.objects.filter(
+    #        person=role.person_id,
+    #        joined__gte=role.startdate,
+    #        joined__lte=role.enddate).update(role = role)
+            
 class Bill(models.Model):
     title = models.CharField(max_length=255, help_text="The bill's primary display title, including its number.")
     titles = JSONField(default=None) # serialized list of all bill titles as (type, as_of, text)
@@ -107,12 +107,12 @@ class Bill(models.Model):
     major_actions = JSONField(default=[]) # serialized list of all major actions (date/datetime, BillStatus, description)
     
     # role is a new field added with, but might not be perfect for overlapping roles (see Cosponsor)
-	#for role in PersonRole.objects.filter(startdate__gt="1960-01-01"):
-	#	Bill.objects.filter(
-	#		sponsor=role.person_id,
-	#		introduced_date__gte=role.startdate,
-	#		introduced_date__lte=role.enddate).update(sponsor_role = role)
-	
+    #for role in PersonRole.objects.filter(startdate__gt="1960-01-01"):
+    #    Bill.objects.filter(
+    #        sponsor=role.person_id,
+    #        introduced_date__gte=role.startdate,
+    #        introduced_date__lte=role.enddate).update(sponsor_role = role)
+    
     class Meta:
         ordering = ('congress', 'bill_type', 'number')
         unique_together = ('congress', 'bill_type', 'number')
@@ -340,12 +340,20 @@ class Bill(models.Model):
                 if os.path.exists(textfn):
                     textmodtime = datetime.datetime.fromtimestamp(os.path.getmtime(textfn))
                     E.add("text:" + st, textmodtime, index_feeds)
+                    
+            # generate an event for the main summary
+            bs = BillSummary.objects.filter(bill=self)
+            if len(bs) > 0:
+                E.add("summary", bs[0].created, index_feeds)
+               
     
     def render_event(self, eventid, feeds):
         if eventid == "dhg":
             return self.render_event_dhg(feeds)
         if eventid == "sfs":
             return self.render_event_sfs(feeds)
+        if eventid == "summary":
+            return self.render_event_summary(feeds)
             
         ev_type, ev_code = eventid.split(":")
         if ev_type == "state":
@@ -475,6 +483,19 @@ class Bill(models.Model):
             "context": { "noun": self.noun, "doc_date": modsinfo["docdate"], "doc_version_name": modsinfo["doc_version_name"] },
             }
         
+    def render_event_summary(self, feeds):
+        bs = self.oursummary
+        return {
+            "type": "Bill Summary",
+            "date": bs.created,
+            "date_has_no_time": False,
+            "title": self.title,
+            "url": self.get_absolute_url() + "#summary/oursummary",
+            "body_text_template": """{{summary.plain_text|truncatewords:80}}""",
+            "body_html_template": """{{summary.content|truncatewords_html:80|safe}}""",
+            "context": { "summary": bs },
+            }
+
     def get_major_events(self):
         ret = []
         saw_intro = False
@@ -497,8 +518,8 @@ class Bill(models.Model):
         if self.docs_house_gov_postdate: ret.append({ "label": "On House Schedule", "date": self.docs_house_gov_postdate })
         if self.senate_floor_schedule_postdate: ret.append({ "label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate })
         def as_dt(x):
-        	if isinstance(x, datetime.datetime): return x
-        	return datetime.datetime.combine(x, datetime.time.min)
+            if isinstance(x, datetime.datetime): return x
+            return datetime.datetime.combine(x, datetime.time.min)
         ret.sort(key = lambda x : as_dt(x["date"])) # only needed because of the previous two
         
         return ret
@@ -694,8 +715,8 @@ class Bill(models.Model):
         # floor-situation is also interesting but largely redundant with what we already know
         # take the first of background and bill-summary and make a text-only version
         for f in ("background", "bill-summary"):
-			ret["text"] = sanitize(dom.xpath("string(bill/analysis/%s)" % f), as_text=True)
-			if ret["text"]: break
+            ret["text"] = sanitize(dom.xpath("string(bill/analysis/%s)" % f), as_text=True)
+            if ret["text"]: break
         return ret
             
 class RelatedBill(models.Model):
@@ -795,4 +816,19 @@ Feed.register_feed(
     includes = lambda feed : bill_search_feed_execute(feed.feedname.split(":", 1)[1]),
     meta = True,
     )
+
+# Summaries
+class BillSummary(models.Model):
+    bill = models.OneToOneField(Bill, related_name="oursummary", on_delete=models.PROTECT)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    content = models.TextField(blank=True)
+    
+    def plain_text(self):
+        import re
+        content = re.sub("<br>|<li>", " \n ", self.content, re.I)
+        
+        from django.utils.html import strip_tags
+        return strip_tags(content)
+
 
