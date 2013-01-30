@@ -11,7 +11,7 @@ from django.core.cache import cache
 from common.decorators import render_to
 from common.pagination import paginate
 
-from bill.models import Bill, BillType, BillStatus, BillTerm, TermType, BillTextComparison
+from bill.models import Bill, BillType, BillStatus, BillTerm, TermType, BillTextComparison, BillSummary
 from bill.search import bill_search_manager, parse_bill_number
 from bill.title import get_secondary_bill_title
 from committee.util import sort_members
@@ -442,3 +442,7 @@ def join_community(request):
         c.save()
     return { "status": "OK" }
 
+def go_to_summary_admin(request):
+	summary, is_new = BillSummary.objects.get_or_create(bill=get_object_or_404(Bill, id=request.GET["bill"]))
+	return HttpResponseRedirect("/admin/bill/billsummary/%d" % summary.id)
+	

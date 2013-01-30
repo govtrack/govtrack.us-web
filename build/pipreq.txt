@@ -13,4 +13,4 @@ xapian-haystack
 pysolr
 flup
 recaptcha-client
-
+django-wysiwyg

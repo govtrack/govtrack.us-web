@@ -353,7 +353,13 @@
 		{% comment %}
 		{% endcomment %}
 	</div><!-- /actions -->
-	{% endif %}	
+	{% endif %}
+	
+	{% if user.is_staff %}
+	<div style="clear: both; margin-top: .5em; padding: .5em; background-color: #EEE; ">
+		ADMIN - <a href="{% url bill_go_to_summary_admin %}?bill={{bill.id}}">Edit Summary</a>
+	</div>
+	{% endif %}
 </div>
 {% endblock %}
 
@@ -576,6 +582,15 @@
 			  
 				<div class="container">
 					<dl>
+						<dt>Summary</dt>
+						<dd id="summaries">
+							<p>No summaries available.</p>
+						</dd>
+					</dl>
+				</div><!-- /container -->
+
+				<div class="container">
+					<dl>
 						<dt>Text</dt>
 						<dd>
 							{% with text as text_info %}
@@ -595,14 +610,6 @@
 					</dl>
 				</div><!-- /container -->
 				
-				<div class="container">
-					<dl>
-						<dt>Summary</dt>
-						<dd id="summaries">
-							<p>No summaries available.</p>
-						</dd>
-					</dl>
-				</div><!-- /container -->
 				
 				<div class="container">
 					<dl>
@@ -662,6 +669,7 @@
 		<div class="row">
 		<div class="three columns">
 			<ul id="summary_tabs" class="left-tabs">
+				<li><a href="#summary/oursummary">Our Summary</a></li>
 				<li><a href="#summary/libraryofcongress">Library of Congress</a></li>
 				<li><a href="#summary/houserepublicans">House Republicans</a></li>
 				<li><a href="#summary/housedemocrats">House Democrats</a></li>
@@ -678,18 +686,35 @@
 					first_summary = false;
 				}
 				
-				var p1 = $('<p style="margin: 0"><a/></p>');
+				var p1 = $('<p style="margin: 0; line-height: normal;"><span/><a/></p>');
 				p1.find('a').text(name + " »");
 				p1.find('a').attr('href', '#summary/' + href);
 				n.append(p1)
-				
-				var p2 = $('<p class="small" style="margin-bottom: .5em"/>');
-				p2.html(html);
-				n.append(p2)
+				if (!name) {
+					p1.find('span').html(html);
+					p1.find('a').text("more »");
+				} else {
+					var p2 = $('<p class="small" style="margin-bottom: .5em"/>');
+					p2.html(html);
+					n.append(p2)
+				}
 			}
 			</script>
+
+			<div id="oursummary" class="postcontent">
+				<h3 style="margin-bottom: 1em">GovTrack&rsquo;s Bill Summary</h3>
+				{% with bill.oursummary as summary %}
+				{% if not summary %}
+					<p>We don&rsquo;t have a summary available yet.</p>
+				{% else %}
+					{{summary.content|safe}}
+					<div class="small">Last updated {{summary.modified|date}}.</div>
+					<script>add_summary(null, "oursummary", "{{summary.plain_text|truncatewords:30|escapejs}}");</script>
+				{% endif %}
+				{% endwith %}
+			</div>
 			
-			<div id="libraryofcongress">
+			<div id="libraryofcongress" class="postcontent">
 				<h3 style="margin-bottom: 1em">Library of Congress Summary</h3>
 				<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress.</p>
 				<hr/>
@@ -703,7 +728,7 @@
 				{% endwith %}
 			</div>
 			
-			<div id="houserepublicans">
+			<div id="houserepublicans" class="postcontent">
 				<h3 style="margin-bottom: 1em">House Republican Conference Summary</h3>
 				<p>The summary below was written by the <a href="http://www.gop.gov">House Republican Conference</a>, which is the caucus of Republicans in the House of Representatives.</p>
 				<hr/>
@@ -734,7 +759,7 @@
 				{% endwith %}
 			</div>
 			
-			<div id="housedemocrats">
+			<div id="housedemocrats" class="postcontent">
 				<h3 style="margin-bottom: 1em">House Democratic Caucus Summary</h3>
 				<p>The <a href="http://www.dems.gov/">House Democratic Caucus</a> does not provide summaries of bills.</p>
 				<p>So, yes, we display the House Republican Conference&rsquo;s summaries when available even if we do not have a Democratic summary available. That&rsquo;s because we feel it is better to give you as much information as possible, even if we cannot provide every viewpoint.</p>
