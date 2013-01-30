@@ -32,7 +32,10 @@ class BillSummaryAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.save()
         obj.bill.create_events()
-    
+    def delete_model(self, request, obj):
+    	bill = obj.bill
+    	obj.delete()
+        bill.create_events()
 
 admin.site.register(BillTerm, BillTermAdmin)
 admin.site.register(Bill, BillAdmin)

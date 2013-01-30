@@ -442,6 +442,8 @@ def join_community(request):
         c.save()
     return { "status": "OK" }
 
+from django.contrib.auth.decorators import permission_required
+@permission_required('bill.change_billsummary')
 def go_to_summary_admin(request):
 	summary, is_new = BillSummary.objects.get_or_create(bill=get_object_or_404(Bill, id=request.GET["bill"]))
 	return HttpResponseRedirect("/admin/bill/billsummary/%d" % summary.id)
