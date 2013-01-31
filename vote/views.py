@@ -127,7 +127,8 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	
 	vote_title = vote.question
 	vote_result_2 = re.sub("^(Bill|Amendment|Resolution|Conference Report|Nomination) ", "", vote.result)
-	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote.created.strftime("%x")
+	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
+	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
 	seating_rows = 8 if vote.chamber == CongressChamber.house else 4
 		# 4 for Senate (http://www.senate.gov/artandhistory/art/special/Desks/chambermap.cfm)
 		# about 8 for the House
