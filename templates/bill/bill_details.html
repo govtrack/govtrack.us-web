@@ -32,6 +32,20 @@
 		// Handle click on a Facebook action link.
 		var fb_action_target_url = "http://www.govtrack.us{{bill.get_absolute_url|escapejs}}";
 		var fb_actions = null;
+		
+		var fb_is_logged_in = false;
+		function fb_ensure_logged_in(callback) {
+			if (fb_is_logged_in) {
+				callback();
+				return;
+			}
+			
+			FB.login(function(response) {
+				fb_is_logged_in = true;
+				callback();
+			 }, {scope: 'publish_actions'});			
+		}
+		
 		function fb_get_recorded_actions(){
 			fb_actions = { };
 			FB.getLoginStatus(function(response) {
@@ -45,6 +59,12 @@
 					fb_get_recorded_actions2("track");
 					fb_get_recorded_actions2("support");
 					fb_get_recorded_actions2("oppose");
+					
+					// look ahead for the user's current permission so we
+					// don't have to force a login later
+					FB.api('/me/permissions', function (response) {
+						fb_is_logged_in = "publish_actions" in response.data[0];
+					} );					
 				}
 			});
 		}
@@ -77,18 +97,23 @@
 			}
 			$('.share-on-fb-new').show();
 			$('.share-on-fb-existing').hide();
-			$('.fb-like').hide(); // remove me later
 		}
 		
 		function fb_unshare() {
 			for (var ax in fb_actions) {
 				if (fb_actions[ax]) {
-					FB.api(
-					  '/' + fb_actions[ax],
-					  'delete',
-					  function(response) { }
-					);
-					fb_actions[ax] = null; // clear now so it's not async with the post below					
+					// log in and delete the action
+					var og_url = '/' + fb_actions[ax]; // get it now before we modify global var
+					fb_ensure_logged_in(function() {
+						FB.api(
+						  og_url,
+						  'delete',
+						  function(response) { }
+						);			
+					 });
+					 
+					// clear now so it's not async with the post below
+					fb_actions[ax] = null;					
 				}
 			}
 			update_fb_action_status();
@@ -103,7 +128,7 @@
 			fb_unshare();
 			
 			// make sure we have permission (w/ correct scope) to post the action first...
-			FB.login(function(response) {
+			fb_ensure_logged_in(function() {
 				// post new action
 				FB.api(
 				  '/me/og_govtrack:' + action_name,
@@ -117,7 +142,7 @@
 					update_fb_action_status();
 				  }
 				);			
-			 }, {scope: 'publish_actions'});
+			 });
  
 			return false;
 		}
@@ -126,8 +151,10 @@
 
 {% block body_scripts %}
 <script>
-	if (window.location.hash == "#fb-staging")
+	if (window.location.hash == "#fb-staging") {
 		fbAsyncInitFuncs.push(fb_get_recorded_actions);
+		$('.fb-like').hide(); // remove me later
+	}
 </script>
 {% endblock %}
 
