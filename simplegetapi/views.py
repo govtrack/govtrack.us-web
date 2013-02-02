@@ -49,7 +49,10 @@ def serialize(obj, recurse_on=[], requested_fields=None):
                 
             # Get the field value.
             if not isinstance(field, (str, unicode)):
-                v = getattr(obj, field_name)
+                try:
+                    v = getattr(obj, field_name)
+                except:
+                    v = None
             else:
                 # for api_additional_fields
                 v = obj.api_additional_fields[field]
