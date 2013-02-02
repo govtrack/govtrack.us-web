@@ -24,6 +24,7 @@ from settings import CURRENT_CONGRESS
 
 ideology_scores = { }
 
+@anonymous_view
 def vote_list(request):
     # Get the default session to show. We may have sessions listed that are
     # in the future, during a transition, so take the most recent that at
@@ -50,6 +51,7 @@ def load_vote(congress, session, chamber_code, number):
     return get_object_or_404(Vote, congress=congress, session=session,
                              chamber=chamber, number=number)
 
+@anonymous_view
 @render_to('vote/vote_details.html')
 def vote_details(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
@@ -83,7 +85,7 @@ def vote_details(request, congress, session, chamber_code, number):
             "VoteCategory": VoteCategory._items,
             }
 
-
+@anonymous_view
 def vote_export_csv(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
     voters = vote.voters.all().select_related('person', 'option')
@@ -108,6 +110,7 @@ def vote_export_csv(request, congress, session, chamber_code, number):
     return r
 
 
+@anonymous_view
 def vote_export_xml(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
     fobj = open('data/us/%s/rolls/%s%s-%s.xml' % (congress, chamber_code, session, number))
