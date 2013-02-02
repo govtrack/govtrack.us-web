@@ -9,17 +9,19 @@ SCRAPER_PATH = "../scripts/congress"
 
 # UTILS
 
+bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }
+
 def mkdir(path):
 	if not os.path.exists(path):
 		os.makedirs(path)
 
-def md5(fn, modulo):
+def md5(fn, modulo=None):
 	# do an MD5 on the file but run a regex first
 	# to remove content we don't want to check for
 	# differences.
 	
 	data = open(fn).read()
-	data = re.sub(modulo, "--", data)
+	if modulo != None: data = re.sub(modulo, "--", data)
 	
 	md5 = hashlib.md5()
 	md5.update(data)
@@ -69,10 +71,45 @@ if "people" in sys.argv:
 do_bill_parse = False
 
 if "text" in sys.argv:
+	# Update the mirror of GPO FDSys.
+	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --store=mods --log=%s" % (SCRAPER_PATH, log_level))
+	
+	def do_text_file(src, dest):
+		if not os.path.exists(dest):
+			print "missing", src, dest
+			os.link(src, dest)
+		elif os.stat(src).st_ino == os.stat(dest).st_ino:
+			pass # files are the same (hardlinked)
+		else:
+			if md5(src) != md5(dest):
+				print "replacing", src, dest
+			else:
+				print "squashing existing file", src, dest
+			os.unlink(dest)
+			os.link(src, dest)
+	
+	# Glob all of the bill text files. Create hard links in the data directory to
+	# their locations in the congress project data directoy.
+	for congress in xrange(103, CONGRESS+1):
+		mkdir("data/us/bills.text/%d" % CONGRESS)
+		for bt in bill_type_map.values():
+			mkdir("data/us/bills.text/%d/%s" % (CONGRESS, bt))
+		
+		for bill in sorted(glob.iglob("%s/data/%d/bills/*/*" % (SCRAPER_PATH, congress))):
+			bill_type, bill_number = re.match(r"([a-z]+)(\d+)$", os.path.basename(bill)).groups()
+			bill_type = bill_type_map[bill_type]
+			for ver in sorted(glob.iglob(bill + "/text-versions/*")):
+				if "." in ver: continue # .json metadata files
+				basename = "../data/us/bills.text/%d/%s/%s%s%s." % (congress, bill_type, bill_type, bill_number, os.path.basename(ver))
+				do_text_file(ver + "/mods.xml", basename + "mods.xml")
+	
+	# Now do the old-style scraper (except mods files) because it handles
+	# making symlinks to the latest version of each bill. And other data
+	# types, like XML.
+
 	# Scrape with legacy scraper.
 	# Do this before bills because the process of loading into the db checks for new
 	# bill text and generates feed events for text availability.
-	mkdir("data/us/bills.text/%d" % CONGRESS)
 	os.system("cd ../scripts/gather; perl fetchbilltext.pl FULLTEXT %d" % CONGRESS)
 	os.system("cd ../scripts/gather; perl fetchbilltext.pl GENERATE %d" % CONGRESS)
 	do_bill_parse = True # don't know if we got any new files
@@ -143,12 +180,11 @@ if "historical_bills" in sys.argv:
 	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=STATUTE --store=mods --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=65-86 --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	
-	for congress in xrange(85, 85+1): #92+1):
+	for congress in xrange(85, 92+1):
 		print congress, "..."
 		
 		# Copy files into legacy location.
 		mkdir("data/us/%d/bills" % congress)
-		bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }
 		for fn in sorted(glob.glob("%s/data/%d/bills/*/*/data.xml" % (SCRAPER_PATH, congress))):
 			bill_type, number = re.match(r".*congress/data/\d+/bills/([a-z]+)/(?:[a-z]+)(\d+)/data.xml$", fn).groups()
 			if bill_type not in bill_type_map: raise ValueError()
