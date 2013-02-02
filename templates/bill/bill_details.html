@@ -17,7 +17,7 @@
 	{% cache 1200 billmeta bill.id %}
 	{% if bill.congress >= 112 %}
 		{% with text as text_info %}
-			{% if text_info %}
+			{% if text_info.basename %}
 				<meta property="og:image" content="http://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
 			{% else %}
 				<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
@@ -248,7 +248,7 @@
 				<dd>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
 			
 				<dt>Status:</dt>
-				<dd>{{bill.get_current_status_display}}<br/>{{bill.current_status_date}}</dd>
+				<dd>Enacted or Agreed to on {{bill.current_status_date}}</dd>
 			</dl>
 			<p>Limited information is available for bills and resolutions from 1957-1972.</p>
 			{% endif %}
@@ -385,7 +385,13 @@
 						<dt>Status</dt>
 						<dd>
 							<p style="line-height: normal;">
-								{% if not died %}
+								{% if bill.congress < 93 %}
+									{% if bill.noun == "bill" %}
+										This bill was enacted on {{bill.current_status_date|date}}.
+									{% else %}
+										This resolution was agreed to on {{bill.current_status_date|date}}.
+									{% endif %}
+								{% elif not died %}
 									{{bill.current_status_description}}
 								{% else %}
 									This {{bill.noun}} died in a previous session of Congress.
@@ -589,23 +595,24 @@
 					</dl>
 				</div><!-- /container -->
 
+				{% with text as text_info %}
 				<div class="container">
 					<dl>
 						<dt>Text</dt>
 						<dd>
-							{% with text as text_info %}
-								{% if not text_info %}
-									<p>Text not yet available.</p>
-								{% else %}
-									{% if bill.congress >= 112 %}
-									<a href="{{bill.get_absolute_url}}/text">
-										<img src="http://www.govtrack.us/{{text_info.basename}}-thumb200.png" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>
-									</a>
-									{% endif %}
-									<p><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text &raquo;</a></p>
-									<p class="small">Last updated {{text_info.docdate}}.<br/>{{text_info.numpages}}</p>
+							{% if not text_info %}
+								<p>Text not yet available.</p>
+							{% elif bill.congress >= 103 %}
+								{% if bill.congress >= 112 %}
+								<a href="{{bill.get_absolute_url}}/text">
+									<img src="http://www.govtrack.us/{{text_info.basename}}-thumb200.png" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>
+								</a>
 								{% endif %}
-							{% endwith %}
+								<p><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text &raquo;</a></p>
+								<p class="small">Last updated {{text_info.docdate}}.<br/>{{text_info.numpages}}</p>
+							{% else %}
+								<a href="{{text_info.gpo_pdf_url}}">PDF</a> ({{text_info.docdate}})
+							{% endif %}
 						</dd>
 					</dl>
 				</div><!-- /container -->
@@ -621,7 +628,8 @@
 						</dd>
 						{% else %}
 						<dd>
-							<p style="margin:0"><a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO FDSys &ndash; United States Statutes at Large</a></p>
+							<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
+							<p style="margin:0"><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
 							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Printing Office&rsquo;s United States Statutes at Large publication.</p>
 						</dd>
 						{% endif %}
@@ -657,6 +665,7 @@
 						</dd>
 					</dl>
 				</div> <!-- /container -->				
+				{% endwith %}
 				
 			   </div><!-- /frame -->
 			   </div><!-- /holder -->
