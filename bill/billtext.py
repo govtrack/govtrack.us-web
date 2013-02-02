@@ -83,6 +83,9 @@ def get_current_version(bill):
     return load_bill_text(bill, None, mods_only=True)["doc_version"]
     
 def load_bill_text(bill, version, plain_text=False, mods_only=False):
+    if bill.congress < 103:
+        return load_bill_text_alt(bill, version, plain_text=plain_text, mods_only=mods_only)
+    
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
 
     bt = BillType.by_value(bill.bill_type).xml_code
@@ -139,7 +142,48 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         "doc_version": doc_version,
         "doc_version_name": doc_version_name,
         "numpages": numpages,
+        "has_html_text": True,
     }
+
+def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
+    # Load bill text info from the Congress project JSON files.
+    
+    from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
+    import glob, json
+
+    bt = BillType.by_value(bill.bill_type).slug
+    basename = "data/congress/%d/bills/%s/%s%d/text-versions" % (bill.congress, bt, bt, bill.number)
+    
+    if version == None:
+        # Cycle through files to find most recent version by date.
+        dat = None
+        for versionfile in glob.glob(basename + "/*.json"):
+            d = json.load(open(versionfile))
+            if not dat or d["issued_on"] > dat["issued_on"]:
+                dat = d
+    else:
+        dat = json.load(open(basename + "/%s.json" % version))
+            
+    if not mods_only:
+        raise Exception("Bill text not available.")
+            
+    gpo_url = dat["urls"]["pdf"]
+    m = re.match(r"http://www.gpo.gov/fdsys/pkg/(STATUTE-\d+)/pdf/(STATUTE-\d+-.*).pdf", gpo_url)
+    if m:
+        gpo_url = "http://www.gpo.gov/fdsys/granule/%s/%s/content-detail.html" % m.groups()
+            
+    return {
+        "bill_id": bill.id,
+        "bill_name": bill.title,
+        "basename": basename,
+        "docdate": datetime.date(*(int(d) for d in dat["issued_on"].split("-"))),
+        "gpo_url": gpo_url,
+        "gpo_pdf_url": dat["urls"]["pdf"],
+        "doc_version": dat["version_code"],
+        "doc_version_name": bill_gpo_status_codes[dat["version_code"]],
+        "has_html_text": False,
+    }
+    
 
 def compare_xml_text(doc1, doc2, timelimit=10):
     # Compare the text of two XML documents, marking up each document with new
