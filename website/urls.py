@@ -11,6 +11,7 @@ urlpatterns = patterns('website.views',
     #url(r'^campaigns/bulkdata', 'campaign_bulk_data'),
     url(r'^events/syndication-feed', 'push_to_social_media_rss'),
     url(r'^accounts/docket', 'your_docket'),
+    url(r'^accounts/update_settings', 'update_account_settings'),
     url(r'^about/analysis', 'analysis_methodology'),
 )
 

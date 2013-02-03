@@ -5,6 +5,7 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
+from django.contrib.auth.decorators import login_required
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -304,6 +305,21 @@ def your_docket(request):
             lst.bills = [tr.bill() for tr in lst.trackers.all() if tr.bill() != None]
             
     return { "lists": lists }
+
+@login_required
+def update_account_settings(request):
+    if request.POST.get("action") == "unsubscribe":
+        # Turn off all email updates.
+        for x in request.user.userprofile().lists_with_email():
+            x.email = 0
+            x.save()
+        
+    if request.POST.get("action") == "massemail":
+        p = request.user.userprofile()
+        p.massemail = True if request.POST.get("massemail", False) else False
+        p.save()
+            
+    return HttpResponseRedirect("/accounts/profile")
 
 from website.api import api_overview
 

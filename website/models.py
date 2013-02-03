@@ -16,6 +16,9 @@ class UserProfile(models.Model):
             is_default = True,
             defaults = { "name": "Email Updates" , "email": 1 } )
         return SubscriptionList.objects.filter(user=self.user).order_by('name')
+    def lists_with_email(self):
+        # return lists with trackers with email updates turned on
+        return SubscriptionList.objects.filter(user=self.user, email__gt=0, trackers__id__gt=0).distinct().order_by('name')
     
 def get_user_profile(user):
     if hasattr(user, "_profile"): return user._profile
