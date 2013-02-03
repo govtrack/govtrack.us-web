@@ -287,16 +287,11 @@
 	{% endcache %}
 
 	
-	{% if bill.is_alive or request.user.is_superuser %}
+	{% if bill.is_alive %}
 	<div class="aside four columns">
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
 		{% include "events/subscribe_inline.html" %}
-		
-		{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
-		{% if request.user.is_superuser %}
-		<p>Tracked by {{feed.tracked_in_lists.count|intcomma}} users.</p>
-		{% endif %}
 		
 		<div style="margin: 1em 0">
 			<a href="{{bill.get_absolute_url}}/advocacy" class="yellow-btn">Take a Position</a>
@@ -382,9 +377,13 @@
 	</div><!-- /actions -->
 	{% endif %}
 	
+	{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
 	{% if user.is_staff %}
-	<div style="clear: both; margin-top: .5em; padding: .5em; background-color: #EEE; ">
-		ADMIN - <a href="{% url bill_go_to_summary_admin %}?bill={{bill.id}}">Edit Summary</a>
+	<div class="clear"> </div>
+	<div style="margin-top: 1.5em; padding: .5em; background-color: #EEE; ">
+		<b>ADMIN</b> - <a href="{% url bill_go_to_summary_admin %}?bill={{bill.id}}">Edit Summary</a>
+		<br/>Tracked by {{feed.tracked_in_lists.count|intcomma}} users
+		({{feed.tracked_in_lists_with_email.count|intcomma}} w/ email).
 	</div>
 	{% endif %}
 </div>

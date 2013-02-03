@@ -16,6 +16,9 @@ class Feed(models.Model):
     
     def __unicode__(self):
         return self.feedname
+        
+    def tracked_in_lists_with_email(self):
+        return self.tracked_in_lists.filter(email__gt=0)
 
     @staticmethod
     def from_name(feedname, must_exist=True):
