@@ -180,7 +180,7 @@ if "historical_bills" in sys.argv:
 	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=STATUTE --store=mods --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=65-86 --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	
-	for congress in xrange(85, 92+1):
+	for congress in xrange(82, 92+1):
 		print congress, "..."
 		
 		# Copy files into legacy location.
