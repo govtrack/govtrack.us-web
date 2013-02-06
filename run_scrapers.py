@@ -90,7 +90,7 @@ if "text" in sys.argv:
 	
 	# Glob all of the bill text files. Create hard links in the data directory to
 	# their locations in the congress project data directoy.
-	for congress in xrange(103, CONGRESS+1):
+	for congress in xrange(CONGRESS, CONGRESS+1): # we should start at 103 in case GPO has made changes to past files, but it takes so long!
 		mkdir("data/us/bills.text/%d" % CONGRESS)
 		for bt in bill_type_map.values():
 			mkdir("data/us/bills.text/%d/%s" % (CONGRESS, bt))
@@ -99,7 +99,7 @@ if "text" in sys.argv:
 			bill_type, bill_number = re.match(r"([a-z]+)(\d+)$", os.path.basename(bill)).groups()
 			bill_type = bill_type_map[bill_type]
 			for ver in sorted(glob.iglob(bill + "/text-versions/*")):
-				if "." in ver: continue # .json metadata files
+				if ".json" in ver: continue # .json metadata files
 				basename = "../data/us/bills.text/%d/%s/%s%s%s." % (congress, bill_type, bill_type, bill_number, os.path.basename(ver))
 				do_text_file(ver + "/mods.xml", basename + "mods.xml")
 	
