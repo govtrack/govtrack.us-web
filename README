@@ -6,6 +6,10 @@ The data-gathering scripts are elsewhere.
 Installation
 ============
 
+* Clone the suorce code:
+
+	git clone --recursive https://github.com/govtrack/govtrack.us-web.git
+
 * Create a database make a settings_local.py based on settings_local.example.py.
 
 * Install dependencies via OS package manager:

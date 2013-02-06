@@ -1,0 +1,12 @@
+[submodule "ext/django-registration-pv"]
+	path = ext/django-registration-pv
+	url = git://github.com/tauberer/django-registration-pv.git
+[submodule "ext/django-haystack"]
+	path = ext/django-haystack
+	url = https://github.com/tauberer/django-haystack.git
+[submodule "ext/diff_match_patch-python"]
+	path = ext/diff_match_patch-python
+	url = git://github.com/tauberer/diff_match_patch-python.git
+[submodule "ext/stateface"]
+	path = ext/stateface
+	url = https://github.com/propublica/stateface
