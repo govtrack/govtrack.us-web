@@ -14,6 +14,7 @@ settings_local.py
 pip-log.txt
 update.sh
 database.sqlite
+static/css/all-min.css
 
 syntax:regexp
 ^dump.*\.sql
