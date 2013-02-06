@@ -3,3 +3,10 @@ pushd ../extdata/billtrack50
 ./fetch
 popd
 ./parse.py -l ERROR states
+
+# bills and state bills are indexed as they are parsed, but to
+# freshen the index... Because bills index full text and so
+# indexing each time is substantial, set the TIMEOUT and
+# BATCH_SIZE options in the haystack connections appropriately.
+# ./manage.py update_index -v 2 -u states states
+

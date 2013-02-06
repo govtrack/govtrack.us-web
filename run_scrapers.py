@@ -136,6 +136,12 @@ if do_bill_parse:
 	# Load into db.
 	os.system("RELEASE=1 ./parse.py --congress=%d bill" % CONGRESS) #  -l ERROR
 
+	# bills and state bills are indexed as they are parsed, but to
+	# freshen the index... Because bills index full text and so
+	# indexing each time is substantial, set the TIMEOUT and
+	# BATCH_SIZE options in the haystack connections appropriately.
+	# ./manage.py update_index -v 2 -u bill bill
+
 if "amendments" in sys.argv:
 	# Scrape.
 	os.system("cd %s; . .env/bin/activate; ./run amendments --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
@@ -168,6 +174,7 @@ if "votes" in sys.argv:
 		os.system("RELEASE=1 ./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
 
 # TODO: Committee metadata and meetings.
+#./parse.py -l ERROR committee
 
 if "stats" in sys.argv:
 	os.system("cd analysis; python sponsorship_analysis.py %d" % CONGRESS)
