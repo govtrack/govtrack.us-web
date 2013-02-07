@@ -28,6 +28,7 @@ from smartsearch.manager import SearchManager
 from search import person_search_manager
 
 from registration.helpers import json_response
+from twostream.decorators import anonymous_view
 
 from settings import CURRENT_CONGRESS
 
@@ -90,6 +91,7 @@ def person_details(request, pk):
            
     return ret
 
+@anonymous_view
 def searchmembers(request, initial_mode=None):
     return person_search_manager().view(request, "person/person_list.html",
         defaults = {
@@ -106,6 +108,7 @@ def http_rest_json(url, args=None, method="GET"):
     r = urllib2.urlopen(req)
     return json.load(r, "utf8")
     
+@anonymous_view
 @render_to('person/district_map.html')
 def browsemembersbymap(request, state=None, district=None):
     center_lat, center_long, center_zoom = (38, -96, 4)
@@ -200,6 +203,7 @@ def browsemembersbymap(request, state=None, district=None):
         "reps": reps,
     }
     
+@anonymous_view
 @render_to('person/overview.html')
 def membersoverview(request):
     def get_current_members(role_type, delegates, by_party):
@@ -227,6 +231,7 @@ def membersoverview(request):
         "congress_previous": congress_previous,
     }
 
+@anonymous_view
 @render_to('person/district_map_embed.html')
 def districtmapembed(request):
     return {
@@ -236,6 +241,7 @@ def districtmapembed(request):
         "bounds": request.GET.get("bounds", None),
     }
     
+@anonymous_view
 @json_response
 def district_lookup(request):
     lng, lat = float(request.GET.get("lng", "0")), float(request.GET.get("lat", "0"))

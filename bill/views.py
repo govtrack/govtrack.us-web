@@ -24,6 +24,7 @@ from us import get_congress_dates
 
 import urllib, urllib2, json, datetime, os.path
 from registration.helpers import json_response
+from twostream.decorators import anonymous_view
 
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
@@ -99,6 +100,7 @@ def market_test_vote(request):
     
     return { "vote": prediction }
 
+@anonymous_view
 @render_to('bill/bill_text.html')
 def bill_text(request, congress, type_slug, number, version=None):
     if int(congress) < 103:
@@ -147,6 +149,7 @@ def bill_text(request, congress, type_slug, number, version=None):
         "related_bills": related_bills,
     }
 
+@anonymous_view
 @json_response
 def bill_text_ajax(request):
     for p in ("left_bill", "left_version", "right_bill", "right_version", "mode"):
@@ -294,6 +297,7 @@ def subject_choices(include_legacy=True):
         subject_choices_data = sorted(subject_choices_data.items(), key = lambda x : x[0].name)
     return subject_choices_data
 
+@anonymous_view
 @render_to('bill/bill_docket.html')
 def bill_docket(request):
     def build_info():
