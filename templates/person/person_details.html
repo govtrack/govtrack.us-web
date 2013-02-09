@@ -423,7 +423,6 @@
 			</div>
 		</article>
 	</div>
-	{% endcomment %}
     <script type="text/javascript">
         function renderLatestTweet(username) {
             var url = 'http://twitter.com/statuses/user_timeline/' + username + '.json';
@@ -447,6 +446,7 @@
             renderLatestTweet('{{ person.twitterid }}');
         {% endif %}
     </script>
+	{% endcomment %}
 
 	<h3>Recent Legislative Activity</h3>
 	
