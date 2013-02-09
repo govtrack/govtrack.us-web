@@ -32,7 +32,7 @@
 		{% if not request.anonymous %}
 			<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
 		{% else %}
-			  <script type="text/javascript" src="{% url twostream-views-user-head %}?view={{request.path|urlencode}}"> </script>
+			  {% include "twostream/head.html" %}
 		{% endif %}
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"> </script>
 		<script src="{{ MEDIA_URL }}js/jquery.ba-bbq.min.js"></script>

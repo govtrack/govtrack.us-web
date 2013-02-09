@@ -28,10 +28,11 @@ from smartsearch.manager import SearchManager
 from search import person_search_manager
 
 from registration.helpers import json_response
-from twostream.decorators import anonymous_view
+from twostream.decorators import anonymous_view, user_view_for
 
 from settings import CURRENT_CONGRESS
 
+@anonymous_view
 @render_to('person/person_details.html')
 def person_details(request, pk):
     def build_info():
@@ -91,6 +92,22 @@ def person_details(request, pk):
            
     return ret
 
+@user_view_for(person_details)
+def person_details_user_view(request, pk):
+    person = get_object_or_404(Person, pk=pk)
+    
+    # render the event subscribe button, but fake the return path
+    # by overwriting our current URL
+    from django.template import Template, Context, RequestContext, loader
+    request.path = request.GET["path"]
+    request.META["QUERY_STRING"] = ""
+    events_button = loader.get_template("events/subscribe_inline.html")\
+        .render(RequestContext(request, {
+				'feed': Feed.PersonFeed(person.id),
+				}))
+	
+    return { 'events_subscribe_button': events_button }
+                
 @anonymous_view
 def searchmembers(request, initial_mode=None):
     return person_search_manager().view(request, "person/person_list.html",

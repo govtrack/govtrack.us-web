@@ -39,9 +39,7 @@ def anonymous_view(view):
 		
 def user_view_for(anon_view_func):
 	"""Marks a view as providing user-specific information for a view that the
-	anonymous_view decorator has been applied to. Additionally sets cache-control
-	private and must-revalidate."""
-	view = cache_control(private=True, must_revalidate=True)(view)
+	anonymous_view decorator has been applied to."""
 	def decorator(view):
 		anon_view_func.user_func = view
 		return view

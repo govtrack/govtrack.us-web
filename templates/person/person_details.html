@@ -10,6 +10,12 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}js/highcharts.js" ></script>
 {% endblock %}
 
+{% block body_scripts %}
+<script>
+	$('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
+</script>
+{% endblock %}
+
 {% block crumbs %}
 <ul>
 	<li><a href="{% url congress_home %}">Congress</a></li>
@@ -77,7 +83,7 @@
 	{% endcache %}
 
 	<div class="aside four columns">
-	{% include "events/subscribe_inline.html" %}
+		<div id="event_subscribe_inline_container"> </div>
 
 	{% cache 600 member_aside person.id %}
 		{% if photo %}
@@ -87,6 +93,7 @@
 		{% endif %}
 		
 		{% if active_role %}
+		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track {% if person.gender == 1 %}Him{% elif person.gender == 2 %}Her{% else %}Member{% endif %}</a>
 		
 		{% if role.website %}
