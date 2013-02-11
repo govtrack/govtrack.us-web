@@ -296,7 +296,6 @@ def main(options):
             person.set_names()
             if nn != (person.name, person.sortname):
                 log.warn("%s is now %s." % (nn[0], person.name))
-                raise ValueError("re-saving!")
                 person.save()
             
         except Exception, ex:

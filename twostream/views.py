@@ -16,7 +16,7 @@ var the_page = {{page_data|safe}};
 
 @cache_control(private=True, must_revalidate=True)
 def user_head(request):
-	m = resolve(request.GET["path"])
+	m = resolve(request.GET.get("path", request.GET.get("view", "")))
 	
 	user_data = None
 	if request.user.is_authenticated():
