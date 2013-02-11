@@ -167,4 +167,60 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 	$(window).on("hashchange", function() { activate_tab(false); });
 };
 
+// Smart ellipsis.
+//
+// Truncate text with an ellipsis so that it fits exactly within its
+// max-width/max-height CSS properties. Only works on elements that
+// contain only text and no child elements.
+//
+// Also, works well in Chrome but not quite right in FF/IE, although
+// the result in presentable.
+jQuery.fn.truncate_text = function(callback) {
+	var elem = $(this);
+	
+	// elem's width/height are equal to its max-width/height. Wrap
+	// elem in a new div with those dimensions, and remove the
+	// max-width/height from elem.
+	var w = elem.width();
+	var h = elem.height();
+	elem.css({ "max-width": "", "max-height": "", "overflow": "" });
+	
+	var remaining = elem.text();
+	var chopped = null;
+		
+	function do_cut() {
+		// Cut words from elem until it fits, or no text is left.
+		while (elem.height() > h || elem.width() > w) {
+			var idx = remaining.lastIndexOf(" ");
+			if (idx <= 0) break;
+			
+			if (chopped == null) chopped = "";
+			chopped = remaining.substring(idx) + chopped;
+			remaining = remaining.substring(0, idx);
+			elem.text(remaining + " ...");
+		}
+		
+		if (callback)
+			callback(remaining, chopped);
+	}
+	
+	do_cut();
+
+	// In FF and IE, the dimensions of the element may change. Perhaps
+	// this is due to font loading. So we should repeat once the document
+	// is loaded. We should do the ellipsis early to get things layed out
+	// as early as possible.
+	var w1 = elem.width();
+	var h1 = elem.height();
+	$(function() {
+		// have the dimensions changed?
+		if (elem.width() != w1 || elem.height() != h1) {
+			// reset text
+			elem.text(remaining + (chopped ? chopped : ""));
+			
+			// re-do ellipsis
+			do_cut();
+		}
+	});
+}
 

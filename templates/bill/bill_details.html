@@ -192,15 +192,14 @@
 
 <div class="row">
 	{% cache 600 billhead bill.id %}
-	<h1>{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number|truncatewords:17}}</h1>
+	<h1 style="max-height: 3.5em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 		
 	<div id="track_panel_base" class="{% if bill.is_alive %}eight{% else %}twelve{% endif %} columns">
 		<div class="info" {% if not bill.is_alive %}style="width: auto;"{% endif %}>
-			{% if bill.title != bill.title|truncatewords:17 %}
-				{% with bill.title_no_number|truncatewords:17|cut:"..." as bt %}
-					<p style="line-height: 130%">...{{bill.title_no_number|cut:bt}}</p>
-				{% endwith %}
-			{% endif %}
+			<p id="h1_overflow" style="line-height: 130%; display: none;">...</p>
+			<script>$('h1').truncate_text(function (remaining, chopped) {
+			    if (chopped) $('#h1_overflow').text("..." + chopped).show();
+			});</script>
 		
 			{% comment %}
 			<p class="date"></p>
