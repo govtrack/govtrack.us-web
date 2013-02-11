@@ -98,14 +98,23 @@ jQuery.fn.keydown_enter = function(callback) {
 // of <a href="#tabname"> elements, and have corresponding <div id="tabname">
 // elements. Requires jquery.ba-bbq.min.js.
 jQuery.fn.tabs = function(panes, subordinate_to) {
+	function get_href(elem) {
+		// In IE7, getAttribute('href') always returns an absolute URL
+		// even if that's not what is specified in the HTML source. Doh.
+		var href = elem.getAttribute('href');
+		var h = href.indexOf('#');
+		if (h > 0) href = href.substring(h);
+		return href;
+	}
+	
 	var tabs = this;
-	var default_tab = tabs[0].getAttribute('href');
+	var default_tab = get_href(tabs[0]);
 	
 	panes = $(panes);
 	
 	// make a list of valid hrefs
 	var tab_links = { };
-	tabs.each(function() { tab_links[this.getAttribute('href')] = 1; });
+	tabs.each(function() { tab_links[get_href(this)] = 1; });
 	
 	if (subordinate_to)
 		subordinate_to += "/";
@@ -155,7 +164,7 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 		// set the link to .active
 		tabs.removeClass('active');
 		tabs.each(function() {
-			if (this.getAttribute('href') == p)
+			if (get_href(this) == p)
 				$(this).addClass('active');
 		});
 	}
