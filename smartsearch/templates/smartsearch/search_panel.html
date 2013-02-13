@@ -347,7 +347,15 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     return false; // cancel any event
 }
 
-$(function() { update_search(1, null, null, true); });
+$(function() {
+	update_search(1, null, null, true);
+	$(window).scroll(function() {
+		if (update_search_lock) return;
+		var s = $('#show_more');
+		if (s.is(":visible") && $(window).scrollTop() + $(window).height() > s.offset().top)
+			s.click();
+	});
+});
 </script>
 
 <div class="advanced-search four columns">
