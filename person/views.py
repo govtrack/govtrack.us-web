@@ -95,7 +95,9 @@ def person_details(request, pk):
 @user_view_for(person_details)
 def person_details_user_view(request, pk):
     person = get_object_or_404(Person, pk=pk)
-    
+    return render_subscribe_inline(request, Feed.PersonFeed(person.id))
+
+def render_subscribe_inline(request, feed):
     # render the event subscribe button, but fake the return path
     # by overwriting our current URL
     from django.template import Template, Context, RequestContext, loader
@@ -103,9 +105,8 @@ def person_details_user_view(request, pk):
     request.META["QUERY_STRING"] = ""
     events_button = loader.get_template("events/subscribe_inline.html")\
         .render(RequestContext(request, {
-				'feed': Feed.PersonFeed(person.id),
+				'feed': feed,
 				}))
-	
     return { 'events_subscribe_button': events_button }
                 
 @anonymous_view

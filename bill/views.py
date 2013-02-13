@@ -24,8 +24,9 @@ from us import get_congress_dates
 
 import urllib, urllib2, json, datetime, os.path
 from registration.helpers import json_response
-from twostream.decorators import anonymous_view
+from twostream.decorators import anonymous_view, user_view_for
 
+@anonymous_view
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
     if type_slug.isdigit():
@@ -50,11 +51,6 @@ def bill_details(request, congress, type_slug, number):
             if reintro.congress > bill.congress and not reintro_next: reintro_next = reintro
         return reintro_prev, reintro_next
         
-    def get_market():
-        m = bill.get_open_market(request.user)
-        if m: m.name = m.name.replace(bill.display_number, "it")
-        return m
-
     def get_text_info():
         from billtext import load_bill_text
         try:
@@ -68,12 +64,30 @@ def bill_details(request, congress, type_slug, number):
         "subtitle": get_secondary_bill_title(bill, bill.titles),
         "sponsor_name": sponsor_name,
         "reintros": get_reintroductions, # defer so we can use template caching
-        "market": get_market,
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": Feed.BillFeed(bill),
         "text": get_text_info,
     }
+
+@user_view_for(bill_details)
+def bill_details_user_view(request, congress, type_slug, number):
+    bill_type = BillType.by_slug(type_slug)
+    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    from person.views import render_subscribe_inline
+    return render_subscribe_inline(request, Feed.BillFeed(bill))
+
+def render_subscribe_inline(request, feed):
+    # render the event subscribe button, but fake the return path
+    # by overwriting our current URL
+    from django.template import Template, Context, RequestContext, loader
+    request.path = request.GET["path"]
+    request.META["QUERY_STRING"] = ""
+    events_button = loader.get_template("events/subscribe_inline.html")\
+        .render(RequestContext(request, {
+				'feed': feed,
+				}))
+    return { 'events_subscribe_button': events_button }
 
 @json_response
 @login_required

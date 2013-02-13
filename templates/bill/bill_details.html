@@ -151,6 +151,8 @@
 
 {% block body_scripts %}
 <script>
+    $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
+    
 	if (window.location.hash == "#fb-staging") {
 		fbAsyncInitFuncs.push(fb_get_recorded_actions);
 		$('.fb-like').hide(); // remove me later
@@ -288,9 +290,9 @@
 	
 	{% if bill.is_alive %}
 	<div class="aside four columns">
+		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
-		{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
-		{% include "events/subscribe_inline.html" %}
+		<div id="event_subscribe_inline_container"> </div>
 		
 		<div style="margin: 1em 0">
 			<a href="{{bill.get_absolute_url}}/advocacy" class="yellow-btn">Take a Position</a>
