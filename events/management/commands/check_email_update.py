@@ -57,3 +57,5 @@ class Command(BaseCommand):
 			max_id, events = sublist.get_new_events()
 			print len(events), "events pending"
 			
+			for feed in sublist.trackers.all():
+				print "\t", feed.title.encode("utf8")
