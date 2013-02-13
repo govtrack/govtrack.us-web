@@ -192,6 +192,7 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
             ver1 = left_version,
             bill2 = right_bill,
             ver2 = right_version)
+        btc.decompress()
         if not force: return btc.data
     except BillTextComparison.DoesNotExist:
         pass
@@ -203,6 +204,7 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
             ver2 = left_version,
             bill1 = right_bill,
             ver1 = right_version)
+        btc.decompress()
         data = btc2.data
         return {
             "left_meta": data["right_meta"],
@@ -232,15 +234,15 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     }
     
     if not btc:
-        BillTextComparison.objects.create(
+        btc = BillTextComparison(
             bill1 = left_bill,
             ver1 = left_version,
             bill2 = right_bill,
-            ver2 = right_version,
-            data = ret)
-    else:
-        btc.data = ret
-        btc.save()
+            ver2 = right_version)
+    
+	btc.data = ret
+	btc.compress()
+	btc.save()
     
     return ret
 

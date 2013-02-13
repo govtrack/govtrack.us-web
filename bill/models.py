@@ -795,6 +795,14 @@ class BillTextComparison(models.Model):
     data = JSONField()
     class Meta:
         unique_together = ( ('bill1', 'ver1', 'bill2', 'ver2'), )
+    def compress(self):
+        import bz2, base64
+        if "left_text_bz2" not in self.data: self.data["left_text_bz2"] = base64.b64encode(bz2.compress(self.data["left_text"]))
+        if "right_text_bz2" not in self.data: self.data["right_text_bz2"] = base64.b64encode(bz2.compress(self.data["right_text"]))
+    def decompress(self):
+        import bz2, base64
+        self.data["left_text"] = bz2.decompress(base64.b64decode(self.data["left_text_bz2"]))
+        self.data["right_text"] = bz2.decompress(base64.b64decode(self.data["right_text_bz2"]))
 
 # Bill search tracker.
 from events.models import Feed
