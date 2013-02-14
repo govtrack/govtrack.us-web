@@ -153,18 +153,18 @@ $(function() {
         </dd>
     {% endif %}
     
-    <div style="padding-top: 1em; font-size: 95%; line-height: 120%;">
+    <div style="padding-top: 1em; line-height: 120%;">
     {% if vote.category == VoteCategory.amendment %}
     <p>This was a vote to approve or reject an amendment.</p>
     {% endif %}
     {% if vote.category == VoteCategory.passage %}
-    <p>This was a vote to approve or reject a bill or resolution.</p>
+    <p>This was a vote to pass a bill or agree to a resolution.</p>
     {% endif %}
     {% if vote.category == VoteCategory.passage_suspension %}
-    <p>This vote was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
+    <p>This was a vote to pass a bill or agree to a resolution. It was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
     {% endif %}
     {% if vote.category == VoteCategory.cloture %}
-    <p>This was a vote on &ldquo;cloture&rdquo;, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate, while a vote against is a vote to prolong debate or to filibuster.</p>
+    <p>This was a vote on &ldquo;cloture&rdquo;, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate and move to a vote on the issue itself, while a vote against is a vote to prolong debate or to filibuster.</p>
     {% endif %}
     {% if vote.category == VoteCategory.procedural %}
     <p>This was a procedural vote.</p>
