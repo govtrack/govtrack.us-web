@@ -74,8 +74,28 @@ def bill_details(request, congress, type_slug, number):
 def bill_details_user_view(request, congress, type_slug, number):
     bill_type = BillType.by_slug(type_slug)
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    
+    ret = { }
+    if request.user.is_staff:
+        admin_panel = """
+            {% load humanize %}
+            <div class="clear"> </div>
+            <div style="margin-top: 1.5em; padding: .5em; background-color: #EEE; ">
+                <b>ADMIN</b> - <a href="{% url bill_go_to_summary_admin %}?bill={{bill.id}}">Edit Summary</a>
+                <br/>Tracked by {{feed.tracked_in_lists.count|intcomma}} users
+                ({{feed.tracked_in_lists_with_email.count|intcomma}} w/ email).
+            </div>
+            """
+        from django.template import Template, Context, RequestContext, loader
+        ret["admin_panel"] = Template(admin_panel).render(RequestContext(request, {
+            'bill': bill,
+            "feed": Feed.BillFeed(bill),
+            }))
+    
     from person.views import render_subscribe_inline
-    return render_subscribe_inline(request, Feed.BillFeed(bill))
+    ret.update(render_subscribe_inline(request, Feed.BillFeed(bill)))
+    
+    return ret
 
 def render_subscribe_inline(request, feed):
     # render the event subscribe button, but fake the return path
@@ -85,8 +105,8 @@ def render_subscribe_inline(request, feed):
     request.META["QUERY_STRING"] = ""
     events_button = loader.get_template("events/subscribe_inline.html")\
         .render(RequestContext(request, {
-				'feed': feed,
-				}))
+                'feed': feed,
+                }))
     return { 'events_subscribe_button': events_button }
 
 @json_response
@@ -118,7 +138,7 @@ def market_test_vote(request):
 @render_to('bill/bill_text.html')
 def bill_text(request, congress, type_slug, number, version=None):
     if int(congress) < 103:
-    	raise Http404("Bill text is not available before the 103rd congress.")
+        raise Http404("Bill text is not available before the 103rd congress.")
 
     if version == "":
         version = None
@@ -240,9 +260,9 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
             bill2 = right_bill,
             ver2 = right_version)
     
-	btc.data = ret
-	btc.compress()
-	btc.save()
+    btc.data = ret
+    btc.compress()
+    btc.save()
     
     return ret
 
@@ -468,6 +488,6 @@ def join_community(request):
 from django.contrib.auth.decorators import permission_required
 @permission_required('bill.change_billsummary')
 def go_to_summary_admin(request):
-	summary, is_new = BillSummary.objects.get_or_create(bill=get_object_or_404(Bill, id=request.GET["bill"]))
-	return HttpResponseRedirect("/admin/bill/billsummary/%d" % summary.id)
-	
+    summary, is_new = BillSummary.objects.get_or_create(bill=get_object_or_404(Bill, id=request.GET["bill"]))
+    return HttpResponseRedirect("/admin/bill/billsummary/%d" % summary.id)
+    

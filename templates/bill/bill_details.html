@@ -378,15 +378,8 @@
 	</div><!-- /actions -->
 	{% endif %}
 	
-	{% comment %}---- This cannot be cached!!!! ----{% endcomment %}
-	{% if user.is_staff %}
-	<div class="clear"> </div>
-	<div style="margin-top: 1.5em; padding: .5em; background-color: #EEE; ">
-		<b>ADMIN</b> - <a href="{% url bill_go_to_summary_admin %}?bill={{bill.id}}">Edit Summary</a>
-		<br/>Tracked by {{feed.tracked_in_lists.count|intcomma}} users
-		({{feed.tracked_in_lists_with_email.count|intcomma}} w/ email).
-	</div>
-	{% endif %}
+	<div id="admin_panel"> </div>
+	<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
 </div>
 {% endblock %}
 
