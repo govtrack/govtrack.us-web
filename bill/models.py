@@ -492,7 +492,7 @@ class Bill(models.Model):
             "title": self.title,
             "url": self.get_absolute_url() + "#summary/oursummary",
             "body_text_template": """{{summary.plain_text|truncatewords:80}}""",
-            "body_html_template": """{{summary.content|truncatewords_html:80|safe}} <p><strong>Was this summary useful? Please <a href="mailto:operations@govtrack.us">let us know</a>.</strong>""",
+            "body_html_template": """{{summary.content|truncatewords_html:80|safe}}""",
             "context": { "summary": bs },
             }
 

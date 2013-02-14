@@ -224,7 +224,7 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
             ver2 = left_version,
             bill1 = right_bill,
             ver1 = right_version)
-        btc.decompress()
+        btc2.decompress()
         data = btc2.data
         return {
             "left_meta": data["right_meta"],
