@@ -6,35 +6,51 @@ The data-gathering scripts are elsewhere.
 Installation
 ============
 
-* Clone the suorce code:
+* Clone the source code:
 
-	git clone --recursive https://github.com/govtrack/govtrack.us-web.git
+  git clone --recursive https://github.com/govtrack/govtrack.us-web.git
 
-* Create a database make a settings_local.py based on settings_local.example.py.
+* Change directory to the source code root:
+
+  cd ./govtrack.us-web/
+
+* Create a local settings file based on the example file:
+
+  cp settings_local.example.py settings_local.py
+
+* Edit settings_local.py to include your various credentials.
 
 * Install dependencies via OS package manager:
 
   apt-get install python-virtualenv python-lxml python-openid python-oauth2 \
      python-iso8601 python-numpy
-     
-* Install additional dependencies into a virtualenv using `build/buildenv.sh`.
-     
+
+* Run the build script to install additional dependencies into a virtual environment:
+
+  ./build/buildenv.sh
+
 * For search, install Solr:
 
   apt-get install openjdk-7-jre jetty
-  
+
   Follow the instructions at:
   http://django-haystack.readthedocs.org/en/latest/installing_search_engines.html#solr
 
   Symlink bill/solr_schema.xml into solr/conf/schema.xml
-  
-* Initialize the database, minify some files, and check the site works.
+
+* Initialize the database and minify some files:
 
   ./manage.py syncdb
   ./manage.py runserver
   ./minify
-  
-* Get the data files by running `build/rsync.sh` (run it from the main directory, rather than from within build).
 
-* Load the data by running `./run_parsers.sh`
+* Check the site works by visiting the URL specified by the runserver process.
+
+* Get the data files:
+
+  ./build/rsync.sh
+
+* Load the data:
+
+  ./run_parsers.sh
 
