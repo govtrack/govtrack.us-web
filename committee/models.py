@@ -21,7 +21,7 @@ class Committee(models.Model):
     committee_type = models.IntegerField(choices=CommitteeType, blank=True, null=True)
     code = models.CharField(max_length=10)
     name = models.CharField(max_length=255)
-    url = models.CharField(max_length=255, blank=True)
+    url = models.CharField(max_length=255, blank=True, null=True)
     abbrev = models.CharField(max_length=255, blank=True)
     obsolete = models.BooleanField(blank=True, default=False)
     committee = models.ForeignKey('self', blank=True, null=True, related_name='subcommittees', on_delete=models.PROTECT)

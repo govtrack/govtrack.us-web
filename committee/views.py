@@ -19,7 +19,7 @@ def committee_details(request, parent_code, child_code=None):
         obj = get_object_or_404(Committee, code=parent_code)
         parent = None
     members = sort_members(obj.members.all())
-    subcommittees = obj.subcommittees.all()
+    subcommittees = obj.subcommittees.filter(obsolete=False)
     
     party_counts = { }
     for m in members:

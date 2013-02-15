@@ -8,6 +8,7 @@ import logging
 
 from parser.progress import Progress
 from parser.processor import XmlProcessor
+from parser.processor import YamlProcessor, yaml_load
 from parser.models import File
 from committee.models import (Committee, CommitteeType, CommitteeMember,
                               CommitteeMemberRole, CommitteeMeeting)
@@ -16,61 +17,21 @@ from bill.models import Bill, BillType
 
 log = logging.getLogger('parser.committee_parser')
 
-class CommitteeProcessor(XmlProcessor):
-    """
-    Parser of /committees/committe record.
-    """
+TYPE_MAPPING = {'senate': CommitteeType.senate,
+                'joint': CommitteeType.joint,
+                'house': CommitteeType.house}
 
-    REQUIRED_ATTRIBUTES = ['type', 'code', 'displayname']
-    ATTRIBUTES = ['type', 'code', 'displayname', 'abbrev', 'url', 'obsolete']
-    FIELD_MAPPING = {'type': 'committee_type', 'displayname': 'name'}
-    TYPE_MAPPING = {'senate': CommitteeType.senate,
-                    'joint': CommitteeType.joint,
-                    'house': CommitteeType.house}
-
-    def type_handler(self, value):
-        return self.TYPE_MAPPING[value]
-
-
-class SubcommitteeProcessor(XmlProcessor):
-    """
-    Parser of /committees/committee/subcommittee records.
-    """
-
-    REQUIRED_ATTRIBUTES = ['code', 'displayname']
-    ATTRIBUTES = ['code', 'displayname']
-    FIELD_MAPPING = {'displayname': 'name'}
-
-
-class CommitteeMemberProcessor(XmlProcessor):
-    """
-    Parser of /committee/member.
-    """
-
-    REQUIRED_ATTRIBUTES = ['id']
-    ATTRIBUTES = ['id', 'role']
-    FIELD_MAPPING = {'id': 'person'}
-    ROLE_MAPPING = {
-        'Ex Officio': CommitteeMemberRole.exofficio,
-        'Chairman': CommitteeMemberRole.chairman,
-        'Cochairman': CommitteeMemberRole.chairman, # huh!
-        'Chair': CommitteeMemberRole.chairman,
-        'Ranking Member': CommitteeMemberRole.ranking_member,
-        'Vice Chairman': CommitteeMemberRole.vice_chairman,
-        'Vice Chair': CommitteeMemberRole.vice_chairman,
-        'Vice Chairwoman': CommitteeMemberRole.vice_chairman,
-        'Member': CommitteeMemberRole.member,
-    }
-    DEFAULT_VALUES = {'role': 'Member'}
-
-    def id_handler(self, value):
-        try:
-            return Person.objects.get(pk=value, roles__current=True)
-        except:
-            raise ValueError("Committe member %s is no longer a current MoC." % value)
-
-    def role_handler(self, value):
-        return self.ROLE_MAPPING[value]
+ROLE_MAPPING = {
+    'Ex Officio': CommitteeMemberRole.exofficio,
+    'Chairman': CommitteeMemberRole.chairman,
+    'Cochairman': CommitteeMemberRole.chairman, # huh!
+    'Chair': CommitteeMemberRole.chairman,
+    'Ranking Member': CommitteeMemberRole.ranking_member,
+    'Vice Chairman': CommitteeMemberRole.vice_chairman,
+    'Vice Chair': CommitteeMemberRole.vice_chairman,
+    'Vice Chairwoman': CommitteeMemberRole.vice_chairman,
+    'Member': CommitteeMemberRole.member,
+}
 
 class CommitteeMeetingProcessor(XmlProcessor):
     """
@@ -96,50 +57,79 @@ def main(options):
     members of current congress committees.
     """
 
-    com_processor = CommitteeProcessor()
-    subcom_processor = SubcommitteeProcessor()
-    member_processor = CommitteeMemberProcessor()
+    BASE_PATH = '../scripts/congress/cache/congress-legislators/'
+    
     meeting_processor = CommitteeMeetingProcessor()
 
     log.info('Processing committees')
-    COMMITTEES_FILE = 'data/us/committees.xml'
+    COMMITTEES_FILE = BASE_PATH + 'committees-current.yaml'
 
     if not File.objects.is_changed(COMMITTEES_FILE) and not options.force:
         log.info('File %s was not changed' % COMMITTEES_FILE)
     else:
-        tree = etree.parse(COMMITTEES_FILE)
-        total = len(tree.xpath('/committees/committee'))
+        tree = yaml_load(COMMITTEES_FILE)
+        total = len(tree)
         progress = Progress(total=total)
-        for committee in tree.xpath('/committees/committee'):
-            cobj = com_processor.process(Committee(), committee)
-            try: # update existing record if exists
-                cobj.id = Committee.objects.get(code=cobj.code).id
+        seen_committees = set()
+        for committee in tree:
+            try:
+                cobj = Committee.objects.get(code=committee["thomas_id"])
             except Committee.DoesNotExist:
-                pass
+                print "New committee:", committee["thomas_id"]
+                cobj = Committee(code=committee["thomas_id"])
+               
+            cobj.committee_type = TYPE_MAPPING[committee["type"]]
+            cobj.name = committee["name"]
+            cobj.url = committee.get("url", None)
+            cobj.obsolete = False
+            cobj.committee = None
             cobj.save()
+            seen_committees.add(cobj.id)
 
-            for subcom in committee.xpath('./subcommittee'):
-                sobj = subcom_processor.process(Committee(), subcom)
-                sobj.code = cobj.code + sobj.code
-                sobj.committee = cobj
-                try: # update existing record if exists
-                    sobj.id = Committee.objects.get(code=sobj.code).id
+            for subcom in committee.get('subcommittees', []):
+                code = committee["thomas_id"] + subcom["thomas_id"]
+                try:
+                    sobj = Committee.objects.get(code=code)
                 except Committee.DoesNotExist:
-                    pass
+                    print "New subcommittee:", code
+                    sobj = Committee(code=code)
+                
+                sobj.name = subcom["name"]
+                sobj.url = subcom.get("url", None)
+                sobj.type = None
+                sobj.committee = cobj
+                sobj.obsolete = False
                 sobj.save()
+                seen_committees.add(sobj.id)
+                
             progress.tick()
+            
+        # Check for non-obsolete committees in the database that aren't in our
+        # file.
+        other_committees = Committee.objects.filter(obsolete=False).exclude(id__in=seen_committees)
+        if len(other_committees) > 0:
+            print "Marking obsolete:", ", ".join(c.code for c in other_committees)
+            other_committees.update(obsolete=True)
 
         File.objects.save_file(COMMITTEES_FILE)
-
+        
     log.info('Processing committee members')
-    MEMBERS_FILE = 'data/us/112/committees.xml'
+    MEMBERS_FILE = BASE_PATH + 'committee-membership-current.yaml'
     file_changed = File.objects.is_changed(MEMBERS_FILE)
 
     if not file_changed and not options.force:
         log.info('File %s was not changed' % MEMBERS_FILE)
     else:
-        tree = etree.parse(MEMBERS_FILE)
-        total = len(tree.xpath('/committees/committee/member'))
+        # map THOMAS IDs to GovTrack IDs
+        y = yaml_load(BASE_PATH + "legislators-current.yaml")
+        person_id_map = { }
+        for m in y:
+            if "id" in m and "govtrack" in m["id"] and "thomas" in m["id"]:
+                person_id_map[m["id"]["thomas"]] = m["id"]["govtrack"]
+        
+        # load committee members
+        tree = yaml_load(MEMBERS_FILE)
+        total = len(tree)
         progress = Progress(total=total, name='committees')
         
         # We can delete CommitteeMember objects because we don't have
@@ -147,36 +137,29 @@ def main(options):
         CommitteeMember.objects.all().delete()
 
         # Process committee nodes
-        for committee in tree.xpath('/committees/committee'):
+        for committee, members in tree.items():
+            if committee[0] == "H": continue # House data is out of date
+            
             try:
-                cobj = Committee.objects.get(code=committee.get('code'))
+                cobj = Committee.objects.get(code=committee)
             except Committee.DoesNotExist:
-                print "Committee not found:", committee.get('code')
+                print "Committee not found:", committee
                 continue
 
             # Process members of current committee node
-            for member in committee.xpath('./member'):
-                mobj = member_processor.process(CommitteeMember(), member)
+            for member in members:
+                mobj = CommitteeMember()
+                mobj.person = Person.objects.get(id=person_id_map[member["thomas"]])
                 mobj.committee = cobj
+                if "title" in member:
+                    mobj.role = ROLE_MAPPING[member["title"]]
                 mobj.save()
             
-            # Process all subcommittees of current committee node
-            for subcom in committee.xpath('./subcommittee'):
-                try:
-                    sobj = Committee.objects.get(code=committee.get('code')+subcom.get('code'), committee=cobj)
-                except Committee.DoesNotExist:
-                    log.error('In committee membership file, reference to unknown committee %s-%s' % (
-                        cobj.code, subcom.get('code')))
-                else:
-                    # Process members of current subcommittee node
-                    for member in subcom.xpath('./member'):
-                        mobj = member_processor.process(CommitteeMember(), member)
-                        mobj.committee = sobj
-                        mobj.save()
-
             progress.tick()
 
         File.objects.save_file(MEMBERS_FILE)
+        
+    return
 
     log.info('Processing committee schedule')
     SCHEDULE_FILE = 'data/us/112/committeeschedule.xml'
