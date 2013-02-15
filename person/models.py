@@ -95,7 +95,11 @@ class Person(models.Model):
     @cache_result
     def name_and_title(self):
         return get_person_name(self, firstname_position='before', show_suffix=True, role_recent=True, show_party=False, show_district=False)
-       
+
+    @cache_result
+    def name_lastonly(self):
+        return get_person_name(self, firstname_position='none', show_suffix=False, role_recent=True, show_party=True, show_district=True)
+
     def set_names(self):
         self.sortname = get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
         self.name = get_person_name(self, firstname_position='before', role_recent=True)

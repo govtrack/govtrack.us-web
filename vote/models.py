@@ -235,7 +235,7 @@ class Vote(models.Model):
                 "summary": self.summary(),
                 "voters":
                             [
-                                { "url": p.get_absolute_url(), "name": p.name, "vote": self.voters.get(person=p).option.value }
+                                { "url": p.get_absolute_url(), "name": p.name_lastonly(), "vote": self.voters.get(person=p).option.value }
                                 for p in my_reps if self.voters.filter(person=p).exists()
                             ]
                         if feeds != None else []

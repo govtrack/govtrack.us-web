@@ -1,0 +1,42 @@
+{% load events_utils %}{% comment %}
+<style type="text/css">
+.GovTrackEmbed { font-size: 100%; color: black; border: 0px solid white; background-color: white; padding: 0px; width: 350px; }
+.GovTrackEmbedTable { font-size: 100%; color: black }
+.GovTrackEmbedDate { }
+.GovTrackEmbed a { text-decoration: none; color: blue }
+</style>
+{% endcomment %}<div class="GovTrackEmbed" style="text-align: left">
+
+	<div class="GovTrackEmbedTitle" style="margin-bottom: .5em">{{title}}</div>
+	
+	<div class="GovTrackEmbedTable">
+		{% for event in events %}
+		{% with event|render_event:feeds as meta %}
+			<div style="padding-top: .3em; padding-bottom: .3em; border-bottom: 1px solid #EEE; margin-bottom: .3em;">
+				<div>
+					<a href="{{meta.url}}" target="_blank">{{meta.title|truncatewords:100}}</a>
+				</div>
+				<div class="GovTrackEmbedDate">
+					{% if not meta.date_has_no_time %}
+						{{event.when}}
+					{% else %}
+						{{event.when|date}}
+					{% endif %}
+					-
+					{{meta.type}}
+				</div>
+				<div>
+					{{meta.body_html|safe}}
+				</div>
+			</div>
+		{% endwith %}
+		{% empty %}
+		<p>There are no recent legislative events to display.</p>
+		{% endfor %}
+	</div>
+	
+	<div class="GovTrackEmbedFooter" style="font-size: 80%; color: #666666; text-align: center">
+		{% if link %}<a href="http://www.govtrack.us{{link}}" target="_blank">View More...</a> - {% endif %}
+		Powered by <a href="http://www.govtrack.us" target="_blank">GovTrack.us</a>
+	</div>
+</div>

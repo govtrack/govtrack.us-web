@@ -22,10 +22,11 @@ def get_feed_list(request):
         lst = get_object_or_404(SubscriptionList, public_id=request.GET["list_id"])
         return lst.trackers.all(), lst.user.username + "'s " + lst.name
     else:
-        feedlist = request.GET.get('feeds', '').split(',')
+        # monitors was the old URL parameter, used by events_embed_legacy
+        feedlist = request.GET.get('feeds', request.GET.get('monitors', '')).split(',')
         if feedlist == [""]:
             feedlist = []
-            feedtitle = "Tracked Events from GovTrack.us (All Events)"
+            feedtitle = "All Events"
         else:
             feedlist2 = []
             for f in feedlist:
@@ -36,7 +37,7 @@ def get_feed_list(request):
                     if not f.isvalid: raise Http404("Invalid feed name.")
                     feedlist2.append(f)
             feedlist = feedlist2
-            feedtitle = ", ".join(f.title for f in feedlist) + " - Tracked Events from GovTrack.us"
+            feedtitle = ", ".join(f.title for f in feedlist)
         return feedlist, feedtitle
 
 @login_required
@@ -196,6 +197,7 @@ def events_rss(request):
     import urllib
     
     feedlist, feedtitle = get_feed_list(request)
+    feedtitle += " - Tracked Events from GovTrack.us"
     
     class DjangoFeed(django.contrib.syndication.views.Feed):
         title = feedtitle
@@ -265,4 +267,26 @@ def start_search(request):
             "feeds": feeds
         })
     return ret
+    
+def events_embed_legacy(request):
+    # prepare template context
+    feedlist, feedtitle = get_feed_list(request)
+    events = Feed.get_events_for(feedlist, int(request.GET.get('count', '10')))
+    context = { "feeds": feedlist, "events": events, "title": feedtitle,
+        "link": feedlist[0].link if len(feedlist) == 1 else None }
+        
+    # render the HTML
+    from django.template import Template, Context, RequestContext, loader
+    html = loader.get_template("events/events_embed_legacy.html")\
+        .render(RequestContext(request, context))
+    
+    # convert to Javascript document.write statements.
+    from django.utils.html import strip_spaces_between_tags
+    from django.template.defaultfilters import escapejs
+    html = strip_spaces_between_tags(html)
+    js = ""
+    while len(html) > 0:
+        js += "document.write(\"" + escapejs(html[0:128]) + "\");\n"
+        html = html[128:]
+    return HttpResponse(js, mimetype="application/x-javascript; charset=UTF-8")
     
