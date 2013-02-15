@@ -14,7 +14,7 @@
 		{% with event|render_event:feeds as meta %}
 			<div style="padding-top: .3em; padding-bottom: .3em; border-bottom: 1px solid #EEE; margin-bottom: .3em;">
 				<div>
-					<a href="{{meta.url}}" target="_blank">{{meta.title|truncatewords:100}}</a>
+					<a href="http://www.govtrack.us{{meta.url}}" target="_blank">{{meta.title|truncatewords:100}}</a>
 				</div>
 				<div class="GovTrackEmbedDate">
 					{% if not meta.date_has_no_time %}
