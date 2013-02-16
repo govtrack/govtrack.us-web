@@ -68,6 +68,17 @@ if "people" in sys.argv:
 	os.system("RELEASE=1 ./parse.py person") #  -l ERROR
 	os.system("RELEASE=1 ./manage.py update_index -v 0 -u person person")
 
+if "committees" in sys.argv:
+	if CONGRESS != 113: raise ValueErrror()
+	
+	# Convert committee YAML into the legacy format.
+	os.system("python ../scripts/legacy-conversion/convert_committees.py %s %s/cache/congress-legislators/ ../data/us/%d/committees.xml" % (SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
+
+	# Load YAML (directly) into db.
+	os.system("RELEASE=1 ./parse.py -l ERROR committee")
+	
+	
+
 do_bill_parse = False
 
 if "text" in sys.argv:
@@ -172,9 +183,6 @@ if "votes" in sys.argv:
 	# Load into db.
 	if did_any_file_change:
 		os.system("RELEASE=1 ./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
-
-# TODO: Committee metadata and meetings.
-#./parse.py -l ERROR committee
 
 if "stats" in sys.argv:
 	os.system("cd analysis; python sponsorship_analysis.py %d" % CONGRESS)
