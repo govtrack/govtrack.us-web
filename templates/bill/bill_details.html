@@ -294,11 +294,11 @@
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		<div id="event_subscribe_inline_container"> </div>
 		
+		{% comment %}
 		<div style="margin: 1em 0">
 			<a href="{{bill.get_absolute_url}}/advocacy" class="yellow-btn">Take a Position</a>
 		</div>
 		
-		{% comment %}
 		{% if market %}
 		{% if not user.is_authenticated %}
 		<div id="make_prediction">
