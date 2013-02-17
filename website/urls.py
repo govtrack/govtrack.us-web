@@ -13,5 +13,6 @@ urlpatterns = patterns('website.views',
     url(r'^accounts/docket', 'your_docket'),
     url(r'^accounts/update_settings', 'update_account_settings'),
     url(r'^about/analysis', 'analysis_methodology'),
+    url(r'^about/financial', 'financial_report'),
 )
 

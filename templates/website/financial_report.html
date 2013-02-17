@@ -1,0 +1,51 @@
+{% extends "master.html" %}
+{% load humanize %}
+{% block title %}GovTrack.us - Company Financial Report{% endblock %}
+{% block style %}
+.report_table { margin: 1em; }
+.report_table td { padding-right: 1em; padding-bottom: .25em; }
+.report_table .net td { font-weight: bold; background-color: #EEE; border-top: 1px solid #333; }
+{% endblock %}
+{% block crumbs %}
+<ul><li><a href="/about">About GovTrack</a></li><li>Financial Report</li></ul>
+{% endblock %}
+{% block summary %}
+<h1>Financial Report</h1>
+
+<p style="margin-top: 1em">Here&rsquo;s where GovTrack turns some transparency on itself. Below is a completely voluntary financial report of the operations of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>, the company that runs this website.</p>
+<p>Civic Impulse, LLC is registered in the District of Columbia and is wholly owned by <a href="http://razor.occams.info">Joshua Tauberer</a>.</p>
+{% endblock %}
+{% block body %}
+
+<h2>Year by Year Summary Reports</h2>
+
+{% for year_rec in years %}
+	<h3>{{year_rec.year}}</h3>
+	<table class="report_table">
+	{% for item in year_rec.items %}
+		<tr valign="top">
+			<td style="text-align: right; {% if 0 > item.amount %}color: red{% else %}color: blue{% endif %}">
+				{% if 0 > item.amount %}-{% endif %}${{item.unsigned_amount|intcomma}}
+			</td>
+			<td>{{item.category}}</td>
+			<td style="color: #666">{{item.description}}</td>
+		</tr>
+	{% endfor %}
+	<tr valign="top" class="net">
+		<td style="text-align: right; {% if 0 > year_rec.net %}color: red{% else %}color: blue{% endif %}">
+			{% if 0 > year_rec.net %}-{% endif %}${{year_rec.unsigned_net|intcomma}}
+		</td>
+		<td>Net Profit/Loss</td>
+	</tr>
+	</table>
+{% endfor %}
+
+<h2>Notes</h2>
+<p>Because the company is a &ldquo;single-member LLC&rdquo;, it does not report taxes independently of its owner&rsquo;s personal income tax return. This has two important consequences:</p>
+<ul class="bullets">
+	<li>There are no salary payments to owners. Any remaining net profit at the end of the year is profit to the owner.</li>
+	<li>The line-items named Taxes above are estimates of the taxes paid on net profits from the LLC.</li>
+</ul>
+
+{% endblock %}
+

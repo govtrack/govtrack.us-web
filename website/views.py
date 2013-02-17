@@ -409,4 +409,47 @@ def analysis_methodology(request):
         "prognosis_testing_traincongress": bill.prognosis_model_test.train_congress,
         "prognosis_testing_testcongress": bill.prognosis_model_test.test_congress,
     }
+
+@anonymous_view
+@cache_page(60*60 * 1)
+@render_to('website/financial_report.html')
+def financial_report(request):
+    categories = {
+        "AD": ("Advertising", "Revenue from advertisements displayed on GovTrack.us."),
+        "DATALIC": ("Data Licensing", "Revenue from data licensing agreements."),
+        "PRIZE": ("Prize Winnings", "Income from prizes."),
+        "INFR": ("IT Infrastruture", "IT systems infrastructure including the web server."),
+        "LABOR": ("Contract Labor", "Contract labor, such as developers, designers, and	other staff. (Does not count Josh.)"),
+        "OFFICE": ("Office Expenses", "Josh's home office."),
+        "TRAVEL": ("Conferences and Travel", "Expenses for conferences and other similar travel."),
+        "MARKETING": ("Marketing", "Marketing expenses."),
+        "PROF": ("Professional Membership", "Membership in the ACM and other professional organizations."),
+        "HEALTHINS": ("Health Insurance", "Josh's health insurance."),
+        "LEGAL": ("Legal Fees", "Fees related to business filings and legal advice."),
+        "MISC": ("Miscellaneous", "Other expenses."),
+        "TAX": ("Taxes", "Federal/state/local taxes (see note below)."),
+    }
+    
+    import csv
+    rows = []
+    for row in csv.DictReader(open("/home/govtrack/extdata/civic_impulse/financial_report.tsv"), delimiter="\t"):
+        year = { "year": row["Year"], "items": [] }
+        net = 0.0
+        for k, v in row.items():
+            if k in categories and v.strip() != "":
+                amt = float(v.replace("$", "").replace(",", ""))
+                net += amt
+                amt = int(round(amt))
+                year["items"].append({
+                    "category": categories[k][0],
+                    "description": categories[k][1],
+                    "amount": amt,
+                    "unsigned_amount": abs(amt)
+                })
+        year["items"].sort(key = lambda x : (x["amount"] >= 0, abs(x["amount"])), reverse=True)
+        rows.append(year)
+        year["net"] = int(round(net))
+        year["unsigned_net"] = abs(year["net"])
+        
+    return { "years": reversed(rows) }
     
