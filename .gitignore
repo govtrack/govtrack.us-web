@@ -6,6 +6,7 @@
 
 # Project specific
 .env
+log
 settings_local.py
 pip-log.txt
 database.sqlite

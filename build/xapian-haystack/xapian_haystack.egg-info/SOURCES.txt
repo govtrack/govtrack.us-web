@@ -1,5 +1,0 @@
-xapian_backend.py
-xapian_haystack.egg-info/PKG-INFO
-xapian_haystack.egg-info/SOURCES.txt
-xapian_haystack.egg-info/dependency_links.txt
-xapian_haystack.egg-info/top_level.txt
