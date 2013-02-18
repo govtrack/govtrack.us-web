@@ -70,7 +70,7 @@ Installation
   ./build/rsync.sh
   ```
 
-* Ensure the contents of @unitedstates/congress are present (or symlinked) at `../scripts/congress/`.
+* Ensure the contents of [@unitedstates/congress](https://github.com/unitedstates/congress) are present (or symlinked) at `../scripts/congress/`.
 
 * Load the data:
 
