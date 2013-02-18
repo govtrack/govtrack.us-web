@@ -31,7 +31,7 @@ Installation
 
   ```
   apt-get install python-virtualenv python-lxml python-openid python-oauth2 \
-    python-iso8601 python-numpy
+      python-iso8601 python-numpy
   ```
 
 * Run the build script to install additional dependencies into a virtual environment:
@@ -69,6 +69,8 @@ Installation
   ```
   ./build/rsync.sh
   ```
+
+* Ensure the contents of @unitedstates/congress are present (or symlinked) at `../scripts/congress/`.
 
 * Load the data:
 
