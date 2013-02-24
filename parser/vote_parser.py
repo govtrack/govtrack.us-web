@@ -181,10 +181,10 @@ def main(options):
                 vote = vote_processor.process(Vote(), roll_node)
                 if existing_vote: vote.id = existing_vote.id
                 match = re_path.search(fname)
-                vote.congress = match.group(1)
+                vote.congress = int(match.group(1))
                 vote.chamber = chamber_mapping[match.group(2)]
                 vote.session = match.group(3)
-                vote.number = match.group(4)
+                vote.number = int(match.group(4))
                 
                 for bill_node in roll_node.xpath("bill"):
                     try:
