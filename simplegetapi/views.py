@@ -309,6 +309,10 @@ def do_api_call(request, model, qs, id):
         raw_data = raw_data.getvalue()
         resp = HttpResponse(raw_data, mimetype="text/csv")
         resp["Content-Length"] = len(raw_data)
+        if len(raw_data) > 500000:
+            resp['Content-Disposition'] = 'attachment; filename="query.csv"'
+        else:
+            resp['Content-Disposition'] = 'inline; filename="query.csv"'
         return resp
         
     else:
