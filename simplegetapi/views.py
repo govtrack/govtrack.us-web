@@ -109,22 +109,26 @@ def do_api_call(request, model, qs, id):
         
         if type(qs).__name__ == "QuerySet":
             # Allow filtering on all Django ORM fields with db_index=True
-            # by default, unless api_allowed_filters is specified.
+            # by default, unless api_allowed_filters is specified. Don't
+            # allow large offsets because the MySQL query optimizer fails
+            # badly.
             default_filterable_fields = [f.name for f in model._meta.fields if f.name == 'id' or f.db_index]
             fields = set(getattr(model, "api_allowed_filters", default_filterable_fields))
             def is_filterable_field(f): return f in fields
             is_sortable_field = is_filterable_field
+            allow_large_offset = False
         else:
             # Allow filtering on fields indexed in Haystack.
             fields = set(getattr(model, "haystack_index", [])) | set(f[0] for f in getattr(model, "haystack_index_extra", []))
             def is_filterable_field(f): return f in fields
             def is_sortable_field(f): return f in fields
+            allow_large_offset = True
         
         for arg, vals in request.GET.iterlists():
             if arg in ("offset", "limit", "format", "fields"):
                 pass
             
-            elif arg == "sort":
+            elif arg in ("sort", "order_by"):
                 if len(vals) != 1:
                     return HttpResponseBadRequest("Invalid query: Multiple sort parameters.")
                     
@@ -185,6 +189,9 @@ def do_api_call(request, model, qs, id):
             qs = qs[offset:offset + limit]
         except ValueError:
             return HttpResponseBadRequest("Invalid offset or limit.")
+            
+        if offset > 10000 and not allow_large_offset:
+            return HttpResponseBadRequest("Offset > 10000 is not supported for this data type. Try a __gt filter instead.")
             
         # Bulk-load w/ prefetch_related, and keep order.
         ids = [entry.pk for entry in qs]
