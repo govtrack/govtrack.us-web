@@ -9,8 +9,12 @@ import csv, json, StringIO, datetime, lxml
 
 def do_api_call(request, model, qs, id):
     """Processes an API request for a given ORM model, queryset, and optional ORM instance ID."""
-    
+
     # Sanity checks.
+
+    if type(qs).__name__ not in ("QuerySet", "SearchQuerySet"):
+        raise Exception("Invalid use. Pass a QuerySet or Haystack SearchQuerySet.")
+
     if request.method != "GET":
         # This is a GET-only API.
         return HttpResponseNotAllowed(["GET"])
@@ -105,13 +109,20 @@ def serialize_object(obj, recurse_on=[], requested_fields=None):
                 continue
                 
             # Don't recurse on models except where explicitly allowed. And if we aren't going to
-            # recurse on this field, stop here so we don't incur a database lookup. Instead,
-            # output the object ID value instead (which the ORM has already cached).
+            # recurse on this field, stop here so we don't incur a database lookup.
+            #
+            # For ForeignKeys, instead output the object ID value instead (which the ORM has already
+            # cached).
+            #
+            # RelatedObject fields are reverse-relations, so we don't have the ID. Just skip
+            # those.
             #
             # Other relation fields don't do a query when we access the attribute, so it is safe
             # to check those later. Those return RelatedManagers. We check those later.
             if isinstance(field, ForeignKey) and field_name not in recurse_on:
                 ret[field_name] = getattr(obj, field_name + "_id")
+                continue
+            if isinstance(field, RelatedObject) and field_name not in recurse_on:
                 continue
                 
             # Get the field value.
@@ -174,33 +185,10 @@ def serialize_object(obj, recurse_on=[], requested_fields=None):
 def do_api_search(request, model, qs, recurse_on, requested_fields):
     """Processes an API call search request, i.e. /api/modelname?..."""
     
-    # Which fields are filterable and sortable?
-
-    if type(qs).__name__ == "QuerySet":
-        # The queryset is a Django ORM QuerySet. If api_allowed_filters is not specified
-        # on the model, allow filtering/sorting on all Django ORM fields with db_index=True.
-        # Otherwise, allow filtering/sorting on only the fields listed in api_allowed_filters.
-        #  Don't allow large offsets because the MySQL query optimizer fails badly.
-        default_filterable_fields = [f.name for f in model._meta.fields if f.name == 'id' or f.db_index]
-        fields = set(getattr(model, "api_allowed_filters", default_filterable_fields))
-        def is_filterable_field(f): return f in fields
-        is_sortable_field = is_filterable_field
-        allow_large_offset = False
-        
-    elif type(qs).__name__ == "SearchQuerySet":
-        # The queryset is a Haystack SearchQuerySet. Allow filtering/sorting on fields indexed
-        # in Haystack, as specified in the haystack_index attribute on the model (a tuple/list)
-        # and the haystack_index_extra attribute which is a tuple/list of tuples, the first
-        # element of which is the Haystack field name.
-        fields = set(getattr(model, "haystack_index", [])) | set(f[0] for f in getattr(model, "haystack_index_extra", []))
-        def is_filterable_field(f): return f in fields
-        def is_sortable_field(f): return f in fields
-        allow_large_offset = True
-        
-    else:
-        raise Exception("Invalid use. Pass a QuerySet or Haystack SearchQuerySet.")
-
     # Apply filters specified in the query string.
+
+    qs_sort = None
+    qs_filters = { }
 
     for arg, vals in request.GET.iterlists():
         if arg in ("offset", "limit", "format", "fields"):
@@ -213,26 +201,27 @@ def do_api_search(request, model, qs, recurse_on, requested_fields):
             if len(vals) != 1:
                 return HttpResponseBadRequest("Invalid query: Multiple sort parameters.")
                 
-            fieldname = vals[0]
-            if fieldname.startswith("-"): fieldname = fieldname[1:]
-            if not is_sortable_field(fieldname):
-                return HttpResponseBadRequest("Invalid sort field: %s" % fieldname)
-                
-            qs = qs.order_by(vals[0]) # fieldname or -fieldname
+            try:
+                qs = qs.order_by(vals[0]) # fieldname or -fieldname
+            except Exception as e:
+                return HttpResponseBadRequest("Invalid sort: %s" % repr(e))
+
+            qs_sort = (vals[0], "+")
+            if vals[0].startswith("-"): qs_sort = (vals[0][1:], "-")
 
         elif arg == "q" and type(qs).__name__ == "SearchQuerySet":
             # For Haystack searches, 'q' is a shortcut for the content= filter which
             # does Haystack's full text search.
             
             if len(vals) != 1:
-                return HttpResponseBadRequest("Invalid query: Multiple %d parameters." % fieldname)
+                return HttpResponseBadRequest("Invalid query: Multiple %s parameters." % arg)
             qs = qs.filter(content=vals[0])
 
         else:
             # This is a regular field filter.
             
             # split fieldname__operator into parts
-            arg_parts = arg.rsplit("__", 1)
+            arg_parts = arg.rsplit("__", 1) # (field name, ) or (field name, operator)
             
             if len(vals) > 1:
                 # If the filter argument is specified more than once, Django gives us the values
@@ -252,17 +241,19 @@ def do_api_search(request, model, qs, recurse_on, requested_fields):
             if len(arg_parts) == 1: arg_parts.append("exact") # default operator
             fieldname, matchoperator = arg_parts
             
-            # Is this a field we can filter on?
-            if not is_filterable_field(fieldname):
-                return HttpResponseBadRequest("Invalid field name for filter: %s" % fieldname)
-                
+            # Get the model field. For Haystack queries, this filter may not correspond to a model field.
+            try:
+                modelfield = model._meta.get_field(fieldname)
+            except:
+                modelfield = None
+            
             # Handle enum fields in a special way.
             try:
-                choices = model._meta.get_field(fieldname).choices
+                choices = modelfield.choices
                 if is_enum(choices):
                     # Allow the | as a separator to accept multiple values (unless the field was specified
                     # multiple times as query parameters).
-                    if len(vals) == 1: vals = vals.split("|")
+                    if len(vals) == 1: vals = vals[0].split("|")
                     
                     # Convert the string value to the raw database integer value.
                     vals = [int(choices.by_key(v)) for v in vals]
@@ -278,7 +269,66 @@ def do_api_search(request, model, qs, recurse_on, requested_fields):
                     qs = qs.filter(**{ fieldname + "__" + matchoperator: vals })
             except Exception as e:
                 return HttpResponseBadRequest("Invalid filter: %s" % repr(e))
+                
+            qs_filters[fieldname] = (matchoperator, modelfield)
     
+    
+    # Is this a valid set of filters and sort option?
+
+    if type(qs).__name__ == "QuerySet":
+        # The queryset is a Django ORM QuerySet. Allow filtering/sorting on all Django ORM fields
+        # with db_index=True. Additionally allow filtering on a prefix of any Meta.unqiue.
+        
+        # Get the fields with db_index=True. The id field is implicitly indexed.
+        indexed_fields = set(f.name for f in model._meta.fields if f.name == 'id' or f.db_index)
+
+        # For every (a,b,c) in unique_together, make a mapping like:
+        #  a: [] # no dependencies, but indexed
+        #  b: a
+        #  c: (a,b)
+        # indicating which other fields must be filtered on to filter one of these fields.
+        indexed_if = { }
+        for unique_together in model._meta.unique_together:
+            for i in xrange(len(unique_together)):
+                indexed_if[unique_together[i]] = unique_together[:i]
+        
+        # Check the sort field is OK.
+        if qs_sort and qs_sort[0] not in indexed_fields:
+            return HttpResponseBadRequest("Cannot sort on field: %s" % fieldname)
+            
+        # Check the filters are OK.
+        for fieldname, (modelfield, operator) in qs_filters.items():
+            if fieldname not in indexed_fields and fieldname not in indexed_if:
+                return HttpResponseBadRequest("Cannot filter on field: %s" % fieldname)                
+            
+            for f2 in indexed_if.get(fieldname, []):
+                if f2 not in qs_filters:
+                    return HttpResponseBadRequest("Cannot filter on field %s without also filtering on %s" %
+                        (fieldname, ", ".join(indexed_if[fieldname])))
+        
+        # Don't allow very high offset values because MySQL fumbles the query optimization.
+        allow_large_offset = False
+        
+    elif type(qs).__name__ == "SearchQuerySet":
+        # The queryset is a Haystack SearchQuerySet. Allow filtering/sorting on fields indexed
+        # in Haystack, as specified in the haystack_index attribute on the model (a tuple/list)
+        # and the haystack_index_extra attribute which is a tuple/list of tuples, the first
+        # element of which is the Haystack field name.
+        indexed_fields = set(getattr(model, "haystack_index", [])) | set(f[0] for f in getattr(model, "haystack_index_extra", []))
+        
+        # Check the sort field is OK.
+        if qs_sort and qs_sort[0] not in indexed_fields:
+            return HttpResponseBadRequest("Cannot sort on field: %s" % fieldname)
+            
+        # Check the filters are OK.
+        for fieldname, (modelfield, operator) in qs_filters.items():
+            if fieldname not in indexed_fields:
+                return HttpResponseBadRequest("Cannot filter on field: %s" % fieldname)
+            
+        allow_large_offset = True
+        
+    # Form the response.
+
     # Get total count before applying offset/limit.
     count = qs.count()
 
