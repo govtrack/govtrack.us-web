@@ -382,40 +382,23 @@ v1_api.register(BillCosponsorModel())
 #v1_api.register(VoteModel())
 #v1_api.register(VoteVoterModel())
 
-from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.template import RequestContext
-import urllib
-
-def api_overview(request):
-	baseurl = "http://%s/api/v1/" % request.META["HTTP_HOST"]
-	
-	def get_resources():
-		# wrapped in a function so it is cachable at the template level
-		resources = sorted(v1_api._registry.items())
-		for ep, r in resources:
-			r.example_content = r.dispatch_list(request, congress=112, current=True, roles__current=True, limit=1).content
-			r.fields_list = sorted((k, k.replace("_", u"_\u00AD"), v) for (k, v) in r.build_schema()["fields"].items())
-		return resources
-	
-	return render_to_response('website/developers/api.html', {
-		"baseurl": baseurl,
-		"api": get_resources,
-		},
-		RequestContext(request))
-
 #### V2 ####
 
-from django.http import Http404
-from simplegetapi.views import do_api_call
+from simplegetapi.views import do_api_call, build_api_documentation
 
-def get_haystack_query_set(model, connection):
-	from haystack.query import SearchQuerySet
-	return SearchQuerySet().using(connection).filter(indexed_model_name__in=[model.__name__])
-
-def apiv2(request, model, id):
+def get_apiv2_model_qs(model):
+	from django.http import Http404
+	
+	def get_haystack_query_set(model, connection):
+		from haystack.query import SearchQuerySet
+		return SearchQuerySet().using(connection).filter(indexed_model_name__in=[model.__name__])
+	
 	if model == "bill":
 		model = Bill
 		qs = get_haystack_query_set(model, "bill")
+	elif model == "cosponsorship":
+		model = Cosponsor
+		qs = Cosponsor.objects.all()
 	elif model == "person":
 		model = Person
 		qs = get_haystack_query_set(model, "person")
@@ -430,6 +413,27 @@ def apiv2(request, model, id):
 		qs = Voter.objects.all()
 	else:
 		raise Http404()
+		
+	return model, qs
 	
+def apiv2(request, model, id):
+	model, qs = get_apiv2_model_qs(model)
 	return do_api_call(request, model, qs, id)
 	
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+
+def api_overview(request):
+	baseurl = "http://%s/api/v2/" % request.META["HTTP_HOST"]
+	
+	endpoints = ("bill", "cosponsorship", "person", "role", "vote", "vote_voter")
+	
+	api = [ (model, build_api_documentation(*get_apiv2_model_qs(model))) for model in endpoints ]
+	
+	return render_to_response('website/developers/api.html', {
+		"baseurl": baseurl,
+		"api": api,
+		},
+		RequestContext(request))
+
+

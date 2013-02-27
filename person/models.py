@@ -28,6 +28,8 @@ def cache_result(f):
     return g
 
 class Person(models.Model):
+    """Members of Congress and U.S. Presidents since the founding of the nation."""
+	
     firstname = models.CharField(max_length=255, help_text="The person's first name or first initial.")
     lastname = models.CharField(max_length=255, help_text="The person's last name.")
     middlename = models.CharField(max_length=255, blank=True, help_text="The person's middle name (optional).")
@@ -66,6 +68,7 @@ class Person(models.Model):
     #######
     # api
     api_recurse_on_single = ('roles', 'committeeassignments')
+    api_example_id = 400326
     #######
 
     def __unicode__(self):
@@ -241,6 +244,8 @@ class Person(models.Model):
         return sources
 
 class PersonRole(models.Model):
+    """Terms held in office by Members of Congress and U.S. Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President four years, and in the Senate six years (three 'Congresses')."""
+	
     person = models.ForeignKey('person.Person', related_name='roles')
     role_type = models.IntegerField(choices=RoleType, db_index=True, help_text="The type of this role: a U.S. senator, a U.S. congressperson, or a U.S. president.")
     current = models.BooleanField(default=False, choices=[(False, "No"), (True, "Yes")], db_index=True, help_text="Whether the role is currently held, or if this is archival information.")
@@ -262,6 +267,7 @@ class PersonRole(models.Model):
         "description": "get_description",
         "congress_numbers": "congress_numbers",
     }
+    api_example_parameters = { "current": "true", "sort": "state" }
 
     class Meta:
         pass # ordering = ['startdate'] # causes prefetch_related to be slow
@@ -282,7 +288,7 @@ class PersonRole(models.Model):
         return self.get_title_name(short=False)
 
     def get_title_abbreviated(self):
-        """The title used to prefix the names of people with this role: Rep., Sen., President, Del. (delegate), or Res.Com. (resident commissioner)."""
+        """The title used to prefix the names of people with this role: Rep., Sen., President, Del. (delegate), or Commish. (resident commissioner)."""
         return self.get_title_name(short=True)
 
     def get_title_name(self, short):

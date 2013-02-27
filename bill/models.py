@@ -66,14 +66,18 @@ class BillTerm(models.Model):
         return "/congress/bills/subjects/%s/%d" % (slugify(self.name).replace('-', '_'), self.id)
 
 class Cosponsor(models.Model):
-    person = models.ForeignKey('person.Person', on_delete=models.PROTECT)
-    role = models.ForeignKey('person.PersonRole', on_delete=models.PROTECT)
-    bill = models.ForeignKey('bill.Bill')
-    joined = models.DateField(help_text="The date the cosponsor was added. It is always greater than or equal to the bill's introduced_date.")
+    """A (bill, person) pair indicating cosponsorship, with join and withdrawn dates."""
+	
+    person = models.ForeignKey('person.Person', db_index=True, on_delete=models.PROTECT, help_text="The cosponsoring person.")
+    role = models.ForeignKey('person.PersonRole', db_index=True, on_delete=models.PROTECT, help_text="The role of the cosponsor at the time of cosponsorship.")
+    bill = models.ForeignKey('bill.Bill', db_index=True, help_text="The bill being cosponsored.")
+    joined = models.DateField(db_index=True, help_text="The date the cosponsor was added. It is always greater than or equal to the bill's introduced_date.")
     withdrawn = models.DateField(blank=True, null=True, help_text="If the cosponsor withdrew his/her support, the date of withdrawl. Otherwise empty.")
     class Meta:
         unique_together = [("bill", "person"),]
 
+    api_example_parameters = { "sort": "-joined" }
+	
     @property
     def person_name(self):
         # don't need title because it's implicit from the bill type
@@ -88,6 +92,8 @@ class Cosponsor(models.Model):
     #        joined__lte=role.enddate).update(role = role)
             
 class Bill(models.Model):
+    """A bill represents a bill or resolution introduced in the United States Congress."""
+	
     title = models.CharField(max_length=255, help_text="The bill's primary display title, including its number.")
     titles = JSONField(default=None) # serialized list of all bill titles as (type, as_of, text)
     bill_type = models.IntegerField(choices=BillType, help_text="The bill's type (e.g. H.R., S., H.J.Res. etc.)")
@@ -96,8 +102,8 @@ class Bill(models.Model):
     sponsor = models.ForeignKey('person.Person', blank=True, null=True,
                                 related_name='sponsored_bills', help_text="The primary sponsor of the bill.", on_delete=models.PROTECT)
     sponsor_role = models.ForeignKey('person.PersonRole', blank=True, null=True, help_text="The role of the primary sponsor of the bill at the time the bill was introduced.", on_delete=models.PROTECT)
-    committees = models.ManyToManyField(Committee, related_name='bills')
-    terms = models.ManyToManyField(BillTerm, related_name='bills')
+    committees = models.ManyToManyField(Committee, related_name='bills', help_text="Committees to which the bill has been referred.")
+    terms = models.ManyToManyField(BillTerm, related_name='bills', help_text="Subject areas associated with the bill.")
     current_status = models.IntegerField(choices=BillStatus, help_text="The current status of the bill.")
     current_status_date = models.DateField(help_text="The date of the last major action on the bill corresponding to the current_status.")
     introduced_date = models.DateField(help_text="The date the bill was introduced.")
@@ -184,6 +190,8 @@ class Bill(models.Model):
         "thomas_link": "thomas_link",
         "noun": "noun",
     }
+    api_example_id = 76416
+    api_example_list = { "sort": "-introduced_date" }
         
     @property
     def display_number(self):

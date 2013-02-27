@@ -44,6 +44,8 @@ class VoterType(enum.Enum):
 
 
 class Vote(models.Model):
+    """Roll call votes in the U.S. Congress since 1789. How people voted is accessed through the Vote_voter API."""
+    
     congress = models.IntegerField(help_text="The number of the Congress in which the vote took place. The current Congress is %d. In recent history Congresses are two years; however, this was not always the case." % CURRENT_CONGRESS)
     session = models.CharField(max_length=4, help_text="Within each Congress there are sessions. In recent history the sessions correspond to calendar years and are named accordingly. However, in historical data the sessions may be named in completely other ways, such as with letters A, B, and C. Session names are unique *within* a Congress.")
     chamber = models.IntegerField(choices=CongressChamber, help_text="The chamber in which the vote was held, House or Senate.")
@@ -68,6 +70,7 @@ class Vote(models.Model):
         unique_together = (('congress', 'chamber', 'session', 'number'),)
         
     api_recurse_on = ('related_bill', 'options')
+    api_example_parameters = { "sort": "-created" }
 
     def __unicode__(self):
         return self.question
@@ -260,13 +263,16 @@ class VoteOption(models.Model):
         return "other"
 
 class Voter(models.Model):
-    vote = models.ForeignKey('vote.Vote', related_name='voters')
-    person = models.ForeignKey('person.Person', blank=True, null=True, on_delete=models.PROTECT, related_name='votes')
+    """How people voted on roll call votes in the U.S. Congress since 1789. See the Vote API. Filter on the vote field to get the results of a particular vote."""
+	
+    vote = models.ForeignKey('vote.Vote', related_name='voters', help_text="The vote that this record is a part of.")
+    person = models.ForeignKey('person.Person', blank=True, null=True, on_delete=models.PROTECT, related_name='votes', help_text="The person who cast this vote.")
     voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President (in which case, the person field is null).")
     option = models.ForeignKey('vote.VoteOption', help_text="How the person voted.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.") # equal to vote.created
     
     api_recurse_on = ('vote', 'person', 'option')
+    api_example_parameters = { "sort": "-created" }
     
     def __unicode__(self):
         return '%s /%s/ %s' % (self.person, self.option.key, self.vote)

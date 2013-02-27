@@ -16,6 +16,7 @@
 {% block summary %}
 	<h1>GovTrack Data API Documentation</h1>
 	<p>GovTrack&rsquo;s data API provides programmatic access to information about the U.S. Congress.</p>
+	<p>Consider using our <a href="/developers/data">bulk raw data</a> for bulk access.</p>
 {% endblock %}
 {% block links %}
 {% include "website/developers/menu.html" %}
@@ -23,36 +24,59 @@
 
 {% block body %}
 <section class="main twelve columns">
-
-	<p>The GovTrack API was first released in May 2012. You might consider instead using our <a href="/developers/data">bulk raw data</a> which is the most supported method for accessing our data and the way we&rsquo;ve been making data available since 2005. The API will be playing catch-up over the next few months.</p>
 	
 	{% include "website/developers/gettingstarted.html" %}
 
-	<h2>Setting Up</h2>
-	
-	<p>There is currently no setup required to use the API. There is no need for an API key. Just start hitting the URLs. That may change in the future.</p>
-
-	<p>The base URL for all APIs is <tt>{{baseurl}}</tt>.</p>
-	
-	<p>Results are returned in JSON by default, but you can change the result format to JSONP, XML, or CSV using the <tt>format</tt> query string parameter. For instance, add <tt>format=jsonp&amp;callback=your_function</tt>, <tt>format=xml</tt> (currently buggy for some resources), or <tt>format=csv</tt> to your query string arguments. (You will need either a ? or an &amp; to separate it from the rest of the URL or arguments, of course.)</p>
-	
-	<p>Results are paged 20 per call by default. This is true even in CSV format. Set the <tt>limit</tt> parameter to a high value to get all of the results at once.</p>
-
-	<p>The API is based on the <a href="http://tastypieapi.org/">Tastypie</a> Django framework. See Tastypie&rsquo;s documentation on <a href="http://django-tastypie.readthedocs.org/en/latest/interacting.html">interacting with the API</a> for some background instructions.</p>
-	
 	<h2>Examples</h2>
 	
 	<p>Here are some quick examples:</p>
 	
 	<ul class="bullets example_api_uses">
-		<li><a href="{{baseurl}}person?roles__current=true">{{baseurl}}person?roles__current=true</a><br/>List current Members of Congress.</li>
+		<li><a href="{{baseurl}}role?current=true">{{baseurl}}role?current=true</a><br/>List current Members of Congress.</li>
+		<li><a href="{{baseurl}}person/400054">{{baseurl}}person/400054</a><br/>Sen. Richard Burr [R-NC].</li>
 		<li><a href="{{baseurl}}bill?congress=112&amp;order_by=-current_status_date">{{baseurl}}bill?congress=112&amp;order_by=-current_status_date</a><br/>List current bills in Congress with the most recently active bills first.</li>
 		<li><a href="{{baseurl}}bill/74369">{{baseurl}}bill/74369</a><br/>H.R. 1349: Public Online Information Act of 2011.</li>
-		<li><a href="{{baseurl}}vote/?congress=112&session=2011">{{baseurl}}vote/?congress=112&amp;session=2011</a><br/>Roll call votes in 2011</li>
+		<li><a href="{{baseurl}}vote/?congress=112&chamber=house&session=2011">{{baseurl}}vote/?congress=112&amp;chamber=house&amp;session=2011</a><br/>Roll call votes in the House in 2011</li>
 		<li><a href="{{baseurl}}vote/1">{{baseurl}}vote/1</a><br/>Roll call vote metadata for House vote #183 in 2011</li>
 		<li><a href="{{baseurl}}vote_voter/?vote=1&limit=441">{{baseurl}}vote_voter/?vote=1&limit=441</a><br/>Actual votes in House vote #183 in 2011 with a limit set so all results appear in one page.</li>
-		<li><a href="{{baseurl}}vote_voter/?person=400222&amp;option=0&amp;limit=1000&amp;order_by=created&format=csv">{{baseurl}}vote_voter/?person=400222&amp;option=0&amp;limit=1000&amp;order_by=created&amp;format=csv</a><br/>Missed votes by Rep.-then-Sen. Mark Kirk, returned in CSV format. A high limit is set so all of the results make it into the file.</li>
+		<li><a href="{{baseurl}}vote_voter/?person=400222&amp;limit=10000&amp;order_by=created&format=csv&fields=vote__id,created,option__value,vote__category,vote__chamber,vote__question,vote__number">{{baseurl}}vote_voter/?person=400222&amp;limit=10000&amp;order_by=created&amp;format=csv&amp;fields=vote__id,created,option__value,vote__category,vote__chamber,vote__question,vote__number</a><br/>Mark Kirk&rsquo;s voting record returned in CSV format. A high limit is set so all of the results make it into the file.</li>
 	</ul>
+
+	<h2>General Options</h2>
+	
+	<h3>Output Format</h3>
+	
+	<p>Results are returned in JSON by default, but you can change the result format to JSONP, XML, or CSV using the <tt>format</tt> query string parameter. For instance, add <tt>format=jsonp&amp;callback=your_function</tt>, <tt>format=xml</tt>, or <tt>format=csv</tt> to your query string arguments. (You will need either a ? or an &amp; to separate it from the rest of the URL or arguments, of course.)</p>
+	
+	<p>You can also specify which fields you want using the <tt>fields</tt> argument.</p>
+	
+	<p>To get a list of currently serving Members of Congress in CSV format use:<br/><a href="{{baseurl}}role?current=true&format=csv&fields=state,district,title_long,person__firstname,person__lastname,person__name&limit=600">{{baseurl}}role?current=true&amp;format=csv&amp;fields=state,district,title_long,person__firstname,person__lastname,person__name&amp;limit=600</a>.</p>
+	
+	<h3>Limit/Offset</h3>
+	
+	<p>Results are paged 100 per call by default. This is true even in CSV format. Set the <tt>limit</tt> parameter to a high value to get all of the results at once. Use <tt>offset</tt> to page through results.</p>
+
+	<h3>Sort</h3>
+	
+	<p>You can sort results on a single field using the <tt>sort</tt> parameter on any sortable field (as listed below). Prepend the field name with a minus sign to sort in descending order.</p>
+	
+	<p>To find the most recent votes:<br/>
+	<a href="{{baseurl}}vote?sort=-created">{{baseurl}}vote?sort=-created</a></p>
+
+	<h3>Filtering</h3>
+	
+	<p>You can filter output on any filterable field, as indicated in the field documentation below.</p>
+	
+	<p>For instance, to list bills in the 112th Congress use <tt>congress=112</tt> like so:<br/><a href="{{baseurl}}bill?congress=112">{{baseurl}}bill?congress=112</a></p>
+	
+	<p>The bills API also supports the <tt>q</tt> field which performs a full-text search:<br/>
+	<a href="{{baseurl}}bill?q=internet">{{baseurl}}bill?q=internet</a></p>
+
+	<p>Besides exact comparisons, you can also use several operators as <tt>fieldname__operator</tt>. The operators are contains, exact, gt, gte, lt, lte, in, startswith, and range. To find votes this year, use:<br/>
+	<a href="{{baseurl}}vote?created__gt=2013-01-01T00:00:00">{{baseurl}}vote?created__gt=2012-01-01T00:00:00</a></p>
+	
+	<p>The in and range operators accept multiple values separated by pipe characters. To find bills whose status is/was either signed by the president or enacted by veto override use:<br/>
+	<a href="{{baseurl}}bill?current_status__in=enacted_signed|enacted_veto_override">{{baseurl}}bill?current_status__in=enacted_signed|enacted_veto_override</a></p>
 
 	<h2>The API Access Points and Schemas</h2>
 	
@@ -69,45 +93,31 @@
 	{% for endpoint, resourcedef in api %}
 		<a name="endpoint_{{endpoint}}"> </a>
 		<h3>{{endpoint|capfirst}}</h3>
-		<p>{{resourcedef.get_docstring}}</p>
-		<p>Use the list API at <a href="{{baseurl}}{{endpoint}}">{{baseurl}}{{endpoint}}</a> to get a list of objects of this type. The output will look like this:</p>
-		<pre class="example prettyprint">{{resourcedef.example_content}}</pre>
-		
-		{% if resourcedef.Meta.filtering %}
-			<h4 style="margin-bottom: 1em">Filtering</h4>
-			<p>You can filter the results using <em>field=value</em> query string arguments using the following fields:
-				{% for field, type in resourcedef.Meta.filtering.items %}
-					{{ field }}<sup style="vertical-align: super; font-size: 75%; color: #777;">{% if type == 1 %}*{% endif %}{% if type == 2 %}**{% endif %}</sup>{% if not forloop.last %}, {% endif %}{% endfor %}.
-			</p>
-			<p>(Fields marked with a * support <a href="https://docs.djangoproject.com/en/dev/ref/models/querysets/#field-lookups">Django-style filters</a> like __gt. Fields marked with ** support filters that span the relationship, such as x__y=112.)</p>
+		<p>{{resourcedef.docstring}}</p>
+		<p>
+			Use the list API at <a href="{{baseurl}}{{endpoint}}">{{baseurl}}{{endpoint}}</a> to get a list of objects of this type.
+			{% if resourcedef.canonical_example %}
+				Add a slash and the ID of any object to get just that object. For instance, try out <a href="{{baseurl}}{{endpoint}}/{{resourcedef.canonical_example}}">{{baseurl}}{{endpoint}}/{{resourcedef.canonical_example}}</a>.
+			{% endif %}
+		</p>
+
+		{% if resourcedef.example_content %}
+			<pre class="example prettyprint">{{resourcedef.example_content}}</pre>
 		{% endif %}
 		
-		{% if resourcedef.Meta.ordering %}
-			<h4 style="margin-bottom: 1em">Ordering</h4>
-			<p>You can order the results using <em>order_by=fieldname</em> (ascending) or <em>order_by=-fieldname</em> (descending) using the following fields:
-				{% for field in resourcedef.Meta.ordering %}
-					{{ field }}{% if not forloop.last %}, {% endif %}{% endfor %}.
-			</p>
-		{% endif %}
-		
-		{% if resourcedef.canonical_example %}
-			<h4 style="margin-bottom: 1em">Example Resource</h4>
-			<p>Add a slash and the ID of any object to get just that object. For instance, try out <a href="{{baseurl}}{{endpoint}}/{{resourcedef.canonical_example}}">{{baseurl}}{{endpoint}}/{{resourcedef.canonical_example}}</a>.</p>
-		{% endif %}
-		
-		<h4>Field Documentation</h4>
-		
-		<p style="margin: 1em 0 2em 16px;">The fields of each resource have the following meanings. This list can also be accessed programmatically at <a href="{{baseurl}}{{endpoint}}/schema">{{baseurl}}{{endpoint}}/schema</a>.</p>
+		<h4 style="margin-left: 16px">Fields</h4>
 		
 		<dl class="schema">
-		{% for field, field_display, info in resourcedef.fields_list %}
-			<dt>{{field_display}}</dt>
+		{% for field, info in resourcedef.fields_list %}
+			<dt>{{field}}</dt>
 			<dd>
 				<div>
-				{% if field == "id" %}The primary key of this resource.{% endif %}
-				{% if field == "resource_uri" %}The URL path to this resource in the API.{% endif %}
+				{% if field == "id" %}The primary key of this resource. Add a slash and this ID to the base URI for this API endpoint to get information on just this object.{% endif %}
+				{% if field == "link" %}The canonical URL of this resource.{% endif %}
 				{% if field != "id" and field != "resource_uri" %}{{info.help_text}}{% endif %}
 				</div>
+
+				{% if info.filterable %}<div><small>{{info.filterable}}</small></div>{% endif %}
 				
 				{% if info.enum_values %}
 				<div style="margin: 1em 0 1em 0">This field can take on the following values:</div>
@@ -116,7 +126,9 @@
 				{% for k, v in info.enum_values.items %}
 					<tr>
 					<td style="padding-bottom: .5em">{{k}}</td>
-					<td style="padding-left: 2em; padding-bottom: .5em">{{v.label}}{% if v.description %}. <em>{{v.description}}</em>{% endif %}</td>
+					<td style="padding-left: 2em; padding-bottom: .5em; line-height: 120%">{{v.label}}
+						{% if v.description %}<br><small>{{v.description}}</small>{% endif %}
+					</td>
 					</tr>
 				{% endfor %}
 				</table>

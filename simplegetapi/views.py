@@ -1,11 +1,11 @@
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, Http404
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, Http404, QueryDict
 from django.db.models import Model
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.db.models.related import RelatedObject
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from common import enum as enummodule
-import csv, json, StringIO, datetime, lxml
+import csv, json, StringIO, datetime, lxml, urllib
 
 def do_api_call(request, model, qs, id):
     """Processes an API request for a given ORM model, queryset, and optional ORM instance ID."""
@@ -19,10 +19,6 @@ def do_api_call(request, model, qs, id):
         # This is a GET-only API.
         return HttpResponseNotAllowed(["GET"])
     
-    # Get model information specifying how to format API results for calls rooted on this model.
-    recurse_on = getattr(model, "api_recurse_on", [])
-    recurse_on_single = getattr(model, "api_recurse_on_single", [])
-    
     # The user can specify which fields he wants as a comma-separated list. Also supports
     # field__field chaining for related objects.
     requested_fields = [f.strip() for f in request.GET.get("fields", "").split(',') if f.strip() != ""]
@@ -30,9 +26,9 @@ def do_api_call(request, model, qs, id):
     
     # Process the call.
     if id == None:
-        response = do_api_search(request, model, qs, recurse_on, requested_fields)
+        response = do_api_search(model, qs, request.GET, requested_fields)
     else:
-        response = do_api_get_object(model, id, list(recurse_on) + list(recurse_on_single), requested_fields)
+        response = do_api_get_object(model, id, requested_fields)
         
     # Return the result immediately if it is an error condition.
     if isinstance(response, HttpResponse):
@@ -54,6 +50,9 @@ def do_api_call(request, model, qs, id):
     if format == "json":
         return serialize_response_json(response)
         
+    elif format == "jsonp":
+        return serialize_response_jsonp(response, request.GET.get("callback", "callback"))
+        
     elif format == "xml":
         return serialize_response_xml(response)
         
@@ -66,6 +65,25 @@ def do_api_call(request, model, qs, id):
 def is_enum(obj):
     import inspect
     return inspect.isclass(obj) and issubclass(obj, enummodule.Enum)
+    
+def get_orm_fields(obj):
+    for field in obj._meta.fields + \
+        obj._meta.many_to_many + \
+        obj._meta.get_all_related_objects() + \
+        list(getattr(obj, "api_additional_fields", {})):
+            
+        # Get the field name.
+        if isinstance(field, (str, unicode)):
+            # for api_additional_fields
+            field_name = field
+        elif isinstance(field, RelatedObject):
+            # for get_all_related_objects()
+            field_name = field.get_accessor_name()
+        else:
+            # for other fields
+            field_name = field.name
+    
+        yield field_name, field
 
 def serialize_object(obj, recurse_on=[], requested_fields=None):
     """Serializes a Python object to JSON-able data types (listed in the 1st if block below)."""
@@ -92,18 +110,7 @@ def serialize_object(obj, recurse_on=[], requested_fields=None):
         # fields that will not cause additional database queries. ForeignKey,
         # ManyToMany and those sorts of fields should be specified in a
         # recurse_on setting so that they go into the prefetch list.
-        for field in obj._meta.fields + obj._meta.many_to_many + obj._meta.get_all_related_objects() + list(getattr(obj, "api_additional_fields", {})):
-            # Get the field name.
-            if isinstance(field, (str, unicode)):
-                # for api_additional_fields
-                field_name = field
-            elif isinstance(field, RelatedObject):
-                # for get_all_related_objects()
-                field_name = field.get_accessor_name()
-            else:
-                # for other fields
-                field_name = field.name
-
+        for field_name, field in get_orm_fields(obj):
             # Is the user requesting particular fields? If so, check that this is a requested field.
             if local_fields is not None and field_name not in local_fields:
                 continue
@@ -182,15 +189,20 @@ def serialize_object(obj, recurse_on=[], requested_fields=None):
         return unicode(obj)
             
 
-def do_api_search(request, model, qs, recurse_on, requested_fields):
+def do_api_search(model, qs, request_options, requested_fields):
     """Processes an API call search request, i.e. /api/modelname?..."""
     
+    qs_type = type(qs).__name__
+    
+    # Get model information specifying how to format API results for calls rooted on this model.
+    recurse_on = getattr(model, "api_recurse_on", [])
+
     # Apply filters specified in the query string.
 
     qs_sort = None
     qs_filters = { }
 
-    for arg, vals in request.GET.iterlists():
+    for arg, vals in request_options.iterlists():
         if arg in ("offset", "limit", "format", "fields"):
             # These aren't filters.
             pass
@@ -209,7 +221,7 @@ def do_api_search(request, model, qs, recurse_on, requested_fields):
             qs_sort = (vals[0], "+")
             if vals[0].startswith("-"): qs_sort = (vals[0][1:], "-")
 
-        elif arg == "q" and type(qs).__name__ == "SearchQuerySet":
+        elif arg == "q" and qs_type == "SearchQuerySet":
             # For Haystack searches, 'q' is a shortcut for the content= filter which
             # does Haystack's full text search.
             
@@ -274,8 +286,70 @@ def do_api_search(request, model, qs, recurse_on, requested_fields):
     
     
     # Is this a valid set of filters and sort option?
+    
+    indexed_fields, indexed_if = get_model_filterable_fields(model, qs_type)
 
-    if type(qs).__name__ == "QuerySet":
+    # Check the sort field is OK.
+    if qs_sort and qs_sort[0] not in indexed_fields:
+        return HttpResponseBadRequest("Cannot sort on field: %s" % qs_sort[0])
+        
+    # Check the filters are OK.
+    for fieldname, (modelfield, operator) in qs_filters.items():
+        if fieldname not in indexed_fields and fieldname not in indexed_if:
+            return HttpResponseBadRequest("Cannot filter on field: %s" % fieldname)                
+        
+        for f2 in indexed_if.get(fieldname, []):
+            if f2 not in qs_filters:
+                return HttpResponseBadRequest("Cannot filter on field %s without also filtering on %s" %
+                    (fieldname, ", ".join(indexed_if[fieldname])))
+        
+    # Form the response.
+
+    # Get total count before applying offset/limit.
+    count = qs.count()
+
+    # Apply offset/limit.
+    try:
+        offset = int(request_options.get("offset", "0"))
+        limit = int(request_options.get("limit", "100"))
+    except ValueError:
+        return HttpResponseBadRequest("Invalid offset or limit.")
+        
+    if qs_type == "QuerySet":
+        # Don't allow very high offset values because MySQL fumbles the query optimization.
+        if offset > 10000:
+            return HttpResponseBadRequest("Offset > 10000 is not supported for this data type. Try a __gt filter instead.")
+
+    qs = qs[offset:offset + limit]
+
+    # Bulk-load w/ prefetch_related, but keep order.
+    
+    if qs_type == "QuerySet":
+        # For Django ORM QuerySets, just add prefetch_related based on the fields
+        # we're allowed to recurse inside of.
+        objs = qs.prefetch_related(*recurse_on) 
+    elif qs_type == "SearchQuerySet":
+        # For Haystack SearchQuerySets, we need to get the ORM instance IDs,
+        # pull the objects in bulk, and then sort by the original return order.
+        ids = [entry.pk for entry in qs]
+        id_index = { int(id): i for i, id in enumerate(ids) }
+        objs = list(model.objects.filter(id__in=ids).prefetch_related(*recurse_on))
+        objs.sort(key = lambda ob : id_index[int(ob.id)])
+    else:
+        raise Exception(qs_type)
+
+    # Serialize.
+    return {
+        "meta": {
+            "offset": offset,
+            "limit": limit,
+            "total_count": count,
+        },
+        "objects": [serialize_object(s, recurse_on=recurse_on, requested_fields=requested_fields) for s in objs],
+    }
+
+def get_model_filterable_fields(model, qs_type):
+    if qs_type == "QuerySet":
         # The queryset is a Django ORM QuerySet. Allow filtering/sorting on all Django ORM fields
         # with db_index=True. Additionally allow filtering on a prefix of any Meta.unqiue.
         
@@ -292,87 +366,30 @@ def do_api_search(request, model, qs, recurse_on, requested_fields):
             for i in xrange(len(unique_together)):
                 indexed_if[unique_together[i]] = unique_together[:i]
         
-        # Check the sort field is OK.
-        if qs_sort and qs_sort[0] not in indexed_fields:
-            return HttpResponseBadRequest("Cannot sort on field: %s" % fieldname)
-            
-        # Check the filters are OK.
-        for fieldname, (modelfield, operator) in qs_filters.items():
-            if fieldname not in indexed_fields and fieldname not in indexed_if:
-                return HttpResponseBadRequest("Cannot filter on field: %s" % fieldname)                
-            
-            for f2 in indexed_if.get(fieldname, []):
-                if f2 not in qs_filters:
-                    return HttpResponseBadRequest("Cannot filter on field %s without also filtering on %s" %
-                        (fieldname, ", ".join(indexed_if[fieldname])))
-        
-        # Don't allow very high offset values because MySQL fumbles the query optimization.
-        allow_large_offset = False
-        
-    elif type(qs).__name__ == "SearchQuerySet":
+    elif qs_type == "SearchQuerySet":
         # The queryset is a Haystack SearchQuerySet. Allow filtering/sorting on fields indexed
         # in Haystack, as specified in the haystack_index attribute on the model (a tuple/list)
         # and the haystack_index_extra attribute which is a tuple/list of tuples, the first
         # element of which is the Haystack field name.
         indexed_fields = set(getattr(model, "haystack_index", [])) | set(f[0] for f in getattr(model, "haystack_index_extra", []))
         
-        # Check the sort field is OK.
-        if qs_sort and qs_sort[0] not in indexed_fields:
-            return HttpResponseBadRequest("Cannot sort on field: %s" % fieldname)
-            
-        # Check the filters are OK.
-        for fieldname, (modelfield, operator) in qs_filters.items():
-            if fieldname not in indexed_fields:
-                return HttpResponseBadRequest("Cannot filter on field: %s" % fieldname)
-            
-        allow_large_offset = True
+        indexed_if = { }
         
-    # Form the response.
+    else:
+        raise Exception(qs_type)
 
-    # Get total count before applying offset/limit.
-    count = qs.count()
+    return indexed_fields, indexed_if
 
-    # Apply offset/limit.
-    try:
-        offset = int(request.GET.get("offset", "0"))
-        limit = int(request.GET.get("limit", "100"))
-        qs = qs[offset:offset + limit]
-    except ValueError:
-        return HttpResponseBadRequest("Invalid offset or limit.")
-        
-    if offset > 10000 and not allow_large_offset:
-        return HttpResponseBadRequest("Offset > 10000 is not supported for this data type. Try a __gt filter instead.")
-        
-    # Bulk-load w/ prefetch_related, but keep order.
-    
-    if type(qs).__name__ == "QuerySet":
-        # For Django ORM QuerySets, just add prefetch_related based on the fields
-        # we're allowed to recurse inside of.
-        objs = qs.prefetch_related(*recurse_on) 
-    elif type(qs).__name__ == "SearchQuerySet":
-        # For Haystack SearchQuerySets, we need to get the ORM instance IDs,
-        # pull the objects in bulk, and then sort by the original return order.
-        ids = [entry.pk for entry in qs]
-        id_index = { int(id): i for i, id in enumerate(ids) }
-        objs = list(model.objects.filter(id__in=ids).prefetch_related(*recurse_on))
-        objs.sort(key = lambda ob : id_index[int(ob.id)])
-
-    # Serialize.
-    return {
-        "meta": {
-            "offset": offset,
-            "limit": limit,
-            "total_count": count,
-        },
-        "objects": [serialize_object(s, recurse_on=recurse_on, requested_fields=requested_fields) for s in objs],
-    }
-
-def do_api_get_object(model, id, recurse_on, requested_fields):
+def do_api_get_object(model, id, requested_fields):
     """Gets a single object by primary key."""
     
     # Object ID is known.
     obj = get_object_or_404(model, id=id)
-    
+
+    # Get model information specifying how to format API results for calls rooted on this model.
+    recurse_on = list(getattr(model, "api_recurse_on", []))
+    recurse_on += list(getattr(model, "api_recurse_on_single", []))
+
     # Serialize.
     return serialize_object(obj, recurse_on=recurse_on, requested_fields=requested_fields)
 
@@ -380,6 +397,15 @@ def serialize_response_json(response):
     """Convert the response dict to JSON."""
     ret = json.dumps(response, sort_keys=True, ensure_ascii=False, indent=True)
     resp = HttpResponse(ret, mimetype="application/json")
+    resp["Content-Length"] = len(ret)
+    return resp
+
+def serialize_response_jsonp(response, callback_name):
+    """Convert the response dict to JSON."""
+    ret = callback_name + "("
+    ret += json.dumps(response, sort_keys=True, ensure_ascii=False, indent=True)
+    ret += ");"
+    resp = HttpResponse(ret, mimetype="application/javascript")
     resp["Content-Length"] = len(ret)
     return resp
 
@@ -463,3 +489,81 @@ def serialize_response_csv(response, is_list, requested_fields):
         resp['Content-Disposition'] = 'inline; filename="query.csv"'
     return resp
 
+def build_api_documentation(model, qs):
+    indexed_fields, indexed_if = get_model_filterable_fields(model, type(qs).__name__)
+    
+    ex_id = getattr(model, "api_example_id", None)
+
+    if ex_id:
+        example_data = do_api_get_object(model, ex_id, None)
+    else:
+        qd = QueryDict("limit=5").copy()
+        for k, v in getattr(model, "api_example_parameters", {}).items():
+            qd[k] = v
+        example_data = do_api_search(model, qs, qd, None)
+    example_data = json.dumps(example_data, sort_keys=True, ensure_ascii=False, indent=4)
+
+    recurse_on = set(getattr(model, "api_recurse_on", []))
+    recurse_on_single = set(getattr(model, "api_recurse_on_single", []))
+    
+    fields_list = []
+    for field_name, field in get_orm_fields(model):
+        field_info = { }
+
+        if isinstance(field, (str, unicode)):
+            # for api_additional_fields
+            v = model.api_additional_fields[field] # get the attribute or function
+            if not callable(v):
+                # it's an attribute name, so pull the value from the attribute,
+                # which hopefully gives something with a docstring
+                v = getattr(model, v)
+                field_info["help_text"] = v.__doc__
+            
+        elif isinstance(field, RelatedObject):
+            # for get_all_related_objects()
+            if field_name not in (recurse_on|recurse_on_single): continue
+            field_info["help_text"] = "The %s whose %s field is this object." % (field.model.__name__, field.field.name)
+            
+        else:
+            # for regular fields
+            field_info["help_text"] = field.help_text
+
+            if isinstance(field, (ForeignKey, ManyToManyField)):
+                if field_name not in (recurse_on|recurse_on_single):
+                    field_info["help_text"] += " Given as an id."
+                elif field_name not in recurse_on:
+                    if isinstance(field, ManyToManyField):
+                        field_info["help_text"] += " Only returned in a query for a single object."
+                    else:
+                        field_info["help_text"] += " In a list/search query, only the id is returned. In a single-object query, the full object is included in the response."
+                    field_info["help_text"] += " When filtering, specify the id of the target object."
+
+            # Choices?
+            enum = field.choices
+            if is_enum(enum):
+                field_info["enum_values"] = dict((v.key, { "label": v.label, "description": getattr(v, "search_help_text", None) } ) for v in enum.values())
+
+        # Stupid Django hard-coded text.
+        field_info["help_text"] = field_info.get("help_text", "").replace('Hold down "Control", or "Command" on a Mac, to select more than one.', '')
+
+        # Indexed?
+        if field_name in indexed_fields:
+            field_info["filterable"] = "Filterable. Sortable."
+        if field_name in indexed_if:
+            if len(indexed_if[field_name]) == 0:
+                field_info["filterable"] = "Filterable."
+            else:
+                field_info["filterable"] = "Filterable when also filtering on " + " and ".join(indexed_if[field_name]) + "."
+                
+
+        fields_list.append((field_name, field_info))
+    
+    fields_list.sort()
+    
+    return {
+        "docstring": model.__doc__,
+        "canonical_example": ex_id,
+        "example_content": example_data,
+        "fields_list": fields_list,
+    }
+    
