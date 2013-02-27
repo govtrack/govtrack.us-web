@@ -148,6 +148,15 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 				// Set a min-height so that the window height doesn't go down,
 				// which can cause the page to scroll up and confuse the user.
 				if (cur_height) $(this).css({ "min-height": cur_height + "px" });
+				
+				if (!is_initial) {
+					// Scroll to the tab if we are far away.
+					if ( (tabs.offset().top > $(window).scrollTop() + $(window).height()/3) 
+						|| (tabs.offset().top < $(window).scrollTop())
+						) {
+						$("html, body").animate({ scrollTop: tabs.offset().top - $(window).height()/7 });
+					}
+				}
 			}
 		});
 

@@ -281,6 +281,12 @@
 			<p>Limited information is available for bills and resolutions from 1957-1972.</p>
 			{% endif %}
 		
+			{% with bill.oursummary as summary %}
+			{% if summary %}
+				<p style="margin: 1em 0 0 0">{{summary.plain_text|truncatewords:30}} (<a href="#summary/oursummary">read more</a>)</p>
+			{% endif %}
+			{% endwith %}
+			
 		</div><!-- /info -->
 		
 		<p class="helptext" style="clear: both; line-height: 110%; margin: 0;"><small>The {{bill.noun}}&rsquo;s title was written by the {{bill.noun}}&rsquo;s sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
