@@ -6,14 +6,11 @@ Disallow: //
 Disallow: /data
 Disallow: /registration/ext
 Disallow: /congress/bills/browse?
+Disallow: /events/embed_legacy
 Crawl-delay: 10
 
 User-agent: BecomeBot
 Disallow: /
-
-User-agent: ia_archiver
-Disallow: /congress
-
 
 Sitemap: http://www.govtrack.us/sitemap.xml
 

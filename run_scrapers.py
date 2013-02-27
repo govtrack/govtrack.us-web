@@ -47,8 +47,8 @@ def copy(fn1, fn2, modulo):
 fetch_mode = "--force --fast"
 log_level = "error"
 
-if "CACHE" in os.environ:
-	fetch_mode = ""
+if "full-scan" in sys.argv: fetch_mode = "--force"
+if "CACHE" in os.environ: fetch_mode = ""
 	
 # Run scrapers and parsers.
 
@@ -67,6 +67,7 @@ if "people" in sys.argv:
 	# Load YAML (directly) into db.
 	os.system("RELEASE=1 ./parse.py person") #  -l ERROR
 	os.system("RELEASE=1 ./manage.py update_index -v 0 -u person person")
+	#os.system("RELEASE=1 ./manage.py prune_index -u person person")
 
 if "committees" in sys.argv:
 	if CONGRESS != 113: raise ValueErrror()

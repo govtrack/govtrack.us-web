@@ -1,11 +1,9 @@
 {% load events_utils %}GovTrack Email Update
 =====================
 
-{% comment %}
------ Have you tried our new full text keyword search trackers? Check out what's new on GovTrack: http://www.govtrack.us/blog/2012/11/25/site-updates-fall-2012.
-{% endcomment %}
+----- Did you know we're on Facebook and Twitter? Like our Facebook page <https://www.facebook.com/pages/Civic-Impulse/312186525430> or follow @GovTrack <https://twitter.com/govtrack> to stay up to date with the latest bills in Congress. -----
 
-This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to http://www.govtrack.us/accounts/lists.
+This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to http://www.govtrack.us/accounts/profile.
 
 {% for list, events in eventslists %}
 {{list.name}}

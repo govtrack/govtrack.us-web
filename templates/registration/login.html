@@ -1,6 +1,8 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Log In{% endblock %}
 
+{% block override_login %}{% endblock %}
+
 {% block heading_box %}
 			<header class="heading-box row">
 				<h1>Log In</h1>
@@ -14,11 +16,13 @@
 							{% with next as singlesignon_next %}
 								{% include "registration/login_singlesignon.html" %}
 							{% endwith %}
-							<p style="margin-top: 1em">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack.</p>
+							<p style="margin-top: 1em">You can use your Facebook, Google, or Twitter account for a fast, no-password way to log into GovTrack. There is no need to register first.</p>
 						</div>
 
 						<div id="login_form" class="six columns">
 							<h3 style="margin-bottom: 1em">Use your email and password:</h3>
+
+							<p>New here? <a href="/registration/signup{% if next %}?next={{next|urlencode}}{% endif %}">Create a login first</a>.</p>
 
 							{% if errors %}
 								<p class="error">{{errors}} Please try again.</p>
@@ -28,13 +32,11 @@
 							<input id="id_email" type="text" name="email" maxlength="60" value="{{email}}"/><br /> 
 										
 							<label for="id_password">Password</label> 
-							<input type="password" name="password" id="id_password" value="{{password}}" /><br /> 
+							<input type="password" name="password" id="id_password" value="{{password}}" /> 
 										
-							<p style="margin: 5px 0 15px 80px"><input class="submit" type="submit" value="Login" /></p>
+							<p style="margin: 1em 0 15px 80px; clear: both;"><input class="submit" type="submit" value="Login" /></p>
 							
 							<p><a class="forgot" href="{% url registration.views.resetpassword %}">Forgot your password?</p>
-						
-							<p><a href="/registration/signup{% if next %}?next={{next|urlencode}}{% endif %}">New here? Create a login.</a></p>
 
 						</div>
 					

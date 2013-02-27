@@ -8,11 +8,9 @@
 
 {% with "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email" as utm %}
 
-{% comment %}
-<p style="margin: 2em 1em 2em 1em; padding: 1em; border: 1px solid #DDD; background-color: #F3F3FF">Have you tried our new full text keyword search trackers? Check out what&rsquo;s new on GovTrack in our blog post on <a href="http://www.govtrack.us/blog/2012/11/25/site-updates-fall-2012/?{{utm}}">recent site updates</a>.</p>
-{% endcomment %}
+<p style="margin: 2em 1em 2em 1em; padding: 1em; border: 1px solid #DDD; background-color: #F3F3FF">Did you know we&rsquo;re on Facebook and Twitter? Like <a href="https://www.facebook.com/pages/Civic-Impulse/312186525430">our Facebook page</a> or follow <a href="https://twitter.com/govtrack">@GovTrack</a> to stay up to date with the latest bills in Congress.</p>
 
-<p>This is your email update from <a href="http://www.govtrack.us?{{utm}}">GovTrack.us</a>. To change your email update settings, including to unsubscribe, go to <a href="http://www.govtrack.us/accounts/lists?{{utm}}">Your Lists</a>.</p>
+<p>This is your email update from <a href="http://www.govtrack.us?{{utm}}">GovTrack.us</a>. To change your email update settings, including to unsubscribe, go to <a href="http://www.govtrack.us/accounts/profile?{{utm}}">your account settings</a>.</p>
 
 {% for list, events in eventslists %}
 <h3>{{list.name}}</h3>

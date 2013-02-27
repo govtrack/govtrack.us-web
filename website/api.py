@@ -379,8 +379,8 @@ v1_api.register(PersonModel())
 v1_api.register(PersonRoleModel())
 v1_api.register(BillModel())
 v1_api.register(BillCosponsorModel())
-v1_api.register(VoteModel())
-v1_api.register(VoteVoterModel())
+#v1_api.register(VoteModel())
+#v1_api.register(VoteVoterModel())
 
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext
@@ -425,7 +425,7 @@ def apiv2(request, model, id):
 	elif model == "vote":
 		model = Vote
 		qs = Vote.objects.all()
-	elif model == "voter":
+	elif model in ("vote_voter", "voter"):
 		model = Voter
 		qs = Voter.objects.all()
 	else:

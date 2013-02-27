@@ -4196,11 +4196,13 @@ ul.bullets li, .postcontent ul li {
 	display: block;
 	float: left;
 	width: 80px;
+	line-height: 32px;
 }
 
 .login input#id_email,
 .login input#id_password {
-  margin-bottom: 1em;
+  width: 70%;
+  margin: 0;
 }
 
 #sitenewscontainer {

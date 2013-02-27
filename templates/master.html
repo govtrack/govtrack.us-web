@@ -110,7 +110,7 @@
 									{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
 									{% block override_login %}
 									{% if not user.is_authenticated %}
-										<li id="nav_login"><a href="/accounts/login">Log In</a></li>
+										<li id="nav_login"><a href="/accounts/login?next={{request.path|urlencode}}">Log In</a></li>
 										{% if request.anonymous %}<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>{% endif %}
 									{% else %}
 										<li><a href="/accounts/profile">{{user.email}}</a></li>
