@@ -13,19 +13,19 @@
 {% endif %}
 {% endblock %}
 
-{% block summary %}
-<div class="right">
-	<a href="#" class="track-btn" onclick="return show_track_panel();">Track events</a>
-	<p><a href="events.rss?feeds={{feed.feedname|urlencode}}">RSS</a></p>
-</div>
-
-<div id="track_panel_base" class="container">
-	<h1 style="margin-bottom: 12px">{{meta.title}}</h1>
-	{{meta.intro_html|safe}}
-</div>
-
-{% include "events/subscribe_inline.html" %}
-
+{% block heading_box %}
+<header class="heading-box row">
+	<div class="nine columns">
+		<h1 style="margin-bottom: 12px">{{meta.title}}</h1>
+		{{meta.intro_html|safe}}
+	</div>
+	
+	<div class="aside three columns">
+		<a href="#" class="track-btn" onclick="return show_track_panel();">Track events</a>
+		<p><a href="events.rss?feeds={{feed.feedname|urlencode}}">RSS</a></p>
+		{% include "events/subscribe_inline.html" %}
+	</div>
+</header>
 {% endblock %}
 
 {% block body %}

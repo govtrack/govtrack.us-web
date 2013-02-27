@@ -744,7 +744,10 @@
 					<p>We don&rsquo;t have a summary available yet.</p>
 				{% else %}
 					{{summary.content|safe}}
-					<div class="small">Last updated {{summary.modified|date}}.</div>
+					<div class="small" style="margin-top: 1em; border-top: 1px solid #666; padding-top: 1em">
+						Last updated {{summary.modified|date}}.
+						View <a href="/events/bill-summaries">all GovTrack summaries</a>.
+					</div>
 					<script>add_summary(null, "oursummary", "{{summary.plain_text|truncatewords:30|escapejs}}");</script>
 				{% endif %}
 				{% endwith %}
