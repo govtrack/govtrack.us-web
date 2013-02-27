@@ -69,11 +69,13 @@
 	
 	<p>For instance, to list bills in the 112th Congress use <tt>congress=112</tt> like so:<br/><a href="{{baseurl}}bill?congress=112">{{baseurl}}bill?congress=112</a></p>
 	
-	<p>The bills API also supports the <tt>q</tt> field which performs a full-text search:<br/>
+	<p>The bills and people APIs also support the <tt>q</tt> field which performs a full-text search:<br/>
 	<a href="{{baseurl}}bill?q=internet">{{baseurl}}bill?q=internet</a></p>
 
 	<p>Besides exact comparisons, you can also use several operators as <tt>fieldname__operator</tt>. The operators are contains, exact, gt, gte, lt, lte, in, startswith, and range. To find votes this year, use:<br/>
 	<a href="{{baseurl}}vote?created__gt=2013-01-01T00:00:00">{{baseurl}}vote?created__gt=2012-01-01T00:00:00</a></p>
+	
+	<p>Dates are a little quirky at the moment. The bill and person APIs require dates to be specified in Solr&rsquo;s date format which is the typical ISO format plus a Z at the end (<tt>YYYY-MM-DDTHH:MM:SSZ</tt>). The other APIs will accept a date in any format MySQL recognizes, which is usually YYYY, YYYY-MM-DD, YYYY-MM-DDTHH:MM, or YYYY-MM-DDTHH:MM:SS. The Solr format is not recognized by MySQL.</p>
 	
 	<p>The in and range operators accept multiple values separated by pipe characters. To find bills whose status is/was either signed by the president or enacted by veto override use:<br/>
 	<a href="{{baseurl}}bill?current_status__in=enacted_signed|enacted_veto_override">{{baseurl}}bill?current_status__in=enacted_signed|enacted_veto_override</a></p>
@@ -82,7 +84,7 @@
 	
 	<p>The following resources are available in the API.</p>
 	
-	{% cache 6000 govtrack_api_docs_2 request.META.HTTP_HOST %}
+	{% cache 6000 govtrack_api_docs_3 %}
 	
 	<ul class="bullets">
 	{% for endpoint, resourcedef in api %}

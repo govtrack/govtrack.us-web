@@ -548,7 +548,7 @@ def build_api_documentation(model, qs):
 
         # Indexed?
         if field_name in indexed_fields:
-            field_info["filterable"] = "Filterable. Sortable."
+            field_info["filterable"] = "Filterable with operators. Sortable."
         if field_name in indexed_if:
             if len(indexed_if[field_name]) == 0:
                 field_info["filterable"] = "Filterable."
@@ -559,6 +559,9 @@ def build_api_documentation(model, qs):
         fields_list.append((field_name, field_info))
     
     fields_list.sort()
+    
+    if type(qs).__name__ == "SearchQuerySet":
+        fields_list.insert(0, ("q", { "help_text": "Filters according to a full-text search on the object.", "filterable": "Filterable (without operators)." }))
     
     return {
         "docstring": model.__doc__,
