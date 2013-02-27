@@ -317,9 +317,11 @@ class Bill(models.Model):
             common_feeds = [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()]
             enacted_feed = [Feed.EnactedBillsFeed()]
             for datestr, state, text in self.major_actions:
+                date = eval(datestr)
                 if state == BillStatus.introduced:
                     continue # already indexed
-                date = eval(datestr)
+                if state == BillStatus.referred and (date.date() - self.introduced_date).days == 0:
+                    continue # don't dup these events so close
                 E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_passed_bill else []))
                 
             # generate events for new cosponsors... group by join date, and
