@@ -352,7 +352,7 @@ class Bill(models.Model):
             # generate an event for the main summary
             bs = BillSummary.objects.filter(bill=self)
             if len(bs) > 0:
-                E.add("summary", bs[0].created, index_feeds)
+                E.add("summary", bs[0].created, index_feeds + [Feed.from_name("misc:billsummaries")])
                
     
     def render_event(self, eventid, feeds):
@@ -850,4 +850,11 @@ class BillSummary(models.Model):
         from django.utils.html import strip_tags
         return strip_tags(content)
 
+Feed.register_feed(
+    "misc:billsummaries",
+    title = "All Bill Summaries",
+    simple = True,
+    slug = "bill-summaries",
+    intro_html = """<p>This feed includes all GovTrack original research on legislation.</p>""",
+    )
 
