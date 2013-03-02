@@ -282,6 +282,12 @@ class Bill(models.Model):
         date = date.strftime("%B %d, %Y").replace(" 0", " ")
         status = get_bill_status_string(self.congress == settings.CURRENT_CONGRESS, status)       
         return status % (self.noun, date)
+        
+    @property
+    def explanatory_text(self):
+        if self.title_no_number.startswith("Providing for consideration of the bill"):
+            return "This resolution sets the rules for debate for another bill, such as limiting who can submit an amendment and setting floor debate time."
+        return None
 
     def thomas_link(self):
         """Returns the URL for the bill page on http://thomas.loc.gov."""

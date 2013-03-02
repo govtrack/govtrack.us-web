@@ -161,7 +161,9 @@ $(function() {
     <p>This was a vote to approve or reject an amendment.</p>
     {% endif %}
     {% if vote.category == VoteCategory.passage %}
-    <p>This was a vote to pass a bill or agree to a resolution.</p>
+    <p>This was a vote to pass a bill or agree to a resolution.
+    {{vote.related_bill.explanatory_text}}
+    </p>
     {% endif %}
     {% if vote.category == VoteCategory.passage_suspension %}
     <p>This was a vote to pass a bill or agree to a resolution. It was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>

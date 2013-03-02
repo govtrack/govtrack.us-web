@@ -266,6 +266,22 @@
 						</p>
 					{% endfor %}
 					</dd>
+					
+				{% elif bill.explanatory_text %}
+					<dt>See Instead:</dt>
+					<dd>
+						{{bill.explanatory_text}}
+						
+						{% for rb in bill.get_related_bills %}
+							{% if rb.relation == "ruled-by" %}
+								The main bill is:<br/> 
+								<a href="{{rb.related_bill.get_absolute_url}}">
+									{{rb.related_bill.display_number_no_congress_number}}: {{rb.related_bill.title_no_number|truncatewords:15}}
+								</a>
+							{% endif %}
+						{% endfor %}
+					</dd>
+					
 				{% endif %}
 				
 				{% endwith %}
