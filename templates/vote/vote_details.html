@@ -66,12 +66,15 @@ function show_table() {
    		var w = $(this).find('span').width();
    		if (w > margin) margin = w;
    	});
+   	
    	var width = $('#dotchart').width() - margin - 1;
     var rows = $('#vote-list tr[vid]');
+        
     var state_off = 0;
-    var state_shift = 10;
+    var state_shift = 5;
     var prev_state = [null, null];
     if (SORT_STATE && SORT_STATE.column == 3) width -= state_shift*51;
+    $('#dotchart .dot').width(width/rows.length);
     for (var i = 0; i < rows.length; i++) {
     	var dot = $('#dv' + rows[i].getAttribute('vid'));
     	
