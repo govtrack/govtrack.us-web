@@ -2446,9 +2446,11 @@ a.button.prefix, a.button.postfix {
     	}
     .stats tbody tr td:first-child {
         font: 10px/20px Georgia, 'Times New Roman', Times, serif;
+        font-weight: bold;
         text-transform: uppercase;
         text-align: right;
-        padding: 0 35px 0 0;
+        line-height: 100%;
+        padding: 0 10px 0 0;
         width: 84px;
     	}
     .stats thead {
