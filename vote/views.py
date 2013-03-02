@@ -60,21 +60,15 @@ def vote_details(request, congress, session, chamber_code, number):
     
     # sorting by party actually sorts by party first and by ideology score
     # second.
+    congress = int(congress)
     global ideology_scores
-    if not congress in ideology_scores:
-        ideology_scores[congress] = { }
-        for ch in ('h', 's'):
-            try:
-                for ideolog in csv.reader(open("data/us/%d/stats/sponsorshipanalysis_%s.txt" % (int(congress), ch))):
-                    if ideolog[0] == "ID": continue # header row
-                    ideology_scores[congress][int(ideolog[0])] = float(ideolog[1])
-                ideology_scores[congress]["MEDIAN"] = median(ideology_scores[congress].values())
-            except IOError:
-                ideology_scores[congress] = None
-    
+    load_ideology_scores(congress)
     if ideology_scores[congress]:
         for voter in voters:
-            voter.ideolog_score = ideology_scores[congress].get(voter.person.id if voter.person else 0, ideology_scores[congress]["MEDIAN"])
+            voter.ideolog_score = ideology_scores[congress].get(
+            	voter.person.id if voter.person else 0,
+            	ideology_scores[congress].get("MEDIAN:" + voter.person.role.party,
+            		ideology_scores[congress]["MEDIAN"]))
         
     voters.sort(key = lambda x : (x.option.key, x.person.role.party if x.person and x.person.role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
     
@@ -84,6 +78,24 @@ def vote_details(request, congress, session, chamber_code, number):
             "VoterType": VoterType,
             "VoteCategory": VoteCategory._items,
             }
+
+def load_ideology_scores(congress):
+    global ideology_scores
+    if congress in ideology_scores: return
+    ideology_scores[congress] = { }
+    for ch in ('h', 's'):
+        try:
+            scores_by_party = { }
+            for ideolog in csv.reader(open("data/us/%d/stats/sponsorshipanalysis_%s.txt" % (congress, ch))):
+                if ideolog[0] == "ID": continue # header row
+                if float(ideolog[2]) <  .1: continue # very low leadership score, ideology is not reliable
+                ideology_scores[congress][int(ideolog[0])] = float(ideolog[1])
+                scores_by_party.setdefault(ideolog[4].strip(), []).append(float(ideolog[1]))
+            ideology_scores[congress]["MEDIAN"] = median(ideology_scores[congress].values())
+            for party in scores_by_party:
+                ideology_scores[congress]["MEDIAN:"+party] = median(scores_by_party[party])
+        except IOError:
+            ideology_scores[congress] = None
 
 @anonymous_view
 def vote_export_csv(request, congress, session, chamber_code, number):
@@ -140,18 +152,18 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
 	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
 	
-	# get vote totals by party
+	# get vote totals by option and by party
 	totals = vote.totals()
 	total_count = 0
 	total_counts = { } # key: total ({ "+": 123 }, etc.)
-	yea_counts_by_party = [0,0,0] # D, R, I (+ votes totals)
-	nay_counts_by_party = [0,0,0] # D, R, I (+/- votes totals)
-	nonvoting_members_totals = [0,0,0] # D, R, I
-	party_index = { "Democrat": 0, "Republican": 1 }
+	yea_counts_by_party = [0,0,0] # D, I, R (+ votes totals)
+	nay_counts_by_party = [0,0,0] # D, I, R (+/- votes totals)
+	nonvoting_members_totals = [0,0,0] # D, I, R
+	party_index = { "Democrat": 0, "Republican": 2 }
 	for opt in totals["options"]:
 		total_counts[opt["option"].key] = opt["count"]
 		for i in xrange(len(totals["parties"])):
-			j = party_index.get(totals["parties"][i], 2)
+			j = party_index.get(totals["parties"][i], 1)
 			if opt["option"].key not in ("+", "-"):
 				# most votes are by proportion of those voting (not some cloture etc.),
 				# so put present/not-voting tallies in a separate group
@@ -233,8 +245,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	# Seats
 	
 	# Construct an array of rows of seats, where each entry maps to a particular
-	# voter. We don't care who it is actually, only which party and how that
-	# person voted.
+	# voter.
 	
 	# How many rows of seats? That is hard coded by chamber.
 	seating_rows = 8 if vote.chamber == CongressChamber.house else 4
@@ -292,41 +303,86 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	# bottom to top.
 	seats.sort(key = lambda seat : (seat[1]/float(rowcounts[seat[0]]), -seat[0]) )
 	
+	# We can draw in two modes. In one mode, we don't care which actual
+	# person corresponds to which seat. We just draw the groups of voters
+	# in blocks. Or we can draw the actual people in seats we assign
+	# according to their ideology score, from left to right.
+
+    # See if we have ideology scores.
+	voter_details = None
+	if True:
+		global ideology_scores
+		load_ideology_scores(vote.congress)
+		if ideology_scores[vote.congress]:
+			voter_details = [ ]
+			
+			# Load the voters, getting their role at the time they voted.
+			voters = list(vote.voters.all().select_related('person', 'option'))
+			load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
+			
+			# Store ideology scores
+			for voter in voters:
+				if voter.option.key not in ("+", "-"): continue
+				party = party_index.get(voter.person.role.party, 1)
+				option = 0 if voter.option.key == "+" else 1
+				coord =  ideology_scores[vote.congress].get(voter.person.id,
+					ideology_scores[vote.congress].get("MEDIAN:" + voter.person.role.party,
+						ideology_scores[vote.congress]["MEDIAN"]))
+				voter_details.append( (coord, (party, option)) )
+				
+			# Sort voters by party, then by ideology score, then by vote.
+			voter_details.sort(key = lambda x : (x[1][0], x[0], x[1][1]))
+			
+			if len(voter_details) != len(seats):
+				raise ValueError("Gotta check this.")
+				voter_details = None # abort
+			
+	if not voter_details:
+		# Just assign voters to seats in blocks.
+		#
+		# We're fill the seats from left to right different groups of voters:
+		#   D+, D-, I+, I-, R-, R+
+		# For each group, for each voter in the group, pop off a seat and
+		# draw him in that seat.
+	
+		# for each group of voters...
+		seat_idx = 0
+		for (party, vote) in [ (0, 0), (0, 1), (1, 0), (1, 1), (2, 1), (2, 0) ]:
+			# how many votes in this group?
+			n_voters = (yea_counts_by_party if vote == 0 else nay_counts_by_party)[party]
+			# for each voter...
+			for i in xrange(n_voters):
+				seats[seat_idx] = (seats[seat_idx], (party, vote)) 
+				seat_idx += 1
+	
+	else:
+		# Assign voters to seats in order.
+		for i in xrange(len(voter_details)):
+			seats[i] = (seats[i], voter_details[i][1])
+
 	# Draw the seats.
-	#
-	# We're fill the seats from left to right different groups of voters:
-	#   D+, D-, I+, I-, R-, R+
-	# For each group, for each voter in the group, pop off a seat and
-	# draw him in that seat.
-	seat_idx = 0
+	
 	group_colors = {
 		(0, 0): (0.05, 0.24, 0.63), # D+
 		(0, 1): (0.85, 0.85, 1.0), # D-
-		(1, 0): (0.90, 0.05, 0.07), # R+
-		(1, 1): (1.0, 0.85, 0.85), # R-
-		(2, 0): (0.07, 0.05, 0.07), # I+
-		(2, 1): (0.85, 0.85, 0.85), # I-
+		(1, 0): (0.07, 0.05, 0.07), # I+
+		(1, 1): (0.85, 0.85, 0.85), # I-
+		(2, 0): (0.90, 0.05, 0.07), # R+
+		(2, 1): (1.0, 0.85, 0.85), # R-
 	}
-	# for each group of voters...
-	for (party, vote) in [ (0, 0), (0, 1), (2, 0), (2, 1), (1, 1), (1, 0) ]:
-		# how many votes in this group?
-		n_voters = (yea_counts_by_party if vote == 0 else nay_counts_by_party)[party]
-		# for each voter...
-		for i in xrange(n_voters):
-			row, seat_pos = seats[seat_idx]
-			seat_idx += 1
+	
+	for ((row, seat_pos), (party, vote)) in seats:	
+		# radius of this row (again, code dup)
+		r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
 		
-			# radius of this row (again, code dup)
-			r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
-			
-			# draw
-			ctx.set_source_rgb(*group_colors[(party, vote)])
-			ctx.identity_matrix()
-			ctx.translate(image_width/2, 75)
-			ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))
-			ctx.translate(r, 0)
-			ctx.rectangle(-seat_size/2, -seat_size/2, seat_size, seat_size)
-			ctx.fill()
+		# draw
+		ctx.set_source_rgb(*group_colors[(party, vote)])
+		ctx.identity_matrix()
+		ctx.translate(image_width/2, 75)
+		ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))
+		ctx.translate(r, 0)
+		ctx.rectangle(-seat_size/2, -seat_size/2, seat_size, seat_size)
+		ctx.fill()
 
 	# Convert the image buffer to raw bytes.
 	buf = StringIO()
