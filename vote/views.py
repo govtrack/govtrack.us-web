@@ -121,13 +121,15 @@ def vote_export_xml(request, congress, session, chamber_code, number):
 def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	vote = load_vote(congress, session, chamber_code, number)
 	
-	import cairo, re
+	import cairo, re, math
 	from StringIO import StringIO
 	
+	# general image properties
 	font_face = "DejaVu Serif Condensed"
 	image_width = 300
 	image_height = 250
 	
+	# format text to print on the image
 	vote_title = re.sub(r"^On the Motion to ", "To ", vote.question)
 	if re.match(r"Cloture .*Rejected", vote.result):
 		vote_result_2 = "Filibustered"
@@ -137,21 +139,29 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 		vote_result_2 = re.sub("^(Bill|Amendment|Resolution|Conference Report|Nomination|Motion to (Table|Proceed)) ", "", vote.result)
 	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
 	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
-	seating_rows = 8 if vote.chamber == CongressChamber.house else 4
-		# 4 for Senate (http://www.senate.gov/artandhistory/art/special/Desks/chambermap.cfm)
-		# about 8 for the House
-		
+	
+	# get vote totals by party
 	totals = vote.totals()
-	total_counts = { }
-	yea_counts_by_party = [0,0] # D, R
-	party_members_total = [0,0] # D, R
+	total_count = 0
+	total_counts = { } # key: total ({ "+": 123 }, etc.)
+	yea_counts_by_party = [0,0,0] # D, R, I (+ votes totals)
+	nay_counts_by_party = [0,0,0] # D, R, I (+/- votes totals)
+	nonvoting_members_totals = [0,0,0] # D, R, I
+	party_index = { "Democrat": 0, "Republican": 1 }
 	for opt in totals["options"]:
 		total_counts[opt["option"].key] = opt["count"]
 		for i in xrange(len(totals["parties"])):
-			if totals["parties"][i] not in ("Democrat", "Republican"): continue
-			j = 0 if totals["parties"][i] == "Democrat" else 1
-			party_members_total[j] += opt["party_counts"][i]["count"]
-			if opt["option"].key == "+": yea_counts_by_party[j] += opt["party_counts"][i]["count"]
+			j = party_index.get(totals["parties"][i], 2)
+			if opt["option"].key not in ("+", "-"):
+				# most votes are by proportion of those voting (not some cloture etc.),
+				# so put present/not-voting tallies in a separate group
+				nonvoting_members_totals[j] += opt["party_counts"][i]["count"]
+				continue 
+			total_count += opt["party_counts"][i]["count"]
+			if opt["option"].key == "+":
+				yea_counts_by_party[j] += opt["party_counts"][i]["count"]
+			else:
+				nay_counts_by_party[j] += opt["party_counts"][i]["count"]
 	if "+" not in total_counts or "-" not in total_counts: raise Http404() # no thumbnail for other sorts of votes
 	vote_result_1 = "%d-%d" % (total_counts["+"], total_counts["-"])
 	
@@ -221,37 +231,103 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	show_text_centered(ctx, vote_citation, max_width=.98*image_width) 
 	
 	# Seats
-	seats_per_row = 18
-	inner_r = w/2 * 1.5
-	if seating_rows == 4: inner_r = max(inner_r, 75)
-	outer_r = image_width * .45
+	
+	# Construct an array of rows of seats, where each entry maps to a particular
+	# voter. We don't care who it is actually, only which party and how that
+	# person voted.
+	
+	# How many rows of seats? That is hard coded by chamber.
+	seating_rows = 8 if vote.chamber == CongressChamber.house else 4
+		# 4 for Senate (http://www.senate.gov/artandhistory/art/special/Desks/chambermap.cfm)
+		# about 8 for the House
+		
+	# Determine the seating chart dimensions: the radius of the inside row of
+	# seats and the radius of the outside row of seats.
+	inner_r = w/2 * 1.25 + 5 # wrap closely around the text in the middle
+	if seating_rows == 4: inner_r = max(inner_r, 75) # don't make the inner radius too small
+	outer_r = image_width * .45 # end close to the image width
+	
+	# If we assume the absolute spacing of seats is constant from row to row, then
+	# the number of seats per row grows linearly with the radius, following the
+	# circumference. If s0 is the number of seats on the inner row, then
+	# floor(s0 * outer_r/inner_r) is the number of seats on the outer row. The total
+	# number of seats is found by the sum of the arithmetic sequence (n/2 * (a_1+a_n)):
+	#  n = (seating_rows/2)*(s0 + s0*outer_r/inner_r)
+	# We want exactly total_count seats, so solving for s0...
+	seats_per_row = 2.0 * total_count / (seating_rows*(1.0 + outer_r/inner_r))
+
+	# How wide to draw a seat?
 	seat_size = min(.8 * (outer_r-inner_r) / seating_rows, .35 * (2*3.14159*inner_r) / seats_per_row)
-	for seat_row in xrange(seating_rows):
-		r = inner_r + (outer_r-inner_r) * seat_row / float(seating_rows-1)
-		n_seats = int(seats_per_row * r/inner_r + .5)
-		for seat_pos in xrange(n_seats):
-			# which party is this seat and how should we color it?
-			if (n_seats-seat_pos-1)*(party_members_total[0]+party_members_total[1]) < yea_counts_by_party[0]*n_seats:
-				# D-yea
-				ctx.set_source_rgb(0.05, 0.24, 0.63)
-			elif (n_seats-seat_pos-1)*(party_members_total[0]+party_members_total[1]) < party_members_total[0]*n_seats:
-				# D-nay
-				ctx.set_source_rgb(0.85, 0.85, 1.0)
-			elif seat_pos*(party_members_total[0]+party_members_total[1]) < yea_counts_by_party[1]*n_seats:
-				# R-yea
-				ctx.set_source_rgb(0.90, 0.05, 0.07)
-			else:
-				# R-nay
-				ctx.set_source_rgb(1.0, 0.85, 0.85)
+
+	# Determine how many seats on each row.
+	seats_so_far = 0
+	rowcounts = []
+	for row in xrange(seating_rows):
+		# What's the radius of this row?
+		r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
+		
+		# How many seats should we put on this row?
+		if row < seating_rows-1:
+			# Start with seats_per_row on the inner row and grow linearly.
+			# Round to an integer. Alternate rounding down and up.
+			n_seats = seats_per_row * r/inner_r
+			n_seats = int(math.floor(n_seats) if (row % 2 == 0) else math.ceil(n_seats))
+		else:
+			# On the outermost row, just put in how many left we need
+			# so we always have exactly the right number of seats.
+			n_seats = total_count - seats_so_far
+		
+		rowcounts.append(n_seats)
+		seats_so_far += n_seats
+		
+	# Make a list of all of the seats as a list of tuples of the
+	# form (rownum, seatnum) where seatnum is an index from the
+	# left side.
+	seats = []
+	for row, count in enumerate(rowcounts):
+		for i in xrange(count):
+			seats.append( (row, i) )
 			
-			# draw the seat
+	# Sort the seats in the order we will fill them from left to right,
+	# bottom to top.
+	seats.sort(key = lambda seat : (seat[1]/float(rowcounts[seat[0]]), -seat[0]) )
+	
+	# Draw the seats.
+	#
+	# We're fill the seats from left to right different groups of voters:
+	#   D+, D-, I+, I-, R-, R+
+	# For each group, for each voter in the group, pop off a seat and
+	# draw him in that seat.
+	seat_idx = 0
+	group_colors = {
+		(0, 0): (0.05, 0.24, 0.63), # D+
+		(0, 1): (0.85, 0.85, 1.0), # D-
+		(1, 0): (0.90, 0.05, 0.07), # R+
+		(1, 1): (1.0, 0.85, 0.85), # R-
+		(2, 0): (0.07, 0.05, 0.07), # I+
+		(2, 1): (0.85, 0.85, 0.85), # I-
+	}
+	# for each group of voters...
+	for (party, vote) in [ (0, 0), (0, 1), (2, 0), (2, 1), (1, 1), (1, 0) ]:
+		# how many votes in this group?
+		n_voters = (yea_counts_by_party if vote == 0 else nay_counts_by_party)[party]
+		# for each voter...
+		for i in xrange(n_voters):
+			row, seat_pos = seats[seat_idx]
+			seat_idx += 1
+		
+			# radius of this row (again, code dup)
+			r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
+			
+			# draw
+			ctx.set_source_rgb(*group_colors[(party, vote)])
 			ctx.identity_matrix()
 			ctx.translate(image_width/2, 75)
-			ctx.rotate(3.14159 * seat_pos/float(n_seats-1))
+			ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))
 			ctx.translate(r, 0)
 			ctx.rectangle(-seat_size/2, -seat_size/2, seat_size, seat_size)
 			ctx.fill()
-	
+
 	# Convert the image buffer to raw bytes.
 	buf = StringIO()
 	im.write_to_png(buf)
@@ -268,7 +344,7 @@ def vote_check_thumbnails(request):
         .order_by("congress", "session", "chamber", "number")
     ret = ""
     for v in votes:
-        ret += """<div><img src="%s" style="border: 1px solid #777"/></div>\n""" % (v.get_absolute_url() + "/thumbnail")
+        ret += """<div><a href="%s"><img src="%s" style="border: 1px solid #777"/></a></div>\n""" % (v.get_absolute_url(), v.get_absolute_url() + "/thumbnail")
     return HttpResponse(ret, content_type='text/html')
 	
 import django.contrib.sitemaps
