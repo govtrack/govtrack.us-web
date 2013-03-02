@@ -128,8 +128,13 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	image_width = 300
 	image_height = 250
 	
-	vote_title = vote.question
-	vote_result_2 = re.sub("^(Bill|Amendment|Resolution|Conference Report|Nomination) ", "", vote.result)
+	vote_title = re.sub(r"^On the Motion to ", "To ", vote.question)
+	if re.match(r"Cloture .*Rejected", vote.result):
+		vote_result_2 = "Filibustered"
+	elif re.match(r"Cloture .*Agreed to", vote.result):
+		vote_result_2 = "Proceed"
+	else:
+		vote_result_2 = re.sub("^(Bill|Amendment|Resolution|Conference Report|Nomination|Motion to (Table|Proceed)) ", "", vote.result)
 	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
 	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
 	seating_rows = 8 if vote.chamber == CongressChamber.house else 4
@@ -191,20 +196,21 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	show_text_centered(ctx, vote_title, max_width=.95*image_width) 
 	
 	# Vote Tally
-	ctx.set_font_size(26)
+	font_size = 26 if len(vote_result_2) < 10 else 22
+	ctx.set_font_size(font_size)
 	ctx.set_source_rgb(.1, .1, .1)
 	ctx.move_to(150,50)
 	show_text_centered(ctx, vote_result_1)
 	
 	# Vote Result
-	ctx.move_to(150,88)
+	ctx.move_to(150,62+font_size)
 	show_text_centered(ctx, vote_result_2) 
 	w = max(ctx.text_extents(vote_result_1)[2], ctx.text_extents(vote_result_2)[2])
 	
 	# Line
 	ctx.set_line_width(1)
 	ctx.new_path()
-	ctx.line_to(150-w/2, 82)
+	ctx.line_to(150-w/2, 55+font_size)
 	ctx.rel_line_to(w, 0)
 	ctx.stroke()
 	
@@ -255,6 +261,15 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	r = HttpResponse(v, content_type='image/png')
 	r["Content-Length"] = len(v)
 	return r
+
+@anonymous_view
+def vote_check_thumbnails(request):
+    votes = Vote.objects.filter(congress=CURRENT_CONGRESS)\
+        .order_by("congress", "session", "chamber", "number")
+    ret = ""
+    for v in votes:
+        ret += """<div><img src="%s" style="border: 1px solid #777"/></div>\n""" % (v.get_absolute_url() + "/thumbnail")
+    return HttpResponse(ret, content_type='text/html')
 	
 import django.contrib.sitemaps
 class sitemap_current(django.contrib.sitemaps.Sitemap):
