@@ -84,7 +84,7 @@ class BillProcessor(XmlProcessor):
 
     def process_introduced(self, obj, node):
         elem = node.xpath('./introduced')[0]
-        obj.introduced_date = self.parse_datetime(elem.get('datetime'))
+        obj.introduced_date = self.parse_datetime(elem.get('datetime')).date()
 
     def process_current_status(self, obj, node):
         elem = node.xpath('./state')[0]
