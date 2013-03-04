@@ -20,7 +20,7 @@ http://www.govtrack.us{{meta.url}}
 
 =====================================================================
 
-To unsubscribe or change your email updates settings, go to http://www.govtrack.us/accounts/lists.
+To unsubscribe or change your email updates settings, go to http://www.govtrack.us/accounts/profile.
 
 This email was sent by Civic Impulse, LLC <http://www.civicimpulse.com>. You may contact us at operations@govtrack.us. The email address this message was sent from is not monitored for replies.
 

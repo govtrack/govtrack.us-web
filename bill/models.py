@@ -856,7 +856,11 @@ class BillSummary(models.Model):
         content = re.sub("<br>|<li>", " \n ", self.content, re.I)
         
         from django.utils.html import strip_tags
-        return strip_tags(content)
+        content = strip_tags(content)
+        
+        content = content.replace("&nbsp;", " ")
+        
+        return content
 
 Feed.register_feed(
     "misc:billsummaries",
