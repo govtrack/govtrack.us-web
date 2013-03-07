@@ -67,7 +67,7 @@ def vote_details(request, congress, session, chamber_code, number):
         for voter in voters:
             voter.ideolog_score = ideology_scores[congress].get(
             	voter.person.id if voter.person else 0,
-            	ideology_scores[congress].get("MEDIAN:" + voter.person.role.party,
+            	ideology_scores[congress].get("MEDIAN:" + (voter.person.role.party if voter.person and voter.person.role else ""),
             		ideology_scores[congress]["MEDIAN"]))
         
     voters.sort(key = lambda x : (x.option.key, x.person.role.party if x.person and x.person.role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
@@ -323,10 +323,10 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 			# Store ideology scores
 			for voter in voters:
 				if voter.option.key not in ("+", "-"): continue
-				party = party_index.get(voter.person.role.party, 1)
+				party = party_index.get(voter.person.role.party if voter.person and voter.person.role else "Unknown", 1)
 				option = 0 if voter.option.key == "+" else 1
 				coord =  ideology_scores[vote.congress].get(voter.person.id,
-					ideology_scores[vote.congress].get("MEDIAN:" + voter.person.role.party,
+					ideology_scores[vote.congress].get("MEDIAN:" + (voter.person.role.party if voter.person and voter.person.role else ""),
 						ideology_scores[vote.congress]["MEDIAN"]))
 				voter_details.append( (coord, (party, option)) )
 				

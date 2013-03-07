@@ -4164,7 +4164,11 @@ ul.bullets, .postcontent ul {
 	list-style: circle;
 	margin-left: 1.75em;
 	}
-ul.bullets li, .postcontent ul li {
+ol.bullets, .postcontent ol {
+	list-style: decimal;
+	margin-left: 1.75em;
+	}
+ul.bullets li, .postcontent ul li, ol.bullets li, .postcontent ol li {
 	margin: .25em 0 .25em 0;
 	}
 	

@@ -10,6 +10,9 @@
 # rank reduction, using the 2nd dimension.
 #
 # Finally, plot these two dimensions.
+#
+# To update historical data:
+# for c in {93..112}; do echo $c; python sponsorship_analysis.py $c; done
 
 import sys
 import os
@@ -222,7 +225,7 @@ for house_or_senate in ('h', 's'):
 		else:
 			usednames[names[v]] = k
 	
-	# Scale the values from 0 to 1.
+	# Scale the values from 0 to 1. Use a log scale for the leadership score.
 	spectrum = rescale(spectrum)
 	pagerank = rescale(pagerank, log=True)
 	
