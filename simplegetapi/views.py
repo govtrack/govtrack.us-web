@@ -396,7 +396,8 @@ def do_api_get_object(model, id, requested_fields):
 def serialize_response_json(response):
     """Convert the response dict to JSON."""
     ret = json.dumps(response, sort_keys=True, ensure_ascii=False, indent=True)
-    resp = HttpResponse(ret, mimetype="application/json")
+    ret = ret.encode("utf8")
+    resp = HttpResponse(ret, mimetype="application/json; charset=utf-8")
     resp["Content-Length"] = len(ret)
     return resp
 
@@ -405,7 +406,8 @@ def serialize_response_jsonp(response, callback_name):
     ret = callback_name + "("
     ret += json.dumps(response, sort_keys=True, ensure_ascii=False, indent=True)
     ret += ");"
-    resp = HttpResponse(ret, mimetype="application/javascript")
+    ret = ret.encode("utf8")
+    resp = HttpResponse(ret, mimetype="application/javascript; charset=utf-8")
     resp["Content-Length"] = len(ret)
     return resp
 
