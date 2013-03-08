@@ -258,15 +258,17 @@ def do_api_search(model, qs, request_options, requested_fields):
                 modelfield = model._meta.get_field(fieldname)
             except:
                 modelfield = None
+
+            if matchoperator in ("in", "range"):
+                # Allow the | as a separator to accept multiple values (unless the field was specified
+                # multiple times as query parameters).
+                if len(vals) == 1:
+                    vals = vals[0].split("|")
             
             # Handle enum fields in a special way.
             try:
                 choices = modelfield.choices
                 if is_enum(choices):
-                    # Allow the | as a separator to accept multiple values (unless the field was specified
-                    # multiple times as query parameters).
-                    if len(vals) == 1: vals = vals[0].split("|")
-                    
                     # Convert the string value to the raw database integer value.
                     vals = [int(choices.by_key(v)) for v in vals]
             except: # field is not a model field, or enum value is invalid (leave as original)
@@ -278,6 +280,11 @@ def do_api_search(model, qs, request_options, requested_fields):
                     qs = qs.filter(**{ fieldname + "__" + matchoperator: vals[0] })
                 else:
                     # Multi-value operators.
+                    if matchoperator == "range" and len(vals) != 2:
+                        return HttpResponseBadRequest("The range operator requires the range to be specified as two values separated by a pipe character (e.g. 100|200).")
+                    if matchoperator == "in" and len(vals) == 0:
+                        return HttpResponseBadRequest("The in operator requires an argument.")
+                    
                     qs = qs.filter(**{ fieldname + "__" + matchoperator: vals })
             except Exception as e:
                 return HttpResponseBadRequest("Invalid filter: %s" % repr(e))
