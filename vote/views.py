@@ -174,7 +174,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 				yea_counts_by_party[j] += opt["party_counts"][i]["count"]
 			else:
 				nay_counts_by_party[j] += opt["party_counts"][i]["count"]
-	if "+" not in total_counts or "-" not in total_counts: raise Http404() # no thumbnail for other sorts of votes
+	if total_count == 0 or "+" not in total_counts or "-" not in total_counts: raise Http404() # no thumbnail for other sorts of votes
 	vote_result_1 = "%d-%d" % (total_counts["+"], total_counts["-"])
 	
 	def show_text_centered(ctx, text, max_width=None):
