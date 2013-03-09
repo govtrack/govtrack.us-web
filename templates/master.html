@@ -6,46 +6,45 @@
 <!--[if IE 8]>    <html class="lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html> <!--<![endif]-->
 	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"></meta>
-		
+		<meta charset="utf-8" />
+
 		<title>{% block title %}{% endblock %}</title>
-		
-		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 
-		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css?20130307">
-		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen"/><![endif]-->
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		<meta name="description" content="{% block meta_description %}{% endblock %}"></meta>
-		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}"></meta>
+		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css?20130307" />
+		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen" /><![endif]-->
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<meta name="description" content="{% block meta_description %}{% endblock %}" />
+		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
 		{% if HTTP_HOST == "test.govtrack.us" %}<meta name="robots" content="noindex" />{% endif %} {% comment %}moot because site is currently behind authz {% endcomment %}
-		
-		{% comment %}<meta property="fb:admins" content="620474" />{% endcomment %}  
+
+		{% comment %}<meta property="fb:admins" content="620474" />{% endcomment %}
 		<meta property="fb:app_id" content="119329904748946" />
-		<meta property="og:site_name" content="GovTrack.us"/> 
-		
+		<meta property="og:site_name" content="GovTrack.us" />
+
 		{% block extra_css %}{% endblock %}
-		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/modernizr.js"> </script> {% comment %}html5shiv{% endcomment %}
+
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/modernizr.js"></script> {% comment %}html5shiv{% endcomment %}
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		{% if not request.anonymous %}
 			<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
 		{% else %}
-			  {% include "twostream/head.html" %}
+			{% include "twostream/head.html" %}
 		{% endif %}
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"> </script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
 		<script src="{{ MEDIA_URL }}js/jquery.ba-bbq.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-utils.js?2013-02-11"></script>
 		{% block extra_js %}{% endblock %}
-		
+
 		{% block head %}{% endblock %}
-		
+
 		<style type="text/css">
 		{% block style %}{% endblock %}
 		</style>
 	</head>
-	
+
 <body class="{% block body_class %}{% endblock %}">
 
   	{% comment %}
@@ -60,7 +59,7 @@
 
 
 	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" seq="26">
+	<div id="sitenewscontainer" style="display: none" data-seq="26">
 		<div id="sitenews">
 			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"><a href="#" onclick="return hide_site_news()" style="padding: 5px;">X</a></div>
 			<div style="float: right; width: 500px; padding: 8px;">
@@ -72,10 +71,10 @@
 	<script>
 	function hide_site_news() {
 		$('#sitenewscontainer').fadeOut();
-		$.cookie("sitenewsbanner", $('#sitenewscontainer').attr("seq"), { expires: 14, path: '/' });
+		$.cookie("sitenewsbanner", $('#sitenewscontainer').attr("data-seq"), { expires: 14, path: '/' });
 	}
 	$(function() {
-		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("seq")) {
+		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("data-seq")) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
 			$('#sitenewscontainer').fadeIn();
 		}
@@ -96,13 +95,13 @@
 	{% endif %}
 
 	<div id="wrapper">
-		
+
 		<div id="masthead">
 			<div id="header-wrap">
 				<header id="header" class="row">
-					
+
 					<a id="logo" href="/" class="{% block logo_class %}{% endblock %}">govtrack.us</a>
-					
+
 					<div id="nav-block">
 						<div class="row">
 							<div class="block right">
@@ -126,13 +125,13 @@
 								{% endif %}
 								<form name="header_search" action="/search" method="GET" class="search-form">
 									<fieldset>
-										<div class="text"><input type="text" defaulttext="Search" name="q"/></div>
+										<div class="text"><input type="text" placeholder="Search" name="q"/></div>
 										<input class="btn-search" type="submit" value="Search" />
 									</fieldset>
 								</form>
 							</div>
 						</div>
-						
+
 						<nav id="nav">
 							<ul>
 								<li><a href="/">Home</a></li>
@@ -179,8 +178,8 @@
 								<option value="">Go to...</option>
 								<option value="/">Home</option>
 								<optgroup label="Browse">
-									<option value="/congress/members">Members <em>of</em> Congress</option>
-									<option value="/congress/bills">Bills <em>&amp;</em> Resolutions</option>
+									<option value="/congress/members">Members of Congress</option>
+									<option value="/congress/bills">Bills &amp; Resolutions</option>
 									<option value="/congress/votes">Voting Records</option>
 									<option value="/congress/committees">Committees</option>
 									<option value="/congress/live">Live Video (Beta)</option>
@@ -191,17 +190,17 @@
 									<option value="/accounts/lists">Your Lists</option>
 									<option value="/accounts/docket">Your Docket</option>
 									{% endif %}
-									<option><a href="/tools">Other Tools</a></option>
+									<option value="/tools">Other Tools</option>
 								</optgroup>
 								<option value="/about">About</option>
 								<option value="/developers">Use our data</option>
 							</select>
 						</nav><!-- /mobile-nav -->
-						
+
 					</div><!-- /nav-block -->
 				</header>
 			</div><!-- /header-wrap -->
-			
+
 			{% block override_breadcrumbs %}
 			<div id="breadcrumbs">
 				<div class="row">
@@ -215,11 +214,11 @@
 				</div>
 			</div>
 			{% endblock %}
-			
+
 		</div><!-- /masthead -->
-		
-		
-		
+
+
+
 		{% block override_content %}
 		<div id="content" class="row">
 			{% block heading_box %}
@@ -234,8 +233,8 @@
 				</div>
 			</header>
 			{% endblock %}
-			
-			
+
+
 			{% block body %}
 			{% endblock %}
 
@@ -243,11 +242,11 @@
 
 		</div><!-- /content -->
 		{% endblock %}
-		
-		
+
+
 		<footer id="footer">
 			<div class="holder row">
-				
+
 				<nav class="two columns">
 					<ul>
 						<li><a href="/">Home</a></li>
@@ -264,7 +263,7 @@
 						{% endif %}
 					</ul>
 				</nav>
-				
+
 				<section class="six columns offset-by-one">
 					<h4><span>site</span> Information</h4>
 					<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. Read <a href="/about">about GovTrack</a>.</p>
@@ -274,7 +273,7 @@
 					<p>You are encouraged to reuse any material on this site. GovTrack supports other Congress-tracking websites through our <a href="/developers">open data</a>.</p>
 					{% block footer_extra %}{% endblock %}
 				</section>
-				
+
 				<section class="two columns social">
 					<h4><span>follow</span> GovTrack</h4>
 					<ul>
@@ -284,12 +283,12 @@
 						<li><a href="https://github.com/govtrack/govtrack.us-web/commits/master">Source Code</a></li>
 					</ul>
 				</section>
-				
+
 			</div>
 		</footer>
-		
+
 	</div><!-- /wrapper -->
-	
+
 	<!-- Facebook -->
 	<div id="fb-root"></div>
 	<script>
@@ -302,16 +301,16 @@
 		  cookie     : false, // set sessions cookies to allow your server to access the session?
 		  xfbml      : true  // parse XFBML tags on this page?
 		});
-	
+
 		// Additional initialization code such as adding Event Listeners goes here
 		for (var i = 0; i < fbAsyncInitFuncs.length; i++) {
 			fbAsyncInitFuncs[i]();
 		}
 	  };
-	
+
 	  // Load the SDK's source Asynchronously
-	  // Note that the debug version is being actively developed and might 
-	  // contain some type checks that are overly strict. 
+	  // Note that the debug version is being actively developed and might
+	  // contain some type checks that are overly strict.
 	  // Please report such bugs using the bugs tool.
 	  (function(d, debug){
 		 var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
@@ -321,7 +320,7 @@
 		 ref.parentNode.insertBefore(js, ref);
 	   }(document, /*debug*/ false));
 	</script>
-	
+
 	<script type="text/javascript">
 	// for debugging or error loading GA
 	var pageTracker = { _trackEvent: function() { } };
@@ -341,9 +340,9 @@
 	} catch(err) {}
 	</script>
 	{% endif %}
-	
+
 	{% block body_scripts %}{% endblock %}
-	
-</body>	
+
+</body>
 </html>
 {% endwith %}
