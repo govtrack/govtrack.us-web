@@ -10,7 +10,7 @@ def load_data(person):
     return {
         "sponsorship": load_sponsorship_analysis(person),
         "missedvotes": load_votes_analysis(person),
-        "influence": load_influence_analysis(person),
+        #"influence": load_influence_analysis(person),
     }
     
 def load_sponsorship_analysis(person):

@@ -217,13 +217,15 @@
 		});
 		</script>
 		<div style="margin-left: 25px; line-height: 110%; font-size: 13px;">
+		{% if analysis_data.influence %}
 		{% if analysis_data.influence.influencers|length > 0 %}
 			<p>Influenced by: {% for p in analysis_data.influence.influencers.values %}<a href="{{p.get_absolute_url}}">{{p.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
 		{% endif %}
 		{% if analysis_data.influence.influencees|length > 0 %}
 			<p>Influences: {% for p in analysis_data.influence.influencees.values %}<a href="{{p.get_absolute_url}}">{{p.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
 		{% endif %}
-		<p><small>This chart is based on principal components analysis for ideology, PageRank for leadership, and network inference for influence. See <a href="/about/analysis">analysis methodology</a>.</small></p>
+		{% endif %}
+		<p><small>This chart is based on principal components analysis for ideology and PageRank for leadership. See <a href="/about/analysis">analysis methodology</a>.</small></p>
 		</div>
 	</section><!-- /analysis -->
     {% endif %}
