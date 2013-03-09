@@ -50,6 +50,12 @@ class Committee(models.Model):
     def shortname(self):
 	    return self.fullname.replace("Committee on the ", "").replace("Committee on ", "")
 
+    @property
+    def name_no_article(self):
+            n = self.name
+            if n.startswith("the "): n = n[4:]
+            return n
+
     def committee_type_abbrev(self):
         return CommitteeType.by_value(self.committee_type).abbrev
     

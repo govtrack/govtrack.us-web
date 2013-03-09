@@ -598,7 +598,7 @@
 									<p style="margin: 0"><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on the "|cut:"Committee on "}}</a></p>
 									{% for s in bill.committees.all %}
 										{% if s.committee == c %}
-											<p style="margin-left: 2em"><a href="{{s.get_absolute_url}}">{{s}}</a></p>
+											<p style="margin-left: 2em"><a href="{{s.get_absolute_url}}">{{s.name_no_article}}</a></p>
 										{% endif %}
 									{% endfor %}
 								{% endif %}
