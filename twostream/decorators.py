@@ -30,7 +30,7 @@ def anonymous_view(view):
 		request.user = AnonymousUser()
 		if hasattr(request, "session"): request.session = { }
 		for header in list(request.META.keys()):
-			if header not in ('CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP_HOST', 'QUERY_STRING', 'REQUEST_METHOD', 'SERVER_NAME', 'SERVER_PORT'):
+			if header not in ('CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP_HOST', 'QUERY_STRING', 'REQUEST_METHOD', 'SERVER_NAME', 'SERVER_PORT', 'SERVER_PROTOCOL'):
 				del request.META[header]
 		response = view(request, *args, **kwargs)
 		response.csrf_processing_done = True # prevent generation of CSRF cookies
