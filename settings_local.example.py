@@ -1,5 +1,7 @@
 import os.path
 
+ALLOWED_HOSTS = ["*"]
+
 DATABASES = {
 	'default': {
         'NAME': os.path.dirname(__file__) + '/database.sqlite',

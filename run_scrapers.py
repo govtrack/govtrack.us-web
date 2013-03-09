@@ -68,6 +68,9 @@ if "people" in sys.argv:
 	os.system("RELEASE=1 ./parse.py person") #  -l ERROR
 	os.system("RELEASE=1 ./manage.py update_index -v 0 -u person person")
 	#os.system("RELEASE=1 ./manage.py prune_index -u person person")
+	
+	# Save a fixture.
+	os.system("RELEASE=1 ./manage.py dumpdata --format json person > data/db/django-fixture-people.json")
 
 if "committees" in sys.argv:
 	if CONGRESS != 113: raise ValueErrror()

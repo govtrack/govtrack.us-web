@@ -7,9 +7,19 @@ The data-gathering scripts are elsewhere.
 Installation
 ------------
 
-* Clone the source code:
+GovTrack.us runs on Ubuntu 12.10.
+
+* Install dependencies via OS package manager:
 
   ```
+  apt-get install git python-virtualenv python-lxml python-openid python-oauth2 \
+      python-iso8601 python-numpy python-scipy yui-compressor
+  ```
+
+* Clone the source code. Besides this project, you'll also need [@unitedstates/congress-legislators](https://github.com/unitedstates/congress-legislators) which is where legislator and committee information come from.
+
+  ```
+  git clone https://github.com/unitedstates/congress-legislators   
   git clone --recursive https://github.com/govtrack/govtrack.us-web.git
   ```
 
@@ -25,13 +35,10 @@ Installation
   cp settings_local.example.py settings_local.py
   ```
 
-* Edit `settings_local.py` to include your various credentials.
-
-* Install dependencies via OS package manager:
+* Edit `settings_local.py` to set up your database. The default configuration uses SQLite as the database and no database configuration is required. Fill in SECRET_KEY though. Here's how you can generate a SECRET_KEY:
 
   ```
-  apt-get install python-virtualenv python-lxml python-openid python-oauth2 \
-      python-iso8601 python-numpy
+  python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)])'
   ```
 
 * Run the build script to install additional dependencies into a virtual environment:
@@ -58,25 +65,34 @@ Installation
 
   ```
   ./manage.py syncdb
-  ./manage.py runserver
   ./minify
   ```
-
-* Check the site works by visiting the URL specified by the runserver process.
-
-* Get the data files:
+* Load some data:
 
   ```
+  wget http://www.govtrack.us/data/db/django-fixture-people.json
+  ./manage.py loaddata django-fixture-people.json
+
+  ./parse.py committee
+
   ./build/rsync.sh
+  ./parse.py bill --congress=113
   ```
 
-* Ensure the contents of [@unitedstates/congress](https://github.com/unitedstates/congress) are present (or symlinked) at `../scripts/congress/`.
-
-* Load the data:
+* Check the site works by running the development server and visiting the URL specified by the runserver process.
 
   ```
+  ./manage.py runserver
+  ```
+
+* To update the data in the future, first git-pull congress-legislators to get the latest legislator information. Then:
+
+  ```
+  build/rsync.sh
   ./parse.py person
   ./parse.py committee --congress=113
   ./parse.py bill --congress=113
   ./parse.py vote --congress=113
   ```
+
+* TODO: We haven't set up any search indexing, so all of the search pages will come up empty.
