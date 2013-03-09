@@ -49,7 +49,7 @@ def index(request):
     
     events_feed = cache.get("frontpage_events_feed")
     if not events_feed:
-        events_feed = Feed.get_events_for(("misc:activebills2", "misc:billsummaries", "misc:allvotes"), 6)
+        events_feed = Feed.get_events_for([fn for fn in ("misc:activebills2", "misc:billsummaries", "misc:allvotes") if Feed.objects.filter(feedname=fn).exists()], 6)
         cache.set("frontpage_events_feed", events_feed, 60*15) # 15 minutes
 
     return {

@@ -601,7 +601,7 @@ class Event(models.Model):
              ('source_content_type', 'source_object_id', 'eventid', 'feed'),
              ('feed', 'id'),
              ('feed', 'when', 'source_content_type', 'source_object_id', 'eventid'),
-             ('when', 'source_content_type', 'source_object_id', 'seq'))
+             ('when', 'source_content_type', 'source_object_id', 'seq', 'feed'))
     
     def __unicode__(self):
         return unicode(self.source) + " " + unicode(self.eventid) + " / " + unicode(self.feed)

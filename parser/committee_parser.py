@@ -6,6 +6,8 @@ from lxml import etree
 from datetime import datetime
 import logging
 
+from django.conf import settings
+
 from parser.progress import Progress
 from parser.processor import XmlProcessor
 from parser.processor import YamlProcessor, yaml_load
@@ -57,7 +59,7 @@ def main(options):
     members of current congress committees.
     """
 
-    BASE_PATH = '../scripts/congress/cache/congress-legislators/'
+    BASE_PATH = settings.CONGRESS_LEGISLATORS_PATH
     
     meeting_processor = CommitteeMeetingProcessor()
 

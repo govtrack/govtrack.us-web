@@ -8,7 +8,6 @@ from common.decorators import render_to
 from common.pagination import paginate
 
 from datetime import datetime, time
-import simplejson
 
 from registration.helpers import json_response
 

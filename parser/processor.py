@@ -137,6 +137,7 @@ def yaml_load(path):
 
     import cPickle as pickle, os.path, hashlib
     import yaml
+    from yaml import CSafeLoader as Loader, CDumper as Dumper
 
     # Check if the .pickle file exists and a hash stored inside it
     # matches the hash of the YAML file, and if so unpickle it.
@@ -147,7 +148,7 @@ def yaml_load(path):
             return store["data"]
 	
 	# No cached pickled data exists, so load the YAML file.
-    data = yaml.load(open(path))
+    data = yaml.load(open(path), Loader=Loader)
     
     # Store in a pickled file for fast access later.
     pickle.dump({ "hash": h, "data": data }, open(path+".pickle", "w"))

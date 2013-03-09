@@ -6,9 +6,10 @@ import urllib, json, datetime
 
 from emailverification.models import BouncedEmail
 
-from django.contrib.gis.geoip import GeoIP
-geo_ip_db = GeoIP("/home/govtrack/extdata")
-washington_dc = geo_ip_db.geos("69.255.139.56")
+if settings.GEOIP_DB_PATH:
+	from django.contrib.gis.geoip import GeoIP
+	geo_ip_db = GeoIP(settings.GEOIP_DB_PATH)
+	washington_dc = geo_ip_db.geos("69.255.139.56")
 
 # http://whois.arin.net/rest/org/ISUHR/nets
 HOUSE_NET_RANGES = (
@@ -59,7 +60,8 @@ def template_context_processor(request):
         if is_ip_in_any_range(ip, SENATE_NET_RANGES):
             context["remote_net_senate"] = True
             
-        context["is_dc_local"] = geo_ip_db.geos(ip).distance(washington_dc) < .5
+        if settings.GEOIP_DB_PATH:
+            context["is_dc_local"] = geo_ip_db.geos(ip).distance(washington_dc) < .5
     except:
         pass
     

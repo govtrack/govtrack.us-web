@@ -15,7 +15,7 @@ from parser.processor import YamlProcessor, yaml_load
 from parser.models import File
 from person.models import Person, PersonRole, Gender, RoleType, SenatorClass
 
-from settings import CURRENT_CONGRESS
+from settings import CURRENT_CONGRESS, CONGRESS_LEGISLATORS_PATH
 
 log = logging.getLogger('parser.person_parser')
 
@@ -106,8 +106,7 @@ def main(options):
     which have been changed.
     """
 
-    #BASE_PATH = '../scripts/congress-legislators/'
-    BASE_PATH = '../scripts/congress/cache/congress-legislators/'
+    BASE_PATH = CONGRESS_LEGISLATORS_PATH
     SRC_FILES = ['legislators-current', 'legislators-historical', 'legislators-social-media', 'executive'] # order matters
 
     for p in SRC_FILES:
@@ -197,7 +196,6 @@ def main(options):
                     person.save()
                     
             except Person.DoesNotExist:
-                raise ValueError("creating!")
                 created_persons.add(person.pk)
                 person.save()
                 log.warn("Created %s" % person)

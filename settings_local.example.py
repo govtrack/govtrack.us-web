@@ -29,6 +29,8 @@ HAYSTACK_CONNECTIONS = {
     },
 }                   
 
+CONGRESS_LEGISLATORS_PATH='../congress-legislators/'
+GEOIP_DB_PATH = None
 
 SECRET_KEY = 'fill this in'
 
@@ -45,5 +47,4 @@ TWITTER_OAUTH_TOKEN_SECRET = "fill this in"
 FACEBOOK_APP_ID = "fill this in"
 FACEBOOK_APP_SECRET = "fill this in"
 FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
-
 
