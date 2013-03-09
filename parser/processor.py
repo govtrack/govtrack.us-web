@@ -16,7 +16,7 @@ class Processor(object):
 
     def process_attributes(self, obj, node):
         "Process attributes of XML node"
-        
+
         attrib = self.get_node_attribute_keys(node)
 
         for key in self.ATTRIBUTES:
@@ -76,14 +76,14 @@ class Processor(object):
                 return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-05:00')
             except ValueError:
                 return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00')
-                
+
     def is_model_field(self, obj, fieldname):
         from django.db.models import FieldDoesNotExist
         try:
             return obj._meta.get_field(fieldname) is not None # =! None breaks because of operator overloading
         except FieldDoesNotExist:
             return False
-                
+
     def changed(self, old_value, new_value):
         # Since new_value hasn't been touched except for the fields we've set on it,
         # we can use its __dict__, except Django ORM's _state field, to check if any
@@ -97,7 +97,7 @@ class Processor(object):
                     print "Change in", k, "value of", unicode(old_value).encode("utf8"), ":", unicode(v1).encode("utf8"), "=>", unicode(v2).encode("utf8")
                     return True
         return False
-        
+
 class XmlProcessor(Processor):
     def display_node(self, node):
         return '<%s>: ' % node.tag + ', '.join('%s: %s' % x for x in node.attrib.iteritems())
@@ -137,7 +137,10 @@ def yaml_load(path):
 
     import cPickle as pickle, os.path, hashlib
     import yaml
-    from yaml import CSafeLoader as Loader, CDumper as Dumper
+    try:
+        from yaml import CSafeLoader as Loader, CDumper as Dumper
+    except ImportError:
+        from yaml import SafeLoader as Loader, Dumper
 
     # Check if the .pickle file exists and a hash stored inside it
     # matches the hash of the YAML file, and if so unpickle it.
@@ -146,12 +149,12 @@ def yaml_load(path):
         store = pickle.load(open(path + ".pickle"))
         if store["hash"] == h:
             return store["data"]
-	
+
 	# No cached pickled data exists, so load the YAML file.
     data = yaml.load(open(path), Loader=Loader)
-    
+
     # Store in a pickled file for fast access later.
     pickle.dump({ "hash": h, "data": data }, open(path+".pickle", "w"))
-    
+
     return data
 
