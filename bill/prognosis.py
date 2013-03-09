@@ -158,6 +158,14 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 		elif num_cosp > 0:
 			rname2 = CommitteeMemberRole.by_value(rvalue).label.lower()
 			factors.append( ("cosponsor_%s" % rname, "A cosponsor is the %s of a committee to which the %s has been referred." % (rname2, bill.noun), "A cosponsor is a relevant committee %s." % rname2))
+			
+	# what committees is the bill assigned to? only look at committees
+	# in the originating chamber, since assignments in the other chamber
+	# indicate the bill had at least one successful vote.
+	for cm in committees:
+		if cm.committee != None: continue # skip subcommittees
+		if CommitteeType.by_value(cm.committee_type).label != bill.originating_chamber: continue
+		factors.append( ("committee_%s" % cm.code, "The bill was referred to %s." % cm.shortname, "Referred to %s." % cm.shortname))
 
 	# do we have cosponsors on both parties?
 	num_cosp_majority = 0

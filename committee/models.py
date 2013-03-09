@@ -17,7 +17,7 @@ class Committee(models.Model):
     Subcommittees have only code, name, parent nonblank attributes.
     """
 
-    # committee_type makes sense only for committees
+    # committee_type applies to committees but not subcommittees
     committee_type = models.IntegerField(choices=CommitteeType, blank=True, null=True)
     code = models.CharField(max_length=10)
     name = models.CharField(max_length=255)
