@@ -325,7 +325,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 				if voter.option.key not in ("+", "-"): continue
 				party = party_index.get(voter.person.role.party if voter.person and voter.person.role else "Unknown", 1)
 				option = 0 if voter.option.key == "+" else 1
-				coord =  ideology_scores[vote.congress].get(voter.person.id,
+				coord =  ideology_scores[vote.congress].get(voter.person.id if voter.person else "UNKNOWN",
 					ideology_scores[vote.congress].get("MEDIAN:" + (voter.person.role.party if voter.person and voter.person.role else ""),
 						ideology_scores[vote.congress]["MEDIAN"]))
 				voter_details.append( (coord, (party, option)) )
