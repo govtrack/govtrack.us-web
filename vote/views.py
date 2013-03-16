@@ -162,7 +162,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	elif re.match(r"Cloture .*Agreed to", vote.result):
 		vote_result_2 = "Proceed"
 	else:
-		vote_result_2 = re.sub("^(Bill|Amendment|Resolution|Conference Report|Nomination|Motion to (Table|Proceed)) ", "", vote.result)
+		vote_result_2 = re.sub("^(Bill|Amendment|Resolution|Conference Report|Nomination|Motion to \S+) ", "", vote.result)
 	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
 	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
 	

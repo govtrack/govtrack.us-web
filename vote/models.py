@@ -138,7 +138,16 @@ class Vote(models.Model):
             """
             return -len([p for p in all_voters if p.person and p.person.role and p.person.role.party == x])
         
-        all_parties = list(set(x.person.role.party if x.person and x.person.role else "Unknown" for x in all_voters))
+        def get_party(voter):
+            if voter.voter_type != VoterType.vice_president:
+                if voter.person and voter.person.role:
+                    return voter.person.role.party
+                else:
+                    return "Unknown"
+            else:
+                return "Vice President"
+        
+        all_parties = list(set(get_party(x) for x in all_voters))
         all_parties.sort(key=cmp_party)
         total_party_stats = dict((x, {'yes': 0, 'no': 0, 'other': 0, 'total': 0})\
                                  for x in all_parties)
@@ -151,7 +160,7 @@ class Vote(models.Model):
             percent = round(len(voters) / float(total_count) * 100.0)
             party_stats = dict((x, 0) for x in all_parties)
             for voter in voters:
-                party = voter.person.role.party if voter.person and voter.person.role else "Unknown"
+                party = get_party(voter)
                 party_stats[party] += 1
                 total_party_stats[party]['total'] += 1
                 if option.key == '+':
