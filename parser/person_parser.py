@@ -80,8 +80,11 @@ class PersonRoleProcessor(YamlProcessor):
         'class': 'senator_class',
         'url': 'website'
     }
-    ROLE_TYPE_MAPPING = {'rep': RoleType.representative, 'sen': RoleType.senator,
-                         'prez': RoleType.president}
+    ROLE_TYPE_MAPPING = {
+        'rep': RoleType.representative,
+        'sen': RoleType.senator,
+        'prez': RoleType.president,
+        'viceprez': RoleType.vicepresident}
     SENATOR_CLASS_MAPPING = {1: SenatorClass.class1, 2: SenatorClass.class2,
                              3: SenatorClass.class3}
 
@@ -214,41 +217,23 @@ def main(options):
                 role.current = role.startdate <= datetime.now().date() and role.enddate >= datetime.now().date() # \
                         #and CURRENT_CONGRESS in role.congress_numbers()
                 
-                # Overwrite an existing role if there is one that is for the same period
-                # of time and role type.
+                # Try to match this role with one already in the database.
+                # First search for an exact match on type/start/end.
                 ex_role = None
-                
                 for r in roles:
                     if role.role_type == r.role_type and r.startdate == role.startdate and r.enddate == role.enddate:
                         ex_role = r
                         break
                         
+                # Otherwise match on type/start only.
                 if not ex_role:
                     for r in roles:
                         if role.role_type == r.role_type and r.startdate == role.startdate:
                             ex_role = r
                             break
                         
-                if not ex_role:
-                    if role.congress_numbers() == None:
-                        print "Can't identify conress_numbers of db role", person.id, role
-                    # .congress_numbers() is flaky on some historical data because start/end
-                    # dates don't line up nicely with session numbers. So we try to match
-                    # on exact dates first, and if we can match that don't bother using
-                    # congress_numbers.
-                    for r in roles:
-                        if r.congress_numbers() == None:
-                            print "Can't identify conress_numbers of yaml role", person.id, r
-                        if role.role_type == r.role_type and (len(set(role.congress_numbers()) & set(r.congress_numbers())) > 0):
-                            ex_role = r
-                            break
-                    
                 if ex_role:    
                     # These roles correspond.
-                    #if not (ex_role.startdate == role.startdate and ex_role.enddate == role.enddate) and role_processor.changed(ex_role, role):
-                    #    print ex_role
-                    #    print role
-                    #    raise Exception("Do we really want to update this role?")
                     processed_roles.add(ex_role.id)
                     role.id = ex_role.id
                     if role_processor.changed(ex_role, role) or options.force:
@@ -259,10 +244,10 @@ def main(options):
                     roles.remove(ex_role) # don't need to try matching this to any other node
                 else:
                     # Didn't find a matching role.
-                    if len(roles) > 0:
-                        print role, role.congress_numbers(), "is one of these?"
+                    if len([r for r in roles if r.role_type == role.role_type]) > 0:
+                        print role, "is one of these?"
                         for ex_role in roles:
-                            print "\t", ex_role, ex_role.congress_numbers()
+                            print "\t", ex_role
                         raise Exception("There is an unmatched role.")
                     log.warn("Created %s" % role)
                     role.save()

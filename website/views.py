@@ -119,10 +119,10 @@ def do_site_search(q, allow_redirect=False):
     from events.models import Feed
     
     results.append({
-        "title": "Members of Congress and Presidents",
+        "title": "Members of Congress, Presidents, and Vice Presidents",
         "href": "/congress/members/all",
         "qsarg": "name",
-        "noun": "Members of Congress or presidents",
+        "noun": "Members of Congress, Presidents, or Vice Presidents",
         "results": [
             {"href": p.object.get_absolute_url(),
              "label": p.object.name,

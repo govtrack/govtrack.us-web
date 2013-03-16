@@ -9,6 +9,7 @@ class RoleType(enum.Enum):
     senator = enum.Item(1, 'Senator')
     representative = enum.Item(2, 'Representative')
     president = enum.Item(3, 'President')
+    vicepresident = enum.Item(4, 'Vice President')
 
 
 class SenatorClass(enum.Enum):

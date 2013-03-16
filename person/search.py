@@ -63,7 +63,7 @@ def template_get_context(obj, form):
 def person_search_manager():
     sm = SearchManager(Person, connection="person")
     
-    sm.add_filter("was_moc__in", [True]) # exclude presidents
+    sm.add_filter("was_moc__in", [True]) # exclude presidents/vice presidents
     
     sm.add_option('text', label='name', type="text")
     sm.add_option('is_currently_moc', label="currently serving?", type="radio", choices=[(False, "No"), (True, "Yes")])
