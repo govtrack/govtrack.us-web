@@ -8,7 +8,8 @@ import logging
 
 from parser.progress import Progress
 from parser.processor import XmlProcessor
-from person.models import Person
+from person.models import Person, PersonRole
+from person.types import RoleType
 from parser.models import File
 from bill.models import Bill, BillType
 from vote.models import (Vote, VoteOption, VoteSource, Voter,
@@ -140,7 +141,9 @@ def main(options):
                 print "Deleting: ", qs
             except Exception as e:
                 print "Deleting [%s]..." % str(e)
-            #print "Delete skipped..."
+            if qs.count() > 3:
+                print "Delete skipped..."
+                return
             qs.delete()
 
     seen_obj_ids = set()
@@ -163,18 +166,10 @@ def main(options):
         try:
             tree = etree.parse(fname)
             
-            # I corrupted the database by running the parser twice concurrently (bad cron,
-            # now prevented in parse.py with a file lock). To fix this, scan through votes
-            # to find ones that have the wrong number of voter records, or multiple Voter
-            # records for the same individual.
-            #if existing_vote:
-            #    if existing_vote.voters.all().count() == len(tree.xpath("/roll/voter")):
-            #        from django.db.models import Count
-            #        counts = existing_vote.voters.all().values("person").annotate(count=Count("person"))
-            #        if len([p for p in counts if p["person"] in (None, 0) or p['count'] != 1]) == 0:
-            #            seen_obj_ids.add(existing_vote.id)
-            #            continue
-            #    print existing_vote, existing_vote.voters.all().count(), len(tree.xpath("/roll/voter"))
+            ## Look for votes with VP tie breakers.
+            #if len(tree.xpath("/roll/voter[@VP='1']")) == 0:
+            #    had_error = True # prevent delete at the end
+            #    continue
             
             # Process role object
             for roll_node in tree.xpath('/roll'):
@@ -228,11 +223,22 @@ def main(options):
                     voter = voter_processor.process(roll_options, Voter(), voter_node)
                     voter.vote = vote
                     voter.created = vote.created
+                        
+                    # for VP votes, load the actual person...
+                    if voter.voter_type == VoterType.vice_president:
+                        try:
+                            r = PersonRole.objects.get(role_type=RoleType.vicepresident, startdate__lte=vote.created, enddate__gte=vote.created)
+                            voter.person = r.person
+                        except:
+                            # overlapping roles? missing data?
+                            log.error('Could not resolve vice president in %s' % fname, exc_info=ex)
+                        
                     if existing_vote and voter.person:
                         try:
                             voter.id = existing_voters[voter.person.id]
                         except KeyError:
                             pass
+                        
                     voter.save()
                     
                     if voter.voter_type == VoterType.unknown and not vote.missing_data:

@@ -174,6 +174,7 @@ $(function() {
     {% if vote.category == VoteCategory.procedural %}
     <p>This was a procedural vote.</p>
     {% endif %}
+    {% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
     </div>
 </dl>
 {% endblock %}
@@ -299,8 +300,8 @@ $(function() {
 				class="dot party_{{voter.person.role.party|slice:"0:1"}}"
 				id="dv{{voter.id}}"
 				vote="{{ voter.option.key }}"
-				state="{{voter.person.role.state}}"
-				title="{% if voter.voter_type == 1 %}[Information Missing]{% endif %}{% if voter.voter_type == 2 %}The Vice President{% endif %}{% if voter.voter_type == 3 %}{{ voter.person.name }}{% endif %}"
+				state="{% if voter.voter_type == 1 %}[Information Missing]{% elif voter.voter_type == 2 %}The Vice President{% elif voter.voter_type == 3 %}{{ voter.person.role.state }}{% endif %}"
+				title="{% if voter.voter_type == 1 %}[Information Missing]{% elif voter.voter_type == 2 %}The Vice President{% elif voter.voter_type == 3 %}{{ voter.person.name }}{% endif %}"
 			> </span>
 		{% endfor %}
 	</div>
@@ -319,12 +320,12 @@ $(function() {
             {% for voter in voters %}
             <tr vid="{{voter.id}}"
             	voter_group_0="{{ voter.option.value }}"
-            	voter_group_1="{% if voter.voter_type == 3 %}{{ voter.person.role.party }}{% endif %}"
-            	voter_group_3="{% if voter.voter_type_is_member %}{{ voter.person.role.state_name }}{% endif %}"
+            	voter_group_1="{% if voter.voter_type != 1 %}{{ voter.person.role.party }}{% endif %}"
+            	voter_group_3="{% if voter.voter_type_is_member %}{{ voter.person.role.state_name }}{% elif voter.voter_type == 2 %}The Vice President{% endif %}"
             	>
                 <td class="vote_{{ voter.option.alpha_key }}"><nobr>{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</nobr></td>
                 <td>
-                    {% if voter.voter_type == 3 %}
+                    {% if voter.voter_type != 1 %}
                         {% if voter.person.role.party|slice:"0:1" in "DIR" %}
                             <span class="party_{{voter.person.role.party|slice:"0:1"}}" title="{{ voter.person.role.party }}">
                                 &nbsp;
@@ -336,22 +337,21 @@ $(function() {
                         {% endif %}
                     {% endif %}
                 </td>
-                <td>
+                <td style="line-height: normal; padding: 5px 0 5px 0;">
                     {% if voter.voter_type == 1 %}
                         [Information Missing]
-                    {% endif %}
-                    {% if voter.voter_type == 2 %}
-                        The Vice President
-                    {% endif %}
-                    {% if voter.voter_type == 3 %}
+                    {% elif voter.voter_type == 2 %}
+                    	 <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444">{{ voter.person.name_lastfirst_short }}</a>
+                        <br/>(The Vice President)
+                    {% elif voter.voter_type == 3 %}
                         <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444">{{ voter.person.name_lastfirst_short }}</a>
                     {% endif %}
                 </td>
                 <td>
-                    {% if voter.voter_type_is_member %}
-                        {{ voter.person.role.state }}{% if voter.person.role.district %} {{ voter.person.role.district|ordinalhtml|rjust:15 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
+                	{% if voter.voter_type_is_member %}
+		                {{ voter.person.role.state }}{% if voter.person.role.district %} {{ voter.person.role.district|ordinalhtml|rjust:15 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
                     {% else %}
-                     -
+                    	-- {% comment %} a single dash confuses the table sorter?? {% endcomment %}
                     {% endif %}
                 </td>
                 <td style="display: none"> <!-- using for sorting only -->
@@ -366,11 +366,16 @@ $(function() {
 
 <h2>Notes</h2>
 {% if vote.chamber == 2 %}
-<h3 style="margin-top: 30px">Where is the Speaker&rsquo;s vote?</h3>
+<h4 style="margin-top: 30px">Where is the Speaker&rsquo;s vote?</h4>
 <p>According to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk.</p>
 {% endif %}
 
-<h3 style="margin-top: 30px">What&rsquo;s the difference between aye and yea?</h3>
+{% if has_vp_vote %}
+<h4 style="margin-top: 30px">The Vice President cast a tie-breaking vote.</h4>
+<p>The Vice President casts a vote in the Senate when there is a tie. Article I, section 3 of the United States Constitution reads: &ldquo;The Vice President of the United States shall be President of the Senate, but shall have no Vote, unless they be equally divided.&rdquo; Ties in the Senate are rare.</p>
+{% endif %}
+
+<h4 style="margin-top: 30px">What&rsquo;s the difference between aye and yea?</h4>
 <p>There is no meaningful difference between aye and yea (and nay and no), but the terms are used in different sorts of votes based on Congress&rsquo;s long tradition of parliamentary procedure. The House and Senate follow the U.S. Constitution strictly when it says that bills should be decided on by the &ldquo;yeas and nays&rdquo; (Article I, Section 7). The House sometimes operates under a special set of rules called the &ldquo;Committee of the Whole on the State of the Union&rdquo; (or &ldquo;Committee of the Whole&rdquo; for short), which is a sort of pseudo-committee that is made up of every congressman. During this mode of operation, the House uses the terms &ldquo;aye&rdquo; and &ldquo;no&rdquo; instead. (See the Rules of the House, Rule XX, and House Practice in the section Voting.)</p>
 
 {% endwith %}

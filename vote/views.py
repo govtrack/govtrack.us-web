@@ -58,6 +58,19 @@ def vote_details(request, congress, session, chamber_code, number):
     voters = list(vote.voters.all().select_related('person', 'option'))
     load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
     
+    # load the role for the VP, since load_roles_at_date only loads
+    # MoC roles
+    has_vp_vote = False
+    for voter in voters:
+        if voter.voter_type == VoterType.vice_president:
+            from person.types import RoleType
+            has_vp_vote = True
+            try:
+                voter.person.role = voter.person.roles.get(role_type=RoleType.vicepresident, startdate__lte=vote.created, enddate__gte=vote.created)
+            except:
+                raise
+                pass # wahtever
+    
     # sorting by party actually sorts by party first and by ideology score
     # second.
     congress = int(congress)
@@ -77,6 +90,7 @@ def vote_details(request, congress, session, chamber_code, number):
             'CongressChamber': CongressChamber,
             "VoterType": VoterType,
             "VoteCategory": VoteCategory._items,
+            'has_vp_vote': has_vp_vote,
             }
 
 def load_ideology_scores(congress):

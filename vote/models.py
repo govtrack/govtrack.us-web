@@ -266,8 +266,8 @@ class Voter(models.Model):
     """How people voted on roll call votes in the U.S. Congress since 1789. See the Vote API. Filter on the vote field to get the results of a particular vote."""
 	
     vote = models.ForeignKey('vote.Vote', related_name='voters', help_text="The vote that this record is a part of.")
-    person = models.ForeignKey('person.Person', blank=True, null=True, on_delete=models.PROTECT, related_name='votes', help_text="The person who cast this vote.")
-    voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President (in which case, the person field is null).")
+    person = models.ForeignKey('person.Person', blank=True, null=True, on_delete=models.PROTECT, related_name='votes', help_text="The person who cast this vote. May be null if the information could not be determined.")
+    voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President.")
     option = models.ForeignKey('vote.VoteOption', help_text="How the person voted.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.") # equal to vote.created
     
