@@ -20,8 +20,6 @@ h1 {
 .heading-box .article { padding: 0; }
 
 .bill_text_content {
-	width: 640px;
-	float: left;
 	border-right: 1px solid #AAA;
 	padding: 1em;
 	font-family: serif;
@@ -53,8 +51,6 @@ h1 {
 }
 
 #sidebar {
-	width: 230px;
-	float: left;
 	padding-left: 20px;
 }
 
@@ -247,92 +243,98 @@ $(function() {
 
 {% block body %}
 
-<div id="main_text_content" class="bill_text_content">
-{% if not textdata.text_html %}
-	<p>The text of this bill is not yet available. Please check back soon.</p>
-{% else %}
-		{{textdata.text_html|safe}}
-{% endif %}
-</div>
+<div class="row">
+<div class="nine columns">
+	<div id="main_text_content" class="bill_text_content">
+	{% if not textdata.text_html %}
+		<p>The text of this bill is not yet available. Please check back soon.</p>
+	{% else %}
+			{{textdata.text_html|safe}}
+	{% endif %}
+	</div>
 
-<div id="content_loading" class="bill_text_content" style="display: none;">
-	<p>Loading...</p>
-</div>
-
-<div id="bill_comparison_content" style="width: 3000px; overflow: hidden; display: none;">
-	<center style="padding: 1em">
-		<a href="#" onclick="return hide_comparison();">Close Comparison</a>
-	</center>
-
-	<div class="bill_text_content">
-		<div class="header"> </div>
-		<div class="body"> </div>
+	<div id="content_loading" class="bill_text_content" style="display: none;">
+		<p>Loading...</p>
 	</div>
 	
-	<div class="bill_text_content">
-		<div class="header"> </div>
-		<div class="body"> </div>
-	</div>
+	<div id="bill_comparison_content" style="width: 3000px; overflow: hidden; display: none;">
+		<center style="padding: 1em">
+			<a href="#" onclick="return hide_comparison();">Close Comparison</a>
+		</center>
 	
-	<div style="clear: both"> </div>
-</div>
-
-<div id="sidebar">
-	{% if textdata.text_html %}
-	
-	{% if bill.is_alive and not version %}
-	<p>You are reading the latest text of the {{bill.noun}}. The text of a {{bill.noun}} may change in committee or through the amendment process.</p>
-	{% endif %}
-	
-	{% if alternates and alternates|length > 1 %}
-	<p>Select a version of this bill to view:</p>
-	<ul class="bullets">
-		{% for alt in alternates %}
-			{% if textdata.doc_version == alt.doc_version %}
-				<li style="font-weight: bold;">{{alt.docdate|date}}: {{alt.doc_version_name}}</li>
-			{% else %}
-				<li><a href="{{bill.get_absolute_url}}/text/{{alt.doc_version}}">{{alt.docdate|date}}: {{alt.doc_version_name}}</a></li>
-			{% endif %}
-		{% endfor %}
-	</ul>
-	
-	<p>Compare this version to:</p>
-	<ul class="bullets">
-		{% for alt in alternates %}
-			{% if textdata.doc_version == alt.doc_version %}
-				<li style="color: #777;">{{alt.docdate|date}}: {{alt.doc_version_name}}</li>
-			{% else %}
-				<li><a href="#" onclick="return load_comparison(null, '{{alt.doc_version}}');">{{alt.docdate|date}}: {{alt.doc_version_name}}</a></li>
-			{% endif %}
-		{% endfor %}
-	</ul>
-	{% endif %}
-	
-	{% if related_bills %}
-	<p>Compare this bill to another bill:</p>
-	<ul class="bullets">
-		{% for rb, bv in related_bills %}
-			<li><a href="#" onclick="return load_comparison({{rb.id}}, '{{bv|escapejs}}');">{{rb}}</a></li>
-		{% endfor %}
-	</ul>
-	{% endif %}
-
-	{% endif %}
-
-	<div style="margin: 5em auto; width: 120px;">
-		<script type="text/javascript"><!--
-		google_ad_client = "ca-pub-3418906291605762";
-		/* GT Vertical 120x600, created 8/17/08 */
-		google_ad_slot = "7906528817";
-		google_ad_width = 120;
-		google_ad_height = 600;
-		//-->
-		</script>
-		<script type="text/javascript"
-		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-		</script>
-		<div style="font-size: 90%; text-align: center"><a href="/advertising">About Ads</a></div>
+		<div class="bill_text_content">
+			<div class="header"> </div>
+			<div class="body"> </div>
+		</div>
+		
+		<div class="bill_text_content">
+			<div class="header"> </div>
+			<div class="body"> </div>
+		</div>
+		
+		<div style="clear: both"> </div>
 	</div>
 </div>
+<div class="three columns">
+
+	<div id="sidebar">
+		{% if textdata.text_html %}
+		
+		{% if bill.is_alive and not version %}
+		<p>You are reading the latest text of the {{bill.noun}}. The text of a {{bill.noun}} may change in committee or through the amendment process.</p>
+		{% endif %}
+		
+		{% if alternates and alternates|length > 1 %}
+		<p>Select a version of this bill to view:</p>
+		<ul class="bullets">
+			{% for alt in alternates %}
+				{% if textdata.doc_version == alt.doc_version %}
+					<li style="font-weight: bold;">{{alt.docdate|date}}: {{alt.doc_version_name}}</li>
+				{% else %}
+					<li><a href="{{bill.get_absolute_url}}/text/{{alt.doc_version}}">{{alt.docdate|date}}: {{alt.doc_version_name}}</a></li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+		
+		<p>Compare this version to:</p>
+		<ul class="bullets">
+			{% for alt in alternates %}
+				{% if textdata.doc_version == alt.doc_version %}
+					<li style="color: #777;">{{alt.docdate|date}}: {{alt.doc_version_name}}</li>
+				{% else %}
+					<li><a href="#" onclick="return load_comparison(null, '{{alt.doc_version}}');">{{alt.docdate|date}}: {{alt.doc_version_name}}</a></li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+		{% endif %}
+		
+		{% if related_bills %}
+		<p>Compare this bill to another bill:</p>
+		<ul class="bullets">
+			{% for rb, bv in related_bills %}
+				<li><a href="#" onclick="return load_comparison({{rb.id}}, '{{bv|escapejs}}');">{{rb}}</a></li>
+			{% endfor %}
+		</ul>
+		{% endif %}
 	
+		{% endif %}
+	
+		<div style="margin: 5em auto; width: 120px;">
+			<script type="text/javascript"><!--
+			google_ad_client = "ca-pub-3418906291605762";
+			/* GT Vertical 120x600, created 8/17/08 */
+			google_ad_slot = "7906528817";
+			google_ad_width = 120;
+			google_ad_height = 600;
+			//-->
+			</script>
+			<script type="text/javascript"
+			src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+			</script>
+			<div style="font-size: 90%; text-align: center"><a href="/advertising">About Ads</a></div>
+		</div>
+	</div>
+</div>
+</div>
 {% endblock %}
+
