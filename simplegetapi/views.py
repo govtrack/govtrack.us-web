@@ -239,8 +239,7 @@ def do_api_search(model, qs, request_options, requested_fields):
                 # If the filter argument is specified more than once, Django gives us the values
                 # as an array in vals. When used this way, force the __in operator and don't let
                 # the user specify it explicitly.
-                arg_parts[0] = arg
-                arg_parts[1] = "in"
+                arg_parts = [arg, "in"]
                 
             elif len(arg_parts) == 2 and arg_parts[1] not in ("contains", "exact", "gt", "gte", "lt", "lte", "in", "startswith", "range"):
                 # If the operator isn't actually an operator, it's a sub-field name and the user
