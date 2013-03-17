@@ -127,7 +127,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 				if committee_membership.get(bill.sponsor_id, {}).get(committee.code) == rvalue:
 					if rvalue != CommitteeMemberRole.member:
 						factors.append(("sponsor_committee_%s" % rname, "The sponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun), "Sponsor is a relevant committee %s." % CommitteeMemberRole.by_value(rvalue).label.lower()))
-					elif sponsor_party == maj_party:
+					if sponsor_party == maj_party:
 						factors.append(("sponsor_committee_member_majority", "The sponsor is on a committee to which the %s has been referred, and the sponsor is a member of the majority party." % bill.noun, "Sponsor is on a relevant committee & in majority party."))
 						
 		# leadership score of the sponsor, doesn't actually seem to be helpful,
@@ -174,7 +174,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 			num_cosp_majority += 1
 	if bill.sponsor and sponsor_party == maj_party and len(cosponsors) >= 6 and num_cosp_majority < 2.0*len(cosponsors)/3:
 		factors.append(("cosponsors_bipartisan", "The sponsor is in the majority party and at least one third of the %s's cosponsors are from the minority party." % bill.noun, "Sponsor is in majority party and 1/3rd+ of cosponsors are in minority party."))
-	elif num_cosp_majority > 0 and num_cosp_majority < len(cosponsors):
+	if num_cosp_majority > 0 and num_cosp_majority < len(cosponsors):
 		factors.append(("cosponsors_crosspartisan", "There is at least one cosponsor from the majority party and one cosponsor outside of the majority party.", "Has cosponsors from both parties."))
 
 	for is_majority in (False, True):
@@ -305,6 +305,8 @@ def build_model(congress):
 		#if bill_type != BillType.house_bill: continue
 		#if bill_type not in (BillType.house_joint_resolution, BillType.senate_joint_resolution): continue
 		
+		# GET LIST OF BILLS
+		
 		bills = BILLS.filter(bill_type=bill_type)
 		if model_type == 1:
 			# In model 0, we scan across all bills, because all bills were
@@ -328,14 +330,23 @@ def build_model(congress):
 			
 		print "\toverall", int(round(100.0*total_success/total)), "%; N=", total
 		
-		sorted_bills = { }
+		# GET REGRESSION MATRIX INFORMATION
+		
+		# Build a list of sets, one for each bill, containing the binary
+		# factors that apply to the bill. Build a corresponding list of
+		# floats (either 1.0, 0.0) indicating whether the bill was successful.
+		#
+		# Also remember for each binary factor the total count of bills
+		# it applied to and the count of those that were successful.
+		#
+		# And also remember for each binary factor, the short descriptive
+		# text for the factor.
+		
+		factor_success_rate = { }
 		regression_outcomes = [ ]
 		regression_predictors = [ ]
 		factor_descriptions = { }
 		for bill in bills:
-			#import random # speed this up?
-			#if random.random() < .7: continue
-			
 			# What's the measured binary outcome for this bill? Check if the bill
 			# ended in a success state.
 			success = is_success(bill, model_type)
@@ -345,42 +356,78 @@ def build_model(congress):
 			
 			# maintain a simple list of success percent rates for each factor individually
 			for key, descr, general_descr in factors:
-				if not key in sorted_bills: sorted_bills[key] = [0, 0] # count of total, successful
-				sorted_bills[key][0] += 1
-				if success: sorted_bills[key][1] += 1
+				if not key in factor_success_rate: factor_success_rate[key] = [0, 0] # count of total, successful
+				factor_success_rate[key][0] += 1
+				if success: factor_success_rate[key][1] += 1
 				factor_descriptions[key] = general_descr
 				
 			# build data for a regression
 			regression_outcomes.append(1.0 if success else 0.0)
 			regression_predictors.append(set( f[0] for f in factors )) # extract just the key from the (key, descr) tuple
 			
-		# check which factors were useful
-		significant_factors = dict()
-		for key, bill_counts in sorted_bills.items():
-			# create a binomial distribution based on the overall pass rate for this
-			# type of bill (H.R., H.Res., etc.) and a draw the number of bills
-			# within this subset (key) that are passed, and see if it is statistically
-			# different from the overall count. only include statistical differences.
+		# FIRST PASS SIGNIFICANCE CHECK
+		
+		# Reduce the complexity of the regression model by filtering out
+		# factors that, when considered independently, don't have a success
+		# rate that appears to differ from the population success rate.
+			
+		factor_binomial_sig = dict()
+		for key, bill_counts in factor_success_rate.items():
+			# If there were very few bills with this factor, do not include it in the model.
 			if bill_counts[0] < 15: continue
+			
+			# Create a binomial distribution with a sample size the same as
+			# the number of bills with this factor, and with a probability
+			# of heads equal to the population success rate.
 			distr = scipy.stats.binom(bill_counts[0], float(total_success)/float(total))
-			pless = distr.cdf(bill_counts[1])
-			pmore = 1.0-distr.cdf(bill_counts[1])
-			if pless < .015 or pmore < .015 or (total < 100 and (pless < .05 or pmore < .05)):
-				# only show statistically significant differences from the group mean
-				significant_factors[key] = (pless, pmore)
+			
+			# What is the possibility that we would see as many or as few
+			# successes as we do (i.e. two tailed).
+			pless = distr.cdf(bill_counts[1]) # as few == P(count <= observed)
+			pmore = 1.0-(distr.cdf(bill_counts[1]-1) if bill_counts[1] > 0 else 0.0) # as many == P(count >= observed)
+			p = min(pless, pmore)
+			if p < .05:
+				factor_binomial_sig[key] = p
 				
-		# run a logistic regression
-		regression_predictors_map = None
-		regression_beta = None
-		if len(significant_factors) > 0:
-			regression_predictors_map = dict(reversed(e) for e in enumerate(significant_factors))
-			regression_predictors_2 = [ [] for f in regression_predictors_map ]
-			for factors in regression_predictors:
-				for fname, findex in regression_predictors_map.items():
-					regression_predictors_2[findex].append(1.0 if fname in factors else 0.0)
-			regression_predictors_2 = numpy.array(regression_predictors_2)
-			regression_outcomes = numpy.array(regression_outcomes)
-			regression_beta, J_bar, l = logistic_regression(regression_predictors_2, regression_outcomes)
+		# LOGISTIC REGRESSION
+		
+		for trial in xrange(2):
+			regression_predictors_map = None
+			regression_beta = None
+			if len(factor_binomial_sig) > 0:
+				# Assign consecutive indices to the remaining factors.
+				regression_predictors_map = dict(reversed(e) for e in enumerate(factor_binomial_sig))
+				
+				# Build a binary matrix indicating which bills have which factors.
+				regression_predictors_2 = [ [] for f in regression_predictors_map ]
+				for factors in regression_predictors:
+					for fname, findex in regression_predictors_map.items():
+						regression_predictors_2[findex].append(1.0 if fname in factors else 0.0)
+				regression_predictors_2 = numpy.array(regression_predictors_2)
+				regression_outcomes = numpy.array(regression_outcomes)
+				
+				# Perform regression.
+				regression_beta, J_bar, l = logistic_regression(regression_predictors_2, regression_outcomes)
+				
+				# Remove factors that are within 1.75 standard error from zero,
+				# and then re-run the regression.
+				if trial == 0:
+					# Get the standard errors (the logistic_regression module
+					# says to do it this way).
+					from numpy import sqrt, diag, abs, median
+					from numpy.linalg import inv
+					stderrs = sqrt(diag(inv(J_bar))) # [intercept, beta1, beta2, ...]
+					
+					# The standard errors are coming back wacky large for
+					# the factors with VERY large beta. Special-case those.
+					for fname, findex in regression_predictors_map.items():
+						beta = regression_beta[findex+1]
+						stderr = stderrs[findex+1]
+						if abs(beta/stderr) < 1.75 and abs(beta) < 5.0:
+							# This factor's effect is small/non-significant,
+							# so remove it from factor_binomial_sig so that on
+							# next iteration it is excluded from regression.
+							del factor_binomial_sig[fname]
 			
 		# Generate the model for output.
 		model = dict()
@@ -400,10 +447,13 @@ def build_model(congress):
 		model["regression_beta"] = list(regression_beta) if regression_beta != None else None
 		model_factors = dict()
 		model["factors"] = model_factors
-		for key, bill_counts in sorted_bills.items():
-			if key not in significant_factors: continue
-			pless, pmore = significant_factors[key]
-			print "\t" + key, int(round(100.0*bill_counts[1]/bill_counts[0])), "%; N=", bill_counts[0], "p<", int(round(100*pless)), int(round(100*pmore)), "B=", regression_beta[regression_predictors_map[key]+1]
+		for key, bill_counts in factor_success_rate.items():
+			if key not in factor_binomial_sig: continue
+			print "\t" + key, \
+				int(round(100.0*bill_counts[1]/bill_counts[0])), "%;", \
+				"N=", bill_counts[0], \
+				"p<", int(round(100*factor_binomial_sig[key])), \
+				"B=", regression_beta[regression_predictors_map[key]+1]
 			model_factors[key] = dict()
 			model_factors[key]["count"] = bill_counts[0]
 			model_factors[key]["success_rate"] = 100.0*bill_counts[1]/bill_counts[0]
