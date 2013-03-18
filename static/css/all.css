@@ -3975,6 +3975,14 @@ ul.tabs a {
     -moz-border-radius: 4px 4px 0 0;
     border-radius: 4px 4px 0 0;
 }
+	@media only screen and (max-width: 480px) {
+		ul.tabs a {
+		    padding: 0 3px !important;
+			text-transform: none;
+		    font-size: .85em;
+    		letter-spacing: 0;
+		}
+	}
 
 ul.tabs a:hover {
     background-color:#F7F7F7;

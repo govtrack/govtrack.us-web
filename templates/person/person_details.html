@@ -64,7 +64,7 @@
 			</tr>
 	        {% for role in person.roles_condensed %}
 	        <tr>
-	            <td>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</td>
+	            <td><nobr>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</nobr></td>
 	            <td>{{ role.get_role_type_display }}</td>
 	            <td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}</td>
 	        </tr>

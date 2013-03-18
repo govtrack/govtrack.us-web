@@ -9,10 +9,6 @@
 
 {% block head %}
 <style>
-.col_6 {
-	width: 420px;
-	float: left;
-}
 #subject_list span {
 	display: none;
 	font-size: 90%;
@@ -76,8 +72,10 @@ $(function() {
 <div class="panes">
 	<div id="docket">
 		<h2 style="margin: 1em 0 1em 0">Congress&rsquo;s Docket</h2>
+
+		<div class="row">
 		
-		<div class="col_6" style="margin-right: 40px; padding-right: 40px; border-right: 1px solid #EEE;">
+		<div class="six columns">
 			<h4>Coming Up This Week</h4>
 			
 			<p style="margin-top: 1em">{{coming_up|length}} {% if coming_up|length == 1 %}bill or resolution is{% else %}bills and resolutions are{% endif %} on the House and Senate calendars for the coming days. Once bills are scheduled for floor action, they typically have enough support to pass.</p>
@@ -94,7 +92,7 @@ $(function() {
 			{% endfor %}
 		</div>
 		
-		<div class="col_6">
+		<div class="six columns">
 		<p>Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
 		{% for name, descr1, descr2, href, count, queryset in groups %}
@@ -118,6 +116,7 @@ $(function() {
 		{% endif %}
 		{% endfor %}
 		</div>		
+		</div>
 	</div>
 	
 	<div id="subjects">
