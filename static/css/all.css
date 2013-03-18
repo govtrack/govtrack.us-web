@@ -4237,20 +4237,19 @@ ul.bullets li, .postcontent ul li, ol.bullets li, .postcontent ol li {
 	font-family: 'PTSerifRegular';
 }
     #sitenews > div {
-        width: 940px !important;
-        float: none !important;
-        margin: 0 auto;
+        x-width: 940px;
+        float: none;
+        margin: 5px auto;
     }
     #sitenews > div:first-of-type {
-        width: 20px !important;
-        float: right !important;
-        margin: 5px 10px;
+        width: 20px;
+        float: right;
+        margin: 0 10px;
     }
         #sitenews > div:first-of-type a {
           -moz-border-radius: 12px;
           -webkit-border-radius: 12px;
           border-radius: 12px;
-          padding: 0 !important;
           margin: -5px auto 0;
           text-align: center;
         }
