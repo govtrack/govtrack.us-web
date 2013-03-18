@@ -270,7 +270,11 @@ def start_search(request):
 def events_embed_legacy(request):
     # prepare template context
     feedlist, feedtitle = get_feed_list(request)
-    events = Feed.get_events_for(feedlist, int(request.GET.get('count', '10')))
+    try:
+        count = int(request.GET.get('count', ''))
+    except ValueError:
+        count = 10
+    events = Feed.get_events_for(feedlist, count)
     context = { "feeds": feedlist, "events": events, "title": feedtitle,
         "link": feedlist[0].link if len(feedlist) == 1 else None }
         
