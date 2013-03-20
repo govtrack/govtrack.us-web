@@ -37,19 +37,8 @@ def load_majority_party(congress):
 	return majority_party
 
 def load_committee_membership(congress):
-	if congress == 113: return { } # no data yet!
 	# load archival committee data
-	ROLE_MAPPING = { # from the committee parser
-		'Ex Officio': CommitteeMemberRole.exofficio,
-		'Chairman': CommitteeMemberRole.chairman,
-		'Cochairman': CommitteeMemberRole.chairman, # huh!
-		'Chair': CommitteeMemberRole.chairman,
-		'Ranking Member': CommitteeMemberRole.ranking_member,
-		'Vice Chairman': CommitteeMemberRole.vice_chairman,
-		'Vice Chair': CommitteeMemberRole.vice_chairman,
-		'Vice Chairwoman': CommitteeMemberRole.vice_chairman,
-		'Member': CommitteeMemberRole.member,
-	}
+	from parser.committee_parser import ROLE_MAPPING
 	committee_membership = { }
 	for cnode in lxml.etree.parse("data/us/%d/committees.xml" % congress).xpath("committee|committee/subcommittee"):
 		code = cnode.get("code")

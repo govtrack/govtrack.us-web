@@ -140,8 +140,6 @@ def main(options):
 
         # Process committee nodes
         for committee, members in tree.items():
-            if committee[0] == "H": continue # House data is out of date
-            
             try:
                 cobj = Committee.objects.get(code=committee)
             except Committee.DoesNotExist:
