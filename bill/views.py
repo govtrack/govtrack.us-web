@@ -258,9 +258,11 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
             bill1 = left_bill,
             ver1 = left_version,
             bill2 = right_bill,
-            ver2 = right_version)
-    
-    btc.data = ret
+            ver2 = right_version,
+            data = dict(ret)) # clone before compress()
+    else:
+        btc.data = dict(ret) # clone before compress()
+        
     btc.compress()
     btc.save()
     
