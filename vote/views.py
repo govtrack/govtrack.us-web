@@ -71,6 +71,14 @@ def vote_details(request, congress, session, chamber_code, number):
                 raise
                 pass # wahtever
     
+    # Test if we have a diagram for this vote. The only
+    # way to test is to try to make it.
+    try:
+        vote_thumbnail_image(request, congress, session, chamber_code, number, "diagram")
+        has_diagram = True
+    except Http404:
+        has_diagram = False
+    
     # sorting by party actually sorts by party first and by ideology score
     # second.
     congress = int(congress)
@@ -83,6 +91,7 @@ def vote_details(request, congress, session, chamber_code, number):
             	ideology_scores[congress].get("MEDIAN:" + (voter.person.role.party if voter.person and voter.person.role else ""),
             		ideology_scores[congress]["MEDIAN"]))
         
+    # perform an initial sort for display
     voters.sort(key = lambda x : (x.option.key, x.person.role.party if x.person and x.person.role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
     
     return {'vote': vote,
@@ -91,6 +100,7 @@ def vote_details(request, congress, session, chamber_code, number):
             "VoterType": VoterType,
             "VoteCategory": VoteCategory._items,
             'has_vp_vote': has_vp_vote,
+            'has_diagram': has_diagram,
             }
 
 def load_ideology_scores(congress):
@@ -144,7 +154,7 @@ def vote_export_xml(request, congress, session, chamber_code, number):
     
 @anonymous_view
 @cache_page(60 * 60 * 6)
-def vote_thumbnail_image(request, congress, session, chamber_code, number):
+def vote_thumbnail_image(request, congress, session, chamber_code, number, image_type):
 	vote = load_vote(congress, session, chamber_code, number)
 	
 	import cairo, re, math
@@ -153,7 +163,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	# general image properties
 	font_face = "DejaVu Serif Condensed"
 	image_width = 300
-	image_height = 250
+	image_height = 250 if image_type == "thumbnail" else 170
 	
 	# format text to print on the image
 	vote_title = re.sub(r"^On the Motion to ", "To ", vote.question)
@@ -218,43 +228,40 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 	ctx.line_to(0, image_height)
 	ctx.fill()
 	
-	ctx.set_source_rgb(0,1,0)
-	ctx.set_line_width(10)
-	ctx.new_path()
-	ctx.line_to(0, 0)
-	ctx.line_to(image_width, image_height)
-	#ctx.stroke()
-	
-	# Title
-	ctx.set_font_size(20)
-	ctx.set_source_rgb(.2,.2,.2)
-	ctx.move_to(150,10)
-	show_text_centered(ctx, vote_title, max_width=.95*image_width) 
+	chart_top = 0
+	if image_type == "thumbnail":
+		# Title
+		ctx.set_font_size(20)
+		ctx.set_source_rgb(.2,.2,.2)
+		ctx.move_to(150,10)
+		show_text_centered(ctx, vote_title, max_width=.95*image_width)
+		chart_top = 50
 	
 	# Vote Tally
 	font_size = 26 if len(vote_result_2) < 10 else 22
 	ctx.set_font_size(font_size)
 	ctx.set_source_rgb(.1, .1, .1)
-	ctx.move_to(150,50)
+	ctx.move_to(150,chart_top)
 	show_text_centered(ctx, vote_result_1)
 	
 	# Vote Result
-	ctx.move_to(150,62+font_size)
+	ctx.move_to(150,chart_top+12+font_size)
 	show_text_centered(ctx, vote_result_2) 
 	w = max(ctx.text_extents(vote_result_1)[2], ctx.text_extents(vote_result_2)[2])
 	
 	# Line
 	ctx.set_line_width(1)
 	ctx.new_path()
-	ctx.line_to(150-w/2, 55+font_size)
+	ctx.line_to(150-w/2, chart_top+5+font_size)
 	ctx.rel_line_to(w, 0)
 	ctx.stroke()
 	
-	# Vote Info
-	ctx.select_font_face(font_face, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-	ctx.set_font_size(14)
-	ctx.move_to(150,image_height-25)
-	show_text_centered(ctx, vote_citation, max_width=.98*image_width) 
+	if image_type == "thumbnail":
+		# Vote Chamber/Date/Number
+		ctx.select_font_face(font_face, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+		ctx.set_font_size(14)
+		ctx.move_to(150,image_height-25)
+		show_text_centered(ctx, vote_citation, max_width=.98*image_width) 
 	
 	# Seats
 	
@@ -392,13 +399,13 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number):
 		# draw
 		ctx.set_source_rgb(*group_colors[(party, vote)])
 		ctx.identity_matrix()
-		ctx.translate(image_width/2, 75)
+		ctx.translate(image_width/2, chart_top+25)
 		ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))
 		ctx.translate(r, 0)
 		ctx.rectangle(-seat_size/2, -seat_size/2, seat_size, seat_size)
 		ctx.fill()
 
-	# Convert the image buffer to raw bytes.
+	# Convert the image buffer to raw PNG bytes.
 	buf = StringIO()
 	im.write_to_png(buf)
 	v = buf.getvalue()

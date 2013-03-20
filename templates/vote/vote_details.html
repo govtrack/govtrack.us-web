@@ -51,51 +51,6 @@ function show_table() {
                 $(rows[j]).remove();
         }
     }
-    
-    // Make the dot diagram.
-    if ($(window).width() < 960) {
-    	// can't fit in this mode
-    	$('#dotchart').hide();
-    	return;
-    }
-   	var margin = 0;
-   	var tops = Array();
-   	$('#dotchart').show();
-   	$('#dotchart .label').each(function() {
-   		tops[this.getAttribute('key')] = $(this).position().top;
-   		var w = $(this).find('span').width();
-   		if (w > margin) margin = w;
-   	});
-   	
-   	var width = $('#dotchart').width() - margin - 1;
-    var rows = $('#vote-list tr[vid]');
-        
-    var state_off = 0;
-    var state_shift = 5;
-    var prev_state = [null, null];
-    if (SORT_STATE && SORT_STATE.column == 3) width -= state_shift*51;
-    $('#dotchart .dot').width(width/rows.length);
-    for (var i = 0; i < rows.length; i++) {
-    	var dot = $('#dv' + rows[i].getAttribute('vid'));
-    	
-    	var left_off = 0;
-    	
-    	var st = dot.attr("state");
-    	if (SORT_STATE && SORT_STATE.column == 3) {
-    		if (st != prev_state[0]) {
-				state_off += state_shift;
-			} else if ({{vote.chamber}} == 1 && prev_state[1] != dot.attr('vote')) {
-				left_off = -width/rows.length;
-			}
-		}
-    	
-    	dot.animate({
-    		left: (margin + width*i/rows.length + state_off + left_off) + "px",
-    		top: tops[dot.attr('vote')] + 7
-    	});
-
-    	prev_state = [st, dot.attr('vote')];
-    }
 }
 $(function() { 
     $("#vote-list").tablesorter({});
@@ -246,12 +201,13 @@ $(function() {
             {% endcomment %}
         </tbody>
     </table>
+    
+    {% if has_diagram %}
     <aside>
-        <ul class="downloadl-inks">
-            <li><a href="{{ vote.get_absolute_url }}/export/csv" rel="nofollow">Download as CSV</a></li>
-            <li><a href="{{ vote.get_absolute_url }}/export/xml" rel="nofollow">Download as XML</a></li>
-        </ul>
+    	<img src="{{ vote.get_absolute_url }}/diagram" style="width: 320px; height: 170px" />
+    	<div style="text-align: right; color: #777;"><small>Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</small></div>
     </aside>
+    {% endif %}
 </div>
 
 {% comment %}
@@ -288,25 +244,19 @@ $(function() {
 <div class="clear"> </div>
 
 <div id="vote-details" class="section">
-<h2 style="margin-top: 1em">Vote Details</h2>
+
+<div class="heading" style="margin: 1.5em 0 0 0;">
+	<h2 style="margin-bottom: 5px">Vote Details</h2>
+	<aside style="font-size: 90%; color: #777;">
+		Download as
+		<a href="{{ vote.get_absolute_url }}/export/csv" rel="nofollow">CSV</a>
+		| <a href="{{ vote.get_absolute_url }}/export/xml" rel="nofollow">XML</a>
+		| <a href="/api/v2/vote_voter?vote={{ vote.id }}" rel="nofollow">JSON</a>
+	</aside>
+</div>
 
 <div class="details-box">
-	<div id="dotchart">
-		{% for item in totals.options %}
-			<div class="label" key="{{item.option.key}}"><span>{{item.option}}</span></div>
-		{% endfor %}
-		{% for voter in voters %}
-			<span
-				class="dot party_{{voter.person.role.party|slice:"0:1"}}"
-				id="dv{{voter.id}}"
-				vote="{{ voter.option.key }}"
-				state="{% if voter.voter_type == 1 %}[Information Missing]{% elif voter.voter_type == 2 %}The Vice President{% elif voter.voter_type == 3 %}{{ voter.person.role.state }}{% endif %}"
-				title="{% if voter.voter_type == 1 %}[Information Missing]{% elif voter.voter_type == 2 %}The Vice President{% elif voter.voter_type == 3 %}{{ voter.person.name }}{% endif %}"
-			> </span>
-		{% endfor %}
-	</div>
-
-    <div class="container">
+   <div class="container">
         <table id="vote-list" style="display: none">
             <thead>
                 <tr>
