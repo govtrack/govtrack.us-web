@@ -200,6 +200,7 @@ function display_comparison(left_text, right_text, left_meta, right_meta) {
 }
 
 function align_panels() {
+	return;
 	$("#bill_comparison_content").css({ marginLeft: -$("h1").offset().left+50,
 	width: $(window).width() - 30 });
 	$("#bill_comparison_content .bill_text_content").css({ width: ($(window).width() - 100)/2 });
@@ -243,6 +244,26 @@ $(function() {
 
 {% block body %}
 
+<div id="bill_comparison_content" style="display: none;">
+	<center style="padding: 1em">
+		<a href="#" onclick="return hide_comparison();">Close Comparison</a>
+	</center>
+
+	<div class="row">
+	<div class="bill_text_content six columns">
+		<div class="header"> </div>
+		<div class="body"> </div>
+	</div>
+	
+	<div class="bill_text_content six columns">
+		<div class="header"> </div>
+		<div class="body"> </div>
+	</div>
+	</div>
+	
+	<div style="clear: both"> </div>
+</div>
+
 <div class="row">
 <div class="nine columns">
 	<div id="main_text_content" class="bill_text_content">
@@ -255,24 +276,6 @@ $(function() {
 
 	<div id="content_loading" class="bill_text_content" style="display: none;">
 		<p>Loading...</p>
-	</div>
-	
-	<div id="bill_comparison_content" style="width: 3000px; overflow: hidden; display: none;">
-		<center style="padding: 1em">
-			<a href="#" onclick="return hide_comparison();">Close Comparison</a>
-		</center>
-	
-		<div class="bill_text_content">
-			<div class="header"> </div>
-			<div class="body"> </div>
-		</div>
-		
-		<div class="bill_text_content">
-			<div class="header"> </div>
-			<div class="body"> </div>
-		</div>
-		
-		<div style="clear: both"> </div>
 	</div>
 </div>
 <div class="three columns">
