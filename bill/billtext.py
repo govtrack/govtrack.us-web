@@ -165,9 +165,14 @@ def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
         dat = json.load(open(basename + "/%s.json" % version))
             
     if not mods_only:
-        raise Exception("Bill text not available.")
+        raise IOError("Bill text not available.")
             
-    gpo_url = dat["urls"]["pdf"]
+    try:
+        gpo_url = dat["urls"]["pdf"]
+    except:
+        # hmm, data format problem
+        raise IOError("Bill metadata not available.")
+        
     m = re.match(r"http://www.gpo.gov/fdsys/pkg/(STATUTE-\d+)/pdf/(STATUTE-\d+-.*).pdf", gpo_url)
     if m:
         gpo_url = "http://www.gpo.gov/fdsys/granule/%s/%s/content-detail.html" % m.groups()

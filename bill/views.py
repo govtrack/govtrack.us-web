@@ -169,8 +169,11 @@ def bill_text(request, congress, type_slug, number, version=None):
     from billtext import get_current_version
     related_bills = []
     for rb in list(bill.find_reintroductions()) + [r.related_bill for r in bill.get_related_bills()]:
-    	rbv = get_current_version(rb)
-        if not (rb, rbv) in related_bills: related_bills.append((rb, rbv))
+        try:
+            rbv = get_current_version(rb)
+            if not (rb, rbv) in related_bills: related_bills.append((rb, rbv))
+        except IOError:
+            pass # text not available
     for btc in BillTextComparison.objects.filter(bill1=bill):
         if not (btc.bill2, btc.ver2) in related_bills: related_bills.append((btc.bill2, btc.ver2))
     for btc in BillTextComparison.objects.filter(bill2=bill):
