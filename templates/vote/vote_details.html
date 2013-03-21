@@ -117,7 +117,7 @@ $(function() {
     {% endif %}
     {% if vote.category == VoteCategory.passage %}
     <p>This was a vote to pass a bill or agree to a resolution.
-    {{vote.related_bill.explanatory_text}}
+    {% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text}}{% endif %}
     </p>
     {% endif %}
     {% if vote.category == VoteCategory.passage_suspension %}
