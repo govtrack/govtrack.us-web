@@ -1,7 +1,7 @@
 {% load events_utils %}GovTrack Email Update
 =====================
 
------ Did you know we're on Facebook and Twitter? Like our Facebook page <https://www.facebook.com/pages/Civic-Impulse/312186525430> or follow @GovTrack <https://twitter.com/govtrack> to stay up to date with the latest bills in Congress. -----
+----- Good morning! We are trying out sending weekday updates in the morning now. Let us know if this is helpful! -----
 
 This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to http://www.govtrack.us/accounts/profile.
 
