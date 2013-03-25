@@ -174,9 +174,9 @@ def bill_text(request, congress, type_slug, number, version=None):
             if not (rb, rbv) in related_bills: related_bills.append((rb, rbv))
         except IOError:
             pass # text not available
-    for btc in BillTextComparison.objects.filter(bill1=bill):
+    for btc in BillTextComparison.objects.filter(bill1=bill).exclude(bill2=bill):
         if not (btc.bill2, btc.ver2) in related_bills: related_bills.append((btc.bill2, btc.ver2))
-    for btc in BillTextComparison.objects.filter(bill2=bill):
+    for btc in BillTextComparison.objects.filter(bill2=bill).exclude(bill1=bill):
         if not (btc.bill1, btc.ver1) in related_bills: related_bills.append((btc.bill1, btc.ver1))
 
     return {
