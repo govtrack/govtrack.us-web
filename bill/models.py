@@ -112,6 +112,11 @@ class Bill(models.Model):
     senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
     major_actions = JSONField(default=[]) # serialized list of all major actions (date/datetime, BillStatus, description)
     
+    sliplawpubpriv = models.CharField(max_length=3, choices=[("PUB", "Public"), ("PRI", "Private")], blank=True, null=True, help_text="For enacted laws, whether the law is a public (PUB) or private (PRI) law. Unique with congress and sliplawnum.")
+    sliplawnum = models.IntegerField(blank=True, null=True, help_text="For enacted laws, the slip law number (i.e. the law number in P.L. XXX-123). Unique with congress and sliplawpublpriv.")
+    #statutescite = models.CharField(max_length=16, blank=True, null=True, help_text="For enacted laws, a normalized U.S. Statutes at Large citation. Available only for years in which the Statutes at Large has already been published.")
+    
+    
     # role is a new field added with, but might not be perfect for overlapping roles (see Cosponsor)
     #for role in PersonRole.objects.filter(startdate__gt="1960-01-01"):
     #    Bill.objects.filter(
@@ -121,7 +126,8 @@ class Bill(models.Model):
     
     class Meta:
         ordering = ('congress', 'bill_type', 'number')
-        unique_together = ('congress', 'bill_type', 'number')
+        unique_together = [('congress', 'bill_type', 'number'),
+        ('congress', 'sliplawpubpriv', 'sliplawnum')]
         
     def __unicode__(self):
         return self.title
@@ -229,6 +235,11 @@ class Bill(models.Model):
     @property
     def opposite_chamber(self):
         return "Senate" if self.bill_type in (BillType.house_bill, BillType.house_resolution, BillType.house_joint_resolution, BillType.house_concurrent_resolution) else "House"
+        
+    @property
+    def slip_law_number(self):
+        if not self.sliplawnum: return None
+        return ("Pub" if self.sliplawpubpriv == "PUB" else "Pvt") + (".L. %d-%d" % (self.congress, self.sliplawnum))
 
     @property
     def cosponsor_count(self):

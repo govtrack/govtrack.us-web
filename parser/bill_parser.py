@@ -2,6 +2,8 @@
 Parser of:
  * bill terms located in data/us/[liv, liv111, crsnet].xml
  * bills located in data/us/*/bills/*.xml
+ 
+for x in {82..112}; do echo $x; RELEASE=1 ./parse.py bill --congress=$x -l ERROR --force --disable-events --disable-indexing; done
 """
 from lxml import etree
 import logging
@@ -316,11 +318,11 @@ def main(options):
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
             if not skip_stuff:
-            	try:
-            		bill = bill_processor.process(Bill(), node)
-            	except:
-            		print fname
-            		raise
+                try:
+                    bill = bill_processor.process(Bill(), node)
+                except:
+                    print fname
+                    raise
             else:
                 m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
                 bill = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
@@ -328,8 +330,15 @@ def main(options):
             seen_bill_ids.append(bill.id) # don't delete me later
             
             actions = []
+            bill.sliplawpubpriv = None
+            bill.sliplawnum = None
             for axn in tree.xpath("actions/*[@state]"):
                 actions.append( (repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))), BillStatus.by_xml_code(axn.xpath("string(@state)")), axn.xpath("string(text)")) )
+                
+                if actions[-1][1] in (BillStatus.enacted_signed, BillStatus.enacted_veto_override):
+                    bill.sliplawpubpriv = "PUB" if axn.get("type") == "public" else "PRI"
+                    bill.sliplawnum = int(axn.get("number").split("-")[1])
+                    
             bill.major_actions = actions
             bill.save()
             if bill_index: bill_index.update_object(bill, using="bill")

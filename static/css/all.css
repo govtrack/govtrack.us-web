@@ -3872,7 +3872,7 @@ select, input.text {
             line-height: 1em;
             padding-bottom: 1em;
         }
-        .site-search-results form p.intro,
+        .site-search-results form .intro,
         form.topbox p.intro {
             width: 436px;
             float: left;
@@ -3886,6 +3886,7 @@ select, input.text {
         }
         .site-search-results form fieldset #search_entry,
         form.topbox fieldset #search_entry {
+		    float: left;
             width: 78%;
         }
         .site-search-results form fieldset #submit,

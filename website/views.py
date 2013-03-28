@@ -157,8 +157,8 @@ def do_site_search(q, allow_redirect=False):
         })
        
     from settings import CURRENT_CONGRESS
-    from bill.search import parse_bill_number
-    bill = parse_bill_number(q)
+    from bill.search import parse_bill_citation
+    bill = parse_bill_citation(q)
     if not bill or not allow_redirect:
         bills = [\
             {"href": b.object.get_absolute_url(),

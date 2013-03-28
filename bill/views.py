@@ -12,7 +12,7 @@ from common.decorators import render_to
 from common.pagination import paginate
 
 from bill.models import Bill, BillType, BillStatus, BillTerm, TermType, BillTextComparison, BillSummary
-from bill.search import bill_search_manager, parse_bill_number
+from bill.search import bill_search_manager, parse_bill_citation
 from bill.title import get_secondary_bill_title
 from committee.util import sort_members
 from person.models import Person
@@ -275,7 +275,7 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
 
 def bill_list(request):
     if request.POST.get("allow_redirect", "") == "true":
-        bill = parse_bill_number(request.POST.get("text", ""), congress=request.POST.get("congress", ""))
+        bill = parse_bill_citation(request.POST.get("text", ""), congress=request.POST.get("congress", ""))
         if bill:
             @json_response
             def get_redirect_response():

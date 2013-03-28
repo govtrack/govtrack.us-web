@@ -54,7 +54,14 @@ def format_congress_number(value):
     return '%s Congress: %d-%d' % (ordinal(value), start.year, end.year)
 
 # this regex must match slugs in BillType enum!
-bill_number_re = re.compile(r"(hr|s|hconres|sconres|hjres|sjres|hres|sres)(\d+)(/(\d+))?", re.I)
+bill_number_re = re.compile(r"(hr|s|hconres|sconres|hjres|sjres|hres|sres)(\d+)(/(\d+))?$", re.I)
+slip_law_number_re = re.compile(r"(P(?:ub)?|P[rv][a-z]*)L(?:aw)?(\d+)-(\d+)$", re.I)
+
+def parse_bill_citation(q, congress=None):
+    b = parse_bill_number(q, congress=congress)
+    if not b: b = parse_slip_law_number(q)
+    return b
+    
 def parse_bill_number(q, congress=None):
     m = bill_number_re.match(q.replace(" ", "").replace(".", "").replace("-", ""))
     if m == None: return None
@@ -69,6 +76,19 @@ def parse_bill_number(q, congress=None):
         cn = CURRENT_CONGRESS
     try:
         return Bill.objects.get(congress=cn, bill_type=BillType.by_slug(m.group(1).lower()), number=int(m.group(2)))
+    except Bill.DoesNotExist:
+        return None
+
+def parse_slip_law_number(q):
+    m = slip_law_number_re.match(q.replace(" ", "").replace(".", ""))
+    if m == None: return None
+    pub_priv, cn, ln = m.groups()
+    try:
+        return Bill.objects.get(
+            congress = int(cn),
+            sliplawpubpriv = "PUB" if pub_priv.upper() in ("P", "PUB") else "PRI",
+            sliplawnum = int(ln)
+            )
     except Bill.DoesNotExist:
         return None
 

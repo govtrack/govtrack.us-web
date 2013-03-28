@@ -228,6 +228,13 @@
 				{% endif %}
 				</dd>
 				
+				{% with bill.slip_law_number as sln %}
+				{% if sln %}
+					<dt>Slip Law:</dt>
+					<dd>This bill became {{bill.slip_law_number}}.</dd>
+				{% endif %}
+				{% endwith %}				
+				
 				{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
 				<dt>Schedule:</dt>
 				<dd>The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</dd>
@@ -293,6 +300,9 @@
 			
 				<dt>Status:</dt>
 				<dd>Enacted or Agreed to on {{bill.current_status_date}}</dd>
+				
+				<dt>Slip Law:</dt>
+				<dd>This bill became {{bill.slip_law_number}}.</dd>
 			</dl>
 			<p>Limited information is available for bills and resolutions from 1957-1972.</p>
 			{% endif %}
