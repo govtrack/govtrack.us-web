@@ -399,7 +399,7 @@ class Bill(models.Model):
                     action = text
                     break
             else:
-                raise Exception("Invalid event.")
+                raise Exception("Invalid %s event in %s." % (status, str(self)))
                 
         return {
             "type": status.label,
