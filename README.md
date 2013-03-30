@@ -29,6 +29,13 @@ GovTrack.us runs on Ubuntu 12.10.
   cd ./govtrack.us-web/
   ```
 
+* Initialize git submodules:
+
+  ```
+  git submodule init
+  git submodule update
+  ```
+
 * Create a local settings file based on the example file:
 
   ```

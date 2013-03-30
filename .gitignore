@@ -5,7 +5,7 @@
 *~
 
 # Project specific
-.env
+env/
 log
 settings_local.py
 pip-log.txt
