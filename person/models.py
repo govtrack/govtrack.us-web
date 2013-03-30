@@ -68,6 +68,9 @@ class Person(models.Model):
     #######
     # api
     api_recurse_on_single = ('roles', 'committeeassignments')
+    api_additional_fields = {
+        "link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+    }
     api_example_id = 400326
     #######
 
