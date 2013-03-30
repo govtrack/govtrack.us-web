@@ -9,6 +9,7 @@ urlpatterns = patterns('person.views',
 
     url(r'^(?:([A-Za-z]+)(?:/(\d{1,2}))?)?/?$', 'browsemembersbymap'), # Wikipedia has bad links using state names instead of abbrs, so we support it
 	url(r'^[^/]+/(\d+)', 'person_details', name='person_details'),
+    url(r'^(\d+)', 'person_details', name='person_details'),
 	
     url(r'^ajax/district_lookup$', 'district_lookup'),
 	url(r'^embed/mapframe(?:\.xpd)?$', 'districtmapembed', name='districtmapembed'),
