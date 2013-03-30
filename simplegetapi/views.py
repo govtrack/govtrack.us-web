@@ -518,6 +518,15 @@ def build_api_documentation(model, qs):
     for field_name, field in get_orm_fields(model):
         field_info = { }
 
+        # Indexed?
+        if field_name in indexed_fields:
+            field_info["filterable"] = "Filterable with operators. Sortable."
+        if field_name in indexed_if:
+            if len(indexed_if[field_name]) == 0:
+                field_info["filterable"] = "Filterable."
+            else:
+                field_info["filterable"] = "Filterable when also filtering on " + " and ".join(indexed_if[field_name]) + "."
+                
         if isinstance(field, (str, unicode)):
             # for api_additional_fields
             v = model.api_additional_fields[field] # get the attribute or function
@@ -530,21 +539,32 @@ def build_api_documentation(model, qs):
         elif isinstance(field, RelatedObject):
             # for get_all_related_objects()
             if field_name not in (recurse_on|recurse_on_single): continue
-            field_info["help_text"] = "The %s whose %s field is this object." % (field.model.__name__, field.field.name)
+            field_info["help_text"] = "A list of %s instances whose %s field is this object. Each instance is returned as a JSON dict (or equivalent in other output formats)." % (field.model.__name__, field.field.name)
+            if field_name not in recurse_on:
+                field_info["help_text"] += " Only returned in a single-object query."
             
         else:
             # for regular fields
             field_info["help_text"] = field.help_text
 
-            if isinstance(field, (ForeignKey, ManyToManyField)):
+            if isinstance(field, ForeignKey):
                 if field_name not in (recurse_on|recurse_on_single):
-                    field_info["help_text"] += " Given as an id."
-                elif field_name not in recurse_on:
-                    if isinstance(field, ManyToManyField):
-                        field_info["help_text"] += " Only returned in a query for a single object."
+                    field_info["help_text"] += " Returned as an integer ID."
+                else:
+                    if field_name in recurse_on:
+                        field_info["help_text"] += " The full object is included in the response as a JSON dict (or equivalent in other output formats)."
                     else:
-                        field_info["help_text"] += " In a list/search query, only the id is returned. In a single-object query, the full object is included in the response."
-                    field_info["help_text"] += " When filtering, specify the id of the target object."
+                        field_info["help_text"] += " In a list/search query, only the id is returned. In a single-object query, the full object is included in the response as a JSON dict (or equivalent in other output formats)."
+                    if "filterable" in field_info:
+                        field_info["help_text"] += " When filtering, specify the integer ID of the target object. You may be able to get the ID from another API endpoint."
+
+            if isinstance(field, ManyToManyField):
+                if field_name not in (recurse_on|recurse_on_single): continue
+                field_info["help_text"] += " Returned as a list of JSON dicts (or equivalent in other output formats)."
+                if field_name not in recurse_on:
+                    field_info["help_text"] += " Only returned in a query for a single object."
+                if "filterable" in field_info:
+                    field_info["help_text"] += " When filtering, specify the ID of one target object to test if the target is among the values of this field. You may be able to get the ID from another API endpoint."
 
             # Choices?
             enum = field.choices
@@ -553,16 +573,6 @@ def build_api_documentation(model, qs):
 
         # Stupid Django hard-coded text.
         field_info["help_text"] = field_info.get("help_text", "").replace('Hold down "Control", or "Command" on a Mac, to select more than one.', '')
-
-        # Indexed?
-        if field_name in indexed_fields:
-            field_info["filterable"] = "Filterable with operators. Sortable."
-        if field_name in indexed_if:
-            if len(indexed_if[field_name]) == 0:
-                field_info["filterable"] = "Filterable."
-            else:
-                field_info["filterable"] = "Filterable when also filtering on " + " and ".join(indexed_if[field_name]) + "."
-                
 
         fields_list.append((field_name, field_info))
     
