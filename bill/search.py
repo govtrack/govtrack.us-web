@@ -55,7 +55,7 @@ def format_congress_number(value):
 
 # this regex must match slugs in BillType enum!
 bill_number_re = re.compile(r"(hr|s|hconres|sconres|hjres|sjres|hres|sres)(\d+)(/(\d+))?$", re.I)
-slip_law_number_re = re.compile(r"(P(?:ub)?|P[rv][a-z]*)L(?:aw)?(\d+)-(\d+)$", re.I)
+slip_law_number_re = re.compile(r"(P(?:ub[a-z]*)?|P[rv][a-z]*)L(?:aw)?(\d+)-(\d+)$", re.I)
 
 def parse_bill_citation(q, congress=None):
     b = parse_bill_number(q, congress=congress)
@@ -86,7 +86,7 @@ def parse_slip_law_number(q):
     try:
         return Bill.objects.get(
             congress = int(cn),
-            sliplawpubpriv = "PUB" if pub_priv.upper() in ("P", "PUB") else "PRI",
+            sliplawpubpriv = "PUB" if (pub_priv.upper() == "P" or pub_priv.upper().startswith("PUB")) else "PRI",
             sliplawnum = int(ln)
             )
     except Bill.DoesNotExist:
