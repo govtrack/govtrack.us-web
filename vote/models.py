@@ -69,6 +69,9 @@ class Vote(models.Model):
         ordering = ["created", "chamber", "number"]
         unique_together = (('congress', 'chamber', 'session', 'number'),)
         
+    api_additional_fields = {
+        "link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+    }
     api_recurse_on = ('related_bill', 'options')
     api_example_parameters = { "sort": "-created" }
 
