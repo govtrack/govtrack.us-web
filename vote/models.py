@@ -49,7 +49,7 @@ class Vote(models.Model):
     congress = models.IntegerField(help_text="The number of the Congress in which the vote took place. The current Congress is %d. In recent history Congresses are two years; however, this was not always the case." % CURRENT_CONGRESS)
     session = models.CharField(max_length=4, help_text="Within each Congress there are sessions. In recent history the sessions correspond to calendar years and are named accordingly. However, in historical data the sessions may be named in completely other ways, such as with letters A, B, and C. Session names are unique *within* a Congress.")
     chamber = models.IntegerField(choices=CongressChamber, help_text="The chamber in which the vote was held, House or Senate.")
-    number = models.IntegerField('Vote Number', help_text="The number of the vote, unique to a Congress and session pair.")
+    number = models.IntegerField('Vote Number', help_text="The number of the vote, unique to a Congress, session, and chamber.")
     source = models.IntegerField(choices=VoteSource, help_text="The source of the vote information.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.")
     vote_type = models.CharField(max_length=255, help_text="Descriptive text for the type of the vote.")
