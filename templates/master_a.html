@@ -18,9 +18,25 @@
 		google_ad_height = 250;
 		//-->
 		</script>
-		<script type="text/javascript"
-		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-		</script>
+		{% if false %}
+			<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+			</script>
+		{% elif false %}
+			<script type='text/javascript' src='http://dingo.care2.com/petitions/embed.js'></script><div class='care2PetitionEmbed' rssPath='http://www.thepetitionsite.com/feeds/publisher/000/001/700/feed.swf' adSize='small' publisherId='1405' grabbed='0' flags='#000000' buttonColor='#EB6924' html='1'></div>
+		{% else %}
+			<script>
+			// which ad should we display?
+			if (Math.random() < .8) {
+				// GoogleAdSense
+				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
+				ad_exp = "adsense";
+			} else {
+				// Care2 TAP
+				document.write("{{ "<script type='text/javascript' src='http://dingo.care2.com/petitions/embed.js'></script><div class='care2PetitionEmbed' rssPath='http://www.thepetitionsite.com/feeds/publisher/000/001/700/feed.swf' adSize='small' publisherId='1405' grabbed='0' flags='#000002' buttonColor='#EB6924' html='1'></div>"|escapejs }}");
+				ad_exp = "care2tap";
+			}
+			</script>
+		{% endif %}
 		<div class="explainer"><a href="/advertising">(About Ads | Advertise Here)</a></div>
 	</div>
 </div>

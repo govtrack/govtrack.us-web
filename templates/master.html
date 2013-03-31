@@ -46,6 +46,8 @@
 		<style type="text/css">
 		{% block style %}{% endblock %}
 		</style>
+		
+		<script>var ad_exp = null;</script>
 	</head>
 
 <body class="{% block body_class %}{% endblock %}">
@@ -328,6 +330,7 @@
 	 pageTracker = _gat._getTracker("{{GOOGLE_ANALYTICS_KEY|escapejs}}");
 	 pageTracker._setCustomVar(1, "Login Type", {% if request.user.is_authenticated %}"Logged In"{% elif request.anonymous %}the_user ? "Logged In" : "Anonymous"{% else %}"Anonymous"{% endif %}, 2);
 	 pageTracker._setCustomVar(2, "MySegment", {% if not request.anonymous %}"{% if remote_net_house %}House{% elif remote_net_senate %}Senate{% elif is_dc_local %}DC{% else %}Other{% endif %}"{% else %}the_segment{% endif %}, 1);
+	 pageTracker._setCustomVar(3, "AdExp", ad_exp, 3);
 	 pageTracker._trackPageview();
 	} catch(err) {}
 	</script>

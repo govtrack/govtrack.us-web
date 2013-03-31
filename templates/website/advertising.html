@@ -1,25 +1,27 @@
 {% extends "master.html" %}
 {% block title %}Advertising on GovTrack.us{% endblock %}
+
 {% block crumbs %}
-<ul><li><a href="/about">About GovTrack</a></li><li>Advertising</li></ul>
+	<h1>About the Advertising</h1>
 {% endblock %}
-{% block summary %}
-<h1>Advertising on GovTrack</h1>
 
-<p>GovTrack is a project of <a href="http://www.civicimpulse.com/">Civic Impulse, LLC</a>, a for-profit company but one who thinks far more about how to do good work than raising profits. That said, we do run advertising to keep the site humming.</p>
-{% endblock %}
-{% block body %}
-<section class="main">
-	<h2>About the Ads You See</h2>
-	<p>We are an equal-opportunity advertiser, meaning we don&rsquo;t solicit ads from one side of the political spectrum or the other. Most ads are recruited through ad networks that automatically choose the most relevant ads based on the page you are viewing and other factors. In those cases, we had no particular role in determining the advertisements you are viewing. It&rsquo;s a lot like a newspaper: the ads and the content are separate operations that do not affect each other.</p>
-
-	<h2>Interested in Advertising?</h2>
-	<p>Our ads reach politically interested and active people in the United States. If there is a bill in Congress relevant to your business industry, that's probably a good place for you to advertise.</p>
+{% block override_content %}
+<div id="content" class="row">
 	
-	<p>Our rates start at $1.50 CPC or $3.00 CPM. We do not advertise text links.</p>
+	<div class="eight columns">
+		<h2>About the Ads You See</h2>
+		
+		<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com/">Civic Impulse, LLC</a>. We are a small for-profit company trying to make the world better. We sell ad space here to cover our operating costs and to pay our staff. Without advertising, GovTrack as you know it would not be possible. (<a href="/about">More about us...</a>)</p>
 	
-	<p>Drop us a line if you would like to advertise here: <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>.</p>
-</section>
+		<p>Ads on GovTrack work just like the ads you see on TV or in newspapers. We don&rsquo;t solicit ads from one side of the political spectrum or the other. Instead, we sell our ad space to anyone who will pay our ad rates.</p>
+		
+		<p>To maintain our independence from the advertisers, and to reduce the cost to us of managing our ad space, our ad space is currently managed by <a href="https://www.google.com/adsense">Google AdSense</a> and <a href="http://www.care2.com/">Care2</a>. In most cases we do not know who is advertising on GovTrack. Occasionally we sell limited ad space directly to advertisers.</p>
+		
+		<h2>Interested in Advertising on GovTrack?</h2>
+		
+		<p>If you would like to advertise on GovtTrack, please contact us at <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>. Our rates start at $1.50 CPC or $3.00 CPM. We do not advertise text links.</p>
+	</div>
+</div>
 
 {% endblock %}
 
