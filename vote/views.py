@@ -173,6 +173,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 		vote_result_2 = "Proceed"
 	else:
 		vote_result_2 = re.sub("^(Bill|Amendment|Resolution|Conference Report|Nomination|Motion to \S+) ", "", vote.result)
+	if vote_result_2 == "unknown": vote_result_2 = ""
 	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
 	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
 	
@@ -273,10 +274,13 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 		# 4 for Senate (http://www.senate.gov/artandhistory/art/special/Desks/chambermap.cfm)
 		# about 8 for the House
 		
+	# Long ago Congress had very few people.
+	seating_rows = min(total_count / 8 + 1, seating_rows)
+		
 	# Determine the seating chart dimensions: the radius of the inside row of
 	# seats and the radius of the outside row of seats.
 	inner_r = w/2 * 1.25 + 5 # wrap closely around the text in the middle
-	if seating_rows == 4: inner_r = max(inner_r, 75) # don't make the inner radius too small
+	if seating_rows <= 4: inner_r = max(inner_r, 75) # don't make the inner radius too small
 	outer_r = image_width * .45 # end close to the image width
 	
 	# If we assume the absolute spacing of seats is constant from row to row, then
@@ -296,7 +300,10 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 	rowcounts = []
 	for row in xrange(seating_rows):
 		# What's the radius of this row?
-		r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
+		if seating_rows > 1:
+			r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
+		else:
+			r = inner_r
 		
 		# How many seats should we put on this row?
 		if row < seating_rows-1:
@@ -394,7 +401,10 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 	
 	for ((row, seat_pos), (party, vote)) in seats:	
 		# radius of this row (again, code dup)
-		r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
+		if seating_rows > 1:
+			r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
+		else:
+			r = inner_r
 		
 		# draw
 		ctx.set_source_rgb(*group_colors[(party, vote)])
