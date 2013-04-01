@@ -3129,6 +3129,7 @@ aside .download-links { padding: 31px 0 0 	}
         color: #fff;
         text-shadow: 0 1px 1px #3d6410;
         margin: 0 0 15px;
+        cursor: pointer;
         }
         .track-btn, .green-btn { background: url(../images/btn-sprite-green.png) no-repeat; }
         .grey-btn { background: url(../images/btn-sprite-grey.png) no-repeat; }
@@ -3141,6 +3142,13 @@ aside .download-links { padding: 31px 0 0 	}
             }
         .track-btn:active, .green-btn:active, .grey-btn:active, .yellow-btn:active { 
             background-position: 0 -86px;
+        }
+        .small-btn {
+			height: 34px;
+			width: 150px;
+			font-size: 14px;
+			line-height: 34px;
+			text-transform: none;
         }
     .tracker_widget {
         position: absolute;

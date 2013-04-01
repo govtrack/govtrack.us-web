@@ -13,3 +13,7 @@ urlpatterns = patterns('bill.views',
     url(r'^_ajax/join_community', 'join_community'),
     url(r'^_admin/go_to_summary_admin', 'go_to_summary_admin', name="bill_go_to_summary_admin"),
 )
+
+urlpatterns += patterns('bill.aprilfools',
+    url(r'^_ajax/april_fools', 'bill_or_not'),
+)

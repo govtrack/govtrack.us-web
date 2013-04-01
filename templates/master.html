@@ -37,28 +37,28 @@
 		<script src="{{ MEDIA_URL }}js/jquery.ba-bbq.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-utils.js?2013-02-11"></script>
 		{% block extra_js %}{% endblock %}
+		
+		<link rel="stylesheet" href="{{ MEDIA_URL }}js/colorbox/colorbox.css" />
+        <script src="{{ MEDIA_URL }}js/colorbox/jquery.colorbox-min.js"></script>
 
 		{% block head %}{% endblock %}
 
 		<style type="text/css">
 		{% block style %}{% endblock %}
+		
+		#april_fools { width: 800px; height: 400px; }
+		#april_fools .buttons-b { display: none; }
+		@media only screen and (max-width: 767px) {
+			#april_fools { width: 320px; height: 700px; }
+			#april_fools .buttons-b { display: block; }
+			#april_fools .buttons-a { display: none; }
+		}
 		</style>
 	</head>
 
 <body class="{% block body_class %}{% endblock %}">
 
-  	{% comment %}
-	<!-- Bulk Data Campaign -->
-	<div style="position: absolute; top: 0; left: 0; width: 100%; height: 1em; z-index: 10;">
-		<div style="margin: 0 auto; width: 960px; height: 1em; margin-top: .5em; text-align: center; font-weight: bold;">
-			<a href="/campaigns/bulkdata">Congress is rolling the clock back on transparency. Take action!</a>
-		</div>
-	</div>
-	<!-- End Bulk Data Campaign -->
-	{% endcomment %}
-
-
-	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
+	{% if 0 and pagename != "blog_template" and not user_has_bounced_mail %}
 	<div id="sitenewscontainer" style="display: none" data-seq="26">
 		<div id="sitenews">
 			<div><a href="#" onclick="return hide_site_news()">X</a></div>
@@ -93,6 +93,111 @@
 		</div>
 	</div>
 	{% endif %}
+	
+	<div style="display: none;">
+		<div id="april_fools" style="padding: 15px;">
+			<center>
+				<h2 style="border-bottom: 1px solid #333">Real or Not? Only a true wonk knows.</h2>
+				<h4 style="margin-bottom: 1em; font-family: sans-serif;">Which of these is the real <span class="bill-number" style="font-weight: bold; font-size: 110%">H.R. 1234</span>?</h4>
+			</center>
+			<div class="row">
+				<div class="six columns choice_a">
+					<b>A)</b> <span> </span>
+					<div class="buttons-b"><div class="buttons"><div class="grey-btn small-btn" style="margin: 1em auto" data-which="choice_a">This One&rsquo;s Real</div></div></div>
+				</div>
+				<div class="six columns choice_b">
+					<b>B)</b> <span> </span>
+					<div class="buttons-b"><div class="buttons"><div class="grey-btn small-btn" style="margin: 1em auto" data-which="choice_b">This One&rsquo;s Real</div></div></div>
+				</div>
+			</div>
+			<div class="buttons-a">
+			<div class="row buttons">
+				<div class="six columns"><div class="grey-btn small-btn" style="margin: 1em auto" data-which="choice_a">This One&rsquo;s Real</div></div>
+				<div class="six columns"><div class="grey-btn small-btn" style="margin: 1em auto" data-which="choice_b">This One&rsquo;s Real</div></div>
+			</div>
+			</div>
+			<div class="answer" style="text-align: center; display: none; margin-top: 1.5em;">
+				<div><b>That&rsquo;s <span class="result"> </span></b> Now go <a href="">read more about <span class="bill-number"> </span></a> to see what the <span class="bill-type"> </span> introduced on <span class="bill-date"> </span> was about.</div>
+				
+				<div class="green-btn" style="margin: 1em auto">Play Again</div>
+			</div>
+			<p style="text-align: center; font-size: 90%; color: #666; margin-top: 1em;"><a href="#" onclick="return end_game()">End Game</a></p>
+		</div>
+	</div>
+	<div id="sitenewscontainer" style="display: none">
+		<div id="sitenews">
+			<div><a href="#" onclick="return hide_site_news()">X</a></div>
+			<div>
+				<div><a href="#" onclick="show_bill_or_not(true); return false;">Play &ldquo;Real or Not&rdquo; again?</a></div>
+			</div>
+			<div style="clear: both"> </div>
+		</div>
+	</div>
+	<script>
+	var right_answer = null;
+	function show_bill_or_not(show_popup) {
+		$.ajax("/congress/bills/_ajax/april_fools", {
+			success: function(res) {
+				right_answer = (Math.random() < .5 ? "choice_a" : "choice_b");
+				wrong_answer = (right_answer == "choice_a" ? "choice_b" : "choice_a");
+			
+				$("#april_fools .bill-number").text(res.bill_number);
+				$("#april_fools .bill-type").text(res.bill_type);
+				$("#april_fools .bill-date").text(res.actual_bill_intro_date);
+				$("#april_fools .answer a").attr('href', res.actual_bill_link);
+				$("#april_fools ." + right_answer + " span").text(res.actual_bill_title);
+				$("#april_fools ." + wrong_answer + " span").text(res.fake_bill_title);
+
+				$('#april_fools .buttons').show();
+				$('#april_fools .answer').hide();
+
+				if (show_popup) {
+					pageTracker._trackEvent('Real or Not', 'Displayed', null);
+					$.colorbox({href: "#april_fools", inline: true, open: true});
+				}
+			}
+		});
+		
+	}
+	function end_game() {
+		$.colorbox.close();
+		pageTracker._trackEvent('Real or Not', 'End Game', null);
+		return false;
+	}
+	$(function() {
+		// init event handlers
+		$("#april_fools .green-btn").click(function() {
+			show_bill_or_not(false);
+			pageTracker._trackEvent('Real or Not', 'Play Again', null);
+		});
+		$("#april_fools .grey-btn").click(function() {
+			$('#april_fools .buttons').fadeOut(function() { $('#april_fools .answer').fadeIn(); });
+		
+			var which = $(this).attr('data-which');
+			if (which == right_answer) {
+				$('#april_fools .result').text("right!"); 
+			} else {
+				$('#april_fools .result').text("not right, sorry.");
+			}
+			
+			pageTracker._trackEvent('Real or Not', 'Responded', (which == right_answer) ? "right" : "wrong");
+		});
+		
+		// show only on the first page load, and after that make the game available
+		// in the site news banner
+		if ($.cookie("game") != "1") {
+			show_bill_or_not(true);
+			$.cookie("game", "1", { path: '/' });
+		}
+	
+		$('#sitenewscontainer').show();
+	});
+	function hide_site_news() {
+		$('#sitenewscontainer').fadeOut();
+		$.cookie("game", null, { path: '/' }); // reset cookie :)
+	}
+	</script>
+	
 
 	<div id="wrapper">
 
