@@ -2,7 +2,7 @@
 
 # ./run_scrapers.py text bills votes stats
 
-import os, os.path, glob, re, hashlib, shutil, sys
+import os, os.path, glob, re, hashlib, shutil, sys, datetime
 
 CONGRESS = 113
 SCRAPER_PATH = "../scripts/congress"
@@ -177,7 +177,8 @@ if "amendments" in sys.argv:
 
 if "votes" in sys.argv:
 	# Scrape.
-	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
+	session = str(datetime.datetime.now().year)
+	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --session=%s --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, session, log_level))
 	
 	# Copy files into legacy location.
 	did_any_file_change = False

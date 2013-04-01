@@ -149,7 +149,9 @@ class BillProcessor(XmlProcessor):
     def process_committees(self, obj, node):
         comlist = []
         for subnode in node.xpath('./committees/committee'):
-            if subnode.get('code') == "": continue
+            if subnode.get('code') == "":
+                log.warn("Missing code attribute on committee %s." % subnode.get("name"))
+                continue
             try:
                 com = Committee.objects.get(code=subnode.get('code'))
             except Committee.DoesNotExist:
