@@ -14,6 +14,7 @@ urlpatterns = patterns('bill.views',
     url(r'^_admin/go_to_summary_admin', 'go_to_summary_admin', name="bill_go_to_summary_admin"),
 )
 
-urlpatterns += patterns('bill.aprilfools',
-    url(r'^_ajax/april_fools', 'bill_or_not'),
+urlpatterns += patterns('',
+	url(r'^real_or_not', 'bill.bill_or_not.bill_or_not'),
+    url(r'^_ajax/bill_or_not', 'bill.bill_or_not.load_game'),
 )

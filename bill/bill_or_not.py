@@ -2,7 +2,16 @@
 
 from bill.models import *
 from registration.helpers import json_response
+
+from common.decorators import render_to
+from twostream.decorators import anonymous_view
+
 import random, codecs
+
+@anonymous_view
+@render_to('bill/bill_or_not.html')
+def bill_or_not(request):
+	return { }
 
 pregen_bill_titles = None
 def make_random_bill_title(bill_type):
@@ -18,7 +27,7 @@ def make_random_bill_title(bill_type):
 	return random.choice(pregen_bill_titles[bill_type])
 
 @json_response
-def bill_or_not(request):
+def load_game(request):
 	type_map = { "bill": (BillType.house_bill, BillType.senate_bill),
 		"resolution": (BillType.house_resolution, BillType.senate_resolution) }
 	
