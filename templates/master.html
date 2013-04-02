@@ -58,12 +58,12 @@
 
 <body class="{% block body_class %}{% endblock %}">
 
-	{% if 0 and pagename != "blog_template" and not user_has_bounced_mail %}
+	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
 	<div id="sitenewscontainer" style="display: none" data-seq="26">
 		<div id="sitenews">
 			<div><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div>
-				<div>What does this bill mean? GovTrack is now providing original summaries of select legislation: <a href="/events/bill-summaries">read them all</a>.</div>
+				<div>Play <a href="#" onclick="show_bill_or_not(true); return false;">&ldquo;Real or Not&rdquo;</a>: Which is the real bill?</div>
 			</div>
 			<div style="clear: both"> </div>
 		</div>
@@ -124,15 +124,6 @@
 			<p style="text-align: center; font-size: 90%; color: #666; margin-top: 1em;"><a href="#" onclick="return end_game()">End Game</a></p>
 		</div>
 	</div>
-	<div id="sitenewscontainer" style="display: none">
-		<div id="sitenews">
-			<div><a href="#" onclick="return hide_site_news()">X</a></div>
-			<div>
-				<div><a href="#" onclick="show_bill_or_not(true); return false;">Play &ldquo;Real or Not&rdquo; again?</a></div>
-			</div>
-			<div style="clear: both"> </div>
-		</div>
-	</div>
 	<script>
 	var right_answer = null;
 	function show_bill_or_not(show_popup) {
@@ -182,20 +173,7 @@
 			
 			pageTracker._trackEvent('Real or Not', 'Responded', (which == right_answer) ? "right" : "wrong");
 		});
-		
-		// show only on the first page load, and after that make the game available
-		// in the site news banner
-		if ($.cookie("game") != "1") {
-			show_bill_or_not(true);
-			$.cookie("game", "1", { path: '/' });
-		}
-	
-		$('#sitenewscontainer').show();
 	});
-	function hide_site_news() {
-		$('#sitenewscontainer').fadeOut();
-		$.cookie("game", null, { path: '/' }); // reset cookie :)
-	}
 	</script>
 	
 
