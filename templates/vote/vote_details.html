@@ -299,7 +299,7 @@ $(function() {
                 </td>
                 <td>
                 	{% if voter.voter_type_is_member %}
-		                {{ voter.person.role.state }}{% if voter.person.role.district %} {{ voter.person.role.district|ordinalhtml|rjust:15 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
+		                {{ voter.person.role.state }}{% if voter.person.role.district and voter.person.role.district != -1 %} {{ voter.person.role.district|ordinalhtml|rjust:15 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
                     {% else %}
                     	-- {% comment %} a single dash confuses the table sorter?? {% endcomment %}
                     {% endif %}
