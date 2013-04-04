@@ -65,7 +65,7 @@
 		<div style="padding: 4em 0 0 1em">
 		{% if not 'googlebot(at)googlebot.com' in request.META.HTTP_FROM %}
 		<div style="margin: 1em 0 1.5em 2em">
-			<a href="#" class="yellow-btn" onclick="return show_talk_panel();">Create a Group</a>
+			<a href="#" class="push-btn yellow-btn" onclick="return show_talk_panel();">Create a Group</a>
 				{% comment %}Google likes to follow the social registration links which generates an error at Twitter that gets sent in an email to the site maintainer.{% endcomment %}
 			<script>
 			function show_talk_panel() {

@@ -3117,7 +3117,7 @@ aside .download-links { padding: 31px 0 0 	}
 
 /*  Tracker widget styles 
     =========================================================== */
-    .track-btn, .green-btn, .grey-btn, .yellow-btn {
+    .track-btn, .push-btn {
         height: 39px;
         width: 170px;
         font-family: OpenSansRegular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -3134,13 +3134,13 @@ aside .download-links { padding: 31px 0 0 	}
         .track-btn, .green-btn { background: url(../images/btn-sprite-green.png) no-repeat; }
         .grey-btn { background: url(../images/btn-sprite-grey.png) no-repeat; }
         .yellow-btn { background: url(../images/btn-sprite-yellow.png) no-repeat; }
-        .track-btn:hover, .green-btn:hover, .grey-btn:hover, .yellow-btn:hover {
+        .track-btn:hover, .push-btn:hover {
             color: #fff;
             text-decoration: none;
             background-position: 0 -43px;
             border-bottom: 0;
             }
-        .track-btn:active, .green-btn:active, .grey-btn:active, .yellow-btn:active { 
+        .track-btn:active, .push-btn:active { 
             background-position: 0 -86px;
         }
         .small-btn {
