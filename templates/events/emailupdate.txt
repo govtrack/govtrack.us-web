@@ -1,8 +1,8 @@
 {% load events_utils %}GovTrack Email Update
 =====================
-
+{% comment %}
 ----- Good morning! We are trying out sending weekday updates in the morning now. Let us know if this is helpful! -----
-
+{% endcomment %}
 This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to http://www.govtrack.us/accounts/profile.
 
 {% for list, events in eventslists %}
