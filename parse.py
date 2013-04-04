@@ -1,4 +1,4 @@
-#!.env/bin/python
+#!env/bin/python
 from optparse import OptionParser
 import sys, os, os.path
 import logging
