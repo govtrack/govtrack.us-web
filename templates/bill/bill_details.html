@@ -96,20 +96,21 @@
 			$('.share-on-fb').show();
 			$('.share-on-fb-new').show();
 			$('.share-on-fb-existing').hide();
+			$('.share-on-fb .no_hover').text("Share");
 			if (!fb_actions) return;
 			for (var ax in fb_actions) {
 				if (!fb_actions[ax]) continue;
 				$('.share-on-fb-new').hide();
 				$('.share-on-fb-existing').show();
-				if (ax == "track") ax = "are tracking";
-				$('.share-on-fb-existing span').text("You " + ax + " this {{bill.noun}}.")
+				if (ax == "track") ax = "am tracking";
+				$('.share-on-fb-existing span').text("I " + ax + " this bill.")
+				$('.share-on-fb .no_hover').text("Shared!");
 				return;
 			}
 		}
 		
-		function fb_unshare(callback) {
+		function fb_unshare(dont_show_divs) {
 			if (!fb_actions) return; // not initialized, so how are we unsharing?
-			var has_action = false;
 			for (var ax in fb_actions) {
 				if (fb_actions[ax]) {
 					// log in and delete the action
@@ -119,26 +120,27 @@
 						  og_url,
 						  'delete',
 						  function(response) {
-						  	if (callback)
-						  	  callback();
-						  	callback = null; // execute once!
 						  }
 						);			
 					 });
 					 
 					// clear now so it's not async with updating the display immediately
 					fb_actions[ax] = null;
-					has_action = true;					
 				}
 			}
-			update_fb_action_status();
-			if (!has_action) callback();
+			if (!dont_show_divs) update_fb_action_status();
 			return false;
 		}
 		
 		function fb_share(action_name) {
 			// already did this?
 			if (fb_actions && fb_actions[action_name]) return false;
+			
+			// this takes some time, so show a 'working' div.
+			$('.share-on-fb-working').show();
+			$('.share-on-fb-new').hide();
+			$('.share-on-fb-existing').hide();
+			$('.share-on-fb .no_hover').text("Sharing...");
 			
 			// make sure we have permission (w/ correct scope) to post the action first...
 			fb_ensure_logged_in(function() {
@@ -152,28 +154,37 @@
 		}
 			
 		function fb_share_2(action_name) {
-			// delete existing actions on this bill
-			fb_unshare(function() {
-				// post new action
-				FB.api(
-				  '/me/og_govtrack:' + action_name,
-				  'post',
-				  {
-					bill: fb_action_target_url
-					//messge: ...
-				  },
-				  function(response) {
-					fb_actions[action_name] = response.id;
-					update_fb_action_status();
-				  }
-				);			
-			});
+			if (fb_actions[action_name]) {
+				// If, after logging in, it turns out we already did this,
+				// then return.
+				update_fb_action_status();
+				$('.share-on-fb-working').hide();
+				return;
+			}
+			
+			// delete existing actions on this bill...
+			// can be async with next because we know the desired action
+			// doesn't exist, so we're free to create it at the same time
+			// we delete anything else.
+			fb_unshare(true);
+			
+			// post new action
+			FB.api(
+			  '/me/og_govtrack:' + action_name,
+			  'post',
+			  {
+				bill: fb_action_target_url
+				//messge: ...
+			  },
+			  function(response) {
+				fb_actions[action_name] = response.id;
+				update_fb_action_status();
+				$('.share-on-fb-working').hide();
+			  }
+			);			
 		}
 				
-	if (window.location.hash == "#fb-staging") {
-		window.fbAsyncInitFuncs.push(fb_set_initial_state); // must be before FB script is loaded
-		$(function() { $('.fb-like').hide(); }); // remove me later, for now must execute after the div is actually loaded
-	}
+	window.fbAsyncInitFuncs.push(fb_set_initial_state); // must be before FB script is loaded
 	</script>
 {% endblock %}
 
@@ -201,6 +212,12 @@
 .minor_vote {
 	display: none;
 }
+
+.blue-facebook-btn .on_hover { display: none; }
+.blue-facebook-btn:hover .no_hover { display: none; }
+.blue-facebook-btn:hover .on_hover { display: block; }
+.blue-facebook-btn a { color: #FFA; font-weight: bold; }
+.blue-facebook-btn a:hover { text-decoration: underline; border: none; }
 </style>
 {% endblock %}
 
@@ -413,24 +430,29 @@
 
 		{% endcomment %}
 		
-		<div class="share-on-fb" style="display: none; margin-top: 1em">
-			<div><b>Share on Facebook:</b></div>
-			<div class="share-on-fb-new">
-				<div>I
-					<a href="#" onclick="return fb_share('support');">support</a>
-					| <a href="#" onclick="return fb_share('oppose');">oppose</a>
-					| <a href="#" onclick="return fb_share('track');">am tracking</a>
-					this {{bill.noun}}.
+
+		<div class="share-on-fb" style="display: none; margin-top: 12px;">
+			<div class="push-btn blue-facebook-btn" style="cursor: default; margin: 0 auto;">
+				<div class="no_hover" style="margin-left: 15px">Share</div>
+				<div class="on_hover">
+					<div class="push-btn blue-facebook-btn-wide" style="cursor: default; width: 260px; text-align: left; padding: 4px 5px 4px 46px; font-size: 12px; line-height: 16px; text-transform: none; color: white; float: right;">
+						<div class="share-on-fb-working" style="display: none;">Updating your wall...</div>
+						<div class="share-on-fb-new">
+							<div>Write on your wall: &ldquo;I
+								<a href="#" onclick="return fb_share('support');">support</a>
+								<span style="color: #EEE">or</span> <a href="#" onclick="return fb_share('oppose');">oppose</a>
+								<span style="color: #EEE">or</span> <a href="#" onclick="return fb_share('track');">am tracking</a>
+								this bill.&rdquo;
+							</div>
+						</div>
+						<div class="share-on-fb-existing">
+							You shared: &ldquo;<span> </span>&rdquo;
+							[<a href="#" onclick="return fb_unshare();">Remove From Wall</a>]
+						</div>
+					</div>
 				</div>
 			</div>
-			<div class="share-on-fb-existing">
-				<span> </span> [<a href="#" onclick="return fb_unshare();">X</a>]
-			</div>
 		</div>
-		
-		<div class="fb-like" data-send="true" data-layout="button_count" data-width="170" data-show-faces="false" data-font="arial" style="margin-top: 10px"></div>
-		{% comment %}
-		{% endcomment %}
 	</div><!-- /actions -->
 	{% endif %}
 	
