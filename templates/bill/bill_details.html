@@ -46,8 +46,7 @@
 			 }, {scope: 'publish_actions'});			
 		}
 		
-		function fb_get_recorded_actions(){
-			fb_actions = { };
+		function fb_set_initial_state(){
 			var getLoginStatusCallback = function(response) {
 				// firefox doesn't do anything unless we do something here??
 				function blah() { }
@@ -56,9 +55,7 @@
 				if (response.status != "connected") {
 					update_fb_action_status();
 				} else {
-					fb_get_recorded_actions2("track");
-					fb_get_recorded_actions2("support");
-					fb_get_recorded_actions2("oppose");
+					fb_get_current_actions(update_fb_action_status);
 					
 					// look ahead for the user's current permission so we
 					// don't have to force a login later
@@ -69,7 +66,15 @@
 			}
 			FB.getLoginStatus(getLoginStatusCallback, true);
 		}
-		function fb_get_recorded_actions2(action_name){
+		
+		function fb_get_current_actions(callback) {
+			fb_actions = { };
+			fb_get_current_actions_2("track", callback);
+			fb_get_current_actions_2("support", callback);
+			fb_get_current_actions_2("oppose", callback);
+		}
+		
+		function fb_get_current_actions_2(action_name, callback){
 			FB.api(
 			  '/me/og_govtrack:' + action_name,
 			  'get',
@@ -81,13 +86,17 @@
 				}
 				if ("track" in fb_actions && "support" in fb_actions && "oppose" in fb_actions) {
 					// all three queries are completed
-					update_fb_action_status();
+					callback();
 				}
 			  }
 			);
 		}
+		
 		function update_fb_action_status() {
 			$('.share-on-fb').show();
+			$('.share-on-fb-new').show();
+			$('.share-on-fb-existing').hide();
+			if (!fb_actions) return;
 			for (var ax in fb_actions) {
 				if (!fb_actions[ax]) continue;
 				$('.share-on-fb-new').hide();
@@ -96,11 +105,11 @@
 				$('.share-on-fb-existing span').text("You " + ax + " this {{bill.noun}}.")
 				return;
 			}
-			$('.share-on-fb-new').show();
-			$('.share-on-fb-existing').hide();
 		}
 		
-		function fb_unshare() {
+		function fb_unshare(callback) {
+			if (!fb_actions) return; // not initialized, so how are we unsharing?
+			var has_action = false;
 			for (var ax in fb_actions) {
 				if (fb_actions[ax]) {
 					// log in and delete the action
@@ -109,27 +118,42 @@
 						FB.api(
 						  og_url,
 						  'delete',
-						  function(response) { }
+						  function(response) {
+						  	if (callback)
+						  	  callback();
+						  	callback = null; // execute once!
+						  }
 						);			
 					 });
 					 
-					// clear now so it's not async with the post below
-					fb_actions[ax] = null;					
+					// clear now so it's not async with updating the display immediately
+					fb_actions[ax] = null;
+					has_action = true;					
 				}
 			}
 			update_fb_action_status();
+			if (!has_action) callback();
 			return false;
 		}
 		
 		function fb_share(action_name) {
-			if (!fb_actions) return false; // not initialized
-			if (fb_actions[action_name]) return false; // already did this
-			
-			// delete existing actions on this bill
-			fb_unshare();
+			// already did this?
+			if (fb_actions && fb_actions[action_name]) return false;
 			
 			// make sure we have permission (w/ correct scope) to post the action first...
 			fb_ensure_logged_in(function() {
+				// get current actions if we don't already have it
+				if (!fb_actions)
+					fb_get_current_actions(function() { fb_share_2(action_name); });
+				else
+					fb_share_2(action_name);
+			 });
+			return false;
+		}
+			
+		function fb_share_2(action_name) {
+			// delete existing actions on this bill
+			fb_unshare(function() {
 				// post new action
 				FB.api(
 				  '/me/og_govtrack:' + action_name,
@@ -143,12 +167,11 @@
 					update_fb_action_status();
 				  }
 				);			
-			 });
- 
-			return false;
+			});
 		}
+				
 	if (window.location.hash == "#fb-staging") {
-		window.fbAsyncInitFuncs.push(fb_get_recorded_actions); // must be before FB script is loaded
+		window.fbAsyncInitFuncs.push(fb_set_initial_state); // must be before FB script is loaded
 		$(function() { $('.fb-like').hide(); }); // remove me later, for now must execute after the div is actually loaded
 	}
 	</script>
@@ -390,7 +413,7 @@
 
 		{% endcomment %}
 		
-		<div class="share-on-fb" style="display: none">
+		<div class="share-on-fb" style="display: none; margin-top: 1em">
 			<div><b>Share on Facebook:</b></div>
 			<div class="share-on-fb-new">
 				<div>I
