@@ -48,7 +48,7 @@
 		
 		function fb_get_recorded_actions(){
 			fb_actions = { };
-			FB.getLoginStatus(function(response) {
+			var getLoginStatusCallback = function(response) {
 				// firefox doesn't do anything unless we do something here??
 				function blah() { }
 				blah(response.status);
@@ -66,7 +66,8 @@
 						fb_is_logged_in = "publish_actions" in response.data[0];
 					} );					
 				}
-			});
+			}
+			FB.getLoginStatus(getLoginStatusCallback, true);
 		}
 		function fb_get_recorded_actions2(action_name){
 			FB.api(
@@ -146,6 +147,10 @@
  
 			return false;
 		}
+	if (window.location.hash == "#fb-staging") {
+		window.fbAsyncInitFuncs.push(fb_get_recorded_actions); // must be before FB script is loaded
+		$(function() { $('.fb-like').hide(); }); // remove me later, for now must execute after the div is actually loaded
+	}
 	</script>
 {% endblock %}
 
@@ -153,10 +158,6 @@
 <script>
     $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
     
-	if (window.location.hash == "#fb-staging") {
-		fbAsyncInitFuncs.push(fb_get_recorded_actions);
-		$('.fb-like').hide(); // remove me later
-	}
 </script>
 {% endblock %}
 

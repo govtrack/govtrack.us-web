@@ -43,13 +43,16 @@
 		<script src="{{ MEDIA_URL }}js/colorbox/jquery.colorbox-min.js"></script>
 		{% endcomment %}
 
+		<script>
+		var ad_exp = null;
+		window.fbAsyncInitFuncs = Array(); // Facebook init functions should be defined between here and the FB embed later
+		</script>
+		
 		{% block head %}{% endblock %}
 
 		<style type="text/css">
 		{% block style %}{% endblock %}
 		</style>
-		
-		<script>var ad_exp = null;</script>
 	</head>
 
 <body class="{% block body_class %}{% endblock %}">
@@ -288,7 +291,6 @@
 	<!-- Facebook -->
 	<div id="fb-root"></div>
 	<script>
-	  var fbAsyncInitFuncs = Array();
 	  window.fbAsyncInit = function() {
 		// init the FB JS SDK
 		FB.init({
@@ -299,8 +301,8 @@
 		});
 
 		// Additional initialization code such as adding Event Listeners goes here
-		for (var i = 0; i < fbAsyncInitFuncs.length; i++) {
-			fbAsyncInitFuncs[i]();
+		for (var i = 0; i < window.fbAsyncInitFuncs.length; i++) {
+			window.fbAsyncInitFuncs[i]();
 		}
 	  };
 
