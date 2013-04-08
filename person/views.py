@@ -280,7 +280,7 @@ def do_district_lookup(lng, lat):
     if len(resp["objects"]) > 1:
         return { "error": "point is within multiple districts!" }
         
-    d = resp["objects"][0]["slug"].split("-")
+    d = resp["objects"][0]["external_id"].split("-")
     return { "state": d[0].upper(), "district": int(d[1]) }
 
 import django.contrib.sitemaps
