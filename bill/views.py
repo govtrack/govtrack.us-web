@@ -137,9 +137,6 @@ def market_test_vote(request):
 @anonymous_view
 @render_to('bill/bill_text.html')
 def bill_text(request, congress, type_slug, number, version=None):
-    if int(congress) < 103:
-        raise Http404("Bill text is not available before the 103rd congress.")
-
     if version == "":
         version = None
     

@@ -79,7 +79,9 @@ class BillProcessor(XmlProcessor):
             
         obj.save() # save before using m2m relations
         self.process_committees(obj, node)
-        self.process_terms(obj, node, obj.congress)
+        if int(obj.congress) >= 93:
+            # Bills from the Statutes at Large use some other subject term domain.
+            self.process_terms(obj, node, obj.congress)
         self.process_consponsors(obj, node)
         self.process_relatedbills(obj, node)
         return obj
@@ -149,7 +151,7 @@ class BillProcessor(XmlProcessor):
     def process_committees(self, obj, node):
         comlist = []
         for subnode in node.xpath('./committees/committee'):
-            if subnode.get('code') == "":
+            if subnode.get('code') in ("", None):
                 log.warn("Missing code attribute on committee %s." % subnode.get("name"))
                 continue
             try:

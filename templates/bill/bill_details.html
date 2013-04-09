@@ -700,7 +700,7 @@
 						<dd>
 							{% if not text_info %}
 								<p>Text not yet available.</p>
-							{% elif bill.congress >= 103 %}
+							{% elif text_info.has_html_text %}
 								{% if bill.congress >= 112 %}
 								<a href="{{bill.get_absolute_url}}/text">
 									<img src="http://www.govtrack.us/{{text_info.basename}}-thumb200.png" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>

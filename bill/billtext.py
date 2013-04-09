@@ -95,6 +95,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         bill_text_content = None
     else:
         if plain_text:
+            # plain_text never raises an IOError
             try:
                 return open(basename + ".txt").read().decode("utf8", "ignore") # otherwise we get 'Chuck failed' in the xapian_backend apparently due to decoding issue.
             except IOError:
@@ -164,9 +165,35 @@ def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
     else:
         dat = json.load(open(basename + "/%s.json" % version))
             
+    # Load the text content (unless mods_only is set).
+    bill_text_content = None
+    try:
+        if not dat: raise IOError("Bill text is not available for this bill.")
+        if not mods_only:
+            bill_text_content = open(basename + "/" + dat["version_code"] + "/document.txt").read().decode("utf8")
+    except IOError:
+        # text not available
+        if mods_only or not plain_text: raise # these calls require raising
+        bill_text_content = "" # plain_text gets "" returned instead
+
+    # Caller just wants the plain text?
+    if not mods_only and plain_text:
+        # replace form feeds with an indication of the page break
+        return bill_text_content.replace(u"\u000C", "=============================================")
+        
+    # Caller wants HTML.
     if not mods_only:
-        raise IOError("Bill text not available.")
-            
+        # Return the text wrapped in <pre>, and replace form feeds with an <hr>.
+        import cgi
+        bill_text_content = "<pre>" + cgi.escape(bill_text_content) + "</pre>"
+        bill_text_content = bill_text_content.replace(u"\u000C", "<hr>")
+        #bill_text_content = "<pre>""\n".join(
+        #    "<div>" + cgi.escape(line) + "</div>"
+        #    for line in
+        #    bill_text_content.split("\n")
+        #    )
+
+    # Returning metadata?
     try:
         gpo_url = dat["urls"]["pdf"]
     except:
@@ -180,13 +207,14 @@ def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
     return {
         "bill_id": bill.id,
         "bill_name": bill.title,
+        "text_html": bill_text_content,
         "basename": basename,
         "docdate": datetime.date(*(int(d) for d in dat["issued_on"].split("-"))),
         "gpo_url": gpo_url,
         "gpo_pdf_url": dat["urls"]["pdf"],
         "doc_version": dat["version_code"],
         "doc_version_name": bill_gpo_status_codes[dat["version_code"]],
-        "has_html_text": False,
+        "has_html_text": True,
     }
     
 

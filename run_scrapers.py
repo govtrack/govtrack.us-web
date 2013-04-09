@@ -40,6 +40,19 @@ def copy(fn1, fn2, modulo):
 	shutil.copyfile(fn1, fn2)
 	return True
 
+def make_link(src, dest):
+	if not os.path.exists(dest):
+		os.link(src, dest)
+	elif os.stat(src).st_ino == os.stat(dest).st_ino:
+		pass # files are the same (hardlinked)
+	else:
+		if md5(src) != md5(dest):
+			print "replacing", src, dest
+		else:
+			print "squashing existing file", src, dest
+		os.unlink(dest)
+		os.link(src, dest)
+
 # MAIN
 
 # Set options.
@@ -93,26 +106,17 @@ if "text" in sys.argv:
 	# Update the mirror of GPO FDSys.
 	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --store=mods --log=%s" % (SCRAPER_PATH, log_level))
 	
-	def do_text_file(src, dest):
-		if not os.path.exists(dest):
-			print "missing", src, dest
-			os.link(src, dest)
-		elif os.stat(src).st_ino == os.stat(dest).st_ino:
-			pass # files are the same (hardlinked)
-		else:
-			if md5(src) != md5(dest):
-				print "replacing", src, dest
-			else:
-				print "squashing existing file", src, dest
-			os.unlink(dest)
-			os.link(src, dest)
-	
 	# Glob all of the bill text files. Create hard links in the data directory to
 	# their locations in the congress project data directoy.
-	for congress in xrange(CONGRESS, CONGRESS+1): # we should start at 103 in case GPO has made changes to past files, but it takes so long!
-		mkdir("data/us/bills.text/%d" % CONGRESS)
+	
+	# We should start at 103 in case GPO has made changes to past files,
+	# or 82 if we want to start with the statute-extracted text, but it
+	# takes so long to go through it all!
+	starting_congress = CONGRESS
+	for congress in xrange(starting_congress, CONGRESS+1):
+		mkdir("data/us/bills.text/%d" % congress)
 		for bt in bill_type_map.values():
-			mkdir("data/us/bills.text/%d/%s" % (CONGRESS, bt))
+			mkdir("data/us/bills.text/%d/%s" % (congress, bt))
 		
 		for bill in sorted(glob.iglob("%s/data/%d/bills/*/*" % (SCRAPER_PATH, congress))):
 			bill_type, bill_number = re.match(r"([a-z]+)(\d+)$", os.path.basename(bill)).groups()
@@ -120,7 +124,21 @@ if "text" in sys.argv:
 			for ver in sorted(glob.iglob(bill + "/text-versions/*")):
 				if ".json" in ver: continue # .json metadata files
 				basename = "../data/us/bills.text/%d/%s/%s%s%s." % (congress, bill_type, bill_type, bill_number, os.path.basename(ver))
-				do_text_file(ver + "/mods.xml", basename + "mods.xml")
+				if congress >= 103:
+					# Starting with GPO FDSys bill text, we'll pull MODS files
+					# into our legacy location.
+					make_link(ver + "/mods.xml", basename + "mods.xml")
+				else:
+					# For older bill text that we got from GPO FDSys Statutes
+					# at Large, we don't have MODS but we do have text-only
+					# bill text. Statutes only, of course. We have only 'enr'
+					# versions, so immediately create the symlink from the
+					# unversioned file name (representing most recent status)
+					# to the enr version.
+					basename2 = "../data/us/bills.text/%d/%s/%s%s." % (congress, bill_type, bill_type, bill_number)
+					make_link(ver + "/document.txt", basename + "txt")
+					if os.path.exists(basename2 + "txt"): os.unlink(basename2 + "txt")
+					os.symlink(os.path.basename(basename + "txt"), basename2 + "txt")
 	
 	# Now do the old-style scraper (except mods files) because it handles
 	# making symlinks to the latest version of each bill. And other data

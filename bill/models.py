@@ -143,7 +143,7 @@ class Bill(models.Model):
             self.display_number_no_congress_number.replace(".", ""),
             self.display_number_no_congress_number.replace(".", "").replace(" ", ""),
             ] + [t[2] for t in self.titles]) \
-            + "\n\n" + (load_bill_text(self, None, plain_text=True) if self.congress >= 103 else "")
+            + "\n\n" + load_bill_text(self, None, plain_text=True)
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
     haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'))
     def get_terms_index_list(self):
