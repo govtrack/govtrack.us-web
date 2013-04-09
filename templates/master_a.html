@@ -12,7 +12,6 @@
 		{% endcomment %}
 		<script type="text/javascript"><!--
 		google_ad_client = "ca-pub-3418906291605762";
-		/* GT title square */
 		google_ad_slot = "6503428641";
 		google_ad_width = 300;
 		google_ad_height = 250;
@@ -28,6 +27,7 @@
 			// which ad should we display?
 			if (Math.random() < .8) {
 				// GoogleAdSense
+				google_ad_slot = "6495528747"; // use a different unit for experiments so we have analytics
 				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
 				ad_exp = "adsense";
 			} else {
