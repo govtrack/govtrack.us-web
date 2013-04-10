@@ -454,17 +454,17 @@ class sitemap_current(django.contrib.sitemaps.Sitemap):
     changefreq = "weekly"
     priority = 1.0
     def items(self):
-        return Bill.objects.filter(congress=CURRENT_CONGRESS)
+        return Bill.objects.filter(congress=CURRENT_CONGRESS).only("congress", "bill_type", "number")
 class sitemap_previous(django.contrib.sitemaps.Sitemap):
     changefreq = "yearly"
     priority = 0.25
     def items(self):
-        return Bill.objects.filter(congress=CURRENT_CONGRESS-1)
+        return Bill.objects.filter(congress=CURRENT_CONGRESS-1).only("congress", "bill_type", "number")
 class sitemap_archive(django.contrib.sitemaps.Sitemap):
     changefreq = "yearly"
     priority = 0.25
     def items(self):
-        return Bill.objects.filter(congress__lt=CURRENT_CONGRESS-1)
+        return Bill.objects.filter(congress__lt=CURRENT_CONGRESS-1).only("congress", "bill_type", "number")
 
 @render_to('bill/bill_advocacy_tips.html')
 def bill_advocacy_tips(request, congress, type_slug, number):
