@@ -3,9 +3,9 @@
 
 {% block body_class %}bills{% endblock %}
 
-{% block title %}Full Text of {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
+{% block title %}Text of {{bill|truncatewords:16}} ({{textdata.doc_version_name}} version) - GovTrack.us{% endblock %}
 
-{% block meta_description %}{{bill}}{% endblock %}
+{% block meta_description %}Text of {{bill|truncatewords:8}} as of {{textdata.docdate}} ({{textdata.doc_version_name}} version). {{bill|truncatewords:24}}{% endblock %}
 
 {% block extra_css %}
 <style>

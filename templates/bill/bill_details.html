@@ -93,7 +93,6 @@
 		}
 		
 		function update_fb_action_status() {
-			$('.share-on-fb').show();
 			$('.share-on-fb-new').show();
 			$('.share-on-fb-existing').hide();
 			$('.share-on-fb .no_hover').text("Share");
@@ -128,7 +127,10 @@
 					fb_actions[ax] = null;
 				}
 			}
-			if (!dont_show_divs) update_fb_action_status();
+			if (!dont_show_divs) {
+				update_fb_action_status();
+				pageTracker._trackEvent('Share-FB-Action', 'delete', null);
+			}
 			return false;
 		}
 		
@@ -150,6 +152,9 @@
 				else
 					fb_share_2(action_name);
 			 });
+			 
+			pageTracker._trackEvent('Share-FB-Action', action_name, null);
+			
 			return false;
 		}
 			
@@ -431,7 +436,7 @@
 		{% endcomment %}
 		
 
-		<div class="share-on-fb" style="display: none; margin-top: 12px;">
+		<div class="share-on-fb" style="margin-top: 12px;">
 			<div class="push-btn blue-facebook-btn" style="cursor: default; margin: 0 auto;">
 				<div class="no_hover" style="margin-left: 15px">Share</div>
 				<div class="on_hover">
