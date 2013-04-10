@@ -312,7 +312,12 @@ def do_api_search(model, qs, request_options, requested_fields):
     # Form the response.
 
     # Get total count before applying offset/limit.
-    count = qs.count()
+    try:
+        count = qs.count()
+    except ValueError as e:
+        return HttpResponseBadRequest("A parameter is invalid: %s" % str(e))
+    except Exception as e:
+        return HttpResponseBadRequest("Something is wrong with the query: %s" % repr(e))
 
     # Apply offset/limit.
     try:
