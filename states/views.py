@@ -16,14 +16,12 @@ from smartsearch.manager import SearchManager
 
 import django.contrib.sitemaps
 class sitemap(django.contrib.sitemaps.Sitemap):
-	changefreq = "weekly"
-	priority = 0.5
-	
-	def __init__(self, statesession):
-		self.statesession = statesession
+	index_levels = ['state_session']
+	changefreq = "yearly"
+	priority = 0.15
 	
 	def items(self):
-		return StateBill.objects.filter(state_session=self.statesession).select_related('state_session').only('state_session__state', 'state_session__slug', 'bill_number')
+		return StateBill.objects.select_related('state_session').only('state_session__state', 'state_session__slug', 'bill_number')
 
 def cache_result(f):
 	"""A decorator that caches the result of a function with the function so that on further invocations

@@ -440,14 +440,10 @@ class sitemap_current(django.contrib.sitemaps.Sitemap):
     priority = 1.0
     def items(self):
         return Vote.objects.filter(congress=CURRENT_CONGRESS)
-class sitemap_previous(django.contrib.sitemaps.Sitemap):
-    changefreq = "yearly"
-    priority = 0.25
-    def items(self):
-        return Vote.objects.filter(congress=CURRENT_CONGRESS-1)
 class sitemap_archive(django.contrib.sitemaps.Sitemap):
+    index_levels = ['congress', 'session', 'chamber']
     changefreq = "yearly"
     priority = 0.25
     def items(self):
-        return Vote.objects.filter(congress__lt=CURRENT_CONGRESS-1)
+        return Vote.objects.filter(congress__lt=CURRENT_CONGRESS)
     

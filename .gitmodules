@@ -10,3 +10,6 @@
 [submodule "ext/stateface"]
 	path = ext/stateface
 	url = https://github.com/propublica/stateface
+[submodule "ext/django-fastsitemaps2"]
+	path = ext/django-fastsitemaps2
+	url = https://github.com/tauberer/django-fastsitemaps2
