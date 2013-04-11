@@ -80,7 +80,7 @@ def parse_bill_number(q, congress=None):
         return None
 
 def parse_slip_law_number(q):
-    m = slip_law_number_re.match(q.replace(" ", "").replace(".", ""))
+    m = slip_law_number_re.match(q.replace(" ", "").replace(".", "").replace(u"\u2013", "-"))
     if m == None: return None
     pub_priv, cn, ln = m.groups()
     try:
