@@ -14,3 +14,4 @@ pysolr
 flup
 recaptcha-client
 django-wysiwyg
+yuicompressor
