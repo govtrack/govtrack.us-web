@@ -264,12 +264,17 @@ def do_api_search(model, qs, request_options, requested_fields):
                 if len(vals) == 1:
                     vals = vals[0].split("|")
             
+            # Treat "null" as None.
+            for i in xrange(len(vals)):
+                if vals[i].lower() == "null":
+                    vals[i] = None
+            
             # Handle enum fields in a special way.
             try:
                 choices = modelfield.choices
                 if is_enum(choices):
                     # Convert the string value to the raw database integer value.
-                    vals = [int(choices.by_key(v)) for v in vals]
+                    vals = [int(choices.by_key(v)) if v != None else None for v in vals]
             except: # field is not a model field, or enum value is invalid (leave as original)
                 pass
                 
