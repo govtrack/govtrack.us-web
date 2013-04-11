@@ -1,10 +1,12 @@
 {% extends "master.html" %}
 {% load humanize %}
 {% block title %}GovTrack.us - Company Financial Report{% endblock %}
-{% block style %}
+{% block head %}
+<style>
 .report_table { margin: 1em; }
 .report_table td { padding-right: 1em; padding-bottom: .25em; }
 .report_table .net td { font-weight: bold; background-color: #EEE; border-top: 1px solid #333; }
+</style>
 {% endblock %}
 {% block crumbs %}
 <ul><li><a href="/about">About GovTrack</a></li><li>Financial Report</li></ul>
