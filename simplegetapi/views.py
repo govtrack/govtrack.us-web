@@ -566,7 +566,7 @@ def build_api_documentation(model, qs):
                     else:
                         field_info["help_text"] += " In a list/search query, only the id is returned. In a single-object query, the full object is included in the response as a JSON dict (or equivalent in other output formats)."
                     if "filterable" in field_info:
-                        field_info["help_text"] += " When filtering, specify the integer ID of the target object. You may be able to get the ID from another API endpoint."
+                        field_info["filterable"] += " When filtering, specify the integer ID of the target object."
 
             if isinstance(field, ManyToManyField):
                 if field_name not in (recurse_on|recurse_on_single): continue
@@ -574,7 +574,11 @@ def build_api_documentation(model, qs):
                 if field_name not in recurse_on:
                     field_info["help_text"] += " Only returned in a query for a single object."
                 if "filterable" in field_info:
-                    field_info["help_text"] += " When filtering, specify the ID of one target object to test if the target is among the values of this field. You may be able to get the ID from another API endpoint."
+                    field_info["filterable"] += " When filtering, specify the ID of one target object to test if the target is among the values of this field."
+                    
+            # Except ManyToMany
+            elif "filterable" in field_info and field.null:
+                field_info["filterable"] += " To search for a null value, filter on the special string 'null'."
 
             # Choices?
             enum = field.choices
