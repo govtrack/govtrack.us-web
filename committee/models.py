@@ -11,26 +11,27 @@ class CommitteeType(enum.Enum):
 
 
 class Committee(models.Model):
-    """
-    Holds info about committees and subcommittees.
-
-    Subcommittees have only code, name, parent nonblank attributes.
-    """
+    """Committees and subcommittees in the United States Congress, including historical committees."""
 
     # committee_type applies to committees but not subcommittees
-    committee_type = models.IntegerField(choices=CommitteeType, blank=True, null=True)
-    code = models.CharField(max_length=10)
-    name = models.CharField(max_length=255)
-    url = models.CharField(max_length=255, blank=True, null=True)
-    abbrev = models.CharField(max_length=255, blank=True)
-    obsolete = models.BooleanField(blank=True, default=False)
-    committee = models.ForeignKey('self', blank=True, null=True, related_name='subcommittees', on_delete=models.PROTECT)
+    committee_type = models.IntegerField(choices=CommitteeType, blank=True, null=True, help_text="Whether this is a House, Senate, or Joint committee.")
+    code = models.CharField(max_length=10, help_text="An alphanumeric code used for the committee on THOMAS.gov, House.gov, and Senate.gov.")
+    name = models.CharField(max_length=255, help_text="The name of the committee or subcommittee. Committee names typically look like '{House,Senate} Committee on ...', while subcommmittee names look like 'Legislative Branch'.")
+    url = models.CharField(max_length=255, blank=True, null=True, help_text="The committee's website.")
+    abbrev = models.CharField(max_length=255, blank=True, help_text="A really short abbreviation for the committee. Has no special significance.")
+    obsolete = models.BooleanField(blank=True, default=False, db_index=True, help_text="True if this committee no longer exists.")
+    committee = models.ForeignKey('self', blank=True, null=True, related_name='subcommittees', on_delete=models.PROTECT, help_text="This field indicates whether the object is a commmittee, in which case the committee field is null, or a subcommittee, in which case this field gives the parent committee.")
 
     def __unicode__(self):
         return self.name
 
     class Meta:
         ordering = ['name']
+
+    # api
+    api_recurse_on = ("committee",)
+    api_example_id = 2650
+    api_example_list = { "obsolete": "0" }
 
     def get_absolute_url(self):
         parent = self.committee
@@ -91,18 +92,23 @@ class CommitteeMemberRole(enum.Enum):
     member = enum.Item(5, 'Member')
 
 class CommitteeMember(models.Model):
+    """A record indicating the current membership of a Member of Congress on a committee or subcommittee.
+    The IDs on these records are not stable (do not use them)."""
     
     # The parser wipes out this table each time it loads up
     # committee membership, so we should not create any
     # foreign keys to this model.
     
-    person = models.ForeignKey('person.Person', related_name='committeeassignments')
-    committee = models.ForeignKey('committee.Committee', related_name='members')
-    role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member)
+    person = models.ForeignKey('person.Person', related_name='committeeassignments', help_text="The Member of Congress serving on a committee.")
+    committee = models.ForeignKey('committee.Committee', related_name='members', help_text="The committee or subcommittee being served on.")
+    role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member, help_text="The role of the member on the committee.")
 
     def __unicode__(self):
         return '%s @ %s as %s' % (self.person, self.committee, self.get_role_display())
         
+    # api
+    api_recurse_on = ("committee","person")
+    
     def role_name(self):
         return CommitteeMemberRole.by_value(self.role).label
         

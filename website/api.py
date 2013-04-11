@@ -411,6 +411,14 @@ def get_apiv2_model_qs(model):
 	elif model in ("vote_voter", "voter"):
 		model = Voter
 		qs = Voter.objects.all()
+	elif model in ("committee"):
+		from committee.models import Committee
+		model = Committee
+		qs = Committee.objects.all()
+	elif model in ("committee_member"):
+		from committee.models import CommitteeMember
+		model = CommitteeMember
+		qs = CommitteeMember.objects.all()
 	else:
 		raise Http404()
 		
@@ -426,7 +434,7 @@ from django.template import RequestContext
 def api_overview(request):
 	baseurl = "http://%s/api/v2/" % request.META["HTTP_HOST"]
 	
-	endpoints = ("bill", "cosponsorship", "person", "role", "vote", "vote_voter")
+	endpoints = ("bill", "cosponsorship", "person", "role", "vote", "vote_voter", "committee", "committee_member")
 	
 	api = [ (model, build_api_documentation(*get_apiv2_model_qs(model))) for model in endpoints ]
 	
