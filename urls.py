@@ -39,23 +39,22 @@ urlpatterns = patterns('',
 # sitemaps
 from collections import OrderedDict
 import person.views, bill.views, committee.views, vote.views, states.models, states.views
-from fastsitemaps2.views import index as sitemap_index_view
-from fastsitemaps2.views import sitemap as sitemap_map_view
+from django.contrib.sitemaps.views import index as sitemap_index_view
+from django.contrib.sitemaps.views import sitemap as sitemap_map_view
 from twostream.decorators import anonymous_view
 sitemaps = OrderedDict([
         ("bills_current", bill.views.sitemap_current),
-        ("bills_archive", bill.views.sitemap_archive),
+        #("bills_archive", bill.views.sitemap_archive), # takes too long to load
         ("people_current", person.views.sitemap_current),
         ("people_archive", person.views.sitemap_archive),
         ("districts", person.views.sitemap_districts),
         ("committees", committee.views.sitemap),
         ("votes_current", vote.views.sitemap_current),
-        ("votes_archive", vote.views.sitemap_archive),
-        ("state_bills", states.views.sitemap),
+        #("votes_archive", vote.views.sitemap_archive), # takes too long to load
 	])
 urlpatterns += patterns('',
     (r'^sitemap\.xml$', anonymous_view(sitemap_index_view), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemap_pages'}),
-   url(r'^sitemap-(?P<section>.+)\.xml$', anonymous_view(sitemap_map_view), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemap_pages'}, name='sitemap_pages'),
+   url(r'^sitemap-(?P<section>.+)\.xml$', anonymous_view(sitemap_map_view), {'sitemaps': sitemaps}, name='sitemap_pages'),
 )
 
 # API access points
