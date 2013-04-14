@@ -307,8 +307,6 @@ sub {
 .notebox {
   background: #ffdddd;
   border: solid #fcf3d0 1px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
   border-radius: 5px;
   margin-top: 15px;
   padding: 20px;
@@ -414,8 +412,6 @@ sub {
   background: -ms-linear-gradient(top,  #abd380 0%,#7fa659 100%); /* IE10+ */
   background: linear-gradient(to bottom,  #abd380 0%,#7fa659 100%); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#abd380', endColorstr='#7fa659',GradientType=0 ); /* IE6-9 */
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
   border-radius: 5px;
   border: 1px solid;
   border-color: #e3f1d5 #8eb566 #6f914d #8eb566;
@@ -1331,21 +1327,13 @@ a.button.prefix, a.button.postfix {
 
 .prefix {
   left: 2px;
-  -moz-border-radius-topright:        0;
-  -webkit-border-top-right-radius:    0;
   border-top-right-radius:            0;
-  -moz-border-radius-bottomright:     0;
-  -webkit-border-bottom-right-radius: 0;
   border-bottom-right-radius:         0;
 }
 
 .postfix {
   right: 2px;
-  -moz-border-radius-topleft:         0;
-  -webkit-border-top-left-radius:     0;
   border-top-left-radius:             0;
-  -moz-border-radius-bottomleft:      0;
-  -webkit-border-bottom-left-radius:  0;
   border-bottom-left-radius:          0;
 }
 
@@ -1400,8 +1388,6 @@ a.button.prefix, a.button.postfix {
     padding: 5px 10px 2px 0;
     background:#fafafa;
     color: #555;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
     border-radius: 5px;
 }
 #content .main ul > li {
@@ -1666,8 +1652,6 @@ a.button.prefix, a.button.postfix {
   	}
   #nav ul ul li:hover a {
       background: #05647c;
-      -moz-border-radius: 4px;
-      -webkit-border-radius: 4px;
       border-radius: 4px;
   	}
 
@@ -2724,8 +2708,6 @@ aside .download-links { padding: 31px 0 0 	}
         background: #cb4b16;
         color: #fff;
         padding: 0 6px;
-        -moz-border-radius: 2px;
-        -webkit-border-radius: 2px;
         border-radius: 2px;
         height: 20px;
         display: inline-block;
@@ -2734,8 +2716,6 @@ aside .download-links { padding: 31px 0 0 	}
     color: #cb4b16;
     background: #dae2df;
     padding: 0 6px;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
     border-radius: 2px;
     text-decoration: none;
     display: inline-block;
@@ -2993,9 +2973,7 @@ aside .download-links { padding: 31px 0 0 	}
             padding: 20px;
             border: 1px solid #eee;
             margin-bottom: 20px;
-            /*moz-border-radius: 3px;
-            webkit-border-radius: 3px;
-            border-radius: 3px;*/
+            /*border-radius: 3px;*/
         }
         .tracked_event:hover {
             background: #fffcf5;
@@ -3039,8 +3017,6 @@ aside .download-links { padding: 31px 0 0 	}
                     margin-left: .5em;
                     border: solid #ddd 1px;
                     border-radius: 3px;
-                    moz-border-radius: 3px;
-                    webkit-border-radius: 3px;
                 }
 
             .event_date {
@@ -3076,8 +3052,6 @@ aside .download-links { padding: 31px 0 0 	}
     margin-bottom: 10px;
     background: #fff;
     border: solid #dcd6c3 1px;
-    moz-border-radius: 5px;
-    webkit-border-radius: 5px;
     border-radius: 5px;
     overflow: hidden;
     font-size: .9em;
@@ -3159,8 +3133,6 @@ aside .download-links { padding: 31px 0 0 	}
         z-index: 5;
         width: 308px;
         /*background: #f8f7f7;
-        -moz-border-radius: 1px;
-        -webkit-border-radius: 1px;
         border-radius: 1px;
         border: solid #e7e4dc 1px;
         -webkit-box-shadow:
@@ -3203,8 +3175,6 @@ aside .download-links { padding: 31px 0 0 	}
                 margin-bottom: 10px;
                 background: #fff;
                 border: solid #dcd6c3 1px;
-                moz-border-radius: 5px;
-                webkit-border-radius: 5px;
                 border-radius: 5px;
                 overflow: hidden;
                 font-size: .9em;
@@ -3489,16 +3459,12 @@ a.button.prefix, a.button.postfix { padding-left: 0; padding-right: 0; text-alig
 
 span.prefix, span.postfix { background: #f2f2f2; border: 1px solid #cccccc; }
 
-.prefix { left: 2px; -moz-border-radius-topleft: 2px; -webkit-border-top-left-radius: 2px; border-top-left-radius: 2px; -moz-border-radius-bottomleft: 2px; -webkit-border-bottom-left-radius: 2px; border-bottom-left-radius: 2px; }
+.prefix { left: 2px; border-top-left-radius: 2px; border-bottom-left-radius: 2px; }
 
-.postfix { right: 2px; -moz-border-radius-topright: 2px; -webkit-border-top-right-radius: 2px; border-top-right-radius: 2px; -moz-border-radius-bottomright: 2px; -webkit-border-bottom-right-radius: 2px; border-bottom-right-radius: 2px; }
+.postfix { right: 2px; border-top-right-radius: 2px; border-bottom-right-radius: 2px; }
 
 input[type="text"], input[type="password"], input[type="date"], input[type="datetime"], input[type="email"], input[type="number"], input[type="search"], input[type="tel"], input[type="time"], input[type="url"], textarea {
   border: 1px solid #cccccc;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  -ms-border-radius: 2px;
-  -o-border-radius: 2px;
   border-radius: 2px;
   border: 2px solid;
   border-color: #e6d39c ;
@@ -3547,7 +3513,7 @@ textarea::-webkit-input-placeholder {
 }
 
 /* Fieldsets
-fieldset { border: solid 1px #ddd; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px; padding: 12px 12px 0; margin: 18px 0; }
+fieldset { border: solid 1px #ddd; border-radius: 3px; padding: 12px 12px 0; margin: 18px 0; }
 fieldset legend { font-weight: bold; background: white; padding: 0 3px; margin: 0 0 0 -3px; }*/
 
 /* Errors */
@@ -3555,7 +3521,7 @@ fieldset legend { font-weight: bold; background: white; padding: 0 3px; margin: 
 
 .error label, label.error { color: #cb1f16; }
 
-.error small, small.error { display: block; padding: 6px 4px; margin-top: -13px; margin-bottom: 12px; background: #cb1f16; color: #fff; font-size: 12px; font-size: 1.2rem; font-weight: bold; -moz-border-radius-bottomleft: 2px; -webkit-border-bottom-left-radius: 2px; border-bottom-left-radius: 2px; -moz-border-radius-bottomright: 2px; -webkit-border-bottom-right-radius: 2px; border-bottom-right-radius: 2px; }
+.error small, small.error { display: block; padding: 6px 4px; margin-top: -13px; margin-bottom: 12px; background: #cb1f16; color: #fff; font-size: 12px; font-size: 1.2rem; font-weight: bold; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; }
 
 @media only screen and (max-width: 767px) { input[type="text"].one, .row input[type="text"].one, input[type="password"].one, .row input[type="password"].one, input[type="date"].one, .row input[type="date"].one, input[type="datetime"].one, .row input[type="datetime"].one, input[type="email"].one, .row input[type="email"].one, input[type="number"].one, .row input[type="number"].one, input[type="search"].one, .row input[type="search"].one, input[type="tel"].one, .row input[type="tel"].one, input[type="time"].one, .row input[type="time"].one, input[type="url"].one, .row input[type="url"].one, textarea.one, .row textarea.one { width: 100% !important; }
   input[type="text"].two, .row input[type="text"].two, input[type="password"].two, .row input[type="password"].two, input[type="date"].two, .row input[type="date"].two, input[type="datetime"].two, .row input[type="datetime"].two, input[type="email"].two, .row input[type="email"].two, input[type="number"].two, .row input[type="number"].two, input[type="search"].two, .row input[type="search"].two, input[type="tel"].two, .row input[type="tel"].two, input[type="time"].two, .row input[type="time"].two, input[type="url"].two, .row input[type="url"].two, textarea.two, .row textarea.two { width: 100% !important; }
@@ -3572,9 +3538,9 @@ fieldset legend { font-weight: bold; background: white; padding: 0 3px; margin: 
 /* Custom Forms ---------------------- */
 form.custom { /* Custom input, disabled */ }
 form.custom span.custom { display: inline-block; width: 16px; height: 16px; position: relative; top: 2px; border: solid 1px #ccc; background: #fff; }
-form.custom span.custom.radio { -webkit-border-radius: 100px; -moz-border-radius: 100px; -ms-border-radius: 100px; -o-border-radius: 100px; border-radius: 100px; }
+form.custom span.custom.radio { border-radius: 100px; }
 form.custom span.custom.checkbox:before { content: ""; display: block; line-height: 0.8; height: 14px; width: 14px; text-align: center; position: absolute; top: 0; left: 0; font-size: 14px; color: #fff; }
-form.custom span.custom.radio.checked:before { content: ""; display: block; width: 8px; height: 8px; -webkit-border-radius: 100px; -moz-border-radius: 100px; -ms-border-radius: 100px; -o-border-radius: 100px; border-radius: 100px; background: #222; position: relative; top: 3px; left: 3px; }
+form.custom span.custom.radio.checked:before { content: ""; display: block; width: 8px; height: 8px; border-radius: 100px; background: #222; position: relative; top: 3px; left: 3px; }
 form.custom span.custom.checkbox.checked:before { content: "\00d7"; color: #222; }
 form.custom div.custom.dropdown { display: block; position: relative; width: auto; height: 28px; margin-bottom: 9px; margin-top: 2px; }
 form.custom div.custom.dropdown a.current { display: block; width: auto; line-height: 26px; min-height: 28px; padding: 0 38px 0 6px; border: solid 1px #ddd; color: #141414; background-color: #fff; white-space: nowrap; }
@@ -3754,8 +3720,6 @@ select, input.text {
     font: 12px/16px CallunaSans, sans-serif;
     color: #444;
     border: solid #e6d39c 2px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
     border-radius: 3px;
     -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
     }
@@ -3859,8 +3823,6 @@ select, input.text {
     #content div.advanced-search form {
         /*width: 896px;
         background: #f8f7f7;
-        -moz-border-radius: 1px;
-        -webkit-border-radius: 1px;
         border-radius: 1px;
         border: solid #e7e4dc 1px;
         -webkit-box-shadow:
@@ -3934,8 +3896,6 @@ select, input.text {
             padding: 2px 4px;
             margin: .25em 20px 0;
             border: solid #ddd 1px;
-            -moz-border-radius: 3px;
-            -webkit-border-radius: 3px;
             border-radius: 3px;
         }
         #search-results .results-group .more:hover {
@@ -3982,8 +3942,6 @@ ul.tabs a {
     letter-spacing: .15em;
     text-transform: uppercase;
     outline:0;
-    -webkit-border-radius: 4px 4px 0 0;
-    -moz-border-radius: 4px 4px 0 0;
     border-radius: 4px 4px 0 0;
 }
 	@media only screen and (max-width: 480px) {
@@ -4083,8 +4041,6 @@ ul.left-tabs a {
     text-decoration: none;
     font-family: 'PTSerifRegular', serif;
     outline:0;
-    -webkit-border-radius: 4px 4px 0 0;
-    -moz-border-radius: 4px 4px 0 0;
     border-radius: 4px 4px 0 0;
 }
 
@@ -4258,8 +4214,6 @@ ul.bullets li, .postcontent ul li, ol.bullets li, .postcontent ol li {
         margin: 0 10px;
     }
         #sitenews > div:first-of-type a {
-          -moz-border-radius: 12px;
-          -webkit-border-radius: 12px;
           border-radius: 12px;
           margin: -5px auto 0;
           text-align: center;
