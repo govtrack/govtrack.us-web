@@ -42,7 +42,10 @@ def load_sponsorship_analysis2(congressnumber, role_type, person):
     for line in open(fname).read().splitlines():
         chunks = [x.strip() for x in line.strip().split(',')]
         if chunks[0] == "ID": continue
-        
+
+        # Ignore members with low leadership scores because their ideology scores are inaccurate.
+        if float(chunks[2]) < 0.1: continue
+
         pt = { }
         pt['id'] = int(chunks[0])
         pt['ideology'] = chunks[1]
