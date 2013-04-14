@@ -43,16 +43,28 @@
 		<script src="{{ MEDIA_URL }}js/colorbox/jquery.colorbox-min.js"></script>
 		{% endcomment %}
 
-		<script>
+		<script type="text/javascript">
 		var ad_exp = null;
 		window.fbAsyncInitFuncs = Array(); // Facebook init functions should be defined between here and the FB embed later
+		
+		<!-- Google Analytics -->
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', '{{GOOGLE_ANALYTICS_KEY|escapejs}}']);
+		_gaq.push(['_setCustomVar', 1, "Login Type", {% if request.user.is_authenticated %}"Logged In"{% elif request.anonymous %}the_user ? "Logged In" : "Anonymous"{% else %}"Anonymous"{% endif %}, 2]);
+		_gaq.push(['_setCustomVar', 2, "MySegment", {% if not request.anonymous %}"{% if remote_net_house %}House{% elif remote_net_senate %}Senate{% elif is_dc_local %}DC{% else %}Other{% endif %}"{% else %}the_segment{% endif %}, 1]);
+		_gaq.push(['_setCustomVar', 3, "AdExp", ad_exp, 3]);
+		_gaq.push(['_trackPageview']);
+		{% if not debug %}
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		  })();
+		{% endif %}
+		
 		</script>
 		
 		{% block head %}{% endblock %}
-
-		<style type="text/css">
-		{% block style %}{% endblock %}
-		</style>
 	</head>
 
 <body class="{% block body_class %}{% endblock %}">
@@ -318,27 +330,6 @@
 		 ref.parentNode.insertBefore(js, ref);
 	   }(document, /*debug*/ false));
 	</script>
-
-	<script type="text/javascript">
-	// for debugging or error loading GA
-	var pageTracker = { _trackEvent: function() { } };
-	</script>
-	{% if not debug %}
-	<!-- Google Analytics -->
-	<script type="text/javascript">
-	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-	</script>
-	<script type="text/javascript">
-	try {
-	 pageTracker = _gat._getTracker("{{GOOGLE_ANALYTICS_KEY|escapejs}}");
-	 pageTracker._setCustomVar(1, "Login Type", {% if request.user.is_authenticated %}"Logged In"{% elif request.anonymous %}the_user ? "Logged In" : "Anonymous"{% else %}"Anonymous"{% endif %}, 2);
-	 pageTracker._setCustomVar(2, "MySegment", {% if not request.anonymous %}"{% if remote_net_house %}House{% elif remote_net_senate %}Senate{% elif is_dc_local %}DC{% else %}Other{% endif %}"{% else %}the_segment{% endif %}, 1);
-	 pageTracker._setCustomVar(3, "AdExp", ad_exp, 3);
-	 pageTracker._trackPageview();
-	} catch(err) {}
-	</script>
-	{% endif %}
 
 	{% block body_scripts %}{% endblock %}
 
