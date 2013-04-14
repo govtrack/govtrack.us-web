@@ -293,12 +293,6 @@ sub {
 .topbox {
     background: #f3f1e9 url(../images/bg-paper.jpg);
     border: solid #e7e4dc 1px;
-    -moz-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
-    -webkit-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
     box-shadow:
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
@@ -411,12 +405,6 @@ sub {
   border-radius: 5px;
   border: 1px solid;
   border-color: #e3f1d5 #8eb566 #6f914d #8eb566;
-  -webkit-box-shadow:
-    0 0 0 1px rgb(130,169,91),
-    0 1px 0 rgba(255, 255, 255, 0.5) inset;
-  -moz-box-shadow:
-    0 0 0 1px rgb(130,169,91),
-    0 1px 0 rgba(255, 255, 255, 0.5) inset;
   box-shadow:
     0 0 0 1px rgb(130,169,91),
     0 1px 0 rgba(255, 255, 255, 0.5) inset;
@@ -450,13 +438,9 @@ sub {
   border-bottom: solid 1px #6f914d;
 }
 .button:active {
-  -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) inset;
-  -moz-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) inset;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) inset;
 }
 .button:focus {
-  -webkit-box-shadow: 0 0 4px #cb4b16, 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-  -moz-box-shadow: 0 0 4px #cb4b16, 0 1px 0 rgba(255, 255, 255, 0.5) inset;
   box-shadow: 0 0 4px #cb4b16, 0 1px 0 rgba(255, 255, 255, 0.5) inset;
   color: white;
 }
@@ -1544,9 +1528,6 @@ a.button.prefix, a.button.postfix {
           font-size: .85em;
           line-height: 1em;
           box-shadow: none;
-          -webkit-box-shadow: none;
-          -moz-box-shadow: none;
-          /*behavior: url(/static/js/PIE.htc);*/
         }*/
   #nav {
       height: 28px;
@@ -1621,11 +1602,8 @@ a.button.prefix, a.button.postfix {
       padding: 2px 8px 3px 9px;
       font-size: 12px;
       line-height: 28px;
-      -webkit-box-shadow: 0px 0px 4px #bcbbba;
-      -moz-box-shadow: 0px 0px 4px #bcbbba;
       box-shadow: 0px 0px 4px #bcbbba;
       display: none;
-      /*behavior: url(/static/js/PIE.htc);*/
   	}
       #nav ul ul li {
           float: none;
@@ -2124,12 +2102,6 @@ a.button.prefix, a.button.postfix {
     position: relative;
     background: #f3f1e9 url(../images/bg-paper.jpg);
     border: solid #e7e4dc 1px;
-    -moz-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
-    -webkit-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
     box-shadow:
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
@@ -2270,12 +2242,6 @@ a.button.prefix, a.button.postfix {
     position: relative;
     background: #f3f1e9 url(../images/bg-paper.jpg);
     border: solid #e7e4dc 1px;
-    -moz-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
-    -webkit-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
     box-shadow:
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
@@ -2752,18 +2718,11 @@ aside .download-links { padding: 31px 0 0 	}
     position: relative;
     background-color: #fcfcfc;
     border: solid #e7e4dc 1px;
-    -moz-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
-    -webkit-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
     box-shadow:
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
     padding: 10px;
     cursor: pointer;
-    /*behavior: url(/static/js/PIE.htc);*/
 }
 .lt-ie9 #lists div.list {
   box-shadow: none;
@@ -2783,12 +2742,6 @@ aside .download-links { padding: 31px 0 0 	}
 #lists div.active {
     color: black;
     background-color: #fffbf0;
-    -moz-box-shadow:
-        0 0 0 5px #fcf3d0,
-        0 1px 2px 5px rgba(106,106,106,.4);
-    -webkit-box-shadow:
-        0 0 0 5px #fcf3d0,
-        0 1px 2px 5px rgba(106,106,106,.4);
     box-shadow:
         0 0 0 5px #fcf3d0,
         0 1px 2px 5px rgba(106,106,106,.4);
@@ -2887,12 +2840,6 @@ aside .download-links { padding: 31px 0 0 	}
     .side-box {
       background: #f8f7f7;
       border: solid #e7e4dc 1px;
-      -moz-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
-      -webkit-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
       box-shadow:
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
@@ -3054,11 +3001,8 @@ aside .download-links { padding: 31px 0 0 	}
 }
 #list_trackers li:hover,
 #basic_trackers li a:hover {
-    -webkit-box-shadow:
-        0 2px 5px rgba(0,0,0,.2);
     box-shadow:
         0 2px 5px rgba(0,0,0,.2);
-    /*behavior: url(/static/js/PIE.htc);*/
 }
     #list_trackers li span {
         display: inline-block;
@@ -3131,16 +3075,12 @@ aside .download-links { padding: 31px 0 0 	}
         /*background: #f8f7f7;
         border-radius: 1px;
         border: solid #e7e4dc 1px;
-        -webkit-box-shadow:
-            0 0 0 5px #f9f8f4,
-            0 3px 8px 5px rgba(106,106,106,.4);
         box-shadow:
             0 0 0 5px #f9f8f4,
             0 3px 8px 5px rgba(106,106,106,.4);*/
         padding-top: 18px;
         background: url(../images/tracker_widget_top.png) center 0 no-repeat;
         font-family: 'CallunaSans';
-        /*behavior: url(/static/js/PIE.htc);*/
     }
         .widget_content {
             position: relative;
@@ -3201,17 +3141,12 @@ aside .download-links { padding: 31px 0 0 	}
                 color: #fff;
             }
             .list_select li a:hover {
-                -webkit-box-shadow:
-                    0 2px 5px rgba(0,0,0,.2);
                 box-shadow:
                     0 2px 5px rgba(0,0,0,.2);
-                /*behavior: url(/static/js/PIE.htc);*/
             }
             .list_select li.new a:hover,
             .list_select li.all a:hover {
-                -webkit-box-shadow: none;
                 box-shadow: none;
-                /*behavior: url(/static/js/PIE.htc);*/
             }
                 .events_to_track li span.icon,
                 .list_select li span.icon    {
@@ -3466,8 +3401,6 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
   border-color: #e6d39c ;
   outline: 0;
   background: #ffffff url('../images/input_field.png') left top repeat-x;
-  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   color: #555;
   display: block;
@@ -3484,15 +3417,9 @@ input[type="text"].oversize, input[type="password"].oversize, input[type="date"]
 input[type="text"]:focus, input[type="password"]:focus, input[type="date"]:focus, input[type="datetime"]:focus, input[type="email"]:focus, input[type="number"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="time"]:focus, input[type="url"]:focus, textarea:focus {
   outline: none !important;
   border-color: #ddc57e;
-  -webkit-box-shadow: #ffe9a8 0 0 5px 0;
-     -moz-box-shadow: #ffe9a8 0 0 5px 0;
-       -o-box-shadow: #ffe9a8 0 0 5px 0;
-          box-shadow: #ffe9a8 0 0 5px 0;
+  box-shadow: #ffe9a8 0 0 5px 0;
 }
 input[type="file"]:focus, input[type="file"]:active, input[type="radio"]:focus, input[type="radio"]:active, input[type="checkbox"]:focus, input[type="checkbox"]:active {
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  -o-box-shadow: none;
   box-shadow: none;
 }
 input[type="text"][disabled], input[type="password"][disabled], input[type="date"][disabled], input[type="datetime"][disabled], input[type="email"][disabled], input[type="number"][disabled], input[type="search"][disabled], input[type="tel"][disabled], input[type="time"][disabled], input[type="url"][disabled], textarea[disabled] {
@@ -3652,12 +3579,6 @@ form.custom .custom.disabled { background-color: #ddd; }
     background: #f3f1e9 url(../images/bg-paper.jpg);
     margin: 4px 0 30px;
     border: solid #e7e4dc 1px;
-    -moz-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
-    -webkit-box-shadow:
-        0 0 0 5px #f9f8f4,
-        0 1px 2px 5px rgba(106,106,106,.4);
     box-shadow:
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
@@ -3821,9 +3742,6 @@ select, input.text {
         background: #f8f7f7;
         border-radius: 1px;
         border: solid #e7e4dc 1px;
-        -webkit-box-shadow:
-            0 0 0 5px #f9f8f4,
-            0 1px 2px 5px rgba(106,106,106,.4);
         box-shadow:
             0 0 0 5px #f9f8f4,
             0 1px 2px 5px rgba(106,106,106,.4);
@@ -4182,9 +4100,7 @@ ul.bullets li, .postcontent ul li, ol.bullets li, .postcontent ol li {
 	z-index: 999;
     border-top: 2px solid #fff6d3;
     border-bottom: 2px solid #f6db71;
-    -webkit-box-shadow: 0px 2px 4px 0px #666;
-            box-shadow: 0px 2px 4px 0px #666;
-    /*behavior: url(/static/js/PIE.htc);*/
+    box-shadow: 0px 2px 4px 0px #666;
 }
 #sitenews {
 	margin: 0 auto;
