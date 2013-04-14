@@ -3638,7 +3638,7 @@ select, input.text {
     color: #444;
     border: solid #e6d39c 2px;
     border-radius: 3px;
-    -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
+    background-clip: padding-box;
     }
 .advanced-search select {
     width: 120px;
