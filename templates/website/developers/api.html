@@ -41,6 +41,10 @@
 		<li><a href="{{baseurl}}vote_voter/?vote=1&limit=441">{{baseurl}}vote_voter/?vote=1&limit=441</a><br/>Actual votes in House vote #183 in 2011 with a limit set so all results appear in one page.</li>
 		<li><a href="{{baseurl}}vote_voter/?person=400222&amp;limit=10000&amp;order_by=created&format=csv&fields=vote__id,created,option__value,vote__category,vote__chamber,vote__question,vote__number">{{baseurl}}vote_voter/?person=400222&amp;limit=10000&amp;order_by=created&amp;format=csv&amp;fields=vote__id,created,option__value,vote__category,vote__chamber,vote__question,vote__number</a><br/>Mark Kirk&rsquo;s voting record returned in CSV format. A high limit is set so all of the results make it into the file.</li>
 	</ul>
+	
+	<h2>Libraries/Wrappers</h2>
+	
+	<p>You might find these useful: <a href="https://npmjs.org/package/govtrack-node">node.js wrapper</a>, <a href="https://www.temboo.com/library/Library/GovTrack/">GovTrack on Temboo</a>.</p>
 
 	<h2>General Options</h2>
 	
@@ -48,7 +52,7 @@
 	
 	<p>Results are returned in JSON by default, but you can change the result format to JSONP, XML, or CSV using the <tt>format</tt> query string parameter. For instance, add <tt>format=jsonp&amp;callback=your_function</tt>, <tt>format=xml</tt>, or <tt>format=csv</tt> to your query string arguments. (You will need either a ? or an &amp; to separate it from the rest of the URL or arguments, of course.)</p>
 	
-	<p>You can also specify which fields you want using the <tt>fields</tt> argument.</p>
+	<p>You can also specify which fields you want using the <tt>fields</tt> argument. Use double-underscores to span relationships, such as <tt>sponsor__id</tt> for bills.</p>
 	
 	<p>To get a list of currently serving Members of Congress in CSV format use:<br/><a href="{{baseurl}}role?current=true&format=csv&fields=state,district,title_long,person__firstname,person__lastname,person__name&limit=600">{{baseurl}}role?current=true&amp;format=csv&amp;fields=state,district,title_long,person__firstname,person__lastname,person__name&amp;limit=600</a>.</p>
 	
