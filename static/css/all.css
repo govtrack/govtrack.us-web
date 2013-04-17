@@ -3095,7 +3095,7 @@ aside .download-links { padding: 31px 0 0 	}
         width: 340px;
     }
 
-    #list_trackers li a,
+    #list_trackers li > a,
     #basic_trackers li span   {
         display: inline-block;
         float: right;
@@ -3106,7 +3106,7 @@ aside .download-links { padding: 31px 0 0 	}
         background: url(../images/icons.png) -12px 0 no-repeat;
         color: #666;
     }
-        #list_trackers li a:hover,
+        #list_trackers li > a:hover,
         #basic_trackers li a:hover span {
             background-position: -12px -12px;
             border-bottom: 0;

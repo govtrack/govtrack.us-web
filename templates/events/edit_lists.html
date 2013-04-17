@@ -10,12 +10,12 @@ function activate_list(elem) {
 	$('#lists div').removeClass('active');
 	$(elem).addClass("active");
 	$("#list_view h2 .name").text($(elem).find(".name").text());
-	
+
 	$('#basic_trackers input').prop('checked', false);
 	$("#list_trackers").text("");
 
 	$('#email_frequency').val($(elem).attr('list_email'));
-	
+
 	$.ajax({
 		url: "/events/_edit",
 		type: "POST",
@@ -26,9 +26,9 @@ function activate_list(elem) {
 		dataType: "json",
 		success: function(data) {
 			$('#events_header a').attr('href', '/events/events.rss?list_id=' + data.list_public_id);
-			
+
 			$('#items p').toggle(data.list_trackers.length == 0);
-			
+
 			for (var i = 0; i < data.list_trackers.length; i++) {
 				add_tracker(data.list_trackers[i].id, data.list_trackers[i].name, data.list_trackers[i].title, data.list_trackers[i].link, false);
 				var n = $('#basicfeed_' + data.list_trackers[i].id);
@@ -39,7 +39,7 @@ function activate_list(elem) {
 			}
 		}
 	});
-	
+
 	refresh_events();
 }
 
@@ -56,26 +56,26 @@ function refresh_events() {
 		success: function(data) {
 			$('#events').html(data);
 		}
-	});	
+	});
 }
 
 function add_tracker(id, name, title, link, save) {
 	var t = $("<li><span/> <a href='#' onclick='return toggle_tracker(this);' class='active' title='Remove'>remove</a></li>");
-	t.find("span").text(title);
+	t.find("span").append($("<a>").attr("href", link).text(title));
 	t.find("a").attr("feedname", name);
 	$('#items p').fadeOut();
 	$("#list_trackers").append(t);
 	if (save) add_remove_tracker(true, name, false);
-	
+
 	// if it is in the removed list, hide it
 	$('#removed_trackers *').each(function() {
 		if ($(this).find('a').attr('feedname') == name)
 			$(this).remove();
 	});
 	$('#removed').toggle($('#removed_trackers *').length > 0);
-	
+
 	if (save) update_count();
-	
+
 	return false;
 }
 
@@ -90,7 +90,7 @@ function toggle_tracker(node) {
 		$(node).text('add back');
 		$('#removed').fadeIn();
 		$('#removed_trackers').append($(node.parentNode));
-		$('#items p').toggle($('#list_trackers *').length == 0); 
+		$('#items p').toggle($('#list_trackers *').length == 0);
 		add_remove_tracker(false, $(node).attr('feedname'), false);
 	} else {
 		$(node).addClass('active');
@@ -120,12 +120,12 @@ function add_remove_tracker(add_remove, feedname, refresh) {
 			else
 				refresh_events();
 		}
-	});		
+	});
 	return false;
 }
 
 function delete_list(node) {
-	if (!confirm("Delete list " + $(node).find(".name").text() + "?")) return false; 
+	if (!confirm("Delete list " + $(node).find(".name").text() + "?")) return false;
 	$.ajax({
 		url: "/events/_edit",
 		type: "POST",
@@ -240,7 +240,7 @@ $(function() {
 		{% comment %}since the first of these nodes is cloned when we
 		create a new list, it should not have any list-specific data hidden away
 		except where we expect that to be{% endcomment %}
-		
+
 		<div class="four columns">
 			<div class="list group {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)" list_email="{{list.email}}">
 				<h3 class="name">{{list.name}}</h3>
@@ -267,7 +267,7 @@ $(function() {
 	<h2>Settings for: <span class="name">List Name Goes Here</span></h2>
 
 	<div id="edit_list" class="six columns">
-		
+
 		<div id="set_freq" class="control">
 			<h3>How often do you want updates?</h3>
 			<div>
@@ -293,7 +293,7 @@ $(function() {
 			<ul id="removed_trackers">
 			</ul>
 		</div><!-- /items -->
-		
+
 		{% comment %}
 		<div id="search_trackers" class="control">
 			<h3>Find More Items <span>to</span> Track</h3>

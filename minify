@@ -1,2 +1,2 @@
 #!/bin/bash
-yuicompressor static/css/all.css > static/css/all-min.css
+.env/bin/yuicompressor static/css/all.css > static/css/all-min.css
