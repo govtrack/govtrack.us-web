@@ -131,7 +131,7 @@
 			}
 			if (!dont_show_divs) {
 				update_fb_action_status();
-				pageTracker._trackEvent('Share-FB-Action', 'delete', null);
+				_gaq.push(['_trackEvent', 'Share-FB-Action', 'delete', null]);
 			}
 			return false;
 		}
@@ -155,7 +155,7 @@
 					fb_share_2(action_name);
 			 });
 			 
-			pageTracker._trackEvent('Share-FB-Action', action_name, null);
+			_gaq.push(['_trackEvent', 'Share-FB-Action', action_name, null]);
 			
 			return false;
 		}
