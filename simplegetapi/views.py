@@ -56,8 +56,8 @@ def do_api_call(request, model, qs, id):
     elif format == "xml":
         return serialize_response_xml(response)
         
-    elif format == "csv":
-        return serialize_response_csv(response, id == None, requested_fields)
+    elif format in ("csv", "csv:attachment", "csv:inline"):
+        return serialize_response_csv(response, id == None, requested_fields, format)
         
     else:
         return HttpResponseBadRequest("Invalid response format: %s." % format)
@@ -458,7 +458,7 @@ def serialize_response_xml(response):
     resp["Content-Length"] = len(ret)
     return resp
     
-def serialize_response_csv(response, is_list, requested_fields):
+def serialize_response_csv(response, is_list, requested_fields, format):
     if is_list:
         response = response["objects"]
     else:
@@ -499,12 +499,16 @@ def serialize_response_csv(response, is_list, requested_fields):
         writer.writerow([format_value(get_value_recursively(item, c)) for c in requested_fields])
         
     raw_data = raw_data.getvalue()
-    resp = HttpResponse(raw_data, mimetype="text/csv")
-    resp["Content-Length"] = len(raw_data)
-    if len(raw_data) > 500000:
+    if (len(raw_data) > 500000 and format == "csv") or format == "csv:attachment":
+        resp = HttpResponse(raw_data, mimetype="text/csv")
         resp['Content-Disposition'] = 'attachment; filename="query.csv"'
-    else:
+    elif format == "csv:inline":
+        resp = HttpResponse(raw_data, mimetype="text/csv")
         resp['Content-Disposition'] = 'inline; filename="query.csv"'
+    else:
+        resp = HttpResponse(raw_data, mimetype="text/plain")
+        resp['Content-Disposition'] = 'inline'
+    resp["Content-Length"] = len(raw_data)
     return resp
 
 def build_api_documentation(model, qs):
