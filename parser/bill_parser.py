@@ -344,7 +344,11 @@ def main(options):
                     bill.sliplawnum = int(axn.get("number").split("-")[1])
                     
             bill.major_actions = actions
-            bill.save()
+            try:
+                bill.save()
+            except:
+            	print bill
+            	raise
             if bill_index: bill_index.update_object(bill, using="bill")
             
             if not options.disable_events:
