@@ -120,6 +120,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     
     mods = lxml.etree.parse(basename + ".mods.xml")
     ns = { "mods": "http://www.loc.gov/mods/v3" }
+    
     docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
     gpo_url = "http://www.gpo.gov/fdsys/search/pagedetails.action?packageId=" + mods.xpath("string(mods:recordInfo/mods:recordIdentifier[@source='DGPO'])", namespaces=ns)
     #gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
@@ -132,6 +133,27 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     
     doc_version_name = bill_gpo_status_codes[doc_version]
     
+    # citations
+    citations = []
+    for cite in mods.xpath("//mods:identifier", namespaces=ns):
+        if cite.get("type") == "USC citation":
+            try:
+                title_cite, title_app_cite, sec_cite, para_cite = re.match(r"(\d+\S*)\s*U.S.C.(\s*App.)?\s*([^\s(]+)?\s*(\(.*|et seq\.?|note)?$", cite.text).groups()
+                if title_app_cite: title_cite += "a"
+                citations.append({ "type": "usc", "text": cite.text, "title": title_cite, "section": sec_cite, "paragraph" : para_cite })
+            except:
+                citations.append({ "type": "unknown", "text": cite.text })
+        elif cite.get("type") == "Statute citation":
+            citations.append({ "type": "statutes_at_large", "text": cite.text })
+        elif cite.get("type") == "public law citation":
+            try:
+                congress_cite, slip_law_num = re.match(r"Public Law (\d+)-(\d+)$", cite.text).groups()
+                citations.append({ "type": "slip_law", "text": cite.text, "congress": int(congress_cite), "number": int(slip_law_num) })
+            except:
+                citations.append({ "type": "unknown", "text": cite.text })
+        else:
+            continue
+            
     return {
         "bill_id": bill.id,
         "bill_name": bill.title,
@@ -144,6 +166,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         "doc_version_name": doc_version_name,
         "numpages": numpages,
         "has_html_text": True,
+        "citations": citations,
     }
 
 def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):

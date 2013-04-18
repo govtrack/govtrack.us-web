@@ -875,6 +875,35 @@ class BillSummary(models.Model):
         
         return content
 
+# USC Citations
+class USCSection(models.Model):
+    parent_section = models.ForeignKey('self', blank=True, null=True, db_index=True)
+    citation = models.CharField(max_length=32, blank=True, null=True, db_index=True)
+    level_type = models.CharField(max_length=10, choices=[('title', 'Title'), ('subtitle', 'Subtitle'), ('chpater', 'Chapter'), ('subchapter', 'Subchapter'), ('part', 'Part'), ('subpart', 'Subpart'), ('division', 'Division'), ('heading', 'Heading'), ('section', 'Section')])
+    number = models.CharField(max_length=24, blank=True, null=True)
+    name = models.TextField(blank=True, null=True)
+    ordering = models.IntegerField()
+    
+    # utility methods to load from the structure.json file created by github:unitedstates/uscode
+    @staticmethod
+    def load_data(structure_data):
+        if isinstance(structure_data, str):
+            import json
+            structure_data = json.load(open(structure_data))
+        USCSection.objects.all().delete()
+        USCSection.load_data2(None, structure_data)
+    @staticmethod
+    def load_data2(parent, sections):
+        for i, sec in enumerate(sections):
+            obj = USCSection.objects.create(
+                parent_section=parent,
+                citation=sec.get("citation"),
+                level_type=sec["level"],
+                number=sec.get("number"),
+                name=sec.get("name"),
+                ordering=i)
+            USCSection.load_data2(obj, sec.get("subparts", []))
+
 Feed.register_feed(
     "misc:billsummaries",
     title = "All Bill Summaries",

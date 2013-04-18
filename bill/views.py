@@ -52,9 +52,81 @@ def bill_details(request, congress, type_slug, number):
         return reintro_prev, reintro_next
         
     def get_text_info():
+        from models import USCSection
         from billtext import load_bill_text
+        from search import parse_slip_law_number
+        import re
         try:
-            return load_bill_text(bill, None, mods_only=True)
+            metadata = load_bill_text(bill, None, mods_only=True)
+            
+            # do interesting stuff with citations
+            if "citations" in metadata:
+                slip_laws = []
+                statutes = []
+                usc = { }
+                other = []
+                usc_other = USCSection(name="Other Citations", ordering=99999)
+                for cite in metadata["citations"]:
+                    if cite["type"] == "slip_law":
+                        slip_laws.append(cite)
+                        cite["bill"] = parse_slip_law_number(cite["text"])
+                    elif cite["type"] == "statutes_at_large":
+                        statutes.append(cite)
+                    elif cite["type"] == "usc":
+                        # build a normalized citation and a link to LII
+                        cite_norm = "usc/" + cite["title"]
+                        cite_link = "http://www.law.cornell.edu/uscode/text/" + cite["title"]
+                        if cite["section"]:
+                            cite_link += "/" + cite["section"]
+                            cite_norm += "/" + cite["section"]
+                        if cite["paragraph"]: cite_link += "#" + "_".join(re.findall(r"\(([^)]+)\)", cite["paragraph"]))
+                        
+                        # Build a tree of title-chapter-...-section nodes so we can
+                        # display the citations in context.
+                        try:
+                            sec_obj = USCSection.objects.get(citation=cite_norm)
+                        except USCSection.DoesNotExist:
+                            sec_obj = USCSection(name=cite["text"], parent_section=usc_other)
+                        
+                        sec_obj.link = cite_link
+                        
+                        # recursively go up to the title
+                        path = [sec_obj]
+                        while sec_obj.parent_section:
+                            sec_obj = sec_obj.parent_section
+                            path.append(sec_obj)
+                            
+                        # now pop off from the path to put the node at the right point in a tree
+                        container = usc
+                        while path:
+                            p = path.pop(-1)
+                            if p not in container: container[p] = { }
+                            container = container[p]
+                        
+                    else:
+                        other.append(cite)
+                        
+                slip_laws.sort(key = lambda x : (x["congress"], x["number"]))
+                
+                # restructure data format
+                def ucfirst(s): return s[0].upper() + s[1:]
+                def rebuild_usc_sec(seclist, indent=0):
+                    ret = []
+                    seclist = sorted(seclist.items(), key=lambda x : x[0].ordering)
+                    for sec, subparts in seclist:
+                        ret.append({
+                            "text": (ucfirst(sec.level_type + ((" " + sec.number) if sec.number else "") + (": " if sec.name else "")) if sec.level_type else "") + (sec.name if sec.name else ""),
+                            "link": getattr(sec, "link", None),
+                            "indent": indent,
+                        })
+                        ret.extend(rebuild_usc_sec(subparts, indent=indent+1))
+                    return ret
+                usc = rebuild_usc_sec(usc)
+                
+                metadata["citations"] = {
+                    "slip_laws": slip_laws, "statutes": statutes, "usc": usc, "other": other,
+                    "count": len(slip_laws)+len(statutes)+len(usc)+len(other) }
+            return metadata
         except IOError:
             return None
 

@@ -471,11 +471,15 @@
 {% block body %}
 {% cache 600 billoverview bill.id %}
 
+{% with text as text_info %}
+
 <div style="margin-left: -15px">
+
 <ul class="tabs four-up">
 	<li><a href="#overview">Overview</a></li>
 	<li><a href="#summary">Summaries</a></li>
 	<li><a href="#related">Related</a></li>
+	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
 </ul>
 
 <div class="panes">
@@ -703,7 +707,6 @@
 					</dl>
 				</div><!-- /container -->
 
-				{% with text as text_info %}
 				<div class="container">
 					<dl>
 						<dt>Text</dt>
@@ -773,7 +776,6 @@
 						</dd>
 					</dl>
 				</div> <!-- /container -->				
-				{% endwith %}
 				
 			   </div><!-- /frame -->
 			   </div><!-- /holder -->
@@ -976,9 +978,59 @@
 				</div>
 			</div><!-- /metadata-table -->
 	</div> <!-- /related pane -->
+	
+	{% if text_info.citations.count %}
+	<div id="citations"> <!-- text analysis pane -->
+
+		<p>The bill contains the following citations to other parts of U.S. law:</p>
+	
+		{% if text_info.citations.slip_laws %}
+			<h2>Slip Laws</h2>
+			<p>Slip laws refer to enacted bills and joint resolutions in their original form as enacted by Congress, that is, before other laws amend them. Slip laws are cited as &ldquo;Public Law XXX-YYY&rdquo;, where XXX is the number of the Congress in which the bill or resolution was introduced.</p>
+			<ul class="bullets">
+			{% for cite in text_info.citations.slip_laws %}
+				<li>{{cite.text}}{% if cite.bill %}:<br/><a href="{{cite.bill.get_absolute_url}}">{{cite.bill}}</a>{% endif %}</li>
+			{% endfor %}
+			</ul>
+		{% endif %}
+		
+		{% if text_info.citations.usc %}
+			<h2>United States Code</h2>
+			<p>The United States Code is the compilation of permanent laws enacted by Congress. Temporary and other non-permanent laws do not appear in the United States Code. (About half of the United States Code is the law itself, called positive law. The other half is merely a compilation of the laws but has no legal significance.)</p>
+			
+			<ul class="bullets">
+			{% for cite in text_info.citations.usc %}
+				<li style="margin-left: {{cite.indent}}em;">{% if cite.link %}<a href="{{cite.link}}">{{cite.text}}</a>{% else %}{{cite.text}}{% endif %}</li>
+			{% endfor %}
+			</ul>
+		{% endif %}
+		
+		{% if text_info.citations.statutes %}
+			<h2>Statutes at Large</h2>
+			<p>The United States Statutes at Large is the compilation of all laws enacted by Congress.</p>
+			<ul class="bullets">
+			{% for cite in text_info.citations.statutes %}
+				<li>{{cite.text}}</li>
+			{% endfor %}
+			</ul>
+		{% endif %}
+		
+		{% if text_info.citations.other %}
+			<h2>Other Citations</h2>
+			<ul class="bullets">
+			{% for cite in text_info.citations.other %}
+				<li>{{cite.text}}</li>
+			{% endfor %}
+			</ul>
+		{% endif %}
+	</div>
+	{% endif %}
+
 </div>
 </div>
 
+{% endwith %} {% comment %}bill text{% endcomment %}
+				
 {% endcache %}
 
 <script>$("ul.tabs a").tabs("div.panes > div");</script>
