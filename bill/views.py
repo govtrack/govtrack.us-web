@@ -85,8 +85,9 @@ def bill_details(request, congress, type_slug, number):
                         # display the citations in context.
                         try:
                             sec_obj = USCSection.objects.get(citation=cite_norm)
-                        except USCSection.DoesNotExist:
-                            sec_obj = USCSection(name=cite["text"], parent_section=usc_other)
+                        except: # USCSection.DoesNotExist and MultipleObjectsReturned both possible
+                            # the 'id' field is set to make these objects properly hashable
+                            sec_obj = USCSection(id=cite["text"], name=cite["text"], parent_section=usc_other)
                         
                         sec_obj.link = cite_link
                         

@@ -138,7 +138,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     for cite in mods.xpath("//mods:identifier", namespaces=ns):
         if cite.get("type") == "USC citation":
             try:
-                title_cite, title_app_cite, sec_cite, para_cite = re.match(r"(\d+\S*)\s*U.S.C.(\s*App.)?\s*([^\s(]+)?\s*(\(.*|et seq\.?|note)?$", cite.text).groups()
+                title_cite, title_app_cite, sec_cite, para_cite = re.match(r"(\d+\S*)\s*U.S.C.(\s*App.)?\s*([^\s(]+?)?\s*(\(.*|et ?seq\.?|note)?$", cite.text).groups()
                 if title_app_cite: title_cite += "a"
                 citations.append({ "type": "usc", "text": cite.text, "title": title_cite, "section": sec_cite, "paragraph" : para_cite })
             except:
