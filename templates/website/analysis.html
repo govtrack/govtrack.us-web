@@ -323,11 +323,12 @@ def onenorm(u): return sum(abs(u))</pre>
 						null,
 						"Prognosis",
 						"% {% if m.is_introduced_model %}out of committee{% else %}{{m.success_name}}{% endif %}",
-						[{ data: [{% for bin1, bin2, n, success in m.bins %}{ x: Math.round(({{bin1|floatformat:2}}+{{bin2|floatformat:2}})/2*10)/10, y: Math.round({{success|floatformat:3}}*1000)/10 }{% if not forloop.last %}, {% endif %}{% endfor %} ]}],
+						[{ data: [{% for bin, n, success in m.bins %}{ x: Math.round({{bin|floatformat:2}}*10)/10, y: Math.round({{success|floatformat:3}}*1000)/10 }{% if not forloop.last %}, {% endif %}{% endfor %} ]}],
 						{
 							width: 400,
 							height: 250,
 							ymin: 0,
+							xmin: 0,
 							xunit: "% Prognosis",
 							yunit: "% Successful",
 						});

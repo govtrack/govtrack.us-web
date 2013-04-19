@@ -393,7 +393,7 @@ def analysis_methodology(request):
         v["bill_type"] = BillType.by_value(k[0])
         v["is_introduced_model"] = (k[1] == 0)
         v["success_name"] = bill.prognosis_model.factors[(k[0], (k[1] == 0))]["success_name"]
-    prognosis_test.sort(key = lambda kv : (kv[0][0] in (BillType.house_bill, BillType.senate_bill), bill.prognosis_model.factors[kv[0]]["count"]), reverse=True)
+    prognosis_test.sort(key = lambda kv : (kv[0][0] in (BillType.house_bill, BillType.senate_bill), kv[1]["count"]), reverse=True)
     prognosis_test = [kv[1] for kv in prognosis_test]
     
     return {

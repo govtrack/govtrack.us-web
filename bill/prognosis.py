@@ -535,7 +535,7 @@ def compute_prognosis(bill, proscore=False):
 		
 def test_prognosis(congress):
 	from math import exp
-	from numpy import mean, std, digitize, percentile, fmin
+	from numpy import mean, median, std, digitize, percentile, fmin
 	
 	import prognosis_model
 	
@@ -547,27 +547,26 @@ def test_prognosis(congress):
 	for model_type in (0, 1):
 		for bt, blabel in list(BillType):
 			# What was the success rate in the training data?
-			model_1 = prognosis_model.factors[(bt, model_type==0)]
-			if model_type == 0:
-				sr = model_1["success_rate"]
-				if len(model_1["factors"]) == 0: continue # nothing interesting to test
-			else:
-				model_2 = prognosis_model.factors[(bt, model_type==0)]
-				sr = model_1["success_rate"] * model_2["success_rate"] / 100.0
-				if len(model_1["factors"])+len(model_2["factors"]) == 0: continue # nothing interesting to test
+			model = prognosis_model.factors[(bt, model_type==0)]
+			sr = model["success_rate"]
+			if len(model["factors"]) == 0: continue # nothing interesting to test
 			
 			# store output....
 			model_result = { }
 			test_results[(bt, model_type)] = model_result
+			model_result["overall"] = sr
 			
 			# Pull in the data as tuples of (prediction float [0,1], success True/False)
+			bills = Bill.objects.filter(congress=congress, bill_type=bt)
+			if model_type == 1: bills = bills.exclude(current_status__in=BillStatus.introduced_statuses)
+			model_result["count"] = bills.count()
 			data = []
-			for bill in Bill.objects.filter(congress=congress, bill_type=bt).prefetch_related():
+			for bill in bills.prefetch_related():
 				x = compute_prognosis_2(bill, committee_membership, majority_party, None, proscore=False)
 				if model_type == 0:
 					x = x["prediction_1"]
 				else:
-					x = x["prediction_1"] * x["prediction_2"] / 100.0
+					x = x["prediction_2"]
 				y = is_success(bill, model_type)
 				data.append((x, y))
 			xdata = [x[0] for x in data]
@@ -584,7 +583,9 @@ def test_prognosis(congress):
 			for b in xrange(len(bins)-1):
 				bindata = [data[i] for i in xrange(len(data)) if bindices[i] == b]
 				if len(bindata) == 0: continue
-				model_result["bins"].append( (bins[b], bins[b+1], len(bindata), sum(1 for x,y in bindata if y)/float(len(bindata))) )
+				median_prog = median([x for x,y in bindata])
+				pct_success = sum(1 for x,y in bindata if y)/float(len(bindata))
+				model_result["bins"].append( (median_prog, len(bindata), pct_success) )
 			
 			# We don't know a priori what the prediction threshold is above which we
 			# should score a success, so find the threshold that maximizes the f2 score,
