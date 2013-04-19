@@ -885,6 +885,8 @@ class USCSection(models.Model):
     ordering = models.IntegerField()
     
     # utility methods to load from the structure.json file created by github:unitedstates/uscode
+    # don't forget to create a fixture:
+    # ./manage.py dumpdata --format json bill.USCSection > data/db/django-fixture-usc_sections.json
     @staticmethod
     def load_data(structure_data):
         if isinstance(structure_data, str):

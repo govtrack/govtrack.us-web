@@ -29,6 +29,12 @@ GovTrack.us runs on Ubuntu 12.10.
   cd ./govtrack.us-web/
   ```
 
+* Run the build script to install additional dependencies into a virtual environment:
+
+  ```
+  ./build/buildenv.sh
+  ```
+
 * Create a local settings file based on the example file:
 
   ```
@@ -38,13 +44,7 @@ GovTrack.us runs on Ubuntu 12.10.
 * Edit `settings_local.py` to set up your database. The default configuration uses SQLite as the database and no database configuration is required. Fill in SECRET_KEY though. Here's how you can generate a SECRET_KEY:
 
   ```
-  python -c 'import random; print "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)])'
-  ```
-
-* Run the build script to install additional dependencies into a virtual environment:
-
-  ```
-  ./build/buildenv.sh
+  ./manage.py generate_secret_key
   ```
 
 * To enable search:
@@ -70,8 +70,9 @@ GovTrack.us runs on Ubuntu 12.10.
 * Load some data:
 
   ```
-  wget http://www.govtrack.us/data/db/django-fixture-people.json
+  wget http://www.govtrack.us/data/db/django-fixture-{people,usc_sections}.json
   ./manage.py loaddata django-fixture-people.json
+  ./manage.py loaddata django-fixture-usc_sections.json
 
   ./parse.py committee
 
