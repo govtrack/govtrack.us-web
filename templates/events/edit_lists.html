@@ -192,16 +192,18 @@ function new_list(node) {
 		},
 		dataType: "json",
 		success: function(data) {
-			var n = $('#lists > div:first').clone();
+			var n = $('#lists > div:first').clone(); // div.four.columns
 			n.insertBefore($('#newlist'));
+			n.hide();
+			n.fadeIn();
+			
+			n = n.find("> div.list"); // the list node itself
 			n.find(".name").text(data.list_name);
 			n.find(".email_info").text(data.list_email_display);
 			n.find('.num').text('Empty');
 			n.attr("listid", data.list_id);
 			n.attr("list_email", data.list_email);
 			n.removeClass("default_list");
-			n.hide();
-			n.fadeIn();
 			activate_list(n);
 		}
 	});
