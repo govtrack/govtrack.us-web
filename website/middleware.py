@@ -8,8 +8,11 @@ from emailverification.models import BouncedEmail
 
 if settings.GEOIP_DB_PATH:
 	from django.contrib.gis.geoip import GeoIP
+	from django.contrib.gis.geos import Point
 	geo_ip_db = GeoIP(settings.GEOIP_DB_PATH)
-	washington_dc = geo_ip_db.geos("69.255.139.56")
+	washington_dc = Point(-77.0300, 38.8900)
+	phoenix = Point(-112.0739, 33.4492)
+	los_angeles = Point(-118.2428, 34.0522)
 
 # http://whois.arin.net/rest/org/ISUHR/nets
 HOUSE_NET_RANGES = (
@@ -61,7 +64,9 @@ def template_context_processor(request):
             context["remote_net_senate"] = True
             
         if settings.GEOIP_DB_PATH:
-            context["is_dc_local"] = geo_ip_db.geos(ip).distance(washington_dc) < .5
+            user_loc = geo_ip_db.geos(ip)
+            context["is_dc_local"] = user_loc.distance(washington_dc) < .5
+            context["near_phoenix"] = user_loc.distance(phoenix) < 1.2*los_angeles.distance(phoenix)
     except:
         pass
     

@@ -71,12 +71,13 @@
 
 <body class="{% block body_class %}{% endblock %}">
 
-	{% if 0 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" data-seq="27">
+	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
+	<div id="sitenewscontainer" style="display: none" data-seq="28">
 		<div id="sitenews">
 			<div><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div>
-				...
+				<b>Near Phoenix?</b> We&rsquo;ll be presenting at the <a href="http://www.aallnet.org/chapter/azll/legal-research-institute.asp">AzALL Congressional Information Symposium</a>
+				this Friday, April 26. Hope to see you there!
 			</div>
 			<div style="clear: both"> </div>
 		</div>
@@ -87,6 +88,9 @@
 		$.cookie("sitenewsbanner", $('#sitenewscontainer').attr("data-seq"), { expires: 14, path: '/' });
 	}
 	$(function() {
+		if (!near_phoenix) return;
+		_gaq.push(['_trackEvent', 'Banner', 'phoenix', null]);
+	
 		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("data-seq")) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
 			$('#sitenewscontainer').fadeIn();
