@@ -7,12 +7,12 @@ import urllib, json, datetime
 from emailverification.models import BouncedEmail
 
 if settings.GEOIP_DB_PATH:
-	from django.contrib.gis.geoip import GeoIP
-	from django.contrib.gis.geos import Point
-	geo_ip_db = GeoIP(settings.GEOIP_DB_PATH)
-	washington_dc = Point(-77.0300, 38.8900)
-	phoenix = Point(-112.0739, 33.4492)
-	los_angeles = Point(-118.2428, 34.0522)
+    from django.contrib.gis.geoip import GeoIP
+    from django.contrib.gis.geos import Point
+    geo_ip_db = GeoIP(settings.GEOIP_DB_PATH)
+    washington_dc = Point(-77.0300, 38.8900)
+    phoenix = Point(-112.0739, 33.4492)
+    los_angeles = Point(-118.2428, 34.0522)
 
 # http://whois.arin.net/rest/org/ISUHR/nets
 HOUSE_NET_RANGES = (
@@ -29,12 +29,12 @@ SENATE_NET_RANGES = (
     )
 
 def template_context_processor(request):
-	# These are good to have in a context processor and not middleware
-	# because they won't be evaluated until template evaluation, which
-	# might have user-info blocked already for caching (a good thing).
-	
+    # These are good to have in a context processor and not middleware
+    # because they won't be evaluated until template evaluation, which
+    # might have user-info blocked already for caching (a good thing).
+    
     context = {
-    	"GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY
+        "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY
     }
     
     if request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
@@ -57,21 +57,57 @@ def template_context_processor(request):
     try:
         ip = request.META["REMOTE_ADDR"]
         ip = ip.replace("::ffff:", "") # ipv6 wrapping ipv4
-    	
+        
         if is_ip_in_any_range(ip, HOUSE_NET_RANGES):
             context["remote_net_house"] = True
         if is_ip_in_any_range(ip, SENATE_NET_RANGES):
             context["remote_net_senate"] = True
-            
+        
+        try:
+            cong_dist = json.loads(request.COOKIES["cong_dist"])
+        except:
+            cong_dist = None
+        
         if settings.GEOIP_DB_PATH:
             user_loc = geo_ip_db.geos(ip)
             context["is_dc_local"] = user_loc.distance(washington_dc) < .5
             context["near_phoenix"] = user_loc.distance(phoenix) < 1.2*los_angeles.distance(phoenix)
+            
+            # geolocate to a congressional district if not known
+            if not cong_dist:
+                from person.views import do_district_lookup
+                cong_dist = do_district_lookup(*user_loc.coords)
+                cong_dist["queried"] = True
+
+        if cong_dist and "error" not in cong_dist:
+            from person.models import PersonRole, RoleType
+            def fmt_role(r):
+                return { "id": r.person.id, "name": r.person.name, "link": r.person.get_absolute_url(), "type": RoleType.by_value(r.role_type).key }
+            qs = PersonRole.objects.filter(current=True).select_related("person")    
+            cong_dist["reps"] = [fmt_role(r) for r in 
+                qs.filter(role_type=RoleType.representative, state=cong_dist["state"], district=cong_dist["district"])
+                | qs.filter(role_type=RoleType.senator, state=cong_dist["state"])]
+            context["geolocation"] = json.dumps(cong_dist)
+        if cong_dist: # whether or not error
+            request.cong_dist_info = cong_dist
+                
     except:
         pass
     
     return context
-    
+  
+class GovTrackMiddleware:
+    def process_response(self, request, response):
+        # Save the geolocation info in a cookie so we don't have to
+        # query GIS info on each request.
+        if hasattr(request, "cong_dist_info"):
+            cong_dist_info = request.cong_dist_info
+            for k in ("queried", "reps"):
+                if k in cong_dist_info: del cong_dist_info[k]
+            response.set_cookie("cong_dist", json.dumps(cong_dist_info), max_age=60*60*24*21)
+        return response
+
+
 class DebugMiddleware:
     def process_request(self, request):
         r = Req(request=repr(request))

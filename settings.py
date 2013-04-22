@@ -84,6 +84,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'twostream.middleware.CacheLogic',
+    'website.middleware.GovTrackMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
