@@ -135,6 +135,11 @@ function do_search(form) {
 	return false;
 }
 {% if request.GET.q %}$(function() { do_search("#tracker_search"); });{% endif %}
+{% if feed %}$(function() {
+	selected_feed = "{{feed.0|escapejs}}";
+	selected_feed_descr = "{{feed.1|escapejs}}";
+	show_feed();
+});{% endif %}
 </script>
 {% endblock %}
 
@@ -240,13 +245,15 @@ function do_search(form) {
 						<option value="2">Weekly Emails</option>
 					</select>
 				</div>
-				<div class="select_another">Or <a href="#" onclick="return back_to_start();">choose something else</a>.</div>
+				{% if not feed %}
+				<div class="select_another">Or <a href="#" onclick="return back_to_start();">track something else</a>.</div>
+				{% endif %}
 			</div><!-- /set_freq -->
 			<div class="">
 				{% if not request.user.is_authenticated %}
 			
 				<div class="signin_social">
-					<h3 style="margin-bottom: 1em">Save To Your Docket</h3>
+					<h3 style="margin-bottom: 1em">Save This Tracker</h3>
 					{% with "/accounts/lists?"|add:"REPLACE_FEED_HERE" as singlesignon_next %}
 						{% include "registration/login_singlesignon.html" %}
 					{% endwith %}

@@ -237,8 +237,17 @@ def events_show_feed(request, feedslug):
 
 @render_to('events/add_tracker.html')
 def events_add_tracker(request):
+    feed_info = None
+    if "feed" in request.GET:
+        try:
+            feed = Feed.from_name(request.GET["feed"])
+            feed_info = (feed.feedname, feed.title)
+        except:
+            pass
+        
     return {
         'no_arg_feeds': Feed.get_simple_feeds(),
+        'feed': feed_info,
     }
     
 @json_response

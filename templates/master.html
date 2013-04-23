@@ -98,12 +98,34 @@
 	}
 	$(function() {
 		if (!near_phoenix) {
-			if (cong_dist && cong_dist.reps && document.location.pathname != cong_dist.reps[0].link) {
-				$('#sitenews div.ex').hide();
-				$('#sitenews div.sitenewsbody').html(
-					"Live in " + cong_dist.state + "-" + cong_dist.district + "? "
-					+ "Check up on <a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_click');\" href='" + cong_dist.reps[0].link + "'>" +  cong_dist.reps[0].name + "</a>.");
-				$('#sitenewscontainer').fadeIn();
+			if (cong_dist && cong_dist.reps) {
+				if (!the_user && cong_dist.reps[0].key_vote) {
+					var p = cong_dist.reps[0];
+					var vote_way;
+					if (p.key_vote.option == "+") vote_way = "voted yes on";
+					else if (p.key_vote.option == "-") vote_way = "voted against";
+					else if (p.key_vote.option == "0") vote_way = "did not vote in the vote on";
+					else if (p.key_vote.option == "P") vote_way = "abstained in the vote on";
+					
+					$('#sitenews div.ex').hide();
+					$('#sitenews div.sitenewsbody').html(
+						  p.name
+						+ " <a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_vote_link');\" href='" + p.key_vote.link + "' style='text-decoration: none'>"
+						+ vote_way + " "
+						+ p.key_vote.description
+						+ "</a>. "
+						+ "We'll alert you the next time " + p.pronoun + " votes. "
+						+ "<a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_sign_up');\" href='/start?feed=pv:" + p.id + "' style='font-weight: bold'>Sign Up ></a>"
+						+ " <small style='margin-left: 1em'>(<a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_wrong');\" href='/congress/members/" + cong_dist.state + "' style='text-decoration: none'>Not your rep?</a>)</small>"
+						);
+					$('#sitenewscontainer').fadeIn();
+				} else if (document.location.pathname != cong_dist.reps[0].link) {
+					$('#sitenews div.ex').hide();
+					$('#sitenews div.sitenewsbody').html(
+						"Live in " + cong_dist.state + "-" + cong_dist.district + "? "
+						+ "Check up on <a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_click');\" href='" + cong_dist.reps[0].link + "'>" +  cong_dist.reps[0].name + "</a>.");
+					$('#sitenewscontainer').fadeIn();
+				}
 			}
 			return;
 		}

@@ -1,8 +1,8 @@
 from common import enum
 
 class Gender(enum.Enum):
-    male = enum.Item(1, 'Male')
-    female = enum.Item(2, 'Female')
+    male = enum.Item(1, 'Male', pronoun="he")
+    female = enum.Item(2, 'Female', pronoun="she")
 
 
 class RoleType(enum.Enum):

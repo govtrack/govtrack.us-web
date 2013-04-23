@@ -80,13 +80,43 @@ def template_context_processor(request):
                 cong_dist["queried"] = True
 
         if cong_dist and "error" not in cong_dist:
-            from person.models import PersonRole, RoleType
+            from person.models import PersonRole, RoleType, Gender
+            import random
+            def get_key_vote(p):
+                from vote.models import Vote
+                
+                v = 113340
+                descr = "CISPA"
+                
+                v = Vote.objects.get(id=v)
+                try:
+                    return {
+                        "link": v.get_absolute_url(),
+                        "description": descr,
+                        "option": p.votes.get(vote=v).option.key,
+                    }
+                except:
+                    return None
             def fmt_role(r):
-                return { "id": r.person.id, "name": r.person.name, "link": r.person.get_absolute_url(), "type": RoleType.by_value(r.role_type).key }
+                return {
+                	"id": r.person.id,
+                	"name": r.person.name_and_title(),
+                	"link": r.person.get_absolute_url(),
+                	"type": RoleType.by_value(r.role_type).key,
+                	"pronoun": Gender.by_value(r.person.gender).pronoun,
+                	"key_vote": get_key_vote(r.person),
+                }
             qs = PersonRole.objects.filter(current=True).select_related("person")    
             cong_dist["reps"] = [fmt_role(r) for r in 
                 qs.filter(role_type=RoleType.representative, state=cong_dist["state"], district=cong_dist["district"])
                 | qs.filter(role_type=RoleType.senator, state=cong_dist["state"])]
+                
+            if settings.DEBUG:
+                # I need to test with more than my rep (just our DC delegate).
+                cong_dist["reps"] = [fmt_role(r) for r in random.sample(PersonRole.objects.filter(current=True), 3)]
+            
+            random.shuffle(cong_dist["reps"]) # for varied output
+            
             context["geolocation"] = json.dumps(cong_dist)
         if cong_dist: # whether or not error
             request.cong_dist_info = cong_dist
