@@ -13,7 +13,7 @@ from django.core.cache import cache
 from common.decorators import render_to
 from common.pagination import paginate
 
-import json, cPickle, base64
+import json, cPickle, base64, re
 
 from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs, get_congress_dates
 
@@ -36,7 +36,11 @@ from settings import CURRENT_CONGRESS
 @render_to('person/person_details.html')
 def person_details(request, pk):
     def build_info():
-        person = get_object_or_404(Person, pk=pk)
+        if re.match(r"\d", pk):
+            person = get_object_or_404(Person, pk=pk)
+        else:
+            # support bioguide IDs for me
+            person = get_object_or_404(Person, bioguideid=pk)
         
         # current role
         role = person.get_current_role()
@@ -80,7 +84,7 @@ def person_details(request, pk):
                 'feed': Feed.PersonFeed(person.id),
                 }
 
-    ck = "person_details_%d" % int(pk)
+    ck = "person_details_%s" % pk
     ret = cache.get(ck)
     if not ret:
         ret = build_info()
