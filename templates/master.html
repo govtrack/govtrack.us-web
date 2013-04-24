@@ -32,7 +32,7 @@
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		{% if not request.anonymous %}
 			<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
-			<script>var the_user = null; var near_phoenix = false; var cong_dist = null;</script>
+			<script>var the_user = null; var cong_dist = null;</script>
 		{% else %}
 			{% include "twostream/head.html" %}
 		{% endif %}
@@ -97,7 +97,6 @@
 		$.cookie("sitenewsbanner", $('#sitenewscontainer').attr("data-seq"), { expires: 14, path: '/' });
 	}
 	$(function() {
-		if (!near_phoenix) {
 			if (cong_dist && cong_dist.reps) {
 				if (!the_user && cong_dist.reps[0].key_vote) {
 					var p = cong_dist.reps[0];
@@ -127,9 +126,9 @@
 					$('#sitenewscontainer').fadeIn();
 				}
 			}
-			return;
-		}
-		_gaq.push(['_trackEvent', 'Banner', 'phoenix', null]);
+			
+		// no site news at this time
+		return;
 	
 		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("data-seq")) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
