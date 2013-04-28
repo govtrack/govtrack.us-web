@@ -164,6 +164,9 @@ if "bills" in sys.argv:
 		if bill_type not in bill_type_map: raise ValueError()
 		fn2 = "data/us/%d/bills/%s%d.xml" % (CONGRESS, bill_type_map[bill_type], int(number))
 		do_bill_parse |= copy(fn, fn2, r'updated="[^"]+"')
+	
+	# Generate summary files.
+	os.system("cd /home/govtrack/scripts/gather; perl parse_status.pl SUMMARIES %d" % CONGRESS)
 		
 	# TODO: Even if we didn't get any new files, the bills parser also
 	# scrapes docs.house.gov and the Senate floor schedule, so we should
