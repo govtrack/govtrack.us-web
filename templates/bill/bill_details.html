@@ -175,14 +175,18 @@
 			// we delete anything else.
 			fb_unshare(true);
 			
+			var action_obj = {
+				bill: fb_action_target_url
+			};
+			if (window.location.hash == "#fb-staging") {
+				action_obj["fb:explicitly_shared"] = true;
+			}
+			
 			// post new action
 			FB.api(
 			  '/me/og_govtrack:' + action_name,
 			  'post',
-			  {
-				bill: fb_action_target_url
-				//messge: ...
-			  },
+			  action_obj,
 			  function(response) {
 				fb_actions[action_name] = response.id;
 				update_fb_action_status();
@@ -445,16 +449,16 @@
 					<div class="push-btn blue-facebook-btn-wide" style="cursor: default; width: 260px; text-align: left; padding: 4px 5px 4px 46px; font-size: 12px; line-height: 16px; text-transform: none; color: white; float: right;">
 						<div class="share-on-fb-working" style="display: none;">Updating your wall...</div>
 						<div class="share-on-fb-new">
-							<div>Write on your wall: &ldquo;I
+							<div>Write on Facebook: &ldquo;I
 								<a href="#" onclick="return fb_share('support');">support</a>
 								<span style="color: #EEE">or</span> <a href="#" onclick="return fb_share('oppose');">oppose</a>
 								<span style="color: #EEE">or</span> <a href="#" onclick="return fb_share('track');">am tracking</a>
 								this bill.&rdquo;
 							</div>
 						</div>
-						<div class="share-on-fb-existing">
+						<div class="share-on-fb-existing" style="display: none">
 							You shared: &ldquo;<span> </span>&rdquo;
-							[<a href="#" onclick="return fb_unshare();">Remove From Wall</a>]
+							[<a href="#" onclick="return fb_unshare();">Un-Share</a>]
 						</div>
 					</div>
 				</div>
