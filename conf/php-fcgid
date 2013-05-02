@@ -1,0 +1,107 @@
+#!/bin/sh
+#
+# Author: Till Klampaeckel <till@php.net>
+#
+# Credits
+#
+#  * original script: http://unix.derkeiler.com/Mailing-Lists/FreeBSD/questions/2007-09/msg00468.html
+#  * improved: http://till.klampaeckel.de/blog/archives/30-PHP-performance-III-Running-nginx.html
+#  * all linux start script fu inspired by CouchDB's start script (by Noah Slater)
+#
+
+SCRIPT_OK=0
+SCRIPT_ERROR=1
+
+DESCRIPTION="php-fcgi"
+NAME=php-fgcid
+SCRIPT_NAME=$(basename $0)
+
+WWW_GROUP=www-data
+PHP_CGI=/usr/bin/php-cgi
+
+phpfcgid_users="`whoami`"
+phpfcgid_children="2"
+phpfcgid_tmpdir="/tmp"
+phpfcgid_requests="100"
+
+log_daemon_msg () {
+    echo $@
+}
+
+log_end_msg () {
+    # Dummy function to be replaced by LSB library.
+
+    if test "$1" != "0"; then
+        echo "Error with $DESCRIPTION: $NAME"
+    fi
+    return $1
+}
+
+phpfcgid_start() {
+    export PHP_FCGI_CHILDREN=$phpfcgid_children
+    export PHP_FCGI_MAX_REQUESTS=$phpfcgid_requests
+
+    for user in ${phpfcgid_users}; do
+    	echo "Starting $NAME as $user with $phpfcgid_children children (req: $phpfcgid_requests)."
+        socketfn="${phpfcgid_tmpdir}/php-fastcgi.${user}.sock"
+        #chown ${user}:${WWW_GROUP} ${socketdir}
+        #su -m ${user} -c "${PHP_CGI} -b ${socketdir}/socket&"
+        ${PHP_CGI} -b ${socketfn}&
+    done
+}
+
+phpfcgid_stop() {
+    echo "Stopping $NAME."
+    pids=`pgrep php-cgi`
+    pkill php-cgi
+}
+
+phpfcgid_status() {
+    log_daemon_msg "To be implemented: status"
+    log_end_msg $SCRIPT_ERROR
+}
+
+
+parse_script_option_list () {
+
+    case "$1" in
+        start)
+            if phpfcgid_start; then
+                log_end_msg $SCRIPT_OK
+            else
+                log_end_msg $SCRIPT_ERROR
+            fi
+            ;;
+        stop)
+            log_daemon_msg "Stopping $DESCRIPTION" $NAME
+            if phpfcgid_stop; then
+                log_end_msg $SCRIPT_OK
+            else
+                log_end_msg $SCRIPT_ERROR
+            fi
+            ;;
+        restart|force-reload)
+            log_daemon_msg "Restarting $DESCRIPTION" $NAME
+            if phpfcgid_stop; then
+                if phpfcgid_start; then
+                    log_end_msg $SCRIPT_OK
+                else
+                    log_end_msg $SCRIPT_ERROR
+                fi
+            else
+                log_end_msg $SCRIPT_ERROR
+            fi
+            ;;
+        status)
+            phpfcgid_status
+            ;;
+        *)
+            cat << EOF >&2
+Usage: $SCRIPT_NAME {start|stop|restart|force-reload|status}
+EOF
+            exit $SCRIPT_ERROR
+            ;;
+    esac
+}
+
+parse_script_option_list $@
