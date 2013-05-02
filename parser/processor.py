@@ -75,7 +75,10 @@ class Processor(object):
             try:
                 return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-05:00')
             except ValueError:
-                return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00')
+                try:
+                    return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00')
+                except ValueError:
+                    return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
 
     def is_model_field(self, obj, fieldname):
         from django.db.models import FieldDoesNotExist
@@ -114,16 +117,16 @@ class YamlProcessor(Processor):
     def display_node(self, node):
         return pformat(node)
     def get_node_attribute_keys(self, node):
-        # handle a_b path names by scanning node recursively
+        # handle a__b path names by scanning node recursively
         ret = set()
         for k, v in node.items():
             ret.add(k)
             if isinstance(v, dict):
                 for k2 in self.get_node_attribute_keys(v):
-                    ret.add(k + '_' + k2)
+                    ret.add(k + '__' + k2)
         return ret
     def get_node_attribute_value(self, node, attr):
-        for k in attr.split('_'):
+        for k in attr.split('__'):
             node = node.get(k, None)
         return node
     def get_node_child_value(self, node, name):
@@ -150,7 +153,7 @@ def yaml_load(path):
         if store["hash"] == h:
             return store["data"]
 
-	# No cached pickled data exists, so load the YAML file.
+    # No cached pickled data exists, so load the YAML file.
     data = yaml.load(open(path), Loader=Loader)
 
     # Store in a pickled file for fast access later.

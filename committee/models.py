@@ -62,10 +62,12 @@ class Committee(models.Model):
     
     def create_events(self):
         from events.models import Feed, Event
+        feeds = [Feed.AllCommitteesFeed(), Feed.CommitteeMeetingsFeed(self.code)]
+        if self.committee: feeds.append(Feed.CommitteeMeetingsFeed(self.committee.code)) # add parent committee
         with Event.update(self) as E:
             for meeting in self.meetings.all():
-                E.add("mtg_" + str(meeting.id), meeting.when, [Feed.AllCommitteesFeed(), Feed.CommitteeFeed(self.code)]
-                	+ [Feed.BillFeed(b) for b in meeting.bills.all()])
+                E.add("mtg_" + str(meeting.id), meeting.when,
+                	feeds + [Feed.BillFeed(b) for b in meeting.bills.all()])
     
     def render_event(self, eventid, feeds):
         eventinfo = eventid.split("_")
@@ -137,8 +139,10 @@ class CommitteeMeeting(models.Model):
     # committee schedules, so we should not create any
     # foreign keys to this model.
 
+    created = models.DateTimeField(auto_now_add=True)
     committee = models.ForeignKey('committee.Committee', related_name='meetings')
     when = models.DateTimeField()
     subject = models.TextField()
     bills = models.ManyToManyField('bill.Bill', blank=True)
-
+    guid = models.CharField(max_length=36, db_index=True, unique=True)
+    

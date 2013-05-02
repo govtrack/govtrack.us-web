@@ -25,41 +25,41 @@ class PersonProcessor(YamlProcessor):
     a member of Congress at least one time.
     """
 
-    REQUIRED_ATTRIBUTES = ['id_govtrack', 'name_first', 'name_last']
+    REQUIRED_ATTRIBUTES = ['id__govtrack', 'name__first', 'name__last']
     ATTRIBUTES = [
-        'id_govtrack', 'name_first', 'name_last',
-        'name_middle', 'name_suffix', 'name_nickname',
-        'id_bioguide', 'id_votesmart', 'id_opensecrets', 'id_cspan',
-        'social_youtube', 'social_twitter',
-        'bio_birthday', 'bio_gender',
+        'id__govtrack', 'name__first', 'name__last',
+        'name__middle', 'name__suffix', 'name__nickname',
+        'id__bioguide', 'id__votesmart', 'id__opensecrets', 'id__cspan',
+        'social__youtube', 'social__twitter',
+        'bio__birthday', 'bio__gender',
     ]
     GENDER_MAPPING = {'M': Gender.male, 'F': Gender.female}
     FIELD_MAPPING = {
-        'id_govtrack': 'id',
-        'id_bioguide': 'bioguideid',
-        'id_votesmart': 'pvsid',
-        'id_opensecrets': 'osid',
-        'id_cspan': 'cspanid',
-        'social_youtube': 'youtubeid',
-        'social_twitter': 'twitterid',
-        'name_first': 'firstname',
-        'name_last': 'lastname',
-        'bio_birthday': 'birthday',
-        'bio_gender': 'gender',
-        'name_middle': 'middlename',
-        'name_suffix': 'namemod',
-        'name_nickname': 'nickname',
+        'id__govtrack': 'id',
+        'id__bioguide': 'bioguideid',
+        'id__votesmart': 'pvsid',
+        'id__opensecrets': 'osid',
+        'id__cspan': 'cspanid',
+        'social__youtube': 'youtubeid',
+        'social__twitter': 'twitterid',
+        'name__first': 'firstname',
+        'name__last': 'lastname',
+        'bio__birthday': 'birthday',
+        'bio__gender': 'gender',
+        'name__middle': 'middlename',
+        'name__suffix': 'namemod',
+        'name__nickname': 'nickname',
     }
 
-    def bio_gender_handler(self, value):
+    def bio__gender_handler(self, value):
         return self.GENDER_MAPPING[value]
 
-    def bio_birthday_handler(self, value):
+    def bio__birthday_handler(self, value):
         return datetime.strptime(value, '%Y-%m-%d')
 
-    def id_handler(self, value):
+    def id__govtrack_handler(self, value):
         return int(value)
-    def cspanid_handler(self, value):
+    def id__cspan_handler(self, value):
         return int(value)
 
 

@@ -9,13 +9,14 @@ import logging
 from django.conf import settings
 
 from parser.progress import Progress
-from parser.processor import XmlProcessor
 from parser.processor import YamlProcessor, yaml_load
 from parser.models import File
 from committee.models import (Committee, CommitteeType, CommitteeMember,
                               CommitteeMemberRole, CommitteeMeeting)
 from person.models import Person
 from bill.models import Bill, BillType
+
+import json, re
 
 log = logging.getLogger('parser.committee_parser')
 
@@ -35,21 +36,19 @@ ROLE_MAPPING = {
     'Member': CommitteeMemberRole.member,
 }
 
-class CommitteeMeetingProcessor(XmlProcessor):
+class CommitteeMeetingProcessor(YamlProcessor):
     """
-    Parser of committeeschedule.xml.
+    Parser of committee meeting JSON files.
     """
 
-    REQUIRED_ATTRIBUTES = ['committee-id', 'datetime']
-    ATTRIBUTES = ['committee-id', 'datetime']
-    REQUIRED_NODES = ['subject']
-    NODES = ['subject']
-    FIELD_MAPPING = {'committee-id': 'committee', 'datetime': 'when'}
+    REQUIRED_ATTRIBUTES = ['committee', 'occurs_at', 'topic', 'guid']
+    ATTRIBUTES = ['committee', 'subcommittee', 'occurs_at', 'topic', 'guid', 'room']
+    FIELD_MAPPING = { 'occurs_at': 'when', 'topic': 'subject' }
 
-    def committee_id_handler(self, value):
+    def committee_handler(self, value):
         return Committee.objects.get(code=value)
 
-    def datetime_handler(self, value):
+    def occurs_at_handler(self, value):
         return self.parse_datetime(value)
 
 
@@ -159,44 +158,53 @@ def main(options):
 
         File.objects.save_file(MEMBERS_FILE)
         
-    return
-
     log.info('Processing committee schedule')
-    SCHEDULE_FILE = 'data/us/112/committeeschedule.xml'
-    file_changed = File.objects.is_changed(SCHEDULE_FILE)
-
-    if not file_changed and not options.force:
-        log.info('File %s was not changed' % SCHEDULE_FILE)
-    else:
-        tree = etree.parse(SCHEDULE_FILE)
-        
-        # We have to clear out all CommitteeMeeting objects when we refresh because
-        # we have no unique identifier in the upstream data for a meeting. We might use
-        # the meeting's committee & date as an identifier, but since meeting times can
-        # change this might have awkward consequences for the end user if we even
-        # attempted to track that.
-
-        CommitteeMeeting.objects.all().delete()
-
-        # Process committee event nodes
-        for meeting in tree.xpath('/committee-schedule/meeting'):
-            try:
-                mobj = meeting_processor.process(CommitteeMeeting(), meeting)
-                mobj.save()
-                
-                mobj.bills.clear()
-                for bill in meeting.xpath('bill'):
-                    bill = Bill.objects.get(congress=bill.get("session"), bill_type=BillType.by_xml_code(bill.get("type")), number=int(bill.get("number")))
-                    mobj.bills.add(bill)
-            except Committee.DoesNotExist:
-                log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
-
-        for committee in Committee.objects.all():
-            if not options.disable_events:
-                committee.create_events()
-            
-        File.objects.save_file(SCHEDULE_FILE)
-    
+    for chamber in ("house", "senate"):
+		meetings_file = 'data/congress/committee_meetings_%s.json' % chamber
+		file_changed = File.objects.is_changed(meetings_file)
+	
+		if not file_changed and not options.force:
+			log.info('File %s was not changed' % meetings_file)
+		else:
+			meetings = json.load(open(meetings_file))
+			
+			# Process committee event nodes
+			for meeting in meetings:
+				try:
+					mobj = meeting_processor.process(CommitteeMeeting(), meeting)
+					
+					# Associate it with an existing meeting object if GUID is already known.
+					try:
+						mobj.id = CommitteeMeeting.objects.get(guid=mobj.guid).id
+					except CommitteeMeeting.DoesNotExist:
+						pass
+					
+					# Attach the meeting to the subcommittee if set.
+					if mobj.subcommittee:
+						mobj.committee = Committee.objects.get(code=mobj.committee.code + mobj.subcommittee)
+					
+					if mobj.room:
+					    mobj.subject += " [" + mobj.room + "]"
+					
+					mobj.save()
+					
+					mobj.bills.clear()
+					for bill in meeting["bills"]:
+					    try:
+					        bill_type, bill_num, bill_cong = re.match(r"([a-z]+)(\d+)-(\d+)$", bill).groups()
+					        bill = Bill.objects.get(congress=bill_cong, bill_type=BillType.by_slug(bill_type), number=int(bill_num))
+					        mobj.bills.add(bill)
+					    except AttributeError:
+					        pass # regex failed
+				except Committee.DoesNotExist:
+					log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
+	
+			for committee in Committee.objects.all():
+				if not options.disable_events:
+					committee.create_events()
+				
+			File.objects.save_file(meetings_file)
+		
 
 if __name__ == '__main__':
     main()

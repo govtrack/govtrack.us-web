@@ -88,6 +88,8 @@ if "people" in sys.argv:
 if "committees" in sys.argv:
 	if CONGRESS != 113: raise ValueErrror()
 	
+	# Committee metadata.
+	
 	# Pull latest YAML.
 	os.system("cd %s/cache/congress-legislators; git fetch -pq" % SCRAPER_PATH)
 	os.system("cd %s/cache/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
@@ -95,10 +97,11 @@ if "committees" in sys.argv:
 	# Convert committee YAML into the legacy format.
 	os.system(". %s/.env/bin/activate; python ../scripts/legacy-conversion/convert_committees.py %s %s/cache/congress-legislators/ ../data/us/%d/committees.xml" % (SCRAPER_PATH, SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
 
-	# Load YAML (directly) into db.
+	# Committee events.
+	os.system("cd %s; . .env/bin/activate; ./run committee_meetings %s --log=%s" % (SCRAPER_PATH, fetch_mode, log_level))
+	
+	# Load into db.
 	os.system("RELEASE=1 ./parse.py -l ERROR committee")
-	
-	
 
 do_bill_parse = False
 
