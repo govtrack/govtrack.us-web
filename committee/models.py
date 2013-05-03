@@ -36,7 +36,7 @@ class Committee(models.Model):
     def get_absolute_url(self):
         parent = self.committee
         if parent:
-            return reverse('subcommittee_details', args=[parent.code, self.code])
+            return reverse('subcommittee_details', args=[parent.code, self.code[4:]])
         else:
             return reverse('committee_details', args=[self.code])
     

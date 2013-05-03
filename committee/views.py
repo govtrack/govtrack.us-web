@@ -13,7 +13,11 @@ def committee_details(request, parent_code, child_code=None):
     from events.models import Feed
 	
     if child_code:
-        obj = get_object_or_404(Committee, code=child_code, committee__code=parent_code)
+        if len(child_code) == 2:
+            obj = get_object_or_404(Committee, code=parent_code+child_code)
+        else: # legacy
+            obj = get_object_or_404(Committee, code=child_code)
+            return redirect(obj, permanent=True)
         parent = obj.committee
     else:
         obj = get_object_or_404(Committee, code=parent_code)
