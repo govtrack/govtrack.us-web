@@ -1375,6 +1375,7 @@ a.button.prefix, a.button.postfix {
 	text-align: center;
 	}
 	.ads .explainer {
+		margin-bottom: 5px;
 		text-align: center;
 		font-size: 10px;
 		color: #E63;

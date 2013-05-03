@@ -17,21 +17,22 @@
 		google_ad_height = 250;
 		//-->
 		</script>
-		{% if bill.get_top_term.id != 6038 %}
-			<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-			</script>
-		{% elif false %}
+		{% comment %}
+			<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"> </script>
 			<script type='text/javascript' src='http://dingo.care2.com/petitions/embed.js'></script><div class='care2PetitionEmbed' rssPath='http://www.thepetitionsite.com/feeds/publisher/000/001/700/feed.swf' adSize='small' publisherId='1405' grabbed='0' flags='#000000' buttonColor='#EB6924' html='1'></div>
-		{% else %}
-			<script>
-			// Which ad should we display?
-			
+		{% endcomment %}
+		<script>
+		// Which ad should we display?
+		if (the_segment == "House" || the_segment == "Senate") {
+			google_ad_slot = "7881093146"; // ad unit targeting
+			document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
+		} else {
 			var ad_exp_user = $.cookie("ad_exp");
 			if (ad_exp_user) ad_exp_user = $.deparam(ad_exp_user, true);
 			if (!ad_exp_user || !ad_exp_user.segment)
 				ad_exp_user = { "segment": Math.random() };
 			
-			if (ad_exp_user.segment < .5) {
+			if (ad_exp_user.segment < .8) {
 				// GoogleAdSense
 				google_ad_slot = "6495528747"; // use a different unit for experiments so we have analytics
 				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
@@ -43,8 +44,8 @@
 			}
 			
 			$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 3, path: '/' });
-			</script>
-		{% endif %}
+		}
+		</script>
 		<div class="explainer"><a href="/advertising">(About Ads | Advertise Here)</a></div>
 	</div>
 </div>
