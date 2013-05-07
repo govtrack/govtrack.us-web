@@ -176,10 +176,10 @@
 			fb_unshare(true);
 			
 			var action_obj = {
-				bill: fb_action_target_url
+				bill: fb_action_target_url,
+				"fb:explicitly_shared": true
 			};
 			if (window.location.hash == "#fb-staging") {
-				action_obj["fb:explicitly_shared"] = true;
 			}
 			
 			// post new action
