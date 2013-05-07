@@ -97,6 +97,8 @@ $(function() {
 {% block summary %}
 <h1>{{ vote.question }}</h1>
 
+{% if vote.question_details %}<p>{{ vote.question_details }}</p>{% endif %}
+
 <dl>
     <dt>Number:</dt>
     <dd>{{ vote.get_chamber_display }} Vote #{{ vote.number }} [primary source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>]</dd>
@@ -104,12 +106,21 @@ $(function() {
     <dd>{{ vote.created|date:"DATE_FORMAT" }} ({{ vote.congress|ordinalhtml }} Congress)</dd>
     <dt>Result:</dt>
     <dd>{{ vote.result }}</dd>
+    
     {% if vote.related_bill %}
-    <dt>Related Bill:</dt>
+    <dt>{% if vote.category != VoteCategory.passage and vote.category != VoteCategory.passage_suspension and vote.category != VoteCategory.amendment %}Related {% endif %}Bill:</dt>
     <dd><a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>
         <br/>Introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a>
         on {{vote.related_bill.introduced_date|date:"F j, Y"}}
         <br/>Current Status: {{vote.related_bill.get_current_status_display}}
+        </dd>
+    {% endif %}
+    
+    {% if vote.related_amendment %}
+    <dt>{% if vote.category != VoteCategory.amendment %}Related {% endif %}Amendment:</dt>
+    <dd>{{vote.related_amendment.title}}</a>
+        <br/>Offered by <a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{{vote.related_amendment.sponsor}}</a>
+        on {{vote.related_amendment.offered_date|date:"F j, Y"}}
         </dd>
     {% endif %}
     

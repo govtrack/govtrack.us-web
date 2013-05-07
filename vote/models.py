@@ -62,7 +62,9 @@ class Vote(models.Model):
     total_other = models.IntegerField(blank=True, default=0, help_text="The count of abstain or absent voters.")
     
     related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.", on_delete=models.PROTECT)
+    related_amendment = models.ForeignKey('bill.Amendment', related_name='votes', blank=True, null=True, help_text="A related amendment.", on_delete=models.PROTECT)
     missing_data = models.BooleanField(default=False, help_text="If something in the source could be parsed and we should revisit the file.")
+    question_details = models.TextField(help_text="Additional descriptive text for what the vote was about.", blank=True, null=True)
     
     class Meta:
         # The ordering makes sure votes are in the right order on bill pages.

@@ -59,6 +59,7 @@ def vote_search_manager():
 
     sm.set_template("""
     	<div><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
+		{% if object.question_details %}<div>{{object.question_details}}</div>{% endif %}
 		<div>{{object.name}}</div>
 		<div>{{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
     	<div>{{object.summary}}</div>

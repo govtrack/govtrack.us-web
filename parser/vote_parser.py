@@ -11,7 +11,7 @@ from parser.processor import XmlProcessor
 from person.models import Person, PersonRole
 from person.types import RoleType
 from parser.models import File
-from bill.models import Bill, BillType
+from bill.models import Bill, BillType, Amendment, AmendmentType
 from vote.models import (Vote, VoteOption, VoteSource, Voter,
                          CongressChamber, VoteCategory, VoterType)
 
@@ -181,20 +181,56 @@ def main(options):
                 vote.session = match.group(3)
                 vote.number = int(match.group(4))
                 
+                # Get related bill & amendment.
+                
                 for bill_node in roll_node.xpath("bill"):
                     try:
                         vote.related_bill = Bill.objects.get(congress=bill_node.get("session"), bill_type=BillType.by_xml_code(bill_node.get("type")), number=bill_node.get("number"))
-                        
-                        # for votes on passage, reverse the order of the title so that the
-                        # name of the bill comes first, but keep the vote_type at the end
-                        # to distinguish suspension votes etc. also, the title that comes
-                        # from the upstream source is not formatted in our style.
-                        if vote.category in (VoteCategory.passage, VoteCategory.passage_suspension, VoteCategory.veto_override):
-                            vote.question = truncatewords(vote.related_bill.title, 12) + " (" + vote.vote_type + ")"
-                        
                     except Bill.DoesNotExist:
                         vote.missing_data = True
+
+                for amdt_node in roll_node.xpath("amendment"):
+                    try:
+                        if amdt_node.get("ref") == "regular":
+                            vote.related_amendment = Amendment.objects.get(congress=vote.related_bill.congress, amendment_type=AmendmentType.by_slug(amdt_node.get("number")[0]), number=amdt_node.get("number")[1:])
+                        elif amdt_node.get("ref") == "bill-serial":
+                            vote.related_amendment = Amendment.objects.get(bill=vote.related_bill, sequence=amdt_node.get("number"))
+                    except Amendment.DoesNotExist:
+                        print "Missing amendment", fname
+                        vote.missing_data = True
+                        
+                # clean up some question text and use the question_details field
                 
+                if vote.category in (VoteCategory.passage, VoteCategory.passage_suspension, VoteCategory.veto_override) and vote.related_bill:
+                    # For passage votes, set the question to the bill title and put the question
+                    # details in the details field.
+                    vote.question = truncatewords(vote.related_bill.title, 20)
+                    vote.question_details = vote.vote_type + " in the " + vote.get_chamber_display()
+                    
+                elif vote.category == VoteCategory.amendment and vote.related_amendment:
+                    # For votes on amendments, make a better title/explanation.
+                    vote.question = truncatewords(vote.related_amendment.title, 20)
+                    vote.question_details = vote.vote_type + " in the " + vote.get_chamber_display()
+                    
+                elif vote.related_bill and vote.question.startswith("On the Cloture Motion " + vote.related_bill.display_number):
+                    vote.question = "Cloture on " + truncatewords(vote.related_bill.title, 20)
+                elif vote.related_bill and vote.question.startswith("On Cloture on the Motion to Proceed " + vote.related_bill.display_number):
+                    vote.question = "Cloture on " + truncatewords(vote.related_bill.title, 20)
+                    vote.question_details = "On Cloture on the Motion to Proceed in the " + vote.get_chamber_display()
+                elif vote.related_bill and vote.question.startswith("On the Motion to Proceed " + vote.related_bill.display_number):
+                    vote.question = "Motion to Proceed on " + truncatewords(vote.related_bill.title, 20)
+                    
+                elif vote.related_amendment and vote.question.startswith("On the Cloture Motion " + vote.related_amendment.get_amendment_type_display() + " " + str(vote.related_amendment.number)):
+                    vote.question = "Cloture on " + truncatewords(vote.related_amendment.title, 20)
+                    vote.question_details = vote.vote_type + " in the " + vote.get_chamber_display()
+                
+                # weird House foratting of bill numbers ("H RES 123 Blah blah")
+                if vote.related_bill:
+                    vote.question = re.sub(
+                        "(On [^:]+): " + vote.related_bill.display_number.replace(". ", " ").replace(".", " ").upper() + " .*",
+                        r"\1: " + truncatewords(vote.related_bill.title, 15),
+                        vote.question)
+                    
                 vote.save()
                 
                 seen_obj_ids.add(vote.id) # don't delete me later
@@ -261,7 +297,7 @@ def main(options):
             had_error = True
         
     # delete vote objects that are no longer represented on disk
-    if options.congress and not had_error:
+    if options.congress and not options.filter and not had_error:
         log_delete_qs(Vote.objects.filter(congress=options.congress).exclude(id__in = seen_obj_ids))
 
 if __name__ == '__main__':
