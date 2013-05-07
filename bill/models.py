@@ -914,3 +914,29 @@ Feed.register_feed(
     intro_html = """<p>This feed includes all GovTrack original research on legislation.</p>""",
     )
 
+class AmendmentType(enum.Enum):
+    senate_amendment = enum.Item(1, 'S.Amdt.', slug='s', full_name="Senate Amendment", search_help_text="Senate amendments")
+    house_amendment = enum.Item(2, 'H.Amdt.', slug='h', full_name="House Amendment", search_help_text="House amendments")
+
+class Amendment(models.Model):
+    """An amendment to a bill."""
+
+    congress = models.IntegerField(help_text="The number of the Congress in which the amendment was offered. The current Congress is %d." % settings.CURRENT_CONGRESS)
+    amendment_type = models.IntegerField(choices=AmendmentType, help_text="The amendment's type, indicating the chmaber in which the amendment was offered.")
+    number = models.IntegerField(help_text="The amendment's number according to the Library of Congress's H.Amdt and S.Amdt numbering (just the integer part).")
+    bill = models.ForeignKey(Bill, help_text="The bill the amendment amends.")
+    sequence = models.IntegerField(blank=True, null=True, help_text="For House amendments, the sequence number of the amendment (unique within a bill).")
+
+    title = models.CharField(max_length=255, help_text="A title for the amendment.")
+
+    sponsor = models.ForeignKey('person.Person', blank=True, null=True, related_name='sponsored_amendments', help_text="The sponsor of the amendment.", on_delete=models.PROTECT)
+    sponsor_role = models.ForeignKey('person.PersonRole', blank=True, null=True, help_text="The role of the sponsor of the amendment at the time the amendment was offered.", on_delete=models.PROTECT)
+    offered_date = models.DateField(help_text="The date the amendment was offered.")
+
+    class Meta:
+        unique_together = [('congress', 'amendment_type', 'number'),
+            ('bill', 'sequence')]
+        
+    def __unicode__(self):
+        return self.title
+

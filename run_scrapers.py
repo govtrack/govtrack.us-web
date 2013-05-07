@@ -197,7 +197,8 @@ if "amendments" in sys.argv:
 		fn2 = "data/us/%d/bills.amdt/%s%d.xml" % (CONGRESS, chamber, int(number))
 		copy(fn, fn2, r'updated="[^"]+"')
 		
-	# TODO: Load into db when we have a modle for it?
+	# Load into db.
+	os.system("RELEASE=1 ./parse.py --congress=%d amendment" % CONGRESS) #  -l ERROR
 
 if "votes" in sys.argv:
 	# Scrape.
