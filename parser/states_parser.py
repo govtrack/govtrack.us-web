@@ -16,6 +16,7 @@ from django.db.utils import IntegrityError
 csv.field_size_limit(1000000000) # _csv.Error: field larger than field limit (131072)
 
 log = logging.getLogger('parser.states_parser')
+now = datetime.now()
 
 # Utility functions to cache objects and only save when the objects are popped from the cache.
 cached_objs = { }
@@ -159,9 +160,13 @@ def process_subjects(row, options, filename):
     s.save()
 
 # TODO: unicameral?
-chamber_map = { "lower": StateChamberEnum.lower, "upper": StateChamberEnum.upper,
+chamber_map = {
+	"lower": StateChamberEnum.lower, "upper": StateChamberEnum.upper,
+	"initiative petition": StateChamberEnum.unknown,
 	"": StateChamberEnum.unknown, "none": StateChamberEnum.unknown,
-	"a": StateChamberEnum.unknown, }
+	"a": StateChamberEnum.unknown,
+	"c": StateChamberEnum.unknown,
+	}
 
 @iffilechanged
 @rowbyrow
@@ -241,6 +246,7 @@ def process_bill_actions(row, options, filename, haystack_index):
         cached_objs["b:" + row["BillID"]] = b
     
     when = datetime.strptime(row["ActionDate"], '%Y-%m-%d %H:%M:%S')
+    if when > now: return # weird stuff
     seq = int(row["ActionOrder"])
     
     if not b.introduced_date or when.date() < b.introduced_date:

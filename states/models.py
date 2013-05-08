@@ -116,7 +116,7 @@ class StateBill(models.Model):
 	# indexing
 	def get_index_text(self):
 		return self.long_title + "\n" + self.short_title + "\t" + self.summary
-	haystack_index = ('state_session', 'bill_number', 'chamber')
+	haystack_index = ('state_session', 'bill_number', 'chamber', 'last_action_date')
 	haystack_index_extra = (('state', 'Char'),)
 
 	def state_name(self): return us.statenames[self.state_session.state]
