@@ -172,6 +172,7 @@ chamber_map = {
 @rowbyrow
 def process_bills(row, options, filename, haystack_index):
     if row["StateCode"] == "US": return # duh, we have federal data already
+    if row["IntroducedSession"].strip() == "": return # fake bills
     
     # dupes
     if row["BillID"] in ("207399", "207400"): return
