@@ -1,8 +1,7 @@
-User-agent: Mediapartners-Google*
+User-agent: Mediapartners-Google
 Disallow:
 
 User-agent: *
-Disallow: //
 Disallow: /data
 Disallow: /registration/ext
 Disallow: /congress/bills/browse?
@@ -10,7 +9,7 @@ Disallow: /congress/billsearch.xpd
 Disallow: /events/embed_legacy
 Disallow: /blog/wp-includes
 Disallow: /accounts
-Crawl-delay: 10
+Crawl-delay: 7
 
 User-agent: BecomeBot
 Disallow: /
