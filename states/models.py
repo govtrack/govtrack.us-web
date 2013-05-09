@@ -56,6 +56,29 @@ class StateSession(models.Model):
 
 	def __unicode__(self):
 		return us.statenames[self.state] + " " + self.name
+		
+	def set_date_range(self):
+	    # Set the start/end date range based on the last action dates of
+	    # bills tied to this state session.
+	    from django.db.models import Min, Max
+	    drange = self.statebill_set.aggregate(Min('last_action_date'), Max('last_action_date'))
+	    self.startdate = drange['last_action_date__min']
+	    self.enddate = drange['last_action_date__max']
+	    self.save()
+	    
+	def set_is_current(self):
+	    # Set current if there is no other state session for this state with
+	    # a later date. This is used to know what bills can have further
+	    # action. But at least AK's bills dont ever expire, and maybe that's
+	    # in other states too, so this would be incorrect for that. But
+	    # we'd still like to know what is the current session.
+	    if self.enddate == None:
+	        # Not sure.
+	        self.current = False
+	        self.save()
+	        return
+	    self.current = not StateSession.objects.filter(state=self.state, startdate__gte=self.enddate).exists()
+	    self.save()
 
 from events.models import Feed
 Feed.register_feed(
@@ -123,7 +146,8 @@ class StateBill(models.Model):
 
 	@property
 	def short_display_title(self):
-		return self.state_session.state + " " + self.state_session.slug + " " + self.bill_number + ". " + self.short_title
+		#return self.state_session.state + " " + self.state_session.slug + " " + self.bill_number + ". " + self.short_title
+		return self.bill_number + " (" + self.state_session.state + " " + self.state_session.slug + "): " + self.short_title
 		
 	@property
 	def is_current(self):

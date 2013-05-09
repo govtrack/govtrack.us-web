@@ -97,6 +97,8 @@ def state_bill_browse(request, state):
 	if not state: sm.add_option('state', label="state", type="select", sort="KEY", formatter=lambda k : k.upper())
 	sm.add_option('state_session', label="session", type="select", sort=lambda k : (datetime.now().date() - k.startdate) if k.startdate else timedelta(days=0), visible_if=lambda post:state or "state" in post, formatter=lambda k : k.name) # use now to make reverse sort
 	sm.add_option('chamber', label="chamber")
+	
+	sm.add_sort('Last Action', '-last_action_date', default=True)
 
 	sm.set_template("""
     	<a href="{{object.get_absolute_url}}" style="font-size: 15px">{{object|truncatewords_html:50}}</a>

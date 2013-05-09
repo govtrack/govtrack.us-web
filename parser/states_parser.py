@@ -332,16 +332,22 @@ def main(options):
     Process state legislative data.
     """
     
+    # Prepare indexing.
     haystack_index = None
     if not options.disable_indexing:
         from states.search_indexes import StateBillIndex
         haystack_index = StateBillIndex()
 
+    # Load.
     process_legislators(options, "../extdata/billtrack50/tLegislator.txt")
     process_subjects(options, "../extdata/billtrack50/tStateSubject.txt")
     process_bills(options, "../extdata/billtrack50/tBill.txt", haystack_index)
     process_bill_documents(options, "../extdata/billtrack50/tDocument.txt", haystack_index)
     process_bill_actions(options, "../extdata/billtrack50/tActionHistory.txt", haystack_index)
-    
+
+    # Save any objects still in memory.    
     cached_objs_clear(haystack_index)
 
+    # Set some final metadata on sessions.
+    for s in StateSession.objects.all(): s.set_date_range()
+    for s in StateSession.objects.all(): s.set_is_current()
