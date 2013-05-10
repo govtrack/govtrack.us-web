@@ -119,7 +119,8 @@ $(function() {
     {% if vote.related_amendment %}
     <dt>{% if vote.category != VoteCategory.amendment %}Related {% endif %}Amendment:</dt>
     <dd>{{vote.related_amendment.title}}</a>
-        <br/>Offered by <a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{{vote.related_amendment.sponsor}}</a>
+        <br/>Offered
+        {% if vote.related_amendment.sponsor %}by <a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{{vote.related_amendment.sponsor}}</a>{% endif %}
         on {{vote.related_amendment.offered_date|date:"F j, Y"}}
         </dd>
     {% endif %}

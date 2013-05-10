@@ -48,14 +48,15 @@ class AmendmentProcessor(XmlProcessor):
         obj.offered_date = self.parse_datetime(elem.get('datetime')).date()
 
     def process_title(self, obj, node):
+        obj.title = \
+             obj.get_amendment_type_display() + " " + str(obj.number) \
+             + ((" (" + obj.sponsor.lastname + ")") if obj.sponsor else "") \
+             + " to " + obj.bill.display_number
+             
         for elem in node.xpath('title|description|purpose'):
             text = unicode(elem.text) if elem.text else ""
             if text.strip() != "":
-                obj.title = \
-                    obj.get_amendment_type_display() + " " + str(obj.number) \
-                    + ((" (" + obj.sponsor.lastname + ")") if obj.sponsor else "") \
-                    + " to " + obj.bill.display_number \
-                    + ": " + text
+                text += ": " + text
                 break
 
     def process_sponsor(self, obj, node):
