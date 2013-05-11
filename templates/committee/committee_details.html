@@ -125,13 +125,22 @@
 		        {% endfor %}
 		    </div>
 		</div>
+		
 		<div id="activity">
-			<h2 style="margin: 1em 0 1em 0">Committee Activity</h3>
-			
-		    <div class="col_left tweets">	
+			<div class="six columns">
+				<h2 style="margin: 1em 0 1em 0">Committee Bills</h3>
+				{% if committee.bills.count > 0 %}
+					<p>Browse <a href="/congress/bills/browse#committees={{committee.id}}">{{committee.bills.count}} bills referred to this committee</a>.</p>
+				{% else %}
+					<p>No bills have been assigned to this {% if parent %}sub{% endif %}committee.</p>
+				{% endif %}
+			</div>
+		    <div class="six columns last tweets">
+				<h2 style="margin: 1em 0 1em 0">Recent Activity</h3>
 				{% include "events/trackedeventspanel.html" %}
 			</div>
 		</div>
+		
 		{% if subcommittees %}
 		<div id="subcommittees">
 		    <h2 style="margin: 1em 0 1em 0">Subcommittees</h2>
