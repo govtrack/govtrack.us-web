@@ -33,7 +33,7 @@ a.imp { font-weight: bold; }
 
 	<p>In 2012, GovTrack.us was used by more than 5 million individuals. Its embeddable widgets were deployed on more than 70 official websites of Members of Congress.</p>
 
-	<p>We bring together the status of U.S. federal legislation, voting records for the Senate and House of Representatives, information on Members of Congress, congressional district maps, and more<!--the status of state legislation-->. Most of the information is assembled in an automated way by scanning federal government websites, such as <a href="http://thomas.loc.gov/">THOMAS</a>. <!--State legislative information is available here through a partnership with <a href="http://www.BillTrack50.com">LegiNation, Inc.</a> and <a href="http://www.LegiScan.com">LegiScan, Inc</a>.--></p>
+	<p>We bring together the status of U.S. federal legislation, voting records for the Senate and House of Representatives, information on Members of Congress, congressional district maps, and more. Most of the information is assembled in an automated way by scanning federal government websites, such as <a href="http://thomas.loc.gov/">THOMAS</a>. State legislative information is available here through a partnership with <a href="http://www.BillTrack50.com">LegiNation, Inc.</a> and <a href="http://www.LegiScan.com">LegiScan, Inc</a>.</p>
 	
 	<p>Once we get the information, we make it easier to understand and we let you track bills for updates with <a href="/start">email updates and RSS feeds</a>. We also have unique statistical analyses to put the information in context. Read the <a class="imp" href="/about/analysis">&laquo;Analysis Methodology&raquo;</a>.</p>
 
@@ -54,30 +54,27 @@ a.imp { font-weight: bold; }
 	<p>We pull in current federal legislative data about as fast as Congress makes it available on its websites. Our database also extends into the past. Here&rsquo;s a full coverage table:</p>
 	
 	<table class="coverage_table">
-		<tr><th colspan="3" style="padding: 1em 0 .5em 0">All Time Periods (1789-present)</th></tr>
-
-		<tr>
-			<td>Legislators</td>
-			<td>From the <a href="https://github.com/unitedstates/congress-legislators">congress-legislators project</a>.</td></tr>
-		</tr>
-
 		<tr><th colspan="3" style="padding: 1em 0 .5em 0">Current Information (113<sup>th</sup> Congress)</th></tr>
 		
 		<tr>
 			<td>Bill Status</td>
-			<td>From <a href="http://thomas.gov">THOMAS.gov</a> via <a href="https://github.com/unitedstates/congress">congress project</a>.<br/>Typically updated the next business day after events occur</td></tr>
+			<td>From <a href="http://thomas.gov">THOMAS.gov</a> via <a href="https://github.com/unitedstates/congress">congress project</a>.<br/>Updated daily, with legislative activity appearing the next business day</td></tr>
 		</tr>
 		<tr>
 			<td>Bill Text</td>
-			<td>From <a href="http://thomas.gov">THOMAS.gov</a>.<br/>Typically updated 1-3 business days after a bill is introduced or has other major action</td></tr>
+			<td>From <a href="http://thomas.gov">THOMAS.gov</a> and <a href="http://www.gpo.gov/fdsys">GPO.gov FDSys</a>.<br/>Updated daily, with text available 1-3 business days after a bill is introduced or has other major action</td></tr>
 		</tr>
 		<tr>
 			<td>Votes</td>
-			<td>From the <a href="http://www.senate.gov">Senate</a> and <a href="http://www.house.gov">House</a> websites via <a href="https://github.com/unitedstates/congress">congress project</a>.<br/>Typically updated within two hours of the vote</td></tr>
+			<td>From the <a href="http://www.senate.gov">Senate</a> and <a href="http://www.house.gov">House</a> websites via <a href="https://github.com/unitedstates/congress">congress project</a>.<br/>Updated hourly</td></tr>
 		</tr>
 		<tr>
 			<td>Committee Meetings</td>
 			<td>From the <a href="http://www.senate.gov">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a> via <a href="https://github.com/unitedstates/congress">congress project</a>.<br/>Updated daily; House committee meetings may be incomplete</td></tr>
+		</tr>
+		<tr>
+			<td>Committee Assignments</td>
+			<td>From the <a href="http://www.senate.gov">Senate</a> and <a href="http://clerk.house.gov">House</a> websites via <a href="https://github.com/unitedstates/congress">congress project</a>.<br/>Updated periodically</td></tr>
 		</tr>
 	
 		<tr><th colspan="3" style="padding: 1em 0 .5em 0">1993-2012 (103<sup>rd</sup>-112<sup>th</sup> Congresses)</th></tr>
@@ -88,7 +85,7 @@ a.imp { font-weight: bold; }
 		</tr>
 		<tr>
 			<td>Bill Text</td>
-			<td>From <a href="http://thomas.gov">THOMAS.gov</a>.</td></tr>
+			<td>From <a href="http://thomas.gov">THOMAS.gov</a> and <a href="http://www.gpo.gov/fdsys">GPO.gov FDSys</a>.</td></tr>
 		</tr>
 		<tr>
 			<td>Votes</td>
@@ -103,7 +100,7 @@ a.imp { font-weight: bold; }
 		</tr>
 		<tr>
 			<td>Bill Text</td>
-			<td>From the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov</a> (volumes 87-106), via <a href="https://github.com/unitedstates/congress">congress project</a>, only <b>enacted bills and concurrent resolutions agreed to</b></td></tr>
+			<td>From the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov FDSys</a> (volumes 87-106), via <a href="https://github.com/unitedstates/congress">congress project</a>, only <b>enacted bills and concurrent resolutions agreed to</b></td></tr>
 		</tr>
 		<tr>
 			<td>Votes</nobr></small></td>
@@ -114,7 +111,7 @@ a.imp { font-weight: bold; }
 		
 		<tr>
 			<td>Bill Status &amp; Text</td>
-			<td><b>Only enacted bills and concurrent resolutions agreed to.</b> From the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov</a> (volumes 65-86), via <a href="https://github.com/unitedstates/congress">congress project</a></td></tr>
+			<td><b>Only enacted bills and concurrent resolutions agreed to.</b> From the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov FDSys</a> (volumes 65-86), via <a href="https://github.com/unitedstates/congress">congress project</a></td></tr>
 		</tr>
 		<tr>
 			<td>Votes</nobr></small></td>
@@ -128,10 +125,37 @@ a.imp { font-weight: bold; }
 			<td>From Rosenthal &amp;  Poole&rsquo;s <a href="http://voteview.com/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a>, Carnegie  Mellon  University. (Senate votes through 1989, House votes through 1990.)</td></tr>
 		</tr>
 
+		<tr><th colspan="3" style="padding: 1em 0 .5em 0">Other Information</th></tr>
+
+		<tr>
+			<td>Members of Congress</td>
+			<td>Biographical information is from the <a href="https://github.com/unitedstates/congress-legislators">congress-legislators project</a>,
+			a community repository we develop and help maintain.</td></tr>
+		</tr>
+
+		<tr>
+			<td>District Boundaries</td>
+			<td>Congressional district boundaries on the maps are from the <a href="https://www.census.gov/rdo/data/113th_congressional_and_new_state_legislative_district_plans.html">U.S. Census Bureau</a>.</td>
+		</tr>
+		<tr>
+			<td>Bill Summaries</td>
+			<td>We display several sorts of bill summaries, including some that we write ourselves. Other summaries are from
+			the Library of Congress&rsquo;s Congressional Research Service (via THOMAS)
+			and the <a href="http://www.gop.gov/">House Republican Conference</a>.</td>
+		</tr>
+		<tr>
+			<td>Photos</td>
+			<td>Photos of Members of Congress are credited on the pages for each Member of Congress.
+			They have been sourced from various locations, including the <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=GPO&browsePath=Congressional+Pictorial+Directory">Congressional Pictorial Directory</a>,
+			the <a href="http://bioguide.congress.gov/">Congressional Biographical Directory</a>,
+			and the <a href="http://www.gop.gov/">House Republican Conference</a>.<td>
+		</tr>
+		<tr>
+			<td>State Legislation</td>
+			<td>From <a href="http://www.BillTrack50.com">LegiNation, Inc.</a>, <a href="http://www.LegiScan.com">LegiScan, Inc</a>, and <a href="http://openstates.org/">OpenStates</a>.<br/>Updated weekly</td>
+		</tr>
 	</table>
 	
-	<p style="margin-top: 1em">See the full list of <a class="imp" href="/sources">&laquo;Data Sources&raquo;</a>.</p>
-
 	<h2>The Open Government / Open Government Data / Government Transparency Movements</h2>
 	
 	<p>The open government movement involves citizens, web developers, designers, researchers, writers, statisticians, government managers, and elected officials in a concerted effort to make data a national asset, to make government more transparent and effective, and to empower citizens to participate effectively in governance and in their communities.</p>
