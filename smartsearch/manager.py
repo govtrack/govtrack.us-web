@@ -79,7 +79,7 @@ class SearchManager(object):
         m.update(self.model.__name__ + "|" + qsparams.urlencode())
         cachekey = "smartsearch__response__" + m.hexdigest()
         resp = cache.get(cachekey)
-        if resp:
+        if resp and False:
             resp = HttpResponse(resp, content_type='text/json')
             resp["X-Cached"] = "True"
             return resp
@@ -114,7 +114,7 @@ class SearchManager(object):
                     loadable_facets.append(option.field_name)
                     faceted_qs = faceted_qs.facet(option.field_name, **FACET_OPTIONS)
                 if len(loadable_facets) > 0:
-                    cache_key = self.build_cache_key('bulkfaceting__' + ",".join(loadable_facets), request)
+                    cache_key = self.build_cache_key('bulkfaceting__' + ",".join(loadable_facets), qsparams)
                     loaded_facets = cache.get(cache_key)
                     if not loaded_facets:
                         fq = faceted_qs.facet_counts()
@@ -123,7 +123,7 @@ class SearchManager(object):
                             cache.set(cache_key, loaded_facets, FACET_CACHE_TIME)
 
             # At the moment there's no need to cache the count because we also cache the final response.
-            #cache_key = self.build_cache_key('count', request)
+            #cache_key = self.build_cache_key('count', qsparams)
             #qs_count = cache.get(cache_key)
             #if qs_count == None:
             #    qs_count = qs.count()
@@ -137,7 +137,7 @@ class SearchManager(object):
                 option.field_name,
                 option.type,
                 
-                self.generate_choices(request, option, loaded_facets,
+                self.generate_choices(qsparams, option, loaded_facets,
                     # In order to speed up the display of results, we query the facet counts
                     # in two phases. The facet counts for select-type fields are delayed
                     # until the second phase (because you can't see them immediately).
@@ -290,17 +290,17 @@ class SearchManager(object):
                         yield item.object
             return SR(qs)
             
-    def build_cache_key(self, prefix, request, omit=None):
+    def build_cache_key(self, prefix, qsparams, omit=None):
         def get_value(f):
-            if f in request.POST: return urllib.quote(request.POST[f])
-            if f + "[]" in request.POST: return "&".join(urllib.quote(v) for v in sorted(request.POST.getlist(f + "[]")))
+            if f in qsparams: return urllib.quote(qsparams[f])
+            if f + "[]" in qsparams: return "&".join(urllib.quote(v) for v in sorted(qsparams.getlist(f + "[]")))
             return ""
         return "smartsearch_%s_%s__%s" % (
             self.model.__name__,
             prefix,
             "&".join( unicode(k) + "=" + unicode(v) for k, v in self.global_filters.items() )
             + "&&" +
-            "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in request.POST or o.field_name + "[]" in request.POST) and (o != omit) ),
+            "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in qsparams or o.field_name + "[]" in qsparams) and (o != omit) ),
             )        
                         
     def get_model_field(self, option):
@@ -324,20 +324,20 @@ class SearchManager(object):
             field = None
         return include_counts, field, choice_label_map
                         
-    def generate_choices(self, request, option, loaded_facets, simple=False):
+    def generate_choices(self, qsparams, option, loaded_facets, simple=False):
         # There are no facets for text-type fields.
         if option.type == "text":
             return None
             
         # Option is not set and we only want simple results.
-        if simple and not (option.field_name in request.POST or option.field_name+"[]" in request.POST or option.field_name in self.global_filters):
+        if simple and not (option.field_name in qsparams or option.field_name+"[]" in qsparams or option.field_name in self.global_filters):
             return [('__ALL__', 'All', -1, None)]
 
-        cache_key = self.build_cache_key('faceting__' + option.field_name, request, omit=option if not simple else None)
+        cache_key = self.build_cache_key('faceting__' + option.field_name, qsparams, omit=option if not simple else None)
         
         if option.choices:
             if callable(option.choices):
-                counts = option.choices(request)
+                counts = option.choices(qsparams)
             else:
                 counts = list(option.choices)
         else:
@@ -396,7 +396,7 @@ class SearchManager(object):
                 objs = get_object_set([opt[0] for opt in facet_counts])
                 counts = [build_choice(opt[0], opt[1]) for opt in facet_counts]
             else:
-                resp = self.queryset(request.POST, exclude=option if not simple else None)
+                resp = self.queryset(qsparams, exclude=option if not simple else None)
                 
                 if hasattr(resp, 'facet'):
                     # Haystack.
