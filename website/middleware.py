@@ -71,7 +71,7 @@ def template_context_processor(request):
             context["is_dc_local"] = user_loc.distance(washington_dc) < .5
             
             # geolocate to a congressional district if not known
-            if not cong_dist:
+            if not cong_dist and False:
                 from person.views import do_district_lookup
                 cong_dist = do_district_lookup(*user_loc.coords)
                 cong_dist["queried"] = True
