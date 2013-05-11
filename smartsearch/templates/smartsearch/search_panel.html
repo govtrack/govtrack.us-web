@@ -215,6 +215,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     
     postdata.faceting = "false";
     postdata.allow_redirect = (isinitial ? "false" : "true"); // hit back after getting a redirect would generate an immediate redirect again, not helpful
+    postdata.do_search = 1; // always required
 
     $("#loading_status").show();
     $("#show_more").hide();
@@ -226,7 +227,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     $.ajax(
         {
             url: document.location.pathname,
-            type: "POST",
+            type: "GET",
             dataType: "json",
             data: postdata,
             success: function(res) {
@@ -274,9 +275,10 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 						// Call the search twice, because we get facets in two parts.
 						
 						prev_search.faceting = "false";
+						prev_search.do_search = 1; // always required
 						$.ajax({
 								url: document.location.pathname,
-								type: "POST",
+								type: "GET",
 								dataType: "json",
 								data: prev_search,
 								success: function(res) {
@@ -288,7 +290,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 						prev_search.faceting = "true";
 						$.ajax({
 								url: document.location.pathname,
-								type: "POST",
+								type: "GET",
 								dataType: "json",
 								data: prev_search,
 								success: function(res) {
@@ -307,7 +309,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 						postdata.faceting = "true";
 						$.ajax({
 								url: document.location.pathname,
-								type: "POST",
+								type: "GET",
 								dataType: "json",
 								data: postdata,
 								success: function(res) {

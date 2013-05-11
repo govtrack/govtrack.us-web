@@ -12,6 +12,7 @@ from django.core.cache import cache
 import json, urllib, hashlib
 
 from common.enum import MetaEnum
+from twostream.decorators import anonymous_view
 
 FACET_CACHE_TIME = 60*60
 FACET_OPTIONS = { "limit": -1, "sort": "count" } # limits cause problems because the selected option can dissapear!
@@ -55,9 +56,16 @@ class SearchManager(object):
         if not self.template_context_func:
             self.template_context_func = lambda obj, form : Context({ "object": obj, "form": form })
         return [self.template.render(self.template_context_func(obj, form)) for obj in objects]
-        
-    def view(self, request, template, defaults={}, noun=("item", "items"), context={}, paginate=None):
-        if request.META["REQUEST_METHOD"] == "GET":
+    
+    def view(self, request, *args, **kwargs):
+        # put the request argument first so that we can use anonymous_view
+        return SearchManager.view2(request, self, *args, **kwargs)
+
+    @staticmethod
+    @anonymous_view
+    def view2(request, self, template, defaults={}, noun=("item", "items"), context={}, paginate=None):
+        if request.META["REQUEST_METHOD"] == "GET" \
+        	and request.GET.get('do_search', None) == None:
             c = {
                 'form': self.options,
                 'sort_options': [(name, key, isdefault if defaults.get("sort", None) == None else defaults.get("sort", None) == key) for name, key, isdefault in self.sort_options],
@@ -67,10 +75,15 @@ class SearchManager(object):
                 }
             c.update(context)
             return render_to_response(template, c, RequestContext(request))
+            
+        # Get the dict of params. We use .urlencode() on the dict which is available for .GET and .POST
+        # but not .REQUEST. We can switch completely to request.GET later, after a transition time
+        # which caches expire.
+        qsparams = (request.GET if request.META["REQUEST_METHOD"] == "GET" else request.POST)
 
         # Although we cache some facet queries, also cache the final response.
         m = hashlib.md5()
-        m.update(self.model.__name__ + "|" + request.POST.urlencode())
+        m.update(self.model.__name__ + "|" + qsparams.urlencode())
         cachekey = "smartsearch__response__" + m.hexdigest()
         resp = cache.get(cachekey)
         if resp:
@@ -79,7 +92,7 @@ class SearchManager(object):
             return resp
 
         try:
-            qs = self.queryset(request.POST)
+            qs = self.queryset(qsparams)
             
             # In order to generate the facets, we will call generate_choices on each
             # visible search field. When generating facets with the Django ORM, a
@@ -102,9 +115,9 @@ class SearchManager(object):
                 loadable_facets = []
                 for option in self.options:
                     if option.filter: continue
-                    if option.field_name in request.POST or option.field_name+"[]" in request.POST: continue
+                    if option.field_name in qsparams or option.field_name+"[]" in qsparams: continue
                     if option.type == "text": continue
-                    if option.type == "select" and request.POST["faceting"]=="false": continue # 2nd phase only
+                    if option.type == "select" and qsparams["faceting"]=="false": continue # 2nd phase only
                     loadable_facets.append(option.field_name)
                     faceted_qs = faceted_qs.facet(option.field_name, **FACET_OPTIONS)
                 if len(loadable_facets) > 0:
@@ -141,21 +154,21 @@ class SearchManager(object):
                     # all the user can see in the drop-down before the click the select box
                     # anyway. If the select field's value is unset (i.e. all), then we load
                     # all results in both phases.
-                    simple=make_simple_choices(option) and request.POST["faceting"]=="false"),
+                    simple=make_simple_choices(option) and qsparams["faceting"]=="false"),
                 
-                make_simple_choices(option) and request.POST["faceting"]=="false",
+                make_simple_choices(option) and qsparams["faceting"]=="false",
                 
-                option.field_name in request.POST or option.field_name+"[]" in request.POST or option.visible_if(request.POST) if option.visible_if else True
+                option.field_name in qsparams or option.field_name+"[]" in qsparams or option.visible_if(qsparams) if option.visible_if else True
                 ) for option in self.options
                     
                     # In the second phase, don't generate facets for options we've already
                     # done in the first phase.
-                    if request.POST["faceting"]=="false" or make_simple_choices(option)
+                    if qsparams["faceting"]=="false" or make_simple_choices(option)
                 ]
 
-            if request.POST["faceting"] == "false":
-                if not paginate or paginate(request.POST):
-                    page_number = int(request.POST.get("page", "1"))
+            if qsparams["faceting"] == "false":
+                if not paginate or paginate(qsparams):
+                    page_number = int(qsparams.get("page", "1"))
                     per_page = 20
                 else:
                     page_number = 1
@@ -165,7 +178,7 @@ class SearchManager(object):
                 obj_list = page.page(page_number).object_list
             
                 ret = {
-                    "results": self.results(obj_list, request.POST),
+                    "results": self.results(obj_list, qsparams),
                     "options": facets,
                     "page": page_number,
                     "num_pages": page.num_pages,
@@ -175,7 +188,7 @@ class SearchManager(object):
                 }
                 
                 try:
-                    ret["description"] = self.describe(dict(request.POST.iterlists()))
+                    ret["description"] = self.describe(dict(qsparams.iterlists()))
                 except:
                     pass # self.describe is untested
 
