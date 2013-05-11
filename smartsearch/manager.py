@@ -12,7 +12,6 @@ from django.core.cache import cache
 import json, urllib, hashlib
 
 from common.enum import MetaEnum
-from twostream.decorators import anonymous_view
 
 FACET_CACHE_TIME = 60*60
 FACET_OPTIONS = { "limit": -1, "sort": "count" } # limits cause problems because the selected option can dissapear!
@@ -57,13 +56,7 @@ class SearchManager(object):
             self.template_context_func = lambda obj, form : Context({ "object": obj, "form": form })
         return [self.template.render(self.template_context_func(obj, form)) for obj in objects]
     
-    def view(self, request, *args, **kwargs):
-        # put the request argument first so that we can use anonymous_view
-        return SearchManager.view2(request, self, *args, **kwargs)
-
-    @staticmethod
-    @anonymous_view
-    def view2(request, self, template, defaults={}, noun=("item", "items"), context={}, paginate=None):
+    def view(self, request, template, defaults={}, noun=("item", "items"), context={}, paginate=None):
         if request.META["REQUEST_METHOD"] == "GET" \
         	and request.GET.get('do_search', None) == None:
             c = {

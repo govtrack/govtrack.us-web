@@ -170,18 +170,6 @@ def bill_details_user_view(request, congress, type_slug, number):
     
     return ret
 
-def render_subscribe_inline(request, feed):
-    # render the event subscribe button, but fake the return path
-    # by overwriting our current URL
-    from django.template import Template, Context, RequestContext, loader
-    request.path = request.GET["path"]
-    request.META["QUERY_STRING"] = ""
-    events_button = loader.get_template("events/subscribe_inline.html")\
-        .render(RequestContext(request, {
-                'feed': feed,
-                }))
-    return { 'events_subscribe_button': events_button }
-
 @json_response
 @login_required
 def market_test_vote(request):
@@ -511,7 +499,8 @@ def bill_docket(request):
         cache.set("bill_docket_info", ret, 60*60)
     
     return ret
-    
+
+@anonymous_view
 def subject(request, sluggedname, termid):
     ix = get_object_or_404(BillTerm, id=termid)
     if ix.parents.all().count() == 0:
@@ -521,6 +510,14 @@ def subject(request, sluggedname, termid):
         ix1 = ix.parents.all()[0]
         ix2 = ix
     return show_bill_browse("bill/subject.html", request, ix1, ix2, { "term": ix, "feed": Feed.IssueFeed(ix) })
+    
+@user_view_for(subject)
+def subject_user_view(request, sluggedname, termid):
+    ix = get_object_or_404(BillTerm, id=termid)
+    ret = { }
+    from person.views import render_subscribe_inline
+    ret.update(render_subscribe_inline(request, Feed.IssueFeed(ix)))
+    return ret
     
 import django.contrib.sitemaps
 class sitemap_current(django.contrib.sitemaps.Sitemap):

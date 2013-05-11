@@ -38,8 +38,9 @@
 	</div>
 
 	<div class="aside four columns">
-		{% include "events/subscribe_inline.html" %}
-		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this Subject</a>
+        <script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
+        <a href="#" class="track-btn" onclick="return show_track_panel();">Track this subject</a>
+        <div id="event_subscribe_inline_container"> </div>
 	</div><!-- /actions -->
 </div>
 {% endblock %}
@@ -49,4 +50,10 @@
 {% include "smartsearch/search_panel.html" %}
 
 <p><small>Bill subjects are set by the Library of Congress.</small></p>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+  $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
+</script>
 {% endblock %}
