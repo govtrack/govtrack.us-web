@@ -125,7 +125,6 @@ if "text" in sys.argv:
 			bill_type, bill_number = re.match(r"([a-z]+)(\d+)$", os.path.basename(bill)).groups()
 			bill_type = bill_type_map[bill_type]
 			for ver in sorted(glob.iglob(bill + "/text-versions/*")):
-				if ".json" in ver: continue # .json metadata files
 				basename = "../data/us/bills.text/%d/%s/%s%s%s." % (congress, bill_type, bill_type, bill_number, os.path.basename(ver))
 				if congress >= 103:
 					# Starting with GPO FDSys bill text, we'll pull MODS files
@@ -228,7 +227,10 @@ if "historical_bills" in sys.argv:
 	
 	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=STATUTE --store=mods --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=65-86 --log=%s" % (SCRAPER_PATH, "warn")) # log_level
+	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=87-106 --textversions --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	
+	# Copy bill metadata into our legacy location.
+	# (No need to copy text-versions anywhere: we read it from the congress data directory.)
 	for congress in xrange(82, 92+1):
 		print congress, "..."
 		

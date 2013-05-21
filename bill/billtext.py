@@ -181,12 +181,12 @@ def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
     if version == None:
         # Cycle through files to find most recent version by date.
         dat = None
-        for versionfile in glob.glob(basename + "/*.json"):
+        for versionfile in glob.glob(basename + "/*/data.json"):
             d = json.load(open(versionfile))
             if not dat or d["issued_on"] > dat["issued_on"]:
                 dat = d
     else:
-        dat = json.load(open(basename + "/%s.json" % version))
+        dat = json.load(open(basename + "/%s/data.json" % version))
             
     # Load the text content (unless mods_only is set).
     bill_text_content = None
