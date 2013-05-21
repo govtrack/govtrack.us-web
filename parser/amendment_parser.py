@@ -56,7 +56,7 @@ class AmendmentProcessor(XmlProcessor):
         for elem in node.xpath('title|description|purpose'):
             text = unicode(elem.text) if elem.text else ""
             if text.strip() != "":
-                text += ": " + text
+                obj.title += ": " + text
                 break
 
     def process_sponsor(self, obj, node):

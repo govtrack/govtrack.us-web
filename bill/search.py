@@ -37,9 +37,9 @@ def subject_choices(include_legacy=True):
 def get_terms(terms):
     return sorted([(t.id, t.name + ("" if t.term_type==TermType.new else " (Legacy Subject)")) for t in terms], key = lambda x : ("Legacy Subject" in x[1], x[1]))
 
-def sub_terms(request):
-    if "terms" in request.POST:
-        return get_terms(BillTerm.objects.filter(parents__id=request.POST["terms"]))
+def sub_terms(requestargs):
+    if "terms" in requestargs:
+        return get_terms(BillTerm.objects.filter(parents__id=requestargs["terms"]))
     else:
         return []
 def sub_term_filter(qs, form):
