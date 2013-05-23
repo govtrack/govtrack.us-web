@@ -1,10 +1,12 @@
 # -*- coding: utf-8
 
 from django.contrib import admin
-#from .models import
+from website.models import *
 
-class Admin(admin.ModelAdmin):
-    list_display = ['']
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user']
+    search_fields = ['user__username', 'user__email']
+    readonly_fields = ['user']
 
+admin.site.register(UserProfile, UserProfileAdmin)
 
-#admin.site.register(

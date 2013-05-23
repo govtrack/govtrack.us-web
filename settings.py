@@ -59,7 +59,7 @@ SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification 
 REGISTRATION_ASK_USERNAME = False
 
 #set the user profile for registration activation key
-AUTH_PROFILE_MODULE = 'registration.UserProfile'
+AUTH_PROFILE_MODULE = 'website.UserProfile'
 
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 587

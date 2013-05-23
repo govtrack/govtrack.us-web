@@ -57,7 +57,7 @@ def index(request):
         'tweets': twitter_feed,
         'blog': blog_feed,
         }
-	  
+      
 @anonymous_view
 def staticpage(request, pagename):
     if pagename == "developers": pagename = "developers/index"
@@ -192,8 +192,8 @@ def do_site_search(q, allow_redirect=False):
             for p in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"], content=q)[0:9]]
             })
 
-	# subject terms, but exclude subject terms that look like committee names because
-	# that is confusing to also see with committee results
+    # subject terms, but exclude subject terms that look like committee names because
+    # that is confusing to also see with committee results
     from bill.models import BillTerm, TermType
     results.append({
         "title": "Subject Areas (Federal Legislation)",
@@ -419,7 +419,7 @@ def financial_report(request):
         "DATALIC": ("Data Licensing", "Revenue from data licensing agreements."),
         "PRIZE": ("Prize Winnings", "Income from prizes."),
         "INFR": ("IT Infrastruture", "IT systems infrastructure including the web server."),
-        "LABOR": ("Contract Labor", "Contract labor, such as developers, designers, and	other staff. (Does not count Josh.)"),
+        "LABOR": ("Contract Labor", "Contract labor, such as developers, designers, and    other staff. (Does not count Josh.)"),
         "OFFICE": ("Office Expenses", "Josh's home office."),
         "TRAVEL": ("Conferences and Travel", "Expenses for conferences and other similar travel."),
         "MARKETING": ("Marketing", "Marketing expenses."),
@@ -453,3 +453,93 @@ def financial_report(request):
         
     return { "years": reversed(rows) }
     
+@render_to('website/ad_free_start.html')
+def go_ad_free_start(request):
+    # just show the go-ad-free page.
+    
+    is_ad_free = False
+    
+    if not request.user.is_anonymous():
+        is_ad_free = request.user.get_profile().get_ad_free_message()
+        
+    return { "is_ad_free": is_ad_free }
+    
+def go_ad_free_redirect(request):
+    # create a Payment and redirect to the approval step, and track this
+    
+    if request.user.is_anonymous():
+        return HttpResponseRedirect(reverse(go_ad_free_start))
+        
+    if request.user.get_profile().get_ad_free_message():
+        raise ValueError("User already has this feature.")
+    
+    import paypalrestsdk
+
+    sandbox = ""
+    if paypalrestsdk.api.default().mode == "sandbox":
+        sandbox = "-sandbox"
+    
+    payment = paypalrestsdk.Payment({
+      "intent": "sale",
+      "payer": { "payment_method": "paypal" },
+      "transactions": [{
+        "item_list": {
+          "items": [{
+            "name": "Ad-Free GovTrack.us for Life",
+            "sku": "govtrack-ad-free-for-life" + sandbox,
+            "price": "5.00",
+            "currency": "USD",
+            "quantity": 1 }]
+            },
+          "amount": {
+            "total": "5.00",
+            "currency": "USD"
+          },
+          "description": "Ad-Free%s: GovTrack.us is ad-free while you're logged in." % sandbox }],
+      "redirect_urls": {
+        "return_url": request.build_absolute_uri(reverse(go_ad_free_finish)),
+        "cancel_url": request.build_absolute_uri(reverse(go_ad_free_start)),
+      },
+    })
+    
+    if not payment.create():
+      raise ValueError("Error creating PayPal.Payment: " + repr(payment.error))
+      
+    request.session["paypal-payment-to-execute"] = payment.id
+      
+    from website.models import PayPalPayment
+    rec = PayPalPayment(
+        paypal_id = payment.id,
+        user = request.user,
+        response_data = payment.to_dict(),
+        notes = "ad-free $5")
+    rec.save()
+  
+    for link in payment.links:
+        if link.method == "REDIRECT":
+            return HttpResponseRedirect(link.href)
+    else:
+        raise ValueError("No redirect in PayPal.Payment: " + payment.id)
+    
+def go_ad_free_finish(request):
+    if request.user.is_anonymous():
+        raise ValueError("User got logged out!")
+
+    # Do as much before we destroy state.
+    prof = request.user.get_profile()
+
+    from website.models import PayPalPayment
+    (payment, rec) = PayPalPayment.execute(request, "ad-free $5")
+    
+    try:
+        # Update the user profile.
+        if prof.paid_features == None: prof.paid_features = { }
+        prof.paid_features["ad_free_life"] = (payment.id, None)
+        prof.save()
+      
+        # Send user back to the start.
+        return HttpResponseRedirect(reverse(go_ad_free_start))
+     
+    except Exception as e:
+        raise ValueError(str(e) + " while processing " + payment.id)
+

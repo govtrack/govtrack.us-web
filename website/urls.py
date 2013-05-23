@@ -14,5 +14,8 @@ urlpatterns = patterns('website.views',
     url(r'^accounts/update_settings', 'update_account_settings'),
     url(r'^about/analysis', 'analysis_methodology'),
     url(r'^about/financial', 'financial_report'),
+    url(r'^accounts/go_ad_free$', 'go_ad_free_start'),
+    url(r'^accounts/go_ad_free/start$', 'go_ad_free_redirect'),
+    url(r'^accounts/go_ad_free/finish$', 'go_ad_free_finish'),
 )
 

@@ -1,6 +1,7 @@
 from django.db import models
-
 from django.contrib.auth.models import User
+
+from jsonfield import JSONField
 
 from events.models import Feed, SubscriptionList
 
@@ -8,6 +9,9 @@ class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True, db_index=True)
     massemail = models.BooleanField(default=True) # may we send you mail?
     old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
+    
+    # monetization
+    paid_features = JSONField(default={}, null=True) # maps feature name to tuple (payment ID, sale ID or None if not useful)
     
     def lists(self):
         # make sure the 'default' list exists
@@ -19,7 +23,27 @@ class UserProfile(models.Model):
     def lists_with_email(self):
         # return lists with trackers with email updates turned on
         return SubscriptionList.objects.filter(user=self.user, email__gt=0, trackers__id__gt=0).distinct().order_by('name')
-    
+
+    def get_ad_free_message(self):
+        if not self.paid_features: return False
+        if not "ad_free_life" in self.paid_features: return False
+        
+        ad_free_pmt = self.paid_features['ad_free_life']
+        if not ad_free_pmt: return False
+        pmt = PayPalPayment.objects.get(paypal_id = ad_free_pmt[0])
+        
+        from datetime import datetime, timedelta
+        
+        #from django.conf import settings
+        #if settings.DEBUG:
+        #	return repr(pmt.response_data)
+        
+        if pmt.created > (datetime.now() - timedelta(days=0.5)):
+            return "Thanks for your subscription to an ad-free GovTrack!"
+        else:
+            return "You went ad-free on %s. Thanks!" % pmt.created.strftime("%x")
+
+
 def get_user_profile(user):
     if hasattr(user, "_profile"): return user._profile
     profile, isnew = UserProfile.objects.get_or_create(user = user)
@@ -54,4 +78,57 @@ class CommunityInterest(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ( ('user', 'bill'), )
+
+class PayPalPayment(models.Model):
+    paypal_id = models.CharField(max_length=64, db_index=True)
+    user = models.ForeignKey(User, db_index=True, on_delete=models.PROTECT)
+    response_data = JSONField()
+    executed = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    notes = models.CharField(max_length=64)
+    
+    class Meta:
+        unique_together = ( ('user', 'created'), ) # dangerous?
+
+    @staticmethod
+    def from_session(request):
+        import paypalrestsdk
+        try:
+            payment_id = request.session["paypal-payment-to-execute"]
+            del request.session["paypal-payment-to-execute"]
+        except KeyError:
+            raise ValueError("User session lost track of payment object." )
+
+        payment = paypalrestsdk.Payment.find(payment_id)
+
+        try:
+            rec = PayPalPayment.objects.get(paypal_id = payment.id)
+        except PayPalPayment.DoesNotExist:
+            raise ValueError("Trying to complete a payment that does not exist in our database: " + payment.id)
+    
+        if payment.state != "created" or rec.executed:
+            raise ValueError("Trying to complete an already-executed payment: %s, %s (%s)" + (payment.state, str(rec.executed), payment.id))
+
+        return (payment, rec)
+
+    @staticmethod
+    def execute(request, notes_must_match):
+        # Get object.
+        (payment, rec) = PayPalPayment.from_session(request)
+        
+        # Validate.
+        if rec.notes != notes_must_match:
+            raise ValueError("Trying to complete the wrong sort of payment: %s" % payment.id)
+            
+        # Execute.
+        if not payment.execute({"payer_id": request.GET["PayerID"]}):
+            raise ValueError("Error executing PayPal.Payment (%s): " + (payment.id, repr(payment.error)))
+            
+        # Update our database record of the payment.
+        rec.response_data = payment.to_dict()
+        rec.executed = True
+        rec.save()
+        
+        return (payment, rec)
+    
 

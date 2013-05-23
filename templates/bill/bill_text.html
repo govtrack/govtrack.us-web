@@ -337,9 +337,19 @@ $(function() {
 			google_ad_height = 600;
 			//-->
 			</script>
+			{% comment %}violates ad_free
 			<script type="text/javascript"
 			src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 			</script>
+			{% endcomment %}
+			<script>
+			if (is_ad_free) {
+				document.write("An ad would be here, but you've gone ad-free!");
+			} else {
+				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
+			}
+			</script>
+
 			<div style="font-size: 90%; text-align: center"><a href="/advertising">About Ads</a></div>
 		</div>
 	</div>
