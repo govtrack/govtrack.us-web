@@ -183,12 +183,14 @@ def main(options):
                 
                 # Get related bill & amendment.
                 
+                vote.related_bill = None
                 for bill_node in roll_node.xpath("bill"):
                     try:
                         vote.related_bill = Bill.objects.get(congress=bill_node.get("session"), bill_type=BillType.by_xml_code(bill_node.get("type")), number=bill_node.get("number"))
                     except Bill.DoesNotExist:
                         vote.missing_data = True
 
+                vote.related_amendment = None
                 for amdt_node in roll_node.xpath("amendment"):
                     try:
                         if amdt_node.get("ref") == "regular":

@@ -53,9 +53,11 @@ class AmendmentProcessor(XmlProcessor):
              + ((" (" + obj.sponsor.lastname + ")") if obj.sponsor else "") \
              + " to " + obj.bill.display_number
              
-        for elem in node.xpath('title|description|purpose'):
+        for elem in node.xpath('description|purpose'):
             text = unicode(elem.text) if elem.text else ""
             if text.strip() != "":
+                # Clean titles.
+                text = re.sub(r"^(?:An )?(?:substitute )?amendment (?:in the nature of a substitute )?numbered (\d+) printed in (part .* of )?(House Report \d+-\d+|the Congressional Record) to ", "To ", text, re.I)
                 obj.title += ": " + text
                 break
 
