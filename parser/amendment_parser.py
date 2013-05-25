@@ -17,6 +17,7 @@ from parser.progress import Progress
 from parser.processor import XmlProcessor
 from parser.models import File
 from bill.models import Amendment, AmendmentType, Bill, BillType
+from vote.models import Vote
 from person.models import Person
 from settings import CURRENT_CONGRESS
 
@@ -113,6 +114,12 @@ def main(options):
         progress.tick()
         
         if not File.objects.is_changed(fname) and not options.force:
+            m = re.match(r"data/us/(\d+)/bills.amdt/([sh])(\d+).xml", fname)
+            if not m:
+                print "Invalid file name", fname
+            else:
+                amdt = Amendment.objects.get(congress=m.group(1), amendment_type=AmendmentType.by_slug(m.group(2)), number=m.group(3))
+                seen_amdt_ids.append(amdt.id) # don't delete me later
             continue
             
         tree = etree.parse(fname)
@@ -137,13 +144,18 @@ def main(options):
         except:
             print amdt
             raise
+            
+        # If this amendment is related to a vote, mark the vote as missing data because
+        # we may need to update the vote title if the amendment title has changed.
+        Vote.objects.filter(related_amendment=amdt).update(missing_data=True)
 
         File.objects.save_file(fname)
         
-    # delete bill objects that are no longer represented on disk.... this is too dangerous.
-    if options.congress and not options.filter and False:
-        # this doesn't work because seen_bill_ids is too big for sqlite!
-        Amendment.objects.filter(congress=options.congress).exclude(id__in = seen_amdt_ids).delete()
+    # Are any amendments in the database no longer on disk?
+    if options.congress and not options.filter:
+        missing = Amendment.objects.filter(congress=options.congress).exclude(id__in = seen_amdt_ids)
+        if missing.exists():
+            print "Amendments should be deleted: ", missing
 
 
 if __name__ == '__main__':
