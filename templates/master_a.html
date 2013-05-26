@@ -40,7 +40,7 @@
 			ad_exp_user.impression += 1;
 			$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 21, path: '/' });
 			
-			if ((ad_exp_user.impression % 6) == 5) {
+			if ((ad_exp_user.impression % 5) == 4) {
 				document.write("{{ "<a href='/accounts/go_ad_free'><img src='/static/images/go_ad_free.png'/></a>"|escapejs }}");
 				try { 
 				_gaq.push(['_trackEvent', 'ads' , 'go_ad_free_banner_impression']); 

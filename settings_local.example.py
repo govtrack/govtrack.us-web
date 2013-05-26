@@ -50,3 +50,7 @@ FACEBOOK_APP_ID = "fill this in"
 FACEBOOK_APP_SECRET = "fill this in"
 FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
 
+# The ad-free payment requires something like this:
+#import paypalrestsdk
+#paypalrestsdk.configure(mode="sandbox", client_id="...", client_secret="...")
+

@@ -76,12 +76,11 @@
 <body class="{% block body_class %}{% endblock %}">
 
 	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" data-seq="28">
+	<div id="sitenewscontainer" style="display: none" data-seq="29">
 		<div id="sitenews">
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div class="sitenewsbody">
-				<b>Near Phoenix?</b> We&rsquo;ll be presenting at the <a href="http://www.aallnet.org/chapter/azll/legal-research-institute.asp">AzALL Congressional Information Symposium</a>
-				this Friday, April 26. Hope to see you there!
+				Want to hide the ads? You can now <a href="http://www.govtrack.us/accounts/go_ad_free">go ad-free for life</a> for $5.
 			</div>
 			<div style="clear: both"> </div>
 		</div>
@@ -100,7 +99,7 @@
 		$.cookie("sitenewsbanner", $('#sitenewscontainer').attr("data-seq"), { expires: 14, path: '/' });
 	}
 	$(function() {
-			if (cong_dist && cong_dist.reps) {
+			if (cong_dist && cong_dist.reps && 0) {
 				if (!the_user && cong_dist.reps[0].key_vote) {
 					var p = cong_dist.reps[0];
 					var vote_way;
@@ -130,9 +129,6 @@
 				}
 			}
 			
-		// no site news at this time
-		return;
-	
 		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("data-seq")) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
 			$('#sitenewscontainer').fadeIn();
