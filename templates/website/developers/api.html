@@ -16,7 +16,6 @@
 {% block summary %}
 	<h1>GovTrack Data API Documentation</h1>
 	<p>GovTrack&rsquo;s data API provides programmatic access to information about the U.S. Congress.</p>
-	<p>Consider using our <a href="/developers/data">bulk raw data</a> for bulk access.</p>
 {% endblock %}
 {% block links %}
 {% include "website/developers/menu.html" %}
@@ -24,6 +23,10 @@
 
 {% block body %}
 <section class="main twelve columns">
+
+	<p>Our API provides live access to most of the information found on GovTrack. Data for the 113th Congress are from <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a> and <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>, community projects that we helped create and now help maintain. Historical data is from our legacy scrapers.</p>
+	<p>Consider using our <a href="/developers/data">bulk raw data</a>, or the bulk offerings of the two github projects, for bulk access to the complete database, rather than making many individual queries, if you need the whole thing.</p>
+
 	
 	{% include "website/developers/gettingstarted.html" %}
 
