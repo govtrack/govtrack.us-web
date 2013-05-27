@@ -176,7 +176,7 @@ if "bills" in sys.argv:
 
 if do_bill_parse:
 	# Load into db.
-	os.system("RELEASE=1 ./parse.py --congress=%d bill" % CONGRESS) #  -l ERROR
+	os.system("RELEASE=1 ./parse.py --congress=%d -l %s bill" % (CONGRESS, log_level))
 
 	# bills and state bills are indexed as they are parsed, but to
 	# freshen the index... Because bills index full text and so
