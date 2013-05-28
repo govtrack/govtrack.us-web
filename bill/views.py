@@ -91,6 +91,9 @@ def bill_details(request, congress, type_slug, number):
                         
                         sec_obj.link = cite_link
                         
+                        if "range_to_section" in cite:
+                        	sec_obj.range_to_section = cite["range_to_section"]
+                        
                         # recursively go up to the title
                         path = [sec_obj]
                         while sec_obj.parent_section:
@@ -118,6 +121,7 @@ def bill_details(request, congress, type_slug, number):
                         ret.append({
                             "text": (ucfirst(sec.level_type + ((" " + sec.number) if sec.number else "") + (": " if sec.name else "")) if sec.level_type else "") + (sec.name if sec.name else ""),
                             "link": getattr(sec, "link", None),
+                            "range_to_section": getattr(sec, "range_to_section", None),
                             "indent": indent,
                         })
                         ret.extend(rebuild_usc_sec(subparts, indent=indent+1))

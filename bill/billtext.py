@@ -140,6 +140,39 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
             try:
                 title_cite, title_app_cite, sec_cite, para_cite = re.match(r"(\d+\S*)\s*U.S.C.(\s*App.)?\s*([^\s(]+?)?\s*(\(.*|et ?seq\.?|note)?$", cite.text).groups()
                 if title_app_cite: title_cite += "a"
+                if para_cite and para_cite.strip() == "": para_cite = None
+                
+                if not para_cite and "-" in sec_cite:
+                    # This dash may indicate a range of sections, or it may just be
+                    # a dash that occurs within section names. Be smart and try to
+                    # figure it out.
+                    found_range = False
+                    sec_dash_parts = sec_cite.split("-")
+                    for i in xrange(1, len(sec_dash_parts)):
+                        # Split the citation around each particular dash, and if both
+                        # halves are valid citations with the same parent then assume
+                        # this is a range. (A nice case is 16 U.S.C. 3839aa-8, where
+                        # both 3839aa and 8 are valid sections but are far apart.)
+                        sec_parts = ["-".join(sec_dash_parts[:i]),
+                                     "-".join(sec_dash_parts[i:])]
+                        from models import USCSection
+                        sec_parent = None
+                        for sec_part in sec_parts:
+                            matched_sec = list(USCSection.objects.filter(citation="usc/" + title_cite + "/" + sec_part))
+                            if len(matched_sec) == 0:
+                                break # part doesn't exist, skip the else block below and fall through to assume this is not a range
+                            if sec_parent == None:
+                                sec_parent = matched_sec[0].parent_section_id
+                            else:
+                                if sec_parent != matched_sec[0].parent_section_id:
+                                    break # likewise, parents dont match so not a range
+                        else:
+                            # Both parts exist. Treat as a USC citation range.
+                            citations.append({ "type": "usc", "text": cite.text, "title": title_cite, "section": sec_parts[0], "paragraph": None, "range_to_section": sec_parts[1] })
+                            found_range = True
+                            break
+                    if found_range: continue
+                    
                 citations.append({ "type": "usc", "text": cite.text, "title": title_cite, "section": sec_cite, "paragraph" : para_cite })
             except:
                 citations.append({ "type": "unknown", "text": cite.text })

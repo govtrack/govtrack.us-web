@@ -1004,7 +1004,10 @@
 			
 			<ul class="bullets">
 			{% for cite in text_info.citations.usc %}
-				<li style="margin-left: {{cite.indent}}em;">{% if cite.link %}<a href="{{cite.link}}">{{cite.text}}</a>{% else %}{{cite.text}}{% endif %}</li>
+				<li style="margin-left: {{cite.indent}}em;">
+					{% if cite.link %}<a href="{{cite.link}}">{{cite.text}}</a>{% else %}{{cite.text}}{% endif %}
+					{% if cite.range_to_section %} (through {{cite.range_to_section}}){% endif %}
+					</li>
 			{% endfor %}
 			</ul>
 		{% endif %}
