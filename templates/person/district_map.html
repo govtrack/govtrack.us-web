@@ -394,9 +394,10 @@
 				{% endif %}
 			{% else %}
 			<h3>{{district|ordinalhtml}} Congressional District</h3>
+			<p>{{cities}}</p>
 			{% endif %}
 			<ul style="height: 300px; width: 250px; overflow: auto;">
-				{% for dist, rep in reps %}
+				{% for dist, rep, rep_cities in reps %}
 					<li style="margin-bottom: .5em">
 						{% if not district %}
 						{% if reps|length > 1 or dist > 0 %}
@@ -408,12 +409,16 @@
 						{% else %}
 							<em>Vacant</em>
 						{% endif %}
+						{% if not district and rep_cities %}
+							<div style="margin-left: 2em; font-size: 90%; line-height: 125%;">{{rep_cities|truncatewords:4}}</div>
+						{% endif %}
 					</li>
 				{% endfor %}
 			</ul>
 			{% if district %}
 			<p>(<a href="/congress/members/{{state}}">Back to all of {{statename}}</a>)</p>
 			{% endif %}
+			<p style="line-height: 125%"><small>County and neighborhood names courtesy of Census and <a href="http://www.zillow.com/howto/api/neighborhood-boundaries.htm">Zillow</a> geographic data.</small></p>
 		{% endif %}
 	
 	</div><!-- /advanced-search -->

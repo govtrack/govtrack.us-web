@@ -46,7 +46,11 @@
 
 				{% if role.district > 0 %}
 				<dt>District:</dt>
-				<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a></dd>
+				<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a>
+					{% if cities %}
+						<div style="font-size: 90%; line-height: 125%;">({{cities}})</div>
+					{% endif %}
+				</dd>
 				{% endif %}
 				
 				<dt>Party:</dt>

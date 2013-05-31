@@ -82,6 +82,7 @@ def person_details(request, pk):
                 'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
                 'committeeassignments': get_committee_assignments(person),
                 'feed': Feed.PersonFeed(person.id),
+                'cities': get_district_cities("%s-%02d" % (role.state.lower(), role.district)) if role and role.district else None,
                 }
 
     ck = "person_details_%s" % pk
@@ -168,10 +169,11 @@ def browsemembersbymap(request, state=None, district=None):
                 dists = [int(district)]
         
         for i in dists:
+            cities = get_district_cities("%s-%02d" % (state.lower(), i)) if i > 0 else None
             try:
-                reps.append((i, Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=i)))
+                reps.append((i, Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=i), cities))
             except Person.DoesNotExist:
-                reps.append((i, None))
+                reps.append((i, None, cities))
 
         zoom_info_cache_key = "map_zoom_%s-%s" % (state, "" if not district else district)
 
@@ -224,7 +226,31 @@ def browsemembersbymap(request, state=None, district=None):
         "statelist": statelist,
         "senators": sens,
         "reps": reps,
+        "cities": get_district_cities("%s-%02d" % (state.lower(), int(district))) if state and district else None,
     }
+    
+def get_district_cities(district_id):
+    district_info = cache.get("district_cities_%s" % district_id)
+    if district_info:
+        if district_info == "NONE": district_info = None
+        return district_info
+    
+    district_info = json.load(open("data/misc/cd-intersection-data.json")).get(district_id)
+    if district_info:
+        locations_1 = [c["name"] for c in sorted(district_info, key=lambda c:-c["pct_of_district"]) if c["pct_of_county"] > .98][0:8]
+        locations_2 = [c["name"] for c in sorted(district_info, key=lambda c:-c["pct_of_county"]) if c["pct_of_county"] <= .98][0:8]
+        district_info = ", ".join(locations_1)
+        if len(locations_2) > 2:
+            if len(locations_1) > 0:
+                district_info += " and parts of "
+                locations_2 = locations_2[0:5]
+            else:
+                district_info += "Parts of "
+            district_info += ", ".join(locations_2)
+    
+    cache.set("district_cities_%s" % district_id, district_info if district_info != None else "NONE")
+    
+    return district_info
     
 @anonymous_view
 @render_to('person/overview.html')
