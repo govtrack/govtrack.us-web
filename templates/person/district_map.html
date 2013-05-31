@@ -306,10 +306,6 @@
 
 {% block body %}
 
-{% comment %}
-{% include "ad_footer_leaderboard.html" %}
-{% endcomment %}
-
 <div id="search-members" class="section box row">
 	<div class="advanced-search four columns">
 		{% if not state %}
@@ -461,8 +457,8 @@ src="http://www.govtrack.us/congress/members/embed/mapframe?{% if state %}state=
 				<a href="http://gis.govtrack.us/boundaries/cd-2012/{{state.lower}}-{{district_zero}}/simple_shape?format=kml">low res</a>
 				|
 				<a href="http://gis.govtrack.us/boundaries/cd-2012/{{state.lower}}-{{district_zero}}/shape?format=kml">hi res</a>.
-			</div>
 			{% endif %}
+			</div>
 		</div>
 	</div>
 </div><!-- /search-members -->
