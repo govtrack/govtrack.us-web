@@ -237,8 +237,8 @@ def get_district_cities(district_id):
     
     district_info = json.load(open("data/misc/cd-intersection-data.json")).get(district_id)
     if district_info:
-        locations_1 = [c["name"] for c in sorted(district_info, key=lambda c:-c["pct_of_district"]) if c["pct_of_county"] > .98][0:8]
-        locations_2 = [c["name"] for c in sorted(district_info, key=lambda c:-c["pct_of_county"]) if c["pct_of_county"] <= .98][0:8]
+        locations_1 = [c["name"] for c in sorted(district_info, key=lambda c:-c["pct_of_district"]) if c["pct_of_locality"] > .98][0:8]
+        locations_2 = [c["name"] for c in sorted(district_info, key=lambda c:-c["pct_of_locality"]) if c["pct_of_locality"] <= .98][0:8]
         district_info = ", ".join(locations_1)
         if len(locations_2) > 2:
             if len(locations_1) > 0:
