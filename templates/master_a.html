@@ -32,38 +32,41 @@
 		if (is_ad_free) {
 			document.write("An ad would be here, but you've gone ad-free!");
 		} else if (the_segment == "House" || the_segment == "Senate") {
-			google_ad_slot = "7881093146"; // ad unit targeting
+			google_ad_slot = "7881093146"; // ad unit targeting staff only
 			document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
 			
-		} else if (true) {
+		} else {
 			if (!ad_exp_user.impression) ad_exp_user.impression = 0;
 			ad_exp_user.impression += 1;
+			//if (!ad_exp_user.segment) ad_exp_user.segment = Math.random();
 			$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 21, path: '/' });
+			
+			var can_run_ad_exp = true;
 			
 			if ((ad_exp_user.impression % 5) == 4) {
 				document.write("{{ "<a href='/accounts/go_ad_free'><img src='/static/images/go_ad_free.png'/></a>"|escapejs }}");
 				try { 
 				_gaq.push(['_trackEvent', 'ads' , 'go_ad_free_banner_impression']); 
 				} catch(err){}
+				
+			} else if (can_run_ad_exp && (Math.random() < .1)) {
+			// } else if (ad_exp_user.segment < .8) {
+				document.write("{{ "<script type='text/javascript' src='http://ap.lijit.com/www/delivery/fpi.js?z=206353&u=govtrack&width=300&height=250'></script>"|escapejs }}");
+				ad_exp = "lijit";
+				
 			} else {
+				if (can_run_ad_exp) {
+					google_ad_slot = "6495528747"; // use a different unit for experiments so we have analytics
+					ad_exp = "adsense";
+				}
 				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
 			}
 			
-		} else {
-			if (!ad_exp_user.segment) ad_exp_user.segment = Math.random();
-		
-			if (ad_exp_user.segment < .8) {
-				// GoogleAdSense
-				google_ad_slot = "6495528747"; // use a different unit for experiments so we have analytics
-				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
-				ad_exp = "adsense";
-			} else {
+			/*
 				// Care2 TAP
 				document.write("{{ "<script type='text/javascript' src='http://dingo.care2.com/petitions/embed.js'></script><div class='care2PetitionEmbed' rssPath='http://www.thepetitionsite.com/feeds/publisher/000/001/700/feed.swf' adSize='small' publisherId='1405' grabbed='0' flags='#000002' buttonColor='#EB6924' html='1'></div>"|escapejs }}");
 				ad_exp = "care2tap";
-			}
-			
-			$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 3, path: '/' });
+			*/
 		}
 		</script>
 		<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/go_ad_free">Go Ad-Free for $5</a>)</div>
