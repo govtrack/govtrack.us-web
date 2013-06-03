@@ -460,7 +460,7 @@ def go_ad_free_start(request):
     is_ad_free = False
     
     if not request.user.is_anonymous():
-        is_ad_free = request.user.get_profile().get_ad_free_message()
+        is_ad_free = request.user.userprofile().get_ad_free_message()
         
     return { "is_ad_free": is_ad_free }
     
