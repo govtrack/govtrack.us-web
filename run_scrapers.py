@@ -36,7 +36,7 @@ def copy(fn1, fn2, modulo):
 	if os.path.exists(fn2):
 		if md5(fn1, modulo) == md5(fn2, modulo):
 			return False
-	print fn2
+	#print fn2
 	shutil.copyfile(fn1, fn2)
 	return True
 
@@ -197,7 +197,7 @@ if "amendments" in sys.argv:
 		copy(fn, fn2, r'updated="[^"]+"')
 		
 	# Load into db.
-	os.system("RELEASE=1 ./parse.py --congress=%d amendment" % CONGRESS) #  -l ERROR
+	os.system("RELEASE=1 ./parse.py --congress=%d -l %s amendment" % (CONGRESS, log_level))
 
 if "votes" in sys.argv:
 	# Scrape.
@@ -215,7 +215,7 @@ if "votes" in sys.argv:
 		
 	# Load into db.
 	if did_any_file_change or True: # amendments can mark votes as missing data
-		os.system("RELEASE=1 ./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
+		os.system("RELEASE=1 ./parse.py --congress=%d -l %s vote" % (CONGRESS, log_level))
 
 if "stats" in sys.argv:
 	os.system("cd analysis; python sponsorship_analysis.py %d" % CONGRESS)
