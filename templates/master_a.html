@@ -41,7 +41,7 @@
 			//if (!ad_exp_user.segment) ad_exp_user.segment = Math.random();
 			$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 21, path: '/' });
 			
-			var can_run_ad_exp = true;
+			var can_run_ad_exp = false;
 			
 			if ((ad_exp_user.impression % 5) == 4) {
 				document.write("{{ "<a href='/accounts/go_ad_free'><img src='/static/images/go_ad_free.png'/></a>"|escapejs }}");
