@@ -74,7 +74,7 @@ GovTrack.us runs on Ubuntu 12.10.
   ./manage.py loaddata django-fixture-people.json
   ./manage.py loaddata django-fixture-usc_sections.json
 
-  ./parse.py committee
+  ./parse.py committee # fails b/c meeting data not available
 
   ./build/rsync.sh
   ./parse.py bill --congress=113
