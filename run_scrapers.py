@@ -214,7 +214,7 @@ if "votes" in sys.argv:
 		did_any_file_change |= copy(fn, fn2, r'updated="[^"]+"')
 		
 	# Load into db.
-	if did_any_file_change:
+	if did_any_file_change or True: # amendments can mark votes as missing data
 		os.system("RELEASE=1 ./parse.py --congress=%d vote" % CONGRESS) #  -l ERROR
 
 if "stats" in sys.argv:

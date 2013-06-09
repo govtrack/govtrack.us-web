@@ -183,24 +183,30 @@ def main(options):
                 
                 # Get related bill & amendment.
                 
-                vote.related_bill = None
                 for bill_node in roll_node.xpath("bill"):
                     try:
                         vote.related_bill = Bill.objects.get(congress=bill_node.get("session"), bill_type=BillType.by_xml_code(bill_node.get("type")), number=bill_node.get("number"))
                     except Bill.DoesNotExist:
                         vote.missing_data = True
 
-                vote.related_amendment = None
                 for amdt_node in roll_node.xpath("amendment"):
-                    try:
-                        if amdt_node.get("ref") == "regular":
+                    if amdt_node.get("ref") == "regular":
+                        try:
                             vote.related_amendment = Amendment.objects.get(congress=vote.related_bill.congress, amendment_type=AmendmentType.by_slug(amdt_node.get("number")[0]), number=amdt_node.get("number")[1:])
-                        elif amdt_node.get("ref") == "bill-serial":
-                            vote.related_amendment = Amendment.objects.get(bill=vote.related_bill, sequence=amdt_node.get("number"))
-                    except Amendment.DoesNotExist:
-                        print "Missing amendment", fname
-                        vote.missing_data = True
-                        
+                        except Amendment.DoesNotExist:
+                            print "Missing amendment", fname
+                            vote.missing_data = True
+                    elif amdt_node.get("ref") == "bill-serial":
+                        # It is impossible to associate House votes with amendments just from the House
+                        # vote XML because the amendment-num might correspond either with the A___ number
+                        # or with the "An amendment, numbered ____" number from the amendment purpose,
+                        # and there's really no way to figure out which. Maybe we can use the amendment
+                        # sponsor instead?
+                        #vote.related_amendment = Amendment.objects.get(bill=vote.related_bill, sequence=amdt_node.get("number"))
+                        # Instead, we set related_amendment from the amendment parser. Here, we have to
+                        # preserve the related_amendment if it is set.
+                        if existing_vote: vote.related_amendment = existing_vote.related_amendment
+
                 # clean up some question text and use the question_details field
                 
                 if vote.category in (VoteCategory.passage, VoteCategory.passage_suspension, VoteCategory.veto_override) and vote.related_bill:

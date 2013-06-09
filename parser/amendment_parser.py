@@ -17,9 +17,10 @@ from parser.progress import Progress
 from parser.processor import XmlProcessor
 from parser.models import File
 from bill.models import Amendment, AmendmentType, Bill, BillType
-from vote.models import Vote
+from vote.models import Vote, CongressChamber
 from person.models import Person
 from settings import CURRENT_CONGRESS
+from us import get_session_from_date
 
 log = logging.getLogger('parser.bill_parser')
 PERSON_CACHE = {}
@@ -144,6 +145,23 @@ def main(options):
         except:
             print amdt
             raise
+            
+        # For House votes on amendments, the only way to associate the vote with the
+        # amendment is to use the THOMAS/Congress.gov action lines. The House vote XML
+        # has an amendment-num field but its meaning is ambiguous, so it is useless.
+        # When we parse a House amendment with an action line referencing a roll call vote,
+        # save this amendment as that vote's related_amendment, then mark the vote as
+        # 'missing data' (below) so that on the next parse of votes its title gets updated.
+        if amdt.amendment_type == AmendmentType.house_amendment:
+            for vote in node.xpath("actions/vote[@how='roll']"):
+                v_congress, v_session = get_session_from_date(XmlProcessor.parse_datetime(vote.get('datetime')).date())
+                v_roll = int(vote.get("roll"))
+                try:
+                    vote = Vote.objects.get(congress=v_congress, chamber=CongressChamber.house, session=v_session, number=v_roll)
+                    vote.related_amendment = amdt
+                    vote.save()
+                except Vote.DoesNotExist:
+                    print "Missing vote data in", fname
             
         # If this amendment is related to a vote, mark the vote as missing data because
         # we may need to update the vote title if the amendment title has changed.

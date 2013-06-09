@@ -68,7 +68,8 @@ class Processor(object):
         else:
             return value
 
-    def parse_datetime(self, value):
+    @staticmethod
+    def parse_datetime(value):
         try:
             return datetime.strptime(value, '%Y-%m-%d')
         except ValueError:
