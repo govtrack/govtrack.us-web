@@ -248,7 +248,13 @@ class SearchManager(object):
                 if option.type == "text":
                     # For full-text searching, don't use __in so that the search
                     # backend does its usual query operation.
-                    filters[option.field_name] = " ".join(values)
+                    values = " ".join(values) # should not really be more than one, but in case the parameter is specified multiple times in the query string
+                    if not self.qs:
+                       # This is a Haystack search. Handle text a little differently.
+                       # Wrap it in an AutoQuery so advanced search options like quoted phrases are used.
+                       from haystack.inputs import AutoQuery
+                       values = AutoQuery(values)
+                    filters[option.field_name] = values
                 elif not u'__ALL__' in values:
                     # if __ALL__ value presents in filter values
                     # then do not limit queryset
