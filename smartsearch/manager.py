@@ -236,15 +236,8 @@ class SearchManager(object):
                     qs = qs_
                 
             else:
-                def clean_values(x):
-                    for y in x:
-                        if y in ("true", "on"):
-                            yield True
-                        elif y == "false":
-                            yield False
-                        else:                        
-                            yield y
-                values = list(clean_values(postdata.getlist(option.field_name)+postdata.getlist(option.field_name+"[]")))
+                values = postdata.getlist(option.field_name)+postdata.getlist(option.field_name+"[]")
+                
                 if option.type == "text":
                     # For full-text searching, don't use __in so that the search
                     # backend does its usual query operation.
@@ -255,9 +248,21 @@ class SearchManager(object):
                        from haystack.inputs import AutoQuery
                        values = AutoQuery(values)
                     filters[option.field_name] = values
+                    
                 elif not u'__ALL__' in values:
                     # if __ALL__ value presents in filter values
                     # then do not limit queryset
+
+                    def parse_booleans(x):
+                        for y in x:
+                            if y in ("true", "on"):
+                                yield True
+                            elif y == "false":
+                                yield False
+                            else:                        
+                                yield y
+                    values = list(parse_booleans(values))
+
                     filters['%s__in' % option.field_name] = values
 
         # apply filters simultaneously so that filters on related objects are applied
