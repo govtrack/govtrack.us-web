@@ -44,16 +44,34 @@ def get_feed_list(request):
 @render_to('events/edit_lists.html')
 def edit_subscription_lists(request):
     message = None
+    sublist = None
     
     if "add" in request.GET:
         # This is a redirect from the add tracker page.
-        sublist = request.user.userprofile().lists().filter(is_default=True).get()
 
-        sublist.email = int(request.GET["emailupdates"])
-        if sublist.email == 0 and sublist.trackers.count() == 0:
-            # When creating a new list, if the user chose no email updates, change
-            # the name of the default list so it is not Email Updates.
-            sublist.name = "My List"
+        # Get the list to add the feed into
+        if "emailupdates" in request.GET:
+            # Use the default list, unless a different email update rate is chosen.
+            email_rate = int(request.GET["emailupdates"])
+            sublist = request.user.userprofile().lists().filter(is_default=True).get()
+            if sublist.trackers.count() > 0 and sublist.email != email_rate:
+                try:
+                    sublist = request.user.userprofile().lists().filter(email=email_rate).get()
+                except SubscriptionList.DoesNotExist:
+                    sublist = SubscriptionList.objects.create(user=request.user, name="My List")
+                
+            if sublist.trackers.count() == 0:
+                # Set list name and email rate.
+                sublist.email = email_rate
+                if sublist.email == 0:
+                    sublist.name = "My List"
+                elif sublist.email == 1:
+                    sublist.name = "Daily Email Updates"
+                elif sublist.email == 2:
+                    sublist.name = "Weekly Email Updates"
+                
+        else:
+            sublist = request.user.userprofile().lists().get(id=request.GET["listid"])
 
         feed = Feed.from_name(request.GET["add"])
         # for 'meta' feeds like bill search, we may get back a feed not in the db
@@ -65,6 +83,7 @@ def edit_subscription_lists(request):
         message = feed.title + " was added to your list " + sublist.name + "."
     
     return {
+        'default_list': sublist,
         'message': message,
         'no_arg_feeds': Feed.get_simple_feeds(),
             }

@@ -1,0 +1,18 @@
+{% extends "master.html" %}
+{% block heading_box %}
+	<header class="heading-box row">
+		<div class="two columns" style="padding: 0">
+			<img src="/static/images/{% block cat-icon-filename %}{% endblock %}" alt="Page Icon"/>
+		</div>
+		<div class="seven columns">
+			<div style="padding-right: 2em">
+				{% block summary %}
+				{% endblock %}
+			</div>
+		</div>
+		<div class="three columns">
+			<a href="/start?feed={{feed.feedname|urlencode}}" class="track-btn" style="margin: .5em auto;">Track {% block track_button_noun %}This{% endblock %}</a> 
+			<p>{% block track_button_explanation %}...{% endblock %}</p>
+		</div>
+	</header>
+{% endblock %}

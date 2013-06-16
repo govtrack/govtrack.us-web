@@ -2879,14 +2879,6 @@ aside .download-links { padding: 31px 0 0 	}
       box-shadow: none;
 
     }
-    #edit_list .control {
-        margin-bottom: 20px;
-        padding-bottom: 20px;
-        border-bottom: solid #dfdbcf 1px;
-    }
-    #edit_list .control select {
-        float: right; 
-    }
     #edit_list h4,
     #edit_list label,
     .side-box label {
@@ -2899,10 +2891,6 @@ aside .download-links { padding: 31px 0 0 	}
     }
     #set_freq label {
         display: inline-block;
-        float: left;
-        margin-right: 1em;
-        margin-top: 5px;
-
     }
     #browse_links {
         margin-top: 1.5em;

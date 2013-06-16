@@ -15,6 +15,7 @@ from numpy import median
 
 from vote.models import Vote, CongressChamber, VoterType, VoteCategory
 from vote.search import vote_search_manager
+from events.models import Feed
 from person.util import load_roles_at_date
 from us import get_all_sessions
 
@@ -36,7 +37,8 @@ def vote_list(request):
     
     return vote_search_manager().view(request, "vote/vote_list.html",
         defaults = { "session": default_session },
-        paginate = lambda form : "session" not in form ) # people like to see all votes for a year on one page
+        paginate = lambda form : "session" not in form, # people like to see all votes for a year on one page
+        context = { "feed": Feed(feedname="misc:allvotes") })
 
 def load_vote(congress, session, chamber_code, number):
     """

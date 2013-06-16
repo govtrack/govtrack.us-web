@@ -238,9 +238,9 @@ function new_list(node) {
 }
 
 $(function() {
-    {% if request.GET.listid %}
+    {% if request.GET.listid or default_list %}
     $('#lists div.list').each(function() {
-        if (this.getAttribute("listid") == "{{request.GET.listid|escapejs}}")
+        if (this.getAttribute("listid") == {% if request.GET.listid %}"{{request.GET.listid|escapejs}}"{% else %}"{{default_list.id}}"{% endif %})
             activate_list(this);
     });
     {% endif %}

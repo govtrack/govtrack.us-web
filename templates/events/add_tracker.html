@@ -45,7 +45,12 @@ function show_feed() {
 
 function update_login_links() {
 	// update login/registration links
-	var qs = "add=" + encodeURIComponent(selected_feed) + "&emailupdates=" + $('#email_frequency').val();
+	var qs = "add=" + encodeURIComponent(selected_feed);
+	{% if not request.user.is_authenticated or request.user.subscription_lists.count <= 1 %}
+		qs += "&emailupdates=" + $('#email_frequency').val();
+	{% else %}
+		qs += "&listid=" + $('input:radio[name=list]:checked').val();
+	{% endif %}
 	
 	$('a').each(function() {
 		var href = this.getAttribute("href_original");
@@ -236,15 +241,29 @@ function do_search(form) {
 		<div id="edit_list" class="four columns fat">
 			<div id="set_freq" class="control">
 				<h3>You Selected: <span> </span></h3>
+
 				<div>
+				{% if not request.user.is_authenticated or request.user.subscription_lists.count <= 1 %}
 					<p>We can send these updates to you by email. </p>
 					<label for="email_frequency">How often would you like updates?</label>
-					<select id="email_frequency" name="email_frequency" onchange="update_login_links();">
+					<select id="email_frequency" name="email_frequency" onchange="update_login_links();" style="margin-bottom: 1em">
 						<option value="0">No Email - I&rsquo;ll come back on my own.</option>
 						<option value="1" selected>Daily Emails</option>
 						<option value="2">Weekly Emails</option>
 					</select>
+				{% else %}
+					<p>Which list would you like to add this tracker into?</p>
+					<ul>
+						{% for sublist in request.user.userprofile.lists %}
+							<li>
+								<input id="sublist{{sublist.id}}" type="radio" name="list" value="{{sublist.id}}" {% if forloop.counter == 1 %}checked{% endif %}  onchange="update_login_links();"/>
+								<label for="sublist{{sublist.id}}">{{sublist.name}}</label>
+							</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
 				</div>
+				
 				{% if not feed %}
 				<div class="select_another">Or <a href="#" onclick="return back_to_start();">track something else</a>.</div>
 				{% endif %}
