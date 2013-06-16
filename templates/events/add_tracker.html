@@ -11,12 +11,14 @@ function back_to_start() {
 }
 
 var selected_feed;
+var selected_feed_title;
 var selected_feed_descr;
 
 function select_feed(ev) {
 	selected_feed = $(ev.target).attr("feedname");
-	selected_feed_descr = $(ev.target).attr("title");
-	if (!selected_feed_descr) selected_feed_descr = $(ev.target).text();
+	selected_feed_title = $(ev.target).attr("title");
+	selected_feed_descr = $(ev.target).attr("descr");
+	if (!selected_feed_title) selected_feed_title = $(ev.target).text();
 	return show_feed();
 }
 
@@ -25,7 +27,8 @@ function show_feed() {
 	$('#step1b').hide();
 	$('#step2').show();
 	
-	$('#step2 h3 span').text(selected_feed_descr);
+	$('#step2 h3 span').text(selected_feed_title);
+	$('#step2 .description').text(selected_feed_descr);
 
 	$('#events_preview_2').html("<p class='error'>Loading...</p>");
 	$.ajax({
@@ -78,7 +81,7 @@ function do_search(form) {
 		data: { q: qq },
 		success: function(res) {
 			selected_feed = "billsearch:text=" + escape(qq);
-			selected_feed_descr = "Search for \"" + qq + "\"";
+			selected_feed_title = "Search for \"" + qq + "\"";
 			$('#events_preview_1').html("<p class='error'>Loading...</p>");
 			$.ajax({
 				url: "/events/_load_events",
@@ -142,7 +145,8 @@ function do_search(form) {
 {% if request.GET.q %}$(function() { do_search("#tracker_search"); });{% endif %}
 {% if feed %}$(function() {
 	selected_feed = "{{feed.0|escapejs}}";
-	selected_feed_descr = "{{feed.1|escapejs}}";
+	selected_feed_title = "{{feed.1|escapejs}}";
+	selected_feed_descr = "{{feed.2|escapejs}}";
 	show_feed();
 });{% endif %}
 </script>
@@ -189,7 +193,7 @@ function do_search(form) {
 					<h2 class="has_marker"><span>B</span>Use a Pre-set Tracker</h2>
 					<ul id="basic_trackers">
 						{% for tracker in no_arg_feeds %}
-						<li><a href="#" feedname="{{tracker.feedname}}" onclick="return select_feed({target: this});" title="{{tracker.title}}">{{tracker.title}} <span>Add</span></a></li>
+						<li><a href="#" feedname="{{tracker.feedname}}" onclick="return select_feed({target: this});" title="{{tracker.title}}" descr="{{tracker.description}}">{{tracker.title}} <span>Add</span></a></li>
 						{% endfor %}
 					</ul>
 					
@@ -238,9 +242,11 @@ function do_search(form) {
 
 
 	<div id="step2" class="panel row" style="display: none">
-		<div id="edit_list" class="four columns fat">
+		<div id="edit_list" class="four columns fat " style="line-height: 125%">
 			<div id="set_freq" class="control">
 				<h3>You Selected: <span> </span></h3>
+				
+				<p class="description"> </p>
 
 				<div>
 				{% if not request.user.is_authenticated or request.user.subscription_lists.count <= 1 %}
@@ -272,7 +278,7 @@ function do_search(form) {
 				{% if not request.user.is_authenticated %}
 			
 				<div class="signin_social">
-					<h3 style="margin-bottom: 1em">Save This Tracker</h3>
+					<h3 style="margin-top: 1em">Save This Tracker</h3>
 					{% with "/accounts/lists?"|add:"REPLACE_FEED_HERE" as singlesignon_next %}
 						{% include "registration/login_singlesignon.html" %}
 					{% endwith %}

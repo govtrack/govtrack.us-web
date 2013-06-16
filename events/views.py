@@ -261,7 +261,7 @@ def events_add_tracker(request):
     if "feed" in request.GET:
         try:
             feed = Feed.from_name(request.GET["feed"])
-            feed_info = (feed.feedname, feed.title)
+            feed_info = (feed.feedname, feed.title, feed.description)
         except:
             pass
         
@@ -280,6 +280,7 @@ def start_search(request):
         feeds = [{
             "name": r["feed"].feedname,
             "title": r["label"],
+            "description": r["feed"].description,
             "subfeeds": [{
                     "name": f.feedname,
                     "title": f.scoped_title,

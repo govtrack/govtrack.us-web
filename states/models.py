@@ -89,6 +89,7 @@ Feed.register_feed(
 	simple = True,
 	sort_order = 200,
 	category = "state-bills",
+	description = "Get an update on major activity on all state legislation.",
 	)
 for st in us.stateabbrs:
 	Feed.register_feed(
@@ -96,12 +97,14 @@ for st in us.stateabbrs:
 		title = us.statenames[st] + " Legislation",
 		link = "/states/%s" % st.lower(),
 		category = "state-bills",
+		description = "Get an update on major activity on all bills in this state.",
 		)
 Feed.register_feed(
 	"states_bill:",
 	title = lambda feed : unicode(StateBill.objects.get(id=feed.feedname.split(":")[1])),
 	link = lambda feed : StateBill.objects.get(id=feed.feedname.split(":")[1]).get_absolute_url(),
 	category = "state-bills",
+	description = "Get an update on major activity on this bill.",
 	)
 
 class StateBill(models.Model):

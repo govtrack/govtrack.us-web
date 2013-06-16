@@ -856,6 +856,7 @@ Feed.register_feed(
     includes = lambda feed : bill_search_feed_execute(feed.feedname.split(":", 1)[1]),
     meta = True,
     category = "federal-bills",
+	description = "Get updates for all bills matching the keyword search, including major activity, being scheduled for debate, new cosponsors, etc.",
     )
 
 # Summaries
@@ -914,7 +915,7 @@ Feed.register_feed(
     slug = "bill-summaries",
     intro_html = """<p>This feed includes all GovTrack original research on legislation.</p>""",
     category = "federal-bills",
-    description = "This feed includes all GovTrack original research on legislation.",
+	description = "Get an update whenever we post a GovTrack original bill summary.",
     )
 
 class AmendmentType(enum.Enum):

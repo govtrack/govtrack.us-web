@@ -123,7 +123,7 @@ class Feed(models.Model):
             "simple": True,
             "sort_order": 105,
             "category": "federal-bills",
-            "description": "Get an update when any bill is introduced, scheduled for debate, voted on, or enacted.",
+            "description": "Get an update when any bill is introduced, scheduled for debate, or has major action such as a vote or being enacted.",
         },
         "misc:enactedbills": {
             "title": "New Laws",
@@ -134,7 +134,7 @@ class Feed(models.Model):
             "single_event_type": True,
             "sort_order": 104,
             "category": "federal-bills",
-            "description": "You'll be alerted every time Congress enacts a law.",
+            "description": "You will be alerted every time Congress enacts a law.",
         },
         "misc:introducedbills": {
             "simple": True,
@@ -157,7 +157,7 @@ class Feed(models.Model):
             "simple": True,
             "sort_order": 100,
             "category": "federal-bills",
-            "description": "Get an update when any bill is scheduled for debate, voted on, or enacted.",
+            "description": "Get an update when any bill is scheduled for debate or has major action such as a vote or being enacted.",
         },
         "misc:comingup": {
             "simple": True,
@@ -169,7 +169,7 @@ class Feed(models.Model):
             "single_event_type": True,
             "sort_order": 102,
             "category": "federal-bills",
-            "description": "Know what bills are scheduled for the week ahead.",
+            "description": "You will get updates when any bill is scheduled for debate in the week ahead by the House Majority Leader or in the day ahead according to the Senate Floor Schedule.",
         },
         "misc:allcommittee": {
             "simple": True,
@@ -188,13 +188,14 @@ class Feed(models.Model):
             "single_event_type": True,
             "sort_order": 101,
             "category": "federal-votes",
-            "description": "Track every roll call vote in Congress.",
+            "description": "You will get an alert for every roll call vote in Congress.",
         },
         "bill:": {
             "title": lambda self : truncate_words(self.bill().title, 12),
             "noun": "bill",
             "link": lambda self: self.bill().get_absolute_url(),
             "category": "federal-bills",
+            "description": "You will get updates when this bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when bill text becomes available or when we write a bill summary, plus similar events for related bills.",
         },
         "p:": {
             "title": lambda self : self.person().name,
@@ -203,6 +204,7 @@ class Feed(models.Model):
             "link": lambda self: self.person().get_absolute_url(),
             "scoped_title": lambda self : "All Events for " + self.person().lastname,
             "category": "federal-other",
+            "description": "You will get updates about major activity on sponsored bills and how this Member of Congress votes in roll call votes.",
         },
         "ps:": {
             "title": lambda self : self.person().name + " - Bills Sponsored",
@@ -210,6 +212,7 @@ class Feed(models.Model):
             "link": lambda self: self.person().get_absolute_url(),
             "scoped_title": lambda self : self.person().lastname + "'s Sponsored Bills",
             "category": "federal-bills",
+            "description": "You will get updates about major activity on bills sponsored by this Member of Congress.",
         },
         "pv:": {
             "title": lambda self : self.person().name + " - Voting Record",
@@ -218,6 +221,7 @@ class Feed(models.Model):
             "scoped_title": lambda self : self.person().lastname + "'s Voting Record",
             "single_event_type": True,
             "category": "federal-votes",
+            "description": "You will get updates on how this Member of Congress votes in roll call votes.",
         },
         "committee:": {
             "title": lambda self : truncate_words(self.committee().fullname, 12),
@@ -227,6 +231,7 @@ class Feed(models.Model):
             "scoped_title": lambda self : "All Events for This Committee",
             "is_valid": lambda self : self.committee(test=True),
             "category": "federal-committees",
+            "description": "You will get updates about major activity on bills referred to this commmittee plus notices of scheduled hearings and mark-up sessions.",
         },
         "committeebills:": {
             "title": lambda self : "Bills in " + truncate_words(self.committee().fullname, 12),
@@ -234,6 +239,7 @@ class Feed(models.Model):
             "link": lambda self: self.committee().get_absolute_url(),
             "scoped_title": lambda self : "Activity on This Committee's Bills",
             "category": "federal-committees",
+            "description": "You will get updates about major activity on bills referred to this commmittee.",
         },
         "committeemeetings:": {
             "title": lambda self : "Meetings for " + truncate_words(self.committee().fullname, 12),
@@ -242,6 +248,7 @@ class Feed(models.Model):
             "scoped_title": lambda self : "This Committee's Hearings and Markups",
             "single_event_type": True,
             "category": "federal-committees",
+            "description": "You will get notices for this committee's scheduled hearings and mark-up sessions.",
         },
         "crs:": {
             "title": lambda self : self.issue().name,
@@ -249,6 +256,7 @@ class Feed(models.Model):
             "link": lambda self: self.issue().get_absolute_url(),
             "is_valid": lambda self : self.issue(test=True),
             "category": "federal-bills",
+            "description": "You will get updates about major activity on bills in this subject area including notices of newly introduced bills, updates when a bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when bill text becomes available or when we write a bill summary.",
         }
     }
     
