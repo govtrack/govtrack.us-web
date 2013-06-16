@@ -7,7 +7,8 @@ class CacheLogic:
 		
 	def process_response(self, request, response):
 		if not getattr(request, "anonymous", False)\
-			or request.method not in ("GET", "HEAD"):
+			or request.method not in ("GET", "HEAD")\
+			or settings.DEBUG:
 			# This view does not have the anonymous attribute, or was requested
 			# with a method we should not cache, so apply cache-control headers
 			# to prevent any upstream caching.

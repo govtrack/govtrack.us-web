@@ -5,6 +5,7 @@ from functools import wraps
 
 from django.contrib.auth.models import AnonymousUser
 from django.views.decorators.cache import cache_control
+from django.conf import settings
 import django.middleware.csrf
 
 # Inject ourselves into CSRF processing to prevent the generation of CSRF
@@ -29,9 +30,17 @@ def anonymous_view(view):
 		request.COOKIES = { }
 		request.user = AnonymousUser()
 		if hasattr(request, "session"): request.session = { }
+
 		for header in list(request.META.keys()):
-			if header not in ('CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP_HOST', 'QUERY_STRING', 'REQUEST_METHOD', 'SERVER_NAME', 'SERVER_PORT', 'SERVER_PROTOCOL'):
+			if header not in ('CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP_HOST', 'QUERY_STRING', 'REQUEST_METHOD', 'SERVER_NAME', 'SERVER_PORT', 'SERVER_PROTOCOL', 'REMOTE_ADDR'):
 				del request.META[header]
+				
+		# In order for the Django debug template context processor to work, we can't
+		# clear REMOTE_ADDR. Clear it if {{debug}} would be false. The resulting page
+		# should not be cached since it may depend on REMOTE_ADDR.
+		if 'REMOTE_ADDR' in request.META and (not settings.DEBUG or request.META['REMOTE_ADDR'] not in settings.INTERNAL_IPS):
+			del request.META['REMOTE_ADDR']
+			
 		response = view(request, *args, **kwargs)
 		response.csrf_processing_done = True # prevent generation of CSRF cookies
 		return response

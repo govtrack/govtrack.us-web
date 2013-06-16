@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.join(ROOT, 'lib'))
 
 DEBUG = not ("RELEASE" in os.environ)
 TEMPLATE_DEBUG = DEBUG
+INTERNAL_IPS = ('127.0.0.1',)
 
 ADMINS = (
     ('Joshua Tauberer', 'tauberer@govtrack.us'),
