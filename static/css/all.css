@@ -1800,6 +1800,7 @@ a.button.prefix, a.button.postfix {
     	#categories li a {
     		display: block;
     		width: 225px;
+                margin-top: 13px;
     		padding-top: 137px;
     		text-align: center;
             font-family: 'PTSerifBold';
@@ -2040,7 +2041,6 @@ a.button.prefix, a.button.postfix {
     line-height: 1.25em;
   }
 
-  #cat-icon,
   #map_canvas,
   #embed_teaser { display: none; }
 }
@@ -2286,7 +2286,6 @@ a.button.prefix, a.button.postfix {
 /* Page Heading category box ======================== */
 /* ================================================== */
 .heading-box,
-#search-members,
 #search-again {
     position: relative;
     background: #f3f1e9 url(../images/bg-paper.jpg);
@@ -2300,7 +2299,7 @@ a.button.prefix, a.button.postfix {
     box-shadow:
         0 0 0 5px #f9f8f4,
         0 1px 2px 5px rgba(106,106,106,.4);
-    padding: 18px;
+    padding: 12px;
     color: #545454;
 	}
 
@@ -2317,39 +2316,12 @@ a.button.prefix, a.button.postfix {
 
   #search-again { margin-top: -15px; }
     
-    /* Category page icons */
-  .heading-box #cat-icon {
-    min-height: 146px;
-  }
-	body.bills .heading-box #cat-icon {
-		min-height: 100px;
-	  }  
-    .search .heading-box #cat-icon { 
-    	background: url(../images/cat-search.png) right center no-repeat;
-		}
-	.votes .heading-box #cat-icon,
-	.search.votes .heading-box #cat-icon {
-		background: url(../images/img-voting-records.png) right center no-repeat;
-		}
-    .bills .heading-box #cat-icon,
-    .search.bills .heading-box #cat-icon {
-    	background: url(../images/img-bills-resolutions.png) right center no-repeat;
-		}
-    .member .heading-box #cat-icon,
-    .search.member .heading-box #cat-icon {
-    	background: url(../images/img-congress-members.png) right center no-repeat;
-    	min-height: 130px;
-    	}
-    .committees .heading-box #cat-icon,
-    .search.committees .heading-box #cat-icon {
-    	background: url(../images/img-committees.png) right center no-repeat;
-    	}
         
     	.heading-box h1 {
-            margin-bottom: .25em;
-        }
-    	.heading-box h2 { 
-        	text-transform: uppercase;
+			font-size: 1.5em;
+			font-weight: bold;
+			line-height: 1.5em;
+			margin-bottom: 0.5em; 
         	}
 
         .heading-box .three {

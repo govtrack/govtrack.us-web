@@ -1,12 +1,12 @@
-{% extends 'master.html' %}
+{% extends 'master_b.html' %}
 
 {% block logo_class %}states{% endblock %}
 {% block footer_extra %}{% include "states/footer.html" %}{% endblock %}
 
 {% block title %}Search State Legislation - GovTrack.us{% endblock %}
-{% block body_class %}search state bills{% endblock %}
 {% block meta_description %}Search state bills and resolutions in the fifty states of the United States.{% endblock %}
 {% block meta_keywords %}state,legislation,bill,law,united states{% endblock %}
+{% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
 
 {% block head %}
 <link media="all" rel="stylesheet" href="{{ MEDIA_URL }}fonts/stateface.css">

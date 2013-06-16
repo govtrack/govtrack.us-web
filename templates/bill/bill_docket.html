@@ -1,11 +1,11 @@
-{% extends "master.html" %}
+{% extends "master_b.html" %}
 {% load humanize govtrack_utils %}
 
 {% block title %}Bills and Resolutions -- GovTrack.us{% endblock %}
 
 {% block meta_description %}A list of legislation in the U.S. Congress.{% endblock %}
 
-{% block body_class %}bills{% endblock %}
+{% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
 
 {% block head %}
 <style>
@@ -53,7 +53,7 @@ $(function() {
 	<h1>Bills and Resolutions</h1>
 	<p style="margin-top: 1em; margin-bottom: 0">
 		{% if 5000 > total %}
-		Around 10,000 bills and resolutions are considered by the United States Congress in each two-year session, but of those bills and resolutions only about 400 will become law.{% comment %} The current cycle is called the {{current_congress}}.{% endcomment %}
+		Around 10,000 bills and resolutions are considered by the U.S. Congress in each two-year session, but of those only about 4% will become law. The current two-year session is called the {{current_congress}} Congress.
 		{% else %}
 		There are {{total|intcomma}} bills and resolutions currently before the United States Congress. Of those, only about 5% will become law. They must be enacted before the end of the {{current_congress_years}} session (the &ldquo;{{current_congress}} Congress&rdquo;).
 		{% endif %}

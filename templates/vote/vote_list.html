@@ -1,32 +1,23 @@
-{% extends 'master.html' %}
+{% extends 'master_b.html' %}
 
 {% block title %}Congressional Votes Database - GovTrack.us{% endblock %}
-{% block body_class %}votes{% endblock %}
+{% block cat-icon-filename %}img-voting-records.png{% endblock %}
 
 {% block crumbs %}
 <ul>
 <li><a href="{% url congress_home %}">Congress</a></li>
-<li>Voting Records</li>
+<li>Votes</li>
 </ul>
 {% endblock %}
 
 {% block summary %}
-<h1>Congressional Votes Database</h1>
+<h1>Roll Call Votes</h1>
 
-<p>The Senate and House each conduct hundreds of recorded/roll call votes each year, used both to pass legislation and amendments as well as to approve motions and for quorum calls. Use the options to navigate the voting records database.</p>
+<p>Browse roll call votes in the U.S. Senate and House of Representatives using the filters below.</p>
 {% endblock %}
 
 {% block body %}
 
-{% comment %}
-{% with recent_vote as vote %}
-<h3>Recent vote: {{ vote }}</h3>
-{% include "vote/_recent_vote.html" %}
-{% endwith %}
-{% endcomment %}
-
-
-{% include "smartsearch/search_panel.html" %}
-
+{% include "smartsearch/search_panel.html" with heading="Filter Votes" %}
 
 {% endblock %}

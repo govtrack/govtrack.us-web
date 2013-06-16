@@ -1,0 +1,12 @@
+{% extends "master.html" %}
+{% block heading_box %}
+	<header class="heading-box row">
+		<div class="two columns" style="padding: 0">
+			<img src="/static/images/{% block cat-icon-filename %}{% endblock %}" alt="Page Icon"/>
+		</div>
+		<div class="ten columns">
+			{% block summary %}
+			{% endblock %}
+		</div>
+	</header>
+{% endblock %}

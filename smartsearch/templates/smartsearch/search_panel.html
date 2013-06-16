@@ -363,7 +363,7 @@ $(function() {
 <div class="advanced-search four columns">
     <form id="searchform" onsubmit="update_search(); return false;">
     <fieldset>
-    <h3>Search</h3>
+    <h3>{% firstof heading "Search" %}</h3>
     <div id="searcherror"> </div>
     <ul>
         {% for field in form %}
