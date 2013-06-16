@@ -30,7 +30,7 @@ h4 { margin-top: 1.5em; }
 		{% for list in lists %}
 			<p style="margin-left: 2em">{{list.name}} ({{list.get_email_display}})</p>
 		{% endfor %}
-		<p>To turn email updates off use the <a href="/accounts/lists">Your Lists</a> page, or unsubscribe from all lists:</p>
+		<p>To turn email updates off use the <a href="/accounts/lists">What I&rsquo;m Tracking</a> page, or unsubscribe from all lists:</p>
 		
 		<form action="/accounts/update_settings" method="post" style="margin-left: 2em">{% csrf_token %}
 			<input type="hidden" name="action" value="unsubscribe"/>

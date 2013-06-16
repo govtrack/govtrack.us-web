@@ -2765,11 +2765,6 @@ aside .download-links { padding: 31px 0 0 	}
     padding-top: 20px;
 }
 #lists .options { display: none; }
-#lists > h3 {
-    border-bottom: 1px solid #dae2df;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
 #lists div.four.columns {
     margin-bottom: 20px;
 }
@@ -2887,26 +2882,8 @@ aside .download-links { padding: 31px 0 0 	}
     
 #list_view {
     clear: both;
-    margin-top: 20px;
-    border-top: 1px solid #dae2df;
-    padding-top: 30px;
+	margin-top: 20px;
 }
-    #list_view h2 {
-        color: #40a4bd;
-        text-transform: none;
-        font-size: 1.6em;
-        margin-bottom: 20px;
-        font-family: 'PTSerifItalic';
-    }
-        #list_view h2 span.name {
-            text-transform: uppercase;
-            color: #666;
-            font-family: 'PTSerifBold';
-        }
-    #list_view h3 {
-        font-size: 1em;
-        color: #40a4bd;
-    }
 
     #edit_list,
     .side-box {
@@ -2966,26 +2943,6 @@ aside .download-links { padding: 31px 0 0 	}
         min-height: 480px;
         width: 47.5%;
     }
-        #events_header {
-            border-bottom: solid #dae2df 5px;
-            margin-bottom: 20px;
-        }
-            #events_header h3 {
-                float: left;
-                font-size: 1.25em;
-            }
-            #events_header h4 { float: left; }
-            #events_header a {
-                display: block;
-                float: right;
-                height: 16px;
-                padding-right: 20px;
-                background: url(../images/icon_rss.png) right top no-repeat;
-            }
-            #events_header a:hover {
-                background-position: right -16px;
-                border-bottom: none;
-            }
 
 /*  Event styles for global use
     ========================================================= */
@@ -3068,6 +3025,9 @@ aside .download-links { padding: 31px 0 0 	}
 
 /*  Edit trackers panel styles
     ========================================================= */
+#list_trackers {
+	margin-top: 1em;
+}
 #list_trackers li,
 #basic_trackers li a {
     display: block;
@@ -3093,10 +3053,30 @@ aside .download-links { padding: 31px 0 0 	}
 }
     #list_trackers li span {
         display: inline-block;
-        width: 340px;
+        /*width: 340px;*/
     }
 
-    #list_trackers li > a,
+    #list_trackers li > a {
+        display: inline-block;
+        float: right;
+        color: #666;
+    }
+    #list_trackers li > a span {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-top: 6px;
+        text-indent: -9999px;
+        background: url(../images/icons.png) -12px 0 no-repeat;
+    }
+		#list_trackers li > a:hover {
+			color: #C66;
+		}
+        #list_trackers li > a:hover span {
+            background-position: -12px -12px;
+            border-bottom: 0;
+        }
+        
     #basic_trackers li span   {
         display: inline-block;
         float: right;
@@ -3107,7 +3087,6 @@ aside .download-links { padding: 31px 0 0 	}
         background: url(../images/icons.png) -12px 0 no-repeat;
         color: #666;
     }
-        #list_trackers li > a:hover,
         #basic_trackers li a:hover span {
             background-position: -12px -12px;
             border-bottom: 0;
