@@ -3661,12 +3661,6 @@ form.custom .custom.disabled { background-color: #ddd; }
 .member .advanced-search {
   padding-top: 20px;
 }
-.advanced-search form {
-    /*border: 1px solid #e6e2d8;*/
-    padding-top: 20px;
-    /*overflow: hidden;*/
-    /*width: 260px;*/
-    }
 .advanced-search h3 {   
     text-align: center;
     text-transform: uppercase;
@@ -3822,7 +3816,7 @@ select, input.text {
             0 0 0 5px #f9f8f4,
             0 1px 2px 5px rgba(106,106,106,.4);
         padding: 15px;*/
-        margin: 15px 6px 50px;
+        margin: 0 6px 50px;
     }
         #content .site-search-results form h3,
         form.topbox h3 {
