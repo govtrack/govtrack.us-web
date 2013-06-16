@@ -406,6 +406,8 @@ def subject_choices(include_legacy=True):
 @render_to('bill/bill_docket.html')
 def bill_docket(request):
     def build_info():
+        feeds = [f for f in Feed.get_simple_feeds() if f.category == "federal-bills"]
+        
         groups0 = [
             ("Enacted Laws", "enacted bills and joint resolutions", " so far in this session of Congress",
                 BillStatus.final_status_passed_bill), # 2
@@ -486,6 +488,8 @@ def bill_docket(request):
             activity_enacted_by_month = []
     
         return {
+            "feeds": feeds,
+            
             "total": Bill.objects.filter(congress=CURRENT_CONGRESS).count(),
             "current_congress_years": current_congress_years,
             "current_congress": current_congress,

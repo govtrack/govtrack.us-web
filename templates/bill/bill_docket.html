@@ -62,20 +62,37 @@ $(function() {
 
 {% block body %}
 
-<ul class="tabs four-up">
-	<li><a href="#docket">Docket</a></li>
+<div class="row">
+	<div class="five columns">
+
+		<h2>Search for a Bill</h2>
+		<p>Search for bills using the search box at the top right of every page, or use the <a href="/congress/bills/browse">advanced search</a> to screen by status, subject, and other factors.</p>
+		
+		<h2>Track All Bills</h2>
+		<p>Get email updates for:</p>
+		<ul id="basic_trackers">
+			{% for feed in feeds %}
+			<li>
+				<a href="/start?feed={{feed.feedname|urlencode}}" style="height: auto">
+					{{feed.title}} <span>Add</span>
+					<div style="color: #555; line-height: 125%; margin-bottom: 3px">{{feed.description}}</div>
+				</a>
+			</li>
+			{% endfor %}
+		</ul>
+	
+	</div>
+
+	<div class="seven columns">
+
+<ul class="tabs three-up">
+	<li><a href="#docket">Coming Up</a></li>
 	<li><a href="#subjects">By Subject</a></li>
-	<li><a href="#search">Search and Track</a></li>
-	<li><a href="#statistics">Statistics</a></li>
+	<li><a href="#bystatus">Browse By Status</a></li>
 </ul>
 
 <div class="panes">
 	<div id="docket">
-		<h2 style="margin: 1em 0 1em 0">Congress&rsquo;s Docket</h2>
-
-		<div class="row">
-		
-		<div class="six columns">
 			<h4>Coming Up This Week</h4>
 			
 			<p style="margin-top: 1em">{{coming_up|length}} {% if coming_up|length == 1 %}bill or resolution is{% else %}bills and resolutions are{% endif %} on the House and Senate calendars for the coming days. Once bills are scheduled for floor action, they typically have enough support to pass.</p>
@@ -90,9 +107,11 @@ $(function() {
 					{% endif %}
 				</div>
 			{% endfor %}
-		</div>
-		
-		<div class="six columns">
+	</div>
+	
+	<div id="bystatus">	
+		<h2>Browse Bills by Status</h2>
+	
 		<p>Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
 		{% for name, descr1, descr2, href, count, queryset in groups %}
@@ -115,8 +134,6 @@ $(function() {
 			{% endif %}
 		{% endif %}
 		{% endfor %}
-		</div>		
-		</div>
 	</div>
 	
 	<div id="subjects">
@@ -135,26 +152,12 @@ $(function() {
 		{% endfor %}
 		</ul>
 	</div>
-	
-	<div id="search">
-		<h2 style="margin: 1em 0 .5em 0">Search Bills and Resolutions</h2>
-		<p style="width: 600px">Search for bills using the search box at the top right of every page, or use the <a href="/congress/bills/browse">advanced search</a> to screen by status, subject, and other factors.</p>
-		
-		<h2 style="margin: 1em 0 .5em 0">Track Legislative Events</h2>
-		<p style="width: 600px">Use these pages to subscribe to email updates to track bills and resolutions in Congress.</p>
-		<ul class="bullets">
-			<li><a href="/events/introduced-bills">Introduced Bills</a></li>
-			<li><a href="/events/enacted-bills">Enacted Bills</a></li>
-			<li><a href="/events/major-bill-activity">All Major Activity</a></li>
-			<li><a href="/events/bill-activity">All Major Activity with Introductions</a></li>
-			<li><a href="/events/coming-up">Coming Up</a></li>
-			<li><a href="/events/bill-summaries">Bill Summaries</a></li>
-		</ul>
-	
+		</div>
 	</div>
+</div>
 
 	<div id="statistics">
-		<h2 style="margin: 1em 0 .5em 0">Statistics and Historical Comparison</h2>
+		<h2>Statistics and Historical Comparison</h2>
 		
 		<p>Here are counts of bills and resolutions by status in the current Congress compared to previous Congresses. Note that the current Congress is not yet finished.</p>
 		
@@ -262,7 +265,7 @@ $(function() {
 		{% endfor %}
 		<p style="padding: 1em 0 1em 0;">Use the cumulative percent charts to estimate how much has yet to occur in the current session of Congress. For instance, the cumulative percent of bills enacted for December in the first year of a session is 34%, meaning that while the session is half over, only one-third of the number of bills that will be enacted have been enacted by that point.</p>
 	</div>	
-</div>
+
 
 <script>$("ul.tabs a").tabs("div.panes > div");</script>
 
