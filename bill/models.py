@@ -855,6 +855,7 @@ Feed.register_feed(
     link = lambda feed : "/congress/bills/browse?" + feed.feedname.split(":", 1)[1],
     includes = lambda feed : bill_search_feed_execute(feed.feedname.split(":", 1)[1]),
     meta = True,
+    category = "federal-bills",
     )
 
 # Summaries
@@ -908,10 +909,12 @@ class USCSection(models.Model):
 
 Feed.register_feed(
     "misc:billsummaries",
-    title = "All Bill Summaries",
+    title = "GovTrack Bill Summaries",
     simple = True,
     slug = "bill-summaries",
     intro_html = """<p>This feed includes all GovTrack original research on legislation.</p>""",
+    category = "federal-bills",
+    description = "This feed includes all GovTrack original research on legislation.",
     )
 
 class AmendmentType(enum.Enum):

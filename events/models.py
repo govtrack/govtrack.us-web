@@ -116,40 +116,48 @@ class Feed(models.Model):
     
     feed_metadata = {
         "misc:activebills": {
-            "title": "Major Activity on All Legislation",
+            "title": "All Legislative Activity",
             "slug": "bill-activity",
             "intro_html": """<p>This feed tracks all major activity on legislation, including newly introduced bills and resolutions, votes on bills and resolutions, enacted bills, and other such events.</p> <p>To exclude newly introduced bills and resolutions, use the <a href="/events/major-bill-activity">Major Activity on All Legislation Except New Introductions</a> feed.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
             "simple": True,
-            "sort_order": 100,
+            "sort_order": 105,
+            "category": "federal-bills",
+            "description": "Get an update when any bill is introduced, scheduled for debate, voted on, or enacted.",
         },
         "misc:enactedbills": {
-            "title": "Enacted Bills",
+            "title": "New Laws",
             "slug": "enacted-bills",
             "intro_html": """<p>This feed tracks the enactment of bills either by the the signature of the president or a veto override.</p> <p>You can also <a href="/congress/bills/browse?status=28,29">browse enacted bills</a> using advanced bill search.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
             "simple": True,
             "single_event_type": True,
-            "sort_order": 101,
+            "sort_order": 104,
+            "category": "federal-bills",
+            "description": "You'll be alerted every time Congress enacts a law.",
         },
         "misc:introducedbills": {
             "simple": True,
-            "title": "Introduced Bills and Resolutions",
+            "title": "New Bills and Resolutions",
             "slug": "introduced-bills",
             "intro_html": """<p>This feed tracks newly introduced bills and resolutions.</p> <p>You can also <a href="/congress/bills/browse?sort=-introduced_date">browse introduced bills</a> using advanced bill search.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
             "simple": True,
             "single_event_type": True,
-            "sort_order": 104,
+            "sort_order": 106,
+            "category": "federal-bills",
+            "description": "Get an update whenever a new bill or resolution is introduced.",
         },
         "misc:activebills2": {
             "simple": True,
-            "title": "Major Activity on All Legislation Except New Introductions",
+            "title": "Major Legislative Activity",
             "slug": "major-bill-activity",
             "intro_html": """<p>This feed tracks major activity on legislation, including votes on bills and resolutions, enacted bills, and other such events.</p> <p>This feed includes all of the same events as the <a href="/events/bill-activity">Major Activity on All Legislation</a> feed except newly introduced bills and resolutions.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
             "simple": True,
-            "sort_order": 105,
+            "sort_order": 100,
+            "category": "federal-bills",
+            "description": "Get an update when any bill is scheduled for debate, voted on, or enacted.",
         },
         "misc:comingup": {
             "simple": True,
@@ -160,13 +168,17 @@ class Feed(models.Model):
             "simple": True,
             "single_event_type": True,
             "sort_order": 102,
+            "category": "federal-bills",
+            "description": "Know what bills are scheduled for the week ahead.",
         },
         "misc:allcommittee": {
             "simple": True,
             "title": "Committee Meetings",
             "link": "/congress/committees",
             "simple": True,
-            "sort_order": 106,
+            "sort_order": 103,
+            "category": "federal-committees",
+            "description": "Get an alert whenever a committee hearing or mark-up session is scheduled.",
         },
         "misc:allvotes": {
             "simple": True,
@@ -174,12 +186,15 @@ class Feed(models.Model):
             "link": "/congress/votes",
             "simple": True,
             "single_event_type": True,
-            "sort_order": 103,
+            "sort_order": 101,
+            "category": "federal-votes",
+            "description": "Track every roll call vote in Congress.",
         },
         "bill:": {
             "title": lambda self : truncate_words(self.bill().title, 12),
             "noun": "bill",
             "link": lambda self: self.bill().get_absolute_url(),
+            "category": "federal-bills",
         },
         "p:": {
             "title": lambda self : self.person().name,
@@ -187,12 +202,14 @@ class Feed(models.Model):
             "includes": lambda self : [Feed.PersonVotesFeed(self.person()), Feed.PersonSponsorshipFeed(self.person())],
             "link": lambda self: self.person().get_absolute_url(),
             "scoped_title": lambda self : "All Events for " + self.person().lastname,
+            "category": "federal-other",
         },
         "ps:": {
             "title": lambda self : self.person().name + " - Bills Sponsored",
             "noun": "person",
             "link": lambda self: self.person().get_absolute_url(),
             "scoped_title": lambda self : self.person().lastname + "'s Sponsored Bills",
+            "category": "federal-bills",
         },
         "pv:": {
             "title": lambda self : self.person().name + " - Voting Record",
@@ -200,6 +217,7 @@ class Feed(models.Model):
             "link": lambda self: self.person().get_absolute_url(),
             "scoped_title": lambda self : self.person().lastname + "'s Voting Record",
             "single_event_type": True,
+            "category": "federal-votes",
         },
         "committee:": {
             "title": lambda self : truncate_words(self.committee().fullname, 12),
@@ -208,12 +226,14 @@ class Feed(models.Model):
             "link": lambda self: self.committee().get_absolute_url(),
             "scoped_title": lambda self : "All Events for This Committee",
             "is_valid": lambda self : self.committee(test=True),
+            "category": "federal-committees",
         },
         "committeebills:": {
             "title": lambda self : "Bills in " + truncate_words(self.committee().fullname, 12),
             "noun": "committee",
             "link": lambda self: self.committee().get_absolute_url(),
             "scoped_title": lambda self : "Activity on This Committee's Bills",
+            "category": "federal-committees",
         },
         "committeemeetings:": {
             "title": lambda self : "Meetings for " + truncate_words(self.committee().fullname, 12),
@@ -221,12 +241,14 @@ class Feed(models.Model):
             "link": lambda self: self.committee().get_absolute_url(),
             "scoped_title": lambda self : "This Committee's Hearings and Markups",
             "single_event_type": True,
+            "category": "federal-committees",
         },
         "crs:": {
             "title": lambda self : self.issue().name,
             "noun": "subject area",
             "link": lambda self: self.issue().get_absolute_url(),
             "is_valid": lambda self : self.issue(test=True),
+            "category": "federal-bills",
         }
     }
     
@@ -470,6 +492,15 @@ class Feed(models.Model):
     def single_event_type(self):
         m = self.type_metadata()
         return m.get("single_event_type", False)
+
+    @property
+    def category(self):
+        m = self.type_metadata()
+        return m.get("category", None)
+    @property
+    def description(self):
+        m = self.type_metadata()
+        return m.get("description", None)
 
     def bill(self):
          if not hasattr(self, "_ref"):

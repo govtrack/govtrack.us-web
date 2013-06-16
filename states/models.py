@@ -87,18 +87,21 @@ Feed.register_feed(
 	slug = "states_bills",
 	intro_html = """Use this feed to track all legislative events in all United States state legislatures.""",
 	simple = True,
-	sort_order = 200
+	sort_order = 200,
+	category = "state-bills",
 	)
 for st in us.stateabbrs:
 	Feed.register_feed(
 		"states_%s_bills" % st,
 		title = us.statenames[st] + " Legislation",
 		link = "/states/%s" % st.lower(),
+		category = "state-bills",
 		)
 Feed.register_feed(
 	"states_bill:",
 	title = lambda feed : unicode(StateBill.objects.get(id=feed.feedname.split(":")[1])),
 	link = lambda feed : StateBill.objects.get(id=feed.feedname.split(":")[1]).get_absolute_url(),
+	category = "state-bills",
 	)
 
 class StateBill(models.Model):
