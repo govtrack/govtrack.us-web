@@ -114,6 +114,7 @@ def state_bill_browse(request, state):
 		context = {
 			"state": state.upper(),
 			"statename": us.statenames.get(state.upper(), None),
+			"feed": Feed.objects.get_or_create(feedname="states_allbills" if not state else "states_%s_bills" % state.upper())[0]
 		},
 		)
 
