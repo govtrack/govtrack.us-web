@@ -940,6 +940,7 @@ class Amendment(models.Model):
     class Meta:
         unique_together = [('congress', 'amendment_type', 'number'),
             ('bill', 'sequence')]
+            # bill+sequence is not unique, see the github thread on amendment numbering --- currently this is manually fixed up in the db as a non-unique index
         
     def __unicode__(self):
         return self.title
