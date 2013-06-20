@@ -225,7 +225,6 @@
 											{% endif %}
 										{% endif %}
 										<li><a href="/accounts/docket">Your Docket</a></li>
-										{% comment %}<li><a href="/tools">Other Tools</a></li>{% endcomment %}
 									</ul>
 								</li>
 								<li><a href="/about">About</a></li>
@@ -250,7 +249,6 @@
 									<option value="/accounts/lists">What I&rsquo;m Tracking</option>
 									<option value="/accounts/docket">Your Docket</option>
 									{% endif %}
-									<option value="/tools">Other Tools</option>
 								</optgroup>
 								<option value="/about">About</option>
 								<option value="/developers">Use our data</option>
@@ -313,7 +311,6 @@
 						<li><a href="/overview">Overview</a></li>
 						<li><a href="/about">About GovTrack</a></li>
 						<li><a href="/developers">For Developers</a></li>
-						<li><a href="/tools">Other Tools</a></li>
 						{% if not user.is_authenticated %}
 						<li><a href="/accounts/login">Log in</a></li>
 						{% else %}
