@@ -1,15 +1,21 @@
-<div class="signin_social" style="width: 200px; margin: 0 auto;">
-	{% with request.get_full_path|add:return_hash as singlesignon_next %}
-	{% include "registration/login_singlesignon.html" %}
-	{% endwith %}
+<div class="login_social">
+	<div class="signin_social" style="width: 200px; margin: 0 auto;">
+		{% with request.get_full_path|add:return_hash as singlesignon_next %}
+		{% include "registration/login_singlesignon.html" %}
+		{% endwith %}
+	</div>
 </div>
+<div class="login_buttons" style="text-align: center">
+	<a href="/registration/signup?next={{request.path|add:return_hash|urlencode}}" class="btn done">Sign Up</a>
+	<a href="/accounts/login?next={{request.path|add:return_hash|urlencode}}" class="btn done">Log In</a>
+</div>
+
+<div style="clear: both"> </div>
 
 <!--<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">Or register a new account:</p>-->
 
-<a href="/registration/signup?next={{request.path|add:return_hash|urlencode}}" class="btn done">Sign Up</a>
-
+{% comment %}
 <h3 style="margin-top: 1.5em">Returning User Login</h3>
-
 <div>
 	<form method="post" class="login" action="/accounts/login" style="margin: 0">
 	{% csrf_token %}
@@ -23,4 +29,4 @@
 	<div style="margin-top: 5px"><input class="submit btn done" type="submit" value="Login" /></div>
 	</form>
 </div>
-
+{% endcomment %}

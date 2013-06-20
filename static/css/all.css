@@ -3012,8 +3012,6 @@ aside .download-links { padding: 31px 0 0 	}
     /*behavior: url(/static/js/PIE.htc);*/
 }
     #list_trackers li span {
-        display: inline-block;
-        /*width: 340px;*/
     }
 
     #list_trackers li > a {
@@ -3093,44 +3091,24 @@ aside .download-links { padding: 31px 0 0 	}
 			text-transform: none;
         }
     .tracker_widget {
-        position: absolute;
-        top: 40px;
-        left: -68px;
-        z-index: 5;
-        width: 308px;
-        /*background: #f8f7f7;
-        -moz-border-radius: 1px;
-        -webkit-border-radius: 1px;
-        border-radius: 1px;
-        border: solid #e7e4dc 1px;
-        -webkit-box-shadow:
-            0 0 0 5px #f9f8f4,
-            0 3px 8px 5px rgba(106,106,106,.4);
-        box-shadow:
-            0 0 0 5px #f9f8f4,
-            0 3px 8px 5px rgba(106,106,106,.4);*/
-        padding-top: 18px;
-        background: url(../images/tracker_widget_top.png) center 0 no-repeat;
+        width: 475px;
         font-family: 'CallunaSans';
-        /*behavior: url(/static/js/PIE.htc);*/
+        line-height: 130%;
     }
+	@media (max-width: 550px) and (min-width: 400px) {
+		.tracker_widget { width: 325px; }
+		.tracker_widget .login_social { width: auto !important; margin-bottom: 1em; }
+	}
         .widget_content {
-            position: relative;
-            padding: 10px 20px 20px;
-            background: url(../images/tracker_widget_mid.png) center top repeat-y;
+            padding: 10px 20px 0px 20px;
         }
 
             .tracker_widget h3 {
                 font-size: 1em;
                 color: #40a4bd;
                 text-align: center;
-                margin-bottom: .5em;
+                margin: 1em 0 .5em 0;
                 text-transform: none;
-            }
-            .events_to_track,
-            .list_select {
-                margin-bottom: 20px;
-                border-bottom: solid #dfdbcf 1px;
             }
             .events_to_track { padding-bottom: 1em; }
             #content .list_select ul { margin-bottom: 0; } /* override a default page style */
@@ -3140,9 +3118,8 @@ aside .download-links { padding: 31px 0 0 	}
                 padding: 0 10px;
                 height: 25px;
                 line-height: 28px;
-                margin-bottom: 10px;
+                margin: 2px 0;
                 background: #fff;
-                border: solid #dcd6c3 1px;
                 moz-border-radius: 5px;
                 webkit-border-radius: 5px;
                 border-radius: 5px;
@@ -3220,14 +3197,11 @@ aside .download-links { padding: 31px 0 0 	}
                 .list_select li.all:hover span.icon {
                     background-position: 0 -12px;
                 }
-            .tracker_widget .btn {
+            .tracker_widget .login_buttons .btn {
+				display: inline-block;
                 line-height: 24px !important; /* override default button style */
-                margin: 10px auto 0 !important; /* override default button margins */
+                margin-top: 1em !important;
             }
-        .widget_footer {
-            padding-bottom: 15px;
-            background: url(../images/tracker_widget_btm.png) center bottom no-repeat;
-        }
 
 /* Create a Tracker Wizard styles 
    ============================================================== */
@@ -3718,7 +3692,7 @@ select, input.text {
     background: url(../images/btn-advans-search.png) no-repeat;
     width: 120px;
     height: 24px;
-    display: block;
+    display: inline-block;
     overflow: hidden;
     margin: 24px 0 0;
     padding: 0 0 2px;

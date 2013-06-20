@@ -45,6 +45,7 @@ function activate_list(elem) {
             $('#rss_link').attr('href', '/events/events.rss?list_id=' + data.list_public_id);
 
             $('#items p').toggle(data.list_trackers.length == 0);
+            $('#items p').text('You have not yet tracked anything.'); // hidden if not relevant
 
             for (var i = 0; i < data.list_trackers.length; i++) {
                 add_tracker(data.list_trackers[i].id, data.list_trackers[i].name, data.list_trackers[i].title, data.list_trackers[i].link, false);
@@ -77,7 +78,7 @@ function refresh_events() {
 }
 
 function add_tracker(id, name, title, link, save) {
-    var t = $("<li><span/> <a href='#' onclick='return toggle_tracker(this);' class='active' title='Remove'>Remove <span/></a></li>");
+    var t = $("<li><a href='#' onclick='return toggle_tracker(this);' class='active' title='Remove'>Remove <span/></a> <span/></li>");
     t.find("span").append($("<a>").attr("href", link).text(title));
     t.find("a").attr("feedname", name);
     $('#items p').fadeOut();
@@ -303,7 +304,7 @@ $(function() {
             <h2 class="if_multiple_lists">Tracked <span>in</span> This List</h2>
             <ul id="list_trackers">
             </ul>
-            <p>You have not yet tracked anything.</p>
+            <p></p>
         </div><!-- /items -->
 
         <p class="if_single_list">Tracking a lot? Separate your trackers into <a href="#" onclick="return new_list();">multiple lists</a>.</p>

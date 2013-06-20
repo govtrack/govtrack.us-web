@@ -706,6 +706,60 @@ class SubscriptionList(models.Model):
     
     class Meta:
         unique_together = [('user', 'name')]
+        
+    @staticmethod
+    def create(user, email_rate=None):
+        sublist = None
+        ctr = 1
+        base_name = "My List"
+        if email_rate == 1: base_name = "Daily Updates"
+        if email_rate == 2: base_name = "Weekly Updates"
+        while not sublist and ctr < 1000:
+            try:
+                sublist = SubscriptionList.objects.create(user=user, name=base_name + (" " + str(ctr) if ctr > 1 else ""))
+            except:
+                ctr += 1
+        if email_rate != None:
+            sublist.email = email_rate
+        return sublist
+
+    @staticmethod
+    def get_for_email_rate(user, email_rate):
+        try:
+            sublist = SubscriptionList.objects.get(user=user, is_default=True)
+            if sublist.email == email_rate:
+                return sublist
+                
+            if sublist.trackers.count() == 0:
+                # The default list has a different email rate set, but it's
+                # empty so just revise it.
+                sublist.email = email_rate
+                sublist.save()
+
+                # Also try to rename it, but be careful of the uniqueness
+                # constraint on the name.
+                try:
+                    if sublist.email == 0:
+                        sublist.name = "My List"
+                    elif sublist.email == 1:
+                        sublist.name = "Daily Email Updates"
+                    elif sublist.email == 2:
+                        sublist.name = "Weekly Email Updates"
+                    sublist.save()
+                except:
+                    pass # uniqueness constraint on name violated, doesn't matter
+                return sublist
+            else:
+                # The default list has something in it at a different email rate,
+                # so fall back.
+                raise SubscriptionList.DoesNotExist()                    
+        except SubscriptionList.DoesNotExist:
+            try:
+                # If there is a single list with the desired email rate, use that list.
+                return SubscriptionList.objects.get(user=user, email=email_rate)
+            except SubscriptionList.DoesNotExist:
+                # There is no list with the desired email rate, so create a new list.
+                return SubscriptionList.create(user, email_rate=email_rate)
 
     def get_public_id(self):
         if not self.public_id:

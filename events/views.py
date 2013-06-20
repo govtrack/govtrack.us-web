@@ -51,25 +51,8 @@ def edit_subscription_lists(request):
 
         # Get the list to add the feed into
         if "emailupdates" in request.GET:
-            # Use the default list, unless a different email update rate is chosen.
             email_rate = int(request.GET["emailupdates"])
-            sublist = request.user.userprofile().lists().filter(is_default=True).get()
-            if sublist.trackers.count() > 0 and sublist.email != email_rate:
-                try:
-                    sublist = request.user.userprofile().lists().filter(email=email_rate).get()
-                except SubscriptionList.DoesNotExist:
-                    sublist = SubscriptionList.objects.create(user=request.user, name="My List")
-                
-            if sublist.trackers.count() == 0:
-                # Set list name and email rate.
-                sublist.email = email_rate
-                if sublist.email == 0:
-                    sublist.name = "My List"
-                elif sublist.email == 1:
-                    sublist.name = "Daily Email Updates"
-                elif sublist.email == 2:
-                    sublist.name = "Weekly Email Updates"
-                
+            sublist = SubscriptionList.get_for_email_rate(request.user, email_rate)    
         else:
             sublist = request.user.userprofile().lists().get(id=request.GET["listid"])
 
@@ -94,29 +77,42 @@ def edit_subscription_list(request):
     if not request.user.is_authenticated():
         return { "error": "not logged in" }
         
-    if not "listid" in request.POST:
-        return { "error": "missing parameter" }
+    if "email_freq" in request.POST:
+        # Use the default list, unless a different email update rate is chosen.
+        email_rate = int(request.POST["email_freq"])
+        sublist = SubscriptionList.get_for_email_rate(request.user, email_rate)
+        
+    elif not "listid" in request.POST:
+        if request.POST["command"] != "remove-from-all":
+            return { "error": "missing parameter" }
     elif request.POST["listid"] != "_new_list":
         sublist = get_object_or_404(SubscriptionList, user=request.user, id=request.POST["listid"])
     else:
-        sublist = None
-        ctr = 1
-        while not sublist and ctr < 1000:
-            try:
-                sublist = SubscriptionList.objects.create(user=request.user, name="New List " + str(ctr))
-            except:
-                ctr += 1
+        sublist = SubscriptionList.create(request.user)
     
     state = None
     
     if request.POST["command"] in ("toggle", "add", "remove"):
         f = get_object_or_404(Feed, feedname=request.POST["feed"])
+        
+        if "email_freq" in request.POST:
+            # Delete the tracker from all other lists.
+            for s in SubscriptionList.objects.filter(user=request.user):
+                s.trackers.remove(f)
+                if not s.is_default and s.trackers.count() == 0: s.delete()
+        
         if (request.POST["command"] == "toggle" and f in sublist.trackers.all()) or request.POST["command"] == "remove":
             sublist.trackers.remove(f)
             state = False
         else:
             sublist.trackers.add(f)
             state = True
+    if request.POST["command"] == "remove-from-all":
+        f = get_object_or_404(Feed, feedname=request.POST["feed"])
+        for s in SubscriptionList.objects.filter(user=request.user):
+            s.trackers.remove(f)
+            if not s.is_default and s.trackers.count() == 0: s.delete()
+        return { "status": "OK" }
     if request.POST["command"] == "rename":
         sublist.name = request.POST["name"]
         sublist.save()
@@ -302,7 +298,7 @@ def events_embed_legacy(request):
     try:
         feedlist, feedtitle = get_feed_list(request)
     except ObjectDoesNotExist:
-    	raise Http404()
+        raise Http404()
     try:
         count = int(request.GET.get('count', ''))
     except ValueError:

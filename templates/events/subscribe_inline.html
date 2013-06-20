@@ -1,8 +1,5 @@
 {% load govtrack_utils %}
 
-{% if not 'googlebot(at)googlebot.com' in request.META.HTTP_FROM %}
-	{% comment %}Google likes to follow the social registration links which generates an error at Twitter that gets sent in an email to the site maintainer.{% endcomment %}
-
 <style>
 #new_list_row p {
 	margin: 3px 0 3px 0;
@@ -15,73 +12,118 @@ var feed_list_state = {{% for f in feed.includes_feeds_and_self %}
 		{% for list in request.user.userprofile.lists %}{{list.id}}: {% if f in list.trackers.all %}true{% else %}false{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}
 	}{% if not forloop.last %}, {% endif %}{% endfor %}
 };
-
+var has_tracker = false;
 function show_track_panel() {
-	if (!$('#track_panel').is(":visible")) {
-		var btn = $('.track-btn');
-		$('#track_panel').css({
-			left: btn.position().left + btn.offsetParent().width()/2 - $('#track_panel').width()/2,
-			top: btn.position().top + btn.height()
-		});
-		$('#track_panel').slideDown();
-	} else {
-		$('#track_panel').slideUp();
-	}
+	// show before colorbox appears so it computes full height to avoid scrolling inside the colorbox
+	$('#track_panel .events_to_track').show();
+	
+	// in the simple mode, update the control state now
+	$('#track_panel .done.add').text(!has_tracker ? 'Add Tracker' : 'Update');
+	$('#track_panel .if_has_tracker').toggle(has_tracker);
+	
+	$.colorbox({href: "#track_panel", inline: true, open: true});
+	
+	// hide after colorbox computes full height to avoid scrolling inside the colorbox
+	$('#track_panel .events_to_track').hide();
+	
 	return false;
-}
-{% if request.user.is_authenticated %}
-function toggle_list_item(node) {
-	var listid = $(node.parentNode).attr("list_id");
-	$.ajax({
-		url: "/events/_edit",
-		type: "POST",
-		data: {
-			listid: listid,
-			command: "toggle",
-			feed: feed_cur_feed
-		},
-		dataType: "json",
-		success: function(data) {
-			feed_list_state[feed_cur_feed][listid] = data.state;
-			$(node.parentNode).toggleClass('selected', data.state);
-		}
-	});
-	return false; // cancel click
 }
 
-function new_list(node) {
-	$.ajax({
-		url: "/events/_edit",
-		type: "POST",
-		data: {
-			listid: "_new_list",
-			command: "add",
-			feed: feed_cur_feed
-		},
-		dataType: "json",
-		success: function(data) {
-			var item = $('#base_list_row').clone();
-			item.attr("list_id", data.list_id);
-			item.addClass("selected");
-			item.find(".name").text(data.list_name);
-			item.insertBefore($('#new_list_row'));
-			item.fadeIn();
-		}
-	});
-	return false;
-}
-function selected_feed_changed(new_feed) {
-	$("#track_panel_selected_feed li").removeClass('selected');
-	$(new_feed.parentNode).addClass("selected");
-	
-	feed_cur_feed = $(new_feed).attr('feed');
-	$('.list_select li').each(function() {
-		if ($(this).hasClass("new") || $(this).hasClass("all")) return; // skip these buttons
-		$(this).toggleClass('selected', feed_list_state[feed_cur_feed][$(this).attr('list_id')]);
-	});
-	
-	return false; // cancel click
-}
+{% if request.user.is_authenticated %}
+{% if request.user.userprofile.lists.count <= 1 %}
+	{% if feed in request.user.userprofile.lists.0.trackers.all %}
+		has_tracker = true;
+	{% endif %}
+	function save_tracker() {
+		var emailfreq = $("#track_panel .list_select li.selected").attr("email_freq");
+		$.ajax({
+			url: "/events/_edit",
+			type: "POST",
+			data: {
+				email_freq: emailfreq,
+				command: "add",
+				feed: feed_cur_feed
+			},
+			dataType: "json",
+			success: function(data) {
+				$.colorbox.close();
+			}
+		});
+		return false; // cancel click
+	}
+	function remove_tracker() {
+		$.ajax({
+			url: "/events/_edit",
+			type: "POST",
+			data: {
+				command: "remove-from-all",
+				feed: feed_cur_feed
+			},
+			dataType: "json",
+			success: function(data) {
+				$.colorbox.close();
+			}
+		});
+		return false; // cancel click
+	}
+	function toggle_list_item(node) {
+		$(node.parentNode.parentNode).find(">li").removeClass('selected');
+		$(node.parentNode).addClass('selected');
+		return false; // cancel click
+	}
+{% else %}
+	function toggle_list_item(node) {
+		var listid = $(node.parentNode).attr("list_id");
+		$.ajax({
+			url: "/events/_edit",
+			type: "POST",
+			data: {
+				listid: listid,
+				command: "toggle",
+				feed: feed_cur_feed
+			},
+			dataType: "json",
+			success: function(data) {
+				feed_list_state[feed_cur_feed][listid] = data.state;
+				$(node.parentNode).toggleClass('selected', data.state);
+			}
+		});
+		return false; // cancel click
+	}
+	function new_list(node) {
+		$.ajax({
+			url: "/events/_edit",
+			type: "POST",
+			data: {
+				listid: "_new_list",
+				command: "add",
+				feed: feed_cur_feed
+			},
+			dataType: "json",
+			success: function(data) {
+				var item = $('#base_list_row').clone();
+				item.attr("list_id", data.list_id);
+				item.addClass("selected");
+				item.find(".name").text(data.list_name);
+				item.insertBefore($('#new_list_row'));
+				item.fadeIn();
+			}
+		});
+		return false;
+	}
+	function selected_feed_changed(new_feed) {
+		$("#track_panel_selected_feed li").removeClass('selected');
+		$(new_feed.parentNode).addClass("selected");
+		
+		feed_cur_feed = $(new_feed).attr('feed');
+		$('.list_select li').each(function() {
+			if ($(this).hasClass("new") || $(this).hasClass("all")) return; // skip these buttons
+			$(this).toggleClass('selected', feed_list_state[feed_cur_feed][$(this).attr('list_id')]);
+		});
+		
+		return false; // cancel click
+	}
+{% endif %}
 {% endif %}
 $(function() {
 	if (window.location.hash == "#track") {
@@ -91,18 +133,28 @@ $(function() {
 });
 </script>
 
-<div id="track_panel" style="display: none;" class="tracker_widget">
+<div style="display: none;" >
+<div id="track_panel" class="tracker_widget">
 	<div class="widget_content">
-	{% if not request.user.is_authenticated %}
-		<h3>Sign Up for Tracking</h3>
+
+	<h3>When you track this {{feed.type_metadata.noun}}...</h3>
+	<p>
+		{{feed.description}}
+		{% if request.user.is_authenticated and feed.includes_feeds|length != 0 %}
+			<a href="#" onclick="$('#track_panel .events_to_track').fadeIn(); $(this).remove(); return false;">More options...</a>
+		{% endif %}
+	</p>
 	
-		<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have one of these accounts, start tracking this {{feed.type_metadata.noun}} by clicking an icon to register or log in:</p>
+	{% if not request.user.is_authenticated %}
+		<p style="margin-top: 1em">Sign up for this {{feed.type_metadata.noun}}&rsquo;s email updates below, or use this <a href="{{feed.rss_url}}">RSS feed</a>.</p>
+		
+		<h3>Sign up for email updates...</h3>
+	
+		<p style="margin-bottom: 1em">If you want to use your Facebook, Google, or Twitter account to log in here, just click the appropriate button:</p>
 		
 		{% with "#track" as return_hash %}
 		{% include "events/track_button_login.html" %}
 		{% endwith %}
-
-		{% comment %}<p>You can also track this {{feed.type_metadata.noun}} using the <a href="{{feed.rss_url}}">RSS feed</a> without having to sign up.</p>{% endcomment %}
 	{% else %}
 	
 		{% if feed.includes_feeds|length != 0 %}
@@ -116,27 +168,51 @@ $(function() {
 			</div>
 		{% endif %}
 
-		<div class="list_select">
-			<h3>To which lists would you like to add this?</h3>
-			<ul>
-				{% for list in request.user.userprofile.lists %}
-				<li list_id="{{list.id}}"
-					{% if forloop.first %}id="base_list_row"{% endif %}
-					{% if feed in list.trackers.all %}class="selected"{% endif %} ><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">{{list.name}}</span></a></li>
-				{% endfor %}
+		{% if request.user.userprofile.lists.count <= 1 %}
+			{% with request.user.userprofile.lists.0 as the_list %}
+			<div class="list_select">
+				<h3>Tracker options</h3>
 				
-				<li id="new_list_row" class="new"><a href="#" onclick="return new_list();"><span class="icon"></span> Add a new list</a></li>
-				<li class="all"><a href="/accounts/lists"><span class="icon"></span> Edit your lists</a></li>
-				
-				<div style="clear: both"> </div>
-			</ul>
-		</div>
+				<p class="if_has_tracker" style="margin-bottom: 1em; display: none;">You are tracking this {{feed.type_metadata.noun}}.</p>
+
+				<p>How often would you like email updates?</p>
+
+				<ul>
+					<li email_freq="0" {% if feed in the_list.trackers.all and the_list.email == 0 %}class="selected"{% endif %}><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">No Email Updates</span></a></li>
+					<li email_freq="1" {% if feed in the_list.trackers.all and the_list.email == 1 %}class="selected"{% elif feed in the_list.trackers.all %}{% else %}class="selected"{% endif %}><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">Daily Updates</span></a></li>
+					<li email_freq="2" {% if feed in the_list.trackers.all and the_list.email == 2 %}class="selected"{% endif %}><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">Weekly Updates</span></a></li>
+					<div style="clear: both"> </div>
+				</ul>
+
+				<a href="#" class="btn done add" onclick="has_tracker = true; return save_tracker()" style="margin-bottom: 1em">Add Tracker</a>
+				<a href="#" class="btn done if_has_tracker" onclick="has_tracker = false; return remove_tracker()" style="margin-bottom: 1em; display: none;">Remove</a>
+			</div>
+			{% endwith %}
+		{% else %}
+			<div class="list_select">
+				<h3>To which lists would you like to add this?</h3>
+				<ul>
+					{% for list in request.user.userprofile.lists %}
+					<li list_id="{{list.id}}"
+						{% if forloop.first %}id="base_list_row"{% endif %}
+						{% if feed in list.trackers.all %}class="selected"{% endif %} ><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">{{list.name}}</span></a></li>
+					{% endfor %}
+					
+					<li id="new_list_row" class="new"><a href="#" onclick="return new_list();"><span class="icon"></span> Add a new list</a></li>
+					<li class="all"><a href="/accounts/lists"><span class="icon"></span> Edit your lists</a></li>
+					
+					<div style="clear: both"> </div>
+				</ul>
+			</div>
+			
+			<a href="#" class="btn done" onclick="return $.colorbox.close(); return false;">I'm done</a>
+		{% endif %}
 		
-		<a href="#" class="btn done" onclick="show_track_panel()">I'm done</a>
+		<hr/>
+
+		<p style="margin-top: 1em">You can also track this {{feed.type_metadata.noun}} using this <a href="{{feed.rss_url}}">RSS feed</a>.</p>
 	{% endif %}
 	</div><!-- /widget_content -->
 	<div class="widget_footer"></div>
 </div>
-
-{% endif %}
-
+</div>
