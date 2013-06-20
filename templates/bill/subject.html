@@ -17,6 +17,10 @@
 		<h1>{{term.name}}</h1>
 		
 		<p>Use this page to browse bills in the U.S. Congress related to the subject {{term.name}}.</p>
+
+		<p><small>Classification into subject areas is retreived from the Library of Congress.</small></p>
+		
+		{% comment %}
 		{% with term.subterms.all as subs %}
 		{% if subs|length > 0 %}
 			<p style="margin: 0">Or drill down to:</p>
@@ -35,6 +39,8 @@
 				<a href="{{parent.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{parent.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
 		{% endif %}
 		{% endwith %}
+		
+		{% endcomment %}
 	</div>
 
 	<div class="aside four columns">
@@ -49,7 +55,6 @@
 
 {% include "smartsearch/search_panel.html" %}
 
-<p><small>Bill subjects are set by the Library of Congress.</small></p>
 {% endblock %}
 
 {% block body_scripts %}
