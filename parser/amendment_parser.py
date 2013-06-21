@@ -59,7 +59,7 @@ class AmendmentProcessor(XmlProcessor):
             text = unicode(elem.text) if elem.text else ""
             if text.strip() != "":
                 # Clean titles.
-                text = re.sub(r"^(?:An )?(?:substitute )?amendment (?:in the nature of a substitute )?numbered (\d+) printed in (part .* of )?(House Report \d+-\d+|the Congressional Record) to ", "To ", text, re.I)
+                text = re.sub(r"(?i)^(?:An )?(?:substitute )?amendment (?:in the nature of a substitute )?(numbered|No\.) (\d+) printed in (part .* of )?(House Report \d+-\d+|the Congressional Record) to ", "To ", text)
                 obj.title += ": " + text
                 break
 
