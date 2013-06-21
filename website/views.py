@@ -485,17 +485,17 @@ def go_ad_free_redirect(request):
       "transactions": [{
         "item_list": {
           "items": [{
-            "name": "Ad-Free GovTrack.us for Life",
-            "sku": "govtrack-ad-free-for-life" + sandbox,
-            "price": "5.00",
+            "name": "Ad-Free GovTrack.us for 1 Year",
+            "sku": "govtrack-ad-free-for-year" + sandbox,
+            "price": "2.00",
             "currency": "USD",
             "quantity": 1 }]
             },
           "amount": {
-            "total": "5.00",
+            "total": "2.00",
             "currency": "USD"
           },
-          "description": "Ad-Free%s: GovTrack.us is ad-free while you're logged in." % sandbox }],
+          "description": "Ad-Free%s: GovTrack.us is ad-free for a year while you're logged in." % sandbox }],
       "redirect_urls": {
         "return_url": request.build_absolute_uri(reverse(go_ad_free_finish)),
         "cancel_url": request.build_absolute_uri(reverse(go_ad_free_start)),
@@ -512,7 +512,7 @@ def go_ad_free_redirect(request):
         paypal_id = payment.id,
         user = request.user,
         response_data = payment.to_dict(),
-        notes = "ad-free $5")
+        notes = "ad-free-year $2")
     rec.save()
   
     for link in payment.links:
@@ -529,12 +529,12 @@ def go_ad_free_finish(request):
     prof = request.user.get_profile()
 
     from website.models import PayPalPayment
-    (payment, rec) = PayPalPayment.execute(request, "ad-free $5")
+    (payment, rec) = PayPalPayment.execute(request, "ad-free-year $2")
     
     try:
         # Update the user profile.
         if prof.paid_features == None: prof.paid_features = { }
-        prof.paid_features["ad_free_life"] = (payment.id, None)
+        prof.paid_features["ad_free_year"] = (payment.id, None)
         prof.save()
       
         # Send user back to the start.

@@ -26,22 +26,28 @@ class UserProfile(models.Model):
 
     def get_ad_free_message(self):
         if not self.paid_features: return False
-        if not "ad_free_life" in self.paid_features: return False
-        
-        ad_free_pmt = self.paid_features['ad_free_life']
-        if not ad_free_pmt: return False
-        pmt = PayPalPayment.objects.get(paypal_id = ad_free_pmt[0])
-        
+
         from datetime import datetime, timedelta
         
-        #from django.conf import settings
-        #if settings.DEBUG:
-        #	return repr(pmt.response_data)
-        
-        if pmt.created > (datetime.now() - timedelta(days=0.5)):
-            return "Thanks for your subscription to an ad-free GovTrack!"
+        if self.paid_features.get("ad_free_year"):
+            ad_free_pmt = self.paid_features['ad_free_year']
+            pmt = PayPalPayment.objects.get(paypal_id = ad_free_pmt[0])
+            if pmt.created > (datetime.now() - timedelta(days=0.5)):
+                return "Thanks for your one-year subscription to an ad-free GovTrack!"
+            else:
+                return "You went ad-free on %s. Your subscription expires on %s. Thanks!" % (
+                	pmt.created.strftime("%x"),
+                	pmt.created.replace(year=pmt.created.year+1).strftime("%x") )
+        elif self.paid_features.get("ad_free_life"):
+            ad_free_pmt = self.paid_features['ad_free_life']
+            pmt = PayPalPayment.objects.get(paypal_id = ad_free_pmt[0])
+            if pmt.created > (datetime.now() - timedelta(days=0.5)):
+                return "Thanks for your subscription to an ad-free GovTrack for life!"
+            else:
+                return "You went ad-free for life on %s. Thanks!" % pmt.created.strftime("%x")
         else:
-            return "You went ad-free on %s. Thanks!" % pmt.created.strftime("%x")
+            return False
+            
 
 
 def get_user_profile(user):
