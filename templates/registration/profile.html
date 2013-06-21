@@ -69,14 +69,17 @@ h4 { margin-top: 1.5em; }
 	
 		<div>
 			<label for="email">New Email Address</label>
-			<input type="text" size="20" id="email" name="email" value="{{user.email}}"/>
+			<input type="text" size="20" id="email" name="email" value="{{user.email}}"  style="margin-bottom: 0"/>
 		</div>
+		<p style="margin: 0"><small>Leave blank to keep unchanged.</small></p>
 		{% if errors.email %}<p class="error">{{errors.email}}</p>{% endif %}
 		
-		<div>
+		<div style="margin-top: 1em">
 			<label for="password">New Password</label>
-			<input type="password" size="20" id="password" name="password" value=""/>
+			<input type="password" size="20" id="password" name="password" value="" style="margin-bottom: 0"/>
 		</div>
+		<p style="margin: 0"><small>Leave blank to keep unchanged.</small></p>
+		{% if errors.password %}<p class="error">{{errors.password}}</p>{% endif %}
 		{% if not user.has_usable_password %}
 			{% if sso|length == 0 %}
 				<p style="margin-top: 1em">Your account is missing a password. You should set one so you can log back in later!</p>
@@ -89,7 +92,9 @@ h4 { margin-top: 1.5em; }
 			{% endif %}
 		{% endif %}
 		
-		<input type="submit" class="submit" value="Next &gt;"/>
+		{% if success %}<p class="error" style="margin-top: 1em">{{success}}</p>{% endif %}
+		
+		<input type="submit" class="submit" value="Next &gt;" style="margin-top: 1em"/>
 	</form>
 			
 	<hr style="margin: 2em 0 2em 0"/>
