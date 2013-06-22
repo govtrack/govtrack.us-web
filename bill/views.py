@@ -402,42 +402,49 @@ def subject_choices(include_legacy=True):
         subject_choices_data = sorted(subject_choices_data.items(), key = lambda x : x[0].name)
     return subject_choices_data
 
+# used by bill_docket and bill_statistics
+bill_status_groups = [
+    ("Enacted Laws",
+        "enacted bills and joint resolutions", " so far in this session of Congress", " (both bills and joint resolutions can be enacted as law)",
+        BillStatus.final_status_passed_bill), # 2
+    ("Passed Resolutions",
+        "passed resolutions", " so far in this session of Congress (for joint and concurrent resolutions, passed both chambers)", " (for joint and concurrent resolutions, this means passed both chambers)",
+        BillStatus.final_status_passed_resolution), # 3
+    ("At the President",
+        "bills", " that are awaiting the president's signature", " that passed the House and Senate but were not signed by the President",
+        (BillStatus.passed_bill,)), # 1
+    ("Active Legislation",
+        "bills and joint/concurrent resolutions", " that had a significant vote in one chamber and are likely to get a vote in the other chamber", " that had a significant vote in one chamber",
+        (BillStatus.pass_over_house, BillStatus.pass_over_senate, BillStatus.pass_back_senate, BillStatus.pass_back_house)), # 4
+    ("Other Legislation",
+        "bills and resolutions", " that have been introduced, referred to committee, or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
+        (BillStatus.introduced, BillStatus.referred, BillStatus.reported)), # 3
+    ("Failed Legislation",
+        "bills and resolutions", " that failed a vote on passage and are now dead or failed a significant vote such as cloture, passage under suspension, or resolving differences", " that failed a vote on passage or failed a significant vote such as cloture, passage under suspension, or resolving differences", 
+        (BillStatus.fail_originating_house, BillStatus.fail_originating_senate, BillStatus.fail_second_house, BillStatus.fail_second_senate, BillStatus.prov_kill_suspensionfailed, BillStatus.prov_kill_cloturefailed, BillStatus.prov_kill_pingpongfail)), # 7
+    ("Vetoed Bills (w/o Override)",
+        "bills", " that were vetoed and the veto was not overridden by Congress", " that were vetoed and the veto was not overridden by Congress",
+        (BillStatus.prov_kill_veto, BillStatus.override_pass_over_house, BillStatus.override_pass_over_senate, BillStatus.vetoed_pocket, BillStatus.vetoed_override_fail_originating_house, BillStatus.vetoed_override_fail_originating_senate, BillStatus.vetoed_override_fail_second_house, BillStatus.vetoed_override_fail_second_senate)), # 8
+]
+
+def load_bill_status_qs(statuses, congress=CURRENT_CONGRESS):
+    return Bill.objects.filter(congress=congress, current_status__in=statuses)
+
 @anonymous_view
 @render_to('bill/bill_docket.html')
 def bill_docket(request):
     def build_info():
         feeds = [f for f in Feed.get_simple_feeds() if f.category == "federal-bills"]
         
-        groups0 = [
-            ("Enacted Laws", "enacted bills and joint resolutions", " so far in this session of Congress",
-                BillStatus.final_status_passed_bill), # 2
-            ("Passed Resolutions", "passed resolutions", " so far in this session of Congress (for joint and concurrent resolutions, passed both chambers)",
-                BillStatus.final_status_passed_resolution), # 3
-            ("At the President", "bills", " that are awaiting the president's signature",
-                (BillStatus.passed_bill,)), # 1
-            ("Active Legislation", "bills and joint/concurrent resolutions", " that had a significant vote in one chamber and are likely to get a vote in the other chamber",
-                (BillStatus.pass_over_house, BillStatus.pass_over_senate, BillStatus.pass_back_senate, BillStatus.pass_back_house)), # 4
-            ("Inactive Legislation", "bills and resolutions", " that have been introduced, referred to committee, or reported by committee and await further action",
-                (BillStatus.introduced, BillStatus.referred, BillStatus.reported)), # 3
-            ("Failed Legislation", "bills and resolutions", " that failed a vote on passage and are now dead or failed a significant vote such as cloture, passage under suspension, or resolving differences", 
-                (BillStatus.fail_originating_house, BillStatus.fail_originating_senate, BillStatus.fail_second_house, BillStatus.fail_second_senate, BillStatus.prov_kill_suspensionfailed, BillStatus.prov_kill_cloturefailed, BillStatus.prov_kill_pingpongfail)), # 7
-            ("Vetoed Bills", "bills", " that were vetoed and the veto was not overridden by Congress",
-                (BillStatus.prov_kill_veto, BillStatus.override_pass_over_house, BillStatus.override_pass_over_senate, BillStatus.vetoed_pocket, BillStatus.vetoed_override_fail_originating_house, BillStatus.vetoed_override_fail_originating_senate, BillStatus.vetoed_override_fail_second_house, BillStatus.vetoed_override_fail_second_senate)), # 8
-
-        ]
-        
-        def loadgroupqs(statuses, congress=CURRENT_CONGRESS):
-            return Bill.objects.filter(congress=congress, current_status__in=statuses)
-        
         groups = [
             (   g[0], # title
                 g[1], # text 1
                 g[2], # text 2
-                "/congress/bills/browse?status=" + ",".join(str(s) for s in g[3]), # link
-               loadgroupqs(g[3]).count(), # count in category
-               loadgroupqs(g[3]).order_by('-current_status_date')[0:6], # top 6 in this category
+                "/congress/bills/browse?status=" + ",".join(str(s) for s in g[4]), # link
+               load_bill_status_qs(g[4]).count(), # count in category
+               load_bill_status_qs(g[4]).order_by('-current_status_date')[0:6], # top 6 in this category
                 )
-            for g in groups0 ]
+            for g in bill_status_groups ]
             
         dhg_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, docs_house_gov_postdate__gt=datetime.datetime.now() - datetime.timedelta(days=10)).filter(docs_house_gov_postdate__gt=F('current_status_date'))
         sfs_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, senate_floor_schedule_postdate__gt=datetime.datetime.now() - datetime.timedelta(days=5)).filter(senate_floor_schedule_postdate__gt=F('current_status_date'))
@@ -449,44 +456,6 @@ def bill_docket(request):
         current_congress_years = '%d-%d' % (start.year, end.year)
         current_congress = ordinal(CURRENT_CONGRESS)
         
-        # Get the count of bills by status and by Congress.
-        counts_by_congress = []
-        for c in xrange(96, CURRENT_CONGRESS+1):
-            total = Bill.objects.filter(congress=c).count()
-            if total == 0: continue # during transitions between Congresses
-            counts_by_congress.append({
-                "congress": c,
-                "dates": get_congress_dates(c),
-                "counts": [ ],
-                "total": total,
-            })
-            for g in groups0:
-                t = loadgroupqs(g[3], congress=c).count()
-                counts_by_congress[-1]["counts"].append(
-                    { "count": t,
-                      "percent": "%0.0f" % float(100.0*t/total),
-                      "link": "/congress/bills/browse?congress=%s&status=%s" % (c, ",".join(str(s) for s in g[3])),
-                      } )
-        counts_by_congress.reverse()
-        
-        # When does activity occur within the session cycle?
-        if settings.DATABASES['default']['ENGINE'] != 'django.db.backends.sqlite3':
-            from django.db import connection
-            cursor = connection.cursor()
-            def pull_time_stat(field, where, historical=True):
-                cursor.execute("SELECT YEAR(%s) - congress*2 - 1787, MONTH(%s), COUNT(*) FROM bill_bill WHERE congress>=96 AND congress%s%d AND %s GROUP BY YEAR(%s) - congress*2, MONTH(%s)" % (field, field, "<" if historical else "=", CURRENT_CONGRESS, where, field, field))
-                activity = [{ "x": r[0]*12 + (r[1]-1), "count": r[2], "year": r[0] } for r in cursor.fetchall()]
-                total = sum(m["count"] for m in activity)
-                for i, m in enumerate(activity): m["cumulative_count"] = m["count"]/float(total) + (0.0 if i==0 else activity[i-1]["cumulative_count"])
-                for m in activity: m["count"] = round(m["count"] / (CURRENT_CONGRESS-96), 1)
-                for m in activity: m["cumulative_count"] = round(m["cumulative_count"] * 100.0)
-                return activity
-            activity_introduced_by_month = pull_time_stat('introduced_date', "1")
-            activity_enacted_by_month = pull_time_stat('current_status_date', "current_status IN (%d,%d)" % (int(BillStatus.enacted_signed), int(BillStatus.enacted_veto_override)))
-        else:
-            activity_introduced_by_month = []
-            activity_enacted_by_month = []
-    
         return {
             "feeds": feeds,
             
@@ -497,12 +466,6 @@ def bill_docket(request):
             "coming_up": coming_up,
             "subjects": subject_choices(),
             "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.referred, BillStatus.reported),
-            
-            "groups2": groups0,
-            "counts_by_congress": counts_by_congress,
-            
-            "activity": (("Bills and Resolutions Introduced", activity_introduced_by_month),
-             ("Bills and Joint Resolutions Enacted", activity_enacted_by_month) )
         }
         
     ret = cache.get("bill_docket_info")    
@@ -511,6 +474,54 @@ def bill_docket(request):
         cache.set("bill_docket_info", ret, 60*60)
     
     return ret
+
+@anonymous_view
+@render_to('bill/bill_statistics.html')
+def bill_statistics(request):
+    # Get the count of bills by status and by Congress.
+    counts_by_congress = []
+    for c in xrange(93, CURRENT_CONGRESS+1):
+        total = Bill.objects.filter(congress=c).count()
+        if total == 0: continue # during transitions between Congresses
+        counts_by_congress.append({
+            "congress": c,
+            "dates": get_congress_dates(c),
+            "counts": [ ],
+            "total": total,
+        })
+        for g in bill_status_groups:
+            t = load_bill_status_qs(g[4], congress=c).count()
+            counts_by_congress[-1]["counts"].append(
+                { "count": t,
+                  "percent": "%0.0f" % float(100.0*t/total),
+                  "link": "/congress/bills/browse?congress=%s&status=%s" % (c, ",".join(str(s) for s in g[4])),
+                  } )
+    counts_by_congress.reverse()
+    
+    # When does activity occur within the session cycle?
+    if settings.DATABASES['default']['ENGINE'] != 'django.db.backends.sqlite3':
+        from django.db import connection
+        cursor = connection.cursor()
+        def pull_time_stat(field, where, historical=True):
+            cursor.execute("SELECT YEAR(%s) - congress*2 - 1787, MONTH(%s), COUNT(*) FROM bill_bill WHERE congress>=93 AND congress%s%d AND %s GROUP BY YEAR(%s) - congress*2, MONTH(%s)" % (field, field, "<" if historical else "=", CURRENT_CONGRESS, where, field, field))
+            activity = [{ "x": r[0]*12 + (r[1]-1), "count": r[2], "year": r[0] } for r in cursor.fetchall()]
+            total = sum(m["count"] for m in activity)
+            for i, m in enumerate(activity): m["cumulative_count"] = m["count"]/float(total) + (0.0 if i==0 else activity[i-1]["cumulative_count"])
+            for m in activity: m["count"] = round(m["count"] / (CURRENT_CONGRESS-96), 1)
+            for m in activity: m["cumulative_count"] = round(m["cumulative_count"] * 100.0)
+            return activity
+        activity_introduced_by_month = pull_time_stat('introduced_date', "1")
+        activity_enacted_by_month = pull_time_stat('current_status_date', "current_status IN (%d,%d)" % (int(BillStatus.enacted_signed), int(BillStatus.enacted_veto_override)))
+    else:
+        activity_introduced_by_month = []
+        activity_enacted_by_month = []
+
+    return {
+        "groups2": bill_status_groups,
+        "counts_by_congress": counts_by_congress,
+        "activity": (("Bills and Resolutions Introduced", activity_introduced_by_month),
+         ("Bills and Joint Resolutions Enacted", activity_enacted_by_month) )
+    }
 
 @anonymous_view
 def subject(request, sluggedname, termid):
