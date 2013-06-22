@@ -788,7 +788,7 @@ def get_formatted_bill_summary(bill):
                 <xsl:if test="not(@name='')"> - </xsl:if>
                 <xsl:value-of select="@name"/>
             </div>
-            <div style="margin-left: 2em">
+            <div style="margin-left: 2em" xml:space="preserve">  <!-- 'preserve' prevents a self-closing tag which breaks HTML parse -->
                 <xsl:apply-templates/>
             </div>
             </xsl:otherwise>
