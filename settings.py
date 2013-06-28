@@ -59,7 +59,6 @@ LOGIN_REDIRECT_URL = "/accounts/profile"
 SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
 
-AUTH_PROFILE_MODULE = 'website.UserProfile'
 SESSION_COOKIE_AGE = 6*604800 # seconds in six weeks
 
 EMAIL_HOST = 'localhost'

@@ -450,7 +450,7 @@ def go_ad_free_redirect(request):
     if request.user.is_anonymous():
         return HttpResponseRedirect(reverse(go_ad_free_start))
         
-    if request.user.get_profile().get_ad_free_message():
+    if request.user.userprofile().get_ad_free_message():
         raise ValueError("User already has this feature.")
     
     import paypalrestsdk
@@ -506,7 +506,7 @@ def go_ad_free_finish(request):
         raise ValueError("User got logged out!")
 
     # Do as much before we destroy state.
-    prof = request.user.get_profile()
+    prof = request.user.userprofile()
 
     from website.models import PayPalPayment
     (payment, rec) = PayPalPayment.execute(request, "ad-free-year $2")

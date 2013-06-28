@@ -53,8 +53,8 @@ h4 { margin-top: 1.5em; }
 	
 	<h2 style="margin-top: 1.5em">Other Account Issues</h2>
 	
-	{% if user.get_profile.paid_features.ad_free_life or user.get_profile.paid_features.ad_free_year %}
-		<p>{{user.get_profile.get_ad_free_message}} More about <a href="/accounts/go_ad_free">going ad-free</a>.</p>
+	{% if user.userprofile.paid_features.ad_free_life or user.userprofile.paid_features.ad_free_year %}
+		<p>{{user.userprofile.get_ad_free_message}} More about <a href="/accounts/go_ad_free">going ad-free</a>.</p>
 	{% endif %}
 	
 	<p style="margin-top: 1em">For other account issues, please email us at <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>.</p>

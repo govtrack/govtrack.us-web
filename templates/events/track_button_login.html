@@ -24,7 +24,7 @@
 	<label for="id_email" style="width: auto; line-height: 110%;">Email Address:</label>
 	<input id="id_email" type="text" name="email" maxlength="60" placeholder="you@yourcompany.com" style="margin: 0"/><br />
 	
-	<label for="id_password" style="width: auto; line-height: 110%;">Password: (<a class="forgot" href="{% url registration.views.resetpassword %}">Forgot password?</a>)</label>
+	<label for="id_password" style="width: auto; line-height: 110%;">Password: (<a class="forgot" href="{% url "registration.views.resetpassword" %}">Forgot password?</a>)</label>
 	<input type="password" name="password" id="id_password" /> 
 	<div style="margin-top: 5px"><input class="submit btn done" type="submit" value="Login" /></div>
 	</form>

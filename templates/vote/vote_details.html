@@ -88,7 +88,7 @@ $(function() {
 
 {% block crumbs %}
 <ul>
-    <li><a href="{% url congress_home %}">Congress</a></li>
+    <li><a href="{% url "congress_home" %}">Congress</a></li>
     <li><a href="/congress/votes">Votes</a></li>
     <li>{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}</li>
 </ul>

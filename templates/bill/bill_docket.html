@@ -38,7 +38,7 @@ $(function() {
 
 {% block crumbs %}
 <ul>
-<li><a href="{% url congress_home %}">Congress</a></li>
+<li><a href="{% url "congress_home" %}">Congress</a></li>
 <li>Bills</li>
 </ul>
 {% endblock %}
@@ -76,7 +76,7 @@ $(function() {
 		</ul>
 		
 		<h2>Other Information</h2>
-		<p>We&rsquo;ve also <a href="{% url bill_stats %}">compiled historical statistics</a> about how many bills
+		<p>We&rsquo;ve also <a href="{% url "bill_stats" %}">compiled historical statistics</a> about how many bills
 		are enacted and when during the legislative session activity tends to occur.</p>
 	</div>
 
