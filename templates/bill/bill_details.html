@@ -585,12 +585,12 @@
 								<p><b>
 								{{p.prediction_1|floatformat:0}}%</b> chance of getting past committee.<br/>
 								<b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-								<p class="small">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{bill.bill_type_name_short}}s made it past committee
+								<p class="small">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{p.bill_type_descr}} made it past committee
 								and {% if 40 > p.success_rate %}only {% endif %} {{p.success_rate|floatformat:0}}% were {{p.success_name_2}}
 								in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}}.
 							{% else %}
 								<p><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-								<p class="small">{% if 40 > p.success_rate_2 %}Only {% endif %}{{p.success_rate_2|floatformat:0}}% of {{bill.bill_type_name_short}}s that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
+								<p class="small">{% if 40 > p.success_rate_2 %}Only {% endif %}{{p.success_rate_2|floatformat:0}}% of {{bill.bill_type_descr}} that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
 							{% endif %}
 							[{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}<a href="#" onclick="$('#prognosis_factors').slideToggle(); return false;">show factors</a> | {% endif %}
 							<a href="/about/analysis#prognosis">methodology</a>]

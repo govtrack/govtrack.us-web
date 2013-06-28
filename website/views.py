@@ -359,22 +359,15 @@ def analysis_methodology(request):
         
         return data
         
+    import bill.prognosis
     import bill.prognosis_model
     import bill.prognosis_model_test
-    prognosis_factors = list((k, dict(v)) for k, v in bill.prognosis_model.factors.items()) # clone
-    for k, v in prognosis_factors:
-        v["bill_type"] = BillType.by_value(k[0])
-        v["is_introduced_model"] = k[1]
+    prognosis_factors = sorted([dict(v) for v in bill.prognosis_model.factors.values()],
+        key = lambda m : m["count"], reverse=True)
+    for v in prognosis_factors:
         v["factors"] = sorted(v["factors"].values(), key = lambda f : f["regression_beta"], reverse=True)
-    prognosis_factors = [kv[1] for kv in prognosis_factors]
-    prognosis_factors.sort(key = lambda m : (m["bill_type"] in (BillType.house_bill, BillType.senate_bill), m["count"]), reverse=True)
-    prognosis_test = list(bill.prognosis_model_test.model_test_results.items()) # clone
-    for k, v in prognosis_test:
-        v["bill_type"] = BillType.by_value(k[0])
-        v["is_introduced_model"] = (k[1] == 0)
-        v["success_name"] = bill.prognosis_model.factors[(k[0], (k[1] == 0))]["success_name"]
-    prognosis_test.sort(key = lambda kv : (kv[0][0] in (BillType.house_bill, BillType.senate_bill), kv[1]["count"]), reverse=True)
-    prognosis_test = [kv[1] for kv in prognosis_test]
+    prognosis_test = sorted(bill.prognosis_model_test.model_test_results.values(),
+        key = lambda v : v["count"], reverse=True)
     
     return {
         "ideology": lambda : { # defer until cache miss

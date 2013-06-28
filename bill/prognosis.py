@@ -23,6 +23,24 @@ from us import get_congress_dates
 
 from django.db.models import Count
 
+# Group BillType types into bill, joint res, concurrent res, and simple res.
+bill_type_map = {
+	"bill": (BillType.house_bill, BillType.senate_bill),
+	"jr": (BillType.house_joint_resolution, BillType.senate_joint_resolution),
+	"cr": (BillType.house_concurrent_resolution, BillType.senate_concurrent_resolution),
+	"sr": (BillType.house_resolution, BillType.senate_resolution),
+}
+bill_type_map_inv = { }
+for k, v in bill_type_map.items():
+	for bt in v:
+		bill_type_map_inv[bt] = k
+bill_type_names = {
+	"bill": "bills",
+	"jr": "joint resolutions",
+	"cr": "concurrent resolutions",
+	"sr": "simple resolutions",
+}
+
 def load_majority_party(congress):
 	majority_party = { }
 	start, end = get_congress_dates(congress)
@@ -281,8 +299,10 @@ def build_model(congress):
 	pop_title_prefixes.append("A joint resolution proposing an amendment to the Constitution")
 	pop_title_prefixes.append("Providing for consideration of")
 		
-	# We create separate models for bills by the bill type (H.R., S., H.Res., etc.)
-	# and by whether the bill is introduced/referred or has been reported or more.
+	# We create separate models for bills by the bill type (bill, joint resolution,
+	# concurrent resolution, simple resolution) and by whether the bill's status is
+	# introduced/referred or has been reported or more.
+	#
 	# Once a bill has been reported by committee it's chances of success are
 	# of course much higher, since the bills that have not been reported by committee
 	# in historical data are necessarily failed bills. Also the models change
@@ -290,13 +310,10 @@ def build_model(congress):
 		
 	MODEL = dict()
 	
-	for (bill_type, bill_type_descr), model_type in itertools.product(BillType, (0, 1)):
-		#if bill_type != BillType.house_bill: continue
-		#if bill_type not in (BillType.house_joint_resolution, BillType.senate_joint_resolution): continue
-		
+	for bill_type, model_type in itertools.product(bill_type_map.keys(), (0, 1)):
 		# GET LIST OF BILLS
 		
-		bills = BILLS.filter(bill_type=bill_type)
+		bills = BILLS.filter(bill_type__in=bill_type_map[bill_type])
 		if model_type == 1:
 			# In model 0, we scan across all bills, because all bills were
 			# in the introduced/referred status at one point. If we filter it to bills whose
@@ -306,7 +323,7 @@ def build_model(congress):
 			# of reported bills which make it to success.
 			bills = bills.exclude(current_status__in=BillStatus.introduced_statuses)
 
-		print bill_type_descr, model_type
+		print bill_type, model_type
 		
 		total = bills.count()
 		
@@ -335,6 +352,7 @@ def build_model(congress):
 		regression_outcomes = [ ]
 		regression_predictors = [ ]
 		factor_descriptions = { }
+		#bills = bills[0:100] # REMOVEME
 		for bill in bills:
 			# What's the measured binary outcome for this bill? Check if the bill
 			# ended in a success state.
@@ -405,7 +423,11 @@ def build_model(congress):
 					# says to do it this way).
 					from numpy import sqrt, diag, abs, median
 					from numpy.linalg import inv
-					stderrs = sqrt(diag(inv(J_bar))) # [intercept, beta1, beta2, ...]
+					try:
+						stderrs = sqrt(diag(inv(J_bar))) # [intercept, beta1, beta2, ...]
+					except numpy.linalg.linalg.LinAlgError as e:
+						print "\t", e
+						break
 					
 					# The standard errors are coming back wacky large for
 					# the factors with VERY large beta. Special-case those.
@@ -424,14 +446,17 @@ def build_model(congress):
 		if model_type == 0:
 			model["success_name"] = "sent out of committee to the floor"
 		else:
-			if bill_type in (BillType.senate_bill, BillType.house_bill):
+			if bill_type == "bill":
 				model["success_name"] = "enacted"
-			elif bill_type in (BillType.senate_joint_resolution, BillType.house_joint_resolution):
+			elif bill_type == "jr":
 				model["success_name"] = "enacted or passed"
 			else:
 				model["success_name"] = "agreed to"
 		model["count"] = total
 		model["success_rate"] = 100.0*total_success/total
+		model["bill_type"] = bill_type
+		model["bill_type_descr"] = bill_type_names[bill_type]
+		model["is_introduced_model"] = (model_type == 0)
 		model["regression_predictors_map"] = regression_predictors_map
 		model["regression_beta"] = list(regression_beta) if regression_beta != None else None
 		model_factors = dict()
@@ -468,8 +493,8 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 	# There are two models for every bill, one from introduced to reported
 	# and the other from reported to success.
 	
-	model_1 = prognosis_model.factors[(bill.bill_type, True)]
-	model_2 = prognosis_model.factors[(bill.bill_type, False)]
+	model_1 = prognosis_model.factors[(bill_type_map_inv[bill.bill_type], True)]
+	model_2 = prognosis_model.factors[(bill_type_map_inv[bill.bill_type], False)]
 	
 	# Eliminate factors that are not used in either model.
 	factors = [f for f in factors if f[0] in model_1["factors"] or f[0] in model_2["factors"]]
@@ -518,6 +543,7 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 		"prediction_2": prediction_2,
 		"prediction": (prediction_1 * prediction_2 / 100.0) if is_introduced else prediction_2,
 		"success_name": model_2["success_name"],
+		"bill_type_descr": model_2["bill_type_descr"],
 		
 		"factors_help_help": [descr for key, descr, gen_descr in factors if helps(key, True, True)],
 		"factors_hurt_hurt": [descr for key, descr, gen_descr in factors if helps(key, False, False)],
@@ -545,7 +571,9 @@ def test_prognosis(congress):
 	test_results = { }
 	
 	for model_type in (0, 1):
-		for bt, blabel in list(BillType):
+		for bt in bill_type_map:
+			print "Testing", model_type, bt, "..."
+			
 			# What was the success rate in the training data?
 			model = prognosis_model.factors[(bt, model_type==0)]
 			sr = model["success_rate"]
@@ -556,9 +584,13 @@ def test_prognosis(congress):
 			test_results[(bt, model_type)] = model_result
 			model_result["overall"] = sr
 			
+			for key in ("bill_type", "bill_type_descr", "is_introduced_model", "success_name"):
+				model_result[key] = model[key]
+			
 			# Pull in the data as tuples of (prediction float [0,1], success True/False)
-			bills = Bill.objects.filter(congress=congress, bill_type=bt)
+			bills = Bill.objects.filter(congress=congress, bill_type__in=bill_type_map[bt])
 			if model_type == 1: bills = bills.exclude(current_status__in=BillStatus.introduced_statuses)
+			#bills = bills[0:100] # REMOVEME
 			model_result["count"] = bills.count()
 			data = []
 			for bill in bills.prefetch_related():
@@ -636,7 +668,7 @@ def top_prognosis(congress, bill_type):
 	max_b = None
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
-	for bill in Bill.objects.filter(congress=congress, bill_type=bill_type):
+	for bill in Bill.objects.filter(congress=congress, bill_type__in=bill_type_map_inv[bill_type]):
 		p = compute_prognosis_2(bill, committee_membership, majority_party)
 		if not max_p or p["prediction"] > max_p:
 			max_p = p["prediction"]
