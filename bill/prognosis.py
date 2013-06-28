@@ -260,15 +260,30 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 
 	return factors
 
-def is_success(bill, model_type):
+def is_success(bill, model_type, indexed_paragraphs):
 	if model_type == 0:
 		return bill.current_status not in BillStatus.introduced_statuses
 	else:
-		return bill.current_status in BillStatus.final_status_passed
+		if bill.current_status in BillStatus.final_status_passed:
+			return 1.0
 
+		# If the bill wasn't itself enacted, compare its contents to
+		# enacted bills.
+		hashes = get_bill_paragraphs(bill)
+		if not hashes: return 0.0 # text not available
+		good_hashes = 0.0
+		total_hashes = 0.0
+		for h in hashes:
+			c = indexed_paragraphs.get(h, 0)
+			if c > 1: continue # if it occurs more than once in enacted bills, it's probably boilerplate so skip it
+			total_hashes += 1.0
+			if c == 1: good_hashes += 1.0
+		return good_hashes/total_hashes
+					
 def build_model(congress):
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
+	indexed_success_text = load_indexed_success_text()
 	lobbying_data = None #load_lobbying_data(congress)
 	
 	# universe
@@ -354,9 +369,9 @@ def build_model(congress):
 		factor_descriptions = { }
 		#bills = bills[0:100] # REMOVEME
 		for bill in bills:
-			# What's the measured binary outcome for this bill? Check if the bill
-			# ended in a success state.
-			success = is_success(bill, model_type)
+			# What's the measured outcome for this bill? Check if the bill
+			# ended in a success state. Allow floating-point values!
+			success = is_success(bill, model_type, indexed_success_text[bill_type])
 			
 			# Get the binary factors that apply to this bill.
 			factors = get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data)
@@ -365,11 +380,11 @@ def build_model(congress):
 			for key, descr, general_descr in factors:
 				if not key in factor_success_rate: factor_success_rate[key] = [0, 0] # count of total, successful
 				factor_success_rate[key][0] += 1
-				if success: factor_success_rate[key][1] += 1
+				factor_success_rate[key][1] += success
 				factor_descriptions[key] = general_descr
 				
 			# build data for a regression
-			regression_outcomes.append(1.0 if success else 0.0)
+			regression_outcomes.append(success)
 			regression_predictors.append(set( f[0] for f in factors )) # extract just the key from the (key, descr) tuple
 			
 		# FIRST PASS SIGNIFICANCE CHECK
@@ -561,12 +576,13 @@ def compute_prognosis(bill, proscore=False):
 		
 def test_prognosis(congress):
 	from math import exp
-	from numpy import mean, median, std, digitize, percentile, fmin
+	from numpy import mean, median, std, digitize, percentile, average
 	
 	import prognosis_model
 	
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
+	indexed_success_text = load_indexed_success_text()
 	
 	test_results = { }
 	
@@ -587,7 +603,8 @@ def test_prognosis(congress):
 			for key in ("bill_type", "bill_type_descr", "is_introduced_model", "success_name"):
 				model_result[key] = model[key]
 			
-			# Pull in the data as tuples of (prediction float [0,1], success True/False)
+			# Pull in the data as tuples of (prediction, success), each of which is a
+			# float in the range of [0,1].
 			bills = Bill.objects.filter(congress=congress, bill_type__in=bill_type_map[bt])
 			if model_type == 1: bills = bills.exclude(current_status__in=BillStatus.introduced_statuses)
 			#bills = bills[0:100] # REMOVEME
@@ -599,7 +616,7 @@ def test_prognosis(congress):
 					x = x["prediction_1"]
 				else:
 					x = x["prediction_2"]
-				y = is_success(bill, model_type)
+				y = is_success(bill, model_type, indexed_success_text[bt])
 				data.append((x, y))
 			xdata = [x[0] for x in data]
 			
@@ -616,42 +633,28 @@ def test_prognosis(congress):
 				bindata = [data[i] for i in xrange(len(data)) if bindices[i] == b]
 				if len(bindata) == 0: continue
 				median_prog = median([x for x,y in bindata])
-				pct_success = sum(1 for x,y in bindata if y)/float(len(bindata))
+				pct_success = mean([y for x,y in bindata])
 				model_result["bins"].append( (median_prog, len(bindata), pct_success) )
 			
-			# We don't know a priori what the prediction threshold is above which we
-			# should score a success, so find the threshold that maximizes the f2 score,
-			# which is like the f-score but weighs the precision more.
+			# Make a precision-recall chart over various values for a prognosis threshold.
+			# This chart doesn't make much sense now that we measure success as a
+			# continuous variable. I've adapted the notions of precision and recall so
+			# that they are sensible in this case. When the y values are in fact binary
+			# (0.0 or 1.0), the result is the traditional definition of precision and
+			# recall.
 			def compute_scores(T):
-				true_pos = sum(1 for (x,y) in data if (x >= T) and y)
-				false_pos = sum(1 for (x,y) in data if (x >= T) and not y)
-				true_neg = sum(1 for (x,y) in data if (x < T) and not y)
-				false_neg = sum(1 for (x,y) in data if (x < T) and y)
-				precision = float(true_pos)/(true_pos + false_pos) if (true_pos + false_pos) > 0 else 1.0
-				recall = float(true_pos)/(true_pos + false_neg) if (true_pos + false_neg) > 0 else 1.0
-				accuracy = float(true_pos + true_neg)/len(data)
-				beta = .5 # 1=standard f-score, .5 weighs precision higher than recall
-				fscore = ((1 + beta**2) * (precision * recall) / ((precision * beta**2) + recall)) if precision+recall > 0 else 0
+				precision = mean([y for (x,y) in data if (x >= T)])
+				recall = average([1.0 if x >= T else 0.0 for (x,y) in data], weights=[y for (x,y) in data])
 				return {
 					"threshold": T,
-					"table": { "tp": true_pos, "fp": false_pos, "tn": true_neg, "fn": false_neg },
 					"precision": precision,
 					"recall": recall,
-					"accuracy": accuracy,
-					"fscore_beta": beta,
-					"fscore": fscore,
 				}
-			def compute_neg_f2(T):
-				return -compute_scores(T)["fscore"]
-			best_threshold = float(fmin(compute_neg_f2, sr))
-			model_result["max_fscore"] = compute_scores(best_threshold)
-			
-			# And also make a precision-recall chart.
 			model_result["precision_recall"] = []
 			for i in range(-18, 0):
 				T = 100 * exp(i / 5.0) # threshold data points on a logarithmic scale
 				cs = compute_scores(T)
-				if cs["fscore"] == 0: continue # causes weirdness in charts
+				if cs["precision"]+cs["recall"] == 0: continue # causes weirdness in charts
 				model_result["precision_recall"].append(cs)
 			
 
@@ -674,12 +677,78 @@ def top_prognosis(congress, bill_type):
 			max_p = p["prediction"]
 			max_b = bill
 	print max_p, max_b
-	
+
+def get_bill_paragraphs(bill):
+	from billtext import load_bill_text
+	from hashlib import md5
+		
+	try:
+		dom = lxml.etree.fromstring(load_bill_text(bill, None)["text_html"])
+	except IOError:
+		return None
+		
+	hashes = { }
+		
+	for node in dom.xpath("//p"):	
+		text = lxml.etree.tostring(node, method="text", encoding="utf8")
+		text = text.lower() # normalize case
+		text = re.sub("^\(.*?\)\s*", "", text) # remove initial list numbering
+		text = re.sub(r"\W+", " ", text).strip() # normalize spaces and other non-word characters
+		if text == "": continue
+		text = md5(text).hexdigest()
+		hashes[text] = hashes.get(text, 0) + 1
+
+	return hashes
+
+def index_successful_paragraphs(congress):
+	cache = { bt: {} for bt in bill_type_map }
+		
+	# For each successful bill, load its text and store hashes of
+	# its paragraphs.
+	for bill_type in bill_type_map.keys():
+		bills = Bill.objects.filter(congress=congress, bill_type__in=bill_type_map[bill_type],
+			current_status__in=BillStatus.final_status_passed)
+		for bill in bills:
+			hashes = get_bill_paragraphs(bill)
+			if not hashes: continue
+			for h, c in hashes.items():
+				cache[bill_type][h] = cache[bill_type].get(h, 0) + c
+
+	# Write out a list of hashes and for each, the number of times
+	# the hash occurred in successful bills. Paragraphs that appear
+	# more than once won't be counted.
+	with open("bill/prognosis_model_paragraphs.txt", "w") as cachefile:
+		for bill_type in bill_type_map.keys():
+			cachefile.write(bill_type + "\n")
+			for k, v in sorted(cache[bill_type].items()):
+				cachefile.write(k + " " + str(v) + "\n")
+			cachefile.write("\n")
+		
+def load_indexed_success_text():
+	cache = { bt: {} for bt in bill_type_map } 
+	bt = None
+	with open("bill/prognosis_model_paragraphs.txt") as cachefile:
+		for line in cachefile:
+			line = line.strip()
+			if bt is None:
+				bt = line
+			elif line == "":
+				bt = None # next line is a bill type
+			else:
+				hashval, count = line.split(" ")
+				cache[bt][hashval] = int(count)
+	return cache
+			
 if __name__ == "__main__":
 	import sys
 	if sys.argv[-1] == "train":
+		index_successful_paragraphs(112)
 		build_model(112)
 	elif sys.argv[-1] == "test":
+		index_successful_paragraphs(111)
 		build_model(111) # delete the model after if this is for a past Congress!
+		index_successful_paragraphs(112)
 		test_prognosis(112)
-
+	elif sys.argv[-1] == "index-text":
+		index_successful_paragraphs(112)
+		

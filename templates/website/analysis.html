@@ -240,12 +240,13 @@ def onenorm(u): return sum(abs(u))</pre>
 			
 			<h3>Methodology</h3>
 			
-			<p>This analysis is based on a logistic regression. Logistic regression is similar to simple linear regression but it is more appropriate when modeling probabilities. The explanatory variables are the binary factors mentioned above and listed at right. The dependent variable is whether the bill was
-			enacted, or for resolutions whether it was agreed to.</p>
+			<p>This analysis is based on a logistic regression. Logistic regression is similar to simple linear regression but it is more appropriate when modeling probabilities. We create eight separate models: For each of the four types of legislative measures (bills, joint resolutions, concurrent resolutions, and simple resolutions), we compute one model that predicts whether the bill/resolution will get out of committee and a separate model that computes, for bills/resolutions out of committee, whether the bill/resolution will be enacted or agreed to.</p>
 			
-			<p>The output of the logistic regression models are weights assigned to the factors, called &beta; in the table at the right. The prognosis score for a bill is computed by multiplying all of the factors together that apply to the bill (more or less, see <a href="http://en.wikipedia.org/wiki/Logistic_regression">logistic regression on Wikipedia</a> for details).</p>
+			<p>The independent variables are the binary factors mentioned above and listed in the factors table at the right.</p>
 			
-			<p>We create eight separate models: For each of the four types of legislative measures (bills, joint resolutions, concurrent resolutions, and simple resolutions), we compute one model that predicts whether the bill/resolution will get out of committee and a separate model that computes, for bills/resolutions out of committee, whether the bill/resolution will be enacted or agreed to.</p>
+			<p>The dependent variable is how successful the bill or resolution was. When predicting whether a bill or resolution will make it out of committee, it is a binary variable. When predicting whether a bill will be enacted or a resolution agreed to, this is a continuous variable computed as the percentage of paragraphs in the bill that appear in any enacted bill (and similarly for resolutions). We do this because there are often identical bills in Congress (so-called companion bills) and often bills are incorporated into other bills (such as omnibus bills), and we want to give the original bills credit for being successful even if the original bill itself is not enacted per se.</p>
+			
+			<p>The output of the logistic regression models are weights assigned to the factors, called &beta; in the table at the right. The prognosis score for a bill is computed by multiplying all of the factors together that apply to the bill (more or less, see <a href="http://en.wikipedia.org/wiki/Logistic_regression">logistic regression on Wikipedia</a> for details). The result is a number that can be interpreted as a probability.</p>
 			
 			<p>In choosing the factors for model, we select from a large set of plausible factors those which appear to be statistically significant on their own (using a binomial distribution). After the logistic regression, we remove factors that appear statistically non-significant and re-compute the model.</p>
 
@@ -284,7 +285,7 @@ def onenorm(u): return sum(abs(u))</pre>
 				{% for m in prognosis_factors %}
 					<h4 style="margin: 1.25em 0 .5em 0;">{{m.bill_type_descr|capfirst}} {{m.success_name}}</h4>
 					
-					<p>Overall, {{m.success_rate|floatformat:0}}% of the {{m.count|intcomma}} {{m.bill_type_descr.lower}} {% if not m.is_introduced_model %}that got past committee{% endif %} in {{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}} were {{m.success_name}}. The following factors help or hurt that:</p>
+					<p>Overall, about {{m.success_rate|floatformat:0}}% of the {{m.count|intcomma}} {{m.bill_type_descr.lower}} {% if not m.is_introduced_model %}that got past committee{% endif %} in {{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}} were {{m.success_name}}. The following factors help or hurt that:</p>
 					
 					{% if m.factors %}
 						<table style="margin: 1em 0 1em 1em; font-size: 85%;">
