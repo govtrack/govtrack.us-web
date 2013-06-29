@@ -129,8 +129,10 @@
 		<div id="activity">
 			<div class="six columns">
 				<h2 style="margin: 1em 0 1em 0">Committee Bills</h3>
-				{% if committee.bills.count > 0 %}
-					<p>Browse <a href="/congress/bills/browse#committees={{committee.id}}">{{committee.bills.count}} bills referred to this committee</a>.</p>
+				{% if committee.current_bills.count > 0 and 0 %}
+					<p>Browse <a href="/congress/bills/browse#committees={{committee.id}}">{{committee.current_bills.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>.</p>
+				{% elif committee.bills.count > 0 %}
+					<p>Browse <a href="/congress/bills/browse#committees={{committee.id}}&congress=__ALL__">{{committee.bills.count|intcomma}} bills previously referred to this {% if parent %}sub{% endif %}committee</a>.</p>
 				{% else %}
 					<p>No bills have been assigned to this {% if parent %}sub{% endif %}committee.</p>
 				{% endif %}

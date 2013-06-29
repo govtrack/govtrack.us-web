@@ -4,6 +4,8 @@ from django.core.urlresolvers import reverse
 
 from common import enum
 
+from settings import CURRENT_CONGRESS
+
 class CommitteeType(enum.Enum):
     senate = enum.Item(1, 'Senate', abbrev="S")
     joint = enum.Item(2, 'Joint', abbrev="J")
@@ -59,6 +61,9 @@ class Committee(models.Model):
 
     def committee_type_abbrev(self):
         return CommitteeType.by_value(self.committee_type).abbrev
+        
+    def current_bills(self):
+        return self.bills.filter(congress=CURRENT_CONGRESS)
     
     def create_events(self):
         from events.models import Feed, Event
