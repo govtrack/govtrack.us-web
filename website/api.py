@@ -118,11 +118,12 @@ class GBaseModel(ModelResource):
 	def build_filters(self, filters=None):
 		if not filters: return { }
 		# Replace enumeration keys with the right values.
-		from django.db.models.sql.constants import QUERY_TERMS, LOOKUP_SEP
+		from django.db.models.sql.constants import QUERY_TERMS
+		LOOKUP_SEP = "__"
 		f = { }
 		for k, v in filters.items():
 			path = k.split(LOOKUP_SEP)
-			if len(path) and path[-1] in QUERY_TERMS.keys(): path.pop()
+			if len(path) and path[-1] in QUERY_TERMS: path.pop()
 			model, field = self.find_field(path)
 			if model:
 				enum = model.Meta.queryset.model._meta.get_field(field).choices
