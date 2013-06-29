@@ -85,11 +85,12 @@ def person_details(request, pk):
                 'cities': get_district_cities("%s-%02d" % (role.state.lower(), role.district)) if role and role.district else None,
                 }
 
-    ck = "person_details_%s" % pk
-    ret = cache.get(ck)
-    if not ret:
-        ret = build_info()
-        cache.set(ck, ret, 600)
+    #ck = "person_details_%s" % pk
+    #ret = cache.get(ck)
+    #if not ret:
+    #    ret = build_info()
+    #    cache.set(ck, ret, 600)
+    ret = build_info()
 
     # redirect to canonical URL
     if request.path != ret["person"].get_absolute_url():
