@@ -111,19 +111,23 @@ function show_track_panel() {
 		});
 		return false;
 	}
+{% endif %}
 	function selected_feed_changed(new_feed) {
 		$("#track_panel_selected_feed li").removeClass('selected');
 		$(new_feed.parentNode).addClass("selected");
 		
 		feed_cur_feed = $(new_feed).attr('feed');
+
+		{% if request.user.userprofile.lists.count <= 1 %}
+		{% else %}
 		$('.list_select li').each(function() {
 			if ($(this).hasClass("new") || $(this).hasClass("all")) return; // skip these buttons
 			$(this).toggleClass('selected', feed_list_state[feed_cur_feed][$(this).attr('list_id')]);
 		});
+		{% endif %}
 		
 		return false; // cancel click
 	}
-{% endif %}
 {% endif %}
 $(function() {
 	if (window.location.hash == "#track") {
