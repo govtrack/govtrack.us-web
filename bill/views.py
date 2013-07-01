@@ -149,7 +149,10 @@ def bill_details(request, congress, type_slug, number):
 
 @user_view_for(bill_details)
 def bill_details_user_view(request, congress, type_slug, number):
-    bill_type = BillType.by_slug(type_slug)
+    try:
+        bill_type = BillType.by_slug(type_slug)
+    except BillType.NotFound:
+        raise Http404("Invalid bill type: " + type_slug)
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
     
     ret = { }
