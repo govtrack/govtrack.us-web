@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.core.urlresolvers import resolve
 from django.template import Template, Context, RequestContext
 from django.views.decorators.cache import cache_control
@@ -24,7 +24,11 @@ def user_head(request):
 		
 	page_data = None
 	if hasattr(m.func, 'user_func'):
-		page_data = m.func.user_func(request, *m.args, **m.kwargs)
+		try:
+			page_data = m.func.user_func(request, *m.args, **m.kwargs)
+		except Http404:
+			# silently ignore, probably the main page was a 404 too
+			pass
 	
 	return HttpResponse(head_template.render(RequestContext(request, {
 				"user_data": json.dumps(user_data),
