@@ -46,13 +46,17 @@ def committee_details(request, parent_code, child_code=None):
 @render_to('committee/committee_list.html')
 def committee_list(request):
     from events.models import Feed
+    import re
 
-    def key(x):
-        return unicode(x).replace('the ', '')
-    
     def getlist(type_):
         items = list(Committee.objects.filter(committee_type=type_, obsolete=False))
-        return sorted(items, key=key)
+        for c in items:
+            m = re.match("(House|Senate) ((Select|Special|Permanent Select) )?Committee on (the )?(.+)", unicode(c))
+            if not m:
+                c.display_name = unicode(c)
+            else:
+                c.display_name = m.group(5)
+        return sorted(items, key=lambda c : (not c.display_name.startswith("Joint "), c.display_name))
 
     return {
         'senate_committees': getlist(CommitteeType.senate),

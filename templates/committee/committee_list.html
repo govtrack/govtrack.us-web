@@ -21,26 +21,31 @@
         <h2>Senate Committees</h2>
         <ul>
             {% for item in senate_committees %}
-            <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+            <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
             {% endfor %}
         </ul>
-
-        <h2>Joint Committees</h2>
-        <ul>
-            {% for item in joint_committees %}
-            <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
+	</div>
 
     <div class="six columns">
         <h2>House Committees</h2>
         <ul>
             {% for item in house_committees %}
-            <li><a href="{{ item.get_absolute_url }}">{{ item }}</a></li>
+            <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
             {% endfor %}
         </ul>
     </div>
 
+	<div class="twelve columns">
+        <h2>Joint Committees</h2>
+        <p>The joint committees are made up of both senators and congressmen. They typically have an oversight or policy role but no legislative duties.</p>
+        <ul>
+            {% for item in joint_committees %}
+            <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
+            {% endfor %}
+        </ul>
+        <p>While the Joint Committees on Printing and the Library have nominal responsibility for oversight of the Government Printing Office and the Library of Congress, respectively,
+        the committees are essentially defunct and oversight takes place within the
+        majority party leadership of each chamber.</p>
+    </div>
 {% endblock %}
 
