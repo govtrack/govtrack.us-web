@@ -1,11 +1,13 @@
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, Http404, QueryDict
 from django.db.models import Model
+from django.db.models import DateField, DateTimeField
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.db.models.related import RelatedObject
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from common import enum as enummodule
 import csv, json, StringIO, datetime, lxml, urllib
+import dateutil
 
 def do_api_call(request, model, qs, id):
     """Processes an API request for a given ORM model, queryset, and optional ORM instance ID."""
@@ -263,20 +265,11 @@ def do_api_search(model, qs, request_options, requested_fields):
                 # multiple times as query parameters).
                 if len(vals) == 1:
                     vals = vals[0].split("|")
-            
-            # Treat "null" as None.
-            for i in xrange(len(vals)):
-                if vals[i].lower() == "null":
-                    vals[i] = None
-            
-            # Handle enum fields in a special way.
+                    
             try:
-                choices = modelfield.choices
-                if is_enum(choices):
-                    # Convert the string value to the raw database integer value.
-                    vals = [int(choices.by_key(v)) if v != None else None for v in vals]
-            except: # field is not a model field, or enum value is invalid (leave as original)
-                pass
+                vals = [normalize_field_value(v, model, modelfield) for v in vals]
+            except ValueError as e:
+                return HttpResponseBadRequest("Invalid value for %s filter: %s" % (fieldname, str(e)))
                 
             try:
                 if matchoperator not in ("in", "range"):
@@ -291,7 +284,7 @@ def do_api_search(model, qs, request_options, requested_fields):
                     
                     qs = qs.filter(**{ fieldname + "__" + matchoperator: vals })
             except Exception as e:
-                return HttpResponseBadRequest("Invalid filter: %s" % repr(e))
+                return HttpResponseBadRequest("Invalid value for %s filter: %s" % (fieldname, repr(e)))
                 
             qs_filters[fieldname] = (matchoperator, modelfield)
     
@@ -363,6 +356,44 @@ def do_api_search(model, qs, request_options, requested_fields):
         },
         "objects": [serialize_object(s, recurse_on=recurse_on, requested_fields=requested_fields) for s in objs],
     }
+ 
+def normalize_field_value(v, model, modelfield):
+    # Convert "null" to None.
+    if v.lower() == "null":
+        if modelfield and not modelfield.null:
+            raise ValueError("Field cannot be null.")
+        return None
+        
+    # If the model field's choices is a common.enum.Enum instance,
+    # then the filter specifies the enum key, which has to be
+    # converted to an integer.
+    choices = modelfield.choices if modelfield else None
+    if choices and is_enum(choices):
+        try:
+            # Convert the string value to the raw database integer value.
+            return int(choices.by_key(v))
+        except: # field is not a model field, or enum value is invalid (leave as original)
+            raise ValueError("%s is not a valid value; possibly values are %s" % (v, ", ".join(c.key for c in choices.values())))
+
+    # If this is a filter on a datetime field, parse the date in ISO format
+    # because that's how we serialize it. Normally you can just pass a string
+    # value to .filter(). The conversion takes place in the backend. MySQL
+    # will recognize ISO-like formats. But Haystack with Solr will only
+    # recognize the Solr datetime format. So it's better to parse now and
+    # pass a datetime instance.
+    
+    is_dt = False
+    if modelfield and isinstance(modelfield, (DateField, DateTimeField)):
+        is_dt = True
+    # and for our way of specifying additional Haystack fields...
+    for fieldname, fieldtype in getattr(model, "haystack_index_extra", []):
+        if modelfield and fieldname == modelfield.name and fieldtype in ("Date", "DateTime"):
+            is_dt = True
+    if is_dt:
+        # Let any ValueErrors percolate up.
+        return dateutil.parser.parse(str(v), default=datetime.datetime.min, ignoretz=not settings.USE_TZ)
+        
+    return v
 
 def get_model_filterable_fields(model, qs_type):
     if qs_type == "QuerySet":
