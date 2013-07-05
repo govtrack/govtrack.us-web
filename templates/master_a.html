@@ -43,7 +43,7 @@
 			
 			var can_run_ad_exp = false;
 			
-			if ((ad_exp_user.impression % 5) == 4) {
+			if ((ad_exp_user.impression % 15) == 14) {
 				document.write("{{ "<a href='/accounts/go_ad_free'><img src='/static/images/go_ad_free.png'/></a>"|escapejs }}");
 				try { 
 				_gaq.push(['_trackEvent', 'ads' , 'go_ad_free_banner_impression']); 
