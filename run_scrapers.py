@@ -62,6 +62,7 @@ log_level = "error"
 
 if "full-scan" in sys.argv: fetch_mode = "--force"
 if "CACHE" in os.environ: fetch_mode = ""
+if "DEBUG" in os.environ: log_level = "info"
 	
 # Run scrapers and parsers.
 
@@ -107,7 +108,7 @@ do_bill_parse = False
 
 if "text" in sys.argv:
 	# Update the mirror of GPO FDSys.
-	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --store=mods --log=%s" % (SCRAPER_PATH, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --store=mods,text --log=%s" % (SCRAPER_PATH, log_level))
 	
 	# Glob all of the bill text files. Create hard links in the data directory to
 	# their locations in the congress project data directoy.

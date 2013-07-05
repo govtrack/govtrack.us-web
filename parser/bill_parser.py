@@ -21,6 +21,7 @@ from parser.models import File
 from bill.models import BillTerm, TermType, BillType, Bill, Cosponsor, BillStatus, RelatedBill
 from person.models import Person
 from bill.title import get_primary_bill_title
+from bill.billtext import get_bill_text_metadata
 from committee.models import Committee
 from settings import CURRENT_CONGRESS
 
@@ -304,14 +305,20 @@ def main(options):
                 seen_bill_ids.append(b.id)
                 
                 # Update the index/events for any bill with recently changed text
-                textfile = "data/us/bills.text/%s/%s/%s%s.txt" % (m.group(1), m.group(2), m.group(2), m.group(3))
-                if (bill_index and not options.disable_events) and os.path.exists(textfile) and File.objects.is_changed(textfile):
+                textfile = get_bill_text_metadata(b, None)
+                if not textfile:
+                    if b.introduced_date < (datetime.now()-timedelta(days=14)).date():
+                        print "No bill text?", fname, b.introduced_date
+                    continue
+                textfile = textfile["plain_text_file"]
+                if (bill_index and not options.disable_events) and File.objects.is_changed(textfile):
                     bill_index.update_object(b, using="bill") # index the full text
                     b.create_events() # events for new bill text documents
                     File.objects.save_file(textfile)
                     
                 continue
             except Bill.DoesNotExist:
+                print "Unchanged metadata file but bill doesn't exist:", fname
                 pass # just parse as normal
             
         if options.slow:
@@ -347,8 +354,8 @@ def main(options):
             try:
                 bill.save()
             except:
-            	print bill
-            	raise
+                print bill
+                raise
             if bill_index: bill_index.update_object(bill, using="bill")
             
             if not options.disable_events:

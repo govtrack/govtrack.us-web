@@ -138,12 +138,14 @@ class Bill(models.Model):
         
     # indexing
     def get_index_text(self):
+        bill_text = load_bill_text(self, None, plain_text=True)
+        if not bill_text: print "NO BILL TEXT", self
         return "\n".join([
             self.title,
             self.display_number_no_congress_number.replace(".", ""),
             self.display_number_no_congress_number.replace(".", "").replace(" ", ""),
             ] + [t[2] for t in self.titles]) \
-            + "\n\n" + load_bill_text(self, None, plain_text=True)
+            + "\n\n" + bill_text
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
     haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'))
     def get_terms_index_list(self):

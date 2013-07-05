@@ -83,7 +83,7 @@ def get_current_version(bill):
     return load_bill_text(bill, None, mods_only=True)["doc_version"]
     
 def load_bill_text(bill, version, plain_text=False, mods_only=False):
-    if bill.congress < 103:
+    if bill.congress < 103 or plain_text:
         return load_bill_text_alt(bill, version, plain_text=plain_text, mods_only=mods_only)
     
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
@@ -94,29 +94,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     if mods_only:
         bill_text_content = None
     else:
-        if plain_text:
-            # plain_text never raises an IOError
-            try:
-                return open(basename + ".txt").read().decode("utf8", "ignore") # otherwise we get 'Chuck failed' in the xapian_backend apparently due to decoding issue.
-            except IOError:
-                return ""
-        elif os.path.exists(basename + ".xml") and False:
-            dom = lxml.etree.parse(basename + ".xml")
-            transform = lxml.etree.parse(os.path.join(os.path.dirname(os.path.realpath(__file__)), "textxsl/billres.xsl"))
-            transform = lxml.etree.XSLT(transform)
-            result = transform(dom)
-            
-            # empty nodes cause HTML parsing problems, so remove them.
-            # iterate in reverse document order so that we hit parents after
-            # their children, since if we remove all of the children then we may
-            # want to remove the parent too.
-            for node in reversed(list(result.getiterator())):
-                if node.xpath("string(.)") == "":
-                    node.getparent().remove(node)
-                    
-            bill_text_content = lxml.etree.tostring(result.xpath("head/style")[0]) + lxml.etree.tostring(result.xpath("body")[0])
-        else:
-            bill_text_content = open(basename + ".html").read()
+        bill_text_content = open(basename + ".html").read()
     
     mods = lxml.etree.parse(basename + ".mods.xml")
     ns = { "mods": "http://www.loc.gov/mods/v3" }
@@ -202,9 +180,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         "citations": citations,
     }
 
-def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
-    # Load bill text info from the Congress project JSON files.
-    
+def get_bill_text_metadata(bill, version):
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
     import glob, json
 
@@ -218,31 +194,50 @@ def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
             d = json.load(open(versionfile))
             if not dat or d["issued_on"] > dat["issued_on"]:
                 dat = d
+        if not dat: return None
     else:
         dat = json.load(open(basename + "/%s/data.json" % version))
+        
+    dat["plain_text_file"] = basename + "/" + dat["version_code"] + "/document.txt"
+    
+    return dat
+        
+def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
+    # Load bill text info from the Congress project data directory.
+    # We have JSON files for metadata and plain text files mirrored from GPO
+    # containing bill text (either from the Statutes at Large OCR'ed text
+    # layers, or from GPO FDSys's BILLS collection).
+    
+    dat = get_bill_text_metadata(bill, version)
             
     # Load the text content (unless mods_only is set).
     bill_text_content = None
     try:
         if not dat: raise IOError("Bill text is not available for this bill.")
         if not mods_only:
-            bill_text_content = open(basename + "/" + dat["version_code"] + "/document.txt").read().decode("utf8")
+            bill_text_content = open(dat["plain_text_file"]).read().decode("utf8")
     except IOError:
         # text not available
         if mods_only or not plain_text: raise # these calls require raising
         bill_text_content = "" # plain_text gets "" returned instead
 
+    # In the BILLS collection, there's gunk at the top and bottom that we'd
+    # rather just remove: metadata in brackets at the top, and <all> at the end.
+    # We remove it because it's not really useful when indexing.
+    bill_text_content = re.sub(r"^\s*(\[[^\n]+\]\s*)*", "", bill_text_content)
+    bill_text_content = re.sub(r"\s*<all>\s*$", "", bill_text_content)
+
     # Caller just wants the plain text?
     if not mods_only and plain_text:
-        # replace form feeds with an indication of the page break
-        return bill_text_content.replace(u"\u000C", "=============================================")
+        # replace form feeds (OCR'd layers only) with an indication of the page break
+        return bill_text_content.replace(u"\u000C", "\n=============================================\n")
         
     # Caller wants HTML.
     if not mods_only:
         # Return the text wrapped in <pre>, and replace form feeds with an <hr>.
         import cgi
         bill_text_content = "<pre>" + cgi.escape(bill_text_content) + "</pre>"
-        bill_text_content = bill_text_content.replace(u"\u000C", "<hr>")
+        bill_text_content = bill_text_content.replace(u"\u000C", "<hr>") # (OCR'd layers only)
         #bill_text_content = "<pre>""\n".join(
         #    "<div>" + cgi.escape(line) + "</div>"
         #    for line in
@@ -258,13 +253,13 @@ def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
         
     m = re.match(r"http://www.gpo.gov/fdsys/pkg/(STATUTE-\d+)/pdf/(STATUTE-\d+-.*).pdf", gpo_url)
     if m:
+        # TODO (but not needed right now): Docs from the BILLS collection.
         gpo_url = "http://www.gpo.gov/fdsys/granule/%s/%s/content-detail.html" % m.groups()
             
     return {
         "bill_id": bill.id,
         "bill_name": bill.title,
         "text_html": bill_text_content,
-        "basename": basename,
         "docdate": datetime.date(*(int(d) for d in dat["issued_on"].split("-"))),
         "gpo_url": gpo_url,
         "gpo_pdf_url": dat["urls"]["pdf"],
