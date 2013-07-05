@@ -105,8 +105,11 @@ def edit_subscription_list(request):
             sublist.trackers.remove(f)
             state = False
         else:
-            if f not in sublist.trackers.all():
+            try:
                 sublist.trackers.add(f)
+            except:
+                # Ignore any uniqueness constraint violation.
+                pass
             state = True
     if request.POST["command"] == "remove-from-all":
         f = get_object_or_404(Feed, feedname=request.POST["feed"])
