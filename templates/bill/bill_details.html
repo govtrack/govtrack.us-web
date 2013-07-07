@@ -479,11 +479,12 @@
 
 <div style="margin-left: -15px">
 
-<ul class="tabs four-up">
+<ul class="tabs five-up">
 	<li><a href="#overview">Overview</a></li>
 	<li><a href="#summary">Summaries</a></li>
 	<li><a href="#related">Related</a></li>
 	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
+	<li><a href="#comments">Comments</a></li>
 </ul>
 
 <div class="panes">
@@ -1033,14 +1034,40 @@
 	</div>
 	{% endif %}
 
-</div>
-</div>
+	<div id="comments">
+	
+		<div id="disqus_thread"></div>
+		<script type="text/javascript">
+			var disqus_shortname = 'govtrack'; // required: replace example with your forum shortname
+			var disqus_identifier = '{{feed.feedname|escapejs}}';
+			var disqus_title = '{{bill.display_number_with_congress_number|escapejs}}: {{bill.title_no_number|escapejs}}';
+			var disqus_url = 'http://www.govtrack.us{{bill.get_absolute_url|escapejs}}';
+			var disqus_loaded = false;
+			function initialize_disqus() {
+				if (disqus_loaded) return;
+				disqus_loaded = true;
+				var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+				dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+				(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+			}
+		</script>
+		<noscript><a href="http://disqus.com/?ref_noscript">Comments powered by Disqus</a> are not available without Javascript.</noscript>
+		<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>    
+	
+	</div>
+	
+</div> <!--panes -->
+</div> <!-- margin fix -->
 
 {% endwith %} {% comment %}bill text{% endcomment %}
 				
 {% endcache %}
 
-<script>$("ul.tabs a").tabs("div.panes > div");</script>
+<script>$("ul.tabs a").tabs("div.panes > div", null, function(tabname) {
+	if (tabname == "comments") {
+		initialize_disqus();
+	};
+});</script>
 <script>$("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
 
 {% endblock %}
