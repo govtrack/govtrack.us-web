@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 urlpatterns = patterns('events.views',
     url(r'^accounts/lists', 'edit_subscription_lists'),

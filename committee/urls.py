@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 urlpatterns = patterns('committee.views',
     url(r'^$', 'committee_list', name='committee_list'),

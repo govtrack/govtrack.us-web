@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 urlpatterns = patterns('bill.views',
     url(r'^browse$', 'bill_list', name='bill_list'),
