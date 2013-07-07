@@ -97,13 +97,13 @@ jQuery.fn.keydown_enter = function(callback) {
 // Tabs that work via the window hash. Call this method over a node set
 // of <a href="#tabname"> elements, and have corresponding <div id="tabname">
 // elements. Requires jquery.ba-bbq.min.js.
-jQuery.fn.tabs = function(panes, subordinate_to) {
+jQuery.fn.tabs = function(panes, subordinate_to, on_tab_activate) {
 	function get_href(elem) {
 		// In IE7, getAttribute('href') always returns an absolute URL
 		// even if that's not what is specified in the HTML source. Doh.
 		var href = elem.getAttribute('href');
 		var h = href.indexOf('#');
-		if (h > 0) href = href.substring(h);
+		if (h >= 0) href = href.substring(h+1); // chop off the hash too
 		return href;
 	}
 	
@@ -125,7 +125,7 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 	
 	// What happens when the page hash changes?
 	function activate_tab(is_initial) {
-		var p = location.hash;
+		var p = location.hash.substring(1);
 		
 		// for top-level tabs, act on only the top part of the tab structure
 		if (subordinate_to == "") p = p.replace(/\/.*/, "");
@@ -141,7 +141,7 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 		
 		// activate the new tab pane
 		panes.each(function() {
-			if ("#" + subordinate_to + this.getAttribute('id') == p || "#" + this.getAttribute('tab') == p) {
+			if (subordinate_to + this.getAttribute('id') == p || this.getAttribute('tab') == p) {
 				// Show it immediately if this is on page load, otherwise fade it in fast.
 				if (is_initial) $(this).show(); else $(this).fadeIn("fast");
 				
@@ -165,7 +165,7 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 		// height from decreasing (because no tabs are shown) which
 		// could cause the page to scroll up, which would confuse the user.
 		panes.each(function() {
-			if (!("#" + subordinate_to + this.getAttribute('id') == p || "#" + this.getAttribute('tab') == p)) {
+			if (!(subordinate_to + this.getAttribute('id') == p || this.getAttribute('tab') == p)) {
 				$(this).hide();
 			}
 		});
@@ -176,6 +176,10 @@ jQuery.fn.tabs = function(panes, subordinate_to) {
 			if (get_href(this) == p)
 				$(this).addClass('active');
 		});
+		
+		// fire callback
+		if (on_tab_activate)
+			on_tab_activate(current_tab);
 	}
 
 	// On first load, load the tab corresponding to the page hash.
