@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User
-from django.utils.text import truncate_words
 
 import re
 import urllib
@@ -830,3 +829,7 @@ def expand_feeds(feeds):
         i += 1
     return feeds, map_to_source
 
+def truncate_words(s, num):
+    from django.utils.text import Truncator
+    return Truncator(s).words(num, truncate=" ...")
+    
