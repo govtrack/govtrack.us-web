@@ -13,25 +13,21 @@
 	<p>GovTrack applies the principles of open data to legislative transparency. We screen scrape <a href="/about">a variety of official government websites</a> each day and make the resulting normalized database of legislative information available for free for reuse &mdash; in bulk (since 2005) and with an API (since 2012). Our database is the foundation for <a href="/developers/downstream">dozens of other open government websites</a>.</p>
 	
 	<h2>How to get the data</h2>
+		
+	<p><a href="/developers/data">Bulk Data</a>. Our bulk data contains the raw data behind most everything you see on GovTrack in XML or JSON format (and sometimes both). You can download the bulk data using <tt>rsync</tt>, a common Unix data transfer utility. We began making our bulk data available in 2005.</p>
 	
-	<p>Starting in 2013 we began transitioning to a newer data collection system, so the data is currently fragmented among several sources:</p>
-	
-	<p><a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a>. This is a community project that we started to maintain a comprehensive database of all Members of Congress since 1789. The github account contains YAML files which you can load into your application. (Before 2013, this was our "people" database.)</p>
-	
-	<p><a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>. This is a community project to compile a comprehensive database of U.S. federal legislation. It is based in part on the source code we developed in the early 2000&rsquo;s to scrape THOMAS, and now we maintain the new code with others as part of a group effort. The project provides <a href="https://github.com/unitedstates/congress/wiki">bulk data downloads</a>, or you can run the Python scripts yourself on your own schedule.</p>
-
-	<p><a href="/developers/data">Legacy Bulk Data</a>. Since 2005 we have provided our database of flat XML files for bills and related data via our bulk data rsync server. This is the easiest method to get the complete database of bill status data and to keep it updated. Data files for the 113th Congress are from the two github projects above, so the information is identical. Historical data is from our legacy scrapers.</p>
-	
-	<p><a href="/developers/api">API</a>. Our API went online in May 2012. It is not quite as complete as some of the other data access methods. Data for the 113th Congress are from the two github projects above, so the information is identical. Historical data is from our legacy scrapers.</p>
+	<p><a href="/developers/api">API</a>. The API is appropriate for use in applications that need only small slices of our data at a time. If you intend to query data in bulk, use our <a href="/developers/data">bulk data</a> instead. Our first API went online in May 2012. It is currently in version 2.</p>
 	
 	<p><a href="http://gis.govtrack.us/map/demo/cd-2012/">GIS API and Maps</a>. We host a map server and API for United States Congressional Districts, 113th Congress (i.e. 2012 elections and on), based on the geographic data made available by the U.S. Census.</p>
 	
 	<h2>What about source code?</h2>
 		
-	<p>Our github repository at <a href="https://github.com/govtrack/govtrack.us-web">github:govtrack/govtrack.us-web</a> contains the source code for the Django front-end that you see at govtrack.us. Pull requests are welcome!</p>
+	<p>Our github repository at <a href="https://github.com/govtrack/govtrack.us-web">github:govtrack/govtrack.us-web</a> contains the source code for the Django front-end that you see at govtrack.us. Pull requests are welcome! Our front-end source code is not openly licensed right now, but if you want to stand it up for a different government/jurisdiction drop us a a line.</p>
 	
-	<p>Our front-end source code is not openly licensed right now, but if you want to stand it up for a different government/jurisdiction drop us a a line. The source code for gathering the data is in one of the repositories listed above.</p>
+	<p><a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a>. This is an open source community project that we started to maintain a comprehensive database of all Members of Congress since 1789. The github account contains YAML files which you can load into your application. You can also find the files in our <a href="/developers/data">bulk data</a>. (Before 2013, this was our "people" database.)</p>
 	
+	<p><a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>. This is an open source community project to compile a comprehensive database of U.S. federal legislation. It is based in part on the source code we developed in the early 2000&rsquo;s to scrape THOMAS, and now we maintain the new code with others as part of a group effort. The project provides <a href="https://github.com/unitedstates/congress/wiki">bulk data downloads</a>, or you can run the Python scripts yourself on your own schedule, and we make the data available through our <a href="/developers/data">bulk data</a>.</p>
+
 	
 </section>
 {% endblock %}

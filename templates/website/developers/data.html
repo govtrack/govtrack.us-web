@@ -1,102 +1,132 @@
 {% extends "master.html" %}
+
 {% block title %}GovTrack.us - Bulk Raw Data{% endblock %}
+
 {% block crumbs %}
 <ul><li><a href="/developers">Developer Documentation</a></li> <li>Bulk Raw Data</li></ul>
 {% endblock %}
+
 {% block summary %}
 	<h1>Bulk Raw Data Documentation</h1>
 	<p>GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
+	<p>Our bulk data rsync server provides access to most of the information found on GovTrack. Data for the 113th Congress (2013 and on) are from <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a> and <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>, community projects that we helped create and now help maintain. Historical data is from our legacy scrapers.</p>
+	<p>Consider using our <a href="/developers/api">API</a> if you only need a small slice of the data.</p>
 {% endblock %}
+
 {% block links %}
 {% include "website/developers/menu.html" %}
+{% endblock %}
+
+{% block head %}
+<style>
+h3 { margin: 4px 0 4px 16px; }
+tt { font-size: 90%; }
+</style>
 {% endblock %}
 
 {% block body %}
 <section class="main twelve columns">
 
-	<p>Our bulk data rsync server provides access to most of the information found on GovTrack. Data for the 113th Congress (2013 and on) are from <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a> and <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>, community projects that we helped create and now help maintain. Historical data is from our legacy scrapers.</p>
-	<p>Consider using our <a href="/developers/api">API</a> if you only need a small slice of the data.</p>
 	
-	<h2>What Data Is Available</h2>
-	
-	<ul class="bullets">
-		<li><b>Bills and Resolutions</b>: Our database contains metadata about bills and resolutions (title, status, actions, etc.) from the 82nd Congress through the present, but consult the <a href="/about">coverage table</a> for details about what is available when.</li>
-		
-		<li><b>Roll Call Votes</b>: Our database contains roll call votes from the founding of the nation. See below.</li>
-		
-		<li><b>Other Data</b>: We have some other data as well. See below, but also consult the two github projects listed at the top!</li>
-	</ul>
-	
-	
-
 	{% include "website/developers/gettingstarted.html" %}
 
-	<h2>Getting the Data</h2>
+	<h2>Overview</h2>
 	
-	<p>The raw data is 43 gigabytes in all. As a result, we have a few different methods for helping you get the data you want:</p>
+	<p>The bulk data is a deep directory structure of flat XML and JSON files. The directory layout is described below.</p>
+	
+	<h3>Try HTTP First</h3>
+	
+	<p>You can familiarize yourself with the contents of our bulk data by browsing <a 	href="/data/congress/">http://www.govtrack.us/data/congress/</a>. Get an idea for the directory structure and what the files look like.</p>
+	
+	<h3>Basic Directory Layout</h3>
+	
+	<p>Our files are in three main directories:</p>
 	
 	<ul>
-	<li>You can browse the bulk data at <a 
-	href="/data/">http://www.govtrack.us/data</a>. Start here to get an idea for the directory structure and what the files look like. We discourage using HTTP to actually download the data in bulk, though. (Also see the <a href="/developers/api">API</a> for HTTP-based access.)</li>
+		<li><a href="/data/congress-legislators/">/data/congress-legislators/</a><br>
+		Information on Members of Congress from 1789-present, presidents and vice presidents, Congressional committees, and current committee assignments. This data is a mirror of the files in <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a>.</li>
 
-	<li>&ldquo;Rsync&rdquo; is the preferred method for obtaining the bulk data. You can use rsync to choose just the directories you want and it efficiently keeps  your files up to date by downloading only changes since your last update. <a href="/developers/rsync">Rsync Instructions &gt;</a></li>
+		<li><a href="/data/congress/">/data/congress/</a> (i.e. http://www.govtrack.us/data/congress/)<br>
+		Bill status and other legislative data from 2013 (113th Congress) and forward. This data is the output of the scrapers developed by the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project.</li>
+		
+		<li><a href="/data/us/">/data/us/</a><br>
+		Bill status and other legislative data from 1789-2012 (1st-112th Congresses). These files come from our legacy scrapers and are no longer being updated.</li>
 	</ul>
-
-	<h2 style="margin-bottom: 1em">Bulk Data Schema</h2>
 	
-	<h3>General Structure</h3>
+	<p>More information on these directories can be found below.</p>
+	
+	<h3>Getting the Data</h3>
+	
+	<p>To fetch the data we support <tt>rsync</tt>, a common Unix/Mac tool for efficiently fetching files and keeping them updated as they change. The root of our rsync tree is <tt>govtrack.us::govtrackdata</tt>, and this corresponds exactly to what you see at <a 
+	href="/data/">http://www.govtrack.us/data/</a>.</p>
+	
+	<p>To download bill data for the 113th Congress into a local directory named bills, run:</p>
+	
+	<pre>rsync -avz --delete --delete-excluded --exclude **/text-versions/ \
+		govtrack.us::govtrackdata/congress/113/bills .</pre>
+	
+	<p>(Note the double colons in the middle and the period at the end. This is a long command. I&rsquo;ve indicated the line continuation with a backslash.)</p>
+	
+	<p>This directory will grow as bills are introduced, and files will be updated regularly as we pull new information from Congress. To keep your files fresh, just run the command again. It will only download new and updated files!</p>
+	
+	<p>The complete data directory is around 100 gigabytes in all, so keep your rsync command as narrowly focused as possible.</p>
+	
+	<p>Although you can also see these files over HTTP, we discourage using HTTP to actually download the data in bulk. Use it for a few files, but don&rsquo;t hammer our server with tens of thousands of HTTP requests.</p>
+	
+	<p>For more info about rsync, see <a href="/developers/rsync">our rsync notes</a> and the <a href="http://ss64.com/bash/rsync.html">rsync documentation</a>.</p>
+
+	<h2 style="margin-bottom: 1em">Directory Layout</h2>
+	
+	<h3>Know what a &ldquo;Congress&rdquo; is!</h3>
 	
 	<p>Most files are organized by &ldquo;Congress.&rdquo; A &ldquo;Congress&rdquo; 
 	is a two-year term of activity, starting in the year after an 
 	election year. Many things in Congress reset after each two year 
-	term, such as bill numbers. In GovTrack, a "Congress" is called 
-	a "session" (which is actually a misnomer because each 
-	"Congress" is made up of two "sessions" which follow the 
-	calendar years).</p>
+	term, such as bill numbers. Each year is called a &ldquo;session&rdquo;.
+	(In historical data, the durations of sessions and Congresses were more arbitrary.)</p>
 	
-	<p>The 112<sup>th</sup> Congress (<tt>session = 112</tt>) roughly covers the period 2011-2012, although technically the Congress usually starts a few days into January of the first year and extends a few days into January of the year following the last full year of the Congress.
-	Each Congress is in its own directory: <tt>data/us/112</tt>, <tt>data/us/111</tt>,
-	<tt>data/us/110</tt>, etc. We have roll call data going back to the first
-	Congress, so we have data going back to the directory <tt>data/us/1</tt>.</p>
+	<p>Congresses start and end on January 3 of odd-numbered years. The 113<sup>th</sup> Congress
+	started on Jan 3, 2013 at noon and will end on Jan 3, 2015 at noon. (Again, in historical
+	data the start and end dates of Congresses was more arbitrary.)</p>
 	
-	<h3>Schemas</h3>
+	<h3>Directories</h3>
 
 	<ul>
+		<li><tt><a href="/data/congress-legislators/">/data/congress-legislators/</a></tt><br>
+		This directory contains several files in YAML format containing information on Members of Congress from 1789-present, presidents and vice presidents, Congressional committees, and current committee assignments. See the documentation at <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a> for details.</li>
 
-	<li>Bills and resolutions are stored in <a href="/data/us/112/bills">data/us/112/bills</a> for the current Congress and similarly named directories for other Congresses. <a href="/developers/bill_xml">Bill XML Schema &gt;</a></li>
+		<li><tt><a href="/data/congress/113/bills">/data/congress/113/bills</a>/[bill_type]/[bill_type][bill_number]/data.[json|xml]</tt><br>
+		Bill and resolution status for bills in the 113th Congress. See the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project documentation for details of the JSON format. The XML format is backwards-compatible with our legacy bill XML files (<a href="/developers/bill_xml">documentation</a>).</li>
+		
+		<li><tt><a href="/data/congress/113/bills/sconres/sconres14/text-versions/is/">/data/congress/113/bills</a>/[bill_type]/[bill_type][bill_number]/<b>text-versions</b>/[version]</tt><br>
+		Bill and resolution text and text metadata for a particular bill. Note that while we only have bill status data for the 113th Congress and forward in this area of the data directory, we have bill text metadata going back much further (see our <a href="/about">coverage table</a> for details). See the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project documentation for details.</li>
+
+		<li><tt><a href="/data/congress/113/amendments">/data/congress/113/amendments</a>/[amdt_type]/[amdt_type][amdt_number]/data.[json|xml]</tt><br>
+		Amendment status for amendments to bills in the 113th Congress. See the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project documentation for details of the JSON format. The XML format is backwards-compatible with our legacy amendment XML files.</li>
+
+		<li><tt><a href="/data/congress/113/votes">/data/congress/113/votes</a>/[session]/[chamber][number]/data.[json|xml]</tt><br>
+		Roll call vote results for the 113th Congress. See the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project documentation for details of the JSON format. The XML format is backwards-compatible with our legacy roll call vote XML files (<a href="/developers/vote_xml">documentation</a>).</li>
 	
-	<li>Roll call votes are stored in <a href="/data/us/112/rolls">data/us/112/rolls</a> for the current Congress and similarly named directories for other Congresses. Votes by unanimous consent, for example,
-	are not included here because they are not recorded votes. <a href="/developers/vote_xml">Roll Call Vote XML Schema &gt;</a> </li>
+		<li><tt><a href="/data/us/112/bills">/data/us/[congress]/bills</a></tt><br>
+		Historical bill and resolution status from the 93rd to the 112th Congress. <a href="/developers/bill_xml">Bill XML Schema &gt;</a></li>
+		
+		<li><tt><a href="/data/us/112/rolls">/data/us/[congress]/rolls</a></tt><br>
+		Historical roll call vote results for the 1st through 112th Congress. See our <a href="/about">coverage table</a> for where this data came from. Note that votes by unanimous consent and other similar unrecorded vote types are not included here because they are not recorded votes. <a href="/developers/vote_xml">Roll Call Vote XML Schema &gt;</a> </li>
 
+		<li><tt><a href="/data/us/sessions.tsv">/data/us/sessions.tsv</a></tt><br>
+		A TSV file containing the start and adjournment dates of each Congress and session.</li>
+	
+		<li><tt><a href="/data/photos">/data/photos</a></tt><br>
+		Contains jpeg images of Members of Congress, past and present. 
+		Not all Members of Congress's have photos. The name of the photo is the GovTrack 
+		numeric identifier for the person followed by: nothing, for the 
+		largest original image available; 200px, 100px, 50px, for three 
+		sizes of the photo, by width; all followed by .jpeg. -credit.txt files
+		give a tab-delimeted source URL and source description information
+		for each photo.</li>
 	</ul>
 	
-	<h3>Other Files</h3>
-	
-	<ul>
-	<li><a href="/data/us/sessions.tsv">data/us/sessions.tsv</a>
-	gives the start and end date of each session (typically one year) and 
-	Congress (typically two years).</li>
-
-	<li>The <a href="/data/photos">data/photos</a> directory 
-	contains jpeg images of Members of Congress, past and present. 
-	Not all MoC's have photos. The name of the photo is the GovTrack 
-	numeric identifier for the person followed by: nothing, for the 
-	largest original image available; 200px, 100px, 50px, for three 
-	sizes of the photo, by width; all followed by .jpeg. -credit.txt files
-	give a tab-delimeted source URL and source description information
-	for each photo.</li>
-	
-	<li>The <a href="/data/us/bills.text">data/us/bills.text</a> directory includes the text of legislation in PDF, XML, and text format (from GPO) and in HTML format (from THOMAS). It is organzized by Congress, bill type, and GPO bill status code.
-	See <a href="http://www.gpo.gov/help/index.html#about_congressional_bills.htm">GPO's documentation on bill text status</a>.</li>
-	
-	<li><b>DEPRECATED AS OF 1/3/2013 &mdash;</b> <a href="/data/us/people.xml">data/us/people.xml</a>:
-	This file contains everyone that has ever served in Congress, and U.S. presidents, with their party
-	affiliation, terms in Congress, birthdays, etc.
-	This file is quite large... best not to open it in your browser.
-	This file has been put together from a variety of sources and is
-	maintained by hand. <a href="/developers/people_xml">People.xml Schema &gt;</a></li>
-	</ul>
-	
+	<p>Other files that you may see in the /data directory are unsupported. Use at your own risk.</p>
 
 </section>
 {% endblock %}
