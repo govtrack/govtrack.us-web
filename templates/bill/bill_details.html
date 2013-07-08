@@ -484,7 +484,7 @@
 	<li><a href="#summary">Summaries</a></li>
 	<li><a href="#related">Related</a></li>
 	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
-	<li><a id="comments_tab_link" href="#comments">Comments</a></li>
+	<li id="comments_tab" style="display: none"><a href="#comments">Comments</a></li>
 </ul>
 
 <div class="panes">
@@ -1076,8 +1076,10 @@ $("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
 var DISQUSWIDGETS = {
 	displayCount: function(obj) {
 		var c = (obj && obj.counts && obj.counts.length > 0) ? obj.counts[0].comments : 0;
-		var n = $('#comments_tab_link');
+		var n = $('#comments_tab a');
 		n.text(n.text() + " (" + c + ")");
+		{% if not bill.is_alive %}if (c > 0) {% endif %}$('#comments_tab').show();
+			
 	}
 };
 </script>
