@@ -484,7 +484,7 @@
 	<li><a href="#summary">Summaries</a></li>
 	<li><a href="#related">Related</a></li>
 	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
-	<li><a href="#comments">Comments</a></li>
+	<li><a id="comments_tab_link" href="#comments">Comments</a></li>
 </ul>
 
 <div class="panes">
@@ -1063,11 +1063,24 @@
 				
 {% endcache %}
 
-<script>$("ul.tabs a").tabs("div.panes > div", null, function(tabname) {
+<script>
+$("ul.tabs a").tabs("div.panes > div", null, function(tabname) {
 	if (tabname == "comments") {
 		initialize_disqus();
 	};
-});</script>
-<script>$("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
+});
+$("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
+
+<!-- disqus comment count, hacked from their count.js code -->
+<script>
+var DISQUSWIDGETS = {
+	displayCount: function(obj) {
+		var c = (obj && obj.counts && obj.counts.length > 0) ? obj.counts[0].comments : 0;
+		var n = $('#comments_tab_link');
+		n.text(n.text() + " (" + c + ")");
+	}
+};
+</script>
+<script src="http://govtrack.disqus.com/count-data.js?q=1&0=1,{{feed.feedname|urlencode}}"> </script>
 
 {% endblock %}
