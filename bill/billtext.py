@@ -224,8 +224,9 @@ def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
     # In the BILLS collection, there's gunk at the top and bottom that we'd
     # rather just remove: metadata in brackets at the top, and <all> at the end.
     # We remove it because it's not really useful when indexing.
-    bill_text_content = re.sub(r"^\s*(\[[^\n]+\]\s*)*", "", bill_text_content)
-    bill_text_content = re.sub(r"\s*<all>\s*$", "", bill_text_content)
+    if bill_text_content:
+        bill_text_content = re.sub(r"^\s*(\[[^\n]+\]\s*)*", "", bill_text_content)
+        bill_text_content = re.sub(r"\s*<all>\s*$", "", bill_text_content)
 
     # Caller just wants the plain text?
     if not mods_only and plain_text:
