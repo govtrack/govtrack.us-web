@@ -100,7 +100,7 @@ class BillProcessor(XmlProcessor):
         titles = []
         for elem in node.xpath('./titles/title'):
             text = unicode(elem.text) if elem.text else None
-            titles.append((elem.get('type'), elem.get('as'), text))
+            titles.append((elem.get('type') + ("-partial" if elem.get("partial") == "1" else ""), elem.get('as'), text))
         obj.titles = titles
         obj.title = get_primary_bill_title(obj, titles)
 
