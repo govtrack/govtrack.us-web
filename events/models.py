@@ -225,7 +225,7 @@ class Feed(models.Model):
             "noun": "bill",
             "link": lambda self: self.bill().get_absolute_url(),
             "category": "federal-bills",
-            "description": "You will get updates when this bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when bill text becomes available or when we write a bill summary, plus similar events for related bills.",
+            "description": "You will get updates when this bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when a committee meeting is scheduled, when bill text becomes available or when we write a bill summary, plus similar events for related bills.",
         },
         "p:": {
             "title": lambda self : self.person().name,
