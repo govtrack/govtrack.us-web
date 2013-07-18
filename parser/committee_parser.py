@@ -17,6 +17,7 @@ from person.models import Person
 from bill.models import Bill, BillType
 
 import json, re
+import common.enum
 
 log = logging.getLogger('parser.committee_parser')
 
@@ -196,6 +197,8 @@ def main(options):
 					        mobj.bills.add(bill)
 					    except AttributeError:
 					        pass # regex failed
+					    except common.enum.NotFound:
+					        pass # invalid bill type code in source data
 				except Committee.DoesNotExist:
 					log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
 	
