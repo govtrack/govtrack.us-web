@@ -663,6 +663,10 @@ class Bill(models.Model):
             return [t for t in self.terms.all() if t.is_top_term()][0]
         except IndexError:
             return None
+    def get_top_term_id(self):
+        t = self.get_top_term()
+        if t: t = t.id
+        return t
         
     def get_terms_sorted(self):
         terms = list(self.terms.all())

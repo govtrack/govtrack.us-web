@@ -145,6 +145,21 @@ def bill_details(request, congress, type_slug, number):
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": Feed.BillFeed(bill),
         "text": get_text_info,
+        
+        "care2_category_id": {
+        	5816: '793', # Agriculture and Food=>Health
+        	5840: '789', # Animals=>Animal Welfare
+        	5996: '794', # Civil Rights=>Human Rights
+        	5991: '791', # Education=>Education
+        	6021: '792', # Energy=>Environment & Wildlife
+        	6038: '792', # Environmental Protection=>Environment & Wildlife
+        	6053: '793', # Families=>Health
+        	6130: '793', # Health=>Health
+        	6206: '794', # Immigration=>Human Rights
+        	6279: '792', # Public Lands/Natural Resources=>Environment & Wildlife
+        	6321: '791', # Social Sciences=>Education
+        	6328: '793', # Social Welfare => Health
+        }.get(bill.get_top_term_id(), '795') # fall back to Politics category
     }
 
 @user_view_for(bill_details)
