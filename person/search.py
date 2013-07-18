@@ -72,6 +72,7 @@ def person_search_manager():
     sm.add_option('most_recent_role_district', label="district", type="select", formatter = lambda v : "At Large" if v == 0 else ordinal(v), visible_if=lambda form:"most_recent_role_state" in form, sort="KEY")
     sm.add_option('most_recent_role_party', label="party", type="select", formatter = lambda v : v.capitalize())
     sm.add_option('gender')
+    sm.add_sort("Last Name", "lastname", default=True)
     
     # sm.add_option('name', label='last name', type="text", filter=name_filter, choices="NONE")
     # sm.add_option('roles__current', label="currently serving?", type="radio", filter=current_filter)
