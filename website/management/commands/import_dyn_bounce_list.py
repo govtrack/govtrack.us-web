@@ -14,8 +14,8 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		for rec in csv.DictReader(sys.stdin):
 			if rec["Bounce Type"] != "hard": continue
-			if rec["Bounce Rule"] != "emaildoesntexist":
-				if rec["Bounce Rule"] not in ("blockedcontent", "localconfigerror", "overquota", "relayerror", "remoteconfigerror"):
+			if rec["Bounce Rule"] not in ("emaildoesntexist", "blockedcontent", "overquota", "inactive"):
+				if rec["Bounce Rule"] not in ("localconfigerror", "relayerror", "remoteconfigerror"):
 					print "Unmatched rule:", rec["Bounce Rule"]
 				continue
 			
