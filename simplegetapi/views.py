@@ -324,6 +324,9 @@ def do_api_search(model, qs, request_options, requested_fields):
     except ValueError:
         return HttpResponseBadRequest("Invalid offset or limit.")
         
+    if limit > 600:
+        return HttpResponseBadRequest("Limit > 600 is not supported. Consider using our bulk data instead.")
+
     if qs_type == "QuerySet":
         # Don't allow very high offset values because MySQL fumbles the query optimization.
         if offset > 10000:
