@@ -9,28 +9,14 @@
 
 	<div class="six columns" style="margin-top: 1em; padding-left: 0;">
 	
-		<h2>$2/year for an ad-free GovTrack</h2>
+		<h2>Support our work and get rid of the advertisements</h2>
 
-		<p>Want to get rid of the ads on GovTrack? Now you can!</p>
+		<p style="margin: 1.5em 0;">For $2, we&rsquo;ll hide all of the ads on GovTrack for a year.</p>
 		
-		<p>For $2, we&rsquo;ll hide all of the ads on GovTrack for a year. Here are the details:</p>
-		
-		<ul class="bullets">
-			<li>You must be logged in for the ads to be hidden.</li>
-			<li>We&rsquo;re only accepting payment via PayPal right now. You can use a credit card, but you&rsquo;ll need to create a PayPal account first.</li>
-			<li>If you&rsquo;re not happy and want the ads back, we&rsquo;ll send you a refund no-questions-asked within 7 days of your payment.</li>
-		</ul>
-	
-		<p>We began offering this service on May 23, 2013 in order to provide a less distracting and more privacy-protecting way to access GovTrack.us.
-		Before June 21, 2013, the offer was $5 to go ad-free for life. On June 21 we changed it to $2/year.</p>
-	</div>
-	
-	<div class="six columns last" style="padding-top: 50px; text-align: center;">
-	
 		{% if not request.user.is_authenticated %}
-			<p>You must be logged in to go ad-free.</p>
+			<p style="margin: 1.5em 0;">You must be logged in to go ad-free.</p>
 		
-			<div style="width: 50%; margin: 0 auto;">
+			<div style="width: 50%; margin-left: 2em;">
 				<div class="signin_social">
 					{% with "/accounts/go_ad_free" as singlesignon_next %}
 						{% include "registration/login_singlesignon.html" %}
@@ -60,6 +46,19 @@
 		{% endif %}
 	</div>
 
+	<div class="six columns last" style="padding-top: 50px;">
+		<p>Here are some details:</p>
+		
+		<ul class="bullets">
+			<li>You must be logged in for the ads to be hidden.</li>
+			<li>We&rsquo;re only accepting payment via PayPal right now. You can use a credit card, but you&rsquo;ll need to create a PayPal account first.</li>
+			<li>If you&rsquo;re not happy and want the ads back, we&rsquo;ll send you a refund no-questions-asked within 7 days of your payment.</li>
+		</ul>
+	
+		<p>We began offering this service on May 23, 2013 in order to provide a less distracting and more privacy-protecting way to access GovTrack.us.
+		Before June 21, 2013, the offer was $5 to go ad-free for life. On June 21 we changed it to $2/year.</p>
+	</div>
+	
 </div>
 </div>
 {% endblock %}
