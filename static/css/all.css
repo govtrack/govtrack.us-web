@@ -155,6 +155,9 @@ a:hover {
 	color: #664030; 
 	border-bottom: dotted #dfab96 1px;
 	}
+a.no-hover-border:hover {
+	border-bottom: none;
+}
 input, textarea, select {
     vertical-align: middle;
     color: #000;

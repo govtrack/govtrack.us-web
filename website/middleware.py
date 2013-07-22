@@ -26,6 +26,8 @@ SENATE_NET_RANGES = (
     ("156.33.0.0", "156.33.255.255"),
     )
 
+trending_feeds = None
+
 def template_context_processor(request):
     # These are good to have in a context processor and not middleware
     # because they won't be evaluated until template evaluation, which
@@ -36,6 +38,17 @@ def template_context_processor(request):
     }
     
     if request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
+    
+    # Add top-tracked feeds.
+    global trending_feeds
+    if not trending_feeds or trending_feeds[0] < datetime.datetime.now()-datetime.timedelta(hours=2):
+        trf = cache.get("trending_feeds")
+        if not trf:
+            from events.models import Feed
+            trf = Feed.get_trending_feeds()
+            cache.set("trending_feeds", trf, 60*60*2)
+        trending_feeds = (datetime.datetime.now(), [Feed.objects.get(id=f) for f in trf])
+    context["trending_feeds"] = trending_feeds[1]
     
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
@@ -96,12 +109,12 @@ def template_context_processor(request):
                     return None
             def fmt_role(r):
                 return {
-                	"id": r.person.id,
-                	"name": r.person.name_and_title(),
-                	"link": r.person.get_absolute_url(),
-                	"type": RoleType.by_value(r.role_type).key,
-                	"pronoun": Gender.by_value(r.person.gender).pronoun,
-                	"key_vote": get_key_vote(r.person),
+                    "id": r.person.id,
+                    "name": r.person.name_and_title(),
+                    "link": r.person.get_absolute_url(),
+                    "type": RoleType.by_value(r.role_type).key,
+                    "pronoun": Gender.by_value(r.person.gender).pronoun,
+                    "key_vote": get_key_vote(r.person),
                 }
             qs = PersonRole.objects.filter(current=True).select_related("person")    
             cong_dist["reps"] = [fmt_role(r) for r in 

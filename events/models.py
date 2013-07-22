@@ -111,6 +111,37 @@ class Feed(models.Model):
     def get_ten_events(self):
         return self.get_events(10)
 
+    @staticmethod
+    def get_trending_feeds():
+        def get_feed_counts(num_days):
+            # Get the number of new subscriptions to all feeds in the last some days.
+            # We don't have a model for the relationship, but we have a table that
+            # adds date_added automatically as a timestamp. If we add a 'through'
+            # model, we have to replace .add/.remove on the field with other methods.
+            from django.db import connection
+            cursor = connection.cursor()
+            cursor.execute("SELECT feed_id, count(*) FROM events_subscriptionlist_trackers WHERE date_added > %s GROUP BY feed_id", [datetime.now() - timedelta(days=num_days)])
+            subs = cursor.fetchall()
+            return { row[0]: row[1] for row in subs } 
+            
+        trending = []
+        for period in (2, 7, 21, 60):
+            # Get the number of times each feed was subscribed to in the last period and 2*period days.
+            subs1 = get_feed_counts(period)
+            subs2 = get_feed_counts(period*2)
+            
+            # Order the mentioned feeds by the ratio of recent subscriptions to less recent subscriptions,
+            # but giving a boost for the total number of new subscriptions.
+            mv = float(max(subs1.values()))
+            feeds = sorted(subs1.keys(), key = lambda f : subs1[f]/subs2.get(f, 1) + 2*(subs1[f]/mv)**.5, reverse=True)
+            
+            # Take the top trending bill not seen in a previous period.
+            for f in feeds:
+                if f not in trending:
+                    trending.append(f)
+                    break
+        return trending
+
     # feed metadata
     
     feed_metadata = {

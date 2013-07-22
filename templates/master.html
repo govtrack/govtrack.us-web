@@ -12,7 +12,7 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130415" />
+		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130722" />
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen" /><![endif]-->
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -80,11 +80,23 @@
 <body class="{% block body_class %}{% endblock %}">
 
 	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" data-seq="30">
+	<div id="sitenewscontainer" style="display: none" data-seq="31">
 		<div id="sitenews">
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div class="sitenewsbody">
+				{% comment %}
 				<p>Want to hide the ads? You can now <a href="http://www.govtrack.us/accounts/go_ad_free">go ad-free</a> for $2/year.</p>
+				{% endcomment %}
+				
+				<div style="font-size: 85%; color: #553;">Trending on GovTrack now...</div>
+				<div id="trending_bills" style="max-width: 920px; margin: 0 auto; font-size: 90%;">
+				{% for f in trending_feeds %}
+					<a class="no-hover-border" style="width: 230px; float: left; padding-right: 15px; margin: 3px 0; line-height: 120%; max-height: 2.5em; overflow: hidden;" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');">
+						{{f.title}}
+					</a>
+				{% endfor %}
+				<div style="clear: both"> </div>
+				</div>
 			</div>
 			<div style="clear: both"> </div>
 		</div>
@@ -103,6 +115,7 @@
 		$.cookie("sitenewsbanner", $('#sitenewscontainer').attr("data-seq"), { expires: 14, path: '/' });
 	}
 	$(function() {
+		{% comment %}
 			if (cong_dist && cong_dist.reps && 0) {
 				if (!the_user && cong_dist.reps[0].key_vote) {
 					var p = cong_dist.reps[0];
@@ -132,10 +145,12 @@
 					$('#sitenewscontainer').fadeIn();
 				}
 			}
+		{% endcomment %}
 			
 		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("data-seq")) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
 			$('#sitenewscontainer').fadeIn();
+			setTimeout("$('#trending_bills > a').each(function() { $(this).truncate_text() });", 10); // a little after the fade has started so the divs are shown
 		}
 	});
 	</script>
