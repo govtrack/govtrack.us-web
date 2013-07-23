@@ -42,9 +42,9 @@ def template_context_processor(request):
     # Add top-tracked feeds.
     global trending_feeds
     if not trending_feeds or trending_feeds[0] < datetime.datetime.now()-datetime.timedelta(hours=2):
+        from events.models import Feed
         trf = cache.get("trending_feeds")
         if not trf:
-            from events.models import Feed
             trf = Feed.get_trending_feeds()
             cache.set("trending_feeds", trf, 60*60*2)
         trending_feeds = (datetime.datetime.now(), [Feed.objects.get(id=f) for f in trf])

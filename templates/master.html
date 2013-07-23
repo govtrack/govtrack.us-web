@@ -91,7 +91,7 @@
 				<div style="font-size: 85%; color: #553;">Trending on GovTrack now...</div>
 				<div id="trending_bills" style="max-width: 920px; margin: 0 auto; font-size: 90%;">
 				{% for f in trending_feeds %}
-					<a class="no-hover-border" style="width: 230px; float: left; padding-right: 15px; margin: 3px 0; line-height: 120%; max-height: 2.5em; overflow: hidden;" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');">
+					<a class="no-hover-border" style="width: 230px; float: left; padding-right: 15px; margin: 3px 0; line-height: 120%; max-height: 2.5em; overflow: hidden; text-decoration: none;" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
 						{{f.title}}
 					</a>
 				{% endfor %}
