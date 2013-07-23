@@ -1,0 +1,100 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Videos{% endblock %}
+{% block meta_description %}Original video reporting from GovTrack.us{% endblock %}
+
+{% block body_class %}about{% endblock %}
+
+{% block og_image %}
+	{% if video_id == "2013-07-22_few-bills" %}
+		<meta property="og:image" content="http://img.youtube.com/vi/wKGY-Z5_mHc/0.jpg" />
+	{% endif %}
+{% endblock %}
+
+{% block head %}
+	{% if video_id == "2013-07-22_few-bills" %}
+		<meta property="og:title" content="Lawmakers Who Aren’t Making Law" />
+		<meta property="og:description" content="The current Congress is on track to enact fewer bills than any other Congress in modern history. What’s more, the number of bills introduced continues a downward trend from the last Congress." />
+	{% endif %}
+{% endblock %}
+	
+{% block extra_css %}
+<style>
+h2 { line-height: 130%; }
+.heading-box #cat-icon { min-height: auto; }
+.date { color: #777; font-style: italic; }
+#support_our_work {
+	margin: 0 0 1.5em 0;
+	border: 1px solid #EEE;
+	background-color: #FAFAF9;
+	padding: .5em;
+	color: red;
+}
+#support_our_work form { width: 130px; margin: 0 auto; }
+</style>
+{% endblock %}
+
+{% block summary %}
+<div>
+	<h1>GovTrack Videos</h1>
+
+	<p style="margin-bottom: 0">We took a camera out of the office to figure out what&rsquo;s really going on.</p>
+</div>
+{% endblock %}
+{% block links %}
+{% endblock %}
+
+{% block body %}
+<section class="row">
+	<div class="seven columns">
+		<iframe width="500" height="281" src="//www.youtube.com/embed/wKGY-Z5_mHc" frameborder="0" allowfullscreen></iframe>
+	</div>
+	<div class="five columns">
+		<div id="support_our_work">
+			<div style="font-weight: bold">Want to see Avi do another video?</div>
+			<div style="margin: 5px 0 8px 0;">Support future videos by leaving Avi a tip, or send ideas for our next video to <a href="mailto:&#105;&#100;&#101;&#097;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#105;&#100;&#101;&#097;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>.</div>
+			
+			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+				<input type="hidden" name="cmd" value="_s-xclick">
+				<input type="hidden" name="hosted_button_id" value="JHY2CZHYCPGZ2">
+				<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1" style="float: right">
+				<input type="image" src="http://www.govtrack.us/static/img/leave_a_tip.png" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+			</form>
+		</div>
+
+		<h2>Lawmakers Who Aren’t Making Law</h2>
+	
+		<p><span class="date">7/22/2013.</span> The current Congress is on track to enact fewer bills than any other Congress in modern history. What’s more, the number of bills introduced continues a downward trend from the last Congress.</p>
+		<p>Written by Avi Eilam. See the <a href="http://www.govtrack.us/blog/2013/07/23/lawmakers-who-aren%E2%80%99t-making-law/">full blog post</a>.</p>
+	</div>
+</section>
+
+<section>
+	<hr/>
+	<h2>Older Videos</h2>
+</section>
+	
+<section class="row">
+	<div class="seven columns">
+		<iframe width="500" height="281" src="//www.youtube.com/embed/2TmXo4Ij0bs" frameborder="0" allowfullscreen></iframe>
+	</div>
+	<div class="five columns">
+		<h2>Tracking S. 510, Part 2: FDA Food Safety Modernization Act (111th Congress)</h2>
+		<p><span class="date">11/15/2010.</span> We covered the controversial food safety bill.</p>
+		<p>Produced by Patrick Tutwiler.</p>
+	</div>
+</section>
+
+<section class="row">
+	<div class="seven columns">
+		<iframe width="500" height="281" src="//www.youtube.com/embed/aDnd8_t7Y5w" frameborder="0" allowfullscreen></iframe>
+	</div>
+	<div class="five columns">
+		<h2>Tracking S. 510, Part 1: FDA Food Safety Modernization Act (111th Congress) </h2>
+		<p><span class="date">10/12/2010.</span> We covered the controversial food safety bill.</p>
+		<p>Produced by Patrick Tutwiler.</p>
+	</div>
+
+</section>
+
+{% endblock %}
+
