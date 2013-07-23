@@ -17,5 +17,6 @@ urlpatterns = patterns('website.views',
     url(r'^accounts/go_ad_free$', 'go_ad_free_start'),
     url(r'^accounts/go_ad_free/start$', 'go_ad_free_redirect'),
     url(r'^accounts/go_ad_free/finish$', 'go_ad_free_finish'),
+    url(r'^videos(?:/(?P<video_id>[a-z0-9\-_]+))?', 'videos'),
 )
 

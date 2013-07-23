@@ -516,3 +516,8 @@ def go_ad_free_finish(request):
     except Exception as e:
         raise ValueError(str(e) + " while processing " + payment.id)
 
+@anonymous_view
+def videos(request, video_id=None):
+    return render_to_response('website/videos.html', { "video_id": video_id }, RequestContext(request))
+
+
