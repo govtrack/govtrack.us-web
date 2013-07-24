@@ -146,8 +146,16 @@
 				}
 			}
 		{% endcomment %}
+		
+		// get the first (after the X) link's href, and if it's the current page, don't show
+		// the banner.
+		var cur_link = null;
+		try {
+			cur_link = $('#sitenewscontainer a:not(:first)').first().attr("href");
+		} catch (err) { }
 			
-		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("data-seq")) {
+		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("data-seq")
+			&& location.pathname != cur_link) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
 			$('#sitenewscontainer').fadeIn();
 			setTimeout("$('#trending_bills > a').each(function() { $(this).truncate_text() });", 10); // a little after the fade has started so the divs are shown
