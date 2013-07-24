@@ -14,14 +14,21 @@
 		{% with text as text_info %}
 			{% if text_info.basename %}
 				<meta property="og:image" content="http://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
+				<meta property="twitter:image:src" content="http://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
 			{% else %}
-				<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
+				<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118"
+				/>
+				<meta property="twitter:image:src" content="http://www.govtrack.us/static/images/media_icon.png?20130118"
 			{% endif %}
 		{% endwith %}
 	{% else %}
 		<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
+		<meta property="twitter:image:src" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
 	{% endif %}
 	{% endcache %}
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="{{bill.title}}">
+	<meta name="twitter:description" content="{{subtitle}}">
 {% endblock %}
 
 {% block head %}
