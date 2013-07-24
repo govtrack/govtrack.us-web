@@ -45,10 +45,27 @@ h2 { line-height: 130%; }
 
 {% block body %}
 <section class="row">
-	<div class="seven columns">
-		<iframe width="500" height="281" src="//www.youtube.com/embed/wKGY-Z5_mHc" frameborder="0" allowfullscreen></iframe>
+	<div class="{% if not video_id %}seven{% else %}eight{% endif %} columns">
+		<iframe width="{% if not video_id %}500{% else %}610{% endif %}" height="{% if not video_id %}281{% else %}343{% endif %}" src="//www.youtube.com/embed/wKGY-Z5_mHc" frameborder="0" allowfullscreen></iframe>
+		
+		{% if video_id == "2013-07-22_few-bills" %}
+		<div style="padding: 2em 0; width: 610px; line-height: 140%; text-align: justify;">
+			<h2>Lawmakers Who Aren’t Making Law</h2>
+			<p><span class="date">7/22/2013.</span> By Avi Eilam.</p>
+			<p>The press’ quarterly report cards on Congress are out and the picture isn’t pretty. As <em><a href="http://www.huffingtonpost.com/2013/07/08/113th-congress-bills_n_3563008.html">The Huffington Post</a></em> and <em><a href="http://www.theatlanticwire.com/politics/2013/07/you-only-have-yourself-blame-congress-ineptitude/67052/">The Atlantic Wire</a></em> report, based on data from GovTrack, the current Congress has enacted fewer bills than any other Congress in modern history at this point in the legislative session. Just <a href="http://www.govtrack.us/congress/bills/browse?status=28,29">21 bills</a> have been passed by both the House and Senate and signed into law since the 113th Congress convened in January. What’s more, the number of <a href="http://www.govtrack.us/congress/bills/browse">bills introduced in this Congress</a> – 4,753 – is also significantly less than past Congresses.</p>
+			<p style="margin: 1.75em 0; text-align: center;"><a href="http://www.govtrack.us/blog/wp-content/uploads/2013/07/bills_enacted.png"><img src="http://www.govtrack.us/blog/wp-content/uploads/2013/07/bills_enacted.png" alt="" width="500"/></a></p>
+			<p>The aggregate numbers, however, are only part of the picture. Individual members differ widely in the number of bills they have introduced; that is, bills they are primary sponsors of. On the one end of the scale are <a href="http://www.govtrack.us/congress/members/david_vitter/400418">Sen. David Vitter</a> (R-LA), with 60 bills introduced so far, and <a href="http://www.govtrack.us/congress/members/barbara_lee/400237">Rep. Barbara Lee</a> (D-CA), with 34, and on the other end, those who have introduced one or two bills. And then there are lawmakers who have yet to file a single bill this Congress – two senators and fourteen members of the House, to be exact.</p>
+			<p style="margin: 1.75em 0; text-align: center;"><a href="http://www.govtrack.us/blog/wp-content/uploads/2013/07/bills_introduced.png"><img src="http://www.govtrack.us/blog/wp-content/uploads/2013/07/bills_introduced.png" alt="" width="500"/></a></p>
+			<p>The members of Congress who haven’t filed a bill so far are an assorted bunch. The list includes House Speaker <a href="http://www.govtrack.us/congress/members/john_boehner/400036">Rep. John Boehner</a> (R-OH), whose many administrative and procedural duties preclude him from being very active in proposing legislation.</p>
+			<p>Six of the members who haven’t yet filed a bill are in their first term: freshmen <a href="http://www.govtrack.us/congress/members/george_holding/412553">Rep. George Holding</a> (R-NC), <a href="http://www.govtrack.us/congress/members/alan_lowenthal/412521">Rep. Alan Lowenthal</a> (D-CA), <a href="http://www.govtrack.us/congress/members/tom_rice/412572">Rep. Tom Rice</a> (R-SC), <a href="http://www.govtrack.us/congress/members/bradley_schneider/412534">Rep. Bradley Schneider</a> (D-IL), <a href="http://www.govtrack.us/congress/members/tim_scott/412471">Sen. Tim Scott</a> (R-SC), and <a href="http://www.govtrack.us/congress/members/jeffrey_chiesa/412597">Sen. Jeffrey Chiesa</a> (R-NJ), who was appointed to the seat vacated by the death of Frank Lautenberg in June. <a href="http://www.govtrack.us/congress/members/marshall_sanford/400607">Rep. Mark Sanford</a> (R-SC), who previously served in Congress in 2000 but began this term in May after winning a special election, also hasn&#8217;t yet filed a bill. These lawmakers are presumably taking the time to learn how Congress works and decide on their legislative agenda.</p>
+			<p>The remaining eight members of the House with no bill in their name have been in Congress for a while: <a href="http://www.govtrack.us/congress/members/corrine_brown/400048">Rep. Corrine Brown</a> (D-FL), <a href="http://www.govtrack.us/congress/members/james_clyburn/400075">Rep. Jim Clyburn</a> (D-SC), <a href="http://www.govtrack.us/congress/members/kay_granger/400157">Rep. Kay Granger</a> (R-TX), <a href="http://www.govtrack.us/congress/members/jeb_hensarling/400175">Rep. Jeb Hensarling</a> (R-TX), <a href="http://www.govtrack.us/congress/members/jack_kingston/400221">Rep. Jack Kingston</a> (R-GA), <a href="http://www.govtrack.us/congress/members/kenny_marchant/400656">Rep. Kenny Marchant</a> (R-TX), <a href="http://www.govtrack.us/congress/members/david_scott/400363">Rep. David Scott</a> (D-GA) and <a href="http://www.govtrack.us/congress/members/lynn_westmoreland/400627">Rep. Lynn Westmoreland</a> (R-GA). All but one of them, Congressman Hensarling, also proposed fewer bills than the average for a member of the House in the last Congress. Rep. Westmoreland, for example, proposed four bills during the 112th Congress, compared to the average of 15.7 (see the <em><a href="http://www.brookings.edu/research/reports/2013/07/vital-statistics-congress-mann-ornstein">Vital Statistics on Congress</a></em> report from the <em>Brookings</em> Institution and American Enterprise Institute), while Congressman Scott proposed only one(!).</p>
+			<p>At least one of these House members, Rep. Corrine Brown, announced she would in fact be filing a bill this Congress. Back in January, Rep. Brown issued a <a href="http://corrinebrown.house.gov/index.php?option=com_content&amp;view=article&amp;id=708:congresswoman-corrine-brown-to-reintroduce-voting-rights-legislation-&amp;catid=3:press-releases&amp;Itemid=35">press release</a> saying she intended to reintroduce the Easy Voting Act, and also <a href="https://twitter.com/RepCorrineBrown/status/293833243768274946">tweeted</a> about it. But this hasn’t happened.</p>
+			<p>An argument can be made that the kind of bookkeeping described here is not particularly important. Members of Congress could claim that they do not propose bills because they are against more government. The question then remains, however, why they do not sponsor bills aimed at reducing or reforming government. This seems like something their constituents should ask them.</p>
+		</div>
+		{% endif %}
+		
 	</div>
-	<div class="five columns">
+	<div class="{% if not video_id %}five{% else %}four{% endif %} columns">
 		<div id="support_our_work">
 			<div style="font-weight: bold">Want to see Avi do another video?</div>
 			<div style="margin: 5px 0 8px 0;">Support future videos by leaving Avi a tip, or send ideas for our next video to <a href="mailto:&#105;&#100;&#101;&#097;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#105;&#100;&#101;&#097;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>.</div>
@@ -57,14 +74,15 @@ h2 { line-height: 130%; }
 				<input type="hidden" name="cmd" value="_s-xclick">
 				<input type="hidden" name="hosted_button_id" value="JHY2CZHYCPGZ2">
 				<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1" style="float: right">
-				<input type="image" src="http://www.govtrack.us/static/img/leave_a_tip.png" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+				<input type="image" src="/static/img/leave_a_tip.png" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
 			</form>
 		</div>
 
-		<h2>Lawmakers Who Aren’t Making Law</h2>
-	
-		<p><span class="date">7/22/2013.</span> The current Congress is on track to enact fewer bills than any other Congress in modern history. What’s more, the number of bills introduced continues a downward trend from the last Congress.</p>
-		<p>Written by Avi Eilam. See the <a href="http://www.govtrack.us/blog/2013/07/23/lawmakers-who-arent-making-law/">full blog post</a>.</p>
+		{% if video_id != "2013-07-22_few-bills" %}
+			<h2>Lawmakers Who Aren’t Making Law</h2>
+			<p><span class="date">7/22/2013.</span> The current Congress is on track to enact fewer bills than any other Congress in modern history. What’s more, the number of bills introduced continues a downward trend from the last Congress.</p>
+			<p>Written by Avi Eilam. See the <a href="http://www.govtrack.us/blog/2013/07/23/lawmakers-who-arent-making-law/">full blog post</a>.</p>
+		{% endif %}
 	</div>
 </section>
 

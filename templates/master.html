@@ -80,13 +80,19 @@
 <body class="{% block body_class %}{% endblock %}">
 
 	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" data-seq="31">
+	<div id="sitenewscontainer" style="display: none" data-seq="32">
 		<div id="sitenews">
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div class="sitenewsbody">
+				<div id="trending_bills" style="width: 550px; margin: 0 auto;">
+				<a class="no-hover-border" href="/videos/2013-07-22_few-bills" style="float: left; width: 120px;"><img src="http://img.youtube.com/vi/wKGY-Z5_mHc/mqdefault.jpg" style="height: 50px;"/></a>
+				<p style="text-align: left; padding-top: 10px;">
+					Watch our video on <a href="/videos/2013-07-22_few-bills">Lawmakers Who Aren’t Making Law</a>.
+				</p>
+				</div>
+			
 				{% comment %}
 				<p>Please support our work. For $2 we&rsquo;ll <a href="http://www.govtrack.us/accounts/go_ad_free">hide the advertisements</a> for a year.</p>
-				{% endcomment %}
 				
 				<div style="font-size: 85%; color: #553;">Trending on GovTrack now...</div>
 				<div id="trending_bills" style="max-width: 920px; margin: 0 auto; font-size: 90%;">
@@ -97,6 +103,7 @@
 				{% endfor %}
 				<div style="clear: both"> </div>
 				</div>
+				{% endcomment %}
 			</div>
 			<div style="clear: both"> </div>
 		</div>
