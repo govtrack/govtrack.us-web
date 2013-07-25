@@ -9,6 +9,7 @@ class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True, db_index=True)
     massemail = models.BooleanField(default=True) # may we send you mail?
     old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
+    last_mass_email = models.IntegerField()
     
     # monetization
     paid_features = JSONField(default={}, null=True) # maps feature name to tuple (payment ID, sale ID or None if not useful)

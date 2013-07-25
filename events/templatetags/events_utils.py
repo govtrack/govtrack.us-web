@@ -42,6 +42,7 @@ def render_event(event, feed):
 @register.filter
 @stringfilter
 def append_qsarg(value, arg):
+    if not arg: return value
     if "?" in value:
         value += "&"
     else:
