@@ -376,7 +376,7 @@ def main(options):
     if not m:
         log.error('No docs.house.gov download link found at http://docs.house.gov.')
     else:
-        def bt_re(bt): return re.escape(bt[1]).replace(r"\.", "\.?\s*")
+        def bt_re(bt): return re.escape(bt[1]).replace(r"\.", r"\.?\s*")
         try:
             dhg = etree.parse(urllib.urlopen("http://docs.house.gov/floor/" + m.group(1))).getroot()
         except:
@@ -385,15 +385,15 @@ def main(options):
         # iso8601.parse_date(dhg.get("week-date")+"T00:00:00").date()
         for item in dhg.xpath("category/floor-items/floor-item"):
             billname = item.xpath("legis-num")[0].text
-            m = re.match("\s*(?:Concur in the Senate Amendment to |Senate Amendment to )?("
+            m = re.match(r"\s*(?:Concur in the Senate Amendment to |Senate Amendment to )?("
                 + "|".join(bt_re(bt) for bt in BillType)
-                + ")(\d+)\s*(\[Conference Report\]\s*)?$", billname, re.I)
+                + r")(\d+)\s*(\[Conference Report\]\s*)?$", billname, re.I)
             if not m:
                 if billname.strip() != "H.R. __":
                     log.error('Could not parse legis-num "%s" in docs.house.gov.' % billname)
             else:
                 for bt in BillType:
-                    if re.match(bt_re(bt) + "$", m.group(1)):
+                    if re.match(bt_re(bt) + "$", m.group(1), re.I):
                         try:
                             bill = Bill.objects.get(congress=CURRENT_CONGRESS, bill_type=bt[0], number=m.group(2))
                             bill.docs_house_gov_postdate = iso8601.parse_date(item.get("add-date")).replace(tzinfo=None)
@@ -406,7 +406,7 @@ def main(options):
                             log.error('Could not find bill "%s" in docs.house.gov.' % billname)
                         break
                 else:
-                    log.error('Could not parse legis-num bill type "%s" in docs.house.gov.' % billname)
+                    log.error('Could not parse legis-num bill type "%s" in docs.house.gov.' % m.group(1))
 
     # Parse Senate.gov's "Floor Schedule" blurb for coming up tomorrow.
     now = datetime.now()
