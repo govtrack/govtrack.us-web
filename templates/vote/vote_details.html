@@ -6,6 +6,14 @@
 
 {% block head %}
 	<meta property="og:title" content="{{ vote.question|truncatewords:10 }} -- {{ vote.get_chamber_display }} Vote #{{ vote.number }} -- {{ vote.created|date:"DATE_FORMAT" }}" />
+	<style>
+	#vote_explainer p { margin: 0; }
+	{% if not vote.related_amendment %}
+	.summary-box dt { width: 70px; }
+	{% else %}
+	.summary-box dt { width: 95px; }
+	{% endif %}
+	</style>
 {% endblock %}
 {% block og_image %}
 	<meta property="og:image" content="http://www.govtrack.us{{vote.get_absolute_url}}/thumbnail"/>
@@ -101,6 +109,7 @@ $(function() {
 
 {% if vote.question_details %}<p>{{ vote.question_details }}</p>{% endif %}
 
+<div class="eight columns" style="padding: 0">
 <dl>
     <dt>Number:</dt>
     <dd>{{ vote.get_chamber_display }} Vote #{{ vote.number }} [primary source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>]</dd>
@@ -108,13 +117,23 @@ $(function() {
     <dd>{{ vote.created|date:"DATE_FORMAT" }} ({{ vote.congress|ordinalhtml }} Congress)</dd>
     <dt>Result:</dt>
     <dd>{{ vote.result }}</dd>
-    
+</dl>
+</div>
+
+<div class="four columns">
+	<a href="/start?feed=misc:allvotes" class="track-btn" title="Get email alerts or set up an RSS feed">Track Votes</a>
+</div>
+
+<div class="twelve columns" style="padding: 10px 0 0 0;">
+<dl>
     {% if vote.related_bill %}
     <dt>{% if vote.category != VoteCategory.passage and vote.category != VoteCategory.passage_suspension and vote.category != VoteCategory.amendment %}Related {% endif %}Bill:</dt>
     <dd><a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>
+    	{% if not vote.related_amendment %}
         <br/>Introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a>
         on {{vote.related_bill.introduced_date|date:"F j, Y"}}
         <br/>Current Status: {{vote.related_bill.get_current_status_display}}
+        {% endif %}
         </dd>
     {% endif %}
     
@@ -127,7 +146,7 @@ $(function() {
         </dd>
     {% endif %}
     
-    <div style="padding-top: 1em; line-height: 120%;">
+    <div id="vote_explainer" style="padding-top: 1em; line-height: 120%;">
     {% if vote.category == VoteCategory.amendment %}
     <p>This was a vote to approve or reject an amendment.</p>
     {% endif %}
@@ -148,6 +167,7 @@ $(function() {
     {% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
     </div>
 </dl>
+</div>
 {% endblock %}
 
 {% block body %}
