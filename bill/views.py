@@ -428,21 +428,18 @@ bill_status_groups = [
     ("Passed Resolutions",
         "passed resolutions", " so far in this session of Congress (for joint and concurrent resolutions, passed both chambers)", " (for joint and concurrent resolutions, this means passed both chambers)",
         BillStatus.final_status_passed_resolution), # 3
-    ("At the President",
-        "bills", " that are awaiting the president's signature", " that passed the House and Senate but were not signed by the President",
-        (BillStatus.passed_bill,)), # 1
-    ("Active Legislation",
-        "bills and joint/concurrent resolutions", " that had a significant vote in one chamber and are likely to get a vote in the other chamber", " that had a significant vote in one chamber",
-        (BillStatus.pass_over_house, BillStatus.pass_over_senate, BillStatus.pass_back_senate, BillStatus.pass_back_house)), # 4
-    ("Other Legislation",
-        "bills and resolutions", " that have been introduced, referred to committee, or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
-        (BillStatus.introduced, BillStatus.referred, BillStatus.reported)), # 3
+    ("Got A Vote",
+        "bills and joint/concurrent resolutions", " that had a significant vote in one chamber, making them likely to have further action", " that had a significant vote in one chamber",
+        (BillStatus.pass_over_house, BillStatus.pass_over_senate, BillStatus.pass_back_senate, BillStatus.pass_back_house, BillStatus.passed_bill)), # 5
     ("Failed Legislation",
         "bills and resolutions", " that failed a vote on passage and are now dead or failed a significant vote such as cloture, passage under suspension, or resolving differences", " that failed a vote on passage or failed a significant vote such as cloture, passage under suspension, or resolving differences", 
         (BillStatus.fail_originating_house, BillStatus.fail_originating_senate, BillStatus.fail_second_house, BillStatus.fail_second_senate, BillStatus.prov_kill_suspensionfailed, BillStatus.prov_kill_cloturefailed, BillStatus.prov_kill_pingpongfail)), # 7
     ("Vetoed Bills (w/o Override)",
         "bills", " that were vetoed and the veto was not overridden by Congress", " that were vetoed and the veto was not overridden by Congress",
         (BillStatus.prov_kill_veto, BillStatus.override_pass_over_house, BillStatus.override_pass_over_senate, BillStatus.vetoed_pocket, BillStatus.vetoed_override_fail_originating_house, BillStatus.vetoed_override_fail_originating_senate, BillStatus.vetoed_override_fail_second_house, BillStatus.vetoed_override_fail_second_senate)), # 8
+    ("Other Legislation",
+        "bills and resolutions", " that have been introduced, referred to committee, or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
+        (BillStatus.introduced, BillStatus.referred, BillStatus.reported)), # 3
 ]
 
 def load_bill_status_qs(statuses, congress=CURRENT_CONGRESS):
