@@ -223,7 +223,6 @@
 	border-bottom: 1px dotted #AAA;
 	padding-top: 1em;
 	padding-bottom: 0;
-	line-height: normal;
 	font-size: 85%;
 	font-family: sans-serif;
 }
@@ -235,7 +234,6 @@
 .blue-facebook-btn:hover .no_hover { display: none; }
 .blue-facebook-btn:hover .on_hover { display: block; }
 .blue-facebook-btn a { color: #FFA; font-weight: bold; }
-.blue-facebook-btn a:hover { text-decoration: underline; border: none; }
 </style>
 {% endblock %}
 
@@ -257,7 +255,7 @@
 		
 	<div id="track_panel_base" class="{% if bill.is_alive %}eight{% else %}twelve{% endif %} columns">
 		<div class="info" {% if not bill.is_alive %}style="width: auto;"{% endif %}>
-			<p id="h1_overflow" style="line-height: 130%; display: none;">...</p>
+			<p id="h1_overflow" style="display: none;">...</p>
 			<script>$('h1').truncate_text(function (remaining, chopped) {
 			    if (chopped) $('#h1_overflow').text("..." + chopped).show();
 			});</script>
@@ -505,7 +503,7 @@
 					<dl>
 						<dt>Status</dt>
 						<dd>
-							<p style="line-height: normal;">
+							<p>
 								{% if bill.congress < 93 %}
 									{% if bill.noun == "bill" %}
 										This bill was enacted on {{bill.current_status_date|date}}.
@@ -705,7 +703,7 @@
 				<div class="container">
 					<dl>
 						<dt>Full Title</dt>
-						<dd><p style="line-height: normal">{{subtitle}}</p></dd>
+						<dd><p>{{subtitle}}</p></dd>
 					</dl>
 				</div>
 			  	{% endif %}
@@ -817,14 +815,14 @@
 					first_summary = false;
 				}
 				
-				var p1 = $('<p style="margin: 0; line-height: normal;"><span/><a/></p>');
+				var p1 = $('<p style="margin: 0;"><span/><a/></p>');
 				p1.find('a').text(name + " »");
 				p1.find('a').attr('href', '#summary/' + href);
 				n.append(p1)
 				if (!name) {
 					p1.find('span').html(html);
 					p1.find('a').text("more »");
-					p1.attr('style', 'margin-bottom: 1em; line-height: normal;');
+					p1.attr('style', 'margin-bottom: 1em;');
 				} else {
 					var p2 = $('<p class="small" style="margin-bottom: .5em"/>');
 					p2.html(html);
@@ -936,12 +934,12 @@
 							{% if bill.relatedbills.exists %}
 							<div>
 							{% for rb in bill.get_related_bills %}
-								<p style="margin-bottom: .25em; line-height: normal;">
+								<p style="margin-bottom: .25em;">
 									{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">
 										{{rb.related_bill.display_number_no_congress_number}}: {{rb.related_bill.title_no_number|truncatewords:15}}
 									</a>
 								</p>
-								<p class="small" style="margin-bottom: .75em; line-height: normal;">
+								<p class="small" style="margin-bottom: .75em;">
 									{{rb.related_bill.get_current_status_display}}<br/>
 									Last Action: {{rb.related_bill.current_status_date|date}}
 								</p>

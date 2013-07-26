@@ -12,7 +12,7 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130722" />
+		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130726" />
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen" /><![endif]-->
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -89,7 +89,7 @@
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div class="sitenewsbody">
 				<div id="trending_bills" style="width: 550px; margin: 0 auto;">
-				<a class="no-hover-border" href="/videos/2013-07-22_few-bills" style="float: left; width: 120px;"><img src="http://img.youtube.com/vi/wKGY-Z5_mHc/mqdefault.jpg" style="height: 50px;"/></a>
+				<a href="/videos/2013-07-22_few-bills" style="float: left; width: 120px;"><img src="http://img.youtube.com/vi/wKGY-Z5_mHc/mqdefault.jpg" style="height: 50px;"/></a>
 				<p style="text-align: left; padding-top: 10px;">
 					Watch our video on <a href="/videos/2013-07-22_few-bills">Lawmakers Who Aren’t Making Law</a>.
 				</p>
@@ -101,7 +101,7 @@
 				<div style="font-size: 85%; color: #553;">Trending on GovTrack now...</div>
 				<div id="trending_bills" style="max-width: 920px; margin: 0 auto; font-size: 90%;">
 				{% for f in trending_feeds %}
-					<a class="no-hover-border" style="width: 230px; float: left; padding-right: 15px; margin: 3px 0; line-height: 120%; max-height: 2.5em; overflow: hidden; text-decoration: none;" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
+					<a class="plain" style="width: 230px; float: left; padding-right: 15px; margin: 3px 0; line-height: 120%; max-height: 2.5em; overflow: hidden;" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
 						{{f.title}}
 					</a>
 				{% endfor %}

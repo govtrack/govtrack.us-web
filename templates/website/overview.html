@@ -74,7 +74,7 @@
 				<p>Start tracking legislation in your state:</p>
 				<ul>
 					{% for state in states %}
-					<li><a href="/states/{{state.0|lower}}"><span class="stateface stateface-{{state.0|lower}}" style="display: inline-block; width: 1.5em"> </span><span style="display: inline-block; width: 1.75em">{{state.0}}</span> &mdash; {{state.1}}</a></li>
+					<li><a href="/states/{{state.0|lower}}" class="plain"><span class="stateface stateface-{{state.0|lower}}" style="display: inline-block; width: 1.5em"> </span><span style="display: inline-block; width: 1.75em">{{state.0}}</span> &mdash; {{state.1}}</a></li>
 					{% endfor %}
 				</ul>
 			</div>

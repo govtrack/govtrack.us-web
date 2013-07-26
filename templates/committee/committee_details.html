@@ -54,7 +54,7 @@
 	    {% if committee.url %}
 			<div class="article">
 				<strong>Official Website:</strong>
-				<a href="{{committee.url}}" target="_blank">{{committee.url}}</a>
+				<a href="{{committee.url}}" target="_blank" class="plain">{{committee.url}}</a>
 			</div>
 	    {% endif %}
 	</div><!-- /aside -->
@@ -102,7 +102,7 @@
 	            	{% endif %}
 		            {% endif %}
 
-		            <h5><a href="{{ member.person.get_absolute_url }}">{{ member.person.name_no_details }}</a></h5>
+		            <h5><a href="{{ member.person.get_absolute_url }}" class="plain">{{ member.person.name_no_details }}</a></h5>
 
 		            <div class="info">
 		            	{% if committee.committee_type == TYPE_JOINT %}
@@ -116,7 +116,7 @@
 		            	<div>{{role.party}}</div>
 		            	
 						{% if member.subcommittee_role %}
-							<div style="font-size: 95%; line-height: 120%; border-top: 1px solid #AAA; margin-top: 3px; padding-top: 3px;">Chair, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
+							<div style="font-size: 95%; line-height: 120%; border-top: 1px solid #AAA; margin-top: 3px; padding-top: 3px;">Chair, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}" class="plain">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
 						{% endif %}
 		            </div>
 		            {% endwith %}

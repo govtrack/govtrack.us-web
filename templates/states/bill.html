@@ -35,7 +35,7 @@
 		
 		<div class="info">
 			{% if bill.long_title != bill.short_title %}
-				<p style="line-height: 130%">{{bill.long_title}}</p>
+				<p>{{bill.long_title}}</p>
 			{% endif %}
 
 			<dl>
@@ -75,7 +75,7 @@
 		{% endif %}
 		
 		{% if bill.state == "VA" %}
-			<p style="margin-top: 2em; font-style: italic; font-size: 95%; line-height: normal;">For tracking Virginia state legislation, GovTrack actually recommends using <a href="http://www.richmondsunlight.com/search/?q={{bill.bill_number|urlencode}}">RichmondSunlight.com</a>.</p>
+			<p style="margin-top: 2em; font-style: italic; font-size: 95%;">For tracking Virginia state legislation, GovTrack actually recommends using <a href="http://www.richmondsunlight.com/search/?q={{bill.bill_number|urlencode}}">RichmondSunlight.com</a>.</p>
 		{% endif %}
 	</div><!-- /actions -->
 </div>

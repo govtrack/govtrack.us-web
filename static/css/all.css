@@ -142,22 +142,22 @@ body {
     font-family: OpenSansRegular, Arial, Helvetica, sans-serif;
     font-size: 14px;
     font-size: 1.4 rem;
-    line-height: 1.5em;
     background: #2b393b;
     -webkit-font-smoothing: antialiased;
     position: relative;
 	}
 a {
     color: #cb4b16;
-    text-decoration: none;
 	}
 a:hover { 
 	color: #664030; 
-	border-bottom: dotted #dfab96 1px;
 	}
-a.no-hover-border:hover {
-	border-bottom: none;
-}
+a.plain, #masthead a {
+    text-decoration: none;
+    }
+a.plain:hover, #masthead a:hover {
+    text-decoration: underline;
+	}
 input, textarea, select {
     vertical-align: middle;
     color: #000;
@@ -2135,6 +2135,7 @@ a.button.prefix, a.button.postfix {
     	}
     #breadcrumbs a:hover {
     	text-shadow: 0 1px 2px #333;
+        text-decoration: none;
     	border-bottom: dashed #a9d7e3 1px;
     }
 
@@ -2706,30 +2707,6 @@ aside .download-links { padding: 31px 0 0 	}
         height: 20px;
         display: inline-block;
     	}
-.paging a {
-    color: #cb4b16;
-    background: #dae2df;
-    padding: 0 6px;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    border-radius: 2px;
-    text-decoration: none;
-    display: inline-block;
-	}
-.paging a:hover {
-    background: #cb4b16;
-    color: #fff;
-    border-bottom: 0;
-	}
-.paging .prev a, .paging .next a {
-    background: #dae2df;
-    color: #cb4b16;
-	}
-/*.paging .prev { display: none 	}*/
-    .paging .prev a:hover, .paging .next a:hover {
-        background: #cb4b16;
-        color: #fff;
-    	}
 
 /* Manage Lists Page ========================================================= */
 /* =========================================================================== */
@@ -3005,6 +2982,7 @@ aside .download-links { padding: 31px 0 0 	}
     border-radius: 5px;
     overflow: hidden;
     font-size: .9em;
+    text-decoration: none;
 }
 #list_trackers li:hover,
 #basic_trackers li a:hover {
@@ -3066,6 +3044,7 @@ aside .download-links { padding: 31px 0 0 	}
         line-height: 39px;
         text-align: center;
         text-transform: uppercase;
+        text-decoration: none;
         display: block;
         color: #fff;
         text-shadow: 0 1px 1px #3d6410;
@@ -3079,8 +3058,8 @@ aside .download-links { padding: 31px 0 0 	}
         .blue-facebook-btn-wide { background: url(../images/btn-sprite-facebook-wide.png) no-repeat; }
         .track-btn:hover, .push-btn:hover {
             color: #fff;
-            text-decoration: none;
             background-position: 0 -43px;
+            text-decoration: none;
             border-bottom: 0;
             }
         .track-btn:active, .push-btn:active { 
@@ -3324,7 +3303,6 @@ aside .download-links { padding: 31px 0 0 	}
     #footer a:hover {
     	border-bottom: 0;
     	color: #fff;
-    	text-decoration: none;
     	}
     /*#footer .holder {
         width: 940px;
@@ -3344,8 +3322,9 @@ aside .download-links { padding: 31px 0 0 	}
             vertical-align: top;
             border-bottom: 1px solid #405255;
         	}
-        #footer nav a {
-        	display: block 
+        #footer nav a, #footer .social a {
+        	display: block;
+        	text-decoration: none;
         	}
         #footer nav a:hover {
         	}
@@ -3375,7 +3354,6 @@ aside .download-links { padding: 31px 0 0 	}
     padding: 0 8px 0 2px;
 	}
 #footer .social a { display: block 	}
-#footer .social a:hover { text-decoration: none 	}
 #footer section { 
     margin-bottom: 25px;
     overflow: hidden;
@@ -3559,7 +3537,7 @@ form.custom .custom.disabled { background-color: #ddd; }
 	  .searching .results .result_item > a {
 	  	display: block;
 		font: normal normal normal 1.2em/1.5em PTSerifBold, 'Pallatino Linotype', Georgia, 'Times New Roman', serif;
-		line-height: 130%;
+  		text-decoration: none;
 	  }
 	  	.searching .results .result_item > a:hover {
 	  		border: none;
@@ -3707,6 +3685,7 @@ select, input.text {
     text-align: center;
     cursor: pointer;
     color: #fff;
+    text-decoration: none;
     }
     .advanced-search .btn-search:hover,
     .tracker_widget .btn.done:hover {

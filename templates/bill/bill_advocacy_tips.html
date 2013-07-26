@@ -113,7 +113,7 @@
 				{% if not request.user.is_authenticated %}
 					<h3>Sign Up for GovTrack Communities</h3>
 				
-					<p style="margin: 15px 0 15px 0; line-height: normal; font-size: 90%;">If you have one of these accounts, join this {{bill.noun}}&rsquo;s community by clicking an icon to register or log in:</p>
+					<p style="margin: 15px 0 15px 0; font-size: 90%;">If you have one of these accounts, join this {{bill.noun}}&rsquo;s community by clicking an icon to register or log in:</p>
 					
 					{% with "#talk" as return_hash %}
 					{% include "events/track_button_login.html" %}

@@ -146,7 +146,7 @@ $(function() {
         </dd>
     {% endif %}
     
-    <div id="vote_explainer" style="padding-top: 1em; line-height: 120%;">
+    <div id="vote_explainer" style="padding-top: 1em;">
     {% if vote.category == VoteCategory.amendment %}
     <p>This was a vote to approve or reject an amendment.</p>
     {% endif %}
@@ -323,14 +323,14 @@ $(function() {
                         {% endif %}
                     {% endif %}
                 </td>
-                <td style="line-height: normal; padding: 5px 0 5px 0;">
+                <td style="padding: 5px 0 5px 0;">
                     {% if voter.voter_type == 1 %}
                         [Information Missing]
                     {% elif voter.voter_type == 2 %}
-                    	 <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444">{{ voter.person.name_lastfirst_short }}</a>
+                    	 <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
                         <br/>(The Vice President)
                     {% elif voter.voter_type == 3 %}
-                        <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444">{{ voter.person.name_lastfirst_short }}</a>
+                        <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
                     {% endif %}
                 </td>
                 <td>
