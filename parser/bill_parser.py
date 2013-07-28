@@ -307,11 +307,11 @@ def main(options):
                 # Update the index/events for any bill with recently changed text
                 textfile = get_bill_text_metadata(b, None)
                 if not textfile:
-                    if b.introduced_date < (datetime.now()-timedelta(days=14)).date():
+                    if b.congress >= 103 and b.introduced_date < (datetime.now()-timedelta(days=14)).date():
                         print "No bill text?", fname, b.introduced_date
                     continue
                 textfile = textfile["plain_text_file"]
-                if (bill_index and not options.disable_events) and File.objects.is_changed(textfile):
+                if (bill_index and not options.disable_events) and os.path.exists(textfile) and File.objects.is_changed(textfile):
                     bill_index.update_object(b, using="bill") # index the full text
                     b.create_events() # events for new bill text documents
                     File.objects.save_file(textfile)

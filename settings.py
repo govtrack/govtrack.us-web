@@ -160,7 +160,7 @@ IGNORABLE_404_URLS = (
 CURRENT_CONGRESS = 113
 
 EMAIL_UPDATES_RETURN_PATH = "bounces+uid=%d@GovTrack.us"
-BOUNCES_UID_REGEX = re.compile(r"bounces\+uid=(\d+)@GovTrack\.us")
+BOUNCES_UID_REGEX = re.compile(r"<?bounces\+uid=(\d+)@GovTrack\.us>?", re.I)
 
 PREDICTIONMARKET_SEED_MONEY = 1000
 PREDICTIONMARKET_BANK_UID = 136196

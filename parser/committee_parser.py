@@ -199,6 +199,8 @@ def main(options):
 					        pass # regex failed
 					    except common.enum.NotFound:
 					        pass # invalid bill type code in source data
+					    except Bill.DoesNotExist:
+					        pass # we don't know about bill yet
 				except Committee.DoesNotExist:
 					log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
 	

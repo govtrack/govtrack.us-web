@@ -30,6 +30,7 @@ class Command(BaseCommand):
 			print "Not a user."
 			return
 		
+		print "Joined:", user.date_joined
 		print "Last Login:", user.last_login
 		
 		try:
@@ -48,14 +49,12 @@ class Command(BaseCommand):
 			print sublist.name,
 			if sublist.email == 0:
 				print "- Emails Off"
-				continue
 			else:
 				print "-", sublist.get_email_display(),
-				
-			print "Last Email:", sublist.last_email_sent,
+				print "Last Email:", sublist.last_email_sent,
 			
-			max_id, events = sublist.get_new_events()
-			print len(events), "events pending"
+				max_id, events = sublist.get_new_events()
+				print len(events), "events pending"
 			
 			for feed in sublist.trackers.all():
 				print "\t", feed.title.encode("utf8")
