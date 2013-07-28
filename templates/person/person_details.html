@@ -261,7 +261,7 @@
 		<p>Some of {{person.lastname}}’s most recently sponsored bills include...</p>
 		<ul>
 			{% for bill in recent_bills %}
-			<li><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
+			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
 			{% endfor %}
 		</ul>
 		<p><a href="/congress/bills/browse?sponsor={{person.id}}">View All &raquo;</a> (including bills from previous years)</p>
