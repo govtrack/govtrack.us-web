@@ -1,9 +1,9 @@
 {% extends "master_a.html" %}
 {% load humanize persontags cache govtrack_utils %}
 
-{% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}{{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district %}'s {{role.district|ordinal}} District{% endif %}{% endif %} - GovTrack.us{% endblock %}
+{% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}U.S. {{ role.get_role_type_display }}{% if role.state %} for {{ role.get_state_display }}{% if role.district %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
 
-{% block meta_description %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
+{% block meta_description %}{% if cities %}Represents {{cities}}. {% endif %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
 {% block meta_keywords %}{{person.name_no_district}},legislation,bills,district,sponsor,cosponsor,votes,missed votes,absences,committees{% endblock %}
 
 {% block extra_js %}
@@ -46,11 +46,7 @@
 
 				{% if role.district > 0 %}
 				<dt>District:</dt>
-				<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a>
-					{% if cities %}
-						<div style="font-size: 90%;">({{cities}})</div>
-					{% endif %}
-				</dd>
+				<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a></dd>
 				{% endif %}
 				
 				<dt>Party:</dt>

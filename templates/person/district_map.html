@@ -1,7 +1,7 @@
 {% extends "master_b.html" %}
 {% load humanize govtrack_utils %}
 {% block title %}{% if not state %}Members of Congress &amp; Congressional District Maps{% endif %}{% if state and not district %}{{statename}}&rsquo;s Members of Congress &amp; Congressional District Map{% endif %}{% if state and district %}{{statename}}&rsquo;s {{district|ordinal}} Congressional District - Representatives &amp; District Map{% endif %} - GovTrack.us{% endblock %}
-{% block meta_description %}{% if not state %}What congressional district are you in?{% endif %} Find your U.S. Congress senators and representative {% if state and not district %}in {{statename}}{% endif %}{% if state and district %}in {{statename}}&rsquo;s {{district|ordinal}} Congressional District{% endif %} using a map.{% endblock %}
+{% block meta_description %}{% if state and district and cities%}Congressional district for {{cities}}. {% endif %}{% if not state %}What congressional district are you in? {% endif %}Find your U.S. Congress senators and representative {% if state and not district %}in {{statename}}{% endif %}{% if state and district %}in {{statename}}&rsquo;s {{district|ordinal}} Congressional District{% endif %} using a map.{% endblock %}
 {% block meta_keywords %}U.S. Congress,congressional districts,map,senators,representatives,congressmen,House of Representatives,Senate{% endblock %}
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
 {% block head %}
@@ -370,7 +370,7 @@
 				<ul>
 					{% for rep in senators %}
 						{% if rep %}
-							<li><a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a></li>
+							<li style="margin-bottom: .5em"><a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a></li>
 						{% else %}
 							<li><em>Vacant</em></li>
 						{% endif %}
@@ -387,7 +387,6 @@
 				{% endif %}
 			{% else %}
 			<h3>{{district|ordinalhtml}} Congressional District</h3>
-			<p>{{cities}}</p>
 			{% endif %}
 			<ul style="height: 300px; width: 250px; overflow: auto;">
 				{% for dist, rep, rep_cities in reps %}
@@ -402,16 +401,13 @@
 						{% else %}
 							<em>Vacant</em>
 						{% endif %}
-						{% if not district and rep_cities %}
-							<div style="margin-left: 2em; font-size: 90%;">{{rep_cities|truncatewords:4}}</div>
-						{% endif %}
 					</li>
 				{% endfor %}
 			</ul>
 			{% if district %}
 			<p>(<a href="/congress/members/{{state}}">Back to all of {{statename}}</a>)</p>
 			{% endif %}
-			<p<small>County and neighborhood names courtesy of Census and <a href="http://www.zillow.com/howto/api/neighborhood-boundaries.htm">Zillow</a> geographic data.</small></p>
+			<!--<p<small>County and neighborhood names courtesy of Census and <a href="http://www.zillow.com/howto/api/neighborhood-boundaries.htm">Zillow</a> geographic data.</small></p>-->
 		{% endif %}
 	
 	</div><!-- /advanced-search -->
