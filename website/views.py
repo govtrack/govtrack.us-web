@@ -140,13 +140,14 @@ def do_site_search(q, allow_redirect=False):
     from bill.search import parse_bill_citation
     bill = parse_bill_citation(q)
     if not bill or not allow_redirect:
+        from haystack.inputs import AutoQuery
         bills = [\
             {"href": b.object.get_absolute_url(),
              "label": b.object.title,
              "obj": b.object,
              "feed": Feed.BillFeed(b.object) if b.object.is_alive else None,
              "secondary": b.object.congress != CURRENT_CONGRESS }
-            for b in SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], content=q).order_by('-current_status_date')[0:9]]
+            for b in SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], content=AutoQuery(q)).order_by('-current_status_date')[0:9]]
     else:
         #bills = [{"href": bill.get_absolute_url(), "label": bill.title, "obj": bill, "secondary": bill.congress != CURRENT_CONGRESS }]
         return HttpResponseRedirect(bill.get_absolute_url())
