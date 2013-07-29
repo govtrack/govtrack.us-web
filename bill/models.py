@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from common import enum
 from jsonfield import JSONField
 
-from committee.models import Committee, CommitteeMeeting
+from committee.models import Committee, CommitteeMeeting, CommitteeMember, MEMBER_ROLE_WEIGHTS
 from bill.status import BillStatus, get_bill_status_string
 from bill.title import get_bill_number, get_primary_bill_title
 from bill.billtext import load_bill_text
@@ -293,7 +293,7 @@ class Bill(models.Model):
     def get_status_text(self, status, date) :
         status = BillStatus.by_value(status).xml_code
         date = date.strftime("%B %d, %Y").replace(" 0", " ")
-        status = get_bill_status_string(self.congress == settings.CURRENT_CONGRESS, status)       
+        status = get_bill_status_string(self.is_current, status)       
         return status % (self.noun, date)
         
     @property
@@ -402,6 +402,7 @@ class Bill(models.Model):
         date = self.introduced_date
         action = None
         action_type = None
+        reps_on_committees = []
        
         if status == BillStatus.introduced:
             action_type = "introduced"
@@ -413,7 +414,55 @@ class Bill(models.Model):
                     break
             else:
                 raise Exception("Invalid %s event in %s." % (status, str(self)))
+        
+        if self.is_current and BillStatus.by_value(status).xml_code == "INTRODUCED":
+            cmtes = list(self.committees.all())
+            if not cmtes:
+                explanation = "This %s is in the first stage of the legislative process. It will typically be considered by committee next." % self.noun
+            else:
+                def nice_list(items, max_count):
+                    if len(items) > max_count:
+                        if len(items) == max_count+1:
+                            items[max_count:] = ["one other committee"]
+                        else:
+                            items[max_count:] = [str(len(items)-max_count) + " other committees"]
+                    if len(items) == 1:
+                        return items[0]
+                    elif len(items) == 2:
+                        return items[0] + " and " + items[1]
+                    else:
+                        return ", ".join(items[0:-1]) + ", and " + items[-1]
+                explanation = "This %s was referred to the %s which will consider it before sending it to the %s floor for consideration." % (
+                    self.noun,
+                    nice_list(sorted(c.fullname for c in cmtes), 2),
+                    self.originating_chamber)
                 
+                # See if any tracked reps are members of the committees. Also
+                # check the bill's sponsor, since we display it.
+                reps_tracked = set()
+                if self.sponsor: reps_tracked.add(self.sponsor)
+                for f in feeds:
+                    if f.feedname.split(":")[0] not in ("p", "ps", "pv"): continue
+                    reps_tracked.add(f.person())
+                mbrs = list(CommitteeMember.objects.filter(person__in=reps_tracked, committee__in=cmtes))
+                if len(mbrs) > 0:
+                    mbrs.sort(key = lambda m : (-MEMBER_ROLE_WEIGHTS[m.role], m.committee.shortname))
+                    for m in mbrs:
+                        reps_on_committees.append(m.person.name + " is " + m.role_name_2() + " the " + (m.committee.fullname if len(cmtes) > 1 else "committee") + ".")
+                else:
+                    # Neither the sponsor nor any tracked reps are on those committes.
+                    # What about cosponsors?
+                    m = CommitteeMember.objects.filter(person__in=self.cosponsors.all(), committee__in=cmtes).count()
+                    if m > 0:
+                        reps_on_committees.append("%d cosponsor%s on %s." % (
+                            m,
+                            " is" if m == 1 else "s are",
+                            "that committee" if len(cmtes) == 1 else "those committees"))
+                    
+        else:
+            explanation = self.get_status_text(status, date)
+
+
         return {
             "type": status.label,
             "date": date,
@@ -423,17 +472,21 @@ class Bill(models.Model):
             "body_text_template":
 """{% if sponsor and action_type == 'introduced' %}Sponsor: {{sponsor|safe}}{% endif %}
 {% if action %}Last Action: {{action|safe}}{% endif %}
-{% if action %}Explanation: {% endif %}{{summary|safe}}""",
+{% if action %}Explanation: {% endif %}{{summary|safe}}
+{% for rep in reps_on_committees %}
+{{rep}}{% endfor %}""",
             "body_html_template":
 """{% if sponsor and action_type == 'introduced' %}<p>Sponsor: <a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a></p>{% endif %}
 {% if action %}<p>Last Action: {{action}}</p>{% endif %}
 <p>{% if action %}Explanation: {% endif %}{{summary}}</p>
+{% for rep in reps_on_committees %}<p>{{rep}}</p>{% endfor %}
 """,
             "context": {
                 "sponsor": self.sponsor,
                 "action": action,
                 "action_type": action_type,
-                "summary": self.get_status_text(status, date),
+                "summary": explanation,
+                "reps_on_committees": reps_on_committees,
                 }
             }
 
