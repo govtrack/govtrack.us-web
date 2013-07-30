@@ -1,0 +1,175 @@
+{% load govtrack_utils %}
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+
+	<link rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css?20130318" media="all" />
+
+	<style type="text/css">
+		:root {
+			min-width: 500px;
+			min-height: 300px;
+		}
+
+		#wrapper {
+			margin: 1em; /* fallback margin for old browsers */
+			width: 98vw;
+			height: 98vh;
+			margin: 1vh 1vw;
+		}
+
+		h1 {
+			font-size: 2em;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.summary-box {
+			padding: 1em;
+			margin: 1em;
+			position: auto;
+		}
+
+		.metadata-table {
+			margin: 1em auto;
+			max-width: 475px;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="wrapper">
+		<div class="box summary-box">
+			<h1><a href="{{bill.get_absolute_url}}">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+
+			{% if bill.congress >= 93 %}
+			<dl>
+				<dt>Introduced:</dt>
+				<dd>{{bill.introduced_date}} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
+
+				<dt>Sponsor:</dt>
+				{% if bill.sponsor %}
+					<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{sponsor_name}}</a></dd>
+				{% else %}
+					<dd>(bill introduced by rule or other special circumstance)</dd>
+				{% endif %}
+
+				<dt>Status:</dt>
+				<dd>
+				{% if not dead %}
+					{{bill.get_current_status_display}}
+				{% else %}
+					Died ({{bill.get_current_status_display}})
+				{% endif %}
+				</dd>
+
+				{% with bill.slip_law_number as sln %}
+				{% if sln %}
+					<dt>Slip Law:</dt>
+					<dd>This bill became {{bill.slip_law_number}}.</dd>
+				{% endif %}
+				{% endwith %}
+
+				{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
+				<dt>Schedule:</dt>
+				<dd>The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</dd>
+				{% endif %}
+
+				{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
+				<dt>Schedule:</dt>
+				<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
+				{% endif %}
+
+				{% if bill.get_upcoming_meetings|length %}
+				<dt>Schedule:</dt>
+				<dd>
+					<div>This {{bill.noun}} is scheduled for the following committee meetings:</div>
+					{% for m in bill.get_upcoming_meetings %}
+						<div>{{m.when}} &mdash; {{m.committee.fullname}}</div>
+					{% endfor %}
+				</dd>
+				{% endif %}
+
+				{% with reintro_as=reintros.1 related_newer=bill.get_related_bills_newer %}
+
+				{% if reintro_as %}
+					<dt>See Instead:</dt>
+					<dd>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
+					{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</dd>
+
+				{% elif related_newer %}
+					<dt>See Instead:</dt>
+					<dd>
+					{% for rb in related_newer %}
+						<p style="margin-bottom: .25em">
+							<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill.display_number_no_congress_number}}</a>
+							(same title)
+							<br/>{{rb.related_bill.get_current_status_display}} &mdash; {{rb.related_bill.current_status_date|date}}
+						</p>
+					{% endfor %}
+					</dd>
+
+				{% elif bill.explanatory_text %}
+					<dt>See Instead:</dt>
+					<dd>
+						{{bill.explanatory_text}}
+
+						{% for rb in bill.get_related_bills %}
+							{% if rb.relation == "ruled-by" %}
+								The main bill is:<br/>
+								<a href="{{rb.related_bill.get_absolute_url}}">
+									{{rb.related_bill.display_number_no_congress_number}}: {{rb.related_bill.title_no_number|truncatewords:15}}
+								</a>
+							{% endif %}
+						{% endfor %}
+					</dd>
+
+				{% endif %}
+
+				{% endwith %}
+			</dl>
+			{% else %}
+			<dl>
+				<dt>Introduced:</dt>
+				<dd>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
+
+				<dt>Status:</dt>
+				<dd>Enacted or Agreed to on {{bill.current_status_date}}</dd>
+
+				<dt>Slip Law:</dt>
+				<dd>This bill became {{bill.slip_law_number}}.</dd>
+			</dl>
+			<p>Limited information is available for bills and resolutions from 1957-1972.</p>
+			{% endif %}
+		</div><!-- /summary-box -->
+
+		{% with text as text_info %}
+		<div class="metadata-table"><div class="holder"><div class="frame">
+		<div class="container">
+			<dl>
+				<dt>Text</dt>
+				<dd>
+					{% if not text_info %}
+						<p>Text not yet available.</p>
+					{% elif text_info.has_html_text %}
+						{% if bill.congress >= 112 %}
+						<a href="{{bill.get_absolute_url}}/text">
+							<img src="http://www.govtrack.us/{{text_info.basename}}-thumb200.png" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>
+						</a>
+						{% endif %}
+						<p><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text &raquo;</a></p>
+						<p class="small">Last updated {{text_info.docdate}}.<br/>{{text_info.numpages}}</p>
+					{% else %}
+						<a href="{{text_info.gpo_pdf_url}}">PDF</a> ({{text_info.docdate}})
+					{% endif %}
+				</dd>
+			</dl>
+		</div><!-- /container -->
+		</div></div></div>
+		{% endwith %}
+	</div><!-- /wrapper -->
+
+</body>
+</html>
