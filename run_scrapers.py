@@ -178,6 +178,8 @@ if "bills" in sys.argv:
 	# TODO: Even if we didn't get any new files, the bills parser also
 	# scrapes docs.house.gov and the Senate floor schedule, so we should
 	# also periodically make sure we run the scraper for that too.
+	
+	# os.system("RELEASE=1 ./manage.py dumpdata --format json bill.BillTerm > data/db/django-fixture-billterms.json")
 
 if do_bill_parse:
 	# Load into db.

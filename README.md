@@ -47,7 +47,7 @@ GovTrack.us runs on Ubuntu 12.10.
   ./manage.py generate_secret_key
   ```
 
-* To enable search:
+* To enable search (for which complete instructions haven't been provided, so really skip this):
 
   * Install Solr:
 
@@ -70,15 +70,18 @@ GovTrack.us runs on Ubuntu 12.10.
 * Load some data:
 
   ```
-  wget http://www.govtrack.us/data/db/django-fixture-{people,usc_sections}.json
+  wget http://www.govtrack.us/data/db/django-fixture-{people,usc_sections,billterms}.json
   ./manage.py loaddata django-fixture-people.json
   ./manage.py loaddata django-fixture-usc_sections.json
+  ./manage.py loaddata django-fixture-billterms.json
 
   ./parse.py committee # fails b/c meeting data not available
 
   ./build/rsync.sh
-  ./parse.py bill --congress=113
+  ./parse.py bill --congress=113 --disable-index --disable-events
   ```
+  
+If you configured Solr, you can remove --disable-index. For the sake of speed, --disable-events will skip the creation of the events table for bills, which is the basis for feeds and tracking, so that will be nonfunctional.
 
 * Check the site works by running the development server and visiting the URL specified by the runserver process.
 
@@ -86,7 +89,7 @@ GovTrack.us runs on Ubuntu 12.10.
   ./manage.py runserver
   ```
 
-* To update the data in the future, first git-pull congress-legislators to get the latest legislator information. Then:
+* To update the data in the future, first git-pull the congress-legislators repo to get the latest legislator information. Then:
 
   ```
   build/rsync.sh

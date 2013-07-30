@@ -297,7 +297,10 @@ def main(options):
     for fname in files:
         progress.tick()
         
-        if not File.objects.is_changed(fname) and not options.force:
+        # With indexing or events enabled, if the bill metadata file hasn't changed check
+        # the bill's latest text file for changes so we can create a text-is-available
+        # event and so we can index the bill's text.
+        if (bill_index and not options.disable_events) and not File.objects.is_changed(fname) and not options.force:
             m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
 
             try:
@@ -311,7 +314,7 @@ def main(options):
                         print "No bill text?", fname, b.introduced_date
                     continue
                 textfile = textfile["plain_text_file"]
-                if (bill_index and not options.disable_events) and os.path.exists(textfile) and File.objects.is_changed(textfile):
+                if os.path.exists(textfile) and File.objects.is_changed(textfile):
                     bill_index.update_object(b, using="bill") # index the full text
                     b.create_events() # events for new bill text documents
                     File.objects.save_file(textfile)

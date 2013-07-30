@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.db import models
+from django.db import models, DatabaseError
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -118,17 +118,24 @@ class Feed(models.Model):
             # We don't have a model for the relationship, but we have a table that
             # adds date_added automatically as a timestamp. If we add a 'through'
             # model, we have to replace .add/.remove on the field with other methods.
-            from django.db import connection
-            cursor = connection.cursor()
-            cursor.execute("SELECT feed_id, count(*) FROM events_subscriptionlist_trackers WHERE date_added > %s GROUP BY feed_id", [datetime.now() - timedelta(days=num_days)])
-            subs = cursor.fetchall()
-            return { row[0]: row[1] for row in subs } 
-            
+            try:
+                from django.db import connection
+                cursor = connection.cursor()
+                cursor.execute("SELECT feed_id, count(*) FROM events_subscriptionlist_trackers WHERE date_added > %s GROUP BY feed_id", [datetime.now() - timedelta(days=num_days)])
+                subs = cursor.fetchall()
+                return { row[0]: row[1] for row in subs } 
+            except DatabaseError as e:
+                # The database table hasn't been configured with the date_added column,
+                # which is hidden from the Django ORM at the moment.
+                print "Database isn't configured with date_added column in events_subscriptionlist_trackers."
+                return None
+                
         trending = []
         for period in (2, 6, 11, 23):
             # Get the number of times each feed was subscribed to in the last period and 2*period days.
             subs1 = get_feed_counts(period)
             subs2 = get_feed_counts(period*2)
+            if subs1 == None or subs2 == None: return [] # database not configured
             
             # Order the mentioned feeds by the ratio of recent subscriptions to less recent subscriptions,
             # but giving a boost for the total number of new subscriptions.
