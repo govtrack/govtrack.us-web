@@ -210,14 +210,6 @@ def bill_widget(request, congress, type_slug, number):
     sponsor_name = None if not bill.sponsor else \
         get_person_name(bill.sponsor, role_date=bill.introduced_date, firstname_position='before', show_suffix=True)
 
-    def get_reintroductions():
-        reintro_prev = None
-        reintro_next = None
-        for reintro in bill.find_reintroductions():
-            if reintro.congress < bill.congress: reintro_prev = reintro
-            if reintro.congress > bill.congress and not reintro_next: reintro_next = reintro
-        return reintro_prev, reintro_next
-
     def get_text_info():
         from billtext import load_bill_text
         try:
@@ -230,7 +222,6 @@ def bill_widget(request, congress, type_slug, number):
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
         "sponsor_name": sponsor_name,
-        "reintros": get_reintroductions, # defer so we can use template caching
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": Feed.BillFeed(bill),
