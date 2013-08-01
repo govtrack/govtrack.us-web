@@ -1,9 +1,10 @@
+{% load humanize %}
 {% load govtrack_utils %}
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title></title>
+	<title>{{bill.title_no_number}} ({{bill.display_number_no_congress_number}}{% if not bill.is_current%}, {{bill.congress|ordinal}} Congress{% endif %}) &ndash; Bill Widget &ndash; GovTrack.us</title>
 
 	<link rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css?20130318" media="all" />
 
@@ -19,18 +20,30 @@
 			margin: 1em; /* fallback margin for old browsers */
 			font-size: 14px; /* fallback font-size for old browsers */
 			width: 98vw;
-			max-height: 98vh;
-			margin: 1vh 1vw;
+			height: 98vh;
+			margin: auto !important;
 			font-size: 1.5vw;
 			overflow-y: auto;
+			background-color: rgba( 255, 255, 255, 0.95 );
+			border-radius: 1vmin;
+		}
+
+		header {
+			margin: 1em 2em;
+		}
+
+		header > a > img {
+			height: 33px; /* fallback height for old browsers */
+			height: 11vmin;
 		}
 
 		.summary-box {
 			position: auto;
-			margin: 1em;
+			margin: 0em 1em 1em;
 			padding: 1em;
 			font-size: 200%;
-			line-height: normal !important;
+			line-height: 1.5 !important;
+			min-height: min-content;
 		}
 
 		.summary-box h1 {
@@ -46,17 +59,36 @@
 			text-align: right;
 		}
 
-		.metadata-table {
-			margin: 1em auto;
-			max-width: 475px;
-		}
+		@supports ( display: flex ) {
+			body {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				width: 100vw;
+				height: 100vh;
+			}
 
+			#wrapper {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+			}
+
+			#wrapper .summary-box {
+				align-self: stretch;
+			}
+		}
 	</style>
 </head>
 <body>
 	<div id="wrapper">
-		<div class="box summary-box">
-			<h1><a href="{{bill.get_absolute_url}}">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+		<header>
+			{% comment %} XXX: This should use a variable to specify the root page URL. {% endcomment %}
+			<a href="http://www.govtrack.us/" target="_blank"><img src="{{ MEDIA_URL }}images/logo.gif" height="33px" alt="Powered by GovTrack.us" /></a>
+		</header>
+
+		<div class="summary-box">
+			<h1><a href="{{bill.get_absolute_url}}" target="_blank">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 
 			{% if bill.congress >= 93 %}
 			<dl>
@@ -65,7 +97,7 @@
 
 				<dt>Sponsor:</dt>
 				{% if bill.sponsor %}
-					<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{sponsor_name}}</a></dd>
+					<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}" target="_blank">{{sponsor_name}}</a></dd>
 				{% else %}
 					<dd>(bill introduced by rule or other special circumstance)</dd>
 				{% endif %}
@@ -111,10 +143,10 @@
 					{% if not text_info %}
 						<p>Text not yet available.</p>
 					{% elif text_info.has_html_text %}
-						<p><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text &raquo;</a></p>
+						<p><a href="{{bill.get_absolute_url}}/text" target="_blank">Read {{bill.noun|capfirst}} Text &raquo;</a></p>
 						<p class="small">Last updated {{text_info.docdate}}.<br/>{{text_info.numpages}}</p>
 					{% else %}
-						<a href="{{text_info.gpo_pdf_url}}">PDF</a> ({{text_info.docdate}})
+						<a href="{{text_info.gpo_pdf_url}}" target="_blank">PDF</a> ({{text_info.docdate}})
 					{% endif %}
 				</dd>
 				{% endwith %}
