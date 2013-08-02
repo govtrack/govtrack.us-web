@@ -247,7 +247,11 @@
 			} else if (!$('#address').hasClass('default') && $('#address').val()) {
 				doGeoCode($('#address').val());
 			} else if (!$('#zip').hasClass('default') && $('#zip').val()) {
-				doGeoCode($('#zip').val());
+				if ($('#zip').val().substring(0, 1) == "-") {
+					window.location = "http://xkcd.com/1245/";
+				} else {
+					doGeoCode($('#zip').val());
+				}
 			}
 			return false;
 		}
