@@ -466,7 +466,7 @@ class Bill(models.Model):
                 # check the bill's sponsor, since we display it.
                 reps_tracked = set()
                 if self.sponsor: reps_tracked.add(self.sponsor)
-                for f in feeds:
+                for f in (feeds if feeds else []):
                     if f.feedname.split(":")[0] not in ("p", "ps", "pv"): continue
                     reps_tracked.add(f.person())
                 mbrs = list(CommitteeMember.objects.filter(person__in=reps_tracked, committee__in=cmtes))
