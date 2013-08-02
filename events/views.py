@@ -236,7 +236,7 @@ def events_rss(request):
         def item_guid(self, item):
             return self.item_link(item) + "#eventid=" + urllib.quote_plus(item["guid"]) 
         def item_pubdate(self, item):
-            return item["date"] if isinstance(item["date"], datetime) else datetime.combine(item["date"], time.min)
+            return item["date"] if (not item["date"] or isinstance(item["date"], datetime)) else datetime.combine(item["date"], time.min)
             
     return DjangoFeed()(request)
     
