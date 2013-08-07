@@ -55,7 +55,7 @@ class BillTerm(models.Model):
         return self.name
     def __repr__(self):
         return "<BillTerm: %s:%s>" % (TermType.by_value(self.term_type).label, self.name)
-        
+
     class Meta:
         unique_together = ('name', 'term_type')
 
@@ -67,7 +67,7 @@ class BillTerm(models.Model):
 
 class Cosponsor(models.Model):
     """A (bill, person) pair indicating cosponsorship, with join and withdrawn dates."""
-    
+
     person = models.ForeignKey('person.Person', db_index=True, on_delete=models.PROTECT, help_text="The cosponsoring person.")
     role = models.ForeignKey('person.PersonRole', db_index=True, on_delete=models.PROTECT, help_text="The role of the cosponsor at the time of cosponsorship.")
     bill = models.ForeignKey('bill.Bill', db_index=True, help_text="The bill being cosponsored.")
@@ -77,23 +77,23 @@ class Cosponsor(models.Model):
         unique_together = [("bill", "person"),]
 
     api_example_parameters = { "sort": "-joined" }
-    
+
     @property
     def person_name(self):
         # don't need title because it's implicit from the bill type
         from person.name import get_person_name
         return get_person_name(self.person, role_date=self.joined, firstname_position="after", show_title=False)
-        
+
     # role is a new field which I added with (does not take into account people with overlapping roles such as going from House to Senate on the same day):
     #for role in PersonRole.objects.filter(startdate__lte="1970-01-01", startdate__gt="1960-01-01"):
     #    Cosponsor.objects.filter(
     #        person=role.person_id,
     #        joined__gte=role.startdate,
     #        joined__lte=role.enddate).update(role = role)
-            
+
 class Bill(models.Model):
     """A bill represents a bill or resolution introduced in the United States Congress."""
-    
+
     title = models.CharField(max_length=255, help_text="The bill's primary display title, including its number.")
     titles = JSONField(default=None) # serialized list of all bill titles as (type, as_of, text)
     bill_type = models.IntegerField(choices=BillType, help_text="The bill's type (e.g. H.R., S., H.J.Res. etc.)")
@@ -111,31 +111,31 @@ class Bill(models.Model):
     docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
     senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
     major_actions = JSONField(default=[]) # serialized list of all major actions (date/datetime, BillStatus, description)
-    
+
     sliplawpubpriv = models.CharField(max_length=3, choices=[("PUB", "Public"), ("PRI", "Private")], blank=True, null=True, help_text="For enacted laws, whether the law is a public (PUB) or private (PRI) law. Unique with congress and sliplawnum.")
     sliplawnum = models.IntegerField(blank=True, null=True, help_text="For enacted laws, the slip law number (i.e. the law number in P.L. XXX-123). Unique with congress and sliplawpublpriv.")
     #statutescite = models.CharField(max_length=16, blank=True, null=True, help_text="For enacted laws, a normalized U.S. Statutes at Large citation. Available only for years in which the Statutes at Large has already been published.")
-    
-    
+
+
     # role is a new field added with, but might not be perfect for overlapping roles (see Cosponsor)
     #for role in PersonRole.objects.filter(startdate__gt="1960-01-01"):
     #    Bill.objects.filter(
     #        sponsor=role.person_id,
     #        introduced_date__gte=role.startdate,
     #        introduced_date__lte=role.enddate).update(sponsor_role = role)
-    
+
     class Meta:
         ordering = ('congress', 'bill_type', 'number')
         unique_together = [('congress', 'bill_type', 'number'),
         ('congress', 'sliplawpubpriv', 'sliplawnum')]
-        
+
     def __unicode__(self):
         return self.title
-        
-    #@models.permalink    
+
+    #@models.permalink
     def get_absolute_url(self):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
-        
+
     # indexing
     def get_index_text(self):
         bill_text = load_bill_text(self, None, plain_text=True)
@@ -157,14 +157,14 @@ class Bill(models.Model):
     def proscore(self):
         """A modified prognosis score that omits factors associated with uninteresting bills, such as naming post offices. Only truly valid for current bills, and useless to compare across Congresses, but returns a value for all bills."""
         # To aid search, especially for non-current bills, add in something to give most recently active bills a boost.
- 
+
         type_boost = {
            BillType.senate_bill: 1.0, BillType.house_bill: 1.0,
            BillType.senate_resolution: 0.2, BillType.house_resolution: 0.2,
            BillType.senate_concurrent_resolution: 0.3, BillType.house_concurrent_resolution: 0.3,
            BillType.senate_joint_resolution: 0.75, BillType.house_joint_resolution: 0.75,
         }
-        
+
         cstart, cend = get_congress_dates(self.congress)
         csd = self.current_status_date
         if hasattr(csd, 'date'): csd = csd.date()
@@ -186,14 +186,14 @@ class Bill(models.Model):
     def usc_citations_uptree(self):
         # Index the list of citation sections (including all higher levels of hierarchy)
         # using the USCSection object IDs.
-        
+
         # Load citation information from GPO MODS file.
         try:
             metadata = load_bill_text(self, None, mods_only=True)
         except IOError:
             return []
         if "citations" not in metadata: return []
-        
+
         # For each USC-type citation...
         ret = set()
         for cite in metadata["citations"]:
@@ -207,7 +207,7 @@ class Bill(models.Model):
                 ret.add(sec_obj.id)
                 sec_obj = sec_obj.parent_section
         return ret
-        
+
     # api
     api_recurse_on = ("sponsor", "sponsor_role")
     api_recurse_on_single = ("committees", "cosponsors", "terms")
@@ -224,7 +224,7 @@ class Bill(models.Model):
     }
     api_example_id = 76416
     api_example_list = { "sort": "-introduced_date" }
-        
+
     @property
     def display_number(self):
         """The bill's number, suitable for display, e.g. H.R. 1234. If the bill is for a past session of Congress, includes the Congress number."""
@@ -241,7 +241,7 @@ class Bill(models.Model):
     def title_no_number(self):
         """The title of the bill without the number."""
         return get_primary_bill_title(self, self.titles, with_number=False)
-        
+
     @property
     def bill_type_slug(self):
         return BillType.by_value(self.bill_type).slug
@@ -261,7 +261,7 @@ class Bill(models.Model):
     @property
     def opposite_chamber(self):
         return "Senate" if self.bill_type in (BillType.house_bill, BillType.house_resolution, BillType.house_joint_resolution, BillType.house_concurrent_resolution) else "House"
-        
+
     @property
     def slip_law_number(self):
         if not self.sliplawnum: return None
@@ -294,7 +294,7 @@ class Bill(models.Model):
     def is_alive(self):
         """Whether the bill was introduced in the current session of Congress and the bill's status is not a final status (i.e. can take no more action like a failed vote)."""
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
-        
+
     def get_approved_links(self):
         return self.links.filter(approved=True)
 
@@ -304,7 +304,7 @@ class Bill(models.Model):
         prog = prognosis.compute_prognosis(self)
         prog["congressdates"] = get_congress_dates(prog["congress"])
         return prog
-        
+
     def get_formatted_summary(self):
         s = get_formatted_bill_summary(self)
         # this cleanup doesn't always work because sometimes the line is split between <divs>
@@ -317,9 +317,9 @@ class Bill(models.Model):
     def get_status_text(self, status, date) :
         status = BillStatus.by_value(status).xml_code
         date = date.strftime("%B %d, %Y").replace(" 0", " ")
-        status = get_bill_status_string(self.is_current, status)       
+        status = get_bill_status_string(self.is_current, status)
         return status % (self.noun, date)
-        
+
     @property
     def explanatory_text(self):
         if self.title_no_number.startswith("Providing for consideration of the bill "):
@@ -337,7 +337,7 @@ class Bill(models.Model):
         """Returns the URL for the bill page on POPVOX."""
         return "https://www.popvox.com/bills/us/%d/%s%d" \
             % (self.congress, self.bill_type_slug, self.number)
-            
+
     def create_events(self):
         if self.congress < 112: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
@@ -350,14 +350,14 @@ class Bill(models.Model):
             index_feeds.extend([Feed.IssueFeed(ix) for ix in self.terms.all()])
             index_feeds.extend([Feed.CommitteeBillsFeed(cx) for cx in self.committees.all()])
             index_feeds.extend([Feed.objects.get_or_create(feedname="usc:" + str(sec))[0] for sec in self.usc_citations_uptree()])
-            
+
             # also index into feeds for any related bills and previous versions of this bill
             # that people may still be tracking
             for rb in self.get_related_bills():
                 index_feeds.append(Feed.BillFeed(rb.related_bill))
             for b in self.find_reintroductions():
                 index_feeds.append(Feed.BillFeed(b))
-            
+
             # generate events for major actions
             E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
             common_feeds = [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()]
@@ -369,7 +369,7 @@ class Bill(models.Model):
                 if state == BillStatus.referred and (date.date() - self.introduced_date).days == 0:
                     continue # don't dup these events so close
                 E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_passed_bill else []))
-                
+
             # generate events for new cosponsors... group by join date, and
             # assume that join dates we've seen don't have new cosponsors
             # added later, or else we may miss that in an email update. we
@@ -380,13 +380,13 @@ class Bill(models.Model):
                 cosponsor_join_dates.add(cosp.joined)
             for joindate in cosponsor_join_dates:
                 E.add("cosp:" + joindate.isoformat(), joindate, [bill_feed])
-                
+
             # generate an event for appearing on docs.house.gov or the senate floor schedule:
             if self.docs_house_gov_postdate:
                 E.add("dhg", self.docs_house_gov_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
             if self.senate_floor_schedule_postdate:
                 E.add("sfs", self.senate_floor_schedule_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
-                
+
             # generate an event for each new GPO text availability
             from glob import glob
             from billtext import bill_gpo_status_codes
@@ -396,13 +396,13 @@ class Bill(models.Model):
                 if os.path.exists(textfn):
                     textmodtime = datetime.datetime.fromtimestamp(os.path.getmtime(textfn))
                     E.add("text:" + st, textmodtime, index_feeds)
-                    
+
             # generate an event for the main summary
             bs = BillSummary.objects.filter(bill=self)
             if len(bs) > 0:
                 E.add("summary", bs[0].created, index_feeds + [Feed.from_name("misc:billsummaries")])
-               
-    
+
+
     def render_event(self, eventid, feeds):
         if eventid == "dhg":
             return self.render_event_dhg(feeds)
@@ -410,7 +410,7 @@ class Bill(models.Model):
             return self.render_event_sfs(feeds)
         if eventid == "summary":
             return self.render_event_summary(feeds)
-            
+
         ev_type, ev_code = eventid.split(":")
         if ev_type == "state":
             return self.render_event_state(ev_code, feeds)
@@ -420,7 +420,7 @@ class Bill(models.Model):
             return self.render_event_text(ev_code, feeds)
         else:
             raise Exception()
-          
+
     def render_event_state(self, ev_code, feeds):
         from status import BillStatus
         status = BillStatus.by_value(int(ev_code))
@@ -428,7 +428,7 @@ class Bill(models.Model):
         action = None
         action_type = None
         reps_on_committees = []
-       
+
         if status == BillStatus.introduced:
             action_type = "introduced"
         else:
@@ -439,7 +439,7 @@ class Bill(models.Model):
                     break
             else:
                 raise Exception("Invalid %s event in %s." % (status, str(self)))
-        
+
         if self.is_current and BillStatus.by_value(status).xml_code == "INTRODUCED":
             cmtes = list(self.committees.all())
             if not cmtes:
@@ -461,7 +461,7 @@ class Bill(models.Model):
                     self.noun,
                     nice_list(sorted(c.fullname for c in cmtes), 2),
                     self.originating_chamber)
-                
+
                 # See if any tracked reps are members of the committees. Also
                 # check the bill's sponsor, since we display it.
                 reps_tracked = set()
@@ -483,7 +483,7 @@ class Bill(models.Model):
                             m,
                             " is" if m == 1 else "s are",
                             "that committee" if len(cmtes) == 1 else "those committees"))
-                    
+
         else:
             explanation = self.get_status_text(status, date)
 
@@ -530,7 +530,7 @@ class Bill(models.Model):
                 "body_html_template": "Event error.",
                 "context": {},
                 }
-            
+
         return {
             "type": "New Cosponsor" + ("" if len(cosp) == 1 else "s"),
             "date": cosp[0].joined,
@@ -568,19 +568,19 @@ class Bill(models.Model):
             "body_html_template": """<p>This {{noun}} has been added to the Senate&rsquo;s floor schedule for the next legislative day.</p><p>Last Action: {{current_status}}</p>""",
             "context": { "noun": self.noun, "current_status": self.current_status_description },
             }
-        
+
     def render_event_text(self, ev_code, feeds):
         from billtext import bill_gpo_status_codes, load_bill_text
         if not ev_code in bill_gpo_status_codes: raise Exception()
         bt = BillType.by_value(self.bill_type).xml_code
         textfn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (self.congress, bt, bt, self.number, ev_code) # use pdf since we don't modify it once we download it, and hopefully we actually have a displayable format like HTML
         if not os.path.exists(textfn): raise Exception()
-        
+
         try:
             modsinfo = load_bill_text(self, ev_code, mods_only=True)
         except IOError:
             modsinfo = { "docdate": "Unknown Date", "doc_version_name": "Unknown Version" }
-        
+
         return {
             "type": "Bill Text",
             "date": datetime.datetime.fromtimestamp(os.path.getmtime(textfn)),
@@ -591,7 +591,7 @@ class Bill(models.Model):
             "body_html_template": """<p>This {{noun}}&rsquo;s text {% if doc_version_name != "Introduced" %}for status <i>{{doc_version_name}}</i> ({{doc_date}}) {% endif %}is now available.</p>""",
             "context": { "noun": self.noun, "doc_date": modsinfo["docdate"], "doc_version_name": modsinfo["doc_version_name"] },
             }
-        
+
     def render_event_summary(self, feeds):
         bs = self.oursummary
         return {
@@ -624,26 +624,26 @@ class Bill(models.Model):
                 "extra": text,
             })
         if not saw_intro: ret.insert(0, { "label": "Introduced", "date": self.introduced_date })
-        
+
         if self.docs_house_gov_postdate: ret.append({ "label": "On House Schedule", "date": self.docs_house_gov_postdate })
         if self.senate_floor_schedule_postdate: ret.append({ "label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate })
         def as_dt(x):
             if isinstance(x, datetime.datetime): return x
             return datetime.datetime.combine(x, datetime.time.min)
         ret.sort(key = lambda x : as_dt(x["date"])) # only needed because of the previous two
-        
+
         return ret
-    
+
     def get_future_events(self):
         # predict the major actions not yet occurred on the bill, based on its
         # current status.
-        
+
         # define a state diagram
         common_paths = {
             BillStatus.introduced: BillStatus.referred,
             BillStatus.referred: BillStatus.reported,
         }
-        
+
         type_specific_paths = {
             BillType.house_bill: {
                 BillStatus.reported: BillStatus.pass_over_house,
@@ -651,7 +651,7 @@ class Bill(models.Model):
                 BillStatus.pass_back_house: (BillStatus.passed_bill, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
                 BillStatus.passed_bill: BillStatus.enacted_signed,
-                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
+                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
                 BillStatus.prov_kill_cloturefailed: (BillStatus.passed_bill, "Passed Senate"),
                 BillStatus.prov_kill_pingpongfail: (BillStatus.passed_bill, "Passed House/Senate"),
                 BillStatus.prov_kill_veto: BillStatus.override_pass_over_house,
@@ -663,15 +663,15 @@ class Bill(models.Model):
                 BillStatus.pass_back_house: (BillStatus.passed_bill, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
                 BillStatus.passed_bill: BillStatus.enacted_signed,
-                BillStatus.prov_kill_suspensionfailed: (BillStatus.passed_bill, "Passed House"), 
+                BillStatus.prov_kill_suspensionfailed: (BillStatus.passed_bill, "Passed House"),
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: (BillStatus.passed_bill, "Passed Senate/House"),
                 BillStatus.prov_kill_veto: BillStatus.override_pass_over_senate,
                 BillStatus.override_pass_over_senate: BillStatus.enacted_veto_override,
-            },                
+            },
             BillType.house_resolution:  {
                 BillStatus.reported: BillStatus.passed_simpleres,
-                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
+                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
             },
             BillType.senate_resolution: {
                 BillStatus.reported: BillStatus.passed_simpleres,
@@ -682,7 +682,7 @@ class Bill(models.Model):
                 BillStatus.pass_over_house: (BillStatus.passed_concurrentres, "Passed Senate"),
                 BillStatus.pass_back_house: (BillStatus.passed_concurrentres, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_concurrentres, "House Approves Senate Changes"),
-                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
+                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
                 BillStatus.prov_kill_cloturefailed: BillStatus.passed_concurrentres,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
             },
@@ -691,7 +691,7 @@ class Bill(models.Model):
                 BillStatus.pass_over_senate: (BillStatus.passed_concurrentres, "Passed House"),
                 BillStatus.pass_back_house: (BillStatus.passed_concurrentres, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_concurrentres, "House Approves Senate Changes"),
-                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_concurrentres, 
+                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_concurrentres,
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
             },
@@ -700,7 +700,7 @@ class Bill(models.Model):
                 BillStatus.pass_over_house: BillStatus.passed_constamend,
                 BillStatus.pass_back_house: BillStatus.passed_constamend,
                 BillStatus.pass_back_senate: BillStatus.passed_constamend,
-                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house, 
+                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
                 BillStatus.prov_kill_cloturefailed: BillStatus.passed_constamend,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_constamend,
             },
@@ -709,12 +709,12 @@ class Bill(models.Model):
                 BillStatus.pass_over_senate: BillStatus.passed_constamend,
                 BillStatus.pass_back_house: BillStatus.passed_constamend,
                 BillStatus.pass_back_senate: BillStatus.passed_constamend,
-                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_constamend, 
+                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_constamend,
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_constamend,
             }
         }
-            
+
         bt = self.bill_type
         if bt == BillType.house_joint_resolution and not "Proposing an Amendment" in self.title: bt = BillType.house_bill
         if bt == BillType.senate_joint_resolution and not "Proposing an Amendment" in self.title: bt = BillType.senate_bill
@@ -722,7 +722,7 @@ class Bill(models.Model):
         path = { }
         path.update(common_paths)
         path.update(type_specific_paths[bt])
-        
+
         seq = []
         st = self.current_status
         while st in path:
@@ -733,9 +733,9 @@ class Bill(models.Model):
             else:
                 label = st.label
             seq.append(label)
-            
+
         return seq
-        
+
     def get_top_term(self):
         try:
             return [t for t in self.terms.all() if t.is_top_term()][0]
@@ -745,12 +745,12 @@ class Bill(models.Model):
         t = self.get_top_term()
         if t: t = t.id
         return t
-        
+
     def get_terms_sorted(self):
         terms = list(self.terms.all())
         terms.sort(key = lambda x : (not x.is_top_term(), x.name))
         return terms
-        
+
     def get_related_bills(self):
         # Gets a unqie list of related bills, sorted by the relation type, whether the titles are
         # the same, and the last action date.
@@ -767,10 +767,10 @@ class Bill(models.Model):
                 ret.append(rb)
                 seen.add(rb.related_bill)
         return ret
-        
+
     def get_related_bills_newer(self):
         return [rb for rb in self.get_related_bills()
-            if self.title_no_number == rb.related_bill.title_no_number 
+            if self.title_no_number == rb.related_bill.title_no_number
             and rb.related_bill.current_status_date > self.current_status_date]
 
     def find_reintroductions(self):
@@ -780,17 +780,17 @@ class Bill(models.Model):
             if normalize_title(self.title_no_number) != normalize_title(reintro.title_no_number): continue
             yield reintro
 
-    
+
     def get_open_market(self, user):
         from django.contrib.contenttypes.models import ContentType
         bill_ct = ContentType.objects.get_for_model(Bill)
-        
+
         import predictionmarket.models
         try:
             m = predictionmarket.models.Market.objects.get(owner_content_type=bill_ct, owner_object_id=self.id, isopen=True)
         except predictionmarket.models.Market.DoesNotExist:
             return None
-            
+
         for outcome in m.outcomes.all():
             if outcome.owner_key == "1": # "yes"
                 m.yes = outcome
@@ -804,7 +804,7 @@ class Bill(models.Model):
                 for outcome in positions:
                     m.user_positions[outcome.owner_key] = positions[outcome]
         return m
-            
+
     def get_gop_summary(self):
         import urllib, StringIO
         try:
@@ -832,18 +832,18 @@ class Bill(models.Model):
             ret["text"] = sanitize(dom.xpath("string(bill/analysis/%s)" % f), as_text=True)
             if ret["text"]: break
         return ret
-            
+
 class RelatedBill(models.Model):
     bill = models.ForeignKey(Bill, related_name="relatedbills")
     related_bill = models.ForeignKey(Bill, related_name="relatedtobills")
     relation = models.CharField(max_length=16)
-    
+
     relation_sort_order = { "identical": 0 }
-    
+
 def get_formatted_bill_summary(bill):
     sfn = "data/us/%d/bills.summary/%s%d.summary.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
     if not os.path.exists(sfn): return None
-    
+
     dom = etree.parse(open(sfn))
     xslt_root = etree.XML('''
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -927,9 +927,9 @@ def bill_search_feed_title(q):
 def bill_search_feed_execute(q):
     from search import bill_search_manager
     from settings import CURRENT_CONGRESS
-    
+
     bills = bill_search_manager().execute_qs(q, overrides={'congress': CURRENT_CONGRESS}).order_by("-current_status_date")[0:100] # we have to limit to make this reasonably fast
-    
+
     def make_feed_name(bill):
         return "bill:" + BillType.by_value(bill.bill_type).xml_code + str(bill.congress) + "-" + str(bill.number)
     return Feed.objects.filter(feedname__in=[make_feed_name(bill) for bill in bills if bill != None]) # batch load
@@ -949,16 +949,16 @@ class BillSummary(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     content = models.TextField(blank=True)
-    
+
     def plain_text(self):
         import re
         content = re.sub("<br>|<li>", " \n ", self.content, re.I)
-        
+
         from django.utils.html import strip_tags
         content = strip_tags(content)
-        
+
         content = content.replace("&nbsp;", " ")
-        
+
         return content
 
 # USC Citations
@@ -971,17 +971,17 @@ class USCSection(models.Model):
     name = models.TextField(blank=True, null=True)
     ordering = models.IntegerField()
     update_flag = models.IntegerField(default=0)
-    
+
     def __unicode__(self):
         return ((unicode(self.parent_section) + " > ") if self.parent_section else "") + self.get_level_type_display() + " "  + (self.number if self.number else "[No Number]")
-    
+
     @property
     def name_recased(self):
         exceptions = ("and", "of", "the", "a", "an")
         if self.name and self.name == self.name.upper():
             return " ".join([w if i == 0 or w.lower() not in exceptions else w.lower() for i, w in enumerate(self.name.title().split(" "))])
         return self.name
-    
+
     @property
     def citation_or_id(self):
         if self.citation:
@@ -992,10 +992,10 @@ class USCSection(models.Model):
             except:
                 pass # pass through if there are multiple instances
         return self.id
-        
+
     def get_absolute_url(self):
         return "/congress/bills/uscode/" + str(self.citation_or_id).replace("usc/", "")
-    
+
     # utility methods to load from the structure.json file created by github:unitedstates/uscode
     # don't forget:
     #   * These objects are used in feeds. Delete with care.
@@ -1024,20 +1024,20 @@ class USCSection(models.Model):
     @staticmethod
     def load_data2(parent, sections):
         ambig = { }
-        
+
         for i, sec in enumerate(sections):
             # because level/number may be ambiguous, count sequence too
             # this doesn't handle unnumbered headings very nicely, ah well
             deambig = ambig.get((sec["level"], sec.get("number")), 0)
             ambig[(sec["level"], sec.get("number"))] = deambig+1
-            
+
             fields = {
                 "name": sec.get("name"),
                 "ordering": i,
                 "citation": sec.get("citation"),
                 "update_flag": 1,
             }
-            
+
             ## Force a re-numbering on the deambig field.
             #for i2, s2 in enumerate(USCSection.objects.filter(
             #    parent_section=parent,
@@ -1045,7 +1045,7 @@ class USCSection(models.Model):
             #    number=sec.get("number")).order_by("ordering")[1:]):
             #    s2.deambig = i2+1
             #    s2.save()
-            
+
             obj, is_new = USCSection.objects.get_or_create(
                 parent_section=parent,
                 level_type=sec["level"],
@@ -1102,7 +1102,7 @@ class Amendment(models.Model):
         unique_together = [('congress', 'amendment_type', 'number'),
             ('bill', 'sequence')]
             # bill+sequence is not unique, see the github thread on amendment numbering --- currently this is manually fixed up in the db as a non-unique index
-        
+
     def __unicode__(self):
         return self.title
 
