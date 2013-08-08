@@ -197,7 +197,7 @@ def bill_details_user_view(request, congress, type_slug, number):
     return ret
 
 @anonymous_view
-@render_to('bill/bill_widget.html')
+@render_to("bill/bill_widget.html")
 def bill_widget(request, congress, type_slug, number):
     try:
         bill_type = BillType.by_slug(type_slug)
@@ -218,14 +218,41 @@ def bill_widget(request, congress, type_slug, number):
             return None
 
     return {
-        'bill': bill,
+        "bill": bill,
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
         "sponsor_name": sponsor_name,
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
-        "feed": Feed.BillFeed(bill),
         "text": get_text_info,
+    }
+
+@anonymous_view
+def bill_widget_loader(request, congress, type_slug, number):
+    try:
+        bill_type = BillType.by_slug(type_slug)
+    except BillType.NotFound:
+        raise Http404("Invalid bill type: " + type_slug)
+
+    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+
+    # Apparently @render_to() doesn't support additional parameters, so we have to render manually.
+    from django.shortcuts import render_to_response
+    from django.template import RequestContext
+    return render_to_response("bill/bill_widget.js", { "bill": bill }, context_instance=RequestContext(request), content_type="text/javascript" )
+
+@anonymous_view
+@render_to("bill/bill_widget_info.html")
+def bill_widget_info(request, congress, type_slug, number):
+    try:
+        bill_type = BillType.by_slug(type_slug)
+    except BillType.NotFound:
+        raise Http404("Invalid bill type: " + type_slug)
+
+    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+
+    return {
+        "bill": bill,
     }
 
 @json_response

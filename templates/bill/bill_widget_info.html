@@ -1,0 +1,26 @@
+{% extends 'master.html' %}
+{% load humanize govtrack_utils %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}{{bill.title_no_number}} ({{bill.display_number_no_congress_number}}{% if not bill.is_current %}, {{bill.congress|ordinal}} Congress{% endif %}) &ndash; Bill Widget &ndash; GovTrack.us{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li><a href="{% url "congress_home" %}">Congress</a></li>
+	<li><a href="/congress/bills">Bills</a></li>
+	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
+	<li>Bill Widget</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+<p>Embed this widget on your website!</p>
+{% endblock %}
+
+{% block body %}
+<div>
+	<script id="govtrack:widget:{{bill.noun}}:{{bill.congress}}:{{bill.bill_type_slug}}{{bill.number}}:script" src="{{bill.get_absolute_url}}/widget.js" type="text/javascript"></script>
+	<pre>&lt;script id="govtrack:widget:{{bill.noun}}:{{bill.congress}}:{{bill.bill_type_slug}}{{bill.number}}:script" src="http://www.govtrack.us{{bill.get_absolute_url}}/widget.js" type="text/javascript"&gt;&lt;/script&gt;</pre>
+</div>
+{% endblock %}

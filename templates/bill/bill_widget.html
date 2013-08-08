@@ -4,7 +4,7 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>{{bill.title_no_number}} ({{bill.display_number_no_congress_number}}{% if not bill.is_current%}, {{bill.congress|ordinal}} Congress{% endif %}) &ndash; Bill Widget &ndash; GovTrack.us</title>
+	<title>{{bill.title_no_number}} ({{bill.display_number_no_congress_number}}{% if not bill.is_current %}, {{bill.congress|ordinal}} Congress{% endif %}) &ndash; Bill Widget &ndash; GovTrack.us</title>
 
 	<link rel="stylesheet" href="{{ MEDIA_URL }}css/all-min.css?20130318" media="all" />
 
@@ -88,7 +88,7 @@
 		</header>
 
 		<div class="summary-box">
-			<h1><a href="{{bill.get_absolute_url}}" target="_blank">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+			<h1><a href="{{bill.get_absolute_url}}" target="_blank">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current %} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 
 			{% if bill.congress >= 93 %}
 			<dl>
