@@ -26,18 +26,21 @@ import urllib, urllib2, json, datetime, os.path, re
 from registration.helpers import json_response
 from twostream.decorators import anonymous_view, user_view_for
 
+def load_bill_from_url(congress, type_slug, number):
+    # not sure why we were trying this
+    #if type_slug.isdigit():
+    #    bill_type = type_slug
+    try:
+        bill_type = BillType.by_slug(type_slug)
+    except BillType.NotFound:
+        raise Http404("Invalid bill type: " + type_slug)
+
+    return get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+
 @anonymous_view
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
-    if type_slug.isdigit():
-        bill_type = type_slug
-    else:
-        try:
-            bill_type = BillType.by_slug(type_slug)
-        except BillType.NotFound:
-            raise Http404("Invalid bill type: " + type_slug)
-
-    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    bill = load_bill_from_url(congress, type_slug, number)
 
     from person.name import get_person_name
     sponsor_name = None if not bill.sponsor else \
@@ -168,11 +171,7 @@ def bill_details(request, congress, type_slug, number):
 
 @user_view_for(bill_details)
 def bill_details_user_view(request, congress, type_slug, number):
-    try:
-        bill_type = BillType.by_slug(type_slug)
-    except BillType.NotFound:
-        raise Http404("Invalid bill type: " + type_slug)
-    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    bill = load_bill_from_url(congress, type_slug, number)
 
     ret = { }
     if request.user.is_staff:
@@ -199,12 +198,7 @@ def bill_details_user_view(request, congress, type_slug, number):
 @anonymous_view
 @render_to("bill/bill_widget.html")
 def bill_widget(request, congress, type_slug, number):
-    try:
-        bill_type = BillType.by_slug(type_slug)
-    except BillType.NotFound:
-        raise Http404("Invalid bill type: " + type_slug)
-
-    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+    bill = load_bill_from_url(congress, type_slug, number)
 
     from person.name import get_person_name
     sponsor_name = None if not bill.sponsor else \
@@ -218,6 +212,7 @@ def bill_widget(request, congress, type_slug, number):
             return None
 
     return {
+        "SITE_ROOT_URL": settings.SITE_ROOT_URL,
         "bill": bill,
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
@@ -229,30 +224,20 @@ def bill_widget(request, congress, type_slug, number):
 
 @anonymous_view
 def bill_widget_loader(request, congress, type_slug, number):
-    try:
-        bill_type = BillType.by_slug(type_slug)
-    except BillType.NotFound:
-        raise Http404("Invalid bill type: " + type_slug)
+    bill = load_bill_from_url(congress, type_slug, number)
 
-    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
-
-    # Apparently @render_to() doesn't support additional parameters, so we have to render manually.
+    # @render_to() doesn't support additional parameters, so we have to render manually.
     from django.shortcuts import render_to_response
     from django.template import RequestContext
-    return render_to_response("bill/bill_widget.js", { "bill": bill }, context_instance=RequestContext(request), content_type="text/javascript" )
+    return render_to_response("bill/bill_widget.js", { "bill": bill, "SITE_ROOT_URL": settings.SITE_ROOT_URL }, context_instance=RequestContext(request), content_type="text/javascript" )
 
 @anonymous_view
 @render_to("bill/bill_widget_info.html")
 def bill_widget_info(request, congress, type_slug, number):
-    try:
-        bill_type = BillType.by_slug(type_slug)
-    except BillType.NotFound:
-        raise Http404("Invalid bill type: " + type_slug)
-
-    bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
-
+    bill = load_bill_from_url(congress, type_slug, number)
     return {
         "bill": bill,
+        "SITE_ROOT_URL": settings.SITE_ROOT_URL,
     }
 
 @json_response
