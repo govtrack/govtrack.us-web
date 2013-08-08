@@ -151,28 +151,23 @@
     <field name="indexed_model_name" type="string" indexed="true" stored="true" multiValued="false" />
 
     <field name="congress" type="long" indexed="true" stored="true" multiValued="false" />
-
-    <field name="current_status_date" type="date" indexed="true" stored="true" multiValued="false" />
-
     <field name="bill_type" type="long" indexed="true" stored="true" multiValued="false" />
-
     <field name="number" type="long" indexed="true" stored="true" multiValued="false" />
 
+    <field name="introduced_date" type="date" indexed="true" stored="true" multiValued="false" />
+    <field name="sponsor" type="long" indexed="true" stored="true" multiValued="false" />
+    <field name="sponsor_party" type="string" indexed="true" stored="true" multiValued="true" />
+
+    <field name="current_status_date" type="date" indexed="true" stored="true" multiValued="false" />
     <field name="current_status" type="long" indexed="true" stored="true" multiValued="false" />
 
-    <field name="introduced_date" type="date" indexed="true" stored="true" multiValued="false" />
-
-    <field name="sponsor" type="long" indexed="true" stored="true" multiValued="false" />
-
     <field name="committees" type="long" indexed="true" stored="true" multiValued="true" />
-
     <field name="cosponsors" type="long" indexed="true" stored="true" multiValued="true" />
-
     <field name="terms" type="long" indexed="true" stored="true" multiValued="true" />
 
     <field name="proscore" type="float" indexed="true" stored="true" multiValued="false" />
+    <field name="usc_citations_uptree" type="long" indexed="true" stored="true" multiValued="true" />
 
-    <field name="sponsor_party" type="string" indexed="true" stored="true" multiValued="true" />
   </fields>
 
   <!-- field to use to determine and enforce document uniqueness. -->

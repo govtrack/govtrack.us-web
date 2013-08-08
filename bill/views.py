@@ -627,17 +627,18 @@ def uscodeindex(request, secid):
     # Mark the children if we should allow the user to navigate there.
     # Only let them go to parts of the table of contents where there
     # are lots of bills to potentially track, at least historically.
+    has_child_navigation = False
     for c in children:
         c.num_bills = qs.filter(usc_citations_uptree=c.id).count()
-    if children:
-        for c in children:
-            c.allow_navigation = c.num_bills > 5
+        c.allow_navigation = c.num_bills > 5
+        has_child_navigation |= c.allow_navigation
     
     return {
         "parent": parent,
         "children": children,
+        "has_child_navigation": has_child_navigation,
         "num_bills_here": num_bills,
-        "bills_here": (qs.filter(usc_citations_uptree=parent.id) if parent else qs) if num_bills < 100 else None,
+        "bills_here": (qs_current.filter(usc_citations_uptree=parent.id) if parent else qs) if num_bills < 100 else None,
         "base_template": 'master_c.html' if parent else "master_b.html",
         "feed": (Feed.objects.get_or_create(feedname="usc:" + str(parent.id))[0]) if parent else None,
     }
