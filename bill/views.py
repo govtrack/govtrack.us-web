@@ -22,7 +22,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json, datetime, os.path
+import urllib, urllib2, json, datetime, os.path, re
 from registration.helpers import json_response
 from twostream.decorators import anonymous_view, user_view_for
 
@@ -72,41 +72,45 @@ def bill_details(request, congress, type_slug, number):
                         cite["bill"] = parse_slip_law_number(cite["text"])
                     elif cite["type"] == "statutes_at_large":
                         statutes.append(cite)
-                    elif cite["type"] == "usc":
-                        # build a normalized citation and a link to LII
-                        cite_norm = "usc/" + cite["title"]
-                        cite_link = "http://www.law.cornell.edu/uscode/text/" + cite["title"]
-                        if cite["section"]:
-                            cite_link += "/" + cite["section"]
-                            cite_norm += "/" + cite["section"]
-                        if cite["paragraph"]: cite_link += "#" + "_".join(re.findall(r"\(([^)]+)\)", cite["paragraph"]))
-                        
+                    elif cite["type"] in ("usc-section", "usc-chapter"):
                         # Build a tree of title-chapter-...-section nodes so we can
                         # display the citations in context.
                         try:
-                            sec_obj = USCSection.objects.get(citation=cite_norm)
+                            sec_obj = USCSection.objects.get(citation=cite["key"])
                         except: # USCSection.DoesNotExist and MultipleObjectsReturned both possible
+                            # create a fake entry for the sake of output
                             # the 'id' field is set to make these objects properly hashable
                             sec_obj = USCSection(id=cite["text"], name=cite["text"], parent_section=usc_other)
-                        
-                        sec_obj.link = cite_link
                         
                         if "range_to_section" in cite:
                             sec_obj.range_to_section = cite["range_to_section"]
                         
                         # recursively go up to the title
                         path = [sec_obj]
-                        while sec_obj.parent_section:
-                            sec_obj = sec_obj.parent_section
-                            path.append(sec_obj)
+                        so = sec_obj
+                        while so.parent_section:
+                            so = so.parent_section
+                            path.append(so)
                             
+                        # build a link to LII
+                        if cite["type"] == "usc-section":
+                            cite_link = "http://www.law.cornell.edu/uscode/text/" + cite["title"]
+                            if cite["section"]:
+                                cite_link += "/" + cite["section"]
+                            if cite["paragraph"]: cite_link += "#" + "_".join(re.findall(r"\(([^)]+)\)", cite["paragraph"]))
+                        elif cite["type"] == "usc-chapter":
+                            cite_link = "http://www.law.cornell.edu/uscode/text/" + cite["title"] + "/" + "/".join(
+                                (so.level_type + "-" + so.number) for so in reversed(path[:-1])
+                                )
+                        sec_obj.link = cite_link
+                        
                         # now pop off from the path to put the node at the right point in a tree
                         container = usc
                         while path:
                             p = path.pop(-1)
                             if p not in container: container[p] = { }
                             container = container[p]
-                        
+
                     else:
                         other.append(cite)
                         
@@ -119,7 +123,7 @@ def bill_details(request, congress, type_slug, number):
                     seclist = sorted(seclist.items(), key=lambda x : x[0].ordering)
                     for sec, subparts in seclist:
                         ret.append({
-                            "text": (ucfirst(sec.level_type + ((" " + sec.number) if sec.number else "") + (": " if sec.name else "")) if sec.level_type else "") + (sec.name if sec.name else ""),
+                            "text": (ucfirst(sec.level_type + ((" " + sec.number) if sec.number else "") + (": " if sec.name else "")) if sec.level_type else "") + (sec.name_recased if sec.name else ""),
                             "link": getattr(sec, "link", None),
                             "range_to_section": getattr(sec, "range_to_section", None),
                             "indent": indent,
@@ -147,18 +151,18 @@ def bill_details(request, congress, type_slug, number):
         "text": get_text_info,
         
         "care2_category_id": {
-        	5816: '793', # Agriculture and Food=>Health
-        	5840: '789', # Animals=>Animal Welfare
-        	5996: '794', # Civil Rights=>Human Rights
-        	5991: '791', # Education=>Education
-        	6021: '792', # Energy=>Environment & Wildlife
-        	6038: '792', # Environmental Protection=>Environment & Wildlife
-        	6053: '793', # Families=>Health
-        	6130: '793', # Health=>Health
-        	6206: '794', # Immigration=>Human Rights
-        	6279: '792', # Public Lands/Natural Resources=>Environment & Wildlife
-        	6321: '791', # Social Sciences=>Education
-        	6328: '793', # Social Welfare => Health
+            5816: '793', # Agriculture and Food=>Health
+            5840: '789', # Animals=>Animal Welfare
+            5996: '794', # Civil Rights=>Human Rights
+            5991: '791', # Education=>Education
+            6021: '792', # Energy=>Environment & Wildlife
+            6038: '792', # Environmental Protection=>Environment & Wildlife
+            6053: '793', # Families=>Health
+            6130: '793', # Health=>Health
+            6206: '794', # Immigration=>Human Rights
+            6279: '792', # Public Lands/Natural Resources=>Environment & Wildlife
+            6321: '791', # Social Sciences=>Education
+            6328: '793', # Social Welfare => Health
         }.get(bill.get_top_term_id(), '795') # fall back to Politics category
     }
 
@@ -383,6 +387,7 @@ def show_bill_browse(template, request, ix1, ix2, context):
             "text": request.GET.get("text", None),
             "current_status": request.GET.get("status").split(",") if "status" in request.GET else None,
             "sort": request.GET.get("sort", None if "sponsor" not in request.GET else "-introduced_date"),
+            "usc_cite": request.GET.get("usc_cite"),
         },
         noun = ("bill", "bills"),
         context = context,
@@ -599,3 +604,41 @@ def go_to_summary_admin(request):
     summary, is_new = BillSummary.objects.get_or_create(bill=get_object_or_404(Bill, id=request.GET["bill"]))
     return HttpResponseRedirect("/admin/bill/billsummary/%d" % summary.id)
     
+@anonymous_view
+@render_to('bill/uscode_index.html')
+def uscodeindex(request, secid):
+    from bill.models import USCSection
+    if not secid:
+        parent = None
+    elif re.match(r"\d+$", secid):
+        parent = get_object_or_404(USCSection, id=secid)
+    else:
+        parent = get_object_or_404(USCSection, citation="usc/" + secid)
+        
+    children = USCSection.objects.filter(parent_section=parent).order_by('ordering')
+    
+    from haystack.query import SearchQuerySet
+    qs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"])
+    qs_current = qs.filter(congress=CURRENT_CONGRESS)
+    
+    # How many bills cite this section?
+    num_bills = qs_current.filter(usc_citations_uptree=parent.id).count() if parent else qs_current.count()
+    
+    # Mark the children if we should allow the user to navigate there.
+    # Only let them go to parts of the table of contents where there
+    # are lots of bills to potentially track, at least historically.
+    for c in children:
+        c.num_bills = qs.filter(usc_citations_uptree=c.id).count()
+    if children:
+        for c in children:
+            c.allow_navigation = c.num_bills > 5
+    
+    return {
+        "parent": parent,
+        "children": children,
+        "num_bills_here": num_bills,
+        "bills_here": (qs.filter(usc_citations_uptree=parent.id) if parent else qs) if num_bills < 100 else None,
+        "base_template": 'master_c.html' if parent else "master_b.html",
+        "feed": (Feed.objects.get_or_create(feedname="usc:" + str(parent.id))[0]) if parent else None,
+    }
+

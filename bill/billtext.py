@@ -110,50 +110,12 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     docdate = datetime.date(*(int(d) for d in docdate.split("-")))
     
     doc_version_name = bill_gpo_status_codes[doc_version]
-    
-    # citations
+
+    # load a list of citations as marked up by GPO
     citations = []
     for cite in mods.xpath("//mods:identifier", namespaces=ns):
         if cite.get("type") == "USC citation":
-            try:
-                title_cite, title_app_cite, sec_cite, para_cite = re.match(r"(\d+\S*)\s*U.S.C.(\s*App.)?\s*([^\s(]+?)?\s*(\(.*|et ?seq\.?|note)?$", cite.text).groups()
-                if title_app_cite: title_cite += "a"
-                if para_cite and para_cite.strip() == "": para_cite = None
-                
-                if not para_cite and "-" in sec_cite:
-                    # This dash may indicate a range of sections, or it may just be
-                    # a dash that occurs within section names. Be smart and try to
-                    # figure it out.
-                    found_range = False
-                    sec_dash_parts = sec_cite.split("-")
-                    for i in xrange(1, len(sec_dash_parts)):
-                        # Split the citation around each particular dash, and if both
-                        # halves are valid citations with the same parent then assume
-                        # this is a range. (A nice case is 16 U.S.C. 3839aa-8, where
-                        # both 3839aa and 8 are valid sections but are far apart.)
-                        sec_parts = ["-".join(sec_dash_parts[:i]),
-                                     "-".join(sec_dash_parts[i:])]
-                        from models import USCSection
-                        sec_parent = None
-                        for sec_part in sec_parts:
-                            matched_sec = list(USCSection.objects.filter(citation="usc/" + title_cite + "/" + sec_part))
-                            if len(matched_sec) == 0:
-                                break # part doesn't exist, skip the else block below and fall through to assume this is not a range
-                            if sec_parent == None:
-                                sec_parent = matched_sec[0].parent_section_id
-                            else:
-                                if sec_parent != matched_sec[0].parent_section_id:
-                                    break # likewise, parents dont match so not a range
-                        else:
-                            # Both parts exist. Treat as a USC citation range.
-                            citations.append({ "type": "usc", "text": cite.text, "title": title_cite, "section": sec_parts[0], "paragraph": None, "range_to_section": sec_parts[1] })
-                            found_range = True
-                            break
-                    if found_range: continue
-                    
-                citations.append({ "type": "usc", "text": cite.text, "title": title_cite, "section": sec_cite, "paragraph" : para_cite })
-            except:
-                citations.append({ "type": "unknown", "text": cite.text })
+            citations.append( parse_usc_citation(cite) )
         elif cite.get("type") == "Statute citation":
             citations.append({ "type": "statutes_at_large", "text": cite.text })
         elif cite.get("type") == "public law citation":
@@ -162,8 +124,6 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
                 citations.append({ "type": "slip_law", "text": cite.text, "congress": int(congress_cite), "number": int(slip_law_num) })
             except:
                 citations.append({ "type": "unknown", "text": cite.text })
-        else:
-            continue
             
     return {
         "bill_id": bill.id,
@@ -179,6 +139,47 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         "has_html_text": True,
         "citations": citations,
     }
+
+def parse_usc_citation(cite):
+    m = re.match(r"(\d+)\s*U.S.C.(\s*App.)?\s*Chapter\s*(\S+)$", cite.text)
+    if m:
+        title_cite, title_app_cite, chapter_cite = m.groups()
+        if title_app_cite: title_cite += "a"
+        return { "type": "usc-chapter", "text": cite.text, "title": title_cite, "chapter": chapter_cite, "key" : "usc/chapter/" + title_cite + "/" + chapter_cite }
+    
+    m = re.match(r"(\d+\S*)\s*U.S.C.(\s*App.)?\s*([^\s(]+?)?\s*(\(.*|et ?seq\.?|note)?$", cite.text)
+    if m:
+        title_cite, title_app_cite, sec_cite, para_cite = m.groups()
+        if title_app_cite: title_cite += "a"
+        if para_cite and para_cite.strip() == "": para_cite = None
+        
+        # The citation may contain any number of dashes. At most one may indicate
+        # a range, and the rest are dashes that appear within section numbers themselves.
+        # Loop through all of the dashes and check if it splits the citation into two
+        # valid section numbers (i.e. actually appears in the USC) that are also near
+        # each other (same parent).
+        #
+        # A nice example is 16 U.S.C. 3839aa-8, where both "3839aa" and "8" are valid
+        # sections but are far apart, so this does not indicate a range.
+        #
+        # Skip this if there is a paragraph in the citation --- that can't be appended
+        # to a range.
+        sec_dash_parts = sec_cite.split("-") if not para_cite else []
+        for i in xrange(1, len(sec_dash_parts)):
+            # Split the citation around the dash to check each half.
+            sec_parts = ["-".join(sec_dash_parts[:i]),
+                         "-".join(sec_dash_parts[i:])]
+            from models import USCSection
+            matched_secs = list(USCSection.objects.filter(citation__in = 
+                [("usc/" + title_cite + "/" + sec_part) for sec_part in sec_parts]))
+            if len(matched_secs) != 2: continue # one or the other was not a valid section number
+            if matched_secs[0].parent_section_id != matched_secs[1].parent_section_id: continue # not nearby
+            return { "type": "usc", "text": cite.text, "title": title_cite, "section": sec_parts[0], "paragraph": None, "range_to_section": sec_parts[1], "key" : "usc/" + title_cite + "/" + sec_parts[0] }
+            
+        # Not a range.
+        return { "type": "usc-section", "text": cite.text, "title": title_cite, "section": sec_cite, "paragraph" : para_cite, "key" : "usc/" + title_cite + "/" + sec_cite }
+        
+    return { "type": "unknown", "text": cite.text }
 
 def get_bill_text_metadata(bill, version):
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency

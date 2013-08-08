@@ -1,9 +1,28 @@
 rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
-	--exclude "rdf" --exclude "misc" --exclude "db" \
-	--exclude "us/bills.text*" --exclude "us/*/cr" \
-	--exclude "**/repstats" --exclude "**/repstats.person" \
-	--exclude "**/bills.amdt" --exclude "**/bills.cbo" --exclude "**/bills.ombsap" \
-	--exclude "photos" \
-	--exclude "congress" \
-	--exclude "congress-legislators" \
-	--include "us/113" --exclude "us/[0-9]*"
+	--include "us" \
+	--include "us/liv.xml" \
+	--include "us/liv111.xml" \
+	--include "us/crsnet.xml" \
+	--include "us/sessions.tsv" \
+	--include "us/committees.xml" \
+	--include "us/113" \
+	--include "us/113/committees.xml" \
+	--include "us/113/bills" \
+	--include "us/113/bills/*.xml" \
+	--include "us/113/rolls" \
+	--include "us/113/rolls/*.xml" \
+	--include "us/bills.text" \
+	--include "us/bills.text/113" \
+	--include "us/bills.text/113/*" \
+	--include "us/bills.text/113/*/*.html" \
+	--include "us/bills.text/113/*/*.mods.xml" \
+	--include "congress" \
+	--include "congress/113" \
+	--include "congress/113/bills" \
+	--include "congress/113/bills/*" \
+	--include "congress/113/bills/*/*" \
+	--include "congress/113/bills/*/*/text-versions" \
+	--include "congress/113/bills/*/*/text-versions/*" \
+	--include "congress/113/bills/*/*/text-versions/*/mods.xml" \
+	--include "congress/113/bills/*/*/text-versions/*/document.txt" \
+	--exclude "**"

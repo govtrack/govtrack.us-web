@@ -112,7 +112,7 @@ class SearchManager(object):
                     if option.type == "text": continue
                     if option.type == "select" and qsparams["faceting"]=="false": continue # 2nd phase only
                     loadable_facets.append(option.field_name)
-                    faceted_qs = faceted_qs.facet(option.field_name, **FACET_OPTIONS)
+                    faceted_qs = faceted_qs.facet(option.orm_field_name, **FACET_OPTIONS)
                 if len(loadable_facets) > 0:
                     cache_key = self.build_cache_key('bulkfaceting__' + ",".join(loadable_facets), qsparams)
                     loaded_facets = cache.get(cache_key)
@@ -247,7 +247,7 @@ class SearchManager(object):
                        # Wrap it in an AutoQuery so advanced search options like quoted phrases are used.
                        from haystack.inputs import AutoQuery
                        values = AutoQuery(values)
-                    filters[option.field_name] = values
+                    filters[option.orm_field_name] = values
                     
                 elif not u'__ALL__' in values:
                     # if __ALL__ value presents in filter values
@@ -263,7 +263,7 @@ class SearchManager(object):
                                 yield y
                     values = list(parse_booleans(values))
 
-                    filters['%s__in' % option.field_name] = values
+                    filters['%s__in' % option.orm_field_name] = values
 
         # apply filters simultaneously so that filters on related objects are applied
         # to the same related object. if they were applied chained (i.e. filter().filter())
@@ -319,11 +319,11 @@ class SearchManager(object):
         choice_label_map = None
         try:
             meta = self.model._meta
-            if "__" not in option.field_name:
-                fieldname = option.field_name
+            if "__" not in option.orm_field_name:
+                fieldname = option.orm_field_name
             else:
                 include_counts = False # one-to-many relationships make the aggregation return non-distinct results
-                path = option.field_name.split("__")
+                path = option.orm_field_name.split("__")
                 fieldname = path.pop()
                 for p in path:
                     meta = [f.model._meta for f in meta.get_all_related_objects() if f.get_accessor_name() == p][0]
@@ -411,24 +411,24 @@ class SearchManager(object):
                 
                 if hasattr(resp, 'facet'):
                     # Haystack.
-                    resp = resp.facet(option.field_name, **FACET_OPTIONS).facet_counts()
+                    resp = resp.facet(option.orm_field_name, **FACET_OPTIONS).facet_counts()
                     if len(resp) == 0:
                         return []
-                    facet_counts = resp["fields"][option.field_name]
+                    facet_counts = resp["fields"][option.orm_field_name]
                     objs = get_object_set([opt[0] for opt in facet_counts])
                     counts = [build_choice(opt[0], opt[1]) for opt in facet_counts]
                 else:
                     # ORM explanation: do GROUP BY, then COUNT
                     # http://docs.djangoproject.com/en/dev/topics/db/aggregation/#values
                     resp = resp\
-                               .values(option.field_name)\
+                               .values(option.orm_field_name)\
                                .annotate(_count=Count('id'))\
                                .distinct().order_by()
                            
-                    objs = get_object_set([x[option.field_name] for x in resp if x[option.field_name] != ""])
+                    objs = get_object_set([x[option.orm_field_name] for x in resp if x[option.orm_field_name] != ""])
                     counts = [ 
-                        build_choice(x[option.field_name], x['_count'] if include_counts else None)
-                        for x in resp if x[option.field_name] != ""]
+                        build_choice(x[option.orm_field_name], x['_count'] if include_counts else None)
+                        for x in resp if x[option.orm_field_name] != ""]
                         
             ## Stock Solr returns facets that have 0 count. Filter those out.
             ## Except we're using my fork to unset the facet limit.
@@ -510,7 +510,7 @@ class SearchManager(object):
 class Option(object):
     def __init__(self, manager, field_name, type="checkbox", required=False,
                  filter=None, choices=None, label=None, sort="COUNT",
-                 visible_if=None, help=None, formatter=None):
+                 visible_if=None, help=None, formatter=None, orm_field_name=None):
         """
         Args:
             manager: `SearchManager` instance
@@ -535,4 +535,5 @@ class Option(object):
         self.visible_if = visible_if
         self.help = help
         self.formatter = formatter
+        self.orm_field_name = orm_field_name if orm_field_name else field_name
         

@@ -67,7 +67,7 @@ class BillTerm(models.Model):
 
 class Cosponsor(models.Model):
     """A (bill, person) pair indicating cosponsorship, with join and withdrawn dates."""
-	
+    
     person = models.ForeignKey('person.Person', db_index=True, on_delete=models.PROTECT, help_text="The cosponsoring person.")
     role = models.ForeignKey('person.PersonRole', db_index=True, on_delete=models.PROTECT, help_text="The role of the cosponsor at the time of cosponsorship.")
     bill = models.ForeignKey('bill.Bill', db_index=True, help_text="The bill being cosponsored.")
@@ -77,7 +77,7 @@ class Cosponsor(models.Model):
         unique_together = [("bill", "person"),]
 
     api_example_parameters = { "sort": "-joined" }
-	
+    
     @property
     def person_name(self):
         # don't need title because it's implicit from the bill type
@@ -93,7 +93,7 @@ class Cosponsor(models.Model):
             
 class Bill(models.Model):
     """A bill represents a bill or resolution introduced in the United States Congress."""
-	
+    
     title = models.CharField(max_length=255, help_text="The bill's primary display title, including its number.")
     titles = JSONField(default=None) # serialized list of all bill titles as (type, as_of, text)
     bill_type = models.IntegerField(choices=BillType, help_text="The bill's type (e.g. H.R., S., H.J.Res. etc.)")
@@ -147,7 +147,7 @@ class Bill(models.Model):
             ] + [t[2] for t in self.titles]) \
             + "\n\n" + bill_text
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
-    haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'))
+    haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'), ('usc_citations_uptree', 'MultiValue'))
     def get_terms_index_list(self):
         return set([t.id for t in self.terms.all()])
     def get_committees_index_list(self):
@@ -183,6 +183,30 @@ class Bill(models.Model):
             Bill._majority_party = mp
         p = self.sponsor_role.party
         return (p, "Majority Party" if p == mp[self.congress][self.bill_type] else "Minority Party")
+    def usc_citations_uptree(self):
+        # Index the list of citation sections (including all higher levels of hierarchy)
+        # using the USCSection object IDs.
+        
+        # Load citation information from GPO MODS file.
+        try:
+            metadata = load_bill_text(self, None, mods_only=True)
+        except IOError:
+            return []
+        if "citations" not in metadata: return []
+        
+        # For each USC-type citation...
+        ret = set()
+        for cite in metadata["citations"]:
+            # Load the object, if it exists, and go up the TOC hierarchy indexing at every level.
+            if cite["type"] not in ("usc-section", "usc-chapter"): continue
+            try:
+                sec_obj = USCSection.objects.get(citation=cite["key"])
+            except: # USCSection.DoesNotExist and MultipleObjectsReturned both possible
+                continue
+            while sec_obj:
+                ret.add(sec_obj.id)
+                sec_obj = sec_obj.parent_section
+        return ret
         
     # api
     api_recurse_on = ("sponsor", "sponsor_role")
@@ -325,6 +349,7 @@ class Bill(models.Model):
                 index_feeds.append(Feed.PersonSponsorshipFeed(self.sponsor))
             index_feeds.extend([Feed.IssueFeed(ix) for ix in self.terms.all()])
             index_feeds.extend([Feed.CommitteeBillsFeed(cx) for cx in self.committees.all()])
+            index_feeds.extend([Feed.objects.get_or_create(feedname="usc:" + str(sec))[0] for sec in self.usc_citations_uptree()])
             
             # also index into feeds for any related bills and previous versions of this bill
             # that people may still be tracking
@@ -915,7 +940,7 @@ Feed.register_feed(
     includes = lambda feed : bill_search_feed_execute(feed.feedname.split(":", 1)[1]),
     meta = True,
     category = "federal-bills",
-	description = "Get updates for all bills matching the keyword search, including major activity, being scheduled for debate, new cosponsors, etc.",
+    description = "Get updates for all bills matching the keyword search, including major activity, being scheduled for debate, new cosponsors, etc.",
     )
 
 # Summaries
@@ -940,32 +965,109 @@ class BillSummary(models.Model):
 class USCSection(models.Model):
     parent_section = models.ForeignKey('self', blank=True, null=True, db_index=True)
     citation = models.CharField(max_length=32, blank=True, null=True, db_index=True)
-    level_type = models.CharField(max_length=10, choices=[('title', 'Title'), ('subtitle', 'Subtitle'), ('chpater', 'Chapter'), ('subchapter', 'Subchapter'), ('part', 'Part'), ('subpart', 'Subpart'), ('division', 'Division'), ('heading', 'Heading'), ('section', 'Section')])
+    level_type = models.CharField(max_length=10, choices=[('title', 'Title'), ('subtitle', 'Subtitle'), ('chapter', 'Chapter'), ('subchapter', 'Subchapter'), ('part', 'Part'), ('subpart', 'Subpart'), ('division', 'Division'), ('heading', 'Heading'), ('section', 'Section')])
     number = models.CharField(max_length=24, blank=True, null=True)
+    deambig = models.IntegerField(default=0) # disambiguates two sections with the same parent, level_type, and number by their order in the source file
     name = models.TextField(blank=True, null=True)
     ordering = models.IntegerField()
+    update_flag = models.IntegerField(default=0)
+    
+    def __unicode__(self):
+        return ((unicode(self.parent_section) + " > ") if self.parent_section else "") + self.get_level_type_display() + " "  + (self.number if self.number else "[No Number]")
+    
+    @property
+    def name_recased(self):
+        exceptions = ("and", "of", "the", "a", "an")
+        if self.name and self.name == self.name.upper():
+            return " ".join([w if i == 0 or w.lower() not in exceptions else w.lower() for i, w in enumerate(self.name.title().split(" "))])
+        return self.name
+    
+    @property
+    def citation_or_id(self):
+        if self.citation:
+            # check that it is unique
+            try:
+                USCSection.objects.get(citation=self.citation)
+                return self.citation
+            except:
+                pass # pass through if there are multiple instances
+        return self.id
+        
+    def get_absolute_url(self):
+        return "/congress/bills/uscode/" + str(self.citation_or_id).replace("usc/", "")
     
     # utility methods to load from the structure.json file created by github:unitedstates/uscode
-    # don't forget to create a fixture:
-    # ./manage.py dumpdata --format json bill.USCSection > data/db/django-fixture-usc_sections.json
+    # don't forget:
+    #   * These objects are used in feeds. Delete with care.
+    #     After loading, obsoleted entries are left with update_flag=0.
+    #     Check if any of those are used in feeds before deleting them.
+    #   * After loading, create a fixture to bootstrap local deployments of the website & backups.
+    #     ./manage.py dumpdata --format json bill.USCSection > data/db/django-fixture-usc_sections.json
+    @staticmethod
+    def load_data_new():
+        import json
+        D = json.load(open("../../uscode/structure_xml.json"))
+        D2 = json.load(open("../../uscode/structure_html.json"))
+        for t in D2:
+         if t["number"].endswith("a"):
+          D.append(t)
+        D.sort(key = lambda title : (int(title["number"].replace("a", "")), title["number"]))
+        USCSection.load_data(D)
+        print USCSection.objects.filter(update_flag=0).count(), "deleted sections" # .delete() ?
     @staticmethod
     def load_data(structure_data):
         if isinstance(structure_data, str):
             import json
             structure_data = json.load(open(structure_data))
-        USCSection.objects.all().delete()
+        USCSection.objects.update(update_flag=0)
         USCSection.load_data2(None, structure_data)
     @staticmethod
     def load_data2(parent, sections):
+        ambig = { }
+        
         for i, sec in enumerate(sections):
-            obj = USCSection.objects.create(
+            # because level/number may be ambiguous, count sequence too
+            # this doesn't handle unnumbered headings very nicely, ah well
+            deambig = ambig.get((sec["level"], sec.get("number")), 0)
+            ambig[(sec["level"], sec.get("number"))] = deambig+1
+            
+            fields = {
+                "name": sec.get("name"),
+                "ordering": i,
+                "citation": sec.get("citation"),
+                "update_flag": 1,
+            }
+            
+            ## Force a re-numbering on the deambig field.
+            #for i2, s2 in enumerate(USCSection.objects.filter(
+            #    parent_section=parent,
+            #    level_type=sec["level"],
+            #    number=sec.get("number")).order_by("ordering")[1:]):
+            #    s2.deambig = i2+1
+            #    s2.save()
+            
+            obj, is_new = USCSection.objects.get_or_create(
                 parent_section=parent,
-                citation=sec.get("citation"),
                 level_type=sec["level"],
                 number=sec.get("number"),
-                name=sec.get("name"),
-                ordering=i)
+                deambig=deambig,
+                defaults=fields)
+            if not is_new:
+                # update fields; importantly, set the update_flag
+                for k, v in fields.items():
+                    setattr(obj, k, v)
+                obj.save()
+            else:
+                print "created", obj
             USCSection.load_data2(obj, sec.get("subparts", []))
+
+Feed.register_feed(
+    "usc:",
+    title = lambda feed : unicode(USCSection.objects.get(id=feed.feedname.split(":", 1)[1])),
+    link = lambda feed : USCSection.objects.get(id=feed.feedname.split(":", 1)[1]).get_absolute_url(),
+    category = "federal-bills",
+    description = "Get updates for bills citing this part of the U.S. Code, including major activity and when the bill is scheduled for debate.",
+    )
 
 Feed.register_feed(
     "misc:billsummaries",
@@ -974,7 +1076,7 @@ Feed.register_feed(
     slug = "bill-summaries",
     intro_html = """<p>This feed includes all GovTrack original research on legislation.</p>""",
     category = "federal-bills",
-	description = "Get an update whenever we post a GovTrack original bill summary.",
+    description = "Get an update whenever we post a GovTrack original bill summary.",
     )
 
 class AmendmentType(enum.Enum):

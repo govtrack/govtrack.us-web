@@ -1,0 +1,84 @@
+{% extends base_template %}
+{% load humanize %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}Bills Amending {% if parent %}{{parent}}: {{parent.name_recased|truncatewords:5}} of {% endif %}the United States Code - GovTrack.us{% endblock %}
+{% block meta_description %}Find bills that amend the United States Code.{% endblock %}
+{% block meta_keywords %}U.S. Congress,Congress,legislation,bill,law{% endblock %}
+{% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
+{% block track_button_noun %}Citations{% endblock %}
+{% block track_button_explanation %}Get alerts for bills that cite this part of the U.S. Code.{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li><a href="{% url "congress_home" %}">Congress</a></li>
+	<li><a href="/congress/bills">Bills</a></li>
+	{% if not parent %}
+		<li>U.S. Code Index</li>
+	{% else %}
+		<li><a href="/congress/bills/uscode">U.S. Code Index</a></li>
+		{% if parent.parent_section %}<li><a href="/congress/bills/uscode/{{parent.parent_section.id}}">{{parent.parent_section.name|truncatewords:4}}</a></li>{% endif %}
+		<li>{{parent.name|truncatewords:5}}</li>
+	{% endif %}
+</ul>
+{% endblock %}
+
+{% block summary %}
+	{% if not parent %}
+		<h1>Bills that Amend the United States Code</h1>
+		<p style="margin: 0">Browse bills in the United States Congress by the sections of the United States Code they cite. Click a title of the U.S. Code to see bills citing that title, and to drill down to chapters and sections.</p>
+	{% else %}
+		<h1>{{parent}}{% if parent.name %}: {{parent.name_recased|truncatewords:10}}{% endif %}</h1>
+		<p style="margin: 0">{{num_bills_here|intcomma}} bill{% if num_bills_here > 1 %}s in the current Congress contain{% else %} contains{% endif %} a citation to this {{parent.get_level_type_display|lower}} of the U.S. Code.</p>
+	{% endif %}
+{% endblock %}
+
+{% block body %}
+
+<div class="row">
+	{% if children|length %}
+	<div class="six columns">
+		<h2>Drill down to...</h2>
+		<ul class="bullets">
+			{% for child in children %}
+			<li>
+				{% if child.allow_navigation %}
+				<a href="/congress/bills/uscode/{{child.citation_or_id|cut:"usc/"}}">{{child.get_level_type_display}} {{child.number}}{% if child.name %}: {{child.name_recased}}{% endif %}</a>
+				{% else %}
+				<span style="color: #777">{{child.get_level_type_display}} {{child.number}}{% if child.name %}: {{child.name_recased}}</span>{% endif %}
+				{% endif %}
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+	<div class="six columns">
+		{% if bills_here %}
+			<h2>Bills citing this {{parent.get_level_type_display|lower}}...</h2>
+			<p>Browse the list below or filter with <a href="/congress/bills/browse?usc_cite={{parent.citation_or_id|urlencode}}">advanced search</a>.</p>
+		{% elif children|length and parent %}
+			<p>Click on a sub-section on the left to narrow your search or
+			browse the {{num_bills_here|intcomma}} bills citing this {{parent.get_level_type_display|lower}} using the <a href="/congress/bills/browse?usc_cite={{parent.citation_or_id|urlencode}}">advanced search</a>.</p>
+		{% else %}
+			<h2>What is the U.S. Code?</h2>
+			
+			<p>The United States Code is the compilation of permanent and general laws enacted by the United States Congress. It is one aspect of United States law. Regulations, case law, state, and local laws are not included in the United States Code.</p>
+			
+			<p>Temporary and other non-permanent laws, such as yearly appropriations, also do not appear in the United States Code. These laws can be found instead in the U.S. Statutes at Large. Recent laws can also be found <a href="/congress/bills/browse#current_status=28&amp;current_status=29&amp;congress=__ALL__">as bills</a> here on GovTrack.</p>
+			
+			<p>About half of the United States Code is the law itself. These titles (parts) of the U.S. Code are called positive law titles. The other half, composed of the non-positive-law titles, is a compilation of the laws enacted by Congress but, technically speaking, is not the law. The original laws as passed by Congress have precedence when there is a difference.</p>
+		{% endif %}
+		
+		<ul class="bullets">
+		{% for bill in bills_here %}
+			<li><a href="{{bill.object.get_absolute_url}}">{{bill.object}}</a></li>
+		{% endfor %}
+		</ul>
+	</div>
+</div>
+
+{% endblock %}
