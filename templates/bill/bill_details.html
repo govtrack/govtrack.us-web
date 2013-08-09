@@ -696,6 +696,13 @@
 		</div> <!-- /six columns -->
 			
 		<div class="six columns last" style="padding: 0">
+			{% if bill.is_alive %}
+				<div style="text-align: center; padding: 1em;">
+					<p style="margin: .25em; font-weight: bold;">NEW: Add GovTrack to your site!</p>
+					<p><a href="{{bill.get_absolute_url}}/widget">Get a bill status widget for your website &raquo;</a></p>
+				</div>
+			{% endif %}
+			
 			<div class="metadata-table">
 			  <div class="holder">
 			  <div class="frame">
