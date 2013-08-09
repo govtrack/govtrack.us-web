@@ -1,0 +1,46 @@
+{% extends 'master_b.html' %}
+{% load humanize govtrack_utils %}
+
+{% block title %}Bill Widget &ndash; {{bill.title}} &ndash; GovTrack.us{% endblock %}
+{% block meta_description %}Create a widget for your website for a bill in the U.S. Congress.{% endblock %}
+{% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
+
+{% block head %}
+<style>
+	pre {
+		color: black;
+	}
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li><a href="{% url "congress_home" %}">Congress</a></li>
+	<li><a href="/congress/bills">Bills</a></li>
+	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
+	<li>Bill Widget</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+<h1>Bill Widget: {{bill.display_number}}</h1>
+<p>Embed a widget showing the current status of this bill on your website!</p>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+	<div class="six columns">
+		<p>Copy the HTML code below into your website.</p>
+		
+		<pre>&lt;script id="govtrack:widget:bill:{{bill.congress}}:{{bill.bill_type_slug}}{{bill.number}}:script" src="http://www.govtrack.us{{bill.get_absolute_url}}/widget.js" type="text/javascript"&gt;&lt;/script&gt;</pre>
+		
+		<p>The widget will look like the preview to the right.</p>
+		
+		<p>This code uses HTML script tags and iframes. It may not work on all blogging platforms.</p>
+	</div>
+	
+	<div class="six columns">
+		<script id="govtrack:widget:bill:{{bill.congress}}:{{bill.bill_type_slug}}{{bill.number}}:script" src="{{bill.get_absolute_url}}/widget.js" type="text/javascript"></script>
+	</div>
+</div>
+{% endblock %}
