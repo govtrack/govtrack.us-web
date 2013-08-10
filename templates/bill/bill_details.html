@@ -267,7 +267,7 @@
 			{% if bill.congress >= 93 %}
 			<dl>
 				<dt>Introduced:</dt>
-				<dd>{{bill.introduced_date}} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
+				<dd>{{bill.introduced_date}}{% if not bill.is_alive %} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}){% endif %}</dd>
 			
 				<dt>Sponsor:</dt>
 				{% if bill.sponsor %}
@@ -371,8 +371,6 @@
 			{% endwith %}
 			
 		</div><!-- /info -->
-		
-		<p class="helptext" style="clear: both; line-height: 110%; margin: 0;"><small>The {{bill.noun}}&rsquo;s title was written by the {{bill.noun}}&rsquo;s sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 	</div>
 	{% endcache %}
 
@@ -471,6 +469,8 @@
 		</div>
 	</div><!-- /actions -->
 	{% endif %}
+
+	<p class="helptext" style="clear: both; line-height: 110%; margin: 0 0 0 10px;"><small>The {{bill.noun}}&rsquo;s title was written by its sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
 	
 	<div id="admin_panel"> </div>
 	<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>

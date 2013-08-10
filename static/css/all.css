@@ -1371,7 +1371,7 @@ a.button.prefix, a.button.postfix {
 	}
 .ads.square { 
 	width: 336px;
-	margin: 0 auto;
+	margin: -58px auto 0 auto;
 	}
 .ads.footer.leaderboard { 
 	margin: 20px 0 20px 0;
@@ -1455,10 +1455,10 @@ a.button.prefix, a.button.postfix {
   padding: 18px 0 0;
 }
 #header {
-    height: 130px;
+    height: 100px;
 	}
   #header .row {
-    padding: 18px 0 17px;
+    padding: 0 0 17px;
     background: url(../images/divider.gif) repeat-x 0 100%;
     margin: 0 0 9px;
   }
@@ -1480,7 +1480,7 @@ a.button.prefix, a.button.postfix {
   width: 140px;
   text-indent: -9999px;
   overflow: hidden;
-  margin-top: 66px;
+  margin-top: 40px;
 }
 #logo:hover {
 	border-bottom: 0;
@@ -2103,10 +2103,9 @@ a.button.prefix, a.button.postfix {
 #breadcrumbs {
     background: url(../images/bg-breadcrumbs.jpg) no-repeat 50% 1px;
     height: 95px;
-    color: #fff;
-    text-shadow:0 1px 1px #066982;
-    font: normal 18px/21px PTSerifBold, Georgia, 'Times New Roman', Times, serif;
-    padding: 23px 0 0;
+    color: #eee;
+    font: normal 14px/16px PTSerif, Georgia, 'Times New Roman', Times, serif;
+    padding: 18px 0 0;
     text-transform: uppercase;
 	}
     #breadcrumbs h1 {
@@ -2123,29 +2122,27 @@ a.button.prefix, a.button.postfix {
     #breadcrumbs li {
         display: inline;
         padding: 0 6px 0 11px;
-        background: url(../images/arrow.gif) no-repeat 0 50%;
+        background: url(../images/arrow.gif) no-repeat 0 75%;
     	}
     #breadcrumbs li:first-child {
         background: none;
         padding: 0 6px 0 0;
     	}
     #breadcrumbs a {
-        color: #fff;
-        font-size: 14px;
+        color: #eee;
+        font-size: 12px;
     	}
     #breadcrumbs a:hover {
     	text-shadow: 0 1px 2px #333;
-        text-decoration: none;
-    	border-bottom: dashed #a9d7e3 1px;
     }
 
 /* Summary box styles
    ================================================= */
 .summary-box {
-    padding: 20px;
+    padding: 20px 20px 10px 20px;
     font: 14px/20px PTSerifRegular, Georgia, 'Times New Roman', Times, serif;
     position: relative;
-    margin: -39px 0 40px;
+    margin: -58px 0 40px;
     position: relative;
     background: #f3f1e9 url(../images/bg-paper.jpg);
     border: solid #e7e4dc 1px;
@@ -2193,8 +2190,8 @@ a.button.prefix, a.button.postfix {
     	}
     .summary-box .info {
         background: url(../images/divider-4.gif) repeat-x 0 100%;
-        padding: 0 0 18px;
-        margin: 0 0 19px;
+        padding: 0 0 12px;
+        margin: 0 0 9px;
         font-family: OpenSansRegular;
     	}
     .bill .summary-box .info {
@@ -2246,10 +2243,8 @@ a.button.prefix, a.button.postfix {
         vertical-align: middle;
     	}
 .summary-box .aside {
-      /*width: 172px;
-      float: right;*/
     text-align: center;
-    padding: 15px 0 0;
+    padding: 5px 0 5px 0;
 	}
 .photo {
     padding: 4px;
@@ -2315,7 +2310,7 @@ a.button.prefix, a.button.postfix {
 }
 
   .heading-box.row,
-  #search-members.row { margin: -45px 0 40px; }
+  #search-members.row { margin: -58px 0 40px; }
   #search-members.section.row { margin-top: 0; padding: 0; }
 
   #search-again { margin-top: -15px; }
