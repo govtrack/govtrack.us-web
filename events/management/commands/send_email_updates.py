@@ -56,6 +56,8 @@ class Command(BaseCommand):
 			# updates turned on to the right daily/weekly setting.
 			users = User.objects.filter(subscription_lists__email__in = list_email_freq).distinct()
 			
+		#users = users.filter(id__gte=122350, id__lt=169660)
+			
 		total_emails_sent = 0
 		total_events_sent = 0
 		total_users_skipped_stale = 0

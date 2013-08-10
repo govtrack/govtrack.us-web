@@ -144,6 +144,7 @@ def main(options):
                         leg_id_map[(k,v)] = govtrack_id
             else:
                 # GovTrack IDs are not always listed in this file.
+                govtrack_id = None
                 for k, v in m["id"].items():
                     if type(v) != list and (k, v) in leg_id_map:
                         govtrack_id = leg_id_map[(k,v)]
@@ -162,7 +163,7 @@ def main(options):
             elif p == "executive":
                 legislator_data[govtrack_id]["terms"].extend( m["terms"] )
             else:
-                raise ValueError("Duplication in an unexpected way.")
+                raise ValueError("Duplication in an unexpected way (%d, %s)." % (govtrack_id, p))
     
     person_processor = PersonProcessor()
     role_processor = PersonRoleProcessor()

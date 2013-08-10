@@ -383,7 +383,7 @@ def main(options):
         try:
             dhg = etree.parse(urllib.urlopen("http://docs.house.gov/floor/" + m.group(1))).getroot()
         except:
-            print "http://docs.house.gov/" + m.group(1)
+            print "http://docs.house.gov/floor/" + m.group(1)
             raise
         # iso8601.parse_date(dhg.get("week-date")+"T00:00:00").date()
         for item in dhg.xpath("category/floor-items/floor-item"):
