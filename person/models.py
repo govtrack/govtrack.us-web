@@ -60,9 +60,10 @@ class Person(models.Model):
         # We need to index the name, and also the name without
         # hard-to-type characters.
         import unicodedata
-        return self.name_no_details() + "\n" + \
-            u"".join(c for c in unicodedata.normalize('NFKD', self.name_no_details())
-                if not unicodedata.combining(c))
+        n = self.name_no_details().replace(u"\u201c", " ").replace(u"\u201d", " ")
+        r = n + "\n" + \
+            u"".join(c for c in unicodedata.normalize('NFKD', n) if not unicodedata.combining(c))
+        return r
     haystack_index = ('lastname', 'gender')
     haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'), ('was_moc', 'Boolean'), ('is_currently_moc', 'Boolean'))
     #######
