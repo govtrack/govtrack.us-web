@@ -1,30 +1,22 @@
 {% extends "master.html" %}
 {% block heading_box %}
 <div class="row group">
-	<div class="summary-box box eight columns">
+	<div class="summary-box box eight columns" style="width: 604px">
 		{% block summary %}
 		{% endblock %}
 	</div><!-- /summary-box -->
 	
-	<div class="ads square four columns">
+	<div class="ads square four columns" style="margin-top: -39px">
 		{% comment %} if remote_net_house or remote_net_senate or request.user.username == "admin" %}
 			<a href="mailto:operations+love@govtrack.us"><img src="/static/funnies/322Heart_02.png"/></a>
 		{% endcomment %}
 		<script type="text/javascript"><!--
 		google_ad_client = "ca-pub-3418906291605762";
-		google_ad_slot = "6503428641";
-		google_ad_width = 300;
-		google_ad_height = 250;
-		//-->
-		</script>
-		{% comment %}
-			DONT USE THESE - VIOLATES USERS WHO HAVE BOUGHT OUT OF ADS
-			<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"> </script>
-			<script type='text/javascript' src='http://dingo.care2.com/petitions/embed.js'></script><div class='care2PetitionEmbed' rssPath='http://www.thepetitionsite.com/feeds/publisher/000/001/700/feed.swf' adSize='small' publisherId='1405' grabbed='0' flags='#000000' buttonColor='#EB6924' html='1'></div>
-		{% endcomment %}
-		<script>
+		google_ad_slot = "4342089141";
+		google_ad_width = 336;
+		google_ad_height = 280;
+
 		// Which ad should we display?
-		
 		var ad_exp_user = $.cookie("ad_exp");
 		if (ad_exp_user) ad_exp_user = $.deparam(ad_exp_user, true);
 		if (!ad_exp_user) ad_exp_user = { };
@@ -46,10 +38,7 @@
 			// save cookie
 			$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 21, path: '/' });
 			
-			// misc
-			if (ad_exp_user.impression == 2) _gaq.push(['_trackEvent', 'ads' , 'second_impression']);
-			
-			if ((ad_exp_user.impression % 10) == 9) {
+			if (0) {
 				// every 10th impression show an ad to let users buy out of ads
 				document.write("{{ "<a href='/accounts/go_ad_free'><img src='/static/images/go_ad_free.png'/></a>"|escapejs }}");
 				try { 
@@ -65,12 +54,13 @@
 				
 			} else {
 				if (true) {
-					google_ad_slot = "6495528747"; // use a different unit for experiments so we have analytics
+					google_ad_slot = "4342089141"; // use a different unit for experiments so we have analytics
 					ad_exp = "adsense";
 				}
 				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
 			}
 		}
+		//-->
 		</script>
 		<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/go_ad_free">Go Ad-Free for $2/year</a>)</div>
 	</div>

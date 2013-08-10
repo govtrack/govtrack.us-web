@@ -1370,8 +1370,8 @@ a.button.prefix, a.button.postfix {
     padding-bottom: 26px;
 	}
 .ads.square { 
-	width: 300px;
-	float: right;
+	width: 336px;
+	margin: 0 auto;
 	}
 .ads.footer.leaderboard { 
 	margin: 20px 0 20px 0;
