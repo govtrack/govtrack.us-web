@@ -329,27 +329,14 @@ $(function() {
 		{% endif %}
 	
 		<div style="margin: 5em auto; width: 120px;">
-			<script type="text/javascript"><!--
-			google_ad_client = "ca-pub-3418906291605762";
-			/* GT Vertical 120x600, created 8/17/08 */
-			google_ad_slot = "7906528817";
-			google_ad_width = 120;
-			google_ad_height = 600;
-			//-->
-			</script>
-			{% comment %}violates ad_free
-			<script type="text/javascript"
-			src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-			</script>
-			{% endcomment %}
 			<script>
 			if (is_ad_free) {
 				document.write("An ad would be here, but you've gone ad-free!");
 			} else {
-				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
+				document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:160px;height:600px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8493087146"></ins>'|escapejs }}");
+				(adsbygoogle = window.adsbygoogle || []).push({});
 			}
 			</script>
-
 			<div style="font-size: 90%; text-align: center"><a href="/advertising">About Ads</a></div>
 		</div>
 	</div>

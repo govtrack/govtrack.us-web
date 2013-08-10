@@ -11,11 +11,6 @@
 			<a href="mailto:operations+love@govtrack.us"><img src="/static/funnies/322Heart_02.png"/></a>
 		{% endcomment %}
 		<script type="text/javascript"><!--
-		google_ad_client = "ca-pub-3418906291605762";
-		google_ad_slot = "4342089141";
-		google_ad_width = 336;
-		google_ad_height = 280;
-
 		// Which ad should we display?
 		var ad_exp_user = $.cookie("ad_exp");
 		if (ad_exp_user) ad_exp_user = $.deparam(ad_exp_user, true);
@@ -25,7 +20,7 @@
 			document.write("An ad would be here, but you've gone ad-free!");
 		} else if (the_segment == "House" || the_segment == "Senate") {
 			google_ad_slot = "7881093146"; // ad unit targeting staff only
-			document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
+			document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="7881093146"></ins>'|escapejs }}");
 			
 		} else {
 			// track total number of impressions this user has seen.
@@ -50,14 +45,10 @@
 				// Care2 TAP
 				// {{bill.get_top_term_id}}
 				document.write("{{ "<script type='text/javascript' src='http://dingo.care2.com/petitions/embed.js'></script><div class='care2PetitionEmbed' rssPath='http://www.thepetitionsite.com/feeds/publisher/000/001/"|escapejs }}{% firstof care2_category_id '795' %}{{ "/feed.swf' adSize='small' publisherId='1405' grabbed='0' flags='#000002' buttonColor='#EB6924' html='1'></div>"|escapejs }}");
-				ad_exp = "care2tap";
 				
 			} else {
-				if (true) {
-					google_ad_slot = "4342089141"; // use a different unit for experiments so we have analytics
-					ad_exp = "adsense";
-				}
-				document.write("{{ "<script type='text/javascript' src='http://pagead2.googlesyndication.com/pagead/show_ads.js'> </script>"|escapejs }}");
+				document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:336px;height:280px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="4342089141"></ins>'|escapejs }}");
+				(adsbygoogle = window.adsbygoogle || []).push({});
 			}
 		}
 		//-->

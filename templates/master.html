@@ -12,7 +12,7 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130726" />
+		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130810" />
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen" /><![endif]-->
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -58,7 +58,6 @@
 		
 
 		<script type="text/javascript">
-		var ad_exp = null;
 		window.fbAsyncInitFuncs = Array(); // Facebook init functions should be defined between here and the FB embed later
 		
 		<!-- Google Analytics -->
@@ -66,7 +65,6 @@
 		_gaq.push(['_setAccount', '{{GOOGLE_ANALYTICS_KEY|escapejs}}']);
 		_gaq.push(['_setCustomVar', 1, "Login Type", {% if request.user.is_authenticated %}"Logged In"{% elif request.anonymous %}the_user ? "Logged In" : "Anonymous"{% else %}"Anonymous"{% endif %}, 2]);
 		_gaq.push(['_setCustomVar', 2, "MySegment", {% if not request.anonymous %}"{% if remote_net_house %}House{% elif remote_net_senate %}Senate{% elif is_dc_local %}DC{% else %}Other{% endif %}"{% else %}the_segment{% endif %}, 1]);
-		_gaq.push(['_setCustomVar', 3, "AdExp", ad_exp, 3]);
 		_gaq.push(['_trackPageview']);
 		{% if not debug %}
 		(function() {
@@ -380,6 +378,8 @@
 		</footer>
 
 	</div><!-- /wrapper -->
+
+	<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
 	<!-- Facebook -->
 	<div id="fb-root"></div>

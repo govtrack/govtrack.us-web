@@ -1371,14 +1371,14 @@ a.button.prefix, a.button.postfix {
 	}
 .ads.square { 
 	width: 336px;
-	margin: -58px auto 0 auto;
+	margin: -62px auto 0 auto;
 	}
 .ads.footer.leaderboard { 
 	margin: 20px 0 20px 0;
 	text-align: center;
 	}
 	.ads .explainer {
-		margin-bottom: 5px;
+		margin-bottom: 10px;
 		text-align: center;
 		font-size: 10px;
 		color: #E63;
