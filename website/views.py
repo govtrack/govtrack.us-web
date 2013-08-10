@@ -109,7 +109,7 @@ def do_site_search(q, allow_redirect=False):
              "obj": p.object,
              "feed": Feed.PersonFeed(p.object),
              "secondary": p.object.get_current_role() == None }
-            for p in SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q)[0:9]]
+            for p in SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q).order_by('-is_currently_serving', '-score')[0:9]]
         })
        
     # Skipping states for now because we might want to go to the district maps or to

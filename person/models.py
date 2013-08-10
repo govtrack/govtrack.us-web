@@ -59,10 +59,12 @@ class Person(models.Model):
     def get_index_text(self):
         # We need to index the name, and also the name without
         # hard-to-type characters.
+        def str2(s): return s if s != None else ""
         import unicodedata
         n = self.name_no_details().replace(u"\u201c", " ").replace(u"\u201d", " ")
         r = n + "\n" + \
-            u"".join(c for c in unicodedata.normalize('NFKD', n) if not unicodedata.combining(c))
+            u"".join(c for c in unicodedata.normalize('NFKD', n) if not unicodedata.combining(c)) + "\n" + \
+            str2(self.most_recent_role_state()) + " " + str2(statenames.get(self.most_recent_role_state()))
         return r
     haystack_index = ('lastname', 'gender')
     haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'), ('was_moc', 'Boolean'), ('is_currently_moc', 'Boolean'))
