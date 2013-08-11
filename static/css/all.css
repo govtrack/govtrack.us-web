@@ -96,19 +96,6 @@
 
 }
 
-@font-face {
-  font-family: 'icomoon';
-  src: url('../fonts/icomoon.eot');
-  src: url('../fonts/icomoon.eot?#iefix') format('embedded-opentype'),
-       url('../fonts/icomoon.svg#icomoon') format('svg'),
-       url('../fonts/icomoon.woff') format('woff'),
-       url('../fonts/icomoon.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-
-
 /* CSS Reset
    ================================================== */
 * {
@@ -477,121 +464,49 @@ sub {
 /* Icons ------------------------------------------------ */
 /* ====================================================== */
 @font-face {
-  font-family: 'govtrack_icons_1';
-  src: url("../fonts/govtrack_icons_1.eot");
-  src: url("../fonts/govtrack_icons_1.eot?#iefix") format('embedded-opentype'), 
-       url("../fonts/govtrack_icons_1.woff") format('woff'), 
-       url("../fonts/govtrack_icons_1.ttf") format('truetype'), 
-       url("../fonts/govtrack_icons_1.svg#govtrack_icons_1") format('svg');
+  font-family: 'fontello';
+  src: url('../fonts/fontello.eot?77944705');
+  src: url('../fonts/fontello.eot?77944705#iefix') format('embedded-opentype'),
+       url('../fonts/fontello.woff?77944705') format('woff'),
+       url('../fonts/fontello.ttf?77944705') format('truetype'),
+       url('../fonts/fontello.svg?77944705#fontello') format('svg');
   font-weight: normal;
   font-style: normal;
 }
-[class^="icon-"]:before,
-[class*=" icon-"]:before {
-  font-family: 'govtrack_icons_1';
+ [class^="icon-"]:before, [class*=" icon-"]:before {
+  font-family: "fontello";
   font-style: normal;
   font-weight: normal;
   speak: none;
+ 
   display: inline-block;
   text-decoration: inherit;
   width: 1em;
-  margin-right: 0.2em;
+  margin-right: .2em;
   text-align: center;
-  opacity: 0.7;
-/* fix buttons height */
+  /* opacity: .8; */
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+     
+  /* fix buttons height, for twitter bootstrap */
   line-height: 1em;
-/* you can be more comfortable with increased icons size */
-  font-size: 120%; 
+ 
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+  margin-left: .2em;
+ 
+  /* you can be more comfortable with increased icons size */
+  /* font-size: 120%; */
+ 
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
-[class^="icon-"]:hover:before,
-[class*=" icon-"]:hover:before { 
-  opacity: 1;
-  -webkit-transition: all 0.15s linear; -moz-transition: all 0.15s linear; -o-transition: all 0.15s linear; transition: all 0.15s linear;
-}
-
-.icon-plus:before             { content: '\4b'; } /* 'K' */
-.icon-minus:before            { content: '\4c'; } /* 'L' */
-.icon-info:before             { content: '\48'; } /* 'H' */
-.icon-left:before             { content: '\53'; } /* 'S' */
-.icon-up:before               { content: '\55'; } /* 'U' */
-.icon-right:before            { content: '\56'; } /* 'V' */
-.icon-down:before             { content: '\54'; } /* 'T' */
-.icon-home:before             { content: '\72'; } /* 'r' */
-.icon-up-dir:before           { content: '\61'; } /* 'a' */
-.icon-right-dir:before        { content: '\62'; } /* 'b' */
-.icon-down-dir:before         { content: '\60'; } /* '`' */
-.icon-left-dir:before         { content: '\5f'; } /* '_' */
-.icon-star:before             { content: '\3b'; } /* ';' */
-.icon-star-empty:before       { content: '\3a'; } /* ':' */
-.icon-th-list:before          { content: '\76'; } /* 'v' */
-.icon-heart-empty:before      { content: '\38'; } /* '8' */
-.icon-heart:before            { content: '\39'; } /* '9' */
-.icon-flag:before             { content: '\6e'; } /* 'n' */
-.icon-cog:before              { content: '\3e'; } /* '&gt;' */
-.icon-attention:before        { content: '\51'; } /* 'Q' */
-.icon-mail:before             { content: '\2709'; } /* '✉' */
-.icon-mail-1:before           { content: '\2f'; } /* '/' */
-.icon-pencil:before           { content: '\2e'; } /* '.' */
-.icon-ok:before               { content: '\45'; } /* 'E' */
-.icon-cancel:before           { content: '\46'; } /* 'F' */
-.icon-cancel-circle:before    { content: '\47'; } /* 'G' */
-.icon-help:before             { content: '\50'; } /* 'P' */
-.icon-quote-right:before      { content: '\69'; } /* 'i' */
-.icon-plus-circle:before      { content: '\4e'; } /* 'N' */
-.icon-minus-circle:before     { content: '\4d'; } /* 'M' */
-.icon-direction:before        { content: '\25'; } /* '%' */
-.icon-help-circle:before      { content: '\4f'; } /* 'O' */
-.icon-info-circle:before      { content: '\49'; } /* 'I' */
-.icon-eye-1:before            { content: '\75'; } /* 'u' */
-.icon-camera-alt:before       { content: '\57'; } /* 'W' */
-.icon-export:before           { content: '\6f'; } /* 'o' */
-.icon-print:before            { content: '\3c'; } /* '&lt;' */
-.icon-comment:before          { content: '\67'; } /* 'g' */
-.icon-chat:before             { content: '\68'; } /* 'h' */
-.icon-vcard:before            { content: '\34'; } /* '4' */
-.icon-location:before         { content: '\35'; } /* '5' */
-.icon-map:before              { content: '\36'; } /* '6' */
-.icon-compass:before          { content: '\24'; } /* '$' */
-.icon-docs:before             { content: '\22'; } /* '&quot;' */
-.icon-rss:before              { content: '\42'; } /* 'B' */
-.icon-rss-alt:before          { content: '\2b'; } /* '+' */
-.icon-share:before            { content: '\37'; } /* '7' */
-.icon-popup:before            { content: '\66'; } /* 'f' */
-.icon-down-open:before        { content: '\5c'; } /* '\' */
-.icon-left-open:before        { content: '\5b'; } /* '[' */
-.icon-right-open:before       { content: '\5e'; } /* '^' */
-.icon-up-open:before          { content: '\5d'; } /* ']' */
-.icon-install:before          { content: '\52'; } /* 'R' */
-.icon-facebook-rect:before    { content: '\28'; } /* '(' */
-.icon-twitter-bird:before     { content: '\2a'; } /* '*' */
-.icon-googleplus-rect:before  { content: '\27'; } /* ''' */
-.icon-linkedin-rect:before    { content: '\70'; } /* 'p' */
-.icon-youtube:before          { content: '\2c'; } /* ',' */
-.icon-globe:before            { content: '\71'; } /* 'q' */
-.icon-picture-1:before        { content: '\23'; } /* '#' */
-.icon-mic:before              { content: '\3f'; } /* '?' */
-.icon-video-1:before          { content: '\6c'; } /* 'l' */
-.icon-thumbs-up-1:before      { content: '\73'; } /* 's' */
-.icon-thumbs-down:before      { content: '\74'; } /* 't' */
-.icon-user:before             { content: '\32'; } /* '2' */
-.icon-users:before            { content: '\33'; } /* '3' */
-.icon-lamp:before             { content: '\6b'; } /* 'k' */
-.icon-monitor:before          { content: '\6a'; } /* 'j' */
-.icon-doc-text:before         { content: '\21'; } /* '!' */
-.icon-calendar:before         { content: '\41'; } /* 'A' */
-.icon-pin:before              { content: '\4a'; } /* 'J' */
-.icon-attach:before           { content: '\2d'; } /* '-' */
-.icon-book-open:before        { content: '\65'; } /* 'e' */
-.icon-phone:before            { content: '\31'; } /* '1' */
-.icon-mobile:before           { content: '\30'; } /* '0' */
-.icon-camera:before           { content: '\6d'; } /* 'm' */
-.icon-search:before           { content: '\64'; } /* 'd' */
-.icon-lock:before             { content: '\44'; } /* 'D' */
-.icon-lock-open:before        { content: '\43'; } /* 'C' */
-.icon-bookmark:before         { content: '\63'; } /* 'c' */
-.icon-link:before             { content: '\3d'; } /* '=' */
-.icon-clock:before            { content: '\40'; } /* '@' */
-
+ 
+.icon-thumbs-up:before { content: '\e801'; } /* '' */
+.icon-thumbs-down:before { content: '\e802'; } /* '' */
+.icon-search:before { content: '\e800'; } /* '' */
 
 
 /* The Grid ---------------------- */
