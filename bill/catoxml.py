@@ -8,16 +8,16 @@ if __name__ == "__main__":
 
 import urllib, json
 
-from bill.billtext import load_bill_text, parse_usc_citation
-from bill.views import load_bill_from_url
-
 # XXX: Modified from fetch_bill_index_json() in unitedstates/congress/tasks/deepbills.py
 def fetch_deepbills_bill_index():
 	return json.loads(urllib.urlopen("http://deepbills.cato.org/api/1/bills").read())
 
 ### MODS ###
 
-def mods_metadata_for(deepbills_bill_version_id_parts):
+def mods_govtrack_metadata_for(deepbills_bill_version_id_parts):
+	from bill.billtext import load_bill_text
+	from bill.views import load_bill_from_url
+
 	try:
 		bill = load_bill_from_url(deepbills_bill_version_id_parts["congress"], deepbills_bill_version_id_parts["billtype"], deepbills_bill_version_id_parts["billnumber"])
 	except django.http.response.Http404:
@@ -30,8 +30,8 @@ def mods_metadata_for(deepbills_bill_version_id_parts):
 
 	return metadata
 
-def mods_citations_for(deepbills_bill_version_id_parts):
-	metadata = mods_metadata_for(deepbills_bill_version_id_parts)
+def mods_govtrack_citations_for(deepbills_bill_version_id_parts):
+	metadata = mods_govtrack_metadata_for(deepbills_bill_version_id_parts)
 
 	return metadata["citations"]
 
@@ -244,7 +244,7 @@ def govtrack_citation_text_for(deepbills_citation):
 
 	return govtrack_citation_text
 
-def govtrack_citation_for(entity_type, entity_value, entity_ref_text, entity_proposed=False):
+def deepbills_govtrack_citation_for(entity_type, entity_value, entity_ref_text, entity_proposed=False):
 	deepbills_citation = deepbills_citation_for(entity_type, entity_value, entity_ref_text, entity_proposed)
 
 	govtrack_citation = {}
@@ -293,15 +293,18 @@ def govtrack_citation_for(entity_type, entity_value, entity_ref_text, entity_pro
 
 	return govtrack_citation
 
-def deepbills_citations_for(deepbills_bill_version_id_parts):
+def deepbills_entity_refs_for(deepbills_bill_version_id_parts):
 	from lxml import etree
-
-	citations = {}
 
 	deepbills_bill = etree.fromstring(fetch_deepbills_bill_xml(deepbills_bill_version_id_parts))
 	ns = { "cato": "http://namespaces.cato.org/catoxml" }
 
-	entity_refs = deepbills_bill.findall(".//cato:entity-ref", namespaces=ns)
+	return deepbills_bill.findall(".//cato:entity-ref", namespaces=ns)
+
+def deepbills_govtrack_citations_for(deepbills_bill_version_id_parts):
+	citations = {}
+
+	entity_refs = deepbills_entity_refs_for(deepbills_bill_version_id_parts)
 
 	for entity_ref in entity_refs:
 		entity_type = entity_ref.get("entity-type")
@@ -309,7 +312,7 @@ def deepbills_citations_for(deepbills_bill_version_id_parts):
 		entity_proposed = True if ( entity_ref.get("value", "false") == "true" ) else False
 
 		if entity_value is not None:
-			citation = govtrack_citation_for(entity_type, entity_value, entity_ref.text, entity_proposed)
+			citation = deepbills_govtrack_citation_for(entity_type, entity_value, entity_ref.text, entity_proposed)
 
 			if entity_type not in citations:
 				citations[entity_type] = []
@@ -329,10 +332,10 @@ for deepbills_bill_version_id_parts in deepbills_bill_index:
 	if deepbills_bill_version_id_parts["billtype"] != "hr":
 		continue
 
-	mods_citations = mods_citations_for(deepbills_bill_version_id_parts)
+	mods_citations = mods_govtrack_citations_for(deepbills_bill_version_id_parts)
 
 	try:
-		deepbills_citations = deepbills_citations_for(deepbills_bill_version_id_parts)
+		deepbills_citations = deepbills_govtrack_citations_for(deepbills_bill_version_id_parts)
 	except IOError:
 		print "Timeout:", deepbills_url_for(deepbills_bill_version_id_parts)
 		continue
