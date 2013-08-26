@@ -8,9 +8,14 @@ if __name__ == "__main__":
 
 import urllib, json
 
-# XXX: Modified from fetch_bill_index_json() in unitedstates/congress/tasks/deepbills.py
-def fetch_deepbills_bill_index():
-	return json.loads(urllib.urlopen("http://deepbills.cato.org/api/1/bills").read())
+def data_dir():
+	return "data"
+
+def congress_data_dir(data_dir=data_dir()):
+	return "%s/congress" % ( data_dir )
+
+def bill_text_path_for(congress, bill_type, bill_number, bill_version, congress_data_dir=congress_data_dir()):
+	return "%s/%d/bills/%s/%s%d/text-versions/%s" % ( congress_data_dir, congress, bill_type, bill_type, bill_number, bill_version )
 
 ### MODS ###
 
@@ -37,9 +42,16 @@ def mods_govtrack_citations_for(deepbills_bill_version_id_parts):
 
 ### DeepBills ###
 
+# XXX: Modified from fetch_bill_index_json() in unitedstates/congress/tasks/deepbills.py
+def fetch_deepbills_bill_index():
+	return json.loads(urllib.urlopen("http://deepbills.cato.org/api/1/bills").read())
+
 # XXX: Modified from deepbills_url_for() in unitedstates/congress/tasks/deepbills.py
 def deepbills_url_for(deepbills_bill_version_id_parts):
   return "http://deepbills.cato.org/api/1/bill?congress=%s&billtype=%s&billnumber=%s&billversion=%s" % ( deepbills_bill_version_id_parts["congress"], deepbills_bill_version_id_parts["billtype"], deepbills_bill_version_id_parts["billnumber"], deepbills_bill_version_id_parts["billversion"] )
+
+def deepbills_xml_path_for(deepbills_bill_version_id_parts, congress_data_dir=congress_data_dir()):
+	return "%s/catoxml.xml" % ( bill_text_path_for(int(deepbills_bill_version_id_parts["congress"]), deepbills_bill_version_id_parts["billtype"], int(deepbills_bill_version_id_parts["billnumber"]), deepbills_bill_version_id_parts["billversion"], congress_data_dir) )
 
 # XXX: Modified from fetch_single_bill_json() in unitedstates/congress/tasks/deepbills.py
 def fetch_deepbills_bill_json(deepbills_bill_version_id_parts):
@@ -49,12 +61,21 @@ def fetch_deepbills_bill_json(deepbills_bill_version_id_parts):
 def extract_catoxml_bill_body_from(single_bill_json):
   return single_bill_json["billbody"].encode("utf-8")
 
-def fetch_deepbills_bill_xml(deepbills_bill_version_id_parts):
-	# TODO: This should check for the file on the local server first.
-	if False:
-		return ""
-	else:
-		return extract_catoxml_bill_body_from(fetch_deepbills_bill_json(deepbills_bill_version_id_parts))
+def fetch_deepbills_bill_xml_from_disk(deepbills_bill_version_id_parts, congress_data_dir=congress_data_dir()):
+	# XXX: This assumes the file on disk is the most recent file available.
+	return open(deepbills_xml_path_for(deepbills_bill_version_id_parts, congress_data_dir)).read()
+
+def fetch_deepbills_bill_xml_from_web(deepbills_bill_version_id_parts):
+	return extract_catoxml_bill_body_from(fetch_deepbills_bill_json(deepbills_bill_version_id_parts))
+
+def fetch_deepbills_bill_xml(deepbills_bill_version_id_parts, congress_data_dir=congress_data_dir()):
+	try:
+		deepbills_bill_xml = fetch_deepbills_bill_xml_from_disk(deepbills_bill_version_id_parts, congress_data_dir)
+	except IOError:
+		# XXX: This makes no attempt to save the downloaded file to disk.
+		deepbills_bill_xml = fetch_deepbills_bill_xml_from_web(deepbills_bill_version_id_parts)
+
+	return deepbills_bill_xml
 
 def is_special_segment(entity_value_segment):
 	return (entity_value_segment in [ "note", "etseq" ])
@@ -296,7 +317,15 @@ def deepbills_govtrack_citation_for(entity_type, entity_value, entity_ref_text, 
 def deepbills_entity_refs_for(deepbills_bill_version_id_parts):
 	from lxml import etree
 
-	deepbills_bill = etree.fromstring(fetch_deepbills_bill_xml(deepbills_bill_version_id_parts))
+	try:
+		deepbills_bill = etree.fromstring(fetch_deepbills_bill_xml(deepbills_bill_version_id_parts))
+	except IOError:
+		print "Timeout:", deepbills_url_for(deepbills_bill_version_id_parts)
+		return None
+	except etree.XMLSyntaxError:
+		print "XML Syntax Error:", deepbills_url_for(deepbills_bill_version_id_parts)
+		return None
+
 	ns = { "cato": "http://namespaces.cato.org/catoxml" }
 
 	return deepbills_bill.findall(".//cato:entity-ref", namespaces=ns)
@@ -305,6 +334,9 @@ def deepbills_govtrack_citations_for(deepbills_bill_version_id_parts):
 	citations = {}
 
 	entity_refs = deepbills_entity_refs_for(deepbills_bill_version_id_parts)
+
+	if entity_refs is None:
+		return None
 
 	for entity_ref in entity_refs:
 		entity_type = entity_ref.get("entity-type")
@@ -333,17 +365,10 @@ for deepbills_bill_version_id_parts in deepbills_bill_index:
 		continue
 
 	mods_citations = mods_govtrack_citations_for(deepbills_bill_version_id_parts)
+	deepbills_citations = deepbills_govtrack_citations_for(deepbills_bill_version_id_parts)
 
-	try:
-		deepbills_citations = deepbills_govtrack_citations_for(deepbills_bill_version_id_parts)
-	except IOError:
-		print "Timeout:", deepbills_url_for(deepbills_bill_version_id_parts)
-		continue
-
-	if ( mods_citations is not None ) or ( deepbills_citations is not None ):
+	if ( mods_citations is not None ) and ( deepbills_citations is not None ):
 		print deepbills_bill_version_id_parts
-#		print mods_citations
-#		print deepbills_citations
 
 		mods_citation_set = set()
 		deepbills_citation_set = set()
@@ -369,4 +394,12 @@ for deepbills_bill_version_id_parts in deepbills_bill_index:
 			if deepbills_citation_key not in mods_citation_set:
 				print "'%s' not in MODS citations" % ( deepbills_citation_key )
 
+		print ""
+	elif mods_citations is not None:
+		print deepbills_bill_version_id_parts
+		print "MODS Citations:", mods_citations
+		print ""
+	elif deepbills_citations is not None:
+		print deepbills_bill_version_id_parts
+		print "DeepBills Citations:", deepbills_citations
 		print ""
