@@ -205,7 +205,7 @@ def do_api_search(model, qs, request_options, requested_fields):
     qs_filters = { }
 
     for arg, vals in request_options.iterlists():
-        if arg in ("offset", "limit", "format", "fields"):
+        if arg in ("offset", "limit", "format", "fields", "callback"):
             # These aren't filters.
             pass
         
