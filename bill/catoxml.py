@@ -8,6 +8,14 @@ if __name__ == "__main__":
 
 import urllib, json
 
+class CatoXMLSyntaxError(SyntaxError):
+	def __init__(self, deepbills_bill_version_id_parts, msg):
+		self.congress = deepbills_bill_version_id_parts["congress"]
+		self.bill_type = deepbills_bill_version_id_parts["billtype"]
+		self.bill_number = deepbills_bill_version_id_parts["billnumber"]
+		self.bill_version = deepbills_bill_version_id_parts["billversion"]
+		self.msg = "%s-%s%s-%s: %s" % ( self.congress, self.bill_type, self.bill_number, self.bill_version, msg )
+
 def data_dir():
 	return "data"
 
@@ -150,6 +158,7 @@ def build_citation(entity_value_segments, entity_value_segment_names):
 def segment_names_for(entity_type):
 	segment_name_map = {
 		"uscode": {
+			# XXX: The CatoXML spec is not clear on what actually comes after 'subparagraph' for the 'usc' subtype.
 			"usc": [ "subtype", "title", "section", "subsection", "paragraph", "subparagraph", "clause", "subclause", "item", "subitem" ],
 			"usc-chapter": [ "subtype", "title", "chapter", "subchapter" ],
 			"usc-appendix": [ "subtype", "title", "section" ],
@@ -254,7 +263,7 @@ def govtrack_citation_text_for(deepbills_citation):
 		govtrack_citation_text += deepbills_citation["act"]
 	elif deepbills_citation["type"] == "statute-at-large":
 		govtrack_citation_text += deepbills_citation["volume"]
-		govtrack_citation_text += " U.S.C."
+		govtrack_citation_text += " Stat. "
 		govtrack_citation_text += deepbills_citation["page"]
 	elif deepbills_citation["type"] == "public-law":
 		# XXX: We might want to add segment citations here.
@@ -344,7 +353,12 @@ def deepbills_govtrack_citations_for(deepbills_bill_version_id_parts):
 		entity_proposed = True if ( entity_ref.get("value", "false") == "true" ) else False
 
 		if entity_value is not None:
-			citation = deepbills_govtrack_citation_for(entity_type, entity_value, entity_ref.text, entity_proposed)
+			entity_value = entity_value.encode("utf-8")
+
+			try:
+				citation = deepbills_govtrack_citation_for(entity_type, entity_value, entity_ref.text, entity_proposed)
+			except (KeyError, ValueError) as e:
+				raise CatoXMLSyntaxError( deepbills_bill_version_id_parts, "\nType: %s\nValue%s\nText: %s\nProposed: %s\n%s" % ( entity_type, entity_value, entity_ref.text, entity_proposed, e.message ) )
 
 			if entity_type not in citations:
 				citations[entity_type] = []
@@ -365,7 +379,11 @@ for deepbills_bill_version_id_parts in deepbills_bill_index:
 		continue
 
 	mods_citations = mods_govtrack_citations_for(deepbills_bill_version_id_parts)
-	deepbills_citations = deepbills_govtrack_citations_for(deepbills_bill_version_id_parts)
+
+	try:
+		deepbills_citations = deepbills_govtrack_citations_for(deepbills_bill_version_id_parts)
+	except CatoXMLSyntaxError as e:
+		print e.msg
 
 	if ( mods_citations is not None ) and ( deepbills_citations is not None ):
 		print deepbills_bill_version_id_parts
