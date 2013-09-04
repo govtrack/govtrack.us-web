@@ -102,7 +102,12 @@ class BillProcessor(XmlProcessor):
             text = unicode(elem.text) if elem.text else None
             titles.append((elem.get('type') + ("-partial" if elem.get("partial") == "1" else ""), elem.get('as'), text))
         obj.titles = titles
-        obj.title = get_primary_bill_title(obj, titles)
+        
+        # let the XML override the displayed bill number (American Memory bills)
+        n = unicode(node.xpath('string(bill-number)'))
+        if not n: n = None
+        
+        obj.title = get_primary_bill_title(obj, titles, override_number=n)
 
     def process_sponsor(self, obj, node):
         try:
@@ -279,7 +284,10 @@ def main(options):
         from bill.search_indexes import BillIndex
         bill_index = BillIndex()
 
-    if options.congress:
+    if options.congress and int(options.congress) <= 42:
+        files = glob.glob('data/congress/%s/bills/*/*/*.xml' % options.congress)
+        log.info('Parsing unitedstates/congress bills of only congress#%s' % options.congress)
+    elif options.congress:
         files = glob.glob('data/us/%s/bills/*.xml' % options.congress)
         log.info('Parsing bills of only congress#%s' % options.congress)
     else:
@@ -300,7 +308,7 @@ def main(options):
         # With indexing or events enabled, if the bill metadata file hasn't changed check
         # the bill's latest text file for changes so we can create a text-is-available
         # event and so we can index the bill's text.
-        if (bill_index and not options.disable_events) and not File.objects.is_changed(fname) and not options.force:
+        if int(options.congress) > 42 and (bill_index and not options.disable_events) and not File.objects.is_changed(fname) and not options.force:
             m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
 
             try:
@@ -327,19 +335,13 @@ def main(options):
         if options.slow:
             time.sleep(1)
             
-        skip_stuff = False
-            
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
-            if not skip_stuff:
-                try:
-                    bill = bill_processor.process(Bill(), node)
-                except:
-                    print fname
-                    raise
-            else:
-                m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
-                bill = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
+            try:
+                bill = bill_processor.process(Bill(), node)
+            except:
+                print fname
+                raise
            
             seen_bill_ids.append(bill.id) # don't delete me later
             
@@ -363,14 +365,18 @@ def main(options):
             
             if not options.disable_events:
                 bill.create_events()
-
-        if not skip_stuff:
-            File.objects.save_file(fname)
+                
+        File.objects.save_file(fname)
         
     # delete bill objects that are no longer represented on disk.... this is too dangerous.
     if options.congress and not options.filter and False:
         # this doesn't work because seen_bill_ids is too big for sqlite!
         Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
+        
+    # The rest is for current only...
+    
+    if options.congress and int(options.congress) != CURRENT_CONGRESS:
+        return
         
     # Parse docs.house.gov for what might be coming up this week.
     import iso8601

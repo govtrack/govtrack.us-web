@@ -8,15 +8,19 @@ from django.contrib.humanize.templatetags.humanize import ordinal
 
 def get_bill_number(bill, show_congress_number="ARCHIVAL"):
     "Compute display form of bill number"
-
-    from bill.models import BillType
-    ret = '%s %s' % (BillType.by_value(bill.bill_type).label, bill.number)
+    
+    if bill.congress <= 42:
+        # This is an American Memory bill. It's number is stored.
+        ret = bill.title.split(":")[0]
+    else:
+        from bill.models import BillType
+        ret = '%s %s' % (BillType.by_value(bill.bill_type).label, bill.number)
     if (bill.congress != settings.CURRENT_CONGRESS and show_congress_number == "ARCHIVAL") or show_congress_number == "ALL":
         ret += ' (%s)' % ordinal(bill.congress)
     return ret
 
 
-def get_primary_bill_title(bill, titles, with_number=True):
+def get_primary_bill_title(bill, titles, with_number=True, override_number=None):
     """
     Calculate primary bill title.
 
@@ -31,7 +35,7 @@ def get_primary_bill_title(bill, titles, with_number=True):
     else:
         title = "No Title"
     if with_number:
-        return '%s: %s' % (get_bill_number(bill), title)
+        return '%s: %s' % (get_bill_number(bill) if not override_number else override_number, title)
     else:
         return title
 
