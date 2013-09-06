@@ -116,6 +116,8 @@ class Bill(models.Model):
     sliplawnum = models.IntegerField(blank=True, null=True, help_text="For enacted laws, the slip law number (i.e. the law number in P.L. XXX-123). Unique with congress and sliplawpublpriv.")
     #statutescite = models.CharField(max_length=16, blank=True, null=True, help_text="For enacted laws, a normalized U.S. Statutes at Large citation. Available only for years in which the Statutes at Large has already been published.")
 
+    source = models.CharField(max_length=15, choices=[("thomas-legacy", "THOMAS.gov (via GovTrack Legacy Scraper)"), ("thomas-congproj", "THOMAS.gov (via Congress Project)"), ("statutesatlarge", "U.S. Statutes at Large"), ("americanmemory", "LoC American Memory Collection")], help_text="The primary source for this bill's metadata.")
+    source_link = models.CharField(max_length=256, blank=True, null=True, help_text="When set, a link to the page on the primary source website for this bill. Set when source='americanmemory' only.")
 
     # role is a new field added with, but might not be perfect for overlapping roles (see Cosponsor)
     #for role in PersonRole.objects.filter(startdate__gt="1960-01-01"):
@@ -998,6 +1000,8 @@ class USCSection(models.Model):
 
     # utility methods to load from the structure.json file created by github:unitedstates/uscode
     # don't forget:
+    #   * STOP: The upstream 'citation' key has changed: usc/chapter/x/y is now usc/title/x/chapter/y
+    #           And intermediate levels are similar.
     #   * These objects are used in feeds. Delete with care.
     #     After loading, obsoleted entries are left with update_flag=0.
     #     Check if any of those are used in feeds before deleting them.

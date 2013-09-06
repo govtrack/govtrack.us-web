@@ -345,6 +345,23 @@ def main(options):
            
             seen_bill_ids.append(bill.id) # don't delete me later
             
+            if bill.congress >= 113:
+                bill.source = "thomas-congproj"
+            elif bill.congress >= 93:
+                bill.source = "thomas-legacy"
+            elif bill.congress >= 82:
+                bill.source = "statutesatlarge"
+            elif bill.congress <= 42:
+                bill.source = "americanmemory"
+            else:
+                raise ValueError()
+
+            # So far this is just for American Memory bills.
+            if node.xpath("string(source/@url)"):
+                bill.source_link = unicode(node.xpath("string(source/@url)"))
+            else:
+                bill.source_link = None
+
             actions = []
             bill.sliplawpubpriv = None
             bill.sliplawnum = None
