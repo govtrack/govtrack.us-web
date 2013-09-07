@@ -264,26 +264,39 @@
 			<p class="date"></p>
 			{% if subtitle %}<p class="subtitle">{{subtitle}}</p>{% endif %}{% endcomment %}
 			
-			{% if bill.congress >= 93 %}
 			<dl>
-				<dt>Introduced:</dt>
-				<dd>{{bill.introduced_date}}{% if not bill.is_alive %} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}){% endif %}</dd>
-			
-				<dt>Sponsor:</dt>
-				{% if bill.sponsor %}
-					<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{sponsor_name}}</a></dd>
+				{% if bill.source != "statutesatlarge" %}
+					<dt>Introduced:</dt>
+					<dd>{{bill.introduced_date}}{% if not bill.is_alive %} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}){% endif %}</dd>
 				{% else %}
-					<dd>(bill introduced by rule or other special circumstance)</dd>
+					{# from the SaL, the introduced date is not known #}
+					<dt>Introduced:</dt>
+					<dd>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
+				{% endif %}
+
+				{% if bill.congress >= 93 %}
+					<dt>Sponsor:</dt>
+					{% if bill.sponsor %}
+						<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{sponsor_name}}</a></dd>
+					{% else %}
+						<dd>(bill introduced by rule or other special circumstance)</dd>
+					{% endif %}
 				{% endif %}
 			
+				{% if bill.source != "americanmemory" %}
 				<dt>Status:</dt>
 				<dd>
-				{% if not dead %}
-					{{bill.get_current_status_display}}
-				{% else %}
-					Died ({{bill.get_current_status_display}})
-				{% endif %}
+					{% if bill.source == "statutesatlarge" and bill.noun == "bill" %}
+						Enacted on {{bill.current_status_date}}
+					{% elif bill.source == "statutesatlarge" and bill.noun == "resolution" %}
+						Enacted or Agreed to on {{bill.current_status_date}}
+					{% elif not dead %}
+						{{bill.get_current_status_display}}
+					{% else %}
+						Died ({{bill.get_current_status_display}})
+					{% endif %}
 				</dd>
+				{% endif %}
 				
 				{% with bill.slip_law_number as sln %}
 				{% if sln %}
@@ -349,21 +362,23 @@
 				{% endif %}
 				
 				{% endwith %}
-			</dl>
-			{% else %}
-			<dl>
-				<dt>Introduced:</dt>
-				<dd>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
-			
-				<dt>Status:</dt>
-				<dd>Enacted or Agreed to on {{bill.current_status_date}}</dd>
 				
-				<dt>Slip Law:</dt>
-				<dd>This bill became {{bill.slip_law_number}}.</dd>
+				{% if bill.source == "statutesatlarge" %}
+				{% with text as text_info %}
+				<dt>Source:</dt>
+				<dd>
+					<a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a>
+				</dd>
+				{% endwith %}
+				{% elif bill.source == "americanmemory" %}
+				<dt>Source:</dt>
+				<dd>
+					<a href="{{bill.source_link}}">American Memory Century of Lawmaking</a>
+				</dd>
+				{% endif %}
+				
 			</dl>
-			<p>Limited information is available for bills and resolutions from 1957-1972.</p>
-			{% endif %}
-		
+			
 			{% with bill.oursummary as summary %}
 			{% if summary %}
 				<p style="margin: 1em 0 0 0">{{summary.plain_text|truncatewords:30}} (<a href="#summary/oursummary">read more</a>)</p>
@@ -470,7 +485,16 @@
 	</div><!-- /actions -->
 	{% endif %}
 
-	<p class="helptext" style="clear: both; line-height: 110%; margin: 0 0 0 10px;"><small>The {{bill.noun}}&rsquo;s title was written by its sponsor. {{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</small></p>
+	<p class="helptext" style="clear: both; line-height: 110%; margin: 0 0 0 10px;"><small>
+		{% if bill.congress < 93 %}
+			Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
+		{% else %}
+			{% if not bill.is_success %}
+				The {{bill.noun}}&rsquo;s title was written by its sponsor.
+			{% endif %}
+			{{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.
+		{% endif %}
+	</small></p>
 	
 	<div id="admin_panel"> </div>
 	<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
@@ -486,10 +510,13 @@
 
 <ul class="tabs five-up">
 	<li><a href="#overview">Overview</a></li>
+	
+	{% if bill.source != "americanmemory" %}
 	<li><a href="#summary">Summaries</a></li>
 	<li><a href="#related">Related</a></li>
 	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
 	<li id="comments_tab" style="display: none"><a href="#comments">Comments</a></li>
+	{% endif %}
 </ul>
 
 <div class="panes">
@@ -504,12 +531,14 @@
 						<dt>Status</dt>
 						<dd>
 							<p>
-								{% if bill.congress < 93 %}
+								{% if bill.source == "statutesatlarge" %}
 									{% if bill.noun == "bill" %}
 										This bill was enacted on {{bill.current_status_date|date}}.
 									{% else %}
-										This resolution was agreed to on {{bill.current_status_date|date}}.
+										This resolution was enacted or agreed to on {{bill.current_status_date|date}}.
 									{% endif %}
+								{% elif bill.source == "americanmemory" %}
+									We don&rsquo;t have status information for bills in this historical collection.
 								{% elif not died %}
 									{{bill.current_status_description}}
 								{% else %}
@@ -715,6 +744,7 @@
 				</div>
 			  	{% endif %}
 			  
+				{% if bill.source != "americanmemory" %}
 				<div class="container">
 					<dl>
 						<dt>Summary</dt>
@@ -744,21 +774,26 @@
 						</dd>
 					</dl>
 				</div><!-- /container -->
-				
+				{% endif %}
 				
 				<div class="container">
 					<dl>
 						<dt>Primary Source</dt>
 						{% if bill.congress >= 93 %}
 						<dd>
-							<p style="margin:0"><a href="{{bill.thomas_link}}">View on THOMAS (The Library of Congress)</a></p>
-							<p class="small">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here.</p>
+							<p style="margin:0"><a href="{{bill.thomas_link}}">THOMAS.gov (The Library of Congress)</a></p>
+							<p class="small">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here. {% if bill.source == "thomas-congproj" %}Data comes via the <a href="https://github.com/unitedstates/congress">congress project</a>.{% endif %}</p>
 						</dd>
-						{% else %}
+						{% elif bill.source == "statutesatlarge" %}
 						<dd>
 							<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
 							<p style="margin:0"><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
-							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Printing Office&rsquo;s United States Statutes at Large publication.</p>
+							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Printing Office&rsquo;s United States Statutes at Large publication, via the <a href="https://github.com/unitedstates/congress">congress project</a>.</p>
+						</dd>
+						{% elif bill.source == "americanmemory" %}
+						<dd>
+							<p style="margin:0"><a href="{{bill.source_link}}">American Memory Century of Lawmaking</a></p>
+							<p class="small">Historical information on bills from 1799-1873 comes from the Library of Congress&rsquo;s American Memory Century of Lawmaking collection, via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law project</a>.</p>
 						</dd>
 						{% endif %}
 						
@@ -801,6 +836,7 @@
 		</div> <!-- row -->
 	</div>  <!-- /overview pane -->
 	
+	{% if bill.source != "americanmemory" %}
 	<div id="summary"> <!-- summary pane -->
 		<div class="row">
 		<div class="three columns">
@@ -1067,6 +1103,7 @@
 		<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>    
 	
 	</div>
+	{% endif %}
 	
 </div> <!--panes -->
 </div> <!-- margin fix -->
@@ -1085,6 +1122,7 @@ $("ul.tabs a").tabs("div.panes > div", null, function(tabname) {
 });
 $("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
 
+{% if bill.congress >= 113 %}
 <!-- disqus comment count, hacked from their count.js code -->
 <script>
 var DISQUSWIDGETS = {
@@ -1098,5 +1136,6 @@ var DISQUSWIDGETS = {
 };
 </script>
 <script src="http://govtrack.disqus.com/count-data.js?q=1&0=1,{{feed.feedname|urlencode}}"> </script>
+{% endif %}
 
 {% endblock %}

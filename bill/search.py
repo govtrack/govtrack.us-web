@@ -136,9 +136,9 @@ def bill_search_manager():
     
     sm.set_template("""
     	<a href="{{object.get_absolute_url}}" style="font-size: 15px">{{object|truncatewords_html:50}}</a>
-    	<div>Sponsor: {{object.sponsor}}</div>
-    	<div>Introduced: {{object.introduced_date}}</div>
-    	<div>{{object.get_current_status_display}}: {{object.current_status_date}}</div>
+    	{% if object.sponsor %}<div>Sponsor: {{object.sponsor}}</div>{% endif %}
+    	{% if object.source != "statutesatlarge" %}<div>Introduced: {{object.introduced_date}}</div>{% endif %}
+    	{% if object.source != "americanmemory" %}<div>{% if object.source != "statutesatlarge" %}{{object.get_current_status_display}}{% else %}Enacted/Agreed to{% endif %}: {{object.current_status_date}}</div>{% endif %}
 	""")
     
     return sm

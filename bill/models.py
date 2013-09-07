@@ -141,7 +141,7 @@ class Bill(models.Model):
     # indexing
     def get_index_text(self):
         bill_text = load_bill_text(self, None, plain_text=True)
-        if not bill_text: print "NO BILL TEXT", self
+        if self.congress >= 82 and not bill_text: print "NO BILL TEXT", self
         return "\n".join([
             self.title,
             self.display_number_no_congress_number.replace(".", ""),
@@ -296,6 +296,9 @@ class Bill(models.Model):
     def is_alive(self):
         """Whether the bill was introduced in the current session of Congress and the bill's status is not a final status (i.e. can take no more action like a failed vote)."""
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
+    def is_success(self):
+        """Whether the bill was enacted (for bills) or passed (for resolutions)."""
+        return self.current_status in BillStatus.final_status_passed
 
     def get_approved_links(self):
         return self.links.filter(approved=True)
@@ -776,6 +779,7 @@ class Bill(models.Model):
             and rb.related_bill.current_status_date > self.current_status_date]
 
     def find_reintroductions(self):
+        if self.sponsor == None: return
         def normalize_title(title): # remove anything that looks like a year
             return re.sub(r"of \d\d\d\d$", "", title)
         for reintro in Bill.objects.exclude(congress=self.congress).filter(sponsor=self.sponsor).order_by('congress'):
