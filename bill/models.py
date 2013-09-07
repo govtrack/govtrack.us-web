@@ -116,7 +116,7 @@ class Bill(models.Model):
     sliplawnum = models.IntegerField(blank=True, null=True, help_text="For enacted laws, the slip law number (i.e. the law number in P.L. XXX-123). Unique with congress and sliplawpublpriv.")
     #statutescite = models.CharField(max_length=16, blank=True, null=True, help_text="For enacted laws, a normalized U.S. Statutes at Large citation. Available only for years in which the Statutes at Large has already been published.")
 
-    source = models.CharField(max_length=15, choices=[("thomas-legacy", "THOMAS.gov (via GovTrack Legacy Scraper)"), ("thomas-congproj", "THOMAS.gov (via Congress Project)"), ("statutesatlarge", "U.S. Statutes at Large"), ("americanmemory", "LoC American Memory Collection")], help_text="The primary source for this bill's metadata.")
+    source = models.CharField(max_length=16, choices=[("thomas-legacy", "THOMAS.gov (via GovTrack Legacy Scraper)"), ("thomas-congproj", "THOMAS.gov (via Congress Project)"), ("statutesatlarge", "U.S. Statutes at Large"), ("americanmemory", "LoC American Memory Collection")], help_text="The primary source for this bill's metadata.")
     source_link = models.CharField(max_length=256, blank=True, null=True, help_text="When set, a link to the page on the primary source website for this bill. Set when source='americanmemory' only.")
 
     # role is a new field added with, but might not be perfect for overlapping roles (see Cosponsor)

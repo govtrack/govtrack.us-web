@@ -158,7 +158,8 @@ class BillProcessor(XmlProcessor):
         comlist = []
         for subnode in node.xpath('./committees/committee'):
             if subnode.get('code') in ("", None):
-                log.warn("Missing code attribute on committee %s." % subnode.get("name"))
+                if obj.congress >= 93:
+                    log.warn("Missing code attribute on committee %s." % subnode.get("name"))
                 continue
             try:
                 com = Committee.objects.get(code=subnode.get('code'))

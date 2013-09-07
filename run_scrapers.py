@@ -228,11 +228,11 @@ if "stats" in sys.argv:
 	os.system("cd analysis; python sponsorship_analysis.py %d" % CONGRESS)
 	os.system("cd analysis; python missed_votes.py %d" % CONGRESS)
 	
-if "historical_bills" in sys.argv:
+if "am_mem_bills" in sys.argv:
 	# American Memory
-	# for c in {6..42}; do ./parse.py bill --force --congress=$c --level=warn; done
+	os.syste("for c in {6..42}; do echo $c; RELEASE=1 ./parse.py bill --force --congress=$c --level=warn; done")
 	
-	
+if "stat_bills" in sys.argv:
 	# Pull in statutes from the 85th-92nd Congress
 	# via the GPO's Statutes at Large.
 	
