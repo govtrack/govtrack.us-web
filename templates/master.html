@@ -81,21 +81,17 @@
 
 <body class="{% block body_class %}{% endblock %}">
 
-	{% if 0 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" data-seq="32">
+	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
+	<div id="sitenewscontainer" style="display: none" data-seq="34">
 		<div id="sitenews">
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div class="sitenewsbody">
-				<div id="trending_bills" style="width: 550px; margin: 0 auto;">
-				<a href="/videos/2013-07-22_few-bills" style="float: left; width: 120px;"><img src="http://img.youtube.com/vi/wKGY-Z5_mHc/mqdefault.jpg" style="height: 50px;"/></a>
-				<p style="text-align: left; padding-top: 10px;">
-					Watch our video on <a href="/videos/2013-07-22_few-bills">Lawmakers Who Aren’t Making Law</a>.
-				</p>
-				</div>
+				{# <p>NEW: Get alerts for <a href="http://www.govtrack.us/congress/bills/uscode/chapter/50/36">bills amending the Foreign Intelligence Surveillance Act</a>.</p> #}
+			
+				<p>You asked for widgets, better accessibility, and improvements to email updates, and you got it. Read about the <a href="http://www.govtrack.us/blog/2013/08/12/summer-updates/">Summer 2013 Updates</a>.</p>
 			
 				{% comment %}
-				<p>Please support our work. For $2 we&rsquo;ll <a href="http://www.govtrack.us/accounts/go_ad_free">hide the advertisements</a> for a year.</p>
-				
+				<div id="trending_bills" style="width: 550px; margin: 0 auto;">
 				<div style="font-size: 85%; color: #553;">Trending on GovTrack now...</div>
 				<div id="trending_bills" style="max-width: 920px; margin: 0 auto; font-size: 90%;">
 				{% for f in trending_feeds %}
@@ -104,6 +100,7 @@
 					</a>
 				{% endfor %}
 				<div style="clear: both"> </div>
+				</div>
 				</div>
 				{% endcomment %}
 			</div>

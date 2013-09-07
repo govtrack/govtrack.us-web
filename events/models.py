@@ -171,7 +171,7 @@ class Feed(models.Model):
             "single_event_type": True,
             "sort_order": 104,
             "category": "federal-bills",
-            "description": "You will be alerted every time Congress enacts a law.",
+            "description": "You will be alerted every time a law is enacted.",
         },
         "misc:introducedbills": {
             "simple": True,

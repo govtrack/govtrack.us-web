@@ -36,7 +36,7 @@ class StateLegislator(models.Model):
 class StateSubjectTerm(models.Model):
 	bt50id = models.IntegerField(unique=True, db_index=True)
 	state = models.CharField(max_length=2)
-	name = models.CharField(max_length=64)
+	name = models.CharField(max_length=128)
 
 	class Meta:
 		ordering = ('state', 'name')
