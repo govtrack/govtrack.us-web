@@ -330,7 +330,7 @@ class Bill(models.Model):
         if self.title_no_number.startswith("Providing for consideration of the bill "):
             return "This resolution sets the rules for debate for another bill, such as limiting who can submit an amendment and setting floor debate time."
         if self.title_no_number.startswith("An original "):
-            return "An original bill is one which is drafted and approved by a committee before it is formally introduced in the House or Senate."
+            return "An \"original bill\" is one which is drafted and approved by a committee before it is formally introduced in the House or Senate."
         return None
 
     def thomas_link(self):

@@ -344,21 +344,6 @@
 					{% endfor %}
 					</dd>
 					
-				{% elif bill.explanatory_text %}
-					<dt>See Instead:</dt>
-					<dd>
-						{{bill.explanatory_text}}
-						
-						{% for rb in bill.get_related_bills %}
-							{% if rb.relation == "ruled-by" %}
-								The main bill is:<br/> 
-								<a href="{{rb.related_bill.get_absolute_url}}">
-									{{rb.related_bill.display_number_no_congress_number}}: {{rb.related_bill.title_no_number|truncatewords:15}}
-								</a>
-							{% endif %}
-						{% endfor %}
-					</dd>
-					
 				{% endif %}
 				
 				{% endwith %}
@@ -486,6 +471,7 @@
 	{% endif %}
 
 	<p class="helptext" style="clear: both; line-height: 110%; margin: 0 0 0 10px;"><small>
+		{{bill.explanatory_text}}
 		{% if bill.congress < 93 %}
 			Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
 		{% else %}
