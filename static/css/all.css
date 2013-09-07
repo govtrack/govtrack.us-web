@@ -2966,7 +2966,7 @@ aside .download-links { padding: 31px 0 0 	}
         .yellow-btn { background: url(../images/btn-sprite-yellow.png) no-repeat; }
         .blue-facebook-btn { background: url(../images/btn-sprite-facebook.png) no-repeat; }
         .blue-facebook-btn-wide { background: url(../images/btn-sprite-facebook-wide.png) no-repeat; }
-        .track-btn:hover, .push-btn:hover {
+        .track-btn:hover, .push-btn:hover, .push-btn.hover-state {
             color: #fff;
             background-position: 0 -43px;
             text-decoration: none;
@@ -2982,6 +2982,12 @@ aside .download-links { padding: 31px 0 0 	}
 			line-height: 34px;
 			text-transform: none;
         }
+        
+		.blue-facebook-btn .on_hover { display: none; }
+		.blue-facebook-btn:hover .no_hover { display: none; }
+		.blue-facebook-btn:hover .on_hover { display: block; }
+		.blue-facebook-btn-wide a { color: #FFA; font-weight: bold; }
+        
     .tracker_widget {
         width: 475px;
         font-family: 'CallunaSans';
