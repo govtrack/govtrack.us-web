@@ -481,7 +481,7 @@
 	{% endif %}
 
 	<p class="helptext" style="clear: both; line-height: 110%; margin: 0 0 0 10px;"><small>
-		{{bill.explanatory_text}}
+		{% if bill.explanatory_text %}{{bill.explanatory_text}}{% endif %}
 		{% if bill.congress < 93 %}
 			Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
 		{% else %}
