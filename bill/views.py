@@ -63,7 +63,7 @@ def bill_details(request, congress, type_slug, number):
             metadata = load_bill_text(bill, None, mods_only=True)
 
             # do interesting stuff with citations
-            if "citations" in metadata:
+            if "citations" in metadata and not settings.DEBUG:
                 slip_laws = []
                 statutes = []
                 usc = { }

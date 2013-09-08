@@ -367,7 +367,7 @@ class Bill(models.Model):
             E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
             common_feeds = [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()]
             enacted_feed = [Feed.EnactedBillsFeed()]
-            for datestr, state, text in self.major_actions:
+            for datestr, state, text, srcxml in self.major_actions:
                 date = eval(datestr)
                 if state == BillStatus.introduced:
                     continue # already indexed
@@ -437,7 +437,7 @@ class Bill(models.Model):
         if status == BillStatus.introduced:
             action_type = "introduced"
         else:
-            for datestr, st, text in self.major_actions:
+            for datestr, st, text, srcxml in self.major_actions:
                 if st == status:
                     date = eval(datestr)
                     action = text
@@ -614,12 +614,17 @@ class Bill(models.Model):
         if self.congress < 93: return []
         ret = []
         saw_intro = False
-        for datestr, st, text in self.major_actions:
+        for datestr, st, text, srcxml in self.major_actions:
             date = eval(datestr)
-            if (st == BillStatus.passed_bill and self.bill_type in (BillType.senate_bill, BillType.senate_joint_resolution)) or (st == BillStatus.passed_concurrentres and self.bill_type == BillType.senate_concurrent_resolution):
-                st = "Passed House"
-            elif (st == BillStatus.passed_bill and self.bill_type in (BillType.house_bill, BillType.house_joint_resolution)) or (st == BillStatus.passed_concurrentres and self.bill_type == BillType.house_concurrent_resolution):
-                st = "Passed Senate"
+            srcnode = etree.fromstring(srcxml) if srcxml else None
+            if st == BillStatus.passed_bill or st == BillStatus.passed_concurrentres and srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
+            	ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
+                if srcnode.get("type") == "vote2":
+                    st = ("Passed %s" % ch)
+                elif srcnode.get("type") == "pingpong":
+                    st = ("%s Agreed to Changes" % ch)
+                elif srcnode.get("type") == "conference":
+                    st = "Conference Report Adopted" # PASSED:BILL only occurs on the second chamber, so indicate both agreed to in text
             else:
                 if st == BillStatus.introduced: saw_intro = True
                 st = BillStatus.by_value(st).label

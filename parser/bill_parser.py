@@ -309,7 +309,7 @@ def main(options):
         # With indexing or events enabled, if the bill metadata file hasn't changed check
         # the bill's latest text file for changes so we can create a text-is-available
         # event and so we can index the bill's text.
-        if int(options.congress) > 42 and (bill_index and not options.disable_events) and not File.objects.is_changed(fname) and not options.force:
+        if (not options.congress or options.congress>42) and (bill_index and not options.disable_events) and not File.objects.is_changed(fname) and not options.force:
             m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
 
             try:
@@ -367,7 +367,12 @@ def main(options):
             bill.sliplawpubpriv = None
             bill.sliplawnum = None
             for axn in tree.xpath("actions/*[@state]"):
-                actions.append( (repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))), BillStatus.by_xml_code(axn.xpath("string(@state)")), axn.xpath("string(text)")) )
+                actions.append( (
+                	repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))),
+                	BillStatus.by_xml_code(axn.xpath("string(@state)")),
+                	axn.xpath("string(text)"),
+                    etree.tostring(axn),
+                	) )
                 
                 if actions[-1][1] in (BillStatus.enacted_signed, BillStatus.enacted_veto_override):
                     bill.sliplawpubpriv = "PUB" if axn.get("type") == "public" else "PRI"
