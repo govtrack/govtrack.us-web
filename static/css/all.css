@@ -4053,11 +4053,6 @@ ul.bullets li, .postcontent ul li, ol.bullets li, .postcontent ol li {
 	text-align: center;
 	font-family: 'PTSerifRegular';
 }
-    #sitenews > div {
-        x-width: 940px;
-        float: none;
-        margin: 5px auto;
-    }
     #sitenews > div:first-of-type {
         width: 20px;
         float: right;
@@ -4073,9 +4068,38 @@ ul.bullets li, .postcontent ul li, ol.bullets li, .postcontent ol li {
         #sitenews > div:first-of-type a:hover {
             border-bottom: 0;
         }
+    #sitenews div.sitenewsbody {
+    	width: 100%;
+        margin: 5px auto;
+    }
+    @media (min-width: 960px) {
+    	#sitenews div.sitenewsbody {
+    		width: 940px;
+    	}
+    }
 	#sitenews a {
 		/* incredibly, this causes IE9 to freeze -- border-bottom: 1px dotted #CB4B16; */
 		text-decoration: underline;
+	}
+	
+	#trending_trackers a {
+		display: inline-block;
+		width: 230px;
+		padding: 3px 8px;
+		margin: 0;
+		line-height: 120%;
+		max-height: 2.5em;
+		overflow: hidden;
+		vertical-align: middle;
+	}
+	@media (max-width: 940px) {
+		#trending_trackers a.trending_trackers_4 { display: none; }
+	}
+	@media (max-width: 720px) {
+		#trending_trackers a.trending_trackers_3 { display: none; }
+	}
+	@media (max-width: 490px) {
+		#trending_trackers a.trending_trackers_2 { display: none; }
 	}
 
 #logo.states {
