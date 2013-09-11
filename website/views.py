@@ -18,7 +18,7 @@ from events.models import Feed
 import us
 
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 @anonymous_view
 @render_to('website/index.html')
@@ -270,7 +270,7 @@ def push_to_social_media_rss(request):
         def item_guid(self, item):
             return "http://www.govtrack.us/events/guid/" + item["guid"] 
         def item_pubdate(self, item):
-            return item["date"] if isinstance(item["date"], datetime) else datetime.combine(item["date"], time.min)
+            return item["date"] if isinstance(item["date"], datetime) or item["date"] is None else datetime.combine(item["date"], time.min)
             
     return DjangoFeed()(request)
 
