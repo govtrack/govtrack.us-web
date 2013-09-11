@@ -155,7 +155,7 @@ class Feed(models.Model):
         "misc:activebills": {
             "title": "All Legislative Activity",
             "slug": "bill-activity",
-            "intro_html": """<p>This feed tracks all major activity on legislation, including newly introduced bills and resolutions, votes on bills and resolutions, enacted bills, and other such events.</p> <p>To exclude newly introduced bills and resolutions, use the <a href="/events/major-bill-activity">Major Activity on All Legislation Except New Introductions</a> feed.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
+            "intro_html": """<p>This feed tracks all major activity on legislation, including newly introduced bills and resolutions, votes on bills and resolutions, enacted bills, and other such events.</p> <p>To exclude newly introduced bills and resolutions, use the <a href="/events/major-bill-activity">Major Legislation Activity</a> feed.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
             "simple": True,
             "sort_order": 105,
@@ -189,7 +189,7 @@ class Feed(models.Model):
             "simple": True,
             "title": "Major Legislative Activity",
             "slug": "major-bill-activity",
-            "intro_html": """<p>This feed tracks major activity on legislation, including votes on bills and resolutions, enacted bills, and other such events.</p> <p>This feed includes all of the same events as the <a href="/events/bill-activity">Major Activity on All Legislation</a> feed except newly introduced bills and resolutions.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
+            "intro_html": """<p>This feed tracks major activity on legislation, including votes on bills and resolutions, enacted bills, and other such events.</p> <p>This feed includes all of the same events as the <a href="/events/bill-activity">All Legislative Activity</a> feed except newly introduced bills and resolutions.</p> <p>You can also browse bills and filter by status using <a href="/congress/bills/browse">advanced bill search</a>.</p>""",
             "breadcrumbs": [("/congress", "Congress"), ("/congress/bills", "Bills")],
             "simple": True,
             "sort_order": 100,
