@@ -6,7 +6,7 @@ def build_haystack_index(model):
 		indexed_model_name = indexes.CharField(default=model.__name__)
 		def get_model(self):
 			return model
-		def index_queryset(self):
+		def index_queryset(self, using=None):
 			return model.objects.prefetch_related(*self.prefetch_related_list)
 			
 	I.__name__ = model.__name__

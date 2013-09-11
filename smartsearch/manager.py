@@ -14,7 +14,7 @@ import json, urllib, hashlib
 from common.enum import MetaEnum
 
 FACET_CACHE_TIME = 60*60
-FACET_OPTIONS = { "limit": -1, "sort": "count" } # limits cause problems because the selected option can dissapear!
+FACET_OPTIONS = { "limit": -1, "mincount": 1, "sort": "count" } # limits cause problems because the selected option can dissapear!
 
 class SearchManager(object):
     def __init__(self, model, qs=None, connection=None):
