@@ -12,7 +12,7 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130907" />
+		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130911" />
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen" /><![endif]-->
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -82,7 +82,7 @@
 <body class="{% block body_class %}{% endblock %}">
 
 	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" data-seq="35">
+	<div id="sitenewscontainer" style="display: none" data-seq="36">
 		<div id="sitenews">
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div class="sitenewsbody">
