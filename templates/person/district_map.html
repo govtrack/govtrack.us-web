@@ -6,9 +6,9 @@
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
-	<script type="text/javascript" src="http://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
-	<script type="text/javascript" src="http://gis.govtrack.us/static/js/maps_helpers.js"></script>
+	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript" src="/gis/static/js/google_maps_helpers.js"></script>
+	<script type="text/javascript" src="/gis/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
 		var current_layer = null;
 		function showOverlay() {
@@ -32,7 +32,7 @@
 			// Apply the map layer.
 			var overlay = new google.maps.ImageMapType({
 			  getTileUrl: function(coord, zoom) {
-				  return "http://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
+				  return "/gis/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
 			  },
 			  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
 			  isPng: tileimgformat == "png",
@@ -49,7 +49,7 @@
 			if (tileimgformat != "png") {
 				var overlay2 = new google.maps.ImageMapType({
 				  getTileUrl: function(coord, zoom) {
-					  return "http://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=fill");
+					  return "/gis/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=fill");
 				  },
 				  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
 				  isPng: false,
@@ -146,7 +146,7 @@
 					current_layer.split("/")[0], // when looking at a district, still do hit testing on whole country
 					null,
 					func,
-					"http://gis.govtrack.us");
+					"/gis");
 			}
 			
 			google.maps.event.addListener(map, "mousemove", function(e) {
@@ -419,7 +419,7 @@
 
 	<div style="display: none">
 		<div id="fullscreen" style="padding: 10px">
-			<img src="{{ MEDIA_URL }}static/images/stock_fullscreen.png" title="Toggle Full Screen" onclick="doFullScreen();" style="cursor: pointer"/>
+			<img src="{{ MEDIA_URL }}images/stock_fullscreen.png" title="Toggle Full Screen" onclick="doFullScreen();" style="cursor: pointer"/>
 		</div>
 	</div>
 	

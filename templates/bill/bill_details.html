@@ -759,7 +759,7 @@
 							{% elif text_info.has_html_text %}
 								{% if bill.congress >= 112 %}
 								<a href="{{bill.get_absolute_url}}/text">
-									<img src="http://www.govtrack.us/{{text_info.basename}}-thumb200.png" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>
+									<img src="/{{text_info.basename}}-thumb200.png" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>
 								</a>
 								{% endif %}
 								<p><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text &raquo;</a></p>
@@ -1095,7 +1095,7 @@
 				(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
 			}
 		</script>
-		<noscript><a href="http://disqus.com/?ref_noscript">Comments powered by Disqus</a> are not available without Javascript.</noscript>
+		<noscript><a href="//disqus.com/?ref_noscript">Comments powered by Disqus</a> are not available without Javascript.</noscript>
 		<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>    
 	
 	</div>
@@ -1131,7 +1131,7 @@ var DISQUSWIDGETS = {
 	}
 };
 </script>
-<script src="http://govtrack.disqus.com/count-data.js?q=1&0=1,{{feed.feedname|urlencode}}"> </script>
+<script src="//govtrack.disqus.com/count-data.js?q=1&0=1,{{feed.feedname|urlencode}}"> </script>
 {% endif %}
 
 {% endblock %}

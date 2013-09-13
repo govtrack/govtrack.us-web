@@ -117,41 +117,6 @@
 				{% endcomment %}
 			
 				<section class="featured-articles">
-					{% comment %}
-					<div id="from_the_floor">
-					</div>
-					
-					<script>
-					function sunlight_live_callback(data) {
-						if (data && data.floor_updates && data.floor_updates[0] && data.floor_updates[0].events && data.floor_updates[0].events[0]) {
-							var time = new Date(Date.parse(data.floor_updates[0].timestamp));
-							var hr = time.getHours();
-							var am = "am";
-							if (hr == 0) hr = 12;
-							else if (hr == 12) am = "pm";
-							else if (hr > 12) { hr -= 12; am = "pm"; }
-							time = time.toLocaleDateString() + " " + hr + ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes() + " " + am;
-							
-							var ev = data.floor_updates[0].events[0];
-							if (ev.length > 160) ev = ev.substring(0, 158) + "...";
-							
-							var n = $("<article class='post'><div class='article'><h4 class='where'/><p><span class='text'/><br/> <span class='date'/></p><div></article>");
-							n.find(".date").text(time);
-							n.find(".where").text("In the " + (data.floor_updates[0].chamber == "senate" ? "Senate" : "House") + " Now");
-							n.find(".text").text(ev);
-							$('#from_the_floor').append(n);
-							
-							if (data.floor_updates[0].events[0].indexOf("do now adjourn") >= 0 || data.floor_updates[0].events[0].indexOf("will next convene") >= 0)
-								$('#currently_in_session .' + data.floor_updates[0].chamber + "-area").removeClass("active");
-						}
-					}
-					</script>
-					<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=senate"></script>
-					<script src="http://api.realtimecongress.org/api/v1/floor_updates.json?apikey=cef0df6234aa496bb3b36be96eb4ee93&callback=sunlight_live_callback&per_page=1&chamber=house"></script>
-
-					<h3><span>recent</span> Activity</h3>
-					{% endcomment %}
-
 					{% for item in events %}
 					{% with item|render_event:subscription_feeds as event %}
 					<article class="post {{event.type}}">

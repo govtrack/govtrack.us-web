@@ -410,46 +410,6 @@
 
 {% cache 600 member_news person.id %}
 <div class="tweets four columns">
-	{% comment %}
-	<div id="happening_now">
-		<h3>Happening Now</h3>
-		
-		<article class="post" id="latest-tweet" style="display: none">
-			<a href="" class="tweetlink photo">
-				<img src="http://twitter-badges.s3.amazonaws.com/t_logo-a.png" border="0" width="20" height="20"/>
-			</a>
-			<div class="article">
-				<h4><a href="#" class="twittername">@XXX</a></h4>
-				<p class="content">YYY</p>
-				<em class="twitterdate">6 hours ago via web</em>
-			</div>
-		</article>
-	</div>
-    <script type="text/javascript">
-        function renderLatestTweet(username) {
-            var url = 'http://twitter.com/statuses/user_timeline/' + username + '.json';
-            $.get(url, {count: 1}, function(data) {
-                if (data.length) {
-                    var tweet = data[0];
-                    var created = new Date(tweet.created_at);
-                    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
-                                  'Sep', 'Oct', 'Nov', 'Dec'];
-                    var datestr = months[created.getMonth()] + '. ' + created.getDate() + ', ' + created.getFullYear();
-                    var content = tweet.text;
-                    $('#latest-tweet').show().find('.content').text(content).show();
-					$('#latest-tweet').find('.twittername').text("@" + username).show();
-					$('#latest-tweet').find('.twittername, .tweetlink').attr('href', 'http://www.twitter.com/' + username)
-					$('#latest-tweet').find('.twitterdate').text(datestr).show();
-					$('#happening_now').show();
-                }
-            }, 'jsonp');
-        }
-        {% if person.twitterid %}
-            renderLatestTweet('{{ person.twitterid }}');
-        {% endif %}
-    </script>
-	{% endcomment %}
-
 	<h3>Recent Legislative Activity</h3>
 	
 	{% include "events/trackedeventspanel.html" %}
