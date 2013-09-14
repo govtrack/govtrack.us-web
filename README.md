@@ -79,6 +79,7 @@ GovTrack.us runs on Ubuntu 12.10.
 
   ./build/rsync.sh
   ./parse.py bill --congress=113 --disable-index --disable-events
+  ./parse.py vote --congress=113 --disable-index --disable-events
   ```
   
 If you configured Solr, you can remove --disable-index. For the sake of speed, --disable-events will skip the creation of the events table for bills, which is the basis for feeds and tracking, so that will be nonfunctional.
