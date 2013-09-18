@@ -12,7 +12,7 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130911" />
+		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130918" />
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen" /><![endif]-->
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -82,7 +82,7 @@
 <body class="{% block body_class %}{% endblock %}">
 
 	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" data-seq="36">
+	<div id="sitenewscontainer" style="display: none" data-seq="37">
 		<div id="sitenews">
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			<div class="sitenewsbody">
@@ -91,7 +91,7 @@
 				{# <p>You asked for widgets, better accessibility, and improvements to email updates, and you got it. Read about the <a href="http://www.govtrack.us/blog/2013/08/12/summer-updates/">Summer 2013 Updates</a>.</p> #}
 				
 				{#<p>In the news: <a href="/congress/bills/113/sjres21">S.J.Res. 21</a>: Authorizing limited and specified use of the United States Armed Forces against Syria.</p>#}
-			
+				
 				<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">
 				<div style="color: #553; margin-bottom: 4px; font-size: 95%; font-style: italic; padding-left: 2em;">Trending on GovTrack now...</div>
 				{% for f in trending_feeds %}

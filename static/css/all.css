@@ -4085,10 +4085,10 @@ ul.bullets li, .postcontent ul li, ol.bullets li, .postcontent ol li {
 	#trending_trackers a {
 		display: inline-block;
 		width: 230px;
-		padding: 3px 8px;
+		padding: 3px 8px 2px 8px;
 		margin: 0;
 		line-height: 120%;
-		max-height: 2.5em;
+		max-height: 2.65em;
 		overflow: hidden;
 		vertical-align: middle;
 	}
