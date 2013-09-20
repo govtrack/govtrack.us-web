@@ -134,7 +134,14 @@ $(function() {
         on {{vote.related_bill.introduced_date|date:"F j, Y"}}
         <br/>Current Status: {{vote.related_bill.get_current_status_display}}
         {% endif %}
+
+		{% with vote.related_bill.oursummary as summary %}
+		{% if summary %}
+			<p style="margin: 1em 0 0 0">{{summary.plain_text|truncatewords:30}} (<a href="{{vote.related_bill.get_absolute_url}}#summary/oursummary">read more</a>)</p>
+		{% endif %}
+		{% endwith %}
         </dd>
+        
     {% endif %}
     
     {% if vote.related_amendment %}
