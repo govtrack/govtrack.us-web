@@ -124,10 +124,39 @@ $(function() {
 	<a href="/start?feed=misc:allvotes" class="track-btn" title="Get email alerts or set up an RSS feed">Track Votes</a>
 </div>
 
-<div class="twelve columns" style="padding: 10px 0 0 0;">
+<div class="twelve columns" style="padding: .8em 0 0 0;">
+
+<div id="vote_explainer" style="padding-bottom: 1em;">
+    {% if vote.category == VoteCategory.amendment %}
+    <p>This was a vote to approve or reject an amendment.</p>
+    {% endif %}
+    {% if vote.category == VoteCategory.passage %}
+    	<p>
+    	{% if vote.related_bill.noun == "bill" %}
+    		This was a vote to pass a bill.
+    	{% elif vote.related_bill.noun == "resolution" %}
+    		This was a vote to agree to a resolution.
+    	{% else %}
+    		This was a vote to pass a bill or agree to a resolution.
+    	{% endif %}
+    	{% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text}}{% endif %}
+    </p>
+    {% endif %}
+    {% if vote.category == VoteCategory.passage_suspension %}
+    <p>This was a vote to pass a bill or agree to a resolution. It was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
+    {% endif %}
+    {% if vote.category == VoteCategory.cloture %}
+    <p>This was a vote on &ldquo;cloture&rdquo;, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate and move to a vote on the issue itself, while a vote against is a vote to prolong debate or to filibuster.</p>
+    {% endif %}
+    {% if vote.category == VoteCategory.procedural %}
+    <p>This was a procedural vote.</p>
+    {% endif %}
+    {% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
+</div>
+    
 <dl>
     {% if vote.related_bill %}
-    <dt>{% if vote.category != VoteCategory.passage and vote.category != VoteCategory.passage_suspension and vote.category != VoteCategory.amendment %}Related {% endif %}Bill:</dt>
+    <dt>{% if vote.category != VoteCategory.passage and vote.category != VoteCategory.passage_suspension and vote.category != VoteCategory.amendment %}Related {% endif %}{{vote.related_bill.noun|capfirst}}:</dt>
     <dd><a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>
     	{% if not vote.related_amendment %}
         <br/>Introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a>
@@ -153,26 +182,7 @@ $(function() {
         </dd>
     {% endif %}
     
-    <div id="vote_explainer" style="padding-top: 1em;">
-    {% if vote.category == VoteCategory.amendment %}
-    <p>This was a vote to approve or reject an amendment.</p>
-    {% endif %}
-    {% if vote.category == VoteCategory.passage %}
-    <p>This was a vote to pass a bill or agree to a resolution.
-    {% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text}}{% endif %}
-    </p>
-    {% endif %}
-    {% if vote.category == VoteCategory.passage_suspension %}
-    <p>This was a vote to pass a bill or agree to a resolution. It was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
-    {% endif %}
-    {% if vote.category == VoteCategory.cloture %}
-    <p>This was a vote on &ldquo;cloture&rdquo;, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate and move to a vote on the issue itself, while a vote against is a vote to prolong debate or to filibuster.</p>
-    {% endif %}
-    {% if vote.category == VoteCategory.procedural %}
-    <p>This was a procedural vote.</p>
-    {% endif %}
-    {% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
-    </div>
+
 </dl>
 </div>
 {% endblock %}
