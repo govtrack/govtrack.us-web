@@ -161,7 +161,7 @@ $(function() {
     	{% if not vote.related_amendment %}
         <br/>Introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a>
         on {{vote.related_bill.introduced_date|date:"F j, Y"}}
-        <br/>Current Status: {{vote.related_bill.get_current_status_display}}
+        {# <br/>Current Status: {{vote.related_bill.get_current_status_display}} #}
         {% endif %}
 
 		{% with vote.related_bill.oursummary as summary %}
