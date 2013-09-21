@@ -286,6 +286,7 @@ class Bill(models.Model):
     @property
     def current_status_description(self):
         """Descriptive text for the bill's current status."""
+        if self.source == "americanmemory": return None # not known
         return self.get_status_text(self.current_status, self.current_status_date)
 
     @property
@@ -321,7 +322,7 @@ class Bill(models.Model):
 
     def get_status_text(self, status, date) :
         status = BillStatus.by_value(status).xml_code
-        date = date.strftime("%B %d, %Y").replace(" 0", " ")
+        date = date.replace(year=2000).strftime("%B %d, YYYY").replace(" 0", " ").replace("YYYY", str(date.year)) # historical bills < 1900 would otherwise raise an error
         status = get_bill_status_string(self.is_current, status)
         return status % (self.noun, date)
 
