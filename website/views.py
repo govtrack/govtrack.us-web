@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -64,7 +65,7 @@ def get_blog_items():
         return re.sub("&#(\d+)(;|(?=\s))", _callback, data)
 
     import feedparser
-    feed = feedparser.parse("http://www.govtrack.us/blog/atom")
+    feed = feedparser.parse(settings.SITE_ROOT_URL + "/blog/atom")
 
     return [{"link":entry.link, "title":decode_unicode_references(entry.title), "date":datetime(*entry.updated_parsed[0:6]), "content":decode_unicode_references(entry.content[0].value)} for entry in feed["entries"][0:4]]
 
@@ -266,7 +267,7 @@ def push_to_social_media_rss(request):
         def item_description(self, item):
             return item["body_text"]
         def item_link(self, item):
-            return "http://www.govtrack.us" + item["url"]# + "?utm_campaign=govtrack_push&utm_source=govtrack_push" 
+            return settings.SITE_ROOT_URL + item["url"]# + "?utm_campaign=govtrack_push&utm_source=govtrack_push" 
         def item_guid(self, item):
             return "http://www.govtrack.us/events/guid/" + item["guid"] 
         def item_pubdate(self, item):

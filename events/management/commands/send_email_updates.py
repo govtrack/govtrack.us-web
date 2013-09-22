@@ -145,6 +145,7 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 		"eventslists": eventslists,
 		"feed": all_trackers, # use all trackers in the user's account as context for displaying events
 		"emailpingurl": emailpingurl,
+		"SITE_ROOT_URL": settings.SITE_ROOT_URL,
 	})
 	
 	email = EmailMultiAlternatives(emailsubject, templ_txt.render(ctx), emailreturnpath, [user.email],

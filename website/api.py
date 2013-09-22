@@ -1,4 +1,5 @@
 from django.core.serializers import json as django_json
+from django.conf import settings
 from tastypie.serializers import Serializer
 from tastypie.resources import ModelResource
 from tastypie.api import Api
@@ -212,7 +213,7 @@ class PersonModel(GBaseModel):
 		}
 		additional_properties = {
 			"name_no_details": "name_no_details",
-			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+			"link": lambda obj : settings.SITE_ROOT_URL + obj.get_absolute_url(),
 		}
 	roles = fields.ToManyField('website.api.PersonRoleModel', 'roles', help_text="A list of terms in Congress or as President that this person has been elected to. A list of API resources to query for more information.")
 	current_role = fields.ToOneField('website.api.PersonRoleModel', 'current_role', null=True, full=True, help_text="The current term in Congress or as President that this person is currently serving, or null if none.")
@@ -221,7 +222,7 @@ class PersonModelSimple(PersonModel):
 	# Based on the PersonModel, but avoid fields that require another database call.
 	class Meta(PersonModel.Meta):
 		additional_properties = {
-			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+			"link": lambda obj : settings.SITE_ROOT_URL + obj.get_absolute_url(),
 		}
 		excludes = ["roles", "current_role"]
 	
@@ -276,7 +277,7 @@ class BillModel(GBaseModel):
 		excludes = ["titles", "major_actions"]
 		ordering = ['current_status_date', 'introduced_date', 'docs_house_gov_postdate', 'senate_floor_schedule_postdate']
 		additional_properties = {
-			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+			"link": lambda obj : settings.SITE_ROOT_URL + obj.get_absolute_url(),
 			"display_number": "display_number_no_congress_number",
 			"title_without_number": "title_no_number",
 			"bill_resolution_type": "noun",
@@ -329,7 +330,7 @@ class VoteModel(GBaseModel):
 		excludes = ["missing_data"]
 		ordering = ['created']
 		additional_properties = {
-			"link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+			"link": lambda obj : settings.SITE_ROOT_URL + obj.get_absolute_url(),
 			"source_link": "get_source_link",
 			"options": "get_options",
 			#"voters": "get_voters",
@@ -355,7 +356,7 @@ class VoteVoterModel(GBaseModel):
 			"option": "get_option_key",
 			"person_name": "person_name",
 			"vote_description": "get_vote_name",
-			"link": lambda obj : "http://www.govtrack.us" + obj.vote.get_absolute_url(),
+			"link": lambda obj : settings.SITE_ROOT_URL + obj.vote.get_absolute_url(),
 		}
 		ordering = ['created']
 	vote = fields.ToOneField('website.api.VoteModel', 'vote', help_text="The vote that this was a part of.")

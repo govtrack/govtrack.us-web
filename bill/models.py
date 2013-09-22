@@ -214,7 +214,7 @@ class Bill(models.Model):
     api_recurse_on = ("sponsor", "sponsor_role")
     api_recurse_on_single = ("committees", "cosponsors", "terms")
     api_additional_fields = {
-        "link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+        "link": lambda obj : settings.SITE_ROOT_URL + obj.get_absolute_url(),
         "display_number": "display_number_no_congress_number",
         "title_without_number": "title_no_number",
         "bill_resolution_type": "noun",

@@ -34,6 +34,7 @@ def template_context_processor(request):
     # might have user-info blocked already for caching (a good thing).
     
     context = {
+        "SITE_ROOT_URL": settings.SITE_ROOT_URL,
         "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY
     }
     

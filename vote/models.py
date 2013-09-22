@@ -4,13 +4,13 @@ import math
 from django.db import models
 from django.db.models import Q
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 from common import enum
 
 from person.util import load_roles_at_date
 
 from us import get_session_ordinal
-from settings import CURRENT_CONGRESS
 
 class CongressChamber(enum.Enum):
     senate = enum.Item(1, 'Senate')
@@ -46,7 +46,7 @@ class VoterType(enum.Enum):
 class Vote(models.Model):
     """Roll call votes in the U.S. Congress since 1789. How people voted is accessed through the Vote_voter API."""
     
-    congress = models.IntegerField(help_text="The number of the Congress in which the vote took place. The current Congress is %d. In recent history Congresses are two years; however, this was not always the case." % CURRENT_CONGRESS)
+    congress = models.IntegerField(help_text="The number of the Congress in which the vote took place. The current Congress is %d. In recent history Congresses are two years; however, this was not always the case." % settings.CURRENT_CONGRESS)
     session = models.CharField(max_length=4, help_text="Within each Congress there are sessions. In recent history the sessions correspond to calendar years and are named accordingly. However, in historical data the sessions may be named in completely other ways, such as with letters A, B, and C. Session names are unique *within* a Congress.")
     chamber = models.IntegerField(choices=CongressChamber, help_text="The chamber in which the vote was held, House or Senate.")
     number = models.IntegerField('Vote Number', help_text="The number of the vote, unique to a Congress, session, and chamber.")
@@ -72,7 +72,7 @@ class Vote(models.Model):
         unique_together = (('congress', 'chamber', 'session', 'number'),)
         
     api_additional_fields = {
-        "link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+        "link": lambda obj : settings.SITE_ROOT_URL + obj.get_absolute_url(),
     }
     api_recurse_on = ('related_bill', 'options')
     api_example_parameters = { "sort": "-created" }

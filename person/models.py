@@ -12,7 +12,6 @@ from person.types import Gender, RoleType, SenatorClass, State
 from name import get_person_name
 
 from us import stateapportionment, get_congress_dates, statenames, get_congress_from_date
-from settings import CURRENT_CONGRESS
 
 import functools
 def cache_result(f):
@@ -72,7 +71,7 @@ class Person(models.Model):
     # api
     api_recurse_on_single = ('roles', 'committeeassignments')
     api_additional_fields = {
-        "link": lambda obj : "http://www.govtrack.us" + obj.get_absolute_url(),
+        "link": lambda obj : settings.SITE_ROOT_URL + obj.get_absolute_url(),
     }
     api_example_id = 400326
     #######
@@ -346,7 +345,7 @@ class PersonRole(models.Model):
         n = self.congress_numbers()
         if not n: return None
         n = n[-1]
-        if n > CURRENT_CONGRESS: n = CURRENT_CONGRESS # we don't ever mean to ask for a future one (senators, PR res com)
+        if n > settings.CURRENT_CONGRESS: n = settings.CURRENT_CONGRESS # we don't ever mean to ask for a future one (senators, PR res com)
         return n
 
     def create_events(self, prev_role, next_role):

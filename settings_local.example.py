@@ -33,6 +33,7 @@ HAYSTACK_CONNECTIONS = {
 
 CONGRESS_LEGISLATORS_PATH='../congress-legislators/'
 GEOIP_DB_PATH = None
+RSS_CAMPAIGN_QUERYSTRING = "?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss"
 
 SECRET_KEY = 'fill this in'
 

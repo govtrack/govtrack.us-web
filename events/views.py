@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -15,7 +16,6 @@ from registration.helpers import json_response
 from models import *
 from website.models import *
 from events.templatetags.events_utils import render_event
-from settings import CURRENT_CONGRESS
 
 def get_feed_list(request):
     if "list_id" in request.GET:
@@ -232,7 +232,7 @@ def events_rss(request):
         def item_description(self, item):
             return item["type"] + ": " + item["body_text"]
         def item_link(self, item):
-            return "http://www.govtrack.us" + item["url"] + "?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss"
+            return settings.SITE_ROOT_URL + item["url"] + settings.RSS_CAMPAIGN_QUERYSTRING
         def item_guid(self, item):
             return self.item_link(item) + "#eventid=" + urllib.quote_plus(item["guid"]) 
         def item_pubdate(self, item):
