@@ -82,27 +82,10 @@
 <body class="{% block body_class %}{% endblock %}">
 
 	{% if 1 and pagename != "blog_template" and not user_has_bounced_mail %}
-	<div id="sitenewscontainer" style="display: none" data-seq="37">
+	<div id="sitenewscontainer" style="display: none">
 		<div id="sitenews">
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
-			<div class="sitenewsbody">
-				{# <p>NEW: Get alerts for <a href="http://www.govtrack.us/congress/bills/uscode/chapter/50/36">bills amending the Foreign Intelligence Surveillance Act</a>.</p> #}
-			
-				{# <p>You asked for widgets, better accessibility, and improvements to email updates, and you got it. Read about the <a href="http://www.govtrack.us/blog/2013/08/12/summer-updates/">Summer 2013 Updates</a>.</p> #}
-				
-				{#<p>In the news: <a href="/congress/bills/113/sjres21">S.J.Res. 21</a>: Authorizing limited and specified use of the United States Armed Forces against Syria.</p>#}
-				
-				<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">
-				<div style="color: #553; margin-bottom: 4px; font-size: 95%; font-style: italic; padding-left: 2em;">Trending on GovTrack now...</div>
-				{% for f in trending_feeds %}
-					<a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
-						{{f.title|truncatewords:10}}
-					</a>
-				{% endfor %}
-				<div style="clear: both"> </div>
-				</div>
-			</div>
-			<div style="clear: both"> </div>
+			{% include "site-news-banner.html" %}
 		</div>
 	</div>
 	<script>
@@ -116,7 +99,7 @@
 
 	function hide_site_news() {
 		$('#sitenewscontainer').fadeOut();
-		$.cookie("sitenewsbanner", $('#sitenewscontainer').attr("data-seq"), { expires: 14, path: '/' });
+		$.cookie("sitenewsbanner", $('#sitenewscontainer .sitenewsbody').attr("data-seq"), { expires: 14, path: '/' });
 	}
 	$(function() {
 		{% comment %}
@@ -158,7 +141,7 @@
 			cur_link = $('#sitenewscontainer a:not(:first)').first().attr("href");
 		} catch (err) { }
 			
-		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer').attr("data-seq")
+		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer .sitenewsbody').attr("data-seq")
 			&& location.pathname != cur_link) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
 			$('#sitenewscontainer').fadeIn();

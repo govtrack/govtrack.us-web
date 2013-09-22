@@ -1,0 +1,16 @@
+<div class="sitenewsbody" data-seq="39">
+	<p>GovTrack now supports SSL/https. <a href="https://www.govtrack.us{{request.get_full_path}}">Try it out</a>.</p>
+	
+	{% comment %}
+	<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">
+	<div style="color: #553; margin-bottom: 4px; font-size: 95%; font-style: italic; padding-left: 2em;">Trending on GovTrack now...</div>
+	{% for f in trending_feeds %}
+		<a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
+			{{f.title|truncatewords:10}}
+		</a>
+	{% endfor %}
+	<div style="clear: both"> </div>
+	</div>
+	{% endcomment %}
+</div>
+<div style="clear: both"> </div>
