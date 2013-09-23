@@ -409,6 +409,31 @@
 
 	{% block body_scripts %}{% endblock %}
 
+	<div style="display: none">
+		<div id="needs_google_login_update" style="height: 300px; padding: 1em;">
+			<h2>Account Update Required</h2>
+
+			<p style="margin-bottom: 1em">You log in to GovTrack with your Google account. Google now recommends a new
+			login technology.</p>
+
+			<p style="margin-bottom: 1em">In order for us to migrate your account to the new technology,
+			please click the link below:</p>
+
+			<p style="margin: 1em">
+				<a href="/registration/ext/associate/start/google_oauth2?next={{request.path|urlencode}}&amp;email={{request.user.email|urlencode}}" style="vertical-align: middle !important">
+				Update Google Login &gt;
+				</a>
+			</p>
+		</div>
+	</div>			
+		</div>
+	</div>
+	<script>
+		if (needs_google_login_update) $(function() {
+			$.colorbox({href: "#needs_google_login_update", inline: true, open: true, width: $(window).width() > 640 ? 640 : $(window).width() * .9});
+		});
+	</script>
+
 </body>
 </html>
 {% endwith %}

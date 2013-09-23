@@ -38,7 +38,16 @@ def template_context_processor(request):
     }
     
     if request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
-    
+
+    # Migrate Google OpenID logins to Google OAuth logins.
+    from registration.models import AuthRecord
+    if request.user.is_authenticated():
+        if AuthRecord.objects.filter(user=request.user, provider="google_openid").exists() \
+            and not AuthRecord.objects.filter(user=request.user, provider="google_oauth2").exists():
+            context["needs_google_login_update"] = True
+
+    ####
+
     # Add top-tracked feeds.
     global trending_feeds
     if not trending_feeds or trending_feeds[0] < datetime.datetime.now()-datetime.timedelta(hours=2):

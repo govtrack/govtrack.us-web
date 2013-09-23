@@ -54,7 +54,7 @@ STATIC_URL = '/static/'
 
 # django-regitration-pv
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
-SITE_ROOT_URL = "http://www.govtrack.us"
+SITE_ROOT_URL = "https://www.govtrack.us"
 LOGIN_REDIRECT_URL = "/accounts/profile"
 SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
@@ -161,6 +161,9 @@ CURRENT_CONGRESS = 113
 
 EMAIL_UPDATES_RETURN_PATH = "bounces+uid=%d@GovTrack.us"
 BOUNCES_UID_REGEX = re.compile(r"<?bounces\+uid=(\d+)@GovTrack\.us>?", re.I)
+
+FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
+GOOGLE_AUTH_SCOPE = "openid email"
 
 PREDICTIONMARKET_SEED_MONEY = 1000
 PREDICTIONMARKET_BANK_UID = 136196
