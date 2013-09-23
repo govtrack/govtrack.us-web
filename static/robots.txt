@@ -14,5 +14,5 @@ Crawl-delay: 7
 User-agent: BecomeBot
 Disallow: /
 
-Sitemap: http://www.govtrack.us/sitemap.xml
+Sitemap: https://www.govtrack.us/sitemap.xml
 

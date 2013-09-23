@@ -14,16 +14,19 @@
 		{% with text as text_info %}
 			{% if text_info.basename %}
 				<meta property="og:image" content="http://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
-				<meta property="twitter:image:src" content="http://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
+				<meta property="og:image:secure_url" content="https://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
+				<meta property="twitter:image:src" content="https://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
 			{% else %}
 				<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118"
+				<meta property="og:image:secure_url" content="https://www.govtrack.us/static/images/media_icon.png?20130118"
 				/>
-				<meta property="twitter:image:src" content="http://www.govtrack.us/static/images/media_icon.png?20130118"
+				<meta property="twitter:image:src" content="https://www.govtrack.us/static/images/media_icon.png?20130118"
 			{% endif %}
 		{% endwith %}
 	{% else %}
 		<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
-		<meta property="twitter:image:src" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
+		<meta property="og:image:secure_url" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
+		<meta property="twitter:image:src" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
 	{% endif %}
 	{% endcache %}
 	<meta name="twitter:card" content="summary">
@@ -34,12 +37,12 @@
 {% block head %}
 	<meta property="og:title" content="{{bill.title_no_number}} ({% if not bill.is_current %}{{bill.current_status_date|date:"Y"}}{% endif %}{{bill.display_number_no_congress_number}})" />
 	<meta property="og:description" content="{% if subtitle %}{{subtitle}}{% else %}A {{bill.noun}} in the U.S. Congress.{% endif %}" />
-	<meta property="og:url" content="http://www.govtrack.us{{bill.get_absolute_url}}" />
+	<meta property="og:url" content="https://www.govtrack.us{{bill.get_absolute_url}}" />
 	<meta property="og:type" content="og_govtrack:bill">
 
 	<script>
 		// Handle click on a Facebook action link.
-		var fb_action_target_url = "http://www.govtrack.us{{bill.get_absolute_url|escapejs}}";
+		var fb_action_target_url = "https://www.govtrack.us{{bill.get_absolute_url|escapejs}}";
 		var fb_actions = null;
 		
 		var fb_is_logged_in = false;

@@ -17,6 +17,8 @@
 {% endblock %}
 {% block og_image %}
 	<meta property="og:image" content="http://www.govtrack.us{{vote.get_absolute_url}}/thumbnail"/>
+	<meta property="og:image:secure_url" content="https://www.govtrack.us{{vote.get_absolute_url}}/thumbnail"/>
+    <meta property="twitter:image:src" content="https://www.govtrack.us{{vote.get_absolute_url}}/thumbnail"/>
 	<meta name="twitter:card" content="summary">
 	<meta name="twitter:description" content="{{vote.summary}}. {{ vote.get_chamber_display }} Vote #{{ vote.number }} ({{ vote.created|date:"Y" }}). {{vote.created|date}}.">
 {% endblock %}
