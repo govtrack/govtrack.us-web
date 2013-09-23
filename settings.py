@@ -54,7 +54,7 @@ STATIC_URL = '/static/'
 
 # django-regitration-pv
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
-SITE_ROOT_URL = "http://www.govtrack.us"
+SITE_ROOT_URL = "https://www.govtrack.us"
 LOGIN_REDIRECT_URL = "/accounts/profile"
 SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
