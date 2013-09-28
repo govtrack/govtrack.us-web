@@ -1,8 +1,8 @@
 {% load events_utils %}GovTrack Email Update
 =====================
-{% comment %}
------ Good morning! We are trying out sending weekday updates in the morning now. Let us know if this is helpful! -----
-{% endcomment %}
+
+----- On the blog: The House says core legislative data isn’t coming any time soon. The Senate remains silent. http://www.govtrack.us/blog/2013/09/25/an-update-on-getting-legislative-data-from-the-house/ -----
+
 This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to {{SITE_ROOT_URL}}/accounts/profile.
 
 {% for list, events in eventslists %}
