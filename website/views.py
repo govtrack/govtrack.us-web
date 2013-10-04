@@ -45,7 +45,7 @@ def staticpage(request, pagename):
     
     ctx = { 'pagename': pagename }
     
-    if pagename == "overview":
+    if pagename == "start":
         from us import statenames
         from states.views import states_with_data
         ctx['states'] = ((s, statenames[s]) for s in states_with_data())
