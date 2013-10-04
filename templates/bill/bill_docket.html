@@ -33,6 +33,11 @@ $(function() {
 		return false;
 	});
 });
+
+function do_keyword_tracker_submit() {
+	window.location = "/events/track-something?feed=billsearch:text=" + escape($('#track-by-keyword-input').val());
+	return false;
+}
 </script>
 {% endblock %}
 
@@ -61,7 +66,15 @@ $(function() {
 
 		<h2>Search for a Bill</h2>
 		<p>Search for bills using the search box at the top right of every page, or use the <a href="/congress/bills/browse">advanced search</a> to screen by status, subject, and other factors.</p>
-		
+
+		<h2>Track By Keyword Search</h2>
+		<form onsubmit="return do_keyword_tracker_submit()">
+			<label for="track-by-keyword-input" style="margin-bottom: 7px">Enter a keyword or phrase to get alerts for:</label>
+			<input id="track-by-keyword-input" type="text" placeholder="your alert keyword or phrase" style="width: 220px; height: 26px; float: left; margin: 0 0 5px 0;"/>
+			<input type="submit" class="submit btn-search-small2"/>
+			<p style="clear: both; font-style: italic; font-size: 95%;">or try <a href="#subjects">subject areas</a>, <a href="/congress/committees">committees</a>, <a href="/congress/bills/uscode">U.S. Code citations</a>.</p>
+		</form>
+
 		<h2>Track All Bills</h2>
 		<p>Get email updates for:</p>
 		<ul id="basic_trackers">
