@@ -1,37 +1,151 @@
 {% extends 'master.html' %}
-
-{% block title %}{{meta.title}} -- GovTrack.us{% endblock %}
+{% block title %}Track {{feed.title}} -- GovTrack.us{% endblock %}
 
 {% block head %}
+<style>
+  #events_add_tracker h2 {
+    font-size: 1.75em;
+    color: #40A4BD;
+    text-transform: none;
+    padding-bottom: 1em;
+  }
+
+  #events_add_tracker h3 {
+    text-transform: none;
+    padding-bottom: 1em;
+    color: #40a4bd;
+  }
+
+#feed_preview {
+  border-right: #ddd 1px solid;
+}
+#feed_preview {
+  border-right: 0;
+}
+#events_list {
+  width: auto;
+  padding: 0;
+  border-left: none;
+}
+
+</style>
+
+<script>
+var selected_feed = "{{feed.feedname|escapejs}}";
+
+function show_feed() {
+	$('#events_preview_2').html("<p class='error'>Loading...</p>");
+	$.ajax({
+		url: "/events/_load_events",
+		type: "POST",
+		data: { feed: selected_feed, count: 10, newtab: 1 },
+		dataType: "html",
+		success: function(data) {
+			$('#events_preview_2').html(data);
+		}
+	});
+
+	update_login_links();
+	
+	return false;
+}
+
+function update_login_links() {
+	// update login/registration links
+	var qs = "add=" + encodeURIComponent(selected_feed);
+	{% if not request.user.is_authenticated or request.user.subscription_lists.count <= 1 %}
+		qs += "&emailupdates=" + $('#email_frequency').val();
+	{% else %}
+		qs += "&listid=" + $('input:radio[name=list]:checked').val();
+	{% endif %}
+	
+	$('a').each(function() {
+		var href = this.getAttribute("href_original");
+		if (!href) {
+			href = this.getAttribute("href");
+			if (!href) return;
+			this.setAttribute("href_original", href);
+		}
+		this.setAttribute("href", href.replace("REPLACE_FEED_HERE", (href.indexOf("next=") >= 0) ? encodeURIComponent(qs) : qs));
+	});
+}
+
+
+$(function() {
+	show_feed();
+});
+</script>
 {% endblock %}
 
 {% block crumbs %}
-{% if not meta.breadcrumbs %}
-<ul><li>Feeds</ul></li>
-{% else %}
-<ul>{% for url, name in meta.breadcrumbs %}<li><a href="{{url}}">{{name}}</a></li>{% endfor %}<li>{{meta.title}}</li></ul>
-{% endif %}
+<div>Start Tracking</div>
+<h1 style="font-size: 32px">{{feed.title}}</h1>
 {% endblock %}
 
 {% block heading_box %}
-<header class="heading-box row">
-	<div class="nine columns">
-		<h1 style="margin-bottom: 12px">{{meta.title}}</h1>
-		{{meta.intro_html|safe}}
-	</div>
-	
-	<div class="aside three columns">
-		<a href="#" class="track-btn" onclick="return show_track_panel();">Track events</a>
-		<p><a href="events.rss?feeds={{feed.feedname|urlencode}}">RSS</a></p>
-		{% include "events/subscribe_inline.html" %}
-	</div>
-</header>
 {% endblock %}
 
 {% block body %}
+<div id="events_add_tracker" class="panel row">
+	<div id="edit_list" class="four columns fat " style="line-height: 125%">
+		<div id="set_freq" class="control">
+			<p class="description">{{feed.description}}</p>
 
-<h2>Recent Events</h2>
+			<div>
+			{% if not request.user.is_authenticated or request.user.subscription_lists.count <= 1 %}
+				<p>How often would you like updates by email?</p>
+				<select id="email_frequency" name="email_frequency" onchange="update_login_links();" style="margin-bottom: 1em">
+					<option value="0">No Email - I&rsquo;ll come back on my own.</option>
+					<option value="1" selected>Daily Emails</option>
+					<option value="2">Weekly Emails</option>
+				</select>
+			{% else %}
+				<p>Which list would you like to add this tracker into?</p>
+				<ul>
+					{% for sublist in request.user.userprofile.lists %}
+						<li>
+							<input id="sublist{{sublist.id}}" type="radio" name="list" value="{{sublist.id}}" {% if forloop.counter == 1 %}checked{% endif %}  onchange="update_login_links();"/>
+							<label for="sublist{{sublist.id}}">{{sublist.name}}</label>
+						</li>
+					{% endfor %}
+				</ul>
+			{% endif %}
+			</div>
+			
+		</div><!-- /set_freq -->
+		<div class="">
+			{% if not request.user.is_authenticated %}
+		
+			<div class="signin_social">
+				<h3 style="margin-top: 1em">Save This Tracker</h3>
+				{% with "/accounts/lists?"|add:"REPLACE_FEED_HERE" as singlesignon_next %}
+					{% include "registration/login_singlesignon.html" %}
+				{% endwith %}
+				<p style="margin: .5em 0 1em 0; font-size: 90%;">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack. Just click the appropriate button above. Or register the simple way by clicking the Register button below.</p>
+			</div>
+			<div style="clear: both"> </div>
+		
+			<a class="button" href="/registration/signup?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}" style="margin-bottom: 5px">Register a New Account</a>
+			<a class="button" href="/accounts/login?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}">Existing User Log In</a>
+			
+			{% else %}
+				<a class="button" href="/accounts/lists?REPLACE_FEED_HERE">Save</a>
+			{% endif %}
+		</div>
+	</div><!-- /edit_list -->
+	
+	<div id="feed_preview" class="eight columns fat">
+		<div id="events_list">
+			<div class="group" style="margin-bottom: 1em;">
+				<h4>Preview:</h4>
+			</div>
 
-{% include "events/trackedeventslist.html" %}
+			<div id="events_preview_2">
+			</div><!-- /events -->
 
+		</div><!-- /event_list -->
+	</div><!-- /feed_preview -->
+
+
+</div><!-- /panel -->
 {% endblock %}

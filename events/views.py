@@ -248,55 +248,18 @@ def events_show_feed(request, feedslug):
             feed = Feed.from_name(feedname)
             break
     else:
-        raise Http404()
+        if feedslug == "track-something" and "feed" in request.GET:
+            try:
+                feed = Feed.from_name(request.GET["feed"])
+            except:
+                raise Http404()
+        else:
+            raise Http404()
         
     return {
         "feed": feed,
-        "meta":  feedmeta,
     }
 
-@render_to('events/add_tracker.html')
-def events_add_tracker(request):
-    feed_info = None
-    if "feed" in request.GET:
-        try:
-            feed = Feed.from_name(request.GET["feed"])
-            feed_info = (feed.feedname, feed.title, feed.description)
-        except:
-            pass
-        
-    return {
-        'no_arg_feeds': Feed.get_simple_feeds(),
-        'feed': feed_info,
-    }
-    
-@json_response
-def start_search(request):
-    # Do a site search to find relevant trackers.
-    
-    from website.views import do_site_search
-    ret = []
-    for grp in do_site_search(request.GET.get("q", "")):
-        feeds = [{
-            "name": r["feed"].feedname,
-            "title": r["label"],
-            "description": r["feed"].description,
-            "subfeeds": [{
-                    "name": f.feedname,
-                    "title": f.scoped_title,
-                }
-                for f in r["feed"].includes_feeds()],
-            }
-            for r in grp["results"] if r.get("feed", None) != None]
-        ret.append({
-            "title": grp["title"],
-            "href": grp["href"],
-            "noun": grp["noun"],
-            "qsarg": grp.get("qsarg", None),
-            "feeds": feeds
-        })
-    return ret
-    
 def events_embed_legacy(request):
     # prepare template context
     try:

@@ -67,7 +67,7 @@ $(function() {
 		<ul id="basic_trackers">
 			{% for feed in feeds %}
 			<li>
-				<a href="/start?feed={{feed.feedname|urlencode}}" style="height: auto">
+				<a href="{{feed.link}}" style="height: auto">
 					{{feed.title}} <span>Add</span>
 					<div style="color: #555; line-height: 125%; margin-bottom: 3px">{{feed.description}}</div>
 				</a>

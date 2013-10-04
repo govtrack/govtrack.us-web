@@ -8,7 +8,5 @@ urlpatterns = patterns('events.views',
     url('^events/events.rss$', 'events_rss'),
     url('^events/embed_legacy$', 'events_embed_legacy'),
     url('^events/([\w\-]+)$', 'events_show_feed'),
-    url('^start$', 'events_add_tracker'),
-    url('^events/_ajax/start/search$', 'start_search'),
 )
 

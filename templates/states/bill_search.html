@@ -16,7 +16,7 @@
 
 {% block crumbs %}
 <ul>
-	<li><a href="/overview#states">States</a></li>
+	<li><a href="/start#states">States</a></li>
 	{% if state %}<li><a href="/states/{{state|lower}}">{{state}}</a></li>{% endif %}
 	<li>Bill Search</li>
 </ul>
@@ -26,7 +26,7 @@
 <h2>{% if state %}<span class="stateface stateface-{{state|lower}}"> </span>{% endif %}{% if not state %}Search {% else %}{{ statename }}{% endif %} State Legislation</h2>
 
 {% if not state %}
-<p>Use this page to find recent bills and resolutions in the 50 states of the United States. Go to the <a href="/overview#states">overview page</a> to select a state.</p>
+<p>Use this page to find recent bills and resolutions in the 50 states of the United States. Go to the <a href="/start#states">overview page</a> to select a state.</p>
 {% else %}
 <p>Use this page to find recent bills and resolutions in the {{statename}} state legislature.</p>
 {% endif %}

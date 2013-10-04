@@ -70,7 +70,7 @@ def get_blog_items():
     return [{"link":entry.link, "title":decode_unicode_references(entry.title), "date":datetime(*entry.updated_parsed[0:6]), "content":decode_unicode_references(entry.content[0].value)} for entry in feed["entries"][0:4]]
 
 def congress_home(request):
-    return HttpResponseRedirect("/overview")
+    return HttpResponseRedirect("/start")
 
 def do_site_search(q, allow_redirect=False):
     if q.strip() == "":

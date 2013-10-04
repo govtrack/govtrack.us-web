@@ -1696,16 +1696,15 @@ a.button.prefix, a.button.postfix {
             text-transform: none;
         	}
 #categories {
-    text-align: center;
-    text-transform: uppercase;
 	}
     #categories li {
         display: inline-block;
         width: 225px;
-        background: url(../images/bg-info-box-nav.png) no-repeat 50% 12px;
+        background: url(../images/bg-info-box-nav.png) no-repeat 0 12px;
         min-height: 153px;
         margin: 0 3px 20px;
         vertical-align: top;
+        text-align: center;
     	}
       #categories div p {
         margin-top: 20px;
@@ -1715,32 +1714,33 @@ a.button.prefix, a.button.postfix {
         font-size: 10pt;
         line-height: 140%;
       }
-    	#categories li a {
+    	#categories li > a {
     		display: block;
     		width: 225px;
-                margin-top: 13px;
+        margin-top: 13px;
     		padding-top: 137px;
     		text-align: center;
-            font-family: 'PTSerifBold';
+        font-family: 'PTSerifBold';
+        text-transform: uppercase;
     		}
-            #categories li a span {
+            #categories li > a span {
                 font-family: 'PTSerifBoldItalic';
                 text-transform: lowercase;
             }
-    	#categories a:hover {
+    	#categories li > a:hover {
     		border-bottom: 0;
     		}
     	
-    	#categories #link-members a {
+    	#categories #link-members > a {
     		background: url(../images/img-congress-members.png) center 5px no-repeat;
     		}
-    	#categories #link-bills a {
+    	#categories #link-bills > a {
     		background: url(../images/img-bills-resolutions.png) center 5px no-repeat;
     		}
-    	#categories #link-votes a {
+    	#categories #link-votes > a {
     		background: url(../images/img-voting-records.png) center top no-repeat;
     		}
-    	#categories #link-committees a {
+    	#categories #link-committees > a {
     		background: url(../images/img-committees.png) center 15px no-repeat;
     		}
 
@@ -3100,111 +3100,6 @@ aside .download-links { padding: 31px 0 0 	}
                 line-height: 24px !important; /* override default button style */
                 margin-top: 1em !important;
             }
-
-/* Create a Tracker Wizard styles 
-   ============================================================== */
-#tracker_wizard {
-  }
-  
-  #tracker_wizard .panel {
-  }
-
-  #tracker_wizard #tracker_search {
-  	  padding-right: 1.5em;
-  }
-
-  #tracker_wizard .has_marker {
-    padding-left: 1.7em;
-    padding-bottom: .25em;
-    border-bottom: #e7e4dc solid 1px;
-    margin-bottom: 1em;
-  }
-  
-  #tracker_wizard .has_marker span {
-    display: block;
-    position: absolute;
-    left: 0;
-    width: 1.5em;
-    height: 1.5em;
-    padding: .25em;
-    border-radius: .75em;
-    text-align: center;
-    line-height: 1em;
-    font-family: PTSerifRegular;
-    font-size: 1em;
-    font-weight: bold;
-    color: #40A4BD;
-    background: #444;
-  }
-
-  #tracker_wizard h2 {
-    font-size: 1.75em;
-    color: #40A4BD;
-    text-transform: none;
-    padding-bottom: 1em;
-  }
-
-  #tracker_wizard h3 {
-    text-transform: none;
-    padding-bottom: 1em;
-    color: #40a4bd;
-  }
-  #tracker_search.again {
-    margin-top: -40px;
-  }
-  #tracker_search .group { margin-bottom: 1em;}
-
-  #tracker_search label {
-    float: left;
-    width: 300px;
-    line-height: 40px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 10%;
-  }
-  #tracker_search.small label {
-    width: auto;
-    line-height: 30px; 
-  }
-
-  #tracker_search #search_entry {
-    float: left;
-    height: 40px;
-    width: 300px;
-  }
-
-  #tracker_search #submit {
-    float: right;
-    height: 40px;
-    width: 100px;
-  }
-
-  #tracker_wizard form .box {
-    padding: 20px;
-    margin-bottom: 40px;
-  }
-  #tracker_wizard .row+.note {
-    margin-top: 15px;
-  }
-
-  #tracker_wizard #events_list {
-    width: auto;
-    padding: 0;
-    border-left: none;
-  }
-
-#tracker_wizard .select_another {
-	clear: both;
-	text-align: right;
-	font-size: 10px;
-}
-#tracker_wizard #keyword_results {
-  border-right: #ddd 1px solid;
-}
-#tracker_wizard #step2 #keyword_results {
-  border-right: 0;
-}
-
 
 /*  Footer Styles 
     ======================================================== */

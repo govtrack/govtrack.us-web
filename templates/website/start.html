@@ -2,10 +2,16 @@
 {% block title %}GovTrack.us - Research Congress {% endblock %}
 {% block head %}
 <link media="all" rel="stylesheet" href="{{ MEDIA_URL }}fonts/stateface.css">
+<style>
+	#categories li { display: block; width: auto; }
+	#categories li > a { float: left; margin: 0; }
+	#categories div a { font-weight: bold; }
+	#categories div p { font-size: 16px; margin: .5em 0; }
+</style>
 {% endblock %}
 
 {% block crumbs %}
-<h1>Overview</h1>
+<h1>Welcome to GovTrack</h1>
 {% endblock %}
 
 {% block heading_box %}
@@ -18,46 +24,47 @@
 		<div class="frame">
 			<div class="container row">
 				<div class="heading twelve columns">
-					<h2>Federal Legislation</h2>
+					<h2>The U.S. Congress and Federal Legislation</h2>
 					<p style="margin: 1em">Use GovTrack to research and track legislation in the United States Congress, including Members of Congress, bills and resolutions, voting records, and committee activity.</p>
 				</div>
+			</div>
+			<div class="container row">
+				<div class="twelve columns">
 				<ul id="categories">
 					<li id="link-members">
-						<a href="/congress/members">
-							Members <span>of</span> Congress
-						</a>
+						<a href="/congress/members"></a>
 						<div>
-							<p>Use our Congressional directory to research current senators and representatives and all Members of Congress dating back to the founding of our nation.</p>
-							<p>We also compute statistics such as ideology, leadership, and missed votes.</p>
+							<p><a href="/congress/members">Members <span>of</span> Congress</a></p>
+							<p>Use our Congressional directory to research current senators and representatives and all Members of Congress dating back to the founding of our nation. We also compute statistics such as ideology, leadership, and missed votes.</p>
+							<p>Track Members of Congress to be alerted when they introduce new bills or vote.</p>
 						</div>
 					</li>
 					<li id="link-bills">
-						<a href="{% url "bill_docket" %}">
-							Bills <span>&amp;</span> Resolutions
-						</a>
+						<a href="{% url "bill_docket" %}"></a>
 						<div>
-							<p>GovTrack follows the status of all bills in Congress from introduction to enactment.</p>
-							<p>Our database of bills goes back to 1979, the 106th Congress. It is updated daily.</p>
-							<p>Read the text of bills and see how bills change through their life cycle.</p>
+							<p><a href="{% url "bill_docket" %}">Bills <span>&amp;</span> Resolutions</a></p>
+							<p>GovTrack follows the status of all bills in Congress from introduction to enactment. Read the text of bills and see how bills change through their life cycle.</p>
+							<p>Track bills by subject or keyword to be alerted when legislation you are interested in is introduced or moves through the House and Senate.</p>
 						</div>
 					</li>
 					<li id="link-votes">
-						<a href="{% url "vote_list" %}">
-							Voting Records
-						</a>
+						<a href="{% url "vote_list" %}"></a>
 						<div>
-							<p>The votes database tracks the votes of Members of Congress on bills and procedural motions from 1789 to the present.</p>
+							<p><a href="{% url "vote_list" %}">Voting Records</a></p>
+							<p>Our votes database tracks the votes of Members of Congress on bills and procedural motions from 1789 to the present.</p>
+							<p>Track votes to be alerted after every vote in Congress.</p>
 						</div>
 					</li>
 					<li id="link-committees">
-						<a href="{% url "committee_list" %}">
-							Committees
-						</a>
+						<a href="{% url "committee_list" %}"></a>
 						<div>
+							<p><a href="{% url "committee_list" %}">Committees</a></p>
 							<p>Congress divides its work into committees and subcommittees where most of the policymaking process occurs. Use the committees database to see where legislation is being debated.</p>
+							<p>Track committees to be alerted when legislation in a subject area of interest to you is introduced or acted on.</p>
 						</div>
 					</li>
 				</ul>
+				</div>
 			</div>
 		</div>
 	</div>

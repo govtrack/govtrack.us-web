@@ -19,28 +19,14 @@
 			<p id="intro" class="column four">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your life or business.</p>
 			
 			<div id="start_search" class="column four right">
+				<h2><a href="/start" style="font-size: 20px; color: white;">Start tracking now ▶</a></h2>
 				
-				<form id="start_tracking" action="/start" method="GET" class="row">
-					<div class="row">
-					  <div class="eleven columns offset-by-one">
-						<h2>Start tracking now!</h2>
-					    <div class="row collapse">
-					      <div class="eight mobile-three columns">
-					        <input id="start_tracking_q" name="q" type="text" placeholder="Find something to track" />
-					      </div>
-					      <div class="four mobile-one columns">
-					        <a href="#" class="postfix button expand" onclick="if ($('#start_tracking_q').val() == 'Find something to track') document.location = '/start'; else $('#start_tracking')[0].submit(); return false;"><span class="icon-search">Search</span></a>
-					      </div>
-					    </div>
-					  </div>
-					</div>
-			    </form>
 				{% if not user.is_authenticated %}
 				<p id="have_account">Already have an account? <a href="/accounts/login">Log in</a></p>
 				{% if request.anonymous %}<script>if (the_user) $('#have_account').hide();</script>{% endif %}
 				{% endif %}
 				
-			</div><!-- /start-search -->
+			</div><!-- /start_search -->
 
 		</div>
 	</div>
@@ -80,7 +66,7 @@
 			</ul>
 
 			<div class="state">
-				<span>And now <a href="/overview#states">State&nbsp;Legislation</a>!</span>
+				<span>And now <a href="/start#states">State&nbsp;Legislation</a>!</span>
 			</div>
 
 		</div>
