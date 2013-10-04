@@ -287,6 +287,18 @@ $(function() {
 <div class="three columns">
 
 	<div id="sidebar">
+		<div style="margin: 5em 0;">
+			<script>
+			if (is_ad_free) {
+				document.write("An ad would be here, but you've gone ad-free!");
+			} else {
+				document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:200px;height:200px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="9757129944"></ins>'|escapejs }}");
+				(adsbygoogle = window.adsbygoogle || []).push({});
+			}
+			</script>
+			<div style="font-size: 90%; text-align: center"><a href="/advertising">About Ads</a></div>
+		</div>
+
 		{% if textdata.text_html %}
 		
 		{% if bill.is_alive and not version %}
