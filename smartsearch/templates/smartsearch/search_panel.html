@@ -1,17 +1,7 @@
 <script src="/static/js/jquery.ba-bbq.min.js"> </script>
 
-<div class="searching row">
-<section class="eight columns">
-    <div class="summary" style="display: none">
-        <p><span class="total">xxx</span> <span class="noun">things</span> matched your search<span class="searchdescr"></span>.</p>
-    </div>
-    
-    <div class="results" style="display: none;">
-    </div>
-    
-    <div id="loading_status" style="display: none;">Loading...</div>
-    <a id="show_more" style="display: none;" href="#" onclick="return update_search(null, 1)">Show More Results</a>
-</section>
+<div class="searching row" style="margin: 0">
+
 <script>
 function addCommas(nStr)
 {
@@ -401,6 +391,22 @@ $(function() {
     </fieldset>
     </form>
 </div>
+
+<section class="eight columns">
+<div class="margin-left-30-wide">
+
+    <div class="summary" style="display: none">
+        <p><span class="total">xxx</span> <span class="noun">things</span> matched your search<span class="searchdescr"></span>.</p>
+    </div>
+    
+    <div class="results" style="display: none;">
+    </div>
+    
+    <div id="loading_status" style="display: none;">Loading...</div>
+    <a id="show_more" style="display: none;" href="#" onclick="return update_search(null, 1)">Show More Results</a>
+
+</div>
+</section>
 
 <div style="clear: both"></div>
 

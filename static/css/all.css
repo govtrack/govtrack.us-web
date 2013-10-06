@@ -3518,8 +3518,9 @@ select, input.text {
     cursor: pointer;
     color: #fff;
     }
-
-
+    @media (min-width: 770px) {
+      .margin-left-30-wide { margin-left: 30px; }
+    }
 
 
 /* Search members styles
