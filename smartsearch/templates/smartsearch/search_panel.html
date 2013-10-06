@@ -17,7 +17,6 @@ function addCommas(nStr)
 }
 function show_facets(postdata, options, isinitial) {
     var should_hide_default_facets = $(window).width() <= 770;
-    var has_hidden_facet = false;
 
     // Display options.
     for (var k in options) {
@@ -120,7 +119,6 @@ function show_facets(postdata, options, isinitial) {
         if (visible && should_hide_default_facets && has_default_value) {
             field_container.attr("is-default-hidden", "true");
             if (isinitial) field_container.hide(); else field_container.fadeOut();
-            has_hidden_facet = true;
 
         } else {
             // Set visibility from what we're told from the server side.
@@ -130,6 +128,7 @@ function show_facets(postdata, options, isinitial) {
     }
 
     // Show the "Show more options" link if we've hidden anything.
+    var has_hidden_facet = ($('#searchform *[is-default-hidden=true]').length > 0);
     $('#show_more_options').toggle(has_hidden_facet);
 
     // Don't show the facets until after the first time they are loaded.
