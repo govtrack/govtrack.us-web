@@ -3423,6 +3423,7 @@ form.custom .custom.disabled { background-color: #ddd; }
     width: 260px;
     background: url(../images/divider-5.gif) repeat-x 0 100%;
     }
+.advanced-search form { margin: 0; }
 .advanced-search form ul { width: 284px     }
 .advanced-search form li {
     display: inline-block;
@@ -3557,8 +3558,7 @@ select, input.text {
 
 /*  Search results page
     ==================================== */
-    #content div.site-search-results form,
-    #content div.advanced-search form {
+    #content div.site-search-results form {
         /*width: 896px;
         background: #f8f7f7;
         -moz-border-radius: 1px;
