@@ -13,7 +13,7 @@ import logging, pprint
 from parser.progress import Progress
 from parser.processor import YamlProcessor, yaml_load
 from parser.models import File
-from person.models import Person, PersonRole, Gender, RoleType, SenatorClass
+from person.models import Person, PersonRole, Gender, RoleType, SenatorClass, SenatorRank
 
 from settings import CURRENT_CONGRESS, CONGRESS_LEGISLATORS_PATH
 
@@ -70,7 +70,7 @@ class PersonRoleProcessor(YamlProcessor):
 
     REQUIRED_ATTRIBUTES = ['type', 'start', 'end']
     ATTRIBUTES = [
-        'type', 'start', 'end', 'class',
+        'type', 'start', 'end', 'class', 'state_rank',
         'district', 'state', 'party', 'url'
     ]
     FIELD_MAPPING = {
@@ -78,6 +78,7 @@ class PersonRoleProcessor(YamlProcessor):
         'start': 'startdate',
         'end': 'enddate',
         'class': 'senator_class',
+        'state_rank': 'senator_rank',
         'url': 'website'
     }
     ROLE_TYPE_MAPPING = {
@@ -87,6 +88,7 @@ class PersonRoleProcessor(YamlProcessor):
         'viceprez': RoleType.vicepresident}
     SENATOR_CLASS_MAPPING = {1: SenatorClass.class1, 2: SenatorClass.class2,
                              3: SenatorClass.class3}
+    SENATOR_RANK_MAPPING = {'senior': SenatorRank.senior, 'junior': SenatorRank.junior}
 
     def type_handler(self, value):
         return self.ROLE_TYPE_MAPPING[value]
@@ -99,6 +101,10 @@ class PersonRoleProcessor(YamlProcessor):
 
     def class_handler(self, value):
         return self.SENATOR_CLASS_MAPPING[value]
+
+    def state_rank_handler(self, value):
+        print value
+        return self.SENATOR_RANK_MAPPING[value]
 
 
 def main(options):

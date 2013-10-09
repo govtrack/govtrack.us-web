@@ -48,6 +48,11 @@
 				<dt>District:</dt>
 				<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a></dd>
 				{% endif %}
+
+				{% if role.senator_rank %}
+				<dt>Seniority:</dt>
+				<dd><abbr title="The senior senator is the longer serving of the two senators from a state. The junior senator refers to the other senator.">{{role.get_senator_rank_display}}</abbr></dd>
+				{% endif %}
 				
 				<dt>Party:</dt>
 				<dd>{{ role.party }}</dd>

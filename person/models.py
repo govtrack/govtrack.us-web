@@ -8,7 +8,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 from common import enum
-from person.types import Gender, RoleType, SenatorClass, State
+from person.types import Gender, RoleType, SenatorClass, SenatorRank, State
 from name import get_person_name
 
 from us import stateapportionment, get_congress_dates, statenames, get_congress_from_date
@@ -258,6 +258,7 @@ class PersonRole(models.Model):
     enddate = models.DateField(db_index=True, help_text="The date the role ended (when the person resigned, died, etc.)")
     # http://en.wikipedia.org/wiki/Classes_of_United_States_Senators
     senator_class = models.IntegerField(choices=SenatorClass, blank=True, null=True, db_index=True, help_text="For senators, their election class, which determines which years they are up for election. (It has nothing to do with seniority.)") # None for representatives
+    senator_rank = models.IntegerField(choices=SenatorRank, blank=True, null=True, help_text="For senators, their state rank, i.e. junior or senior. For historical data, this is their last known rank.") # None for representatives
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts
     district = models.IntegerField(blank=True, null=True, db_index=True, help_text="For representatives, the number of their congressional district. 0 for at-large districts, -1 in historical data if the district is not known.") # None for senators/presidents
     state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True, db_index=True, help_text="For senators and representatives, the two-letter USPS abbrevation for the state or territory they are serving. Values are the abbreviations for the 50 states (each of which have at least one representative and two senators, assuming no vacancies) plus DC, PR, and the island territories AS, GU, MP, and VI (all of which have a non-voting delegate), and for really old historical data you will also find PI (Philippines, 1907-1946), DK (Dakota Territory, 1861-1889), and OR (Orleans Territory, 1806-1811) for non-voting delegates.")
@@ -325,7 +326,9 @@ class PersonRole(models.Model):
         if self.role_type == RoleType.vicepresident:
             return self.get_title_name(False)
         if self.role_type == RoleType.senator:
-            return self.get_title_name(False) + " from " + statenames[self.state]
+            js = ""
+            if self.current and self.senator_rank: js = self.get_senator_rank_display() + " "
+            return js + self.get_title_name(False) + " from " + statenames[self.state]
         if self.role_type == RoleType.representative:
             if self.district == -1:
                 return self.get_title_name(False) + " for " + statenames[self.state]

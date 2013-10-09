@@ -149,10 +149,12 @@ def browsemembersbymap(request, state=None, district=None):
        
         # Load senators for all states that are not territories.
         if stateapportionment[state] != "T":
-            sens = Person.objects.filter(roles__current=True, roles__state=state, roles__role_type=RoleType.senator)
+            sens = Person.objects.filter(roles__current=True, roles__state=state, roles__role_type=RoleType.senator)\
+                .order_by('roles__senator_rank')
             sens = list(sens)
-            for i in xrange(2-len(sens)): # make sure we list at least two slots
-                sens.append(None)
+
+            # make sure we list at least two slots, filling with Vacant if needed
+            for i in xrange(2-len(sens)): sens.append(None)
     
         # Load representatives for at-large districts.
         reps = []

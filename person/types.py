@@ -17,6 +17,11 @@ class SenatorClass(enum.Enum):
     class2 = enum.Item(2, 'Class 2')
     class3 = enum.Item(3, 'Class 3')
 
+class SenatorRank(enum.Enum):
+    # the order is used by order_by on the district maps page
+    senior = enum.Item(1, 'Senior')
+    junior = enum.Item(2, 'Junior')
+
 
 class State(enum.Enum):
     """
