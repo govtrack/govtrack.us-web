@@ -1,13 +1,11 @@
-<div class="sitenewsbody" data-seq="44">
-	<p>During the shutdown the Senate and the Library of Congress are no longer providing timely updates to legislative information.<br/>
-	As a result, <a href="https://www.govtrack.us/blog/2013/10/01/government-shutdown/">some information</a> on GovTrack may fall out of date during this time.</p>
+<div class="sitenewsbody" data-seq="45">
+	<p>During the shutdown <a href="https://www.govtrack.us/blog/2013/10/01/government-shutdown/">some information</a> on GovTrack may fall out of date.</p>
 
 	{# <p>Our friends at the nonprofit Public.Resource.Org were sued for putting state laws online. Please <a href="http://www.kickstarter.com/projects/publicresource/public-safety-codes-of-the-world-stand-up-for-safe" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'p.r.o.');">support their work</a>.</p> #}
 
 	{# <p>The House says core legislative data <a href="http://www.govtrack.us/blog/2013/09/25/an-update-on-getting-legislative-data-from-the-house/">isn&rsquo;t coming any time soon</a>. The Senate remains silent.</p> #}
 	
-	{% comment %}
-	<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">
+	<div id="trending_trackers" style="margin: 1em auto; font-size: 90%;">
 	<div style="color: #553; margin-bottom: 4px; font-size: 95%; font-style: italic; padding-left: 2em;">Trending on GovTrack now...</div>
 	{% for f in trending_feeds %}
 		<a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
@@ -16,6 +14,5 @@
 	{% endfor %}
 	<div style="clear: both"> </div>
 	</div>
-	{% endcomment %}
 </div>
 <div style="clear: both"> </div>
