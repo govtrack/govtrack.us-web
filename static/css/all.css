@@ -3963,9 +3963,8 @@ ul.bullets li, .postcontent ul li, ol.bullets li, .postcontent ol li {
           border-radius: 12px;
           margin: -5px auto 0;
           text-align: center;
-        }
-        #sitenews > div:first-of-type a:hover {
-            border-bottom: 0;
+		  text-decoration: none;
+		  font-family: sans-serif;
         }
     #sitenews div.sitenewsbody {
     	width: 100%;
