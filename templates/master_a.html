@@ -11,45 +11,37 @@
 			<a href="mailto:operations+love@govtrack.us"><img src="/static/funnies/322Heart_02.png"/></a>
 		{% endcomment %}
 		<script type="text/javascript"><!--
-		// Which ad should we display?
+		// Track some ad impression statistics.
 		var ad_exp_user = $.cookie("ad_exp");
 		if (ad_exp_user) ad_exp_user = $.deparam(ad_exp_user, true);
 		if (!ad_exp_user) ad_exp_user = { };
+
+		// increment impression count
+		if (!ad_exp_user.impression) ad_exp_user.impression = 0;
+		ad_exp_user.impression += 1;
+
+		// put users in buckets: assign each user a random number in [0,1].
+		if (!ad_exp_user.segment) ad_exp_user.segment = Math.random();
+		
+		// save cookie
+		$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 21, path: '/' });
 		
 		if (is_ad_free) {
 			document.write("An ad would be here, but you've gone ad-free!");
+
 		} else if (the_segment == "House" || the_segment == "Senate") {
-			google_ad_slot = "7881093146"; // ad unit targeting staff only
+			// ad unit targeting staff only
 			document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="7881093146"></ins>'|escapejs }}");
+			(adsbygoogle = window.adsbygoogle || []).push({});
+
+		} else if ($(window).width() < 940) {
+			document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:200px;height:200px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="9757129944"></ins>'|escapejs }}");
+			(adsbygoogle = window.adsbygoogle || []).push({});
 			
 		} else {
-			// track total number of impressions this user has seen.
-			if (!ad_exp_user.impression) ad_exp_user.impression = 0;
-			ad_exp_user.impression += 1;
-			
-			// put users in buckets: assign each user a random number in [0,1].
-			if (!ad_exp_user.segment) ad_exp_user.segment = Math.random();
-			
-			// save cookie
-			$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 21, path: '/' });
-			
-			if (0) {
-				// every 10th impression show an ad to let users buy out of ads
-				document.write("{{ "<a href='/accounts/go_ad_free'><img src='/static/images/go_ad_free.png'/></a>"|escapejs }}");
-				try { 
-				_gaq.push(['_trackEvent', 'ads' , 'go_ad_free_banner_impression']); 
-				} catch(err){}
-				
-			} else if (0) { // ad_exp_user.segment < .1
-				// Display an experimental ad to 10% of users:
-				// Care2 TAP
-				// {{bill.get_top_term_id}}
-				document.write("{{ "<script type='text/javascript' src='http://dingo.care2.com/petitions/embed.js'></script><div class='care2PetitionEmbed' rssPath='http://www.thepetitionsite.com/feeds/publisher/000/001/"|escapejs }}{% firstof care2_category_id '795' %}{{ "/feed.swf' adSize='small' publisherId='1405' grabbed='0' flags='#000002' buttonColor='#EB6924' html='1'></div>"|escapejs }}");
-				
-			} else {
-				document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:336px;height:280px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="4342089141"></ins>'|escapejs }}");
-				(adsbygoogle = window.adsbygoogle || []).push({});
-			}
+			document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:336px;height:280px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="4342089141"></ins>'|escapejs }}");
+			(adsbygoogle = window.adsbygoogle || []).push({});
+
 		}
 		//-->
 		</script>

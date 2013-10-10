@@ -1286,8 +1286,11 @@ a.button.prefix, a.button.postfix {
 	}
 .ads.square { 
 	width: 336px;
-	margin: -62px auto 0 auto;
+  text-align: center;
 	}
+  @media (min-width: 940px) {
+    .ads.square { margin: -62px auto 0 auto; }
+  }
 .ads.footer.leaderboard { 
 	margin: 20px 0 20px 0;
 	text-align: center;
