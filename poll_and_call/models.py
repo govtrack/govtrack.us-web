@@ -36,6 +36,7 @@ class IssuePosition(models.Model):
 	text = models.CharField(max_length=255, help_text="A description of the position.")
 	valence = models.NullBooleanField(blank=True, null=True, help_text="The valence of this position, for linking with bills.")
 	created = models.DateTimeField(auto_now_add=True, db_index=True, help_text="The date and time the issue was created.")
+	call_script = models.TextField(blank=True, null=True, help_text="What you should say when you call your rep about this issue.")
 
 	class Meta:
 		ordering = ('-created',)
@@ -77,4 +78,29 @@ class UserPosition(models.Model):
 
 	def __unicode__(self):
 		return unicode(self.user) + "/" + unicode(self.position)
-		
+
+	def get_current_target(self):
+		from person.models import PersonRole
+		return PersonRole.objects.get(current=True, state=self.district[0:2], district=int(self.district[2:]))
+
+	def can_change_position(self):
+		return not CallLog.objects.filter(user=self.user, position=self).exists()
+
+
+class CallLog(models.Model):
+	"""The log of a call to Congress."""
+
+	user = models.ForeignKey('auth.User', db_index=True, help_text="The user who created this call.", on_delete=models.CASCADE)
+	position = models.ForeignKey(UserPosition, db_index=True, help_text="The position this call was communicating.", on_delete=models.CASCADE)
+	target = models.ForeignKey('person.PersonRole', db_index=True, help_text="The Member of Congress the user called.", on_delete=models.PROTECT)
+	created = models.DateTimeField(auto_now_add=True, db_index=True)
+
+	status = models.CharField(max_length=64) # current status of the call
+
+	log = JSONField(help_text="A dict of TwilML information for different parts of the call.")
+
+	class Meta:
+		ordering = ('-created',)
+
+	def __unicode__(self):
+		return self.created.isoformat() + " " + unicode(self.user)

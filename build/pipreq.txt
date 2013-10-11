@@ -18,4 +18,5 @@ django-wysiwyg
 yuicompressor
 paypalrestsdk
 markdown
-
+django_twilio
+twilio

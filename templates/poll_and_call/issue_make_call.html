@@ -1,0 +1,175 @@
+{% extends "master_b.html" %}
+
+{% load humanize %}
+{% load cache %}
+{% load markup %}
+{% load govtrack_utils %}
+
+{% block title %}{{issue.question}} - GovTrack.us{% endblock %}
+{% block meta_description %}{{issue.title}}{% endblock %}
+{% block cat-icon-filename %}img-voting-records.png{% endblock %}
+
+{% block body_scripts %}
+<script>
+var call_id = null;
+
+function start_call() {
+	var num = $("#phone").val();
+	if (!num) return;
+
+	$('#phone, #start_call').prop("disabled", 1);
+	$('#call_status').text("We are dialing your number...");
+
+	$.ajax(
+		"/poll/_ajax/start-call",
+		{
+			type: "POST",
+			data: {
+				p: {{user_position.id}},
+				phone_number: num
+			},
+			error: function() {
+				$('#phone, #start_call').prop("disabled", 0);
+				$('#call_status').text("Something went wrong. Please try again another time.");
+			},
+			success: function(status) {
+				if (!status.ok) {
+					$('#phone, #start_call').prop("disabled", 0);
+					$('#call_status').text(status.msg);
+					return;
+				}
+
+				// poll for status updates
+				call_id = status.call_id;
+				setTimeout("poll_call_status()", 3000);
+			}
+		})
+}
+
+function poll_call_status() {
+	$.ajax(
+		"/poll/_ajax/poll-call-status",
+		{
+			type: "POST",
+			data: {
+				id: call_id
+			},
+			error: function() {
+				$('#call_status').text("Something went wrong....");
+				setTimeout("poll_call_status()", 5000);
+			},
+			success: function(status) {
+				$('#call_status').text(status.msg);
+
+				// poll again
+				if (!status.finished)
+					setTimeout("poll_call_status()", 3000);
+			}
+		})
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+#script {
+	margin: 1.5em 1.75em;
+	border: 1px solid black;
+	padding: 1em;
+	background-color: #F5F5F5;
+	font-size: 110%;
+	font-family: Tahoma, Ubuntu, Arial;
+	line-height: 145%;
+}
+#script > p > span {
+	font-weight: bold;
+}
+#script p.them {
+	font-style: italic;
+	color: #666;
+	border-top: 1px solid #888;
+	border-bottom: 1px solid #888;
+	padding: 3px;
+	line-height: 130%;
+}
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li>Polls</li>
+	<li>{{issue.title}}</li>
+</ul>
+{% endblock %}
+
+{% block body_class %}issue{% endblock %}
+
+{% block summary %}
+<div class="row">
+	<h1>Call Congress About {{issue.title}}</h1>
+
+	<p style="margin: 0">Make your voice heard. We&rsquo;ll walk you through the call step by step! (<a href="{{issue.get_absolute_url}}">skip this step</a>)</p>
+</div>
+{% endblock %}
+
+{% block body %}
+
+<div class="row">
+	<div class="six columns">
+		<h2>What To Say</h2>
+
+		<p>When you call your representative, a staff assistant will pick up the phone. Here is a script you can follow to effectively communicate your position:</p>
+
+		<div id="script">
+			<p class="them"><span>Them:</span> {{moc.get_title}} {{moc.person.lastname}}&rsquo;s office, how can I help you?</p>
+
+			<p>Hi, my name is <span>[Your Name]</span>, and I&rsquo;m a resident of {% if moc.district %}the {{moc.district|ordinal}} district{% else %}{% if moc.state == "DC" %}the {% endif %}{{moc.state_name}}{% endif %}.</p>
+
+			{{position.call_script|markdown}}
+
+			<p>Can I count on the {{moc.get_title|lower}}&rsquo;s support?</p>
+
+			<p class="them"><span>Them:</span> Thank you for calling. The {{moc.get_title|lower}}&rsquo;s position is _____. Can I get your name again and your address?</p>
+
+			<p>Sure my name is . . . and my address is . . .</p>
+
+			<p class="them"><span>Them:</span> I will let the {{moc.get_title|lower}} know you called.</p>
+
+			<p>Thank you for your time.</p>
+		</div>
+
+		<p>If asked, do provide any contact information the staff assistant asks for. That information helps them track the sentiment of their constituents, and it
+		means they are taking your call seriously.</p>
+	</div>
+
+	<div class="six columns">
+		<h2 style="margin-top: 120px">Ready to call?</h2>
+
+		<p>Your representative is {{moc.person}}.</p>
+
+		<p>We&rsquo;ll connect a call for you. If you provide your phone number, we&rsquo;ll call you, and then we will connect your call to the office of {{moc.person.name_and_title}}.</p>
+
+		<div style="margin: 2em 40px; font-size: 110%;">
+			<div style="margin-bottom: 5px;">Enter your phone number:</div>
+			<input id="phone" type="tel" style="font-size: 28px; width: 220px; height: 40px; display: inline" placeholder="000 555-8888"/>
+			<button id="start_call" onclick="start_call()" style="font-size: 28px; height: 38px;">Call Me</button>
+			<div id="call_status"></div>
+		</div>
+
+		<p><small>We&rsquo;ll be recording your call so we can learn how to improve this process.</small></p>
+
+		<h2>Rather call yourself?</h2>
+
+		<p>Feel free to make the call yourself too. {{moc.person.name_and_title}}&rsquo;s phone number is <b><a href="tel:{{moc.phone}}">{{moc.phone}}</a></b>.</p>
+
+		<h2>Finished?</h2>
+
+		<p>Once you finish the call, or if you want to skip this step, <a href="{{issue.get_absolute_url}}">click here</a>. You can come back to this later.</p>
+	</div>
+</div>
+
+<h2 style="margin-top: 1em">Issue Background</h2>
+
+{{issue.introtext|markdown}}
+
+{% endblock %}

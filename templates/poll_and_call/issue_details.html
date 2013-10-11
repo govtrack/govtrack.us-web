@@ -54,13 +54,15 @@
 </div>
 <div id="you_already_chose" style="display: none;">
 	<p>You chose: <span style="font-weight: bold"/></p>
-	<button onclick="$('#you_choose').show(); $('#you_already_chose').hide();" style="margin-bottom: .5em">Change Position &nbsp; ▶</button>
+	<button id="change_position" onclick="$('#you_choose').show(); $('#you_already_chose').hide();" style="margin-bottom: .5em">Change Position &nbsp; ▶</button>
+	<button id="make_call" onclick="window.location = '{{issue.get_absolute_url|escapejs}}/make_call';" style="margin-bottom: .5em">Call Congress &nbsp; ▶</button>
 </div>
 <script>
 if (the_page && the_page.position) {
 	$('#you_choose').hide();
 	$('#you_already_chose').show();
 	$('#you_already_chose span').text(the_page.position.text);
+	$('#change_position, #make_call').toggle(the_page.position.can_change);
 }
 </script>
 
