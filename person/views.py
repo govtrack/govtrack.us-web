@@ -178,45 +178,8 @@ def browsemembersbymap(request, state=None, district=None):
             except Person.DoesNotExist:
                 reps.append((i, None, cities))
 
-        zoom_info_cache_key = "map_zoom_%s-%s" % (state, "" if not district else district)
-
-        if state == "MP":
-            center_long, center_lat, center_zoom = (145.7, 15.1, 11.0)
-        elif state == "AS":
-            center_long, center_lat, center_zoom = (-170.255127, -14.514462, 8.0)
-        elif state == "HI":
-            center_long, center_lat, center_zoom = (-155.5, 20, 7.0)
-        elif state == "AK":
-            # Alaska has a longitude wrap-around problem so it's easier to just specify
-            # the coordinates manually than to figure out generically how to do the math
-            # of taking the average of the bounding box coordinates.
-            center_long, center_lat, center_zoom = (-150, 63, 4.0)
-        elif cache.get(zoom_info_cache_key):
-            center_lat, center_long, center_zoom = cache.get(zoom_info_cache_key)
-        else:
-            def get_coords(state, distr):
-                import urllib, json
-                if not distr:
-                    url = "http://gis.govtrack.us/boundaries/2012-states/%s/?format=json" % state.lower()
-                else:
-                    url = "http://gis.govtrack.us/boundaries/cd-2012/%s-%02d/?format=json" % (state.lower(), int(distr))
-                resp = json.load(urllib.urlopen(url))
-                sw_lng, sw_lat, ne_lng, ne_lat = resp["extent"]
-                area = (ne_lng-sw_lng)*(ne_lat-sw_lat)
-                center_long, center_lat = (sw_lng+ne_lng)/2.0, (sw_lat+ne_lat)/2.0
-                center_zoom = round(1.0 - log(sqrt(area)/1000.0))
-                return center_lat, center_long, center_zoom
-                
-            center_lat, center_long, center_zoom = get_coords(state, None)
+        center_long, center_lat, center_zoom = get_district_bounds(state, district)
             
-            # Zoom in to district if it is too small to be seen on a whole-state map.
-            if district:
-                distr_center_lat, district_center_long, district_center_zoom = get_coords(state, district)
-                if district_center_zoom > center_zoom + 1:
-                    center_lat, center_long, center_zoom = distr_center_lat, district_center_long, district_center_zoom
-                    
-            cache.set(zoom_info_cache_key, (center_lat, center_long, center_zoom) )
-    
     return {
         "center_lat": center_lat,
         "center_long": center_long,
@@ -232,6 +195,48 @@ def browsemembersbymap(request, state=None, district=None):
         "cities": get_district_cities("%s-%02d" % (state.lower(), int(district))) if state and district else None,
     }
     
+def get_district_bounds(state, district):
+    zoom_info_cache_key = "map_zoom_%s-%s" % (state, "" if not district else district)
+
+    if state == "MP":
+        return (145.7, 15.1, 11.0)
+    elif state == "AS":
+        center_long, center_lat, center_zoom = (-170.255127, -14.514462, 8.0)
+    elif state == "HI":
+        center_long, center_lat, center_zoom = (-155.5, 20, 7.0)
+    elif state == "AK":
+        # Alaska has a longitude wrap-around problem so it's easier to just specify
+        # the coordinates manually than to figure out generically how to do the math
+        # of taking the average of the bounding box coordinates.
+        center_long, center_lat, center_zoom = (-150, 63, 4.0)
+    elif cache.get(zoom_info_cache_key):
+        center_lat, center_long, center_zoom = cache.get(zoom_info_cache_key)
+    else:
+        def get_coords(state, distr):
+            import urllib, json
+            if not distr:
+                url = "http://gis.govtrack.us/boundaries/2012-states/%s/?format=json" % state.lower()
+            else:
+                url = "http://gis.govtrack.us/boundaries/cd-2012/%s-%02d/?format=json" % (state.lower(), int(distr))
+            resp = json.load(urllib.urlopen(url))
+            sw_lng, sw_lat, ne_lng, ne_lat = resp["extent"]
+            area = (ne_lng-sw_lng)*(ne_lat-sw_lat)
+            center_long, center_lat = (sw_lng+ne_lng)/2.0, (sw_lat+ne_lat)/2.0
+            center_zoom = round(1.0 - log(sqrt(area)/1000.0))
+            return center_lat, center_long, center_zoom
+            
+        center_lat, center_long, center_zoom = get_coords(state, None)
+
+        # Zoom in to district if it is too small to be seen on a whole-state map.
+        if district:
+            distr_center_lat, district_center_long, district_center_zoom = get_coords(state, district)
+            if district_center_zoom > center_zoom + 1:
+                center_lat, center_long, center_zoom = distr_center_lat, district_center_long, district_center_zoom
+                
+        cache.set(zoom_info_cache_key, (center_lat, center_long, center_zoom) )
+
+    return (center_lat, center_long, center_zoom)
+
 def get_district_cities(district_id):
     district_info = cache.get("district_cities_%s" % district_id)
     if district_info:
@@ -290,11 +295,18 @@ def membersoverview(request):
 @anonymous_view
 @render_to('person/district_map_embed.html')
 def districtmapembed(request):
+    bounds2 = None
+    try:
+        bounds2 = get_district_bounds(request.GET.get("state", ""), request.GET.get("district", ""))
+    except:
+        pass
+
     return {
         "demo": "demo" in request.GET,
         "state": request.GET.get("state", ""),
         "district": request.GET.get("district", ""),
         "bounds": request.GET.get("bounds", None),
+        "bounds2": bounds2,
     }
     
 @anonymous_view

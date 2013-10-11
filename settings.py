@@ -104,6 +104,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.humanize',
     'django.contrib.sitemaps',
+    'django.contrib.markup',
     # 3rd party libraries
     'common',
     'django_extensions',
@@ -125,6 +126,7 @@ INSTALLED_APPS = (
     'smartsearch',
     'bill',
     'states',
+    'poll_and_call',
     'predictionmarket',
 
     # for django-registration-pv

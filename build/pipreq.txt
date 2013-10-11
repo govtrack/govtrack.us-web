@@ -17,3 +17,5 @@ recaptcha-client
 django-wysiwyg
 yuicompressor
 paypalrestsdk
+markdown
+

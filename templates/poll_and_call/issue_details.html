@@ -1,0 +1,79 @@
+{% extends "master_a.html" %}
+
+{% load humanize %}
+{% load cache %}
+{% load markup %}
+{% load govtrack_utils %}
+
+{% block title %}{{issue.question}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}{{issue.title}}{% endblock %}
+
+{% block head %}
+	<meta property="og:title" content="{{issue.question}}" />
+	<meta property="og:url" content="https://www.govtrack.us{{issue.get_absolute_url}}" />
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+	function do_poll(posid, choice_index) {
+		window.location = "{{issue.get_absolute_url}}/join/" + posid + "?meta_order=" + choice_index;
+	}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li>Polls</li>
+</ul>
+{% endblock %}
+
+{% block body_class %}issue{% endblock %}
+
+{% block summary %}
+<div class="row">
+	<h1>{{issue.title}}</h1>
+
+	{{issue.introtext|markdown}}
+</div>
+{% endblock %}
+
+{% block body %}
+
+<h2>{{issue.question}}</h2>
+<div id="you_choose">
+	<p>What do you think?</p>
+	{% for p in issue.get_randomized_positions %}
+	<div class="position">
+		<button onclick="do_poll({{p.id}}, {{forloop.counter0}})" style="margin-bottom: .5em">{{forloop.counter}}. {{p.text}} &nbsp; ▶</button>
+	</div>
+	{% endfor %}
+</div>
+<div id="you_already_chose" style="display: none;">
+	<p>You chose: <span style="font-weight: bold"/></p>
+	<button onclick="$('#you_choose').show(); $('#you_already_chose').hide();" style="margin-bottom: .5em">Change Position &nbsp; ▶</button>
+</div>
+<script>
+if (the_page && the_page.position) {
+	$('#you_choose').hide();
+	$('#you_already_chose').show();
+	$('#you_already_chose span').text(the_page.position.text);
+}
+</script>
+
+{% if total_users == 0 %}
+	<hr style="margin-top: 3em;">
+	<p>Poll results are not yet available.</p>
+{% else %}
+
+	<h2 style="margin-top: 1em">Results</h2>
+	{% for p in positions %}
+		<p>{{p.percent_users}}% &ndash; {{p.text}}</p>
+	{% endfor %}
+
+{% endif %}
+
+{% endblock %}

@@ -14,8 +14,13 @@
 		
 		function initialize() {
 			var myOptions = {
+				{% if not bounds and bounds2 %}
+				zoom: {{bounds2.2}},
+				center: new google.maps.LatLng({{bounds2.0}}, {{bounds2.1}}),
+				{% else %}
 				zoom: 4,
 				center: new google.maps.LatLng(38, -96),
+				{% endif %}
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				panControl: false,
 				zoomControl: true,
@@ -73,7 +78,13 @@
 				map.fitBounds(bounds);
 			{% endif %}
 			
-			createDistrictsOverlay("cd-2012");
+			var layer = "cd-2012";
+			if (state && district)
+				layer += "/" + state.toLowerCase() + "-" + (district < 10 ? "0" : "") + district;
+			else if (state)
+				layer += "/" + state.toLowerCase() + "-00";
+
+			createDistrictsOverlay(layer);
 			
 			{% if not demo %}
 			var mh = document.getElementById("map_canvas").offsetHeight;
@@ -95,7 +106,7 @@
 			// Apply the map layer.
 			var overlay = new google.maps.ImageMapType({
 			  getTileUrl: function(coord, zoom) {
-				  return "/gis/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
+				  return "{% if debug %}https://www.govtrack.us{% endif %}/gis/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
 			  },
 			  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
 			  isPng: tileimgformat == "png",

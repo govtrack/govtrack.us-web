@@ -1,0 +1,132 @@
+{% extends "master_b.html" %}
+
+{% load humanize %}
+{% load cache %}
+{% load markup %}
+{% load govtrack_utils %}
+
+{% block title %}{{position.text}} - {{issue.question}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}{{issue.title}}{% endblock %}
+{% block cat-icon-filename %}img-voting-records.png{% endblock %}
+
+{% block head %}
+	<meta property="og:title" content="{{position.text}} - {{issue.question}}" />
+	<meta property="og:url" content="https://www.govtrack.us{{issue.get_absolute_url}}/{{position.id}}" />
+
+	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+var geocoder;
+function doGeoCode() {
+	if (!geocoder) geocoder = new google.maps.Geocoder();
+	var addr = $("#addr").val()
+	if (!addr) return;
+
+	geocoder.geocode(
+		{ 'address': addr },
+		function(results, status) {
+			if (status != google.maps.GeocoderStatus.OK) {
+				alert("Sorry, Google couldn't find that address: " + status);
+				return;
+			}
+
+			var geocoder_result = results[0].geometry.location;
+			$.ajax({
+				url: "/congress/members/ajax/district_lookup",
+				data: {
+					lat: results[0].geometry.location.lat(),
+					lng: results[0].geometry.location.lng()
+				},
+				dataType: "json",
+				success: function(data) {
+					if (!data.state) {
+						alert("The address does not appear to be within a United States Congressional District.");
+						return;
+					}
+					show_map(data.state, data.district, geocoder_result.lat(), geocoder_result.lng());
+				}
+			});
+		});
+}
+
+function show_map(state, district, marker_lat, marker_lng) {
+	$("#distr").val(state + district);
+
+	$("#map")
+		.attr("src", "/congress/members/embed/mapframe?state=" + state + "&district=" + district + "&marker_lat=" + marker_lat + "&marker_lng=" + marker_lng)
+		.show();
+
+	$(".warning").hide();
+	$('#ok_go').show();
+	$('#ok_go h4').text("Do you live in " + state + (district ? "-" + district : "") + "?");
+}
+
+$("#addr").val("4417 Pine st, Philadelphia");
+doGeoCode();
+</script>
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li>Polls</li>
+	<li><a href="{{issue.get_absolute_url}}">{{issue.title}}</a></li>
+</ul>
+{% endblock %}
+
+{% block body_class %}issue{% endblock %}
+
+{% block summary %}
+<div class="row">
+	<h1>{{issue.title}}</h1>
+
+	<p>You chose: <b>{{position.text}}</b>
+	(<a href="{{issue.get_absolute_url}}">go back</a>)</p>
+
+	<p>One last thing: let&rsquo;s find your congressional district.</p>
+</div>
+{% endblock %}
+
+{% block body %}
+
+<div class="row">
+	<div class="six columns">
+		<h2>Find your congressional district</h2>
+
+		<p>What is your home address?</p>
+		<div><input id="addr" type="text" placeholder="123 Main St, Wishaloo, California"/></div>
+		<div style="text-align: right">
+			<button onclick="doGeoCode()">Ok ▶</button>
+		</div>
+
+		<p class="warning" style="margin: .5em 0 1.5em 0"><small>We do not store your home address once we find your district.</small></p>
+
+		<div id="ok_go" style="display: none">
+			<h4>Confirm</h4>
+
+			<p>Check the map to make sure we found your district correctly. You may need to zoom in to see if your home is within the shaded area.</p>
+
+			<p>If we got it right, click Confirm!</p>
+
+			<form method="post" style="margin-top: 1em">
+				{% csrf_token %}
+				<input id="distr" type="hidden" name="district" value="???"/>
+				<input type="hidden" name="meta_order" value="{{request.GET.meta_order}}"/>
+				<input type="submit" value="Confirm &nbsp; ▶"/>
+			</form>
+
+			<p>If we got your district wrong... Sorry, you won&rsquo;t be able to participate right now. We hope to fix this soon.</p>
+		</div>
+	</div>
+
+	<div class="six columns">
+		<iframe id="map" width="100%" height="300" frameborder="1" scrolling="no" marginheight="0" marginwidth="0" src="#"> </iframe>
+	</div>
+</div>
+
+{% endblock %}
