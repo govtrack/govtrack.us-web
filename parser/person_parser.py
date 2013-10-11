@@ -71,7 +71,7 @@ class PersonRoleProcessor(YamlProcessor):
     REQUIRED_ATTRIBUTES = ['type', 'start', 'end']
     ATTRIBUTES = [
         'type', 'start', 'end', 'class', 'state_rank',
-        'district', 'state', 'party', 'url'
+        'district', 'state', 'party', 'url', 'phone',
     ]
     FIELD_MAPPING = {
         'type': 'role_type',
@@ -103,7 +103,6 @@ class PersonRoleProcessor(YamlProcessor):
         return self.SENATOR_CLASS_MAPPING[value]
 
     def state_rank_handler(self, value):
-        print value
         return self.SENATOR_RANK_MAPPING[value]
 
 
