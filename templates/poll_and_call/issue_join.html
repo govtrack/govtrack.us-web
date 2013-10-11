@@ -64,8 +64,6 @@ function show_map(state, district, marker_lat, marker_lng) {
 	$('#ok_go h4').text("Do you live in " + state + (district ? "-" + district : "") + "?");
 }
 
-$("#addr").val("4417 Pine st, Philadelphia");
-doGeoCode();
 </script>
 {% endblock %}
 
@@ -125,7 +123,7 @@ doGeoCode();
 	</div>
 
 	<div class="six columns">
-		<iframe id="map" width="100%" height="300" frameborder="1" scrolling="no" marginheight="0" marginwidth="0" src="#"> </iframe>
+		<iframe id="map" width="100%" height="300" frameborder="1" scrolling="no" marginheight="0" marginwidth="0" src="about:blank" style="display: none"> </iframe>
 	</div>
 </div>
 

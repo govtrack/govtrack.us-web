@@ -64,7 +64,7 @@ if (the_page && the_page.position) {
 }
 </script>
 
-{% if total_users == 0 %}
+{% if total_users < 100 %}
 	<hr style="margin-top: 3em;">
 	<p>Poll results are not yet available.</p>
 {% else %}

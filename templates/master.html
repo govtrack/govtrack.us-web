@@ -143,7 +143,7 @@
 		} catch (err) { }
 			
 		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer .sitenewsbody').attr("data-seq")
-			&& location.pathname != cur_link) {
+			&& document.location.pathname != cur_link) {
 			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
 			$('#sitenewscontainer').fadeIn();
 			setTimeout("$('#trending_bills > a').each(function() { $(this).truncate_text() });", 10); // a little after the fade has started so the divs are shown

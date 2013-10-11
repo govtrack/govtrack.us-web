@@ -41,10 +41,15 @@ class IssuePosition(models.Model):
 		ordering = ('-created',)
 
 	def __unicode__(self):
+		i = "?"
+		try:
+			i = self.issue.all()[0].title
+		except:
+			pass
 		v = ""
 		if self.valence is True: v = "(+) "
 		if self.valence is False: v = "(-) "
-		return v + self.issue.all()[0].title + " -- " + self.text
+		return v + i + " -- " + self.text
 
 class RelatedBill(models.Model):
 	"""A bill related to an issue, and possibly a link between support/oppose for the bill and IssuePositions."""
