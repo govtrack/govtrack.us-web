@@ -19,10 +19,29 @@
 	function do_poll(posid, choice_index) {
 		window.location = "{{issue.get_absolute_url}}/join/" + posid + "?meta_order=" + choice_index;
 	}
+	function show_submission_status(msg) {
+		$('#submission_status').text(msg).show();
+		window.location.hash = "#";
+	}
+	$(function(){
+		if (window.location.hash == "#vacant") show_submission_status("Your representative's office is currently vacant.")
+		if (window.location.hash == "#nophone") show_submission_status("We don't currently have a phone number on file for your representative.")
+		if (window.location.hash == "#hours") show_submission_status("Please come back during east coast office hours and click Call Congress above to call your representative.")
+	});
 </script>
 {% endblock %}
 
 {% block extra_css %}
+<style>
+#submission_status {
+	margin: 1em;
+	padding: .75em;
+	border: 1px solid red;
+	color: red;
+	font-weight: bold;
+	max-width: 30em;
+}
+</style>
 {% endblock %}
 
 {% block crumbs %}
@@ -56,6 +75,9 @@
 	<p>You chose: <span style="font-weight: bold"/></p>
 	<button id="change_position" onclick="$('#you_choose').show(); $('#you_already_chose').hide();" style="margin-bottom: .5em">Change Position &nbsp; ▶</button>
 	<button id="make_call" onclick="window.location = '{{issue.get_absolute_url|escapejs}}/make_call';" style="margin-bottom: .5em">Call Congress &nbsp; ▶</button>
+	<div id="submission_status" style="display: none">
+		Hello!
+	</div>
 </div>
 <script>
 if (the_page && the_page.position) {

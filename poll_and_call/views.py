@@ -93,12 +93,16 @@ def issue_make_call(request, issue_slug):
 		rep = user_position.get_current_target()
 	except PersonRole.DoesNotExist:
 		# vacant, I suppose
-		return HttpResponseRedirect(issue.get_absolute_url())
+		return HttpResponseRedirect(issue.get_absolute_url() + "#vacant")
 
 	# do we have a valid-looking phone number?
 	if not rep.phone or len("".join(c for c in rep.phone if unicode.isdigit(c))) != 10:
 		# Rep has no valid phone.
-		return HttpResponseRedirect(issue.get_absolute_url())
+		return HttpResponseRedirect(issue.get_absolute_url() + "#nophone")
+
+	# is this a good time of day to call?
+	if not ((0 <= datetime.now().weekday() <= 4) and ('09:15' <= datetime.now().time().isoformat() <= '16:45')):
+		return HttpResponseRedirect(issue.get_absolute_url() + "#hours")
 
 	position = user_position.position
 	position.call_script = dynamic_call_script(issue, position, rep.person, rep)
