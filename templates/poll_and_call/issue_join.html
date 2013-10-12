@@ -56,7 +56,7 @@ function show_map(state, district, marker_lat, marker_lng) {
 	$("#distr").val(state + district);
 
 	$("#map")
-		.attr("src", "/congress/members/embed/mapframe?state=" + state + "&district=" + district + "&marker_lat=" + marker_lat + "&marker_lng=" + marker_lng)
+		.attr("src", "/congress/members/embed/mapframe?state=" + state + "&district=" + district + "&marker_lat=" + marker_lat + "&marker_lng=" + marker_lng + "&footer=0")
 		.show();
 
 	$(".warning").hide();
@@ -68,6 +68,9 @@ function show_map(state, district, marker_lat, marker_lng) {
 {% endblock %}
 
 {% block extra_css %}
+<style>
+#map { border: 1px solid black; }
+</style>
 {% endblock %}
 
 {% block crumbs %}

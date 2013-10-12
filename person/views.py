@@ -178,7 +178,7 @@ def browsemembersbymap(request, state=None, district=None):
             except Person.DoesNotExist:
                 reps.append((i, None, cities))
 
-        center_long, center_lat, center_zoom = get_district_bounds(state, district)
+        center_lat, center_long, center_zoom = get_district_bounds(state, district)
             
     return {
         "center_lat": center_lat,
@@ -303,6 +303,7 @@ def districtmapembed(request):
 
     return {
         "demo": "demo" in request.GET,
+        "hide_footer": "demo" in request.GET or "footer" in request.GET,
         "state": request.GET.get("state", ""),
         "district": request.GET.get("district", ""),
         "bounds": request.GET.get("bounds", None),

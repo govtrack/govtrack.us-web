@@ -146,29 +146,29 @@ def start_call(request):
 	if len(phone_num) != 10:
 		return { "ok": False, "msg": "Enter your area code and phone number." }
 
-	try:
-		cl = CallLog.objects.create(
-			user=request.user,
-			position=user_position,
-			target=user_position.get_current_target(),
-			status="not-yet-started",
-			log={})
+	cl = CallLog.objects.create(
+		user=request.user,
+		position=user_position,
+		target=user_position.get_current_target(),
+		status="not-yet-started",
+		log={})
 
-		client = twilio_client()
-		call = client.calls.create(
-			to=("+1" + phone_num),
-            from_=settings.TWILIO_OUR_NUMBER,
-            url=request.build_absolute_uri("/poll/_twilio/call-start/" + str(cl.id)),
-            status_callback=request.build_absolute_uri("/poll/_twilio/call-end/" + str(cl.id)),
-            )
+	client = twilio_client()
+	call = client.calls.create(
+		to=("+1" + phone_num),
+        from_=settings.TWILIO_OUR_NUMBER,
+        url=request.build_absolute_uri("/poll/_twilio/call-start/" + str(cl.id)),
+        status_callback=request.build_absolute_uri("/poll/_twilio/call-end/" + str(cl.id)),
+        )
 
-		cl.log["sid"] = call.sid
-		cl.status = "started"
-		cl.save()
+	cl.log["sid"] = call.sid
+	cl.status = "started"
+	cl.save()
 
-		return { "ok": True, "call_id": cl.id }
-	except Exception as e:
-		return { "ok": False, "msg": "Something went wrong, sorry!", "error": repr(e) }
+	return { "ok": True, "call_id": cl.id }
+	
+#	except Exception as e:
+#		return { "ok": False, "msg": "Something went wrong, sorry!", "error": repr(e) }
 
 @login_required
 @json_response

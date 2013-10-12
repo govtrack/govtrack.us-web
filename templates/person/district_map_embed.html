@@ -86,7 +86,7 @@
 
 			createDistrictsOverlay(layer);
 			
-			{% if not demo %}
+			{% if not hide_footer %}
 			var mh = document.getElementById("map_canvas").offsetHeight;
 			var fh = document.getElementById("map_footer").offsetHeight;
 			document.getElementById("map_canvas").style.height = (mh-fh)  + "px";
@@ -139,7 +139,7 @@
 </head>
 <body onload="initialize()">
 	<div id="map_canvas" style="width: 100%; height: 100%"> </div>
-	{% if not demo %}
+	{% if not hide_footer %}
 	<center id="map_footer" style="font-size: 60%; padding: .5em"><a href="http://www.govtrack.us/congress/members" target="_blank">Find your Members of Congress</a> on <a href="http://www.govtrack.us/" target="_blank">GovTrack.us</a></center>
 	{% endif %}
 </body>
