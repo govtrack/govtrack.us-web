@@ -34,7 +34,7 @@ def issue_show(request, issue_slug):
 	for r in results:
 		p = pos_map[r["position"]]
 		p.total_users = r["count"]
-		p.percent_users = 100*r["count"]/total_users
+		p.percent_users = int(round(100.0*r["count"]/total_users))
 
 	return { "issue": issue, "positions": positions, "total_users": total_users }
 
@@ -45,7 +45,7 @@ def issue_show_user_view(request, issue_slug):
 	if request.user.is_authenticated():
 		try:
 			up = UserPosition.objects.get(user=request.user, position__issue=issue)
-			D["position"] =  { "id": up.position.id, "text": up.position.text, "can_change": up.can_change_position() }
+			D["position"] =  { "id": up.position.id, "text": up.position.text, "can_change": up.can_change_position(), "can_call": up.can_make_call() }
 		except:
 			pass
 	return D
@@ -101,8 +101,8 @@ def issue_make_call(request, issue_slug):
 		return HttpResponseRedirect(issue.get_absolute_url() + "#nophone")
 
 	# is this a good time of day to call?
-	if not ((0 <= datetime.now().weekday() <= 4) and ('09:15' <= datetime.now().time().isoformat() <= '16:45')):
-		return HttpResponseRedirect(issue.get_absolute_url() + "#hours")
+	#if not ((0 <= datetime.now().weekday() <= 4) and ('09:15' <= datetime.now().time().isoformat() <= '16:45')):
+	#	return HttpResponseRedirect(issue.get_absolute_url() + "#hours")
 
 	position = user_position.position
 	position.call_script = dynamic_call_script(issue, position, rep.person, rep)
@@ -130,6 +130,8 @@ def dynamic_call_script(issue, position, person, role):
 			return position.call_script + " I ask %s to hold %s ground until the Republicans agree to fund the government." % (name, pos_pro)
 		elif role.party == "Republican":
 			return position.call_script + " I ask %s to pass a clean CR." % (name,)
+	elif issue.slug == "debt-ceiling-2013":
+			return position.call_script % (name,)
 	return position.call_script
 
 def twilio_client():

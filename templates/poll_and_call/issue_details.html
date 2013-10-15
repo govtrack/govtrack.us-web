@@ -46,7 +46,7 @@
 
 {% block crumbs %}
 <ul>
-	<li>Polls</li>
+	<li>Call Congress</li>
 </ul>
 {% endblock %}
 
@@ -64,7 +64,8 @@
 
 <h2>{{issue.question}}</h2>
 <div id="you_choose">
-	<p>What do you think?</p>
+	<p>We&rsquo;ll walk you through how to call your representative about this issue.
+	{% if positions|length > 1 %}Which side of the issue are you on?{% endif %}</p>
 	{% for p in issue.get_randomized_positions %}
 	<div class="position">
 		<button onclick="do_poll({{p.id}}, {{forloop.counter0}})" style="margin-bottom: .5em">{{forloop.counter}}. {{p.text}} &nbsp; ▶</button>
@@ -84,19 +85,23 @@ if (the_page && the_page.position) {
 	$('#you_choose').hide();
 	$('#you_already_chose').show();
 	$('#you_already_chose span').text(the_page.position.text);
-	$('#change_position, #make_call').toggle(the_page.position.can_change);
+	$('#change_position').toggle(the_page.position.can_change);
+	$('#make_call').toggle(the_page.position.can_change && the_page.position.can_call);
 }
 </script>
 
 {% if total_users < 100 %}
 	<hr style="margin-top: 3em;">
 	<p>Poll results are not yet available.</p>
+	
 {% else %}
 
-	<h2 style="margin-top: 1em">Results</h2>
+	<h2 style="margin-top: 1em">Poll Results</h2>
+	<p>Here is what you&rsquo;ve said:</p>
 	{% for p in positions %}
 		<p>{{p.percent_users}}% &ndash; {{p.text}}</p>
 	{% endfor %}
+	<p>{{total_users|intcomma}} users have responded to the survey so far.</p>
 
 {% endif %}
 

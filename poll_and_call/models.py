@@ -72,7 +72,7 @@ class UserPosition(models.Model):
 	position = models.ForeignKey(IssuePosition, db_index=True, help_text="The position the user choses.", on_delete=models.CASCADE)
 	created = models.DateTimeField(auto_now_add=True, db_index=True)
 
-	district = models.CharField(max_length=3, db_index=True, help_text="The state and district, in uppercase without any spaces, of the user at the time the user took this posiiton.")
+	district = models.CharField(max_length=4, db_index=True, help_text="The state and district, in uppercase without any spaces, of the user at the time the user took this posiiton.")
 
 	metadata = JSONField(help_text="Other information stored with the position.")
 
@@ -82,6 +82,9 @@ class UserPosition(models.Model):
 	def get_current_target(self):
 		from person.models import PersonRole
 		return PersonRole.objects.get(current=True, state=self.district[0:2], district=int(self.district[2:]))
+
+	def can_make_call(self):
+		return len(self.district) > 2 # ugh, data collection error
 
 	def can_change_position(self):
 		return not CallLog.objects.filter(user=self.user, position=self).exists()
