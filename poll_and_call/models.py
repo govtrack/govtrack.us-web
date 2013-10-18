@@ -106,4 +106,4 @@ class CallLog(models.Model):
 		ordering = ('-created',)
 
 	def __unicode__(self):
-		return self.created.isoformat() + " " + unicode(self.user)
+		return self.created.isoformat() + " " + unicode(self.user) + " " + unicode(self.position)
