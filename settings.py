@@ -60,6 +60,7 @@ SERVER_EMAIL = "GovTrack <noreply@GovTrack.us>" # From: address on verification 
 REGISTRATION_ASK_USERNAME = False
 
 SESSION_COOKIE_AGE = 6*604800 # seconds in six weeks
+SESSION_COOKIE_SECURE = True # send session cookies over SSL only
 
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 587
