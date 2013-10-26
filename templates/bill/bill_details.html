@@ -511,7 +511,7 @@
 	<li><a href="#overview">Overview</a></li>
 	
 	{% if bill.source != "americanmemory" %}
-	<li><a href="#summary">Summaries</a></li>
+	<li id="summary_tab" style="display: none"><a href="#summary">Summaries</a></li>
 	<li><a href="#related">Related</a></li>
 	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
 	<li id="comments_tab" style="display: none"><a href="#comments">Comments</a></li>
@@ -840,10 +840,6 @@
 		<div class="row">
 		<div class="three columns">
 			<ul id="summary_tabs" class="left-tabs">
-				<li><a href="#summary/oursummary">Our Summary</a></li>
-				<li><a href="#summary/libraryofcongress">Library of Congress</a></li>
-				<li><a href="#summary/houserepublicans">House Republicans</a></li>
-				<li><a href="#summary/housedemocrats">House Democrats</a></li>
 			</ul>
 		</div>
 	
@@ -851,14 +847,19 @@
 			<script>
 			var first_summary = true;
 			function add_summary(name, href, html) {
+				// add a sub-tab
+				$('#summary_tabs').append($('<li><a/></li>').find('a')
+					.text(name ? name : "Our Summary").attr('href', '#summary/' + href));
+
+				// add a link on the overview, and show the tab
 				var n = $('#summaries');
 				if (first_summary) {
 					n.text('');
 					first_summary = false;
+					$('#summary_tab').show();
 				}
 				
 				var p1 = $('<p style="margin: 0;"><span/><a/></p>');
-				p1.find('a').text(name + " »");
 				p1.find('a').attr('href', '#summary/' + href);
 				n.append(p1)
 				if (!name) {
@@ -866,6 +867,7 @@
 					p1.find('a').text("more »");
 					p1.attr('style', 'margin-bottom: 1em;');
 				} else {
+					p1.find('a').text(name + " »");
 					var p2 = $('<p class="small" style="margin-bottom: .5em"/>');
 					p2.html(html);
 					n.append(p2)

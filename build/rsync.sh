@@ -9,6 +9,8 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "us/113/committees.xml" \
 	--include "us/113/bills" \
 	--include "us/113/bills/*.xml" \
+	--include "us/113/bills.summary" \
+	--include "us/113/bills.summary/*.xml" \
 	--include "us/113/rolls" \
 	--include "us/113/rolls/*.xml" \
 	--include "us/bills.text" \
@@ -25,4 +27,5 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "congress/113/bills/*/*/text-versions/*" \
 	--include "congress/113/bills/*/*/text-versions/*/mods.xml" \
 	--include "congress/113/bills/*/*/text-versions/*/document.txt" \
+	--include "congress/113/bills/*/*/text-versions/*/catoxml.xml" \
 	--exclude "**"
