@@ -1123,7 +1123,7 @@ $("ul.tabs a").tabs("div.panes > div", null, function(tabname) {
 		initialize_disqus();
 	};
 });
-$("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
+if (!first_summary) $("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
 
 {% if bill.congress >= 113 %}
 <!-- disqus comment count, hacked from their count.js code -->
