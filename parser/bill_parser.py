@@ -417,11 +417,12 @@ def main(options):
         # iso8601.parse_date(dhg.get("week-date")+"T00:00:00").date()
         for item in dhg.xpath("category/floor-items/floor-item"):
             billname = item.xpath("legis-num")[0].text
+            if billname is None: continue # weird but OK
             m = re.match(r"\s*(?:Concur in the Senate Amendment to |Senate Amendment to )?("
                 + "|".join(bt_re(bt) for bt in BillType)
                 + r")(\d+)\s*(\[Conference Report\]\s*)?$", billname, re.I)
             if not m:
-                if billname.strip() != "H.R. __":
+                if not billname.strip().endswith(" __"):
                     log.error('Could not parse legis-num "%s" in docs.house.gov.' % billname)
             else:
                 for bt in BillType:
