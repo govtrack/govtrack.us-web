@@ -10,3 +10,6 @@
 [submodule "ext/stateface"]
 	path = ext/stateface
 	url = https://github.com/propublica/stateface
+[submodule "ext/congressxml"]
+	path = ext/congressxml
+	url = https://github.com/GPHemsley/congressxml

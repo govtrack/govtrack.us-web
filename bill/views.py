@@ -297,10 +297,7 @@ def bill_text(request, congress, type_slug, number, version=None):
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
 
     from billtext import load_bill_text, bill_gpo_status_codes
-    try:
-        textdata = load_bill_text(bill, version)
-    except IOError:
-        textdata = None
+    textdata = load_bill_text(bill, version)
 
     # Get a list of the alternate versions of this bill.
     alternates = None

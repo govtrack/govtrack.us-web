@@ -125,7 +125,7 @@
 				</dd>
 				{% endif %}
 				{% with text as text_info %}
-				{% if text_info and text_info.has_html_text %}
+				{% if text_info and text_info.has_displayable_text %}
 				<dt>Text:</dt>
 				<dd>
 					<p><a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}/text" target="_blank">Read {{bill.noun|capfirst}} Text &raquo;</a> <span style="color: #777">({{text_info.numpages}})</span></dd>

@@ -60,6 +60,8 @@ h1 {
 	padding-left: 20px;
 }
 
+{% include "bill/congressxml.css" %}
+
 </style>
 {% endblock %}
 
@@ -244,7 +246,9 @@ $(function() {
 		
 		<p><a href="{{bill.get_absolute_url}}">Status &amp; Summary</a>
 		| <a href="{{textdata.gpo_pdf_url}}">PDF</a>
-		| Source: <a href="{{textdata.gpo_url}}">GPO</a></p>
+		| Source: <a href="{{textdata.gpo_url}}">GPO</a>
+		{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
+		</p>
 	</div><!-- /info -->
 {% endblock %}
 

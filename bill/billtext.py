@@ -1,3 +1,4 @@
+
 if __name__ == "__main__":
     import sys, os
     sys.path.insert(0, "..")
@@ -82,21 +83,8 @@ bill_gpo_status_codes = {
 def get_current_version(bill):
     return load_bill_text(bill, None, mods_only=True)["doc_version"]
     
-def load_bill_text(bill, version, plain_text=False, mods_only=False):
-    if bill.congress < 103 or plain_text:
-        return load_bill_text_alt(bill, version, plain_text=plain_text, mods_only=mods_only)
-    
-    from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
-
-    bt = BillType.by_value(bill.bill_type).xml_code
-    basename = "data/us/bills.text/%s/%s/%s%d%s" % (bill.congress, bt, bt, bill.number, version if version != None else "")
-    
-    if mods_only:
-        bill_text_content = None
-    else:
-        bill_text_content = open(basename + ".html").read()
-    
-    mods = lxml.etree.parse(basename + ".mods.xml")
+def load_bill_mods_metadata(fn):
+    mods = lxml.etree.parse(fn)
     ns = { "mods": "http://www.loc.gov/mods/v3" }
     
     docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
@@ -126,17 +114,12 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
                 citations.append({ "type": "unknown", "text": cite.text })
             
     return {
-        "bill_id": bill.id,
-        "bill_name": bill.title,
-        "basename": basename,
-        "text_html": bill_text_content,
         "docdate": docdate,
         "gpo_url": gpo_url,
         "gpo_pdf_url": gpo_pdf_url,
         "doc_version": doc_version,
         "doc_version_name": doc_version_name,
         "numpages": numpages,
-        "has_html_text": True,
         "citations": citations,
     }
 
@@ -199,76 +182,118 @@ def get_bill_text_metadata(bill, version):
     else:
         dat = json.load(open(basename + "/%s/data.json" % version))
         
-    dat["plain_text_file"] = basename + "/" + dat["version_code"] + "/document.txt"
+    basename += "/" + dat["version_code"]
+
+    html_fn = "data/us/bills.text/%s/%s/%s%d%s.html" % (bill.congress, bt, bt, bill.number, dat["version_code"])
+
+    if os.path.exists(basename + "/mods.xml"):
+        dat["mods_file"] = basename + "/mods.xml"
+
+    if os.path.exists(basename + "/document.txt"):
+        dat["text_file"] = basename + "/document.txt"
+        dat["has_displayable_text"] = True
+
+    # get an XML file if one exists
+    if os.path.exists(basename + "/catoxml.xml"):
+        dat["xml_file"] = basename + "/catoxml.xml"
+        dat["has_displayable_text"] = True
+        dat["xml_file_source"] = "cato-deepbills"
+    elif os.path.exists(basename + "/document.xml"):
+        dat["xml_file"] = basename + "/document.xml"
+        dat["has_displayable_text"] = True
+
+    # fall back to our legacy HTML if available
+    elif os.path.exists(html_fn):
+        dat["html_file"] = html_fn
+        dat["has_displayable_text"] = True
     
     return dat
         
-def load_bill_text_alt(bill, version, plain_text=False, mods_only=False):
+def load_bill_text(bill, version, plain_text=False, mods_only=False):
     # Load bill text info from the Congress project data directory.
     # We have JSON files for metadata and plain text files mirrored from GPO
     # containing bill text (either from the Statutes at Large OCR'ed text
     # layers, or from GPO FDSys's BILLS collection).
     
     dat = get_bill_text_metadata(bill, version)
+    if not dat:
+        # No text is available.
+        if plain_text:
+            return "" # for indexing, just return empty string if no text is available
+        raise IOError("Bill text is not available for this bill.")
+
+    ret = {
+        "bill_id": bill.id,
+        "bill_name": bill.title,
+        "has_displayable_text": dat.get("has_displayable_text"),
+    }
+
+    # Load basic metadata from a MODS file if one exists.
+    if "mods_file" in dat:
+        ret.update(load_bill_mods_metadata(dat["mods_file"]))
+
+    # Otherwise fall back on using the text-versions data.json file. We may have
+    # this for historical bills that we don't have a MODS file for.
+    else:
+        gpo_url = dat["urls"]["pdf"]
+
+        m = re.match(r"http://www.gpo.gov/fdsys/pkg/(STATUTE-\d+)/pdf/(STATUTE-\d+-.*).pdf", gpo_url)
+        if m:
+            # TODO (but not needed right now): Docs from the BILLS collection.
+            gpo_url = "http://www.gpo.gov/fdsys/granule/%s/%s/content-detail.html" % m.groups()
+
+        ret.update({
+            "docdate": datetime.date(*(int(d) for d in dat["issued_on"].split("-"))),
+            "gpo_url": gpo_url,
+            "gpo_pdf_url": dat["urls"]["pdf"],
+            "doc_version": dat["version_code"],
+            "doc_version_name": bill_gpo_status_codes[dat["version_code"]],
+        })
+
+    # If the caller only wants metadata, return it.
+    if mods_only:
+        return ret
+
+    if "html_file" in dat and not plain_text:
+        # if html_file is specified, we have rendered content already
+        ret.update({
+            "text_html": open(dat["html_file"]).read().decode("utf8"),
+        })
+
+    elif "xml_file" in dat and not plain_text:
+        # convert XML on the fly to HTML
+        import lxml.html, congressxml
+        ret.update({
+            "text_html": lxml.html.tostring(congressxml.convert_xml(dat["xml_file"])),
+            "source": dat.get("xml_file_source"),
+        })
+
+    elif "text_file" in dat:
+        bill_text_content = open(dat["text_file"]).read().decode("utf8")
+
+        # In the GPO BILLS collection, there's gunk at the top and bottom that we'd
+        # rather just remove: metadata in brackets at the top, and <all> at the end.
+        # We remove it because it's not really useful when indexing.
+        if bill_text_content:
+            bill_text_content = re.sub(r"^\s*(\[[^\n]+\]\s*)*", "", bill_text_content)
+            bill_text_content = re.sub(r"\s*<all>\s*$", "", bill_text_content)
+
+        # Caller just wants the plain text?
+        if plain_text:
+            # replace form feeds (OCR'd layers only) with an indication of the page break
+            return bill_text_content.replace(u"\u000C", "\n=============================================\n")
             
-    # Load the text content (unless mods_only is set).
-    bill_text_content = None
-    try:
-        if not dat: raise IOError("Bill text is not available for this bill.")
-        if not mods_only:
-            bill_text_content = open(dat["plain_text_file"]).read().decode("utf8")
-    except IOError:
-        # text not available
-        if mods_only or not plain_text: raise # these calls require raising
-        bill_text_content = "" # plain_text gets "" returned instead
-
-    # In the BILLS collection, there's gunk at the top and bottom that we'd
-    # rather just remove: metadata in brackets at the top, and <all> at the end.
-    # We remove it because it's not really useful when indexing.
-    if bill_text_content:
-        bill_text_content = re.sub(r"^\s*(\[[^\n]+\]\s*)*", "", bill_text_content)
-        bill_text_content = re.sub(r"\s*<all>\s*$", "", bill_text_content)
-
-    # Caller just wants the plain text?
-    if not mods_only and plain_text:
-        # replace form feeds (OCR'd layers only) with an indication of the page break
-        return bill_text_content.replace(u"\u000C", "\n=============================================\n")
-        
-    # Caller wants HTML.
-    if not mods_only:
         # Return the text wrapped in <pre>, and replace form feeds with an <hr>.
         import cgi
         bill_text_content = "<pre>" + cgi.escape(bill_text_content) + "</pre>"
         bill_text_content = bill_text_content.replace(u"\u000C", "<hr>") # (OCR'd layers only)
-        #bill_text_content = "<pre>""\n".join(
-        #    "<div>" + cgi.escape(line) + "</div>"
-        #    for line in
-        #    bill_text_content.split("\n")
-        #    )
 
-    # Returning metadata?
-    try:
-        gpo_url = dat["urls"]["pdf"]
-    except:
-        # hmm, data format problem
-        raise IOError("Bill metadata not available.")
-        
-    m = re.match(r"http://www.gpo.gov/fdsys/pkg/(STATUTE-\d+)/pdf/(STATUTE-\d+-.*).pdf", gpo_url)
-    if m:
-        # TODO (but not needed right now): Docs from the BILLS collection.
-        gpo_url = "http://www.gpo.gov/fdsys/granule/%s/%s/content-detail.html" % m.groups()
-            
-    return {
-        "bill_id": bill.id,
-        "bill_name": bill.title,
-        "text_html": bill_text_content,
-        "docdate": datetime.date(*(int(d) for d in dat["issued_on"].split("-"))),
-        "gpo_url": gpo_url,
-        "gpo_pdf_url": dat["urls"]["pdf"],
-        "doc_version": dat["version_code"],
-        "doc_version_name": bill_gpo_status_codes[dat["version_code"]],
-        "has_html_text": True,
-    }
+        ret.update({
+            "text_html": bill_text_content,
+        })
+
+
+    return ret
     
 
 def compare_xml_text(doc1, doc2, timelimit=10):

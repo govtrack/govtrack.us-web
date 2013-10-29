@@ -25,7 +25,9 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "congress/113/bills/*/*" \
 	--include "congress/113/bills/*/*/text-versions" \
 	--include "congress/113/bills/*/*/text-versions/*" \
+	--include "congress/113/bills/*/*/text-versions/*/data.json" \
 	--include "congress/113/bills/*/*/text-versions/*/mods.xml" \
 	--include "congress/113/bills/*/*/text-versions/*/document.txt" \
+	--include "congress/113/bills/*/*/text-versions/*/document.xml" \
 	--include "congress/113/bills/*/*/text-versions/*/catoxml.xml" \
 	--exclude "**"

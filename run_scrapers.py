@@ -112,7 +112,10 @@ do_bill_parse = False
 
 if "text" in sys.argv:
 	# Update the mirror of GPO FDSys.
-	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --store=mods,text --log=%s" % (SCRAPER_PATH, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --store=mods,text,xml --log=%s" % (SCRAPER_PATH, log_level))
+
+	# Update the mirror of Cato's deepbills.
+	os.system("cd %s; . .env/bin/activate; ./run deepbills --log=%s" % (SCRAPER_PATH, log_level))
 	
 	# Glob all of the bill text files. Create hard links in the data directory to
 	# their locations in the congress project data directoy.
