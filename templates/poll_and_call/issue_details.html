@@ -90,6 +90,10 @@ if (the_page && the_page.position) {
 }
 </script>
 
+{% for bill in issue.bills.all %}
+	<p style="margin-top: 1em">Return to <a href="{{bill.bill.get_absolute_url}}">{{bill.bill}}</a></p>
+{% endfor %}
+
 {% if total_users < 100 %}
 	<hr style="margin-top: 3em;">
 	<p>Poll results are not yet available.</p>

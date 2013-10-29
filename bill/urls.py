@@ -16,6 +16,7 @@ urlpatterns = patterns('bill.views',
     url(r'^_ajax/load_text', 'bill_text_ajax'),
     url(r'^_ajax/join_community', 'join_community'),
     url(r'^_admin/go_to_summary_admin', 'go_to_summary_admin', name="bill_go_to_summary_admin"),
+    url(r'^_redirect/start-poll', 'start_poll', name="bill_start_poll"),
 )
 
 urlpatterns += patterns('',

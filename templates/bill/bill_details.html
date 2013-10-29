@@ -224,6 +224,14 @@
 }
 #action-panel h1 { font-size: 20px; }
 #action-panel h2 { font-size: 16px; }
+
+#call_congress_positions button {
+	display: block;
+	margin-top: .75em;
+	margin-left: 2em;
+	padding: 4px 6px 4px 4px;
+	font: 16px/20px Ubuntu, Verdana, Tahoma, Arial, sans-serif;
+}
 </style>
 {% endblock %}
 
@@ -436,29 +444,49 @@
 
 		{% endcomment %}
 		
-		<div id="action-button" style="display: none; margin-top: 12px;">
+		<div id="action-button" style="display: none; margin: 12px 0;">
 			<a class="push-btn yellow-btn" style="font-size: 12px; color: #444;" href="#" onclick="$.colorbox({href: '#action-panel', inline: true, open: true, width: ($(window).width() >= 750 ? '650px' : '90%')}); _gaq.push(['_trackEvent', 'bill-action', 'what-can-i-do', null]); return false;">
 				<span class="icon-thumbs-up"></span>/<span class="icon-thumbs-down"></span>
-				<span style="text-shadow: none">What can I do?</span>
+				<span style="text-shadow: none; margin-left: 3px;">Call Congress<i>!</i></span>
 			</a>
 		</div>
 		<script>if (the_segment != "House" && the_segment != "Senate") $('#action-button').show();</script>
 		<div style="display: none">
 			<div id="action-panel" style="padding: 10px">
-				<h1 style="text-align: center">What can I do?</h1>
+				<h1 style="text-align: center">Call Congress!</h1>
 				
-				<h2>Write a Letter</h2>
-				<p>Writing a letter to your representative and senators is the most effective action you can take as an individual. Start by <a href="/congress/members/map">finding your district</a>. Then go to your representative and senators&rsquo; websites and fill out their contact forms. Start your letter like this:</p>
-				<blockquote style="margin: 1.25em; border: 1px solid #CCC; background-color: #FAFAFA; padding: .5em">I support/opppose
-					{% if "..." not in bill.title|truncatewords:8 %}
-						{{bill.title|truncatewords:11}}
-					{% else %}
-						{{bill.display_number}} (&ldquo;{{bill.title_no_number|truncatewords:10}}&rdquo;)
-					{% endif %}
-					because . . .</blockquote>
-				<p>Some tips: Include a Personal Story | Keep It Short | Say Thank You</p>
+				<script>
+					function do_poll(posid) {
+						window.location = "{% url "bill_start_poll" %}?bill={{bill.id}}&position=" + posid;
+					}
+				</script>
+
+				<h2>Make the Call!</h2>
+				<div id="call_congress_positions">
+					<p>A phone call to Congress is an effective ways to let your voice be heard. We&rsquo;ll walk you through how to call your representative about this {{bill.noun}}.</p>
+					<button onclick="do_poll('support');"><span class="icon-thumbs-up"></span> I support {{bill.display_number}}</button>
+					<button onclick="do_poll('oppose');"><span class="icon-thumbs-down"></span> I oppose {{bill.display_number}}</button>
+				</div>
+				<div id="call_congress_position_chosen" style="display: none;">
+					<p style="margin-bottom: .5em;">You chose: <span style="font-weight: bold"/></p>
+					<button id="change_position" onclick="$('#call_congress_positions').show(); $('#call_congress_position_chosen').hide();" style="margin-bottom: .5em">Change Position &nbsp; ▶</button>
+					<button id="make_call" onclick="window.location = the_page.poll_and_call_position.call_url;" style="margin-bottom: .5em">Call Congress &nbsp; ▶</button>
+					<div id="submission_status" style="display: none">
+						Hello!
+					</div>
+				</div>
+				<script>
+				if (the_page && the_page.poll_and_call_position) {
+					var p = the_page.poll_and_call_position;
+					$('#call_congress_positions').hide();
+					$('#call_congress_position_chosen').show();
+					$('#call_congress_position_chosen span').text(p.text);
+					$('#change_position').toggle(p.can_change);
+					$('#make_call').toggle(p.can_change && p.can_call);
+				}
+				</script>				
 				
-				<h2>Spread the Word</h2>
+				<h2 style="margin-top: 2em;">Next: Spread the Word</h2>
 				<p>Share this {{bill.noun}} with your network of friends &mdash; especially friends in other congressional districts &mdash; to get the word out.</p>
 		
 				<div class="push-btn blue-facebook-btn-wide hover-state" style="cursor: default; width: 260px; text-align: left; padding: 4px 5px 4px 46px; font-size: 12px; line-height: 16px; text-transform: none; color: white; margin: 1em auto;">

@@ -73,7 +73,7 @@ function poll_call_status() {
 {% block extra_css %}
 <style>
 #script {
-	margin: 1.5em 1.75em;
+	margin: 1.5em 1.75em 1.5em 0;
 	border: 1px solid black;
 	padding: 1em;
 	background-color: #F5F5F5;
@@ -115,8 +115,15 @@ function poll_call_status() {
 {% block body %}
 
 <div class="row">
+	<div class="twelve columns">
+		<h2>Now Make the Call</h2>
+		<p style="margin-bottom: 2em">Your representative is <b>{{moc.person}}</b>. A phone call to {{moc.person.lastname}}&rsquo;s office goes a long way to making your voice heard. We&rsquo;ll walk you through the whole thing.</p>
+	</div>
+</div>
+
+<div class="row">
 	<div class="six columns">
-		<h2>What To Say</h2>
+		<h4 style="margin-bottom: .5em;">Call Script</h4>
 
 		<p>When you call your representative, a staff assistant will pick up the phone. Here is a script you can follow to effectively communicate your position:</p>
 
@@ -129,7 +136,7 @@ function poll_call_status() {
 
 			<p>Can I count on the {{moc.get_title|lower}}&rsquo;s support?</p>
 
-			<p class="them"><span>Them:</span> Thank you for calling. The {{moc.get_title|lower}}&rsquo;s position is _____. Can I get your name again and your address?</p>
+			<p class="them"><span>Them:</span> Thank you for calling. Can I get your name again and your address?</p>
 
 			<p>Sure my name is . . . and my address is . . .</p>
 
@@ -143,11 +150,9 @@ function poll_call_status() {
 	</div>
 
 	<div class="six columns">
-		<h2 style="margin-top: 120px">Ready to call?</h2>
+		<h4 style="margin-bottom: .5em;">When You Are Ready...</h4>
 
-		<p>Your representative is {{moc.person}}.</p>
-
-		<p>We&rsquo;ll connect a call for you. If you provide your phone number, we&rsquo;ll call you, and then we will connect your call to the office of {{moc.person.name_and_title}}.</p>
+		<p>We&rsquo;ll connect a call to {{moc.person.lastname}}&rsquo;s office for you. If you provide your phone number, we&rsquo;ll call you, and then we will connect your call to the office of {{moc.person.name_and_title}}.</p>
 
 		<div style="margin: 2em 40px; font-size: 110%;">
 			<div style="margin-bottom: 5px;">Enter your phone number:</div>
@@ -156,20 +161,21 @@ function poll_call_status() {
 			<div id="call_status"></div>
 		</div>
 
-		<p><small>We&rsquo;ll be recording your call so we can learn how to improve this process.</small></p>
+		<p><small>We&rsquo;ll be recording your call so we can learn how to improve this process and make your future experience on GovTrack more effective.</small></p>
 
-		<h2>Rather call yourself?</h2>
+		<h5 style="margin-bottom: .5em">Rather call yourself?</h5>
 
-		<p>Feel free to make the call yourself too. {{moc.person.name_and_title}}&rsquo;s phone number is <b><a href="tel:{{moc.phone}}">{{moc.phone}}</a></b>.</p>
+		<p>Feel free to make the call yourself too. {{moc.person.name_and_title}}&rsquo;s phone number is <b><a href="tel:{{moc.phone}}">{{moc.phone}}</a></b>.{% if moc.website %} Or visit <a href="{{moc.website}}">{{moc.website}}</a> and fill out the contact form to write a letter.{% endif %}</p>
 
-		<h2>Finished?</h2>
+		<h5 style="margin-bottom: .5em">Finished?</h5>
 
 		<p>Once you finish the call, or if you want to skip this step, <a href="{{issue.get_absolute_url}}">click here</a>. You can come back to this later.</p>
 	</div>
 </div>
 
-<h2 style="margin-top: 1em">Issue Background</h2>
-
+{% comment %}
+<h4 style="margin-top: 1em">Issue Background</h4>
 {{issue.introtext|markdown}}
+{% endcomment %}
 
 {% endblock %}

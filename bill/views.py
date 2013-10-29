@@ -193,6 +193,25 @@ def bill_details_user_view(request, congress, type_slug, number):
     from person.views import render_subscribe_inline
     ret.update(render_subscribe_inline(request, Feed.BillFeed(bill)))
 
+    # poll_and_call
+    if request.user.is_authenticated():
+        from poll_and_call.models import RelatedBill as IssueByBill, UserPosition
+        try:
+            issue = IssueByBill.objects.get(bill=bill).issue
+            try:
+                up = UserPosition.objects.get(user=request.user, position__issue=issue)
+                ret["poll_and_call_position"] =  {
+                    "id": up.position.id,
+                    "text": up.position.text,
+                    "can_change": up.can_change_position(),
+                    "can_call": up.can_make_call(),
+                    "call_url": issue.get_absolute_url() + "/make_call",
+                }
+            except UserPosition.DoesNotExist:
+                pass
+        except IssueByBill.DoesNotExist:
+            pass
+        
     return ret
 
 @anonymous_view
@@ -687,3 +706,44 @@ def uscodeindex(request, secid):
         "feed": (Feed.objects.get_or_create(feedname="usc:" + str(parent.id))[0]) if parent else None,
     }
 
+@anonymous_view
+def start_poll(request):
+    from poll_and_call.models import Issue, IssuePosition, RelatedBill as IssueByBill
+
+    # get the bill & valence
+    bill = get_object_or_404(Bill, id=request.GET.get("bill"))
+    valence = (request.GET.get("position") == "support")
+
+    # get the Issue
+    try:
+        ix = IssueByBill.objects.get(bill=bill).issue
+    except IssueByBill.DoesNotExist:
+        # no Issue yet, so create
+        ix = Issue.objects.create(
+            slug = "%d-%s-%d" % (bill.congress, bill.bill_type_slug, bill.number),
+            title = bill.title,
+            question = "What is your position on %s?" % bill.title,
+            introtext = "Weigh in on %s." % bill.display_number_with_congress_number,
+            isopen = True,
+            )
+        IssueByBill.objects.create(issue=ix, bill=bill, valence=True)
+
+        # how to refer to the bill
+        from django.template.defaultfilters import truncatewords
+        bt = truncatewords(bill.title, 8)
+        if "..." not in bt:
+            bt = truncatewords(bill.title, 11)
+        else:
+            bt = u"%s (\u201C%s\u201D)" % (bill.display_number, bt)
+        ix.positions.add(IssuePosition.objects.create(
+            text="Support",
+            valence=True,
+            call_script="I support %s." % bt,
+            ))
+        ix.positions.add(IssuePosition.objects.create(
+            text="Oppose",
+            valence=False,
+            call_script="I oppose %s." % bt,
+            ))
+
+    return HttpResponseRedirect(ix.get_absolute_url() + "/join/" + str(ix.positions.get(valence=valence).id))
