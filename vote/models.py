@@ -33,7 +33,7 @@ class VoteCategory(enum.Enum):
     procedural = enum.Item(7, 'Procedural', search_help_text="A variety of procedural votes such as quorum calls.")
     other = enum.Item(8, 'Other', search_help_text="A variety of uncategorized votes.")
     unknown = enum.Item(9, 'Unknown Category', search_help_text="A variety of uncategorized votes.")
-    ratification = enum.Item(9, 'Treaty Ratification', search_help_text="Senate votes to ratify treaties.")
+    ratification = enum.Item(12, 'Treaty Ratification', search_help_text="Senate votes to ratify treaties.")
     veto_override = enum.Item(10, 'Veto Override', search_help_text="Votes to override a presidential veto.")
     conviction = enum.Item(11, 'Impeachment Conviction', search_help_text="'Guilty or Not Guilty' votes in the Senate to convict an office holder of impeachment.")
 
