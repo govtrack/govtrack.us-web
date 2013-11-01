@@ -77,7 +77,7 @@ class UserPosition(models.Model):
 	metadata = JSONField(help_text="Other information stored with the position.")
 
 	def __unicode__(self):
-		return unicode(self.user) + "/" + unicode(self.position)
+		return self.created.isoformat() + " " + unicode(self.user) + "/" + unicode(self.position)
 
 	def get_current_target(self):
 		from person.models import PersonRole
