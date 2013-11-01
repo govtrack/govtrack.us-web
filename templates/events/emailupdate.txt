@@ -1,7 +1,7 @@
 {% load events_utils %}GovTrack Email Update
 =====================
 
------ On the blog: The House says core legislative data isn’t coming any time soon. The Senate remains silent. http://www.govtrack.us/blog/2013/09/25/an-update-on-getting-legislative-data-from-the-house/ -----
+----- New: Use GovTrack to Call Congress: https://www.govtrack.us/blog/2013/10/31/new-use-govtrack-to-call-congress/ -----
 
 This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to {{SITE_ROOT_URL}}/accounts/profile.
 
