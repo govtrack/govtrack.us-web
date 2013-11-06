@@ -90,12 +90,13 @@ for person_role in PersonRole.objects.filter(
 	people[pid] = person_role
 	people_list["h" if person_role.role_type == RoleType.representative else "s"].add(pid)
 
-	# A staffer tells me they're interested in the number of unique cosponsors to their
-	# bills, all time. We'll compute that here too. For historical data, compute for
+	# A staffer tells me they're interested in the number of unique/total cosponsors to their
+	# bills in the current Congress. We'll compute that here too. For historical data, compute for
 	# bills up to the end of the Congress.
-	bills = person_role.person.sponsored_bills.filter(congress__lte=congressnumber)
-	cosp = set(Cosponsor.objects.filter(bill__in=list(bills)).values_list('person', flat=True))
-	person_role.total_unique_cosponsors = len(cosp)
+	bills = person_role.person.sponsored_bills.filter(congress=congressnumber)
+	cosp = Cosponsor.objects.filter(bill__in=list(bills)).values_list('person', flat=True)
+	person_role.total_cosponsors = len(cosp)
+	person_role.unique_cosponsors = len(set(cosp))
 
 # Perform analysis totally separately for each chamber.
 for house_or_senate in ('h', 's'):
@@ -247,7 +248,7 @@ for house_or_senate in ('h', 's'):
 		else:
 			usednames[names[v]] = k
 
-		other_cols[v] = [people[k].total_unique_cosponsors]
+		other_cols[v] = [people[k].unique_cosponsors, people[k].total_cosponsors]
 	
 	# Scale the values from 0 to 1. Use a log scale for the leadership score.
 	spectrum = rescale(spectrum)
@@ -323,10 +324,10 @@ for house_or_senate in ('h', 's'):
 	# Dump CSV file.
 	
 	w = open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + ".txt", "w")
-	w.write("ID, ideology, leadership, name, party, description, total_unique_cosponsors\n")
+	w.write("ID, ideology, leadership, name, party, description, unique_cosponsors_%d, total_cosponsors_%d\n" % (congressnumber, congressnumber))
 	for i in xrange(nreps):
 		w.write(", ".join( [unicode(d).encode("utf8") for d in (
-			ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i], other_cols[i][0]
+			ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i], other_cols[i][0], other_cols[i][1]
 			)]) + "\n" )
 	w.close()
 	

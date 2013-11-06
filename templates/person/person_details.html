@@ -125,7 +125,7 @@
         
 		<p>{{ person.lastname }} {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a {{ analysis_data.sponsorship.description }} according to
 		GovTrack's own analysis of bill sponsorship{% if not analysis_data.sponsorship.current %} from {{ person.lastname }}&rsquo;s time serving in the
-		{{analysis_data.sponsorship.chamber}}{% endif %}. A total of {{analysis_data.sponsorship.total_unique_cosponsors|intcomma}} Members of Congress {% if analysis_data.sponsorship.current %}have{% else %}had{% endif %} cosponsored {{ person.lastname }}&rsquo;s bills.</p>
+		{{analysis_data.sponsorship.chamber}}{% endif %}. {{ person.lastname }}&rsquo;s bills {% if analysis_data.sponsorship.current %}have had{% else %}had{% endif %} a total of {{analysis_data.sponsorship.total_cosponsors|intcomma}} cosponsors in the {{analysis_data.sponsorship.congress|ordinalhtml}} Congress.</p>
 
 		<p>Use this chart to compare {{ person.lastname }} to other members of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %} in the {{analysis_data.sponsorship.congress|ordinalhtml}} Congress{% endif %} on leadership and ideology.</p>
 
@@ -207,7 +207,7 @@
 							{
 								x: {{item.ideology}},
 								y: {{item.leadership}},
-								name: "{{item.name|escapejs}}\n<br>Total Cosponsors: {{item.total_unique_cosponsors}}"
+								name: "{{item.name|escapejs}}\n<br>{{item.total_cosponsors}} cosponsors ({{analysis_data.sponsorship.congress|ordinal}} Congress)"
 							}
 							{% if not forloop.last %},{% endif %}
 						{% endfor %}
