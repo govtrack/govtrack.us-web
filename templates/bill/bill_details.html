@@ -225,6 +225,8 @@
 #action-panel h1 { font-size: 20px; }
 #action-panel h2 { font-size: 16px; }
 
+#prognosis_factors p span, #prognosis_factors .key { color: #777; font-family: Arial, Helvetica, sans-serif;}
+
 #call_congress_positions button {
 	display: block;
 	margin-top: .75em;
@@ -659,33 +661,40 @@
 							</small></p>
 							
 							<div id="prognosis_factors" style="display: none">
+							<p>The following factors determined this {{bill.noun}}&rsquo;s prognosis:</p>
+
 							{% if p.factors_help_help %}
-							<p>The following factors helped this {{bill.noun}}:</p>
 							{% for factor in p.factors_help_help %}
-								<p class="small" style="margin-left: 1em">{{factor}}</p>
+								<p class="small" style="margin-left: 1em">{{factor}} <span>▲</span></p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_hurt_hurt %}
-							<p>The following factors hurt this {{bill.noun}}:</p>
 							{% for factor in p.factors_hurt_hurt %}
-								<p class="small" style="margin-left: 1em">{{factor}}</p>
+								<p class="small" style="margin-left: 1em">{{factor}} <span>▼</span></p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_help_hurt %}
-							<p>The following factors help this {{bill.noun}} get past committee but hurt it on the floor:</p>
 							{% for factor in p.factors_help_hurt %}
-								<p class="small" style="margin-left: 1em">{{factor}}</p>
+								<p class="small" style="margin-left: 1em">{{factor}} <span>▲▼</span></p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_hurt_help %}
-							<p>The following factors hurt this {{bill.noun}} in getting past committee but help it on the floor:</p>
 							{% for factor in p.factors_hurt_help %}
-								<p class="small" style="margin-left: 1em">{{factor}}</p>
+								<p class="small" style="margin-left: 1em">{{factor}} <span>▼▲</span></p>
 							{% endfor %}
 							{% endif %}
+
+							<p class="small key">Key:
+								{% if p.factors_help_help %}▲ Correlated with successful bills.{% endif %}
+								{% if p.factors_hurt_hurt %}▼ Correlated with unsuccessful bills.{% endif %}
+								{% if p.factors_help_hurt %}▲▼ Correlated with {{bill.noun}}s that get past committee but are not enacted.{% endif %}
+								{% if p.factors_hurt_help %}▲▼ Correlated with {{bill.noun}}s that don&rsquo;t get past committee and with bills that are enacted.{% endif %}
+								Correlation may not indicate causation.
+							</p>
+
 							</div>
 						</dd>
 						{% endif %}
