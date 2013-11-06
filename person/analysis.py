@@ -53,6 +53,7 @@ def load_sponsorship_analysis2(congressnumber, role_type, person):
         pt['name'] = chunks[3]
         pt['party'] = chunks[4]
         pt['description'] = chunks[5]
+        pt['total_unique_cosponsors'] = int(chunks[6])
         
         if chunks[4] == "": continue # empty party means... not in office?
         

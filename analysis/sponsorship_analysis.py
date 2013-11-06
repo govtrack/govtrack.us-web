@@ -14,7 +14,7 @@
 # Finally, plot these two dimensions.
 #
 # To update historical data:
-# for c in {93..112}; do echo $c; python sponsorship_analysis.py $c; done
+# for c in {93..112}; do echo $c; analysis/sponsorship_analysis.py $c; done
 
 import sys
 import os
@@ -26,6 +26,7 @@ import lxml.etree as lxml
 
 from person.models import PersonRole
 from person.types import RoleType
+from bill.models import Bill, Cosponsor
 from us import get_congress_dates
 
 import matplotlib
@@ -88,6 +89,13 @@ for person_role in PersonRole.objects.filter(
 	if pid in people: continue # saw a more recent term for this person
 	people[pid] = person_role
 	people_list["h" if person_role.role_type == RoleType.representative else "s"].add(pid)
+
+	# A staffer tells me they're interested in the number of unique cosponsors to their
+	# bills, all time. We'll compute that here too. For historical data, compute for
+	# bills up to the end of the Congress.
+	bills = person_role.person.sponsored_bills.filter(congress__lte=congressnumber)
+	cosp = set(Cosponsor.objects.filter(bill__in=list(bills)).values_list('person', flat=True))
+	person_role.total_unique_cosponsors = len(cosp)
 
 # Perform analysis totally separately for each chamber.
 for house_or_senate in ('h', 's'):
@@ -222,6 +230,7 @@ for house_or_senate in ('h', 's'):
 	# Create a list of names in row order.
 	ids = [None for k in rep_to_row]
 	names = [None for k in rep_to_row]
+	other_cols = [None for k in rep_to_row]
 	usednames = { }
 	for k, v in rep_to_row.items():
 		ids[v] = k
@@ -237,6 +246,8 @@ for house_or_senate in ('h', 's'):
 			names[rep_to_row[k2]] = people[k2].person.lastname + " [" + people[k2].state  + d + "]"
 		else:
 			usednames[names[v]] = k
+
+		other_cols[v] = [people[k].total_unique_cosponsors]
 	
 	# Scale the values from 0 to 1. Use a log scale for the leadership score.
 	spectrum = rescale(spectrum)
@@ -312,9 +323,11 @@ for house_or_senate in ('h', 's'):
 	# Dump CSV file.
 	
 	w = open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + ".txt", "w")
-	w.write("ID, ideology, leadership, name, party, description, ideology2\n")
+	w.write("ID, ideology, leadership, name, party, description, total_unique_cosponsors\n")
 	for i in xrange(nreps):
-		w.write(", ".join( [unicode(d).encode("utf8") for d in (ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i], spectrum2[i])]) + "\n" )
+		w.write(", ".join( [unicode(d).encode("utf8") for d in (
+			ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i], other_cols[i][0]
+			)]) + "\n" )
 	w.close()
 	
 	# Dump metadata JSON file.

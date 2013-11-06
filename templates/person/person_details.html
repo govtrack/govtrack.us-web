@@ -125,7 +125,8 @@
         
 		<p>{{ person.lastname }} {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a {{ analysis_data.sponsorship.description }} according to
 		GovTrack's own analysis of bill sponsorship{% if not analysis_data.sponsorship.current %} from {{ person.lastname }}&rsquo;s time serving in the
-		{{analysis_data.sponsorship.chamber}}{% endif %}.</p>
+		{{analysis_data.sponsorship.chamber}}{% endif %}. A total of {{analysis_data.sponsorship.total_unique_cosponsors|intcomma}} Members of Congress {% if analysis_data.sponsorship.current %}have{% else %}had{% endif %} cosponsored {{ person.lastname }}&rsquo;s bills.</p>
+
 		<p>Use this chart to compare {{ person.lastname }} to other members of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %} in the {{analysis_data.sponsorship.congress|ordinalhtml}} Congress{% endif %} on leadership and ideology.</p>
 
 		<div id="sponsorship_analysis_chart"> </div>
@@ -206,11 +207,7 @@
 							{
 								x: {{item.ideology}},
 								y: {{item.leadership}},
-								name: "{{item.name|escapejs}}{% if item.id in analysis_data.influence.influencers %} - Influences {{person.lastname|escapejs}}{% endif %}{% if item.id in analysis_data.influence.influencees %} - Influenced by {{person.lastname|escapejs}}{% endif %}"
-								{% if item.id in analysis_data.influence.influencers %}, marker: { radius: 4, fillColor: "white", lineColor: party_colors['{{party.grouper|escapejs}}'], lineWidth: 2 }
-								{% else %}
-								{% if item.id in analysis_data.influence.influencees %}, marker: { radius: 4, fillColor: "#CCC", lineColor: party_colors['{{party.grouper|escapejs}}'], lineWidth: 2 }{% endif %}
-								{% endif %}
+								name: "{{item.name|escapejs}}\n<br>Total Cosponsors: {{item.total_unique_cosponsors}}"
 							}
 							{% if not forloop.last %},{% endif %}
 						{% endfor %}
@@ -262,7 +259,7 @@
 	
 {% if recent_bills %}
 	<section id="sponsorship">
-		<h3>Bill Sponsorship <span>&amp;</span> Cosponsorship</h3>
+		<h3>Bills Sponsored</h3>
 		<p>Some of {{person.lastname}}’s most recently sponsored bills include...</p>
 		<ul>
 			{% for bill in recent_bills %}
