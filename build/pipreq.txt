@@ -7,7 +7,7 @@ django-debug-toolbar
 django-picklefield
 django-tastypie
 defusedxml
-jsonfield
+django-json-field
 beautifulsoup
 feedparser
 xapian-haystack

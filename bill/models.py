@@ -4,7 +4,7 @@ from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 
 from common import enum
-from jsonfield import JSONField
+from json_field import JSONField
 
 from committee.models import Committee, CommitteeMeeting, CommitteeMember, MEMBER_ROLE_WEIGHTS
 from bill.status import BillStatus, get_bill_status_string

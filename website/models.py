@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from jsonfield import JSONField
+from json_field import JSONField
 
 from events.models import Feed, SubscriptionList
 

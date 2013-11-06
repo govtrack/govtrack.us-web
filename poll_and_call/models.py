@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from jsonfield import JSONField
+from json_field import JSONField
 
 import random
 
