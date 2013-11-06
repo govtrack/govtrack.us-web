@@ -1,4 +1,4 @@
-#!.env/bin/python
+#!.env/bin/python -R
 import os, sys
 
 try:

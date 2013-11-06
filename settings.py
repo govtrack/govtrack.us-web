@@ -61,6 +61,7 @@ REGISTRATION_ASK_USERNAME = False
 
 SESSION_COOKIE_AGE = 6*604800 # seconds in six weeks
 SESSION_COOKIE_SECURE = True # send session cookies over SSL only
+CSRF_COOKIE_SECURE = True # similarly
 
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 587
@@ -105,7 +106,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.humanize',
     'django.contrib.sitemaps',
-    'django.contrib.markup',
     # 3rd party libraries
     'common',
     'django_extensions',

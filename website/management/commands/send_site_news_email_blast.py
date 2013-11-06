@@ -13,7 +13,7 @@ from emailverification.models import BouncedEmail
 
 from datetime import datetime, timedelta
 
-import yaml, markdown, re
+import yaml, markdown2, re
 
 class Command(BaseCommand):
 	args = 'daily|weekly|all|test|count'
@@ -99,7 +99,7 @@ def load_blast():
 		"utm": "utm_campaign=govtrack_email_blast&utm_source=govtrack/email_blast&utm_medium=email",
 	})
 	body_html = templ.render(ctx).strip()
-	body_html = markdown.markdown(body_html)
+	body_html = markdown2.markdown(body_html)
 	ctx.pop()
 	ctx.update({ "body": body_html })
 	body_html = templ_html_wrapper.render(ctx)

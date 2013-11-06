@@ -1,4 +1,4 @@
-django==1.5
+django==1.6
 django-common
 django-extensions
 python-dateutil
@@ -17,6 +17,6 @@ recaptcha-client
 django-wysiwyg
 yuicompressor
 paypalrestsdk
-markdown
+markdown2
 django_twilio
 twilio
