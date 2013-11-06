@@ -1,3 +1,5 @@
+#!script
+
 # Compute missed votes % for Members of Congress and summary
 # statistics by chamber.
 
@@ -9,7 +11,7 @@ import lxml.etree as lxml
 from scipy.stats import percentileofscore, scoreatpercentile
 
 congress = int(sys.argv[1])
-datadir = "../data/us/%d/" % congress
+datadir = "data/us/%d/" % congress
 
 # UTILS
 

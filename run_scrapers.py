@@ -225,8 +225,8 @@ if "votes" in sys.argv:
 		os.system("RELEASE=1 ./parse.py --congress=%d -l %s vote" % (CONGRESS, log_level))
 
 if "stats" in sys.argv:
-	os.system("cd analysis; python sponsorship_analysis.py %d" % CONGRESS)
-	os.system("cd analysis; python missed_votes.py %d" % CONGRESS)
+	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)
+	os.system("analysis/missed_votes.py %d" % CONGRESS)
 	
 if "am_mem_bills" in sys.argv:
 	# American Memory

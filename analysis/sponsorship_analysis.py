@@ -1,5 +1,7 @@
+#!script
+
 # Compute a Markov transition matrix representing the cosponsorship patterns
-# of representatives and (separately) senators for a given (session of) Congress.
+# of representatives and (separately) senators for a given time period.
 # Each transition is from a Member of Congress to another Member of Congress
 # if the former cosponsors a bill of the latter. The matrix is constructed so that
 # the columns represent the transition probabilities (i.e. columns sum to 1).
@@ -29,7 +31,7 @@ import matplotlib.pyplot as plt
 # CONFIGURATION
 
 congressnumber = int(sys.argv[1])
-datadir = "../data"
+datadir = "data"
 matplotlib.rcParams["font.size"] = 9.0
 matplotlib.rcParams["lines.markersize"] = 3
 
