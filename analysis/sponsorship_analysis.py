@@ -310,10 +310,10 @@ for house_or_senate in ('h', 's'):
 			pp_20 = scipy.stats.scoreatpercentile(pagerank, 20)
 			pp_80 = scipy.stats.scoreatpercentile(pagerank, 80)
 			
-			descr_table = [
-				["left-leaning, Independent leader", "moderate Independent leader", "right-leaning Independent leader"],
+			descr_table = [ # no damn commas
+				["left-leaning Independent leader", "moderate Independent leader", "right-leaning Independent leader"],
 				["left-leaning Independent", "centrist Independent", "right-leaning Independent"],
-				["lonely, left-leaning Independent", "lonely, centrist Independent", "lonely, right-leaning Independent"],
+				["lonely left-leaning Independent", "lonely centrist Independent", "lonely right-leaning Independent"],
 				]
 				
 		for i in xrange(nreps):
