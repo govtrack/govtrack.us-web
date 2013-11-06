@@ -24,6 +24,10 @@ import numpy
 import scipy.stats
 import lxml.etree as lxml
 
+from person.models import PersonRole
+from person.types import RoleType
+from us import get_congress_dates
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -65,16 +69,25 @@ def rescale(u, log=False):
 
 os.system("mkdir -p " + datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis")
 
-# Load up the session people file. We'll need some of this info later.
+# Load up the Congress's people file. We'll need some of this info later.
 # Put each person only in the House or Senate output, even if they served in both,
-# according to their most recent role.
+# according to their most recent role. We want to include everyone who served
+# during the Congress, even if they are not now serving.
 people = { }
 people_list = { 'h': set(), 's': set() }
-peoplexml = lxml.parse(datadir + "/us/" + str(congressnumber) + "/people.xml")
-for person in peoplexml.xpath("person"):
-	people[int(person.get('id'))] = person
-	roletype = person.xpath("role")[-1].get("type")
-	people_list["h" if roletype == "rep" else "s"].add( int(person.get('id')) )
+congress_dates = get_congress_dates(congressnumber)
+
+for person_role in PersonRole.objects.filter(
+	role_type__in=(RoleType.senator, RoleType.representative),
+	startdate__lt=congress_dates[1], # start dates of next congress are on this day too
+	enddate__gt=congress_dates[0] # end dates from previous congress are on this day too
+	).select_related("person")\
+	.order_by('-startdate'): # so we put people in the right list by their most recent term
+
+	pid = person_role.person_id
+	if pid in people: continue # saw a more recent term for this person
+	people[pid] = person_role
+	people_list["h" if person_role.role_type == RoleType.representative else "s"].add(pid)
 
 # Perform analysis totally separately for each chamber.
 for house_or_senate in ('h', 's'):
@@ -83,11 +96,9 @@ for house_or_senate in ('h', 's'):
 	
 	# Map GovTrack person IDs to rows (or columns) of the matrix.
 	rep_to_row = { }
-	row_to_rep = { }
 	def rownum(id):
 		if not id in rep_to_row:
 			rep_to_row[id] = len(rep_to_row)
-			row_to_rep[rep_to_row[id]] = people[id]
 		return rep_to_row[id]
 		
 	# Store a flat (i.e. sparse) list of all cells that have the value 1. Note that
@@ -152,7 +163,7 @@ for house_or_senate in ('h', 's'):
 	# Actually, since scale doesn't matter, just multiply it by the mean.
 	parties = [None for i in xrange(nreps)]
 	for k, v in rep_to_row.items():
-		parties[v] = people[k].xpath('string(role[last()]/@party)')
+		parties[v] = people[k].party
 	R_scores = [spectrum[i] for i in xrange(nreps) if parties[i] == "Republican"]
 	R_score_mean = sum(R_scores)/len(R_scores)
 	spectrum = spectrum * R_score_mean
@@ -214,16 +225,16 @@ for house_or_senate in ('h', 's'):
 	usednames = { }
 	for k, v in rep_to_row.items():
 		ids[v] = k
-		names[v] = people[k].get('lastname')
+		names[v] = people[k].person.lastname
 		
 		# Check that the name is not a dup of someone else, and if so,
 		# append a state (and district) to each.
 		if names[v] in usednames:
 			k2 = usednames[names[v]]
 			
-			names[v] = people[k].get('lastname') + " [" + people[k].xpath('string(role[@current]/@state)')  + people[k].xpath('string(role[@current]/@district)') + "]"
-			
-			names[rep_to_row[k2]] = people[k2].get('lastname') + " [" + people[k2].xpath('string(role[@current]/@state)')  + people[k2].xpath('string(role[@current]/@district)') + "]"
+			d = str(people[k].district) if people[k].district is not None else ""
+			names[v] = people[k].person.lastname + " [" + people[k].state  + d + "]"
+			names[rep_to_row[k2]] = people[k2].person.lastname + " [" + people[k2].state  + d + "]"
 		else:
 			usednames[names[v]] = k
 	
