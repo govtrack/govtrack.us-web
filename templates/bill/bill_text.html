@@ -248,6 +248,7 @@ $(function() {
 		| <a href="{{textdata.gpo_pdf_url}}">PDF</a>
 		| Source: <a href="{{textdata.gpo_url}}">GPO</a>
 		{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
+		{% if textdata.source == "statutes" %}&mdash; <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">Statutes at Large</a>{% endif %}
 		</p>
 	</div><!-- /info -->
 {% endblock %}

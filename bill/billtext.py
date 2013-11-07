@@ -193,6 +193,10 @@ def get_bill_text_metadata(bill, version):
         dat["text_file"] = basename + "/document.txt"
         dat["has_displayable_text"] = True
 
+        for source in dat.get("sources", []):
+            if source["source"] == "statutes":
+                dat["text_file_source"] = "statutes"
+
     # get an XML file if one exists
     if os.path.exists(basename + "/catoxml.xml"):
         dat["xml_file"] = basename + "/catoxml.xml"
@@ -255,7 +259,9 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         return ret
 
     if "html_file" in dat and not plain_text:
-        # if html_file is specified, we have rendered content already
+        # if html_file is specified, we have rendered content already.
+        # This will be for bills around the 105th Congress when bill text
+        # was available from GPO but not in XML.
         ret.update({
             "text_html": open(dat["html_file"]).read().decode("utf8"),
         })
@@ -269,6 +275,8 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         })
 
     elif "text_file" in dat:
+        # bill text from the Statutes at Large, or when plain_text is True then from GPO
+
         bill_text_content = open(dat["text_file"]).read().decode("utf8")
 
         # In the GPO BILLS collection, there's gunk at the top and bottom that we'd
@@ -290,6 +298,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
 
         ret.update({
             "text_html": bill_text_content,
+            "source": dat.get("text_file_source"),
         })
 
 
