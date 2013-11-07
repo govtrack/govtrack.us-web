@@ -15,7 +15,7 @@ pysolr==2.1.0
 flup
 recaptcha-client
 django-wysiwyg
-yuicompressor
+rcssmin
 paypalrestsdk
 markdown2
 django_twilio

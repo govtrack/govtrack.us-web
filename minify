@@ -1,2 +1,2 @@
 #!/bin/bash
-.env/bin/yuicompressor static/css/all.css > static/css/all-min.css
+.env/bin/python -mrcssmin < static/css/all.css > static/css/all-min.css
