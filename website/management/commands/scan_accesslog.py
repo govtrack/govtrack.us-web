@@ -2,7 +2,7 @@
 # a list of links by bill, and for search term keywords. You'll
 # probably run in a cron job using:
 #
-# tail -200000 ../logs/access_log|RELEASE=1 ./manage.py scan_accesslog 5
+# tail -200000 ../logs/access_log|./manage.py scan_accesslog 5
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings

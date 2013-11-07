@@ -1,7 +1,7 @@
 """
 Parser for amendments.
  
-for x in {82..112}; do echo $x; RELEASE=1 ./parse.py amendment --congress=$x -l ERROR --force --disable-events --disable-indexing; done
+for x in {82..112}; do echo $x; ./parse.py amendment --congress=$x -l ERROR --force --disable-events --disable-indexing; done
 """
 from lxml import etree
 import logging

@@ -3,7 +3,7 @@ Parser of:
  * bill terms located in data/us/[liv, liv111, crsnet].xml
  * bills located in data/us/*/bills/*.xml
  
-for x in {82..112}; do echo $x; RELEASE=1 ./parse.py bill --congress=$x -l ERROR --force --disable-events --disable-indexing; done
+for x in {82..112}; do echo $x; ./parse.py bill --congress=$x -l ERROR --force --disable-events --disable-indexing; done
 """
 from lxml import etree
 import logging

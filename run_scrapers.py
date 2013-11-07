@@ -83,12 +83,12 @@ if "people" in sys.argv:
 	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
 	
 	# Load YAML (directly) into db.
-	os.system("RELEASE=1 ./parse.py person") #  -l ERROR
-	os.system("RELEASE=1 ./manage.py update_index -v 0 -u person person")
-	#os.system("RELEASE=1 ./manage.py prune_index -u person person")
+	os.system("./parse.py person") #  -l ERROR
+	os.system("./manage.py update_index -v 0 -u person person")
+	#os.system("./manage.py prune_index -u person person")
 	
 	# Save a fixture.
-	os.system("RELEASE=1 ./manage.py dumpdata --format json person > data/db/django-fixture-people.json")
+	os.system("./manage.py dumpdata --format json person > data/db/django-fixture-people.json")
 
 if "committees" in sys.argv:
 	if CONGRESS != 113: raise ValueErrror()
@@ -106,7 +106,7 @@ if "committees" in sys.argv:
 	os.system("cd %s; . .env/bin/activate; ./run committee_meetings %s --log=%s" % (SCRAPER_PATH, fetch_mode, log_level))
 	
 	# Load into db.
-	os.system("RELEASE=1 ./parse.py -l ERROR committee")
+	os.system("./parse.py -l ERROR committee")
 
 do_bill_parse = False
 
@@ -179,11 +179,11 @@ if "bills" in sys.argv:
 	# scrapes docs.house.gov and the Senate floor schedule, so we should
 	# also periodically make sure we run the scraper for that too.
 	
-	# os.system("RELEASE=1 ./manage.py dumpdata --format json bill.BillTerm > data/db/django-fixture-billterms.json")
+	# os.system("./manage.py dumpdata --format json bill.BillTerm > data/db/django-fixture-billterms.json")
 
 if do_bill_parse:
 	# Load into db.
-	os.system("RELEASE=1 ./parse.py --congress=%d -l %s bill" % (CONGRESS, log_level))
+	os.system("./parse.py --congress=%d -l %s bill" % (CONGRESS, log_level))
 
 	# bills and state bills are indexed as they are parsed, but to
 	# freshen the index... Because bills index full text and so
@@ -204,7 +204,7 @@ if "amendments" in sys.argv:
 		copy(fn, fn2, r'updated="[^"]+"')
 		
 	# Load into db.
-	os.system("RELEASE=1 ./parse.py --congress=%d -l %s amendment" % (CONGRESS, log_level))
+	os.system("./parse.py --congress=%d -l %s amendment" % (CONGRESS, log_level))
 
 if "votes" in sys.argv:
 	# Scrape.
@@ -222,7 +222,7 @@ if "votes" in sys.argv:
 		
 	# Load into db.
 	if did_any_file_change or True: # amendments can mark votes as missing data
-		os.system("RELEASE=1 ./parse.py --congress=%d -l %s vote" % (CONGRESS, log_level))
+		os.system("./parse.py --congress=%d -l %s vote" % (CONGRESS, log_level))
 
 if "stats" in sys.argv:
 	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)
@@ -230,7 +230,7 @@ if "stats" in sys.argv:
 	
 if "am_mem_bills" in sys.argv:
 	# American Memory
-	os.syste("for c in {6..42}; do echo $c; RELEASE=1 ./parse.py bill --force --congress=$c --level=warn; done")
+	os.syste("for c in {6..42}; do echo $c; ./parse.py bill --force --congress=$c --level=warn; done")
 	
 if "stat_bills" in sys.argv:
 	# Pull in statutes from the 85th-92nd Congress
@@ -254,5 +254,5 @@ if "stat_bills" in sys.argv:
 			copy(fn, fn2, r'updated="[^"]+"')
 			
 		# Load into db.
-		os.system("RELEASE=1 ./parse.py --congress=%d bill" % congress) #  -l ERROR
+		os.system("./parse.py --congress=%d bill" % congress) #  -l ERROR
 		
