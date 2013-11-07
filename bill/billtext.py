@@ -211,6 +211,10 @@ def get_bill_text_metadata(bill, version):
     elif os.path.exists(html_fn):
         dat["html_file"] = html_fn
         dat["has_displayable_text"] = True
+
+    thumb_fn = "data/us/bills.text/%s/%s/%s%d%s-thumb200.png" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
+    if os.path.exists(thumb_fn):
+        dat["thumbnail_path"] = thumb_fn
     
     return dat
         
@@ -238,6 +242,8 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
         ret.update(load_bill_mods_metadata(dat["mods_file"]))
     if "html_file" in dat:
         ret.update({ "html_file": dat["html_file"] })
+    if "thumbnail_path" in dat:
+        ret.update({ "thumbnail_path": dat["thumbnail_path"] })
 
     # Otherwise fall back on using the text-versions data.json file. We may have
     # this for historical bills that we don't have a MODS file for.

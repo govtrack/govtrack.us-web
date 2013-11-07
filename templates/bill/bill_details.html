@@ -12,10 +12,10 @@
 	{% cache 1200 billmeta bill.id %}
 	{% if bill.congress >= 112 %}
 		{% with text as text_info %}
-			{% if text_info.basename %}
-				<meta property="og:image" content="http://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
-				<meta property="og:image:secure_url" content="https://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
-				<meta property="twitter:image:src" content="https://www.govtrack.us/{{text_info.basename}}-thumb200.png"/>
+			{% if text_info.thumbnail_path %}
+				<meta property="og:image" content="http://www.govtrack.us/{{text_info.thumbnail_path}}"/>
+				<meta property="og:image:secure_url" content="https://www.govtrack.us/{{text_info.thumbnail_path}}"/>
+				<meta property="twitter:image:src" content="https://www.govtrack.us/{{text_info.thumbnail_path}}"/>
 			{% else %}
 				<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118"
 				<meta property="og:image:secure_url" content="https://www.govtrack.us/static/images/media_icon.png?20130118"
@@ -792,7 +792,7 @@
 							{% elif text_info.has_displayable_text %}
 								{% if bill.congress >= 112 %}
 								<a href="{{bill.get_absolute_url}}/text">
-									<img src="/{{text_info.basename}}-thumb200.png" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>
+									<img src="/{{text_info.thumbnail_path}}" width="75" style="float: left; margin: 0 1em 0 1em; border: 1px solid #444;"/>
 								</a>
 								{% endif %}
 								<p><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text &raquo;</a></p>

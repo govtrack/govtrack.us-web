@@ -322,7 +322,7 @@ def main(options):
                     if b.congress >= 103 and b.introduced_date < (datetime.now()-timedelta(days=14)).date():
                         print "No bill text?", fname, b.introduced_date
                     continue
-                textfile = textfile["plain_text_file"]
+                textfile = textfile["text_file"]
                 if os.path.exists(textfile) and File.objects.is_changed(textfile):
                     bill_index.update_object(b, using="bill") # index the full text
                     b.create_events() # events for new bill text documents
