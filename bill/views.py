@@ -387,8 +387,8 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     left = load_bill_text(left_bill, left_version, mods_only=True)
     right = load_bill_text(right_bill, right_version, mods_only=True)
 
-    doc1 = lxml.etree.parse(left["basename"] + ".html")
-    doc2 = lxml.etree.parse(right["basename"] + ".html")
+    doc1 = lxml.etree.parse(left["html_file"])
+    doc2 = lxml.etree.parse(right["html_file"])
     compare_xml_text(doc1, doc2, timelimit=timelimit) # revises DOMs in-place
 
     # dates aren't JSON serializable

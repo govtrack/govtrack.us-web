@@ -184,7 +184,8 @@ def get_bill_text_metadata(bill, version):
         
     basename += "/" + dat["version_code"]
 
-    html_fn = "data/us/bills.text/%s/%s/%s%d%s.html" % (bill.congress, bt, bt, bill.number, dat["version_code"])
+    bt2 = BillType.by_value(bill.bill_type).xml_code
+    html_fn = "data/us/bills.text/%s/%s/%s%d%s.html" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
 
     if os.path.exists(basename + "/mods.xml"):
         dat["mods_file"] = basename + "/mods.xml"
@@ -235,6 +236,8 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     # Load basic metadata from a MODS file if one exists.
     if "mods_file" in dat:
         ret.update(load_bill_mods_metadata(dat["mods_file"]))
+    if "html_file" in dat:
+        ret.update({ "html_file": dat["html_file"] })
 
     # Otherwise fall back on using the text-versions data.json file. We may have
     # this for historical bills that we don't have a MODS file for.
