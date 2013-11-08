@@ -13,8 +13,6 @@ from emailverification.models import BouncedEmail
 
 from datetime import datetime, timedelta
 
-import yaml, markdown2, re
-
 class Command(BaseCommand):
 	args = 'daily|weekly|all|test|count'
 	help = 'Sends out an email blast to users with a site announcement.'
@@ -75,43 +73,20 @@ def load_blast():
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
 			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
 		
-	# Load the Markdown template for the current blast.
-	templ = get_template("website/email/blast.md")
+	# get plain text, HTML, and metadata for the blast
+	from events.management.commands.send_email_updates import load_markdown_content
+	content = load_markdown_content("website/email/blast.md", "utm_campaign=govtrack_email_blast&utm_source=govtrack/email_blast&utm_medium=email")
+
+	# put the HTML inside a master layout
+
 	ctx = Context({ })
+	ctx.update({ "body": content["body_html"] })
 
-	# Get the text-only body content, which also includes some email metadata.
-	# Replace Markdown-style [text][href] links with the text plus bracketed href.
-	ctx.update({ "format": "text", "utm": "" })
-	body_text = templ.render(ctx).strip()
-	ctx.pop()
-	body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 at \2", body_text)
-
-	# The top of the text content contains metadata in YAML format,
-	# with "id" and "subject" required.
-	meta_info, body_text = body_text.split("----------", 1)
-	meta_info = yaml.load(meta_info)
-	body_text = body_text.strip()
-
-	# Get the HTML body content.
 	templ_html_wrapper = get_template("website/email/blast.html")
-	ctx.update({
-		"format": "html",
-		"utm": "utm_campaign=govtrack_email_blast&utm_source=govtrack/email_blast&utm_medium=email",
-	})
-	body_html = templ.render(ctx).strip()
-	body_html = markdown2.markdown(body_html)
-	ctx.pop()
-	ctx.update({ "body": body_html })
 	body_html = templ_html_wrapper.render(ctx)
-	ctx.pop()
-	
-	# Store everything in meta_info.
-	
-	meta_info["from"] = emailfromaddr
-	meta_info["body_text"] = body_text
-	meta_info["body_html"] = body_html
-	
-	return meta_info
+
+	content["from"] = emailfromaddr
+	return content
 	
 def send_blast(user_id, blast):
 	user = User.objects.get(id=user_id)

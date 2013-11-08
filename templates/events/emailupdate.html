@@ -4,11 +4,15 @@
 		<title>GovTrack Email Update</title>
 	</head>
 	<body>
-<h1>GovTrack.us Email Update</h1>
-
 {% with "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email" as utm %}
 
-<p style="margin: 2em 1em 2em 1em; padding: 1em; border: 1px solid #DDD; background-color: #F3F3FF">New: <a href="https://www.govtrack.us/blog/2013/10/31/new-use-govtrack-to-call-congress/?{{utm}}">Use GovTrack to Call Congress</a></p>
+{% if announcement.active %}
+<div style="margin: 2em 1em 2em 1em; padding: .25em 1em .25em 1em; border: 1px solid #DDD; background-color: #F3F3FF">
+	{{announcement.body_html|safe}}
+</div>
+{% endif %}
+
+<h1>GovTrack.us Email Update</h1>
 
 <p>This is your email update from <a href="{{SITE_ROOT_URL}}?{{utm}}">GovTrack.us</a>. To change your email update settings, including to unsubscribe, go to <a href="{{SITE_ROOT_URL}}/accounts/profile?{{utm}}">your account settings</a>.</p>
 
@@ -32,8 +36,6 @@
 	{% endwith %}
 	{% endfor %}
 {% endfor %}
-
-<hr/>
 
 <p>To unsubscribe or change your email updates settings, go to <a href="{{SITE_ROOT_URL}}/accounts/profile?{{utm}}">your account settings</a>.</p>
 <p>This email was sent by <a href="http://www.civicimpulse.com?{{utm}}">Civic Impulse, LLC</a>. You may contact us at <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</p>

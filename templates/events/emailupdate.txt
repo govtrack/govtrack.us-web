@@ -1,9 +1,9 @@
 {% load events_utils %}GovTrack Email Update
 =====================
 
------ New: Use GovTrack to Call Congress: https://www.govtrack.us/blog/2013/10/31/new-use-govtrack-to-call-congress/ -----
+{% if announcement.active %}----- {{announcement.body_text|safe}} -----
 
-This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to {{SITE_ROOT_URL}}/accounts/profile.
+{% endif %}This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to {{SITE_ROOT_URL}}/accounts/profile.
 
 {% for list, events in eventslists %}
 {{list.name}}

@@ -12,6 +12,7 @@ from events.models import *
 from emailverification.models import Ping, BouncedEmail
 
 from datetime import datetime, timedelta
+import yaml, markdown2
 
 now = datetime.now()
 
@@ -104,8 +105,13 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 	emailreturnpath = emailfromaddr
 	if hasattr(settings, 'EMAIL_UPDATES_RETURN_PATH'):
 		emailreturnpath = (settings.EMAIL_UPDATES_RETURN_PATH % user.id)
+
+	# get announcement content
+	announce = load_markdown_content("website/email/email_update_announcement.md")
 		
-	emailsubject = "GovTrack.us Email Update for %s" % datetime.now().strftime("%x")
+	emailsubject = "GovTrack Update for %s" % (datetime.now().strftime("%b. %d").replace(" 0", " "))
+	if announce["active"] and announce["subject"]:
+		emailsubject += "  |  " + announce["subject"]
 
 	send_no_events = send_old_events
 
@@ -146,11 +152,17 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 		"feed": all_trackers, # use all trackers in the user's account as context for displaying events
 		"emailpingurl": emailpingurl,
 		"SITE_ROOT_URL": settings.SITE_ROOT_URL,
+		"announcement": announce
 	})
-	
-	email = EmailMultiAlternatives(emailsubject, templ_txt.render(ctx), emailreturnpath, [user.email],
+
+	# render text and HTML renditions
+	templ_txt = templ_txt.render(ctx)
+	templ_html = templ_html.render(ctx)
+
+	# form MIME message
+	email = EmailMultiAlternatives(emailsubject, templ_txt, emailreturnpath, [user.email],
 		headers = { 'From': emailfromaddr })
-	email.attach_alternative(templ_html.render(ctx), "text/html")
+	email.attach_alternative(templ_html, "text/html")
 	
 	try:
 		if verbose:
@@ -171,3 +183,37 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 		sublist.save()
 		
 	return eventcount # did sent email
+
+def load_markdown_content(template_path, utm=""):
+	# Load the Markdown template for the current blast.
+	templ = get_template(template_path)
+	ctx = Context({ })
+
+	# Get the text-only body content, which also includes some email metadata.
+	# Replace Markdown-style [text][href] links with the text plus bracketed href.
+	ctx.update({ "format": "text", "utm": "" })
+	body_text = templ.render(ctx).strip()
+	ctx.pop()
+	body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 at \2", body_text)
+
+	# The top of the text content contains metadata in YAML format,
+	# with "id" and "subject" required.
+	meta_info, body_text = body_text.split("----------", 1)
+	meta_info = yaml.load(meta_info)
+	body_text = body_text.strip()
+
+	# Get the HTML body content.
+	ctx.update({
+		"format": "html",
+		"utm": utm,
+	})
+	body_html = templ.render(ctx).strip()
+	body_html = markdown2.markdown(body_html)
+	ctx.pop()
+
+	# Store everything in meta_info.
+	
+	meta_info["body_text"] = body_text
+	meta_info["body_html"] = body_html
+	
+	return meta_info
