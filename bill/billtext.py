@@ -79,6 +79,19 @@ bill_gpo_status_codes = {
     "rts": "Referred to Senate Committee",
     "s_p": "Star Print of an Amendment",
     }
+
+def get_gpo_status_code_name(doc_version):
+    # handle e.g. "eas2"
+    digit_suffix = ""
+    while len(doc_version) > 0 and doc_version[-1].isdigit():
+        digit_suffix = doc_version[-1] + digit_suffix
+        doc_version = doc_version[:-1]
+    
+    doc_version_name = bill_gpo_status_codes.get(doc_version, "Unknown Status")
+
+    if digit_suffix: doc_version_name += " " + digit_suffix
+
+    return doc_version_name
     
 def get_current_version(bill):
     return load_bill_text(bill, None, mods_only=True)["doc_version"]
@@ -96,8 +109,7 @@ def load_bill_mods_metadata(fn):
     if numpages: numpages = re.sub(r" p\.$", " pages", numpages)
     
     docdate = datetime.date(*(int(d) for d in docdate.split("-")))
-    
-    doc_version_name = bill_gpo_status_codes[doc_version]
+    doc_version_name = get_gpo_status_code_name(doc_version)
 
     # load a list of citations as marked up by GPO
     citations = []
@@ -260,7 +272,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
             "gpo_url": gpo_url,
             "gpo_pdf_url": dat["urls"]["pdf"],
             "doc_version": dat["version_code"],
-            "doc_version_name": bill_gpo_status_codes[dat["version_code"]],
+            "doc_version_name": get_gpo_status_code_name(dat["version_code"]),
         })
 
     # If the caller only wants metadata, return it.
