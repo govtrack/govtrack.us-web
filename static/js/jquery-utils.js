@@ -246,3 +246,75 @@ jQuery.fn.truncate_text = function(callback) {
 	});
 }
 
+/**
+ * jQuery.fn.sortElements based on:
+ * --------------
+ * @author James Padolsey (http://james.padolsey.com)
+ * @version 0.11
+ * @updated 18-MAR-2010
+ * --------------
+ * @param Function key_func:
+ *   Returns a key, which can be an Array, for an element in the list, on which to sort.
+ */
+jQuery.fn.sortElements = (function(){
+    
+    var sort = [].sort;
+    
+    return function(key_func) {
+        
+        var placements = this.map(function(){
+            
+            var sortElement = this,
+                parentNode = sortElement.parentNode,
+                
+                // Since the element itself will change position, we have
+                // to have some way of storing it's original position in
+                // the DOM. The easiest way is to have a 'flag' node:
+                nextSibling = parentNode.insertBefore(
+                    document.createTextNode(''),
+                    sortElement.nextSibling
+                );
+            
+            return function() {
+                
+                if (parentNode === this) {
+                    throw new Error(
+                        "You can't sort elements if any one is a descendant of another."
+                    );
+                }
+                
+                // Insert before flag:
+                parentNode.insertBefore(this, nextSibling);
+                // Remove flag:
+                parentNode.removeChild(nextSibling);
+                
+            };
+            
+        });
+       
+       	function comparator(a, b) {
+            a = key_func(a);
+            b = key_func(b);
+            return comparator2(a, b);
+       	}
+        function comparator2(a, b) {
+            if (!$.isArray(a) || !$.isArray(b)) {
+            	if (a < b) return -1;
+            	if (a > b) return 1;
+            	return 0;
+            }
+
+            for (var i = 0; i < a.length; i++) {
+            	var c = comparator2(a[i], b[i]);
+            	if (c != 0) return c;
+            }
+            return 0;
+        }
+
+        return sort.call(this, comparator).each(function(i){
+            placements[i].call(this);
+        });
+        
+    };
+    
+})();

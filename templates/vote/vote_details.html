@@ -24,9 +24,8 @@
 {% endblock %}
 	
 {% block extra_js %}
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
-var SORT_STATE = null;
+var current_sort_column = null;
 function show_table() {
 	// We achieve a multi-column layout by cloning the table three
 	// times (or as many as will fit) and then removing the elements
@@ -38,7 +37,7 @@ function show_table() {
 	var rows = table.find("tr");
     var last_seen_group = null;
 	for (var j = 1; j < rows.length; j++) {
-		var gr = $(rows[j]).attr('voter_group_' + SORT_STATE.column);
+		var gr = $(rows[j]).attr('voter_group_' + current_sort_column);
 		if (gr != last_seen_group) {
 			var extra_row = $("<tr class='group'><td colspan='4'/></tr>");
 			extra_row.find("td").text(gr);
@@ -66,33 +65,45 @@ function show_table() {
         }
     }
 }
+function get_sort_func(order_indexes) {
+    function sort_key(n) {
+        var key = [];
+        for (var i = 0; i < order_indexes.length; i++) {
+            if (order_indexes[i] == 3)
+                key.push($(n).attr('voter_sort_' + order_indexes[i]))
+            else
+                key.push($($(n).find('td')[order_indexes[i]]).text())
+        }
+        return key;
+    }
+    return sort_key;
+}
 $(function() { 
-    $("#vote-list").tablesorter({});
     var headers = $('#vote-list th');
-    headers.unbind();
     headers.click(function() {
         var index = $(this).index();
-        if (SORT_STATE && SORT_STATE.column == index) {
-            order = SORT_STATE.order == 0 ? 1: 0;
-        } else {
-            order = 0;
-        }
-        SORT_STATE = {column: index, order: order};
+        headers.not(headers[index]).removeClass('headerSortDown').removeClass('headerSortUp');
+
+        // are we going ascending or descending?
+        current_sort_column = index;
+
+        // multi-column sort order
         var sorting;
         switch (index) {
-            /* Vote  */  case 0: sorting = [[index, order], [1, 0], [2, 0], [3, 0]]; break;
-            /* Party */  case 1: sorting = [[index, order], [4, order], [2, 0], [3, 0], [1, 0]]; break;
-            /* Name  */  case 2: sorting = [[index, order], [3, 0], [1, 0]]; break;
-            /* State */  case 3: sorting = [[index, order], [2, 0], [0, 0]]; break;
+            /* Vote  */  case 0: sorting = [index, 1, 2, 3]; break;
+            /* Party */  case 1: sorting = [index, 4, 2, 3, 1]; break;
+            /* Name  */  case 2: sorting = [index, 3, 1]; break;
+            /* State */  case 3: sorting = [index, 2, 0]; break;
         }
-        $('#vote-list').trigger('sorton', [sorting]);
-        headers.not(headers[index]).removeClass('headerSortDown').removeClass('headerSortUp');
+
+        $('#vote-list tbody tr').sortElements(get_sort_func(sorting));
         
         show_table();
     });
     
-    SORT_STATE = {column: 3, order: 0};
-    $('#vote-list').trigger('sorton', [  [[3, 0], [2, 0], [0, 0]] ]);
+    // initial sort
+    current_sort_column = 3;
+    $('#vote-list tbody  tr').sortElements(get_sort_func([3,2,0]));
     show_table();
 }); 
 </script>
@@ -322,11 +333,13 @@ $(function() {
                     <th style="display: none">Score</th> <!-- for sorting only -->
                 </tr>
             </thead>
+            <tbody>
             {% for voter in voters %}
             <tr vid="{{voter.id}}"
             	voter_group_0="{{ voter.option.value }}"
             	voter_group_1="{% if voter.voter_type != 1 %}{{ voter.person.role.party }}{% endif %}"
             	voter_group_3="{% if voter.voter_type_is_member %}{{ voter.person.role.state_name }}{% elif voter.voter_type == 2 %}The Vice President{% endif %}"
+                voter_sort_3="{% if voter.voter_type_is_member %}{{ voter.person.role.state_name }} {{ voter.person.role.district|rjust:3 }}{% elif voter.voter_type == 2 %}00{% endif %}"
             	>
                 <td class="vote_{{ voter.option.alpha_key }}"><nobr>{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</nobr></td>
                 <td>
@@ -354,7 +367,7 @@ $(function() {
                 </td>
                 <td>
                 	{% if voter.voter_type_is_member %}
-		                {{ voter.person.role.state }}{% if voter.person.role.district and voter.person.role.district != -1 %} {{ voter.person.role.district|ordinalhtml|rjust:15 }}{% endif %} {% comment %} the rjust makes sure the numbers are sorted properly {% endcomment %}
+		                {{ voter.person.role.state }}{% if voter.person.role.district and voter.person.role.district != -1 %} {{ voter.person.role.district|ordinalhtml }}{% endif %}
                     {% else %}
                     	-- {% comment %} a single dash confuses the table sorter?? {% endcomment %}
                     {% endif %}
@@ -364,6 +377,7 @@ $(function() {
                 </td>
             </tr>
         {% endfor %}
+        </tbody>
         </table>
     </div>
 </div>
