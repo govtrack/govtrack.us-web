@@ -136,8 +136,8 @@ class YamlProcessor(Processor):
 def yaml_load(path):
     # Loading YAML is ridiculously slow. In congress-legislators's
     # utils, we cache the YAML in a pickled file which is a lot
-    # faster. This has to match the utils file there since we'll
-    # overwrite their file when we save the pickle cache...
+    # faster. The format of the pickle file is incompatible with
+	# what the congress project utils.py does, so use a different filename.
 
     import cPickle as pickle, os.path, hashlib
     import yaml
@@ -149,8 +149,8 @@ def yaml_load(path):
     # Check if the .pickle file exists and a hash stored inside it
     # matches the hash of the YAML file, and if so unpickle it.
     h = hashlib.sha1(open(path).read()).hexdigest()
-    if os.path.exists(path + ".pickle"):
-        store = pickle.load(open(path + ".pickle"))
+    if os.path.exists(path + ".pickle2"):
+        store = pickle.load(open(path + ".pickle2"))
         if store["hash"] == h:
             return store["data"]
 
@@ -158,7 +158,7 @@ def yaml_load(path):
     data = yaml.load(open(path), Loader=Loader)
 
     # Store in a pickled file for fast access later.
-    pickle.dump({ "hash": h, "data": data }, open(path+".pickle", "w"))
+    pickle.dump({ "hash": h, "data": data }, open(path+".pickle2", "w"))
 
     return data
 
