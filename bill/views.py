@@ -22,7 +22,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json, datetime, os.path, re
+import urllib, urllib2, json, datetime, re
 from registration.helpers import json_response
 from twostream.decorators import anonymous_view, user_view_for
 
@@ -307,9 +307,10 @@ def bill_text(request, congress, type_slug, number, version=None):
     if textdata:
         alternates = []
         for v in bill_gpo_status_codes:
-            fn = "data/us/bills.text/%s/%s/%s%d%s.mods.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, BillType.by_value(bill.bill_type).xml_code, bill.number, v)
-            if os.path.exists(fn):
+            try:
                 alternates.append(load_bill_text(bill, v, mods_only=True))
+            except IOError:
+                pass
         alternates.sort(key = lambda mods : mods["docdate"])
 
     # Get a list of related bills.
