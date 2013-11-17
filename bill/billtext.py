@@ -202,6 +202,7 @@ def get_bill_text_metadata(bill, version):
     if os.path.exists(basename + "/mods.xml"):
         dat["mods_file"] = basename + "/mods.xml"
 
+    # get a plain text file if one exists
     if os.path.exists(basename + "/document.txt"):
         dat["text_file"] = basename + "/document.txt"
         dat["has_displayable_text"] = True
@@ -210,6 +211,11 @@ def get_bill_text_metadata(bill, version):
             if source["source"] == "statutes":
                 dat["text_file_source"] = "statutes"
 
+    # get an HTML file if one exists
+    if os.path.exists(html_fn):
+        dat["html_file"] = html_fn
+        dat["has_displayable_text"] = True
+
     # get an XML file if one exists
     if os.path.exists(basename + "/catoxml.xml"):
         dat["xml_file"] = basename + "/catoxml.xml"
@@ -217,11 +223,6 @@ def get_bill_text_metadata(bill, version):
         dat["xml_file_source"] = "cato-deepbills"
     elif os.path.exists(basename + "/document.xml"):
         dat["xml_file"] = basename + "/document.xml"
-        dat["has_displayable_text"] = True
-
-    # fall back to our legacy HTML if available
-    elif os.path.exists(html_fn):
-        dat["html_file"] = html_fn
         dat["has_displayable_text"] = True
 
     thumb_fn = "data/us/bills.text/%s/%s/%s%d%s-thumb200.png" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
@@ -252,10 +253,6 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     # Load basic metadata from a MODS file if one exists.
     if "mods_file" in dat:
         ret.update(load_bill_mods_metadata(dat["mods_file"]))
-    if "html_file" in dat:
-        ret.update({ "html_file": dat["html_file"] })
-    if "thumbnail_path" in dat:
-        ret.update({ "thumbnail_path": dat["thumbnail_path"] })
 
     # Otherwise fall back on using the text-versions data.json file. We may have
     # this for historical bills that we don't have a MODS file for.
@@ -275,24 +272,28 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
             "doc_version_name": get_gpo_status_code_name(dat["version_code"]),
         })
 
+    # Pass through some fields.
+    for f in ('html_file', 'thumbnail_path'):
+        if f in dat:
+            ret[f] = dat[f]
+
     # If the caller only wants metadata, return it.
     if mods_only:
         return ret
 
-    if "html_file" in dat and not plain_text:
-        # if html_file is specified, we have rendered content already.
-        # This will be for bills around the 105th Congress when bill text
-        # was available from GPO but not in XML.
-        ret.update({
-            "text_html": open(dat["html_file"]).read().decode("utf8"),
-        })
-
-    elif "xml_file" in dat and not plain_text:
+    if "xml_file" in dat and not plain_text:
         # convert XML on the fly to HTML
         import lxml.html, congressxml
         ret.update({
             "text_html": lxml.html.tostring(congressxml.convert_xml(dat["xml_file"])),
             "source": dat.get("xml_file_source"),
+        })
+
+    elif "html_file" in dat and not plain_text:
+        # This will be for bills around the 103rd-108th Congresses when
+        # bill text is available from GPO but not in XML.
+        ret.update({
+            "text_html": open(dat["html_file"]).read().decode("utf8"),
         })
 
     elif "text_file" in dat:
