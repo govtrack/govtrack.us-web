@@ -5,6 +5,7 @@ from poll_and_call.models import Issue, IssuePosition, RelatedBill, UserPosition
 
 class IssueAdmin(admin.ModelAdmin):
 	prepopulated_fields = {"slug": ("title",)}
+	raw_id_fields = ['positions']
 
 class RelatedBillAdmin(admin.ModelAdmin):
     raw_id_fields = ['issue', 'bill']
