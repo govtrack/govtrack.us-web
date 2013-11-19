@@ -73,14 +73,19 @@ if "people" in sys.argv:
 	os.system("cd %s/cache/congress-legislators; git fetch -pq" % SCRAPER_PATH)
 	os.system("cd %s/cache/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
-	# Copy into our public directory.
-	for f in glob.glob("%s/cache/congress-legislators/*.yaml" % SCRAPER_PATH):
-		make_link(f, "data/congress-legislators/%s" % os.path.basename(f))
-	
-	# Convert people YAML into the legacy format.
+	# Convert people YAML into the legacy format and alternative formats.
 	mkdir("data/us/%d" % CONGRESS)
 	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/people.xml 0" % SCRAPER_PATH)
 	os.system("python ../scripts/legacy-conversion/convert_people.py %s/cache/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
+	os.system("cd %s/cache/congress-legislators/scripts; . .env/bin/activate; python alternate_bulk_formats.py" % SCRAPER_PATH)
+
+	# Copy into our public directory.
+	for f in glob.glob("%s/cache/congress-legislators/*.yaml" % SCRAPER_PATH):
+		make_link(f, "data/congress-legislators/%s" % os.path.basename(f))
+	for f in glob.glob("%s/cache/congress-legislators/alternate_formats/*.csv" % SCRAPER_PATH):
+		make_link(f, "data/congress-legislators/%s" % os.path.basename(f))
+
+	# Convert people YAML into alternate formats.
 	
 	# Load YAML (directly) into db.
 	os.system("./parse.py person") #  -l ERROR
