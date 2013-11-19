@@ -25,6 +25,7 @@ function start_call() {
 			type: "POST",
 			data: {
 				p: {{user_position.id}},
+				target: {{moc.id}},
 				phone_number: num
 			},
 			error: function() {
@@ -116,7 +117,7 @@ function poll_call_status() {
 <div class="row">
 	<div class="twelve columns">
 		<h2>Now Make the Call</h2>
-		<p style="margin-bottom: 2em">Your representative is <b>{{moc.person}}</b>. A phone call to {{moc.person.lastname}}&rsquo;s office goes a long way to making your voice heard. We&rsquo;ll walk you through the whole thing.</p>
+		<p style="margin-bottom: 2em">You are represented by <b>{{moc.person}}</b>. A phone call to {{moc.person.lastname}}&rsquo;s office goes a long way to making your voice heard. We&rsquo;ll walk you through the whole thing.</p>
 	</div>
 </div>
 
@@ -124,7 +125,7 @@ function poll_call_status() {
 	<div class="six columns">
 		<h4 style="margin-bottom: .5em;">Call Script</h4>
 
-		<p>When you call your representative, a staff assistant will pick up the phone. Here is a script you can follow to effectively communicate your position:</p>
+		<p>When you call your {{moc.get_title|lower}}, a staff assistant will pick up the phone. Here is a script you can follow to effectively communicate your position:</p>
 
 		<div id="script">
 			<p class="them"><span>Them:</span> {{moc.get_title}} {{moc.person.lastname}}&rsquo;s office, how can I help you?</p>
@@ -153,14 +154,14 @@ function poll_call_status() {
 
 		<p>We&rsquo;ll connect a call to {{moc.person.lastname}}&rsquo;s office for you. If you provide your phone number, we&rsquo;ll call you, and then we will connect your call to the office of {{moc.person.name_and_title}}.</p>
 
-		<div style="margin: 2em 40px; font-size: 110%;">
+		<div style="margin: 1.5em 40px; font-size: 110%;">
 			<div style="margin-bottom: 5px;">Enter your phone number:</div>
 			<input id="phone" type="tel" style="font-size: 28px; width: 220px; height: 40px; display: inline" placeholder="000 555-8888"/>
 			<button id="start_call" onclick="start_call()" style="font-size: 28px; height: 38px;">Call Me</button>
 			<div id="call_status"></div>
 		</div>
 
-		<p><small>We&rsquo;ll be recording your call so we can learn how to improve this process and make your future experience on GovTrack more effective.</small></p>
+		<p style="margin-bottom: 2em"><small>We&rsquo;ll be recording your call so we can learn how to improve this process and make your future experience on GovTrack more effective.</small></p>
 
 		<h5 style="margin-bottom: .5em">Rather call yourself?</h5>
 
@@ -168,7 +169,18 @@ function poll_call_status() {
 
 		<h5 style="margin-bottom: .5em">Finished?</h5>
 
-		<p>Once you finish the call, or if you want to skip this step, <a href="{{issue.get_absolute_url}}">click here</a>. You can come back to this later.</p>
+		{% if other_targets|length == 0 %}
+			<p>Once you finish the call, or if you want to skip this step, <a href="{{issue.get_absolute_url}}">click here</a>. You can come back to this later.</p>
+		{% else %}
+			<p>Once you finish this call, you can also call your other representative or senators:</p>
+			{% for t in other_targets %}
+				<form method="get" style="margin-left: 2em">
+					<input type="hidden" name="target" value="{{t.id}}"/>
+					<input type="submit" value="Call {{t.person.name}} &nbsp; ▶"/>
+				</form>
+			{% endfor %}
+			<p>Or if you want to skip this step, <a href="{{issue.get_absolute_url}}">click here</a>. You can come back to this later.</p>
+		{% endif %}
 	</div>
 </div>
 

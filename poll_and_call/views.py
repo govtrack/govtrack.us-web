@@ -45,7 +45,13 @@ def issue_show_user_view(request, issue_slug):
 	if request.user.is_authenticated():
 		try:
 			up = UserPosition.objects.get(user=request.user, position__issue=issue)
-			D["position"] =  { "id": up.position.id, "text": up.position.text, "can_change": up.can_change_position(), "can_call": up.can_make_call() }
+			targets = up.get_current_targets()
+			D["position"] =  {
+				"id": up.position.id,
+				"text": up.position.text,
+				"can_change": up.can_change_position(),
+				"can_call": [(t.id, t.person.name) for t in targets] if isinstance(targets, list) else [],
+			}
 		except:
 			pass
 	return D
@@ -62,11 +68,17 @@ def issue_join(request, issue_slug, position_id):
 	if request.method == "POST":
 		# This is a confirmation.
 
-		# Don't allow any changes if a call has been made.
-		if CallLog.objects.filter(user=request.user, position__position__issue=issue).exists():
-			return HttpResponseRedirect(issue.get_absolute_url())
+		try:
+			up = UserPosition.objects.get(user=request.user, position__issue=issue)
+			if not up.can_change_position():
+				return HttpResponseRedirect(issue.get_absolute_url())
 
-		UserPosition.objects.filter(user=request.user, position__issue=issue).delete()
+			# User can change his position. Delete the old position.
+			up.delete()
+		except UserPosition.DoesNotExist:
+			pass
+
+		# Create the new position.
 		UserPosition.objects.create(
 			user=request.user,
 			position=position,
@@ -84,21 +96,20 @@ def issue_make_call(request, issue_slug):
 	issue = get_object_or_404(Issue, slug=issue_slug)
 	user_position = get_object_or_404(UserPosition, user=request.user, position__issue=issue)
 
-	# don't allow a user to make more than one call
-	if CallLog.objects.filter(user=request.user, position=user_position).exists():
-		return HttpResponseRedirect(issue.get_absolute_url())
+	# is there a representative to call in the user's district that the user hasn't called?
+	targets = user_position.get_current_targets()
+	if isinstance(targets, str):
+		return HttpResponseRedirect(issue.get_absolute_url() + "#" + targets)
 
-	# is there a representative to call in the user's district?
+	# choose a target at random
+	rep = targets[0]
+
+	# if 'target' is a GET parameter, call that target.
 	try:
-		rep = user_position.get_current_target()
-	except PersonRole.DoesNotExist:
-		# vacant, I suppose
-		return HttpResponseRedirect(issue.get_absolute_url() + "#vacant")
-
-	# do we have a valid-looking phone number?
-	if not rep.phone or len("".join(c for c in rep.phone if unicode.isdigit(c))) != 10:
-		# Rep has no valid phone.
-		return HttpResponseRedirect(issue.get_absolute_url() + "#nophone")
+		rep = [t for t in targets if t.id == int(request.GET['target'])][0]
+	except:
+		# target is not a parameter, is not an integer, is not one of the targets
+		pass
 
 	# is this a good time of day to call?
 	#if not ((0 <= datetime.now().weekday() <= 4) and ('09:15' <= datetime.now().time().isoformat() <= '16:45')):
@@ -112,6 +123,7 @@ def issue_make_call(request, issue_slug):
 		"user_position": user_position,
 		"position": position,
 		"moc": rep,
+		"other_targets": [t for t in targets if t != rep],
 		}
 
 def dynamic_call_script(issue, position, person, role):
@@ -143,9 +155,13 @@ def twilio_client():
 def start_call(request):
 	user_position = get_object_or_404(UserPosition, id=request.POST["p"], user=request.user)
 
-	# if a call has been made, don't allow another
-	if CallLog.objects.filter(user=request.user, position=user_position).exists():
-		return { "ok": False, "msg": "You've already made a call." }
+	# validate the 'target' parameter
+	possible_targets = user_position.get_current_targets()
+	if isinstance(possible_targets, str): return { "ok": False, "msg": "There is no one for you to call." }
+	try:
+		target = [t for t in possible_targets if t.id == int(request.POST['target'])][0]
+	except:
+		return { "ok": False, "msg": "You cannot call that office." }
 
 	# basic phone number validation
 	phone_num = "".join(c for c in request.POST["phone_number"] if unicode.isdigit(c)).encode("ascii")
@@ -155,7 +171,7 @@ def start_call(request):
 	cl = CallLog.objects.create(
 		user=request.user,
 		position=user_position,
-		target=user_position.get_current_target(),
+		target=target,
 		status="not-yet-started",
 		log={})
 

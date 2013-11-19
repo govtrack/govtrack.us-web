@@ -200,11 +200,12 @@ def bill_details_user_view(request, congress, type_slug, number):
             issue = IssueByBill.objects.get(bill=bill).issue
             try:
                 up = UserPosition.objects.get(user=request.user, position__issue=issue)
+                targets = up.get_current_targets()
                 ret["poll_and_call_position"] =  {
                     "id": up.position.id,
                     "text": up.position.text,
                     "can_change": up.can_change_position(),
-                    "can_call": up.can_make_call(),
+                    "can_call": [(t.id, t.person.name) for t in targets] if isinstance(targets, list) else [],
                     "call_url": issue.get_absolute_url() + "/make_call",
                 }
             except UserPosition.DoesNotExist:
@@ -731,11 +732,10 @@ def start_poll(request):
 
         # how to refer to the bill
         from django.template.defaultfilters import truncatewords
-        bt = truncatewords(bill.title, 8)
-        if "..." not in bt:
-            bt = truncatewords(bill.title, 11)
-        else:
-            bt = u"%s (\u201C%s\u201D)" % (bill.display_number, bt)
+        bt = truncatewords(bill.title, 10)
+        if "..." in bt:
+            bt = truncatewords(bill.title, 15)
+            bt = u"%s (\u201C%s\u201D)" % (bill.display_number, bt.replace(bill.display_number + ": ", ""))
         ix.positions.add(IssuePosition.objects.create(
             text="Support",
             valence=True,

@@ -259,9 +259,11 @@ class Bill(models.Model):
         return "bill" if self.bill_type in (BillType.house_bill, BillType.senate_bill) else "resolution"
     @property
     def originating_chamber(self):
+        # also see current_status_chamber
         return "House" if self.bill_type in (BillType.house_bill, BillType.house_resolution, BillType.house_joint_resolution, BillType.house_concurrent_resolution) else "Senate"
     @property
     def opposite_chamber(self):
+        # also see current_status_chamber
         return "Senate" if self.bill_type in (BillType.house_bill, BillType.house_resolution, BillType.house_joint_resolution, BillType.house_concurrent_resolution) else "House"
 
     @property
@@ -300,6 +302,19 @@ class Bill(models.Model):
     def is_success(self):
         """Whether the bill was enacted (for bills) or passed (for resolutions)."""
         return self.current_status in BillStatus.final_status_passed
+    @property
+    def current_status_chamber(self):
+        """Returns 'House', 'Senate', 'Unknown', or 'Done' indicating which chamber is currently considering the
+        bill. 'Done' means the bill is dead or out of Congress."""
+        if not self.is_alive or self.current_status in (BillStatus.passed_bill,):
+            return 'Done'
+        if self.current_status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
+            return self.originating_chamber
+        if self.current_status in (BillStatus.pass_over_house, BillStatus.pass_back_house, BillStatus.prov_kill_cloturefailed, BillStatus.override_pass_over_house):
+            return "Senate"
+        if self.current_status in (BillStatus.pass_over_senate, BillStatus.pass_back_senate, BillStatus.prov_kill_suspensionfailed, BillStatus.override_pass_over_senate):
+            return "House"
+        return "Unknown" # prov_kill_pingpongfail, prov_kill_veto
 
     def get_approved_links(self):
         return self.links.filter(approved=True)

@@ -79,15 +79,50 @@ class UserPosition(models.Model):
 	def __unicode__(self):
 		return self.created.isoformat() + " " + unicode(self.user) + "/" + unicode(self.position)
 
-	def get_current_target(self):
-		from person.models import PersonRole
-		return PersonRole.objects.get(current=True, state=self.district[0:2], district=int(self.district[2:]))
-
-	def can_make_call(self):
-		return len(self.district) > 2 # ugh, data collection error
-
 	def can_change_position(self):
-		return not CallLog.objects.filter(user=self.user, position=self).exists()
+		# Can the user change his position? Not if he made any calls about it.
+		return not CallLog.objects.filter(position=self).exists()
+
+	def get_current_targets(self):
+		# Returns either a list of a string with a reason why there are no targets to call.
+
+		# ugh, data collection error when this was first launched
+		if len(self.district) <= 2: return "unknown"
+
+		# get all of the chambers any related bills are currently being considered in
+		issue = self.position.issue.get()
+		chambers = set()
+		for rb in RelatedBill.objects.filter(issue=issue).select_related("bill"):
+			chambers.add(rb.bill.current_status_chamber)
+
+		# get the represenative or senators as appropriate, and check for various
+		# error conditions along the way.
+		from person.models import PersonRole, RoleType
+		from us import stateapportionment
+		targets = []
+		if len(chambers) == 0 or "House" in chambers or "Unknown" in chambers:
+			targets.extend( PersonRole.objects.filter(current=True, role_type=RoleType.representative, state=self.district[0:2], district=int(self.district[2:])) )
+			if len(targets) == 0 and ((len(chambers) == 1 and "House" in chambers) or stateapportionment[self.district[0:2]] == "T"): return "house-vacant"
+		if len(chambers) == 0 or "Senate" in chambers or "Unknown" in chambers:
+			targets.extend( PersonRole.objects.filter(current=True, role_type=RoleType.senator, state=self.district[0:2]) )
+			if len(chambers) == 1 and "Senate" in chambers and len(targets) == 0:
+				if stateapportionment[self.district[0:2]] == "T": return "no-senators"
+				return "senate-vacant"
+		if len(targets) == 0: return "vacant"
+
+		# make sure we have a phone number on file
+		def is_valid_phone(phone):
+			if not phone: return False
+			if len("".join(c for c in phone if unicode.isdigit(c))) != 10: return False
+			return True
+		targets = [t for t in targets if is_valid_phone(t.phone)]
+		if len(targets) == 0: return "no-phone"
+
+		# filter out anyone the user has already called or that has a not-valid phone number
+		targets = [t for t in targets if not CallLog.objects.filter(position=self, target=t).exists()]
+		if len(targets) == 0: return "all-calls-made"
+
+		return targets
 
 
 class CallLog(models.Model):
