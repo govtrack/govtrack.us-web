@@ -1,7 +1,7 @@
 {% if format == "text" %}
 active: true
-subject: "News: Support Code for America"
+subject: "DATA Act passes the House"
 ----------
 {% endif %}
 
-Want to see more efforts like GovTrack? Consider supporting our friends at [Code for America](http://www.crowdrise.com/govtrack-for-codeforamerica). They do amazing work and could use your financial support.
+The House passed the [DATA Act](https://www.govtrack.us/congress/bills/113/hr2061), a landmark government spending transparency bill. Please [call your senators](https://www.govtrack.us/poll/113-hr-2061/join/8783) and ask them to pass the House bill.
