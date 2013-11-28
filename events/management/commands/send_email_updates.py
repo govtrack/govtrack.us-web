@@ -11,6 +11,7 @@ from optparse import make_option
 from events.models import *
 from emailverification.models import Ping, BouncedEmail
 
+import os
 from datetime import datetime, timedelta
 import yaml, markdown2
 
@@ -57,7 +58,9 @@ class Command(BaseCommand):
 			# updates turned on to the right daily/weekly setting.
 			users = User.objects.filter(subscription_lists__email__in = list_email_freq).distinct()
 			
-		#users = users.filter(id__gte=122350, id__lt=169660)
+		if os.environ.get("START"):
+			users = users.filter(id__gte=int(os.environ["START"]))
+				#, id__lt=169660)
 			
 		total_emails_sent = 0
 		total_events_sent = 0
