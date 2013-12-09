@@ -133,16 +133,17 @@ body {
 	-webkit-font-smoothing: antialiased;
 	position: relative;
 	}
-a {
+a:link, a:visited {
 	color: #cb4b16;
 	}
-a:hover {
+a:hover, a:focus, a:active {
 	color: #664030;
 	}
-a.plain, #masthead a {
+a.plain:link, #masthead a:link {
 	text-decoration: none;
 	}
-a.plain:hover, #masthead a:hover {
+a.plain:hover, a.plain:focus, a.plain:active,
+#masthead a:hover, #masthead a:focus, #masthead a:active {
 	text-decoration: underline;
 	}
 input, textarea, select {
