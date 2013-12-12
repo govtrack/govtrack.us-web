@@ -1,7 +1,7 @@
 {% if format == "text" %}
 active: true
-subject: "DATA Act passes the House"
+subject: "New on GovTrack in Fall 2013"
 ----------
 {% endif %}
 
-The House passed the [DATA Act](https://www.govtrack.us/congress/bills/113/hr2061), a landmark government spending transparency bill. Please [call your senators](https://www.govtrack.us/poll/113-hr-2061/join/8783) and ask them to pass the House bill.
+There's lots new on GovTrack this season. Read about our [Fall 2013 Updates](https://www.govtrack.us/blog/2013/12/12/fall-2013-updates-to-govtrack/), including calling congress, better bill text, keyword trackers, historical bills, and more.
