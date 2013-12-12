@@ -98,6 +98,13 @@ for person_role in PersonRole.objects.filter(
 	person_role.total_cosponsors = len(cosp)
 	person_role.unique_cosponsors = len(set(cosp))
 
+	# ...and the number of other people's bills the member has cosponsored this Congress.
+	person_role.total_cosponsored_bills = Cosponsor.objects.filter(person=person_role.person, bill__congress=congressnumber).count()
+
+	# ...and the number of bills the Member introduced this Congress
+	person_role.total_introduced_bills = Bill.objects.filter(sponsor=person_role.person, congress=congressnumber).count()
+
+
 # Perform analysis totally separately for each chamber.
 for house_or_senate in ('h', 's'):
 	start_date = None
@@ -248,7 +255,7 @@ for house_or_senate in ('h', 's'):
 		else:
 			usednames[names[v]] = k
 
-		other_cols[v] = [people[k].unique_cosponsors, people[k].total_cosponsors]
+		other_cols[v] = [people[k].total_introduced_bills, people[k].total_cosponsored_bills, people[k].unique_cosponsors, people[k].total_cosponsors]
 	
 	# Scale the values from 0 to 1. Use a log scale for the leadership score.
 	spectrum = rescale(spectrum)
@@ -324,11 +331,11 @@ for house_or_senate in ('h', 's'):
 	# Dump CSV file.
 	
 	w = open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + ".txt", "w")
-	w.write("ID, ideology, leadership, name, party, description, unique_cosponsors_%d, total_cosponsors_%d\n" % (congressnumber, congressnumber))
+	w.write("ID, ideology, leadership, name, party, description, introduced_bills_%d, cosponsored_bills_%d, unique_cosponsors_%d, total_cosponsors_%d\n" % tuple([congressnumber]*4))
 	for i in xrange(nreps):
-		w.write(", ".join( [unicode(d).encode("utf8") for d in (
-			ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i], other_cols[i][0], other_cols[i][1]
-			)]) + "\n" )
+		w.write(", ".join( [unicode(d).encode("utf8") for d in
+			[ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i]] + other_cols[i]
+			]) + "\n" )
 	w.close()
 	
 	# Dump metadata JSON file.
