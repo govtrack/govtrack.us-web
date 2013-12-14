@@ -449,6 +449,7 @@ def serialize_response_json(response):
     ret = ret.encode("utf8")
     resp = HttpResponse(ret, mimetype="application/json; charset=utf-8")
     resp["Content-Length"] = len(ret)
+    resp["Generated-At"] = datetime.datetime.now().isoformat()
     return resp
 
 def serialize_response_jsonp(response, callback_name):

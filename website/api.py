@@ -10,6 +10,8 @@ from common import enum as enummodule
 
 import csv, json, StringIO
 
+from twostream.decorators import anonymous_view
+
 class MySerializer(Serializer):
     def __init__(self, *args, **kwargs):
         Serializer.__init__(self, *args, **kwargs)
@@ -424,7 +426,8 @@ def get_apiv2_model_qs(model):
 		raise Http404()
 		
 	return model, qs
-	
+
+@anonymous_view	
 def apiv2(request, model, id):
 	model, qs = get_apiv2_model_qs(model)
 	return do_api_call(request, model, qs, id)
