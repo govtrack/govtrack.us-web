@@ -419,7 +419,7 @@ sub {
 	box-shadow:
 	0 0 0 1px rgb(130,169,91),
 	0 1px 0 rgba(255, 255, 255, 0.5) inset;
-	color: white;
+	color: white !important; /* overriding a:link,a:visited color */
 	cursor: pointer;
 	font-family: "Helvetica Neue", "HelveticaNeue", Helvetica, Arial, "Lucida Grande", sans-serif;
 	font-size: 14px;
@@ -2960,14 +2960,14 @@ aside .download-links { padding: 31px 0 0 }
 		text-transform: uppercase;
 		text-decoration: none;
 		display: block;
-		color: #fff;
+		color: #fff !important; /* overrides a:link, a:visited */
 		text-shadow: 0 1px 1px #3d6410;
 		margin: 0 0 15px;
 		cursor: pointer;
 		}
 		.track-btn, .green-btn { background: url(../images/btn-sprite-green.png) no-repeat; }
 		.grey-btn { background: url(../images/btn-sprite-grey.png) no-repeat; }
-		.yellow-btn { background: url(../images/btn-sprite-yellow.png) no-repeat; }
+		.yellow-btn { background: url(../images/btn-sprite-yellow.png) no-repeat; color: #444 !important; } /* must override a:link, a:visited color */
 		.blue-facebook-btn { background: url(../images/btn-sprite-facebook.png) no-repeat; }
 		.blue-facebook-btn-wide { background: url(../images/btn-sprite-facebook-wide.png) no-repeat; }
 		.track-btn:hover, .push-btn:hover, .push-btn.hover-state {
