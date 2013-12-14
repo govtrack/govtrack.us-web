@@ -155,7 +155,7 @@ def do_site_search(q, allow_redirect=False):
     results.append({
         "title": "Bills and Resolutions (Federal)",
         "href": "/congress/bills/browse",
-        "qsarg": "text",
+        "qsarg": "congress=__ALL__&text",
         "noun": "federal bills or resolutions",
         "results": bills})
 
