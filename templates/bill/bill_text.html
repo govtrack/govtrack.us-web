@@ -338,7 +338,10 @@ $(function() {
 		<p>Compare this bill to another bill:</p>
 		<ul class="bullets">
 			{% for rb, bv in related_bills %}
-				<li><a href="#" onclick="return load_comparison({{rb.id}}, '{{bv|escapejs}}');">{{rb}}</a></li>
+				<li><a href="#" onclick="return load_comparison({{rb.id}}, '{{bv|escapejs}}');">
+				 	{% if rb.congress == bill.congress %}{{rb.display_number_no_congress_number}}{% else %}{{rb.display_number_with_congress_number}}{% endif %} {{rb.title_no_number}}
+					({{bv|upper}})
+				</a></li>
 			{% endfor %}
 		</ul>
 		{% endif %}
