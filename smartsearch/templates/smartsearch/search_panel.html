@@ -288,7 +288,12 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 					$("#show_more").toggle(res.page < res.num_pages);
 					$('.results').show();
                     
-                    if (res.total == 0) {
+					if (pageinc) {
+						// If this was just a call to append more results fluidly to the bottom
+						// of the results list, there is no need to do any further work to
+						// update the facets.
+
+                    } else if (res.total == 0) {
 						// Now we have a problem. If there are no results, then the facets
 						// are going to be messed up because there can be no drill-down.
 						// We got here because the user did a free-form text search that
