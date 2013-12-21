@@ -44,7 +44,7 @@
 		{% if not request.anonymous %}
 			<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
 			<script>
-				var the_user = null;
+				var the_user = {% if request.user.is_authenticated %}{ "email": "{{request.user.email|escapejs}}" }{% else %}null{% endif %};
 				{% include "user_head_script.js" %}
 			</script>
 		{% else %}
@@ -62,19 +62,17 @@
 		window.fbAsyncInitFuncs = Array(); // Facebook init functions should be defined between here and the FB embed later
 		
 		<!-- Google Analytics -->
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', '{{GOOGLE_ANALYTICS_KEY|escapejs}}']);
-		_gaq.push(['_setCustomVar', 1, "Login Type", {% if request.user.is_authenticated %}"Logged In"{% elif request.anonymous %}the_user ? "Logged In" : "Anonymous"{% else %}"Anonymous"{% endif %}, 2]);
-		_gaq.push(['_setCustomVar', 2, "MySegment", {% if not request.anonymous %}"{% if remote_net_house %}House{% elif remote_net_senate %}Senate{% elif is_dc_local %}DC{% else %}Other{% endif %}"{% else %}the_segment{% endif %}, 1]);
-		_gaq.push(['_trackPageview']);
-		{% if not debug %}
-		(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		  })();
-		{% endif %}
-		
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', '{{GOOGLE_ANALYTICS_KEY|escapejs}}');
+		ga('set', 'dimension1', the_user ? "Logged In" : "Anonymous");
+		ga('set', 'dimension2', the_segment);
+		ga('send', 'pageview');
+		<!-- End Google Analytics -->
+
 		</script>
 		
 		{% block head %}{% endblock %}
@@ -92,7 +90,7 @@
 	<script>
 	function trackOutboundLink(link, category, action) { 
 		try { 
-		_gaq.push(['_trackEvent', category , action]); 
+			ga('send', 'event', category, action);
 		} catch(err){}
 		setTimeout(function() { document.location.href = link.href; }, 100);
 		return false;

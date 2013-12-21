@@ -30,7 +30,7 @@
 		function padDigits(number, digits) {
 		    return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
 		}
-		_gaq.push(['_trackEvent', 'Advertisements', 'ImpressionCount', padDigits(ad_exp_user.impression, 5), null, true]);
+		ga('send', 'event', 'Advertisements', 'ImpressionCount', padDigits(ad_exp_user.impression, 5), null, {'nonInteraction': 1});
 		
 		if (is_ad_free) {
 			document.write("An ad would be here, but you've gone ad-free!");

@@ -141,7 +141,6 @@
 			}
 			if (!dont_show_divs) {
 				update_fb_action_status();
-				_gaq.push(['_trackEvent', 'Share-FB-Action', 'delete', null]);
 			}
 			return false;
 		}
@@ -165,8 +164,6 @@
 					fb_share_2(action_name);
 			 });
 			 
-			_gaq.push(['_trackEvent', 'Share-FB-Action', action_name, null]);
-			
 			return false;
 		}
 			
@@ -447,7 +444,7 @@
 		{% endcomment %}
 		
 		<div id="action-button" style="display: none; margin: 12px 0;">
-			<a class="push-btn yellow-btn" style="font-size: 12px;" href="#" onclick="$.colorbox({href: '#action-panel', inline: true, open: true, width: ($(window).width() >= 750 ? '650px' : '90%')}); _gaq.push(['_trackEvent', 'bill-action', 'what-can-i-do', null]); return false;">
+			<a class="push-btn yellow-btn" style="font-size: 12px;" href="#" onclick="$.colorbox({href: '#action-panel', inline: true, open: true, width: ($(window).width() >= 750 ? '650px' : '90%')}); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
 				<span class="icon-thumbs-up"></span>/<span class="icon-thumbs-down"></span>
 				<span style="text-shadow: none; margin-left: 3px;">Call Congress<i>!</i></span>
 			</a>
