@@ -6,7 +6,7 @@
 	<meta charset="utf-8" />
 	<title>Bill Widget &ndash; {{bill.title_no_number}} ({{bill.display_number_no_congress_number}}{% if not bill.is_current %}, {{bill.congress|ordinal}} Congress{% endif %}) &ndash; GovTrack.us</title>
 
-	<link rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20130318" media="all" />
+	<link rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20130318" media="all" />
 
 	<style type="text/css">
 		:root {
@@ -137,7 +137,7 @@
 
 
 	<div id="thelogo">
-		<a href="{{SITE_ROOT_URL}}" target="_blank"><img src="{{SITE_ROOT_URL}}{{ MEDIA_URL }}images/logo.gif" height="33px" alt="Powered by GovTrack.us" /></a>
+		<a href="{{SITE_ROOT_URL}}" target="_blank"><img src="{{SITE_ROOT_URL}}{{ STATIC_URL }}images/logo.gif" height="33px" alt="Powered by GovTrack.us" /></a>
 	</div>
 		
 </body>

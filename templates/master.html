@@ -1,5 +1,5 @@
 {% load govtrack_utils %}
-{% with "/static/" as MEDIA_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
+{% with "/static/" as STATIC_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
 <!DOCTYPE html>
 <!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>    <html class="lt-ie9 lt-ie8"> <![endif]-->
@@ -12,8 +12,8 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		<link media="all" rel="stylesheet" href="{{ MEDIA_URL }}css/all{% if not debug %}-min{% endif %}.css?20131214" />
-		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ie.css" media="screen" /><![endif]-->
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20131214" />
+		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie.css" media="screen" /><![endif]-->
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
@@ -33,7 +33,7 @@
 
 		{% block extra_css %}{% endblock %}
 
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/modernizr.js"></script> {% comment %}html5shiv{% endcomment %}
+		<script type="text/javascript" src="{{ STATIC_URL }}js/modernizr.js"></script> {% comment %}html5shiv{% endcomment %}
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script>
 			// when debugging off the network, fall back to a local copy of jquery
@@ -50,11 +50,11 @@
 		{% else %}
 			{% include "twostream/head.html" %}
 		{% endif %}
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js"></script>
-		<script src="{{ MEDIA_URL }}js/jquery.ba-bbq.min.js"></script>
-		<link rel="stylesheet" href="{{ MEDIA_URL }}js/colorbox/colorbox.css" />
-		<script src="{{ MEDIA_URL }}js/colorbox/jquery.colorbox-min.js"></script>
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-utils.js?2013-07-07"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
+		<script src="{{ STATIC_URL }}js/jquery.ba-bbq.min.js"></script>
+		<link rel="stylesheet" href="{{ STATIC_URL }}js/colorbox/colorbox.css" />
+		<script src="{{ STATIC_URL }}js/colorbox/jquery.colorbox-min.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?2013-07-07"></script>
 		{% block extra_js %}{% endblock %}
 		
 
