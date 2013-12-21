@@ -43,6 +43,8 @@ for role_type in (RoleType.representative, RoleType.senator):
 	sessions = []
 
 	for congress, session, startdate, enddate in get_all_sessions():
+		if congress < 109: continue # make a smaller table
+
 		if build(role_type, congress, session, startdate, enddate, people_sort_order, data_matrix):
 			print role_type.congress_chamber, congress, session
 			sessions.append((congress, session))
