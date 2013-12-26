@@ -35,7 +35,6 @@ import matplotlib.pyplot as plt
 
 # CONFIGURATION
 
-congressnumber = int(sys.argv[1])
 datadir = "data"
 matplotlib.rcParams["font.size"] = 9.0
 matplotlib.rcParams["lines.markersize"] = 3
@@ -68,28 +67,31 @@ def rescale(u, log=False):
 
 # BEGIN
 
-os.system("mkdir -p " + datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis")
+def get_roles_of_people(congressnumber):
+	congress_dates = get_congress_dates(congressnumber)
+	return PersonRole.objects.filter(
+		role_type__in=(RoleType.senator, RoleType.representative),
+		startdate__lt=congress_dates[1], # start dates of next congress are on this day too
+		enddate__gt=congress_dates[0] # end dates from previous congress are on this day too
+		).select_related("person")\
+		.order_by('-startdate')  # so we put people in the right list by their most recent term
 
-# Load up the Congress's people file. We'll need some of this info later.
-# Put each person only in the House or Senate output, even if they served in both,
-# according to their most recent role. We want to include everyone who served
-# during the Congress, even if they are not now serving.
-people = { }
-people_list = { 'h': set(), 's': set() }
-congress_dates = get_congress_dates(congressnumber)
+def get_people(roles):
+	# Put each person only in the House or Senate output, even if they served in both,
+	# according to their most recent role. We want to include everyone who served
+	# during the Congress, even if they are not now serving.
+	people = { }
+	people_list = { 'h': set(), 's': set() }
 
-for person_role in PersonRole.objects.filter(
-	role_type__in=(RoleType.senator, RoleType.representative),
-	startdate__lt=congress_dates[1], # start dates of next congress are on this day too
-	enddate__gt=congress_dates[0] # end dates from previous congress are on this day too
-	).select_related("person")\
-	.order_by('-startdate'): # so we put people in the right list by their most recent term
+	for person_role in roles:
+		pid = person_role.person_id
+		if pid in people: continue # saw a more recent term for this person
+		people[pid] = person_role
+		people_list["h" if person_role.role_type == RoleType.representative else "s"].add(pid)
 
-	pid = person_role.person_id
-	if pid in people: continue # saw a more recent term for this person
-	people[pid] = person_role
-	people_list["h" if person_role.role_type == RoleType.representative else "s"].add(pid)
+	return people, people_list
 
+def attach_other_stats(congressnumber, person_role):
 	# A staffer tells me they're interested in the number of unique/total cosponsors to their
 	# bills in the current Congress. We'll compute that here too. For historical data, compute for
 	# bills up to the end of the Congress.
@@ -105,8 +107,7 @@ for person_role in PersonRole.objects.filter(
 	person_role.total_introduced_bills = Bill.objects.filter(sponsor=person_role.person, congress=congressnumber).count()
 
 
-# Perform analysis totally separately for each chamber.
-for house_or_senate in ('h', 's'):
+def build_matrix(congressnumber, starting_congress, house_or_senate, people, people_list):
 	start_date = None
 	end_date = None
 	
@@ -122,7 +123,7 @@ for house_or_senate in ('h', 's'):
 	# but include only those Members of Congress that served in the indicated
 	# Congress.
 	cells = []
-	for cn in xrange(congressnumber-2, congressnumber+1):
+	for cn in xrange(starting_congress, congressnumber+1):
 		for billfilename in glob.glob(datadir + "/us/" + str(cn) + "/bills/" + house_or_senate + "*.xml"):
 			xml = lxml.parse(billfilename)
 			date = xml.xpath("introduced/@datetime")[0]
@@ -155,16 +156,25 @@ for house_or_senate in ('h', 's'):
 	P = numpy.identity(nreps, numpy.float) # numpy.zeros( (nreps,nreps) )
 	for sponsor, cosponsor in cells:
 		P[sponsor, cosponsor] += 1.0
-	
+
+	return start_date, end_date, rep_to_row, nreps, P
+
+def smooth_matrix(nreps, P):
 	# Take the square root of each cell to flatten out outliers where one person
 	# cosponsors a lot of other people's bills.
 	for i in xrange(nreps):
 		for j in xrange(nreps):
 			P[i,j] = math.sqrt(P[i,j])
 
-	
-	# Political Spectrum Analysis
-	#################
+def build_party_list(rep_to_row, people, nreps):
+	parties = [None for i in xrange(nreps)]
+	for k, v in rep_to_row.items():
+		parties[v] = people[k].party
+	return parties
+
+def ideology_analysis(nreps, parties, P):
+	# Ideology (formerly "Political Spectrum") Analysis
+	###################################################
 
 	# Run a singular value decomposition to get a rank-reduction, one dimension
 	# of which should separate representatives on a liberal-conservative scale.
@@ -177,18 +187,18 @@ for house_or_senate in ('h', 's'):
 	# To make the spectrum left-right, we'll multiply the scores by the sign of
 	# the mean score of the Republicans to put them on the right.
 	# Actually, since scale doesn't matter, just multiply it by the mean.
-	parties = [None for i in xrange(nreps)]
-	for k, v in rep_to_row.items():
-		parties[v] = people[k].party
 	R_scores = [spectrum[i] for i in xrange(nreps) if parties[i] == "Republican"]
 	R_score_mean = sum(R_scores)/len(R_scores)
 	spectrum = spectrum * R_score_mean
+
+	# Scale the values from 0 to 1.
+	spectrum = rescale(spectrum)
 	
-	# third dimension of the analysis
-	spectrum2 = vh[2,:]
+	return spectrum
 	
-	# "PageRank" Leadership
-	###############
+def leadership_analysis(nreps, P):
+	# Leadership Analysis based on the Google PageRank Algorithm
+	############################################################
 
 	# For each column, normalize so the sum is one. We started with an
 	# identity matrix so even MoCs that only cosponsor their own bills
@@ -230,11 +240,12 @@ for house_or_senate in ('h', 's'):
 	
 		x = y
 		
-	pagerank = x
+	# Scale the values from 0 to 1 on a logarithmic scale.
+	x = rescale(x, log=True)
+
+	return x # this is the pagerank
 	
-	# Output
-	######
-	
+def build_output_columns(rep_to_row, people):
 	# Create a list of names in row order.
 	ids = [None for k in rep_to_row]
 	names = [None for k in rep_to_row]
@@ -256,15 +267,9 @@ for house_or_senate in ('h', 's'):
 			usednames[names[v]] = k
 
 		other_cols[v] = [people[k].total_introduced_bills, people[k].total_cosponsored_bills, people[k].unique_cosponsors, people[k].total_cosponsors]
-	
-	# Scale the values from 0 to 1. Use a log scale for the leadership score.
-	spectrum = rescale(spectrum)
-	pagerank = rescale(pagerank, log=True)
-	
-	# Descriptions (allocate).
-	descr = list(spectrum)
-	
-	# Draw a figure.
+	return ids, names, other_cols
+
+def draw_figure(congressnumber, house_or_senate, start_date, end_date, nreps, parties, spectrum, pagerank, names):
 	for figsize, figsizedescr in ((1.0, ""), (1.5 if house_or_senate == "s" else 3.0, "_large")):
 		fig = plt.figure()
 		plt.title(("House of Representatives" if house_or_senate == "h" else "Senate") + ", " + start_date + " to " + end_date)
@@ -285,7 +290,9 @@ for house_or_senate in ('h', 's'):
 	
 		plt.savefig(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + figsizedescr + ".png", dpi=120*figsize, bbox_inches="tight", pad_inches=.02)
 
+def describe_members(nreps, parties, spectrum, pagerank):
 	# Describe what kind of person each is....
+	descr = [None for x in xrange(nreps)] # allocate some space
 	for party in ("Republican", "Democrat", "Independent"):
 		ss = [spectrum[i] for i in xrange(nreps) if parties[i] == party]
 		pp = [pagerank[i] for i in xrange(nreps) if parties[i] == party]
@@ -327,9 +334,10 @@ for house_or_senate in ('h', 's'):
 		for i in xrange(nreps):
 			if parties[i] == party:
 				descr[i] = descr_table[2 if pagerank[i] < pp_20 else 1 if pagerank[i] < pp_80 else 0][0 if spectrum[i] < ss_20 else 1 if spectrum[i] < ss_80 else 2]
+				
+	return descr
 		
-	# Dump CSV file.
-	
+def write_stats_to_disk(congressnumber, house_or_senate, nreps, ids, parties, names, spectrum, pagerank, descr, other_cols):
 	w = open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + ".txt", "w")
 	w.write("ID, ideology, leadership, name, party, description, introduced_bills_%d, cosponsored_bills_%d, unique_cosponsors_%d, total_cosponsors_%d\n" % tuple([congressnumber]*4))
 	for i in xrange(nreps):
@@ -338,8 +346,7 @@ for house_or_senate in ('h', 's'):
 			]) + "\n" )
 	w.close()
 	
-	# Dump metadata JSON file.
-	
+def write_metadata_to_disk(congressnumber, house_or_senate, start_date, end_date):
 	w = open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + "_meta.txt", "w")
 	w.write('{\n')
 	w.write(' "start_date": "' + start_date + '",\n')
@@ -347,9 +354,11 @@ for house_or_senate in ('h', 's'):
 	w.write('}\n')
 	w.close()
 
-	# Create an image for each person.
-	# We no longer need this as the site displays Javascript-based graphs.
-	if False:
+def create_member_images():
+		# We no longer need this as the site displays Javascript-based graphs. So this is here
+		# archivally and is no longer used.
+
+		# Create an image for each person.
 		for j in xrange(nreps):
 			fig = plt.figure()
 			plt.xlabel("Ideology", size="x-large") # size not working, ugh
@@ -362,4 +371,30 @@ for house_or_senate in ('h', 's'):
 				plt.plot(ss, pp, "." + color, markersize=7)
 			plt.plot(spectrum[j], pagerank[j], "ok", markersize=20)
 			plt.savefig(datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis/" + str(ids[j]) + ".png", dpi=25, bbox_inches="tight", pad_inches=.05)
+
+def do_analysis(congressnumber, starting_congress, house_or_senate, people, people_list):
+	start_date, end_date, rep_to_row, nreps, P = build_matrix(congressnumber, starting_congress, house_or_senate, people, people_list)
+	smooth_matrix(nreps, P)
+	parties = build_party_list(rep_to_row, people, nreps)
+	spectrum = ideology_analysis(nreps, parties, P)
+	pagerank = leadership_analysis(nreps, P)
+	ids, names, other_cols = build_output_columns(rep_to_row, people)
+	draw_figure(congressnumber, house_or_senate, start_date, end_date, nreps, parties, spectrum, pagerank, names)
+	descr = describe_members(nreps, parties, spectrum, pagerank)
+	write_stats_to_disk(congressnumber, house_or_senate, nreps, ids, parties, names, spectrum, pagerank, descr, other_cols)
+	write_metadata_to_disk(congressnumber, house_or_senate, start_date, end_date)
+
 			
+if __name__ == "__main__":
+	congressnumber = int(sys.argv[1])
+
+	os.system("mkdir -p " + datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis")
+
+	people, people_list = get_people(get_roles_of_people(congressnumber))
+	for person_role in people.values():
+		attach_other_stats(congressnumber, person_role)
+
+	# Perform analysis totally separately for each chamber.
+	for house_or_senate in ('h', 's'):
+		do_analysis(congressnumber, congressnumber-2, house_or_senate, people, people_list)
+
