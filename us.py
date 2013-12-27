@@ -90,10 +90,34 @@ def get_all_sessions():
     get_session_from_date(None) # load data
     return SESSION_DATES # [(congress, session, startdate, enddate), ...]
 
-def get_congress_from_date(when, allow_start_date=True, allow_end_date=True):
-    get_congress_dates(1) # load data
-    for c, (sd, ed) in CONGRESS_DATES.items():
-        if (sd < when or (allow_start_date and sd == when)) and (when < ed or (allow_end_date and when == ed)):
-            return c
-    return None
+def get_congress_from_date(when, range_type=None):
+    if when.isoformat() < "1941-01-03":
+        # Before this time the dates of Congresses were pretty arbitrary.
+        get_congress_dates(1) # load data
+        for c, (sd, ed) in CONGRESS_DATES.items():
+            if (sd < when or (range_type=='start' and sd == when)) and (when < ed or (range_type=='end' and when == ed)):
+                return c
+        return None
+    else:
+        # Since 1941, we can reliably use the Jan 3-Jan 3 rule.
+        legislative_year = when.year
+        if when.month == 1 and when.day <= 2:
+            # Get the "legislative year", which is the same as the calendar year
+            # except on Jan 1, 2, and half of 3 which is a part of the previous legislative year.
+            legislative_year = when.year - 1
+        elif when.month == 1 and when.day == 3:
+            # This date is the end of a range, so we'll treat Jan 3 as being before noon.
+            if range_type == "end":
+                legislative_year = when.year - 1
+
+            # This date is the start of a range, so we'll treat Jan 3 as being after noon.
+            elif range_type == "start":
+                legislative_year = when.year
+
+            else:
+                raise ValueError("Date is ambiguous; must pass range_type='start' or 'end'.")
+
+        # Now do some simple integer math to compute the Congress number.
+        return ((legislative_year + 1) / 2) - 894
+
 

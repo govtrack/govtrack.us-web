@@ -342,10 +342,11 @@ class PersonRole(models.Model):
     def congress_numbers(self):
         """The Congressional sessions (Congress numbers) that this role spans, as a list from the starting Congress number through consecutive numbers to the ending Congress number."""
         # Senators can span Congresses, so return a range.
-        c1 = get_congress_from_date(self.startdate, allow_end_date=False)
-        c2 = get_congress_from_date(self.enddate, allow_start_date=False)
+        c1 = get_congress_from_date(self.startdate, range_type="start")
+        c2 = get_congress_from_date(self.enddate, range_type="end")
         if not c1 or not c2: return None
         return range(c1, c2+1) # congress number only, not session
+
     def most_recent_congress_number(self):
         n = self.congress_numbers()
         if not n: return None
