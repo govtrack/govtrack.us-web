@@ -222,6 +222,17 @@ def main(options):
                 
                 role.current = role.startdate <= datetime.now().date() and role.enddate >= datetime.now().date() # \
                         #and CURRENT_CONGRESS in role.congress_numbers()
+
+                # Scan for most recent leadership role within the time period of this term,
+                # which isn't great for Senators because it's likely it changed a few times
+                # within a term, especially if there was a party switch.
+                role.leadership_title = None
+                for leadership_node in node.get("leadership_roles", []):
+                    # must match on date and chamber
+                    if leadership_node["start"] >= role.enddate.isoformat(): continue # might start on the same day but is for the next Congress
+                    if "end" in leadership_node and leadership_node["end"] <= role.startdate.isoformat(): continue # might start on the same day but is for the previous Congress
+                    if leadership_node["chamber"].lower() != RoleType.by_value(role.role_type).congress_chamber: continue
+                    role.leadership_title = leadership_node["title"]
                 
                 # Try to match this role with one already in the database.
                 # First search for an exact match on type/start/end.

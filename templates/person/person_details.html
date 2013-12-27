@@ -28,9 +28,12 @@
 
 {% block summary %}
 <div class="row group">
-	{% cache 600 member_head person.id %}
+	{% cache 600 member_head person.id 2 %}
 	<div id="track_panel_base" class="eight columns">
-		<h1>{{person.name_and_title}}</h1>
+		<h1 style="line-height: 1.15em">
+			{{person.name_and_title}}
+			{% if role and active_role and role.leadership_title %}<br><small>{{role.leadership_title_full}}</small>{% endif %}
+		</h1>
 		
 		{% if role and not active_role %}
 		<p>Former {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}{% endif %}</p>

@@ -264,7 +264,8 @@ class PersonRole(models.Model):
     state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True, db_index=True, help_text="For senators and representatives, the two-letter USPS abbrevation for the state or territory they are serving. Values are the abbreviations for the 50 states (each of which have at least one representative and two senators, assuming no vacancies) plus DC, PR, and the island territories AS, GU, MP, and VI (all of which have a non-voting delegate), and for really old historical data you will also find PI (Philippines, 1907-1946), DK (Dakota Territory, 1861-1889), and OR (Orleans Territory, 1806-1811) for non-voting delegates.")
     party = models.CharField(max_length=255, blank=True, null=True, db_index=True, help_text="The political party of the person. If the person changes party, it is usually the most recent party during this role.")
     website = models.CharField(max_length=255, blank=True, help_text="The URL to the official website of the person during this role, if known.")
-    phone = models.CharField(max_length=64, blank=True, null=True, help_text="The last known phone number of the DC congressional office during this rule, if known.")
+    phone = models.CharField(max_length=64, blank=True, null=True, help_text="The last known phone number of the DC congressional office during this role, if known.")
+    leadership_title = models.CharField(max_length=255, blank=True, null=True, help_text="The last known leadership role held during this role, if any.")
 
     # API
     api_recurse_on = ('person',)
@@ -351,6 +352,12 @@ class PersonRole(models.Model):
         n = n[-1]
         if n > settings.CURRENT_CONGRESS: n = settings.CURRENT_CONGRESS # we don't ever mean to ask for a future one (senators, PR res com)
         return n
+
+    @property
+    def leadership_title_full(self):
+        if not self.leadership_title: return None
+        if self.leadership_title == "Speaker": return "Speaker of the House"
+        return RoleType.by_value(self.role_type).congress_chamber + " " + self.leadership_title
 
     def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()

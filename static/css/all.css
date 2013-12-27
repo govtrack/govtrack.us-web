@@ -2107,6 +2107,11 @@ a.button.prefix, a.button.postfix {
 		.summary-box h1 sup {
 			font-size: 65%;
 		}
+		.summary-box h1 small {
+			font-size: 15px;
+			font-style: italic;
+			color: #666;
+		}
 	.summary-box .info {
 		background: url(../images/divider-4.gif) repeat-x 0 100%;
 		padding: 0 0 12px;

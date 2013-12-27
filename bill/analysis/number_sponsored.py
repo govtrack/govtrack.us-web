@@ -49,7 +49,7 @@ for role_type in (RoleType.representative, RoleType.senator):
 			print role_type.congress_chamber, congress, session
 			sessions.append((congress, session))
 
-	writer = csv.writer(open("sponsorship_counts_%s.csv" % role_type.congress_chamber, "w"))
+	writer = csv.writer(open("sponsorship_counts_%s.csv" % role_type.congress_chamber.lower()[0], "w"))
 	writer.writerow(["id", "name"] + [cs[1] for cs in sessions])
 
 	def zero(value):
