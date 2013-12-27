@@ -2153,7 +2153,7 @@ a.button.prefix, a.button.postfix {
 	.summary-box table td {
 		background: #fbfaf5;
 		border: 1px solid #e8e5d7;
-		padding: 0 9px 0;
+		padding: 3px 9px 3px 9px;
 		vertical-align: middle;
 		height: 30px;
 		font: normal 14px/16px OpenSansRegular, Verdana, Arial, Helvetica, sans-serif;

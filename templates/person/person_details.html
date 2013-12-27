@@ -67,14 +67,13 @@
 		<table>
 			<tr>
 				<th>Dates</th>
-				<th>Title</th>
-				<th>Representing</th>
+				<th>Title / State / District</th>
 			</tr>
 	        {% for role in person.roles_condensed %}
 	        <tr>
 	            <td><nobr>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</nobr></td>
-	            <td>{{ role.get_role_type_display }}</td>
-	            <td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}</td>
+	            <td>{{ role.get_role_type_display }}{% if role.state %},{% endif %}<br>
+	                {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}</td>
 	        </tr>
 	        {% endfor %}
 		</table>
