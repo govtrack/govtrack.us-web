@@ -51,6 +51,7 @@ MEDIA_ROOT = os.path.join(ROOT, 'media')
 MEDIA_URL = '/media/'
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(ROOT, 'static')]
 
 # django-regitration-pv
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
@@ -83,7 +84,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'twostream.middleware.CacheLogic',
@@ -113,7 +114,7 @@ INSTALLED_APPS = (
     'common',
     'django_extensions',
     #'south',
-    'debug_toolbar',
+    #'debug_toolbar',
     
     'haystack',
     'tastypie',

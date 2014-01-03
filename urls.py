@@ -8,14 +8,6 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
-    # serve some static files during debugging
-    url(r'^(data/photos/.*)$',
-        django.views.static.serve, {'document_root': settings.ROOT}),
-    url(r'^(data/us/112/stats/person/sponsorshipanalysis/.*)$',
-        django.views.static.serve, {'document_root': settings.ROOT}),
-    url(r'^%s(?P<path>.*)$' % settings.MEDIA_URL.lstrip('/'),
-        django.views.static.serve, {'document_root': settings.MEDIA_ROOT}),
-
 	# main URLs
     url(r'', include('redirect.urls')),
     url(r'', include('website.urls')),
@@ -66,3 +58,6 @@ urlpatterns += patterns('',
     (r'^api/', include(v1_api.urls)),
 )
 
+# static files during debugging
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+urlpatterns += staticfiles_urlpatterns()
