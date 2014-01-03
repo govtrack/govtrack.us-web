@@ -107,7 +107,7 @@ def attach_other_stats(congressnumber, person_role):
 	person_role.total_introduced_bills = Bill.objects.filter(sponsor=person_role.person, congress=congressnumber).count()
 
 
-def build_matrix(congressnumber, starting_congress, house_or_senate, people, people_list):
+def build_matrix(congressnumber, starting_congress, house_or_senate, people, people_list, filter_startdate=None, filter_enddate=None):
 	start_date = None
 	end_date = None
 	
@@ -126,21 +126,40 @@ def build_matrix(congressnumber, starting_congress, house_or_senate, people, peo
 	for cn in xrange(starting_congress, congressnumber+1):
 		for billfilename in glob.glob(datadir + "/us/" + str(cn) + "/bills/" + house_or_senate + "*.xml"):
 			xml = lxml.parse(billfilename)
-			date = xml.xpath("introduced/@datetime")[0]
-			start_date = min(start_date, date) if start_date else date
-			end_date = max(end_date, date)
 			
+			# get the sponsor
 			spx = xml.xpath("sponsor/@id")
 			if len(spx) == 0: # e.g. debt limit with no sponsor
 				continue
 			if not int(spx[0]) in people_list[house_or_senate]:
 				continue
 			sponsor = rownum(int(spx[0]))
-			for cosponsor_str in xml.xpath("cosponsors/cosponsor/@id"):
-				if int(cosponsor_str) not in people_list[house_or_senate]:
-					continue
-				cosponsor = rownum(int(cosponsor_str))
+
+			# loop through the cosponsors
+			has_entry = False
+			for cosponsor_node in xml.xpath("cosponsors/cosponsor"):
+				# get the cosponsor's ID
+				cosponsor_id = int(cosponsor_node.xpath("string(@id)"))
+				if cosponsor_id not in people_list[house_or_senate]: continue
+
+				# if a date filter is specified, only take cosponsors that joined within
+				# the date range (inclusive)
+				if filter_startdate:
+					join_date = cosponsor_node.xpath("string(@joined)")
+					if join_date < filter_startdate or join_date > filter_enddate:
+						continue
+
+				# add an entry to the flat list of sponsor-cosponsor pairs
+				cosponsor = rownum(cosponsor_id)
 				cells.append( (sponsor, cosponsor) )
+				has_entry = True
+
+			# if there was a sponsor/cosponsor pair from this bill, extend the
+			# start_date/end_date range to cover the introduced date of this bill.
+			if has_entry:
+				date = xml.xpath("introduced/@datetime")[0]
+				start_date = min(start_date, date) if start_date else date
+				end_date = max(end_date, date)
 	
 	# In the event a member of congress neither sponsored nor cosponsored
 	# a bill, just give them an empty slot.
@@ -334,7 +353,7 @@ def describe_members(nreps, parties, spectrum, pagerank):
 		for i in xrange(nreps):
 			if parties[i] == party:
 				descr[i] = descr_table[2 if pagerank[i] < pp_20 else 1 if pagerank[i] < pp_80 else 0][0 if spectrum[i] < ss_20 else 1 if spectrum[i] < ss_80 else 2]
-				
+
 	return descr
 		
 def write_stats_to_disk(congressnumber, house_or_senate, nreps, ids, parties, names, spectrum, pagerank, descr, other_cols):
