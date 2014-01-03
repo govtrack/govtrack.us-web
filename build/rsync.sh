@@ -13,11 +13,13 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "us/113/bills.summary/*.xml" \
 	--include "us/113/rolls" \
 	--include "us/113/rolls/*.xml" \
+	--include "us/113/stats/" \
+	--include "us/113/stats/*.json" \
 	--include "us/bills.text" \
 	--include "us/bills.text/113" \
 	--include "us/bills.text/113/*" \
+	--exclude "us/bills.text/113/*/*.gen.html" \
 	--include "us/bills.text/113/*/*.html" \
-	--include "us/bills.text/113/*/*.mods.xml" \
 	--include "congress" \
 	--include "congress/113" \
 	--include "congress/113/bills" \
