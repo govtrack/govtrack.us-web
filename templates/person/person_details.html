@@ -6,6 +6,19 @@
 {% block meta_description %}{% if cities %}Represents {{cities}}. {% endif %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
 {% block meta_keywords %}{{person.name_no_district}},legislation,bills,district,sponsor,cosponsor,votes,missed votes,absences,committees{% endblock %}
 
+{% block head %}
+<style>
+	#session_stats {
+		margin: 0 0 2em -20px;
+		border: 2px solid #EEE;
+		background-color: #E4E4E4;
+		padding: 10px 20px;
+	}
+	#session_stats h3 {
+	}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script type="text/javascript" src="{{ STATIC_URL }}js/highcharts.js" ></script>
 {% endblock %}
@@ -120,6 +133,13 @@
 <div class="row">
 {% cache 600 member_details person.id %}
 <div id="member-details" class="eight columns">
+
+	{% if has_session_stats %}
+	<div id="session_stats">
+		<h3>New: {{has_session_stats.meta.session}} Report Card</h3>
+		Read our new <a href="{{person.get_absolute_url}}/report-card/{{has_session_stats.meta.session}}">{{has_session_stats.meta.session}} Report Card for {{person.lastname}} &raquo;</a>
+	</div>
+	{% endif %}
 
 	{% if analysis_data.sponsorship %}
 	<section id="sponsorship_analysis">

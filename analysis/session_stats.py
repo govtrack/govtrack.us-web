@@ -6,13 +6,13 @@
 # rank the results across subsets of Members to contextualize
 # the information.
 
-import sys, json
+import sys, json, re
 
 import us
 import datetime # implicitly used in eval()'ing dates inside major_actions
 
 from person.models import Person, PersonRole, RoleType
-from bill.models import Cosponsor, Bill, BillStatus, RelatedBill
+from bill.models import Cosponsor, Bill, BillStatus, RelatedBill, BillType
 from vote.models import Vote, Voter, CongressChamber
 from committee.models import CommitteeMemberRole
 
@@ -37,14 +37,18 @@ def get_cohorts(person, role, congress, session, committee_membership):
 		cohorts.append({ "key": chamber + "-leadership", "position": role.leadership_title })
 
 	# freshmen/sophomores
+	min_start_date = None
 	prev_congresses_served = set()
-	for r in PersonRole.objects.filter(person=person, role_type=role.role_type, enddate__lte=role.startdate):
-		if r.congress_numbers() is None: print r.id
+	# use enddate__lte=endate to include the current role itself since for
+	# senators their current role may span previous congresses
+	for r in PersonRole.objects.filter(person=person, role_type=role.role_type, enddate__lte=role.enddate):
+		if not min_start_date or r.startdate < min_start_date: min_start_date = r.startdate
 		for c in r.congress_numbers():
 			if c < congress:
 				prev_congresses_served.add(c)
 	if len(prev_congresses_served) == 0: cohorts.append({ "key": chamber + "-freshmen", "chamber": chamber })
 	if len(prev_congresses_served) == 1: cohorts.append({ "key": chamber + "-sophomores", "chamber": chamber })
+	if min_start_date and (role.enddate - min_start_date).days > 365.25*10: cohorts.append({ "key": chamber + "-tenyears", "chamber": chamber, "first_date": min_start_date.isoformat()  })
 
 	# committee leadership positions
 	committee_positions = []
@@ -69,19 +73,18 @@ def get_cohorts(person, role, congress, session, committee_membership):
 		else:
 			cohorts.append({ "key": chamber + "-safe-seat" })
 
-	# TODO: Roll Call Casuality List?
-
 	return cohorts
 
 
 def get_vote_stats(person, role, stats, votes_this_year):
 	# Missed vote % in the chamber that the Member is currently serving in.
+	if role.leadership_title == "Speaker": return
 	votes_elligible = Voter.objects.filter(person=person, vote__in=votes_this_year[role.role_type])
 	votes_missed = votes_elligible.filter(option__key="0")
 	v1 = votes_elligible.count()
 	v2 = votes_missed.count()
 	stats["missed-votes"] = {
-		"value": float(v2)/float(v1) if v1 > 0 else None,
+		"value": 100.0*float(v2)/float(v1) if v1 > 0 else None,
 		"elligible": v1,
 		"missed": v2,
 		"role": RoleType.by_value(role.role_type).key,
@@ -100,14 +103,14 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 		current_status_date__gte=startdate, current_status_date__lte=enddate)
 	stats["bills-enacted"] = {
 		"value": bills_enacted.count(),
+		"bills": make_bill_entries(bills_enacted),
 	}
 
 	bills = list(bills)
-	was_reported = 0
-	has_cmte_leaders = 0
+	was_reported = []
+	has_cmte_leaders = []
 	has_cosponsors_both_parties = 0
-	has_companion = 0
-	subject_areas = { }
+	has_companion = []
 	for bill in bills:
 		# In order to test these remaining factors, we have to look more closely
 		# at the bill because we can only use activities that ocurred during the
@@ -120,7 +123,7 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 			date = eval(datestr)
 			if isinstance(date, datetime.datetime): date = date.date()
 			if date >= startdate and date <= enddate and st == BillStatus.reported:
-				was_reported += 1
+				was_reported.append(bill)
 				break # make sure not to double-count any bills in case of data errors
 
 		# Check whether any cosponsors are on relevant committees.
@@ -130,7 +133,7 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 			for cosponsor in cosponsors:
 				if committee_membership.get(cosponsor.person.id, {}).get(committee.code) in (CommitteeMemberRole.ranking_member, CommitteeMemberRole.vice_chairman, CommitteeMemberRole.chairman):
 					x = True
-		if x: has_cmte_leaders += 1
+		if x: has_cmte_leaders.append(bill)
 
 		# Check whether there's a cosponsor from both parties.
 		co_d = False
@@ -143,34 +146,30 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 
         # Check if a companion bill was introduced during the time period.
 		if RelatedBill.objects.filter(bill=bill, relation="identical", related_bill__introduced_date__gte=startdate, related_bill__introduced_date__lte=enddate).exists():
-			has_companion += 1
+			has_companion.append(bill)
 
-		# Top subject areas
-		top_term = bill.get_top_term_id()
-		if top_term:
-			subject_areas[top_term] = subject_areas.get(top_term, 0) + 1
 
 	stats["bills-reported"] = {
-		"value": was_reported,
+		"value": len(was_reported),
+		"bills": make_bill_entries(was_reported),
 	}
 
 	stats["bills-with-committee-leaders"] = {
-		"value": has_cmte_leaders,
+		"value": len(has_cmte_leaders),
+		"bills": make_bill_entries(has_cmte_leaders),
 	}
 
-	stats["bills-with-cosponsors-both-parties"] = {
-		"value": float(has_cosponsors_both_parties)/float(len(bills)) if len(bills) > 0 else None,
-	}
+	if len(bills) > 10:
+		stats["bills-with-cosponsors-both-parties"] = {
+			"value": 100.0*float(has_cosponsors_both_parties)/float(len(bills)),
+			"num_bills": len(bills),
+		}
 
 	stats["bills-with-companion"] = {
-		"value": has_companion,
+		"value": len(has_companion),
+		"other_chamber": RoleType.by_value(role.role_type).congress_chamber_other,
+		"bills": make_bill_entries(has_companion),
 	}
-
-	if len(subject_areas) > 0:
-		subject_areas = sorted([(v,k) for (k, v) in subject_areas.items()], reverse=True)
-		stats["bills-top-term"] = {
-			"counts": subject_areas[0:3],
-		}
 
 def get_cosponsor_stats(person, role, stats, congress, startdate, enddate):
 	# Count of cosponsors on the Member's bills with a join date in this session.
@@ -178,6 +177,23 @@ def get_cosponsor_stats(person, role, stats, congress, startdate, enddate):
 	stats["cosponsors"] = {
 		"value": cosponsors.count(),
 	}
+
+def get_cosponsored_stats(person, role, stats, congress, startdate, enddate):
+	# Count of bills this person cosponsored.
+	cosponsored = Cosponsor.objects.filter(person=person, bill__congress=congress, joined__gte=startdate, joined__lte=enddate)
+	stats["cosponsored"] = {
+		"value": cosponsored.count(),
+	}
+
+	# Of those bills, how many sponsored by a member of the other party.
+	if role.party in ("Democrat", "Republican") and cosponsored.count() > 10:
+		cosponsored_bi = cosponsored.exclude(bill__sponsor_role__party=role.party)
+		stats["cosponsored-other-party"] = {
+			"value": 100.0 * float(cosponsored_bi.count()) / float(cosponsored.count()),
+			"cosponsored": cosponsored.count(),
+			"cosponsored_other_party": cosponsored_bi.count(),
+		}
+
 
 def run_sponsorship_analysis(people, congress, startdate, enddate):
 	# Run our own ideology and leadership analysis. While the chart we show on
@@ -223,14 +239,50 @@ def get_committee_stats(person, role, stats, committee_membership):
 		else:
 			subchair_list.append( (committee, role_type) )
 
-	stats["committee-leader-positions"] = {
-		"value": len(chair_list),
+	stats["committee-positions"] = {
+		"value": 5*len(chair_list) + len(subchair_list),
 		"committees": chair_list,
+		"subcommittees": subchair_list,
 	}
-	stats["subcommittee-leader-positions"] = {
-		"value": len(subchair_list),
-		"committees": subchair_list,
+
+transparency_bills = None
+def get_transparency_stats(person, role, stats, congress, startdate, enddate):
+	global transparency_bills
+	if not transparency_bills:
+		transparency_bills = []
+		for line in open("analysis/transparency-bills.txt"):
+			bill = Bill.from_congressproject_id(re.split("\s", line)[0])
+			transparency_bills.append(bill)
+
+	# which bills are in the right chamber?
+	plausible_bills = []
+	for bill in transparency_bills:
+		if BillType.by_value(bill.bill_type).chamber == RoleType.by_value(role.role_type).congress_chamber:
+			plausible_bills.append(bill)
+
+	# did person sponsor any of these within this session?
+	sponsored = []
+	for bill in transparency_bills:
+		if startdate <= bill.introduced_date <= enddate and bill.sponsor == person:
+			sponsored.append(bill)
+
+	# did person cosponsor any of these within this session?
+	cosponsored = []
+	for cosp in Cosponsor.objects.filter(person=person, bill__in=transparency_bills, joined__gte=startdate, joined__lte=enddate):
+		cosponsored.append(cosp.bill)
+
+	stats["transparency-bills"] = {
+		"value": len(sponsored)*3 + len(cosponsored),
+		"sponsored": make_bill_entries(sponsored),
+		"cosponsored": make_bill_entries(cosponsored),
+		"num_bills": len(plausible_bills),
+		"chamber": RoleType.by_value(role.role_type).congress_chamber,
 	}
+
+def make_bill_entries(bills):
+	return [make_bill_entry(b) for b in bills]
+def make_bill_entry(bill):
+	return (unicode(bill), bill.get_absolute_url())
 
 def collect_stats(session):
 	# Get the congress and start/end dates of the session that this corresponds to.
@@ -283,8 +335,10 @@ def collect_stats(session):
 		get_vote_stats(person, role, stats, votes_this_year)
 		get_sponsor_stats(person, role, stats, congress, startdate, enddate, committee_membership)
 		get_cosponsor_stats(person, role, stats, congress, startdate, enddate)
+		get_cosponsored_stats(person, role, stats, congress, startdate, enddate)
 		get_sponsorship_analysis_stats(person, role, stats)
 		get_committee_stats(person, role, stats, committee_membership)
+		get_transparency_stats(person, role, stats, congress, startdate, enddate)
 
 	return AllStats
 
@@ -320,18 +374,17 @@ def contextualize(stats):
 				# don't bother with context for very small cohorts
 				if len(pop) < 6: continue
 
-				# don't bother if this person had the same value as more than a quarter of the cohort
-				num_ties = sum(1 if v == value else 0 for v in pop) - 1 # minus himself
-				if num_ties > len(pop)/4: continue
-
 				context = statinfo["context"].setdefault(cohort["key"], { })
 
 				# count individuals in the cohort population with a lower value
+				num_ties = sum(1 if v == value else 0 for v in pop) - 1 # minus himself
 				context["rank_ascending"] = sum(1 if v < value else 0 for v in pop) + 1
 				context["rank_descending"] = sum(1 if v > value else 0 for v in pop) + 1
 				context["rank_ties"] = num_ties
 				context["percentile"] = int(round(100 * sum(1 if v < value else 0 for v in pop) / float(len(pop))))
 				context["N"] = len(pop)
+				context["min"] = min(pop)
+				context["max"] = max(pop)
 
 
 
@@ -341,5 +394,11 @@ if __name__ == "__main__":
 	stats = collect_stats(session)
 	#stats = json.load(sys.stdin)
 	contextualize(stats)
+	stats = {
+		"meta": {
+			"as-of": datetime.datetime.now().isoformat(),
+		},
+		"people": stats,
+	}
 	json.dump(stats, sys.stdout, indent=2, sort_keys=True)
 

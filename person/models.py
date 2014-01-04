@@ -4,14 +4,14 @@ from django.template.defaultfilters import slugify
 from django.conf import settings
 from django.core.cache import cache
 
-import datetime
+import datetime, json, os.path
 from dateutil.relativedelta import relativedelta
 
 from common import enum
 from person.types import Gender, RoleType, SenatorClass, SenatorRank, State
 from name import get_person_name
 
-from us import stateapportionment, get_congress_dates, statenames, get_congress_from_date
+from us import stateapportionment, get_congress_dates, statenames, get_congress_from_date, get_all_sessions
 
 import functools
 def cache_result(f):
@@ -248,6 +248,47 @@ class Person(models.Model):
                 sources.add("keithpoole")
         return sources
 
+    def get_photo(self):
+        photo_path = 'data/photos/%d-100px.jpeg' % self.pk
+        if os.path.exists(photo_path):
+            photo_url = '/' + photo_path
+            with open(photo_path.replace("-100px.jpeg", "-credit.txt"), "r") as f:
+                photo_credit = f.read().strip().split(" ", 1)
+                return photo_url, photo_credit
+        else:
+            return None, None
+
+    @staticmethod
+    def load_session_stats(session):
+      # Which Congress is it?
+        for congress, s, sd, ed in get_all_sessions():
+            if s == session: break # leaves "congress" variable set
+        else:
+            raise ValueError("Invalid session: %s" % session)
+
+        fn = "data/us/%d/stats/session-%s.json" % (congress, session)
+        try:
+            datafile = json.load(open(fn))
+            datafile["meta"]["congress"] = congress # save where we got this from
+            datafile["meta"]["session"] = session # save where we got this from
+            datafile["meta"]["startdate"] = sd
+            datafile["meta"]["enddate"] = ed
+        except IOError:
+            raise ValueError("No statistics are available for session %s." % session)
+
+        return datafile
+
+    def get_session_stats(self, session):
+        datafile = Person.load_session_stats(session)
+  
+        if str(self.id) not in datafile["people"]:
+            raise ValueError("No statistics available for person %d in session %s." % (self.id, session))
+
+        stats = datafile["people"][str(self.id)]
+        stats["meta"] = datafile["meta"] # copy this over
+        return stats
+
+
 class PersonRole(models.Model):
     """Terms held in office by Members of Congress, Presidents, and Vice Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President/Vice President four years, and in the Senate six years (three 'Congresses')."""
 	
@@ -401,3 +442,20 @@ class PersonRole(models.Model):
         if not found_me: raise Exception("Didn't find myself?!")
         return (startdate, enddate)
 
+    def get_most_recent_session_stats(self):
+        # Which Congress and session's end date is the most recently covered by this role?
+        errs = []
+        congresses = self.congress_numbers()
+        for congress, session, sd, ed in reversed(get_all_sessions()):
+            if congress not in congresses: continue
+            if self.startdate < ed <= self.enddate:
+                try:
+                    return self.person.get_session_stats(session)
+                except ValueError as e:
+                    errs.append(unicode(e))
+        raise ValueError("No statistics are available for this role: %s" % "; ".join(errs))
+
+    def opposing_party(self):
+        if self.party == "Democrat": return "Republican"
+        if self.party == "Republican": return "Democrat"
+        return None
