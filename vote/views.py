@@ -31,9 +31,11 @@ def vote_list(request):
     # in the future, during a transition, so take the most recent that at
     # least has started.
     default_session = None
-    for i, (cn, sn, sd, ed) in enumerate(get_all_sessions()):
-        if sd > datetime.now().date(): break
+    for i, (cn, sn, sd, ed) in reversed(list(enumerate(get_all_sessions()))):
+        if sd > datetime.now().date(): continue
+        if not Vote.objects.filter(congress=cn, session=sn).exists(): continue
         default_session = i
+        break
     
     return vote_search_manager().view(request, "vote/vote_list.html",
         defaults = { "session": default_session },
