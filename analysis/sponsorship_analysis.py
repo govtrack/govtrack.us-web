@@ -280,8 +280,9 @@ def build_output_columns(rep_to_row, people):
 			k2 = usednames[names[v]]
 			
 			d = str(people[k].district) if people[k].district is not None else ""
+			d2 = str(people[k2].district) if people[k2].district is not None else ""
 			names[v] = people[k].person.lastname + " [" + people[k].state  + d + "]"
-			names[rep_to_row[k2]] = people[k2].person.lastname + " [" + people[k2].state  + d + "]"
+			names[rep_to_row[k2]] = people[k2].person.lastname + " [" + people[k2].state  + d2 + "]"
 		else:
 			usednames[names[v]] = k
 
