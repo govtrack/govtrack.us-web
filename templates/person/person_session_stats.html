@@ -18,13 +18,13 @@
 		border-bottom: 1px solid #DDD;
 	}
 	section.stat h2 {
-		font-size: 1.7em;
-		margin: 0 0 8px 0;
+		font-size: 1.8em;
+		margin: 0 0 18px 0;
 	}
 	section.stat h3.rank {
 		font-size: 1.2em;
 		text-transform: inherit;
-		margin: 0 0 14px 0;
+		margin: 0 0 22px 0;
 	}
 	section .rank em {
 		border: 1px solid #A98;
@@ -70,6 +70,11 @@
 	}
 	section table.context tr.odd {
 		background-color: #EEE;
+	}
+	section p.notes {
+		font-size: 88%;
+		color: #777;
+		margin: .5em 0 1em 0;
 	}
 
 	section .icon {
@@ -337,6 +342,15 @@ function smooth_scroll(elem) {
 				</tr>
 			{% endfor %}
 		</table>
+
+		{% if stat.key == "missed-votes" %}
+			{% if role.role_type == 2 %}<p class="notes">The Speaker of the House is not included in this statistic (see the notes at the very bottom of the page for why), and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>{% endif %}
+		{% elif stat.key == "bills-with-cosponsors-both-parties" %}
+			<p class="notes">Only Members of Congress who sponsored more than 10 bills and resolutions are included in this statistic.</p>
+		{% elif stat.key == "cosponsored-other-party" %}
+			<p class="notes">Only Democratic and Republican Members of Congress who cosponsored more than 10 bills and resolutions are included in this statistic.</p>
+		{% endif %}
+
 		{% endif %}
 		{% endwith %}
 	</div>
@@ -352,7 +366,7 @@ function smooth_scroll(elem) {
 		<p><strong>Freshmen/Sophomores:</strong> Freshmen and sophomores refer to Members of Congress that did not serve in the previous Congress or that served no earlier than the previous Congress, respectively, and in the same chamber as they were at the end of {{session}}.</p>
 		<p><strong>Joint Resolutions:</strong> When counting laws, we also include joint resolutions that are enacted.</p>
 		<p><strong>Speaker&rsquo;s Votes:</strong> Missed votes are not computed for the Speaker of the House. According to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings.&rdquo; In practice this means the Speaker of the House rarely votes but is not considered absent.</p>
-		<p><strong>Bipartisan Bills:</strong> When computing statistics for Writing Bipartisan Bills, we omit Members of Congress who sponsored fewer than 10 bills. Similarly for Joining Bipartisan Bills, we omit Members of Congress that cosponsored fewer than 10 bills.</p>
+		<p><strong>Bipartisan Bills:</strong> When computing statistics for Writing Bipartisan Bills, we included only Members of Congress who sponsored more than 10 bills. Similarly for Joining Bipartisan Bills, we included Members of Congress who cosponsored more than 10 bills.</p>
 		<p><strong>Leadership/Ideology:</strong> The leadership and ideology scores are not displayed for Members of Congress who introduced fewer than 10 bills, or, for ideology, for Members of Congress that have a low leadership score, as there is usually not enough data in these cases to compute reliable leadership and ideology statistics.</p>
 		<p><strong>Transparency Bills:</strong> We identified 14 bills (9 House bills and 5 Senate bills) that improve access to government records and are on subjects that we believe are non-partisan.</p>
 	</section>
