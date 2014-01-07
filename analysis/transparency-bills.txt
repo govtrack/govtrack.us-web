@@ -1,14 +1,20 @@
+hr96-113	Cameras in the Courtroom Act
 hr760-113	Readable Legislation Act of 2013
+hr917-113	Sunshine in the Courtroom Act of 2013
 hr1104-113	FACA amendments
+hr1133-113	Presidential Library Donation Reform Act of 2013
 hr1162-113	Government Accountability Office Improvement Act
 hr1211-113	FOIA Act
 hr1233-113	Presidential and Federal Records Act Amendments of 2013
-hr1133-113	Presidential Library Donation Reform Act of 2013
 hr1380-113	Access to Congressionally Mandated Reports Act
 hr2061-113	DATA Act
-hr3361-113	FISA reform
+hr2440-113	FISA Court in the Sunshine Act of 2013
+hr2475-113	Ending Secret Law Act
 s375-113	Senate Campaign Disclosure Parity Act
+s405-113	Sunshine in the Courtroom Act of 2013
 s549-113	Public Online Information Act of 2013
 s994-113	DATA Act
-s1599-113	FISA reform
+s1130-113	Ending Secret Law Act
+s1207-113	Cameras in the Courtroom Act
+s1467-113	FISA Court Reform Act of 2013
 s1665-113	Read the Bills Act

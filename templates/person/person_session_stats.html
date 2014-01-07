@@ -277,7 +277,7 @@ function smooth_scroll(elem) {
 			subcommittee{{stat.subcommittees|length|pluralize}}, as either a chair (majority party) or ranking member (minority party), at the end of the session. For comparison to other Members of Congress, we assigned a score giving five points for each full committee leadership position and one point for each subcommittee leadership position. <a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
 
 		{% elif stat.key == "transparency-bills" %}
-			<p>GovTrack looked at whether {{person.lastname}} supported any of {{stat.num_bills}} government transparency bills in the {{stat.chamber}} that we identified in this session. We gave {{person.lastname}} <strong>{{stat.value}}</strong> point{{stat.value|pluralize}}, based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
+			<p>GovTrack looked at whether {{person.lastname}} supported any of {{stat.num_bills}} <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">government transparency bills</a> in the {{stat.chamber}} that we identified in this session. We gave {{person.lastname}} <strong>{{stat.value}}</strong> point{{stat.value|pluralize}}, based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
 			{% if stat.sponsored|length > 0 %}<p class="details">Sponsored: {% for title, link in stat.sponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 			{% if stat.cosponsored|length > 0 %}<p class="details">Cosponsored: {% for title, link in stat.cosponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
@@ -368,7 +368,7 @@ function smooth_scroll(elem) {
 		<p><strong>Speaker&rsquo;s Votes:</strong> Missed votes are not computed for the Speaker of the House. According to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings.&rdquo; In practice this means the Speaker of the House rarely votes but is not considered absent.</p>
 		<p><strong>Bipartisan Bills:</strong> When computing statistics for Writing Bipartisan Bills, we included only Members of Congress who sponsored more than 10 bills. Similarly for Joining Bipartisan Bills, we included Members of Congress who cosponsored more than 10 bills.</p>
 		<p><strong>Leadership/Ideology:</strong> The leadership and ideology scores are not displayed for Members of Congress who introduced fewer than 10 bills, or, for ideology, for Members of Congress that have a low leadership score, as there is usually not enough data in these cases to compute reliable leadership and ideology statistics.</p>
-		<p><strong>Transparency Bills:</strong> We identified 14 bills (9 House bills and 5 Senate bills) that improve access to government records and are on subjects that we believe are non-partisan.</p>
+		<p><strong>Transparency Bills:</strong> We identified <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">20 bills (12 House bills and 8 Senate bills)</a> that improve access to government records and are on subjects that we believe are non-partisan.</p>
 	</section>
 </div><!-- /member-details -->
 
