@@ -2047,13 +2047,17 @@ a.button.prefix, a.button.postfix {
 		background: none;
 		padding: 0 6px 0 0;
 		}
+	#breadcrumbs, #breadcrumbs a {
+		color: #fff;
+		}
 	#breadcrumbs a {
-		color: #eee;
 		font-size: 12px;
 		}
 	#breadcrumbs a:hover {
 		text-shadow: 0 1px 2px #333;
-	}
+		}
+	#breadcrumbs li:nth-child(3), #breadcrumbs li:nth-child(3) a { text-shadow: 0 1px 1px #ccc; }
+	#breadcrumbs li:nth-child(4), #breadcrumbs li:nth-child(4) a { text-shadow: 0 1px 1px #aaa; }
 
 /* Summary box styles
 	 ================================================= */
