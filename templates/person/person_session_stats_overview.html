@@ -1,0 +1,205 @@
+{% extends "master_b.html" %}
+{% load humanize persontags cache govtrack_utils %}
+
+{% block title %}Report Cards for {{session}}{% if specific_stat %} - {{specific_stat_title}}{% endif %}{% if cohort %} - {{cohort_title}}{% endif %} - GovTrack.us{% endblock %}
+{% block meta_description %}Year-end {{session}} legislative statistics.{% endblock %}
+{% block cat-icon-filename %}img-congress-members.png{% endblock %}
+
+{% block head %}
+<style>
+	section.stat .nine.columns {
+		margin: 0 0 2em 0;
+	}
+
+	section p.notes {
+		font-size: 88%;
+		color: #777;
+		margin: 1em 0 1em 0;
+	}
+
+	section .icon {
+		margin: 0 auto;
+		width: 150px;
+		height: 120px;
+	}
+	section.icon-congress-members .icon {
+		background: url(/static/images/img-congress-members.png) center 5px no-repeat;
+	}
+	section.icon-committees .icon {
+		background: url(/static/images/img-committees.png) center 15px no-repeat;
+	}
+	section.icon-bills-resolutions .icon {
+		background: url(/static/images/img-bills-resolutions.png) center 5px no-repeat;
+	}
+	section.icon-voting-records .icon {
+		background: url(/static/images/img-voting-records.png) center top no-repeat;
+	}
+	section.icon-open-government .icon {
+		background: url(/static/images/img-open-government.png) center top no-repeat;
+	}
+	section.icon-handshake .icon{
+		background: url(/static/images/img-handshake.png) center top no-repeat;
+	}
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li><a href="{% url "congress_home" %}">Congress</a></li>
+	<li><a href="/congress/members">Members of Congress</a></li>
+	{% if cohort or specific_stat %}
+		<li><a href="/congress/members/report-cards/{{session}}">{{session}} Report Cards</a></li>
+		{% if cohort %}<li>{{cohort_title}}</li>{% endif %}
+		{% if specific_stat %}<li>{{specific_stat_title}}</li>{% endif %}
+	{% else %}
+		<li>{{session}} Report Cards</li>
+	{% endif %}
+</ul>
+{% endblock %}
+
+{% block body_class %}member{% endblock %}
+
+{% block summary %}
+<div class="row group">
+	<h1>{{session}} Report Cards{% if cohort %}: {{cohort_title}}{% endif %}</h1>
+
+	<p>These special year-end statistics dissect the legislative records of Members of Congress during the {{session}}.</p>
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+
+	<div class="three columns">
+		{% if cohorts %}
+		<p>Look at report cards for...</p>
+		<ul>
+		{% for sort_order, cohort_key, cohort_name, cohort_count in cohorts %}
+			{% if cohort_key != cohort %}
+				<li><a href="/congress/members/report-cards/{{session}}/{{cohort_key}}" {% if not cohort %}{% if cohort_key == "house" or cohort_key == "senate" %}style="font-weight: bold"{% endif %}{% endif %}>{{cohort_name}}</a> ({{cohort_count}})</li>
+			{% else %}
+				<li><strong>{{cohort_name}} ({{cohort_count}})</strong></li>
+			{% endif %}
+		{% endfor %}
+		</ul>
+		{% endif %}
+	</div>
+
+	<div class="nine columns">
+
+		{% for stat in metrics %}
+		<section id="{{stat.key}}" class="row stat {{stat.key}} icon-{{stat.icon}}">
+			<div class="three columns">
+				<div class="icon">&nbsp;</div>
+			</div>
+
+			<div class="nine columns">
+				<h2>{{stat.title}}</h2>
+
+				{% if stat.key == "missed-votes" %}
+					<p>The percentage of votes each legislator missed in {{session}}.</p>
+
+				{% elif stat.key == "bills-introduced" %}
+					<p>The number of bills each legislator introduced in {{session}}.</p>
+
+				{% elif stat.key == "bills-enacted" %}
+					<p>The number of bills each legislator introduced that became law in {{session}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law.</p>
+
+				{% elif stat.key == "bills-reported" %}
+					<p>The number of bills that each legislator introduced in {{session}} that got a committee vote sending it to the floor for further consideration. Most bills and resolutions languish in committee without any action.</p>
+
+				{% elif stat.key == "bills-with-committee-leaders" %}
+					<p>The number of bills that each legislator introduced in {{session}} that had a cosponsor who was a chair or ranking member of a committee that the bill was referred to. Getting support from committee leaders on relevant committees is a crucial step in moving legislation forward.</p>
+
+				{% elif stat.key == "bills-with-cosponsors-both-parties" %}
+					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the percent of bills introduced by each legislator in {{session}} which had both a Democratic cosponsor and a Republican cosponsor.</p>
+
+				{% elif stat.key == "bills-with-companion" %}
+					<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. This is the number of bills introduced by each legislator in {{session}} that had a companion bill in the other chamber. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>
+
+				{% elif stat.key == "cosponsors" %}
+					<p>The total number of cosponsors joining the bills written by each legislator in {{session}}.</p>
+
+				{% elif stat.key == "cosponsored" %}
+					<p>The number of bills cosponsored by each legislator in {{session}}.</p>
+
+				{% elif stat.key == "cosponsored-other-party" %}
+					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the percent of bills cosponsored by each legislator which were introduced by a member of the other party.</p>
+
+				{% elif stat.key == "ideology" %}
+					<p>Our unique ideology analysis assigns a score to Members of Congress according to their legislative behavior by how similar the pattern of bills and resolutions they cosponsor are to other Members of Congress.</p>
+
+				{% elif stat.key == "leadership" %}
+					<p>Our unique leadership analysis looks at who is cosponsoring whose bills. A higher score
+					shows a greater ability to get cosponsors on bills.</p>
+
+				{% elif stat.key == "committee-positions" %}
+					<p>A score, giving five points for each full committee leadership position and one point for each subcommittee leadership position, for each legislator.</p>
+
+				{% elif stat.key == "transparency-bills" %}
+					<p>GovTrack looked at whether legislators supported any of 20 <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">government transparency bills</a> that we identified in {{session}}. We gave a score to each legislator based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
+				{% endif %}
+
+				<table>
+				{% for context in stat.contexts %}
+					{% if not cohort %}
+					<tr><td colspan="3"><h5 {% if not forloop.first %}style="margin-top: 1em"{% endif %}>{{context.title}}</h5></td></tr>
+					{% endif %}
+
+					{% for ascending_descending in context.people %}
+						{% for rank, value, person in ascending_descending %}
+							<tr>
+								<td style="text-align: right; padding-right: 1em; color: #777">
+									#{{rank}}
+								</td>
+								<td style="text-align: right; padding-right: 1em">
+									{% if stat.key == "ideology" or stat.key == "leadership" %}
+										{{value|floatformat:2}}
+									{% elif stat.key == "missed-votes" or stat.key == "bills-with-cosponsors-both-parties" or stat.key == "cosponsored-other-party" %}
+										{{value|floatformat:1}}%
+									{% else %}
+										{{value}}
+									{% endif %}
+								</td>
+								<td><a href="{{person.get_absolute_url}}/report-card/{{session}}">{{person}}</a></td>
+							</tr>
+						{% endfor %}
+						{% if forloop.first and context.people.0|length > 0 and context.people.1|length > 0 %}<tr><td colspan="3" style="text-align: center">...</td></tr>{% endif %}
+					{% endfor %}
+				
+					{% if not specific_stat %}
+					<tr><td colspan="2"></td><td><small><a href="/congress/members/report-cards/{{session}}/{{context.key}}/{{stat.key}}">Expand...</a></small></td></tr>
+					{% else %}
+					<tr><td colspan="2"></td><td><small><a href="/congress/members/export/report-card/{{session}}/{{stat.key}}/{{context.key}}.csv">Export to CSV...</a></small></td></tr>
+					{% endif %}
+				{% endfor %}
+				</table>
+
+				
+				{% if stat.key == "missed-votes" %}
+					<p class="details">The Speaker of the House is not included in this statistic (see the notes at the very bottom of the page for why), and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>
+				{% elif stat.key == "bills-with-cosponsors-both-parties" %}
+					<p class="notes">Only Members of Congress who sponsored more than 10 bills and resolutions are included in this statistic.</p>
+				{% elif stat.key == "cosponsored-other-party" %}
+					<p class="notes">Only Democratic and Republican Members of Congress who cosponsored more than 10 bills and resolutions are included in this statistic.</p>
+				{% elif stat.key == "ideology" %}
+					<p class="notes">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{session}} is considered, the ideology score here may differ from those elsewhere on GovTrack.</p>
+				{% elif stat.key == "leadership" %}
+					<p class="notes">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{session}} is considered, the leadership scores here may differ from those elsewhere on GovTrack.</p>
+				{% endif %}
+
+			</div>
+		</section>
+		{% endfor %}
+	</div>
+
+</div><!-- /.row -->
+
+<div class="row">
+	<section>
+		{% include "person/session_stats_notes.html" %}
+	</section>
+
+</div><!-- /.row -->
+{% endblock %}
+

@@ -374,124 +374,9 @@ def person_session_stats(request, pk, session):
     # get the role as stored in the file
     role = PersonRole.objects.get(id=stats["role_id"])
 
-    stat_titles = {
-        "missed-votes":  { "title": "Missed Votes", "icon": "voting-records" },
-        "bills-introduced":  { "title": "Bills Introduced", "icon": "bills-resolutions" },
-        "bills-enacted":  { "title": "Laws Enacted", "icon": "bills-resolutions" },
-        "bills-reported":  { "title": "Bills Out of Committee", "icon": "committees" },
-        "bills-with-committee-leaders":  { "title": "Powerful Cosponsors", "icon": "committees" },
-        "bills-with-cosponsors-both-parties":  { "title": "Writing Bipartisan Bills", "icon": "handshake" },
-        "bills-with-companion":  { "title": "Working with the {{other_chamber}}", "icon": "handshake" },
-        "cosponsors":  { "title": "Cosponsors", "icon": "congress-members" },
-        "cosponsored":  { "title": "Bills Cosponsored", "icon": "bills-resolutions" },
-        "cosponsored-other-party":  { "title": "Joining Bipartisan Bills", "icon": "handshake" },
-        "ideology": { "title": "Ideology Score", "icon": "congress-members", "superlatives": ("most conservative", "most liberal") },
-        "leadership":  { "title": "Leadership Score", "icon": "congress-members" },
-        "committee-positions":  { "title": "Committee Positions", "icon": "committees" },
-        "transparency-bills":  { "title": "Government Transparency", "icon": "open-government" },
-    }
-
-    # Remove ideology if the person has a low leadership score because it indicates bad data.
-    # Remove it and leadership if the introduced fewer than ten bills.
-    if stats["stats"]["bills-introduced"]["value"] < 10 or stats["stats"]["leadership"]["value"] < .25: del stats["stats"]["ideology"]
-    if stats["stats"]["bills-introduced"]["value"] < 10: del stats["stats"]["leadership"]
-    for s in list(stats["stats"].keys()):
-        if stats["stats"][s]["value"] is None:
-            del stats["stats"][s]
-
-    # Delete some dumb other contexts.
-    delete = [
-        ("committee-positions", "senate-committee-leaders"),
-        ("committee-positions", "house-committee-leaders"),
-        ("missed-votes", "party-house-democrat"),
-        ("missed-votes", "party-house-republican"),
-        ("missed-votes", "party-house-independent"),
-        ("missed-votes", "party-senate-democrat"),
-        ("missed-votes", "party-senate-republican"),
-        ("missed-votes", "party-senate-independent"),
-        ]
-    for statname, stat in stats["stats"].items():
-        if "context" not in stat: continue
-        for s, c in delete:
-            if statname == s and c in stat["context"]:
-                del stat["context"][c]
-
-    # put nice names in the context cohorts
-    def get_cohort_name(key):
-        if key == "house": return "All Representatives"
-        if key == "senate": return "All Senators"
-        if key == "party-house-democrat": return "House Democrats"
-        if key == "party-house-republican": return "House Republicans"
-        if key == "party-house-independent": return "House Independents"
-        if key == "party-senate-democrat": return "Senate Democrats"
-        if key == "party-senate-republican": return "Senate Republicans"
-        if key == "party-senate-independent": return "Senate Independents"
-        if key.startswith("house-state-delegation-"): return statenames[key[23:25].upper()] + " Delegation"
-        if key == "house-leadership": return "House Party Leaders"
-        if key == "senate-leadership": return "Senate Party Leaders"
-        if key == "house-freshmen": return "House Freshmen"
-        if key == "senate-freshmen": return "Senate Freshmen"
-        if key == "house-sophomores": return "House Sophomores"
-        if key == "senate-sophomores": return "Senate Sophomores"
-        if key == "house-tenyears": return "Serving 10+ Years"
-        if key == "senate-tenyears": return "Senators Serving 10+ Years"
-        if key == "house-committee-leaders": return "House Cmte. Chairs/RkMembs"
-        if key == "senate-committee-leaders": return "Senate Cmte. Chairs/RkMembs"
-        if key == "house-competitive-seat": return "Competitive House Seats"
-        if key == "house-safe-seat": return "Safe House Seats"
-        raise ValueError(key)
-    for statname, stat in stats["stats"].items():
-        stat["key"] = statname
-        stat.update(stat_titles.get(statname, { "title": statname, "icon": "" }))
-        stat["title"] = stat["title"].replace("{{other_chamber}}", stat.get("other_chamber",""))
-
-        stat["show_values"] = statname not in ("leadership", "ideology")
-        if "superlatives" not in stat: stat["superlatives"] = ("highest", "lowest")
-
-        for cohort, context in stat.get("context", {}).items():
-            context["key"] = cohort
-            context["name"] = get_cohort_name(cohort)
-
-            # If the person's rank is less than the number of ties, don't use this context
-            # for the headline.
-            if min(context["rank_ascending"], context["rank_descending"]) < context["rank_ties"]:
-                context["use_in_headline"] = False
-
-            # These are never interesting.
-            if cohort == "house-safe-seat":
-                context["use_in_headline"] = False
-
-            # The percentile we computed off-line is the normal percentile, but it's not good for
-            # "Top 20%"-style measures. Re-do it.
-            context["percentile2"] = (min(context["rank_ascending"], context["rank_descending"]) + context["rank_ties"])/float(context["N"])
-
-    stats["stats"] = list(stats["stats"].values())
-
-    # Within each statistic, put the context cohorts into the most interesting
-    # order for display, which is cohorts from smallest size to largest size.
-    #
-    # Also choose the context cohort that is best for the statistic's headline,
-    # which is the cohort with the most extreme percentile, with ties favoring
-    # the larger group.
-    def cohort_comparer_for_display(cohort):
-        return cohort["N"]
-    def cohort_comparer_for_headline(cohort):
-        return (min(cohort["percentile"], 100-cohort["percentile"]), -cohort["N"])
-    for stat in stats["stats"]:
-        if len(stat.get("context", {})) == 0: continue
-        stat["context_for_display"] = sorted(stat["context"].values(), key = cohort_comparer_for_display)
-
-        contexts_for_headline = [c for c in stat["context"].values() if c.get("use_in_headline", True)]
-        if len(contexts_for_headline) > 0:
-            stat["context_for_headline"] = sorted(contexts_for_headline, key = cohort_comparer_for_headline)[0]
-
-    # put the statistics in the most interesting order, which is statistics
-    # for which the member has the most extreme values to display.
-    def stat_comparer(stat):
-        if len(stat.get("context_for_headline", [])) == 0: return (999999, 0) # no contextual info, put last
-        c = stat["context_for_headline"]
-        return (min(c["rank_ascending"], c["rank_descending"]) + c["rank_ties"]/2.0, -c["N"])
-    stats["stats"].sort(key = stat_comparer)
+    # clean and sort the stats for this person so they're ready for display
+    from person.views_sessionstats import clean_person_stats
+    clean_person_stats(stats)
 
     # group into an order for navigation
     nav_groups = []
@@ -517,6 +402,96 @@ def person_session_stats(request, pk, session):
         "meta": stats["meta"],
         "stats": stats["stats"],
         "nav_groups": nav_groups,
+    }
+
+@anonymous_view
+@render_to('person/person_session_stats_overview.html')
+def person_session_stats_overview(request, session, cohort, specific_stat):
+    try:
+        stats = Person.load_session_stats(session)
+    except ValueError:
+        # no stats
+        raise Http404()
+
+    from person.views_sessionstats import get_cohort_name, stat_titles
+
+    # Get all of the cohorts in the data.
+    cohorts = { }
+    cohort_keys = set()
+    for person in stats["people"].values():
+        for c in person["cohorts"]:
+            c = c["key"]
+            cohorts[c] = cohorts.get(c, 0) + 1
+            cohort_keys.add(c)
+    cohorts = [ (-v, k, get_cohort_name(k, True), v) for k,v in cohorts.items() if "delegation" not in k and v > 10]
+    cohorts = sorted(cohorts)
+
+    # Gather data.
+    metrics = { }
+    for pid, person in stats["people"].items():
+        try:
+            personobj = Person.objects.get(id=int(pid))
+        except:
+            # debugging
+            continue
+
+        for stat, statinfo in person["stats"].items():
+            if specific_stat is not None and stat != specific_stat: continue
+
+            for cohort_key, context in statinfo.get("context", {}).items():
+                # filter by cohort, if we're doing that
+                if cohort is not None and cohort != cohort_key: continue
+                if cohort is None and cohort_key not in ("house", "senate"): continue
+
+                # create an entry for this statistic
+                metrics.setdefault(stat, {
+                    "key": stat,
+                    "title": stat_titles[stat]["title"],
+                    "icon": stat_titles[stat]["icon"],
+                    "contexts": { }
+                })
+                metrics[stat]["title"] = metrics[stat]["title"].replace("{{other_chamber}}", "Other Chamber")
+                metrics[stat]["contexts"].setdefault(cohort_key, {
+                    "key": cohort_key,
+                    "title": get_cohort_name(cohort_key, True),
+                    "N": context["N"],
+                    "people": ([], []),
+                    })
+
+                # if this person ranks #1, #2, #3, fill him in
+                c = metrics[stat]["contexts"][cohort_key]["people"]
+                if specific_stat is not None:
+                    c[0].append( (context["rank_descending"], statinfo["value"], personobj) )
+                elif context["rank_ties"] <= 3:
+                    if context["rank_ascending"] < 3 and stat in ("ideology", "leadership", "bills-with-cosponsors-both-parties", "cosponsored-other-party", "missed-votes"):
+                        c[1].append( (context["rank_descending"], statinfo["value"], personobj) )
+                    elif context["rank_descending"] < 3:
+                        c[0].append( (context["rank_descending"], statinfo["value"], personobj) )
+
+
+    metrics = sorted(metrics.values(), key = lambda m : m["title"])
+
+    for m in metrics:
+        m["contexts"] = sorted(m["contexts"].values(), key = lambda c : -c["N"])
+        for c in m["contexts"]:
+            c["people"][0].sort()
+            c["people"][1].sort()
+
+    #from person.views_sessionstats import clean_person_stats
+    #for pid, personstats in stats["people"].items():
+    #    clean_person_stats(personstats)
+
+    import dateutil
+    return {
+        "session": session,
+        "meta": stats["meta"],
+        "metrics": metrics,
+        "cohorts": cohorts,
+        "cohort": cohort,
+        "cohort_title": get_cohort_name(cohort, True) if cohort else None,
+        "specific_stat": specific_stat,
+        "specific_stat_title": stat_titles[specific_stat]["title"].replace("{{other_chamber}}", "Other Chamber") if specific_stat else None,
+        "publishdate": dateutil.parser.parse(stats["meta"]["as-of"]),
     }
 
 @anonymous_view
