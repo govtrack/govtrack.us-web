@@ -1,6 +1,6 @@
 #!script
 
-import sys, csv
+import sys, csv, json
 
 from us import get_all_sessions
 from bill.models import *
@@ -24,9 +24,25 @@ for congress, session, startdate, enddate in get_all_sessions():
 	# the first session because comparing it to the 113th Congress
 	# 1st Session today, we don't know what will be enacted in the
 	# 2nd Session.
-	enacted_bills = bills.filter(
+	enacted_bills = set(bills.filter(
 		current_status__in=BillStatus.final_status_passed_bill,
-		current_status_date__lte=enddate)
+		current_status_date__lte=enddate))
+
+	# Our final status ENACTED:* relies on the bill being assigned
+	# a slip law number by OFR. This is different from the bill actually
+	# being enacted and is certainly different from the popular notion
+	# of a bill being signed by the president. Compute the enacted list
+	# by looking at <signed> action types.
+	for b in bills:
+		fn = "data/congress/%s/bills/%s/%s%d/data.json" % (
+        	b.congress,
+            BillType.by_value(b.bill_type).slug,
+            BillType.by_value(b.bill_type).slug,
+            b.number)
+		bj = json.load(open(fn))
+		for axn in bj["actions"]:
+			if axn["type"] == "signed" and axn["acted_at"] <= enddate.isoformat():
+				enacted_bills.add(b)
 
 	page_count = 0
 	if congress >= 103:
@@ -35,5 +51,5 @@ for congress, session, startdate, enddate in get_all_sessions():
 			pp = int(pp.replace(" pages", ""))
 			page_count += pp
 
-	print congress, session, bills.count(), enacted_bills.count(), page_count
+	print congress, session, bills.count(), len(enacted_bills), page_count
 
