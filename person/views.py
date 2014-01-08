@@ -60,10 +60,10 @@ def person_details(request, pk):
         analysis_data = analysis.load_data(person)
         has_session_stats = False
         if role:
-            #try:
+            try:
                 has_session_stats = role.get_most_recent_session_stats()
-            #except:
-            #s    pass
+            except:
+                pass
         
         links = []
         if person.osid: links.append(("OpenSecrets", "http://www.opensecrets.org/politicians/summary.php?cid=" + person.osid))
