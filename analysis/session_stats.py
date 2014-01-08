@@ -90,6 +90,29 @@ def get_vote_stats(person, role, stats, votes_this_year):
 		"role": RoleType.by_value(role.role_type).key,
 	}
 
+def was_bill_enacted(b, startdate, enddate):
+	# our status code is currently tied to the assignment of a slip
+	# law number, which isn't what we mean exactly.
+
+	# If it *was* assigned a slip law number, which in the future might
+	# be useful for veto overrides, then OK.
+	if b.current_status in BillStatus.final_status_passed_bill and \
+		startdate <= b.current_status_date <= enddate:
+		return True
+
+	# Otherwise, check the actions for a <signed> action.
+	fn = "data/congress/%s/bills/%s/%s%d/data.json" % (
+    	b.congress,
+        BillType.by_value(b.bill_type).slug,
+        BillType.by_value(b.bill_type).slug,
+        b.number)
+	bj = json.load(open(fn))
+	for axn in bj["actions"]:
+		if axn["type"] == "signed" and startdate.isoformat() <= axn["acted_at"] <= enddate.isoformat():
+			return True
+			
+	return False
+
 def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committee_membership):
 	# How many bills did the Member introduce during this time window?
 	bills = Bill.objects.filter(sponsor=person, congress=congress,
@@ -99,10 +122,11 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 	}
 
 	# How many bills were enacted within this time window?
-	bills_enacted = bills.filter(current_status__in=BillStatus.final_status_passed_bill,
-		current_status_date__gte=startdate, current_status_date__lte=enddate)
+	#bills_enacted = bills.filter(current_status__in=BillStatus.final_status_passed_bill,
+	#	current_status_date__gte=startdate, current_status_date__lte=enddate)
+	bills_enacted = [b for b in bills if was_bill_enacted(b, startdate, enddate)]
 	stats["bills-enacted"] = {
-		"value": bills_enacted.count(),
+		"value": len(bills_enacted),
 		"bills": make_bill_entries(bills_enacted),
 	}
 

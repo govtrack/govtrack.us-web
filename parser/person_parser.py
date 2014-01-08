@@ -231,7 +231,7 @@ def main(options):
                     # must match on date and chamber
                     if leadership_node["start"] >= role.enddate.isoformat(): continue # might start on the same day but is for the next Congress
                     if "end" in leadership_node and leadership_node["end"] <= role.startdate.isoformat(): continue # might start on the same day but is for the previous Congress
-                    if leadership_node["chamber"].lower() != RoleType.by_value(role.role_type).congress_chamber: continue
+                    if leadership_node["chamber"] != RoleType.by_value(role.role_type).congress_chamber.lower(): continue
                     role.leadership_title = leadership_node["title"]
                 
                 # Try to match this role with one already in the database.
