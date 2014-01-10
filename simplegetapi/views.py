@@ -415,6 +415,9 @@ def get_model_filterable_fields(model, qs_type):
         for unique_together in model._meta.unique_together:
             for i in xrange(len(unique_together)):
                 indexed_if[unique_together[i]] = unique_together[:i]
+
+        # Also allow the model to specify other conditions.
+        indexed_if.update( getattr(model, "api_filter_if", {}) )
         
     elif qs_type == "SearchQuerySet":
         # The queryset is a Haystack SearchQuerySet. Allow filtering/sorting on fields indexed
@@ -538,9 +541,9 @@ def serialize_response_csv(response, is_list, requested_fields, format):
         resp = HttpResponse(raw_data, mimetype="text/csv")
         resp['Content-Disposition'] = 'attachment; filename="query.csv"'
     elif format == "csv:inline":
-        resp = HttpResponse(raw_data, mimetype="text/csv")
-        resp['Content-Disposition'] = 'inline; filename="query.csv"'
-    else:
+        #resp = HttpResponse(raw_data, mimetype="text/csv")
+        #resp['Content-Disposition'] = 'inline; filename="query.csv"'
+    #else:
         resp = HttpResponse(raw_data, mimetype="text/plain")
         resp['Content-Disposition'] = 'inline'
     resp["Content-Length"] = len(raw_data)

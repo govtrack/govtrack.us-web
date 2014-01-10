@@ -287,6 +287,7 @@ class Voter(models.Model):
     
     api_recurse_on = ('vote', 'person', 'option')
     api_example_parameters = { "sort": "-created" }
+    api_filter_if = { "option__key": ["person"] }
     
     def __unicode__(self):
         return '%s /%s/ %s' % (self.person, self.option.key, self.vote)
