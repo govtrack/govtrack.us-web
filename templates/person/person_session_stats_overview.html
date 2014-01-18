@@ -142,9 +142,7 @@
 
 				<table>
 				{% for context in stat.contexts %}
-					{% if not cohort %}
 					<tr><td colspan="3"><h5 {% if not forloop.first %}style="margin-top: 1em"{% endif %}>{{context.title}}</h5></td></tr>
-					{% endif %}
 
 					{% for ascending_descending in context.people %}
 						{% for rank, value, person in ascending_descending %}
@@ -178,12 +176,14 @@
 				
 				{% if stat.key == "missed-votes" %}
 					<p class="details">The Speaker of the House is not included in this statistic (see the notes at the very bottom of the page for why), and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>
+				{% elif stat.key == "bills-enacted" %}
+					<p class="notes">We only count enacted bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through companion bills or incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
 				{% elif stat.key == "bills-with-cosponsors-both-parties" %}
 					<p class="notes">Only Members of Congress who sponsored more than 10 bills and resolutions are included in this statistic.</p>
 				{% elif stat.key == "cosponsored-other-party" %}
 					<p class="notes">Only Democratic and Republican Members of Congress who cosponsored more than 10 bills and resolutions are included in this statistic.</p>
 				{% elif stat.key == "ideology" %}
-					<p class="notes">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{session}} is considered, the ideology score here may differ from those elsewhere on GovTrack.</p>
+					<p class="notes">For more, see <a href="/about/analysis#ideology">our methodology</a>. Note that because on this page only legislative activity in {{session}} is considered, the ideology score here may differ from those elsewhere on GovTrack.</p>
 				{% elif stat.key == "leadership" %}
 					<p class="notes">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{session}} is considered, the leadership scores here may differ from those elsewhere on GovTrack.</p>
 				{% endif %}

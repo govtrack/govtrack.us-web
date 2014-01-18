@@ -507,6 +507,7 @@ def person_session_stats_export(request, session, statistic, cohort):
     for person_id, person_stats in stats["people"].items():
         if cohort not in [c["key"] for c in person_stats["cohorts"]]: continue
         if statistic not in person_stats["stats"]: continue
+        if "context" not in person_stats["stats"][statistic]: continue
         rows.append([
             person_stats["stats"][statistic]["context"][cohort]["rank_ascending"],
             person_stats["stats"][statistic]["context"][cohort]["rank_descending"],

@@ -1,7 +1,8 @@
 {% if format == "text" %}
 active: true
-subject: "New on GovTrack in Fall 2013"
+subject: "2013 Report Cards for All Members of Congress"
 ----------
 {% endif %}
 
-There's lots new on GovTrack this season. Read about our [Fall 2013 Updates](https://www.govtrack.us/blog/2013/12/12/fall-2013-updates-to-govtrack/), including calling congress, better bill text, keyword trackers, historical bills, and more.
+We made a report card for every Member of Congress based on the legislative activity in 2013.
+Read more [about the report cards](https://www.govtrack.us/blog/2014/01/08/2013-report-cards-for-all-members-of-congress/).
