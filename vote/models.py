@@ -290,7 +290,7 @@ class Voter(models.Model):
     api_filter_if = { "option__key": ["person"] }
     
     def __unicode__(self):
-        return '%s /%s/ %s' % (self.person, self.option.key, self.vote)
+        return u'%s /%s/ %s' % (unicode(self.person), self.option.key, unicode(self.vote))
         
     def voter_type_is_member(self):
         return self.voter_type == VoterType.member
