@@ -540,10 +540,10 @@ def serialize_response_csv(response, is_list, requested_fields, format):
     if (len(raw_data) > 500000 and format == "csv") or format == "csv:attachment":
         resp = HttpResponse(raw_data, mimetype="text/csv")
         resp['Content-Disposition'] = 'attachment; filename="query.csv"'
-    elif format == "csv:inline":
+    #elif format == "csv:inline":
         #resp = HttpResponse(raw_data, mimetype="text/csv")
         #resp['Content-Disposition'] = 'inline; filename="query.csv"'
-    #else:
+    else:
         resp = HttpResponse(raw_data, mimetype="text/plain")
         resp['Content-Disposition'] = 'inline'
     resp["Content-Length"] = len(raw_data)
