@@ -214,8 +214,11 @@ def events_list_items(request):
 def events_rss(request):
     import django.contrib.syndication.views
     import urllib
-    
-    feedlist, feedtitle = get_feed_list(request)
+
+    try:
+        feedlist, feedtitle = get_feed_list(request)
+    except Exception as e:
+        raise Http404(unicode(e))
     feedtitle += " - Tracked Events from GovTrack.us"
     
     class DjangoFeed(django.contrib.syndication.views.Feed):
