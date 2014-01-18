@@ -2,7 +2,7 @@ from models import Req
 from django.core.cache import cache
 from django.conf import settings
  
-import urllib, json, datetime
+import urllib, json, datetime, base64
 
 from emailverification.models import BouncedEmail
 
@@ -25,6 +25,12 @@ HOUSE_NET_RANGES = (
 SENATE_NET_RANGES = (
     ("156.33.0.0", "156.33.255.255"),
     )
+# http://whois.arin.net/rest/org/EXOP/nets
+EOP_NET_RANGES = (
+    ("165.119.0.0", "165.119.255.255"),
+    ("198.137.240.0", "198.137.241.255"),
+    ("204.68.207.0", "204.68.207.255"),
+	)
 
 trending_feeds = None
 
@@ -72,8 +78,13 @@ def template_context_processor(request):
         
         if is_ip_in_any_range(ip, HOUSE_NET_RANGES):
             context["remote_net_house"] = True
+            request._track_this_user = True
         if is_ip_in_any_range(ip, SENATE_NET_RANGES):
             context["remote_net_senate"] = True
+            request._track_this_user = True
+        if is_ip_in_any_range(ip, EOP_NET_RANGES):
+            context["remote_net_eop"] = True
+            request._track_this_user = True
         
         try:
             cong_dist = json.loads(request.COOKIES["cong_dist"])
@@ -146,6 +157,16 @@ class GovTrackMiddleware:
             for k in ("queried", "reps"):
                 if k in cong_dist_info: del cong_dist_info[k]
             response.set_cookie("cong_dist", json.dumps(cong_dist_info), max_age=60*60*24*21)
+
+		# log some requets for processing later
+        if hasattr(request, "_track_this_user"):
+            uid = request.COOKIES.get("uuid")
+            if not uid:
+                import uuid
+                uid = base64.urlsafe_b64encode(uuid.uuid4().bytes).replace('=', '')
+            response.set_cookie("uuid", uid, max_age=60*60*24*365*10)
+            print "TRACK", uid, datetime.datetime.now().isoformat(), base64.b64encode(repr(request))
+
         return response
 
 
