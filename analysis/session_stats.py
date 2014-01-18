@@ -90,9 +90,12 @@ def get_vote_stats(person, role, stats, votes_this_year):
 		"role": RoleType.by_value(role.role_type).key,
 	}
 
-def was_bill_enacted(b, startdate, enddate):
-	# our status code is currently tied to the assignment of a slip
+def was_bill_enacted(b, startdate, enddate, recurse=True):
+	# Our status code is currently tied to the assignment of a slip
 	# law number, which isn't what we mean exactly.
+	#
+	# (Additionally, we should count a bill as enacted if any identified companion
+	# bill is enacted.)
 
 	# If it *was* assigned a slip law number, which in the future might
 	# be useful for veto overrides, then OK.
@@ -110,6 +113,12 @@ def was_bill_enacted(b, startdate, enddate):
 	for axn in bj["actions"]:
 		if axn["type"] == "signed" and startdate.isoformat() <= axn["acted_at"] <= enddate.isoformat():
 			return True
+
+	# Otherwise check companion bills.
+	#if recurse:
+	#	for rb in RelatedBill.objects.filter(bill=b, relation="identical").select_related("related_bill"):
+	#		if was_bill_enacted(rb.related_bill, startdate, enddate, recurse=False):
+	#			return True
 			
 	return False
 
