@@ -495,7 +495,7 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
     }
 
 @anonymous_view
-def person_session_stats_export(request, session, statistic, cohort):
+def person_session_stats_export(request, session, cohort, statistic):
     try:
         stats = Person.load_session_stats(session)
     except ValueError:
@@ -514,38 +514,38 @@ def person_session_stats_export(request, session, statistic, cohort):
             person_stats["stats"][statistic]["context"][cohort]["percentile"],
             person_stats["stats"][statistic]["value"],
             int(person_id),
+			"", # bioguide ID
             int(person_stats["role_id"]),
-            "",
-            "",
+            "", # state
+            "", # district
             ])
     if len(rows) == 0:
         raise Http404()
 
     # assign sortname to the 2nd column so we can use it in sorting
     people = Person.objects.in_bulk([r[4] for r in rows])
-    roles = PersonRole.objects.in_bulk([r[5] for r in rows])
+    roles = PersonRole.objects.in_bulk([r[6] for r in rows])
     for r in rows:
-        if r[4] not in people: continue # database mismatch, happens during testing
-        r[5], r[6] = roles[r[5]].state, roles[r[5]].district if isinstance(roles[r[5]].district, int) else ""
-        r[7] = people[r[4]].lastname.encode("utf-8")
+        #if r[4] not in people: continue # database mismatch, happens during testing
+        r[5] = people[r[4]].bioguideid
+        r[6], r[7] = roles[r[6]].state, roles[r[6]].district if isinstance(roles[r[6]].district, int) else ""
+        r[8] = people[r[4]].lastname.encode("utf-8")
 
-    # sort
-    rows.sort(key = lambda r : (r[0], r[5]))
-
-    # turn into strings
-    for r in rows:
-        r[0] = unicode(r[0]).encode('utf-8')
-        r[2] = unicode(r[2]).encode("utf-8")
+    # sort by rank, then by name
+    rows.sort(key = lambda r : (r[0], r[8]))
 
     # format CSV
     import csv, StringIO
     outfile = StringIO.StringIO()
     writer = csv.writer(outfile)
-    writer.writerow(["rank_from_low", "rank_from_high", "percentile", statistic, "id", "state", "district", "name"])
+    writer.writerow(["rank_from_low", "rank_from_high", "percentile", statistic, "id", "bioguide_id", "state", "district", "name"])
     for row in rows: writer.writerow(row)
     output = outfile.getvalue()
 
     # construct response
-    r = HttpResponse(output, content_type='text/csv')
-    r['Content-Disposition'] = 'attachment; filename=' + "govtrack-stats-%s-%s-%s.csv" % (session, statistic, cohort)
+    if request.GET.get("inline") is None:
+        r = HttpResponse(output, content_type='text/csv')
+        r['Content-Disposition'] = 'attachment; filename=' + "govtrack-stats-%s-%s-%s.csv" % (session, cohort, statistic)
+    else:
+        r = HttpResponse(output, content_type='text/plain')
     return r
