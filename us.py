@@ -118,6 +118,6 @@ def get_congress_from_date(when, range_type=None):
                 raise ValueError("Date is ambiguous; must pass range_type='start' or 'end'.")
 
         # Now do some simple integer math to compute the Congress number.
-        return ((legislative_year + 1) / 2) - 894
+        return ((legislative_year + 1) // 2) - 894
 
 
