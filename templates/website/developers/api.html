@@ -50,40 +50,27 @@
 	<p>You might find these useful: <a href="https://npmjs.org/package/govtrack-node">node.js wrapper</a>, <a href="https://www.temboo.com/library/Library/GovTrack/">GovTrack on Temboo</a>.</p>
 
 	<h2>General Options</h2>
-	
-	<h3>Output Format</h3>
-	
-	<p>Results are returned in JSON by default, but you can change the result format to JSONP, XML, or CSV using the <tt>format</tt> query string parameter. For instance, add <tt>format=jsonp&amp;callback=your_function</tt>, <tt>format=xml</tt>, or <tt>format=csv</tt> to your query string arguments. (You will need either a ? or an &amp; to separate it from the rest of the URL or arguments, of course.)</p>
-	
-	<p>You can also specify which fields you want using the <tt>fields</tt> argument. Use double-underscores to span relationships, such as <tt>sponsor__id</tt> for bills.</p>
-	
-	<p>To get a list of currently serving Members of Congress in CSV format use:<br/><a href="{{baseurl}}role?current=true&format=csv&fields=state,district,title_long,person__firstname,person__lastname,person__name&limit=600">{{baseurl}}role?current=true&amp;format=csv&amp;fields=state,district,title_long,person__firstname,person__lastname,person__name&amp;limit=600</a>.</p>
-	
-	<h3>Limit/Offset</h3>
-	
-	<p>Results are paged 100 per call by default. This is true even in CSV format. Set the <tt>limit</tt> parameter to a high value to get all of the results at once. Use <tt>offset</tt> to page through results. The maximum limit is 600.</p>
 
-	<h3>Sort</h3>
+	{% include "simplegetapi/documentation_generalopts.html" %}
 	
-	<p>You can sort results on a single field using the <tt>sort</tt> parameter on any sortable field (as listed below). Prepend the field name with a minus sign to sort in descending order.</p>
-	
-	<p>To find the most recent votes:<br/>
-	<a href="{{baseurl}}vote?sort=-created">{{baseurl}}vote?sort=-created</a></p>
+	<h3>Examples</h3>
 
-	<h3>Filtering</h3>
-	
-	<p>You can filter output on any filterable field, as indicated in the field documentation below.</p>
-	
-	<p>For instance, to list bills in the 112th Congress use <tt>congress=112</tt> like so:<br/><a href="{{baseurl}}bill?congress=112">{{baseurl}}bill?congress=112</a></p>
+	<p>To list bills in the 112th Congress use a filter like <tt>congress=112</tt> like so:<br/><a href="{{baseurl}}bill?congress=112">{{baseurl}}bill?congress=112</a></p>
 	
 	<p>The bills and people APIs also support the <tt>q</tt> field which performs a full-text search:<br/>
 	<a href="{{baseurl}}bill?q=internet">{{baseurl}}bill?q=internet</a></p>
-	
-	<p>To specify a null value, just use &ldquo;null&rdquo;. For date and date-time fields, use ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS), like you&rsquo;ll see in the output. All dates and times are in Congress&rsquo;s local time, i.e. U.S. Eastern (UTC-5/-4 depending on daylight savings). (Date formatting used to be quirky but this has been fixed.)</p>
 
-	<p>Besides exact comparisons, you can also use several operators as <tt>fieldname__operator</tt>. The operators are contains, exact, gt, gte, lt, lte, in, startswith, and range. To find votes this year, use:<br/>
+	<p>To find votes this year, filter using a date:<br/>
 	<a href="{{baseurl}}vote?created__gt=2013-01-01T00:00:00">{{baseurl}}vote?created__gt=2012-01-01T00:00:00</a></p>
 	
+	<p>Here is an example of using the <tt>format</tt> field to get output in CSV format, requesting 600 results with <tt>limit</tt>,
+	filtering (<tt>current=true</tt>), and requesting particular fields in the output (with underscore notation to span relationships).
+	To get a list of currently serving Members of Congress in CSV format use:<br/><a 
+	href="{{baseurl}}role?current=true&format=csv&fields=state,district,title_long,person__firstname,person__lastname,person__name&limit=600">{{baseurl}}role?current=true&amp;format=csv&amp;fields=state,district,title_long,person__firstname,person__lastname,person__name&amp;limit=600</a>.</p>
+	
+	<p>Here is an example of sorting a date field reverse-chronologically. To find the most recent votes:<br/>
+	<a href="{{baseurl}}vote?sort=-created">{{baseurl}}vote?sort=-created</a></p>
+
 	<p>The in and range operators accept multiple values separated by pipe characters. To find bills whose status is/was either signed by the president or enacted by veto override use:<br/>
 	<a href="{{baseurl}}bill?current_status__in=enacted_signed|enacted_veto_override">{{baseurl}}bill?current_status__in=enacted_signed|enacted_veto_override</a></p>
 
@@ -102,50 +89,8 @@
 	{% for endpoint, resourcedef in api %}
 		<a name="endpoint_{{endpoint}}"> </a>
 		<h3>{{endpoint|capfirst}}</h3>
-		<p>{{resourcedef.docstring}}</p>
-		<p>
-			Use the list API at <a href="{{baseurl}}{{endpoint}}">{{baseurl}}{{endpoint}}</a> to get a list of objects of this type.
-			{% if resourcedef.canonical_example %}
-				Add a slash and the ID of any object to get just that object. For instance, try out <a href="{{baseurl}}{{endpoint}}/{{resourcedef.canonical_example}}">{{baseurl}}{{endpoint}}/{{resourcedef.canonical_example}}</a>.
-			{% endif %}
-		</p>
 
-		{% if resourcedef.example_content %}
-			<pre class="example prettyprint">{{resourcedef.example_content}}</pre>
-		{% endif %}
-		
-		<h4 style="margin-left: 16px">Fields</h4>
-		
-		<dl class="schema">
-		{% for field, info in resourcedef.fields_list %}
-			<dt>{{field}}</dt>
-			<dd>
-				<div>
-				{% if field == "id" %}The primary key of this resource. Add a slash and this ID to the base URI for this API endpoint to get information on just this object.{% endif %}
-				{% if field == "link" %}The canonical URL of this resource.{% endif %}
-				{% if field != "id" and field != "resource_uri" %}{{info.help_text}}{% endif %}
-				</div>
-
-				{% if info.filterable %}<div><small>{{info.filterable}}</small></div>{% endif %}
-				
-				{% if info.enum_values %}
-				<div style="margin: 1em 0 1em 0">This field can take on the following values:</div>
-				<table>
-				<tr><th>Value</th> <th style="padding-left: 2em">Notes</th></tr>
-				{% for k, v in info.enum_values.items %}
-					<tr>
-					<td style="padding-bottom: .5em">{{k}}</td>
-					<td style="padding-left: 2em; padding-bottom: .5em; line-height: 120%">{{v.label}}
-						{% if v.description %}<br><small>{{v.description}}</small>{% endif %}
-					</td>
-					</tr>
-				{% endfor %}
-				</table>
-				{% endif %}
-			</dd>
-			<div style="clear: both"> </div>
-		{% endfor %}
-		</dl>
+		{% include "simplegetapi/documentation_fields.html" %}
 	{% endfor %}
 	
 	{% endcache %}

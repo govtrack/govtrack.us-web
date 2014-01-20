@@ -123,6 +123,7 @@ INSTALLED_APPS = (
     
     # project modules
     'twostream',
+    'simplegetapi',
     'person',
     'committee',
     'website',

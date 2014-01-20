@@ -436,7 +436,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 def api_overview(request):
-	baseurl = "http://%s/api/v2/" % request.META["HTTP_HOST"]
+	baseurl = "https://%s/api/v2/" % request.META["HTTP_HOST"]
 	
 	endpoints = ("bill", "cosponsorship", "person", "role", "vote", "vote_voter", "committee", "committee_member")
 	

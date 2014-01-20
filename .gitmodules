@@ -13,3 +13,6 @@
 [submodule "ext/congressxml"]
 	path = ext/congressxml
 	url = https://github.com/GPHemsley/congressxml
+[submodule "ext/django-simplegetapi"]
+	path = ext/django-simplegetapi
+	url = https://github.com/JoshData/django-simplegetapi
