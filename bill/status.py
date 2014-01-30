@@ -21,6 +21,8 @@ class BillStatus(enum.Enum):
     passed_bill = enum.Item(9, 'Enrolled Bill', xml_code='PASSED:BILL', search_help_text="The bill passed both chambers of Congress in identical form and goes on to the President for signing next.", sort_order=(3,2))
     pass_back_house = enum.Item(10, 'Passed House with Changes', xml_code='PASS_BACK:HOUSE', search_help_text="The House passed the bill with changes and sent it back to the Senate.", sort_order=(2,0))
     pass_back_senate = enum.Item(11, 'Passed Senate with Changes', xml_code='PASS_BACK:SENATE', search_help_text="The Senate passed the bill with changes and sent it back to the House.", sort_order=(2,1))
+    conference_passed_house = enum.Item(30, 'Conference Report Agreed to by House', xml_code='CONFERENCE:PASSED:HOUSE', search_help_text="The House approved a conference committee report to resolve differences. The Senate must also approve it.", sort_order=(2,2))
+    conference_passed_senate = enum.Item(31, 'Conference Report Agreed to by Senate', xml_code='CONFERENCE:PASSED:SENATE', search_help_text="The Senate approved a conference committee report to resolve differences. The House must also approve it.", sort_order=(2,3))
     prov_kill_suspensionfailed = enum.Item(12, 'Failed Under Suspension', xml_code='PROV_KILL:SUSPENSIONFAILED', search_help_text="Passage failed under \"suspension of the rules\" but can be voted on again.", sort_order=(4,0))
     prov_kill_cloturefailed = enum.Item(13, 'Failed Cloture', xml_code='PROV_KILL:CLOTUREFAILED', search_help_text="Cloture (ending a filibuster) failed but can be tried again.", sort_order=(4,1))
     prov_kill_pingpongfail = enum.Item(14, 'Failed to Resolve Differences', xml_code='PROV_KILL:PINGPONGFAIL', search_help_text="The House or Senate failed to resolve differences with the other chamber but can try again.", sort_order=(4,2))
@@ -79,6 +81,10 @@ def get_bill_status_string(is_current, status):
             status = "This %s passed in the Senate and the House, but the House made changes and sent it back to the Senate on %s."
         elif status == "PASS_BACK:SENATE":
             status = "This %s has been passed in the House and the Senate, but the Senate made changes and sent it back to the House on %s."
+        elif status == "CONFERENCE:PASSED:HOUSE":
+            status = "The conference report for this %s was agreed to in the House on %s. The Senate must also approve it. A conference report resolves the differences in the bill in each chamber."
+        elif status == "CONFERENCE:PASSED:SENATE":
+            status = "The conference report for this %s was agreed to in the Senate on %s. The House must also approve it. A conference report resolves the differences in the bill in each chamber."
         elif status == "PROV_KILL:SUSPENSIONFAILED":
             status = "This %s is provisionally dead due to a failed vote on %s under a fast-track procedure called \"suspension.\" It may or may not get another vote."
         elif status == "PROV_KILL:CLOTUREFAILED":
@@ -101,8 +107,10 @@ def get_bill_status_string(is_current, status):
             status = "This %s was introduced in a previous session of Congress and was passed by the Senate on %s but was never passed by the House."
         elif status == "PASSED:BILL":
             status = "This %s was passed by Congress on %s but was not enacted before the end of its Congressional session. (It is possible this bill is waiting for the signature of the President.)"
-        elif status == "PASS_BACK:HOUSE" or status == "PASS_BACK:SENATE":
+        elif status in ("PASS_BACK:HOUSE", "PASS_BACK:SENATE"):
             status = "This %s was introduced in a previous session of Congress and though it was passed by both chambers on %s it was passed in non-identical forms and the differences were never resolved."
+        elif status in ("CONFERENCE:PASSED:HOUSE", "CONFERENCE:PASSED:SENATE"):
+            status = "This %s was introduced in a previous session of Congress and though it was passed by both chambers, it was passed in non-identical form and only one chamber approved a conference report to resolve the differences."
         elif status == "PROV_KILL:SUSPENSIONFAILED" or status == "PROV_KILL:CLOTUREFAILED" or status == "PROV_KILL:PINGPONGFAIL":
             status = "This %s was introduced in a previous session of Congress but was killed due to a failed vote for cloture, under a fast-track vote called \"suspension\", or while resolving differences on %s."
         elif status == "PROV_KILL:VETO":

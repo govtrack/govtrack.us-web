@@ -580,7 +580,7 @@
 								{% for item in bill.get_major_events %}
 								<tr>
 									<td class="done" title="{{item.extra}}">{{item.label}}</td>
-									<td>{{item.date|date:"DATE_FORMAT"}}</td>
+									<td><nobr>{{item.date|date:"DATE_FORMAT"}}</nobr></td>
 								</tr>
 								{% endfor %}
 							
@@ -610,6 +610,7 @@
 											{{v}}
 										{% endif %}
 									</a><br/>
+									{% if v.is_on_passage and v.vote_type != "On Passage of the Bill" and v.vote_type != "On the Resolution" %}{{v.vote_type}}<br/>{% endif %}
 									{{v.created}}<br/>
 									{{v.summary}}</p>
 								{% endfor %}

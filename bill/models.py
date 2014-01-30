@@ -316,9 +316,9 @@ class Bill(models.Model):
             return 'Done'
         if self.current_status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
             return self.originating_chamber
-        if self.current_status in (BillStatus.pass_over_house, BillStatus.pass_back_house, BillStatus.prov_kill_cloturefailed, BillStatus.override_pass_over_house):
+        if self.current_status in (BillStatus.pass_over_house, BillStatus.pass_back_house, BillStatus.conference_passed_house, BillStatus.prov_kill_cloturefailed, BillStatus.override_pass_over_house):
             return "Senate"
-        if self.current_status in (BillStatus.pass_over_senate, BillStatus.pass_back_senate, BillStatus.prov_kill_suspensionfailed, BillStatus.override_pass_over_senate):
+        if self.current_status in (BillStatus.pass_over_senate, BillStatus.pass_back_senate, BillStatus.conference_passed_senate, BillStatus.prov_kill_suspensionfailed, BillStatus.override_pass_over_senate):
             return "House"
         return "Unknown" # prov_kill_pingpongfail, prov_kill_veto
 
@@ -639,14 +639,15 @@ class Bill(models.Model):
         for datestr, st, text, srcxml in self.major_actions:
             date = eval(datestr)
             srcnode = etree.fromstring(srcxml) if srcxml else None
-            if st == BillStatus.passed_bill or st == BillStatus.passed_concurrentres and srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
-            	ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
+            if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres) and srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
+                ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
+                # PASSED:BILL only occurs on the second chamber, so indicate both agreed to in text
                 if srcnode.get("type") == "vote2":
                     st = ("Passed %s" % ch)
                 elif srcnode.get("type") == "pingpong":
                     st = ("%s Agreed to Changes" % ch)
                 elif srcnode.get("type") == "conference":
-                    st = "Conference Report Adopted" # PASSED:BILL only occurs on the second chamber, so indicate both agreed to in text
+                    st = ("Conference Report Agreed to by %s" % ch)
             else:
                 if st == BillStatus.introduced: saw_intro = True
                 st = BillStatus.by_value(st).label
@@ -682,6 +683,8 @@ class Bill(models.Model):
                 BillStatus.pass_over_house: (BillStatus.passed_bill, "Passed Senate"),
                 BillStatus.pass_back_house: (BillStatus.passed_bill, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
+                BillStatus.conference_passed_house: (BillStatus.passed_bill, "Conference Report Agreed to by Senate"),
+                BillStatus.conference_passed_senate: (BillStatus.passed_bill, "Conference Report Agreed to by House"),
                 BillStatus.passed_bill: BillStatus.enacted_signed,
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
                 BillStatus.prov_kill_cloturefailed: (BillStatus.passed_bill, "Passed Senate"),
@@ -694,6 +697,8 @@ class Bill(models.Model):
                 BillStatus.pass_over_senate: (BillStatus.passed_bill, "Passed House"),
                 BillStatus.pass_back_house: (BillStatus.passed_bill, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
+                BillStatus.conference_passed_house: (BillStatus.passed_bill, "Conference Report Agreed to by Senate"),
+                BillStatus.conference_passed_senate: (BillStatus.passed_bill, "Conference Report Agreed to by House"),
                 BillStatus.passed_bill: BillStatus.enacted_signed,
                 BillStatus.prov_kill_suspensionfailed: (BillStatus.passed_bill, "Passed House"),
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
@@ -714,6 +719,8 @@ class Bill(models.Model):
                 BillStatus.pass_over_house: (BillStatus.passed_concurrentres, "Passed Senate"),
                 BillStatus.pass_back_house: (BillStatus.passed_concurrentres, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_concurrentres, "House Approves Senate Changes"),
+                BillStatus.conference_passed_house: (BillStatus.passed_concurrentres, "Conference Report Agreed to by Senate"),
+                BillStatus.conference_passed_senate: (BillStatus.passed_concurrentres, "Conference Report Agreed to by House"),
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
                 BillStatus.prov_kill_cloturefailed: BillStatus.passed_concurrentres,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
@@ -723,6 +730,8 @@ class Bill(models.Model):
                 BillStatus.pass_over_senate: (BillStatus.passed_concurrentres, "Passed House"),
                 BillStatus.pass_back_house: (BillStatus.passed_concurrentres, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_concurrentres, "House Approves Senate Changes"),
+                BillStatus.conference_passed_house: (BillStatus.passed_concurrentres, "Conference Report Agreed to by Senate"),
+                BillStatus.conference_passed_senate: (BillStatus.passed_concurrentres, "Conference Report Agreed to by House"),
                 BillStatus.prov_kill_suspensionfailed: BillStatus.passed_concurrentres,
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_concurrentres,
@@ -732,6 +741,8 @@ class Bill(models.Model):
                 BillStatus.pass_over_house: BillStatus.passed_constamend,
                 BillStatus.pass_back_house: BillStatus.passed_constamend,
                 BillStatus.pass_back_senate: BillStatus.passed_constamend,
+                BillStatus.conference_passed_house: BillStatus.passed_constamend,
+                BillStatus.conference_passed_senate: BillStatus.passed_constamend,
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
                 BillStatus.prov_kill_cloturefailed: BillStatus.passed_constamend,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_constamend,
@@ -741,6 +752,8 @@ class Bill(models.Model):
                 BillStatus.pass_over_senate: BillStatus.passed_constamend,
                 BillStatus.pass_back_house: BillStatus.passed_constamend,
                 BillStatus.pass_back_senate: BillStatus.passed_constamend,
+                BillStatus.conference_passed_house: BillStatus.passed_constamend,
+                BillStatus.conference_passed_senate: BillStatus.passed_constamend,
                 BillStatus.prov_kill_suspensionfailed: BillStatus.passed_constamend,
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_constamend,
