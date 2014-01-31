@@ -63,7 +63,7 @@ def bill_details(request, congress, type_slug, number):
             metadata = load_bill_text(bill, None, mods_only=True)
 
             # do interesting stuff with citations
-            if "citations" in metadata and not settings.DEBUG:
+            if "citations" in metadata: #and and not settings.DEBUG:
                 slip_laws = []
                 statutes = []
                 usc = { }
@@ -79,10 +79,12 @@ def bill_details(request, congress, type_slug, number):
                         # Build a tree of title-chapter-...-section nodes so we can
                         # display the citations in context.
                         try:
+                            can_link = True
                             sec_obj = USCSection.objects.get(citation=cite["key"])
                         except: # USCSection.DoesNotExist and MultipleObjectsReturned both possible
                             # create a fake entry for the sake of output
                             # the 'id' field is set to make these objects properly hashable
+                            can_link = False
                             sec_obj = USCSection(id=cite["text"], name=cite["text"], parent_section=usc_other)
 
                         if "range_to_section" in cite:
@@ -101,10 +103,13 @@ def bill_details(request, congress, type_slug, number):
                             if cite["section"]:
                                 cite_link += "/" + cite["section"]
                             if cite["paragraph"]: cite_link += "#" + "_".join(re.findall(r"\(([^)]+)\)", cite["paragraph"]))
-                        elif cite["type"] == "usc-chapter":
+                        elif cite["type"] == "usc-chapter" and can_link:
                             cite_link = "http://www.law.cornell.edu/uscode/text/" + cite["title"] + "/" + "/".join(
                                 (so.level_type + "-" + so.number) for so in reversed(path[:-1])
                                 )
+                        else:
+                            cite_link = None
+
                         sec_obj.link = cite_link
 
                         # now pop off from the path to put the node at the right point in a tree
