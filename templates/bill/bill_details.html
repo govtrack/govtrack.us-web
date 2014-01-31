@@ -600,8 +600,8 @@
 							<dt>Votes</dt>
 							<dd>
 								{% for v in bill.votes.all %}
-								<p class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote">
-									<a href="{{v.get_absolute_url}}">
+								<div class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote" style="margin-bottom: 1em">
+									<div><a href="{{v.get_absolute_url}}">
 										{% if v.is_on_passage %}
 											{{v.get_chamber_display}} Vote on Passage
 										{% elif v.is_major %}
@@ -609,10 +609,13 @@
 										{% else %}
 											{{v}}
 										{% endif %}
-									</a><br/>
+									</a></div>
+									<div style="font-size: 90%">
 									{% if v.is_on_passage and v.vote_type != "On Passage of the Bill" and v.vote_type != "On the Resolution" %}{{v.vote_type}}<br/>{% endif %}
 									{{v.created}}<br/>
-									{{v.summary}}</p>
+									{{v.summary}}
+									</div>
+									</div>
 								{% endfor %}
 								<p id="more_votes" style="display: none; font-style: italic;"><a href="#" onclick="return show_all_votes();">Show <span class='num'> </span> <span class='desc'> </span> vote(s)...</a><p>
 								<p id="fewer_votes" style="display: none"><a href="#" onclick="return hide_minor_votes();">Hide minor vote(s)...</a><p>
