@@ -65,18 +65,19 @@ def issue_join(request, issue_slug, position_id):
 	except IssuePosition.DoesNotExist:
 		raise Http404()
 
+	try:
+		up = UserPosition.objects.get(user=request.user, position__issue=issue)
+		if up.can_change_position():
+			# User can change his position. Delete the old position before going on.
+			up.delete()
+		else:
+			# The position is fixed. Go on to making a call.
+			return HttpResponseRedirect(issue.get_absolute_url() + "/make_call")
+	except UserPosition.DoesNotExist:
+		pass
+
 	if request.method == "POST":
 		# This is a confirmation.
-
-		try:
-			up = UserPosition.objects.get(user=request.user, position__issue=issue)
-			if not up.can_change_position():
-				return HttpResponseRedirect(issue.get_absolute_url())
-
-			# User can change his position. Delete the old position.
-			up.delete()
-		except UserPosition.DoesNotExist:
-			pass
 
 		# Create the new position.
 		UserPosition.objects.create(
@@ -118,12 +119,17 @@ def issue_make_call(request, issue_slug):
 	position = user_position.position
 	position.call_script = dynamic_call_script(issue, position, rep.person, rep)
 
+	next_step = issue.get_absolute_url()
+	for bill in issue.bills.all():
+		next_step = bill.bill.get_absolute_url()
+
 	return {
 		"issue": issue,
 		"user_position": user_position,
 		"position": position,
 		"moc": rep,
 		"other_targets": [t for t in targets if t != rep],
+		"next_step": next_step,
 		}
 
 def dynamic_call_script(issue, position, person, role):
@@ -168,6 +174,11 @@ def start_call(request):
 	if len(phone_num) != 10:
 		return { "ok": False, "msg": "Enter your area code and phone number." }
 
+	try:
+		client = twilio_client()
+	except Exception as e:
+		return { "ok": False, "msg": "Site error: " + str(e) }
+
 	cl = CallLog.objects.create(
 		user=request.user,
 		position=user_position,
@@ -175,7 +186,6 @@ def start_call(request):
 		status="not-yet-started",
 		log={})
 
-	client = twilio_client()
 	call = client.calls.create(
 		to=("+1" + phone_num),
         from_=settings.TWILIO_OUR_NUMBER,

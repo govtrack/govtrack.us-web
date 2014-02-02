@@ -225,12 +225,20 @@
 #prognosis_factors p span, #prognosis_factors .key { color: #777; font-family: Arial, Helvetica, sans-serif;}
 
 #call_congress_positions button {
-	display: block;
+	display: inline-block;
 	margin-top: .75em;
 	margin-left: 2em;
-	padding: 4px 6px 4px 4px;
-	font: 16px/20px Ubuntu, Verdana, Tahoma, Arial, sans-serif;
+	padding: 8px;
+	font: 18px/24px Ubuntu, Verdana, Tahoma, Arial, sans-serif;
+	text-align: center;
 }
+	#call_congress_positions button span {
+		display: block;
+		font-size: 42px;
+		margin-top: 10px;
+	}
+		#call_congress_positions button.support span { color: green; }
+		#call_congress_positions button.oppose span { color: red; }
 </style>
 {% endblock %}
 
@@ -444,9 +452,9 @@
 		{% endcomment %}
 		
 		<div id="action-button" style="display: none; margin: 12px 0;">
-			<a class="push-btn yellow-btn" style="font-size: 12px;" href="#" onclick="$.colorbox({href: '#action-panel', inline: true, open: true, width: ($(window).width() >= 750 ? '650px' : '90%')}); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
-				<span class="icon-thumbs-up"></span>/<span class="icon-thumbs-down"></span>
-				<span style="text-shadow: none; margin-left: 3px;">Call Congress<i>!</i></span>
+			<a class="push-btn yellow-btn"  href="#" onclick="$.colorbox({href: '#action-panel', inline: true, open: true, width: ($(window).width() >= 750 ? '650px' : '90%'), transition: 'none'}); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
+				<span class="icon-speech-bubble-round-dots" style="color: #020"></span>
+				<span style="text-shadow: none; margin-left: 3px; text-transform: none">Call Congress</span>
 			</a>
 		</div>
 		<script>if (the_segment != "House" && the_segment != "Senate") $('#action-button').show();</script>
@@ -460,11 +468,16 @@
 					}
 				</script>
 
-				<h2>Make the Call!</h2>
 				<div id="call_congress_positions">
-					<p>A phone call to Congress is an effective ways to let your voice be heard. We&rsquo;ll walk you through how to call your representative about this {{bill.noun}}.</p>
-					<button onclick="do_poll('support');"><span class="icon-thumbs-up"></span> I support {{bill.display_number}}</button>
-					<button onclick="do_poll('oppose');"><span class="icon-thumbs-down"></span> I oppose {{bill.display_number}}</button>
+					<p style="margin-bottom: 1em">A phone call to Congress is an effective way to let your voice be heard. We&rsquo;ll walk you through the whole thing. How do you feel about {{bill.display_number}}?</p>
+					<button onclick="do_poll('support');" class="support">
+						<div>I support {{bill.display_number}}</div>
+						<span class="icon-thumbs-up-filled"></span>
+					</button>
+					<button onclick="do_poll('oppose');" class="oppose">
+						<div>I oppose {{bill.display_number}}</div>
+						<span class="icon-thumbs-down-filled"></span>
+					</button>
 				</div>
 				<div id="call_congress_position_chosen" style="display: none;">
 					<p style="margin-bottom: .5em;">You chose: <span style="font-weight: bold"/></p>
@@ -485,6 +498,7 @@
 				}
 				</script>				
 				
+				<!--
 				<h2 style="margin-top: 2em;">Next: Spread the Word</h2>
 				<p>Share this {{bill.noun}} with your network of friends &mdash; especially friends in other congressional districts &mdash; to get the word out.</p>
 		
@@ -503,6 +517,7 @@
 						[<a href="#" onclick="return fb_unshare();">Un-Share</a>]
 					</div>
 				</div>
+				-->
 			
 			</div>
 		</div>

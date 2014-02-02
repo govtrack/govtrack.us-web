@@ -85,6 +85,15 @@
 				layer += "/" + state.toLowerCase() + "-00";
 
 			createDistrictsOverlay(layer);
+
+			{% if request.GET.marker_lat %}
+				var loc = new google.maps.LatLng("{{request.GET.marker_lat|escapejs}}", "{{request.GET.marker_lng|escapejs}}");
+				map.setCenter(loc);
+				var marker = new google.maps.Marker({
+					map: map, 
+					position: loc
+				});
+			{% endif %}
 			
 			{% if not hide_footer %}
 			var mh = document.getElementById("map_canvas").offsetHeight;

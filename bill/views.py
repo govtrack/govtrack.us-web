@@ -732,28 +732,43 @@ def start_poll(request):
         # no Issue yet, so create
         ix = Issue.objects.create(
             slug = "%d-%s-%d" % (bill.congress, bill.bill_type_slug, bill.number),
-            title = bill.title,
-            question = "What is your position on %s?" % bill.title,
+            title = "PLACEHOLDER",
+            question = "PLACEHOLDER",
             introtext = "Weigh in on %s." % bill.display_number_with_congress_number,
             isopen = True,
             )
         IssueByBill.objects.create(issue=ix, bill=bill, valence=True)
 
-        # how to refer to the bill
-        from django.template.defaultfilters import truncatewords
-        bt = truncatewords(bill.title, 10)
-        if "..." in bt:
-            bt = truncatewords(bill.title, 15)
-            bt = u"%s (\u201C%s\u201D)" % (bill.display_number, bt.replace(bill.display_number + ": ", ""))
-        ix.positions.add(IssuePosition.objects.create(
-            text="Support",
-            valence=True,
-            call_script="I support %s." % bt,
-            ))
-        ix.positions.add(IssuePosition.objects.create(
-            text="Oppose",
-            valence=False,
-            call_script="I oppose %s." % bt,
-            ))
+    # update the Issue since the bill title may have changed
+    ix.title = bill.title
+    ix.question = "What is your position on %s?" % bill.title
+    ix.save()
+
+    # how to refer to the bill in the call script
+    from django.template.defaultfilters import truncatewords
+    title = bill.title_no_number
+    if re.match(".* Act( of \d{4})?", title):
+        title = "The " + title
+    title = bill.display_number + ": " + title
+    bt = truncatewords(title, 11)
+    if "..." in bt:
+        bt = truncatewords(title, 15)
+        bt = u"%s (\u201C%s\u201D)" % (bill.display_number, bt.replace(bill.display_number + ": ", ""))
+
+    # create and update the options
+    for valence, verb in ((True, "support"), (False, "oppose")):
+        try:
+            p = ix.positions.get(valence=valence)
+        except:
+            p = IssuePosition.objects.create(
+                    text="PLACEHOLDER",
+                    valence=valence,
+                    call_script="PLACEHOLDER",
+                    )
+            ix.positions.add(p)
+
+        p.text = verb.title()
+        p.call_script = "I support %s." % bt
+        p.save()
 
     return HttpResponseRedirect(ix.get_absolute_url() + "/join/" + str(ix.positions.get(valence=valence).id))

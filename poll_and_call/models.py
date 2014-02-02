@@ -118,8 +118,8 @@ class UserPosition(models.Model):
 		targets = [t for t in targets if is_valid_phone(t.phone)]
 		if len(targets) == 0: return "no-phone"
 
-		# filter out anyone the user has already called or that has a not-valid phone number
-		targets = [t for t in targets if not CallLog.objects.filter(position=self, target=t).exists()]
+		# filter out anyone the user has already called 
+		targets = [t for t in targets if not CallLog.has_made_successful_call(self, t)]
 		if len(targets) == 0: return "all-calls-made"
 
 		return targets
@@ -142,3 +142,14 @@ class CallLog(models.Model):
 
 	def __unicode__(self):
 		return self.created.isoformat() + " " + unicode(self.user) + " " + unicode(self.position)
+
+	def is_complete(self):
+		return isinstance(self.log, dict) and self.log.get("finished", {}).get("RecordingUrl") is not None
+
+	@staticmethod
+	def has_made_successful_call(userposition, target):
+		for cl in CallLog.objects.filter(position=userposition, target=target):
+			if cl.is_complete():
+				return True
+		return False
+	
