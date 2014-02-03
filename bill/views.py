@@ -756,19 +756,19 @@ def start_poll(request):
         bt = u"%s (\u201C%s\u201D)" % (bill.display_number, bt.replace(bill.display_number + ": ", ""))
 
     # create and update the options
-    for valence, verb in ((True, "support"), (False, "oppose")):
+    for opt_valence, opt_verb in ((True, "support"), (False, "oppose")):
         try:
-            p = ix.positions.get(valence=valence)
+            p = ix.positions.get(valence=opt_valence)
         except:
             p = IssuePosition.objects.create(
                     text="PLACEHOLDER",
-                    valence=valence,
+                    valence=opt_valence,
                     call_script="PLACEHOLDER",
                     )
             ix.positions.add(p)
 
-        p.text = verb.title()
-        p.call_script = "I support %s." % bt
+        p.text = opt_verb.title()
+        p.call_script = "I %s %s." % (opt_verb, bt)
         p.save()
 
     return HttpResponseRedirect(ix.get_absolute_url() + "/join/" + str(ix.positions.get(valence=valence).id))
