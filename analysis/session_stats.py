@@ -97,6 +97,8 @@ def was_bill_enacted(b, startdate, enddate, recurse=True):
 	# (Additionally, we should count a bill as enacted if any identified companion
 	# bill is enacted.)
 
+	# TODO: See new function in the Bill model.
+
 	# If it *was* assigned a slip law number, which in the future might
 	# be useful for veto overrides, then OK.
 	if b.current_status in BillStatus.final_status_passed_bill and \
