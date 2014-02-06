@@ -390,6 +390,27 @@
 
 	{% block body_scripts %}{% endblock %}
 
+	<!-- Yes this is ridiculous... -->
+	<link rel="stylesheet" type="text/css" href="/static/libs/clippy/clippy.css" media="all">
+	<script src="/static/libs/clippy/clippy.min.js"></script>
+	<script type="text/javascript">
+    if (the_segment == "DC") {
+        var CLIPPY = null;
+        clippy.load(Math.random() < .9 ? 'Clippy' : 'Rover', function(agent) {
+            CLIPPY = agent;
+            agent.show();
+            setTimeout("do_clippy_anim();", 5000);
+        });
+    }
+    function do_clippy_anim() {
+        if (Math.random() < .2)
+            CLIPPY.speak("h/t @tjl");
+        else
+            CLIPPY.animate();
+        setTimeout("do_clippy_anim();", 11000);
+    }
+    </script>
+
 </body>
 </html>
 {% endwith %}
