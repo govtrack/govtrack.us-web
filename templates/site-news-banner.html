@@ -1,11 +1,11 @@
-<div class="sitenewsbody" data-seq="56">
+<div class="sitenewsbody" data-seq="57">
+	{% comment %}
 	<p>Consolidated Appropriations Act of 2014:
 		<a href="https://www.govtrack.us/congress/votes/113-2014/h21">House Vote</a>
 		| <a href="https://www.govtrack.us/congress/votes/113-2014/s13">Senate Vote</a>
 		| <a href="https://www.govtrack.us/congress/bills/113/hr3547">Bill</a>
 	</p>
-
-	<p>January 8: <a href="https://www.govtrack.us/blog/2014/01/08/2013-report-cards-for-all-members-of-congress/">2013 Report Cards for All Members of Congress</a></p>
+	{% endcomment %}
 
 	{% comment %}
 	<p>We just gave $25 to Code for America. Consider <a href="#" onclick="$('#charity-panel').slideToggle(); return false;">matching our donation</a>
@@ -29,10 +29,7 @@
 	</div>
 	{% endcomment %}
 
-	{% comment %}
-	<p><b>New:</b> <a href="https://www.govtrack.us/blog/2013/10/31/new-use-govtrack-to-call-congress/">Use GovTrack to Call Congress</a></p>
-
-	<div id="trending_trackers" style="margin: 1em auto; font-size: 90%;">
+	<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">
 	<div style="color: #553; margin-bottom: 4px; font-size: 95%; font-style: italic; padding-left: 2em;">Trending on GovTrack now...</div>
 	{% for f in trending_feeds %}
 		<a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
@@ -41,6 +38,5 @@
 	{% endfor %}
 	<div style="clear: both"> </div>
 	</div>
-	{% endcomment %}
 </div>
 <div style="clear: both"> </div>
