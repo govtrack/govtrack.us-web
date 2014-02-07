@@ -16,6 +16,3 @@
 [submodule "ext/django-simplegetapi"]
 	path = ext/django-simplegetapi
 	url = https://github.com/JoshData/django-simplegetapi
-[submodule "ext/clippy"]
-	path = ext/clippy
-	url = https://github.com/smore-inc/clippy.js
