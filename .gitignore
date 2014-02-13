@@ -6,6 +6,7 @@
 
 # Project specific
 .env
+db
 log
 settings_local.py
 pip-log.txt
