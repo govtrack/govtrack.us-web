@@ -9,7 +9,7 @@
 {% block head %}
 <style>
 	#session_stats {
-		margin: 0 0 2em -20px;
+		margin: 0 0 2em -10px;
 		border: 2px solid #EEE;
 		background-color: #E4E4E4;
 		padding: 10px 20px;
@@ -42,7 +42,7 @@
 {% block summary %}
 <div class="row group">
 	{% cache 600 member_head person.id 2 %}
-	<div id="track_panel_base" class="eight columns">
+	<div id="track_panel_base" class="col-sm-8">
 		<h1 style="line-height: 1.15em">
 			{{person.name_and_title}}
 			{% if role and active_role and role.leadership_title %}<br><small>{{role.leadership_title_full}}</small>{% endif %}
@@ -102,7 +102,7 @@
 	</div><!-- /container -->
 	{% endcache %}
 
-	<div class="aside four columns">
+	<div class="aside col-sm-4">
 		<div id="event_subscribe_inline_container"> </div>
 
 	{% cache 600 member_aside person.id %}
@@ -132,11 +132,11 @@
 {% block body %}
 <div class="row">
 {% cache 600 member_details person.id %}
-<div id="member-details" class="eight columns">
+<div id="member-details" class="col-sm-8">
 
 	{% if has_session_stats %}
 	<div id="session_stats">
-		<h3>New: {{has_session_stats.meta.session}} Report Card</h3>
+		<h3 style="margin: 0">New: {{has_session_stats.meta.session}} Report Card</h3>
 		Read our new <a href="{{person.get_absolute_url}}/report-card/{{has_session_stats.meta.session}}">{{has_session_stats.meta.session}} Report Card for {{person.lastname}} &raquo;</a>
 	</div>
 	{% endif %}
@@ -259,13 +259,13 @@
 	<section id="membership">
 		<h3>Committee Membership</h3>
 		<p>{{person.name_no_details}} sits on the following committees:</p>
-		<ul>
+		<ul style="list-style: none; padding: 0;">
 			{% for c in committeeassignments %}
 			<li>
 				{% if c.role_name != 'Member' %}{{c.role_name}}, {% endif %}
 				<a href="{{c.committee.get_absolute_url}}">{{c.committee}}</a>
 				{% if c.subroles %}
-					<ul>
+					<ul style="list-style: none; padding: 0;">
 					{% for s in c.subroles %}
 					<li>{{s.role_name}}, Subcommittee on <a href="{{s.committee.get_absolute_url}}">{{s.committee}}</a></li>
 					{% endfor %}
@@ -283,7 +283,7 @@
 	<section id="sponsorship">
 		<h3>Bills Sponsored</h3>
 		<p>Some of {{person.lastname}}’s most recently sponsored bills include...</p>
-		<ul>
+		<ul style="list-style: none; padding: 0;">
 			{% for bill in recent_bills %}
 			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
 			{% endfor %}
@@ -407,7 +407,7 @@
 	<section>
 	<h3>Primary Sources</h3>
 	<p>The information on this page is originally sourced from a variety of materials, including:</p>
-	<ul>
+	<ul style="list-style: none; padding: 0;">
 	{% with person.vote_sources as person_vote_sources %}
 		{% if committeeassignments or "congress" in person_vote_sources %}
 			<li>The <a href="http://www.house.gov">House</a> and <a href="http://www.senate.gov">Senate</a> websites, for committee membership and voting records</li>
@@ -433,7 +433,7 @@
 {% endcache %}
 
 {% cache 600 member_news person.id %}
-<div class="tweets four columns">
+<div class="tweets col-sm-4">
 	<h3>Recent Legislative Activity</h3>
 	
 	{% include "events/trackedeventspanel.html" %}

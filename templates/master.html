@@ -1,10 +1,10 @@
 {% load govtrack_utils %}
 {% with "/static/" as STATIC_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
 <!DOCTYPE html>
-<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>    <html class="lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>    <html class="lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html> <!--<![endif]-->
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en"> <!--<![endif]-->
 	<head>
 		<meta charset="utf-8" />
 
@@ -12,8 +12,11 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20131227" />
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20140215" />
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie.css" media="screen" /><![endif]-->
+
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
@@ -162,17 +165,13 @@
 	</div>
 	{% endif %}
 	
-	<div id="wrapper">
-
 		<div id="masthead">
-			<div id="header-wrap">
-				<header id="header" class="row">
-
+				<header id="header" class="container">
 					<a id="logo" href="/" class="{% block logo_class %}{% endblock %}">govtrack.us</a>
 
 					<div id="nav-block">
 						<div class="row">
-							<div class="block right">
+							<div class="block" style="float: right">
 								<ul class="super-nav">
 									{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
 									{% block override_login %}
@@ -267,11 +266,11 @@
 
 					</div><!-- /nav-block -->
 				</header>
-			</div><!-- /header-wrap -->
+		</div><!-- /masthead -->
 
 			{% block override_breadcrumbs %}
 			<div id="breadcrumbs">
-				<div class="row">
+				<div class="container">
 					{% block crumbs %}{% endblock %}
 					{% comment %}
 					<ul class="twelve columns">
@@ -283,39 +282,41 @@
 			</div>
 			{% endblock %}
 
-		</div><!-- /masthead -->
-
-
-
+		{% block wide_content %}
+		<div id="main_content">
+		<div class="container">
 		{% block override_content %}
-		<div id="content" class="row">
+		<div id="content">
+			<div class="row">
 			{% block heading_box %}
-			<header class="heading-box row">
-				<div class="eight columns">
+			<div class="heading-box row">
+				<div class="col-sm-8">
 					{% block summary %}
 					{% endblock %}
 				</div>
-				<div class="four columns">
+				<div class="col-sm-4">
 					{% block links %}
 					{% endblock %}
 				</div>
-			</header>
+			</div>
 			{% endblock %}
+			</div>
 
-
+			<div class="row">
 			{% block body %}
 			{% endblock %}
-
-
-
+			</div>
 		</div><!-- /content -->
 		{% endblock %}
-
+		</div>
+		</div>
+		{% endblock %}
 
 		<footer id="footer">
-			<div class="holder row">
+			<div class="container">
+			<div class="row">
 
-				<nav class="two columns">
+				<nav class="col-sm-2">
 					<ul>
 						<li><a href="/">Home</a></li>
 						<li><a href="/start">Start Tracking</a></li>
@@ -331,7 +332,7 @@
 					</ul>
 				</nav>
 
-				<section class="six columns offset-by-one">
+				<section class="col-sm-offset-1 col-sm-6">
 					<h4><span>site</span> Information</h4>
 					<p>GovTrack.us is a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. Read <a href="/about">about the site</a>
 					or contact us at <a href="mailto:&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>.
@@ -340,7 +341,7 @@
 					{% block footer_extra %}{% endblock %}
 				</section>
 
-				<section class="two columns social">
+				<section class="col-sm-offset-1 col-sm-2 social">
 					<h4><span>follow</span> GovTrack</h4>
 					<ul>
 						<li><a href="http://www.facebook.com/pages/Civic-Impulse/312186525430"><span>Facebook</span></a></li>
@@ -351,10 +352,12 @@
 				</section>
 
 			</div>
+			</p>
 		</footer>
 
 	</div><!-- /wrapper -->
 
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
 	<!-- Facebook -->

@@ -30,7 +30,7 @@
 <div class="row">
 	<h1><span class="stateface stateface-{{bill.state_session.state|lower}}">{{bill.bill_number}}</span>. {{bill.short_title|truncatewords:25}}</h1>
 		
-	<div id="track_panel_base" class="eight columns">
+	<div id="track_panel_base" class="col-sm-8">
 		<p class="date">{{state_metadata.legislature_name}}. {{bill.session}}. {% if chamber_name %}{{chamber_name}}.{% endif %}</p>
 		
 		<div class="info">
@@ -68,7 +68,7 @@
 		
 	</div>
 
-	<div class="aside four columns">
+	<div class="aside col-sm-4">
 		{% if bill.is_current and feed %}
 		{% include "events/subscribe_inline.html" %}
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
@@ -84,14 +84,14 @@
 {% block body %}
 <div id="bill-overview" class="section">
 	
-	<div class="six columns">
+	<div class="col-sm-6">
 		<h2>History</h2>
 		{% for action in bill.actions.all %}
 			<p>{{action.date|date}}: {{action.text}}</p>
 		{% endfor %}
 	</div>
 	
-	<div class="six columns last">
+	<div class="col-sm-6 last">
 		{% if bill.summary %}
 		<h2>Summary</h2>
 		{{bill.summary}}

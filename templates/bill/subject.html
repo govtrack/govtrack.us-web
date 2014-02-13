@@ -13,7 +13,7 @@
 
 {% block summary %}
 <div class="row">
-	<div id="track_panel_base" class="eight columns">
+	<div id="track_panel_base" class="col-sm-8">
 		<h1>{{term.name}}</h1>
 		
 		<p>Use this page to browse bills in the U.S. Congress related to the subject {{term.name}}.</p>
@@ -43,7 +43,7 @@
 		{% endcomment %}
 	</div>
 
-	<div class="aside four columns">
+	<div class="aside col-sm-4">
         <script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
         <a href="#" class="track-btn" onclick="return show_track_panel();">Track this subject</a>
         <div id="event_subscribe_inline_container"> </div>

@@ -5,6 +5,52 @@
 
 {% block meta_description %}{{ committee }}{% endblock %}
 
+{% block head %}
+<style>
+.flag {
+	color:#fff;
+	font-size: 12px;
+	padding:0px 3px;
+	position:relative;
+	line-height: 20px;
+	left:-10px;
+	margin: 0 auto;
+	font-family: 'PTSerifBold', serif;
+}
+.flag:before {
+	content:"";
+	position:absolute;
+	top:100%;
+	left:0px;
+	width:0px;
+	height:0px;
+	border-width:5px;
+	border-style:solid;
+}
+.flag:after {
+	content:"";
+	position:absolute;
+	top:0px;
+	left:100%;
+	width:0px;
+	height:0px;
+	border-right-color:transparent !important;
+}
+.flag.flag_d { background:#4089bd; }
+.flag.flag_d:after { border:10px solid #4089bd; }
+.flag.flag_d:before { border-color: transparent #2e8ea6 #2e8ea6 transparent; }
+.flag.flag_r { background:#bd4040; }
+.flag.flag_r:after { border:10px solid #bd4040; }
+.flag.flag_r:before { border-color: transparent #a62e2e #a62e2e transparent; }
+.flag.flag_d.sub_chair { background:#82a5bd; }
+.flag.flag_d.sub_chair:after { border:10px solid #82a5bd; }
+.flag.flag_d.sub_chair:before { border-color: transparent #739ca6 #739ca6 transparent; }
+.flag.flag_r.sub_chair { background:#bd8282; }
+.flag.flag_r.sub_chair:after { border:10px solid #bd8282; }
+.flag.flag_r.sub_chair:before { border-color: transparent #a67272 #a67272 transparent; }
+</style>
+{% endblock %}
+
 {% block crumbs %}
 <ul>
 <li><a href="/congress/committees">Committees</a></li>
@@ -21,7 +67,7 @@
 <div class="row group">
     <h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
 	
-	<div id="track_panel_base" class="eight columns">
+	<div id="track_panel_base" class="col-sm-8">
        	{% if committee.committee_type == TYPE_JOINT %}
        		<p>This is a &ldquo;joint&rdquo; committee, which means it has members from both the House and Senate.
        		Please note that we do not currently have information on the House members of joint committees.</p>
@@ -47,7 +93,7 @@
 	
 	
 
-	<div class="aside four columns">
+	<div class="aside col-sm-4">
 		{% include "events/subscribe_inline.html" %}
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track Committee</a>
 		
@@ -80,7 +126,7 @@
 	    	</div>
 	        <div class="row">
 	        {% endif %}
-		        <div class="member two columns">
+		        <div class="member col-sm-2">
 	            	
 		            <div class="photo">
 	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url }}" /></a>
@@ -127,7 +173,7 @@
 		</div>
 		
 		<div id="activity">
-			<div class="six columns">
+			<div class="col-sm-6">
 				<h2 style="margin: 1em 0 1em 0">Committee Bills</h3>
 				{% if committee.current_bills.count > 0 %}
 					<p>Browse <a href="/congress/bills/browse#committees={{committee.id}}">{{committee.current_bills.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>.</p>
@@ -137,7 +183,7 @@
 					<p>No bills have been assigned to this {% if parent %}sub{% endif %}committee.</p>
 				{% endif %}
 			</div>
-		    <div class="six columns last tweets">
+		    <div class="col-sm-6 last tweets">
 				<h2 style="margin: 1em 0 1em 0">Recent Activity</h3>
 				{% include "events/trackedeventspanel.html" %}
 			</div>

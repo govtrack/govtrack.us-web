@@ -3,28 +3,21 @@
 
 {% block head %}
 <style>
-  #events_add_tracker h2 {
+  h2 {
     font-size: 1.75em;
     color: #40A4BD;
     text-transform: none;
     padding-bottom: 1em;
   }
 
-  #events_add_tracker h3 {
+  h3 {
     text-transform: none;
     padding-bottom: 1em;
     color: #40a4bd;
   }
 
-#feed_preview {
-  border-right: #ddd 1px solid;
-}
-#feed_preview {
-  border-right: 0;
-}
 #events_list {
-  width: auto;
-  padding: 0;
+  padding-left: 2em;
   border-left: none;
 }
 
@@ -86,11 +79,12 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-<div id="events_add_tracker" class="panel row">
-	<div id="edit_list" class="four columns fat " style="line-height: 125%">
+<div style="margin-top: 20px">
+	<div id="edit_list" class="col-sm-4 fat " style="line-height: 125%">
 		<div id="set_freq" class="control">
 			<p class="description">{{feed.description}}</p>
 
+			<h3 style="margin-top: 1em; padding: 0;">Tracker Options</h3>
 			<div>
 			{% if not request.user.is_authenticated or request.user.subscription_lists.count <= 1 %}
 				<p>How often would you like updates by email?</p>
@@ -117,7 +111,7 @@ $(function() {
 			{% if not request.user.is_authenticated %}
 		
 			<div class="signin_social">
-				<h3 style="margin-top: 1em">Save This Tracker</h3>
+				<h3 style="margin-top: 1em; padding: 0;">Save This Tracker</h3>
 				{% with "/accounts/lists?"|add:"REPLACE_FEED_HERE" as singlesignon_next %}
 					{% include "registration/login_singlesignon.html" %}
 				{% endwith %}
@@ -134,11 +128,9 @@ $(function() {
 		</div>
 	</div><!-- /edit_list -->
 	
-	<div id="feed_preview" class="eight columns fat">
+	<div id="feed_preview" class="col-sm-8">
 		<div id="events_list">
-			<div class="group" style="margin-bottom: 1em;">
-				<h4>Preview:</h4>
-			</div>
+			<h4 style="margin-bottom: 1em">Preview:</h4>
 
 			<div id="events_preview_2">
 			</div><!-- /events -->

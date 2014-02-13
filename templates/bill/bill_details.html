@@ -254,11 +254,10 @@
 
 {% block summary %}
 
-<div class="row">
-	{% cache 600 billhead bill.id %}
 	<h1 style="max-height: 3.5em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
-		
-	<div id="track_panel_base" class="{% if bill.is_alive %}eight{% else %}twelve{% endif %} columns">
+	<div class="row">
+	{% cache 600 billhead bill.id %}
+	<div id="track_panel_base" class="{% if bill.is_alive %}col-sm-8{% else %}col-sm-12{% endif %}">
 		<div class="info" {% if not bill.is_alive %}style="width: auto;"{% endif %}>
 			<p id="h1_overflow" style="display: none;">...</p>
 			<script>$('h1').truncate_text(function (remaining, chopped) {
@@ -383,7 +382,7 @@
 
 	
 	{% if bill.is_alive %}
-	<div class="aside four columns">
+	<div class="aside col-sm-4">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		<div id="event_subscribe_inline_container"> </div>
@@ -547,8 +546,6 @@
 
 {% with text as text_info %}
 
-<div style="margin-left: -15px">
-
 <ul class="tabs five-up">
 	<li><a href="#overview">Overview</a></li>
 	
@@ -563,11 +560,11 @@
 <div class="panes">
 	<div id="overview"> <!-- overview pane -->
 		<div class="row">
-		<div class="six columns">
+		<div class="col-sm-6">
 			<div class="metadata-table">
 			  <div class="holder">
 			  <div class="frame">
-				<div class="container">
+				<div class="frame-container">
 					<dl>
 						<dt>Status</dt>
 						<dd>
@@ -720,7 +717,7 @@
 				</div><!-- /container -->
 				
 				{% if bill.congress >= 93 %}
-				<div class="container">
+				<div class="frame-container">
 					<dl class="heading">
 						<dt>Cosponsors</dt>
 						<dd>
@@ -776,12 +773,12 @@
 			</div><!-- /metadata-table -->
 		</div> <!-- /six columns -->
 			
-		<div class="six columns last" style="padding: 0">
+		<div class="col-sm-6" style="padding: 0">
 			<div class="metadata-table">
 			  <div class="holder">
 			  <div class="frame">
 			  	{% if subtitle %}
-				<div class="container">
+				<div class="frame-container">
 					<dl>
 						<dt>Full Title</dt>
 						<dd><p>{{subtitle}}</p></dd>
@@ -790,7 +787,7 @@
 			  	{% endif %}
 			  
 				{% if bill.source != "americanmemory" %}
-				<div class="container">
+				<div class="frame-container">
 					<dl>
 						<dt>Summary</dt>
 						<dd id="summaries">
@@ -799,7 +796,7 @@
 					</dl>
 				</div><!-- /container -->
 
-				<div class="container">
+				<div class="frame-container">
 					<dl>
 						<dt>Text</dt>
 						<dd>
@@ -821,7 +818,7 @@
 				</div><!-- /container -->
 				{% endif %}
 				
-				<div class="container">
+				<div class="frame-container">
 					<dl>
 						<dt>Widget</dt>
 						<dd>
@@ -889,12 +886,12 @@
 	{% if bill.source != "americanmemory" %}
 	<div id="summary" style="margin-left: 15px"> <!-- summary pane -->
 		<div class="row">
-		<div class="three columns">
+		<div class="col-sm-3">
 			<ul id="summary_tabs" class="left-tabs">
 			</ul>
 		</div>
 	
-		<div class="nine columns">
+		<div class="col-sm-9">
 			<script>
 			var first_summary = true;
 			function add_summary(name, href, html) {
@@ -1005,7 +1002,7 @@
 				{% comment %}
 				{% with bill.get_approved_links as links %}
 				{% if links|length > 0 %}
-				<div class="container">
+				<div class="frame-container">
 					<dl style="margin-top: 1em">
 						<dt>News Sites &amp; Links:</dt>
 						<dd>
@@ -1022,7 +1019,7 @@
 				{% endwith %}
 				{% endcomment %}
 			
-				<div class="container">
+				<div class="frame-container">
 					<dl style="margin-top: 1em">
 						<dt>Related Bills</dt>
 						<dd>
@@ -1050,7 +1047,7 @@
 				
 				{% with reintros.0 as reintro_from %}
 				{% if reintro_from %}
-				<div class="container">
+				<div class="frame-container">
 					<dl style="margin-top: 1em">
 						<dt>Supersedes</dt>
 						<dd>
@@ -1061,7 +1058,7 @@
 				{% endif %}
 				{% endwith %}
 					
-				<div class="container">
+				<div class="frame-container">
 					<dl style="margin-top: 1em">
 						<dt>Subject Areas:</dt>
 						<dd>
@@ -1165,7 +1162,6 @@
 	{% endif %}
 	
 </div> <!--panes -->
-</div> <!-- margin fix -->
 
 {% include "ad_footer_leaderboard.html" %}
 
@@ -1179,7 +1175,7 @@ $("ul.tabs a").tabs("div.panes > div", null, function(tabname) {
 		initialize_disqus();
 	};
 });
-if (!first_summary) $("#summary_tabs a").tabs("#summary .nine > div", "summary");</script>
+if (!first_summary) $("#summary_tabs a").tabs("#summary .col-sm-9 > div", "summary");</script>
 
 {% if bill.congress >= 113 %}
 <!-- disqus comment count, hacked from their count.js code -->

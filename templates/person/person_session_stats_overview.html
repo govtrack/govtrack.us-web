@@ -70,7 +70,7 @@
 {% block body %}
 <div class="row">
 
-	<div class="three columns">
+	<div class="col-sm-3">
 		{% if cohorts %}
 		<p>Look at report cards for...</p>
 		<ul>
@@ -85,16 +85,16 @@
 		{% endif %}
 	</div>
 
-	<div class="nine columns">
+	<div class="col-sm-9">
 
 		{% for stat in metrics %}
 		<section id="{{stat.key}}" class="row stat {{stat.key}} icon-{{stat.icon}}">
-			<div class="three columns">
+			<div class="col-sm-3">
 				<div class="icon">&nbsp;</div>
 			</div>
 
-			<div class="nine columns">
-				<h2>{{stat.title}}</h2>
+			<div class="col-sm-9">
+				<h2 style="margin-top: 0">{{stat.title}}</h2>
 
 				{% if stat.key == "missed-votes" %}
 					<p>The percentage of votes each legislator missed in {{session}}.</p>

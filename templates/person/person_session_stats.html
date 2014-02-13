@@ -126,12 +126,12 @@ function smooth_scroll(elem) {
 	<h1 style="text-align: center;">{{session}} Report Cards</h1>
 
 	{% if photo %}
-	<div class="three columns">
+	<div class="col-sm-3">
 			<div class="photo">
 				<img src="{{ photo }}" alt="Photo" width="100" height="122"/> <!-- 90x112 -->
 			</div>
 	</div>
-	<div class="nine columns">
+	<div class="col-sm-9">
 	{% endif %}
 		<h2>{{person.name_and_title}}</h2>
 
@@ -160,11 +160,11 @@ function smooth_scroll(elem) {
 <div class="row nav">
 	<p style="color: #666; font-style: italic; margin: 0 0 .8em 1em;">Jump to...</p>
 	{% for grp in nav_groups %}
-		<div class="four columns">
-			<div class="four columns">
+		<div class="col-sm-4">
+			<div class="col-sm-4">
 				<img src="/static/images/img-{{grp.icon}}.png" width="80" style="float: left; margin-right: 1em"/>
 			</div>
-			<div class="eight columns">
+			<div class="col-sm-8">
 				<div style="padding-bottom: 6px; margin-left: -15px; {% if grp.icon == "open-government" or grp.icon == "voting-records" %}padding-top: 3px{% endif %}">
 					{% for stat in grp.stats %}
 						<div style="margin-bottom: 1px;"><a href="#{{stat.key}}" onclick="return smooth_scroll(this);">{{stat.title}}</a></div>
@@ -183,11 +183,11 @@ function smooth_scroll(elem) {
 
 {% for stat in stats %}
 <section id="{{stat.key}}" class="row stat {{stat.key}} icon-{{stat.icon}}">
-	<div class="three columns">
+	<div class="col-sm-3">
 		<div class="icon">&nbsp;</div>
 	</div>
 
-	<div class="nine columns">
+	<div class="col-sm-9">
 		<h2>{{stat.title}}</h2>
 
 		{% with stat.context_for_headline as h %}

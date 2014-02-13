@@ -8,11 +8,12 @@
 	<meta property="og:title" content="{{ vote.question|truncatewords:10 }} -- {{ vote.get_chamber_display }} Vote #{{ vote.number }} -- {{ vote.created|date:"DATE_FORMAT" }}" />
 	<style>
 	#vote_explainer p { margin: 0; }
-	{% if not vote.related_amendment %}
+	{% if not vote.related_amendment and vote.related_bill.noun != "resolution" %}
 	.summary-box dt { width: 70px; }
 	{% else %}
 	.summary-box dt { width: 95px; }
 	{% endif %}
+    .stats th { text-align: center; }
 	</style>
 {% endblock %}
 {% block og_image %}
@@ -118,11 +119,13 @@ $(function() {
 {% endblock %}
 
 {% block summary %}
+
 <h1>{{ vote.question }}</h1>
 
 {% if vote.question_details %}<p>{{ vote.question_details }}</p>{% endif %}
 
-<div class="eight columns" style="padding: 0">
+<div class="row">
+<div class="col-sm-8">
 <dl>
     <dt>Number:</dt>
     <dd>{{ vote.get_chamber_display }} Vote #{{ vote.number }} [primary source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>]</dd>
@@ -133,11 +136,10 @@ $(function() {
 </dl>
 </div>
 
-<div class="four columns">
+<div class="col-sm-4">
 	<a href="/events/track-something?feed=misc:allvotes" class="track-btn" title="Get email alerts or set up an RSS feed">Track Votes</a>
 </div>
-
-<div class="twelve columns" style="padding: .8em 0 0 0;">
+</div>
 
 <div id="vote_explainer" style="padding-bottom: 1em;">
     {% if vote.category == VoteCategory.amendment %}
@@ -167,7 +169,7 @@ $(function() {
     {% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
 </div>
     
-<dl>
+<dl style="margin: 0">
     {% if vote.related_bill %}
     <dt>{% if vote.category != VoteCategory.passage and vote.category != VoteCategory.passage_suspension and vote.category != VoteCategory.amendment %}Related {% endif %}{{vote.related_bill.noun|capfirst}}:</dt>
     <dd><a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>
@@ -197,7 +199,6 @@ $(function() {
     
 
 </dl>
-</div>
 {% endblock %}
 
 {% block body %}
@@ -322,7 +323,6 @@ $(function() {
 </div>
 
 <div class="details-box">
-   <div class="container">
         <table id="vote-list" style="display: none">
             <thead>
                 <tr>
@@ -379,7 +379,6 @@ $(function() {
         {% endfor %}
         </tbody>
         </table>
-    </div>
 </div>
 </div>
 

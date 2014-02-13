@@ -38,18 +38,18 @@ h3 { margin: 1em 0; }
 <div class="panes">
 	<div id="overview" style="margin-top: 1em">
 		<div class="row">
-		<div class="six columns">
+		<div class="col-md-6">
 			<h2>Ideology</h2>
 			<p>The <a href="#ideology">Ideology Analysis</a> compares the sponsorship and cosponsorship patterns of Members of Congress to put them on a scale roughly from liberal to conservative. <a href="#ideology">Read More &raquo;</a></p>
 		</div>
 	
-		<div class="six columns last">
+		<div class="col-md-6">
 			<h2>Prognosis</h2>
 			<p>The <a href="#prognosis">Prognosis Analysis</a> looks at the factors that help or hurt a bill&rsquo;s chance of getting out of committee and being enacted. It is based on a regression model. <a href="#prognosis">Read More &raquo;</a></p>
 		</div>
 		</div>
 		<div class="row">
-		<div class="six columns">
+		<div class="col-md-6">
 			<h2>Leadership</h2>
 			<p>The <a href="#leadership">Leadership Analysis</a> looks at who is cosponsoring whose bills to see who the legislative leaders are. It&rsquo;s a little like if you scratch my back will I scratch yours? The analysis is based on Google PageRank, the algorithm Google uses to order search results. <a href="#leadership">Read More &raquo;</a></p>
 		</div>
@@ -60,7 +60,7 @@ h3 { margin: 1em 0; }
 		<h2>Ideology Analysis of Members of Congress</h2>
 		
 		<div class="row">
-		<div class="six columns">
+		<div class="col-md-6">
 			<p>The ideology analysis assigns a liberal&ndash;conservative score to each Member of Congress based on his or her pattern of cosponsorship.</p>
 			
 			<p>In a nutshell, Members of Congress who cosponsor similar sets of bills will get scores close together, while Members of Congress who sponsor different sets of bills will have scores far apart. Members of Congress with similar political views will tend to cosponsor the same set of bills, or bills by the same set of authors, and inversely Members of Congress with different political views will tend to cosponsor other congressmen’s bills.</p>
@@ -118,7 +118,7 @@ ideology = vT[1,:]</pre>
 		</div>
 		
 		{% if ideology.senate or ideology.house %}
-		<div class="six columns last">
+		<div class="col-md-6 last">
 		<div id="sponsorship_analysis_chart_senate"> </div>
 		<div id="sponsorship_analysis_chart_house"> </div>
 		<script>
@@ -138,7 +138,7 @@ ideology = vT[1,:]</pre>
 		<h2>Leadership Analysis of Members of Congress</h2>
 		
 		<div class="row">
-		<div class="six columns">
+		<div class="col-md-6">
 			<p>A leadership score is computed for each Member of Congress by looking at how often other Members of Congress cosponsor their bills &mdash; more or less. The analysis is based on PageRank, Google&rsquo;s algorithm for ranking pages on the web.</p>
 			
 			<p>The idea behind a leadership score is that if X cosponsors Y&rsquo;s bills but Y does not cosponsor X&rsquo;s bills, then X is a follower relative to Y being a leader. </p>
@@ -200,7 +200,7 @@ def onenorm(u): return sum(abs(u))</pre>
 		</div>
 		
 		{% if ideology.senate or ideology.house %}
-		<div class="six columns last">
+		<div class="col-md-6 last">
 		<div id="sponsorship_analysis_chart_senate2"> </div>
 		<div id="sponsorship_analysis_chart_house2"> </div>
 		<script>
@@ -220,7 +220,7 @@ def onenorm(u): return sum(abs(u))</pre>
 		<h2>Bill Prognosis Analysis</h2>
 		
 		<div class="row">
-		<div class="six columns">
+		<div class="col-md-6">
 			<p>GovTrack computes a prognosis for each bill, which is the probability that the bill will be enacted. Our computation is based on factors that are correlated with successful or failed bills in the past, such as whether the sponsor is a committee chair.</p>
 			
 			<p>What is the point of this?</p>
@@ -268,7 +268,7 @@ def onenorm(u): return sum(abs(u))</pre>
 			
 		</div>
 		
-		<div class="six columns last">
+		<div class="col-md-6 last">
 			<h3 style="margin-bottom: 1em">Results</h3>
 			
 			<ul id="prognosis_results_tabs" class="tabs three-up">

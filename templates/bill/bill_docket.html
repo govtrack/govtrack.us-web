@@ -62,7 +62,7 @@ function do_keyword_tracker_submit() {
 {% block body %}
 
 <div class="row">
-	<div class="five columns">
+	<div class="col-sm-5">
 
 		<h2>Search for a Bill</h2>
 		<p>Search for bills using the search box at the top right of every page, or use the <a href="/congress/bills/browse">advanced search</a> to screen by status, subject, and other factors.</p>
@@ -77,7 +77,7 @@ function do_keyword_tracker_submit() {
 
 		<h2>Track All Bills</h2>
 		<p>Get email updates for:</p>
-		<ul id="basic_trackers">
+		<ul id="basic_trackers" style="padding: 0">
 			{% for feed in feeds %}
 			<li>
 				<a href="{{feed.link}}" style="height: auto">
@@ -93,7 +93,7 @@ function do_keyword_tracker_submit() {
 		are enacted and when during the legislative session activity tends to occur.</p>
 	</div>
 
-	<div class="seven columns">
+	<div class="col-sm-7">
 
 <ul class="tabs three-up">
 	<li><a href="#docket">Coming Up</a></li>

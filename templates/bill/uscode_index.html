@@ -41,7 +41,7 @@
 
 <div class="row">
 	{% if has_child_navigation %}
-	<div class="six columns">
+	<div class="col-sm-6">
 		<h2>Drill down to...</h2>
 		<ul class="bullets">
 			{% for child in children %}
@@ -56,7 +56,7 @@
 		</ul>
 	</div>
 	{% endif %}
-	<div class="six columns">
+	<div class="col-sm-6">
 		{% if bills_here %}
 			<h2>Bills citing this {{parent.get_level_type_display|lower}}...</h2>
 			<p>Browse the list below or filter with <a href="/congress/bills/browse?usc_cite={{parent.citation_or_id|urlencode}}">advanced search</a>.</p>

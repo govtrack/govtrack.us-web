@@ -78,8 +78,8 @@ function refresh_events() {
 }
 
 function add_tracker(id, name, title, link, save) {
-    var t = $("<li><a href='#' onclick='return toggle_tracker(this);' class='active' title='Remove'>Remove <span/></a> <span/></li>");
-    t.find("span").append($("<a>").attr("href", link).text(title));
+    var t = $("<li><a href='#' onclick='return toggle_tracker(this);' class='active plain' title='Remove'>Remove <span/></a> <span class='span2'/></li>");
+    t.find("span.span2").append($("<a>").attr("href", link).attr("class", "plain").text(title));
     t.find("a").attr("feedname", name);
     $('#items p').fadeOut();
     $("#list_trackers").append(t);
@@ -273,7 +273,7 @@ $(function() {
         {% comment %}since the first of these nodes is cloned when we
         create a new list, it should not have any list-specific data hidden away
         except where we expect that to be{% endcomment %}
-        <div class="four columns">
+        <div class="col-sm-4">
             <div class="list group {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)" list_email="{{list.email}}">
                 <h3 class="name">{{list.name}}</h3>
                 <div class="options">
@@ -297,12 +297,12 @@ $(function() {
 <section id="list_view">
     <h2 class="if_multiple_lists">Settings for: <span class="name">List Name Goes Here</span></h2>
 
-    <div class="five columns">
+    <div class="col-sm-5">
 
         <div id="items" class="control">
             <h2 class="if_single_list">I Am Tracking...</h2>
             <h2 class="if_multiple_lists">Tracked <span>in</span> This List</h2>
-            <ul id="list_trackers">
+            <ul id="list_trackers" style="padding: 0">
             </ul>
             <p></p>
         </div><!-- /items -->
@@ -347,12 +347,12 @@ $(function() {
 
     </div>
 
-    <div class="seven columns">
+    <div class="col-sm-7">
         
         <div id="set_freq" class="control">
             <h2>Getting Updates</h2>
             <div class="row">
-                <div class="eight columns">
+                <div class="col-sm-8">
                     <h3>Email</h3>
                     <select id="email_frequency" name="email_frequency" onchange="change_email_options();">
                         <option value="0">Don&rsquo;t Send Emails</option>
@@ -361,7 +361,7 @@ $(function() {
                     </select>
                     <p style="clear: both; line-height: 120%;"><small>You&rsquo;ll only get an email if there are new events matching your trackers.</small></p>
                 </div>
-                <div class="four columns">
+                <div class="col-sm-4">
                     <h3>RSS</h3>
                     <p><a id="rss_link" href="#" class="add_icon rss">Get these events by RSS</a>.</p>
                 </div>

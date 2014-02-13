@@ -19,17 +19,9 @@
 
 {% block override_content %}
 {% block body %}
-<div id="info-box">
-	<div class="holder">
-		<div class="frame">
-			<div class="container row">
-				<div class="heading twelve columns">
-					<h2>The U.S. Congress and Federal Legislation</h2>
-					<p style="margin: 1em">Use GovTrack to research and track legislation in the United States Congress, including Members of Congress, bills and resolutions, voting records, and committee activity.</p>
-				</div>
-			</div>
-			<div class="container row">
-				<div class="twelve columns">
+				<h2>The U.S. Congress and Federal Legislation</h2>
+				<p>Use GovTrack to research and track legislation in the United States Congress, including Members of Congress, bills and resolutions, voting records, and committee activity.</p>
+
 				<ul id="categories">
 					<li id="link-members">
 						<a href="/congress/members"></a>
@@ -64,19 +56,14 @@
 						</div>
 					</li>
 				</ul>
-				</div>
-			</div>
-		</div>
-	</div>
 
-	<div id="content" class="row">
 		<a name="states"> </a>
 		<div id="state_list">
-			<div class="twelve columns">
 				<h2>State Legislation</h2>
-				<p style="margin: 1em">Starting in May 2012 we have been offering experimental state legislative tracking tools.</p>
+				<p style="margin: 1em 0">Starting in May 2012 we have been offering experimental state legislative tracking tools.</p>
+		<div class="row">
 			</div>
-			<div class="six columns">
+			<div class="col-xs-6">
 				<h4>Choose a State</h4>
 				<p>Start tracking legislation in your state:</p>
 				<ul>
@@ -85,7 +72,7 @@
 					{% endfor %}
 				</ul>
 			</div>
-				<div class="side-box six columns">
+				<div class="side-box col-xs-6">
 					<h4>50-State Tracking</h4>
 					<p>Or <a href="/states/bills/browse">search bills in all 50 states</a>:</p>
 					
@@ -98,7 +85,6 @@
 				</div>
 			</div>
 		</div>
-	</div><!-- /content -->
-</div><!-- /info-box -->
+
 {% endblock %}
 {% endblock %}

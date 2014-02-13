@@ -51,7 +51,7 @@
 
 {% block body %}
 <section class="row">
-	<div class="{% if not video_id %}seven{% else %}eight{% endif %} columns">
+	<div class="{% if not video_id %}col-md-7{% else %}col-md-8{% endif %}">
 		<iframe width="{% if not video_id %}500{% else %}610{% endif %}" height="{% if not video_id %}281{% else %}343{% endif %}" src="//www.youtube.com/embed/wKGY-Z5_mHc" frameborder="0" allowfullscreen></iframe>
 		
 		{% if video_id == "2013-07-22_few-bills" %}
@@ -71,7 +71,7 @@
 		{% endif %}
 		
 	</div>
-	<div class="{% if not video_id %}five{% else %}four{% endif %} columns">
+	<div class="{% if not video_id %}col-md-5{% else %}col-md-4{% endif %} columns">
 		<div id="support_our_work">
 			<div style="font-weight: bold">Want to see Avi do another video?</div>
 			<div style="margin: 5px 0 8px 0;">Support future videos by leaving Avi a tip, or send ideas for our next video to <a href="mailto:&#105;&#100;&#101;&#097;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#105;&#100;&#101;&#097;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>.</div>
@@ -98,10 +98,10 @@
 </section>
 	
 <section class="row">
-	<div class="seven columns">
+	<div class="col-sm-7">
 		<iframe width="500" height="281" src="//www.youtube.com/embed/2TmXo4Ij0bs" frameborder="0" allowfullscreen></iframe>
 	</div>
-	<div class="five columns">
+	<div class="col-sm-5">
 		<h2>Tracking S. 510, Part 2: FDA Food Safety Modernization Act (111th Congress)</h2>
 		<p><span class="date">11/15/2010.</span> We covered the controversial food safety bill.</p>
 		<p>Produced by Patrick Tutwiler.</p>
@@ -109,10 +109,10 @@
 </section>
 
 <section class="row">
-	<div class="seven columns">
+	<div class="col-sm-7">
 		<iframe width="500" height="281" src="//www.youtube.com/embed/aDnd8_t7Y5w" frameborder="0" allowfullscreen></iframe>
 	</div>
-	<div class="five columns">
+	<div class="col-sm-5">
 		<h2>Tracking S. 510, Part 1: FDA Food Safety Modernization Act (111th Congress) </h2>
 		<p><span class="date">10/12/2010.</span> We covered the controversial food safety bill.</p>
 		<p>Produced by Patrick Tutwiler.</p>

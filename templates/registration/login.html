@@ -3,15 +3,30 @@
 
 {% block override_login %}{% endblock %}
 
+{% block head %}
+<style>
+.login label {
+	display: block;
+	margin: .75em 0 0 0;
+}
+
+.login input#id_email,
+.login input#id_password {
+	width: 70%;
+	margin: 0;
+}
+</style>
+{% endblock %}
+
 {% block heading_box %}
-			<header class="heading-box row">
+			<header class="heading-box row" style="max-width: 700px;">
 				<h1>Log In</h1>
 				<form method="post" class="login row">
 					{% csrf_token %}
 					<input type="hidden" name="next" value="{{ next }}" />
 
 					
-						<div class="signin_social six columns">
+						<div class="signin_social col-md-6">
 							<h3 style="margin-bottom: 1em">Have one of these?</h3>
 							{% with next as singlesignon_next %}
 								{% include "registration/login_singlesignon.html" %}
@@ -19,7 +34,7 @@
 							<p style="margin-top: 1em">You can use your Facebook, Google, or Twitter account for a fast, no-password way to log into GovTrack. There is no need to register first.</p>
 						</div>
 
-						<div id="login_form" class="six columns">
+						<div id="login_form" class="col-md-6" style="border-left: solid #e7e4dc 2px; padding-left: 2em;">
 							<h3 style="margin-bottom: 1em">Use your email and password:</h3>
 
 							<p>New here? <a href="/registration/signup{% if next %}?next={{next|urlencode}}{% endif %}">Create a login first</a>.</p>
@@ -34,7 +49,7 @@
 							<label for="id_password">Password</label> 
 							<input type="password" name="password" id="id_password" value="{{password}}" /> 
 										
-							<p style="margin: 1em 0 15px 80px; clear: both;"><input class="submit" type="submit" value="Login" /></p>
+							<p style="margin: 1em 0 15px 80px; clear: both;"><input class="submit" type="submit" value="Login &gt;" /></p>
 							
 							<p><a class="forgot" href="{% url "registration.views.resetpassword" %}">Forgot your password?</p>
 

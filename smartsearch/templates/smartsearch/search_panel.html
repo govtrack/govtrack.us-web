@@ -16,7 +16,7 @@ function addCommas(nStr)
   return x1 + x2;
 }
 function show_facets(postdata, options, isinitial) {
-    var should_hide_default_facets = $(window).width() <= 770;
+    var should_hide_default_facets = $(window).width() < 992;
 
     // Display options.
     for (var k in options) {
@@ -397,23 +397,22 @@ $(function() {
 });
 </script>
 
-<div class="advanced-search four columns">
+<div class="advanced-search col-sm-4">
     <form id="searchform" onsubmit="update_search(); return false;">
     <h3>{% firstof heading "Search" %}</h3>
     <div class="initial_loading" style="margin-top: 1em;">Loading options...</div>
-    <fieldset style="display: none">
     <div id="searcherror"> </div>
-    <ul>
+    <fieldset style="display: none">
         {% for field in form %}
-            <li id="searchform_field_{{field.field_name}}_container" {% if field.type != "select" or field.help %}class="wide"{% endif %} style="cursor: pointer">
-                <label for="searchform_field_{{field.field_name}}">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
+            <div id="searchform_field_{{field.field_name}}_container" style="{% if field.type != "select" or field.help %}width: 100%;{% else %}width: 50%; padding-right: 1em;{% endif %} float: left; cursor: pointer; margin-bottom: 1em; font-weight: normal;">
+                <label for="searchform_field_{{field.field_name}}" style="margin: 0;">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
                 {% if field.type == "text" %}
-                    <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text with_search_button" onchange="$('#show_more').hide()"> </input>
+                    <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text with_search_button" onchange="$('#show_more').hide()" style="width: 65%; margin-right: 5px;"> </input>
                     <input id="searchform_field_{{field.field_name}}_button" class="btn-search-small" type="submit" value="Search" value="Go" onclick="update_search()"> </input>
                     	{% comment %}when the text value changes, hide Show More so that we don't try to access a later page on a different search query than what we've loaded so far{% endcomment %}
                 {% endif %}
                 {% if field.type == "select" %}
-                    <select id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" size="1" onchange="update_search()"> </select>
+                    <select id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" size="1" onchange="update_search()" style="width: 100%"> </select>
                 {% endif %}
                 {% if field.type == "checkbox" or field.type == "radio" %}
                     <div id="searchform_field_{{field.field_name}}"> </div>
@@ -421,27 +420,26 @@ $(function() {
                 {% if field.help %}
                     <div style="margin-top: 3px"><small>{{field.help}}</small></div>
                 {% endif %}
-            </li>
+            </div>
         {% endfor %}
         
         {% if sort_options|length > 0 %}
-            <li>
-                <label for="searchform_sort">Sort by</label>
+            <div style="clear: both;">
+                <label for="searchform_sort" style="margin: 0;">Sort by</label>
                 <select id="searchform_sort" name="sort" size="1" onchange="update_search()">
                     <option value="relevance">Relevance</option>
                     {% for label, key, default in sort_options %}
                         <option value="{{key}}" {% if default %}selected{% endif %}>{{label}}</option>
                     {% endfor %}
                 </select>
-            </li>
+            </div>
         {% endif %}
-    </ul>
-    <a id="show_more_options" href="#" onclick="return show_more_options();">Show more options...</a>
+    <a id="show_more_options" href="#" onclick="return show_more_options();" style="display: block; clear: both; margin-top: 1em;">Show more options...</a>
     </fieldset>
     </form>
 </div>
 
-<section class="eight columns">
+<section class="col-sm-8">
 <div class="margin-left-30-wide">
 
     <div class="summary" style="display: none">

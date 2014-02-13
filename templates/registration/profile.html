@@ -9,6 +9,16 @@
 <style>
 h2 { border-bottom: 1px solid #444; }
 h4 { margin-top: 1.5em; }
+
+.login label {
+	display: block;
+	margin: .75em 0 0 0;
+}
+.login input#id_email,
+.login input#id_password {
+	width: 70%;
+	margin: 0;
+}
 </style>
 {% endblock %}
 
@@ -19,7 +29,7 @@ h4 { margin-top: 1.5em; }
 <div id="content">
 	
 <div class="row" style="margin-top: .5em">
-<div class="eight columns" style="padding-left: 0; padding-right: 2em">
+<div class="col-sm-6" style="padding-left: 0; padding-right: 2em">
 	<h2>May we email you?</h2>
 	
 	<h4>Subscription Lists</h4>
@@ -60,11 +70,11 @@ h4 { margin-top: 1.5em; }
 	<p style="margin-top: 1em">For other account issues, please email us at <a href="mailto:operations@govtrack.us">operations@govtrack.us</a>.</p>
 </div>
 
-<div class="four columns">
+<div class="col-sm-4">
 	
 	<h2>Login Information</h2>
 	
-	<form method="post" style="margin-top: 1em;">{% csrf_token %}
+	<form method="post" style="margin-top: 1em;" class="login">{% csrf_token %}
 		<p>Use this form to change the email address or password for your GovTrack account.</p>
 	
 		<div>

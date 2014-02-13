@@ -64,25 +64,25 @@
 	
 	<div style="padding: 1em 2em">
 	<div class="row">
-		<div class="six columns">
+		<div class="col-sm-6">
 			<a href="/congress/members/map" class="push-btn green-btn">View District Maps</a>
 		</div>
-		<div class="six columns last">
+		<div class="col-sm-6 last">
 			<a href="/congress/members/current#most_recent_role_type=Senator" class="push-btn green-btn">List Senators</a>
 		</div>
 	</div>
 	<div class="row" style="margin-top: .5em">
-		<div class="six columns">
-			<form action="#" onsubmit="return doform();">
-				<label for="address">Enter your address:</label>
-				<input id="address" class="text" type="text" value="" style="width: 210px; height: 26px; float: left;"/>
+		<div class="col-sm-6">
+			<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
+				<label for="address" style="display: block">Enter your address:</label>
+				<input id="address" class="text" type="text" value="" style="width: 210px; height: 26px; float: left; font-size: 14px;"/>
 				<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
 				<input class="btn-search-small2" type="submit" value="Search"  />
 			</form>
 		</div>
-		<div class="six columns last">
-			<label for="state">Or select a state:</label>
-			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value">
+		<div class="col-sm-6 last">
+			<label for="state" style="display: block; clear: both;">Or select a state:</label>
+			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" style="display: block; background-color: white; font-size: 14px;">
 				<option value="">(Select State)</option>
 				{% for abbr, name in statelist %}
 				<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
@@ -93,6 +93,9 @@
 	</div>
 	
 	<hr style="margin: 1em 1em 2em 1em"/>
+
+<div class="row">
+<div class="col-sm-6">
 	
 	<h2>The Senate</h2>
 	
@@ -100,15 +103,16 @@
 	
 	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of senators by party:</p>
 	
-	<table style="width: 15em">
+	<table style="width: 15em; margin-bottom: 1em;">
 	{% for p in senate_by_party %}
 	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}
 	{% if senate_vacancies > 0 %}<tr><th>Vacancies</th> <td>{{senate_vacancies}}</td></tr>{% endif %}
 	<tr><th>Total</th> <td>100</td></tr>
 	</table>
-	
-	<h2 style="margin-top: 1em">The House of Representatives</h2>
+</div>
+<div class="col-sm-6">	
+	<h2>The House of Representatives</h2>
 	
 	<p>The country is also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative (aka congressperson) to the House for a 2-year term.</p>
 
@@ -123,7 +127,9 @@
 	</table>
 	
 	<p style="margin-top: .5em">In addition, the District of Columbia and the U.S.&rsquo;s island territories elect a total of 6 delegates to the House with limited voting privileges. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
-	
+</div>
+</div>
+
 	<h2 style="margin-top: 1em">Congressional Sessions</h2>
 	
 	<p>Congress works in two-year sessions tied to the elections. Each session is actually called a Congress and begins in the January of the year following an election.</p>

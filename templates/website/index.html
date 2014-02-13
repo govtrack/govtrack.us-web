@@ -12,13 +12,16 @@
 {% block body_class %}homepage{% endblock %}
 
 {% block override_breadcrumbs %}
-<div id="intro-box" class="row">
-	<div class="column twelve">
+<div id="intro-box">
+	<div class="container">
 		<h1>Easily track the activities <br> of the United States Congress.</h1>
 		<div class="row">
-			<p id="intro" class="column four">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your life or business.</p>
+			<div class="col-sm-4">
+			<p id="intro">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your life or business.</p>
+			</div>
 			
-			<div id="start_search" class="column four right">
+			<div class="col-sm-offset-4 col-sm-4">
+			<div id="start_search">
 				<h2><a href="/start" style="font-size: 20px; color: white;">Start tracking now ▶</a></h2>
 				
 				{% if not user.is_authenticated %}
@@ -27,16 +30,16 @@
 				{% endif %}
 				
 			</div><!-- /start_search -->
-
+			</div>
 		</div>
 	</div>
 </div><!-- /intro-box -->
 {% endblock %}
 
-{% block override_content %}
-<div id="info-box">
+{% block wide_content %}
+<div id="info-box" style="background-color: white;">
 	<div class="holder">
-		<div class="row">
+		<div class="container">
 			
 			<div class="heading">
 				<h2><span>find</span> Information</h2>
@@ -73,35 +76,11 @@
 	</div>
 </div><!-- /info-box -->
 
-
 <div class="entries-box">
-	<div class="entries-holder row">
-		<!--<div class="frame group">-->
-			<div class="eight columns" id="in-congress">
+	<div class="entries-holder container">
+			<div class="col-sm-7">
 				<h2><span>in</span> Congress</h2>
-				{% comment %}
-				<div class="four columns">
-					<h3><span>congress</span> Happening Now</h3>
-					<div id="currently_in_session" class="widget-session">
-						<h4>Currently <em>in</em> Session:</h4>
-						<div class="block">
-							<div class="senate-area active">
-								<span class="ico-house"></span>
-								<strong><em>the</em> Senate</strong>
-							</div>
-							<div class="house-area active">
-								<span class="ico-senate"></span>
-								<strong><em>the</em> House</strong>
-							</div>
-						</div>
-					</div>
-					<section class="congress-tweets">
-						<div class="holder">
-						</div>
-					</section>
-				</div>
-				{% endcomment %}
-			
+		
 				<section class="featured-articles">
 					{% for item in events %}
 					{% with item|render_event:subscription_feeds as event %}
@@ -123,7 +102,7 @@
 				</section>
 			</div><!-- /in-congress -->
 
-			<div class="aside four columns end">
+			<div class="col-sm-offset-1 col-sm-4">
 				<article class="rss-block">
 					<h3><span>from the</span> GovTrack Blog <!--<a href="/blog"><img src="images/ico-rss.gif" width="9" height="9" alt="image description"></a>--></h3>
 					{% for item in blog %}
@@ -137,26 +116,7 @@
 					</div>
 					{% endfor %}
 				</article>
-				
-				{% comment %}
-				<section class="tweets-block">
-					<h3>GovTrack Tweets</h3>
-					
-					{% for tweet in tweets %}
-					<article class="post">
-						<div class="article">
-							<p>{{tweet.text|safe}}</p>
-							<em>{{tweet.relative_created_at}}</em>
-						</div>
-					</article>
-					{% endfor %}
-					
-					<a href="http://twitter.com/GovTrack" class="twitter-follow-button">Follow @GovTrack</a>
-					<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>			
-				</section>
-				{% endcomment %}
 			</div>
-		<!-- </div> --><!-- /frame -->
 	</div>
 </div>
 {% endblock %}
