@@ -415,6 +415,12 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
 
     from person.views_sessionstats import get_cohort_name, stat_titles
 
+    try:
+        cohort_title = get_cohort_name(cohort, True) if cohort else None
+    except ValueError: 
+        # invalid URL
+        raise Http404()
+
     # Get all of the cohorts in the data.
     cohorts = { }
     cohort_keys = set()
@@ -488,7 +494,7 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
         "metrics": metrics,
         "cohorts": cohorts,
         "cohort": cohort,
-        "cohort_title": get_cohort_name(cohort, True) if cohort else None,
+        "cohort_title": cohort_title,
         "specific_stat": specific_stat,
         "specific_stat_title": stat_titles[specific_stat]["title"].replace("{{other_chamber}}", "Other Chamber") if specific_stat else None,
         "publishdate": dateutil.parser.parse(stats["meta"]["as-of"]),
