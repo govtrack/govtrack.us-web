@@ -107,7 +107,7 @@ function poll_call_status() {
 {% block body_class %}issue{% endblock %}
 
 {% block summary %}
-<div class="row">
+<div>
 	<h1>Call Congress About {{issue.title}}</h1>
 
 	<p style="margin: 0">Make your voice heard. We&rsquo;ll walk you through the call step by step! (<a href="{{issue.get_absolute_url}}">skip this step</a>)</p>
@@ -127,7 +127,7 @@ function poll_call_status() {
 		<div style="margin: 1.5em 40px; font-size: 110%;">
 			<div style="margin-bottom: 5px;">Enter your phone number:</div>
 			<input id="phone" type="tel" style="font-size: 28px; width: 220px; height: 40px; display: inline" placeholder="000 555-8888"/>
-			<button id="start_call" onclick="start_call()" style="font-size: 28px; height: 38px;">Call Me</button>
+			<button id="start_call" onclick="start_call()" style="font-size: 24px; height: 38px;">Call Me</button>
 			<div id="call_status"></div>
 		</div>
 
