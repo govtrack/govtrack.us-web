@@ -548,7 +548,7 @@ header ul, footer ul {
 	}
 
 	#intro-box h1 {
-		font: normal 4.75em/1em PTSerifRegular;
+		font: normal 4.5em/1em PTSerifRegular;
 		color: #fff;
 		margin: 10px 0 34px -3px;
 		text-shadow: 0 1px 1px #066982;
@@ -619,8 +619,13 @@ header ul, footer ul {
 			text-transform: none;
 			}
 #categories {
-	width: 980px;
-	margin: 0 auto;
+	text-align: center;
+	}
+	@media (min-width: 1100px) {
+		#categories {
+			width: 980px;
+			margin: 0 auto;
+		}
 	}
 	#categories li {
 		display: inline-block;
@@ -825,19 +830,18 @@ header ul, footer ul {
 
 
 /* Home Header break 1 ---------------------------- */
-@media only screen and (max-width: 918px) {
-	 #intro-box h1 {
+@media only screen and (max-width: 991px) {
+	#intro-box h1 {
 	margin-top: 20px;
-	font-size: 4em;
+	font-size: 3.5em;
 	line-height: 1.1em;
 	}
 }
 
 /* Home Header break 2 ---------------------------- */
-@media only screen and (max-width: 770px) {
-
+@media only screen and (max-width: 767px) {
 	#intro-box h1 {
-	margin-top: 38px;
+	margin-top: 20px;
 	font-size: 3em;
 	line-height: 1.25em;
 	}
@@ -847,7 +851,7 @@ header ul, footer ul {
 }
 
 /* Home Header break 3 ---------------------------- */
-@media only screen and (max-width: 582px) {
+@media only screen and (max-width: 655px) {
 	#header { height: auto; }
 	#logo {
 		margin: 10px 0;
@@ -860,7 +864,7 @@ header ul, footer ul {
 	#intro-box h1 {
 	margin-top: .5em;
 	margin-bottom: .5em;
-	font-size: 2.5em;
+	font-size: 2em;
 	line-height: 1.3em;
 	}
 	#intro-box #intro {
@@ -873,8 +877,8 @@ header ul, footer ul {
 	 #intro-box h1 {
 	margin-top: .5em;
 	margin-bottom: .5em;
-	font-size: 2.25em;
-	line-height: 1.3em;
+	font-size: 1.5em;
+	line-height: 1.2em;
 	}
 }
 
