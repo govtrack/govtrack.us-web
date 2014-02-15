@@ -6,7 +6,7 @@
 	<meta charset="utf-8" />
 	<title>Bill Widget &ndash; {{bill.title_no_number}} ({{bill.display_number_no_congress_number}}{% if not bill.is_current %}, {{bill.congress|ordinal}} Congress{% endif %}) &ndash; GovTrack.us</title>
 
-	<link rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20130318" media="all" />
+	<link rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20140215" media="all" />
 
 	<style type="text/css">
 		:root {
@@ -18,6 +18,7 @@
 		
 		body {
 			background: none; /* transparent */
+			margin: 0;
 		}
 
 		#thelogo {
@@ -78,7 +79,7 @@
 		<div class="summary-box">
 			<h1><a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}" target="_blank">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current %} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 
-			<dl>
+			<dl style="margin: 0">
 				<dt>Introduced:</dt>
 				<dd>{{bill.introduced_date}} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
 
@@ -128,7 +129,7 @@
 				{% if text_info and text_info.has_displayable_text %}
 				<dt>Text:</dt>
 				<dd>
-					<p><a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}/text" target="_blank">Read {{bill.noun|capfirst}} Text &raquo;</a> <span style="color: #777">({{text_info.numpages}})</span></dd>
+					<a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}/text" target="_blank">Read {{bill.noun|capfirst}} Text &raquo;</a> <span style="color: #777">({{text_info.numpages}})</span></dd>
 				</dd>
 				{% endif %}
 				{% endwith %}

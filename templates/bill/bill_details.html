@@ -214,7 +214,7 @@
 <!-- bid:{{bill.id}} -->
 <style>
 .panes {
-	background-color: #fcf9f4;
+	background-color: #fefaf6;
 	border-left: 1px solid #ddc;
 	border-right: 1px solid #ddc;
 	border-bottom: 1px solid #ddc;
@@ -426,7 +426,7 @@
 	</div>
 	
 	{% if bill.is_alive %}
-	<div class="aside col-sm-4">
+	<div class="aside col-sm-4" style="margin-top: -5px">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		<div id="event_subscribe_inline_container"> </div>
@@ -646,30 +646,30 @@
 							[{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}<a href="#" onclick="$('#prognosis_factors').slideToggle(); return false;">show factors</a> | {% endif %}<a href="/about/analysis#prognosis">methodology</a>]
 							</small></p>
 							
-							<div id="prognosis_factors" style="display: none">
-							<p>The following factors determined this {{bill.noun}}&rsquo;s prognosis:</p>
+							<div id="prognosis_factors" style="display: none; margin-top: 1em;">
+							<p style="margin-bottom: .5em">The following factors determined this {{bill.noun}}&rsquo;s prognosis:</p>
 
 							{% if p.factors_help_help %}
 							{% for factor in p.factors_help_help %}
-								<p class="small" style="margin-left: 1em">{{factor}} <span>▲</span></p>
+								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▲</span></p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_hurt_hurt %}
 							{% for factor in p.factors_hurt_hurt %}
-								<p class="small" style="margin-left: 1em">{{factor}} <span>▼</span></p>
+								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▼</span></p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_help_hurt %}
 							{% for factor in p.factors_help_hurt %}
-								<p class="small" style="margin-left: 1em">{{factor}} <span>▲▼</span></p>
+								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▲▼</span></p>
 							{% endfor %}
 							{% endif %}
 							
 							{% if p.factors_hurt_help %}
 							{% for factor in p.factors_hurt_help %}
-								<p class="small" style="margin-left: 1em">{{factor}} <span>▼▲</span></p>
+								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▼▲</span></p>
 							{% endfor %}
 							{% endif %}
 

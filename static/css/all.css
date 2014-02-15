@@ -1935,7 +1935,8 @@ aside .download-links { padding: 31px 0 0 }
 /* ================================================ */
 .searching {
 	}
-	.searching section {
+	.searching label {
+        font-weight: normal;
 		}
 	.searching .summary {
 		padding: 0 0 13px;
@@ -2140,7 +2141,6 @@ select, input.text {
 		font-size: 16px;
 		}
 	#search-members .btn-search {
-		float: right;
 		margin: 0 0 20px;
 		text-shadow: 0 1px 1px #555;
 		}

@@ -425,7 +425,7 @@ $(function() {
         
         {% if sort_options|length > 0 %}
             <div style="clear: both;">
-                <label for="searchform_sort" style="margin: 0;">Sort by</label>
+                <label for="searchform_sort" style="margin: 0;">sort by</label>
                 <select id="searchform_sort" name="sort" size="1" onchange="update_search()">
                     <option value="relevance">Relevance</option>
                     {% for label, key, default in sort_options %}
