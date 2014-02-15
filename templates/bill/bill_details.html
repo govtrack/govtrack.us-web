@@ -261,7 +261,7 @@
 #overview dt, #related dt {
 	font-weight: normal;
 	color: #000;
-	margin-bottom: 4px;
+	margin-bottom: 6px;
 }
 
 #overview table {
@@ -713,10 +713,9 @@
 		<div class="sep">&nbsp;</div>
 
 		<div class="row">
+			{% if current or bill.get_major_events|length > 0 %}
 			<div class="col-sm-6 col-md-4">
-
-						<dl>
-						{% if current or bill.get_major_events|length > 0 %}
+					<dl>
 						<dt>Progress</dt>
 						<dd>
 							<table>
@@ -737,8 +736,48 @@
 								{% endif %}
 							</table>
 						</dd>
-						{% endif %}
+					</dl>
+			</div>
+			{% endif %}
 						
+		  	{% if subtitle %}
+			<div class="col-sm-6 col-md-4">
+			<dl>
+						<dt>Full Title</dt>
+						<dd><p>{{subtitle}}</p></dd>
+			</dl>
+			</div>
+		  	{% endif %}
+				
+		<div class="col-sm-6 col-md-4">
+					<dl>
+						<dt>Primary Source</dt>
+						{% if bill.congress >= 93 %}
+						<dd>
+							<p style="margin-bottom: .25em"><a href="{{bill.thomas_link}}">THOMAS.gov (The Library of Congress)</a></p>
+							<p class="small" style="line-height: 130%">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here. {% if bill.source == "thomas-congproj" %}Data comes via the <a href="https://github.com/unitedstates/congress">congress project</a>.{% endif %}</p>
+						</dd>
+						{% elif bill.source == "statutesatlarge" %}
+						<dd>
+							<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
+							<p style="margin-bottom: .25em"><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
+							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Printing Office&rsquo;s United States Statutes at Large publication, via the <a href="https://github.com/unitedstates/congress">congress project</a>.</p>
+						</dd>
+						{% elif bill.source == "americanmemory" %}
+						<dd>
+							<p style="margin-bottom: .25em"><a href="{{bill.source_link}}">American Memory Century of Lawmaking</a></p>
+							<p class="small">Historical information on bills from 1799-1873 comes from the Library of Congress&rsquo;s American Memory Century of Lawmaking collection, via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law project</a>.</p>
+						</dd>
+						{% endif %}
+					</dl>
+		</div> <!-- columns -->
+		</div> <!-- row -->
+
+		<div class="sep">&nbsp;</div>
+
+		<div class="row">
+			<div class="col-sm-6 col-md-4">
+				<dl>
 						{% if bill.votes.exists %}
 							<dt>Votes</dt>
 							<dd>
@@ -835,49 +874,24 @@
 				</dl>
 			</div>
 
-		<div class="col-sm-6 col-md-4">
-			<dl>
-			  	{% if subtitle %}
-						<dt>Full Title</dt>
-						<dd><p>{{subtitle}}</p></dd>
-			  	{% endif %}
-			  
+			<div class="col-sm-6 col-md-4">
+				<dl>
 				{% if bill.source != "americanmemory" %}
 						<dt>Summary</dt>
 						<dd id="summaries">
 							<p>No summaries available.</p>
 						</dd>
-
 				{% endif %}
-			</dl>
-		</div>
-				
-		<div class="col-sm-6 col-md-4">
-					<dl>
+				</dl>
+			</div>
+
+			<div class="col-sm-6 col-md-4">
+				<dl>
 						<dt>Widget</dt>
 						<dd>
 							<p><a href="{{bill.get_absolute_url}}/widget">Get a bill status widget for your website &raquo;</a></p>
 						</dd>
 
-						<dt>Primary Source</dt>
-						{% if bill.congress >= 93 %}
-						<dd>
-							<p style="margin:0"><a href="{{bill.thomas_link}}">THOMAS.gov (The Library of Congress)</a></p>
-							<p class="small" style="line-height: 130%">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here. {% if bill.source == "thomas-congproj" %}Data comes via the <a href="https://github.com/unitedstates/congress">congress project</a>.{% endif %}</p>
-						</dd>
-						{% elif bill.source == "statutesatlarge" %}
-						<dd>
-							<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
-							<p style="margin:0"><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
-							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Printing Office&rsquo;s United States Statutes at Large publication, via the <a href="https://github.com/unitedstates/congress">congress project</a>.</p>
-						</dd>
-						{% elif bill.source == "americanmemory" %}
-						<dd>
-							<p style="margin:0"><a href="{{bill.source_link}}">American Memory Century of Lawmaking</a></p>
-							<p class="small">Historical information on bills from 1799-1873 comes from the Library of Congress&rsquo;s American Memory Century of Lawmaking collection, via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law project</a>.</p>
-						</dd>
-						{% endif %}
-						
 						<dt>Citation</dt>
 						<dd>
 							<script>function show_cite(fmt) {
@@ -907,9 +921,11 @@
 							|quote={{bill.title_no_number|truncatewords:15}}<br/>
 							}}</p>
 						</dd>
-					</dl>
-		</div> <!-- columns -->
-		</div> <!-- row -->
+				</dl>
+			</div>
+
+		</div> <!-- /row -->
+
 	</div>  <!-- /overview pane -->
 	
 	{% if bill.source != "americanmemory" %}
@@ -1024,22 +1040,8 @@
 	</div> <!-- /summary pane -->
 	
 	<div id="related" style="padding: 1em"> <!-- related pane -->
-				{% comment %}
-				{% with bill.get_approved_links as links %}
-				{% if links|length > 0 %}
-						<dt>News Sites &amp; Links:</dt>
-						<dd>
-							{% for link in links %}
-								<div style="margin-bottom: .5em">
-									<div><a href="{{link.url}}" target="_blank" rel="nofollow">{{link.title}}</a></div>
-									<div><small>{{link.created|date}} &mdash; {{link.hostname}}</small></div>
-								</div>
-							{% endfor %}
-						</dd>
-				{% endif %}
-				{% endwith %}
-				{% endcomment %}
-
+		<div class="row">
+			<div class="col-sm-6 col-lg-4">
 				<dl>
 						<dt>Related Bills</dt>
 						<dd>
@@ -1062,8 +1064,7 @@
 							
 							<p>Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
 						</dd>
-					</dl>
-				
+
 				{% with reintros.0 as reintro_from %}
 				{% if reintro_from %}
 						<dt>Supersedes</dt>
@@ -1072,6 +1073,11 @@
 						</dd>
 				{% endif %}
 				{% endwith %}
+
+				</dl>
+			</div>
+			<div class="col-sm-6">
+				<dl>
 					
 						<dt>Subject Areas:</dt>
 						<dd>
@@ -1087,6 +1093,8 @@
 							{% endif %}
 						</dd>
 					</dl>
+			</div>
+		</div> <!-- /row -->
 	</div> <!-- /related pane -->
 	
 	{% if text_info.citations.count %}
