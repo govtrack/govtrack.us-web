@@ -432,16 +432,21 @@
 		<div id="event_subscribe_inline_container"> </div>
 		
 		<div id="action-button" style="display: none; margin: 12px 0;">
-			<a class="push-btn yellow-btn"  href="#" onclick="$.colorbox({href: '#action-panel', inline: true, open: true, width: ($(window).width() >= 750 ? '650px' : '90%'), transition: 'none'}); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
+			<a class="push-btn yellow-btn"  href="#" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
 				<span class="icon-speech-bubble-round-dots" style="color: #020"></span>
 				<span style="text-shadow: none; margin-left: 3px; text-transform: none">Call Congress</span>
 			</a>
 		</div>
 		<script>if (the_segment != "House" && the_segment != "Senate") $('#action-button').show();</script>
-		<div style="display: none">
-			<div id="action-panel" style="padding: 10px">
-				<h1 style="text-align: center">Call Congress!</h1>
-				
+
+		<div class="modal fade" id="action-panel" tabindex="-1" role="dialog" aria-labelledby="actionPanelModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="actionPanelModalLabel">Call Congress</h4>
+		      </div>
+		      <div class="modal-body">
 				<script>
 					function do_poll(posid) {
 						window.location = "{% url "bill_start_poll" %}?bill={{bill.id}}&position=" + posid;
@@ -477,6 +482,11 @@
 					$('#make_call').toggle(p.can_call.length > 0);
 				}
 				</script>				
+		      </div>
+		    </div>
+		  </div>
+		</div>		
+
 				
 				<!--
 				<h2 style="margin-top: 2em;">Next: Spread the Word</h2>
@@ -498,10 +508,7 @@
 					</div>
 				</div>
 				-->
-			
-			</div>
-		</div>
-
+	
 	</div><!-- /actions -->
 	{% endif %}
 

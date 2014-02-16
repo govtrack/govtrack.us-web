@@ -111,8 +111,15 @@ a:link, a:visited {
 	color: #cb4b16;
 	text-decoration: underline;
 	}
+	a.btn:link, a.btn:visited {
+		color: white;
+		text-decoration: none;
+	}
 a:hover, a:focus, a:active {
 	color: #664030;
+	}
+	a.btn:hover, a.btn:focus, a.btn:active {
+		color: white;
 	}
 a.plain:link, #masthead a:link, #intro-box a:link {
 	text-decoration: none;
@@ -1393,9 +1400,6 @@ aside .download-links { padding: 31px 0 0 }
 	padding-top: 20px;
 }
 #lists .options { display: none; }
-#lists div.four.columns {
-	margin-bottom: 20px;
-}
 #lists div.list {
 	position: relative;
 	background-color: #fcfcfc;
@@ -1411,6 +1415,7 @@ aside .download-links { padding: 31px 0 0 }
 		0 1px 2px 5px rgba(106,106,106,.4);
 	padding: 10px;
 	cursor: pointer;
+	margin-bottom: 1em;
 	/*behavior: url(/static/js/PIE.htc);*/
 }
 .lt-ie9 #lists div.list {
@@ -1748,27 +1753,22 @@ aside .download-links { padding: 31px 0 0 }
 		.blue-facebook-btn-wide a { color: #FFA; font-weight: bold; }
 
 	.tracker_widget {
-		width: 475px;
 		font-family: 'CallunaSans';
 		line-height: 130%;
+		text-align: left;
 	}
-	@media (max-width: 550px) and (min-width: 400px) {
-		.tracker_widget { width: 325px; }
-		.tracker_widget .login_social { width: auto !important; margin-bottom: 1em; }
-	}
-		.widget_content {
-			padding: 10px 20px 0px 20px;
-		}
+			.tracker_widget.modal-body {
+				padding-bottom: 0;
+			}
 
 			.tracker_widget h3 {
 				font-size: 1em;
 				color: #40a4bd;
 				text-align: center;
-				margin: 1em 0 .5em 0;
+				margin: 0 0 .5em 0;
 				text-transform: none;
 			}
-			.events_to_track { padding-bottom: 1em; }
-			#content .list_select ul { margin-bottom: 0; } /* override a default page style */
+			.list_select ul { padding: 0; list-style: none; }
 			.events_to_track li a,
 			.list_select li a {
 				display: block;
@@ -1782,27 +1782,17 @@ aside .download-links { padding: 31px 0 0 }
 				border-radius: 5px;
 				overflow: hidden;
 				font-size: .9em;
+				text-decoration: none;
 			}
 			.events_to_track li a {
 				background: transparent;
 				border: 0;
 				margin-bottom: 0;
 			}
-			.list_select li.new {
-				float: left;
-				font-size: 90%;
-			}
-			.list_select li.all {
-				float: right;
-			}
 			.list_select li.new a,
 			.list_select li.all a {	 /* Styles the "Add New List" link */
-				display: inline-block;
 				background: transparent;
 				border: 0;
-				width: 120px;
-				color: rgb(230, 105, 55);
-				font-size: 95%;
 			}
 			.list_select li.selected a {
 				background: #8e8778;
@@ -1854,11 +1844,19 @@ aside .download-links { padding: 31px 0 0 }
 				.list_select li.all:hover span.icon {
 					background-position: 0 -12px;
 				}
-			.tracker_widget .login_buttons .btn {
-				display: inline-block;
-				line-height: 24px !important; /* override default button style */
-				margin-top: 1em !important;
-			}
+	#track_panel .singlesignon {
+		display: inline-block;
+	}
+		#track_panel .singlesignon .legend {
+			display: none;
+		}
+		#track_panel .singlesignon li {
+			display: inline-block;
+			float: none;
+		}
+		#track_panel .singlesignon li .btn {
+			padding: 0;
+		}
 
 /*	Footer Styles
 	======================================================== */

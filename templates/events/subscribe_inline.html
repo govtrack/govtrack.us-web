@@ -14,26 +14,29 @@ var feed_list_state = {{% for f in feed.includes_feeds_and_self %}
 };
 var has_tracker = false;
 function show_track_panel() {
-	// show before colorbox appears so it computes full height to avoid scrolling inside the colorbox
-	$('#track_panel .events_to_track').show();
-	
 	// in the simple mode, update the control state now
-	$('#track_panel .done.add').text(!has_tracker ? 'Add Tracker' : 'Update');
+	$('#track_panel .btn.add').text(!has_tracker ? 'Add Tracker' : 'Update');
 	$('#track_panel .if_has_tracker').toggle(has_tracker);
+	if (has_tracker) {
+		$('#track_panel .show_events_to_track').remove();
+		$('#track_panel .events_to_track').show();
+	}
 	
-	$.colorbox({href: "#track_panel", inline: true, open: true});
-	
-	// hide after colorbox computes full height to avoid scrolling inside the colorbox
-	$('#track_panel .events_to_track').hide();
+	$("#track_panel").modal();
 	
 	return false;
+}
+function hide_track_panel() {
+	$("#track_panel").modal("hide");
 }
 
 {% if request.user.is_authenticated %}
 {% if request.user.userprofile.lists.count <= 1 %}
-	{% if feed in request.user.userprofile.lists.0.trackers.all %}
+	{% for f in feed.includes_feeds_and_self %}
+	{% if f in request.user.userprofile.lists.0.trackers.all %}
 		has_tracker = true;
 	{% endif %}
+	{% endfor %}
 	function save_tracker() {
 		var emailfreq = $("#track_panel .list_select li.selected").attr("email_freq");
 		$.ajax({
@@ -46,7 +49,7 @@ function show_track_panel() {
 			},
 			dataType: "json",
 			success: function(data) {
-				$.colorbox.close();
+				hide_track_panel();
 			}
 		});
 		return false; // cancel click
@@ -61,7 +64,7 @@ function show_track_panel() {
 			},
 			dataType: "json",
 			success: function(data) {
-				$.colorbox.close();
+				hide_track_panel();
 			}
 		});
 		return false; // cancel click
@@ -137,34 +140,30 @@ $(function() {
 });
 </script>
 
-<div style="display: none;" >
-<div id="track_panel" class="tracker_widget">
-	<div class="widget_content">
+<div class="modal fade" id="track_panel" tabindex="-1" role="dialog" aria-labelledby="track_panel_ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 class="modal-title" id="track_panel_ModalLabel">Track {{feed.type_metadata.noun}}</h3>
+      </div>
+      <div class="modal-body tracker_widget">
+
+<div class="row">
+<div class="col-sm-6">
 
 	<h3>When you track this {{feed.type_metadata.noun}}...</h3>
 	<p>
 		{{feed.description}}
 		{% if request.user.is_authenticated and feed.includes_feeds|length != 0 %}
-			<a href="#" onclick="$('#track_panel .events_to_track').fadeIn(); $(this).remove(); return false;">More options...</a>
+			<a class="show_events_to_track" href="#" onclick="$('#track_panel .events_to_track').fadeIn(); $(this).remove(); return false;">More options...</a>
 		{% endif %}
 	</p>
-	
-	{% if not request.user.is_authenticated %}
-		<p style="margin-top: 1em">Sign up for this {{feed.type_metadata.noun}}&rsquo;s email updates below, or use this <a href="{{feed.rss_url}}">RSS feed</a>.</p>
-		
-		<h3>Sign up for email updates...</h3>
-	
-		<p style="margin-bottom: 1em">If you want to use your Facebook, Google, or Twitter account to log in here, just click the appropriate button:</p>
-		
-		{% with "#track" as return_hash %}
-		{% include "events/track_button_login.html" %}
-		{% endwith %}
-	{% else %}
-	
-		{% if feed.includes_feeds|length != 0 %}
-			<div class="events_to_track">
-				<h3>What would you like to track?</h3>
-				<ol id="track_panel_selected_feed">
+
+		{% if request.user.is_authenticated and feed.includes_feeds|length != 0 %}
+			<div class="events_to_track" style="display: none">
+				<h3 style="margin-top: 1em">What would you like to track?</h3>
+				<ol id="track_panel_selected_feed" style="padding: 0;">
 					{% for f in feed.includes_feeds_and_self %}
 						<li {% if forloop.first %}class="selected"{% endif %}><a href="#" feed="{{f.feedname}}" onclick="return selected_feed_changed(this);"><span class="icon"></span> {{f.scoped_title}}</a></li>
 					{% endfor %}
@@ -172,14 +171,42 @@ $(function() {
 			</div>
 		{% endif %}
 
+
+</div>
+<div class="col-sm-6">
+	
+	{% if not request.user.is_authenticated %}
+		<h3>Sign up first</h3>
+	
+		<p>You&rsquo;ll need to sign up (or log in) before you can begin tracking this {{feed.type_metadata.noun}}.
+		That&rsquo;s because we need your email address before we can send you email updates.</p>
+
+</div> <!-- /col -->
+</div> <!-- /row -->
+
+      </div>
+      <div class="modal-footer">
+
+		{% with "#track" as return_hash %}
+
+		{% with request.get_full_path|add:return_hash as singlesignon_next %}
+			{% include "registration/login_singlesignon.html" %}
+		{% endwith %}
+
+        <a class="btn btn-primary" href="/registration/signup?next={{request.path|add:return_hash|urlencode}}">Sign Up</a>
+        <a class="btn btn-primary" href="/accounts/login?next={{request.path|add:return_hash|urlencode}}">Log In</a>
+		{% endwith %}
+
+		<p style="margin-top: 1.5em; margin-bottom: 0; text-align: left;"><small>You can also track this {{feed.type_metadata.noun}} using this <a href="{{feed.rss_url}}">RSS feed</a>.</small></p>
+
+	{% else %}
+	
 		{% if request.user.userprofile.lists.count <= 1 %}
 			{% with request.user.userprofile.lists.0 as the_list %}
 			<div class="list_select">
-				<h3>Tracker options</h3>
+				<h3>Get email?</h3>
 				
-				<p class="if_has_tracker" style="margin-bottom: 1em; display: none;">You are tracking this {{feed.type_metadata.noun}}.</p>
-
-				<p>How often would you like email updates?</p>
+				<p style="margin-bottom: .5em">How often would you like email updates?</p>
 
 				<ul>
 					<li email_freq="0" {% if feed in the_list.trackers.all and the_list.email == 0 %}class="selected"{% endif %}><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">No Email Updates</span></a></li>
@@ -188,13 +215,23 @@ $(function() {
 					<div style="clear: both"> </div>
 				</ul>
 
-				<a href="#" class="btn done add" onclick="has_tracker = true; return save_tracker()" style="margin-bottom: 1em">Add Tracker</a>
-				<a href="#" class="btn done if_has_tracker" onclick="has_tracker = false; return remove_tracker()" style="margin-bottom: 1em; display: none;">Remove</a>
 			</div>
+
+</div> <!-- /col -->
+</div> <!-- /row -->
+
+      </div>
+      <div class="modal-footer">
+
+				<button type="button" class="btn btn-default" data-dismiss="modal" onclick="hide_track_panel(); return false;">Cancel</button>
+   				<a href="#" class="btn btn-primary add" onclick="has_tracker = true; return save_tracker()">Add Tracker</a>
+				<a href="#" class="btn btn-danger if_has_tracker" onclick="has_tracker = false; return remove_tracker()" style="display: none;">Remove Tracker</a>
+
 			{% endwith %}
 		{% else %}
 			<div class="list_select">
-				<h3>To which lists would you like to add this?</h3>
+				<h3>Add to your lists...</h3>
+				<p>You may put this tracker into one or more of your lists:</p>
 				<ul>
 					{% for list in request.user.userprofile.lists %}
 					<li list_id="{{list.id}}"
@@ -202,21 +239,25 @@ $(function() {
 						{% if feed in list.trackers.all %}class="selected"{% endif %} ><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">{{list.name}}</span></a></li>
 					{% endfor %}
 					
-					<li id="new_list_row" class="new"><a href="#" onclick="return new_list();"><span class="icon"></span> Add a new list</a></li>
+					<li id="new_list_row" class="new" style="margin-top: .5em"><a href="#" onclick="return new_list();"><span class="icon"></span> Add a new list</a></li>
 					<li class="all"><a href="/accounts/lists"><span class="icon"></span> Edit your lists</a></li>
 					
 					<div style="clear: both"> </div>
 				</ul>
 			</div>
-			
-			<a href="#" class="btn done" onclick="return $.colorbox.close(); return false;">I'm done</a>
+
+</div> <!-- /col -->
+</div> <!-- /row -->
+
+      </div>
+      <div class="modal-footer">
+			<button type="button" class="btn btn-default" data-dismiss="modal" onclick="hide_track_panel(); return false;">Done</button>
 		{% endif %}
 		
-		<hr/>
-
-		<p style="margin-top: 1em">You can also track this {{feed.type_metadata.noun}} using this <a href="{{feed.rss_url}}">RSS feed</a>.</p>
 	{% endif %}
-	</div><!-- /widget_content -->
-	<div class="widget_footer"></div>
-</div>
+
+
+      </div>
+    </div>
+  </div>
 </div>

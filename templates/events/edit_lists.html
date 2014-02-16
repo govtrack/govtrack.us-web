@@ -17,6 +17,9 @@ h2 {
     padding-bottom: 10px;
     margin-bottom: 20px;
 }
+.list h3.name {
+    margin: 0;
+}
 </style>
 
 <script>
@@ -264,11 +267,11 @@ $(function() {
 {% endif %}
 
 <section class="group if_multiple_lists">
-    <div id="lists">
-        
     <h2>My Lists</h2>
-    <p><em>Click on a list to manage its trackers and email update settings:</em></p>
+    <p style="margin: 0"><em>Click on a list to manage its trackers and email update settings:</em></p>
 
+    <div id="lists" class="row">
+        
     {% for list in request.user.userprofile.lists %}
         {% comment %}since the first of these nodes is cloned when we
         create a new list, it should not have any list-specific data hidden away
@@ -283,17 +286,24 @@ $(function() {
                 <div class="list_info">
                     <div class="num">{{list.trackers.count}} item{{list.trackers.count|pluralize}}</div>
                     <div class="freq">{% if list.name != "Email Updates" %}Email Updates:{% else %}Frequency:{% endif %} <span class="email_info">{{list.get_email_display}}</span></div>
+                    <div style="clear: both"></div>
                 </div>
             </div>
         </div>
 
 
     {% endfor %}
-    <a id="newlist" class="button" href="#" onclick="return new_list();">+ Create New List</a>
+
+    <div class="col-sm-4" id="newlist">
+        <a class="button" href="#" onclick="return new_list();">+ Create New List</a>
+    </div>
+
+    </div> <!-- /row -->
 
     </div><!-- /lists -->
 </section>
 
+<div class="row">
 <section id="list_view">
     <h2 class="if_multiple_lists">Settings for: <span class="name">List Name Goes Here</span></h2>
 
@@ -376,4 +386,5 @@ $(function() {
     </div><!-- /events -->
 
 </section>
+</div>
 {% endblock %}
