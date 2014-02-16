@@ -431,69 +431,6 @@
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		<div id="event_subscribe_inline_container"> </div>
 		
-		{% comment %}
-		<div style="margin: 1em 0">
-			<a href="{{bill.get_absolute_url}}/advocacy" class="push-btn yellow-btn">Take a Position</a>
-		</div>
-		
-		{% if market %}
-		{% if not user.is_authenticated %}
-		<div id="make_prediction">
-		<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>. <a href="/accounts/login?next={{bill.get_absolute_url|urlencode}}">Log in</a> to make a bet.</p>
-		</div>
-		{% else %}
-		<div id="make_prediction">
-		<p>{{market.name}} The community prediction is <b>{{market.yes_price}}%</b>.</p>
-		<p class="youthink" {% if market.user_positions %}style="display: none"{% endif %}>What do you think?</p>
-		<p class="empty" {% if market.user_positions %}style="display: none"{% endif %}>
-			1) <a href="#" prediction="-1">Worse Than {{market.yes_price}}%</a>.<br/>
-			2) <a href="#" prediction="1">Better Than {{market.yes_price}}%</a>.
-		</p>
-		<p class="nonempty" {% if not market.user_positions %}style="display: none"{% endif %}>
-			You bet on <span>{% if market.user_positions.1.shares > 0 %}yes{% else %}no{% endif %}</span>.
-			{% if market.user_profit == 0 %}
-				<a href="#" prediction="0">Clear bet</a>.
-			{% endif %}
-			{% if market.user_profit > 0 %}
-				<a href="#" prediction="0">Cash out</a> for {{market.user_profit|floatformat:0}} points.
-			{% endif %}
-			{% if market.user_profit < 0 %}
-				<a href="#" prediction="0">Take your loss</a> of {{market.user_profit|floatformat:0}} points before it gets worse.
-			{% endif %}
-		</p>
-		</div>
-		<script>
-		$("#make_prediction a").click(function() {
-			var p = this.getAttribute("prediction");
-			$.ajax({
-				url: "/congress/bills/_ajax/market_test_vote",
-				type: "POST",
-				data: {
-					bill: {{bill.id}},
-					prediction: p
-				},
-				dataType: "json",
-				success: function(data) {
-					if (data.vote == 0) {
-						$("#make_prediction .empty").show();
-						$("#make_prediction .nonempty").hide();
-						$("#make_prediction .youthink").show();
-					} else {
-						$("#make_prediction .empty").hide();
-						$("#make_prediction .nonempty").show();
-						$("#make_prediction .nonempty span").text(data.vote == 1 ? "yes" : "no");
-						$("#make_prediction .youthink").hide();
-					}
-				}
-			});	
-			return false;
-		});
-		</script>
-		{% endif %}
-		{% endif %}
-
-		{% endcomment %}
-		
 		<div id="action-button" style="display: none; margin: 12px 0;">
 			<a class="push-btn yellow-btn"  href="#" onclick="$.colorbox({href: '#action-panel', inline: true, open: true, width: ($(window).width() >= 750 ? '650px' : '90%'), transition: 'none'}); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
 				<span class="icon-speech-bubble-round-dots" style="color: #020"></span>
