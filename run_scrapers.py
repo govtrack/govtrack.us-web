@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!script
 
 # ./run_scrapers.py text bills votes stats
 
@@ -20,7 +20,8 @@ def md5(fn, modulo=None):
 	# to remove content we don't want to check for
 	# differences.
 	
-	data = open(fn).read()
+	with open(fn) as fobj:
+		data = fobj.read()
 	if modulo != None: data = re.sub(modulo, "--", data)
 	
 	md5 = hashlib.md5()
@@ -264,3 +265,64 @@ if "stat_bills" in sys.argv:
 		# Load into db.
 		os.system("./parse.py --congress=%d bill" % congress) #  -l ERROR
 		
+if "photos" in sys.argv:
+	# Pull in any new photos from the unitedstates/images repository.
+
+	import person.models, os, shutil, yaml
+
+	src = '../scripts/congress-images/congress/original/'
+	dst = 'data/photos/'
+
+	# Get a list of GovTrack IDs and Bioguide IDs for which photos are provided
+	# in the unitedstates/images repo. Only import photos of current Members of
+	# Congress because I haven't reviewed older photos necessarily.
+	bioguide_ids = [f[len(src):-4] for f in glob.glob(src + '*.jpg')]
+	id_pairs = person.models.Person.objects.filter(
+		bioguideid__in=bioguide_ids,
+		roles__current=True)\
+		.values_list('id', 'bioguideid')
+
+	for govtrack_id, bioguide_id in id_pairs:
+		# source JPEG & sanity check that it exists
+		fn1 = src + bioguide_id + ".jpg"
+		if not os.path.exists(fn1):
+			raise IOError(fn1)
+
+		# get required metadata
+		metadata = yaml.load(open(fn1.replace("/original/", "/metadata/").replace(".jpg", ".yaml")))
+		if metadata.get("name", "").strip() == "": raise ValueError("Metadata is missing name.")
+		if metadata.get("link", "").strip() == "": raise ValueError("Metadata is missing link.")
+
+		# check if the destination JPEG already exists and it has different content
+		fn2 = dst + str(govtrack_id) + ".jpeg"
+		if os.path.exists(fn2) and md5(fn1) != md5(fn2):
+			# Back up the existing files first. If we already have a backed up
+			# image, don't overwrite the back up. Figure out what to do another
+			# time and just bail now. Check that we won't overwrite any files
+			# before we attempt to move them.
+			def get_archive_fn(fn):
+				return fn.replace("/photos/", "/photos/archive/")
+			files_to_archive = [fn2] + glob.glob(fn2.replace(".jpeg", "-*"))
+			for fn in files_to_archive:
+				if os.path.exists(get_archive_fn(fn)):
+				 	raise ValueError("Archived photo already exists: " + fn)
+
+			# Okay now actually do the backup.
+			for fn in files_to_archive:
+				print fn, "=>", get_archive_fn(fn)
+				shutil.move(fn, get_archive_fn(fn))
+
+		# Copy in the file.
+		print fn1, "=>", fn2
+		shutil.copy2(fn1, fn2)
+
+		# Write the metadata.
+		with open(fn2.replace(".jpeg", "-credit.txt"), "w") as credit_file:
+			credit_file.write( (metadata.get("link", "").strip() + " " + metadata.get("name", "").strip() + "\n").encode("utf-8") )
+
+		# Generate resized versions.
+		for size_width in (50, 100, 200):
+			size_height = int(round(size_width * 1.2))
+			os.system("convert %s -resize %dx%d^ -gravity center -extent %dx%d %s"
+				% (fn2, size_width, size_height, size_width, size_height,
+					fn2.replace(".jpeg", ("-%dpx.jpeg" % size_width)) ))
