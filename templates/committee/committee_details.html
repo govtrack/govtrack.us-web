@@ -7,6 +7,7 @@
 
 {% block head %}
 <style>
+#members h5 { margin: 6px 0 0 0; }
 .flag {
 	color:#fff;
 	font-size: 12px;
@@ -117,16 +118,15 @@
 	</ul>
 
 	<div class="panes">
-		<div id="members" class="committee-members-grid row">
+		<div id="members" class="committee-members-grid">
 			<h2 style="margin: 1em 0 1em 0">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</h2>
 				
 		    <div class="row">
 	        {% for member in members %}
-	        {% if forloop.counter0|divisibleby:6 and not forloop.first %}
-	    	</div>
-	        <div class="row">
-	        {% endif %}
-		        <div class="member col-sm-2">
+		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
+		        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm"></div>{% endif %}
+		        {% if forloop.counter0|divisibleby:2 %}<div class="clearfix visible-xs"></div>{% endif %}
+		        <div class="member col-xs-6 col-sm-3 col-md-2">
 	            	
 		            <div class="photo">
 	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url }}" /></a>
@@ -143,8 +143,6 @@
 	                <div class="flag flag_{{role.party|slice:":1"|lower}} sub_chair" title="Subcommittee Chair: {{member.subcommittee_role.committee.name}}">
 	                	{{member.subcommittee_role.committee.name|cut:"The "|truncatewords:1}}
 	                </div>
-	                {% else %}
-	            	<div>&nbsp;</div>
 	            	{% endif %}
 		            {% endif %}
 
