@@ -1,8 +1,8 @@
 {% extends "master.html" %}
 {% block heading_box %}
 	<header class="heading-box row">
-		<div class="col-sm-2" style="padding: 0">
-			<img src="/static/images/{% block cat-icon-filename %}{% endblock %}" alt="Page Icon"/>
+		<div class="col-sm-2">
+			<img src="/static/images/{% block cat-icon-filename %}{% endblock %}" alt="Page Icon" class="img-responsive"/>
 		</div>
 		<div class="col-sm-7">
 			<div style="padding-right: 2em">
@@ -12,7 +12,7 @@
 		</div>
 		<div class="col-sm-3">
 			<a href="/events/track-something?feed={{feed.feedname|urlencode}}" class="track-btn" style="margin: .5em auto;">Track {% block track_button_noun %}This{% endblock %}</a> 
-			<p>{% block track_button_explanation %}...{% endblock %}</p>
+			<p style="margin: 0; line-height: 115%;"><small>{% block track_button_explanation %}...{% endblock %}</small></p>
 		</div>
 	</header>
 {% endblock %}

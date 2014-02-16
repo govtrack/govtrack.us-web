@@ -13,32 +13,34 @@
 
 {% block summary %}
     <h1>Congressional Committees</h1>
-    <p>Committees decide which bills and resolutions move forward to consideration by the House or Senate as a whole. Committee chairmen have enormous influence over this process.</p>
+    <p style="margin-bottom: 0;">Committees decide which bills and resolutions move forward to consideration by the House or Senate as a whole. Committee chairmen have enormous influence over this process.</p>
 {% endblock %}
 
 {% block body %}
-	<div class="col-sm-6">
+<div class="row">
+	<div class="col-sm-offset-1 col-sm-5">
         <h2>Senate Committees</h2>
-        <ul>
+        <ul style="list-style: none; padding: 0;">
             {% for item in senate_committees %}
             <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
             {% endfor %}
         </ul>
 	</div>
 
-    <div class="col-sm-6">
+    <div class="col-sm-5">
         <h2>House Committees</h2>
-        <ul>
+        <ul style="list-style: none; padding: 0;">
             {% for item in house_committees %}
             <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
             {% endfor %}
         </ul>
     </div>
-
-	<div class="twelve columns">
+</div>
+<div class="row">
+	<div class="col-sm-offset-1 col-sm-10">
         <h2>Joint Committees</h2>
         <p>The joint committees are made up of both senators and congressmen. They typically have an oversight or policy role but no legislative duties.</p>
-        <ul>
+        <ul style="list-style: none; padding: 0;">
             {% for item in joint_committees %}
             <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
             {% endfor %}
@@ -47,5 +49,6 @@
         the committees are essentially defunct and oversight takes place within the
         majority party leadership of each chamber.</p>
     </div>
+</div>
 {% endblock %}
 

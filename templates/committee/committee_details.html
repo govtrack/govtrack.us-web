@@ -64,9 +64,9 @@
 {% endblock %}
 
 {% block summary %}
+<h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
+
 <div class="row group">
-    <h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
-	
 	<div id="track_panel_base" class="col-sm-8">
        	{% if committee.committee_type == TYPE_JOINT %}
        		<p>This is a &ldquo;joint&rdquo; committee, which means it has members from both the House and Senate.
