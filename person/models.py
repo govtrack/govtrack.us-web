@@ -249,10 +249,11 @@ class Person(models.Model):
         return sources
 
     def get_photo(self):
-        photo_path = 'data/photos/%d-100px.jpeg' % self.pk
+        size = 200
+        photo_path = 'data/photos/%d-%dpx.jpeg' % (self.pk, size)
         if os.path.exists(photo_path):
             photo_url = '/' + photo_path
-            with open(photo_path.replace("-100px.jpeg", "-credit.txt"), "r") as f:
+            with open(photo_path.replace("-%dpx.jpeg" % size, "-credit.txt"), "r") as f:
                 photo_credit = f.read().strip().split(" ", 1)
                 return photo_url, photo_credit
         else:
