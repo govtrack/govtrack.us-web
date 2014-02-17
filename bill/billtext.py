@@ -78,6 +78,8 @@ bill_gpo_status_codes = {
     "rth": "Referred to House Committee",
     "rts": "Referred to Senate Committee",
     "s_p": "Star Print of an Amendment",
+    "fph": "Failed Passage in the House",
+    "fps": "Failed Passage in the Senate",
     }
 
 def get_gpo_status_code_name(doc_version):
@@ -87,7 +89,7 @@ def get_gpo_status_code_name(doc_version):
         digit_suffix = doc_version[-1] + digit_suffix
         doc_version = doc_version[:-1]
     
-    doc_version_name = bill_gpo_status_codes.get(doc_version, "Unknown Status")
+    doc_version_name = bill_gpo_status_codes.get(doc_version, "Unknown Status (%s)" % doc_version)
 
     if digit_suffix: doc_version_name += " " + digit_suffix
 
