@@ -7,6 +7,18 @@ import random, markdown2
 
 register = template.Library()
 
+@register.filter
+def date2(value):
+    import datetime
+    if isinstance(value, str): raise ValueError("Invalid argument: " + repr(value))
+    if isinstance(value, datetime.datetime) and (value.time() == datetime.time.min): value = value.date()
+    if not isinstance(value, datetime.datetime):
+        ret = value.strftime("%b %d, %Y")
+    else:
+        ret = value.strftime("%b %d, %Y %I:%M %p")
+    ret = ret.replace(" 0", " ") # Oct 01 => Oct 1
+    return ret
+
 @register.assignment_tag
 def randint(a, b):
 	return random.randint(int(a), int(b))
@@ -30,3 +42,15 @@ def ordinalhtml(value):
 @stringfilter
 def markdown(value):
     return safestring.mark_safe(markdown2.markdown(force_unicode(value), safe_mode=True))
+
+@register.filter
+def mod(value, arg):
+    return int(value) % int(arg)
+
+@register.filter
+def mult(value, arg):
+    return float(value) * float(arg)
+
+@register.filter
+def to_int(value):
+    return int(round(float(value)))

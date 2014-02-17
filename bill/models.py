@@ -9,7 +9,7 @@ from json_field import JSONField
 from committee.models import Committee, CommitteeMeeting, CommitteeMember, MEMBER_ROLE_WEIGHTS
 from bill.status import BillStatus, get_bill_status_string
 from bill.title import get_bill_number, get_primary_bill_title
-from bill.billtext import load_bill_text
+from bill.billtext import load_bill_text, get_gpo_status_code_name
 from us import get_congress_dates
 
 from django.conf import settings
@@ -633,10 +633,15 @@ class Bill(models.Model):
             }
 
     def get_major_events(self):
+        # we don't have events for historical bills.... but we should create
+        # a default one...
         if self.congress < 93: return []
+
+        # create events for major actions
         ret = []
         saw_intro = False
         for datestr, st, text, srcxml in self.major_actions:
+            if st == BillStatus.referred: continue # so not interesting
             date = eval(datestr)
             srcnode = etree.fromstring(srcxml) if srcxml else None
             if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres) and srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
@@ -654,16 +659,40 @@ class Bill(models.Model):
             ret.append({
                 "label": st,
                 "date": date,
-                "extra": text,
+                "action_text": text,
             })
         if not saw_intro: ret.insert(0, { "label": "Introduced", "date": self.introduced_date })
+        return ret
 
+        # create events for being scheduled on a calendar...
+        # of course if it's scheduled more than once we only have the most recent
         if self.docs_house_gov_postdate: ret.append({ "label": "On House Schedule", "date": self.docs_house_gov_postdate })
         if self.senate_floor_schedule_postdate: ret.append({ "label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate })
+
+        # generate an event for each new GPO text availability
+        bt = BillType.by_value(self.bill_type).slug
+        textbase = "data/congress/%d/bills/%s/%s%d/text-versions" % (self.congress, bt, bt, self.number)
+        import json
+        from glob import glob
+        from parser.processor import Processor
+        for versionfile in glob(textbase + "/*/data.json"):
+            d = json.load(open(versionfile))
+            ret.append({
+                "label": "Bill Text for %s" % get_gpo_status_code_name(d["version_code"]),
+                "date": Processor.parse_datetime(d["issued_on"]).date(),
+                "version_code": d["version_code"],
+                "sort_alter": 1,
+            })
+
+        # re-sort
         def as_dt(x):
-            if isinstance(x, datetime.datetime): return x
-            return datetime.datetime.combine(x, datetime.time.min)
-        ret.sort(key = lambda x : as_dt(x["date"])) # only needed because of the previous two
+            if isinstance(x['date'], datetime.datetime):
+                ret = x['date']
+            else:
+                ret = datetime.datetime.combine(x['date'], datetime.time.min)
+                if x.get("sort_alter", 0) == 1: ret += datetime.timedelta(days=.999)
+            return ret
+        ret.sort(key = lambda x : (as_dt(x), x.get("sort_alter", 0)))
 
         return ret
 

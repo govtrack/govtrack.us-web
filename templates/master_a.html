@@ -27,7 +27,7 @@
 		}
 		ga('send', 'event', 'Advertisements', 'ImpressionCount', padDigits(ad_exp_user.impression, 5), null, {'nonInteraction': 1});
 		
-		if (is_ad_free) {
+		if (is_ad_free {% if debug %}|| 1{% endif %}) {
 			document.write("An ad would be here, but you've gone ad-free!");
 
 		} else if ($(window).width() < 992) {

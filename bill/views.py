@@ -157,6 +157,7 @@ def bill_details(request, congress, type_slug, number):
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": Feed.BillFeed(bill),
         "text": get_text_info,
+        "progress": bill.get_major_events() + [{"label": e} for e in bill.get_future_events() ],
 
         "care2_category_id": {
             5816: '793', # Agriculture and Food=>Health

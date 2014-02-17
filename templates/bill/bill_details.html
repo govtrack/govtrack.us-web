@@ -227,6 +227,19 @@
 #action-panel h1 { font-size: 20px; }
 #action-panel h2 { font-size: 16px; }
 
+.progress-item {
+	background-image: url(/static/images/bill_details_progress_bg_senate.png);
+	background-repeat: no-repeat;
+	min-height: 100px;
+	margin: 0 -15px;
+	padding: 0 15px;
+}
+	.progress-item .date {
+		width: 255px;
+		text-align: center;
+		height: 20px;
+	}
+
 #prognosis_factors p span, #prognosis_factors .key { color: #777; font-family: Arial, Helvetica, sans-serif;}
 
 #call_congress_positions button {
@@ -245,46 +258,46 @@
 		#call_congress_positions button.support span { color: green; }
 		#call_congress_positions button.oppose span { color: red; }
 
-#overview dl, #overview p {
+#details dl, #details p {
 	margin: 0;
 }
-#overview dl dt {
+#details dl dt {
 	margin-top: 1em;
 }
 
-#overview .sep {
+#details .sep {
 	border-bottom: 1px solid #EDC;
 	height: 0;
 	margin: 2em 0 1em 0;
 }
 
-#overview dt, #related dt {
+#details dt, #related dt {
 	font-weight: normal;
 	color: #000;
 	margin-bottom: 6px;
 }
 
-#overview table {
+#details table {
        width: 100%;
        margin: 0 0 14px;
        font-size: 13px;
        position: relative;
        }
-       #overview table td {
+       #details table td {
                padding: 0 2px 0 8px;
                vertical-align: middle;
                }
-       #overview table td.done {
+       #details table td.done {
                padding-left: 28px;
                background: url('/static/images/ico-checked.gif') 8px center no-repeat;
                }
-       #overview table td.pending {
+       #details table td.pending {
                padding-left: 28px;
                background: url('/static/images/ico-unchecked.gif') 8px center no-repeat;
                }
-       #overview table .odd.done td { background: #e4e9e8 url('/static/images/ico-checked.gif') 8px center no-repeat; }
-       #overview table .odd.pending td { background: #e4e9e8 url('/static/images/ico-unchecked.gif') 8px center no-repeat; }
-       #overview tr.highlight td { font-weight: bold; }
+       #details table .odd.done td { background: #e4e9e8 url('/static/images/ico-checked.gif') 8px center no-repeat; }
+       #details table .odd.pending td { background: #e4e9e8 url('/static/images/ico-unchecked.gif') 8px center no-repeat; }
+       #details tr.highlight td { font-weight: bold; }
 
 </style>
 {% endblock %}
@@ -535,23 +548,18 @@
 
 <ul class="tabs five-up">
 	<li><a href="#overview">Overview</a></li>
+	<li><a href="#details">Details</a></li>
 	
 	{% if bill.source != "americanmemory" %}
 	<li id="summary_tab" style="display: none"><a href="#summary">Summaries</a></li>
-	<li><a href="#related">Related</a></li>
-	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
 	<li id="comments_tab" style="display: none"><a href="#comments">Comments</a></li>
 	{% endif %}
 </ul>
 
 <div class="panes">
-	<div id="overview" style="padding: 1em"> <!-- overview pane -->
-		<div class="row">
-			<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Status</dt>
-						<dd>
-							<p style="line-height: 130%">
+	<div id="overview" style="padding: 1em">
+							<!-- status -->
+							<p>
 								{% if bill.source == "statutesatlarge" %}
 									{% if bill.noun == "bill" %}
 										This bill was enacted on {{bill.current_status_date|date}}.
@@ -565,11 +573,32 @@
 								{% else %}
 									This {{bill.noun}} died in a previous session of Congress.
 								{% endif %}
+								Here&rsquo;s how it got there and where it is going.
 							</p>
-						</dd>
-					</dl>
-			</div>
 
+		<div class="row">
+			{% for item in progress %}
+		        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm visible-md visible-lg"></div>{% endif %}
+
+				<div class="col-sm-3">
+					<div class="visible-lg" style="height: {{forloop.counter0|mod:4|mult:13|to_int}}px">&nbsp;</div>
+					<div class="visible-md" style="height: {{forloop.counter0|mod:4|mult:11|to_int}}px">&nbsp;</div>
+					<div class="visible-sm" style="height: {{forloop.counter0|mod:4|mult:9|to_int}}px">&nbsp;</div>
+					<div class="progress-item">
+						<div class="date">
+							{% if item.date %}
+								{{item.date|date2}}
+							{% endif %}
+						</div>
+						<div style="padding-top: 2em" title="{{item.extra}}">{{item.label}}</div>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+
+	<div id="details" style="padding: 1em"> <!-- details pane -->
+		<div class="row">
 			<div class="col-sm-6 col-md-4">
 					<dl>
 						{% with bill.get_prognosis as p %}
@@ -657,33 +686,7 @@
 		<div class="sep">&nbsp;</div>
 
 		<div class="row">
-			{% if current or bill.get_major_events|length > 0 %}
-			<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Progress</dt>
-						<dd>
-							<table>
-								{% for item in bill.get_major_events %}
-								<tr>
-									<td class="done" title="{{item.extra}}">{{item.label}}</td>
-									<td><nobr>{{item.date|date:"DATE_FORMAT"}}</nobr></td>
-								</tr>
-								{% endfor %}
-							
-								{% if current %}
-								{% for item in bill.get_future_events %}
-								<tr>
-									<td class="pending">{{item}}</td>
-									<td>...</td>
-								</tr>
-								{% endfor %}
-								{% endif %}
-							</table>
-						</dd>
-					</dl>
-			</div>
-			{% endif %}
-						
+
 		  	{% if subtitle %}
 			<div class="col-sm-6 col-md-4">
 			<dl>
@@ -870,7 +873,122 @@
 
 		</div> <!-- /row -->
 
-	</div>  <!-- /overview pane -->
+		<div class="sep">&nbsp;</div>
+
+		<div class="row">
+			<div class="col-sm-6 col-md-4">
+				<dl>
+						<dt>Related Bills</dt>
+						<dd>
+							{% if bill.relatedbills.exists %}
+							<div>
+							{% for rb in bill.get_related_bills %}
+								<p style="margin-bottom: .25em;">
+									{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">
+										{{rb.related_bill.display_number_no_congress_number}}: {{rb.related_bill.title_no_number|truncatewords:15}}
+									</a>
+								</p>
+								<p class="small" style="margin-bottom: .75em;">
+									{{rb.related_bill.get_current_status_display}}<br/>
+									Last Action: {{rb.related_bill.current_status_date|date}}
+								</p>
+							{% endfor %}
+							</div>
+							<p class="small">Related bills are identified by the Library of Congress.</p>
+							{% endif %}
+							
+							<p>Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
+						</dd>
+
+				{% with reintros.0 as reintro_from %}
+				{% if reintro_from %}
+						<dt>Supersedes</dt>
+						<dd>
+							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
+						</dd>
+				{% endif %}
+				{% endwith %}
+
+				</dl>
+			</div>
+			<div class="col-sm-6 col-md-4">
+				<dl>
+						<dt>Subject Areas:</dt>
+						<dd>
+							{% if bill.get_terms_sorted|length = 0 %}
+								<p>None known at this time.</p>
+							{% else %}
+							<p>Use these subject areas to explore related legislation:</p>
+							<div>
+							{% for term in bill.get_terms_sorted %}
+								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
+							{% endfor %}
+							</div>
+							{% endif %}
+						</dd>
+					</dl>
+			</div>
+		</div> <!-- /row -->
+
+		{% if text_info.citations.count %}
+		<div class="sep">&nbsp;</div>
+
+		<div class="row">
+		<div class="col-xs-12">
+			<h2>Citations</h2>
+
+			<p>The bill contains the following citations to other parts of U.S. law:</p>
+		
+			{% if text_info.citations.slip_laws %}
+				<h3>Slip Laws</h3>
+				<p>Slip laws refer to enacted bills and joint resolutions in their original form as enacted by Congress, that is, before other laws amend them. Slip laws are cited as &ldquo;Public Law XXX-YYY&rdquo;, where XXX is the number of the Congress in which the bill or resolution was introduced.</p>
+				<ul class="bullets">
+				{% for cite in text_info.citations.slip_laws %}
+					<li>{{cite.text}}{% if cite.bill %}:<br/><a href="{{cite.bill.get_absolute_url}}">{{cite.bill}}</a>{% endif %}</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+			
+			{% if text_info.citations.usc %}
+				<h3>United States Code</h3>
+
+				<p>The United States Code is the compilation of general and permanent laws enacted by Congress. Laws that are not 
+				permanent in nature, law that affect a single individual, family, or small group, regulations, case law, state
+				law, and local law do not appear in the United States Code.</p>
+				
+				<ul class="bullets">
+				{% for cite in text_info.citations.usc %}
+					<li style="margin-left: {{cite.indent}}em;">
+						{% if cite.link %}<a href="{{cite.link}}">{{cite.text}}</a>{% else %}{{cite.text}}{% endif %}
+						{% if cite.range_to_section %} (through {{cite.range_to_section}}){% endif %}
+						</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+			
+			{% if text_info.citations.statutes %}
+				<h3>Statutes at Large</h3>
+				<p>The United States Statutes at Large is the compilation of all laws enacted by Congress.</p>
+				<ul class="bullets">
+				{% for cite in text_info.citations.statutes %}
+					<li>{{cite.text}}</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+			
+			{% if text_info.citations.other %}
+				<h3>Other Citations</h3>
+				<ul class="bullets">
+				{% for cite in text_info.citations.other %}
+					<li>{{cite.text}}</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+		</div>
+		</div> <!-- /row -->
+		{% endif %}
+
+	</div>  <!-- /details pane -->
 	
 	{% if bill.source != "americanmemory" %}
 	<div id="summary" style="margin-left: 15px"> <!-- summary pane -->
@@ -888,7 +1006,7 @@
 				$('#summary_tabs').append($('<li><a/></li>').find('a')
 					.text(name ? name : "Our Summary").attr('href', '#summary/' + href));
 
-				// add a link on the overview, and show the tab
+				// add a link on the details, and show the tab
 				var n = $('#summaries');
 				if (first_summary) {
 					n.text('');
@@ -982,117 +1100,9 @@
 		</div>
 		</div>
 	</div> <!-- /summary pane -->
+
 	
-	<div id="related" style="padding: 1em"> <!-- related pane -->
-		<div class="row">
-			<div class="col-sm-6 col-lg-4">
-				<dl>
-						<dt>Related Bills</dt>
-						<dd>
-							{% if bill.relatedbills.exists %}
-							<div>
-							{% for rb in bill.get_related_bills %}
-								<p style="margin-bottom: .25em;">
-									{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">
-										{{rb.related_bill.display_number_no_congress_number}}: {{rb.related_bill.title_no_number|truncatewords:15}}
-									</a>
-								</p>
-								<p class="small" style="margin-bottom: .75em;">
-									{{rb.related_bill.get_current_status_display}}<br/>
-									Last Action: {{rb.related_bill.current_status_date|date}}
-								</p>
-							{% endfor %}
-							</div>
-							<p class="small">Related bills are identified by the Library of Congress.</p>
-							{% endif %}
-							
-							<p>Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
-						</dd>
 
-				{% with reintros.0 as reintro_from %}
-				{% if reintro_from %}
-						<dt>Supersedes</dt>
-						<dd>
-							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
-						</dd>
-				{% endif %}
-				{% endwith %}
-
-				</dl>
-			</div>
-			<div class="col-sm-6">
-				<dl>
-					
-						<dt>Subject Areas:</dt>
-						<dd>
-							{% if bill.get_terms_sorted|length = 0 %}
-								<p>None known at this time.</p>
-							{% else %}
-							<p>Use these subject areas to explore related legislation:</p>
-							<div>
-							{% for term in bill.get_terms_sorted %}
-								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
-							{% endfor %}
-							</div>
-							{% endif %}
-						</dd>
-					</dl>
-			</div>
-		</div> <!-- /row -->
-	</div> <!-- /related pane -->
-	
-	{% if text_info.citations.count %}
-	<div id="citations" style="padding: 1em"> <!-- text analysis pane -->
-
-		<p>The bill contains the following citations to other parts of U.S. law:</p>
-	
-		{% if text_info.citations.slip_laws %}
-			<h2>Slip Laws</h2>
-			<p>Slip laws refer to enacted bills and joint resolutions in their original form as enacted by Congress, that is, before other laws amend them. Slip laws are cited as &ldquo;Public Law XXX-YYY&rdquo;, where XXX is the number of the Congress in which the bill or resolution was introduced.</p>
-			<ul class="bullets">
-			{% for cite in text_info.citations.slip_laws %}
-				<li>{{cite.text}}{% if cite.bill %}:<br/><a href="{{cite.bill.get_absolute_url}}">{{cite.bill}}</a>{% endif %}</li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-		
-		{% if text_info.citations.usc %}
-			<h2>United States Code</h2>
-
-			<p>The United States Code is the compilation of general and permanent laws enacted by Congress. Laws that are not 
-			permanent in nature, law that affect a single individual, family, or small group, regulations, case law, state
-			law, and local law do not appear in the United States Code.</p>
-			
-			<ul class="bullets">
-			{% for cite in text_info.citations.usc %}
-				<li style="margin-left: {{cite.indent}}em;">
-					{% if cite.link %}<a href="{{cite.link}}">{{cite.text}}</a>{% else %}{{cite.text}}{% endif %}
-					{% if cite.range_to_section %} (through {{cite.range_to_section}}){% endif %}
-					</li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-		
-		{% if text_info.citations.statutes %}
-			<h2>Statutes at Large</h2>
-			<p>The United States Statutes at Large is the compilation of all laws enacted by Congress.</p>
-			<ul class="bullets">
-			{% for cite in text_info.citations.statutes %}
-				<li>{{cite.text}}</li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-		
-		{% if text_info.citations.other %}
-			<h2>Other Citations</h2>
-			<ul class="bullets">
-			{% for cite in text_info.citations.other %}
-				<li>{{cite.text}}</li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-	</div>
-	{% endif %}
 
 	<div id="comments" style="padding: 1em">
 		<p style="text-align: center; font-style: italic; margin-bottom: 1em;">
