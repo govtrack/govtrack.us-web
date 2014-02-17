@@ -92,10 +92,10 @@
 		</table>
 		
 		{% if links %}
-			<p style="margin-top: 1em"><small>See Also:
+			<p style="margin: 1em 0 0 0; line-height: 110%;"><small><span style="margin-right: .5em">See Also:</span>
 			{% for label, link in links %}
 				{% if not forloop.first %} | {% endif %}
-				<a href="{{link}}" target="_blank">{{label}}</a>
+				<a href="{{link}}" target="_blank" style="white-space: nowrap">{{label}}</a>
 			{% endfor %}
 			</small></p>
 		{% endif %}
@@ -114,14 +114,6 @@
 		{% if active_role %}
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track {% if person.gender == 1 %}Him{% elif person.gender == 2 %}Her{% else %}Member{% endif %}</a>
-		
-		{% if role.website %}
-		<div class="article">
-			<strong>Official Website:</strong>
-			<a href="{{role.website}}" target="_blank" class="plain">{{role.website}}</a>
-			{% if person.twitterid %}<br/><a href="http://twitter.com/{{person.twitterid}}" target="_blank" class="plain">@{{person.twitterid}}</a>{% endif %}
-		</div>
-		{% endif %}
 		{% endif %}
 	</div><!-- /aside -->
 </div>
