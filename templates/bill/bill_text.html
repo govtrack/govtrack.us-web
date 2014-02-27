@@ -217,9 +217,9 @@ function align_panels() {
 $(window).resize(align_panels);
 
 $(function() {
-	var m = /^#compare=(\d+)/.exec(window.location.hash);
+	var m = /^#compare=(?:(\d+):)?([a-z][a-z0-9]+)?/.exec(window.location.hash);
 	if (m) {
-		load_comparison(m[1], null);
+		load_comparison(m[1], m[2]);
 	}
 });
 </script>
