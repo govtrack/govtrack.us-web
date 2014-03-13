@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
@@ -14,6 +14,7 @@ from common.pagination import paginate
 from cache_utils.decorators import cached
 
 from twostream.decorators import anonymous_view
+from registration.helpers import json_response
 
 from events.models import Feed
 import us
@@ -523,3 +524,11 @@ def videos(request, video_id=None):
     return render_to_response('website/videos.html', { "video_id": video_id }, RequestContext(request))
 
 
+@login_required
+@json_response
+def set_district(request):
+    prof = request.user.userprofile()
+    if request.POST.get("state") not in list(us.statenames)+["XX"]: return HttpResponseBadRequest(request.POST.get("state") + "|"+str(set(us.statenames)))
+    prof.congressionaldistrict = "%s%02d" % (request.POST.get("state"), int(request.POST.get("district")))
+    prof.save()
+    return { "status": "ok" }

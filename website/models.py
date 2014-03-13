@@ -10,9 +10,10 @@ class UserProfile(models.Model):
     massemail = models.BooleanField(default=True) # may we send you mail?
     old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
     last_mass_email = models.IntegerField(default=0)
+    congressionaldistrict = models.CharField(max_length=4, blank=True, null=True, db_index=True) # or 'XX00' if the user doesn't want to provide it
     
     # monetization
-    paid_features = JSONField(default={}, null=True) # maps feature name to tuple (payment ID, sale ID or None if not useful)
+    paid_features = JSONField(default={}, blank=True, null=True) # maps feature name to tuple (payment ID, sale ID or None if not useful)
     
     def lists(self):
         # make sure the 'default' list exists

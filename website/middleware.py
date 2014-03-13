@@ -6,6 +6,8 @@ import urllib, json, datetime, base64
 
 from emailverification.models import BouncedEmail
 
+import us
+
 if settings.GEOIP_DB_PATH:
     from django.contrib.gis.geoip import GeoIP
     from django.contrib.gis.geos import Point
@@ -41,7 +43,8 @@ def template_context_processor(request):
     
     context = {
         "SITE_ROOT_URL": settings.SITE_ROOT_URL,
-        "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY
+        "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY,
+        "STATE_CHOICES": sorted([(kv[0], kv[1], us.stateapportionment[kv[0]]) for kv in us.statenames.items() if kv[0] in us.stateapportionment], key = lambda kv : kv[1]),
     }
     
     if request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
@@ -149,6 +152,13 @@ def template_context_processor(request):
     return context
   
 class GovTrackMiddleware:
+    def process_request(self, request):
+        if request.user.is_authenticated():
+            request.user.twostream_data = {
+                'cd': request.user.userprofile().congressionaldistrict or None,
+            }
+        return None
+
     def process_response(self, request, response):
         # Save the geolocation info in a cookie so we don't have to
         # query GIS info on each request.

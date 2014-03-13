@@ -21,6 +21,8 @@ def user_head(request):
 	user_data = None
 	if request.user.is_authenticated():
 		user_data = { "email": request.user.email }
+		if hasattr(request.user, 'twostream_data'):
+			user_data.update(request.user.twostream_data)
 		
 	page_data = None
 	if hasattr(m.func, 'user_func'):
