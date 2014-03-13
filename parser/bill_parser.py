@@ -364,8 +364,6 @@ def main(options):
                 bill.source_link = None
 
             actions = []
-            bill.sliplawpubpriv = None
-            bill.sliplawnum = None
             for axn in tree.xpath("actions/*[@state]"):
                 actions.append( (
                 	repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))),
@@ -374,6 +372,9 @@ def main(options):
                     etree.tostring(axn),
                 	) )
                 
+            bill.sliplawpubpriv = None
+            bill.sliplawnum = None
+            for axn in tree.xpath("actions/enacted[@law]"):
                 if actions[-1][1] in (BillStatus.enacted_signed, BillStatus.enacted_veto_override):
                     bill.sliplawpubpriv = "PUB" if axn.get("type") == "public" else "PRI"
                     bill.sliplawnum = int(axn.get("number").split("-")[1])
