@@ -1,7 +1,7 @@
 {% if format == "text" %}
 active: true
-subject: "Try Calling Congress!"
+subject: "We Asked Congress for More Data, Again"
 ----------
 {% endif %}
 
-A phone call to Congress is an effective way to let your voice be heard, and now you can call Congress right from GovTrack. We'll walk you through the whole thing. Click any bill in this email update and look for the Call Congress button.
+In [a new letter](https://www.govtrack.us/blog/2014/03/08/the-congressional-data-coalition-writes-to-house-appropriators/) to the House this month, we joined 18 other organizations and individuals in calling for access to the legislative data on bill status that Congress has but won’t share.
