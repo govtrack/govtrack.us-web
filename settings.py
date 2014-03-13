@@ -57,7 +57,7 @@ STATICFILES_DIRS = [os.path.join(ROOT, 'static')]
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
 SITE_ROOT_URL = "https://www.govtrack.us"
 LOGIN_REDIRECT_URL = "/accounts/profile"
-SERVER_EMAIL = "GovTrack.us <noreply@GovTrack.us>" # From: address on verification emails
+SERVER_EMAIL = "GovTrack.us <noreply@mail.GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
 
 SESSION_COOKIE_AGE = 6*604800 # seconds in six weeks
@@ -169,7 +169,7 @@ IGNORABLE_404_URLS = (
 
 CURRENT_CONGRESS = 113
 
-EMAIL_UPDATES_FROMADDR = "GovTrack.us Email Updates <noreply@GovTrack.us>"
+EMAIL_UPDATES_FROMADDR = "GovTrack.us Email Updates <noreply@mail.GovTrack.us>"
 EMAIL_UPDATES_RETURN_PATH = "bounces+uid=%d@GovTrack.us"
 BOUNCES_UID_REGEX = re.compile(r"<?bounces\+uid=(\d+)@GovTrack\.us>?", re.I)
 
