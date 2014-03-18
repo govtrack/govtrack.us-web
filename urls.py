@@ -15,12 +15,13 @@ urlpatterns = patterns('',
     url(r'^congress/committees/', include('committee.urls')),
     url(r'^congress/', include('vote.urls')),
     url(r'^congress/bills/', include('bill.urls')),
+    url(r'^calendar/', include('event_calendar.urls')),
     url(r'', include('events.urls')),
     url(r'^market/', include('predictionmarket.urls')),
     url(r'^states(/|$)', include('states.urls')),
     url(r'^poll(/|$)', include('poll_and_call.urls')),
     url(r'^api/v2/([^/]+)(?:/(\d+))?', 'website.api.apiv2'),
-    
+
     url(r'^_twostream', include('twostream.urls')),
 
     # django-registration-pv
