@@ -2,6 +2,8 @@
 from django.db import models
 from django.core.urlresolvers import reverse
 
+from datetime import datetime, timedelta
+
 from common import enum
 
 from settings import CURRENT_CONGRESS
@@ -41,7 +43,7 @@ class Committee(models.Model):
             return reverse('subcommittee_details', args=[parent.code, self.code[4:]])
         else:
             return reverse('committee_details', args=[self.code])
-    
+
     @property
     def fullname(self):
         if self.committee == None:
@@ -59,12 +61,18 @@ class Committee(models.Model):
             if n.startswith("the "): n = n[4:]
             return n
 
+    def committee_type_label(self):
+        try:
+            return CommitteeType.by_value(self.committee_type).label
+        except enum.NotFound:
+            return ""
+
     def committee_type_abbrev(self):
         return CommitteeType.by_value(self.committee_type).abbrev
-        
+
     def current_bills(self):
         return self.bills.filter(congress=CURRENT_CONGRESS)
-    
+
     def create_events(self):
         from events.models import Feed, Event
         feeds = [Feed.AllCommitteesFeed(), Feed.CommitteeMeetingsFeed(self.code)]
@@ -73,11 +81,11 @@ class Committee(models.Model):
             for meeting in self.meetings.all():
                 E.add("mtg_" + str(meeting.id), meeting.when,
                 	feeds + [Feed.BillFeed(b) for b in meeting.bills.all()])
-    
+
     def render_event(self, eventid, feeds):
         eventinfo = eventid.split("_")
         mtg = CommitteeMeeting.objects.get(id=eventinfo[1])
-        
+
         return {
             "type": "Committee Meeting",
             "date": mtg.when,
@@ -101,30 +109,30 @@ class CommitteeMemberRole(enum.Enum):
 class CommitteeMember(models.Model):
     """A record indicating the current membership of a Member of Congress on a committee or subcommittee.
     The IDs on these records are not stable (do not use them)."""
-    
+
     # The parser wipes out this table each time it loads up
     # committee membership, so we should not create any
     # foreign keys to this model.
-    
+
     person = models.ForeignKey('person.Person', related_name='committeeassignments', help_text="The Member of Congress serving on a committee.")
     committee = models.ForeignKey('committee.Committee', related_name='members', help_text="The committee or subcommittee being served on.")
     role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member, help_text="The role of the member on the committee.")
 
     def __unicode__(self):
         return '%s @ %s as %s' % (self.person, self.committee, self.get_role_display())
-        
+
     # api
     api_recurse_on = ("committee","person")
-    
+
     def role_name(self):
         return CommitteeMemberRole.by_value(self.role).label
-        
+
     def subcommittee_role(self):
         try:
             return CommitteeMember.objects.filter(committee__committee=self.committee, person=self.person, role=CommitteeMemberRole.chairman)[0]
         except IndexError:
             return None
-            
+
     def role_name_2(self):
         if self.role in (CommitteeMemberRole.member, CommitteeMemberRole.exofficio):
             return "a member of"
@@ -140,14 +148,75 @@ MEMBER_ROLE_WEIGHTS = {
 }
 
 class CommitteeMeeting(models.Model):
-    # The parser wipes out this table each time it loads up
-    # committee schedules, so we should not create any
-    # foreign keys to this model.
-
+    guid = models.CharField(max_length=36, unique=True)
+    event_id = models.PositiveIntegerField(null=True, default=None)
+    congress = models.PositiveIntegerField(default=CURRENT_CONGRESS)
+    chamber = models.CharField(max_length=1)#models.IntegerField(choices=CommitteeType, blank=True, null=True, help_text="Whether this is a House, Senate, or Joint committee.")
+    committee = models.ForeignKey(Committee, related_name="meetings")
+    subcommittee = models.CharField(max_length=2, null=True, default=None)
+    meeting_type = models.CharField(max_length=4, null=True, default=None)
+    topic = models.TextField()
+    occurs_at = models.DateTimeField()
+    room = models.TextField(null=True)
+    closed = models.BooleanField(default=False)
+    bills = models.ManyToManyField("bill.Bill", blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    committee = models.ForeignKey('committee.Committee', related_name='meetings')
-    when = models.DateTimeField()
-    subject = models.TextField()
-    bills = models.ManyToManyField('bill.Bill', blank=True)
-    guid = models.CharField(max_length=36, db_index=True, unique=True)
-    
+
+    class Meta:
+        ordering = [ "occurs_at" ]
+
+    def __unicode__(self):
+        return self.guid
+
+    @property
+    def chamber_name(self):
+        if self.chamber == "h":
+            chamber_name = "House"
+        elif self.chamber == "s":
+            chamber_name = "Senate"
+        elif self.chamber == "j":
+            chamber_name = "Joint"
+        else:
+            chamber_name = self.chamber
+
+        return chamber_name
+
+    @property
+    def meeting_type_name(self):
+        if self.meeting_type == "HMTG":
+            meeting_type_name = "Meeting"
+        elif self.meeting_type == "HHRG":
+            meeting_type_name = "Hearing"
+        elif self.meeting_type == "HMKP":
+            meeting_type_name = "Markup"
+        else:
+            meeting_type_name = self.meeting_type
+
+        return meeting_type_name
+
+    @property
+    def meeting_date(self):
+        return self.occurs_at.strftime("%B %d")
+
+    @property
+    def meeting_time(self):
+        return self.occurs_at.strftime("%I:%M %p")
+
+    @property
+    def is_new(self):
+        return (self.created > (datetime.now() - timedelta(hours=36)))
+
+    # Legacy properties
+
+    @property
+    def when(self):
+        return self.occurs_at
+
+    @property
+    def subject(self):
+        subject = self.topic
+
+        if self.room:
+            subject += " [" + mobj.room + "]"
+
+        return subject

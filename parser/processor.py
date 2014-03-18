@@ -30,7 +30,14 @@ class Processor(object):
                     value = self.get_node_attribute_value(node, key)
                 else:
                     value = self.DEFAULT_VALUES[key]
-                setattr(obj, field_name, self.convert(key, value))
+                try:
+                    setattr(obj, field_name, self.convert(key, value))
+                except ValueError as e:
+                    print dir(obj)
+                    print node
+                    print field_name, key, value, self.convert(key, value)
+                    print e
+                    raise
 
     def process_subnodes(self, obj, node):
         "Process subnodes of XML node"
