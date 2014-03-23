@@ -5,13 +5,14 @@ from django.core.urlresolvers import reverse
 from common.decorators import render_to
 from common.pagination import paginate
 
-from committee.models import Committee, CommitteeMemberRole, CommitteeType
+from committee.models import Committee, CommitteeMemberRole, CommitteeType, CommitteeMeeting
 from committee.util import sort_members
+from events.models import Feed
+
+from datetime import datetime
 
 @render_to('committee/committee_details.html')
 def committee_details(request, parent_code, child_code=None):
-    from events.models import Feed
-	
     if child_code:
         if len(child_code) == 2:
             obj = get_object_or_404(Committee, code=parent_code+child_code)
@@ -51,12 +52,11 @@ def committee_list(request):
     def getlist(type_):
         items = list(Committee.objects.filter(committee_type=type_, obsolete=False))
         for c in items:
-            m = re.match("(House|Senate) ((Select|Special|Permanent Select) )?Committee on (the )?(.+)", unicode(c))
-            if not m:
-                c.display_name = unicode(c)
+            if c.name.startswith("Joint "):
+                c.display_name = c.name
             else:
-                c.display_name = m.group(5)
-        return sorted(items, key=lambda c : (not c.display_name.startswith("Joint "), c.display_name))
+                c.display_name = c.sortname()
+        return sorted(items, key=lambda c : c.display_name)
 
     return {
         'senate_committees': getlist(CommitteeType.senate),
@@ -64,7 +64,8 @@ def committee_list(request):
         'joint_committees': getlist(CommitteeType.joint),
         'feed': Feed.AllCommitteesFeed(),
     }
-    
+
+   
 import django.contrib.sitemaps
 class sitemap(django.contrib.sitemaps.Sitemap):
     changefreq = "weekly"
@@ -72,3 +73,13 @@ class sitemap(django.contrib.sitemaps.Sitemap):
     def items(self):
         return Committee.objects.filter(obsolete=False)
 
+@render_to("committee/calendar.html")
+def committee_calendar(request):
+    committee_meetings = list(CommitteeMeeting.objects.filter(when__gte=datetime.now().date()).order_by()\
+        .prefetch_related("committee", "committee__committee"))
+    committee_meetings.sort(key = lambda mtg : (mtg.when, mtg.committee.sortname(True)))
+
+    return {
+        "committee_meetings": committee_meetings,
+        'feed': Feed.AllCommitteesFeed(),
+    }

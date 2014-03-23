@@ -43,9 +43,9 @@ class CommitteeMeetingProcessor(YamlProcessor):
     Parser of committee meeting JSON files.
     """
 
-    REQUIRED_ATTRIBUTES = [ "guid", "congress", "committee", "occurs_at", "topic" ]
-    ATTRIBUTES = [ "guid", "house_event_id", "house_meeting_type", "congress", "chamber", "committee", "subcommittee", "occurs_at", "room", "topic", "closed", "bills" ]
-    FIELD_MAPPING = { "house_event_id": "event_id", "house_meeting_type": "meeting_type" }
+    REQUIRED_ATTRIBUTES = ['committee', 'occurs_at', 'topic', 'guid']
+    ATTRIBUTES = ['committee', 'subcommittee', 'occurs_at', 'topic', 'guid', 'room']
+    FIELD_MAPPING = { 'occurs_at': 'when', 'topic': 'subject' }
 
     def committee_handler(self, value):
         return Committee.objects.get(code=value)
@@ -61,7 +61,7 @@ def main(options):
     """
 
     BASE_PATH = settings.CONGRESS_LEGISLATORS_PATH
-
+    
     meeting_processor = CommitteeMeetingProcessor()
 
     log.info('Processing committees')
@@ -80,7 +80,7 @@ def main(options):
             except Committee.DoesNotExist:
                 print "New committee:", committee["thomas_id"]
                 cobj = Committee(code=committee["thomas_id"])
-
+               
             cobj.committee_type = TYPE_MAPPING[committee["type"]]
             cobj.name = committee["name"]
             cobj.url = committee.get("url", None)
@@ -96,7 +96,7 @@ def main(options):
                 except Committee.DoesNotExist:
                     print "New subcommittee:", code
                     sobj = Committee(code=code)
-
+                
                 sobj.name = subcom["name"]
                 sobj.url = subcom.get("url", None)
                 sobj.type = None
@@ -104,9 +104,9 @@ def main(options):
                 sobj.obsolete = False
                 sobj.save()
                 seen_committees.add(sobj.id)
-
+                
             progress.tick()
-
+            
         # Check for non-obsolete committees in the database that aren't in our
         # file.
         other_committees = Committee.objects.filter(obsolete=False).exclude(id__in=seen_committees)
@@ -115,7 +115,7 @@ def main(options):
             other_committees.update(obsolete=True)
 
         File.objects.save_file(COMMITTEES_FILE)
-
+        
     log.info('Processing committee members')
     MEMBERS_FILE = BASE_PATH + 'committee-membership-current.yaml'
     file_changed = File.objects.is_changed(MEMBERS_FILE)
@@ -129,12 +129,12 @@ def main(options):
         for m in y:
             if "id" in m and "govtrack" in m["id"] and "thomas" in m["id"]:
                 person_id_map[m["id"]["thomas"]] = m["id"]["govtrack"]
-
+        
         # load committee members
         tree = yaml_load(MEMBERS_FILE)
         total = len(tree)
         progress = Progress(total=total, name='committees')
-
+        
         # We can delete CommitteeMember objects because we don't have
         # any foreign keys to them.
         CommitteeMember.objects.all().delete()
@@ -149,78 +149,68 @@ def main(options):
 
             # Process members of current committee node
             for member in members:
-                # Ignore missing members, as they've probably retired.
-                if "thomas" in member and member["thomas"] in person_id_map:
-                    mobj = CommitteeMember()
-                    mobj.person = Person.objects.get(id=person_id_map[member["thomas"]])
-                    mobj.committee = cobj
-                    if "title" in member:
-                        mobj.role = ROLE_MAPPING[member["title"]]
-                    mobj.save()
-
+                mobj = CommitteeMember()
+                mobj.person = Person.objects.get(id=person_id_map[member["thomas"]])
+                mobj.committee = cobj
+                if "title" in member:
+                    mobj.role = ROLE_MAPPING[member["title"]]
+                mobj.save()
+            
             progress.tick()
 
         File.objects.save_file(MEMBERS_FILE)
-
+        
     log.info('Processing committee schedule')
     for chamber in ("house", "senate"):
 		meetings_file = 'data/congress/committee_meetings_%s.json' % chamber
 		file_changed = File.objects.is_changed(meetings_file)
-
+	
 		if not file_changed and not options.force:
 			log.info('File %s was not changed' % meetings_file)
 		else:
 			meetings = json.load(open(meetings_file))
-
+			
 			# Process committee event nodes
 			for meeting in meetings:
 				try:
-					mobj = meeting_processor.process(CommitteeMeeting(), meeting)
-
 					# Associate it with an existing meeting object if GUID is already known.
+					# Must get it like this, vs just assigning the ID as we do in other parsers,
+					# because of the auto_now_add created field, which otherwise misbehaves.
 					try:
-						mobj.id = CommitteeMeeting.objects.get(guid=mobj.guid).id
+						mobj = CommitteeMeeting.objects.get(guid=meeting['guid'])
 					except CommitteeMeeting.DoesNotExist:
-						pass
-
+						mobj = CommitteeMeeting()
+					
+					# Parse.
+					mobj = meeting_processor.process(mobj, meeting)
+					
 					# Attach the meeting to the subcommittee if set.
 					if mobj.subcommittee:
 						mobj.committee = Committee.objects.get(code=mobj.committee.code + mobj.subcommittee)
-
-					# XXX: This is a hack.
-					if "closed hearings" in mobj.topic.lower():
-						mobj.closed = True
-
-					if mobj.created is None:
-						mobj.created = datetime.now()
-
+					
 					mobj.save()
-
+					
 					mobj.bills.clear()
 					for bill in meeting["bills"]:
-						try:
-							bill_type, bill_num, bill_cong = re.match(r"([a-z]+)(\d+)-(\d+)$", bill).groups()
-							bill_obj = Bill.objects.get(congress=bill_cong, bill_type=BillType.by_slug(bill_type), number=int(bill_num))
-							print bill, bill_obj
-							mobj.bills.add(bill_obj)
-						except AttributeError as e:
-							print "bill: AttributeError", e, bill
-							pass # regex failed
-						except common.enum.NotFound as e:
-							print "bill: NotFound", e, bill
-							pass # invalid bill type code in source data
-						except Bill.DoesNotExist:
-							pass # we don't know about bill yet
-					print mobj.bills
+					    try:
+					        bill_type, bill_num, bill_cong = re.match(r"([a-z]+)(\d+)-(\d+)$", bill).groups()
+					        bill = Bill.objects.get(congress=bill_cong, bill_type=BillType.by_slug(bill_type), number=int(bill_num))
+					        mobj.bills.add(bill)
+					    except AttributeError:
+					        pass # regex failed
+					    except common.enum.NotFound:
+					        pass # invalid bill type code in source data
+					    except Bill.DoesNotExist:
+					        pass # we don't know about bill yet
 				except Committee.DoesNotExist:
 					log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
-
+	
 			for committee in Committee.objects.all():
 				if not options.disable_events:
 					committee.create_events()
-
+				
 			File.objects.save_file(meetings_file)
-
+		
 
 if __name__ == '__main__':
     main()

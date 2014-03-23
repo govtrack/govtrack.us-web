@@ -1,0 +1,102 @@
+{% extends "master_c.html" %}
+{% load humanize persontags %}
+
+{% block title %}Congressional Committee Meetings Calendar &ndash; GovTrack.us{% endblock %}
+{% block cat-icon-filename %}img-committees.png{% endblock %}
+{% block track_button_noun %}Meetings{% endblock %}
+{% block track_button_explanation %}Get notifiations when a new committee meeting is scheduled.{% endblock %}
+
+{% block crumbs %}
+<ul>
+<li><a href="/congress/committees">Committees</a></li>
+<li>Upcoming Meetings</li>
+</ul>
+{% endblock %}
+
+{% block head %}
+<style type="text/css">
+	/*** CALENDAR EVENTS ***/
+
+	h3 {
+		margin-bottom: .75em;
+	}
+
+	div.calendar-time {
+		padding-bottom: 5px;
+	}
+
+	div.calendar-event {
+		margin-bottom: 1.5em;
+		padding: 1em;
+		box-shadow: 0.15em 0.15em 0.25em #333;
+		background-color: rgba(203, 75, 22, 0.05);
+		border-color: #CB4B16;
+	}
+
+	div.calendar-event.new {
+		background-color: rgba(203, 75, 22, 0.1);
+		border-color: #CB4B16;
+	}
+
+	div.calendar-event h4 a {
+		color: inherit;
+		text-decoration: none;
+	}
+</style>
+{% endblock %}
+
+{% block summary %}
+    <h1>Committee Meeting Calendar</h1>
+    <p style="margin-bottom: 0;">Committees conduct their business during hearings, mark-up sessions, and other business meetings.</p>
+{% endblock %}
+
+{% block body %}
+
+<p><small>All times are in Eastern Time when the meeting is in Washington, D.C. Shaded meetings were posted within the last 36 hours. Only meetings posted <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">by the Senate</a> or on <a href="http://docs.house.gov/Committee/Calendar/ByWeek.aspx">docs.House.gov</a> are listed.</small></p>
+
+<div class="dummy">
+<div class="dummy">
+
+{% for committee_meeting in committee_meetings %}
+
+{% ifchanged committee_meeting.when.date %}
+	</div> <!-- /calendar-time -->
+	</div> <!-- /calendar-day -->
+	<div class="calendar-day">
+	<h2><time>{{ committee_meeting.when|date:"l, F G, Y" }}</time></h2>
+	<div class="dummy">
+{% endifchanged %}
+
+{% ifchanged committee_meeting.when %}
+	</div> <!-- /calendar-time -->
+	<div class="calendar-time">
+	<h3><time>{{ committee_meeting.when|date:"P" }}</time></h3>
+{% endifchanged %}
+	<div class="calendar-event {% if committee_meeting.is_recently_added %} new{% endif %}" id="calendar-event:{{ committee_meeting.guid }}">
+		<small style="float: right">
+			{{ committee_meeting.when|date:"D, M G, Y - P" }}
+			{% if committee_meeting.room %}
+				<br><span class="calendar-event-location">Location: {{ committee_meeting.room }}</span>
+			{% endif %}
+		</small>
+
+		<h4 style="margin-top: 0;"><a href="{{committee_meeting.committee.get_absolute_url}}">{{committee_meeting.abbrev_committee_name}}</a></h4>
+
+		<p class="calendar-event-topic" style="margin-bottom: 0">
+			{{ committee_meeting.subject }}
+		</p>
+
+		{% if committee_meeting.bills.count > 0 %}
+			<ul style="margin-top: 1em; padding-left: 1.1em; font-size: 90%;">
+				{% for bill in committee_meeting.bills.all %}
+					<li><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:20}}</a></li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+	</div>
+{% endfor %}
+
+</div> <!-- /calendar-time -->
+</div> <!-- /calendar-day -->
+
+{% endblock %}

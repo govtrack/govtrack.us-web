@@ -3,6 +3,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 
 from datetime import datetime, timedelta
+import re
 
 from common import enum
 
@@ -55,6 +56,17 @@ class Committee(models.Model):
     def shortname(self):
 	    return self.fullname.replace("Committee on the ", "").replace("Committee on ", "")
 
+    def sortname(self, with_chamber=False):
+        if self.committee:
+            return self.committee.sortname(with_chamber) + ": " + self.name.replace("Subcommittee on the ", "").replace("Subcommittee on ", "")
+
+        m = re.match("(House|Senate|Joint) ((Select|Special|Permanent Select) )?Committee on (the )?(.+)", self.name)
+        if not m: return self.name # unrecognized format
+        return \
+              ((self.committee.sortname + " ") if self.committee else "") \
+            + ((m.group(1) + " ") if with_chamber else "") \
+            + m.group(5)
+
     @property
     def name_no_article(self):
             n = self.name
@@ -92,9 +104,9 @@ class Committee(models.Model):
             "title": self.fullname + " Meeting",
             "url": self.get_absolute_url(),
             "body_text_template": """{{subject|safe}}""",
-            "body_html_template": """{{subject}}""",
+            "body_html_template": """<p>{{subject}}</p> <p><small>Check out our new <a href="https://www.govtrack.us/congress/committees/calendar">committee meeting calendar</a>.</small></p>""",
             "context": {
-                "subject": mtg.subject,
+                "subject": mtg.subject + (" (Location: " + mtg.room + ")" if mtg.room else ""),
                 }
             }
 
@@ -148,75 +160,23 @@ MEMBER_ROLE_WEIGHTS = {
 }
 
 class CommitteeMeeting(models.Model):
-    guid = models.CharField(max_length=36, unique=True)
-    event_id = models.PositiveIntegerField(null=True, default=None)
-    congress = models.PositiveIntegerField(default=CURRENT_CONGRESS)
-    chamber = models.CharField(max_length=1)#models.IntegerField(choices=CommitteeType, blank=True, null=True, help_text="Whether this is a House, Senate, or Joint committee.")
-    committee = models.ForeignKey(Committee, related_name="meetings")
-    subcommittee = models.CharField(max_length=2, null=True, default=None)
-    meeting_type = models.CharField(max_length=4, null=True, default=None)
-    topic = models.TextField()
-    occurs_at = models.DateTimeField()
-    room = models.TextField(null=True)
-    closed = models.BooleanField(default=False)
-    bills = models.ManyToManyField("bill.Bill", blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    committee = models.ForeignKey(Committee, related_name="meetings", db_index=True)
+    when = models.DateTimeField()
+    subject = models.TextField()
+    bills = models.ManyToManyField("bill.Bill", blank=True)
+    guid = models.CharField(max_length=36, db_index=True, unique=True)
+    room = models.TextField(null=True)
 
     class Meta:
-        ordering = [ "occurs_at" ]
+        ordering = [ "-created" ]
 
     def __unicode__(self):
         return self.guid
 
     @property
-    def chamber_name(self):
-        if self.chamber == "h":
-            chamber_name = "House"
-        elif self.chamber == "s":
-            chamber_name = "Senate"
-        elif self.chamber == "j":
-            chamber_name = "Joint"
-        else:
-            chamber_name = self.chamber
-
-        return chamber_name
-
-    @property
-    def meeting_type_name(self):
-        if self.meeting_type == "HMTG":
-            meeting_type_name = "Meeting"
-        elif self.meeting_type == "HHRG":
-            meeting_type_name = "Hearing"
-        elif self.meeting_type == "HMKP":
-            meeting_type_name = "Markup"
-        else:
-            meeting_type_name = self.meeting_type
-
-        return meeting_type_name
-
-    @property
-    def meeting_date(self):
-        return self.occurs_at.strftime("%B %d")
-
-    @property
-    def meeting_time(self):
-        return self.occurs_at.strftime("%I:%M %p")
-
-    @property
-    def is_new(self):
+    def is_recently_added(self):
         return (self.created > (datetime.now() - timedelta(hours=36)))
 
-    # Legacy properties
-
-    @property
-    def when(self):
-        return self.occurs_at
-
-    @property
-    def subject(self):
-        subject = self.topic
-
-        if self.room:
-            subject += " [" + mobj.room + "]"
-
-        return subject
+    def abbrev_committee_name(self):
+        return self.committee.sortname(True)
