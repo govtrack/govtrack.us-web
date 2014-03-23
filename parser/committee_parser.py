@@ -173,20 +173,20 @@ def main(options):
 			# Process committee event nodes
 			for meeting in meetings:
 				try:
-					mobj = meeting_processor.process(CommitteeMeeting(), meeting)
-					
 					# Associate it with an existing meeting object if GUID is already known.
+					# Must get it like this, vs just assigning the ID as we do in other parsers,
+					# because of the auto_now_add created field, which otherwise misbehaves.
 					try:
-						mobj.id = CommitteeMeeting.objects.get(guid=mobj.guid).id
+						mobj = CommitteeMeeting.objects.get(guid=meeting['guid'])
 					except CommitteeMeeting.DoesNotExist:
-						pass
+						mobj = CommitteeMeeting()
+					
+					# Parse.
+					mobj = meeting_processor.process(mobj, meeting)
 					
 					# Attach the meeting to the subcommittee if set.
 					if mobj.subcommittee:
 						mobj.committee = Committee.objects.get(code=mobj.committee.code + mobj.subcommittee)
-					
-					if mobj.room:
-					    mobj.subject += " [" + mobj.room + "]"
 					
 					mobj.save()
 					

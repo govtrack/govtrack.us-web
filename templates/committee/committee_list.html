@@ -1,11 +1,8 @@
-{% extends "master_c.html" %}
+{% extends "master_b.html" %}
 {% load humanize persontags %}
 
 {% block title %}U.S. Congress List of Commitees - GovTrack.us{% endblock %}
 {% block cat-icon-filename %}img-committees.png{% endblock %}
-
-{% block track_button_noun %}Meetings{% endblock %}
-{% block track_button_explanation %}Click to track upcoming hearings. Or select a committee below to track its bills &amp; meetings.{% endblock %}
 
 {% block crumbs %}
 <ul><li><a href="{% url "congress_home" %}">Congress</a></li> <li>Committees</li></ul>
@@ -17,6 +14,11 @@
 {% endblock %}
 
 {% block body %}
+
+<p style="text-align: center">
+New: <a href="calendar">Calendar of Upcoming Committee Meetings</a>
+</p>
+
 <div class="row">
 	<div class="col-sm-offset-1 col-sm-5">
         <h2>Senate Committees</h2>

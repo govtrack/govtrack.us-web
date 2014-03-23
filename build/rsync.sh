@@ -32,4 +32,6 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "congress/113/bills/*/*/text-versions/*/document.txt" \
 	--include "congress/113/bills/*/*/text-versions/*/document.xml" \
 	--include "congress/113/bills/*/*/text-versions/*/catoxml.xml" \
+	--include "congress/committee_meetings_house.json" \
+	--include "congress/committee_meetings_senate.json" \
 	--exclude "**"
