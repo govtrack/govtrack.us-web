@@ -508,9 +508,13 @@
 
    			return false;
     	}
+		var win_loc_hash = window.location.hash; // may change between now and ()'s execution
+		{% if request.anonymous %}
     	$(function() {
-    		setTimeout(function() { if (the_user && the_user.cd == null) show_askcd() }, 1000)
+			{# the_user.cd is only available if request.anonymous #}
+    		setTimeout(function() { if (the_user && the_user.cd == null && win_loc_hash != "#track") show_askcd() }, 1000)
     	});
+		{% endif %}
     </script>
 	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
 	<!-- / ask for district -->
