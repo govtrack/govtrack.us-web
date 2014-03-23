@@ -374,10 +374,9 @@ def main(options):
                 
             bill.sliplawpubpriv = None
             bill.sliplawnum = None
-            for axn in tree.xpath("actions/enacted[@law]"):
-                if actions[-1][1] in (BillStatus.enacted_signed, BillStatus.enacted_veto_override):
-                    bill.sliplawpubpriv = "PUB" if axn.get("type") == "public" else "PRI"
-                    bill.sliplawnum = int(axn.get("number").split("-")[1])
+            for axn in tree.xpath("actions/enacted"):
+                bill.sliplawpubpriv = "PUB" if axn.get("type") == "public" else "PRI"
+                bill.sliplawnum = int(axn.get("number").split("-")[1])
                     
             bill.major_actions = actions
             try:

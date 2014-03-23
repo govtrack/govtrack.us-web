@@ -4,7 +4,7 @@
 
 import os, os.path, glob, re, hashlib, shutil, sys, datetime
 
-CONGRESS = 113
+CONGRESS = int(os.environ.get("CONGRESS", "113"))
 SCRAPER_PATH = "../scripts/congress"
 
 # UTILS
@@ -62,7 +62,7 @@ fetch_mode = "--force --fast"
 log_level = "error"
 
 if "full-scan" in sys.argv: fetch_mode = "--force"
-if "CACHE" in os.environ: fetch_mode = ""
+if "CACHE" in os.environ: fetch_mode = "--fast"
 if "DEBUG" in os.environ: log_level = "info"
 	
 # Run scrapers and parsers.

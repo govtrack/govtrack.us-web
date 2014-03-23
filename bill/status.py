@@ -31,22 +31,23 @@ class BillStatus(enum.Enum):
     fail_originating_senate = enum.Item(17, 'Failed Senate', xml_code='FAIL:ORIGINATING:SENATE', search_help_text="Failed in the Senate, its originating chamber", sort_order=(5,1))
     fail_second_house = enum.Item(19, 'Passed Senate, Failed House', xml_code='FAIL:SECOND:HOUSE', search_help_text="Passed the Senate but failed in the House.", sort_order=(5,2))
     fail_second_senate = enum.Item(20, 'Passed House, Failed Senate', xml_code='FAIL:SECOND:SENATE', search_help_text="Passed the House but failed in the Senate.", sort_order=(5,3))
-    override_pass_over_house = enum.Item(21, 'Vetoed & House Overrides (Senate Next)', xml_code='OVERRIDE_PASS_OVER:HOUSE', search_help_text="The House passed a veto override, sending it to the Senate.", sort_order=(6,0))
-    override_pass_over_senate = enum.Item(22, 'Vetoed & Senate Overridess (House Next)', xml_code='OVERRIDE_PASS_OVER:SENATE', search_help_text="The Senate passed a veto override, sending it to the House.", sort_order=(6,1))
+    override_pass_over_house = enum.Item(21, 'Vetoed & House Overrides (Senate Next)', xml_code='VETOED:OVERRIDE_PASS_OVER:HOUSE', search_help_text="The House passed a veto override, sending it to the Senate.", sort_order=(6,0))
+    override_pass_over_senate = enum.Item(22, 'Vetoed & Senate Overridess (House Next)', xml_code='VETOED:OVERRIDE_PASS_OVER:SENATE', search_help_text="The Senate passed a veto override, sending it to the House.", sort_order=(6,1))
     vetoed_pocket = enum.Item(23, 'Pocket Vetoed', xml_code='VETOED:POCKET', search_help_text="Pocket vetoed by the President.", sort_order=(5,5))
     vetoed_override_fail_originating_house = enum.Item(24, 'Vetoed & Override Failed in House', xml_code='VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE', search_help_text="The House's attempt to override a veto failed.", sort_order=(5,6))
     vetoed_override_fail_originating_senate = enum.Item(25, 'Vetoed & Override Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE', search_help_text="The Senate's attempt to override a veto failed.", sort_order=(5,7))
     vetoed_override_fail_second_house = enum.Item(26, 'Vetoed & Override Passed Senate, Failed in House', xml_code='VETOED:OVERRIDE_FAIL_SECOND:HOUSE', search_help_text="The Senate overrode the veto but the House's attempt to override the veto failed.", sort_order=(5,8))
     vetoed_override_fail_second_senate = enum.Item(27, 'Vetoed & Override Passed House, Failed in Senate', xml_code='VETOED:OVERRIDE_FAIL_SECOND:SENATE', search_help_text="The House overrode the veto but the Senate's attempt to override the veto failed.", sort_order=(5,9))
     enacted_signed = enum.Item(28, 'Signed by the President', xml_code='ENACTED:SIGNED', search_help_text="Enacted by a signature of the President.", sort_order=(3,3))
-    enacted_veto_override = enum.Item(29, 'Veto Overridden', xml_code='ENACTED:VETO_OVERRIDE', search_help_text="Enacted by a veto override.", sort_order=(3,4))
+    enacted_veto_override = enum.Item(29, 'Veto Overridden', xml_code='ENACTED:VETO_OVERRIDE', search_help_text="Enacted by a veto override.", sort_order=(3,5))
+    enacted_tendayrule = enum.Item(32, 'Enacted by 10 Day Rule', xml_code='ENACTED:TENDAYRULE', search_help_text="Enacted by failing to be returned by the President within ten days (Sundays excepted).", sort_order=(3,4))
 
     # indicates statuses whose descriptions are clear that the bill is no longer active,
     # other statuses are displayed as "Died: " for bills from previous congresses.
-    final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate, passed_bill)
+    final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, enacted_tendayrule, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate, passed_bill)
 
     # indicates a bill at the end of its life cycle and passed
-    final_status_passed_bill = (enacted_signed, enacted_veto_override)
+    final_status_passed_bill = (enacted_signed, enacted_veto_override, enacted_tendayrule)
     final_status_passed_resolution = (passed_simpleres, passed_constamend, passed_concurrentres)
     final_status_passed = tuple(list(final_status_passed_bill) + list(final_status_passed_resolution))
     
@@ -144,6 +145,8 @@ def get_bill_status_string(is_current, status):
         status = "This %s was enacted after being signed by the President on %s."
     elif status == "ENACTED:VETO_OVERRIDE":
         status = "This %s was enacted after a congressional override of the President's veto on %s."
+    elif status == "ENACTED:TENDAYRULE":
+        status = "This %s became enacted on %s after ten days elapsed after being presented to the President."
     
     return status   
 
