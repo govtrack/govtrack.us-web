@@ -11,10 +11,7 @@ DEBUG = ("DEBUG" in os.environ)
 TEMPLATE_DEBUG = DEBUG
 INTERNAL_IPS = ('127.0.0.1',)
 
-ADMINS = (
-    ('Joshua Tauberer', 'tauberer@govtrack.us'),
-)
-
+ADMINS = []
 MANAGERS = ADMINS
 
 if DEBUG and "SSH_CONNECTION" in os.environ:
