@@ -148,11 +148,11 @@ h2 {
 	margin-bottom: 0.5em;
 }
 h3 {
-	font-size: 1.3em;
-	text-transform: uppercase;
+	font-size: 1.15em;
+	margin-left: 0 !important;
 }
 h4 {
-	font-size: 1.2em;
+	font-size: 1.05em;
 }
 h5 {
 	font-family: OpenSansRegular;

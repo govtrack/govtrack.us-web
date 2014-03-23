@@ -21,6 +21,7 @@
 <style>
 h3 { margin: 4px 0 4px 16px; }
 tt { font-size: 90%; }
+li { margin-bottom: 1em; }
 </style>
 {% endblock %}
 
@@ -32,28 +33,9 @@ tt { font-size: 90%; }
 
 	<h2>Overview</h2>
 	
-	<p>The bulk data is a deep directory structure of flat XML and JSON files. The directory layout is described below.</p>
-	
-	<h3>Try HTTP First</h3>
-	
-	<p>You can familiarize yourself with the contents of our bulk data by browsing <a 	href="/data/congress/">http://www.govtrack.us/data/congress/</a>. Get an idea for the directory structure and what the files look like.</p>
-	
-	<h3>Basic Directory Layout</h3>
-	
-	<p>Our files are in three main directories:</p>
-	
-	<ul>
-		<li><a href="/data/congress-legislators/">/data/congress-legislators/</a><br>
-		Information on Members of Congress from 1789-present, presidents and vice presidents, Congressional committees, and current committee assignments. This data is a mirror of the files in <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a>.</li>
+	<p>You can familiarize yourself with the contents of our bulk data by browsing <a href="/data/congress-legislators/">http://www.govtrack.us/data/congress-legislators/</a> and <a href="/data/congress/">http://www.govtrack.us/data/congress/</a>. Get an idea for the directory structure and what the files look like.</p>
 
-		<li><a href="/data/congress/">/data/congress/</a> (i.e. http://www.govtrack.us/data/congress/)<br>
-		Bill status and other legislative data from 2013 (113th Congress) and forward. This data is the output of the scrapers developed by the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project.</li>
-		
-		<li><a href="/data/us/">/data/us/</a><br>
-		Bill status and other legislative data from 1789-2012 (1st-112th Congresses). These files come from our legacy scrapers and are no longer being updated.</li>
-	</ul>
-	
-	<p>More information on these directories can be found below.</p>
+	<p>An explanation of the directory layout of the files and their formats is given below.</p>
 	
 	<h3>Getting the Data</h3>
 	
@@ -75,9 +57,10 @@ tt { font-size: 90%; }
 	
 	<p>For more info about rsync, see <a href="/developers/rsync">our rsync notes</a> and the <a href="http://ss64.com/bash/rsync.html">rsync documentation</a>.</p>
 
-	<h2 style="margin-bottom: 1em">Directory Layout</h2>
-	
-	<h3>Know what a &ldquo;Congress&rdquo; is!</h3>
+
+	<h2 style="margin-bottom: 1em">Terminology</h2>
+
+	<h3>A &ldquo;Congress&rdquo;</h3>
 	
 	<p>Most files are organized by &ldquo;Congress.&rdquo; A &ldquo;Congress&rdquo; 
 	is a two-year term of activity, starting in the year after an 
@@ -89,41 +72,63 @@ tt { font-size: 90%; }
 	started on Jan 3, 2013 at noon and will end on Jan 3, 2015 at noon. (Again, in historical
 	data the start and end dates of Congresses was more arbitrary.)</p>
 	
-	<h3>Directories</h3>
+	<p>Congresses are divided into two &ldquo;sessions&rdquo;, which correspond roughly to
+	calendar years. But they aren&rsquo;t exactly calendar years, so we also call them
+	legislative years. In our data, sessions are identified by the calendar year in which
+	they start, e.g. 2014 is the name for the second session (or legislative year) of the
+	113th Congress and while it began in 2014 it will end on Jan 3, 2015.</p>
+
+	<h2 style="margin-bottom: 1em">Bulk Data Files</h2>
+
+	<h3>Members of Congress (and Presidents/Vice Presidents)</h3>
 
 	<ul>
 		<li><tt><a href="/data/congress-legislators/">/data/congress-legislators/</a></tt><br>
-		This directory contains several files in YAML format containing information on Members of Congress from 1789-present, presidents and vice presidents, Congressional committees, and current committee assignments. See the documentation at <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a> for details.</li>
+		This directory contains files in YAML and CSV format containing information on Members of Congress and presidents and vice presidents from 1789-present. It is basically a mirror of <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a>, and see that project for documentation.</li>
 
-		<li><tt><a href="/data/congress/113/bills">/data/congress/113/bills</a>/[bill_type]/[bill_type][bill_number]/data.[json|xml]</tt><br>
-		Bill and resolution status for bills in the 113th Congress. See the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project documentation for details of the JSON format. The XML format is backwards-compatible with our legacy bill XML files (<a href="/developers/bill_xml">documentation</a>).</li>
-		
-		<li><tt><a href="/data/congress/113/bills/sconres/sconres14/text-versions/is/">/data/congress/113/bills</a>/[bill_type]/[bill_type][bill_number]/<b>text-versions</b>/[version]</tt><br>
-		Bill and resolution text and text metadata for a particular bill. Note that while we only have bill status data for the 113th Congress and forward in this area of the data directory, we have bill text metadata going back much further (see our <a href="/about">coverage table</a> for details). See the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project documentation for details.</li>
-
-		<li><tt><a href="/data/congress/113/amendments">/data/congress/113/amendments</a>/[amdt_type]/[amdt_type][amdt_number]/data.[json|xml]</tt><br>
-		Amendment status for amendments to bills in the 113th Congress. See the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project documentation for details of the JSON format. The XML format is backwards-compatible with our legacy amendment XML files.</li>
-
-		<li><tt><a href="/data/congress/113/votes">/data/congress/113/votes</a>/[session]/[chamber][number]/data.[json|xml]</tt><br>
-		Roll call vote results for the 113th Congress. See the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project documentation for details of the JSON format. The XML format is backwards-compatible with our legacy roll call vote XML files (<a href="/developers/vote_xml">documentation</a>).</li>
-	
-		<li><tt><a href="/data/us/112/bills">/data/us/[congress]/bills</a></tt><br>
-		Historical bill and resolution status from the 93rd to the 112th Congress. <a href="/developers/bill_xml">Bill XML Schema &gt;</a></li>
-		
-		<li><tt><a href="/data/us/112/rolls">/data/us/[congress]/rolls</a></tt><br>
-		Historical roll call vote results for the 1st through 112th Congress. See our <a href="/about">coverage table</a> for where this data came from. Note that votes by unanimous consent and other similar unrecorded vote types are not included here because they are not recorded votes. <a href="/developers/vote_xml">Roll Call Vote XML Schema &gt;</a> </li>
-
-		<li><tt><a href="/data/us/sessions.tsv">/data/us/sessions.tsv</a></tt><br>
-		A TSV file containing the start and adjournment dates of each Congress and session.</li>
-	
 		<li><tt><a href="/data/photos">/data/photos</a></tt><br>
-		Contains jpeg images of Members of Congress, past and present. 
-		Not all Members of Congress's have photos. The name of the photo is the GovTrack 
-		numeric identifier for the person followed by: nothing, for the 
-		largest original image available; 200px, 100px, 50px, for three 
-		sizes of the photo, by width; all followed by .jpeg. -credit.txt files
-		give a tab-delimeted source URL and source description information
-		for each photo.</li>
+		This directory contains JPEG images of Members of Congress, past and present. 
+		The name of the photo is the GovTrack numeric identifier for the person followed by:
+		<tt>.jpeg</tt>, for the largest original image available; <tt>-200px.jpeg</tt>, <tt>-100px.jpeg</tt>,
+		and <tt>-50px.jpeg</tt> for three standard sizes of the photo by width; or <tt>-credit.txt</tt>
+		which is a tab-delimeted file containing first the URL of where the image was acquired
+		from and second the name of the source, both intended to be used in credit links. The photos are sourced
+		from various locations, and many come via the <a href="https://github.com/unitedstates/images">github:unitedstates/images</a>
+		project on github.</li>
+	</ul>
+
+	<h3>Committees and Committee Assignments</h3>
+
+	<ul>
+		<li><tt><a href="/data/congress-legislators/">/data/congress-legislators/</a></tt><br>
+		This directory also contains files in YAML format containing information on Congressional committees (both current &amp;historical) and current committee assignments. It is basically a mirror of <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a>, and see that project for documentation.</li>
+	</ul>
+	
+	<h3>Bills, Amendments, Votes</h3>
+
+	<p>Data files for bills, amendments, and votes are contained in directories named as <a href="/data/congress/113">/data/congress/{congress}</a>, by the Congress number in which the bill or amendment was introduced or the vote took place. The files are the output of the scrapers developed in the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> project.</p>
+
+	<p>Within these directories you will find...</p>
+
+	<ul>
+		<li><tt>bills/{bill-type}/{bill-type}{number}/<b>data.json</b></tt><br>
+		example: <tt><a href="/data/congress/113/bills/hr/hr4015/data.json">/data/congress/113/bills/hr/hr4015/data.json</a></tt><br>
+		Bill status in JSON format for the 93rd Congress (1973) forward, plus limited data for the 82nd-92nd Congresses (1951-1972; statutes and enrolled concurrent resolutions only) and the 6th-42nd Congresses (1799-1873). See the <a href="https://github.com/unitedstates/congress/wiki/bills">documentation</a> at the github:unitedstates/congress project for details. See our <a href="/about">coverage table</a> for details. You&rsquo;ll also see XML files here which are for legacy applications and are no longer supported.</li>
+		
+		<li><tt>bills/{bill-type}/{bill-type}{number}/<b>text-versions/{version}/...</b></tt><br>
+		example: <tt><a href="/data/congress/113/bills/sconres/sconres14/text-versions/is">/data/congress/113/bills/sconres/sconres14/text-versions/is</a></tt><br>
+		Bill text and associated metadata, comprehensively since the 103rd Congress, plus OCR'd stext of statutes for the 82nd-92nd Congresses (1951-1972), and links to scans for bills in the 6th-42nd Congresses (1799-1873). Bills change during their life cycle, and each &ldquo;print&rdquo; from the Government Printing Office has a version code, but use the publication date and version name in the metadata rather than the version code. The text itself is stored in multiple formats. See the <a href="https://github.com/unitedstates/congress/wiki/bill-text">documentation</a> for what formats are available and our <a href="/about">coverage table</a> for other details.</li>
+
+		<li><tt>amendments/{amdt-type}/{amdt-type}{amdt-number}/data.json</tt><br>
+		The metadata and status of floor amendments. See the <a href="https://github.com/unitedstates/congress/wiki/amendments">documentation</a> for details of the JSON format. Amendment information is available starting with the 97th Congress.</li>
+
+		<li><tt>votes/{session}/{chamber}{vote-number}/data.json</tt><br>
+		example: <tt><a href="/data/congress/113/votes/2014/h108/data.json">/data/congress/113/votes/2014/h108/data.json</a></tt><br>
+		Roll call vote results. See the <a href="https://github.com/unitedstates/congress/wiki/votes">documentation</a> for details of the JSON format. Note that not every vote in Congress is a roll call vote. This data is available for the House starting in 1990 (101st Congress, 2nd Session) and for the Senate starting in 1989 (101st Congress).</li>
+	
+		<li><tt><a href="/data/us/sessions.tsv">/data/us/sessions.tsv</a></tt><br>
+		A TSV file containing the start and adjournment dates of each session of Congress.</li>
+	
 	</ul>
 	
 	<p>Other files that you may see in the /data directory are unsupported. Use at your own risk.</p>
