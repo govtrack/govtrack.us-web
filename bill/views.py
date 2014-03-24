@@ -187,12 +187,25 @@ def bill_details_user_view(request, congress, type_slug, number):
                 <b>ADMIN</b> - <a href="{% url "bill_go_to_summary_admin" %}?bill={{bill.id}}">Edit Summary</a>
                 <br/>Tracked by {{feed.tracked_in_lists.count|intcomma}} users
                 ({{feed.tracked_in_lists_with_email.count|intcomma}} w/ email).
+                <br/>{{num_issuepos}} poll responses, {{num_calls}} phone calls to Congress.
             </div>
             """
+
+        try:
+            from poll_and_call.models import *
+            ix = RelatedBill.objects.get(bill=bill).issue
+            num_issuepos = UserPosition.objects.filter(position__issue=ix).count()
+            num_calls = len([c for c in CallLog.objects.filter(position__position__issue=ix) if c.is_complete()])
+        except IssueByBill.DoesNotExist:
+            num_issuepos = 0
+            num_calls = 0
+
         from django.template import Template, Context, RequestContext, loader
         ret["admin_panel"] = Template(admin_panel).render(RequestContext(request, {
             'bill': bill,
             "feed": Feed.BillFeed(bill),
+            "num_issuepos": num_issuepos,
+            "num_calls": num_calls,
             }))
 
     from person.views import render_subscribe_inline
