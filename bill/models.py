@@ -1083,6 +1083,24 @@ class USCSection(models.Model):
     def get_absolute_url(self):
         return "/congress/bills/uscode/" + str(self.citation_or_id).replace("usc/", "")
 
+    def get_cornell_lii_link(self, subsection=None):
+        import re
+        if self.level_type == "section":
+            uscstring, title, sec = self.citation.split("/")
+            return "http://www.law.cornell.edu/uscode/text/" + title + "/" + sec \
+                + ( ("#" + "_".join(re.findall(r"\(([^)]+)\)", subsection))) if subsection else "")
+        else:
+            # path to level through possible subtitles, parts, etc.
+            path = [self]
+            so = self
+            while so.parent_section:
+                so = so.parent_section
+                path.append(so)
+            if not path[-1].citation: return None # not a section actually in the USC
+            path.reverse()
+            return "http://www.law.cornell.edu/uscode/text/" + "/".join(
+                (((so.level_type + "-") if so.level_type != "title" else "") + so.number) for so in path)
+
     # utility methods to load from the structure.json file created by github:unitedstates/uscode
     # don't forget:
     #   * STOP: The upstream 'citation' key has changed: usc/chapter/x/y is now usc/title/x/chapter/y

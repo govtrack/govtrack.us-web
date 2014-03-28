@@ -233,7 +233,7 @@ def get_bill_text_metadata(bill, version):
     
     return dat
         
-def load_bill_text(bill, version, plain_text=False, mods_only=False):
+def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citations=False):
     # Load bill text info from the Congress project data directory.
     # We have JSON files for metadata and plain text files mirrored from GPO
     # containing bill text (either from the Statutes at Large OCR'ed text
@@ -278,6 +278,9 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
     for f in ('html_file', 'thumbnail_path'):
         if f in dat:
             ret[f] = dat[f]
+
+    if with_citations: #and and not settings.DEBUG:
+        load_citation_info(ret)
 
     # If the caller only wants metadata, return it.
     if mods_only:
@@ -325,9 +328,95 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False):
             "source": dat.get("text_file_source"),
         })
 
-
     return ret
-    
+
+def load_citation_info(metadata):
+    if "citations" not in metadata: return
+
+    from models import USCSection
+    from search import parse_slip_law_number
+    import re
+
+    # gather the citations listed in the MODS file
+
+    slip_laws = []
+    statutes = []
+    usc_sections = []
+    other = []
+
+    usc_other = USCSection(name="Other Citations", ordering=99999)
+
+    for cite in metadata["citations"]:
+        if cite["type"] == "slip_law":
+            slip_laws.append(cite)
+            cite["bill"] = parse_slip_law_number(cite["text"])
+        elif cite["type"] == "statutes_at_large":
+            statutes.append(cite)
+        elif cite["type"] in ("usc-section", "usc-chapter"):
+            # Build a tree of title-chapter-...-section nodes so we can
+            # display the citations in context.
+            try:
+                sec_obj = USCSection.objects.get(citation=cite["key"])
+            except: # USCSection.DoesNotExist and MultipleObjectsReturned both possible
+                # create a fake entry for the sake of output
+                # the 'id' field is set to make these objects properly hashable
+                sec_obj = USCSection(id=cite["text"], name=cite["text"], parent_section=usc_other)
+
+            if "range_to_section" in cite:
+                sec_obj.range_to_section = cite["range_to_section"]
+
+            sec_obj.link = sec_obj.get_cornell_lii_link(cite["paragraph"])
+
+            usc_sections.append(sec_obj)
+        else:
+            other.append(cite)
+
+    # sort slip laws
+    slip_laws.sort(key = lambda x : (x["congress"], x["number"]))
+
+    # build a tree for USC citations
+
+    usc = { }
+    for sec_obj in usc_sections:
+            # recursively go up to the title to find the path from title to this section
+            path = [sec_obj]
+            so = sec_obj
+            while so.parent_section:
+                so = so.parent_section
+                so.link = so.get_cornell_lii_link()
+                path.append(so)
+
+            # now create a tree from the path
+            container = usc
+            for p in reversed(path):
+                container["_count"] = container.get("_count", 0) + 1
+                if p not in container: container[p] = { }
+                container = container[p]
+
+    # restructure the tree into a flattened list with indentation attributes on each row
+    def ucfirst(s): return s[0].upper() + s[1:]
+    def rebuild_usc_sec(seclist, indent=0):
+        ret = []
+        seclist = [kv for kv in seclist.items() if kv[0] != "_count"]
+        seclist = sorted(seclist, key=lambda x : x[0].ordering)
+        for sec, subparts in seclist:
+            ret.append({
+                "text": (ucfirst(sec.level_type + ((" " + sec.number) if sec.number else "") + (": " if sec.name else "")) if sec.level_type else "") + (sec.name_recased if sec.name else ""),
+                "link": getattr(sec, "link", None),
+                "range_to_section": getattr(sec, "range_to_section", None),
+                "indent": indent,
+            })
+            ret.extend(rebuild_usc_sec(subparts, indent=indent+1))
+        return ret
+    usc = rebuild_usc_sec(usc)
+
+    metadata["citations"] = {
+        "slip_laws": slip_laws,
+        "statutes": statutes,
+        "usc": usc,
+        "other": other,
+        "count": len(slip_laws)+len(statutes)+len(usc)+len(other)
+    }
 
 def compare_xml_text(doc1, doc2, timelimit=10):
     # Compare the text of two XML documents, marking up each document with new

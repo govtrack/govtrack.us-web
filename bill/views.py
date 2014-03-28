@@ -54,98 +54,12 @@ def bill_details(request, congress, type_slug, number):
             if reintro.congress > bill.congress and not reintro_next: reintro_next = reintro
         return reintro_prev, reintro_next
 
-    def get_text_info():
-        from models import USCSection
-        from billtext import load_bill_text
-        from search import parse_slip_law_number
-        import re
-        try:
-            metadata = load_bill_text(bill, None, mods_only=True)
-
-            # do interesting stuff with citations
-            if "citations" in metadata: #and and not settings.DEBUG:
-                slip_laws = []
-                statutes = []
-                usc = { }
-                other = []
-                usc_other = USCSection(name="Other Citations", ordering=99999)
-                for cite in metadata["citations"]:
-                    if cite["type"] == "slip_law":
-                        slip_laws.append(cite)
-                        cite["bill"] = parse_slip_law_number(cite["text"])
-                    elif cite["type"] == "statutes_at_large":
-                        statutes.append(cite)
-                    elif cite["type"] in ("usc-section", "usc-chapter"):
-                        # Build a tree of title-chapter-...-section nodes so we can
-                        # display the citations in context.
-                        try:
-                            can_link = True
-                            sec_obj = USCSection.objects.get(citation=cite["key"])
-                        except: # USCSection.DoesNotExist and MultipleObjectsReturned both possible
-                            # create a fake entry for the sake of output
-                            # the 'id' field is set to make these objects properly hashable
-                            can_link = False
-                            sec_obj = USCSection(id=cite["text"], name=cite["text"], parent_section=usc_other)
-
-                        if "range_to_section" in cite:
-                            sec_obj.range_to_section = cite["range_to_section"]
-
-                        # recursively go up to the title
-                        path = [sec_obj]
-                        so = sec_obj
-                        while so.parent_section:
-                            so = so.parent_section
-                            path.append(so)
-
-                        # build a link to LII
-                        if cite["type"] == "usc-section":
-                            cite_link = "http://www.law.cornell.edu/uscode/text/" + cite["title"]
-                            if cite["section"]:
-                                cite_link += "/" + cite["section"]
-                            if cite["paragraph"]: cite_link += "#" + "_".join(re.findall(r"\(([^)]+)\)", cite["paragraph"]))
-                        elif cite["type"] == "usc-chapter" and can_link:
-                            cite_link = "http://www.law.cornell.edu/uscode/text/" + cite["title"] + "/" + "/".join(
-                                (so.level_type + "-" + so.number) for so in reversed(path[:-1])
-                                )
-                        else:
-                            cite_link = None
-
-                        sec_obj.link = cite_link
-
-                        # now pop off from the path to put the node at the right point in a tree
-                        container = usc
-                        while path:
-                            p = path.pop(-1)
-                            if p not in container: container[p] = { }
-                            container = container[p]
-
-                    else:
-                        other.append(cite)
-
-                slip_laws.sort(key = lambda x : (x["congress"], x["number"]))
-
-                # restructure data format
-                def ucfirst(s): return s[0].upper() + s[1:]
-                def rebuild_usc_sec(seclist, indent=0):
-                    ret = []
-                    seclist = sorted(seclist.items(), key=lambda x : x[0].ordering)
-                    for sec, subparts in seclist:
-                        ret.append({
-                            "text": (ucfirst(sec.level_type + ((" " + sec.number) if sec.number else "") + (": " if sec.name else "")) if sec.level_type else "") + (sec.name_recased if sec.name else ""),
-                            "link": getattr(sec, "link", None),
-                            "range_to_section": getattr(sec, "range_to_section", None),
-                            "indent": indent,
-                        })
-                        ret.extend(rebuild_usc_sec(subparts, indent=indent+1))
-                    return ret
-                usc = rebuild_usc_sec(usc)
-
-                metadata["citations"] = {
-                    "slip_laws": slip_laws, "statutes": statutes, "usc": usc, "other": other,
-                    "count": len(slip_laws)+len(statutes)+len(usc)+len(other) }
-            return metadata
-        except IOError:
-            return None
+    # bill text info and areas of law affected
+    from billtext import load_bill_text
+    try:
+        text_info = load_bill_text(bill, None, mods_only=True, with_citations=True)
+    except IOError:
+        text_info = None
 
     return {
         'bill': bill,
@@ -156,22 +70,7 @@ def bill_details(request, congress, type_slug, number):
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": Feed.BillFeed(bill),
-        "text": get_text_info,
-
-        "care2_category_id": {
-            5816: '793', # Agriculture and Food=>Health
-            5840: '789', # Animals=>Animal Welfare
-            5996: '794', # Civil Rights=>Human Rights
-            5991: '791', # Education=>Education
-            6021: '792', # Energy=>Environment & Wildlife
-            6038: '792', # Environmental Protection=>Environment & Wildlife
-            6053: '793', # Families=>Health
-            6130: '793', # Health=>Health
-            6206: '794', # Immigration=>Human Rights
-            6279: '792', # Public Lands/Natural Resources=>Environment & Wildlife
-            6321: '791', # Social Sciences=>Education
-            6328: '793', # Social Welfare => Health
-        }.get(bill.get_top_term_id(), '795') # fall back to Politics category
+        "text": text_info,
     }
 
 @user_view_for(bill_details)
