@@ -218,6 +218,13 @@ def get_bill_text_metadata(bill, version):
         dat["html_file"] = html_fn
         dat["has_displayable_text"] = True
 
+    # get a PDF file if one exists
+    pdf_fn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
+    if os.path.exists(pdf_fn):
+        dat["pdf_file"] = pdf_fn
+        dat["has_thumbnail"] = True
+        dat["thumbnail_path"] = bill.get_absolute_url() + "/_text_image"
+
     # get an XML file if one exists
     if os.path.exists(basename + "/catoxml.xml"):
         dat["xml_file"] = basename + "/catoxml.xml"
@@ -227,10 +234,6 @@ def get_bill_text_metadata(bill, version):
         dat["xml_file"] = basename + "/document.xml"
         dat["has_displayable_text"] = True
 
-    thumb_fn = "data/us/bills.text/%s/%s/%s%d%s-thumb200.png" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
-    if os.path.exists(thumb_fn):
-        dat["thumbnail_path"] = thumb_fn
-    
     return dat
         
 def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citations=False):
@@ -275,7 +278,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
         })
 
     # Pass through some fields.
-    for f in ('html_file', 'thumbnail_path'):
+    for f in ('html_file', 'pdf_file', 'has_thumbnail', 'thumbnail_path'):
         if f in dat:
             ret[f] = dat[f]
 

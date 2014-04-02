@@ -273,6 +273,18 @@ class Bill(models.Model):
         return "Senate" if self.bill_type in (BillType.house_bill, BillType.house_resolution, BillType.house_joint_resolution, BillType.house_concurrent_resolution) else "House"
 
     @property
+    def how_a_bill_text(self):
+        if self.bill_type in (BillType.senate_bill, BillType.house_bill):
+            return "A bill must be passed by both the House and Senate in identical form and then be signed by the president to become law."
+        elif self.bill_type in (BillType.senate_concurrent_resolution, BillType.house_concurrent_resolution):
+            return "A concurrent resolution is often used for matters that affect the rules of Congress or to express the sentiment of Congress. It must be agreed to by both the House and Senate in identical form but is not signed by the president and does not carry the force of law."
+        elif self.bill_type in (BillType.senate_joint_resolution, BillType.house_joint_resolution):
+            return "A joint resolution is often used in the same manner as a bill. If passed by both the House and Senate in identical form and signed by the president, it becomes a law. Joint resolutions are also used to propose amendments to the Constitution."
+        elif self.bill_type in (BillType.senate_resolution, BillType.house_resolution):
+            return "A simple resolution is used for matters that affect just one chamber of Congress, often to change the rules of the chamber to set the manner of debate for a related bill. It must be agreed to in the chamber in which it was introduced. It is not voted on in the other chamber and does not have the force of law."
+        raise ValueError()
+
+    @property
     def slip_law_number(self):
         if not self.sliplawnum: return None
         return ("Pub" if self.sliplawpubpriv == "PUB" else "Pvt") + (".L. %d-%d" % (self.congress, self.sliplawnum))
@@ -305,6 +317,10 @@ class Bill(models.Model):
     def is_alive(self):
         """Whether the bill was introduced in the current session of Congress and the bill's status is not a final status (i.e. can take no more action like a failed vote)."""
         return self.congress == settings.CURRENT_CONGRESS and self.current_status not in BillStatus.final_status
+    @property
+    def is_final_status(self):
+        """Whether the bill's current status is a final status."""
+        return self.current_status in BillStatus.final_status
     def is_success(self):
         """Whether the bill was enacted (for bills) or passed (for resolutions)."""
         return self.current_status in BillStatus.final_status_passed

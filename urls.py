@@ -58,6 +58,11 @@ urlpatterns += patterns('',
     (r'^api/', include(v1_api.urls)),
 )
 
-# static files during debugging
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-urlpatterns += staticfiles_urlpatterns()
+if settings.DEBUG:
+    # serve /static during debugging
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns()
+ 
+    # serve /data during debugging
+    from django.conf.urls.static import static
+    urlpatterns += static("/data", document_root="data")

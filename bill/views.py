@@ -42,17 +42,17 @@ def load_bill_from_url(congress, type_slug, number):
 def bill_details(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
 
-    from person.name import get_person_name
-    sponsor_name = None if not bill.sponsor else \
-        get_person_name(bill.sponsor, role_date=bill.introduced_date, firstname_position='before', show_suffix=True)
-
-    def get_reintroductions():
-        reintro_prev = None
-        reintro_next = None
-        for reintro in bill.find_reintroductions():
-            if reintro.congress < bill.congress: reintro_prev = reintro
-            if reintro.congress > bill.congress and not reintro_next: reintro_next = reintro
-        return reintro_prev, reintro_next
+    # get related bills
+    related_bills = []
+    reintro_prev = None
+    reintro_next = None
+    for reintro in bill.find_reintroductions():
+        if reintro.congress < bill.congress: reintro_prev = reintro
+        if reintro.congress > bill.congress and not reintro_next: reintro_next = reintro
+    if reintro_prev: related_bills.append({ "bill": reintro_prev, "note": "was a previous version of this bill.", "show_title": False })
+    if reintro_next: related_bills.append({ "bill": reintro_next, "note": "was a re-introduction of this bill in a later Congress.", "show_title": False })
+    for rb in bill.get_related_bills():
+        related_bills.append({ "bill": rb.related_bill, "note": ("(%s)" % rb.relation.title()) if rb.relation != "unknown" else None, "show_title": True })
 
     # bill text info and areas of law affected
     from billtext import load_bill_text
@@ -65,12 +65,11 @@ def bill_details(request, congress, type_slug, number):
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "subtitle": get_secondary_bill_title(bill, bill.titles),
-        "sponsor_name": sponsor_name,
-        "reintros": get_reintroductions, # defer so we can use template caching
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": Feed.BillFeed(bill),
-        "text": text_info,
+        "text_info": text_info,
+        "related": related_bills,
     }
 
 @user_view_for(bill_details)
@@ -684,3 +683,88 @@ def start_poll(request):
         p.save()
 
     return HttpResponseRedirect(ix.get_absolute_url() + "/join/" + str(ix.positions.get(valence=valence).id))
+
+@anonymous_view
+def bill_text_image(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    from billtext import load_bill_text
+
+    # Rasterizes a page of a PDF to a greyscale PIL.Image.
+    # Crop out the GPO seal & the vertical margins.
+    def pdftopng(pdffile, pagenumber, width=900):
+        from PIL import Image
+        import subprocess, StringIO
+        pngbytes = subprocess.check_output(["/usr/bin/pdftoppm", "-f", str(pagenumber), "-l", str(pagenumber), "-scale-to", str(width), "-png", pdffile])
+        im = Image.open(StringIO.StringIO(pngbytes))
+        im = im.convert("L")
+
+        # crop out the GPO seal:
+        im = im.crop((0, int((.06 if pagenumber==1 else 0) * im.size[0]), im.size[0], im.size[1]))
+
+        # zealous-crop the vertical margins, but at least leaving a little
+        # at the bottom so that when we paste the two pages of the two images
+        # together they don't get totally scruntched, and put in some padding
+        # at the top.
+        # (.getbbox() crops out zeroes, so we'll invert the image to make it work with white)
+        from PIL import ImageOps
+        bbox = ImageOps.invert(im).getbbox()
+        vpad = int(.02*im.size[1])
+        im = im.crop( (0, max(0, bbox[1]-vpad), im.size[0], min(im.size[1], bbox[3]+vpad) ) )
+
+        return im
+
+    # Find the PDF file and rasterize the first two pages.
+
+    metadata = load_bill_text(bill, None, mods_only=True)
+    if metadata.get("pdf_file"):
+        # Use the PDF files on disk.
+        pg1 = pdftopng(metadata.get("pdf_file"), 1)
+        pg2 = pdftopng(metadata.get("pdf_file"), 2)
+    elif settings.DEBUG:
+        # When debugging in a local environment we may not have bill text available
+        # so download the PDF from GPO.
+        import os, tempfile, subprocess
+        try:
+            (fd1, fn1) = tempfile.mkstemp(suffix=".pdf")
+            os.close(fd1)
+            subprocess.check_call(["/usr/bin/wget", "-O", fn1, "-q", metadata["gpo_pdf_url"]])
+            pg1 = pdftopng(fn1, 1)
+            pg2 = pdftopng(fn1, 2)
+        finally:
+            os.unlink(fn1)
+    else:
+        # No PDF is available.
+        raise Http404()
+
+    # Since some bills have big white space at the top of the first page,
+    # we'll combine the first two pages and then shift the window down
+    # until the real start of the bill.
+    
+    from PIL import Image
+    img = Image.new(pg1.mode, (pg1.size[0], int(pg1.size[1]+pg2.size[1])))
+    img.paste(pg1, (0,0))
+    img.paste(pg2, (0,pg1.size[1]))
+
+    # Zealous crop the (horizontal) margins. We do this only after the two
+    # pages have been combined so that we don't mess up their alignment.
+    # Add some padding.
+    from PIL import ImageOps
+    hpad = int(.02*img.size[0])
+    bbox = ImageOps.invert(img).getbbox()
+    img = img.crop( (max(0, bbox[0]-hpad), 0, min(img.size[0], bbox[2]+hpad), img.size[1]) )
+
+    # Now take a window from the top matching a particular aspect ratio.
+    # We're going to display this next to photos of members of congress,
+    # so use that aspect ratio.
+    img = img.crop((0,0, img.size[0], int(240.0/200.0*img.size[0])))
+
+    # Resize to requested width.
+    if "width" in request.GET:
+        img.thumbnail((int(request.GET["width"]), 11.0/8.0*int(request.GET["width"])), Image.ANTIALIAS)
+
+    import StringIO
+    imgbytesbuf = StringIO.StringIO()
+    img.save(imgbytesbuf, "PNG")
+    imgbytes = imgbytesbuf.getvalue()
+    imgbytesbuf.close()
+    return HttpResponse(imgbytes, mimetype="image/png")

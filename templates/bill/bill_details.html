@@ -8,19 +8,10 @@
 {% block meta_keywords %}U.S. Congress,Congress,legislation,bill{% for term in bill.terms.all %}{% if 10 > forloop.counter %},{{term}}{% endif %}{% endfor %},law{% endblock %}
 
 {% block og_image %}
-	{% if bill.congress >= 112 %}
-		{% with text as text_info %}
-			{% if text_info.thumbnail_path %}
-				<meta property="og:image" content="http://www.govtrack.us/{{text_info.thumbnail_path}}"/>
-				<meta property="og:image:secure_url" content="https://www.govtrack.us/{{text_info.thumbnail_path}}"/>
-				<meta property="twitter:image:src" content="https://www.govtrack.us/{{text_info.thumbnail_path}}"/>
-			{% else %}
-				<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118"
-				<meta property="og:image:secure_url" content="https://www.govtrack.us/static/images/media_icon.png?20130118"
-				/>
-				<meta property="twitter:image:src" content="https://www.govtrack.us/static/images/media_icon.png?20130118"
-			{% endif %}
-		{% endwith %}
+	{% if text_info.has_thumbnail %}
+		<meta property="og:image" content="http://www.govtrack.us{{text_info.thumbnail_path}}"/>
+		<meta property="og:image:secure_url" content="https://www.govtrack.us{{text_info.thumbnail_path}}"/>
+		<meta property="twitter:image:src" content="https://www.govtrack.us{{text_info.thumbnail_path}}"/>
 	{% else %}
 		<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
 		<meta property="og:image:secure_url" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
@@ -213,12 +204,24 @@
 {% block extra_css %}
 <!-- bid:{{bill.id}} -->
 <style>
-.panes {
-	background-color: #fefaf6;
-	border-left: 1px solid #ddc;
-	border-right: 1px solid #ddc;
-	border-bottom: 1px solid #ddc;
+#media-row {
+	margin-top: 1.75em;
+	margin-bottom: 1.75em;
 }
+#overview #media-row dt {
+	margin: 0;
+	font-size: 11px;
+	font-weight: normal;
+	text-transform: uppercase;
+	color: #666;
+}
+#media-row dd {
+	margin-bottom: .5em;
+	font-size: 16px;
+}
+	#media-row dd a.name {
+		font-weight: bold;
+	}
 
 .minor_vote {
 	display: none;
@@ -286,6 +289,10 @@
        #overview table .odd.pending td { background: #e4e9e8 url('/static/images/ico-unchecked.gif') 8px center no-repeat; }
        #overview tr.highlight td { font-weight: bold; }
 
+       #overview #notes p {
+       	font-size: 90%;
+       	margin-bottom: .5em;
+       }
 </style>
 {% endblock %}
 
@@ -304,7 +311,7 @@
 	<h1 style="max-height: 3.5em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 	<div class="row">
 	<div id="track_panel_base" class="{% if bill.is_alive %}col-sm-8{% else %}col-sm-12{% endif %}">
-		<div class="info" {% if not bill.is_alive %}style="width: auto;"{% endif %}>
+		<div class="info" style="{% if not bill.is_alive %}width: auto; {% endif %}background: none;">
 			<p id="h1_overflow" style="display: none;">...</p>
 			<script>$('h1').truncate_text(function (remaining, chopped) {
 			    if (chopped) $('#h1_overflow').text("..." + chopped).show();
@@ -324,15 +331,6 @@
 					<dd>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
 				{% endif %}
 
-				{% if bill.congress >= 93 %}
-					<dt>Sponsor:</dt>
-					{% if bill.sponsor %}
-						<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{sponsor_name}}</a></dd>
-					{% else %}
-						<dd>(bill introduced by rule or other special circumstance)</dd>
-					{% endif %}
-				{% endif %}
-			
 				{% if bill.source != "americanmemory" %}
 				<dt>Status:</dt>
 				<dd>
@@ -347,6 +345,15 @@
 					{% endif %}
 				</dd>
 				{% endif %}
+
+				{% with bill.get_prognosis as p %}
+				{% if p %}
+				<dt>Prognosis</dt>
+				<dd>
+					{{p.prediction|floatformat:0}}% chance of being {{p.success_name}}
+				</dd>
+				{% endif %}
+				{% endwith %}
 				
 				{% with bill.slip_law_number as sln %}
 				{% if sln %}
@@ -399,12 +406,10 @@
 				{% endwith %}
 				
 				{% if bill.source == "statutesatlarge" %}
-				{% with text as text_info %}
 				<dt>Source:</dt>
 				<dd>
 					<a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a>
 				</dd>
-				{% endwith %}
 				{% elif bill.source == "americanmemory" %}
 				<dt>Source:</dt>
 				<dd>
@@ -512,17 +517,14 @@
 	</div><!-- /actions -->
 	{% endif %}
 
+	{% if bill.explanatory_text or bill.congress < 93 %}
 	<p class="helptext" style="clear: both; line-height: 110%; margin: 0 0 0 10px;"><small>
 		{% if bill.explanatory_text %}{{bill.explanatory_text}}{% endif %}
 		{% if bill.congress < 93 %}
 			Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
-		{% else %}
-			{% if not bill.is_success %}
-				The {{bill.noun}}&rsquo;s title was written by its sponsor.
-			{% endif %}
-			{{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.
 		{% endif %}
 	</small></p>
+	{% endif %}
 	
 	<div id="admin_panel"> </div>
 	<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
@@ -531,21 +533,106 @@
 
 {% block body %}
 
-{% with text as text_info %}
-
 <ul class="tabs five-up">
 	<li><a href="#overview">Overview</a></li>
 	
 	{% if bill.source != "americanmemory" %}
 	<li id="summary_tab" style="display: none"><a href="#summary">Summaries</a></li>
-	<li><a href="#related">Related</a></li>
+	<li><a href="#related">Explore</a></li>
 	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
 	<li id="comments_tab" style="display: none"><a href="#comments">Comments</a></li>
 	{% endif %}
 </ul>
 
 <div class="panes">
-	<div id="overview" style="padding: 1em"> <!-- overview pane -->
+	<div id="overview"> <!-- overview pane -->
+		<div id="media-row" class="row">
+			<div class="col-sm-4">
+				<div>
+					{% if bill.sponsor.has_photo %}
+						<div style="float: left; margin-right: 17px; max-width: 50%; margin-bottom: 2em">
+							<a href="{{bill.sponsor.get_absolute_url}}">
+								<img src="/data/photos/{{bill.sponsor.id}}-200px.jpeg" title="{{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 3px solid #DDD"/>
+							</a>
+						</div>
+					{% endif %}
+
+					<dl>
+						{% if bill.sponsor %}
+							<dt>Sponsor</dt>
+							<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
+								<div style="line-height: 130%; font-size: 13px; margin-top: 3px;">{{bill.sponsor_role.get_description}}</div>
+							</dd>
+							<dt>Party</dt>
+							<dd>{{bill.sponsor_role.party}}</dd>
+						{% endif %}
+					</dl>
+
+					<div style="clear: both"></div>
+				</div>
+			</div>
+
+			{% if text_info %}
+			<div class="col-sm-4">
+				<div>
+					{% if text_info.has_displayable_text %}
+						{% if text_info.has_thumbnail %}
+						<div style="float: left; margin-right: 17px; max-width: 50%; margin-bottom: 2em">
+							<a href="{{bill.get_absolute_url}}/text" style="display: block; max-width: 200px">
+								<img src="{{bill.get_absolute_url}}/_text_image" class="img-responsive" title="Bill Text" style="border: 1px solid #999;"/>
+							</a>
+						</div>
+						{% endif %}
+						<dl>
+							<dt>Text</dt>
+							<dd><a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a></dd>
+							<dt>Last Updated</dt>
+							<dd>{{text_info.docdate}}</dd>
+							<dt>Length<dt>
+							<dd>{{text_info.numpages}}</dd>
+						</dl>
+					{% else %}
+						<a href="{{text_info.gpo_pdf_url}}">PDF</a> ({{text_info.docdate}})
+					{% endif %}
+				</div>
+				<div style="clear: both"></div>
+			</div>
+			{% endif %}
+
+			{% if related|length > 0 %}
+			<div class="col-sm-4" style="line-height: 125%">
+				<dt style="margin-bottom: .5em">Related Bills</dt>
+
+				{% for rb in related %}
+					<div>
+						<div style="float: left; margin-right: 17px; margin-bottom: 1em; padding-top: 2px;">
+							<a href="{{rb.bill.get_absolute_url}}">
+								<img src="{{rb.bill.get_absolute_url}}/_text_image?width=75" class="img-responsive" title="{{rb.bill}}" style="border: 1px solid #999;" width="75"/>
+							</a>
+						</div>
+						<div>
+							<a href="{{rb.bill.get_absolute_url}}">
+								{% if rb.bill.congress == bill.congress %}
+									{{rb.bill.display_number_no_congress_number}}{% else %}
+									{{rb.bill.display_number_with_congress_number}}{% endif %}</a>{% if rb.show_title %}:<div style="font-size: 85%;">{{rb.bill.title_no_number|truncatewords:14}}</div>{% endif %}
+							{% if rb.note %}{{rb.note}}{% endif %}
+							<p style="font-size: 85%; margin: .5em 0 .75em 0;">
+								{{rb.bill.get_current_status_display}}<br/>
+								{% if not rb.bill.is_final_status %}Last Action: {% endif %}{{rb.bill.current_status_date|date}}
+							</p>
+						</div>
+						<div style="clear: both"></div>
+					</div>
+				{% endfor %}
+				<p class="small">Related bills here are identified by the Library of Congress.
+				Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
+			</div>
+			{% endif %}
+
+		</div>
+
+		<div class="sep">&nbsp;</div>
+
 		<div class="row">
 			<div class="col-sm-6 col-md-4">
 					<dl>
@@ -570,23 +657,51 @@
 					</dl>
 			</div>
 
+			{% if current or bill.get_major_events|length > 0 %}
+			<div class="col-sm-6 col-md-4">
+					<dl>
+						<dt>Progress</dt>
+						<dd>
+							<table>
+								{% for item in bill.get_major_events %}
+								<tr>
+									<td class="done" title="{{item.extra}}">{{item.label}}</td>
+									<td><nobr>{{item.date|date:"DATE_FORMAT"}}</nobr></td>
+								</tr>
+								{% endfor %}
+							
+								{% if current %}
+								{% for item in bill.get_future_events %}
+								<tr>
+									<td class="pending">{{item}}</td>
+									<td>...</td>
+								</tr>
+								{% endfor %}
+								{% endif %}
+							</table>
+						</dd>
+					</dl>
+			</div>
+			{% endif %}
+
 			<div class="col-sm-6 col-md-4">
 					<dl>
 						{% with bill.get_prognosis as p %}
 						{% if p %}
 						<dt>Prognosis</dt>
 						<dd>
-							<p style="margin-bottom: 4px;"><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-
-							<p class="small">
 							{% if p.is_introduced %}
-								This {{bill.noun}} has a {{p.prediction_1|floatformat:0}}%</b> chance of getting past committee first.
-								{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{p.bill_type_descr}} made it past committee
+								<p><b>
+								{{p.prediction_1|floatformat:0}}%</b> chance of getting past committee.<br/>
+								<b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
+								<p class="small">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{p.bill_type_descr}} made it past committee
 								and {% if 40 > p.success_rate %}only {% endif %} about {{p.success_rate|floatformat:0}}% were {{p.success_name_2}}
 								in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}}.
 							{% else %}
-								{% if 40 > p.success_rate_2 %}Only about {% endif %}{{p.success_rate_2|floatformat:0}}% of {{p.bill_type_descr}} that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
+								<p><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
+								<p class="small">{% if 40 > p.success_rate_2 %}Only about {% endif %}{{p.success_rate_2|floatformat:0}}% of {{p.bill_type_descr}} that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
 							{% endif %}
+
 							[{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}<a href="#" onclick="$('#prognosis_factors').slideToggle(); return false;">show factors</a> | {% endif %}<a href="/about/analysis#prognosis">methodology</a>]
 							</small></p>
 							
@@ -632,58 +747,11 @@
 					</dl>
 			</div>
 
-			<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Text</dt>
-						<dd>
-							{% if not text_info %}
-								<p>Text not yet available.</p>
-							{% elif text_info.has_displayable_text %}
-								{% if bill.congress >= 112 %}
-								<a href="{{bill.get_absolute_url}}/text">
-									<img src="/{{text_info.thumbnail_path}}" width="75" style="float: left; margin-right: 1em; border: 1px solid #444;"/>
-								</a>
-								{% endif %}
-								<p><a href="{{bill.get_absolute_url}}/text">Read {{bill.noun|capfirst}} Text &raquo;</a></p>
-								<p class="small">Last updated {{text_info.docdate}}.<br/>{{text_info.numpages}}</p>
-							{% else %}
-								<a href="{{text_info.gpo_pdf_url}}">PDF</a> ({{text_info.docdate}})
-							{% endif %}
-						</dd>
-					</dl>
-			</div>
 		</div> <!-- /row -->
 
 		<div class="sep">&nbsp;</div>
 
 		<div class="row">
-			{% if current or bill.get_major_events|length > 0 %}
-			<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Progress</dt>
-						<dd>
-							<table>
-								{% for item in bill.get_major_events %}
-								<tr>
-									<td class="done" title="{{item.extra}}">{{item.label}}</td>
-									<td><nobr>{{item.date|date:"DATE_FORMAT"}}</nobr></td>
-								</tr>
-								{% endfor %}
-							
-								{% if current %}
-								{% for item in bill.get_future_events %}
-								<tr>
-									<td class="pending">{{item}}</td>
-									<td>...</td>
-								</tr>
-								{% endfor %}
-								{% endif %}
-							</table>
-						</dd>
-					</dl>
-			</div>
-			{% endif %}
-						
 		  	{% if subtitle %}
 			<div class="col-sm-6 col-md-4">
 			<dl>
@@ -692,37 +760,21 @@
 			</dl>
 			</div>
 		  	{% endif %}
-				
-		<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Primary Source</dt>
-						{% if bill.congress >= 93 %}
-						<dd>
-							<p style="margin-bottom: .25em"><a href="{{bill.thomas_link}}">THOMAS.gov (The Library of Congress)</a></p>
-							<p class="small" style="line-height: 130%">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here. {% if bill.source == "thomas-congproj" %}Data comes via the <a href="https://github.com/unitedstates/congress">congress project</a>.{% endif %}</p>
-						</dd>
-						{% elif bill.source == "statutesatlarge" %}
-						<dd>
-							<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
-							<p style="margin-bottom: .25em"><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
-							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Printing Office&rsquo;s United States Statutes at Large publication, via the <a href="https://github.com/unitedstates/congress">congress project</a>.</p>
-						</dd>
-						{% elif bill.source == "americanmemory" %}
-						<dd>
-							<p style="margin-bottom: .25em"><a href="{{bill.source_link}}">American Memory Century of Lawmaking</a></p>
-							<p class="small">Historical information on bills from 1799-1873 comes from the Library of Congress&rsquo;s American Memory Century of Lawmaking collection, via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law project</a>.</p>
-						</dd>
-						{% endif %}
-					</dl>
-		</div> <!-- columns -->
-		</div> <!-- row -->
 
-		<div class="sep">&nbsp;</div>
-
-		<div class="row">
+			{% if bill.source != "americanmemory" %}
 			<div class="col-sm-6 col-md-4">
 				<dl>
-						{% if bill.votes.exists %}
+						<dt>Summary</dt>
+						<dd id="summaries">
+							<p>No summaries available.</p>
+						</dd>
+				</dl>
+			</div>
+			{% endif %}
+
+			{% if bill.votes.exists %}
+			<div class="col-sm-6 col-md-4">
+				<dl>
 							<dt>Votes</dt>
 							<dd>
 								{% for v in bill.votes.all %}
@@ -766,11 +818,14 @@
 									return false;
 								}
 							</script>
-						{% endif %}
+					</dl>
+				</div>
+				{% endif %}
 				
-
 				
 				{% if bill.congress >= 93 %}
+				<div class="col-sm-6 col-md-4">
+					<dl>
 						<dt>Cosponsors</dt>
 						<dd>
 							{% if bill.cosponsor_count == 0 %}
@@ -795,7 +850,7 @@
 							{% endif %}
 						</dd>
 
-					{% if bill.committees.exists %}
+						{% if bill.committees.exists %}
 						<dt>Committees</dt>
 						<dd>
 							{% for c in bill.committees.all %}
@@ -813,21 +868,39 @@
 							{% endfor %}
 							<p class="small" style="margin: 1em 0 0 0">The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
 						</dd>
-					{% endif %}
+						{% endif %}
+					</dl>
+				</div>
 				{% endif %}
-				</dl>
-			</div>
+				
+		</div> <!-- row -->
 
-			<div class="col-sm-6 col-md-4">
-				<dl>
-				{% if bill.source != "americanmemory" %}
-						<dt>Summary</dt>
-						<dd id="summaries">
-							<p>No summaries available.</p>
+		<div class="sep">&nbsp;</div>
+
+		<div class="row">
+
+				<div class="col-sm-6 col-md-4">
+					<dl>
+						<dt>Primary Source</dt>
+						{% if bill.congress >= 93 %}
+						<dd>
+							<p style="margin-bottom: .25em"><a href="{{bill.thomas_link}}">THOMAS.gov (The Library of Congress)</a></p>
+							<p class="small" style="line-height: 130%">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here. {% if bill.source == "thomas-congproj" %}Data comes via the <a href="https://github.com/unitedstates/congress">congress project</a>.{% endif %}</p>
 						</dd>
-				{% endif %}
-				</dl>
-			</div>
+						{% elif bill.source == "statutesatlarge" %}
+						<dd>
+							<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
+							<p style="margin-bottom: .25em"><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
+							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Printing Office&rsquo;s United States Statutes at Large publication, via the <a href="https://github.com/unitedstates/congress">congress project</a>.</p>
+						</dd>
+						{% elif bill.source == "americanmemory" %}
+						<dd>
+							<p style="margin-bottom: .25em"><a href="{{bill.source_link}}">American Memory Century of Lawmaking</a></p>
+							<p class="small">Historical information on bills from 1799-1873 comes from the Library of Congress&rsquo;s American Memory Century of Lawmaking collection, via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law project</a>.</p>
+						</dd>
+						{% endif %}
+					</dl>
+				</div>
 
 			<div class="col-sm-6 col-md-4">
 				<dl>
@@ -865,6 +938,17 @@
 							|quote={{bill.title_no_number|truncatewords:15}}<br/>
 							}}</p>
 						</dd>
+				</dl>
+			</div>
+
+			<div class="col-sm-6 col-md-4">
+				<dl>
+					<dt>Notes</dt>
+					<dd id="notes">
+						<p>{{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</p>
+						<p>{{bill.how_a_bill_text}}</p>
+						{% if not bill.is_success %}<p>The {{bill.noun}}&rsquo;s title was written by its sponsor.</p>{% endif %}
+					</dd>
 				</dl>
 			</div>
 
@@ -983,46 +1067,15 @@
 		</div>
 	</div> <!-- /summary pane -->
 	
-	<div id="related" style="padding: 1em"> <!-- related pane -->
+	<div id="related"> <!-- related pane -->
 		<div class="row">
 			<div class="col-sm-6 col-lg-4">
 				<dl>
-						<dt>Related Bills</dt>
+						<dt>Find Similar Bills</dt>
 						<dd>
-							{% if bill.relatedbills.exists %}
-							<div>
-							{% for rb in bill.get_related_bills %}
-								<p style="margin-bottom: .25em;">
-									{% if rb.relation != "unknown" %}{{rb.relation}}: {% endif %}<a href="{{rb.related_bill.get_absolute_url}}">
-										{{rb.related_bill.display_number_no_congress_number}}: {{rb.related_bill.title_no_number|truncatewords:15}}
-									</a>
-								</p>
-								<p class="small" style="margin-bottom: .75em;">
-									{{rb.related_bill.get_current_status_display}}<br/>
-									Last Action: {{rb.related_bill.current_status_date|date}}
-								</p>
-							{% endfor %}
-							</div>
-							<p class="small">Related bills are identified by the Library of Congress.</p>
-							{% endif %}
-							
 							<p>Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
 						</dd>
 
-				{% with reintros.0 as reintro_from %}
-				{% if reintro_from %}
-						<dt>Supersedes</dt>
-						<dd>
-							<p>This bill was a re-introduction of <a href="{{reintro_from.get_absolute_url}}">{{reintro_from.display_number}}</a> ({{reintro_from.introduced_date}}).</p>
-						</dd>
-				{% endif %}
-				{% endwith %}
-
-				</dl>
-			</div>
-			<div class="col-sm-6">
-				<dl>
-					
 						<dt>Subject Areas:</dt>
 						<dd>
 							{% if bill.get_terms_sorted|length = 0 %}
@@ -1042,7 +1095,7 @@
 	</div> <!-- /related pane -->
 	
 	{% if text_info.citations.count %}
-	<div id="citations" style="padding: 1em"> <!-- text analysis pane -->
+	<div id="citations"> <!-- text analysis pane -->
 
 		<p>The bill contains the following citations to other parts of U.S. law:</p>
 	
@@ -1094,7 +1147,7 @@
 	</div>
 	{% endif %}
 
-	<div id="comments" style="padding: 1em">
+	<div id="comments">
 		<p style="text-align: center; font-style: italic; margin-bottom: 1em;">
 			Use the comment space below for discussion of the merits of {{bill.display_number}} with other GovTrack users.<br/>
 			Your comments are not read by Congressional staff.</p>
@@ -1124,8 +1177,6 @@
 </div> <!--panes -->
 
 {% include "ad_footer_leaderboard.html" %}
-
-{% endwith %} {% comment %}bill text{% endcomment %}
 				
 <script>
 $("ul.tabs a").tabs("div.panes > div", null, function(tabname) {

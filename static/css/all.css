@@ -2263,15 +2263,14 @@ ul.tabs a {
 	height: 40px;
 	width: 100%;
 	padding: 0 23.8px;
-	border: 1px solid #DDC;
-	background-color: #F3F1E9;
-	color:#555;
+	border-bottom: 1px solid #DDC;
+	color:#777;
 	line-height: 40px;
 	text-decoration: none;
 	font-family: 'PTSerifRegular', serif;
 	font-size: .9em;
-	letter-spacing: .15em;
-	text-transform: uppercase;
+	font-weight: normal;
+	letter-spacing: .05em;
 	outline:0;
 	-webkit-border-radius: 4px 4px 0 0;
 	-moz-border-radius: 4px 4px 0 0;
@@ -2295,16 +2294,19 @@ ul.tabs a:hover {
 ul.tabs a.active {
 	border: 1px solid #ddc;
 	border-bottom:0;
-	color:#000;
 	cursor:default;
 	background: #f3f1e9; /* Old browsers */
-	background: -moz-linear-gradient(top,	 #f3f1e9 1%, #ffffff 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#f3f1e9), color-stop(100%,#ffffff)); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top,	#f3f1e9 1%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top,	 #f3f1e9 1%,#ffffff 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top,	#f3f1e9 1%,#ffffff 100%); /* IE10+ */
-	background: linear-gradient(to bottom,	#f3f1e9 1%,#ffffff 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f3f1e9', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+	background: -moz-linear-gradient(top,	 #f3f1e9 1%, #fdfdfd 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#f3f1e9), color-stop(100%,#fdfdfd)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,	#f3f1e9 1%,#fdfdfd 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,	 #f3f1e9 1%,#fdfdfd 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,	#f3f1e9 1%,#fdfdfd 100%); /* IE10+ */
+	background: linear-gradient(to bottom,	#f3f1e9 1%,#fdfdfd 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f3f1e9', endColorstr='#fdfdfd',GradientType=0 ); /* IE6-9 */
+	color: #333;
+	font-weight: bold;
+	letter-spacing: .1em;
+	text-transform: uppercase;
 }
 
 ul.tabs.two-up li a,
