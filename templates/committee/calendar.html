@@ -52,7 +52,7 @@
 
 {% block body %}
 
-<p><small>All times are in Eastern Time when the meeting is in Washington, D.C. Shaded meetings were posted within the last 36 hours. Only meetings posted <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">by the Senate</a> or on <a href="http://docs.house.gov/Committee/Calendar/ByWeek.aspx">docs.House.gov</a> are listed.</small></p>
+<p style="line-height: 120%"><small>All times are in Eastern Time when the meeting is in Washington, D.C. Shaded meetings were posted within the last 36 hours. Only meetings posted <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">by the Senate</a> or on <a href="http://docs.house.gov/Committee/Calendar/ByWeek.aspx">docs.House.gov</a> are listed.</small></p>
 
 <div class="dummy">
 <div class="dummy">
@@ -63,7 +63,7 @@
 	</div> <!-- /calendar-time -->
 	</div> <!-- /calendar-day -->
 	<div class="calendar-day">
-	<h2><time>{{ committee_meeting.when|date:"l, F G, Y" }}</time></h2>
+	<h2><time>{{ committee_meeting.when|date:"l, F j, Y" }}</time></h2>
 	<div class="dummy">
 {% endifchanged %}
 
@@ -74,7 +74,7 @@
 {% endifchanged %}
 	<div class="calendar-event {% if committee_meeting.is_recently_added %} new{% endif %}" id="calendar-event:{{ committee_meeting.guid }}">
 		<small style="float: right">
-			{{ committee_meeting.when|date:"D, M G, Y - P" }}
+			{{ committee_meeting.when|date:"D, M j, Y - P" }}
 			{% if committee_meeting.room %}
 				<br><span class="calendar-event-location">Location: {{ committee_meeting.room }}</span>
 			{% endif %}
