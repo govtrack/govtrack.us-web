@@ -603,18 +603,27 @@
 				<dt style="margin-bottom: .5em">Related Bills</dt>
 
 				{% for rb in related %}
+					{% if forloop.counter == 3 %}
+					<div style="text-align: center; font-size: 90%;">
+						<a id="related_bills_additional_more" href="#">show {{forloop.revcounter}} more</a>
+					</div>
+					<div id="related_bills_additional" style="display: none">
+					{% endif %}
+
 					<div>
-						<div style="float: left; margin-right: 17px; margin-bottom: 1em; padding-top: 2px;">
+						<div style="position: absolute; padding-top: 2px;">
 							<a href="{{rb.bill.get_absolute_url}}">
 								<img src="{{rb.bill.get_absolute_url}}/_text_image?width=75" class="img-responsive" title="{{rb.bill}}" style="border: 1px solid #999;" width="75"/>
 							</a>
 						</div>
-						<div>
+						<div style="padding-left: 90px; min-height: 90px;">
+							{% if rb.prenote %}{{rb.prenote}}{% endif %}
 							<a href="{{rb.bill.get_absolute_url}}">
 								{% if rb.bill.congress == bill.congress %}
 									{{rb.bill.display_number_no_congress_number}}{% else %}
-									{{rb.bill.display_number_with_congress_number}}{% endif %}</a>{% if rb.show_title %}:<div style="font-size: 85%;">{{rb.bill.title_no_number|truncatewords:14}}</div>{% endif %}
+									{{rb.bill.display_number_with_congress_number}}{% endif %}</a>
 							{% if rb.note %}{{rb.note}}{% endif %}
+							{% if rb.show_title %}<div style="font-size: 85%;">{{rb.bill.title_no_number|truncatewords:14}}</div>{% endif %}
 							<p style="font-size: 85%; margin: .5em 0 .75em 0;">
 								{{rb.bill.get_current_status_display}}<br/>
 								{% if not rb.bill.is_final_status %}Last Action: {% endif %}{{rb.bill.current_status_date|date}}
@@ -622,10 +631,16 @@
 						</div>
 						<div style="clear: both"></div>
 					</div>
+
+					{% if forloop.last and forloop.counter >= 3 %}
+						<div style="text-align: center; font-size: 90%;">
+							<a id="related_bills_additional_less" href="#">show less</a>
+						</div>
+					</div> <!-- /hidden box -->
+					{% endif %}
 				{% endfor %}
-				<p class="small">Related bills here are identified by the Library of Congress.
-				Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
 			</div>
+			<script>$('#related_bills_additional').moreLess()</script>
 			{% endif %}
 
 		</div>

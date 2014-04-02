@@ -52,7 +52,12 @@ def bill_details(request, congress, type_slug, number):
     if reintro_prev: related_bills.append({ "bill": reintro_prev, "note": "was a previous version of this bill.", "show_title": False })
     if reintro_next: related_bills.append({ "bill": reintro_next, "note": "was a re-introduction of this bill in a later Congress.", "show_title": False })
     for rb in bill.get_related_bills():
-        related_bills.append({ "bill": rb.related_bill, "note": ("(%s)" % rb.relation.title()) if rb.relation != "unknown" else None, "show_title": True })
+        if rb.relation in ("identical", "rule"):
+            related_bills.append({ "bill": rb.related_bill, "note": "(%s)" % rb.relation, "show_title": False })
+        elif rb.relation == "ruled-by":
+            related_bills.append({ "bill": rb.related_bill, "prenote": "Debate on", "note": " is governed by these rules.", "show_title": False })
+        else:
+            related_bills.append({ "bill": rb.related_bill, "note": ("(%s)" % (rb.relation.title() if rb.relation != "unknown" else "Related")), "show_title": True })
 
     # bill text info and areas of law affected
     from billtext import load_bill_text

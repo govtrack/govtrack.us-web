@@ -318,3 +318,22 @@ jQuery.fn.sortElements = (function(){
     };
     
 })();
+
+jQuery.fn.moreLess = function() {
+	var elem = $(this);
+	var id = elem.attr('id');
+	var more = $("#" + id + "_more");
+	var less = $("#" + id + "_less");
+	function show() {
+		elem.fadeIn();
+		more.hide();
+		return false;
+	}
+	function hide() {
+		elem.fadeOut();
+		more.show();
+		return false;
+	}
+	more.click(show);
+	less.click(hide);
+}
