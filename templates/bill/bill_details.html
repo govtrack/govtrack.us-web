@@ -533,13 +533,12 @@
 
 {% block body %}
 
-<ul class="tabs five-up">
+<ul class="tabs four-up">
 	<li><a href="#overview">Overview</a></li>
 	
 	{% if bill.source != "americanmemory" %}
 	<li id="summary_tab" style="display: none"><a href="#summary">Summaries</a></li>
 	<li><a href="#related">Explore</a></li>
-	{% if text_info.citations.count %}<li><a href="#citations">Citations</a></li>{% endif %}
 	<li id="comments_tab" style="display: none"><a href="#comments">Comments</a></li>
 	{% endif %}
 </ul>
@@ -1091,17 +1090,12 @@
 						</dd>
 					</dl>
 			</div>
-		</div> <!-- /row -->
-	</div> <!-- /related pane -->
-	
-	{% if text_info.citations.count %}
-	<div id="citations"> <!-- text analysis pane -->
 
-		<p>The bill contains the following citations to other parts of U.S. law:</p>
-	
+		{% if text_info.citations.count %}
+		<div class="col-sm-6 col-lg-8">
 		{% if text_info.citations.slip_laws %}
-			<h2>Slip Laws</h2>
-			<p>Slip laws refer to enacted bills and joint resolutions in their original form as enacted by Congress, that is, before other laws amend them. Slip laws are cited as &ldquo;Public Law XXX-YYY&rdquo;, where XXX is the number of the Congress in which the bill or resolution was introduced.</p>
+			<dt>Slip Law Citations</dt>
+			<p>Slip laws refer to enacted bills and joint resolutions in their original form as enacted by Congress. Slip laws are cited as &ldquo;Public Law ___-___&rdquo; using the number of the Congress in which the bill or resolution was introduced and a number assigned to each successive law enacted in that congress.</p>
 			<ul class="bullets">
 			{% for cite in text_info.citations.slip_laws %}
 				<li>{{cite.text}}{% if cite.bill %}:<br/><a href="{{cite.bill.get_absolute_url}}">{{cite.bill}}</a>{% endif %}</li>
@@ -1110,11 +1104,11 @@
 		{% endif %}
 		
 		{% if text_info.citations.usc %}
-			<h2>United States Code</h2>
+			<dt>United States Code Citations</dt>
 
-			<p>The United States Code is the compilation of general and permanent laws enacted by Congress. Laws that are not 
-			permanent in nature, law that affect a single individual, family, or small group, regulations, case law, state
-			law, and local law do not appear in the United States Code.</p>
+			<p>The United States Code is the compilation of general and permanent laws enacted by Congress.</p>
+
+			<p>Use the links below to read the parts of the United States Code cited by this bill.</p>
 			
 			<ul class="bullets">
 			{% for cite in text_info.citations.usc %}
@@ -1124,11 +1118,13 @@
 					</li>
 			{% endfor %}
 			</ul>
+
+			<p>Laws that are not permanent in nature, law that affect a single individual, family, or small group, regulations, case law, statelaw, and local law do not appear in the United States Code.</p>
 		{% endif %}
 		
 		{% if text_info.citations.statutes %}
-			<h2>Statutes at Large</h2>
-			<p>The United States Statutes at Large is the compilation of all laws enacted by Congress.</p>
+			<dt>Statutes at Large Citations</dt>
+			<p>The United States Statutes at Large is the compilation of all laws enacted by Congress, in their original form as originally enacted.</p>
 			<ul class="bullets">
 			{% for cite in text_info.citations.statutes %}
 				<li>{{cite.text}}</li>
@@ -1137,15 +1133,17 @@
 		{% endif %}
 		
 		{% if text_info.citations.other %}
-			<h2>Other Citations</h2>
+			<dt>Other Citations</dt>
 			<ul class="bullets">
 			{% for cite in text_info.citations.other %}
 				<li>{{cite.text}}</li>
 			{% endfor %}
 			</ul>
 		{% endif %}
-	</div>
-	{% endif %}
+		</div> <!-- /col -->
+		{% endif %}
+		</div> <!-- /row -->
+	</div> <!-- /related -->
 
 	<div id="comments">
 		<p style="text-align: center; font-style: italic; margin-bottom: 1em;">
