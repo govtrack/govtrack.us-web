@@ -1,5 +1,6 @@
 {% extends "master.html" %}
 {% block heading_box %}
+<div class="row summary-box-row">
 	<div class="col-sm-4 col-sm-push-8 col-md-5 col-md-push-7 col-lg-4 col-lg-push-8">
 	<div class="ads square">
 		{% comment %} if remote_net_house or remote_net_senate or request.user.username == "admin" %}
@@ -60,5 +61,5 @@
 		{% block summary %}
 		{% endblock %}
 	</div><!-- /summary-box -->
-	
+</div>
 {% endblock %}
