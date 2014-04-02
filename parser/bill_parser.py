@@ -346,10 +346,8 @@ def main(options):
            
             seen_bill_ids.append(bill.id) # don't delete me later
             
-            if bill.congress >= 113:
+            if bill.congress >= 93:
                 bill.source = "thomas-congproj"
-            elif bill.congress >= 93:
-                bill.source = "thomas-legacy"
             elif bill.congress >= 82:
                 bill.source = "statutesatlarge"
             elif bill.congress <= 42:
@@ -392,9 +390,10 @@ def main(options):
         File.objects.save_file(fname)
         
     # delete bill objects that are no longer represented on disk.... this is too dangerous.
-    if options.congress and not options.filter and False:
+    if options.congress and not options.filter:
         # this doesn't work because seen_bill_ids is too big for sqlite!
-        Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids).delete()
+        for b in Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids):
+            print "Bill is no longer on disk: ", b.id, b
         
     # The rest is for current only...
     
