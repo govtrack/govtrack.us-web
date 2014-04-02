@@ -368,7 +368,7 @@ def load_citation_info(metadata):
             if "range_to_section" in cite:
                 sec_obj.range_to_section = cite["range_to_section"]
 
-            sec_obj.link = sec_obj.get_cornell_lii_link(cite["paragraph"])
+            sec_obj.link = sec_obj.get_cornell_lii_link(cite.get("paragraph"))
 
             usc_sections.append(sec_obj)
         else:
