@@ -38,7 +38,7 @@ def copy(fn1, fn2, modulo):
 		if md5(fn1, modulo) == md5(fn2, modulo):
 			return False
 	#print fn2
-	shutil.copyfile(fn1, fn2)
+	shutil.copy2(fn1, fn2)
 	return True
 
 def make_link(src, dest):
@@ -270,6 +270,8 @@ if "photos" in sys.argv:
 
 	import person.models, os, shutil, yaml
 
+	os.system("cd ../scripts/congress-images; git pull --rebase")
+
 	src = '../scripts/congress-images/congress/original/'
 	dst = 'data/photos/'
 
@@ -313,16 +315,16 @@ if "photos" in sys.argv:
 				shutil.move(fn, get_archive_fn(fn))
 
 		# Copy in the file.
-		print fn1, "=>", fn2
-		shutil.copy2(fn1, fn2)
+		if copy(fn1, fn2, None):
+			print fn1, "=>", fn2
 
-		# Write the metadata.
-		with open(fn2.replace(".jpeg", "-credit.txt"), "w") as credit_file:
-			credit_file.write( (metadata.get("link", "").strip() + " " + metadata.get("name", "").strip() + "\n").encode("utf-8") )
-
-		# Generate resized versions.
-		for size_width in (50, 100, 200):
-			size_height = int(round(size_width * 1.2))
-			os.system("convert %s -resize %dx%d^ -gravity center -extent %dx%d %s"
-				% (fn2, size_width, size_height, size_width, size_height,
-					fn2.replace(".jpeg", ("-%dpx.jpeg" % size_width)) ))
+			# Write the metadata.
+			with open(fn2.replace(".jpeg", "-credit.txt"), "w") as credit_file:
+				credit_file.write( (metadata.get("link", "").strip() + " " + metadata.get("name", "").strip() + "\n").encode("utf-8") )
+	
+			# Generate resized versions.
+			for size_width in (50, 100, 200):
+				size_height = int(round(size_width * 1.2))
+				os.system("convert %s -resize %dx%d^ -gravity center -extent %dx%d %s"
+					% (fn2, size_width, size_height, size_width, size_height,
+						fn2.replace(".jpeg", ("-%dpx.jpeg" % size_width)) ))
