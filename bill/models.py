@@ -1115,7 +1115,7 @@ class USCSection(models.Model):
             if not path[-1].citation: return None # not a section actually in the USC
             path.reverse()
             return "http://www.law.cornell.edu/uscode/text/" + "/".join(
-                (((so.level_type + "-") if so.level_type != "title" else "") + so.number) for so in path)
+                (((so.level_type + "-") if so.level_type not in ("title", None) else "") + so.number) if so.number else "?" for so in path)
 
     # utility methods to load from the structure.json file created by github:unitedstates/uscode
     # don't forget:
