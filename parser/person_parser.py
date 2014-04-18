@@ -242,13 +242,13 @@ def main(options):
                         ex_role = r
                         break
                         
-                # Otherwise match on type/start only.
+                # Otherwise match on type & either start or end only.
                 if not ex_role:
                     for r in roles:
-                        if role.role_type == r.role_type and r.startdate == role.startdate:
+                        if role.role_type == r.role_type and (r.startdate == role.startdate or r.enddate == role.enddate):
                             ex_role = r
                             break
-                        
+
                 if ex_role:    
                     # These roles correspond.
                     processed_roles.add(ex_role.id)
