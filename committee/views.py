@@ -39,7 +39,7 @@ def committee_details(request, parent_code, child_code=None):
             'members': members,
             'SIMPLE_MEMBER': CommitteeMemberRole.member,
             'TYPE_JOINT': CommitteeType.joint,
-            'feed': Feed.CommitteeFeed(obj),
+            'feed': obj.get_feed(),
             "member_highlights": [m for m in members if m.role in (CommitteeMemberRole.chairman, CommitteeMemberRole.vice_chairman, CommitteeMemberRole.ranking_member)],
             "party_counts": party_counts,
             }
@@ -62,7 +62,7 @@ def committee_list(request):
         'senate_committees': getlist(CommitteeType.senate),
         'house_committees': getlist(CommitteeType.house),
         'joint_committees': getlist(CommitteeType.joint),
-        'feed': Feed.AllCommitteesFeed(),
+        'feed': Committee.AllCommitteesFeed(),
     }
 
    
@@ -81,5 +81,5 @@ def committee_calendar(request):
 
     return {
         "committee_meetings": committee_meetings,
-        'feed': Feed.AllCommitteesFeed(),
+        'feed': Committee.AllCommitteesFeed(),
     }

@@ -65,6 +65,10 @@ class BillTerm(models.Model):
     def get_absolute_url(self):
         return "/congress/bills/subjects/%s/%d" % (slugify(self.name).replace('-', '_'), self.id)
 
+    def get_feed(self):
+        from events.models import Feed
+        return Feed.objects.get_or_create(feedname="crs:%d" % self.id)[0]
+
 class Cosponsor(models.Model):
     """A (bill, person) pair indicating cosponsorship, with join and withdrawn dates."""
 
@@ -381,30 +385,60 @@ class Bill(models.Model):
         return "https://www.popvox.com/bills/us/%d/%s%d" \
             % (self.congress, self.bill_type_slug, self.number)
 
+    def get_feed(self):
+        from events.models import Feed
+        bt = BillType.by_value(self.bill_type)
+        return Feed.objects.get_or_create(feedname="bill:" + bt.xml_code + str(self.congress) + "-" + str(self.number))[0]
+
+    @staticmethod
+    def ActiveBillsFeed():
+        from events.models import Feed
+        return Feed.get_noarg_feed("misc:activebills")
+    
+    @staticmethod
+    def EnactedBillsFeed():
+        from events.models import Feed
+        return Feed.get_noarg_feed("misc:enactedbills")
+    
+    @staticmethod
+    def IntroducedBillsFeed():
+        from events.models import Feed
+        return Feed.get_noarg_feed("misc:introducedbills")
+    
+    @staticmethod
+    def ActiveBillsExceptIntroductionsFeed():
+        from events.models import Feed
+        return Feed.get_noarg_feed("misc:activebills2")
+    
+    @staticmethod
+    def ComingUpFeed():
+        from events.models import Feed
+        return Feed.get_noarg_feed("misc:comingup")
+    
     def create_events(self):
         if self.congress < 112: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
         with Event.update(self) as E:
             # collect the feeds that we'll add major actions to
-            bill_feed = Feed.BillFeed(self)
+            bill_feed = self.get_feed()
             index_feeds = [bill_feed]
             if self.sponsor != None:
-                index_feeds.append(Feed.PersonSponsorshipFeed(self.sponsor))
-            index_feeds.extend([Feed.IssueFeed(ix) for ix in self.terms.all()])
-            index_feeds.extend([Feed.CommitteeBillsFeed(cx) for cx in self.committees.all()])
+                index_feeds.append(self.sponsor.get_feed("ps"))
+            index_feeds.extend([ix.get_feed() for ix in self.terms.all()])
+            index_feeds.extend([cx.get_feed("bills") for cx in self.committees.all()])
             index_feeds.extend([Feed.objects.get_or_create(feedname="usc:" + str(sec))[0] for sec in self.usc_citations_uptree()])
 
             # also index into feeds for any related bills and previous versions of this bill
             # that people may still be tracking
             for rb in self.get_related_bills():
-                index_feeds.append(Feed.BillFeed(rb.related_bill))
+                index_feeds.append(rb.related_bill.get_feed())
             for b in self.find_reintroductions():
-                index_feeds.append(Feed.BillFeed(b))
+                index_feeds.append(b.get_feed())
 
             # generate events for major actions
-            E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Feed.ActiveBillsFeed(), Feed.IntroducedBillsFeed()])
-            common_feeds = [Feed.ActiveBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed()]
-            enacted_feed = [Feed.EnactedBillsFeed()]
+            E.add("state:" + str(BillStatus.introduced), self.introduced_date, index_feeds + [Bill.ActiveBillsFeed(), Bill.IntroducedBillsFeed()])
+            common_feeds = [Bill.ActiveBillsFeed(), Bill.ActiveBillsExceptIntroductionsFeed()]
+            enacted_feed = [Bill.EnactedBillsFeed()]
             for datestr, state, text, srcxml in self.major_actions:
                 date = eval(datestr)
                 if state == BillStatus.introduced:
@@ -426,9 +460,9 @@ class Bill(models.Model):
 
             # generate an event for appearing on docs.house.gov or the senate floor schedule:
             if self.docs_house_gov_postdate:
-                E.add("dhg", self.docs_house_gov_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
+                E.add("dhg", self.docs_house_gov_postdate, index_feeds + common_feeds + [Bill.ComingUpFeed()])
             if self.senate_floor_schedule_postdate:
-                E.add("sfs", self.senate_floor_schedule_postdate, index_feeds + common_feeds + [Feed.ComingUpFeed()])
+                E.add("sfs", self.senate_floor_schedule_postdate, index_feeds + common_feeds + [Bill.ComingUpFeed()])
 
             # generate an event for each new GPO text availability
             from glob import glob

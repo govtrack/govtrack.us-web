@@ -83,7 +83,7 @@ def person_details(request, pk):
                 'analysis_data': analysis_data,
                 'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
                 'committeeassignments': get_committee_assignments(person),
-                'feed': Feed.PersonFeed(person.id),
+                'feed': person.get_feed(),
                 'cities': get_district_cities("%s-%02d" % (role.state.lower(), role.district)) if role and role.district else None,
                 'has_session_stats': has_session_stats,
                 }
@@ -104,7 +104,7 @@ def person_details(request, pk):
 @user_view_for(person_details)
 def person_details_user_view(request, pk):
     person = get_object_or_404(Person, pk=pk)
-    return render_subscribe_inline(request, Feed.PersonFeed(person.id))
+    return render_subscribe_inline(request, person.get_feed())
 
 def render_subscribe_inline(request, feed):
     # render the event subscribe button, but fake the return path

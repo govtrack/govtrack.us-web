@@ -79,7 +79,8 @@ def do_site_search(q, allow_redirect=False):
     
     results = []
     
-    from events.models import Feed
+    from bill.models import Bill
+    from vote.models import Vote
     if "pass" in q or "fail" in q or "vote" in q:
         results.append({
             "title": "Tracking Federal Legislation",
@@ -92,7 +93,7 @@ def do_site_search(q, allow_redirect=False):
                  "feed": f,
                  "secondary": False }
                 for f in (
-                    Feed.EnactedBillsFeed(), Feed.ActiveBillsExceptIntroductionsFeed(), Feed.ComingUpFeed(), Feed.AllVotesFeed(),
+                    Bill.EnactedBillsFeed(), Bill.ActiveBillsExceptIntroductionsFeed(), Bill.ComingUpFeed(), Vote.AllVotesFeed(),
                     )
                 ]
             })
@@ -109,7 +110,7 @@ def do_site_search(q, allow_redirect=False):
             {"href": p.object.get_absolute_url(),
              "label": p.object.name,
              "obj": p.object,
-             "feed": Feed.PersonFeed(p.object),
+             "feed": p.object.get_feed(),
              "secondary": p.object.get_current_role() == None }
             for p in SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q).order_by('-is_currently_serving', '-score')[0:9]]
         })
@@ -131,7 +132,7 @@ def do_site_search(q, allow_redirect=False):
         "results": sorted([
             {"href": c.get_absolute_url(),
              "label": c.fullname,
-             "feed": Feed.CommitteeFeed(c),
+             "feed": c.get_feed(),
              "obj": c,
              "secondary": c.committee != None}
             for c in Committee.objects.filter(name__icontains=q, obsolete=False)
@@ -147,7 +148,7 @@ def do_site_search(q, allow_redirect=False):
             {"href": b.object.get_absolute_url(),
              "label": b.object.title,
              "obj": b.object,
-             "feed": Feed.BillFeed(b.object) if b.object.is_alive else None,
+             "feed": b.object.get_feed() if b.object.is_alive else None,
              "secondary": b.object.congress != CURRENT_CONGRESS }
             for b in SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], content=AutoQuery(q)).order_by('-current_status_date')[0:9]]
     else:
@@ -186,7 +187,7 @@ def do_site_search(q, allow_redirect=False):
             {"href": p.get_absolute_url(),
              "label": p.name,
              "obj": p,
-             "feed": Feed.IssueFeed(p),
+             "feed": p.get_feed(),
              "secondary": not p.is_top_term() }
             for p in BillTerm.objects.filter(name__icontains=q, term_type=TermType.new).exclude(name__contains=" Committee on ")[0:9]]
         })

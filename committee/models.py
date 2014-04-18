@@ -85,14 +85,24 @@ class Committee(models.Model):
     def current_bills(self):
         return self.bills.filter(congress=CURRENT_CONGRESS)
 
+    def get_feed(self, feed_type=""):
+        if feed_type not in ("", "bills", "meetings"): raise ValueError(feed_type)
+        from events.models import Feed
+        return Feed.objects.get_or_create(feedname="committee%s:%s" % (feed_type, self.code))[0]
+
+    @staticmethod
+    def AllCommitteesFeed():
+        from events.models import Feed
+        return Feed.get_noarg_feed("misc:allcommittee")
+    
     def create_events(self):
         from events.models import Feed, Event
-        feeds = [Feed.AllCommitteesFeed(), Feed.CommitteeMeetingsFeed(self.code)]
-        if self.committee: feeds.append(Feed.CommitteeMeetingsFeed(self.committee.code)) # add parent committee
+        feeds = [Committee.AllCommitteesFeed(), self.get_feed("meetings")]
+        if self.committee: feeds.append(self.committee.get_feed("meetings")) # add parent committee
         with Event.update(self) as E:
             for meeting in self.meetings.all():
                 E.add("mtg_" + str(meeting.id), meeting.when,
-                	feeds + [Feed.BillFeed(b) for b in meeting.bills.all()])
+                	feeds + [b.get_feed() for b in meeting.bills.all()])
 
     def render_event(self, eventid, feeds):
         eventinfo = eventid.split("_")

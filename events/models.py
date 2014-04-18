@@ -227,7 +227,7 @@ class Feed(models.Model):
         "p:": {
             "title": lambda self : self.person().name,
             "noun": "person",
-            "includes": lambda self : [Feed.PersonVotesFeed(self.person()), Feed.PersonSponsorshipFeed(self.person())],
+            "includes": lambda self : [self.person().get_feed("pv"), self.person().get_feed("ps")],
             "link": lambda self: self.person().get_absolute_url(),
             "scoped_title": lambda self : "All Events for " + self.person().lastname,
             "category": "federal-other",
@@ -253,7 +253,7 @@ class Feed(models.Model):
         "committee:": {
             "title": lambda self : truncate_words(self.committee().fullname, 12),
             "noun": "committee",
-            "includes": lambda self : [Feed.CommitteeBillsFeed(self.committee()), Feed.CommitteeMeetingsFeed(self.committee())],
+            "includes": lambda self : [self.committee().get_feed("bills"), self.committee().get_feed("meetings")],
             "link": lambda self: self.committee().get_absolute_url(),
             "scoped_title": lambda self : "All Events for This Committee",
             "is_valid": lambda self : self.committee(test=True),
@@ -341,122 +341,6 @@ class Feed(models.Model):
         feed, is_new = Feed.objects.get_or_create(feedname=feedname)
         return feed
 
-    @staticmethod
-    def ActiveBillsFeed():
-        return Feed.get_noarg_feed("misc:activebills")
-    
-    @staticmethod
-    def EnactedBillsFeed():
-        return Feed.get_noarg_feed("misc:enactedbills")
-    
-    @staticmethod
-    def IntroducedBillsFeed():
-        return Feed.get_noarg_feed("misc:introducedbills")
-    
-    @staticmethod
-    def ActiveBillsExceptIntroductionsFeed():
-        return Feed.get_noarg_feed("misc:activebills2")
-    
-    @staticmethod
-    def ComingUpFeed():
-        return Feed.get_noarg_feed("misc:comingup")
-    
-    @staticmethod
-    def AllCommitteesFeed():
-        return Feed.get_noarg_feed("misc:allcommittee")
-    
-    @staticmethod
-    def AllVotesFeed():
-        return Feed.get_noarg_feed("misc:allvotes")
-
-    # constructors that take object instances, object IDs, or the encoded
-    # object reference used in feed names and returns (possibly creating)
-    # a Feed object.
-    
-    @staticmethod # private method
-    def get_arg_feed(prefix, objclass, id_ref_instance, dereference, reference):
-        # Always dereference id's and references before get_or_created to
-        # prevent the creation of feeds that do not correspond with objects.
-        if isinstance(id_ref_instance, (int, long)):
-            obj = objclass.objects.get(pk=id_ref_instance)
-        elif isinstance(id_ref_instance, (str, unicode)):
-            obj = dereference(id_ref_instance)
-        elif type(id_ref_instance) == objclass:
-            obj = id_ref_instance
-        else:
-            raise ValueError(unicode(id_ref_instance))
-       
-        feedname = prefix + ":" + reference(obj)
-        feed, is_new = Feed.objects.get_or_create(feedname=feedname)
-        feed._ref = obj
-        return feed
-
-    @staticmethod
-    def _PersonFeed(prefix, id_ref_instance):
-        from person.models import Person
-        return Feed.get_arg_feed(prefix, Person, id_ref_instance,
-            lambda id : Person.objects.get(id=id),
-            lambda p : str(p.id))
-
-    @staticmethod
-    def PersonFeed(id_ref_instance):
-        return Feed._PersonFeed("p", id_ref_instance)
-        
-    @staticmethod
-    def PersonVotesFeed(id_ref_instance):
-        return Feed._PersonFeed("pv", id_ref_instance)
-        
-    @staticmethod
-    def PersonSponsorshipFeed(id_ref_instance):
-        return Feed._PersonFeed("ps", id_ref_instance)
-    
-    @staticmethod
-    def BillFeed(id_ref_instance):
-        from bill.models import Bill, BillType
-        def dereference(ref):
-            m = re.match(r"([a-z]+)(\d+)-(\d+)", ref)
-            bill_type = BillType.by_xml_code(m.group(1))
-            bill = Bill.objects.get(congress=m.group(2), bill_type=bill_type, number=m.group(3))
-            return bill
-        def reference(bill):
-            bt = BillType.by_value(bill.bill_type)
-            return bt.xml_code + str(bill.congress) + "-" + str(bill.number)
-        return Feed.get_arg_feed("bill", Bill, id_ref_instance,
-            dereference,
-            reference)
-
-    @staticmethod
-    def IssueFeed(id_ref_instance):
-        from bill.models import BillTerm
-        def dereference(ref):
-            if ref.isdigit():
-                return BillTerm.objects.get(id=int(ref))
-            return BillTerm.objects.get(name=ref)
-        return Feed.get_arg_feed("crs", BillTerm, id_ref_instance,
-            dereference,
-            lambda ix : str(ix.id))
-        
-    @staticmethod
-    def CommitteeFeed(id_ref_instance):
-        from committee.models import Committee
-        return Feed.get_arg_feed("committee", Committee, id_ref_instance,
-            lambda ref : Committee.objects.get(code=ref),
-            lambda obj : obj.code)
-
-    @staticmethod
-    def CommitteeBillsFeed(id_ref_instance):
-        from committee.models import Committee
-        return Feed.get_arg_feed("committeebills", Committee, id_ref_instance,
-            lambda ref : Committee.objects.get(code=ref),
-            lambda obj : obj.code)
-
-    @staticmethod
-    def CommitteeMeetingsFeed(id_ref_instance):
-        from committee.models import Committee
-        return Feed.get_arg_feed("committeemeetings", Committee, id_ref_instance,
-            lambda ref : Committee.objects.get(code=ref),
-            lambda obj : obj.code)
-        
     # iterator methods
     
     @staticmethod
@@ -625,15 +509,12 @@ class Event(models.Model):
     across event instances in the table in multiple fields, otherwise we have a problem using DISTINCT.
     
     To create events, do something like the following, which begins the update process for
-    the source object (self) and adds a single event (with eventid "vote") to multiple feeds.
-    Note that Event.update() will clear out any previously created events for the source
-    object if they are not re-added here.
-        from events.feeds import AllVotesFeed, PersonVotesFeed
+    the source object (self) and adds a single event to multiple feeds. Note that Event.update() will
+    clear out any previously created events for the source object if they are not re-added here.
         from events.models import Event
         with Event.update(self) as E:
-            E.add("vote", self.created, AllVotesFeed())
-            for v in self.voters.all():
-                E.add("vote", self.created, PersonVotesFeed(v.person_id))
+            E.add("eventcode", self.created, feedinstance1)
+            E.add("eventcode", self.created, feedinstance2)
                 
     Event.render is optionally passed a keyword argument feeds which is a sequence of
     feed.Feed objects that allow the event's template to be customized depending on which
@@ -703,6 +584,7 @@ class Event(models.Model):
                 defaults = {"when": when, "seq": self.seq[eventid]},
                 **Event.sourcearg(self.source)
                 )
+            #print ("[%s] %s event record: %s | %s | %s" % (unicode(self.source)[0:15], "New" if created else "Existing", feed.feedname, repr(self.source), eventid)).encode("utf8")
             if not created and event.id in self.existing_events:
                 del self.existing_events[event.id] # i.e. don't delete this event on __exit__
                 if event.when != when: # update this if it changed

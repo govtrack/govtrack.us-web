@@ -289,6 +289,10 @@ class Person(models.Model):
         stats["meta"] = datafile["meta"] # copy this over
         return stats
 
+    def get_feed(self, feed_type="p"):
+        if feed_type not in ("p", "pv", "ps"): raise ValueError(feed_type)
+        from events.models import Feed
+        return Feed.objects.get_or_create(feedname="%s:%d" % (feed_type, self.id))[0]
 
 class PersonRole(models.Model):
     """Terms held in office by Members of Congress, Presidents, and Vice Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President/Vice President four years, and in the Senate six years (three 'Congresses')."""
@@ -406,7 +410,7 @@ class PersonRole(models.Model):
         now = datetime.datetime.now().date()
         from events.models import Feed, Event
         with Event.update(self) as E:
-            f = Feed.PersonFeed(self.person_id)
+            f = self.person.get_feed()
             if not prev_role or not self.continues_from(prev_role):
                 E.add("termstart", self.startdate, f)
             if not next_role or not next_role.continues_from(self):

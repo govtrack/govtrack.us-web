@@ -217,14 +217,19 @@ class Vote(models.Model):
             for v in Voter.objects.filter(vote=self)
         ]
 
+    @staticmethod
+    def AllVotesFeed():
+        from events.models import Feed
+        return Feed.get_noarg_feed("misc:allvotes")
+      
     def create_event(self):
         if self.congress < 111: return # not interested, creates too much useless data and slow to load
         from events.models import Feed, Event
         with Event.update(self) as E:
-            E.add("vote", self.created, Feed.AllVotesFeed())
+            E.add("vote", self.created, Vote.AllVotesFeed())
             for v in self.voters.all():
                 if v.person_id:
-                    E.add("vote", self.created, Feed.PersonVotesFeed(v.person_id))
+                    E.add("vote", self.created, v.person.get_feed("pv"))
     
     def render_event(self, eventid, feeds):
         if feeds:

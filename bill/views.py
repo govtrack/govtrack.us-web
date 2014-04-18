@@ -72,7 +72,7 @@ def bill_details(request, congress, type_slug, number):
         "subtitle": get_secondary_bill_title(bill, bill.titles),
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
-        "feed": Feed.BillFeed(bill),
+        "feed": bill.get_feed(),
         "text_info": text_info,
         "related": related_bills,
     }
@@ -107,13 +107,13 @@ def bill_details_user_view(request, congress, type_slug, number):
         from django.template import Template, Context, RequestContext, loader
         ret["admin_panel"] = Template(admin_panel).render(RequestContext(request, {
             'bill': bill,
-            "feed": Feed.BillFeed(bill),
+            "feed": bill.get_feed(),
             "num_issuepos": num_issuepos,
             "num_calls": num_calls,
             }))
 
     from person.views import render_subscribe_inline
-    ret.update(render_subscribe_inline(request, Feed.BillFeed(bill)))
+    ret.update(render_subscribe_inline(request, bill.get_feed()))
 
     # poll_and_call
     if request.user.is_authenticated():
@@ -543,14 +543,14 @@ def subject(request, sluggedname, termid):
     else:
         ix1 = ix.parents.all()[0]
         ix2 = ix
-    return show_bill_browse("bill/subject.html", request, ix1, ix2, { "term": ix, "feed": Feed.IssueFeed(ix) })
+    return show_bill_browse("bill/subject.html", request, ix1, ix2, { "term": ix, "feed": ix.get_feed() })
 
 @user_view_for(subject)
 def subject_user_view(request, sluggedname, termid):
     ix = get_object_or_404(BillTerm, id=termid)
     ret = { }
     from person.views import render_subscribe_inline
-    ret.update(render_subscribe_inline(request, Feed.IssueFeed(ix)))
+    ret.update(render_subscribe_inline(request, ix.get_feed()))
     return ret
 
 import django.contrib.sitemaps
