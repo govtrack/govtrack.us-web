@@ -1,5 +1,5 @@
 {% if format == "text" %}
-active: true
+active: false
 subject: "We Asked Congress for More Data, Again"
 ----------
 {% endif %}
