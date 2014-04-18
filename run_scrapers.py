@@ -106,7 +106,7 @@ if "committees" in sys.argv:
 	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
 	# Convert committee YAML into the legacy format.
-	os.system(". %s/.env/bin/activate; python ../scripts/legacy-conversion/convert_committees.py %s %s/congress-legislators/ ../data/us/%d/committees.xml" % (SCRAPER_PATH, SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
+	os.system(". %s/congress-legislators/scripts/.env/bin/activate; python ../scripts/legacy-conversion/convert_committees.py %s %s/congress-legislators/ ../data/us/%d/committees.xml" % (SCRAPER_PATH, SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
 
 	# Committee events.
 	os.system("cd %s; . .env/bin/activate; ./run committee_meetings %s --log=%s" % (SCRAPER_PATH, fetch_mode, log_level))
