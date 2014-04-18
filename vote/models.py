@@ -233,7 +233,13 @@ class Vote(models.Model):
     
     def render_event(self, eventid, feeds):
         if feeds:
-            my_reps = set(f.person() for f in feeds if f.person() != None)
+            from person.models import Person
+            my_reps = []
+            for f in feeds:
+                try:
+                    my_reps.append(Person.from_feed(f))
+                except ValueError:
+                    pass # not a person-related feed
             my_reps = sorted(my_reps, key = lambda p : p.sortname)
         else:
             my_reps = []
@@ -311,3 +317,15 @@ class Voter(models.Model):
     def get_vote_name(self):
         return self.vote.name()
 
+# Feeds
+from events.models import Feed
+Feed.register_feed(
+    "misc:allvotes",
+    title = "Roll Call Votes",
+    link = "/congress/votes",
+    simple = True,
+    single_event_type = True,
+    sort_order = 101,
+    category = "federal-votes",
+    description = "You will get an alert for every roll call vote in Congress.",
+    )

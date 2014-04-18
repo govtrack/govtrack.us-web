@@ -91,6 +91,15 @@ class Committee(models.Model):
         return Feed.objects.get_or_create(feedname="committee%s:%s" % (feed_type, self.code))[0]
 
     @staticmethod
+    def from_feed(feed, test=False):
+        if ":" not in feed.feedname or feed.feedname.split(":")[0] not in ("committee", "committeebills", "committeemeetings"): raise ValueError(feed.feedname)
+        try:
+            return Committee.objects.get(code=feed.feedname.split(":")[1])
+        except Committee.DoesNotExist:
+            if test: return False
+            raise ValueError(feed.feedname)
+
+    @staticmethod
     def AllCommitteesFeed():
         from events.models import Feed
         return Feed.get_noarg_feed("misc:allcommittee")
@@ -190,3 +199,46 @@ class CommitteeMeeting(models.Model):
 
     def abbrev_committee_name(self):
         return self.committee.sortname(True)
+
+# feeds
+
+from events.models import Feed, truncate_words
+Feed.register_feed(
+    "misc:allcommittee",
+    title = "Committee Meetings",
+    link = "/congress/committees",
+    simple = True,
+    sort_order = 103,
+    category = "federal-committees",
+    description = "Get an alert whenever a committee hearing or mark-up session is scheduled.",
+    )
+Feed.register_feed(
+    "committee:",
+    title = lambda feed : truncate_words(Committee.from_feed(feed).fullname, 12),
+    noun = "committee",
+    includes = lambda feed : [Committee.from_feed(feed).get_feed("bills"), Committee.from_feed(feed).get_feed("meetings")],
+    link = lambda feed: Committee.from_feed(feed).get_absolute_url(),
+    scoped_title = lambda feed : "All Events for This Committee",
+    is_valid = lambda feed : Committee.from_feed(feed, test=True),
+    category = "federal-committees",
+    description = "You will get updates about major activity on bills referred to this commmittee plus notices of scheduled hearings and mark-up sessions.",
+    )
+Feed.register_feed(
+    "committeebills:",
+    title = lambda feed : "Bills in " + truncate_words(Committee.from_feed(feed).fullname, 12),
+    noun = "committee",
+    link = lambda feed: Committee.from_feed(feed).get_absolute_url(),
+    scoped_title = lambda feed : "Activity on This Committee's Bills",
+    category = "federal-committees",
+    description = "You will get updates about major activity on bills referred to this commmittee.",
+    )
+Feed.register_feed(
+    "committeemeetings:",
+    title = lambda feed : "Meetings for " + truncate_words(Committee.from_feed(feed).fullname, 12),
+    noun = "committee",
+    link = lambda feed: Committee.from_feed(feed).get_absolute_url(),
+    scoped_title = lambda feed : "This Committee's Hearings and Markups",
+    single_event_type = True,
+    category = "federal-committees",
+    description = "You will get notices for this committee's scheduled hearings and mark-up sessions.",
+    )

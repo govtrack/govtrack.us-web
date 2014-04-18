@@ -294,6 +294,11 @@ class Person(models.Model):
         from events.models import Feed
         return Feed.objects.get_or_create(feedname="%s:%d" % (feed_type, self.id))[0]
 
+    @staticmethod
+    def from_feed(feed):
+        if ":" not in feed.feedname or feed.feedname.split(":")[0] not in ("p", "pv", "ps"): raise ValueError(feed.feedname)
+        return Person.objects.get(id=feed.feedname.split(":")[1])
+
 class PersonRole(models.Model):
     """Terms held in office by Members of Congress, Presidents, and Vice Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President/Vice President four years, and in the Senate six years (three 'Congresses')."""
 	
@@ -327,7 +332,7 @@ class PersonRole(models.Model):
         pass # ordering = ['startdate'] # causes prefetch_related to be slow
 
     def __unicode__(self):
-        return '%s / %s to %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display())
+        return '%s / %s to %s / %s' % (Person.from_feed(self).fullname, self.startdate, self.enddate, self.get_role_type_display())
        
     def continues_from(self, prev):
         if self.startdate - prev.enddate > datetime.timedelta(days=120): return False
@@ -410,7 +415,7 @@ class PersonRole(models.Model):
         now = datetime.datetime.now().date()
         from events.models import Feed, Event
         with Event.update(self) as E:
-            f = self.person.get_feed()
+            f = Person.from_feed(self).get_feed()
             if not prev_role or not self.continues_from(prev_role):
                 E.add("termstart", self.startdate, f)
             if not next_role or not next_role.continues_from(self):
@@ -418,13 +423,13 @@ class PersonRole(models.Model):
                     E.add("termend", self.enddate, f)
         
     def render_event(self, eventid, feeds):
-        self.person.role = self # affects name generation
+        Person.from_feed(self).role = self # affects name generation
         return {
             "type": "Elections and Offices",
             "date_has_no_time": True,
             "date": self.startdate if eventid == "termstart" else self.enddate,
-            "title": self.person.name + (" takes office as " if eventid == "termstart" else " leaves office as ") + self.get_description(),
-            "url": self.person.get_absolute_url(),
+            "title": Person.from_feed(self).name + (" takes office as " if eventid == "termstart" else " leaves office as ") + self.get_description(),
+            "url": Person.from_feed(self).get_absolute_url(),
             "body_text_template": "",
             "body_html_template": "",
             "context": {}
@@ -435,7 +440,7 @@ class PersonRole(models.Model):
         enddate = None
         prev_role = None
         found_me = False
-        for role in self.person.roles.filter(role_type=self.role_type, senator_class=self.senator_class, state=self.state, district=self.district).order_by('startdate'):
+        for role in Person.from_feed(self).roles.filter(role_type=self.role_type, senator_class=self.senator_class, state=self.state, district=self.district).order_by('startdate'):
             if found_me and not role.continues_from(prev_role):
                 break
             if prev_role == None or not role.continues_from(prev_role):
@@ -455,7 +460,7 @@ class PersonRole(models.Model):
             if congress not in congresses: continue
             if self.startdate < ed <= self.enddate:
                 try:
-                    return self.person.get_session_stats(session)
+                    return Person.from_feed(self).get_session_stats(session)
                 except ValueError as e:
                     errs.append(unicode(e))
         raise ValueError("No statistics are available for this role: %s" % "; ".join(errs))
@@ -464,3 +469,36 @@ class PersonRole(models.Model):
         if self.party == "Democrat": return "Republican"
         if self.party == "Republican": return "Democrat"
         return None
+
+# Feeds
+
+from events.models import Feed
+Feed.register_feed(
+    "p:",
+    title = lambda feed : Person.from_feed(feed).name,
+    noun = "person",
+    includes = lambda feed : [Person.from_feed(feed).get_feed("pv"), Person.from_feed(feed).get_feed("ps")],
+    link = lambda feed: Person.from_feed(feed).get_absolute_url(),
+    scoped_title = lambda feed : "All Events for " + Person.from_feed(feed).lastname,
+    category = "federal-other",
+    description = "You will get updates about major activity on sponsored bills and how this Member of Congress votes in roll call votes.",
+    )
+Feed.register_feed(
+    "ps:",
+    title = lambda feed : Person.from_feed(feed).name + " - Bills Sponsored",
+    noun = "person",
+    link = lambda feed: Person.from_feed(feed).get_absolute_url(),
+    scoped_title = lambda feed : Person.from_feed(feed).lastname + "'s Sponsored Bills",
+    category = "federal-bills",
+    description = "You will get updates about major activity on bills sponsored by this Member of Congress.",
+    )
+Feed.register_feed(
+    "pv:",
+    title = lambda feed : Person.from_feed(feed).name + " - Voting Record",
+    noun = "person",
+    link = lambda feed: Person.from_feed(feed).get_absolute_url(),
+    scoped_title = lambda feed : Person.from_feed(feed).lastname + "'s Voting Record",
+    single_event_type = True,
+    category = "federal-votes",
+    description = "You will get updates on how this Member of Congress votes in roll call votes.",
+)

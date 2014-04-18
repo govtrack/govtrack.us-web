@@ -69,6 +69,24 @@ class BillTerm(models.Model):
         from events.models import Feed
         return Feed.objects.get_or_create(feedname="crs:%d" % self.id)[0]
 
+    @staticmethod
+    def from_feed(feed, test=False):
+        if not feed.feedname.startswith("crs:"): raise ValueError(feed.feedname)
+        try:
+           return BillTerm.objects.get(id=feed.feedname.split(":")[1])
+        except BillTerm.DoesNotExist:
+            if test: return False
+            raise ValueError(feed.feedname)
+
+           # For legacy calls to RSS feeds, try to map subject name to object.
+           # Many subject names have changed, so this is the best we can do.
+           # Only test against new-style subject terms since we don't generate
+           # events for old bills with old subject terms.
+           #try:
+           #    return BillTerm.objects.get(name=feed.feedname.split(":")[1], term_type=TermType.new)
+           #except BillTerm.DoesNotExist:
+           #    raise ValueError(feed.feedname)
+
 class Cosponsor(models.Model):
     """A (bill, person) pair indicating cosponsorship, with join and withdrawn dates."""
 
@@ -391,6 +409,13 @@ class Bill(models.Model):
         return Feed.objects.get_or_create(feedname="bill:" + bt.xml_code + str(self.congress) + "-" + str(self.number))[0]
 
     @staticmethod
+    def from_feed(feed):
+        if not feed.feedname.startswith("bill:"): raise ValueError("Not a bill feed.")
+        m = re.match(r"([a-z]+)(\d+)-(\d+)", feed.feedname.split(":")[1])
+        bill_type = BillType.by_xml_code(m.group(1))
+        return Bill.objects.get(congress=m.group(2), bill_type=bill_type, number=m.group(3))
+
+    @staticmethod
     def ActiveBillsFeed():
         from events.models import Feed
         return Feed.get_noarg_feed("misc:activebills")
@@ -543,9 +568,12 @@ class Bill(models.Model):
                 # check the bill's sponsor, since we display it.
                 reps_tracked = set()
                 if self.sponsor: reps_tracked.add(self.sponsor)
+                from person.models import Person
                 for f in (feeds if feeds else []):
-                    if f.feedname.split(":")[0] not in ("p", "ps", "pv"): continue
-                    reps_tracked.add(f.person())
+                    try:
+                        reps_tracked.add(Person.from_feed(f))
+                    except ValueError:
+                        pass # not a person-related feed
                 mbrs = list(CommitteeMember.objects.filter(person__in=reps_tracked, committee__in=cmtes))
                 if len(mbrs) > 0:
                     mbrs.sort(key = lambda m : (-MEMBER_ROLE_WEIGHTS[m.role], m.committee.shortname))
@@ -1056,8 +1084,75 @@ class BillTextComparison(models.Model):
         self.data["left_text"] = bz2.decompress(base64.b64decode(self.data["left_text_bz2"]))
         self.data["right_text"] = bz2.decompress(base64.b64decode(self.data["right_text_bz2"]))
 
+# Feeds
+from events.models import Feed, truncate_words
+Feed.register_feed(
+    "misc:enactedbills",
+    category = "federal-bills",
+    description = "You will be alerted every time a law is enacted.",
+    title = "New Laws",
+    simple = True,
+    sort_order = 104,
+    single_event_type = True,
+    slug = "enacted-bills",
+    )
+Feed.register_feed(
+    "misc:comingup",
+    category = "federal-bills",
+    description = "You will get updates when any bill is scheduled for debate in the week ahead by the House Majority Leader or in the day ahead according to the Senate Floor Schedule.",
+    title = "Legislation Coming Up",
+    simple = True,
+    sort_order = 102,
+    single_event_type = True,
+    slug = "coming-up",
+    )
+Feed.register_feed(
+    "misc:activebills2",
+    category = "federal-bills",
+    description = "Get an update when any bill is scheduled for debate or has major action such as a vote or being enacted.",
+    title = "Major Legislative Activity",
+    simple = True,
+    sort_order = 100,
+    slug = "major-bill-activity",
+    )
+Feed.register_feed(
+    "misc:activebills",
+    category = "federal-bills",
+    description = "Get an update when any bill is introduced, scheduled for debate, or has major action such as a vote or being enacted.",
+    title = "All Legislative Activity",
+    simple = True,
+    sort_order = 105,
+    slug = "bill-activity",
+    )
+Feed.register_feed(
+    "misc:introducedbills",
+    category = "federal-bills",
+    description = "Get an update whenever a new bill or resolution is introduced.",
+    title = "New Bills and Resolutions",
+    simple = True,
+    sort_order = 106,
+    single_event_type = True,
+    slug = "introduced-bills",
+    )
+Feed.register_feed(
+    "bill:",
+    title = lambda feed : truncate_words(Bill.from_feed(feed).title, 12),
+    noun = "bill",
+    link = lambda feed: Bill.from_feed(feed).get_absolute_url(),
+    category = "federal-bills",
+    description = "You will get updates when this bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when a committee meeting is scheduled, when bill text becomes available or when we write a bill summary, plus similar events for related bills."
+    )
+Feed.register_feed(
+    "crs:",
+    title = lambda feed : BillTerm.from_feed(feed).name,
+    noun = "subject area",
+    link = lambda feed: BillTerm.from_feed(feed).get_absolute_url(),
+    is_valid = lambda feed : BillTerm.from_feed(feed, test=True),
+    category = "federal-bills",
+    description = "You will get updates about major activity on bills in this subject area including notices of newly introduced bills, updates when a bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when bill text becomes available or when we write a bill summary.",
+    )
+
 # Bill search tracker.
-from events.models import Feed
 def bill_search_feed_title(q):
     from search import bill_search_manager
     return "Bill Search - " + bill_search_manager().describe_qs(q)
