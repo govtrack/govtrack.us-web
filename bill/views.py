@@ -94,6 +94,7 @@ def bill_details_user_view(request, congress, type_slug, number):
             </div>
             """
 
+        from poll_and_call.models import RelatedBill as IssueByBill
         try:
             from poll_and_call.models import *
             ix = RelatedBill.objects.get(bill=bill).issue
