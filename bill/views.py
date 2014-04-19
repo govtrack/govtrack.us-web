@@ -721,7 +721,13 @@ def bill_text_image(request, congress, type_slug, number):
 
     # Find the PDF file and rasterize the first two pages.
 
-    metadata = load_bill_text(bill, None, mods_only=True)
+    try:
+        metadata = load_bill_text(bill, None, mods_only=True)
+    except IOError:
+        # if bill text metadata isn't available, trap the error
+        # and just 404 it
+        raise Http404()
+
     if metadata.get("pdf_file"):
         # Use the PDF files on disk.
         pg1 = pdftopng(metadata.get("pdf_file"), 1)
