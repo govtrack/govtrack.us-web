@@ -34,6 +34,6 @@ class Command(BaseCommand):
 
 		print "users \t url \t bill title"
 		for bf in top_bills:
-			b = Feed.from_name(bf["feedname"]).bill()
+			b = Bill.from_feed(Feed.from_name(bf["feedname"]))
 			print bf["count"], "\t", b.get_absolute_url(), "\t", b
 			
