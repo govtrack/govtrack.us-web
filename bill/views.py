@@ -731,7 +731,10 @@ def bill_text_image(request, congress, type_slug, number):
     if metadata.get("pdf_file"):
         # Use the PDF files on disk.
         pg1 = pdftopng(metadata.get("pdf_file"), 1)
-        pg2 = pdftopng(metadata.get("pdf_file"), 2)
+        try:
+            pg2 = pdftopng(metadata.get("pdf_file"), 2)
+        except:
+            pg2 = pg1.crop((0, 0, pg1.size[0], 0)) # may only be one page!
     elif settings.DEBUG:
         # When debugging in a local environment we may not have bill text available
         # so download the PDF from GPO.
