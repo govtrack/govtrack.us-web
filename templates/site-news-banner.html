@@ -1,6 +1,4 @@
-<div class="sitenewsbody" data-seq="57">
-	<p><small>GovTrack will be unavailable from Friday, April 25 at 9pm until Sunday, April 27 at 9pm while we perform long-overdue site maintenance.</small></p>
-
+<div class="sitenewsbody" data-seq="60">
 	{% comment %}
 	<p>We just gave $25 to Code for America. Consider <a href="#" onclick="$('#charity-panel').slideToggle(); return false;">matching our donation</a>
 	to support other efforts like GovTrack!</p>
@@ -23,9 +21,10 @@
 	</div>
 	{% endcomment %}
 
-	{% comment %}
 	<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">
-	<div style="color: #553; margin-bottom: 4px; font-size: 95%; font-style: italic; padding-left: 2em;">Trending on GovTrack now...</div>
+	<span class="trending_trackers_0">
+		Trending on GovTrack...
+    </span>
 	{% for f in trending_feeds %}
 		<a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
 			{{f.title|truncatewords:10}}
@@ -33,6 +32,5 @@
 	{% endfor %}
 	<div style="clear: both"> </div>
 	</div>
-	{% endcomment %}
 </div>
 <div style="clear: both"> </div>

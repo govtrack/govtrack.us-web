@@ -131,7 +131,7 @@ class Feed(models.Model):
                 return None
                 
         trending = []
-        for period in (2, 6, 11, 23):
+        for period in (2, 7, 14):
             # Get the number of times each feed was subscribed to in the last period and 2*period days.
             subs1 = get_feed_counts(period)
             subs2 = get_feed_counts(period*2)
