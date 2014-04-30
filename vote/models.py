@@ -234,10 +234,10 @@ class Vote(models.Model):
     def render_event(self, eventid, feeds):
         if feeds:
             from person.models import Person
-            my_reps = []
+            my_reps = set()
             for f in feeds:
                 try:
-                    my_reps.append(Person.from_feed(f))
+                    my_reps.add(Person.from_feed(f))
                 except ValueError:
                     pass # not a person-related feed
             my_reps = sorted(my_reps, key = lambda p : p.sortname)
