@@ -40,24 +40,25 @@ h4 { margin-top: 1.5em; }
 		{% for list in lists %}
 			<p style="margin-left: 2em">{{list.name}} ({{list.get_email_display}})</p>
 		{% endfor %}
-		<p>To turn email updates off use the <a href="/accounts/lists">What I&rsquo;m Tracking</a> page, or unsubscribe from all lists:</p>
 		
-		<form action="/accounts/update_settings" method="post" style="margin-left: 2em">{% csrf_token %}
+		<form action="/accounts/update_settings" method="post" style="margin: 1em 2em">{% csrf_token %}
 			<input type="hidden" name="action" value="unsubscribe"/>
 			<input type="submit" class="submit" value="Stop All Email Updates"/>
 		</form>
+
+		<p>You can also turn off email updates on the <a href="/accounts/lists">What I&rsquo;m Tracking</a> page.</p>
 	{% else %}
 		<p style="margin-top: 1em">You have no <a href="/accounts/lists">lists</a> that are configured for email updates.</p>
 	{% endif %}
 	{% endwith %}
 	
-	<h4>Site Announcements</h4>
-	<p style="margin-top: 1em">May we send you occasional announcements about changes to GovTrack.us and government transparency in Congress? These emails are very rare, about once every year.</p>
-	
+	<h4>Other Emails</h4>
+	<p style="margin-top: 1em">We also send our users occasional announcements about changes to GovTrack.us and government transparency in Congress, about once a year. Please uncheck the box if you do not want to receive these emails.</p>
+	<p>We will send you...</p>
 	<form action="/accounts/update_settings" method="post" style="margin-left: 2em">{% csrf_token %}
 		<input type="hidden" name="action" value="massemail"/>
 		<input type="checkbox" {% if request.user.userprofile.massemail %}checked{% endif %} name="massemail" id="opt_massemail"/>
-		<label for="opt_massemail" style="display: inline">We May Send You Periodic Announcements</label>
+		<label for="opt_massemail" style="display: inline">Site Announcements (once a year)</label>
 		<div style="margin-top: .75em"><input type="submit" class="submit" value="Update Settings"/></div>
 	</form>
 	
