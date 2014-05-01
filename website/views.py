@@ -280,14 +280,19 @@ def push_to_social_media_rss(request):
 
 @render_to('website/your_docket.html')
 def your_docket(request):
+    from bill.models import Bill
     # Pre-load the user's subscription lists and for each list
     # pre-load the list of bills entered into the list.
     lists = []
     if request.user.is_authenticated():
         lists = request.user.subscription_lists.all()
         for lst in lists:
-            lst.bills = [tr.bill() for tr in lst.trackers.all() if tr.bill() != None]
-            
+            lst.bills = []
+            for trk in lst.trackers.all():
+                try:
+                    lst.bills.append( Bill.from_feed(trk) )
+                except ValueError:
+                    pass
     return { "lists": lists }
 
 @login_required
