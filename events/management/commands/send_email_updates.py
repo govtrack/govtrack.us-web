@@ -163,8 +163,16 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 	templ_html = templ_html.render(ctx)
 
 	# form MIME message
-	email = EmailMultiAlternatives(emailsubject, templ_txt, emailreturnpath, [user.email],
-		headers = { 'From': emailfromaddr })
+	email = EmailMultiAlternatives(
+		emailsubject,
+		templ_txt,
+		emailreturnpath,
+		[user.email],
+		headers = {
+			'From': emailfromaddr,
+			'Auto-Submitted': 'auto-generated',
+			'X-Auto-Response-Suppress': 'OOF',
+		})
 	email.attach_alternative(templ_html, "text/html")
 	
 	try:
