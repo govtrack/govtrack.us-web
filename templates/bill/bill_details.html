@@ -267,32 +267,81 @@
 	margin-bottom: 6px;
 }
 
-#overview table {
-       width: 100%;
-       margin: 0 0 14px;
-       font-size: 13px;
-       position: relative;
-       }
-       #overview table td {
-               padding: 0 2px 0 8px;
-               vertical-align: middle;
-               }
-       #overview table td.done {
-               padding-left: 28px;
-               background: url('/static/images/ico-checked.gif') 8px center no-repeat;
-               }
-       #overview table td.pending {
-               padding-left: 28px;
-               background: url('/static/images/ico-unchecked.gif') 8px center no-repeat;
-               }
-       #overview table .odd.done td { background: #e4e9e8 url('/static/images/ico-checked.gif') 8px center no-repeat; }
-       #overview table .odd.pending td { background: #e4e9e8 url('/static/images/ico-unchecked.gif') 8px center no-repeat; }
-       #overview tr.highlight td { font-weight: bold; }
-
        #overview #notes p {
        	font-size: 90%;
        	margin-bottom: .5em;
        }
+
+#status-row-grid {
+	margin: 1.75em 0;
+}
+#status-row-grid > div {
+	text-align: center;
+}
+#status-row-grid .arrow {
+	float: right;
+	margin-right: -35px;
+	width: 35px;
+	height: 88px;
+	background-image: url(/static/images/status_icons_arrow.png);
+}
+	@media (min-width: 1200px) {
+		#status-row-grid .arrow {
+			margin-right: -45px;
+		}
+	}
+#status-row-grid .img {
+	width: 132px;
+	height: 88px;
+	margin: 4px auto;
+	background-image: url(/static/images/status_icons.png);
+}
+	#status-row-grid .img.status_introduced { }
+	#status-row-grid .img.status_reported { background-position-x: -132px; }
+	#status-row-grid .img.status_pass_over_house,
+	#status-row-grid .img.status_pass_over_senate,
+	#status-row-grid .img.status_passed_simpleres,
+	#status-row-grid .img.status_passed_constamend,
+	#status-row-grid .img.status_passed_concurrentres,
+	#status-row-grid .img.status_passed_bill,
+	#status-row-grid .img.status_pass_back_house,
+	#status-row-grid .img.status_pass_back_senate,
+	#status-row-grid .img.status_conference_passed_house,
+	#status-row-grid .img.status_conference_passed_senate,
+	#status-row-grid .img.status_override_pass_over_house,
+	#status-row-grid .img.status_override_pass_over_senate
+	 { background-position-x: -264px; }
+	#status-row-grid .img.status_prov_kill_suspensionfailed,
+	#status-row-grid .img.status_prov_kill_cloturefailed,
+	#status-row-grid .img.status_prov_kill_pingpongfail,
+	#status-row-grid .img.status_fail_originating_house,
+	#status-row-grid .img.status_fail_originating_senate,
+	#status-row-grid .img.status_fail_second_house,
+	#status-row-grid .img.status_fail_second_senate,
+	#status-row-grid .img.status_vetoed_override_fail_originating_house,
+	#status-row-grid .img.status_vetoed_override_fail_originating_senate,
+	#status-row-grid .img.status_vetoed_override_fail_second_house,
+	#status-row-grid .img.status_vetoed_override_fail_second_senate
+	 { background-position-x: -398px; }
+	#status-row-grid .img.status_schedule_house,
+	#status-row-grid .img.status_schedule_senate
+	 { background-position-x: -530px; }
+	#status-row-grid .img.status_prov_kill_veto,
+	#status-row-grid .img.status_vetoed_pocket
+	 { background-position-x: -662px; }
+	#status-row-grid .img.status_enacted_signed
+	 { background-position-x: -794px; }
+	#status-row-grid .img.status_enacted_veto_override,
+	#status-row-grid .img.status_enacted_tendayrule
+	 { background-position-x: -924px; }
+#status-row-grid .pending {
+	color: #BBB;
+}
+	#status-row-grid .pending .img {
+		opacity: .3;
+	}
+	
+	
 </style>
 {% endblock %}
 
@@ -339,9 +388,9 @@
 					{% elif bill.source == "statutesatlarge" and bill.noun == "resolution" %}
 						Enacted or Agreed to on {{bill.current_status_date}}
 					{% elif not dead %}
-						{{bill.get_current_status_display}}
+						{{bill.get_current_status_display}} on {{bill.current_status_date}}
 					{% else %}
-						Died ({{bill.get_current_status_display}})
+						Died ({{bill.get_current_status_display}}) in a previous session of Congress
 					{% endif %}
 				</dd>
 				{% endif %}
@@ -545,6 +594,31 @@
 
 <div class="panes">
 	<div id="overview"> <!-- overview pane -->
+		{% if bill.source == "thomas-congproj" %}
+			<div id="status-row-descr" class="row">
+				<div class="col-xs-12">
+					<p style="text-align: center; margin-top: 2em">{{bill.current_status_description}}</p>
+				</div>
+			</div>
+
+			{% if current or bill.get_major_events|length > 0 %}
+				<div id="status-row-grid" class="row">
+					{% for item in bill.get_major_events %}
+						{% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm"></div>{% endif %}
+						{% if forloop.counter0|divisibleby:5 %}<div class="clearfix visible-md"></div> <div class="clearfix visible-lg"></div>{% endif %}
+
+						<div class="col-sm-3 col-md-2 {% if not item.date %}pending{% endif %}">
+							<div class="img status_{{item.key}}"> {% if not forloop.last %}<div class="arrow"> </div>{% endif %} </div>
+							<div title="{{item.actionline}}" {% if item.date %}style="font-weight: bold"{% endif %}>{{item.label}}</div>
+							{% if item.date %}<div style="font-size: 80%; text-transform: uppercase;">{{item.date|date:"DATE_FORMAT"}}</div>{% endif %}
+						</div>
+					{% endfor %}
+				</div>
+			{% endif %}
+
+			<div class="sep">&nbsp;</div>
+		{% endif %}
+
 		<div id="media-row" class="row">
 			<div class="col-sm-4">
 				<div>
@@ -648,56 +722,31 @@
 		<div class="sep">&nbsp;</div>
 
 		<div class="row">
-			<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Status</dt>
-						<dd>
-							<p style="line-height: 130%">
-								{% if bill.source == "statutesatlarge" %}
-									{% if bill.noun == "bill" %}
-										This bill was enacted on {{bill.current_status_date|date}}.
-									{% else %}
-										This resolution was enacted or agreed to on {{bill.current_status_date|date}}.
-									{% endif %}
-								{% elif bill.source == "americanmemory" %}
-									We don&rsquo;t have status information for bills in this historical collection.
-								{% elif not died %}
-									{{bill.current_status_description}}
-								{% else %}
-									This {{bill.noun}} died in a previous session of Congress.
-								{% endif %}
-							</p>
-						</dd>
-					</dl>
-			</div>
 
-			{% if current or bill.get_major_events|length > 0 %}
-			<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Progress</dt>
-						<dd>
-							<table>
-								{% for item in bill.get_major_events %}
-								<tr>
-									<td class="done" title="{{item.extra}}">{{item.label}}</td>
-									<td><nobr>{{item.date|date:"DATE_FORMAT"}}</nobr></td>
-								</tr>
-								{% endfor %}
-							
-								{% if current %}
-								{% for item in bill.get_future_events %}
-								<tr>
-									<td class="pending">{{item}}</td>
-									<td>...</td>
-								</tr>
-								{% endfor %}
-								{% endif %}
-							</table>
+		  	{% if subtitle %}
+			<div class="col-sm-6 col-md-7">
+			<dl>
+						<dt>Full Title</dt>
+						<dd><p>{{subtitle}}</p></dd>
+			</dl>
+			</div>
+		  	{% endif %}
+
+			{% if bill.source != "americanmemory" %}
+			<div class="col-sm-6 col-md-5">
+				<dl>
+						<dt>Summary</dt>
+						<dd id="summaries">
+							<p>No summaries available.</p>
 						</dd>
-					</dl>
+				</dl>
 			</div>
 			{% endif %}
+		</div> <!-- /row -->
 
+		<div class="sep">&nbsp;</div>
+
+		<div class="row">
 			<div class="col-sm-6 col-md-4">
 					<dl>
 						{% with bill.get_prognosis as p %}
@@ -760,31 +809,6 @@
 						{% endwith %}
 					</dl>
 			</div>
-
-		</div> <!-- /row -->
-
-		<div class="sep">&nbsp;</div>
-
-		<div class="row">
-		  	{% if subtitle %}
-			<div class="col-sm-6 col-md-4">
-			<dl>
-						<dt>Full Title</dt>
-						<dd><p>{{subtitle}}</p></dd>
-			</dl>
-			</div>
-		  	{% endif %}
-
-			{% if bill.source != "americanmemory" %}
-			<div class="col-sm-6 col-md-4">
-				<dl>
-						<dt>Summary</dt>
-						<dd id="summaries">
-							<p>No summaries available.</p>
-						</dd>
-				</dl>
-			</div>
-			{% endif %}
 
 			{% if bill.votes.exists %}
 			<div class="col-sm-6 col-md-4">

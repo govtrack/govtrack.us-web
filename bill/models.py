@@ -717,6 +717,8 @@ class Bill(models.Model):
         for datestr, st, text, srcxml in self.major_actions:
             date = eval(datestr)
             srcnode = etree.fromstring(srcxml) if srcxml else None
+            st_key = BillStatus.by_value(st).key
+            if st == BillStatus.referred: continue # don't care about this
             if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres) and srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
                 ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
                 # PASSED:BILL only occurs on the second chamber, so indicate both agreed to in text
@@ -728,20 +730,30 @@ class Bill(models.Model):
                     st = ("Conference Report Agreed to by %s" % ch)
             else:
                 if st == BillStatus.introduced: saw_intro = True
-                st = BillStatus.by_value(st).label
+                st = BillStatus.by_value(st)
+                try:
+                    st = st.simple_label
+                except:
+                    st = st.label
+
             ret.append({
+                "key": st_key,
                 "label": st,
                 "date": date,
-                "extra": text,
+                "actionline": text,
             })
-        if not saw_intro: ret.insert(0, { "label": "Introduced", "date": self.introduced_date })
+        if not saw_intro: ret.insert(0, { "key": BillStatus.introduced.key, "label": "Introduced", "date": self.introduced_date })
 
-        if self.docs_house_gov_postdate: ret.append({ "label": "On House Schedule", "date": self.docs_house_gov_postdate })
-        if self.senate_floor_schedule_postdate: ret.append({ "label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate })
+        if self.docs_house_gov_postdate: ret.append({ "key": "schedule_house", "label": "On House Schedule", "date": self.docs_house_gov_postdate })
+        if self.senate_floor_schedule_postdate: ret.append({ "key": "schedule_senate","label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate })
         def as_dt(x):
             if isinstance(x, datetime.datetime): return x
             return datetime.datetime.combine(x, datetime.time.min)
         ret.sort(key = lambda x : as_dt(x["date"])) # only needed because of the previous two
+
+        if self.is_alive:
+            for key, label in self.get_future_events():
+                ret.append({ "key": key, "label": label })
 
         return ret
 
@@ -751,7 +763,7 @@ class Bill(models.Model):
 
         # define a state diagram
         common_paths = {
-            BillStatus.introduced: BillStatus.referred,
+            BillStatus.introduced: BillStatus.reported,
             BillStatus.referred: BillStatus.reported,
         }
 
@@ -786,7 +798,7 @@ class Bill(models.Model):
             },
             BillType.house_resolution:  {
                 BillStatus.reported: BillStatus.passed_simpleres,
-                BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
+                BillStatus.prov_kill_suspensionfailed: BillStatus.passed_simpleres,
             },
             BillType.senate_resolution: {
                 BillStatus.reported: BillStatus.passed_simpleres,
@@ -854,8 +866,11 @@ class Bill(models.Model):
                 label = st[1]
                 st = st[0]
             else:
-                label = st.label
-            seq.append(label)
+                try:
+                    label = st.simple_label
+                except:
+                    label = st.label
+            seq.append((st.key, label))
 
         return seq
 
