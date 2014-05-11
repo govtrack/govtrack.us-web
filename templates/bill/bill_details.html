@@ -279,15 +279,14 @@
 	text-align: center;
 }
 #status-row-grid .arrow {
-	float: right;
-	margin-right: -35px;
+	margin-left: -35px;
 	width: 35px;
 	height: 88px;
 	background-image: url(/static/images/status_icons_arrow.png);
 }
 	@media (min-width: 1200px) {
 		#status-row-grid .arrow {
-			margin-right: -45px;
+			margin-left: -45px;
 		}
 	}
 #status-row-grid .img {
@@ -297,7 +296,7 @@
 	background-image: url(/static/images/status_icons.png);
 }
 	#status-row-grid .img.status_introduced { }
-	#status-row-grid .img.status_reported { background-position-x: -132px; }
+	#status-row-grid .img.status_reported { background-position: -132px 0; }
 	#status-row-grid .img.status_pass_over_house,
 	#status-row-grid .img.status_pass_over_senate,
 	#status-row-grid .img.status_passed_simpleres,
@@ -310,7 +309,7 @@
 	#status-row-grid .img.status_conference_passed_senate,
 	#status-row-grid .img.status_override_pass_over_house,
 	#status-row-grid .img.status_override_pass_over_senate
-	 { background-position-x: -264px; }
+	 { background-position: -264px 0; }
 	#status-row-grid .img.status_prov_kill_suspensionfailed,
 	#status-row-grid .img.status_prov_kill_cloturefailed,
 	#status-row-grid .img.status_prov_kill_pingpongfail,
@@ -322,18 +321,18 @@
 	#status-row-grid .img.status_vetoed_override_fail_originating_senate,
 	#status-row-grid .img.status_vetoed_override_fail_second_house,
 	#status-row-grid .img.status_vetoed_override_fail_second_senate
-	 { background-position-x: -398px; }
+	 { background-position: -398px 0; }
 	#status-row-grid .img.status_schedule_house,
 	#status-row-grid .img.status_schedule_senate
-	 { background-position-x: -530px; }
+	 { background-position: -530px 0; }
 	#status-row-grid .img.status_prov_kill_veto,
 	#status-row-grid .img.status_vetoed_pocket
-	 { background-position-x: -662px; }
+	 { background-position: -662px 0; }
 	#status-row-grid .img.status_enacted_signed
-	 { background-position-x: -794px; }
+	 { background-position: -794px 0; }
 	#status-row-grid .img.status_enacted_veto_override,
 	#status-row-grid .img.status_enacted_tendayrule
-	 { background-position-x: -924px; }
+	 { background-position: -924px 0; }
 #status-row-grid .pending {
 	color: #BBB;
 }
@@ -604,11 +603,12 @@
 			{% if current or bill.get_major_events|length > 0 %}
 				<div id="status-row-grid" class="row">
 					{% for item in bill.get_major_events %}
+						{% if forloop.counter0|divisibleby:3 %}<div class="clearfix visible-xs"></div>{% endif %}
 						{% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm"></div>{% endif %}
-						{% if forloop.counter0|divisibleby:5 %}<div class="clearfix visible-md"></div> <div class="clearfix visible-lg"></div>{% endif %}
+						{% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div> <div class="clearfix visible-lg"></div>{% endif %}
 
-						<div class="col-sm-3 col-md-2 {% if not item.date %}pending{% endif %}">
-							<div class="img status_{{item.key}}"> {% if not forloop.last %}<div class="arrow"> </div>{% endif %} </div>
+						<div class="col-xs-4 col-sm-3 col-md-2 {% if not item.date %}pending{% endif %}">
+							<div class="img status_{{item.key}}"> {% if not forloop.first %}<div class="arrow"> </div>{% endif %} </div>
 							<div title="{{item.actionline}}" {% if item.date %}style="font-weight: bold"{% endif %}>{{item.label}}</div>
 							{% if item.date %}<div style="font-size: 80%; text-transform: uppercase;">{{item.date|date:"DATE_FORMAT"}}</div>{% endif %}
 						</div>
