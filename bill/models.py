@@ -717,7 +717,11 @@ class Bill(models.Model):
         for datestr, st, text, srcxml in self.major_actions:
             date = eval(datestr)
             srcnode = etree.fromstring(srcxml) if srcxml else None
+
             st_key = BillStatus.by_value(st).key
+            explanation = BillStatus.by_value(st).explanation
+            if callable(explanation): explanation = explanation(self)
+
             if st == BillStatus.referred: continue # don't care about this
             if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres) and srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
                 ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
@@ -741,11 +745,12 @@ class Bill(models.Model):
                 "label": st,
                 "date": date,
                 "actionline": text,
+                "explanation": explanation,
             })
-        if not saw_intro: ret.insert(0, { "key": BillStatus.introduced.key, "label": "Introduced", "date": self.introduced_date })
+        if not saw_intro: ret.insert(0, { "key": BillStatus.introduced.key, "label": "Introduced", "date": self.introduced_date, "explanation": BillStatus.introduced.explanation })
 
-        if self.docs_house_gov_postdate: ret.append({ "key": "schedule_house", "label": "On House Schedule", "date": self.docs_house_gov_postdate })
-        if self.senate_floor_schedule_postdate: ret.append({ "key": "schedule_senate","label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate })
+        if self.docs_house_gov_postdate: ret.append({ "key": "schedule_house", "label": "On House Schedule", "date": self.docs_house_gov_postdate, "explanation": "The House indicated that this %s would be considered in the week ahead." % self.noun })
+        if self.senate_floor_schedule_postdate: ret.append({ "key": "schedule_senate","label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate, "explanation": "The Senate indicated that this %s would be considered in the days ahead." % self.noun })
         def as_dt(x):
             if isinstance(x, datetime.datetime): return x
             return datetime.datetime.combine(x, datetime.time.min)

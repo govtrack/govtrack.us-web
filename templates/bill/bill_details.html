@@ -275,17 +275,17 @@
 #status-row-grid {
 	margin: 1.75em 0;
 }
-#status-row-grid > div {
+#status-row-grid > div.status-item {
 	text-align: center;
 }
-#status-row-grid .arrow {
+#status-row-grid .status-item .arrow {
 	margin-left: -35px;
 	width: 35px;
 	height: 88px;
 	background-image: url(/static/images/status_icons_arrow.png);
 }
 	@media (min-width: 1200px) {
-		#status-row-grid .arrow {
+		#status-row-grid .status-item .arrow {
 			margin-left: -45px;
 		}
 	}
@@ -607,13 +607,19 @@
 						{% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm"></div>{% endif %}
 						{% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div> <div class="clearfix visible-lg"></div>{% endif %}
 
-						<div class="col-xs-4 col-sm-3 col-md-2 {% if not item.date %}pending{% endif %}">
+						<div class="status-item col-xs-4 col-sm-3 col-md-2 {% if not item.date %}pending{% endif %}"
+							data-content="{{item.explanation}}">
 							<div class="img status_{{item.key}}"> {% if not forloop.first %}<div class="arrow"> </div>{% endif %} </div>
 							<div title="{{item.actionline}}" {% if item.date %}style="font-weight: bold"{% endif %}>{{item.label}}</div>
 							{% if item.date %}<div style="font-size: 80%; text-transform: uppercase;">{{item.date|date:"DATE_FORMAT"}}</div>{% endif %}
 						</div>
 					{% endfor %}
 				</div>
+				<script>
+				$(function() {
+					$('#status-row-grid .status-item').popover({ placement: 'bottom', trigger: 'hover' });
+				})
+				</script>
 			{% endif %}
 
 			<div class="sep">&nbsp;</div>
