@@ -540,7 +540,14 @@
 		{% if request.anonymous %}
     	$(function() {
 			{# the_user.cd is only available if request.anonymous #}
-    		setTimeout(function() { if (the_user && the_user.cd == null && win_loc_hash != "#track") show_askcd() }, 1000)
+    		setTimeout(function() {
+    			if (the_segment == "EOP") {
+    				show_modal_error("Hello", "<p>Transparency in government is an American value.</p> <p>That's all.</p>");
+    				ga('send', 'event', 'miscellaneous', 'eop-message');
+    			}else if (the_segment == "Other" && the_user && the_user.cd == null && win_loc_hash != "#track") {
+    				show_askcd()
+    			}
+    		}, 1000)
     	});
 		{% endif %}
     </script>
