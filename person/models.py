@@ -231,6 +231,8 @@ class Person(models.Model):
         return '/data/photos/%d-%dpx.jpeg' % (self.pk, size)
     def get_photo_url_50(self):
         return self.get_photo_url(size=50)
+    def get_photo_url_100(self):
+        return self.get_photo_url(size=100)
     def has_photo(self, size=100):
         import os.path
         return os.path.exists("." + self.get_photo_url(size=size))
