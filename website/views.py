@@ -475,12 +475,12 @@ def go_ad_free_redirect(request):
           "items": [{
             "name": "Ad-Free GovTrack.us for 1 Year",
             "sku": "govtrack-ad-free-for-year" + sandbox,
-            "price": "2.00",
+            "price": "35.00",
             "currency": "USD",
             "quantity": 1 }]
             },
           "amount": {
-            "total": "2.00",
+            "total": "35.00",
             "currency": "USD"
           },
           "description": "Ad-Free%s: GovTrack.us is ad-free for a year while you're logged in." % sandbox }],
@@ -500,7 +500,7 @@ def go_ad_free_redirect(request):
         paypal_id = payment.id,
         user = request.user,
         response_data = payment.to_dict(),
-        notes = "ad-free-year $2")
+        notes = "ad-free-year $35")
     rec.save()
   
     for link in payment.links:
@@ -517,7 +517,7 @@ def go_ad_free_finish(request):
     prof = request.user.userprofile()
 
     from website.models import PayPalPayment
-    (payment, rec) = PayPalPayment.execute(request, "ad-free-year $2")
+    (payment, rec) = PayPalPayment.execute(request, "ad-free-year $35")
     
     try:
         # Update the user profile.
