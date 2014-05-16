@@ -77,7 +77,7 @@ class BillStatus(enum.Enum):
         'Passed Senate with Changes',
         xml_code='PASS_BACK:SENATE',
         search_help_text="The Senate passed the bill with changes and sent it back to the House.",
-        explanation="The Senate passed the bill with changes not in the Senate version and sent it back to the House to approve the changes.",
+        explanation="The Senate passed the bill with changes not in the House version and sent it back to the House to approve the changes.",
         sort_order=(2,1))
     conference_passed_house = enum.Item(30,
         'Conference Report Agreed to by House',
