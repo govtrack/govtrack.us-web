@@ -9,19 +9,15 @@ from emailverification.models import BouncedEmail, Record as EVRecord
 import sys, csv
 
 class Command(BaseCommand):
-	help = 'Creates BouncedMail records for a Dyn Email Delivery report export piped on standard input.'
+	help = 'Creates BouncedMail records for a Mandrill delivery report export piped on standard input.'
 	
 	def handle(self, *args, **options):
 		for rec in csv.DictReader(sys.stdin):
-			if rec["Bounce Type"] != "hard": continue
-			if rec["Bounce Rule"] not in ("emaildoesntexist", "blockedcontent", "overquota", "inactive"):
-				if rec["Bounce Rule"] not in ("localconfigerror", "relayerror", "remoteconfigerror"):
-					print "Unmatched rule:", rec["Bounce Rule"]
-				continue
+			email = rec["Email Address"]
 			
 			found = False
 			
-			for u in User.objects.filter(email=rec["Emailaddress"]):
+			for u in User.objects.filter(email=email):
 				found = True
 				print u
 				be, is_new = BouncedEmail.objects.get_or_create(user=u)
@@ -29,12 +25,12 @@ class Command(BaseCommand):
 					be.bounces += 1
 					be.save()
 			
-			for r in EVRecord.objects.filter(email=rec["Emailaddress"]):
+			for r in EVRecord.objects.filter(email=email):
 				found = True
 				print r
 				r.killed = True
 				r.save()
 				
 			if not found:
-				print rec["Emailaddress"], "not found"
+				print email, "not found"
 
