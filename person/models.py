@@ -454,6 +454,12 @@ class PersonRole(models.Model):
         if not found_me: raise Exception("Didn't find myself?!")
         return (startdate, enddate)
 
+    def next_election_year(self):
+        # For current terms, roles end at the end of a Congress on Jan 3.
+        # The election occurs in the year before.
+        if not self.current: raise ValueError()
+        return self.enddate.year-1
+
     def get_most_recent_session_stats(self):
         # Which Congress and session's end date is the most recently covered by this role?
         errs = []

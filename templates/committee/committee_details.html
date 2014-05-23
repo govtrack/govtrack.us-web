@@ -8,47 +8,6 @@
 {% block head %}
 <style>
 #members h5 { margin: 6px 0 0 0; }
-.flag {
-	color:#fff;
-	font-size: 12px;
-	padding:0px 3px;
-	position:relative;
-	line-height: 20px;
-	left:-10px;
-	margin: 0 auto;
-	font-family: 'PTSerifBold', serif;
-}
-.flag:before {
-	content:"";
-	position:absolute;
-	top:100%;
-	left:0px;
-	width:0px;
-	height:0px;
-	border-width:5px;
-	border-style:solid;
-}
-.flag:after {
-	content:"";
-	position:absolute;
-	top:0px;
-	left:100%;
-	width:0px;
-	height:0px;
-	border-right-color:transparent !important;
-}
-.flag.flag_d { background:#4089bd; }
-.flag.flag_d:after { border:10px solid #4089bd; }
-.flag.flag_d:before { border-color: transparent #2e8ea6 #2e8ea6 transparent; }
-.flag.flag_r { background:#bd4040; }
-.flag.flag_r:after { border:10px solid #bd4040; }
-.flag.flag_r:before { border-color: transparent #a62e2e #a62e2e transparent; }
-.flag.flag_d.sub_chair { background:#82a5bd; }
-.flag.flag_d.sub_chair:after { border:10px solid #82a5bd; }
-.flag.flag_d.sub_chair:before { border-color: transparent #739ca6 #739ca6 transparent; }
-.flag.flag_r.sub_chair { background:#bd8282; }
-.flag.flag_r.sub_chair:after { border:10px solid #bd8282; }
-.flag.flag_r.sub_chair:before { border-color: transparent #a67272 #a67272 transparent; }
 </style>
 {% endblock %}
 
@@ -118,7 +77,7 @@
 	</ul>
 
 	<div class="panes">
-		<div id="members" class="committee-members-grid">
+		<div id="members" class="members-grid">
 			<h2 style="margin: 1em 0 1em 0">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</h2>
 				
 		    <div class="row">
@@ -129,18 +88,18 @@
 		        <div class="member col-xs-6 col-sm-3 col-md-2">
 	            	
 		            <div class="photo">
-	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" /></a>
+	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" width="100" height="120"/></a>
 	            	</div>
 	            	
 		            {% with member.person.get_current_role as role %}
 		            
 					{% if member.role != SIMPLE_MEMBER %}
-		            <div class="flag flag_{{role.party|slice:":1"|lower}}">
+		            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
 		            	{{ member.get_role_display }}
 		            </div>
 		            {% else %}
 	            	{% if member.subcommittee_role %}
-	                <div class="flag flag_{{role.party|slice:":1"|lower}} sub_chair" title="Subcommittee Chair: {{member.subcommittee_role.committee.name}}">
+	                <div class="photo_flag flag_{{role.party|slice:":1"|lower}} sub_chair" title="Subcommittee Chair: {{member.subcommittee_role.committee.name}}">
 	                	{{member.subcommittee_role.committee.name|cut:"The "|truncatewords:1}}
 	                </div>
 	            	{% endif %}
@@ -164,7 +123,6 @@
 						{% endif %}
 		            </div>
 		            {% endwith %}
-		            </center>
 		        </div>
 		        {% endfor %}
 		    </div>

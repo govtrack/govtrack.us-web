@@ -60,9 +60,16 @@
 	</div>
 	</div>
 
-	<div class="summary-box box col-sm-8 col-sm-pull-4 col-md-7 col-md-pull-5 col-lg-8 col-lg-pull-4">
-		{% block summary %}
+	<div class="col-sm-8 col-sm-pull-4 col-md-7 col-md-pull-5 col-lg-8 col-lg-pull-4">
+		<div style="margin-left: -20px">
+		<div class="summary-box box">
+			{% block summary %}
+			{% endblock %}
+		</div>
+
+		{% block summary_col_2 %}
 		{% endblock %}
+		</div>
 	</div><!-- /summary-box -->
 </div>
 {% endblock %}

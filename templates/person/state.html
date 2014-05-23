@@ -1,9 +1,8 @@
-{% extends "master_b.html" %}
+{% extends "master_a.html" %}
 {% load humanize govtrack_utils %}
-{% block title %}{% if not state %}Members of Congress &amp; Congressional District Maps{% endif %}{% if state and not district %}{{statename}}&rsquo;s Members of Congress &amp; Congressional District Map{% endif %}{% if state and district %}{{statename}}&rsquo;s {{district|ordinal}} Congressional District - Representatives &amp; District Map{% endif %} - GovTrack.us{% endblock %}
-{% block meta_description %}{% if state and district and cities%}Congressional district for {{cities}}. {% endif %}{% if not state %}What congressional district are you in? {% endif %}Find your U.S. Congress senators and representative {% if state and not district %}in {{statename}}{% endif %}{% if state and district %}in {{statename}}&rsquo;s {{district|ordinal}} Congressional District{% endif %} using a map.{% endblock %}
+{% block title %}{{statename}}&rsquo;s Members of Congress &amp; Congressional District Maps - GovTrack.us{% endblock %}
+{% block meta_description %}Find your U.S. Congress senators and representative in {{statename}} using a map.{% endblock %}
 {% block meta_keywords %}U.S. Congress,congressional districts,map,senators,representatives,congressmen,House of Representatives,Senate{% endblock %}
-{% block cat-icon-filename %}img-congress-members.png{% endblock %}
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
@@ -184,11 +183,9 @@
 		function doFullScreen() {
 			if (is_full_screen) {
 				$('#map_canvas').css('position', 'relative');
-				$('#map_canvas').css('width', '');
 				$('#map_canvas').css('top', '');
 				$('#map_canvas').css('left', '');
 				$("#map_container").append($('#map_canvas'));
-				google.maps.event.trigger(map, "resize");
 			} else {
 				$('#map_canvas').css('position', 'absolute');
 				$('#map_canvas').css('z-index', '1000');
@@ -198,67 +195,30 @@
 			canvas_resize();
 		}
 		function canvas_resize() {
-			if (!is_full_screen) return;
-			$('#map_canvas').css({
-				left: $(window).scrollLeft(),
-				top: $(window).scrollTop(),
-				width: $(window).width(),
-				height: $(window).height() });
+			if (!is_full_screen) {
+				var w = $('#map_container').width();
+				var h = $(window).height() * .8;
+				$('#map_canvas').css('width', w);
+				$('#map_canvas').css('height', w < h ? w : h);
+			} else {
+				$('#map_canvas').css({
+					left: $(window).scrollLeft(),
+					top: $(window).scrollTop(),
+					width: $(window).width(),
+					height: $(window).height()
+				});
+			}
 			google.maps.event.trigger(map, "resize");
 		}
 		$(window).scroll(canvas_resize);
 		$(window).resize(canvas_resize);
-		
-		var geocoder;
-		function doGeoCode(addr) {
-			if (!geocoder)
-				geocoder = new google.maps.Geocoder();
-			geocoder.geocode(
-				{ 'address': addr },
-				function(results, status) {
-					if (status == google.maps.GeocoderStatus.OK) {
-						var geocoder_result = results[0].geometry.location;
-
-						$.ajax({
-							url: "/congress/members/ajax/district_lookup",
-							data: {
-								lat: results[0].geometry.location.lat(),
-								lng: results[0].geometry.location.lng()
-							},
-							dataType: "json",
-							success: function(data) {
-								if (!data.state) {
-									alert("The address does not appear to be within a United States Congressional District.");
-								} else {
-									if (data.district)
-										window.location = "/congress/members/" + data.state + "/" + data.district + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
-									else
-										window.location = "/congress/members/" + data.state + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
-								}
-							}
-						});
-					} else {
-					   alert("Sorry, Google couldn't find that address: " + status);
-				    }
-				});
-		}
-		
-		function doform() {
-			if (!$('#name').hasClass('default') && $('#name').val()) {
-				window.location = "/congress/members/current?name=" + encodeURI($('#name').val());
-			} else if (!$('#address').hasClass('default') && $('#address').val()) {
-				doGeoCode($('#address').val());
-			} else if (!$('#zip').hasClass('default') && $('#zip').val()) {
-				if ($('#zip').val().substring(0, 1) == "-") {
-					window.location = "http://xkcd.com/1245/";
-				} else {
-					doGeoCode($('#zip').val());
-				}
-			}
-			return false;
-		}
+		$(canvas_resize);
 	</script>
 	<style>
+	.row.summary-box-row { margin-bottom: 20; }
+	h5 { margin-bottom: 0px; }
+	.members-grid .info { margin-top: 8px; font-size: 85%; }
+
 	#map_controls > li {
 		float: left;
 		background-color: white;
@@ -271,7 +231,7 @@
 	#map_controls > li.active {
 		background-color: #FFA;
 	}
-	#map_canvas { height: 100%; }
+	#map_canvas { border: 1px solid black; }
 	#map_canvas * {  max-width: none !important; -webkit-box-sizing: content-box;
      -moz-box-sizing: content-box;
           box-sizing: content-box; } /* fix for bootstrap 3 */
@@ -282,139 +242,156 @@
 <ul>
 	<li><a href="/congress">Congress</a></li>
 	<li><a href="/congress/members">Members of Congress</a></li>
-	{% if not state %}
-	<li>Maps</li>
-	{% else %}
 	<li><a href="/congress/members/map">Maps</a></li>
-		{% if not district %}
-		<li>{{statename}}</li>
-		{% else %}
-		<li><a href="/congress/members/{{state}}">{{statename}}</a></li>
-		<li>{{district|ordinalhtml}}</li>
-		{% endif %}
-	{% endif %}
+	<li>{{statename}}</li>
 </ul>
 {% endblock %}
 
 {% block summary %}
-	{% if not state %}
-		<h2 style="margin: 0">Find a Senator <span>or</span> Representative</h2>
-		<p style="margin: 1em 0 0 0">Use this page to find current Members of Congress by state or district.</p>
+	<h1>{{statename}}</h2>
+
+	{% if stateapp != "T" %}
+		<p>{{statename}} is a U.S. state with two senators in the United States Senate and {{stateapp|apnumber}} representatives in the United States House of Representatives.</p>
+		{% if stateapp > 1 %}<p>Scroll down for a map of the districts.</p>{% endif %}
+	{% elif state == "DC" %}
+		<p>The District of Columbia (DC) is the nation&rsquo;s capital. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators or representatives in Congress. Instead it sends a delegate to the House of Representatives with essentially no voting privileges.</p>
 	{% else %}
-		<h2 style="margin: 0">{{statename}}&rsquo;s {{district|ordinalhtml}} Congressional District</h2>
-		{% if stateapp != "T" %}
-			<p style="margin: 1em 0 0 0">This page lists the senators and representatives for {{statename}}&rsquo;s {{district|ordinalhtml}} congressional district.</p>
-		{% else %}
-			<p style="margin: 1em 0 0 0">This page lists the delegate from {{statename}}.</p>
-		{% endif %}
+		<p>{% if state == "VI" %}The {% endif %}{{statename}} is a territory of the United States. It sends a delegate to the House of Representatives{% if state == "PR" %}, called the Resident Commissioner,{% endif %} with essentially no voting privileges and has no senators in the United States Congress.</p>
 	{% endif %}
 	
 {% endblock %}
 
+{% block summary_col_2 %}
+
+{% if senators|length > 0 %}
+	<h2 style="margin-top: 30px">Senators</h2>
+
+	<p>Each state elects two senators for staggered 6-year terms. Senators represent the entire state.</p>
+
+    <div class="row members-grid">
+    {% for person in senators %}
+        <div class="member col-xs-6 col-md-5">
+        	{% if not person %}
+	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
+	            <p style="margin-top: 1em">The senate seat is currently vacant.</p>
+        	{% else %}
+	            <div class="photo">
+	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+	        	</div>
+	        	
+	            {% with person.get_current_role as role %}
+	            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
+	            	{{ role.get_senator_rank_display }} Senator
+	            </div>
+
+	            <h5><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></h5>
+
+	            <div class="info">
+            		<div>Took Office: {{role.logical_dates.0|date}}</div>
+            		<div>Next Election: {{role.next_election_year}}</div>
+	            	<div>Party: {{role.party}}</div>
+	            </div>
+	            {% endwith %}
+	        {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if representatives|length > 0 and stateapp == "T" %}
+	{% if state == "PR" %}
+		<h2>Resident Commissioner</h2>
+	{% else %}
+		<h2>Delegate</h2>
+	{% endif %}
+
+	<p>Delegates may vote within committees but they are not permitted to vote on anything on the House floor, including on bills. Thus delegates have a marginal role in Congress, and their constituents are not represented in Congress in the same manner as most citizens.</p>
+
+    <div class="members-grid">
+    {% for district, person, cities in representatives %}
+        <div class="member" style="width: 150px">
+        	{% if not person %}
+	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
+	            <p style="margin-top: 1em">The delegate&rsquo;s office is currently vacant.</p>
+        	{% else %}
+	            <div class="photo">
+	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+	        	</div>
+	        	
+	            {% with person.get_current_role as role %}
+	            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
+	            	At-Large
+	            </div>
+
+	            <h5><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></h5>
+
+	            <div class="info">
+            		<div>{{role.logical_dates.0|date}}-Present</div>
+	            	<div>{{role.party}}</div>
+	            </div>
+	            {% endwith %}
+	        {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
+
 {% block body %}
 
-<div id="search-members" class="section box row">
-	<div class="advanced-search col-sm-4">
-		{% if not state %}
-			<form action="#" onsubmit="return doform();">
-				<fieldset>
-					<h3>Find a Senator <span>or</span> Representative</h3>
-					
-					<div class="row">
-						<label for="name">By Last Name</label>
-						<input id="name" class="text" type="text" value=""/>
-						<script>$('#name').input_default('type the last name of a Member of Congress');
-						</script>
-					</div>
-					
-						<div class="row">
-							<label for="state">By State</label>
-							<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value">
-								<option value="">(Select State)</option>
-								{% for abbr, name in statelist %}
-								<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
-								{% endfor %}								
-							</select>
-						</div>
-						<div class="row">
-							<label for="zip">By Zip Code</label>
-							<input id="zip" class="text" type="text" value="" />
-							<script>$('#zip').input_default('ZIP or ZIP+4');</script>
-						</div>
-					
-					<div class="row">
-						<label for="address">By Address</label>
-						<input id="address" class="text" type="text" value="" />
-						<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
-					</div>
-					
-					<input class="btn-search" type="submit" value="Search" />
-					
-				</fieldset>
-			</form>
-			
-			<div>
-				<p><a href="/congress/members/current">List all Members of Congress</a></p>
-				<p><a href="/congress/members/all">Search Former Members of Congress</a></p>
-			</div>
-			
-			{% comment %}
-			<h5>Statistics</h5>
-			<p>Take a look at <a href="/congress/members/stats">statistics</a> about missed votes, bill sponsorship, ideology, and leadership.</p>
-			{% endcomment %}
-			
-		{% else %}
-			<h3>Senators</h3>
-			{% if state == "DC" %}
-				<p>The District of Columbia does not elect senators.</p>
-			{% elif stateapp == "T" %}
-				<p>{% if state == "VI" %}The {% endif %}{{statename}} is a U.S. territory and so does not have any senators.</p>
-			{% else %}
-				<div>
-					{% for rep in senators %}
-						{% if rep %}
-							<p style="margin-bottom: .5em"><a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a></p>
-						{% else %}
-							<p><em>Vacant</em></p>
-						{% endif %}
-					{% endfor %}
-				</div>
-			{% endif %}
-			
-			{% if not district %}
-			<h3 style="margin-top: 1em">Representative{{reps|pluralize}}</h3>
-				{% if stateapp != "T" %}
-					<p>By congressional district:</p>
-				{% else %}
-					<p>{% if state == "DC" or state == "VI" %}The {% endif %}{{statename}} elects a delegate to the House of Representatives with limited voting privileges:</p>
-				{% endif %}
-			{% else %}
-			<h3 style="margin-top: 1em">Representative</h3>
-			{% endif %}
-			<div>
-				{% for dist, rep, rep_cities in reps %}
-					<div style="margin-bottom: .5em">
-						{% if not district %}
-						{% if reps|length > 1 or dist > 0 %}
-						<a href="/congress/members/{{state}}/{{dist}}" title="View District Map" class="plain"><strong>{{dist|ordinalhtml}}</strong> </a> &mdash;
-						{% endif %}
-						{% endif %}
-						{% if rep %}
-							<a href="{{rep.get_absolute_url}}">{{rep.name_no_district}}</a>
-						{% else %}
-							<em>Vacant</em>
-						{% endif %}
-					</div>
-				{% endfor %}
-			</div>
-			{% if district %}
-			<p>(<a href="/congress/members/{{state}}">See all of {{statename}}&rsquo;s districts</a>)</p>
-			{% endif %}
-			<!--<p<small>County and neighborhood names courtesy of Census and <a href="http://www.zillow.com/howto/api/neighborhood-boundaries.htm">Zillow</a> geographic data.</small></p>-->
-		{% endif %}
-	
-	</div><!-- /advanced-search -->
+{% if stateapp != "T" %}
+	<h2 style="margin-top: 0">Representatives</h2>
 
+	<p>The United States is divided into 435 congressional districts &mdash; {{stateapp}} in {{statename}} &mdash; each with a population of about 710,000 individuals. Each district elects a representative to the House for a two-year term. Representatives are also called congressmen/congresswomen. The terms are interchangeable.</p>
+
+    <div class="row members-grid">
+    {% for district, person, cities in representatives %}
+        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
+        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm"></div>{% endif %}
+        {% if forloop.counter0|divisibleby:2 %}<div class="clearfix visible-xs"></div>{% endif %}
+        <div class="member col-xs-6 col-sm-3 col-md-2">
+
+        	{% if not person %}
+	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
+	            <p style="margin-top: 1em">The {{district|ordinalhtml}} district is currently vacant.</p>
+	            <div class="info">
+		        	{% if stateapp != 1 %}
+	            	<div style="margin-top: 4px" title="{{cities}}">{{cities|truncatewords:5}}</div>
+	            	<div><a href="/congress/members/{{state}}/{{district}}">View District Map</a></div>
+	            	{% endif %}
+	            </div>
+        	{% else %}
+	            <div class="photo">
+	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+	        	</div>
+	        	
+	            {% with person.get_current_role as role %}
+	            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
+	            	{% if stateapp != 1 %}
+		            	{{ district|ordinalhtml }} District
+	            	{% else %}
+	            		At Large
+	            	{% endif %}
+	            </div>
+
+	            <h5><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></h5>
+
+	            <div class="info">
+            		<div>Took Office: {{role.logical_dates.0|date}}</div>
+	            	<div>Party: {{role.party}}</div>
+
+		        	{% if stateapp != 1 %}
+	            	<div style="margin-top: 4px" title="{{cities}}">{{cities|truncatewords:5}}</div>
+	            	<div><a href="/congress/members/{{state}}/{{district}}">View District Map</a></div>
+	            	{% endif %}
+	            </div>
+	            {% endwith %}
+	        {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+	<h2>Map</h2>
 
 	<div style="display: none">
 		<div id="fullscreen" style="padding: 10px">
@@ -422,8 +399,8 @@
 		</div>
 	</div>
 	
-	<div id="map_container" class="col-sm-8 last">
-		<div id="map_canvas" class="">
+	<div id="map_container">
+		<div id="map_canvas">
 		</div>
 		<div style="display: none">
 			<ul id="map_controls">
@@ -448,17 +425,13 @@
 src="http://www.govtrack.us/congress/members/embed/mapframe?{% if state %}state={{state|lower}}{% endif %}{% if district %}&amp;district={{district}}{% endif %}&amp;bounds=<span id="embedbounds"></span>"&gt;&lt;/iframe&gt;</pre>
 	  
 			<div style="text-align: center; margin: 1em">Advanced web designers can <a href="/congress/members/embed/mapframe?demo=1">view the source</a> and adapt it to your website&rsquo;s needs.
-			{% if state and district %}
-			Or download KML:
-				<a href="http://gis.govtrack.us/boundaries/cd-2012/{{state.lower}}-{{district_zero}}/simple_shape?format=kml">low res</a>
-				|
-				<a href="http://gis.govtrack.us/boundaries/cd-2012/{{state.lower}}-{{district_zero}}/shape?format=kml">hi res</a>.
-			{% endif %}
 			</div>
 		</div>
 	</div>
 </div><!-- /search-members -->
+{% endif %}
 
+<hr>
 {% include "ad_footer_leaderboard.html" %}
 
 {% endblock %}

@@ -137,65 +137,121 @@ def http_rest_json(url, args=None, method="GET"):
     
 @anonymous_view
 @render_to('person/district_map.html')
-def browsemembersbymap(request, state=None, district=None):
-    center_lat, center_long, center_zoom = (38, -96, 4)
+def browse_map(request):
+    return {
+        "center_lat": 38, # # center the map on the continental US
+        "center_long": -96,
+        "center_zoom": 4,
+        "statelist": statelist,
+    }
     
-    sens = None
-    reps = None
-    if state != None:
-        if state.lower() in state_abbr_from_name:
-            state = state_abbr_from_name[state.lower()]
-        elif state.upper() not in statenames:
-            raise Http404()
-        else:
-            state = state.upper()
-       
-        # Load senators for all states that are not territories.
-        if stateapportionment[state] != "T":
-            sens = Person.objects.filter(roles__current=True, roles__state=state, roles__role_type=RoleType.senator)\
-                .order_by('roles__senator_rank')
-            sens = list(sens)
+def normalize_state_arg(state):
+    if state.lower() in state_abbr_from_name:
+        # Wikipedia links use state names!
+        return state_abbr_from_name[state.lower()]
+    elif state.upper() not in statenames:
+        raise Http404()
+    else:
+        return state.upper()
 
-            # make sure we list at least two slots, filling with Vacant if needed
-            for i in xrange(2-len(sens)): sens.append(None)
+def get_senators(state):
+    # Load senators for all states that are not territories.
+    if stateapportionment[state] == "T":
+        return []
+
+    # Order by rank.
+    sens = Person.objects.filter(roles__current=True, roles__state=state, roles__role_type=RoleType.senator)\
+        .order_by('roles__senator_rank')
+    sens = list(sens)
+
+    # Make sure we list at least two slots, filling with Vacant if needed.
+    for i in xrange(2-len(sens)):
+        sens.append(None)
+
+    return sens
+
+def get_representatives(state):
+    # Load representatives for territories and state at-large districts.
+    if stateapportionment[state] in ("T", 1):
+        dists = [0]
+            
+    # Load representatives for non-at-large states.
+    else:
+        dists = xrange(1, stateapportionment[state]+1)
     
-        # Load representatives for at-large districts.
-        reps = []
-        if stateapportionment[state] in ("T", 1):
-            dists = [0]
-            if district != None:
-                raise Http404()
-                
-        # Load representatives for non-at-large districts.
-        else:
-            dists = xrange(1, stateapportionment[state]+1)
-            if district != None:
-                if int(district) < 1 or int(district) > stateapportionment[state]:
-                    raise Http404()
-                dists = [int(district)]
-        
-        for i in dists:
-            cities = get_district_cities("%s-%02d" % (state.lower(), i)) if i > 0 else None
-            try:
-                reps.append((i, Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=i), cities))
-            except Person.DoesNotExist:
-                reps.append((i, None, cities))
+    reps = []
+    for i in dists:
+        cities = get_district_cities("%s-%02d" % (state.lower(), i)) if i > 0 else None
+        try:
+            reps.append((i, Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=i), cities))
+        except Person.DoesNotExist:
+            reps.append((i, None, cities))
 
-        center_lat, center_long, center_zoom = get_district_bounds(state, district)
+    return reps
+
+@anonymous_view
+@render_to('person/state.html')
+def browse_state(request, state):
+    state = normalize_state_arg(state)
+    center_lat, center_long, center_zoom = get_district_bounds(state, None)
+            
+    return {
+        "state": state,
+        "stateapp": stateapportionment[state],
+        "statename": statenames[state],
+        "senators": get_senators(state),
+        "representatives": get_representatives(state),
+        "center_lat": center_lat,
+        "center_long": center_long,
+        "center_zoom": center_zoom,
+    }
+
+@anonymous_view
+@render_to('person/district_map.html')
+def browse_district(request, state, district):
+    state = normalize_state_arg(state)
+
+    # make district an integer
+    try:
+        district = int(district)
+    except ValueError:
+        raise Http404()
+
+    # check that the district is in range
+    if stateapportionment[state] in ("T", 1):
+        # territories and state-at large districts have no page here
+        raise Http404()
+    elif district < 1 or district > stateapportionment[state]:
+        # invalid district number
+        raise Http404()
+    
+    # senators and representative
+    sens = get_senators(state)
+    try:
+        reps = [(
+            district,
+            Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=district),
+            None,
+            )]
+    except Person.DoesNotExist:
+        reps = [(district, None, None)] # vacant
+
+    # map center
+    center_lat, center_long, center_zoom = get_district_bounds(state, district)
             
     return {
         "center_lat": center_lat,
         "center_long": center_long,
         "center_zoom": center_zoom,
         "state": state,
-        "district": int(district) if district else None,
-        "district_zero": ("%02d" % int(district)) if district else None,
-        "stateapp": stateapportionment[state] if state != None else None,
-        "statename": statenames[state] if state != None else None,
+        "stateapp": stateapportionment[state],
+        "statename": statenames[state],
+        "district": int(district),
+        "district_zero": ("%02d" % int(district)),
         "statelist": statelist,
         "senators": sens,
         "reps": reps,
-        "cities": get_district_cities("%s-%02d" % (state.lower(), int(district))) if state and district else None,
+        "cities": get_district_cities("%s-%02d" % (state.lower(), int(district))),
     }
     
 def get_district_bounds(state, district):

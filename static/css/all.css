@@ -1177,24 +1177,13 @@ header ul, footer ul {
 	#member-details ul ul {
 		margin-bottom: 0;
 	}
-	.committee-members-grid .member {
-	position: relative;
+	.members-grid .member {
 	text-align: center;
 	margin-bottom: 30px;
 	}
-	.committee-members-grid .member .flag{
-	width: 122px;
-	margin-top: -18px;
-	margin-bottom: 6px;
-	left: -4px;
-	}
-	.committee-members-grid .member .flag:before {
-	top: -10px;
-	}
-	.committee-members-grid .member .photo {
+	.members-grid .member .photo {
 	margin: 0 auto;
 	}
-	.committee-members-grid .columns:last-child { float: left; }
 
 
 /* Vote Statistics styles =========================== */
@@ -2570,3 +2559,47 @@ small {
 #missedvotestable th { padding-right: 1em; }
 
 
+.photo_flag{
+	width: 122px;
+	margin-top: -18px;
+	margin-bottom: 6px;
+	color:#fff;
+	font-size: 12px;
+	padding:0px 3px 0px 5px;
+	position:relative;
+	line-height: 20px;
+	left:-4px;
+	margin: 0 auto;
+	font-family: 'PTSerifBold', serif;
+}
+.photo_flag:before {
+	content:"";
+	position:absolute;
+	top: -10px;
+	left:0px;
+	width:0px;
+	height:0px;
+	border-width:5px;
+	border-style:solid;
+}
+.photo_flag:after {
+	content:"";
+	position:absolute;
+	top:0px;
+	left:100%;
+	width:0px;
+	height:0px;
+	border-right-color:transparent !important;
+}
+.photo_flag.flag_d { background:#4089bd; }
+.photo_flag.flag_d:after { border:10px solid #4089bd; }
+.photo_flag.flag_d:before { border-color: transparent #2e8ea6 #2e8ea6 transparent; }
+.photo_flag.flag_r { background:#bd4040; }
+.photo_flag.flag_r:after { border:10px solid #bd4040; }
+.photo_flag.flag_r:before { border-color: transparent #a62e2e #a62e2e transparent; }
+.photo_flag.flag_d.sub_chair { background:#82a5bd; }
+.photo_flag.flag_d.sub_chair:after { border:10px solid #82a5bd; }
+.photo_flag.flag_d.sub_chair:before { border-color: transparent #739ca6 #739ca6 transparent; }
+.photo_flag.flag_r.sub_chair { background:#bd8282; }
+.photo_flag.flag_r.sub_chair:after { border:10px solid #bd8282; }
+.photo_flag.flag_r.sub_chair:before { border-color: transparent #a67272 #a67272 transparent; }

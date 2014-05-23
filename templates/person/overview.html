@@ -63,32 +63,29 @@
 	<p>The United States Congress has an upper chamber called the Senate and a lower chamber called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process.</p>
 	
 	<div style="padding: 1em 2em">
-	<div class="row">
-		<div class="col-sm-6">
-			<a href="/congress/members/map" class="push-btn green-btn">View District Maps</a>
-		</div>
-		<div class="col-sm-6 last">
-			<a href="/congress/members/current#most_recent_role_type=Senator" class="push-btn green-btn">List Senators</a>
-		</div>
-	</div>
 	<div class="row" style="margin-top: .5em">
 		<div class="col-sm-6">
-			<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
-				<label for="address" style="display: block">Enter your address:</label>
-				<input id="address" class="text" type="text" value="" style="width: 150px; height: 26px; float: left; font-size: 14px;"/>
-				<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
-				<input class="btn-search-small2" type="submit" value="Search"  />
-			</form>
-		</div>
-		<div class="col-sm-6 last">
-			<label for="state" style="display: block; clear: both;">Or select a state:</label>
-			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" style="display: block; background-color: white; font-size: 14px;">
+			<label for="state" style="display: block; clear: both;">Select a state to find your senators and representatives:</label>
+			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" style="display: block; width: 95%; background-color: white; font-size: 14px;">
 				<option value="">(Select State)</option>
 				{% for abbr, name in statelist %}
 				<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
 				{% endfor %}								
 			</select>
 		</div>
+		<div class="col-sm-6">
+			<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
+				<label for="address" style="display: block">Or enter your address so we can find your congressional district:</label>
+				<input id="address" class="text" type="text" value="" style="width: 85%; height: 26px; float: left; font-size: 14px;"/>
+				<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
+				<input class="btn-search-small2" type="submit" value="Search"  />
+			</form>
+		</div>
+	</div>
+	<div style="margin-top: 1em">
+		<a href="/congress/members/map">View a Map</a>
+		| <a href="/congress/members/current">List all Members of Congress</a>
+		| <a href="/congress/members/all">Search Former Members of Congress</a>
 	</div>
 	</div>
 	
