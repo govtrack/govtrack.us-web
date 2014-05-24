@@ -1853,11 +1853,11 @@ aside .download-links { padding: 31px 0 0 }
 #footer {
 	clear: both;
 	background: #2b393b;
-	font-size: .85em;
-	color: #a7bfc3;
+	font-size: 14px;
+	color: #a9c2c4;
 	padding: 24px 0 0;
 	}
-	#footer a { color: #40a4bd }
+	#footer a { color: #45a9bf }
 	#footer a:hover {
 		border-bottom: 0;
 		color: #fff;
@@ -1868,11 +1868,8 @@ aside .download-links { padding: 31px 0 0 }
 		overflow: hidden;
 		}*/
 	#footer nav {
-		/*font-size: 12px;*/
+		font-size: 12px;
 		line-height: 2em;
-		/*width: 140px;
-		float: left;
-		margin: 0 98px 0 0;*/
 		margin-bottom: 25px;
 		text-transform: uppercase;
 		}
@@ -1886,8 +1883,8 @@ aside .download-links { padding: 31px 0 0 }
 			}
 		#footer nav a:hover {
 			}
-.social {
-	margin-bottom: 25px;
+#footer .social {
+	font-size: 12px;
 	}
 #footer h4 {
 	border-bottom: 1px solid #405255;
@@ -1918,7 +1915,6 @@ aside .download-links { padding: 31px 0 0 }
 }
 #footer p {
 	margin: 0 0 12px;
-/*	font-size: 12px;*/
 	line-height: 18px;
 	}
 
@@ -2597,6 +2593,9 @@ small {
 .photo_flag.flag_r { background:#bd4040; }
 .photo_flag.flag_r:after { border:10px solid #bd4040; }
 .photo_flag.flag_r:before { border-color: transparent #a62e2e #a62e2e transparent; }
+.photo_flag.flag_i { background:#999; }
+.photo_flag.flag_i:after { border:10px solid #999; }
+.photo_flag.flag_i:before { border-color: transparent #666 #666 transparent; }
 .photo_flag.flag_d.sub_chair { background:#82a5bd; }
 .photo_flag.flag_d.sub_chair:after { border:10px solid #82a5bd; }
 .photo_flag.flag_d.sub_chair:before { border-color: transparent #739ca6 #739ca6 transparent; }
