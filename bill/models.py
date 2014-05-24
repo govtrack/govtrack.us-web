@@ -925,15 +925,17 @@ class Bill(models.Model):
             yield reintro
 
     def was_enacted_ex(self, recurse=True, restrict_to_activity_in_date_range=None):
-        # Checking if a bill was "enacted" in a popular sense is a little tricky for two reasons:
+        # Checking if a bill was "enacted" in a popular sense is a little tricky:
         #
-        #  1) Our status code is currently tied to the assignment of a slip law number by OFR,
-        #     which isn't what we mean exactly. Better to look for a <signed> action in case of
-        #     delays at OFR.
-        #  2) We should count a bill as enacted if any identified companion bill was enacted.
+        #  * We should count a bill as enacted if any identified companion bill was enacted.
         #
         # Returns the actual bill that was enacted (possibly a companion bill), or None if
         # the bill was not "enacted".
+        #
+        # Previously, but this has been corrected in the congress project (7b47095d197ad0b9f886a757eabbede95524b174):
+        #  1) Our status code is currently tied to the assignment of a slip law number by OFR,
+        #     which isn't what we mean exactly. Better to look for a <signed> action in case of
+        #     delays at OFR.
 
         import json
 
@@ -941,23 +943,11 @@ class Bill(models.Model):
             if restrict_to_activity_in_date_range is None: return True
             return restrict_to_activity_in_date_range[0] <= d <= restrict_to_activity_in_date_range[1]
 
-        # If it *was* assigned a slip law number, which could be due to a veto override besides
-        # being signed, then yes.
+        # If we know the bill to have been enacted...
         if self.current_status in BillStatus.final_status_passed_bill and date_filter(self.current_status_date.isoformat()):
             return self
 
-        # Otherwise, check the actions for a <signed> action.
-        if self.congress >= 113: # congress project data not available before this yet
-            fn = "data/congress/%s/bills/%s/%s%d/data.json" % (
-                self.congress,
-                BillType.by_value(self.bill_type).slug,
-                BillType.by_value(self.bill_type).slug,
-                self.number)
-            bj = json.load(open(fn))
-            for axn in bj["actions"]:
-                if axn["type"] == "signed" and date_filter(axn["acted_at"]):
-                    return self
-
+        # Check companion bills...
         if recurse:
             for rb in RelatedBill.objects.filter(bill=self, relation="identical").select_related("related_bill"):
                 e = rb.related_bill.was_enacted_ex(recurse=False, restrict_to_activity_in_date_range=restrict_to_activity_in_date_range)
