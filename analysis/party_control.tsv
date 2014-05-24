@@ -1,0 +1,130 @@
+# Party control of Congress and the Presidency.
+# =============================================
+#
+# This table was transcribed from the Wikipedia page at http://en.wikipedia.org/wiki/Party_divisions_of_United_States_Congresses on May 24, 2014.
+#
+# Except modified as follows:
+# a) In the 107th Congress where party control changed mid-Congress, I've broken the Congress into multiple rows and indicated the date range accordingly. In the first two rows, party control was decided by the tie-breaking vote of the VP.
+# b) Where third-party members caucused with one of the major parties, I've moved their counts into the major parties.
+# c) In the 111th Congress, I took the party counts at the end of the Congress. (There were no power changes during the Congress, but the counts changed mid-Congress.)
+#
+# Note that the "Democrats" and "Republicans" columns represented different parties in early Congresses:
+# * In the 1st-3rd Congresses, the "Democrats" in this table represented the "Anti-Administration" party, and in the 4th-18th Congresses the "Democratic-Republican" party.
+# * In the 1st-3rd Congresses, the "Republicans" in this table represented the "Pro-Administration" party, in the 3th-18th Congresses the "Federalists", in the 19th-24th Congresses the "National Republicans", and in the 25th-33rd Congresses the "Whigs".
+#
+Congress	Years	Until	Senate Party	Senate Total	Senate Democrats	Senate Republicans	Senate Others	Senate Vacancies	House Party	House Total	House Democrats	House Republicans	House Others	House Vacancies	President Party	President Name
+1	1789-1791		R	26	8	18	0	0	R	65	28	37	0	0	R	George Washington
+2	1791-1793		R	30	13	16	0	1	R	69	30	39	0	0	R	George Washington
+3	1793-1795		R	30	14	16	0	0	D	105	54	51	0	0	R	George Washington
+4	1795-1797		R	32	11	21	0	0	D	106	59	47	0	0	R	George Washington
+5	1797-1799		R	32	10	22	0	0	R	106	49	57	0	0	R	John Adams
+6	1799-1801		R	32	10	22	0	0	R	106	46	60	0	0	R	John Adams
+7	1801-1803		D	34	17	15	0	2	D	107	68	38	0	1	D	Thomas Jefferson
+8	1803-1805		D	34	25	9	0	0	D	142	103	39	0	0	D	Thomas Jefferson
+9	1805-1807		D	34	27	7	0	0	D	142	114	28	0	0	D	Thomas Jefferson
+10	1807-1809		D	34	28	6	0	0	D	142	116	26	0	0	D	Thomas Jefferson
+11	1809-1811		D	34	27	7	0	0	D	142	92	50	0	0	D	James Madison
+12	1811-1813		D	36	30	6	0	0	D	143	107	36	0	0	D	James Madison
+13	1813-1815		D	36	28	8	0	0	D	182	114	68	0	0	D	James Madison
+14	1815-1817		D	38	26	12	0	0	D	183	119	64	0	0	D	James Madison
+15	1817-1819		D	42	30	12	0	0	D	185	146	39	0	0	D	James Monroe
+16	1819-1821		D	46	37	9	0	0	D	186	160	26	0	0	D	James Monroe
+17	1821-1823		D	48	44	4	0	0	D	187	155	32	0	0	D	James Monroe
+18	1823-1825		D	48	43	5	0	0	D	213	189	24	0	0	D	James Monroe
+19	1825-1827		D	48	26	22	0	0	R	213	104	109	0	0	R	John Quincy Adams
+20	1827-1829		D	48	27	21	0	0	D	213	113	100	0	0	R	John Quincy Adams
+21	1829-1831		D	48	25	23	0	0	D	213	136	72	5	0	D	Andrew Jackson
+22	1831-1833		D	48	24	22	2	0	D	213	126	66	21	0	D	Andrew Jackson
+23	1833-1835		R	48	20	26	2	0	D	240	143	63	34	0	D	Andrew Jackson
+24	1835-1837		D	52	26	24	2	0	D	242	143	75	24	0	D	Andrew Jackson
+25	1837-1839		D	52	35	17	0	0	D	242	128	100	14	0	D	Martin Van Buren
+26	1839-1841		D	52	30	22	0	0	D	242	125	109	8	0	D	Martin Van Buren
+27	1841-1843		R	52	22	29	0	1	R	242	98	142	2	0	R	William Henry Harrison
+28	1843-1845		R	52	23	29	0	0	D	223	147	72	4	0	R	John Tyler
+29	1845-1847		D	58	34	22	0	2	D	228	142	79	7	0	D	James K. Polk
+30	1847-1849		D	60	38	21	1	0	R	220	110	116	4	0	D	James K. Polk
+31	1849-1851		D	62	35	25	2	0	D	233	113	108	11	1	R	Zachary Taylor
+32	1851-1853		D	62	36	23	3	0	D	233	127	85	21	0	R	Millard Fillmore
+33	1853-1855		D	62	38	22	2	0	D	234	157	71	6	0	D	Franklin Pierce
+34	1855-1857		D	62	39	22	1	0	R	234	83	108	43	0	D	Franklin Pierce
+35	1857-1859		D	64	39	20	5	0	D	237	131	94	13	0	D	James Buchanan
+36	1859-1861		D	66	38	26	2	0	R	237	101	113	23	0	D	James Buchanan
+37	1861-1863		R	50	11	31	7	1	R	178	42	106	28	2	R	Abraham Lincoln
+38	1863-1865		R	51	12	29	0	0	R	183	80	103	0	0	R	Abraham Lincoln
+39	1865-1867		R	52	10	42	0	0	R	191	46	145	0	0	D	Andrew Johnson
+40	1867-1869		R	53	11	42	0	0	R	193	49	143	0	1	D	Andrew Johnson
+41	1869-1871		R	74	11	61	0	2	R	243	73	170	0	0	R	Ulysses S. Grant
+42	1871-1873		R	74	17	57	0	0	R	243	104	136	3	0	R	Ulysses S. Grant
+43	1873-1875		R	74	19	54	0	1	R	293	88	203	0	2	R	Ulysses S. Grant
+44	1875-1877		R	76	29	46	0	1	D	293	181	107	3	2	R	Ulysses S. Grant
+45	1877-1879		R	76	36	39	1	0	D	293	156	137	0	0	R	Rutherford B. Hayes
+46	1879-1881		D	76	43	33	0	0	D	293	150	128	14	1	R	Rutherford B. Hayes
+47	1881-1883		R	76	37	37	2	0	R	293	130	152	11	0	R	James A. Garfield
+48	1883-1885		R	76	36	40	0	0	D	325	200	119	6	0	R	Chester A. Arthur
+49	1885-1887		R	76	34	41	0	1	D	325	182	140	2	1	D	Grover Cleveland
+50	1887-1889		R	76	37	39	0	0	D	325	170	151	4	0	D	Grover Cleveland
+51	1889-1891		R	84	37	47	0	0	R	330	156	173	1	0	R	Benjamin Harrison
+52	1891-1893		R	88	39	47	2	0	D	333	231	88	14	0	R	Benjamin Harrison
+53	1893-1895		D	88	44	38	3	3	D	356	220	126	10	0	D	Grover Cleveland
+54	1895-1897		R	88	39	44	5	0	R	357	104	246	7	0	D	Grover Cleveland
+55	1897-1899		R	90	34	46	10	0	R	357	134	206	16	1	R	William McKinley
+56	1899-1901		R	90	26	53	11	0	R	357	163	185	9	0	R	William McKinley
+57	1901-1903		R	90	29	56	3	2	R	357	153	198	5	1	R	Theodore Roosevelt
+58	1903-1905		R	90	32	58	0	0	R	386	178	207	0	1	R	Theodore Roosevelt
+59	1905-1907		R	90	32	58	0	0	R	386	136	250	0	0	R	Theodore Roosevelt
+60	1907-1909		R	92	29	61	0	2	R	386	164	222	0	0	R	Theodore Roosevelt
+61	1909-1911		R	92	32	59	0	1	R	391	172	219	0	0	R	William Howard Taft
+62	1911-1913		R	92	42	49	0	1	D	391	228	162	1	0	R	William Howard Taft
+63	1913-1915		D	96	51	44	1	0	D	435	290	127	18	0	D	Woodrow Wilson
+64	1915-1917		D	96	56	39	1	0	D	435	231	193	8	3	D	Woodrow Wilson
+65	1917-1919		D	96	53	42	1	0	R	435	210	216	9	0	D	Woodrow Wilson
+66	1919-1921		R	96	47	48	1	0	R	435	191	237	7	0	D	Woodrow Wilson
+67	1921-1923		R	96	37	59	0	0	R	435	132	300	1	2	R	Warren G. Harding
+68	1923-1925		R	96	43	51	2	0	R	435	207	225	3	0	R	Calvin Coolidge
+69	1925-1927		R	96	40	54	1	1	R	435	183	247	5	0	R	Calvin Coolidge
+70	1927-1929		R	96	47	48	1	0	R	435	195	237	3	0	R	Calvin Coolidge
+71	1929-1931		R	96	39	56	1	0	R	435	163	267	1	4	R	Herbert Hoover
+72	1931-1933		R	96	47	48	1	0	D	435	218	217	1	0	R	Herbert Hoover
+73	1933-1935		D	96	59	36	1	0	D	435	313	117	5	0	D	Franklin D. Roosevelt
+74	1935-1937		D	96	69	25	2	0	D	435	322	103	10	0	D	Franklin D. Roosevelt
+75	1937-1939		D	96	75	17	4	0	D	435	333	89	13	0	D	Franklin D. Roosevelt
+76	1939-1941		D	96	69	23	4	0	D	435	262	169	4	0	D	Franklin D. Roosevelt
+77	1941-1943		D	96	66	28	2	0	D	435	267	162	6	0	D	Franklin D. Roosevelt
+78	1943-1945		D	96	57	38	1	0	D	435	222	209	4	0	D	Franklin D. Roosevelt
+79	1945-1947		D	96	57	38	1	0	D	435	243	190	2	0	D	Harry S. Truman
+80	1947-1949		R	96	45	51	0	0	R	435	188	246	1	0	D	Harry S. Truman
+81	1949-1951		D	96	54	42	0	0	D	435	263	171	1	0	D	Harry S. Truman
+82	1951-1953		D	96	48	47	1	0	D	435	234	199	2	0	D	Harry S. Truman
+83	1953-1955		R	96	46	48	2	0	R	435	213	221	1	0	R	Dwight D. Eisenhower
+84	1955-1957		D	96	48	47	1	0	D	435	232	203	0	0	R	Dwight D. Eisenhower
+85	1957-1959		D	96	49	47	0	0	D	435	234	201	0	0	R	Dwight D. Eisenhower
+86	1959-1961		D	98	64	34	0	0	D	437	283	153	1	0	R	Dwight D. Eisenhower
+87	1961-1963		D	100	64	36	0	0	D	437	262	175	0	0	D	John F. Kennedy
+88	1963-1965		D	100	67	33	0	0	D	435	258	176	0	1	D	Lyndon B. Johnson
+89	1965-1967		D	100	68	32	0	0	D	435	295	140	0	0	D	Lyndon B. Johnson
+90	1967-1969		D	100	64	36	0	0	D	435	248	187	0	0	D	Lyndon B. Johnson
+91	1969-1971		D	100	58	42	0	0	D	435	243	192	0	0	R	Richard Nixon
+92	1971-1973		D	100	54	44	2	0	D	435	255	180	0	0	R	Richard Nixon
+93	1973-1975		D	100	56	42	2	0	D	435	242	192	1	0	R	Gerald Ford
+94	1975-1977		D	100	61	37	2	0	D	435	291	144	0	0	R	Gerald Ford
+95	1977-1979		D	100	61	38	1	0	D	435	292	143	0	0	D	Jimmy Carter
+96	1979-1981		D	100	58	41	1	0	D	435	277	158	0	0	D	Jimmy Carter
+97	1981-1983		R	100	46	53	1	0	D	435	242	192	1	0	R	Ronald Reagan
+98	1983-1985		R	100	46	54	0	0	D	435	269	166	0	0	R	Ronald Reagan
+99	1985-1987		R	100	47	53	0	0	D	435	253	182	0	0	R	Ronald Reagan
+100	1987-1989		D	100	55	45	0	0	D	435	258	177	0	0	R	Ronald Reagan
+101	1989-1991		D	100	55	45	0	0	D	435	260	175	0	0	R	George H. W. Bush
+102	1991-1993		D	100	56	44	0	0	D	435	267	167	1	0	R	George H. W. Bush
+103	1993-1995		D	100	57	43	0	0	D	435	258	176	1	0	D	Bill Clinton
+104	1995-1997		R	100	48	52	0	0	R	435	204	230	1	0	D	Bill Clinton
+105	1997-1999		R	100	45	55	0	0	R	435	207	226	2	0	D	Bill Clinton
+106	1999-2001		R	100	45	55	0	0	R	435	211	223	1	0	D	Bill Clinton
+107	2001-2001	2001-01-20	D	100	50	50	0	0	R	435	212	221	2	0	R	George W. Bush
+107	2001-2003	2001-05-24	R	100	50	50	0	0	R	435	212	221	2	0	R	George W. Bush
+107	2001-2003	2003-01-03	D	100	51	49	0	0	R	435	212	221	2	0	R	George W. Bush
+108	2003-2005		R	100	49	51	0	0	R	435	205	229	1	0	R	George W. Bush
+109	2005-2007		R	100	45	55	0	0	R	435	202	231	1	1	R	George W. Bush
+110	2007-2009		D	100	51	49	0	0	D	435	236	199	0	0	R	George W. Bush
+111	2009-2011		D	100	58	42	0	0	D	435	257	178	0	0	D	Barack Obama
+112	2011-2013		D	100	53	47	0	0	R	435	193	242	0	0	D	Barack Obama
+113	2013-2015		D	100	55	45	0	0	R	435	201	234	0	0	D	Barack Obama
