@@ -833,7 +833,7 @@ class Bill(models.Model):
             },
             BillType.house_joint_resolution: { # assuming const amend
                 BillStatus.reported: BillStatus.pass_over_house,
-                BillStatus.pass_over_house: BillStatus.passed_constamend,
+                BillStatus.pass_over_house: (BillStatus.passed_constamend, "Passed Senate"),
                 BillStatus.pass_back_house: BillStatus.passed_constamend,
                 BillStatus.pass_back_senate: BillStatus.passed_constamend,
                 BillStatus.conference_passed_house: BillStatus.passed_constamend,
@@ -841,10 +841,11 @@ class Bill(models.Model):
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
                 BillStatus.prov_kill_cloturefailed: BillStatus.passed_constamend,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_constamend,
+                BillStatus.passed_constamend: (None, "Ratified by State Legislatures"),
             },
             BillType.senate_joint_resolution: { # assuming const amend
                 BillStatus.reported: BillStatus.pass_over_senate,
-                BillStatus.pass_over_senate: BillStatus.passed_constamend,
+                BillStatus.pass_over_senate: (BillStatus.passed_constamend, "Passed House"),
                 BillStatus.pass_back_house: BillStatus.passed_constamend,
                 BillStatus.pass_back_senate: BillStatus.passed_constamend,
                 BillStatus.conference_passed_house: BillStatus.passed_constamend,
@@ -852,12 +853,13 @@ class Bill(models.Model):
                 BillStatus.prov_kill_suspensionfailed: BillStatus.passed_constamend,
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: BillStatus.passed_constamend,
+                BillStatus.passed_constamend: (None, "Ratified by State Legislatures"),
             }
         }
 
         bt = self.bill_type
-        if bt == BillType.house_joint_resolution and not "Proposing an Amendment" in self.title: bt = BillType.house_bill
-        if bt == BillType.senate_joint_resolution and not "Proposing an Amendment" in self.title: bt = BillType.senate_bill
+        if bt == BillType.house_joint_resolution and not "proposing an amendment" in self.title.lower(): bt = BillType.house_bill
+        if bt == BillType.senate_joint_resolution and not "proposing an amendment" in self.title.lower(): bt = BillType.senate_bill
 
         path = { }
         path.update(common_paths)
@@ -875,7 +877,7 @@ class Bill(models.Model):
                     label = st.simple_label
                 except:
                     label = st.label
-            seq.append((st.key, label))
+            seq.append((st.key if st is not None else "status-unknown", label))
 
         return seq
 
