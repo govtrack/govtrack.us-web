@@ -280,7 +280,7 @@ def get_bill_status_string(is_current, status):
         elif status in ("PASS_BACK:HOUSE", "PASS_BACK:SENATE"):
             status = "This %s was introduced in a previous session of Congress and though it was passed by both chambers on %s it was passed in non-identical forms and the differences were never resolved."
         elif status in ("CONFERENCE:PASSED:HOUSE", "CONFERENCE:PASSED:SENATE"):
-            status = "This %s was introduced in a previous session of Congress and though it was passed by both chambers, it was passed in non-identical form and only one chamber approved a conference report to resolve the differences."
+            status = "This %s was introduced in a previous session of Congress and though it was passed by both chamber on %ss, it was passed in non-identical form and only one chamber approved a conference report to resolve the differences."
         elif status == "PROV_KILL:SUSPENSIONFAILED" or status == "PROV_KILL:CLOTUREFAILED" or status == "PROV_KILL:PINGPONGFAIL":
             status = "This %s was introduced in a previous session of Congress but was killed due to a failed vote for cloture, under a fast-track vote called \"suspension\", or while resolving differences on %s."
         elif status == "PROV_KILL:VETO":
