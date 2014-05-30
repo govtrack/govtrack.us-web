@@ -9,7 +9,8 @@ Disallow: /congress/billsearch.xpd
 Disallow: /events/embed_legacy
 Disallow: /blog/wp-includes
 Disallow: /accounts
-Crawl-delay: 7
+Disallow: /api
+Disallow: */xml
 
 User-agent: BecomeBot
 Disallow: /
