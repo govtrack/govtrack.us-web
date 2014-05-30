@@ -1,6 +1,6 @@
 #!script
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import csv, sys
 
 from django.db.models import Count
@@ -32,6 +32,7 @@ def compute_productivity(congress, days_in):
 	enacted_bills_count = len(enacted_bills)
 
 	enacted_bill_pages = 0
+	enacted_bill_words = 0
 	enacted_bill_pages_missing = 0
 	for b in enacted_bills:
 		pp = load_bill_text(b, None, mods_only=True).get("numpages")
@@ -40,7 +41,12 @@ def compute_productivity(congress, days_in):
 			continue
 		pp = int(pp.replace(" pages", ""))
 		enacted_bill_pages += pp
-	if congress < 103: enacted_bill_pages = "(no data)"
+
+		wds = len(load_bill_text(b, None, plain_text=True).split(" "))
+		enacted_bill_words += wds
+
+ 	if congress < 103: enacted_bill_pages = "(no data)"
+ 	if congress < 103: enacted_bill_words = "(no data)"
 
 	# votes
 
@@ -61,13 +67,15 @@ def compute_productivity(congress, days_in):
 	#
 
 	timespan = "%d (%d-%d)" % (congress, get_congress_dates(congress)[0].year, get_congress_dates(congress)[1].year-1)
-	row = [timespan, enacted_bills_count, enacted_bill_pages, house_votes, senate_votes, "Yes" if congress_same_party else "No", "Yes" if branches_same_party else "No"]
+	row = [timespan, enacted_bills_count, enacted_bill_pages, enacted_bill_words, house_votes, senate_votes, "Yes" if congress_same_party else "No", "Yes" if branches_same_party else "No"]
 	#W.writerow(row)
 	print("<tr>%s</tr>" % "".join( "<td>%s</td> " % td for td in row) )
 
 
-days_in = (datetime.now().date() - get_congress_dates(CURRENT_CONGRESS)[0])
-print("We are %d days into the %d Congress" % (days_in.days, CURRENT_CONGRESS))
+#days_in = (datetime.now().date() - get_congress_dates(CURRENT_CONGRESS)[0])
+#print("We are %d days into the %d Congress" % (days_in.days, CURRENT_CONGRESS))
+days_in = timedelta(days=506)
+print("Using %s days." % days_in)
 
 for c in range(93, 113+1):
 	compute_productivity(c, days_in)
