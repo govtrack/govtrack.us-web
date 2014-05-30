@@ -269,6 +269,8 @@ def events_embed_legacy(request):
         feedlist, feedtitle = get_feed_list(request)
     except ObjectDoesNotExist:
         raise Http404()
+    except ValueError:
+        raise Http404()
     try:
         count = int(request.GET.get('count', ''))
     except ValueError:
