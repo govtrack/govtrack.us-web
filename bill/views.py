@@ -522,7 +522,7 @@ def bill_statistics(request):
             for m in activity: m["cumulative_count"] = round(m["cumulative_count"] * 100.0)
             return activity
         activity_introduced_by_month = pull_time_stat('introduced_date', "1")
-        activity_enacted_by_month = pull_time_stat('current_status_date', "current_status IN (%d,%d,%d)" % (int(BillStatus.enacted_signed), int(BillStatus.enacted_veto_override, BillStatus.enacted_tendayrule)))
+        activity_enacted_by_month = pull_time_stat('current_status_date', "current_status IN (%d,%d,%d)" % (int(BillStatus.enacted_signed), int(BillStatus.enacted_veto_override), int(BillStatus.enacted_tendayrule)))
     else:
         activity_introduced_by_month = []
         activity_enacted_by_month = []
