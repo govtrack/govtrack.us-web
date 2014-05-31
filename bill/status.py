@@ -263,9 +263,9 @@ def get_bill_status_string(is_current, status):
             status = "This %s is provisionally dead due to a failed attempt to resolve differences between the House and Senate versions, on %s."
         elif status == "PROV_KILL:VETO":
             status = "This %s was vetoed by the President on %s. The bill is dead unless Congress can override it."
-        elif status == "OVERRIDE_PASS_OVER:HOUSE":
+        elif status == "VETOED:OVERRIDE_PASS_OVER:HOUSE":
             status = "After a presidential veto of the %s, the House succeeeded in an override on %s. It goes to the Senate next."
-        elif status == "OVERRIDE_PASS_OVER:SENATE":
+        elif status == "VETOED:OVERRIDE_PASS_OVER:SENATE":
             status = "After a presidential veto of the %s, the Senate succeeded in an override on %s. It goes to the House next."
     
     else: # Bill is not current.
@@ -285,7 +285,7 @@ def get_bill_status_string(is_current, status):
             status = "This %s was introduced in a previous session of Congress but was killed due to a failed vote for cloture, under a fast-track vote called \"suspension\", or while resolving differences on %s."
         elif status == "PROV_KILL:VETO":
             status = "This %s was vetoed by the President on %s and Congress did not attempt an override before the end of the Congressional session."
-        elif status == "OVERRIDE_PASS_OVER:HOUSE" or status == "OVERRIDE_PASS_OVER:SENATE":
+        elif status == "VETOED:OVERRIDE_PASS_OVER:HOUSE" or status == "VETOED:OVERRIDE_PASS_OVER:SENATE":
             status = "This %s was vetoed by the President and Congress did not finish an override begun on %s before the end of the Congressional session."
         
     # Some status messages do not depend on whether the bill is current.
