@@ -235,23 +235,32 @@ $(function() {
 {% endblock %}
 
 {% block summary %}
-	<h1>{{bill.title|truncatewords:20}}</h1>
+	<a class="back-link-above-h1" href="{{bill.get_absolute_url}}">
+		<span>&lt; Back</span> to {{bill.display_number_no_congress_number}}
+		({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})
+	</a>
+
+	<h1>Text of{% if "Act" in bill.title %} the{% endif %} {{bill.title_no_number|truncatewords:20}}</h1>
+
 	{% if bill.title != bill.title|truncatewords:20 %}
 		{% with bill.title|truncatewords:20|cut:"..." as bt %}
 			<p style="line-height: 130%">...{{bill.title|cut:bt}}</p>
 		{% endwith %}
 	{% endif %}
 
-	<div class="info">
-		<p class="date">{{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}. Text as of {{textdata.docdate}} ({{textdata.doc_version_name}}).</p>
-		
-		<p><a href="{{bill.get_absolute_url}}">Status &amp; Summary</a>
-		| <a href="{{textdata.gpo_pdf_url}}">PDF</a>
-		| Source: <a href="{{textdata.gpo_url}}">GPO</a>
-		{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
-		{% if textdata.source == "statutes" %}&mdash; <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">Statutes at Large</a>{% endif %}
+	<p style="margin-bottom: 0">{{bill.current_status_description}} The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
+{% endblock %}
+
+{% block links %}
+	<div style="padding-left: 3em">
+		<div style="margin-bottom: 1.5em"><a href="{{textdata.gpo_pdf_url}}" class="push-btn grey-btn" style="text-transform: none">Download PDF</a></div>
+
+		<p>Source:
+			<a href="{{textdata.gpo_url}}">GPO</a>
+			{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
+			{% if textdata.source == "statutes" %}&mdash; <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">Statutes at Large</a>{% endif %}
 		</p>
-	</div><!-- /info -->
+	</div>
 {% endblock %}
 
 {% block body %}

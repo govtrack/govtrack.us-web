@@ -172,6 +172,23 @@ ol+h2,
 pre+h2 {
 	margin-top: 1.5em;
 }
+a.back-link-above-h1 {
+	display: block;
+	font-style: normal;
+	line-height: 110%;
+	color: #666;
+	margin-bottom: .4em;
+	margin-top: 0;
+	text-decoration: none;
+}
+	a.back-link-above-h1:hover span {
+		text-decoration: underline;
+	}
+	a.back-link-above-h1 span {
+		font-family: PTSerifBold, 'Pallatino Linotype', Georgia, 'Times New Roman', serif;
+		font-weight: 400;
+		text-transform: uppercase;
+	}
 
 header ul, footer ul {
 	list-style-type: none;
