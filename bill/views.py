@@ -227,6 +227,7 @@ def bill_text(request, congress, type_slug, number, version=None):
 
     # Get a list of the alternate versions of this bill.
     alternates = None
+    is_latest = True
     if textdata:
         alternates = []
         for v in bill_gpo_status_codes:
@@ -235,6 +236,10 @@ def bill_text(request, congress, type_slug, number, version=None):
             except IOError:
                 pass
         alternates.sort(key = lambda mods : mods["docdate"])
+        if len(alternates) > 0:
+            is_latest = False
+            if textdata["doc_version"] == alternates[-1]["doc_version"]:
+                is_latest = True
 
     # Get a list of related bills.
     from billtext import get_current_version
@@ -255,6 +260,7 @@ def bill_text(request, congress, type_slug, number, version=None):
         "congressdates": get_congress_dates(bill.congress),
         "textdata": textdata,
         "version": version,
+        "is_latest": is_latest,
         "alternates": alternates,
         "related_bills": related_bills,
     }
