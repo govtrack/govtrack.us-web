@@ -62,12 +62,35 @@ h1 {
 	padding-left: 20px;
 }
 
+#permalink_widget {
+	display: none;
+	position: absolute;
+	margin: 0 .5em;
+	/*cursor: default;
+	border: 1px solid #EEE;
+	background-color: white;
+	padding: .5em;*/
+}
+
+section.permalink-target {
+	border: 2px solid red;
+}
+p.permalink-target {
+	background-color: black;
+	padding: 3px;
+	color: white;
+}
+	article p.permalink-target a:link {
+		color: #FF0;
+		border-bottom: 1px dotted #FF0;
+	}
+
 {% include "bill/congressxml.css" %}
 
 </style>
 {% endblock %}
 
-{% block head %}
+{% block body_scripts %}
 <script>
 function hide_comparison() {
 	$('#main_text_content').show();
@@ -218,13 +241,80 @@ function align_panels() {
 }
 $(window).resize(align_panels);
 
+var permalink_widget_shown = false;
+var permalink_widget_hovered = false;
+var permalink_current = null;
+
 $(function() {
+	// add the permalink tool
+	$('#permalink_widget').hover(function() {
+		permalink_widget_hovered = true;
+	});
+	$('#permalink_widget a').click(function() {
+		var f = $(this).attr('href').substring( $(this).attr('href').indexOf("#") );
+		show_permalink(f);
+	});
+	$('*[data-citation-path]').hover(function() {
+		// hover enter
+		var me = $(this);
+		if (permalink_current && me[0] == permalink_current[0]) return;
+
+		var w = $('#permalink_widget');
+		w.css({ left: me.offset().left + me.width(), top: me.offset().top })
+		w.fadeIn();
+
+		var fragment = "link=" + me.attr('data-citation-path');
+		var node = me;
+		while (node) {
+			if (node.attr('data-id')) {
+				fragment += "&nearest=" + node.attr('data-id');
+				break;
+			}
+			node = node.parent();
+		}
+
+		w.find('a').attr('href', "{{bill.get_absolute_url|escapejs}}/text/{{textdata.doc_version|escapejs}}#" + fragment);
+		permalink_widget_shown = true;
+		permalink_widget_hovered = false;
+	}, function() {
+		// hover exit
+		permalink_widget_shown = false;
+		setTimeout("if (!permalink_widget_shown && !permalink_widget_hovered) $('#permalink_widget').fadeOut();", 2000)
+	});
+
+	function show_permalink(fragment, with_scroll) {
+		var m = /^#link=([^&]+)(&nearest=([^&]+))?/.exec(fragment);
+		if (m) {
+			var p = $('*[data-citation-path="' + m[1] + '"]');
+			if (!p)
+				p = $('*[data-id="' + m[2] + '"]');
+			if (p) {
+				if (permalink_current) permalink_current.removeClass('permalink-target');
+
+				p.addClass('permalink-target');
+				if (with_scroll) {
+					var y = p.offset().top;
+					$('html, body').animate({scrollTop: y-100}, 2000)
+				}
+				permalink_current = p;
+			}
+		}
+	}
+
+	// go to a permalink
+	show_permalink(window.location.hash, true)
+
+	// easter egg: trigger a comparison using the page fragment
 	var m = /^#compare=(?:(\d+):)?([a-z][a-z0-9]+)?/.exec(window.location.hash);
 	if (m) {
 		load_comparison(m[1], m[2]);
 	}
 });
 </script>
+
+<div id="permalink_widget">
+	<a class="button" href="x">Permalink</a>
+</div>
 {% endblock %}
 
 {% block crumbs %}
