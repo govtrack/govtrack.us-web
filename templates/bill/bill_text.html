@@ -265,7 +265,7 @@ $(function() {
 
 		var fragment = "link=" + me.attr('data-citation-path');
 		var node = me;
-		while (node) {
+		while (node.length > 0) {
 			if (node.attr('data-id')) {
 				fragment += "&nearest=" + node.attr('data-id');
 				break;
@@ -286,9 +286,9 @@ $(function() {
 		var m = /^#link=([^&]+)(&nearest=([^&]+))?/.exec(fragment);
 		if (m) {
 			var p = $('*[data-citation-path="' + m[1] + '"]');
-			if (!p)
-				p = $('*[data-id="' + m[2] + '"]');
-			if (p) {
+			if (p.length == 0)
+				p = $('*[data-id="' + m[3] + '"]');
+			if (p.length > 0) {
 				if (permalink_current) permalink_current.removeClass('permalink-target');
 
 				p.addClass('permalink-target');
