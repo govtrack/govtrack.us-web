@@ -315,9 +315,7 @@ from website.api import api_overview
 @render_to('website/congress_live.html')
 def congress_live(request):
 
-    from cache_utils.decorators import cached
-    @cached(60*5)
-    def get_loc_streams():
+    def get_loc_streams_2():
         # Scrape the LoC for live House committee hearings.
         
         import urllib
@@ -331,6 +329,14 @@ def congress_live(request):
                 feeds.append( { "title": n.group(1), "url": "http://thomas.loc.gov" + m } )
             
         return feeds
+
+    from cache_utils.decorators import cached
+    @cached(60*5)
+    def get_loc_streams():
+        try:
+            return get_loc_streams_2()
+        except IOError:
+            return []
 
     return {
         "housecommittees": get_loc_streams,
