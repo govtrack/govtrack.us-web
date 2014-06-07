@@ -14,6 +14,17 @@
 	.summary-box dt { width: 95px; }
 	{% endif %}
     .stats th { text-align: center; }
+
+	#vote_notes {
+		margin: 4px 0 12px 0;
+		font-size: 85%;
+	}
+		#vote_notes a {
+			margin: 0 .5em;
+		}
+		#vote_notes div {
+			display: none;
+		}
 	</style>
 {% endblock %}
 {% block og_image %}
@@ -79,6 +90,12 @@ function get_sort_func(order_indexes) {
     }
     return sort_key;
 }
+
+function show_notes(elem) {
+	show_modal($(elem).text(), "<div>" + $("#notes_" + $(elem).attr('data-id')).html() + "</div>");
+	return false;
+}
+
 $(function() { 
     var headers = $('#vote-list th');
     headers.click(function() {
@@ -271,8 +288,10 @@ $(function() {
     
     {% if has_diagram %}
     <aside>
-    	<img src="{{ vote.get_absolute_url }}/diagram" style="width: 320px; height: 170px" />
-    	<div style="text-align: right; color: #777;"><small>Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</small></div>
+		<div style="width: 320px;">
+	    	<img src="{{ vote.get_absolute_url }}/diagram" style="width: 320px; height: 170px" />
+    		<div style="text-align: right; color: #777;"><small>Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</small></div>
+		</div>
     </aside>
     {% endif %}
 </div>
@@ -323,6 +342,41 @@ $(function() {
 </div>
 
 <div class="details-box">
+<div id="vote_notes">
+	<span>Notes: </span>
+
+	{% if vote.chamber == 2 %}
+	<a href="#" onclick="return show_notes(this)" data-id="speakers_vote">The Speaker&rsquo;s Vote?</a>
+	<div id="notes_speakers_vote">The Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk. (See <a href="http://www.gpo.gov/fdsys/pkg/HMAN-113/pdf/HMAN-113-houserules.pdf">House Rules</a>, Rule I(7).)</div>
+	{% endif %}
+
+	{% if has_vp_vote %}
+	<a href="#" onclick="return show_notes(this)" data-id="vp">The Vice President&rsquo;s Tie-Breaker</a>
+	<div id="notes_vp">
+	<p>The Vice President casts a vote in the Senate when there is a tie. This is extremely rare.</p>
+	<p>Article I, section 3 of the U.S. Constitution reads, &ldquo;The Vice President of the United States shall be President of the Senate, but shall have no Vote, unless they be equally divided.&rdquo;</p>
+	</div>
+	{% endif %}
+
+    {% if reconsiderers.0|length > 0 %}
+    <a href="#" onclick="return show_notes(this)" data-id="motiontoreconsider">{{reconsiderers.1}}&rsquo;s Vote</a>
+    <div id="notes_motiontoreconsider">
+        {% for v in reconsiderers.0 %}
+            <p>{{v.person.role.get_title_abbreviated}} {{v.person.name_no_details}} ({{v.person.role.party.0}}), the {{v.person.role.leadership_title}}, voted {{v.option.value}} against {{v.person.his_her}} party.</p>
+        {% endfor %}
+        <p>Somtimes a party leader will vote on the winning side, even if it is against his or her position, to have the right to call for a new vote under a <a href="https://www.senate.gov/reference/glossary_term/reconsider.htm">motion to reconsider</a>. For more, see <a href="http://www.washingtonpost.com/blogs/wonkblog/wp/2013/02/17/why-is-harry-reid-always-voting-against-his-own-plans/">this explanation</a> from The Washington Post.</p>
+        <p>We do not know the rationale behind any vote, however.</p>
+    </div>
+    {% endif %}
+
+	<a href="#" onclick="return show_notes(this);" data-id="aye_yea">&ldquo;Aye&rdquo; or &ldquo;Yea&rdquo;?</a>
+	<div id="notes_aye_yea">
+	<p>&ldquo;Aye&rdquo; and &ldquo;Yea&rdquo; mean the same thing, and so do &ldquo;No&rdquo; and &ldquo;Nay&rdquo;. Congress uses different words in different sorts of votes.</p>
+	<p>The U.S. Constitution says that bills should be decided on by the &ldquo;yeas and nays&rdquo; (Article I, Section 7). Congress takes this literally and uses &ldquo;yea&rdquo; and &ldquo;nay&rdquo; when voting on the final passage of bills.</p>
+	<p>All Senate votes use these words. But the House of Representatives uses &ldquo;Aye&rdquo; and &ldquo;No&rdquo; in other sorts of votes.</p>
+	</div>
+</div>
+
         <table id="vote-list" style="display: none">
             <thead>
                 <tr>
@@ -381,22 +435,6 @@ $(function() {
         </table>
 </div>
 </div>
-
-<h2>Notes</h2>
-{% if vote.chamber == 2 %}
-<h4 style="margin-top: 30px">Where is the Speaker&rsquo;s vote?</h4>
-<p>According to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk.</p>
-{% endif %}
-
-{% if has_vp_vote %}
-<h4 style="margin-top: 30px">The Vice President cast a tie-breaking vote.</h4>
-<p>The Vice President casts a vote in the Senate when there is a tie. Article I, section 3 of the United States Constitution reads: &ldquo;The Vice President of the United States shall be President of the Senate, but shall have no Vote, unless they be equally divided.&rdquo; Ties in the Senate are rare.</p>
-{% endif %}
-
-<h4 style="margin-top: 30px">What&rsquo;s the difference between &ldquo;aye&rdquo; and &ldquo;yea&rdquo;?</h4>
-<p>There is no meaningful difference between &ldquo;aye&rdquo; and &ldquo;yea&rdquo; (and &ldquo;nay&rdquo; and &ldquo;no&rdquo;), but the terms are used in different sorts of votes based on Congress&rsquo;s long tradition of parliamentary procedure.</p>
-<p>The House and Senate follow the U.S. Constitution strictly when it says that bills should be decided on by the &ldquo;yeas and nays&rdquo; (Article I, Section 7). So they literally say &ldquo;yea&rdquo; and &ldquo;nay&rdquo; when voting on bills. In the Senate, they always use these words.</p>
-<p>The House sometimes operates under a special set of rules called the &ldquo;Committee of the Whole on the State of the Union&rdquo; (or &ldquo;Committee of the Whole&rdquo; for short), which is a sort of pseudo-committee that is made up of every congressman. During this mode of operation, the House uses the terms &ldquo;aye&rdquo; and &ldquo;no&rdquo; instead, but the meaning is the same. (See the Rules of the House, Rule XX, and House Practice in the section Voting.)</p>
 
 {% endwith %}
 

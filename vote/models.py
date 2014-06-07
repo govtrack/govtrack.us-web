@@ -270,6 +270,35 @@ class Vote(models.Model):
                 }
             }
             
+    def possible_reconsideration_votes(self, voters=None):
+        # Identify possible voters who voted against their view in order to be on the winning
+        # side so they may make a motion to reconsider later. Senate only. Since we don't
+        # know which option represents the winning option, we just look at party leaders who
+        # voted against their party.
+        if self.chamber != CongressChamber.senate: return []
+
+        # Get vote totals by party.
+        if voters == None:
+            voters = list(self.voters.all().select_related('person', 'option'))
+            load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
+        by_party = { }
+        for voter in voters:
+            if not voter.person or not voter.person.role: continue
+            if voter.option.key not in ("+", "-"): continue
+            by_party.setdefault(voter.person.role.party, {}).setdefault(voter.option_id, set()).add(voter)
+
+        # Find the plurality option by party.
+        for party in by_party:
+            by_party[party] = max(by_party[party], key = lambda x : len(by_party[party][x]))
+    
+        # See if any party leaders voted against their party.
+        candidates = []
+        for voter in voters:
+            if voter.person and voter.person.role and voter.person.role.leadership_title:
+                if voter.option.key in ("+", "-") and voter.option_id != by_party[voter.person.role.party]:
+                    candidates.append(voter)
+        return candidates
+
 
 class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='options')

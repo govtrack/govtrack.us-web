@@ -370,7 +370,7 @@
       </div>
     </div>
     <script>
-	function show_modal_error(title, message) {
+	function show_modal(title, message) {
 		$('#error_modal h4').text(title);
 		if (message.charAt(0) != '<') {
 			$('#error_modal .modal-dialog').toggleClass('modal-sm', true);
@@ -543,7 +543,7 @@
 			{# the_user.cd is only available if request.anonymous #}
     		setTimeout(function() {
     			if (the_segment == "EOP") {
-    				show_modal_error("Hello", "<p>Transparency in government is an American value.</p> <p>That's all.</p>");
+    				show_modal("Hello", "<p>Transparency in government is an American value.</p> <p>That's all.</p>");
     				ga('send', 'event', 'miscellaneous', 'eop-message');
     			}else if (the_segment == "Other" && the_user && the_user.cd == null && win_loc_hash != "#track") {
     				show_askcd()

@@ -1217,7 +1217,6 @@ header ul, footer ul {
 		padding: 0;
 		border: 1px solid #d7ddd7;
 		height: 29px;
-		line-height: 29px;
 		vertical-align: middle;
 		}
 	.stats tbody tr td:first-child {
@@ -1320,7 +1319,7 @@ aside .download-links { padding: 31px 0 0 }
 	overflow: hidden;
 	border: 1px solid #ccd1d7;
 	border-width: 1px 0;
-	padding: 16px 0 17px;
+	padding: 8px 0 17px;
 	}
 
 

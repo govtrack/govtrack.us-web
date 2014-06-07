@@ -97,6 +97,10 @@ def vote_details(request, congress, session, chamber_code, number):
         
     # perform an initial sort for display
     voters.sort(key = lambda x : (x.option.key, x.person.role.party if x.person and x.person.role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
+
+    # did any Senate leaders switch their vote for a motion to reconsider?
+    reconsiderers = vote.possible_reconsideration_votes(voters)
+    reconsiderers_titles = "/".join(v.person.role.leadership_title for v in reconsiderers)
     
     return {'vote': vote,
             'voters': voters,
@@ -105,6 +109,7 @@ def vote_details(request, congress, session, chamber_code, number):
             "VoteCategory": VoteCategory._items,
             'has_vp_vote': has_vp_vote,
             'has_diagram': has_diagram,
+            'reconsiderers': (reconsiderers, reconsiderers_titles),
             }
 
 def load_ideology_scores(congress):

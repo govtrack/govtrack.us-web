@@ -112,6 +112,9 @@ class Person(models.Model):
         self.sortname = get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
         self.name = get_person_name(self, firstname_position='before', role_recent=True)
 
+    @property
+    def his_her(self):
+        return { Gender.male: "his", Gender.female: "her" }.get(self.gender, "their")
         
     @property
     def current_role(self):
