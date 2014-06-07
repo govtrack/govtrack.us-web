@@ -126,8 +126,8 @@
 
 	{% if has_session_stats %}
 	<div id="session_stats">
-		<h3 style="margin: 0">New: {{has_session_stats.meta.session}} Report Card</h3>
-		Read our new <a href="{{person.get_absolute_url}}/report-card/{{has_session_stats.meta.session}}">{{has_session_stats.meta.session}} Report Card for {{person.lastname}} &raquo;</a>
+		<h3 style="margin: 0">{{has_session_stats.meta.session}} Report Card</h3>
+		Read our <a href="{{person.get_absolute_url}}/report-card/{{has_session_stats.meta.session}}">{{has_session_stats.meta.session}} Report Card for {{person.lastname}} &raquo;</a>
 	</div>
 	{% endif %}
 
