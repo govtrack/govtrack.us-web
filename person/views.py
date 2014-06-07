@@ -271,6 +271,13 @@ def get_district_bounds(state, district):
     elif cache.get(zoom_info_cache_key):
         center_lat, center_long, center_zoom = cache.get(zoom_info_cache_key)
     else:
+        data = json.load(open("person/district_bounds.json"))
+        key = state + ((":" + str(district)) if district else "")
+        center_lat, center_long, center_zoom = [float(v) for v in data[key].split("|")]
+        cache.set(zoom_info_cache_key, (center_lat, center_long, center_zoom) )
+        return (center_lat, center_long, center_zoom)
+
+def get_district_bounds_query(state, district):
         def get_coords(state, distr):
             import urllib, json
             if not distr:
@@ -292,9 +299,7 @@ def get_district_bounds(state, district):
             if district_center_zoom > center_zoom + 1:
                 center_lat, center_long, center_zoom = distr_center_lat, district_center_long, district_center_zoom
                 
-        cache.set(zoom_info_cache_key, (center_lat, center_long, center_zoom) )
-
-    return (center_lat, center_long, center_zoom)
+        return (center_lat, center_long, center_zoom)
 
 def get_district_cities(district_id):
     district_info = cache.get("district_cities_%s" % district_id)
