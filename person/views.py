@@ -275,7 +275,7 @@ def get_district_bounds(state, district):
         key = state + ((":" + str(district)) if district else "")
         center_lat, center_long, center_zoom = [float(v) for v in data[key].split("|")]
         cache.set(zoom_info_cache_key, (center_lat, center_long, center_zoom) )
-        return (center_lat, center_long, center_zoom)
+    return (center_lat, center_long, center_zoom)
 
 def get_district_bounds_query(state, district):
         def get_coords(state, distr):
