@@ -32,8 +32,9 @@ class Command(BaseCommand):
 			.values('feedname', 'count')\
 			[0:25]
 
-		print "users \t url \t bill title"
+		print "new users \t all users \t sponsor \t url \t bill title"
 		for bf in top_bills:
-			b = Bill.from_feed(Feed.from_name(bf["feedname"]))
-			print bf["count"], "\t", b.get_absolute_url(), "\t", b
+			f = Feed.from_name(bf["feedname"])
+			b = Bill.from_feed(f)
+			print bf["count"], "\t", f.tracked_in_lists.all().count(), "\t", b.sponsor.lastname, b.get_absolute_url(), "\t", b
 			
