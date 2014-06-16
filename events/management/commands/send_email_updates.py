@@ -11,7 +11,7 @@ from optparse import make_option
 from events.models import *
 from emailverification.models import Ping, BouncedEmail
 
-import os
+import os, sys
 from datetime import datetime, timedelta
 import yaml, markdown2
 
@@ -22,42 +22,51 @@ class Command(BaseCommand):
 	help = 'Sends out email updates of events to subscribing users.'
 	
 	def handle(self, *args, **options):
-		if len(args) != 1:
+		if len(args) != 1 or args[0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
 			print "Specify daily or weekly or testadmin or testcount."
 			return
-		if args[0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
-			print "Specify daily or weekly or testadmin or testcount."
-			return
-			
-		verbose = (args[0] not in ('daily', 'weekly',)) or True
-		
-		# What kind of subscription lists are we processing?
-		users = None
-		send_mail = True
-		mark_lists = True
-		send_old_events = False
-		if args[0] == "daily":
-			list_email_freq = (1,)
-		elif args[0] == "weekly":
-			list_email_freq = (1,2)
-		elif args[0] == "testadmin":
-			# test an email to the site administrator only
-			list_email_freq = (1,2)
+
+		if args[0] == "testadmin":
+			# Test an email to the site administrator only. There's no need to be complicated
+			# about finding users --- just use a hard-coded list.
 			users = User.objects.filter(email="jt@occams.info")
 			send_mail = True
 			mark_lists = False
 			send_old_events = True
-		elif args[0] == "testcount":
-			# count up how many daily emails we would send, but don't send any
 			list_email_freq = (1,2)
-			send_mail = False
-			mark_lists = False
-
-		if users == None: # overridden by the testadmin case above
-			# Find all users who have a subscription list with email
-			# updates turned on to the right daily/weekly setting.
-			users = User.objects.filter(subscription_lists__email__in = list_email_freq).distinct()
+		else:
+			# Now that the number of registered users is much larger than the number of event-generating
+			# feeds, it is faster to find users to update by starting with the most recent events.
 			
+			users = None
+			send_mail = True
+			mark_lists = True
+			send_old_events = False
+			if args[0] == "daily":
+				list_email_freq = (1,)
+				back_days = BACKFILL_DAYS_DAILY
+			elif args[0] == "weekly":
+				list_email_freq = (1,2)
+				back_days = BACKFILL_DAYS_WEEKLY
+			elif args[0] == "testcount":
+				# count up how many daily emails we would send, but don't send any
+				list_email_freq = (1,)
+				send_mail = False
+				mark_lists = False
+				back_days = BACKFILL_DAYS_DAILY
+
+			# Find the feed IDs that generated all events in the last back_days days.
+			active_feeds = set(Event.objects.filter(when__gt=datetime.now() - timedelta(days=back_days)).values_list("feed_id", flat=True))
+
+			# Find the subscription lists w/ emails turned on that are tracking those feeds.
+			sublists = set(SubscriptionList.objects.filter(trackers__in=active_feeds, email__in = list_email_freq))
+
+			# And get a list of those users.
+			users = User.objects.filter(subscription_lists__in=sublists)\
+				.distinct()\
+				.only("id", "email", "last_login")\
+				.order_by('id')
+
 		if os.environ.get("START"):
 			users = users.filter(id__gte=int(os.environ["START"]))
 				#, id__lt=169660)
@@ -66,7 +75,16 @@ class Command(BaseCommand):
 		total_events_sent = 0
 		total_users_skipped_stale = 0
 		total_users_skipped_bounced = 0
-		for user in list(users.order_by('id')): # clone up front to avoid holding the cursor (?)
+
+ 		# get the list of user IDs to iterate through; clone up front to avoid holding the cursor (?)
+		user_iterator = list(users)
+
+		# when debugging, show a progress meter
+		if sys.stdout.isatty(): 
+			import tqdm
+			user_iterator = tqdm.tqdm(user_iterator)
+
+		for user in user_iterator:
 			# Check pingback status.
 			try:
 				p = Ping.objects.get(user=user)
@@ -84,7 +102,7 @@ class Command(BaseCommand):
 				total_users_skipped_bounced += 1
 				continue
 			
-			events_sent = send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events)
+			events_sent = send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_events)
 			if events_sent != None:
 				total_emails_sent += 1
 				total_events_sent += events_sent
@@ -99,7 +117,7 @@ class Command(BaseCommand):
 		print total_users_skipped_stale, "users skipped because they are stale"
 		print total_users_skipped_bounced, "users skipped because of a bounced email"
 			
-def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, send_old_events):
+def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_events):
 	global now
 	
 	# get the email's From: header and return path
@@ -118,20 +136,29 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 
 	send_no_events = send_old_events
 
+	# Process each of the subscription lists.
 	all_trackers = set()
-
 	eventslists = []
 	most_recent_event = None
 	eventcount = 0
 	for sublist in user.subscription_lists.all():
-		all_trackers |= set(sublist.trackers.all()) # include trackers for non-email-update list
+		# Get a list of all of the trackers this user has in all lists. We use the
+		# complete list, even in non-email-update-lists, for rendering events.
+		all_trackers |= set(sublist.trackers.all())
+
+		# If this list does not have email updates turned on, move on.
+		if sublist.email not in list_email_freq: continue
+
+		# For debugging, clear the last_event_mailed flag so we can find some events
+		# to send.
 		if send_old_events: sublist.last_event_mailed = None
-		if sublist.email in list_email_freq:
-			max_id, events = sublist.get_new_events()
-			if len(events) > 0:
-				eventslists.append( (sublist, events) )
-				eventcount += len(events)
-				most_recent_event = max(most_recent_event, max_id)
+
+		# Get any new events to email the user about.
+		max_id, events = sublist.get_new_events()
+		if len(events) > 0:
+			eventslists.append( (sublist, events) )
+			eventcount += len(events)
+			most_recent_event = max(most_recent_event, max_id)
 	
 	if len(eventslists) == 0 and not send_no_events:
 		return None
@@ -176,8 +203,6 @@ def send_email_update(user, list_email_freq, verbose, send_mail, mark_lists, sen
 	email.attach_alternative(templ_html, "text/html")
 	
 	try:
-		if verbose:
-			print "emailing", user.id, user.email, "x", eventcount, "..."
 		email.send(fail_silently=False)
 	except Exception as e:
 		print user, e

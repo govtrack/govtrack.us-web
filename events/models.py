@@ -9,6 +9,10 @@ import re
 import urllib
 from datetime import datetime, timedelta
 
+# In a worst-case scenario, at most how many days back should we send events?
+BACKFILL_DAYS_DAILY = 4
+BACKFILL_DAYS_WEEKLY = 14
+
 class Feed(models.Model):
     """Each Feed has a code name that can be used to reconstruct information about the feed."""
     feedname = models.CharField(max_length=64, unique=True, db_index=True)
@@ -225,7 +229,7 @@ class Feed(models.Model):
         if m == None: return False
         if "is_valid" not in m: return True
         return m["is_valid"](self)
-    
+
     @property
     def title(self):
         m = self.type_metadata()
@@ -423,7 +427,7 @@ class SubscriptionList(models.Model):
     
     class Meta:
         unique_together = [('user', 'name')]
-        
+
     @staticmethod
     def create(user, email_rate=None):
         sublist = None
@@ -510,7 +514,7 @@ class SubscriptionList(models.Model):
         # period unless we set last_event_mailed.
         
         # The Django ORM can't handle generating a nice query. It adds joins that ruin indexing.
-        cursor.execute("SELECT id, source_content_type_id, source_object_id, eventid, `when`, seq, feed_id FROM events_event WHERE id > %s AND `when` > %s AND feed_id IN (" + ",".join(str(f.id) for f in feeds) + ") ORDER BY `when`, source_content_type_id, source_object_id, seq", [self.last_event_mailed if self.last_event_mailed else 0, datetime.now() - timedelta(days=4 if self.email == 1 else 14)])
+        cursor.execute("SELECT id, source_content_type_id, source_object_id, eventid, `when`, seq, feed_id FROM events_event WHERE id > %s AND `when` > %s AND feed_id IN (" + ",".join(str(f.id) for f in feeds) + ") ORDER BY `when`, source_content_type_id, source_object_id, seq", [self.last_event_mailed if self.last_event_mailed else 0, datetime.now() - timedelta(days=BACKFILL_DAYS_DAILY if self.email == 1 else BACKFILL_DAYS_WEEKLY)])
         
         max_id = None
         ret = []

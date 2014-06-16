@@ -20,3 +20,4 @@ paypalrestsdk
 markdown2
 django_twilio
 twilio
+tqdm
