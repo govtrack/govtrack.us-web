@@ -45,7 +45,7 @@ class VoteProcessor(XmlProcessor):
         'procedural': VoteCategory.procedural,
         'other': VoteCategory.other,
         'unknown': VoteCategory.unknown,
-        'ratification': VoteCategory.ratification,
+        'treaty': VoteCategory.ratification,
         'veto-override': VoteCategory.veto_override,
         'conviction': VoteCategory.conviction,
         'quorum': VoteCategory.procedural,
