@@ -1,5 +1,5 @@
 {% extends "master_a.html" %}
-{% load humanize persontags cache govtrack_utils %}
+{% load humanize persontags govtrack_utils %}
 
 {% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}U.S. {{ role.get_role_type_display }}{% if role.state %} for {{ role.get_state_display }}{% if role.district %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
 
@@ -41,7 +41,6 @@
 
 {% block summary %}
 <div class="row group">
-	{% cache 600 member_head person.id 2 %}
 	<div id="track_panel_base" class="col-sm-8">
 		<h1 style="line-height: 1.15em">
 			{{person.name_and_title}}
@@ -80,13 +79,14 @@
 		<table>
 			<tr>
 				<th>Dates</th>
-				<th>Title / State / District</th>
+				<th>Title</th>
+				<th>State / District</th>
 			</tr>
 	        {% for role in person.roles_condensed %}
 	        <tr>
 	            <td><nobr>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</nobr></td>
-	            <td>{{ role.get_role_type_display }}{% if role.state %},{% endif %}<br>
-	                {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}</td>
+	            <td>{{ role.get_role_type_display }}</td>
+				<td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}</td>
 	        </tr>
 	        {% endfor %}
 		</table>
@@ -100,7 +100,6 @@
 			</small></p>
 		{% endif %}
 	</div><!-- /container -->
-	{% endcache %}
 
 	<div class="aside col-sm-4">
 		<div id="event_subscribe_inline_container"> </div>
@@ -121,7 +120,6 @@
 
 {% block body %}
 <div class="row">
-{% cache 600 member_details person.id %}
 <div id="member-details" class="col-sm-8">
 
 	{% if has_session_stats %}
@@ -420,15 +418,13 @@
 	</section>
 	
 </div><!-- /member-details -->
-{% endcache %}
 
-{% cache 600 member_news person.id %}
 <div class="tweets col-sm-4">
 	<h3>Recent Legislative Activity</h3>
 	
 	{% include "events/trackedeventspanel.html" %}
 </div>
-{% endcache %}
+
 </div><!-- /.row -->
 {% endblock %}
 
