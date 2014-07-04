@@ -52,12 +52,6 @@ urlpatterns += patterns('',
    url(r'^sitemap-(?P<section>.+)\.xml$', anonymous_view(sitemap_map_view), {'sitemaps': sitemaps}, name='sitemap_pages'),
 )
 
-# API access points
-from website.api import v1_api
-urlpatterns += patterns('',
-    (r'^api/', include(v1_api.urls)),
-)
-
 if settings.DEBUG:
     # serve /static during debugging
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns

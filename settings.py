@@ -114,7 +114,6 @@ INSTALLED_APPS = (
     #'debug_toolbar',
     
     'haystack',
-    'tastypie',
     'django_wysiwyg',
     'django_twilio',
     

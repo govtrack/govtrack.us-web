@@ -5,7 +5,6 @@ python-dateutil
 django-cache-utils
 django-debug-toolbar
 django-picklefield
-django-tastypie
 mimeparse
 defusedxml
 django-json-field
