@@ -36,5 +36,5 @@ class Command(BaseCommand):
 		for bf in top_bills:
 			f = Feed.from_name(bf["feedname"])
 			b = Bill.from_feed(f)
-			print bf["count"], "\t", f.tracked_in_lists.all().count(), "\t", b.sponsor.lastname, b.get_absolute_url(), "\t", b
+			print bf["count"], "\t", f.tracked_in_lists.all().count(), "\t", b.sponsor.lastname.encode("utf8"), b.get_absolute_url(), "\t", b
 			
