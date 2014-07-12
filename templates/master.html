@@ -12,8 +12,13 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
+		{% if not debug %}
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
 		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap-theme.min.css">
+		{% else %}
+		<link rel="stylesheet" href="/static/lib/bootstrap.css">
+		<link rel="stylesheet" href="/static/lib/bootstrap-theme.css">
+		{% endif %}
 		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20140523" />
 		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie.css" media="screen" /><![endif]-->
 
@@ -37,7 +42,11 @@
 		{% block extra_css %}{% endblock %}
 
 		<script type="text/javascript" src="{{ STATIC_URL }}js/modernizr.js"></script> {% comment %}html5shiv{% endcomment %}
+		{% if not debug %}
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		{% else %}
+		<script src="/static/lib/jquery.js"></script>
+		{% endif %}
 		<script>
 			// when debugging off the network, fall back to a local copy of jquery
 			try { $; } catch (err) {
@@ -62,6 +71,7 @@
 		<script type="text/javascript">
 		window.fbAsyncInitFuncs = Array(); // Facebook init functions should be defined between here and the FB embed later
 		
+		{% if not debug %}
 		<!-- Google Analytics -->
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -73,9 +83,15 @@
 		ga('set', 'dimension2', the_segment);
 		ga('send', 'pageview');
 		<!-- End Google Analytics -->
+		{% else %}
+			window.ga = function() { };
+		{% endif %}
 
 		</script>
+
+		{% if not debug %}
 		<script type="text/javascript">(function(){var bsa = document.createElement('script');bsa.type = 'text/javascript';bsa.async = true;bsa.src = '//cdn.buysellads.com/ac/pro.js';document.getElementsByTagName('head')[0].appendChild(bsa);})();</script>
+		{% endif %}
 		
 		{% block head %}{% endblock %}
 	</head>
@@ -555,7 +571,12 @@
 	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
 	<!-- / ask for district -->
 
+	{% if not debug %}
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+	{% else %}
+	<script src="/static/lib/bootstrap.js"></script>
+	{% endif %}
+
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
 	<!-- Facebook -->
