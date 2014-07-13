@@ -113,27 +113,27 @@ def template_context_processor(request):
             user_loc = geo_ip_db.geos(ip)
             context["is_dc_local"] = user_loc.distance(washington_dc) < .5
     except:
-        pass
+        user_loc = None
 
-    # Have we put the user's district in a cookie?
-
-    try:
-        cong_dist = json.loads(request.COOKIES["cong_dist"])
-    except:
-        cong_dist = None
-                   
-    # Geolocate to a congressional district if not known
-    if False and (not cong_dist or cong_dist['state'] == 'XX'):
+    if not request.user.is_authenticated():
+        # Have we put the user's district in a cookie?
         try:
-            from person.views import do_district_lookup
-            cong_dist = do_district_lookup(*user_loc.coords)
-            cong_dist["queried"] = True
+            cong_dist = json.loads(request.COOKIES["cong_dist"])
         except:
-            pass
+            cong_dist = None
 
-    # If the user is logged in, is the district in the user's profile?
+        # Geolocate to a congressional district if not known and save it in
+        # a cookie for next time.
+        if user_loc and (not cong_dist or cong_dist['state'] == 'XX'):
+            try:
+                from person.views import do_district_lookup
+                cong_dist = do_district_lookup(*user_loc.coords)
+                request._save_cong_dist = cong_dist
+            except:
+                pass
 
-    if request.user.is_authenticated():
+    else:
+        # If the user is logged in, is the district in the user's profile?
         profile = request.user.userprofile()
         if profile.congressionaldistrict != None:
             # pass through XX00 so site knows not to prompt
@@ -144,7 +144,7 @@ def template_context_processor(request):
         from person.models import Person
         context["congressional_district"] = json.dumps(cong_dist)
         context["congressional_district_mocs"] = json.dumps([p.id for p in Person.from_state_and_district(cong_dist["state"], cong_dist["district"])])
-                
+
     return context
   
 class GovTrackMiddleware:
@@ -158,11 +158,8 @@ class GovTrackMiddleware:
     def process_response(self, request, response):
         # Save the geolocation info in a cookie so we don't have to
         # query GIS info on each request.
-        if hasattr(request, "cong_dist_info"):
-            cong_dist_info = request.cong_dist_info
-            for k in ("queried", "reps"):
-                if k in cong_dist_info: del cong_dist_info[k]
-            response.set_cookie("cong_dist", json.dumps(cong_dist_info), max_age=60*60*24*21)
+        if hasattr(request, "_save_cong_dist"):
+            response.set_cookie("cong_dist", json.dumps(request._save_cong_dist), max_age=60*60*24*21)
 
 		# log some requets for processing later
         if hasattr(request, "_track_this_user"):

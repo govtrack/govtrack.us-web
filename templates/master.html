@@ -226,8 +226,11 @@
 									{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
 									{% block override_login %}
 									{% if not user.is_authenticated %}
+										<li id="nav_askcd" {% if request.anonymous %}style="display: none"{% endif %}><a href="#" onclick="return show_askcd();">Set District</a></li>
 										<li id="nav_login"><a href="/accounts/login?next={{request.path|urlencode}}">Log In</a></li>
-										{% if request.anonymous %}<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>{% endif %}
+										{% if request.anonymous %}
+											<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
+										{% endif %}
 									{% else %}
 										<li><a href="/accounts/profile">{{user.email}}</a></li>
 										<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
@@ -238,6 +241,8 @@
 									<script>if (the_user) {
 										$('#nav_login').find('a').text(the_user.email).attr('href', '/accounts/profile');
 										$('#nav_logout').show();
+									} else {
+										$('#nav_askcd').show()
 									}</script>
 								{% endif %}
 								<form name="header_search" action="/search" method="GET" class="search-form">
