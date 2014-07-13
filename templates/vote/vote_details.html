@@ -183,65 +183,48 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 </div>
 
 <div id="vote_explainer">
-    {% if vote.category == VoteCategory.amendment %}
-    <p>This was a vote to approve or reject an amendment.</p>
-    {% endif %}
     {% if vote.category == VoteCategory.passage %}
-    	<p>
+	<p>
     	{% if vote.related_bill.noun == "bill" %}
-    		This was a vote to pass a bill.
+    		This was a vote to pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>.
     	{% elif vote.related_bill.noun == "resolution" %}
-    		This was a vote to agree to a resolution.
+    		This was a vote to agree to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>.
     	{% else %}
     		This was a vote to pass a bill or agree to a resolution.
     	{% endif %}
     	{% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text}}{% endif %}
     </p>
-    {% endif %}
-    {% if vote.category == VoteCategory.passage_suspension %}
-    <p>This was a vote to pass a bill or agree to a resolution. It was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
-    {% endif %}
-    {% if vote.category == VoteCategory.cloture %}
+
+    {% elif vote.category == VoteCategory.amendment %}
+    <p>
+        This was a vote to approve or reject an amendment{% if vote.related_bill %} to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% endif %}{% if vote.related_amendment %}, {{vote.related_amendment.title}}{% endif %}.</p>
+
+    {% elif vote.category == VoteCategory.passage_suspension %}
+    <p>This was a vote to {% if vote.related_bill.noun == "bill" %}pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% elif vote.related_bill.noun == "resolution" %}agree to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% else %}pass a bill or agree to a resolution{% endif %}. It was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
+
+    {% elif vote.category == VoteCategory.cloture %}
     <p>This was a vote on &ldquo;cloture&rdquo;, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate and move to a vote on the issue itself, while a vote against is a vote to prolong debate or to filibuster.</p>
+    {% if vote.related_bill %}<p style="margin-top: 1em">The vote was related to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>.</p>{% endif %}
+    
+    {% elif vote.related_bill or vote.related_amendment %}
+        <p>This vote was related to
+            {% if vote.related_amendment %}
+            an amendment {% if vote.related_amendment.sponsor %}by <a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{% endif %}
+            to
+            {% endif %}
+            {% if vote.related_bill %}
+                {% if vote.related_bill.sponsor %}
+                    a {{vote.related_bill.noun}} introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a> on {{vote.related_bill.introduced_date|date:"F j, Y"}},
+                {% endif %}
+                <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>{% endif %}. 
+        </p>
+
     {% endif %}
-    {% if vote.category == VoteCategory.procedural %}
-    <p>This was a procedural vote.</p>
-    {% endif %}
-    {% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
 </div>
+
+{% if has_vp_vote %}<p style="margin: 1em 0 0 0">The Vice President cast a tie-breaking vote.</p>{% endif %}
     
 <p id="yourreps" class="hidden"></p>
-
-{% if vote.related_bill or vote.related_amendment %}
-<dl style="margin: 1em 0 0 0">
-    {% if vote.related_bill %}
-    <dt>{% if vote.category != VoteCategory.passage and vote.category != VoteCategory.passage_suspension and vote.category != VoteCategory.amendment %}Related {% endif %}{{vote.related_bill.noun|capfirst}}:</dt>
-    <dd><a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>
-    	{% if not vote.related_amendment %}
-        <br/>Introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a>
-        on {{vote.related_bill.introduced_date|date:"F j, Y"}}
-        {# <br/>Current Status: {{vote.related_bill.get_current_status_display}} #}
-        {% endif %}
-
-		{% with vote.related_bill.oursummary as summary %}
-		{% if summary %}
-			<p style="margin: 1em 0 0 0">{{summary.plain_text|truncatewords:30}} (<a href="{{vote.related_bill.get_absolute_url}}#summary/oursummary">read more</a>)</p>
-		{% endif %}
-		{% endwith %}
-        </dd>
-        
-    {% endif %}
-    
-    {% if vote.related_amendment %}
-    <dt>{% if vote.category != VoteCategory.amendment %}Related {% endif %}Amendment:</dt>
-    <dd>{{vote.related_amendment.title}}</a>
-        <br/>Offered
-        {% if vote.related_amendment.sponsor %}by <a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{{vote.related_amendment.sponsor}}</a>{% endif %}
-        on {{vote.related_amendment.offered_date|date:"F j, Y"}}
-        </dd>
-    {% endif %}
-</dl>
-{% endif %}
 {% endblock %}
 
 {% block body %}
