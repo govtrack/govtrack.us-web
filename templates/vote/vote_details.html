@@ -135,7 +135,7 @@ $(function() {
 {% block body_scripts %}
 <script>
 // customization based on user's district
-var voters = [{% for voter in voters %}{ vote: "{{ voter.option.value|escapejs }}", moc: {% if voter.voter_type_is_member %}{{voter.person.role.simple_record|json}}{% else %}null{% endif %}}{% if not forloop.last %}, {% endif %}{% endfor %}];
+var voters = {{vote.simple_record|json}};
 onUserDistrictChanged(function (cong_dist, mocs) {
     var text = "";
     if (cong_dist) {

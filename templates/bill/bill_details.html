@@ -201,6 +201,13 @@
 	// customization based on user's district
 	var sponsor = {{ bill.sponsor_role.simple_record|json }};
 	var cosponsors = [{% for cosp in bill.cosponsor_records %}{{cosp.role.simple_record|json}}{% if not forloop.last %}, {% endif %}{% endfor %}];
+	var major_votes = [];
+	{% for v in bill.votes.all %}
+		{% if v.is_major %}
+			major_votes.push({ date: "{{v.created|date}}", mocs: {{v.simple_record|json}} });
+		{% endif %}
+	{% endfor %}
+
 	onUserDistrictChanged(function (cong_dist, mocs) {
 		var text = "";
 		if (cong_dist) {
@@ -211,6 +218,19 @@
 				var c = moc_record_matches_user(cosponsors[i], cong_dist, mocs);
 				if (c)
 					text += c + " is a cosponsor. ";
+			}
+			for (var i = 0; i < major_votes.length; i++) {
+				var t = [];
+				for (var j = 0; j < major_votes[i].mocs.length; j++) {
+		            var v = moc_record_matches_user(major_votes[i].mocs[j].moc, cong_dist, mocs);
+		            if (v) {
+	 		            v = v.replace(/^Your /, "your ");
+		                t.push(v + "voted " + major_votes[i].mocs[j].vote);
+		            }
+				}
+				if (t.length > 0) {
+					text += "On " + major_votes[i].date + " " + t.join(" and ") + ". ";
+				}
 			}
 		}
 		$('#yourreps').toggleClass('hidden', text=="");

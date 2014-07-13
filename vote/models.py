@@ -206,15 +206,16 @@ class Vote(models.Model):
     def summary(self):
         return self.result + " " + str(self.total_plus) + "/" + str(self.total_minus)
         
-    def get_options(self):
-        """The options available for the voters of this vote. Returned as key/value pairs. The keys correspond to the voter data, and the values are the display text for this option ('aye', 'nay', 'yea', 'no', etc.)"""
-        return dict((opt.key, opt.value) for opt in self.options.all())
-    def get_voters(self):
-        """The way the voters voted in this vote."""
+    def simple_record(self):
+        # load people and their roles
+        all_voters = list(self.voters.all().select_related('person', 'option'))
+        persons = [x.person for x in all_voters if x.person != None]
+        load_roles_at_date(persons, self.created)
+
         return [
-            { "person": v.person_id, "value": v.option.key } if v.voter_type_is_member else
-            { "vice_president": True, "value": v.option.key }
-            for v in Voter.objects.filter(vote=self)
+            { "vote": v.option.value, "moc": v.person.role.simple_record() }
+            for v in all_voters
+            if v.voter_type_is_member
         ]
 
     @staticmethod
