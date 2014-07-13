@@ -25,16 +25,21 @@ def compute_productivity(congress, days_in):
 
 	# laws
 
-	enacted_bills = list(Bill.objects.filter(
+	enacted_bills = Bill.objects.filter(
 		congress=congress,
 		current_status__in=BillStatus.final_status_passed_bill,
-		current_status_date__lte=corresponding_day))
+		current_status_date__lte=corresponding_day)
+
+	#enacted_bills = (enacted_bills.filter(title__contains="Appropriations") | enacted_bills.filter(title__contains="Authorization")).distinct()
+
+	enacted_bills = list(enacted_bills)
 	enacted_bills_count = len(enacted_bills)
 
 	enacted_bill_pages = 0
 	enacted_bill_words = 0
 	enacted_bill_pages_missing = 0
 	for b in enacted_bills:
+		#print b
 		pp = load_bill_text(b, None, mods_only=True).get("numpages")
 		if pp is None:
 			enacted_bill_pages_missing += 1
@@ -68,14 +73,18 @@ def compute_productivity(congress, days_in):
 
 	timespan = "%d (%d-%d)" % (congress, get_congress_dates(congress)[0].year, get_congress_dates(congress)[1].year-1)
 	row = [timespan, enacted_bills_count, enacted_bill_pages, enacted_bill_words, house_votes, senate_votes, "Yes" if congress_same_party else "No", "Yes" if branches_same_party else "No"]
-	#W.writerow(row)
-	print("<tr>%s</tr>" % "".join( "<td>%s</td> " % td for td in row) )
+	W.writerow(row)
+	#print("<tr>%s</tr>" % "".join( "<td>%s</td> " % td for td in row) )
 
 
-#days_in = (datetime.now().date() - get_congress_dates(CURRENT_CONGRESS)[0])
-#print("We are %d days into the %d Congress" % (days_in.days, CURRENT_CONGRESS))
-days_in = timedelta(days=506)
-print("Using %s days." % days_in)
+# Look at corresponding time periods from past Congresses.
+# Go back a few days because our data isn't real time!
+days_in = (datetime.now().date() - get_congress_dates(CURRENT_CONGRESS)[0]) \
+	- timedelta(days=4)
+print("We are about %d days into the %d Congress" % (days_in.days, CURRENT_CONGRESS))
+
+days_in = timedelta(days=9999) #544 is 3/4ths
+print("Using: %s" % days_in)
 
 for c in range(93, 113+1):
 	compute_productivity(c, days_in)
