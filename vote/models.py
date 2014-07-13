@@ -70,6 +70,8 @@ class Vote(models.Model):
         # The ordering makes sure votes are in the right order on bill pages.
         ordering = ["created", "chamber", "number"]
         unique_together = (('congress', 'chamber', 'session', 'number'),)
+
+    MAJOR_CATEGORIES = (VoteCategory.passage_suspension, VoteCategory.passage, VoteCategory.passage_part, VoteCategory.nomination, VoteCategory.ratification, VoteCategory.veto_override)
         
     api_additional_fields = {
         "link": lambda obj : settings.SITE_ROOT_URL + obj.get_absolute_url(),
@@ -109,7 +111,7 @@ class Vote(models.Model):
         
     @property
     def is_major(self):
-        return self.category in (VoteCategory.passage_suspension, VoteCategory.passage, VoteCategory.passage_part, VoteCategory.nomination, VoteCategory.ratification, VoteCategory.veto_override)
+        return self.category in Vote.MAJOR_CATEGORIES
 
     @property
     def is_on_passage(self):

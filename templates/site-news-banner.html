@@ -1,5 +1,35 @@
-<div class="sitenewsbody" data-seq="61">
+{% load govtrack_utils %}
+<div class="sitenewsbody" data-seq="62">
+	{% comment %}
 	<p>Check out what&rsquo;s <a href="https://www.govtrack.us/blog/2014/05/12/govtracks-winter-updates/">new on GovTrack</a>.</p>
+	{% endcomment %}
+
+	{% if highlighted_vote %}
+	<p id="highlighted_vote">
+		<span class="hidden" style="display: block">&nbsp;</span>
+		<a href="{{highlighted_vote.link}}">{{highlighted_vote.title}}</a>
+	</p>
+	<script>
+	var highlighted_vote = {{highlighted_vote|json}};
+	$(function() { // delay until the end because moc_record_matches_user isn't available where this template is inserted
+		onUserDistrictChanged(function(cong_dist, mocs) {
+			var V = []
+	        for (var i = 0; i < highlighted_vote.data.length; i++) {
+	            var v = moc_record_matches_user(highlighted_vote.data[i].moc, cong_dist, mocs);
+	            if (v) {
+	            	if (V.length > 0) v = v.replace(/^Your /, "your ");
+	                V.push(v + "voted " + highlighted_vote.data[i].vote);
+	            }
+	        }
+	        if (V.length > 0) {
+	        	$('#highlighted_vote span').removeClass('hidden').text(V.join(" and ") + " on");
+	        } else {
+	        	$('#highlighted_vote span').addClass('hidden');
+	        }
+		})
+	})
+	</script>
+	{% endif %}
 
 	{% comment %}
 	<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">

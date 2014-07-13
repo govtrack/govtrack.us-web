@@ -59,6 +59,21 @@ def template_context_processor(request):
             cache.set("trending_feeds", trf, 60*60*2)
         trending_feeds = (datetime.datetime.now(), [Feed.objects.get(id=f) for f in trf])
     context["trending_feeds"] = trending_feeds[1]
+
+    # Highlight a recent vote. We don't yet need to know the user's district
+    # --- that will happen client-side.
+    def get_highlighted_vote():
+        from vote.models import Vote, VoteCategory
+        candidate_votes = Vote.objects.filter(category__in=Vote.MAJOR_CATEGORIES).exclude(related_bill=None).order_by('-created')
+        for v in candidate_votes:
+            return { "title": v.question, "link": v.get_absolute_url(), "data": v.simple_record() }
+        return "NONE"
+    highlighted_vote = cache.get("highlighted_vote")
+    if highlighted_vote is None:
+        highlighted_vote = get_highlighted_vote()
+        cache.set("highlighted_vote", highlighted_vote, 60*60*2)
+    if highlighted_vote != "NONE":
+        context["highlighted_vote"] = highlighted_vote
     
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
