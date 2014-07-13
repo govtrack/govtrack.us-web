@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.http import Http404, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
@@ -19,7 +19,7 @@ from registration.helpers import json_response
 from events.models import Feed
 import us
 
-import re
+import re, json
 from datetime import datetime, timedelta, time
 
 @anonymous_view
@@ -536,11 +536,27 @@ def videos(request, video_id=None):
     return render_to_response('website/videos.html', { "video_id": video_id }, RequestContext(request))
 
 
-@login_required
-@json_response
 def set_district(request):
-    prof = request.user.userprofile()
-    if request.POST.get("state") not in list(us.statenames)+["XX"]: return HttpResponseBadRequest(request.POST.get("state") + "|"+str(set(us.statenames)))
-    prof.congressionaldistrict = "%s%02d" % (request.POST.get("state"), int(request.POST.get("district")))
-    prof.save()
-    return { "status": "ok" }
+    # Who represents?
+    from person.models import Person
+    mocs = None
+    if request.POST.get("state") != "XX":
+        mocs = [p.id for p in Person.from_state_and_district(request.POST.get("state"), int(request.POST.get("district")))]
+
+    # Form response.
+    response = HttpResponse(
+        json.dumps({ "status": "ok", "mocs": mocs }),
+        mimetype="application/json")
+
+    if request.user.is_authenticated():
+        # Save to database.
+        prof = request.user.userprofile()
+        if request.POST.get("state") not in list(us.statenames)+["XX"]: return HttpResponseBadRequest(request.POST.get("state") + "|"+str(set(us.statenames)))
+        prof.congressionaldistrict = "%s%02d" % (request.POST.get("state"), int(request.POST.get("district")))
+        prof.save()
+    else:
+        # Save in cookie.
+        response.set_cookie("cong_dist", json.dumps({ "state": request.POST.get("state"), "district": int(request.POST.get("district")) }),
+            max_age=60*60*24*21)
+
+    return response

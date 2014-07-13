@@ -1,0 +1,256 @@
+<!-- modal to ask what district you live in -->
+<div id="askcd_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="askcdModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="askcdModalTitle">Select Your District</h4>
+      </div>
+      <div class="modal-body">
+        <p>Please tell us what congressional district you live in so that we can customize your GovTrack experience.</p>
+
+	<form role="form" onsubmit="return askcd_submit();" style="margin: 1em 0 0 0;">
+	  <div class="form-group">
+	    <label for="askcdState">What state do you live in?</label>
+	    <select class="form-control" id="askcdState" size="1">
+	    	<option value="">(Select State)</option>
+	    	{% for statekey, statename, stateapp in STATE_CHOICES %}
+	    		<option value="{{statekey}}" data-districts="{{stateapp}}">{{statename}}</option>
+	    	{% endfor %}
+	    </select>
+	  </div>
+	  <div id="askcdDistrictGroup" class="form-group" style="margin-bottom: 0">
+	    <label for="askcdAddress">What is your home&rsquo;s street address?</label>
+	    <input id="askcdAddress" type="text" class="form-control" placeholder="123 Main St, Cincinatti, OH"/>
+	    <span class="help-block" style="font-size: 85%">We do not store your address and only use it right now to find your district.</span>
+	  </div>
+	</form>            
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="return askcd_submit(true);">Not Now</button>
+      	<button type="button" class="btn btn-primary" onclick="return askcd_submit();">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal to show geocoder result -->
+<div id="askcd_modal_two" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="askcdModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="askcdModalTitle">Select Your District</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-xs-6">
+            <p>Please check that map to make sure we found the location of your home correctly.</p>
+            <p class="text-warning">Drag the marker to your home if it is not in the right location. Zoom out if necessary.</p>
+            <p>Your address is in <span id="askcd_result"> </span>.</p>
+            <p>If everything looks right, click OK below the map to continue.</p>
+          </div>
+          <div class="col-xs-6">
+            <div id="askcd_map" style="width: 100%; border: 1px solid black;"> </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// show dialog to ask user where they live
+function show_askcd() {
+	$('#askcdState').val('');
+	$('#askcdDistrictGroup').hide();
+	$('#askcd_modal .btn-primary').attr('disabled', 'disabled');
+	$('#askcd_modal').modal();
+  return false;
+}
+
+// toggle asking for an address depending on whether the state is at-large
+$('#askcdState').change(function() {
+	var val = $('#askcdState').val();
+	if (val == "") {
+		$('#askcdDistrictGroup').slideUp();
+		$('#askcd_modal .btn-primary').prop('disabled', true).text("Next >");
+	} else {
+		var ndistricts = $('#askcdState option[value=' + val + ']').attr('data-districts');
+		if (ndistricts == "T" || ndistricts == "1") {
+			$('#askcdDistrictGroup').slideUp();
+			$('#askcd_modal .btn-primary').prop('disabled', false).text("OK");
+		} else {
+			$('#askcdDistrictGroup').slideDown();
+			$('#askcd_modal .btn-primary').prop('disabled', false).text("Next >");
+		}
+	}
+});
+
+// user says OK here's my state or state & address
+function askcd_submit(is_cancel) {
+  // record GA event
+  try { 
+  	ga('send', 'event', 'miscellaneous', 'set-district');
+  } catch(err){}
+
+  // get user's state
+	var val = $('#askcdState').val();
+	if (is_cancel) val = "XX";
+	if (val == "") return false;
+
+  // did we ask for an address?
+	var ndistricts = $('#askcdState option[value=' + val + ']').attr('data-districts');
+	if (ndistricts == "T" || ndistricts == "1" || val == "XX") {
+		// submit at-large district, or use cancelled this dialog (set district to "XX0")
+		$.ajax('/accounts/_set_district',
+			{
+				type: "POST",
+				data: {
+					state: val,
+					district: "0"
+				},
+        success: function(res) {
+          // Update page, if the page supports it.
+          if (val != "XX")
+            onUserDistrictChanged(val, 0, res.mocs);
+        }
+			}
+		);
+
+    $('#askcd_modal').modal('hide');
+    if (val == "XX") onUserDistrictChanged(); // all nulls to reset
+    return false;
+  }
+
+  // geocode the address
+  var addr = $('#askcdAddress').val();
+  if (!addr) return false;
+  $('#askcd_modal .btn-primary').prop('disabled', true);
+	var geocoder = new google.maps.Geocoder();
+	geocoder.geocode(
+		{
+			address: addr,
+			region: 'us',
+			componentRestrictions: { administrativeArea: val }
+		},
+		function(results, status) {
+      // Failed to geocode
+			if (status != google.maps.GeocoderStatus.OK) {
+        alert("Sorry, Google couldn't find that address: " + status);
+        $('#askcd_modal .btn-primary').prop('disabled', false);
+				return;
+			}
+
+      // Look up the district at that coordinate
+			var geocoder_result = results[0].geometry.location;
+			$.ajax({
+				url: "/congress/members/ajax/district_lookup",
+				data: {
+					lat: geocoder_result.lat(),
+					lng: geocoder_result.lng()
+				},
+				dataType: "json",
+				success: function(data) {
+          // Did not resolve.
+					if (!data.state) {
+						alert("The address does not appear to be within a United States Congressional District.");
+	    			$('#askcd_modal .btn-primary').prop('disabled', false);
+						return;
+					}
+
+          function on_has_district(data) {
+            // Update UI with the result.
+            $('#askcd_result').text(data.state + "-" + data.district);
+            //$('#askcd_modal_two .btn-info').attr('href', "/congress/members/" + data.state + "/" + data.district + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat());
+
+            // Save into user's account.
+            $.ajax('/accounts/_set_district',
+              {
+                type: "POST",
+                data: {
+                  state: data.state,
+                  district: data.district
+                },
+                success: function(data2) {
+                  // Update page, if the page supports it.
+                  onUserDistrictChanged(data.state, parseInt(data.district), data2.mocs);
+                }
+              }
+            );
+          }
+
+          // Save.
+          on_has_district(data);
+      
+          // Show the result with a map.
+
+   				$('#askcd_modal').modal('hide');
+   				$('#askcd_modal_two').modal();
+          $('#askcd_modal_two').on('shown.bs.modal', function (e) {
+            // Set the map height since that's hard to do in CSS.
+            $('#askcd_map').css({ height: .7 * $('#askcd_map').width() + 'px'});
+
+            // Create the map.
+            var map = map_controller();
+            map.init(
+              document.getElementById("askcd_map"),
+              data.state,
+              null, // show all districts in the overlay, not just the one we think the user is in
+              {
+                zoom: 13,
+                center: geocoder_result,
+              });
+
+            // Add a marker at the location of the user's address. When the user
+            // moves the marker, see what district the marker is in.
+            var marker = map.addMarker(geocoder_result);
+            marker.setIcon("/static/images/map-home-marker-icon.png");
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(function() { marker.setAnimation(null); }, 2000)
+
+            marker.setDraggable(true);
+            google.maps.event.addListener(marker, "dragend", function(e) {
+              $('#askcd_modal_two button').addClass("disabled");
+              $('#askcd_result').text("...");
+
+              // Look up the district at that coordinate
+              var geocoder_result = results[0].geometry.location;
+              $.ajax({
+                url: "/congress/members/ajax/district_lookup",
+                data: {
+                  lat: marker.getPosition().lat(),
+                  lng: marker.getPosition().lng()
+                },
+                dataType: "json",
+                success: function(data) { 
+                  $('#askcd_modal_two button').removeClass("disabled");
+                  if (!data.state) {
+                    alert("That location is not within a United States Congressional District. Please move the marker to your home address.");
+                    return;
+                  }
+                  on_has_district(data);
+                }});
+            });
+          })
+				}
+			});
+		});
+
+	return false;
+}
+var win_loc_hash = window.location.hash; // may change between now and ()'s execution
+$(function() {
+		setTimeout(function() {
+			if (the_segment == "Other" && cong_dist == null && win_loc_hash != "#track") {
+				show_askcd();
+			}
+		}, 1000)
+});
+</script>
+
+<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
+<!-- / ask for district -->

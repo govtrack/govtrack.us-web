@@ -15,6 +15,11 @@
 	{% endif %}
     .stats th { text-align: center; }
 
+    p#yourreps {
+        margin: 1em 0 0 0;
+        font-style: italic;
+    }
+
 	#vote_notes {
 		margin: 4px 0 12px 0;
 		font-size: 85%;
@@ -127,6 +132,25 @@ $(function() {
 </script>
 {% endblock %}
 
+{% block body_scripts %}
+<script>
+// customization based on user's district
+var voters = [{% for voter in voters %}{ vote: "{{ voter.option.value|escapejs }}", moc: {% if voter.voter_type_is_member %}{{voter.person.role.simple_record|json}}{% else %}null{% endif %}}{% if not forloop.last %}, {% endif %}{% endfor %}];
+onUserDistrictChanged(function (cong_dist, mocs) {
+    var text = "";
+    if (cong_dist) {
+        for (var i = 0; i < voters.length; i++) {
+            var v = moc_record_matches_user(voters[i].moc, cong_dist, mocs);
+            if (v)
+                text += v + "voted " + voters[i].vote + ". ";
+        }
+    }
+    $('#yourreps').toggleClass('hidden', text=="");
+    $('#yourreps').text(text);
+});
+</script>
+{% endblock %}
+
 {% block crumbs %}
 <ul>
     <li><a href="{% url "congress_home" %}">Congress</a></li>
@@ -158,7 +182,7 @@ $(function() {
 </div>
 </div>
 
-<div id="vote_explainer" style="padding-bottom: 1em;">
+<div id="vote_explainer">
     {% if vote.category == VoteCategory.amendment %}
     <p>This was a vote to approve or reject an amendment.</p>
     {% endif %}
@@ -186,7 +210,10 @@ $(function() {
     {% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
 </div>
     
-<dl style="margin: 0">
+<p id="yourreps" class="hidden"></p>
+
+{% if vote.related_bill or vote.related_amendment %}
+<dl style="margin: 1em 0 0 0">
     {% if vote.related_bill %}
     <dt>{% if vote.category != VoteCategory.passage and vote.category != VoteCategory.passage_suspension and vote.category != VoteCategory.amendment %}Related {% endif %}{{vote.related_bill.noun|capfirst}}:</dt>
     <dd><a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>
@@ -213,9 +240,8 @@ $(function() {
         on {{vote.related_amendment.offered_date|date:"F j, Y"}}
         </dd>
     {% endif %}
-    
-
 </dl>
+{% endif %}
 {% endblock %}
 
 {% block body %}

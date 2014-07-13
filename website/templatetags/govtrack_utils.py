@@ -4,6 +4,7 @@ from django.utils.encoding import force_unicode
 from django.utils import safestring
 from django.template.defaultfilters import stringfilter
 import random, markdown2
+import json as jsonlib
 
 register = template.Library()
 
@@ -30,3 +31,7 @@ def ordinalhtml(value):
 @stringfilter
 def markdown(value):
     return safestring.mark_safe(markdown2.markdown(force_unicode(value), safe_mode=True))
+
+@register.filter(is_safe=True)
+def json(value):
+    return safestring.mark_safe(jsonlib.dumps(value))

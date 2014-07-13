@@ -5,178 +5,58 @@
 {% block meta_keywords %}U.S. Congress,congressional districts,map,senators,representatives,congressmen,House of Representatives,Senate{% endblock %}
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
+	{% if not debug %}
 	<script type="text/javascript" src="/gis/static/js/google_maps_helpers.js"></script>
 	<script type="text/javascript" src="/gis/static/js/maps_helpers.js"></script>
+	{% else %}
+	<script type="text/javascript" src="http://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
+	<script type="text/javascript" src="http://gis.govtrack.us/static/js/maps_helpers.js"></script>
+	{% endif %}
 	<script type="text/javascript">
-		var current_layer = null;
-		function showOverlay() {
-			current_layer = "cd-2012";
-			{% if state and district %}current_layer += "/{{state|lower}}-{{district|stringformat:"02d"}}";
-			{% endif %}
-			createDistrictsOverlay(current_layer);
-		}
-		
-		/**************************************/
-		var tilesizeshift = 1; // 0=256, 1=use 512px tiles instead of 256
-		
-		// Use PNG or GIF tiles? IE8 and earlier don't support transparent PNGs properly,
-		// so use opaque GIF tiles but set the transparency on the map layer appropriately.
-		var tileimgformat = 'png';
-		if (navigator.appName == 'Microsoft Internet Explorer' && new RegExp("MSIE [678]").exec(navigator.userAgent)) tileimgformat = 'gif';
-		
-		function createDistrictsOverlay(layer) {
-			var tileimgsize = 256 << tilesizeshift;
-		
-			// Apply the map layer.
-			var overlay = new google.maps.ImageMapType({
-			  getTileUrl: function(coord, zoom) {
-				  return "/gis/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
-			  },
-			  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
-			  isPng: tileimgformat == "png",
-			  minZoom: 3,
-			  maxZoom: 28,
-			  opacity: tileimgformat == "png" ? .85 : .65
-			});
-			
-			map.overlayMapTypes.clear();
-			map.overlayMapTypes.insertAt(0, overlay);
-			
-			// For IE8 and earlier, the layer above only applies outlines and labels --- at high opacity.
-			// Apply a second layer for the boundary fill color --- at low opacity.
-			if (tileimgformat != "png") {
-				var overlay2 = new google.maps.ImageMapType({
-				  getTileUrl: function(coord, zoom) {
-					  return "/gis/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=fill");
-				  },
-				  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
-				  isPng: false,
-				  minZoom: 3,
-				  maxZoom: 28,
-				  opacity: .15
-				});
-				
-				map.overlayMapTypes.insertAt(0, overlay2);
-			}
-		}
-		/**************************************/
-		
 		var map;
-		
+
 		$(function() {
-			// Pretty general Google Maps API v3 map options.
-			var myOptions = {
-				zoom: {{center_zoom}},
-				center: new google.maps.LatLng({{center_lat}}, {{center_long}}),
-				mapTypeId: google.maps.MapTypeId.ROADMAP,
-				panControl: false,
-				zoomControl: true,
-				mapTypeControl: false,
-				scaleControl: true,
-				streetViewControl: false,
-				styles: 			
-					[
-					  {
-						"featureType": "water",
-						"stylers": [
-						  { "visibility": "simplified" }
-						]
-					  },{
-						"featureType": "transit.station.bus",
-						"stylers": [
-						  { "visibility": "off" }
-						]
-					  },{
-						"featureType": "poi.business",
-						"stylers": [
-						  { "visibility": "off" }
-						]
-					  },{
-						"featureType": "landscape.man_made",
-						"stylers": [
-						  { "visibility": "off" }
-						]
-					  },{
-						"featureType": "landscape.natural",
-						"stylers": [
-						  { "lightness": 100 }
-						]
-					  },{
-						"featureType": "administrative.province",
-						"elementType": "geometry.stroke",
-						"stylers": [
-						  { "invert_lightness": true }
-						]
-					  },{
-						"featureType": "poi.park",
-						"elementType": "geometry.fill",
-						"stylers": [
-						  { "visibility": "off" }
-						]
-					  }
-					]			
-				};
-			map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-			
-			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#fullscreen')[0]);
-			
-			showOverlay(false);
+			map = map_controller();
+			map.init(
+				document.getElementById("map_canvas"),
+				"{{state|lower}}",
+				null,
+				{
+					zoom: {{center_zoom}},
+					center: new google.maps.LatLng({{center_lat}}, {{center_long}}),
+				}
+				);
 
 			{% if request.GET.marker %}
-				lnglat = "{{request.GET.marker}}".split(":");
-				loc = new google.maps.LatLng(lnglat[1], lnglat[0]);
+				var lnglat = "{{request.GET.marker}}".split(":");
+				var loc = new google.maps.LatLng(lnglat[1], lnglat[0]);
 				map.setCenter(loc);
-				var marker = new google.maps.Marker({
-					map: map, 
-					position: loc
-				});
 				map.setZoom(13);					
+				map.addMarker(loc);
 			{% endif %}
 			
-			google.maps.event.addListener(map, "bounds_changed", function() {
-				var b = map.getBounds();
+			map.onBoundsChanged(function(b) {
 				$("#embedbounds").text(Math.round(b.getSouthWest().lng()*1000)/1000 + "," + Math.round(b.getNorthEast().lat()*1000)/1000 + "," + Math.round(b.getNorthEast().lng()*1000)/1000 + "," + Math.round(b.getSouthWest().lat()*1000)/1000);
 			});
 			
-			if (typeof getTileCoordinate != "undefined") { // local debugging
-			function hit(coord, func) {
-				map_hit_test(
-					getTileCoordinate(coord, map),
-					current_layer.split("/")[0], // when looking at a district, still do hit testing on whole country
-					null,
-					func,
-					"/gis");
-			}
-			
-			google.maps.event.addListener(map, "mousemove", function(e) {
-				var div = $('#map_district_hover_container');
-				var lbl = $('#map_district_hover_label');
-				if (div.is(":visible")) lbl.html("Loading...");
-				hit(e.latLng,
-					function(key, data) {
-						if (data) {
-							lbl.html(data.name);
-							div.show();
-						} else {
-							div.hide();
-						}
-					});
-			});
-									
-			map.controls[google.maps.ControlPosition.TOP_RIGHT].push($('#map_controls')[0]);
-			}
-
-			/*$('#ctrl_layer_2010, #ctrl_layer_2012').click(function() {
-					showOverlay(this.id == "ctrl_layer_2012");
-					$('#ctrl_layer_2010, #ctrl_layer_2012').removeClass("active");
-					$(this).addClass("active");
-					if (this.id == "ctrl_layer_2012") {
-						if (first_time_on_redistricting)
-							alert("Please note:\n\nNew Members of Congress take office in early January. Your current Members of Congress are still based on the 2010 district lines.");
-						first_time_on_redistricting = false;
+			map.addControl(google.maps.ControlPosition.TOP_RIGHT, $('#map_controls')[0])
+			map.onMouseMoveHit(
+				function(key, data) {
+					var div = $('#map_district_hover_container');
+					var lbl = $('#map_district_hover_label');
+					if (data) {
+						lbl.html(data.name);
+						div.show();
+					} else {
+						div.hide();
 					}
-			});*/
+				},
+				function() {
+					var div = $('#map_district_hover_container');
+					var lbl = $('#map_district_hover_label');
+					if (div.is(":visible")) lbl.html("Loading...");
+				});
+
 		});
 		
 		var is_full_screen = false;

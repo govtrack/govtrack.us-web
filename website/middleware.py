@@ -88,67 +88,48 @@ def template_context_processor(request):
         if is_ip_in_any_range(ip, EOP_NET_RANGES):
             context["remote_net_eop"] = True
             request._track_this_user = True
-        
-        try:
-            cong_dist = json.loads(request.COOKIES["cong_dist"])
-        except:
-            cong_dist = None
-        
-        if settings.GEOIP_DB_PATH:
-            user_loc = geo_ip_db.geos(ip)
-            context["is_dc_local"] = user_loc.distance(washington_dc) < .5
-            
-            # geolocate to a congressional district if not known
-            if not cong_dist and False:
-                from person.views import do_district_lookup
-                cong_dist = do_district_lookup(*user_loc.coords)
-                cong_dist["queried"] = True
-
-        if cong_dist and "error" not in cong_dist:
-            from person.models import PersonRole, RoleType, Gender
-            import random
-            def get_key_vote(p):
-                from vote.models import Vote
-                
-                v = 113340
-                descr = "CISPA"
-                
-                v = Vote.objects.get(id=v)
-                try:
-                    return {
-                        "link": v.get_absolute_url(),
-                        "description": descr,
-                        "option": p.votes.get(vote=v).option.key,
-                    }
-                except:
-                    return None
-            def fmt_role(r):
-                return {
-                    "id": r.person.id,
-                    "name": r.person.name_and_title(),
-                    "link": r.person.get_absolute_url(),
-                    "type": RoleType.by_value(r.role_type).key,
-                    "pronoun": Gender.by_value(r.person.gender).pronoun,
-                    "key_vote": get_key_vote(r.person),
-                }
-            qs = PersonRole.objects.filter(current=True).select_related("person")    
-            cong_dist["reps"] = [fmt_role(r) for r in 
-                qs.filter(role_type=RoleType.representative, state=cong_dist["state"], district=cong_dist["district"])
-                | qs.filter(role_type=RoleType.senator, state=cong_dist["state"])]
-                
-            if settings.DEBUG:
-                # I need to test with more than my rep (just our DC delegate).
-                cong_dist["reps"] = [fmt_role(r) for r in random.sample(PersonRole.objects.filter(current=True), 3)]
-            
-            random.shuffle(cong_dist["reps"]) # for varied output
-            
-            context["geolocation"] = json.dumps(cong_dist)
-        if cong_dist: # whether or not error
-            request.cong_dist_info = cong_dist
-                
     except:
         pass
     
+    # Add a context variable for if the user is near DC geographically.
+
+    try:
+        if settings.GEOIP_DB_PATH:
+            user_loc = geo_ip_db.geos(ip)
+            context["is_dc_local"] = user_loc.distance(washington_dc) < .5
+    except:
+        pass
+
+    # Have we put the user's district in a cookie?
+
+    try:
+        cong_dist = json.loads(request.COOKIES["cong_dist"])
+    except:
+        cong_dist = None
+                   
+    # Geolocate to a congressional district if not known
+    if False and (not cong_dist or cong_dist['state'] == 'XX'):
+        try:
+            from person.views import do_district_lookup
+            cong_dist = do_district_lookup(*user_loc.coords)
+            cong_dist["queried"] = True
+        except:
+            pass
+
+    # If the user is logged in, is the district in the user's profile?
+
+    if request.user.is_authenticated():
+        profile = request.user.userprofile()
+        if profile.congressionaldistrict != None:
+            # pass through XX00 so site knows not to prompt
+            cong_dist = { "state": profile.congressionaldistrict[0:2], "district": int(profile.congressionaldistrict[2:]) }
+
+    # If we have a district, get its MoCs.
+    if cong_dist:
+        from person.models import Person
+        context["congressional_district"] = json.dumps(cong_dist)
+        context["congressional_district_mocs"] = json.dumps([p.id for p in Person.from_state_and_district(cong_dist["state"], cong_dist["district"])])
+                
     return context
   
 class GovTrackMiddleware:

@@ -79,6 +79,18 @@ class Person(models.Model):
     def __unicode__(self):
         return self.name
 
+    @staticmethod
+    def from_state_and_district(state, district):
+        qs = PersonRole.objects.filter(current=True).select_related("person")
+        qs = qs.filter(role_type=RoleType.representative, state=state, district=district) \
+            | qs.filter(role_type=RoleType.senator, state=state)
+        ret = []
+        for role in qs:
+            person = role.person
+            person.role = role
+            ret.append(person)
+        return ret
+
     @property
     def fullname(self):
         return u'%s %s' % (self.firstname, self.lastname)
@@ -480,6 +492,13 @@ class PersonRole(models.Model):
         if self.party == "Democrat": return "Republican"
         if self.party == "Republican": return "Democrat"
         return None
+
+    def simple_record(self):
+        return {
+            "id": self.person.id,
+            "state": self.state, "district": self.district, "title": self.get_title().lower(),
+            "name": self.person.name_no_details(),
+            }
 
 # Feeds
 

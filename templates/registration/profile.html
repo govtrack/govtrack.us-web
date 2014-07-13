@@ -7,8 +7,7 @@
 
 {% block head %}
 <style>
-h2 { border-bottom: 1px solid #444; }
-h4 { margin-top: 1.5em; }
+h2 { font-size: 18px; border-bottom: 1px solid #444; }
 
 .login label {
 	display: block;
@@ -29,10 +28,25 @@ h4 { margin-top: 1.5em; }
 <div id="content">
 	
 <div class="row" style="margin-top: .5em">
-<div class="col-sm-6" style="padding-left: 0; padding-right: 2em">
+<div class="col-sm-6">
+	<h2>Your congressional district</h2>
+
+	<p class="no-district hidden">If you <a href="#" onclick="return show_askcd();">pick your congressional district</a> we will customize GovTrack to show you more relevant information.</p>
+	<p class="has-district hidden">Your congressional district is set to <span style="font-weight: bold"> </span>. If that&rsquo;s no longer correct, you may <a href="#" onclick="return show_askcd();">pick your congressional district</a> again.</p>
+	<script>
+	onUserDistrictChanged(function (cong_dist, mocs) {
+		$('.no-district').toggleClass('hidden', !!cong_dist)
+		$('.has-district').toggleClass('hidden', !cong_dist)
+		if (!cong_dist) return;
+		if (cong_dist.district > 0)
+			$('.has-district span').text(cong_dist.state + "-" + cong_dist.district)
+		else
+			$('.has-district span').text(cong_dist.state + " (at large)")
+	});
+	</script>
+
 	<h2>May we email you?</h2>
 	
-	<h4>Subscription Lists</h4>
 	{% with request.user.userprofile.lists_with_email as lists %}
 	{% if lists|length > 0 %}
 	
@@ -52,7 +66,6 @@ h4 { margin-top: 1.5em; }
 	{% endif %}
 	{% endwith %}
 	
-	<h4>Other Emails</h4>
 	<p style="margin-top: 1em">We also send our users occasional announcements about changes to GovTrack.us and government transparency in Congress, about once a year. Please uncheck the box if you do not want to receive these emails.</p>
 	<p>We will send you...</p>
 	<form action="/accounts/update_settings" method="post" style="margin-left: 2em">{% csrf_token %}

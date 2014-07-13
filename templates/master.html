@@ -67,8 +67,44 @@
 		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?2013-07-07"></script>
 		{% block extra_js %}{% endblock %}
 		
-
 		<script type="text/javascript">
+		var user_district_callbacks = [];
+		function onUserDistrictChanged() {
+			function call_callback(cb) {
+				// When there's known data, the state may be XX to indicate the user does not want to be prompted again for his/her district.
+				var cd = cong_dist;
+				if (cd && cd.state == "XX") cd = null;
+
+				// Convert list to hashable array.
+				var mocs = { };
+				if (cong_dist_mocs) {
+					for (var i = 0; i < cong_dist_mocs.length; i++)
+						mocs[cong_dist_mocs[i]] = cong_dist_mocs[i];
+				}
+
+				// Call.
+				cb(cd, mocs);
+			}
+
+			if (typeof arguments[0] == "function") {
+				// Called with a callback. Execute immediately with known data, then save callback for later.
+				var callback = arguments[0];
+				call_callback(callback);
+				user_district_callbacks.push(callback);
+			} else {
+				// Called with a new state and district. Save new info and execute callbacks.
+				if (arguments[0] == null) {
+					cong_dist = null;
+					cong_dist_mocs = null;
+				} else {
+					cong_dist = { state: arguments[0], district: arguments[1] };
+					cong_dist_mocs = arguments[2]; // array of IDs of the user's current MoCs
+				}
+				for (var i = 0; i < user_district_callbacks.length; i++)
+					call_callback(user_district_callbacks[i]);
+			}
+		}
+
 		window.fbAsyncInitFuncs = Array(); // Facebook init functions should be defined between here and the FB embed later
 		
 		{% if not debug %}
@@ -86,7 +122,6 @@
 		{% else %}
 			window.ga = function() { };
 		{% endif %}
-
 		</script>
 
 		{% if not debug %}
@@ -399,177 +434,8 @@
 	}
 	</script>
 
-
-	<!-- modal to ask what district you live in -->
-    <div id="askcd_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="askcdModalTitle" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="askcdModalTitle">Select Your District</h4>
-          </div>
-          <div class="modal-body">
-            <p>Please tell us what congressional district you live in so that we can customize your GovTrack experience.</p>
-
-			<form role="form" onsubmit="return askcd_submit();" style="margin: 1em 0 0 0;">
-			  <div class="form-group">
-			    <label for="askcdState">What state do you live in?</label>
-			    <select class="form-control" id="askcdState" size="1">
-			    	<option value="">(Select State)</option>
-			    	{% for statekey, statename, stateapp in STATE_CHOICES %}
-			    		<option value="{{statekey}}" data-districts="{{stateapp}}">{{statename}}</option>
-			    	{% endfor %}
-			    </select>
-			  </div>
-			  <div id="askcdDistrictGroup" class="form-group">
-			    <label for="askcdAddress">What is your home&rsquo;s street address?</label>
-			    <input id="askcdAddress" type="text" class="form-control" placeholder="123 Main St, Cincinatti, OH"/>
-			    <span class="help-block" style="font-size: 85%">We do not store your address and only use it right now to find your district.</span>
-			  </div>
-			</form>            
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="return askcd_submit(true);">Not Now</button>
-          	<button type="button" class="btn btn-primary" onclick="return askcd_submit();">OK</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="askcd_modal_two" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="askcdModalTitle" aria-hidden="true">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="askcdModalTitle">Select Your District</h4>
-          </div>
-          <div class="modal-body">
-            <p>Thanks. You live in <span id="askcd_result"> </span>.</p>
-          </div>
-          <div class="modal-footer">
-            <a class="btn btn-info" href="about:blank">More Info</a>
-          	<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script>
-    	function show_askcd() {
-    		$('#askcdState').val('');
-    		$('#askcdDistrictGroup').hide();
-    		$('#askcd_modal .btn-primary').attr('disabled', 'disabled');
-    		$('#askcd_modal').modal();
-    	}
-    	$('#askcdState').change(function() {
-    		var val = $('#askcdState').val();
-    		if (val == "") {
-    			$('#askcdDistrictGroup').slideUp();
-	    		$('#askcd_modal .btn-primary').prop('disabled', true).text("Next >");
-    		} else {
-    			var ndistricts = $('#askcdState option[value=' + val + ']').attr('data-districts');
-    			if (ndistricts == "T" || ndistricts == "1") {
-	    			$('#askcdDistrictGroup').slideUp();
-	    			$('#askcd_modal .btn-primary').prop('disabled', false).text("OK");
-    			} else {
-    				$('#askcdDistrictGroup').slideDown();
-	    			$('#askcd_modal .btn-primary').prop('disabled', false).text("Next >");
-    			}
-    		}
-    	});
-    	function askcd_submit(is_cancel) {
-			try { 
-				ga('send', 'event', 'miscellaneous', 'set-district');
-			} catch(err){}
-
-    		var val = $('#askcdState').val();
-    		if (is_cancel) val = "XX";
-    		if (val == "") return false;
-   			var ndistricts = $('#askcdState option[value=' + val + ']').attr('data-districts');
-   			if (ndistricts == "T" || ndistricts == "1" || val == "XX") {
-   				// submit at-large district
-   				$.ajax('/accounts/_set_district',
-   					{
-   						type: "POST",
-   						data: {
-	   						state: val,
-	   						district: "0"
-   						}
-   					}
-   				)
-   				$('#askcd_modal').modal('hide');
-   			} else {
-   				// the user is providing an address
-   				var addr = $('#askcdAddress').val();
-   				if (!addr) return false;
-    			$('#askcd_modal .btn-primary').prop('disabled', true);
-				var geocoder = new google.maps.Geocoder();
-				geocoder.geocode(
-					{
-						address: addr,
-						region: 'us',
-						componentRestrictions: { administrativeArea: val }
-					},
-					function(results, status) {
-						if (status != google.maps.GeocoderStatus.OK) {
-							alert("Sorry, Google couldn't find that address: " + status);
-			    			$('#askcd_modal .btn-primary').prop('disabled', false);
-							return;
-						}
-
-						var geocoder_result = results[0].geometry.location;
-						$.ajax({
-							url: "/congress/members/ajax/district_lookup",
-							data: {
-								lat: results[0].geometry.location.lat(),
-								lng: results[0].geometry.location.lng()
-							},
-							dataType: "json",
-							success: function(data) {
-								if (!data.state) {
-									alert("The address does not appear to be within a United States Congressional District.");
-					    			$('#askcd_modal .btn-primary').prop('disabled', false);
-									return;
-								}
-
-				   				$.ajax('/accounts/_set_district',
-				   					{
-				   						type: "POST",
-				   						data: {
-					   						state: data.state,
-					   						district: data.district
-				   						}
-				   					}
-				   				)
-
-				   				$('#askcd_modal').modal('hide');
-				   				$('#askcd_modal_two').modal();
-
-				   				$('#askcd_result').text(data.state + "-" + data.district);
-				   				$('#askcd_modal_two .btn-info').attr('href', "/congress/members/" + data.state + "/" + data.district + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat());
-							
-							}
-						});
-					});
-   			}
-
-   			return false;
-    	}
-		var win_loc_hash = window.location.hash; // may change between now and ()'s execution
-		{% if request.anonymous %}
-    	$(function() {
-			{# the_user.cd is only available if request.anonymous #}
-    		setTimeout(function() {
-    			if (the_segment == "EOP") {
-    				show_modal("Hello", "<p>Transparency in government is an American value.</p> <p>That's all.</p>");
-    				ga('send', 'event', 'miscellaneous', 'eop-message');
-    			}else if (the_segment == "Other" && the_user && the_user.cd == null && win_loc_hash != "#track") {
-    				show_askcd()
-    			}
-    		}, 1000)
-    	});
-		{% endif %}
-    </script>
-	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
-	<!-- / ask for district -->
+	<script src="/static/js/govtrack.js"></script>
+	{% include "ask_district.html" %}
 
 	{% if not debug %}
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
