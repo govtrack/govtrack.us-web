@@ -108,29 +108,34 @@ def template_context_processor(request):
     
     # Add a context variable for if the user is near DC geographically.
 
+    user_loc = None
     try:
-        if settings.GEOIP_DB_PATH:
+        if settings.GEOIP_DB_PATH and not request.path.startswith("/api/"):
             user_loc = geo_ip_db.geos(ip)
             context["is_dc_local"] = user_loc.distance(washington_dc) < .5
     except:
-        user_loc = None
+        pass
 
     if not request.user.is_authenticated():
         # Have we put the user's district in a cookie?
         try:
             cong_dist = json.loads(request.COOKIES["cong_dist"])
+            x = cong_dist["state"] # validate fields are present
+            x = int(cong_dist["district"]) # ...and valid
         except:
             cong_dist = None
 
         # Geolocate to a congressional district if not known and save it in
         # a cookie for next time.
-        if user_loc and (not cong_dist or cong_dist['state'] == 'XX'):
+        if user_loc and not cong_dist and not request.path.startswith("/api/"):
             try:
                 from person.views import do_district_lookup
                 cong_dist = do_district_lookup(*user_loc.coords)
+                x = cong_dist["state"] # validate fields are present
+                x = int(cong_dist["district"]) # ...and valid
                 request._save_cong_dist = cong_dist
             except:
-                pass
+                cong_dist = None
 
     else:
         # If the user is logged in, is the district in the user's profile?
@@ -138,6 +143,8 @@ def template_context_processor(request):
         if profile.congressionaldistrict != None:
             # pass through XX00 so site knows not to prompt
             cong_dist = { "state": profile.congressionaldistrict[0:2], "district": int(profile.congressionaldistrict[2:]) }
+        else:
+            cong_dist = None
 
     # If we have a district, get its MoCs.
     if cong_dist:

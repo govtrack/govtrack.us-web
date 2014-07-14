@@ -13,6 +13,10 @@
 	var highlighted_vote = {{highlighted_vote|json}};
 	$(function() { // delay until the end because moc_record_matches_user isn't available where this template is inserted
 		onUserDistrictChanged(function(cong_dist, mocs) {
+			if (!cong_dist) {
+				$('#highlighted_vote span').addClass('hidden');
+				return;
+			}
 			var V = []
 	        for (var i = 0; i < highlighted_vote.data.length; i++) {
 	            var v = moc_record_matches_user(highlighted_vote.data[i].moc, cong_dist, mocs);

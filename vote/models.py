@@ -217,7 +217,7 @@ class Vote(models.Model):
         return [
             { "vote": v.option.value, "moc": v.person.role.simple_record() }
             for v in all_voters
-            if v.voter_type_is_member
+            if v.voter_type_is_member and v.person is not None and v.person.role is not None
         ]
 
     @staticmethod
