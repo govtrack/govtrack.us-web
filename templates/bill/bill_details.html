@@ -242,6 +242,22 @@
 {% block extra_css %}
 <!-- bid:{{bill.id}} -->
 <style>
+
+h2 {
+	border-bottom: 2px solid #888;
+	font-size: 17px;
+	margin: 1.25em 0 .5em -6px;
+}
+	h2 span {
+		display: inline-block;
+		margin-left: 6px;
+		padding: 3px 6px 1px 6px;
+		background-color: #555;
+		color: white;
+		font-family: PTSerifBold;
+		font-weight: bold;
+	}
+
 #media-row {
 	margin-top: 1.75em;
 	margin-bottom: 1.75em;
@@ -638,9 +654,11 @@ p#yourreps {
 <div class="panes">
 	<div id="overview"> <!-- overview pane -->
 		{% if bill.source == "thomas-congproj" %}
-			<div id="status-row-descr" class="row">
+			<h2><span>Status</span></h2>
+
+			<div class="row">
 				<div class="col-xs-12">
-					<p style="text-align: center; margin-top: 2em">{{bill.current_status_description}}</p>
+					<p style="margin-top: 1em">{{bill.current_status_description}}</p>
 				</div>
 			</div>
 
@@ -665,9 +683,9 @@ p#yourreps {
 				})
 				</script>
 			{% endif %}
-
-			<div class="sep">&nbsp;</div>
 		{% endif %}
+
+		<h2><span>About the {{bill.noun}}</span></h2>
 
 		<div id="media-row" class="row">
 			<div class="col-sm-4">
@@ -773,34 +791,28 @@ p#yourreps {
 
 		<div class="row">
 
-		  	{% if subtitle %}
+		  	{% if subtitle or bill.source != "americanmemory" %}
 			<div class="col-sm-6 col-md-7">
 			<dl>
+					{% if subtitle %}
 						<dt>Full Title</dt>
 						<dd><p>{{subtitle}}</p></dd>
-			</dl>
-			</div>
-		  	{% endif %}
+					{% endif %}
 
-			{% if bill.source != "americanmemory" %}
-			<div class="col-sm-6 col-md-5">
-				<dl>
+					{% if bill.source != "americanmemory" %}
 						<dt>Summary</dt>
 						<dd id="summaries">
 							<p>No summaries available.</p>
 						</dd>
-				</dl>
+					{% endif %}
+			</dl>
 			</div>
-			{% endif %}
-		</div> <!-- /row -->
+		  	{% endif %}
 
-		<div class="sep">&nbsp;</div>
-
-		<div class="row">
-			<div class="col-sm-6 col-md-4">
+			{% with bill.get_prognosis as p %}
+			{% if p %}
+			<div class="col-sm-6 col-md-5">
 					<dl>
-						{% with bill.get_prognosis as p %}
-						{% if p %}
 						<dt>Prognosis</dt>
 						<dd>
 							{% if p.is_introduced %}
@@ -855,62 +867,16 @@ p#yourreps {
 
 							</div>
 						</dd>
-						{% endif %}
-						{% endwith %}
 					</dl>
 			</div>
+			{% endif %}
+			{% endwith %}
 
-			{% if bill.votes.exists %}
-			<div class="col-sm-6 col-md-4">
-				<dl>
-							<dt>Votes</dt>
-							<dd>
-								{% for v in bill.votes.all %}
-								<div class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote" style="margin-bottom: 1em">
-									<div><a href="{{v.get_absolute_url}}">
-										{% if v.is_on_passage %}
-											{{v.get_chamber_display}} Vote on Passage
-										{% elif v.is_major %}
-											{{v.get_chamber_display}}: {{v.vote_type}}
-										{% else %}
-											{{v}}
-										{% endif %}
-									</a></div>
-									<div style="font-size: 90%">
-									{% if v.is_on_passage and v.vote_type != "On Passage of the Bill" and v.vote_type != "On the Resolution" %}{{v.vote_type}}<br/>{% endif %}
-									{{v.created}}<br/>
-									{{v.summary}}
-									</div>
-									</div>
-								{% endfor %}
-								<p id="more_votes" style="display: none; font-style: italic;"><a href="#" onclick="return show_all_votes();">Show <span class='num'> </span> <span class='desc'> </span> vote(s)...</a><p>
-								<p id="fewer_votes" style="display: none"><a href="#" onclick="return hide_minor_votes();">Hide minor vote(s)...</a><p>
-							</dd>
-							<script>
-								var minor_votes = $('.minor_vote');
-								if (minor_votes.length > 0) {
-									$('#more_votes').show();
-									$('#more_votes').find('span.num').text(minor_votes.length);
-									$('#more_votes').find('span.desc').text($('.major_vote').length == 0 ? "" : "additional");
-								}
-								function show_all_votes() {
-									$('.minor_vote').fadeIn();
-									$('#more_votes').hide();
-									$('#fewer_votes').show();
-									return false;
-								}
-								function hide_minor_votes() {
-									$('.minor_vote').fadeOut();
-									$('#more_votes').show();
-									$('#fewer_votes').hide();
-									return false;
-								}
-							</script>
-					</dl>
-				</div>
-				{% endif %}
-				
-				
+		</div> <!-- /row -->
+
+		<h2><span>Details</span></h2>
+
+		<div class="row">
 				{% if bill.congress >= 93 %}
 				<div class="col-sm-6 col-md-4">
 					<dl>
@@ -937,9 +903,14 @@ p#yourreps {
 								</div>
 							{% endif %}
 						</dd>
+					</dl>
+				</div>
+				{% endif %}
 
-						{% if bill.committees.exists %}
-						<dt>Committees</dt>
+				{% if bill.committees.exists %}
+				<div class="col-sm-6 col-md-4">
+					<dl>
+						<dt>Committee Assignments</dt>
 						<dd>
 							{% for c in bill.committees.all %}
 								{% if not c.committee %}
@@ -956,16 +927,77 @@ p#yourreps {
 							{% endfor %}
 							<p class="small" style="margin: 1em 0 0 0">The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
 						</dd>
-						{% endif %}
 					</dl>
 				</div>
 				{% endif %}
-				
+
+
+			<div class="col-sm-6 col-md-4">
+				<dl>
+					<dt>Votes</dt>
+					<dd>
+						{% if bill.votes.exists %}
+							{% for v in bill.votes.all %}
+							<div class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote" style="margin-bottom: 1em">
+								<div><a href="{{v.get_absolute_url}}">
+									{% if v.is_on_passage %}
+										{{v.get_chamber_display}} Vote on Passage
+									{% elif v.is_major %}
+										{{v.get_chamber_display}}: {{v.vote_type}}
+									{% else %}
+										{{v}}
+									{% endif %}
+								</a></div>
+								<div style="font-size: 90%">
+								{% if v.is_on_passage and v.vote_type != "On Passage of the Bill" and v.vote_type != "On the Resolution" %}{{v.vote_type}}<br/>{% endif %}
+								{{v.created}}<br/>
+								{{v.summary}}
+								</div>
+								</div>
+							{% endfor %}
+							<p id="more_votes" style="display: none; font-style: italic;"><a href="#" onclick="return show_all_votes();">Show <span class='num'> </span> <span class='desc'> </span> vote(s)...</a><p>
+							<p id="fewer_votes" style="display: none"><a href="#" onclick="return hide_minor_votes();">Hide minor vote(s)...</a><p>
+							<script>
+							var minor_votes = $('.minor_vote');
+							if (minor_votes.length > 0) {
+								$('#more_votes').show();
+								$('#more_votes').find('span.num').text(minor_votes.length);
+								$('#more_votes').find('span.desc').text($('.major_vote').length == 0 ? "" : "additional");
+							}
+							function show_all_votes() {
+								$('.minor_vote').fadeIn();
+								$('#more_votes').hide();
+								$('#fewer_votes').show();
+								return false;
+							}
+							function hide_minor_votes() {
+								$('.minor_vote').fadeOut();
+								$('#more_votes').show();
+								$('#fewer_votes').hide();
+								return false;
+							}
+						</script>
+					{% else %}
+						<p>There have been no votes related to this {{bill.noun}}.</p>
+					{% endif %}
+					</dd>
+				</dl>
+			</div>				
 		</div> <!-- row -->
 
-		<div class="sep">&nbsp;</div>
+		<h2><span>Notes, links &amp; tools</span></h2>
 
 		<div class="row">
+			<div class="col-sm-6 col-md-4">
+				<dl>
+					<dt>Notes</dt>
+					<dd id="notes">
+						<p>The &ldquo;{{bill.get_bill_type_display}}&rdquo; in {{bill.display_number_no_congress_number}} means this is a {{bill.bill_type_name}}.</p>
+						<p>{{bill.how_a_bill_text}}</p>
+						{% if not bill.is_success %}<p>The {{bill.noun}}&rsquo;s title was written by its sponsor.</p>{% endif %}
+					</dd>
+				</dl>
+			</div>
 
 				<div class="col-sm-6 col-md-4">
 					<dl>
@@ -1029,16 +1061,6 @@ p#yourreps {
 				</dl>
 			</div>
 
-			<div class="col-sm-6 col-md-4">
-				<dl>
-					<dt>Notes</dt>
-					<dd id="notes">
-						<p>{{bill.get_bill_type_display}} stands for {{bill.bill_type_name}}.</p>
-						<p>{{bill.how_a_bill_text}}</p>
-						{% if not bill.is_success %}<p>The {{bill.noun}}&rsquo;s title was written by its sponsor.</p>{% endif %}
-					</dd>
-				</dl>
-			</div>
 
 		</div> <!-- /row -->
 
