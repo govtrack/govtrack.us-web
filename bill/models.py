@@ -372,8 +372,6 @@ class Bill(models.Model):
 
     def get_formatted_summary(self):
         s = get_formatted_bill_summary(self)
-        # this cleanup doesn't always work because sometimes the line is split between <divs>
-        s = re.sub(r"(\d+/\d+/\d\d\d\d)--[^\.]+.\s*(\(This measure has not been amended since it was .*\. The summary of that version is repeated here\.\)\s*)?(" + "|".join(re.escape(t[2]) for t in self.titles) + r")\s*-\s*", lambda m : m.group(1) + ". ", s)
         return s
 
     def get_upcoming_meetings(self):
@@ -1022,6 +1020,22 @@ def get_formatted_bill_summary(bill):
     if not os.path.exists(sfn): return None
 
     dom = etree.parse(open(sfn))
+
+    # Remove some nodes at the top.
+    normalized_bill_titles = set( re.sub(r"\W", "", t[2]) for t in bill.titles)
+    while len(dom.getroot()) > 0:
+        n = dom.getroot()[0]
+        if len(n) > 0 or n.tail not in (None, ""):
+            break
+        elif n.text in (None, ""):
+            n.getparent().remove(n)
+        elif re.match("\d\d/\d{1,2}/\d\d\d\d--", n.text):
+            n.getparent().remove(n)
+        elif re.sub(r"\W", "", n.text) in normalized_bill_titles:
+            n.getparent().remove(n)
+        else:
+            break
+
     xslt_root = etree.XML('''
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output omit-xml-declaration="yes"/>
