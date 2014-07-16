@@ -10,7 +10,7 @@ from committee.models import Committee, CommitteeMeeting, CommitteeMember, MEMBE
 from bill.status import BillStatus, get_bill_status_string
 from bill.title import get_bill_number, get_primary_bill_title
 from bill.billtext import load_bill_text
-from us import get_congress_dates
+from us import get_congress_dates, get_session_from_date
 
 from django.conf import settings
 
@@ -738,12 +738,30 @@ class Bill(models.Model):
                 except:
                     st = st.label
 
+            vote_text = None
+            vote_link = None
+            if srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "pingpong", "conference"):
+                if srcnode.get("how") == "roll":
+                    try:
+                        from vote.models import Vote, CongressChamber
+                        v = Vote.objects.get(congress=self.congress, session=get_session_from_date(date, congress=self.congress)[1],
+	                        chamber=CongressChamber.senate if srcnode.get("where") == 's' else CongressChamber.house,
+                            number=int(srcnode.get("roll")))
+                        vote_link = v.get_absolute_url()
+                    except Vote.DoesNotExist:
+                        # Somehow the vote is missing.
+                        pass
+                else:
+                    vote_text = srcnode.get("how")
+
             ret.append({
                 "key": st_key,
                 "label": st,
                 "date": date,
                 "actionline": text,
                 "explanation": explanation,
+                "vote_text": vote_text,
+                "vote_link": vote_link,
             })
         if not saw_intro: ret.insert(0, { "key": BillStatus.introduced.key, "label": "Introduced", "date": self.introduced_date, "explanation": BillStatus.introduced.explanation })
 

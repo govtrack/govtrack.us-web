@@ -343,6 +343,13 @@ p#yourreps {
 	height: 88px;
 	background-image: url(/static/images/status_icons_arrow.png);
 }
+	#status-row-grid .status-item .date {
+		font-size: 80%;
+		text-transform: uppercase;
+	}
+	#status-row-grid .status-item .vote {
+        line-height: 100%;
+	}
 	@media (min-width: 1200px) {
 		#status-row-grid .status-item .arrow {
 			margin-left: -45px;
@@ -671,9 +678,15 @@ p#yourreps {
 
 						<div class="status-item col-xs-4 col-sm-3 col-md-2 {% if not item.date %}pending{% endif %}"
 							data-content="{{item.explanation}}">
+							{% if item.vote_link %}<a href="{{item.vote_link}}">{% endif %}
 							<div class="img status_{{item.key}}"> {% if not forloop.first %}<div class="arrow"> </div>{% endif %} </div>
-							<div title="{{item.actionline}}" {% if item.date %}style="font-weight: bold"{% endif %}>{{item.label}}</div>
-							{% if item.date %}<div style="font-size: 80%; text-transform: uppercase;">{{item.date|date:"DATE_FORMAT"}}</div>{% endif %}
+							{% if item.vote_link %}</a>{% endif %}
+
+							<div class="status-label" title="{{item.actionline}}" {% if item.date %}style="font-weight: bold"{% endif %}>{{item.label}}</div>
+							{% if item.date %}<div class="date">{{item.date|date:"DATE_FORMAT"}}</div>{% endif %}
+
+							{% if item.vote_link %}<a href="{{item.vote_link}}"><div class="vote">View Vote Result &raquo;</div></a>{% endif %}
+							{% if item.vote_text %}<div class="vote"><small>It was {{item.vote_text}} so no record of individual votes was made.</small></div>{% endif %}
 						</div>
 					{% endfor %}
 				</div>
