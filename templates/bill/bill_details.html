@@ -701,6 +701,7 @@ p#yourreps {
 		<h2><span>About the {{bill.noun}}</span></h2>
 
 		<div id="media-row" class="row">
+			{% if bill.sponsor %}
 			<div class="col-sm-4">
 				<div>
 					{% if bill.sponsor.has_photo %}
@@ -712,19 +713,18 @@ p#yourreps {
 					{% endif %}
 
 					<dl>
-						{% if bill.sponsor %}
 							<dt>Sponsor</dt>
 							<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
 								<div style="line-height: 130%; font-size: 13px; margin-top: 3px;">{{bill.sponsor_role.get_description}}</div>
 							</dd>
 							<dt>Party</dt>
 							<dd>{{bill.sponsor_role.party}}</dd>
-						{% endif %}
 					</dl>
 
 					<div style="clear: both"></div>
 				</div>
 			</div>
+			{% endif %}
 
 			{% if text_info %}
 			<div class="col-sm-4">
@@ -742,8 +742,11 @@ p#yourreps {
 							<dd><a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a></dd>
 							<dt>Last Updated</dt>
 							<dd>{{text_info.docdate}}</dd>
+
+							{% if text_info.numpages %}
 							<dt>Length<dt>
 							<dd>{{text_info.numpages}}</dd>
+							{% endif %}
 						</dl>
 					{% else %}
 						<a href="{{text_info.gpo_pdf_url}}">PDF</a> ({{text_info.docdate}})
@@ -804,7 +807,7 @@ p#yourreps {
 
 		<div class="row">
 
-		  	{% if subtitle or bill.source != "americanmemory" %}
+		  	{% if subtitle or bill.source == "thomas-congproj" %}
 			<div class="col-sm-6 col-md-7">
 			<dl>
 					{% if subtitle %}
@@ -812,7 +815,7 @@ p#yourreps {
 						<dd><p>{{subtitle}}</p></dd>
 					{% endif %}
 
-					{% if bill.source != "americanmemory" %}
+					{% if bill.source == "thomas-congproj" %}
 						<dt>Summary</dt>
 						<dd id="summaries">
 							<p>No summaries available.</p>
@@ -944,7 +947,7 @@ p#yourreps {
 				</div>
 				{% endif %}
 
-
+			{% if bill.source == "thomas-congproj" %}
 			<div class="col-sm-6 col-md-4">
 				<dl>
 					<dt>Votes</dt>
@@ -995,7 +998,8 @@ p#yourreps {
 					{% endif %}
 					</dd>
 				</dl>
-			</div>				
+			</div>
+			{% endif %}
 		</div> <!-- row -->
 
 		<h2><span>Notes, links &amp; tools</span></h2>
