@@ -140,7 +140,7 @@ var map_controller = function() {
 };
 
 function moc_record_matches_user(moc, cong_dist, cong_dist_mocs) {
-	if (moc == null || moc === "")
+	if (moc == null || moc === "" || cong_dist == null)
 		return null;
 	if (moc.id in cong_dist_mocs)
 		return "Your " + moc.title + " " + moc.name + " ";

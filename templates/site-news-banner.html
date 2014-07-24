@@ -6,17 +6,13 @@
 
 	{% if highlighted_vote %}
 	<p id="highlighted_vote">
-		<span class="hidden" style="display: block">&nbsp;</span>
+		<span style="display: block">Latest major vote:</span>
 		<a href="{{highlighted_vote.link}}">{{highlighted_vote.title}}</a>
 	</p>
 	<script>
 	var highlighted_vote = {{highlighted_vote|json}};
 	$(function() { // delay until the end because moc_record_matches_user isn't available where this template is inserted
 		onUserDistrictChanged(function(cong_dist, mocs) {
-			if (!cong_dist) {
-				$('#highlighted_vote span').addClass('hidden');
-				return;
-			}
 			var V = []
 	        for (var i = 0; i < highlighted_vote.data.length; i++) {
 	            var v = moc_record_matches_user(highlighted_vote.data[i].moc, cong_dist, mocs);
@@ -26,9 +22,9 @@
 	            }
 	        }
 	        if (V.length > 0) {
-	        	$('#highlighted_vote span').removeClass('hidden').text(V.join(" and ") + " on");
+	        	$('#highlighted_vote span').text(V.join(" and ") + " on");
 	        } else {
-	        	$('#highlighted_vote span').addClass('hidden');
+	        	$('#highlighted_vote span').text('Latest major vote:');
 	        }
 		})
 	})
