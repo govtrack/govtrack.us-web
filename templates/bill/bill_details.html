@@ -686,7 +686,7 @@ p#yourreps {
 							{% if item.date %}<div class="date">{{item.date|date:"DATE_FORMAT"}}</div>{% endif %}
 
 							{% if item.vote_link %}<a href="{{item.vote_link}}"><div class="vote">View Vote Result &raquo;</div></a>{% endif %}
-							{% if item.vote_text %}<div class="vote"><small>It was {{item.vote_text}} so no record of individual votes was made.</small></div>{% endif %}
+							{% if item.vote_text %}<div class="vote"><small>Vote was {{item.vote_text}} so no record of individual votes was made.</small></div>{% endif %}
 						</div>
 					{% endfor %}
 				</div>
