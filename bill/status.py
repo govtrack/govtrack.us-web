@@ -193,30 +193,36 @@ class BillStatus(enum.Enum):
         explanation="A vote to override the President's veto failed in the Senate. The bill is now dead.",
         sort_order=(5,9))
     enacted_signed = enum.Item(28,
-        'Signed by the President',
+        u'Enacted \u2014 Signed by the President',
         xml_code='ENACTED:SIGNED',
         search_help_text="Enacted by a signature of the President.",
         explanation="The President signed the bill and it became law.",
         sort_order=(3,3))
     enacted_veto_override = enum.Item(29,
-        'Veto Overridden',
+        u'Enacted \u2014 Veto Overridden',
         xml_code='ENACTED:VETO_OVERRIDE',
         search_help_text="Enacted by a veto override.",
         explanation="Congress overrided the veto of the President. The bill became law.",
         sort_order=(3,5))
     enacted_tendayrule = enum.Item(32,
-        'Enacted by 10 Day Rule',
+        u'Enacted \u2014 By 10 Day Rule',
         xml_code='ENACTED:TENDAYRULE',
         search_help_text="Enacted by failing to be returned by the President within ten days (Sundays excepted).",
         explanation="The bill was enacted by failing to be signed or vetoed by the President within ten days of receiving the bill from Congress (Sundays excepted).",
         sort_order=(3,4))
+    enacted_unknown = enum.Item(33,
+        'Enacted (Unknown Final Step)',
+        xml_code='ENACTED:UNKNOWN',
+        search_help_text="Enacted. It is not known whether the President signed the bill due to limitations in the source data.",
+        explanation="The bill was enacted. (It is not known whether the President signed the bill due to limitations in the source data.)",
+        sort_order=(3,6))
 
     # indicates statuses whose descriptions are clear that the bill is no longer active,
     # other statuses are displayed as "Died: " for bills from previous congresses.
-    final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, enacted_tendayrule, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate, passed_bill)
+    final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, enacted_tendayrule, enacted_unknown, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate, passed_bill)
 
     # indicates a bill at the end of its life cycle and passed
-    final_status_passed_bill = (enacted_signed, enacted_veto_override, enacted_tendayrule)
+    final_status_passed_bill = (enacted_signed, enacted_veto_override, enacted_tendayrule, enacted_unknown)
     final_status_passed_resolution = (passed_simpleres, passed_constamend, passed_concurrentres)
     final_status_passed = tuple(list(final_status_passed_bill) + list(final_status_passed_resolution))
     

@@ -350,6 +350,7 @@ def main(options):
                 bill.source = "thomas-congproj"
             elif bill.congress >= 82:
                 bill.source = "statutesatlarge"
+                if bill.current_status == BillStatus.enacted_signed: bill.current_status = BillStatus.enacted_unknown
             elif bill.congress <= 42:
                 bill.source = "americanmemory"
             else:
