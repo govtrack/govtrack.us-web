@@ -1,8 +1,9 @@
-{% extends "master_a.html" %}
+{% extends "master_b.html" %}
 {% load humanize %}
 {% block title %}Members of the United States Congress - GovTrack.us{% endblock %}
 {% block meta_description %}The United States Congress is made up of 100 senators, 435 congressmen, and 6 delegates to the House of Representatives.{% endblock %}
 {% block meta_keywords %}U.S. Congress,congressional districts,senators,representatives,congressmen,House of Representatives,Senate{% endblock %}
+{% block cat-icon-filename %}img-congress-members.png{% endblock %}
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
@@ -60,12 +61,18 @@
 {% block summary %}
 	<h1>Members of Congress</h1>
 	
-	<p>The United States Congress has an upper chamber called the Senate and a lower chamber called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process.</p>
-	
-	<div style="padding: 1em 2em">
-	<div class="row" style="margin-top: .5em">
-		<div class="col-sm-6">
-			<label for="state" style="display: block; clear: both;">Select a state to find your senators and representatives:</label>
+	<h3>Find your representatives!</h3>
+	<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
+		<p style="margin-bottom: .25em">Enter your address below. We will find your congressional district.</p>
+		<input id="address" class="text" type="text" value="" style="width: 75%; height: 26px; float: left; font-size: 14px;"/>
+		<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
+		<input class="btn-search-small2" type="submit" value="Search"  />
+		<div style="clear: both"> </div>
+	</form>
+
+	<div class="row" style="margin-top: 1.5em">
+		<div class="col-xs-6">
+			<p style="margin-bottom: .5em">Or select a state to list all senators and representatives from that state:</p>
 			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" style="display: block; width: 95%; background-color: white; font-size: 14px;">
 				<option value="">(Select State)</option>
 				{% for abbr, name in statelist %}
@@ -73,27 +80,19 @@
 				{% endfor %}								
 			</select>
 		</div>
-		<div class="col-sm-6">
-			<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
-				<label for="address" style="display: block">Or enter your address so we can find your congressional district:</label>
-				<input id="address" class="text" type="text" value="" style="width: 85%; height: 26px; float: left; font-size: 14px;"/>
-				<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
-				<input class="btn-search-small2" type="submit" value="Search"  />
-			</form>
+		<div class="col-xs-6" style="padding-top: 1em; font-size: 90%">
+			<p><a href="/congress/members/map">View a Map of Congressional Districts</a></p>
+			<p><a href="/congress/members/current">List all Members of Congress</a></p>
+			<p><a href="/congress/members/all">Search Former Members of Congress</a></p>
 		</div>
 	</div>
-	<div style="margin-top: 1em">
-		<a href="/congress/members/map">View a Map</a>
-		| <a href="/congress/members/current">List all Members of Congress</a>
-		| <a href="/congress/members/all">Search Former Members of Congress</a>
-	</div>
-	</div>
-	
+
 	<hr style="margin: 1em 1em 2em 1em"/>
 
+<p>The United States Congress has an upper chamber called the Senate and a lower chamber called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process to create federal statutory law.</p>
+	
 <div class="row">
 <div class="col-sm-6">
-	
 	<h2>The Senate</h2>
 	
 	<p>The 50 states elect 2 senators each for staggered 6-year terms. A senator represents between 1 and 37 million people, depending on their state&rsquo;s population.</p>
@@ -111,9 +110,9 @@
 <div class="col-sm-6">	
 	<h2>The House of Representatives</h2>
 	
-	<p>The country is also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative (aka congressperson) to the House for a 2-year term.</p>
+	<p>The states are also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative to the House of Representatives for a 2-year term.</p>
 
-	<p>As in the Senate, the day-to-day activities of the House are controlled by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of congresspeople by party:</p>
+	<p>As in the Senate, the day-to-day activities of the House are controlled by the &ldquo;majority party.&ldquo; Here is a count of representatives by party:</p>
 	
 	<table style="width: 15em">
 	{% for p in house_by_party %}
@@ -123,11 +122,11 @@
 	<tr><th>Total</th> <td>435</td></tr>
 	</table>
 	
-	<p style="margin-top: .5em">In addition, the District of Columbia and the U.S.&rsquo;s island territories elect a total of 6 delegates to the House with limited voting privileges. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
+	<p style="margin-top: .5em">In addition, the District of Columbia and the U.S.&rsquo;s five island territories each send a non-voting delegate to the House. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
 </div>
 </div>
 
-	<h2 style="margin-top: 1em">Congressional Sessions</h2>
+	<h2>Congressional Sessions</h2>
 	
 	<p>Congress works in two-year sessions tied to the elections. Each session is actually called a Congress and begins in the January of the year following an election.</p>
 	
