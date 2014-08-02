@@ -414,9 +414,6 @@ header ul, footer ul {
 	margin-bottom: 20px;
 	}
 
-.homepage #header {
-	background: url(../images/header-capitol.png) 50% bottom no-repeat;
-}
 #logo {
 	display: block;
 	float: left;
@@ -427,9 +424,13 @@ header ul, footer ul {
 	overflow: hidden;
 	margin-top: 40px;
 }
-#logo:hover {
-	border-bottom: 0;
-}
+	#logo:hover {
+		border-bottom: 0;
+	}
+	.homepage #logo {
+		display: none;
+	}
+
 .super-nav {
 	float: left;
 	font: normal 12px/15px PTSerifItalic, Georgia, 'Times New Roman', Times, serif;
@@ -561,57 +562,7 @@ header ul, footer ul {
 #mobile-nav { display: none; } /* Hide the mobile navigation */
 
 
-/* Home page styles
-	 =============================================== */
-#intro-box {
-	/*width: 940px;*/
-	/*margin: 0 auto;*/
-	padding: 15px 0 10px;
-	height: 320px;
-	background: #40a4bd url(../images/bg-intro-box.jpg) 50% 0 no-repeat;
-	}
 
-	#intro-box h1 {
-		font: normal 4.5em/1em PTSerifRegular;
-		color: #fff;
-		margin: 10px 0 34px -3px;
-		text-shadow: 0 1px 1px #066982;
-		}
-	#intro-box #intro {
-		color: #fff;
-		font: normal 16px/24px PTSerifRegular, Georgia, 'Times New Roman', Times, serif;
-		/*text-shadow: 0 1px 1px #066982;*/
-		}
-	#intro-box p { margin: 0 }
-	#intro-box .block {
-		float: right;
-		width: 268px;
-		padding: 9px 0 0;
-		text-align: right;
-		color: #c0e7ef;
-		font-size: 14px;
-		}
-		#intro-box .block a,
-		#intro-box p a {
-			color: #fff;
-			}
-		#intro-box .block a:hover,
-		#intro-box p a:hover { border-bottom: solid #fff 1px; }
-		#start_search {
-		}
-		#start_search h2 {
-			color: #fff;
-			font-family: PTSerifRegular;
-			margin-bottom: .25em;
-			text-transform: uppercase;
-			letter-spacing: .1em;
-			text-shadow: 0 1px 1px #066982;
-		}
-		#start_search .button span {
-		}
-		#start_search p {
-			color: #c0e7ef;
-		}
 
 
 #info-box {
@@ -645,12 +596,6 @@ header ul, footer ul {
 #categories {
 	text-align: center;
 	}
-	@media (min-width: 1100px) {
-		#categories {
-			width: 980px;
-			margin: 0 auto;
-		}
-	}
 	#categories li {
 		display: inline-block;
 		width: 225px;
@@ -664,7 +609,6 @@ header ul, footer ul {
 		margin-top: 20px;
 		padding: 0 5px 0 5px;
 		text-align: left;
-		text-transform: none;
 		font-size: 10pt;
 		line-height: 140%;
 		}
@@ -675,14 +619,10 @@ header ul, footer ul {
 			padding-top: 137px;
 			text-align: center;
 		font-family: 'PTSerifBold';
-		text-transform: uppercase;
+		text-decoration: none;
 			}
 			#categories li > a span {
 				font-family: 'PTSerifBoldItalic';
-				text-transform: lowercase;
-			}
-		#categories li > a:hover {
-			border-bottom: 0;
 			}
 
 		#categories #link-members > a {
@@ -853,27 +793,6 @@ header ul, footer ul {
 .tweets-block h3 { margin: 0 0 9px }
 
 
-/* Home Header break 1 ---------------------------- */
-@media only screen and (max-width: 991px) {
-	#intro-box h1 {
-	margin-top: 20px;
-	font-size: 3.5em;
-	line-height: 1.1em;
-	}
-}
-
-/* Home Header break 2 ---------------------------- */
-@media only screen and (max-width: 767px) {
-	#intro-box h1 {
-	margin-top: 20px;
-	font-size: 3em;
-	line-height: 1.25em;
-	}
-
-	#map_canvas,
-	#embed_teaser { display: none; }
-}
-
 /* Home Header break 3 ---------------------------- */
 @media only screen and (max-width: 655px) {
 	#header { height: auto; }
@@ -884,37 +803,6 @@ header ul, footer ul {
 	}
 	#nav { display: none; }
 	#mobile-nav { display: block; }
-
-	#intro-box h1 {
-	margin-top: .5em;
-	margin-bottom: .5em;
-	font-size: 2em;
-	line-height: 1.3em;
-	}
-	#intro-box #intro {
-	font-family: 'PTSerifBold';
-	}
-}
-
-/* Home Header break 4 ---------------------------- */
-@media only screen and (max-width: 410px) {
-	 #intro-box h1 {
-	margin-top: .5em;
-	margin-bottom: .5em;
-	font-size: 1.5em;
-	line-height: 1.2em;
-	}
-}
-
-/* Home Header break 5 ---------------------------- */
-@media only screen and (max-width: 319px) {
-	 .homepage #header {
-	background: none;
-	 }
-	 #intro-box {
-	 background: none;
-	 height: auto;
-	 }
 }
 
 /* Remove BG on home when it interferes ----------- */

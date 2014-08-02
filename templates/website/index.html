@@ -7,6 +7,74 @@
   <meta property="og:title" content="GovTrack.us" />
   <meta property="og:description" content="Tracking legislation and votes in the United States Congress." />
   <meta property="og:url" content="{{SITE_ROOT_URL}}" />
+
+<style>
+.homepage #header {
+	background: url(/static/images/header-capitol.png) 218px bottom no-repeat;
+}
+
+#intro-box {
+	background: #40a4bd;
+}
+	#intro-box > .container {
+		padding: 20px 10px 10px;
+		height: 256px;
+		background: #40a4bd url(/static/images/bg-intro-box.jpg) 0 0 no-repeat;
+		}
+
+	#intro-box h1 {
+		margin: 0;
+		font: normal 4em/1em serif;
+		color: #fff;
+		text-shadow: 0 2px 2px #066982;
+		}
+	#intro-box h2 {
+		margin: 8px 0 0 2px;
+		font: normal 1.5em/1em PTSerif;
+		color: #fff;
+		text-shadow: 0 1px 1px #066982;
+	}
+
+	#intro-box p {
+		color: #fff;
+		font-family: PTSerif;
+		font-size: 18px;
+	}
+
+	@media only screen and (max-width: 768px) {
+		 .homepage #header {
+		background: none;
+		 }
+		 #intro-box > .container {
+		 background: none;
+		 height: auto;
+		 }
+	}
+
+	#primary-links a {
+		display: block;
+		padding-bottom: 2em;
+		background: url(/static/images/bg-info-box-nav.png) no-repeat 0 0;
+		background-size: 100% 100%;
+		text-align: center;
+		font-size: 10pt;
+		line-height: 140%;
+		font-family: 'PTSerifBold';
+		text-decoration: none;
+	}
+		#primary-links a span {
+			font-family: 'PTSerifBoldItalic';
+			font-style: italic;
+		}
+		#primary-links a img {
+			margin: 0 auto;
+		}
+		#primary-links a:hover img {
+			opacity: .9;
+		}
+
+	
+</style>
 {% endblock %}
 
 {% block body_class %}homepage{% endblock %}
@@ -14,22 +82,16 @@
 {% block override_breadcrumbs %}
 <div id="intro-box">
 	<div class="container">
-		<h1>Easily track the activities <br> of the United States Congress.</h1>
 		<div class="row">
-			<div class="col-sm-4">
-			<p id="intro">Use GovTrack to keep tabs on your representatives in Congress or to research pending legislation that might impact your life or business.</p>
+			<div class="col-xs-offset-1 col-sm-offset-5">
+				<h1>GovTrack.us</h1>
+				<h2>Tracking the United States Congress</h2>
+				<div class="hidden-xs" style="height: 40px"> </div>
 			</div>
-			
-			<div class="col-sm-offset-4 col-sm-4">
-			<div id="start_search">
-				<h2><a href="/start" style="font-size: 20px; color: white;">Start tracking now ▶</a></h2>
-				
-				{% if not user.is_authenticated %}
-				<p id="have_account">Already have an account? <a href="/accounts/login">Log in</a></p>
-				{% if request.anonymous %}<script>if (the_user) $('#have_account').hide();</script>{% endif %}
-				{% endif %}
-				
-			</div><!-- /start_search -->
+		</div>
+		<div class="row" style="margin-top: 1em">
+			<div class="col-xs-offset-1 col-sm-offset-5">
+				<p>Track bills in Congress, your representative&rsquo;s voting records, upcoming committee meetings, and get alerts by email.</p>
 			</div>
 		</div>
 	</div>
@@ -37,45 +99,37 @@
 {% endblock %}
 
 {% block wide_content %}
-<div id="info-box" style="background-color: white;">
-	<div class="holder">
-		<div class="container">
-			
-			<div class="heading">
-				<h2><span>find</span> Information</h2>
-			</div>
-			
-			<ul id="categories">
-				<li id="link-members">
-					<a href="/congress/members">
-						Members <span>of</span> Congress
-					</a>
-				</li>
-				<li id="link-bills">
-					<a href="{% url "bill_docket" %}">
-						Bills <span>&amp;</span> Resolutions
-					</a>
-				</li>
-				<li id="link-votes">
-					<a href="{% url "vote_list" %}">
-						Voting Records
-					</a>
-				</li>
-				<li id="link-committees">
-					<a href="{% url "committee_list" %}">
-						Committees
-					</a>
-				</li>
-			</ul>
+<div style="background-color: white; padding: 25px 10px 0 15px">
+	<div class="container">
 
-			<div class="state">
-				<span>And now <a href="/start#states">State&nbsp;Legislation</a>!</span>
+		<div id="primary-links" class="row">
+			<div class="col-xs-6 col-sm-3">
+				<a href="/congress/members">
+					<img src="/static/images/img-congress-members.png" class="img-responsive">
+					Members <span>of</span> Congress
+				</a>
 			</div>
-
+			<div class="col-xs-6 col-sm-3">
+				<a href="{% url "bill_docket" %}">
+					<img src="/static/images/img-bills-resolutions.png" class="img-responsive">
+					Bills <span>&amp;</span> Resolutions
+				</a>
+			</div>
+			<div class="col-xs-6 col-sm-3">
+				<a href="{% url "vote_list" %}">
+					<img src="/static/images/img-voting-records.png" class="img-responsive">
+					Voting Records
+				</a>
+			</div>
+			<div class="col-xs-6 col-sm-3">
+				<a href="{% url "committee_list" %}">
+					<img src="/static/images/img-committees.png" class="img-responsive">
+					Committees
+				</a>
+			</div>
 		</div>
 	</div>
-</div><!-- /info-box -->
-
+</div>
 <div class="entries-box">
 	<div class="entries-holder container">
 			<div class="col-sm-7">
