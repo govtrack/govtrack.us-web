@@ -322,6 +322,8 @@ def get_bill_status_string(is_current, status):
         status = "This %s was enacted after a congressional override of the President's veto on %s."
     elif status == "ENACTED:TENDAYRULE":
         status = "This %s became enacted on %s after ten days elapsed after being presented to the President."
+    elif status == "ENACTED:UNKNOWN":
+        status = "This %s was enacted on %s."
     
     return status   
 
