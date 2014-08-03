@@ -457,7 +457,7 @@ def bill_docket(request):
             (   g[0], # title
                 g[1], # text 1
                 g[2], # text 2
-                "/congress/bills/browse?status=" + ",".join(str(s) for s in g[4]), # link
+                "/congress/bills/browse?status=" + ",".join(str(s) for s in g[4]) + "&sort=-current_status_date", # link
                load_bill_status_qs(g[4]).count(), # count in category
                load_bill_status_qs(g[4]).order_by('-current_status_date')[0:6], # top 6 in this category
                 )
