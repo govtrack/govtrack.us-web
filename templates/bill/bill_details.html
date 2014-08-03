@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block head %}
-	<meta property="og:title" content="{{bill.title_no_number}} ({% if not bill.is_current %}{{bill.current_status_date|date:"Y"}}{% endif %}{{bill.display_number_no_congress_number}})" />
+	<meta property="og:title" content="{{bill.title_no_number}} ({% if not bill.is_current %}{{bill.current_status_date|date:"Y"}} - {% endif %}{{bill.display_number_no_congress_number}})" />
 	<meta property="og:description" content="{% if subtitle %}{{subtitle}}{% else %}A {{bill.noun}} in the U.S. Congress.{% endif %}" />
 	<meta property="og:url" content="https://www.govtrack.us{{bill.get_absolute_url}}" />
 	<meta property="og:type" content="og_govtrack:bill">
