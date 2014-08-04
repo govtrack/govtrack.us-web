@@ -16,6 +16,12 @@
 	}
 	#session_stats h3 {
 	}
+	#title-info {
+		margin-bottom: 1em;
+	}
+	#title-info p {
+		margin-bottom: .25em;
+	}
 </style>
 {% endblock %}
 
@@ -47,33 +53,15 @@
 			{% if role and active_role and role.leadership_title %}<br><small>{{role.leadership_title_full}}</small>{% endif %}
 		</h1>
 		
-		{% if role and not active_role %}
-		<p>Former {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}{% endif %}</p>
-		{% endif %}
-		
-		<div class="info">
-			<dl>
-				{% if role and active_role %}
-				{% if role.state and not role.district %}
-				<dt>State:</dt>
-				<dd>{{role.state_name}}</dd>
-				{% endif %}
-
-				{% if role.district > 0 %}
-				<dt>District:</dt>
-				<dd>{{role.state_name}} - <a href="/congress/members/{{ role.state }}/{{role.district}}">District {{role.district}}</a></dd>
-				{% endif %}
-
-				{% if role.senator_rank %}
-				<dt>Seniority:</dt>
-				<dd><abbr title="The senior senator is the longer serving of the two senators from a state. The junior senator refers to the other senator.">{{role.get_senator_rank_display}}</abbr></dd>
-				{% endif %}
-				
-				<dt>Party:</dt>
-				<dd>{{ role.party }}</dd>
-				{% endif %}
-			</dl>
+		{% if role %}
+		<div id="title-info">
+			<p>{% if not active_role %}Former {% endif %}{{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}&rsquo;s At-Large District {% endif %}{% if role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District {% endif %}{% endif %}</p>
+			<p>{{role.party}}</>
+			{% if active_role and role.senator_rank %}
+				<p title="The senior senator is the longer serving of the two senators from a state. The junior senator refers to the other senator.">{{role.get_senator_rank_display}} Senator</p>
+			{% endif %}
 		</div>
+		{% endif %}
 		
 		<h2>Elected Positions</h2>
 		<table>
