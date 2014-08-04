@@ -521,6 +521,17 @@ class Bill(models.Model):
         else:
             raise Exception()
 
+    @staticmethod
+    def get_tracked_people(feeds):
+        reps_tracked = set()
+        from person.models import Person
+        for f in (feeds if feeds else []):
+            try:
+                reps_tracked.add(Person.from_feed(f))
+            except ValueError:
+                pass # not a person-related feed
+        return reps_tracked
+
     def render_event_state(self, ev_code, feeds):
         from status import BillStatus
         status = BillStatus.by_value(int(ev_code))
@@ -528,6 +539,7 @@ class Bill(models.Model):
         action = None
         action_type = None
         reps_on_committees = []
+        reps_tracked = Bill.get_tracked_people(feeds)
 
         if status == BillStatus.introduced:
             action_type = "introduced"
@@ -564,15 +576,10 @@ class Bill(models.Model):
 
                 # See if any tracked reps are members of the committees. Also
                 # check the bill's sponsor, since we display it.
-                reps_tracked = set()
-                if self.sponsor: reps_tracked.add(self.sponsor)
-                from person.models import Person
-                for f in (feeds if feeds else []):
-                    try:
-                        reps_tracked.add(Person.from_feed(f))
-                    except ValueError:
-                        pass # not a person-related feed
-                mbrs = list(CommitteeMember.objects.filter(person__in=reps_tracked, committee__in=cmtes))
+                reps_check_if_on_cmte = set()
+                if self.sponsor: reps_check_if_on_cmte.add(self.sponsor)
+                reps_check_if_on_cmte |= reps_tracked
+                mbrs = list(CommitteeMember.objects.filter(person__in=reps_check_if_on_cmte, committee__in=cmtes))
                 if len(mbrs) > 0:
                     mbrs.sort(key = lambda m : (-MEMBER_ROLE_WEIGHTS[m.role], m.committee.shortname))
                     for m in mbrs:
@@ -590,7 +597,6 @@ class Bill(models.Model):
         else:
             explanation = self.get_status_text(status, date)
 
-
         return {
             "type": status.label,
             "date": date,
@@ -598,13 +604,13 @@ class Bill(models.Model):
             "title": self.title,
             "url": self.get_absolute_url(),
             "body_text_template":
-"""{% if sponsor and action_type == 'introduced' %}Sponsor: {{sponsor|safe}}{% endif %}
+"""{% if sponsor and show_sponsor %}Sponsor: {{sponsor|safe}}{% endif %}
 {% if action %}Last Action: {{action|safe}}{% endif %}
 {% if action %}Explanation: {% endif %}{{summary|safe}}
 {% for rep in reps_on_committees %}
 {{rep}}{% endfor %}""",
             "body_html_template":
-"""{% if sponsor and action_type == 'introduced' %}<p>Sponsor: <a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a></p>{% endif %}
+"""{% if sponsor and show_sponsor %}<p>Sponsor: <a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a></p>{% endif %}
 {% if action %}<p>Last Action: {{action}}</p>{% endif %}
 <p>{% if action %}Explanation: {% endif %}{{summary}}</p>
 {% for rep in reps_on_committees %}<p>{{rep}}</p>{% endfor %}
@@ -612,7 +618,7 @@ class Bill(models.Model):
             "context": {
                 "sponsor": self.sponsor,
                 "action": action,
-                "action_type": action_type,
+                "show_sponsor": action_type == 'introduced' or self.sponsor in reps_tracked,
                 "summary": explanation,
                 "reps_on_committees": reps_on_committees,
                 }
@@ -640,12 +646,16 @@ class Bill(models.Model):
             "date_has_no_time": True,
             "title": self.title,
             "url": self.get_absolute_url(),
-            "body_text_template":
-"""{% for p in cosponsors %}New Cosponsor: {{ p.person.name }}
-{% endfor %}""",
-            "body_html_template": """{% for p in cosponsors %}<p>New Cosponsor: <a href="{{SITE_ROOT}}{{p.person.get_absolute_url}}">{{ p.person.name }}</a></p>{% endfor %}""",
+            "body_text_template": """{% for p in cosponsors %}New Cosponsor: {{ p.person.name }}
+{% endfor %}
+{% if sponsor and show_sponsor %}{{sponsor|safe}} is the sponsor of this {{noun}}.{% endif %}""",
+            "body_html_template": """{% for p in cosponsors %}<p>New Cosponsor: <a href="{{SITE_ROOT}}{{p.person.get_absolute_url}}">{{ p.person.name }}</a></p>{% endfor %}
+{% if sponsor and show_sponsor %}<p><a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a> is the sponsor of this {{noun}}.</p>{% endif %}""",
             "context": {
                 "cosponsors": cosp,
+                "sponsor": self.sponsor,
+                "show_sponsor": self.sponsor in Bill.get_tracked_people(feeds),
+                "noun": self.noun,
                 }
             }
 
@@ -690,9 +700,17 @@ class Bill(models.Model):
             "date_has_no_time": False,
             "title": self.title,
             "url": self.get_absolute_url() + "/text",
-            "body_text_template": """This {{noun}}'s text {% if doc_version_name != "Introduced" %}for status <{{doc_version_name}}> ({{doc_date}}) {% endif %}is now available.""",
-            "body_html_template": """<p>This {{noun}}&rsquo;s text {% if doc_version_name != "Introduced" %}for status <i>{{doc_version_name}}</i> ({{doc_date}}) {% endif %}is now available.</p>""",
-            "context": { "noun": self.noun, "doc_date": modsinfo["docdate"], "doc_version_name": modsinfo["doc_version_name"] },
+            "body_text_template": """This {{noun}}'s text {% if doc_version_name != "Introduced" %}for status <{{doc_version_name}}> ({{doc_date}}) {% endif %}is now available.
+{% if sponsor and show_sponsor %}{{sponsor|safe}} is the sponsor of this {{noun}}.{% endif %}
+""",
+            "body_html_template": """<p>This {{noun}}&rsquo;s text {% if doc_version_name != "Introduced" %}for status <i>{{doc_version_name}}</i> ({{doc_date}}) {% endif %}is now available.</p>
+{% if sponsor and show_sponsor %}<p><a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a> is the sponsor of this {{noun}}.</p>{% endif %}
+""",
+            "context": {
+				"noun": self.noun, "doc_date": modsinfo["docdate"], "doc_version_name": modsinfo["doc_version_name"],
+                "sponsor": self.sponsor,
+                "show_sponsor": self.sponsor in Bill.get_tracked_people(feeds),
+				},
             }
 
     def render_event_summary(self, feeds):
