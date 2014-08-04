@@ -160,7 +160,7 @@ class Person(models.Model):
         for role in self.roles.order_by('startdate'):
             if len(ret) > 0 and role.continues_from(ret[-1]):
                 ret[-1].id = None # prevent corruption
-                ret[-1].enddate = role.enddate
+                ret[-1].enddate = role.logical_enddate()
             else:
                 ret.append(role)
         ret.reverse()
@@ -463,12 +463,17 @@ class PersonRole(models.Model):
                 break
             if prev_role == None or not role.continues_from(prev_role):
                 startdate = role.startdate
-            enddate = role.enddate
+            enddate = role.logical_enddate()
             prev_role = role
             if role.id == self.id:
                 found_me = True
         if not found_me: raise Exception("Didn't find myself?!")
         return (startdate, enddate)
+
+    def logical_enddate(self):
+        if self.enddate.month == 1 and self.enddate.day < 10:
+            return datetime.datetime(self.enddate.year-1, 12, 31)
+        return self.enddate
 
     def next_election_year(self):
         # For current terms, roles end at the end of a Congress on Jan 3.
