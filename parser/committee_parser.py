@@ -86,6 +86,8 @@ def main(options):
             cobj.url = committee.get("url", None)
             cobj.obsolete = False
             cobj.committee = None
+            cobj.jurisdiction = committee.get("jurisdiction")
+            cobj.jurisdiction_link = committee.get("jurisdiction_source")
             cobj.save()
             seen_committees.add(cobj.id)
 

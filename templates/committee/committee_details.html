@@ -26,13 +26,17 @@
 {% block summary %}
 <h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
 
+{% if committee.jurisdiction %}
+	<p>{{committee.jurisdiction}} {% if committee.jurisdiction_link %}(<a href="{{committee.jurisdiction_link}}">source</a>){% endif %}</p>
+{% endif %}
+
+{% if committee.committee_type == TYPE_JOINT %}
+	<p>This is a &ldquo;joint&rdquo; committee, which means it has members from both the House and Senate.
+	We do not currently have information on the House members of joint committees.</p>
+{% endif %}
+
 <div class="row group">
 	<div id="track_panel_base" class="col-sm-8">
-       	{% if committee.committee_type == TYPE_JOINT %}
-       		<p>This is a &ldquo;joint&rdquo; committee, which means it has members from both the House and Senate.
-       		Please note that we do not currently have information on the House members of joint committees.</p>
-       	{% endif %}
-	
 		<div class="info">
 			<dl class="wide">
 				{% for mem in member_highlights %}

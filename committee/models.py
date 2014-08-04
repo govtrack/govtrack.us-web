@@ -26,6 +26,8 @@ class Committee(models.Model):
     abbrev = models.CharField(max_length=255, blank=True, help_text="A really short abbreviation for the committee. Has no special significance.")
     obsolete = models.BooleanField(blank=True, default=False, db_index=True, help_text="True if this committee no longer exists.")
     committee = models.ForeignKey('self', blank=True, null=True, related_name='subcommittees', on_delete=models.PROTECT, help_text="This field indicates whether the object is a commmittee, in which case the committee field is null, or a subcommittee, in which case this field gives the parent committee.")
+    jurisdiction = models.TextField(blank=True, null=True, help_text="The committee's jurisdiction, if known.")
+    jurisdiction_link = models.TextField(blank=True, null=True, help_text="A link to where the jurisdiction text was sourced from.")
 
     def __unicode__(self):
         return self.name
