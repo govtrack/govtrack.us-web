@@ -191,7 +191,7 @@ def main(options):
 					mobj.save()
 					
 					mobj.bills.clear()
-					for bill in meeting["bills"]:
+					for bill in meeting["bill_ids"]:
 					    try:
 					        bill_type, bill_num, bill_cong = re.match(r"([a-z]+)(\d+)-(\d+)$", bill).groups()
 					        bill = Bill.objects.get(congress=bill_cong, bill_type=BillType.by_slug(bill_type), number=int(bill_num))
