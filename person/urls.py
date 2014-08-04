@@ -19,5 +19,6 @@ urlpatterns = patterns('person.views',
 	url(r'^[^/]+/(\d+)/report-card/(\d{4})', 'person_session_stats', name='person_session_stats'), # name slug "/" ID "/year-end/" session name (year)
 	
     url(r'^ajax/district_lookup$', 'district_lookup'),
+    url(r'^ajax/homepage_summary$', 'homepage_summary'),
 	url(r'^embed/mapframe(?:\.xpd)?$', 'districtmapembed', name='districtmapembed'),
 )

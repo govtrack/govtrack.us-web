@@ -89,6 +89,7 @@ class Person(models.Model):
             person = role.person
             person.role = role
             ret.append(person)
+        ret.sort(key = lambda person : (person.role.get_sort_key(), person.sortname))
         return ret
 
     @property
@@ -492,6 +493,10 @@ class PersonRole(models.Model):
         if self.party == "Democrat": return "Republican"
         if self.party == "Republican": return "Democrat"
         return None
+
+    def get_sort_key(self):
+        # As it happens, our enums define a good sort order between senators and representatives.
+        return (self.role_type, self.senator_rank)
 
     def simple_record(self):
         return {

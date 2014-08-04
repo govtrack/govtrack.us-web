@@ -132,7 +132,7 @@
 </div>
 <div class="entries-box">
 	<div class="entries-holder container">
-			<div class="col-sm-7">
+			<div id="generic-events" class="col-sm-7">
 				<h2><span>in</span> Congress</h2>
 		
 				<section class="featured-articles">
@@ -156,6 +156,35 @@
 				</section>
 			</div><!-- /in-congress -->
 
+			<div id="custom-events" class="col-sm-7">
+				<div style="text-align: right"><small><a href="#" onclick="return show_askcd();">not your district?</a></small></div>
+				<h2 style="margin-top: 0"><span>in district...</span></h2>
+				<section class="row" style="margin-bottom: 1em">
+				</section>
+				<section class="featured-articles">
+				</section>
+				<div style="display: none">
+					<div id="custom-events-rep-template" class="col-xs-4" style="text-align: center;">
+						<a style="text-decoration: none; pading: 1em; display: block">
+							<img src="" class="img-responsive" style="margin: 0 auto">
+							<p class="name" style="margin: .5em 0 0 0; font-weight: bold"> </p>
+							<p class="title" style="margin: 0; font-size: 90%; color: #444"> </p>
+						</a>
+					</div>
+					<article id="custom-events-template" class="post">
+						<div class="event_header">
+							<div class="event_type">Date: <span></span></div>
+							<h4 class="event_title"></h4>
+							<p></p>
+						</div>
+						<div class="event_body">
+							<div class="event_body_body"> </div>
+							<a href="" class="more">More information...</a>
+						</div>
+					</article>
+				</div>
+			</div>
+
 			<div class="col-sm-offset-1 col-sm-4">
 				<article class="rss-block">
 					<h3><span>from the</span> GovTrack Blog <!--<a href="/blog"><img src="images/ico-rss.gif" width="9" height="9" alt="image description"></a>--></h3>
@@ -173,5 +202,56 @@
 			</div>
 	</div>
 </div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+// customization based on user's district
+onUserDistrictChanged(function (cong_dist, mocs) {
+    if (cong_dist) {
+		$.ajax({
+			url: "/congress/members/ajax/homepage_summary?district=" + cong_dist.state + cong_dist.district,
+			success: function(res) {
+				$('#custom-events').show();
+				$('#generic-events').hide();
+
+				var n = $('#custom-events');
+				n.find('h2 span').text("in " + res.state_name + "’s " + (res.district > 0 ? res.district_ordinal : 'At-Large') + " Congressional District");
+				n.find('section').text('');
+
+				for (var i = 0; i < res.reps.length; i++) {
+					var r = $('#custom-events-rep-template').clone();
+					r.find('img').attr('src', res.reps[i].photo)
+					r.find('a').attr('href', res.reps[i].link)
+					r.find('.name').text(res.reps[i].name)
+					r.find('.title').text(res.reps[i].title)
+					n.find('.row').append(r);
+				}
+
+				if (res.events.length > 0) {
+					n.find('section.featured-articles').append($('<p>').text('Your representative' + (res.reps.length == 1 ? ' was' : 's were') + ' involved in the following recent legislative events:'));
+				}
+				for (var i = 0; i < res.events.length; i++) {
+					var e = $("#custom-events-template").clone();
+					e.addClass(res.events[i].type);
+					e.find('.event_type span').text(res.events[i].date);
+					e.find('h4').text(res.events[i].type);
+					e.find('p').text(res.events[i].title);
+					e.find('.event_body_body').html(res.events[i].body_html);
+					e.find('.event_body > a').attr('href', res.events[i].url);
+					n.find('section.featured-articles').append(e);
+				}
+			},
+			failure: function() {
+				$('#custom-events').hide();
+				$('#generic-events').show();
+			}
+		});
+    } else {
+		$('#custom-events').hide();
+		$('#generic-events').show();
+	}
+});
+</script>
 {% endblock %}
 
