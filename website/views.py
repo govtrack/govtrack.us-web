@@ -537,11 +537,18 @@ def videos(request, video_id=None):
 
 
 def set_district(request):
+    try:
+        state = request.POST["state"]
+        if state != "XX" and state not in us.statenames: raise Exception()
+        district = int(request.POST["district"])
+    except:
+        return HttpResponseBadRequest()
+
     # Who represents?
     from person.models import Person
     mocs = None
-    if request.POST.get("state") != "XX":
-        mocs = [p.id for p in Person.from_state_and_district(request.POST.get("state"), int(request.POST.get("district")))]
+    if state != "XX":
+        mocs = [p.id for p in Person.from_state_and_district(state, district)]
 
     # Form response.
     response = HttpResponse(
@@ -551,12 +558,11 @@ def set_district(request):
     if request.user.is_authenticated():
         # Save to database.
         prof = request.user.userprofile()
-        if request.POST.get("state") not in list(us.statenames)+["XX"]: return HttpResponseBadRequest(request.POST.get("state") + "|"+str(set(us.statenames)))
-        prof.congressionaldistrict = "%s%02d" % (request.POST.get("state"), int(request.POST.get("district")))
+        prof.congressionaldistrict = "%s%02d" % (state, district)
         prof.save()
     else:
         # Save in cookie.
-        response.set_cookie("cong_dist", json.dumps({ "state": request.POST.get("state"), "district": int(request.POST.get("district")) }),
+        response.set_cookie("cong_dist", json.dumps({ "state": state, "district": district }),
             max_age=60*60*24*21)
 
     return response
