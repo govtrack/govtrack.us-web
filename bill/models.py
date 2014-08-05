@@ -726,7 +726,7 @@ class Bill(models.Model):
             "context": { "summary": bs },
             }
 
-    def get_major_events(self):
+    def get_major_events(self, top=True):
         if self.congress < 93: return []
         ret = []
         saw_intro = False
@@ -783,14 +783,27 @@ class Bill(models.Model):
             })
         if not saw_intro: ret.insert(0, { "key": BillStatus.introduced.key, "label": "Introduced", "date": self.introduced_date, "explanation": BillStatus.introduced.explanation })
 
-        if self.docs_house_gov_postdate: ret.append({ "key": "schedule_house", "label": "On House Schedule", "date": self.docs_house_gov_postdate, "explanation": "The House indicated that this %s would be considered in the week ahead." % self.noun })
-        if self.senate_floor_schedule_postdate: ret.append({ "key": "schedule_senate","label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate, "explanation": "The Senate indicated that this %s would be considered in the days ahead." % self.noun })
+        # Was the bill scheduled for consideration?
+        if top:
+            if self.docs_house_gov_postdate: ret.append({ "key": "schedule_house", "label": "On House Schedule", "date": self.docs_house_gov_postdate, "explanation": "The House indicated that this %s would be considered in the week ahead." % self.noun })
+            if self.senate_floor_schedule_postdate: ret.append({ "key": "schedule_senate","label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate, "explanation": "The Senate indicated that this %s would be considered in the days ahead." % self.noun })
+
+        # Bring in really-major events on identical bills.
+        if top:
+            for b in set(rb.related_bill for rb in self.relatedbills.exclude(relation='unknown').select_related("related_bill")):
+                for e in b.get_major_events(top=False):
+                    if e["key"] in ("introduced", "reported"): continue
+                    e["bill"] = b
+                    ret.append(e)
+
+        # Sort the entries by date. Stable sort for time-less dates.
         def as_dt(x):
             if isinstance(x, datetime.datetime): return x
             return datetime.datetime.combine(x, datetime.time.min)
-        ret.sort(key = lambda x : as_dt(x["date"])) # only needed because of the previous two
+        ret.sort(key = lambda x : as_dt(x["date"]))
 
-        if self.is_alive:
+        # Don't add future events when we're looking at related bills to the bill we really care about.
+        if self.is_alive and top:
             for key, label in self.get_future_events():
                 ret.append({ "key": key, "label": label })
 
