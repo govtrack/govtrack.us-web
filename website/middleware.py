@@ -51,7 +51,9 @@ def template_context_processor(request):
     
     # Add top-tracked feeds.
     global trending_feeds
-    if not trending_feeds or trending_feeds[0] < datetime.datetime.now()-datetime.timedelta(hours=2):
+    if settings.DEBUG:
+        trending_feeds = [None, []]
+    elif not trending_feeds or trending_feeds[0] < datetime.datetime.now()-datetime.timedelta(hours=2):
         from events.models import Feed
         trf = cache.get("trending_feeds")
         if not trf:
