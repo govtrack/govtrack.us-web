@@ -464,7 +464,7 @@ p#yourreps {
 				{% endif %}
 
 				{% with bill.get_prognosis as p %}
-				{% if p %}
+				{% if p and bill.is_alive %}
 				<dt>Prognosis</dt>
 				<dd>
 					{{p.prediction|floatformat:0}}% chance of being {{p.success_name}}
