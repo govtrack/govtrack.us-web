@@ -474,8 +474,8 @@ p#yourreps {
 				
 				{% with bill.slip_law_number as sln %}
 				{% if sln %}
-					<dt>Slip Law:</dt>
-					<dd>This bill became {{bill.slip_law_number}}.</dd>
+					<dt>Law:</dt>
+					<dd>This {{bill.noun}} became the law numbered {{bill.slip_law_number}}.</dd>
 				{% endif %}
 				{% endwith %}				
 				
