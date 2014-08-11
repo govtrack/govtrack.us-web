@@ -472,7 +472,7 @@ class PersonRole(models.Model):
 
     def logical_enddate(self):
         if self.enddate.month == 1 and self.enddate.day < 10:
-            return datetime.datetime(self.enddate.year-1, 12, 31)
+            return datetime.date(self.enddate.year-1, 12, 31)
         return self.enddate
 
     def next_election_year(self):
