@@ -78,6 +78,7 @@ if not DEBUG:
       )
 
 MIDDLEWARE_CLASSES = (
+    #'silk.middleware.SilkyMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -112,6 +113,7 @@ INSTALLED_APPS = (
     'django_extensions',
     #'south',
     #'debug_toolbar',
+    #'silk',
     
     'haystack',
     'django_wysiwyg',
@@ -175,10 +177,8 @@ PREDICTIONMARKET_BANK_UID = 136196
 #if DEBUG: # sometimes we debug in a live environment
 #	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-try:
-    from settings_local import *
-except ImportError:
-    pass
+# Load local settings.
+from settings_local import *
 
 if not SECRET_KEY:
     raise Exception('You must provide SECRET_KEY value in settings_local.py')
@@ -188,4 +188,13 @@ if not SECRET_KEY:
 # sure this has any useful effect.
 import socket
 socket.setdefaulttimeout(10.0)
+
+# Restrict silk profile information to staff users. Don't
+# log request/response bodies because we will go crazy in
+# production.
+SILKY_AUTHENTICATION = True
+SILKY_AUTHORISATION = True
+SILKY_MAX_REQUEST_BODY_SIZE = 0
+SILKY_MAX_RESPONSE_BODY_SIZE = 0
+SILKY_META = True
 
