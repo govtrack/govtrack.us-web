@@ -259,7 +259,7 @@ class Person(models.Model):
     def vote_sources(self):
         from vote.models import Vote
         sources = set()
-        for v in Vote.objects.filter(voters__person=self).values("source").distinct():
+        for v in Vote.objects.filter(voters__person=self).order_by().values("source").distinct():
             if v["source"] in (1, 2):
                 sources.add("congress")
             elif v["source"] == 3:
