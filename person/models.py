@@ -315,7 +315,13 @@ class Person(models.Model):
     @staticmethod
     def from_feed(feed):
         if ":" not in feed.feedname or feed.feedname.split(":")[0] not in ("p", "pv", "ps"): raise ValueError(feed.feedname)
-        return Person.objects.get(id=feed.feedname.split(":")[1])
+        pid = int(feed.feedname.split(":")[1])
+        cache_key = "person:%d" % pid
+        p = cache.get(cache_key)
+        if not p:
+            p = Person.objects.get(id=pid)
+            cache.set(cache_key, p, 60*60*4) # 4 hours
+        return p
 
 class PersonRole(models.Model):
     """Terms held in office by Members of Congress, Presidents, and Vice Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President/Vice President four years, and in the Senate six years (three 'Congresses')."""
