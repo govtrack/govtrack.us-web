@@ -62,4 +62,4 @@ if settings.DEBUG:
     urlpatterns += static("/data", document_root="data")
 
 if "silk" in settings.INSTALLED_APPS:
-	urlpatterns += patterns('', url(r'^silk', include('silk.urls', namespace='silk')))
+	urlpatterns += patterns('', url(r'^silk/', include('silk.urls', namespace='silk')))

@@ -47,7 +47,7 @@ def template_context_processor(request):
         "STATE_CHOICES": sorted([(kv[0], kv[1], us.stateapportionment[kv[0]]) for kv in us.statenames.items() if kv[0] in us.stateapportionment], key = lambda kv : kv[1]),
     }
     
-    if request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
+    if hasattr(request, 'user') and request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
     
     # Add top-tracked feeds.
     global trending_feeds
@@ -118,7 +118,7 @@ def template_context_processor(request):
     except:
         pass
 
-    if not request.user.is_authenticated():
+    if not hasattr(request, 'user') or not request.user.is_authenticated():
         # Have we put the user's district in a cookie?
         try:
             cong_dist = json.loads(request.COOKIES["cong_dist"])
@@ -158,7 +158,7 @@ def template_context_processor(request):
   
 class GovTrackMiddleware:
     def process_request(self, request):
-        if request.user.is_authenticated():
+        if hasattr(request, 'user') and request.user.is_authenticated():
             request.user.twostream_data = {
                 'cd': request.user.userprofile().congressionaldistrict or None,
             }

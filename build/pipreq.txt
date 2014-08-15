@@ -20,4 +20,3 @@ markdown2
 django_twilio
 twilio
 tqdm
-django-silk
