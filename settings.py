@@ -152,8 +152,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 TEST_DATABASE_CHARSET = 'utf8'
 
-DATETIME_FORMAT = 'M d, Y P'
-DATE_FORMAT = 'M d, Y'
+DATETIME_FORMAT = 'M j, Y P'
+DATE_FORMAT = 'M j, Y'
 
 SEND_BROKEN_LINK_EMAILS = False
 IGNORABLE_404_ENDS = ('spinner.gif', 'billtext/images/quote.png')
