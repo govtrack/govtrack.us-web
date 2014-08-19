@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify, date as date_to_str
 from django.core.urlresolvers import reverse
 
 from common import enum
@@ -105,6 +105,13 @@ class Cosponsor(models.Model):
         # don't need title because it's implicit from the bill type
         from person.name import get_person_name
         return get_person_name(self.person, role_date=self.joined, firstname_position="after", show_title=False)
+
+    def details(self):
+        ret = []
+        if self.joined: ret.append("joined " + date_to_str(self.joined))
+        if self.withdrawn: ret.append("withdrawn " + date_to_str(self.withdrawn))
+        if self.bill.is_current and not self.role.current: ret.append("no longer serving")
+        return "; ".join(ret)
 
     # role is a new field which I added with (does not take into account people with overlapping roles such as going from House to Senate on the same day):
     #for role in PersonRole.objects.filter(startdate__lte="1970-01-01", startdate__gt="1960-01-01"):
