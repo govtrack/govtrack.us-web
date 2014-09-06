@@ -1,5 +1,15 @@
 #!script
 
+# D = read.table("lifetime_bill_stats.csv", header=T, sep=',', quote='"')
+# d = D[D$years<=30,]
+# model <- lm(d$enacted ~ d$years + d$years:d$party - 1)
+# summary(model)
+# d$residuals <- model$residuals
+# d$fitted.values <- model$fitted.values
+# d[order(d$residuals),][0:5,]
+# d[order(d$residuals),][(nrow(d)-4):nrow(d),]
+
+
 import sys, csv, datetime
 
 from bill.models import *
@@ -9,7 +19,7 @@ today = datetime.datetime.now().date()
 
 w = csv.writer(sys.stdout)
 
-w.writerow(["est start", "years served", "name", "introduced", "reported", "enacted", "url"])
+w.writerow(["est start", "years served", "# introduced", "# reported", "# enacted", "name", "current party", "link"])
 
 def get_first_swearing_in_date(r):
 	return PersonRole.objects.filter(person=r.person, role_type=r.role_type).order_by("startdate")[0].startdate
@@ -26,8 +36,7 @@ cur_roles.sort(key = lambda r : -get_number_of_years_served(r))
 for r in cur_roles:
 	row = [
 		get_first_swearing_in_date(r).strftime("%x"),
-		str(int(round(get_number_of_years_served(r)))),
-		unicode(r.person).encode("utf8"),
+		str(round(get_number_of_years_served(r), 1)),
 	]
 
 	# bills introduced
@@ -42,6 +51,10 @@ for r in cur_roles:
 	bills_enacted = [b for b in bills if b.was_enacted_ex() is not None]
 	row.append(str(len(bills_enacted)))
 
-	row.append("http://www.govtrack.us" + r.person.get_absolute_url())
+	row.extend([
+		unicode(r.person).encode("utf8"),
+		r.party,
+		"http://www.govtrack.us" + r.person.get_absolute_url(),
+	])
 
 	w.writerow(row)
