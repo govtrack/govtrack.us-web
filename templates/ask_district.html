@@ -244,13 +244,47 @@ function askcd_submit(is_cancel) {
 }
 var win_loc_hash = window.location.hash; // may change between now and ()'s execution
 $(function() {
-		setTimeout(function() {
-			if (the_segment == "Other" && cong_dist == null && win_loc_hash != "#track") {
-				show_askcd();
-			}
-		}, 1000)
+	setTimeout(function() {
+		if (win_loc_hash == "#track") return;
+
+		var flags = $.cookie("flags");
+		flags = !flags ? {} : $.deparam(flags, true);
+
+		if (the_segment == "Other" && cong_dist == null)
+			show_askcd();
+		else if (Math.random() < .3)
+			show_followus(flags);
+
+		$.cookie("flags", $.param(flags, true), { expires: 21, path: '/' });
+	}, 1000)
 });
+
+function show_followus(flags) {
+	if (flags.foll_tw) return; // only show once
+	flags.foll_tw = true;
+
+	$('#followus_modal').modal();
+	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
+}
 </script>
 
 <script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
 <!-- / ask for district -->
+
+<div id="followus_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="followusModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="followusModalTitle">Follow us?</h4>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 20px">We tweet when bills are enacted and some of our original research.</p>
+        <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/govtrack" data-widget-id="508366437044330496" height="250" data-tweet-limit="2" data-chrome="nofooter noborders">Tweets by @govtrack</a>
+      </div>
+      <!--<div class="modal-footer">
+      	<button type="button" class="btn btn-default" data-dismiss="modal">Not Now</button>
+      </div>-->
+    </div>
+  </div>
+</div>
