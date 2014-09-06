@@ -1148,7 +1148,11 @@ p#yourreps {
 				{% if not summary %}
 					<p>We don&rsquo;t have a summary available yet.</p>
 				{% else %}
-					{{summary.content|safe}}
+					{% if summary.id >= 75 %}
+						{{summary.content|markdown}}
+					{% else %}
+						{{summary.content|safe}}
+					{% endif %}
 					<div class="small" style="margin-top: 1em; border-top: 1px solid #666; padding-top: 1em">
 						Last updated {{summary.modified|date}}.
 						View <a href="/events/bill-summaries">all GovTrack summaries</a>.
