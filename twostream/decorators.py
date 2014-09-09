@@ -32,7 +32,10 @@ def anonymous_view(view):
 		if hasattr(request, "session"): request.session = { }
 
 		for header in list(request.META.keys()):
-			if header not in ('CONTENT_LENGTH', 'CONTENT_TYPE', 'HTTP_HOST', 'QUERY_STRING', 'REQUEST_METHOD', 'SERVER_NAME', 'SERVER_PORT', 'SERVER_PROTOCOL', 'REMOTE_ADDR'):
+			if header not in (
+					'SERVER_NAME', 'SERVER_PORT', 'HTTPS', 'wsgi.url_scheme', 'SERVER_PROTOCOL', 'HTTP_HOST',
+					'REQUEST_METHOD', 'REQUEST_URI', 'DOCUMENT_URI', 'PATH_INFO', 'QUERY_STRING', 'CONTENT_LENGTH', 'CONTENT_TYPE',
+					'REMOTE_ADDR'):
 				del request.META[header]
 				
 		# In order for the Django debug template context processor to work, we can't

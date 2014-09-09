@@ -56,6 +56,7 @@ SITE_ROOT_URL = "https://www.govtrack.us"
 LOGIN_REDIRECT_URL = "/accounts/profile"
 SERVER_EMAIL = "GovTrack.us <noreply@mail.GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
+SECURE_PROXY_SSL_HEADER = ("HTTPS", "on")
 
 SESSION_COOKIE_AGE = 6*604800 # seconds in six weeks
 SESSION_COOKIE_SECURE = not DEBUG # send session cookies over SSL only
