@@ -29,6 +29,8 @@ urlpatterns = patterns('',
     (r'^accounts/login/?$', 'registration.views.loginform'), # Django adds a slash when logging out?
     (r'^accounts/logout$', 'django.contrib.auth.views.logout', { "redirect_field_name": "next" }),
     (r'^accounts/profile$', 'registration.views.profile'),
+
+	(r'^dump_request', 'website.views.dumprequest'),
 )
 
 # sitemaps
@@ -63,3 +65,4 @@ if settings.DEBUG:
 
 if "silk" in settings.INSTALLED_APPS:
 	urlpatterns += patterns('', url(r'^silk/', include('silk.urls', namespace='silk')))
+

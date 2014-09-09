@@ -566,3 +566,10 @@ def set_district(request):
             max_age=60*60*24*21)
 
     return response
+
+@anonymous_view
+def dumprequest(request):
+	return HttpResponse(
+		"secure=" + repr(request.is_secure()) + "\n"
+		+ repr(request),
+		content_type="text/plain")
