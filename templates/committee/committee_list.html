@@ -41,7 +41,7 @@ New: <a href="calendar">Calendar of Upcoming Committee Meetings</a>
 <div class="row">
 	<div class="col-sm-offset-1 col-sm-10">
         <h2>Joint Committees</h2>
-        <p>The joint committees are made up of both senators and congressmen. They typically have an oversight or policy role but no legislative duties.</p>
+        <p>The joint committees are made up of both senators and representatives. They typically have an oversight or policy role but no legislative duties.</p>
         <ul style="list-style: none; padding: 0;">
             {% for item in joint_committees %}
             <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
