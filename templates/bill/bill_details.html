@@ -9,9 +9,9 @@
 
 {% block og_image %}
 	{% if text_info.has_thumbnail %}
-		<meta property="og:image" content="http://www.govtrack.us{{text_info.thumbnail_path}}"/>
-		<meta property="og:image:secure_url" content="https://www.govtrack.us{{text_info.thumbnail_path}}"/>
-		<meta property="twitter:image:src" content="https://www.govtrack.us{{text_info.thumbnail_path}}"/>
+		<meta property="og:image" content="http://www.govtrack.us{{text_info.thumbnail_path}}?aspect=1"/>
+		<meta property="og:image:secure_url" content="https://www.govtrack.us{{text_info.thumbnail_path}}?aspect=1"/>
+		<meta property="twitter:image:src" content="https://www.govtrack.us{{text_info.thumbnail_path}}?aspect=.85"/>
 	{% else %}
 		<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
 		<meta property="og:image:secure_url" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
@@ -550,7 +550,9 @@ p#yourreps {
 			
 			{% with bill.oursummary as summary %}
 			{% if summary %}
-				<p style="margin: 1em 0 0 0">{{summary.plain_text|truncatewords:30}} (<a href="#summary/oursummary">read more</a>)</p>
+				<p style="margin: 1em 0 0 0">
+					{{summary.as_html|truncatewords_html:30|safe}}
+					(<a href="#summary/oursummary">read more</a>)</p>
 			{% endif %}
 			{% endwith %}
 			
@@ -695,7 +697,7 @@ p#yourreps {
 							>
 							{% if item.vote_link and not item.bill %}<a href="{{item.vote_link}}">{% endif %}
 							<div class="img status_{{item.key}}">
-								{% if item.bill %}<div class="related-bill-text">{% if bill.bill_type != item.bill.bill_type %}Companion{% else %}Related{% endif %} Bill</div>{% endif %}
+								{% if item.bill %}<div class="related-bill-text">{{item.relation}}</div>{% endif %}
 								{% if not forloop.first %}<div class="arrow"> </div>{% endif %}
 							</div>
 							{% if item.vote_link and not item.bill %}</a>{% endif %}
@@ -1148,11 +1150,7 @@ p#yourreps {
 				{% if not summary %}
 					<p>We don&rsquo;t have a summary available yet.</p>
 				{% else %}
-					{% if summary.id >= 75 %}
-						{{summary.content|markdown}}
-					{% else %}
-						{{summary.content|safe}}
-					{% endif %}
+					{{summary.as_html|safe}}
 					<div class="small" style="margin-top: 1em; border-top: 1px solid #666; padding-top: 1em">
 						Last updated {{summary.modified|date}}.
 						View <a href="/events/bill-summaries">all GovTrack summaries</a>.

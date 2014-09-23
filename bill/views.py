@@ -777,11 +777,15 @@ def bill_text_image(request, congress, type_slug, number):
     # Now take a window from the top matching a particular aspect ratio.
     # We're going to display this next to photos of members of congress,
     # so use that aspect ratio.
-    img = img.crop((0,0, img.size[0], int(240.0/200.0*img.size[0])))
+    try:
+        aspect = float(request.GET["aspect"])
+    except:
+	    aspect = 240.0/200.0
+    img = img.crop((0,0, img.size[0], int(aspect*img.size[0])))
 
     # Resize to requested width.
     if "width" in request.GET:
-        img.thumbnail((int(request.GET["width"]), 11.0/8.0*int(request.GET["width"])), Image.ANTIALIAS)
+        img.thumbnail((int(request.GET["width"]), int(aspect*float(request.GET["width"]))), Image.ANTIALIAS)
 
     import StringIO
     imgbytesbuf = StringIO.StringIO()

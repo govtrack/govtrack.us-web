@@ -14,7 +14,7 @@ from us import get_congress_dates, get_session_from_date
 
 from django.conf import settings
 
-import datetime, os.path, re, urlparse
+import datetime, os.path, re, urlparse, markdown2
 from lxml import etree
 
 "Enums"
@@ -729,7 +729,7 @@ class Bill(models.Model):
             "title": self.title,
             "url": self.get_absolute_url() + "#summary/oursummary",
             "body_text_template": """{{summary.plain_text|truncatewords:80}}""",
-            "body_html_template": """{{summary.content|truncatewords_html:80|safe}}""",
+            "body_html_template": """{{summary.as_html|truncatewords_html:80|safe}}""",
             "context": { "summary": bs },
             }
 
@@ -797,11 +797,19 @@ class Bill(models.Model):
 
         # Bring in really-major events on identical bills.
         if top:
-            for b in set(rb.related_bill for rb in self.relatedbills.exclude(relation='unknown').select_related("related_bill")):
-                for e in b.get_major_events(top=False):
-                    if e["key"] in ("introduced", "reported"): continue
-                    e["bill"] = b
-                    ret.append(e)
+            got_rb = set()
+            for relation_name, relation_types in (
+              ("Companion Bill", ("identical",)),
+              ("Alternative Bill", ("supersedes", "includes")),
+              ("Rules Change", ("rule","caused-action"))):
+                for rb in self.relatedbills.filter(relation__in=relation_types).select_related("related_bill"):
+                    if rb.related_bill in got_rb: continue
+                    got_rb.add(rb.related_bill)
+                    for e in rb.related_bill.get_major_events(top=False):
+                        if e["key"] in ("introduced", "reported"): continue
+                        e["relation"] = relation_name
+                        e["bill"] = rb.related_bill
+                        ret.append(e)
 
         # Sort the entries by date. Stable sort for time-less dates.
         def as_dt(x):
@@ -1264,15 +1272,21 @@ class BillSummary(models.Model):
     modified = models.DateTimeField(auto_now=True)
     content = models.TextField(blank=True)
 
+    def as_html(self):
+        if self.id < 75:
+            return self.content
+        else:
+            return markdown2.markdown(self.content)
+
     def plain_text(self):
+        if self.id >= 75:
+            return self.content
+
         import re
         content = re.sub("<br>|<li>", " \n ", self.content, re.I)
-
         from django.utils.html import strip_tags
         content = strip_tags(content)
-
         content = content.replace("&nbsp;", " ")
-
         return content
 
 # USC Citations
