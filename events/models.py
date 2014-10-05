@@ -100,11 +100,15 @@ class Feed(models.Model):
                             v = { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3], "seq": b[4], "feeds": set() }
                             ret.append(v)
                             seen[key] = v
-                        seen[key]["feeds"].add(source_feed_map.get(feed, feed))
-                            
+                        seen[key]["feeds"].add(source_feed_map.get(feed, feed).feedname)
+
                 ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]), reverse=True)
-                
-                return ret[0:count]
+                ret = ret[0:count]
+
+                # Feed instances aren't hashable without pk's.
+                for r in ret: r["feeds"] = [Feed(feedname=fn) for fn in r["feeds"]]
+
+                return ret
         
     def get_events(self, count):
         return Feed.get_events_for((self,), count)
