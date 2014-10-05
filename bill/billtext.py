@@ -347,7 +347,7 @@ def load_citation_info(metadata):
     usc_sections = []
     other = []
 
-    usc_other = USCSection(name="Other Citations", ordering=99999)
+    usc_other = USCSection(id="_make_this_instance_hashable", name="Other Citations", ordering=99999)
 
     for cite in metadata["citations"]:
         if cite["type"] == "slip_law":
