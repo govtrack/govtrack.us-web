@@ -16,3 +16,6 @@
 [submodule "ext/django-simplegetapi"]
 	path = ext/django-simplegetapi
 	url = https://github.com/JoshData/django-simplegetapi
+[submodule "ext/django-lorien-common"]
+	path = ext/django-lorien-common
+	url = https://github.com/govtrack/django-lorien-common

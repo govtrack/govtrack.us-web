@@ -64,7 +64,7 @@ GovTrack.us runs on Ubuntu 12.10.
 * Initialize the database and minify some files:
 
   ```
-  ./manage.py syncdb
+  ./manage.py migrate
   ./minify
   ```
 * Load some data:

@@ -13,6 +13,6 @@ pip-log.txt
 database.sqlite
 static/css/all-min.css
 static/images/dynamic
-fcgi.conf
+uwsgi.conf
 data
 

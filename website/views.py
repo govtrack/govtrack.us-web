@@ -553,7 +553,7 @@ def set_district(request):
     # Form response.
     response = HttpResponse(
         json.dumps({ "status": "ok", "mocs": mocs }),
-        mimetype="application/json")
+        content_type="application/json")
 
     if request.user.is_authenticated():
         # Save to database.

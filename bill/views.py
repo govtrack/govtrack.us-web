@@ -518,8 +518,8 @@ def bill_statistics(request):
     # When does activity occur within the session cycle?
     if settings.DATABASES['default']['ENGINE'] != 'django.db.backends.sqlite3':
         from django.db import connection
-        cursor = connection.cursor()
-        def pull_time_stat(field, where, historical=True):
+        def pull_time_stat(field, where, cursor):
+            historical = False
             cursor.execute("SELECT YEAR(%s) - congress*2 - 1787, MONTH(%s), COUNT(*) FROM bill_bill WHERE congress>=93 AND congress%s%d AND %s GROUP BY YEAR(%s) - congress*2, MONTH(%s)" % (field, field, "<" if historical else "=", CURRENT_CONGRESS, where, field, field))
             activity = [{ "x": r[0]*12 + (r[1]-1), "count": r[2], "year": r[0] } for r in cursor.fetchall()]
             total = sum(m["count"] for m in activity)
@@ -527,8 +527,9 @@ def bill_statistics(request):
             for m in activity: m["count"] = round(m["count"] / (CURRENT_CONGRESS-96), 1)
             for m in activity: m["cumulative_count"] = round(m["cumulative_count"] * 100.0)
             return activity
-        activity_introduced_by_month = pull_time_stat('introduced_date', "1")
-        activity_enacted_by_month = pull_time_stat('current_status_date', "current_status IN (%d,%d,%d)" % (int(BillStatus.enacted_signed), int(BillStatus.enacted_veto_override), int(BillStatus.enacted_tendayrule)))
+        with connection.cursor() as cursor:
+            activity_introduced_by_month = pull_time_stat('introduced_date', "1", cursor)
+            activity_enacted_by_month = pull_time_stat('current_status_date', "current_status IN (%d,%d,%d)" % (int(BillStatus.enacted_signed), int(BillStatus.enacted_veto_override), int(BillStatus.enacted_tendayrule)), cursor)
     else:
         activity_introduced_by_month = []
         activity_enacted_by_month = []
@@ -792,4 +793,4 @@ def bill_text_image(request, congress, type_slug, number):
     img.save(imgbytesbuf, "PNG")
     imgbytes = imgbytesbuf.getvalue()
     imgbytesbuf.close()
-    return HttpResponse(imgbytes, mimetype="image/png")
+    return HttpResponse(imgbytes, content_type="image/png")

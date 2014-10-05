@@ -292,5 +292,5 @@ def events_embed_legacy(request):
     while len(html) > 0:
         js += "document.write(\"" + escapejs(html[0:128]) + "\");\n"
         html = html[128:]
-    return HttpResponse(js, mimetype="application/x-javascript; charset=UTF-8")
+    return HttpResponse(js, content_type="application/x-javascript; charset=UTF-8")
     

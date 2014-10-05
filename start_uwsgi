@@ -1,0 +1,6 @@
+if test static/css/all.css -nt static/css/all-min.css; then
+ echo Minifying...
+ ./minify
+fi
+source uwsgi.conf
+.env/bin/uwsgi --socket /tmp/uwsgi_govtrack_$NAME.sock --chmod-socket=666 --wsgi-file wsgi.py

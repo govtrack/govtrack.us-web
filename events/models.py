@@ -52,60 +52,59 @@ class Feed(models.Model):
                 return []
         
         from django.db import connection, transaction
-        cursor = connection.cursor()
+        with connection.cursor() as cursor:
+            # Our table has multiple entries for each event, one entry for each feed it is a
+            # part of. Thus, if we query on no feeds or on multiple feeds, we have to make
+            # the results distinct. The Django ORM can't handle generating a nice query for this:
+            # It adds joins that ruin indexing. So we handle this by querying in batches until
+            # we get 'count' distinct events.
+            #
+            # Additionally, MySQL doesnt do indexing well if we query on multiple feeds at once.
+            # In that case, we take a different code path and find 'count' events from each feed,
+            # then put them together, sort, distinct, and take the most recent 'count' items.
 
-        # Our table has multiple entries for each event, one entry for each feed it is a
-        # part of. Thus, if we query on no feeds or on multiple feeds, we have to make
-        # the results distinct. The Django ORM can't handle generating a nice query for this:
-        # It adds joins that ruin indexing. So we handle this by querying in batches until
-        # we get 'count' distinct events.
-        #
-        # Additionally, MySQL doesnt do indexing well if we query on multiple feeds at once.
-        # In that case, we take a different code path and find 'count' events from each feed,
-        # then put them together, sort, distinct, and take the most recent 'count' items.
-
-        if feeds == None:
-            # pull events in batches, eliminating duplicate results (events in multiple feeds),
-            # which is done faster here than in MySQL.
-            start = 0
-            size = count * 2
-            ret = []
-            seen = set()
-            while len(ret) < count:
-                cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when` FROM events_event ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC, seq DESC LIMIT %s OFFSET %s ", [size, start])
+            if feeds == None:
+                # pull events in batches, eliminating duplicate results (events in multiple feeds),
+                # which is done faster here than in MySQL.
+                start = 0
+                size = count * 2
+                ret = []
+                seen = set()
+                while len(ret) < count:
+                    cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when` FROM events_event ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC, seq DESC LIMIT %s OFFSET %s ", [size, start])
+                    
+                    batch = cursor.fetchall()
+                    for b in batch:
+                        if not b in seen:
+                            ret.append( { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3] } )
+                            seen.add(b)
+                    if len(batch) < size: break # no more items
+                    start += size
+                    size *= 2
                 
-                batch = cursor.fetchall()
-                for b in batch:
-                    if not b in seen:
-                        ret.append( { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3] } )
-                        seen.add(b)
-                if len(batch) < size: break # no more items
-                start += size
-                size *= 2
+                return ret
             
-            return ret
-        
-        else:
-            # pull events by feed. When we query on the 'seq' column, MySQL uses the when-based
-            # index rather than the feed-based index, which causes a big problem if there are
-            # no recent events.
-            ret = []
-            seen = { }
-            for feed in feeds:
-                cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when`, seq FROM events_event WHERE feed_id = %s ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC LIMIT %s", [feed.id, count])
+            else:
+                # pull events by feed. When we query on the 'seq' column, MySQL uses the when-based
+                # index rather than the feed-based index, which causes a big problem if there are
+                # no recent events.
+                ret = []
+                seen = { }
+                for feed in feeds:
+                    cursor.execute("SELECT source_content_type_id, source_object_id, eventid, `when`, seq FROM events_event WHERE feed_id = %s ORDER BY `when` DESC, source_content_type_id DESC, source_object_id DESC LIMIT %s", [feed.id, count])
+                    
+                    batch = cursor.fetchall()
+                    for b in batch:
+                        key = tuple(b[0:3]) # the unique part for identifying the event
+                        if not key in seen:
+                            v = { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3], "seq": b[4], "feeds": set() }
+                            ret.append(v)
+                            seen[key] = v
+                        seen[key]["feeds"].add(source_feed_map.get(feed, feed))
+                            
+                ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]), reverse=True)
                 
-                batch = cursor.fetchall()
-                for b in batch:
-                    key = tuple(b[0:3]) # the unique part for identifying the event
-                    if not key in seen:
-                        v = { "source_content_type": b[0], "source_object_id": b[1], "eventid": b[2], "when": b[3], "seq": b[4], "feeds": set() }
-                        ret.append(v)
-                        seen[key] = v
-                    seen[key]["feeds"].add(source_feed_map.get(feed, feed))
-                        
-            ret.sort(key = lambda x : (x["when"], x["source_content_type"], x["source_object_id"], x["seq"]), reverse=True)
-            
-            return ret[0:count]
+                return ret[0:count]
         
     def get_events(self, count):
         return Feed.get_events_for((self,), count)
@@ -124,9 +123,9 @@ class Feed(models.Model):
             # model, we have to replace .add/.remove on the field with other methods.
             try:
                 from django.db import connection
-                cursor = connection.cursor()
-                cursor.execute("SELECT feed_id, count(*) FROM events_subscriptionlist_trackers WHERE date_added > %s GROUP BY feed_id", [datetime.now() - timedelta(days=num_days)])
-                subs = cursor.fetchall()
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT feed_id, count(*) FROM events_subscriptionlist_trackers WHERE date_added > %s GROUP BY feed_id", [datetime.now() - timedelta(days=num_days)])
+                    subs = cursor.fetchall()
                 return { row[0]: row[1] for row in subs } 
             except DatabaseError as e:
                 # The database table hasn't been configured with the date_added column,
@@ -494,9 +493,6 @@ class SubscriptionList(models.Model):
         feeds, source_feed_map = expand_feeds(self.trackers.all())
         if len(feeds) == 0: return None, []
         
-        from django.db import connection, transaction
-        cursor = connection.cursor()
-
         # Temporary workaround. Get the maximum id for the event corresponding to
         # last_event_mailed.
         if self.last_event_mailed:
@@ -514,13 +510,15 @@ class SubscriptionList(models.Model):
         # period unless we set last_event_mailed.
         
         # The Django ORM can't handle generating a nice query. It adds joins that ruin indexing.
-        cursor.execute("SELECT id, source_content_type_id, source_object_id, eventid, `when`, seq, feed_id FROM events_event WHERE id > %s AND `when` > %s AND feed_id IN (" + ",".join(str(f.id) for f in feeds) + ") ORDER BY `when`, source_content_type_id, source_object_id, seq", [self.last_event_mailed if self.last_event_mailed else 0, datetime.now() - timedelta(days=BACKFILL_DAYS_DAILY if self.email == 1 else BACKFILL_DAYS_WEEKLY)])
+        from django.db import connection, transaction
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, source_content_type_id, source_object_id, eventid, `when`, seq, feed_id FROM events_event WHERE id > %s AND `when` > %s AND feed_id IN (" + ",".join(str(f.id) for f in feeds) + ") ORDER BY `when`, source_content_type_id, source_object_id, seq", [self.last_event_mailed if self.last_event_mailed else 0, datetime.now() - timedelta(days=BACKFILL_DAYS_DAILY if self.email == 1 else BACKFILL_DAYS_WEEKLY)])
+            batch = cursor.fetchall()
         
         max_id = None
         ret = []
         seen = { } # uniqify because events are duped for each feed they are in, but track which feeds generated the events
         feedmap = dict((f.id, source_feed_map.get(f, f)) for f in feeds)
-        batch = cursor.fetchall()
         for b in batch:
             key = b[1:3] # get the part that uniquely identifies the event, across feeds
             max_id = max(max_id, b[0]) # since we return one event record randomly out of
