@@ -1,6 +1,15 @@
+# build resources
 if test static/css/all.css -nt static/css/all-min.css; then
  echo Minifying...
  ./minify
 fi
+
+# load local settings
 source uwsgi.conf
-.env/bin/uwsgi --socket /tmp/uwsgi_govtrack_$NAME.sock --chmod-socket=666 --wsgi-file wsgi.py
+
+# daemonize?
+if [ -z "$DEBUG" ]; then
+	daemonize="--daemonize /tmp/uwsgi_govtrack_$NAME.log"
+fi
+
+.env/bin/uwsgi $daemonize --socket /tmp/uwsgi_govtrack_$NAME.sock --chmod-socket=666 --wsgi-file wsgi.py
