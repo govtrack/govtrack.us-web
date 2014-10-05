@@ -11,6 +11,7 @@ from parser.processor import XmlProcessor
 from person.models import Person, PersonRole
 from person.types import RoleType
 from parser.models import File
+from person.util import load_roles_at_date
 from bill.models import Bill, BillType, Amendment, AmendmentType
 from vote.models import (Vote, VoteOption, VoteSource, Voter,
                          CongressChamber, VoteCategory, VoterType)
@@ -136,15 +137,12 @@ def main(options):
     progress = Progress(total=total, name='files', step=10)
 
     def log_delete_qs(qs):
-        if qs.count() > 0:
-            try:
-                print "Deleting: ", qs
-            except Exception as e:
-                print "Deleting [%s]..." % str(e)
-            if qs.count() > 3:
-                print "Delete skipped..."
-                return
-            qs.delete()
+        if qs.count() == 0: return
+        print "Deleting obsoleted records: ", qs
+        #if qs.count() > 3:
+        #    print "Delete skipped..."
+        #    return
+        qs.delete()
 
     seen_obj_ids = set()
     had_error = False
@@ -184,18 +182,27 @@ def main(options):
                 # Get related bill & amendment.
                 
                 for bill_node in roll_node.xpath("bill"):
+                    related_bill_num = bill_node.get("number")
+                    if 9 <= vote.congress <= 42 and vote.session in ('1', '2'):
+                         # Bill numbering from the American Memory colletion is different. The number combines
+                         # the session, bill number, and a 0 or 5 for regular or 'half' numbering. Prior to
+                         # the 9th congress numbering seems to be wholly assigned by us and not related to
+                         # actual numbering, so we skip matching those bills.
+                         related_bill_num = "%d%04d%d" % (int(vote.session), int(bill_node.get("number")), 0)
                     try:
-                        vote.related_bill = Bill.objects.get(congress=bill_node.get("session"), bill_type=BillType.by_xml_code(bill_node.get("type")), number=bill_node.get("number"))
+                        vote.related_bill = Bill.objects.get(congress=bill_node.get("session"), bill_type=BillType.by_xml_code(bill_node.get("type")), number=related_bill_num)
                     except Bill.DoesNotExist:
-                        vote.missing_data = True
+                        if vote.congress >= 93:
+                            vote.missing_data = True
 
                 for amdt_node in roll_node.xpath("amendment"):
                     if amdt_node.get("ref") == "regular":
                         try:
                             vote.related_amendment = Amendment.objects.get(congress=vote.related_bill.congress, amendment_type=AmendmentType.by_slug(amdt_node.get("number")[0]), number=amdt_node.get("number")[1:])
                         except Amendment.DoesNotExist:
-                            print "Missing amendment", fname
-                            vote.missing_data = True
+                            if vote.congress >= 93:
+                                print "Missing amendment", fname
+                                vote.missing_data = True
                     elif amdt_node.get("ref") == "bill-serial":
                         # It is impossible to associate House votes with amendments just from the House
                         # vote XML because the amendment-num might correspond either with the A___ number
@@ -263,6 +270,7 @@ def main(options):
                 if existing_vote:
                     existing_voters = dict(Voter.objects.filter(vote=vote).values_list("person", "id"))
                 seen_voter_ids = set()
+                voters = list()
                 for voter_node in roll_node.xpath('./voter'):
                     voter = voter_processor.process(roll_options, Voter(), voter_node)
                     voter.vote = vote
@@ -272,6 +280,7 @@ def main(options):
                     if voter.voter_type == VoterType.vice_president:
                         try:
                             r = PersonRole.objects.get(role_type=RoleType.vicepresident, startdate__lte=vote.created, enddate__gte=vote.created)
+                            voter.person_role = r
                             voter.person = r.person
                         except:
                             # overlapping roles? missing data?
@@ -283,16 +292,26 @@ def main(options):
                         except KeyError:
                             pass
                         
-                    voter.save()
+                    voters.append(voter)
                     
                     if voter.voter_type == VoterType.unknown and not vote.missing_data:
                         vote.missing_data = True
                         vote.save()
                         
+                # pre-fetch the role of each voter
+                load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
+                for voter in voters:
+                    voter.person_role = voter.person.role
+
+                # save all of the records (inserting/updating)
+                for voter in voters:
+                    voter.save()
                     seen_voter_ids.add(voter.id)
                     
+                # remove obsolete voter records
                 log_delete_qs(Voter.objects.filter(vote=vote).exclude(id__in=seen_voter_ids)) # possibly already deleted by cascade above
 
+                # pre-calculate totals
                 vote.calculate_totals()
 
                 if not options.disable_events:

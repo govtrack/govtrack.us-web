@@ -284,7 +284,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 		# about 8 for the House
 		
 	# Long ago Congress had very few people.
-	seating_rows = min(total_count / 8 + 1, seating_rows)
+	seating_rows = min(total_count, total_count / 8 + 1, seating_rows)
 		
 	# Determine the seating chart dimensions: the radius of the inside row of
 	# seats and the radius of the outside row of seats.

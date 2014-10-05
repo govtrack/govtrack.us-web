@@ -111,7 +111,7 @@ class Vote(models.Model):
         
     @property
     def is_major(self):
-        return self.category in Vote.MAJOR_CATEGORIES
+        return (self.category in Vote.MAJOR_CATEGORIES) or self.congress <= 42
 
     @property
     def is_on_passage(self):
@@ -324,11 +324,12 @@ class Voter(models.Model):
 	
     vote = models.ForeignKey('vote.Vote', related_name='voters', help_text="The vote that this record is a part of.")
     person = models.ForeignKey('person.Person', blank=True, null=True, on_delete=models.PROTECT, related_name='votes', help_text="The person who cast this vote. May be null if the information could not be determined.")
+    person_role = models.ForeignKey('person.PersonRole', blank=True, null=True, on_delete=models.PROTECT, related_name='votes', help_text="The role of the person who cast this vote at the time of the vote. May be null if the information could not be determined.")
     voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President.")
     option = models.ForeignKey('vote.VoteOption', help_text="How the person voted.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.") # equal to vote.created
     
-    api_recurse_on = ('vote', 'person', 'option')
+    api_recurse_on = ('vote', 'person', 'person_role', 'option')
     api_example_parameters = { "sort": "-created" }
     api_filter_if = { "option__key": ["person"] }
     

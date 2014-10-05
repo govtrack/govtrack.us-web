@@ -968,7 +968,6 @@ p#yourreps {
 				</div>
 				{% endif %}
 
-			{% if bill.source == "thomas-congproj" %}
 			<div class="col-sm-6 col-md-4">
 				<dl>
 					<dt>Votes</dt>
@@ -1015,12 +1014,15 @@ p#yourreps {
 							}
 						</script>
 					{% else %}
-						<p>There have been no votes related to this {{bill.noun}}.</p>
+						{% if bill.source == "thomas-congproj" %}
+							<p>There have been no votes related to this {{bill.noun}}.</p>
+						{% else %}
+							<p>No votes are known for this {{bill.noun}}. Vote information is limited in historical data.</p>
+						{% endif %}
 					{% endif %}
 					</dd>
 				</dl>
 			</div>
-			{% endif %}
 		</div> <!-- row -->
 
 		<h2><span>Notes, links &amp; tools</span></h2>

@@ -217,21 +217,22 @@ if "amendments" in sys.argv:
 
 if "votes" in sys.argv:
 	# Scrape.
-	session = str(datetime.datetime.now().year)
-	os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --session=%s --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, session, log_level))
+	if CONGRESS >= 101:
+		session = str(datetime.datetime.now().year)
+		os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --session=%s --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, session, log_level))
 	
 	# Copy files into legacy location.
 	did_any_file_change = False
 	mkdir("data/us/%d/rolls" % CONGRESS)
 	for fn in sorted(glob.glob("%s/data/%d/votes/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
-		congress, session, chamber, number = re.match(r".*congress/data/(\d+)/votes/(\d+)/([hs])(\d+)/data.xml$", fn).groups()
+		congress, session, chamber, number = re.match(r".*congress/data/(\d+)/votes/(\d+|[A-C])/([hs])(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
 		fn2 = "data/us/%d/rolls/%s%s-%d.xml" % (CONGRESS, chamber, session, int(number))
 		did_any_file_change |= copy(fn, fn2, r'updated="[^"]+"')
 		
 	# Load into db.
 	if did_any_file_change or True: # amendments can mark votes as missing data
-		os.system("./parse.py --congress=%d -l %s vote" % (CONGRESS, log_level))
+		os.system("./parse.py --congress=%d -l %s" % (CONGRESS, log_level))
 
 if "stats" in sys.argv:
 	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)
