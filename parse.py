@@ -1,10 +1,8 @@
-#!.env/bin/python
+#!script
 from optparse import OptionParser
 import sys, os, os.path
 import logging
 
-from common.system import setup_django
-setup_django(__file__)
 from django.conf import settings
 
 # Explicitly set DEBUG to False to avoid memory leak

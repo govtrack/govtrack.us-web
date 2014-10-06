@@ -457,7 +457,7 @@ class SearchManager(object):
         
     def execute_qs(self, qs, defaults=None, overrides=None):
         from django.http import QueryDict
-        qd = QueryDict(qs).copy() # copy makes mutable
+        qd = QueryDict(qs.encode("utf8")).copy() # QueryDict() expects a binary string, copy makes mutable
         if defaults:
             for k in defaults:
                 qd.setdefault(k, defaults[k])

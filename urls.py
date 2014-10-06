@@ -3,7 +3,6 @@ from django.conf import settings
 import django.views.static
 
 from django.contrib import admin
-admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
