@@ -232,7 +232,7 @@ if "votes" in sys.argv:
 		
 	# Load into db.
 	if did_any_file_change or True: # amendments can mark votes as missing data
-		os.system("./parse.py --congress=%d -l %s" % (CONGRESS, log_level))
+		os.system("./parse.py vote --congress=%d -l %s" % (CONGRESS, log_level))
 
 if "stats" in sys.argv:
 	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)
