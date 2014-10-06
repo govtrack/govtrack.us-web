@@ -47,6 +47,7 @@ class VoteProcessor(XmlProcessor):
         'other': VoteCategory.other,
         'unknown': VoteCategory.unknown,
         'treaty': VoteCategory.ratification,
+        'ratification': VoteCategory.ratification, # schema changed and no longer used but still present in data files
         'veto-override': VoteCategory.veto_override,
         'conviction': VoteCategory.conviction,
         'quorum': VoteCategory.procedural,
@@ -196,7 +197,7 @@ def main(options):
                             vote.missing_data = True
 
                 for amdt_node in roll_node.xpath("amendment"):
-                    if amdt_node.get("ref") == "regular":
+                    if amdt_node.get("ref") == "regular" and vote.related_bill is not None:
                         try:
                             vote.related_amendment = Amendment.objects.get(congress=vote.related_bill.congress, amendment_type=AmendmentType.by_slug(amdt_node.get("number")[0]), number=amdt_node.get("number")[1:])
                         except Amendment.DoesNotExist:
@@ -302,6 +303,10 @@ def main(options):
                 load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
                 for voter in voters:
                     voter.person_role = voter.person.role
+                    if voter.person_role is None:
+                        log.error("%s: Could not find role for %s on %s." % (fname, voter.person, vote.created))
+                        vote.missing_data = True
+                        vote.save()
 
                 # save all of the records (inserting/updating)
                 for voter in voters:
