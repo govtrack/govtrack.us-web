@@ -4,7 +4,7 @@ from django.template.defaultfilters import slugify, date as date_to_str
 from django.core.urlresolvers import reverse
 
 from common import enum
-from json_field import JSONField
+from jsonfield import JSONField
 
 from committee.models import Committee, CommitteeMeeting, CommitteeMember, MEMBER_ROLE_WEIGHTS
 from bill.status import BillStatus, get_bill_status_string

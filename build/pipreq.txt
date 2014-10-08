@@ -7,7 +7,7 @@ django-debug-toolbar
 django-picklefield
 mimeparse
 defusedxml
-django-json-field
+jsonfield
 beautifulsoup
 feedparser
 pysolr==2.1.0
