@@ -30,7 +30,7 @@
 		{% if calls|length == 0 %}
 			<p>You have not made any calls yet.</p>
 			<p><a class="btn btn-primary" href="start-call">Make Your First Call</a></p>
-		{% endif %}
+		{% else %}
 
 		<table class="table">
 			<thead>
@@ -85,6 +85,7 @@
 			{% endfor %}
 			</tbody>
 		</table>
+		{% endif %}
 	</div>
 
 {% endblock %}

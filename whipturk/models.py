@@ -55,6 +55,9 @@ class WhipReport(models.Model):
 	class Meta:
 		ordering = ('-created',)
 
+	def __unicode__(self):
+		return "%s / %s / %s / %s" % (self.created, self.user, self.bill, self.target.person)
+
 	def has_made_successful_call(self):
 		return isinstance(self.call_log, dict) and self.call_log.get("finished", {}).get("RecordingUrl") is not None
 

@@ -304,7 +304,7 @@ class Bill(models.Model):
     def current_chamber(self):
         status = BillStatus.by_value(self.current_status)
         if status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
-            return self.originating_chamber
+            return self.originating_chamber.lower()
         elif hasattr(status, 'next_action_in'):
             return stats.next_action_in
         else:

@@ -55,7 +55,7 @@ def get_targets_by_chamber(chamber):
 
 def choose_bill():
 	# What shall we ask the user to call about?
-	bill_id = 14224
+	bill_id = 286265
 	return Bill.objects.get(id=bill_id)
 
 def choose_target(bill, user):
@@ -197,7 +197,8 @@ def get_request_log_info(request):
 @twilio_view
 def twilio_callback(request, method, call_id):
 	# Dynamically invoke one of the methods below.
-	return dir()["twilio_call_" + method](request, call_id)
+	import whipturk.views
+	return getattr(whipturk.views, "twilio_call_" + method.replace("-", "_"))(request, call_id)
 
 def twilio_call_start(request, call_id):
 	report = get_object_or_404(WhipReport, id=int(call_id))
@@ -224,14 +225,14 @@ def twilio_call_input(request, call_id):
 	report = get_object_or_404(WhipReport, id=int(call_id))
 	digit = request.POST["Digits"]
 
-	report.log["input"] = dict(request.POST)
-	report.log["input"]["_request"] = get_request_log_info(request)
+	report.call_log["input"] = dict(request.POST)
+	report.call_log["input"]["_request"] = get_request_log_info(request)
 
 	resp = TwilioResponse()
 
 	if digit != "1":
 		# basically an abuse report
-		report.log["input"]["response"] = "did-not-request-call"
+		report.call_log["input"]["response"] = "did-not-request-call"
 		resp.say("We apologize for the inconvenience. Call 202-558-7227 or visit w w w dot gov track dot u s to report abuse. Good bye.")
 		resp.hangup()
 
@@ -242,8 +243,8 @@ def twilio_call_input(request, call_id):
 	else:
 		phone = "+1" + "".join(c for c in report.target.phone if unicode.isdigit(c))
 
-		report.log["input"]["response"] = "continue"
-		report.log["input"]["transfer_to"] = phone
+		report.call_log["input"]["response"] = "continue"
+		report.call_log["input"]["transfer_to"] = phone
 
 		resp.say("Okay. Hold on.")
 		resp.dial(
@@ -259,11 +260,11 @@ def twilio_call_input(request, call_id):
 
 	return resp
 
-def twilio_call_transfer_ended(request, call_id):
+def twilio_call_transfer_end(request, call_id):
 	report = get_object_or_404(WhipReport, id=int(call_id))
 	report.call_status = "connection-ended"
-	report.log["finished"] = dict(request.POST)
-	report.log["finished"]["_request"] = get_request_log_info(request)
+	report.call_log["finished"] = dict(request.POST)
+	report.call_log["finished"]["_request"] = get_request_log_info(request)
 	report.save()
 
 	resp = TwilioResponse()
@@ -273,8 +274,8 @@ def twilio_call_transfer_ended(request, call_id):
 def twilio_call_end(request, call_id):
 	report = get_object_or_404(WhipReport, id=int(call_id))
 	report.call_status = "ended"
-	report.log["end"] = dict(request.POST)
-	report.log["end"]["_request"] = get_request_log_info(request)
+	report.call_log["end"] = dict(request.POST)
+	report.call_log["end"]["_request"] = get_request_log_info(request)
 	report.report_result = WhipReportResult.not_entered
 	report.save()
 
