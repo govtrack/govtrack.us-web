@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'states',
     'poll_and_call',
     'predictionmarket',
+    'whipturk',
 
     # for django-registration-pv
     'emailverification',

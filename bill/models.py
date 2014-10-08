@@ -300,6 +300,16 @@ class Bill(models.Model):
     def opposite_chamber(self):
         # also see current_status_chamber
         return "Senate" if self.bill_type in (BillType.house_bill, BillType.house_resolution, BillType.house_joint_resolution, BillType.house_concurrent_resolution) else "House"
+    @property
+    def current_chamber(self):
+        status = BillStatus.by_value(self.current_status)
+        if status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
+            return self.originating_chamber
+        elif hasattr(status, 'next_action_in'):
+            return stats.next_action_in
+        else:
+            # no pending action
+            return None
 
     @property
     def how_a_bill_text(self):

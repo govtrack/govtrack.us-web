@@ -1,0 +1,198 @@
+{% extends "master_d.html" %}
+
+{% load humanize %}
+{% load cache %}
+{% load govtrack_utils %}
+
+{% block title %}Whip Congress with a Call - GovTrack.us{% endblock %}
+{% block meta_description %}{% endblock %}
+
+{% block head %}
+<style>
+	h3 { border-bottom: 1px solid #222; margin-bottom: 1em; }
+	h2 { margin-top: 0; line-height: 125%; }
+
+	#script {
+		font-family: Tahoma, Ubuntu, Arial;
+		line-height: 145%;
+	}
+	#script p.them {
+		font-style: italic;
+		color: black;
+		border-top: 1px solid #888;
+		border-bottom: 1px solid #888;
+		padding: 3px;
+		line-height: 130%;
+	}
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li><a href="/publicwhip/my-calls">Public Whip</a></li>
+	<li>Place a Call</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+<div>
+	<h1>Place a Whip Call</h1>
+
+	<p style="margin: 0">We are trying to find out the position of {{target.person.name}} on {{bill.display_number}}.</p>
+</div>
+{% endblock %}
+
+{% block body %}
+	<div class="col-md-6">
+		<h3>Please Help Us Call</h3>
+		<div class="row">
+			<div class="col-xs-6">
+				<h2>{{target.person.name_no_district}}</h2>
+				<p>{{target.get_description}}</p>
+			</div>
+			<div class="col-xs-6">
+				<a href="{{target.person.get_absolute_url}}">
+					<img src="/data/photos/{{target.person.id}}-200px.jpeg" title="{{target.person.name_no_details}}" class="img-responsive" style="border: 3px solid #DDD"/>
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-md-6">
+		<h3>About This {{bill.noun|capfirst}}</h3>
+		<div class="row">
+			<div class="col-xs-6">
+				<h2>{{bill.display_number}}</h2>
+				<p>{{bill.title_no_number}}</p>
+			</div>
+			<div class="col-xs-6">
+				<a href="{{bill.get_absolute_url}}">
+					<img src="{{bill.get_absolute_url}}/_text_image" class="img-responsive" title="Bill Thumbnail" style="border: 1px solid #999;"/>
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-xs-12">
+		<h3>Instructions</h3>
+
+		<div class="row">
+			<div class="col-md-6">
+				<p>We want to know if {{target.person.lastname}} supports or opposes {{bill.display_number}}.</p>
+
+				<p>Your call to {{target.person.lastname}}&rsquo;s office will help us figure that out. We&rsquo;ll call you and connect you to {{target.person.his_her}} office. Then just read the script.</p>
+
+				<p>After you complete the call, we&rsquo;ll ask you what happened. You&rsquo;re looking for one of the following answers:</p>
+
+				<ul>
+					<li>{{target.person.lastname}} supports the {{bill.noun}}.</li>
+					<li>{{target.person.lastname}} opposes the {{bill.noun}}.</li>
+					<li>{{target.person.lastname}} has no position on it.</li>
+					<li>{{target.person.lastname}}&rsquo;s position is complicated.</li>
+				</ul>
+
+				<div style="margin: 1.5em 40px 0 0; font-size: 110%;">
+					<div style="margin-bottom: 10px;">Enter your phone number to get started:</div>
+					<input id="phone" type="tel" style="font-size: 28px; width: 220px; height: 40px; display: inline" placeholder="000 555-8888"/>
+					<button id="start_call" onclick="start_call()" style="font-size: 24px; height: 38px;">Call Me</button>
+					<div id="call_status"></div>
+				</div>
+
+				<p style="margin: 2em 0 0 0; line-height: 14px;"><small>We&rsquo;ll be recording your call so we can learn how to improve this process and make your future experience on GovTrack more effective.</small></p>
+
+			</div>
+
+			<div class="col-md-6">
+				<div id="script" class="well">
+			<p class="them" style="border-top: none">{{target.get_title}} {{target.person.lastname}}&rsquo;s office, how can I help you?</p>
+
+			<p>Hello. I am calling to inquire about the {{target.get_title|lower}}&rsquo;s position on {{bill.display_number}}.</p>
+
+			<p>It&rsquo;s the {{bill.noun}} named &ldquo;{{bill.title_no_number}}.&rdquo;</p>
+
+			<p class="them">Okay, hold on a moment while I check.</p>
+
+			<p>Sure.</p>
+
+			<p class="them">The {{target.get_title|lower}} supports / opposes the {{bill.noun}}.</p>
+
+			<p>Thank you for the information.</p>
+
+			<p style="text-align: center">or</p>
+
+			<p class="them">I&rsquo;ll have to get back to you on that. Can I get your phone number?</p>
+
+			<p>Yes, thank you. My number is . . . (Please be helpful and give them your best phone number.)</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+var call_id = null;
+
+$('#phone').keydown_enter(function() { start_call(); });
+
+function start_call() {
+	var num = $("#phone").val();
+	if (!num) return;
+
+	$('#phone, #start_call').prop("disabled", 1);
+	$('#call_status').text("We are dialing your number...");
+
+	$.ajax(
+		"/publicwhip/_ajax/start-call",
+		{
+			type: "POST",
+			data: {
+				bill: {{bill.id}},
+				target: {{target.id}},
+				phone_number: num
+			},
+			error: function() {
+				$('#phone, #start_call').prop("disabled", 0);
+				$('#call_status').text("Something went wrong. Please try again another time.");
+			},
+			success: function(status) {
+				if (!status.ok) {
+					$('#phone, #start_call').prop("disabled", 0);
+					$('#call_status').text(status.msg);
+					return;
+				}
+
+				// poll for status updates
+				call_id = status.call_id;
+				setTimeout("poll_call_status()", 3000);
+			}
+		})
+}
+
+function poll_call_status() {
+	$.ajax(
+		"/publicwhip/_ajax/call-status",
+		{
+			type: "POST",
+			data: {
+				id: call_id
+			},
+			error: function() {
+				$('#call_status').text("Something went wrong....");
+				setTimeout("poll_call_status()", 5000);
+			},
+			success: function(status) {
+				$('#call_status').text(status.msg);
+
+				if (!status.finished)
+					// poll again
+					setTimeout("poll_call_status()", 3000);
+				else
+					// redirect to where the user can enter more information
+					window.location = "/publicwhip/my-calls";
+			}
+		})
+}
+</script>
+{% endblock %}

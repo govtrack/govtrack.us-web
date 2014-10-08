@@ -33,12 +33,14 @@ class BillStatus(enum.Enum):
         xml_code='PASS_OVER:HOUSE',
         search_help_text="Passed the House, waiting for a Senate vote next.",
         explanation=lambda b : "The %s was passed in a vote in the House. It goes to the Senate next." % b.noun,
+        next_action_in="senate",
         sort_order=(1,0))
     pass_over_senate = enum.Item(5,
         'Passed Senate',
         xml_code='PASS_OVER:SENATE',
         search_help_text="Passed the Senate, waiting for a House vote next.",
         explanation=lambda b : "The %s was passed in a vote in the Senate. It goes to the House next." % b.noun,
+        next_action_in="house",
         sort_order=(1,1))
     passed_simpleres = enum.Item(6,
         'Agreed To (Simple Resolution)',
@@ -72,24 +74,28 @@ class BillStatus(enum.Enum):
         xml_code='PASS_BACK:HOUSE',
         search_help_text="The House passed the bill with changes and sent it back to the Senate.",
         explanation="The House passed the bill with changes not in the Senate version and sent it back to the Senate to approve the changes.",
+        next_action_in="senate",
         sort_order=(2,0))
     pass_back_senate = enum.Item(11,
         'Passed Senate with Changes',
         xml_code='PASS_BACK:SENATE',
         search_help_text="The Senate passed the bill with changes and sent it back to the House.",
         explanation="The Senate passed the bill with changes not in the House version and sent it back to the House to approve the changes.",
+        next_action_in="house",
         sort_order=(2,1))
     conference_passed_house = enum.Item(30,
         'Conference Report Agreed to by House',
         xml_code='CONFERENCE:PASSED:HOUSE',
         search_help_text="The House approved a conference committee report to resolve differences. The Senate must also approve it.",
         explanation="The House approved a conference committee report to resolve differences in each chamber's version of the bill. The Senate must also approve the conference report.",
+        next_action_in="senate",
         sort_order=(2,2))
     conference_passed_senate = enum.Item(31,
         'Conference Report Agreed to by Senate',
         xml_code='CONFERENCE:PASSED:SENATE',
         search_help_text="The Senate approved a conference committee report to resolve differences. The House must also approve it.",
         explanation="The Senate approved a conference committee report to resolve differences in each chamber's version of the bill. The House must also approve the conference report.",
+        next_action_in="house",
         sort_order=(2,3))
     prov_kill_suspensionfailed = enum.Item(12,
         'Failed Under Suspension',
@@ -150,6 +156,7 @@ class BillStatus(enum.Enum):
         search_help_text="The House passed a veto override, sending it to the Senate.",
         simple_label="House Overrides Veto",
         explanation="A vote to override the President's veto succeeded in the House. The Senate must do the same.",
+        next_action_in="senate",
         sort_order=(6,0))
     override_pass_over_senate = enum.Item(22,
         'Vetoed & Senate Overrides (House Next)',
@@ -157,6 +164,7 @@ class BillStatus(enum.Enum):
         search_help_text="The Senate passed a veto override, sending it to the House.",
         simple_label="Senate Overrides Veto",
         explanation="A vote to override the President's veto succeeded in the Senate. The House must do the same.",
+        next_action_in="house",
         sort_order=(6,1))
     vetoed_pocket = enum.Item(23,
         'Pocket Vetoed',

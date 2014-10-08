@@ -1,0 +1,110 @@
+{% extends "master_d.html" %}
+
+{% load humanize %}
+{% load cache %}
+{% load govtrack_utils %}
+
+{% block title %}My Whip Calls - GovTrack.us{% endblock %}
+{% block meta_description %}{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li>Public Whip</li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+<div>
+	{% if calls|length > 0 %}
+		<p style="float: right"><a class="btn btn-primary" href="start-call">Make Another Call</a></p>
+	{% endif %}
+
+	<h1>Your Whip Calls to Congress</h1>
+
+	<p style="margin: 0">Have you called Congress through our Public Whip program? Here are the calls you made.</p>
+</div>
+{% endblock %}
+
+{% block body %}
+	<div class="col-sm-12">
+		{% if calls|length == 0 %}
+			<p>You have not made any calls yet.</p>
+			<p><a class="btn btn-primary" href="start-call">Make Your First Call</a></p>
+		{% endif %}
+
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Bill/Resolution</th>
+					<th>You Called</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for call in calls %}
+				<tr>
+					<td>
+						{{call.created|date}}
+					</td>
+					<td>
+						<a href="{{call.bill.get_absolute_url}}">{{call.bill.display_number}}</a>
+					</td>
+					<td>
+						<p>
+							<a href="{{call.target.person.get_absolute_url}}">{{call.target.person}}</a>
+						</p>
+						{% if not call.can_set_result %}
+							<p>
+								{{call.get_result_description}}
+							</p>
+						{% else %}
+							{% if call.should_set_result %}
+								<p style="margin: 0 0 .33em 0">What happened on this call?</p>
+							{% endif %}
+
+							<form onsubmit="return false;" style="margin: 0 0 1em 0">
+								<select class="form-control" onchange="update_report(this);" data-callid="{{call.id}}">
+								{% for key, label in call.get_result_options %}
+									<option value="{{key}}" {% if call.report_result == key %}SELECTED{% endif %}>
+										{% if forloop.counter0 == 0 %}
+											(Please Choose)
+										{% else %}
+											{{label}}
+										{% endif %}
+									</option>
+								{% endfor %}
+								</select>
+							</form>
+
+							{% if call.should_set_result %}
+								<p>If you are waiting for a call back or are going to call the office back yourself, please bookmark this page and come back to it once you determined {{call.target.person.lastname}}&rsquo;s position.</p>
+							{% endif %}
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+function update_report(elem) {
+  if ($(elem).val() == 1) return; // don't save this
+  $.ajax('/publicwhip/_ajax/update-report',
+     {
+       type: "POST",
+       data: {
+         report: elem.getAttribute("data-callid"),
+         value: $(elem).val()
+       },
+       success: function() {
+         alert("Thank you for updating this information.")
+       }
+     }
+   );
+}
+</script>
+{% endblock %}
