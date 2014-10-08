@@ -13,7 +13,7 @@ GovTrack.us runs on Ubuntu 12.10.
 
   ```
   apt-get install git python-virtualenv python-lxml python-openid python-oauth2 \
-      python-iso8601 python-numpy python-scipy
+      python-iso8601 python-numpy python-scipy python-prctl
   ```
 
 * Clone the source code. Besides this project, you'll also need [@unitedstates/congress-legislators](https://github.com/unitedstates/congress-legislators) which is where legislator and committee information come from.
