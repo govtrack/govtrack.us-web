@@ -698,7 +698,7 @@ def start_poll(request):
     return HttpResponseRedirect(ix.get_absolute_url() + "/join/" + str(ix.positions.get(valence=valence).id))
 
 @anonymous_view
-def bill_text_image(request, congress, type_slug, number):
+def bill_text_image(request, congress, type_slug, number, image_type):
     bill = load_bill_from_url(congress, type_slug, number)
     from billtext import load_bill_text
 
@@ -788,6 +788,27 @@ def bill_text_image(request, congress, type_slug, number):
     if "width" in request.GET:
         img.thumbnail((int(request.GET["width"]), int(aspect*float(request.GET["width"]))), Image.ANTIALIAS)
 
+    # Add symbology.
+    if image_type == "thumbnail":
+        img = img.convert("RGBA")
+
+        banner_color = None
+        party_colors = { "Republican": (230, 14, 19, 150), "Democrat": (0, 65, 161, 150) }
+        if bill.sponsor_role: banner_color = party_colors.get(bill.sponsor_role.party)
+        if banner_color:
+            from PIL import ImageDraw
+            im = Image.new("RGBA", img.size, (0,0,0,0))
+            draw = ImageDraw.Draw(im)
+            draw.rectangle(((0, int(.85*im.size[1])), im.size), outline=None, fill=banner_color)
+            del draw
+            img = Image.alpha_composite(img, im)
+
+        if bill.sponsor and bill.sponsor.has_photo():
+            im = Image.open("." + bill.sponsor.get_photo_url(200))
+            im.thumbnail( [int(x/2.5) for x in img.size] )
+            img.paste(im, (int(.05*img.size[1]), int(.95*img.size[1])-im.size[1]))
+
+    # Serialize & return.
     import StringIO
     imgbytesbuf = StringIO.StringIO()
     img.save(imgbytesbuf, "PNG")

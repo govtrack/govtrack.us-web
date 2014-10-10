@@ -9,9 +9,9 @@
 
 {% block og_image %}
 	{% if text_info.has_thumbnail %}
-		<meta property="og:image" content="http://www.govtrack.us{{text_info.thumbnail_path}}?aspect=1"/>
-		<meta property="og:image:secure_url" content="https://www.govtrack.us{{text_info.thumbnail_path}}?aspect=1"/>
-		<meta property="twitter:image:src" content="https://www.govtrack.us{{text_info.thumbnail_path}}?aspect=.85"/>
+		<meta property="og:image" content="http://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=1"/>
+		<meta property="og:image:secure_url" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=1"/>
+		<meta property="twitter:image:src" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=.85"/>
 	{% else %}
 		<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
 		<meta property="og:image:secure_url" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
@@ -794,7 +794,7 @@ p#yourreps {
 					<div>
 						<div style="position: absolute; padding-top: 2px;">
 							<a href="{{rb.bill.get_absolute_url}}">
-								<img src="{{rb.bill.get_absolute_url}}/_text_image?width=75" class="img-responsive" title="{{rb.bill}}" style="border: 1px solid #999;" width="75"/>
+								<img src="{{rb.bill.get_absolute_url}}/thumbnail?width=75" class="img-responsive" title="{{rb.bill}}" style="border: 1px solid #999;" width="75"/>
 							</a>
 						</div>
 						<div style="padding-left: 90px; min-height: 90px;">
