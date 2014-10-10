@@ -1,4 +1,4 @@
-#!.env/bin/python
+#!script
 
 # Compute the success rates of different types of bills with
 # different prognosis factors.
@@ -155,13 +155,8 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 					num_cosp += 1
 					break
 		if rvalue == CommitteeMemberRole.member:
-			if num_cosp <= 2: # ranges are tweakable...
-				num_cosp = str(num_cosp)
-			if num_cosp <= 5:
-				num_cosp = "3-5"
-			else:
-				num_cosp = "6+"
-			factors.append( ("cosponsor_%s_%s" % (rname, num_cosp), "%s cosponsors serve on a committee to which the %s has been referred." % (num_cosp, bill.noun), "%s cosponsors are on a relevant committee." % num_cosp) )
+			if num_cosp >= 2:
+				factors.append( ("cosponsors_%s", "At least two cosponsors serve on a committee to which the %s has been referred." % (bill.noun,), "2 or more cosponsors are on a relevant committee.") )
 		elif num_cosp > 0:
 			rname2 = CommitteeMemberRole.by_value(rvalue).label.lower()
 			factors.append( ("cosponsor_%s" % rname, "A cosponsor is the %s of a committee to which the %s has been referred." % (rname2, bill.noun), "A cosponsor is a relevant committee %s." % rname2))
@@ -679,12 +674,15 @@ def top_prognosis(congress, bill_type):
 	print max_p, max_b
 
 def get_bill_paragraphs(bill):
-	from billtext import load_bill_text
+	from bill.billtext import load_bill_text
 	from hashlib import md5
 		
 	try:
 		dom = lxml.etree.fromstring(load_bill_text(bill, None)["text_html"])
 	except IOError:
+		return None
+	except Exception as e:
+		print("error in bill text", bill.id, bill, e)
 		return None
 		
 	hashes = { }
