@@ -11,13 +11,13 @@
 	{% if text_info.has_thumbnail %}
 		<meta property="og:image" content="http://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=1"/>
 		<meta property="og:image:secure_url" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=1"/>
-		<meta property="twitter:image:src" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=.85"/>
+		<meta property="twitter:image:src" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=.75"/>
 	{% else %}
 		<meta property="og:image" content="http://www.govtrack.us/static/images/media_icon.png?20130118" />
 		<meta property="og:image:secure_url" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
 		<meta property="twitter:image:src" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
 	{% endif %}
-	<meta name="twitter:card" content="summary">
+	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:title" content="{{bill.title}}">
 	<meta name="twitter:description" content="{{subtitle}}">
 {% endblock %}

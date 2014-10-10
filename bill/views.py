@@ -808,6 +808,11 @@ def bill_text_image(request, congress, type_slug, number, image_type):
             im.thumbnail( [int(x/2.5) for x in img.size] )
             img.paste(im, (int(.05*img.size[1]), int(.95*img.size[1])-im.size[1]))
 
+        from PIL import ImageDraw
+        draw = ImageDraw.Draw(img)
+        draw.rectangle(((0, 0), (img.size[0]-1, img.size[1]-1)), outline=(100,100,100,255), fill=None)
+        del draw
+
     # Serialize & return.
     import StringIO
     imgbytesbuf = StringIO.StringIO()
