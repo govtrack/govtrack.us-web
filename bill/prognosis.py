@@ -167,7 +167,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	for cm in committees:
 		if cm.committee != None: continue # skip subcommittees
 		if CommitteeType.by_value(cm.committee_type).label != bill.originating_chamber: continue
-		factors.append( ("committee_%s" % cm.code, "The bill was referred to %s." % cm.shortname, "Referred to %s." % cm.shortname))
+		factors.append( ("committee_%s" % cm.code, "The bill was referred to %s." % cm.shortname, "Referred to %s (incl. companion)." % cm.shortname))
 
 	# do we have cosponsors on both parties?
 	num_cosp_majority = 0
@@ -213,11 +213,11 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 			# companion sponsor's party
 			if bill.sponsor_role and rb.related_bill.sponsor_role:
 				if bill.sponsor_role.party != rb.related_bill.sponsor_role.party:
-					factors.append(("companion_bipartisan", "The %s's companion %s was sponsored by a member of the other party." % (bill.noun, rb.related_bill.display_number), "Has a companion bill sponsored by the other party."))
+					factors.append(("companion_bipartisan", "The %s's companion %s was sponsored by a member of the other party." % (bill.noun, rb.related_bill.display_number), "Has a companion bill sponsored by a member of the other party."))
 			
 			for f in get_bill_factors(rb.related_bill, pop_title_prefixes, committee_membership, majority_party, lobbying_data, include_related_bills=False):
 				if "startswith" in f[0]: continue # don't include title factors because the title is probs the same
-				if f[0] in ("introduced_first90days", "introduced_last90days", "introduced_firstyear", "reintroduced_of_reported", "reintroduced"):
+				if f[0] in ("introduced_first90days", "introduced_last90days", "introduced_firstyear", "reintroduced_of_reported", "reintroduced") or f[0].startswith("committee_"):
 					f = (f[0], "%s (on companion bill %s)" % (f[1], rb.related_bill.display_number), f[2])
 				else:
 					f = ("companion__" + f[0], "Companion bill " + rb.related_bill.display_number + ": " + f[1], "On a companion bill: " + f[2])
