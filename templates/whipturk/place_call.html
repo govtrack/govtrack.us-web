@@ -82,6 +82,8 @@
 
 				<p>Your call to {{target.person.lastname}}&rsquo;s office will help us figure that out. We&rsquo;ll call you and connect you to {{target.person.his_her}} office. Then just read the script.</p>
 
+				<p>The person who answers your call will be a friendly, junior staffer who is used to people calling in and politely asking how the legislator stands on something. Just be nice, be clear, and it will be a quick and easy call.</p>
+
 				<p>After you complete the call, we&rsquo;ll ask you what happened. You&rsquo;re looking for one of the following answers:</p>
 
 				<ul>
@@ -91,6 +93,7 @@
 					<li>{{target.person.lastname}}&rsquo;s position is complicated.</li>
 				</ul>
 
+				{% if goodtime %}
 				<div style="margin: 1.5em 40px 0 0; font-size: 110%;">
 					<div style="margin-bottom: 10px;">Enter your phone number to get started:</div>
 					<input id="phone" type="tel" style="font-size: 28px; width: 220px; height: 40px; display: inline" placeholder="000 555-8888"/>
@@ -99,6 +102,10 @@
 				</div>
 
 				<p style="margin: 2em 0 0 0; line-height: 14px;"><small>We&rsquo;ll be recording your call so we can learn how to improve this process and make your future experience on GovTrack more effective.</small></p>
+
+				{% else %}
+				<p class="text-danger">This feature is only available when Congressional offices are open. Please check back during east coast business hours.</p>
+				{% endif %}
 
 			</div>
 

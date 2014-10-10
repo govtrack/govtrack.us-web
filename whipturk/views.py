@@ -85,7 +85,7 @@ def choose_target(bill, user):
 	# Bump score if this is the user's rep.
 	cd = user.userprofile().congressionaldistrict
 	for target in target_scores:
-		if target.state == cd[0:2] and (target.role_type == RoleType.senator or int(cd[2:]) == target.district):
+		if cd and target.state == cd[0:2] and (target.role_type == RoleType.senator or int(cd[2:]) == target.district):
 			target_scores[target] += 1.0
 
 	# Take target with maximal score.
@@ -110,6 +110,7 @@ def start_call(request):
 	return {
 		"bill": bill,
 		"target": target,
+		"goodtime": (0 <= datetime.now().weekday() <= 4) and (9 <= datetime.now().time().hour <= 16),
 	}
 
 @login_required
@@ -179,9 +180,9 @@ def call_status(request):
 	elif report.call_status == "connecting":
 		msg = "Connecting you to Congress..."
 	elif report.call_status == "connection-ended":
-		msg = "Ending the call..."
+		msg = "Ending the call... Hang on..."
 	elif report.call_status == "ended":
-		msg = "Call ended."
+		msg = "Call ended. Hang on..."
 
 	return { "finished": report.call_status == "ended", "msg": msg }
 
