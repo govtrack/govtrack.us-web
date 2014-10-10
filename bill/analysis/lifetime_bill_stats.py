@@ -19,7 +19,11 @@ today = datetime.datetime.now().date()
 
 w = csv.writer(sys.stdout)
 
-w.writerow(["est start", "years served", "# introduced", "# reported", "# enacted", "name", "current party", "link"])
+w.writerow([
+	"est start", "years served",
+	"# introduced", "# reported", "# enacted",
+	"name", "current party", "link"
+	])
 
 def get_first_swearing_in_date(r):
 	return PersonRole.objects.filter(person=r.person, role_type=r.role_type).order_by("startdate")[0].startdate
@@ -40,7 +44,9 @@ for r in cur_roles:
 	]
 
 	# bills introduced
-	bills = list(Bill.objects.filter(sponsor=r.person))
+	bills = Bill.objects.filter(sponsor=r.person)
+	#bills = bills.filter(introduced_date__gt="1993-01-05")
+	bills = list(bills)
 	row.append(str(len(bills)))
 
 	# bills reported
