@@ -451,7 +451,7 @@ def person_session_stats(request, pk, session):
         else:
             nav_groups.append({ "icon": stat["icon"], "stats": [stat]  })
 
-    import dateutil
+    import dateutil.parser
     from person.types import Gender, RoleType
 
     return {
@@ -550,7 +550,7 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
     #for pid, personstats in stats["people"].items():
     #    clean_person_stats(personstats)
 
-    import dateutil
+    import dateutil.parser
     return {
         "session": session,
         "meta": stats["meta"],
