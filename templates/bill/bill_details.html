@@ -1083,9 +1083,9 @@ p#yourreps {
 								<li><a href="#" onclick="return show_cite('mla')">MLA</a></li>
 								<li><a href="#" onclick="return show_cite('wikipedia')">Wikipedia Template</a></li>
 							</ul>
-							<p id="cite_apa" style="display: none">{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15}}. ({{bill.introduced_date|date:"Y"}}). In www.GovTrack.us. Retrieved {% now "F j, Y" %}, from {{request.build_absolute_uri}}</p>
+							<p id="cite_apa" style="display: none">Civic Impulse. ({% now "Y" %}). {{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15}}. Retrieved from {{request.build_absolute_uri}}</p>
 
-							<p id="cite_mla" style="display: none">&ldquo;{{bill.display_number_no_congress_number}}--{{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15}}.&rdquo; www.GovTrack.us. {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
+							<p id="cite_mla" style="display: none">&ldquo;{{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15}}.&rdquo; www.GovTrack.us. {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
 
 							<p id="cite_wikipedia" style="display: none">{{cite web<br/>
 							|url={{request.build_absolute_uri}}<br/>
