@@ -4,7 +4,7 @@
 # statistics by chamber.
 
 # To update from scratch:
-# for c in {1..112}; do echo $c; python missed_votes.py $c; done
+# for c in {1..113}; do echo $c; python missed_votes.py $c; done
 
 import csv, datetime, glob, os, re, sys
 import lxml.etree as lxml
