@@ -39,8 +39,10 @@ def compute_productivity(congress, days_in):
 	enacted_bill_words = 0
 	enacted_bill_pages_missing = 0
 	for b in enacted_bills:
-		#print b
-		pp = load_bill_text(b, None, mods_only=True).get("numpages")
+		try:
+			pp = load_bill_text(b, None, mods_only=True).get("numpages")
+		except IOError:
+			pp = None
 		if pp is None:
 			enacted_bill_pages_missing += 1
 			continue
@@ -83,7 +85,7 @@ days_in = (datetime.now().date() - get_congress_dates(CURRENT_CONGRESS)[0]) \
 	- timedelta(days=4)
 print("We are about %d days into the %d Congress" % (days_in.days, CURRENT_CONGRESS))
 
-days_in = timedelta(days=9999) #544 is 3/4ths
+#days_in = timedelta(days=9999) #544 is 3/4ths
 print("Using: %s" % days_in)
 
 for c in range(93, 113+1):
