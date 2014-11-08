@@ -96,7 +96,7 @@ jQuery.fn.keydown_enter = function(callback) {
 
 // Tabs that work via the window hash. Call this method over a node set
 // of <a href="#tabname"> elements, and have corresponding <div id="tabname">
-// elements. Requires jquery.ba-bbq.min.js.
+// elements.
 jQuery.fn.tabs = function(panes, subordinate_to, on_tab_activate) {
 	function get_href(elem) {
 		// In IE7, getAttribute('href') always returns an absolute URL
@@ -336,4 +336,44 @@ jQuery.fn.moreLess = function() {
 	}
 	more.click(show);
 	less.click(hide);
+}
+
+function parse_qs(qs) {
+	// Parse something that looks like a query string into a Javascript
+	// object. Based on http://stackoverflow.com/a/2880929/125992.
+	var match,
+	pl     = /\+/g,  // Regex for replacing addition symbol with a space
+	search = /([^&=]+)=?([^&]*)/g,
+	decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+	ret = {};
+	while (match = search.exec(qs)) {
+		var key = decode(match[1]);
+		var value = decode(match[2]);
+		if (key.substring(key.length-2) == '[]') {
+			// Special handling for arrays.
+			key = key.substring(0, key.length-2);
+			value = $.map(value.split(','), decode);
+		}
+		ret[key] = value;
+	}
+	return ret;
+}
+parse_qs.fragment = function() {
+	// Helper that parses the window.location.fragment.
+	return parse_qs(window.location.hash.substring(1));
+}
+
+function form_qs(obj) {
+	// Forms a query-string-like string from a Javascript object's keys and values.
+	var encode = function (s) { return encodeURIComponent(s).replace(/\%20/g, "+"); };
+	var serialize = function(val) {
+		// Special handling for arrays.
+		if (val instanceof Array) return val.map(encode).join(",")
+		return encode(val); // default string conversion
+	};
+	var format_marker = function(val) {
+		if (val instanceof Array) return "[]"
+		return "";
+	};
+	return $.map(obj, function(value, key) { return encode(key)+format_marker(value) + "=" + serialize(value); }).join("&");
 }

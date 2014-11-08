@@ -9,7 +9,7 @@
 		<script type="text/javascript"><!--
 		// Track some ad impression statistics.
 		var ad_exp_user = $.cookie("ad_exp");
-		if (ad_exp_user) ad_exp_user = $.deparam(ad_exp_user, true);
+		if (ad_exp_user) ad_exp_user = parse_qs(ad_exp_user);
 		if (!ad_exp_user) ad_exp_user = { };
 
 		// increment impression count
@@ -20,7 +20,7 @@
 		if (!ad_exp_user.segment) ad_exp_user.segment = Math.random();
 		
 		// save cookie
-		$.cookie("ad_exp", $.param(ad_exp_user, true), { expires: 21, path: '/' });
+		$.cookie("ad_exp", form_qs(ad_exp_user), { expires: 21, path: '/' });
 
 		if (ad_exp_user.impression > 3) {
 			// analytics tracking ad view counts

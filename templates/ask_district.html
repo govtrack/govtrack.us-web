@@ -248,14 +248,14 @@ $(function() {
 		if (win_loc_hash == "#track") return;
 
 		var flags = $.cookie("flags");
-		flags = !flags ? {} : $.deparam(flags, true);
+		flags = !flags ? {} : parse_qs(flags);
 
 		if (the_segment == "Other" && cong_dist == null)
 			show_askcd();
 		else if (Math.random() < .3)
 			show_followus(flags);
 
-		$.cookie("flags", $.param(flags, true), { expires: 21, path: '/' });
+		$.cookie("flags", form_qs(flags), { expires: 21, path: '/' });
 	}, 1000)
 });
 

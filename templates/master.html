@@ -1,10 +1,9 @@
 {% load govtrack_utils %}
 {% with "/static/" as STATIC_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
 <!DOCTYPE html>
-<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="lt-ie9 lt-ie8" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="lt-ie9" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html lang="en"> <!--<![endif]-->
+<!--[if lt IE 8]>         <html class="no-js lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js ie8"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 	<head>
 		<meta charset="utf-8" />
 
@@ -13,14 +12,13 @@
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
 		{% if not debug %}
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
 		{% else %}
 		<link rel="stylesheet" href="/static/lib/bootstrap.css">
 		<link rel="stylesheet" href="/static/lib/bootstrap-theme.css">
 		{% endif %}
 		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20140523" />
-		<!--[if lt IE 8]><link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ie.css" media="screen" /><![endif]-->
 
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -43,18 +41,12 @@
 
 		<script type="text/javascript" src="{{ STATIC_URL }}js/modernizr.js"></script> {% comment %}html5shiv{% endcomment %}
 		{% if not debug %}
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 		{% else %}
 		<script src="/static/lib/jquery.js"></script>
 		{% endif %}
-		<script>
-			// when debugging off the network, fall back to a local copy of jquery
-			try { $; } catch (err) {
-				document.write("{{ "<script src='/static/js/jquery-1.7.2.min.js'> </script>"|escapejs }}");
-			}
-		</script>
 		{% if not request.anonymous %}
-			<script>$('html').ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
+			<script>$(document).ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
 			<script>
 				var the_user = {% if request.user.is_authenticated %}{ "email": "{{request.user.email|escapejs}}" }{% else %}null{% endif %};
 				{% include "user_head_script.js" %}
@@ -63,8 +55,7 @@
 			{% include "twostream/head.html" %}
 		{% endif %}
 		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
-		<script src="{{ STATIC_URL }}js/jquery.ba-bbq.min.js"></script>
-		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?2013-07-07"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?2014-11-08"></script>
 		{% block extra_js %}{% endblock %}
 		
 		<script type="text/javascript">
@@ -128,6 +119,8 @@
 	</head>
 
 <body class="{% block body_class %}{% endblock %}">
+    <!--[if lt IE 8]><p style="background-color: black; color: white;">Internet Explorer version 8 or any modern web browser is required to use this website, sorry.<![endif]-->
+    <!--[if gt IE 7]><!-->
 
 	{% if pagename != "blog_template" and not user_has_bounced_mail %}
 	<div id="sitenewscontainer" style="display: none">
@@ -455,7 +448,7 @@
 	<!-- End Piwik Code -->
 
 	{% if not debug %}
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 	{% else %}
 	<script src="/static/lib/bootstrap.js"></script>
 	{% endif %}
