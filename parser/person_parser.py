@@ -71,7 +71,7 @@ class PersonRoleProcessor(YamlProcessor):
     REQUIRED_ATTRIBUTES = ['type', 'start', 'end']
     ATTRIBUTES = [
         'type', 'start', 'end', 'class', 'state_rank',
-        'district', 'state', 'party', 'url', 'phone',
+        'district', 'state', 'party', 'caucus', 'url', 'phone',
     ]
     FIELD_MAPPING = {
         'type': 'role_type',
