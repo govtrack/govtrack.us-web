@@ -3,8 +3,8 @@ import csv
 from StringIO import StringIO
 from datetime import datetime
 
-from django.http import HttpResponse, Http404
-from django.shortcuts import redirect, get_object_or_404, render_to_response
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import cache_page
@@ -160,6 +160,11 @@ def vote_export_xml(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
     fobj = open('data/us/%s/rolls/%s%s-%s.xml' % (congress, chamber_code, session, number))
     return HttpResponse(fobj, content_type='text/xml')
+
+@anonymous_view
+def vote_get_json(request, congress, session, chamber_code, number):
+    vote = load_vote(congress, session, chamber_code, number)
+    return HttpResponseRedirect("/api/v2/vote/%d" % vote.id)
     
 @anonymous_view
 @cache_page(60 * 60 * 6)
@@ -455,4 +460,3 @@ class sitemap_archive(django.contrib.sitemaps.Sitemap):
     priority = 0.25
     def items(self):
         return Vote.objects.filter(congress__lt=CURRENT_CONGRESS)
-    
