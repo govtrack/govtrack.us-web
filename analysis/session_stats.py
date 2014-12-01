@@ -427,7 +427,7 @@ if __name__ == "__main__":
 	# What session?
 	session = sys.argv[1]
 	stats = collect_stats(session)
-	#stats = json.load(sys.stdin)
+	#stats = json.load(open(sys.argv[1]))['people']
 	contextualize(stats)
 	stats = {
 		"meta": {
