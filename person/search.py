@@ -54,7 +54,7 @@ def template_get_context(obj, form):
             c["description"] = obj.get_current_role().get_description()
         else:
             role = obj.get_most_recent_role()
-            a, b = role.logical_dates()
+            a, b = role.logical_dates(round_end=True)
             c["description"] = role.get_description() + ", %d-%d" % (a.year, b.year)
     except Exception as e:
         pass

@@ -155,12 +155,13 @@ class Person(models.Model):
             today = datetime.date.today()
             return relativedelta(today, self.birthday).years
 
-    def roles_condensed(self):
+    def roles_condensed(self, round_end=True):
         ret = []
         for role in self.roles.order_by('startdate'):
+            role.id = None # prevent corruption
+            role.enddate = role.logical_enddate(round_end=round_end)
             if len(ret) > 0 and role.continues_from(ret[-1]):
-                ret[-1].id = None # prevent corruption
-                ret[-1].enddate = role.logical_enddate()
+                ret[-1].enddate = role.enddate
             else:
                 ret.append(role)
         ret.reverse()
@@ -460,7 +461,7 @@ class PersonRole(models.Model):
             "context": {}
             }
 
-    def logical_dates(self):
+    def logical_dates(self, round_end=False):
         startdate = None
         enddate = None
         prev_role = None
@@ -470,15 +471,15 @@ class PersonRole(models.Model):
                 break
             if prev_role == None or not role.continues_from(prev_role):
                 startdate = role.startdate
-            enddate = role.logical_enddate()
+            enddate = role.logical_enddate(round_end=round_end)
             prev_role = role
             if role.id == self.id:
                 found_me = True
         if not found_me: raise Exception("Didn't find myself?!")
         return (startdate, enddate)
 
-    def logical_enddate(self):
-        if self.enddate.month == 1 and self.enddate.day < 10:
+    def logical_enddate(self, round_end=False):
+        if round_end and self.enddate.month == 1 and self.enddate.day < 10:
             return datetime.date(self.enddate.year-1, 12, 31)
         return self.enddate
 

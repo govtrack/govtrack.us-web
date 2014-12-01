@@ -72,7 +72,7 @@ def get_person_name(person,
                 name += str(role.district)
                 
         if role_recent and not role.current:
-        	a, b = role.logical_dates()
+        	a, b = role.logical_dates(round_end=True)
         	name += ", %d-%d" % (a.year, b.year)
         	
         name += ']'
