@@ -778,16 +778,19 @@ class Bill(models.Model):
             if srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "pingpong", "conference"):
                 if srcnode.get("how") == "roll":
                     try:
-                        from vote.models import Vote, CongressChamber
+                        from vote.models import Vote, CongressChamber, VoteSource
                         v = Vote.objects.get(congress=self.congress, session=get_session_from_date(date, congress=self.congress)[1],
 	                        chamber=CongressChamber.senate if srcnode.get("where") == 's' else CongressChamber.house,
                             number=int(srcnode.get("roll")))
-                        vote_link = v.get_absolute_url()
+                        if v.source != VoteSource.keithpoole:
+                            # The numbering of votes does not apply in the voteview data.
+                            vote_link = v.get_absolute_url()
                     except Vote.DoesNotExist:
                         # Somehow the vote is missing.
                         pass
                 else:
-                    vote_text = srcnode.get("how")
+                    if srcnode.get("how") != "(method not recorded)":
+                        vote_text = srcnode.get("how")
 
             ret.append({
                 "key": st_key,
