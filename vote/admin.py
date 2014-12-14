@@ -9,6 +9,7 @@ class VoteOptionInline(admin.TabularInline):
 class VoteAdmin(admin.ModelAdmin):
     list_display = ('question' ,'congress', 'session', 'chamber', 'number', 'created')
     inlines = (VoteOptionInline,)
+    raw_id_fields = ('related_bill', 'related_amendment')
 
 class VoteOptionAdmin(admin.ModelAdmin):
     list_display = ('vote', 'key', 'value')
