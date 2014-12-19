@@ -76,8 +76,8 @@ if "people" in sys.argv:
 	
 	# Convert people YAML into the legacy format and alternative formats.
 	mkdir("data/us/%d" % CONGRESS)
-	os.system("python ../scripts/legacy-conversion/convert_people.py %s/congress-legislators/ data/us/people_legacy.xml data/us/people.xml 0" % SCRAPER_PATH)
-	os.system("python ../scripts/legacy-conversion/convert_people.py %s/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
+	os.system("python3 ../scripts/legacy-conversion/convert_people.py %s/congress-legislators/ data/us/people_legacy.xml data/us/people.xml 0" % SCRAPER_PATH)
+	os.system("python3 ../scripts/legacy-conversion/convert_people.py %s/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
 	os.system("cd %s/congress-legislators/scripts; . .env/bin/activate; python alternate_bulk_formats.py" % SCRAPER_PATH)
 
 	# Copy into our public directory.

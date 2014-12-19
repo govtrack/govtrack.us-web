@@ -1,10 +1,12 @@
 {% load govtrack_utils %}
-<div class="sitenewsbody" data-seq="62">
-	{% comment %}
-	<p>Check out what&rsquo;s <a href="https://www.govtrack.us/blog/2014/05/12/govtracks-winter-updates/">new on GovTrack</a>.</p>
-	{% endcomment %}
+<div class="sitenewsbody" data-seq="63">
+	<p>Omnibus Spending Bill:
+		<a href="https://www.govtrack.us/congress/votes/113-2014/h563">House vote (Dec. 11)</a>
+		| <a href="https://www.govtrack.us/congress/votes/113-2014/s354">Senate vote (Dec. 13)</a>
+		| <a href="http://www.gpo.gov/fdsys/pkg/CPRT-113HPRT91668/pdf/CPRT-113HPRT91668.pdf">PDF</a>
+	</p>
 
-	{% if highlighted_vote %}
+	{% if highlighted_vote and 0 %}
 	<p id="highlighted_vote">
 		<span style="display: block">Latest major vote:</span>
 		<a href="{{highlighted_vote.link}}">{{highlighted_vote.title}}</a>

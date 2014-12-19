@@ -756,7 +756,7 @@ class Bill(models.Model):
             if callable(explanation): explanation = explanation(self)
 
             if st == BillStatus.referred: continue # don't care about this
-            if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres) and srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
+            if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres) and srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
                 ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
                 # PASSED:BILL only occurs on the second chamber, so indicate both agreed to in text
                 if srcnode.get("type") == "vote2":

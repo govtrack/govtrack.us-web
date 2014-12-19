@@ -431,6 +431,9 @@ class SubscriptionList(models.Model):
     class Meta:
         unique_together = [('user', 'name')]
 
+    def __str__(self):
+        return "%s (%s)" % (self.name, str(self.user))
+
     @staticmethod
     def create(user, email_rate=None):
         sublist = None

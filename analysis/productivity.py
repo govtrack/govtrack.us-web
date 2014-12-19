@@ -19,6 +19,7 @@ for row in csv.reader(open("analysis/party_control.tsv"), delimiter='\t'):
 	party_control[int(row[0])] = (row[3], row[9], row[15]) # senate, house, presidency
 
 W = csv.writer(sys.stdout)
+W.writerow(["congress", "enacted bills", "enacted pages", "enacted words", "house votes", "senate votes", "congress_one_party", "president_congress_one_party"])
 
 def compute_productivity(congress, days_in):
 	corresponding_day = get_congress_dates(congress)[0] + days_in
