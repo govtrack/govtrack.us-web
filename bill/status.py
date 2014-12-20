@@ -64,7 +64,7 @@ class BillStatus(enum.Enum):
         explanation="The concurrent resolution was passed by both chambers in identical form. A concurrent resolution is not signed by the president and does not carry the force of law.",
         sort_order=(3,1))
     passed_bill = enum.Item(9,
-        'Enrolled Bill',
+        'Passed House & Senate',
         xml_code='PASSED:BILL',
         search_help_text="The bill passed both chambers of Congress in identical form and goes on to the President for signing next.",
         explanation="The bill was passed by both chambers in identical form. It goes to the President next who may sign or veto the bill.",
