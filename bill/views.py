@@ -88,6 +88,7 @@ def bill_details_user_view(request, congress, type_slug, number):
             <div class="clear"> </div>
             <div style="margin-top: 1.5em; padding: .5em; background-color: #EEE; ">
                 <b>ADMIN</b> - <a href="{% url "bill_go_to_summary_admin" %}?bill={{bill.id}}">Edit Summary</a>
+                 | <a href="/admin/bill/bill/{{bill.id}}">Edit</a>
                 <br/>Tracked by {{feed.tracked_in_lists.count|intcomma}} users
                 ({{feed.tracked_in_lists_with_email.count|intcomma}} w/ email).
                 <br/>{{num_issuepos}} poll responses, {{num_calls}} phone calls to Congress.

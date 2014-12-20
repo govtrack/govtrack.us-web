@@ -124,6 +124,7 @@ class Bill(models.Model):
     """A bill represents a bill or resolution introduced in the United States Congress."""
 
     title = models.CharField(max_length=255, help_text="The bill's primary display title, including its number.")
+    lock_title = models.BooleanField(default=False, help_text="Whether the title has been manually overridden.")
     titles = JSONField(default=None) # serialized list of all bill titles as (type, as_of, text)
     bill_type = models.IntegerField(choices=BillType, help_text="The bill's type (e.g. H.R., S., H.J.Res. etc.)")
     congress = models.IntegerField(help_text="The number of the Congress in which the bill was introduced. The current Congress is %d." % settings.CURRENT_CONGRESS)
@@ -277,6 +278,8 @@ class Bill(models.Model):
     @property
     def title_no_number(self):
         """The title of the bill without the number."""
+        if self.lock_title:
+            return re.sub("^" + re.escape(self.display_number_no_congress_number+": "), "", self.title)
         return get_primary_bill_title(self, self.titles, with_number=False)
 
     @property

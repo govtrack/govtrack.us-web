@@ -107,7 +107,8 @@ class BillProcessor(XmlProcessor):
         n = unicode(node.xpath('string(bill-number)'))
         if not n: n = None
         
-        obj.title = get_primary_bill_title(obj, titles, override_number=n)
+        if not obj.lock_title:
+            obj.title = get_primary_bill_title(obj, titles, override_number=n)
 
     def process_sponsor(self, obj, node):
         try:
