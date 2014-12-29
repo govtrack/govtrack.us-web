@@ -1,12 +1,12 @@
 #!.env/bin/python -R
 import os, sys
 
-import prctl
-prctl.set_name("django-govtrack")
-
 if "runserver" in sys.argv:
 	# Always do this in debug mode.
 	os.environ["DEBUG"] = "1"
+else:
+	import prctl
+	prctl.set_name("django-govtrack")
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
