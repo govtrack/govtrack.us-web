@@ -520,12 +520,11 @@ def bill_statistics(request):
     if settings.DATABASES['default']['ENGINE'] != 'django.db.backends.sqlite3':
         from django.db import connection
         def pull_time_stat(field, where, cursor):
-            historical = False
-            cursor.execute("SELECT YEAR(%s) - congress*2 - 1787, MONTH(%s), COUNT(*) FROM bill_bill WHERE congress>=93 AND congress%s%d AND %s GROUP BY YEAR(%s) - congress*2, MONTH(%s)" % (field, field, "<" if historical else "=", CURRENT_CONGRESS, where, field, field))
+            cursor.execute("SELECT YEAR(%s) - congress*2 - 1787, MONTH(%s), COUNT(*) FROM bill_bill WHERE congress >= 93 AND %s GROUP BY YEAR(%s) - congress*2, MONTH(%s)" % (field, field, where, field, field))
             activity = [{ "x": r[0]*12 + (r[1]-1), "count": r[2], "year": r[0] } for r in cursor.fetchall()]
             total = sum(m["count"] for m in activity)
             for i, m in enumerate(activity): m["cumulative_count"] = m["count"]/float(total) + (0.0 if i==0 else activity[i-1]["cumulative_count"])
-            for m in activity: m["count"] = round(m["count"] / (CURRENT_CONGRESS-96), 1)
+            for m in activity: m["count"] = round(m["count"] / float(total) * 100.0, 1)
             for m in activity: m["cumulative_count"] = round(m["cumulative_count"] * 100.0)
             return activity
         with connection.cursor() as cursor:
@@ -538,8 +537,8 @@ def bill_statistics(request):
     return {
         "groups2": bill_status_groups,
         "counts_by_congress": counts_by_congress,
-        "activity": (("Bills and Resolutions Introduced", activity_introduced_by_month),
-         ("Bills and Joint Resolutions Enacted", activity_enacted_by_month) )
+        "activity": (("Bills Introduced", activity_introduced_by_month),
+         ("Laws Enacted", activity_enacted_by_month) )
     }
 
 @anonymous_view
