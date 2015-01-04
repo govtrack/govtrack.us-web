@@ -74,10 +74,7 @@ if "people" in sys.argv:
 	os.system("cd %s/congress-legislators; git fetch -pq" % SCRAPER_PATH)
 	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
-	# Convert people YAML into the legacy format and alternative formats.
-	mkdir("data/us/%d" % CONGRESS)
-	os.system("python3 ../scripts/legacy-conversion/convert_people.py %s/congress-legislators/ data/us/people_legacy.xml data/us/people.xml 0" % SCRAPER_PATH)
-	os.system("python3 ../scripts/legacy-conversion/convert_people.py %s/congress-legislators/ data/us/people_legacy.xml data/us/%d/people.xml 1" % (SCRAPER_PATH, CONGRESS))
+	# Convert people YAML into alternative formats.
 	os.system("cd %s/congress-legislators/scripts; . .env/bin/activate; python alternate_bulk_formats.py" % SCRAPER_PATH)
 
 	# Copy into our public directory.
@@ -86,8 +83,6 @@ if "people" in sys.argv:
 	for f in glob.glob("%s/congress-legislators/alternate_formats/*.csv" % SCRAPER_PATH):
 		make_link(f, "data/congress-legislators/%s" % os.path.basename(f))
 
-	# Convert people YAML into alternate formats.
-	
 	# Load YAML (directly) into db.
 	os.system("./parse.py person") #  -l ERROR
 	os.system("./manage.py update_index -v 0 -u person person")
@@ -105,9 +100,6 @@ if "committees" in sys.argv:
 	os.system("cd %s/congress-legislators; git fetch -pq" % SCRAPER_PATH)
 	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
-	# Convert committee YAML into the legacy format.
-	os.system(". %s/congress-legislators/scripts/.env/bin/activate; python ../scripts/legacy-conversion/convert_committees.py %s %s/congress-legislators/ ../data/us/%d/committees.xml" % (SCRAPER_PATH, SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
-
 	# Committee events.
 	os.system("cd %s; . .env/bin/activate; ./run committee_meetings %s --log=%s" % (SCRAPER_PATH, fetch_mode, log_level))
 	

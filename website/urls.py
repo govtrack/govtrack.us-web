@@ -3,7 +3,7 @@ from django.conf.urls import *
 
 urlpatterns = patterns('website.views',
     url(r'^$', 'index', name='index'),
-    url(r'^(start|about|contact|press|advertising|legal|developers|developers/downstream|developers/data|developers/license|developers/rsync|developers/people_xml|blog_template)$', 'staticpage', name='staticpage'),
+    url(r'^(start|about|contact|press|advertising|legal|developers|developers/downstream|developers/data|developers/license|developers/rsync|blog_template)$', 'staticpage', name='staticpage'),
     url(r'^developers/api$', 'api_overview'),
     url(r'^congress/?$', 'congress_home', name='congress_home'),
     url(r'^congress/live$', 'congress_live', name='congress_live'),
