@@ -178,6 +178,13 @@ def parse_usc_citation(cite):
         
     return { "type": "unknown", "text": cite.text }
 
+def get_bill_text_versions(bill):
+    from os import listdir
+    for st in listdir(bill.data_dir_path + "/text-versions"):
+        fn = bill.data_dir_path + "/text-versions/" + st + "/data.json"
+        if os.path.exists(fn):
+            yield st
+
 def get_bill_text_metadata(bill, version):
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
     import glob, json
@@ -195,6 +202,12 @@ def get_bill_text_metadata(bill, version):
         if not dat: return None
     else:
         dat = json.load(open(basename + "/%s/data.json" % version))
+
+    # parse date
+
+    dat["issued_on"] = datetime.date(*(int(d) for d in dat["issued_on"].split("-")))
+
+    # find content files
         
     basename += "/" + dat["version_code"]
 
@@ -270,7 +283,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
             gpo_url = "http://www.gpo.gov/fdsys/granule/%s/%s/content-detail.html" % m.groups()
 
         ret.update({
-            "docdate": datetime.date(*(int(d) for d in dat["issued_on"].split("-"))),
+            "docdate": dat["issued_on"],
             "gpo_url": gpo_url,
             "gpo_pdf_url": dat["urls"]["pdf"],
             "doc_version": dat["version_code"],

@@ -156,7 +156,6 @@ if "text" in sys.argv:
 	# Do this before bills because the process of loading into the db checks for new
 	# bill text and generates feed events for text availability.
 	os.system("cd ../scripts/gather; perl fetchbilltext.pl FULLTEXT %d" % CONGRESS)
-	os.system("cd ../scripts/gather; perl fetchbilltext.pl GENERATE %d" % CONGRESS)
 	do_bill_parse = True # don't know if we got any new files
 	
 if "bills" in sys.argv:

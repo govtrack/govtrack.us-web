@@ -9,7 +9,7 @@ from jsonfield import JSONField
 from committee.models import Committee, CommitteeMeeting, CommitteeMember, MEMBER_ROLE_WEIGHTS
 from bill.status import BillStatus, get_bill_status_string
 from bill.title import get_bill_number, get_primary_bill_title
-from bill.billtext import load_bill_text
+from bill.billtext import load_bill_text, get_bill_text_versions, get_bill_text_metadata
 from us import get_congress_dates, get_session_from_date
 
 from django.conf import settings
@@ -169,6 +169,10 @@ class Bill(models.Model):
         m = re.match("^([a-z]+)(\d+)-(\d+)$", bill_id)
         if not m: raise ValueError("Invalid bill ID: " + bill_id)
         return Bill.objects.get(congress=int(m.group(3)), bill_type=BillType.by_slug(m.group(1)), number=int(m.group(2)))
+
+    @property
+    def data_dir_path(self):
+        return "data/congress/%d/bills/%s/%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, BillType.by_value(self.bill_type).slug, self.number)
 
     #@models.permalink
     def get_absolute_url(self):
@@ -508,14 +512,8 @@ class Bill(models.Model):
                 E.add("sfs", self.senate_floor_schedule_postdate, index_feeds + common_feeds + [Bill.ComingUpFeed()])
 
             # generate an event for each new GPO text availability
-            from glob import glob
-            from billtext import bill_gpo_status_codes
-            bt = BillType.by_value(self.bill_type).xml_code
-            for st in bill_gpo_status_codes:
-                textfn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (self.congress, bt, bt, self.number, st) # use pdf since we don't modify it once we download it, and hopefully we actually have a displayable format like HTML
-                if os.path.exists(textfn):
-                    textmodtime = datetime.datetime.fromtimestamp(os.path.getmtime(textfn))
-                    E.add("text:" + st, textmodtime, index_feeds)
+            for st in get_bill_text_versions(self):
+                E.add("text:" + st, get_bill_text_metadata(self, st)['issued_on'], index_feeds)
 
             # generate an event for the main summary
             bs = BillSummary.objects.filter(bill=self)
@@ -703,12 +701,6 @@ class Bill(models.Model):
             }
 
     def render_event_text(self, ev_code, feeds):
-        from billtext import bill_gpo_status_codes, load_bill_text
-        if not ev_code in bill_gpo_status_codes: raise Exception()
-        bt = BillType.by_value(self.bill_type).xml_code
-        textfn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (self.congress, bt, bt, self.number, ev_code) # use pdf since we don't modify it once we download it, and hopefully we actually have a displayable format like HTML
-        if not os.path.exists(textfn): raise Exception()
-
         try:
             modsinfo = load_bill_text(self, ev_code, mods_only=True)
         except IOError:
@@ -716,8 +708,8 @@ class Bill(models.Model):
 
         return {
             "type": "Bill Text",
-            "date": datetime.datetime.fromtimestamp(os.path.getmtime(textfn)),
-            "date_has_no_time": False,
+            "date": modsinfo["docdate"],
+            "date_has_no_time": True,
             "title": self.title,
             "url": self.get_absolute_url() + "/text",
             "body_text_template": """This {{noun}}'s text {% if doc_version_name != "Introduced" %}for status <{{doc_version_name}}> ({{doc_date}}) {% endif %}is now available.

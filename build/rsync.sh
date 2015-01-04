@@ -19,7 +19,6 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "us/bills.text" \
 	--include "us/bills.text/113" \
 	--include "us/bills.text/113/*" \
-	--exclude "us/bills.text/113/*/*.gen.html" \
 	--include "us/bills.text/113/*/*.html" \
 	--include "us/bills.text/113/h/h2824*.pdf" \
 	--include "photos" \
