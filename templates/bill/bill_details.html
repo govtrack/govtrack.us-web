@@ -1134,8 +1134,8 @@ p#yourreps {
 				p1.find('a').attr('href', '#summary/' + href);
 				n.append(p1)
 				if (!name) {
-					p1.find('span').html(html);
 					p1.find('a').text("more »");
+					p1.find('span').html(html);
 					p1.attr('style', 'margin-bottom: 1em;');
 				} else {
 					p1.find('a').text(name + " »");
@@ -1157,7 +1157,7 @@ p#yourreps {
 						Last updated {{summary.modified|date}}.
 						View <a href="/events/bill-summaries">all GovTrack summaries</a>.
 					</div>
-					<script>add_summary(null, "oursummary", "{{summary.plain_text|truncatewords:30|escapejs}}");</script>
+					<script>add_summary(null, "oursummary", "{{summary.as_html|truncatewords_html:30|escapejs}}");</script>
 				{% endif %}
 				{% endwith %}
 			</div>
