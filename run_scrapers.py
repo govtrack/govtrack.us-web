@@ -4,7 +4,7 @@
 
 import os, os.path, glob, re, hashlib, shutil, sys, datetime
 
-CONGRESS = int(os.environ.get("CONGRESS", "113"))
+CONGRESS = int(os.environ.get("CONGRESS", "114"))
 SCRAPER_PATH = "../scripts/congress"
 
 # UTILS
@@ -68,7 +68,7 @@ if "DEBUG" in os.environ: log_level = "info"
 # Run scrapers and parsers.
 
 if "people" in sys.argv:
-	if CONGRESS != 113: raise ValueErrror()
+	if CONGRESS != 114: raise ValueErrror()
 	
 	# Pull latest poeple YAML.
 	os.system("cd %s/congress-legislators; git fetch -pq" % SCRAPER_PATH)
@@ -92,7 +92,7 @@ if "people" in sys.argv:
 	os.system("./manage.py dumpdata --format json person > data/db/django-fixture-people.json")
 
 if "committees" in sys.argv:
-	if CONGRESS != 113: raise ValueErrror()
+	if CONGRESS != 114: raise ValueErrror()
 	
 	# Committee metadata.
 	
