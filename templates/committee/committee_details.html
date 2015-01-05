@@ -44,7 +44,9 @@
 					<dd><a href="{{mem.person.get_absolute_url}}">{{mem.person}}</a></dd>
 				{% endfor %}
 			</dl>
+			{% if member_highlights|length > 0 %}
 			<p style="margin-top: .5em; line-height: 110%"><small>The chairman is always selected from the majority party. The ranking member is the most senior member of the minority party.</small></p>
+			{% endif %}
 			
 			<dl class="wide" style="margin-top: 1em">
 				{% for party, count in party_counts %}
@@ -52,6 +54,10 @@
 					<dd>{{count}}</dd>
 				{% endfor %}
 			</dl>
+
+			{% if members|length == 0 %}
+			<p>The membership of this committee is not yet available.</p>
+			{% endif %}
 		</div>
 	</div>
 	
@@ -75,12 +81,15 @@
 {% block body %}
 <div class="twelve columns">
 	<ul class="tabs three-up">
+		{% if members|length > 0 %}
 		<li><a href="#members">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
+		{% endif %}
 		<li><a href="#activity">Committee Activity</a></li>
 		{% if subcommittees %}<li><a href="#subcommittees">Subcommittees</a></li>{% endif %}
 	</ul>
 
 	<div class="panes">
+		{% if members|length > 0 %}
 		<div id="members" class="members-grid">
 			<h2 style="margin: 1em 0 1em 0">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</h2>
 				
@@ -131,6 +140,7 @@
 		        {% endfor %}
 		    </div>
 		</div>
+		{% endif %}
 		
 		<div id="activity">
 			<div class="col-sm-6">
