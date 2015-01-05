@@ -14,6 +14,7 @@ from parser.progress import Progress
 from parser.processor import YamlProcessor, yaml_load
 from parser.models import File
 from person.models import Person, PersonRole, Gender, RoleType, SenatorClass, SenatorRank
+from us import get_congress_dates
 
 from settings import CURRENT_CONGRESS, CONGRESS_LEGISLATORS_PATH
 
@@ -220,8 +221,11 @@ def main(options):
                 role = role_processor.process(PersonRole(), role)
                 role.person = person
                 
-                role.current = role.startdate <= datetime.now().date() and role.enddate >= datetime.now().date() # \
-                        #and CURRENT_CONGRESS in role.congress_numbers()
+                now = datetime.now().date()
+                if now < get_congress_dates(CURRENT_CONGRESS)[0]:
+                    # in the transition time before the next Congress, just count as that Congress
+                    now = get_congress_dates(CURRENT_CONGRESS)[0]
+                role.current = role.startdate <= now and role.enddate >= now
 
                 # Scan for most recent leadership role within the time period of this term,
                 # which isn't great for Senators because it's likely it changed a few times
