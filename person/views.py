@@ -422,6 +422,13 @@ class sitemap_districts(django.contrib.sitemaps.Sitemap):
         return ret
     def location(self, item):
         return "/congress/members/" + item[0] + ("/"+str(item[1]) if item[1] else "")
+
+def session_stats_period(session, stats):
+    if not stats['meta']['is_full_congress_stats']:
+        return session
+    else:
+        from django.contrib.humanize.templatetags.humanize import ordinal
+        return "the %s Congress" % ordinal(stats['meta']['congress'])
         
 @anonymous_view
 @render_to('person/person_session_stats.html')
@@ -456,6 +463,7 @@ def person_session_stats(request, pk, session):
 
     return {
         "publishdate": dateutil.parser.parse(stats["meta"]["as-of"]),
+        "period": session_stats_period(session, stats),
         "person": person,
         "photo": person.get_photo()[0],
         "himher": Gender.by_value(person.gender).pronoun_object,
@@ -553,6 +561,7 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
     import dateutil.parser
     return {
         "session": session,
+        "period": session_stats_period(session, stats),
         "meta": stats["meta"],
         "metrics": metrics,
         "cohorts": cohorts,

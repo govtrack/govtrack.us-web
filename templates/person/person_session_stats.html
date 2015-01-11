@@ -144,7 +144,11 @@ function smooth_scroll(elem) {
 			<br>{% if role.current %}Serving{% else %}Served{% endif %} {{role.logical_dates.0|date}} &ndash; {{role.logical_dates.1|date}}
 			</em></p>
 
-		<p>These special year-end statistics cover {{person.lastname}}&rsquo;s record during the {{session}} legislative year and compare {{himher}} to other {{class}} serving at the end of the session.</p>
+		{% if not meta.is_full_congress_stats %}
+			<p>These special year-end statistics cover {{person.lastname}}&rsquo;s record during the {{session}} legislative year and compare {{himher}} to other {{class}} serving at the end of the session.</p>
+		{% else %}
+			<p>These special statistics cover {{person.lastname}}&rsquo;s record during the {{meta.congress|ordinalhtml}} Congress and compare {{himher}} to other {{class}} serving at the end of the session.</p>
+		{% endif %}
 
 		{% if role.leadership_title %}
 			<p style="color: red">Members of Congress with party leadership roles often do not participate in the legislative process in the same way as other Members of Congress. Since {{person.lastname}} {% if role.current %}is{% else %}was{% endif %} busy being {{role.leadership_title}}, the metrics of legislative activity listed below may not apply.</p>
@@ -220,32 +224,32 @@ function smooth_scroll(elem) {
 		{% endif %}
 
 		{% if stat.key == "missed-votes" %}
-			<p>{{person.lastname}} missed <strong>{{stat.value|floatformat:1}}%</strong> of votes ({{stat.missed}} of {{stat.elligible}} votes) in the {{session}} legislative session. <a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
+			<p>{{person.lastname}} missed <strong>{{stat.value|floatformat:1}}%</strong> of votes ({{stat.missed}} of {{stat.elligible}} votes) in {{period}}. <a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
 
 		{% elif stat.key == "bills-introduced" %}
-			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{session}}. <a href="/congress/bills/browse#sponsor={{person.id}}">View Bills &raquo;</a></p>
+			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{period}}. <a href="/congress/bills/browse#sponsor={{person.id}}">View Bills &raquo;</a></p>
 
 		{% elif stat.key == "bills-enacted" %}
-			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law in {{session}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&current_status=28&current_status=29">View Enacted Bills &raquo;</a></p>
+			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&current_status=28&current_status=29">View Enacted Bills &raquo;</a></p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-reported" %}
-			<p>Most bills and resolutions languish in committee without any action. {{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{session}} that got a committee vote sending it to the floor for further consideration.</p>
+			<p>Most bills and resolutions languish in committee without any action. {{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{period}} that got a committee vote sending it to the floor for further consideration.</p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-with-committee-leaders" %}
-			<p><strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions in {{session}} had a cosponsor who was a chair or ranking member of a committee that the bill was referred to. Getting support from committee leaders on relevant committees is a crucial step in moving legislation forward.</p>
+			<p><strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions in {{period}} had a cosponsor who was a chair or ranking member of a committee that the bill was referred to. Getting support from committee leaders on relevant committees is a crucial step in moving legislation forward.</p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-with-cosponsors-both-parties" %}
-			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% else %}{{person.lastname}} tends to gather cosponsors only on one side of the aisle.{% endif %} <strong>{{stat.value|floatformat:"0"}}%</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{session}}.</p>
+			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% else %}{{person.lastname}} tends to gather cosponsors only on one side of the aisle.{% endif %} <strong>{{stat.value|floatformat:"0"}}%</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
 
 		{% elif stat.key == "bills-with-companion" %}
 			<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions had a companion bill in the {{stat.other_chamber}}. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "cosponsors" %}
-			<p>{{person.lastname}}&rsquo;s bills and resolutions had <strong>{{stat.value|intcomma}}</strong> cosponsor{{stat.value|pluralize}} in {{session}}. Securing cosponsors is an important part of getting support for a bill, although having more cosponsors does not always mean a bill will get a vote. <a href="/congress/bills/browse#sponsor={{person.id}}">View Bills &raquo;</a></p>
+			<p>{{person.lastname}}&rsquo;s bills and resolutions had <strong>{{stat.value|intcomma}}</strong> cosponsor{{stat.value|pluralize}} in {{period}}. Securing cosponsors is an important part of getting support for a bill, although having more cosponsors does not always mean a bill will get a vote. <a href="/congress/bills/browse#sponsor={{person.id}}">View Bills &raquo;</a></p>
 
 		{% elif stat.key == "cosponsored" %}
 			<p>{{person.lastname}} cosponsored <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} introduced by other Members of Congress. Cosponsorship shows a willingness to work with others to advance policy goals. <a href="/congress/bills/browse#cosponsors={{person.id}}">View Cosponsored Bills &raquo;</a></p>
@@ -260,12 +264,12 @@ function smooth_scroll(elem) {
 		{% elif stat.key == "ideology" %}
 			<p>Our unique ideology analysis assigns a score to Members of Congress according
 			to their legislative behavior by how similar the pattern of bills and resolutions they cosponsor are to other Members of Congress.</p>
-			<p class="details">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{session}} is considered, the ideology score here may differ from {{person.lastname}}&rsquo;s score elsewhere on GovTrack.</p>
+			<p class="details">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{period}} is considered, the ideology score here may differ from {{person.lastname}}&rsquo;s score elsewhere on GovTrack.</p>
 
 		{% elif stat.key == "leadership" %}
 			<p>Our unique leadership analysis looks at who is cosponsoring whose bills. A higher score
 			shows a greater ability to get cosponsors on bills.</p>
-			<p class="details">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{session}} is considered, the leadership score here may differ from {{person.lastname}}&rsquo;s score elsewhere on GovTrack.</p>
+			<p class="details">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{period}} is considered, the leadership score here may differ from {{person.lastname}}&rsquo;s score elsewhere on GovTrack.</p>
 
 		{% elif stat.key == "committee-positions" %}
 			<p>{{person.lastname}} held a leadership position on <strong>{{stat.committees|length}}</strong>
@@ -342,7 +346,11 @@ function smooth_scroll(elem) {
 		{% if stat.key == "missed-votes" %}
 			{% if role.role_type == 2 %}<p class="notes">The Speaker of the House is not included in this statistic (see the notes at the very bottom of the page for why), and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>{% endif %}
 		{% elif stat.key == "bills-enacted" %}
+			{% if session == '2013' %}
 			<p class="notes">We only count enacted bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through companion bills or incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
+			{% else %}
+			<p class="notes">A bill is considered enacted if it or an exactly identical bill to it is enacted. We only consider bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
+			{% endif %}
 		{% elif stat.key == "bills-with-cosponsors-both-parties" %}
 			<p class="notes">Only Members of Congress who sponsored more than 10 bills and resolutions are included in this statistic.</p>
 		{% elif stat.key == "cosponsored-other-party" %}
