@@ -46,6 +46,12 @@ def get_cohorts(person, role, congress, session, committee_membership):
 		for c in r.congress_numbers():
 			if c < congress:
 				prev_congresses_served.add(c)
+	if person.id == 412507 and session == '2014':
+		# Schatz served only a few days in the 112th Congress. For the 2013 stats,
+		# I originally classified him as a sophomore. I revised it to drop that cohort.
+		# For 2014 stats, I am classifying him as a freshman.
+		assert prev_congresses_served == { 112 }
+		prev_congresses_served = set()
 	if len(prev_congresses_served) == 0: cohorts.append({ "key": chamber + "-freshmen", "chamber": chamber })
 	if len(prev_congresses_served) == 1: cohorts.append({ "key": chamber + "-sophomores", "chamber": chamber })
 	if min_start_date and (role.enddate - min_start_date).days > 365.25*10: cohorts.append({ "key": chamber + "-tenyears", "chamber": chamber, "first_date": min_start_date.isoformat()  })
@@ -90,7 +96,7 @@ def get_vote_stats(person, role, stats, votes_this_year):
 		"role": RoleType.by_value(role.role_type).key,
 	}
 
-def was_bill_enacted(b, startdate, enddate, recurse=True):
+def was_bill_enacted_2013(b, startdate, enddate):
 	# Our status code is currently tied to the assignment of a slip
 	# law number, which isn't what we mean exactly.
 	#
@@ -115,13 +121,7 @@ def was_bill_enacted(b, startdate, enddate, recurse=True):
 	for axn in bj["actions"]:
 		if axn["type"] == "signed" and startdate.isoformat() <= axn["acted_at"] <= enddate.isoformat():
 			return True
-
-	# Otherwise check companion bills.
-	#if recurse:
-	#	for rb in RelatedBill.objects.filter(bill=b, relation="identical").select_related("related_bill"):
-	#		if was_bill_enacted(rb.related_bill, startdate, enddate, recurse=False):
-	#			return True
-			
+		
 	return False
 
 def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committee_membership):
@@ -135,6 +135,8 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 	# How many bills were enacted within this time window?
 	#bills_enacted = bills.filter(current_status__in=BillStatus.final_status_passed_bill,
 	#	current_status_date__gte=startdate, current_status_date__lte=enddate)
+	def was_bill_enacted(b, startdate, enddate):
+		return b.was_enacted_ex(restrict_to_activity_in_date_range=(startdate.isoformat(), enddate.isoformat()))
 	bills_enacted = [b for b in bills if was_bill_enacted(b, startdate, enddate)]
 	stats["bills-enacted"] = {
 		"value": len(bills_enacted),
@@ -321,18 +323,38 @@ def make_bill_entry(bill):
 
 def collect_stats(session):
 	# Get the congress and start/end dates of the session that this corresponds to.
-	for congress, s, startdate, enddate in us.get_all_sessions():
-		if s == session:
-			break
+	if int(session) < 1000:
+		# Specifies a Congress.
+		congress = int(session)
+		session = None
+		is_full_congress_stats = True
+
+		# Get the last session in the Congress to look up the Cook Political Reports table.
+		for c, s, x, y in us.get_all_sessions():
+			if c == congress:
+				competitive_session = s
+				last_day_of_session = y
+
+		# Dummy dates. Don't want to use the congress dates because a bill can be
+		# enacted after the end of the Congress.
+		startdate = datetime.date.min
+		enddate = datetime.date.max
 	else:
-		raise ValueError("Invalid session: " + session)
+		is_full_congress_stats = False
+		competitive_session = session
+		for congress, s, startdate, enddate in us.get_all_sessions():
+			if s == session:
+				break
+		else:
+			raise ValueError("Invalid session: " + session)
+		last_day_of_session = enddate
 
 	# Who was serving on the last day of the session?
 	people = [(r.person, r) for r in PersonRole.objects
 		.filter(
 			role_type__in=(RoleType.representative, RoleType.senator),
-			startdate__lt=enddate, # use __lt and not __lte in case of multiple roles on the same day
-			enddate__gte=enddate, # use __lte in case anyone's term ended exactly on this day
+			startdate__lt=last_day_of_session, # use __lt and not __lte in case of multiple roles on the same day
+			enddate__gte=last_day_of_session, # use __lte in case anyone's term ended exactly on this day
 			)
 		.select_related("person")]
 
@@ -344,7 +366,9 @@ def collect_stats(session):
 	committee_membership = load_committee_membership(congress)
 
 	# Pre-fetch all of the votes in this session.
-	votes_this_year = Vote.objects.filter(congress=congress, session=session)
+	votes_this_year = Vote.objects.filter(congress=congress)
+	if session:
+		votes_this_year = votes_this_year.filter(session=session)
 	votes_this_year = {
 		RoleType.representative: set(votes_this_year.filter(chamber=CongressChamber.house).values_list("id", flat=True)),
 		RoleType.senator: set(votes_this_year.filter(chamber=CongressChamber.senate).values_list("id", flat=True)),
@@ -363,7 +387,7 @@ def collect_stats(session):
 			"role_end": role.enddate.isoformat(),
 
 			"stats": { },
-			"cohorts": get_cohorts(person, role, congress, session, committee_membership),
+			"cohorts": get_cohorts(person, role, congress, competitive_session, committee_membership),
 		}
 
 		stats = AllStats[person.id]["stats"]
@@ -375,7 +399,7 @@ def collect_stats(session):
 		get_committee_stats(person, role, stats, committee_membership)
 		get_transparency_stats(person, role, stats, congress, startdate, enddate)
 
-	return AllStats
+	return AllStats, congress, is_full_congress_stats
 
 def contextualize(stats):
 	# For each statistic compute ranks and percentiles within
@@ -426,12 +450,15 @@ def contextualize(stats):
 if __name__ == "__main__":
 	# What session?
 	session = sys.argv[1]
-	stats = collect_stats(session)
+	stats, congress, is_full_congress_stats = collect_stats(session)
 	#stats = json.load(open(sys.argv[1]))['people']
 	contextualize(stats)
 	stats = {
 		"meta": {
 			"as-of": datetime.datetime.now().isoformat(),
+			"notes": "",
+			"congress": congress,
+			"is_full_congress_stats": is_full_congress_stats,
 		},
 		"people": stats,
 	}
