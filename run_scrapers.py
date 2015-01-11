@@ -225,6 +225,9 @@ if "votes" in sys.argv:
 	if did_any_file_change or True: # amendments can mark votes as missing data
 		os.system("./parse.py vote --congress=%d -l %s" % (CONGRESS, log_level))
 
+	# Update change tracker.
+	os.system("/home/govtrack/update-votes-servo")
+
 if "stats" in sys.argv:
 	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)
 	os.system("analysis/missed_votes.py %d" % CONGRESS)
