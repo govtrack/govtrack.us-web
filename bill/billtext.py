@@ -180,7 +180,10 @@ def parse_usc_citation(cite):
 
 def get_bill_text_versions(bill):
     from os import listdir
-    for st in listdir(bill.data_dir_path + "/text-versions"):
+    d = bill.data_dir_path + "/text-versions"
+    if not os.path.exists(d):
+        return # don't yield anything, no text available
+    for st in listdir(d):
         fn = bill.data_dir_path + "/text-versions/" + st + "/data.json"
         if os.path.exists(fn):
             yield st
