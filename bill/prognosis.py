@@ -55,6 +55,8 @@ def load_majority_party(congress):
 	return majority_party
 
 def load_committee_membership(congress):
+	if congress == 114:
+		return { }
 	# load archival committee data
 	from parser.committee_parser import ROLE_MAPPING
 	committee_membership = { }
