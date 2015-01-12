@@ -46,10 +46,12 @@ def get_cohorts(person, role, congress, session, committee_membership):
 		for c in r.congress_numbers():
 			if c < congress:
 				prev_congresses_served.add(c)
-	if person.id == 412507 and session == '2014':
-		# Schatz served only a few days in the 112th Congress. For the 2013 stats,
-		# I originally classified him as a sophomore. I revised it to drop that cohort.
-		# For 2014 stats, I am classifying him as a freshman.
+	if person.id in (412505, 412503, 412506, 412507) and session == '2014':
+		# Schatz served only a few days in the 112th Congress. Other members took office
+		# within the last two months of the 112th Congress. For the 2013 stats, I originally
+		# classified them as sophomores. I revised it to drop that cohort from Schatz after
+		# hearing from his office. For 2014 stats, I am classifying them all as a freshman
+		# rather than sophomores.
 		assert prev_congresses_served == { 112 }
 		prev_congresses_served = set()
 	if len(prev_congresses_served) == 0: cohorts.append({ "key": chamber + "-freshmen", "chamber": chamber })
@@ -450,13 +452,17 @@ def contextualize(stats):
 if __name__ == "__main__":
 	# What session?
 	session = sys.argv[1]
+	try:
+		notes = sys.argv[2]
+	except:
+		notes = ""
 	stats, congress, is_full_congress_stats = collect_stats(session)
 	#stats = json.load(open(sys.argv[1]))['people']
 	contextualize(stats)
 	stats = {
 		"meta": {
 			"as-of": datetime.datetime.now().isoformat(),
-			"notes": "",
+			"notes": notes,
 			"congress": congress,
 			"is_full_congress_stats": is_full_congress_stats,
 		},

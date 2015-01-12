@@ -147,7 +147,7 @@ function smooth_scroll(elem) {
 		{% if not meta.is_full_congress_stats %}
 			<p>These special year-end statistics cover {{person.lastname}}&rsquo;s record during the {{session}} legislative year and compare {{himher}} to other {{class}} serving at the end of the session.</p>
 		{% else %}
-			<p>These special statistics cover {{person.lastname}}&rsquo;s record during the {{meta.congress|ordinalhtml}} Congress and compare {{himher}} to other {{class}} serving at the end of the session.</p>
+			<p>These special statistics cover {{person.lastname}}&rsquo;s record during the {{meta.congress|ordinalhtml}} Congress ({{congress_dates.0|date}}-{{congress_dates.1|date}}) and compare {{himher}} to other {{class}} also serving at the end of the session.</p>
 		{% endif %}
 
 		{% if role.leadership_title %}
@@ -227,10 +227,10 @@ function smooth_scroll(elem) {
 			<p>{{person.lastname}} missed <strong>{{stat.value|floatformat:1}}%</strong> of votes ({{stat.missed}} of {{stat.elligible}} votes) in {{period}}. <a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
 
 		{% elif stat.key == "bills-introduced" %}
-			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{period}}. <a href="/congress/bills/browse#sponsor={{person.id}}">View Bills &raquo;</a></p>
+			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{period}}. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}">View Bills &raquo;</a></p>
 
 		{% elif stat.key == "bills-enacted" %}
-			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&current_status=28&current_status=29">View Enacted Bills &raquo;</a></p>
+			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&current_status[]=28,29">View Enacted Bills &raquo;</a></p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-reported" %}
@@ -249,15 +249,15 @@ function smooth_scroll(elem) {
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "cosponsors" %}
-			<p>{{person.lastname}}&rsquo;s bills and resolutions had <strong>{{stat.value|intcomma}}</strong> cosponsor{{stat.value|pluralize}} in {{period}}. Securing cosponsors is an important part of getting support for a bill, although having more cosponsors does not always mean a bill will get a vote. <a href="/congress/bills/browse#sponsor={{person.id}}">View Bills &raquo;</a></p>
+			<p>{{person.lastname}}&rsquo;s bills and resolutions had <strong>{{stat.value|intcomma}}</strong> cosponsor{{stat.value|pluralize}} in {{period}}. Securing cosponsors is an important part of getting support for a bill, although having more cosponsors does not always mean a bill will get a vote. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}">View Bills &raquo;</a></p>
 
 		{% elif stat.key == "cosponsored" %}
-			<p>{{person.lastname}} cosponsored <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} introduced by other Members of Congress. Cosponsorship shows a willingness to work with others to advance policy goals. <a href="/congress/bills/browse#cosponsors={{person.id}}">View Cosponsored Bills &raquo;</a></p>
+			<p>{{person.lastname}} cosponsored <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} introduced by other Members of Congress. Cosponsorship shows a willingness to work with others to advance policy goals. <a href="/congress/bills/browse#cosponsors={{person.id}}&congress={{meta.congress}}">View Cosponsored Bills &raquo;</a></p>
 
 		{% elif stat.key == "cosponsored-other-party" %}
 			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% endif %} Of the {{stat.cosponsored}} bills that {{person.lastname}} cosponsored, <strong>{{stat.value|floatformat:"0"}}%</strong> were introduced by someone other than a {{role.party}}.
 			{% if role.opposing_party %}
-				<a href="/congress/bills/browse#cosponsors={{person.id}}&sponsor_party={{role.opposing_party}}">View Cosponsored Bills &raquo;</a>
+				<a href="/congress/bills/browse#cosponsors={{person.id}}&sponsor_party={{role.opposing_party}}&congress={{meta.congress}}">View Cosponsored Bills &raquo;</a>
 			{% endif %}
 			</p>
 

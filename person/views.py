@@ -444,6 +444,9 @@ def person_session_stats(request, pk, session):
     # get the role as stored in the file
     role = PersonRole.objects.get(id=stats["role_id"])
 
+    # mark the role as current if the logical end date is in the future, to fix the display of Served/Serving
+    role.current = (role.logical_dates()[1] > datetime.now().date())
+
     # clean and sort the stats for this person so they're ready for display
     from person.views_sessionstats import clean_person_stats
     clean_person_stats(stats)
@@ -461,9 +464,15 @@ def person_session_stats(request, pk, session):
     import dateutil.parser
     from person.types import Gender, RoleType
 
+    # what dates specifically for the congress?
+    (period_min, period_max) = get_congress_dates(stats["meta"]["congress"])
+    period_min = max(period_min, role.logical_dates()[0])
+    period_max = min(period_max, role.logical_dates()[1])
+
     return {
         "publishdate": dateutil.parser.parse(stats["meta"]["as-of"]),
         "period": session_stats_period(session, stats),
+        "congress_dates": (period_min, period_max),
         "person": person,
         "photo": person.get_photo()[0],
         "himher": Gender.by_value(person.gender).pronoun_object,
