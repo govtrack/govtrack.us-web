@@ -1,12 +1,10 @@
 {% load govtrack_utils %}
 {% with "/static/" as STATIC_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
 <!DOCTYPE html>
-<!--[if lt IE 8]>         <html class="no-js lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js ie8"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<html>
     <head>
-		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
         
 		<title>{% block title %}{% endblock %}</title>
