@@ -404,17 +404,42 @@ def do_analysis(congressnumber, starting_congress, house_or_senate, people, peop
 	write_stats_to_disk(congressnumber, house_or_senate, nreps, ids, parties, names, spectrum, pagerank, descr, other_cols)
 	write_metadata_to_disk(congressnumber, house_or_senate, start_date, end_date)
 
+def influence_matrix(congressnumber, starting_congress, house_or_senate, people, people_list, sponsor):
+	start_date, end_date, rep_to_row, nreps, P_initial = build_matrix(congressnumber, starting_congress, house_or_senate, people, people_list)
+	parties = build_party_list(rep_to_row, people, nreps)
+	initial_score = None
+	initial_pctile = None
+	for cosponsor in [None] + list(rep_to_row):
+		P = numpy.array(P_initial) # clone
+		if cosponsor != None: # baseline
+			#P[(rep_to_row[sponsor], rep_to_row[cosponsor])] += 1
+			P[(rep_to_row[cosponsor], rep_to_row[sponsor])] += 1
+		smooth_matrix(nreps, P)
+		spectrum = ideology_analysis(nreps, parties, P)
+		score = spectrum[rep_to_row[sponsor]]
+		pctile = scipy.stats.percentileofscore([spectrum[i] for i in range(nreps) if parties[i] == "Democrat"], score)
+		if cosponsor is None:
+			initial_score = score
+			initial_pctile = pctile
+			continue
+		print sponsor, cosponsor, score - initial_score, pctile - initial_pctile
 			
 if __name__ == "__main__":
 	congressnumber = int(sys.argv[1])
 
-	os.system("mkdir -p " + datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis")
-
+	# Who should we include in the analysis?
 	people, people_list = get_people(get_roles_of_people(congressnumber))
+
+	if len(sys.argv) == 3:
+		influence_matrix(congressnumber, congressnumber-2, 'h', people, people_list, int(sys.argv[2]))
+		sys.exit(0)
+
+	# Auxiliary stats to include in output.
 	for person_role in people.values():
 		attach_other_stats(congressnumber, person_role)
 
 	# Perform analysis totally separately for each chamber.
+	os.system("mkdir -p " + datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis")
 	for house_or_senate in ('h', 's'):
 		do_analysis(congressnumber, congressnumber-2, house_or_senate, people, people_list)
 
