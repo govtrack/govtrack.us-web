@@ -326,15 +326,15 @@ def describe_members(nreps, parties, spectrum, pagerank):
 		
 		if party == "Democrat":
 			descr_table = [
-				["far-left Democratic leader", "moderate Democratic leader", "centrist Democratic leader"],
-				["far-left Democrat", "rank-and-file Democrat", "centrist Democrat"],
-				["lonely far-left Democratic ", "moderate Democratic follower", "centrist Democratic follower"],
+				["progressive Democratic leader", "moderate Democratic leader", "centrist Democratic leader"],
+				["progressive Democrat", "rank-and-file Democrat", "centrist Democrat"],
+				["lonely progressive Democratic ", "moderate Democratic follower", "centrist Democratic follower"],
 				]
 		elif party == "Republican":
 			descr_table = [
-				["centrist Republican leader", "moderate Republican leader", "far-right Republican leader"],
-				["centrist Republican", "rank-and-file Republican", "far-right Republican"],
-				["centrist Republican follower ", "moderate Republican follower", "lonley far-right Republican follower"],
+				["centrist Republican leader", "moderate Republican leader", "conservative Republican leader"],
+				["centrist Republican", "rank-and-file Republican", "conservative Republican"],
+				["centrist Republican follower ", "moderate Republican follower", "lonley conservative Republican follower"],
 				]
 				
 		else:
