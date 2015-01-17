@@ -30,10 +30,11 @@ def get_cohort_name(key):
     if key == "house-safe-seat": return "of safe House seats"
     raise ValueError(key)
 
-allstats = json.load(sys.stdin)
+allstats = json.load(open(sys.argv[1]))
 collected_stats = []
 for id, stats in allstats["people"].items():
 	person = Person.objects.get(id=id)
+	if not person.roles.filter(current=True).exists(): continue # skip anyone no longer serving
 	role = PersonRole.objects.get(id=stats["role_id"])
 	for statname, statinfo in stats["stats"].items():
 		if statname in ("bills-with-committee-leaders", "bills-with-companion", "committee-positions", "cosponsored-other-party"): continue
@@ -135,14 +136,14 @@ for person, role, statname, cohortname, groupinfo in collected_stats:
 		tweet += "has the " + superlative + " " + statname
 	tweet += " "
 
-	tweet += get_cohort_name(cohortname) + " in 2013"
+	tweet += get_cohort_name(cohortname) + " last Congress"
 	if groupinfo["rank_ties"] > 0:
 		tweet += " (tied w/ %d)" % groupinfo["rank_ties"]
 
 	tweet += ". More in our #reportcard: "
 	if len(tweet) > 120: print "TOO LONG:", # url below counts as 20 chars
 
-	tweet += "https://www.govtrack.us" + person.get_absolute_url() + "/report-card/2013"
+	tweet += "https://www.govtrack.us" + person.get_absolute_url() + "/report-card/2014"
 
 	print tweet
 	print

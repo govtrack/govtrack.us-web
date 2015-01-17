@@ -58,12 +58,20 @@ def person_details(request, pk):
     
         # analysis
         analysis_data = analysis.load_data(person)
-        has_session_stats = False
-        if role:
-            try:
-                has_session_stats = role.get_most_recent_session_stats()
-            except:
-                pass
+        try:
+            has_session_stats = person.get_session_stats('2014')
+        except:
+            # Not everyone has 2014 stats, obviously. They may have stats
+            # corresponding to their most recent role. Since stats are a
+            # session behind, even-year stats might not correspond to
+            # a legislator's most recent role, which is why I hard-coded
+            # the current session stats above.
+            has_session_stats = False
+            if role:
+                try:
+                    has_session_stats = role.get_most_recent_session_stats()
+                except:
+                    pass
         
         links = []
         if role.website: links.append(("%s's Official Website" % person.lastname, role.website))

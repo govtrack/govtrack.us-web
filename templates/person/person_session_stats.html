@@ -74,7 +74,7 @@
 	section p.notes {
 		font-size: 88%;
 		color: #777;
-		margin: .5em 0 1em 0;
+		margin: 1.5em 0 1em 0;
 	}
 
 	section .icon {
@@ -351,6 +351,8 @@ function smooth_scroll(elem) {
 			{% else %}
 			<p class="notes">A bill is considered enacted if it or an exactly identical bill to it is enacted. We only consider bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
 			{% endif %}
+		{% elif stat.key == "bills-with-companion" %}
+			<p class="notes">Companion bills are those that are identified as &ldquo;identical&rdquo; by Congress&rsquo;s Congressional Research Service.</p>
 		{% elif stat.key == "bills-with-cosponsors-both-parties" %}
 			<p class="notes">Only Members of Congress who sponsored more than 10 bills and resolutions are included in this statistic.</p>
 		{% elif stat.key == "cosponsored-other-party" %}
