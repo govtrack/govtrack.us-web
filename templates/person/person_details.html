@@ -121,11 +121,12 @@
 	<section id="sponsorship_analysis">
 		<h3>Sponsorship Analysis</h3>
         
-		<p>{{ person.lastname }} {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a {{ analysis_data.sponsorship.description }} according to
-		GovTrack's own analysis of bill sponsorship{% if not analysis_data.sponsorship.current %} from {{ person.lastname }}&rsquo;s time serving in the
-		{{analysis_data.sponsorship.chamber}}{% endif %}. {{ person.lastname }}&rsquo;s bills {% if analysis_data.sponsorship.current %}have had{% else %}had{% endif %} a total of {{analysis_data.sponsorship.total_cosponsors|intcomma}} cosponsors in the {{analysis_data.sponsorship.congress|ordinalhtml}} Congress.</p>
+		<p>Our unique analysis of the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored provides insight into {{ person.his_her }}
+		position in the {{analysis_data.sponsorship.chamber}}.</p>
 
-		<p>Use this chart to compare {{ person.lastname }} to other members of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %} in the {{analysis_data.sponsorship.congress|ordinalhtml}} Congress{% endif %} on leadership and ideology.</p>
+		<p>Each dot in the chart below is a member of the {{analysis_data.sponsorship.chamber}}. The dots are positioned horizontally according
+		to our progressive&mdash;conservative ideology score and vertically according to our leadership score (leaders toward the top).
+		{{ person.lastname }} is shown as a purple triangle. <small>(<a href="/about/analysis">analysis methodology</a>)</small></p>
 
 		<div id="sponsorship_analysis_chart"> </div>
 		<script>
@@ -225,7 +226,6 @@
 			<p>Influences: {% for p in analysis_data.influence.influencees.values %}<a href="{{p.get_absolute_url}}">{{p.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
 		{% endif %}
 		{% endif %}
-		<p><small>This chart is based on principal components analysis for ideology and PageRank for leadership. See <a href="/about/analysis">analysis methodology</a>.</small></p>
 		</div>
 	</section><!-- /analysis -->
     {% endif %}
