@@ -285,14 +285,25 @@ if "photos" in sys.argv:
 		if not os.path.exists(fn1):
 			raise IOError(fn1)
 
-		# get required metadata
-		metadata = yaml.load(open(fn1.replace("/original/", "/metadata/").replace(".jpg", ".yaml")))
-		if metadata.get("name", "").strip() == "": raise ValueError("Metadata is missing name.")
-		if metadata.get("link", "").strip() == "": raise ValueError("Metadata is missing link.")
+		# destination file name
+		fn2 = dst + str(govtrack_id) + ".jpeg"
+
+		# need to review?
+		#if not (os.path.exists(fn2) and md5(fn1) == md5(fn2)):
+		#	p = person.models.Person.objects.get(id=govtrack_id)
+		#	r = p.roles.get(current=True)
+		#	print ("change" if os.path.exists(fn2) else "new"), p
+			#print "<hr>" \
+			#	"<p>%s</p>" % p.name, \
+			#	"<p>" + ("change" if os.path.exists(fn2) else "new") + "</p>", \
+			#	"<p><img src='https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/original/%s.jpg'></p>" % bioguide_id, \
+			#	"<iframe src='%s' width=100%% height=500> </iframe>" % ("https://twitter.com/"+p.twitterid if p.twitterid else r.website)
 
 		# check if the destination JPEG already exists and it has different content
-		fn2 = dst + str(govtrack_id) + ".jpeg"
 		if os.path.exists(fn2) and md5(fn1) != md5(fn2):
+			print "Not updating an existing different photo for %d/%s." % (govtrack_id, bioguide_id)
+			continue
+
 			# Back up the existing files first. If we already have a backed up
 			# image, don't overwrite the back up. Figure out what to do another
 			# time and just bail now. Check that we won't overwrite any files
@@ -312,6 +323,11 @@ if "photos" in sys.argv:
 		# Copy in the file.
 		if copy(fn1, fn2, None):
 			print fn1, "=>", fn2
+
+			# get required metadata
+			metadata = yaml.load(open(fn1.replace("/original/", "/metadata/").replace(".jpg", ".yaml")))
+			if metadata.get("name", "").strip() == "": raise ValueError("Metadata is missing name.")
+			if metadata.get("link", "").strip() == "": raise ValueError("Metadata is missing link.")
 
 			# Write the metadata.
 			with open(fn2.replace(".jpeg", "-credit.txt"), "w") as credit_file:
