@@ -6,6 +6,7 @@
 	<meta charset="utf-8" />
 	<title>Bill Widget &ndash; {{bill.title_no_number}} ({{bill.display_number_no_congress_number}}{% if not bill.is_current %}, {{bill.congress|ordinal}} Congress{% endif %}) &ndash; GovTrack.us</title>
 
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
 	<link rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20140215" media="all" />
 
 	<style type="text/css">
@@ -48,12 +49,13 @@
 			max-height: 3.25em;
 		}
 
-		.summary-box dt {
-			width: 25%;
-			padding-right: 1em;
-			text-align: right;
+		dl.dl-horizontal dt {
+			clear: both;
+			float: left;
+			width: 90px;
+			margin-bottom: .5em;
 		}
-		
+
 		@supports ( display: flex ) {
 			body {
 				display: flex;
@@ -79,7 +81,7 @@
 		<div class="summary-box">
 			<h1><a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}" target="_blank">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current %} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 
-			<dl style="margin: 0">
+			<dl class="dl-horizontal" style="margin: 0">
 				<dt>Introduced:</dt>
 				<dd>{{bill.introduced_date}} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
 

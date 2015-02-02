@@ -1,0 +1,149 @@
+{% extends 'master.html' %}
+{% load humanize govtrack_utils %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}Summaries for {{bill|truncatewords:16}} ({{textdata.doc_version_name}} version) - GovTrack.us{% endblock %}
+
+{% block meta_description %}Summaries for {{bill|truncatewords:8}} as of {{textdata.docdate}} ({{textdata.doc_version_name}} version). {{bill|truncatewords:24}}{% endblock %}
+
+{% block extra_css %}
+<style>
+h1 {
+	font-size: 24px;
+	line-height: 30px;
+	color: #565656;
+	padding: 0 0 6px;
+	margin: 0 0 6px;
+}	
+
+h3 {
+	margin-top: 0;
+}
+</style>
+{% endblock %}
+
+{% block body_scripts %}
+{% endblock %}
+
+{% block crumbs %}
+<ul>
+	<li><a href="{% url "congress_home" %}">Congress</a></li>
+	<li><a href="/congress/bills">Bills</a></li>
+	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
+</ul>
+{% endblock %}
+
+{% block summary %}
+<div>
+	<a class="back-link-above-h1" href="{{bill.get_absolute_url}}">
+		<span>&lt; Back</span> to {{bill.display_number_no_congress_number}}
+		({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})
+	</a>
+
+	<h1 style="margin: 0">Summaries for{% if "Act" in bill.title %} the{% endif %} {{bill.title_no_number|truncatewords:20}}</h1>
+
+	{% if bill.title != bill.title|truncatewords:20 %}
+		{% with bill.title|truncatewords:20|cut:"..." as bt %}
+			<p style="line-height: 130%;">...{{bill.title|cut:bt}}</p>
+		{% endwith %}
+	{% endif %}
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="col-xs-12">
+	<div role="tabpanel">
+	  <ul id="summary-tabs" class="nav nav-tabs" role="tablist">
+	  </ul>
+	</div>
+
+	<div id="summary-panes" class="tab-content" style="margin-top: 1em; padding-bottom: 2em">
+		<script>
+		var first_summary = true;
+		function add_summary(name, href, html) {
+			// add a sub-tab
+			var tab = $('<li role="presentation"><a role="tab" data-toggle="tab"/></li>');
+			tab.find('a').text(name ? name : "Our Summary").attr('href', '#' + href)
+			$('#summary-tabs').append(tab);
+			if (first_summary) {
+				tab.addClass('active');
+				$('#' + href).addClass('active');
+			}
+		}
+		</script>
+
+		<div id="oursummary" class="tab-pane postcontent" role="tabpanel">
+			<h3 style="margin-bottom: 1em">GovTrack&rsquo;s Bill Summary</h3>
+			{% with bill.oursummary as summary %}
+			{% if not summary %}
+				<p>We don&rsquo;t have a summary available yet.</p>
+			{% else %}
+				{{summary.as_html|safe}}
+				<div class="small" style="margin-top: 1em; border-top: 1px solid #666; padding-top: 1em">
+					Last updated {{summary.modified|date}}.
+					View <a href="/events/bill-summaries">all GovTrack summaries</a>.
+				</div>
+				<script>add_summary(null, "oursummary", "{{summary.as_html|truncatewords_html:30|escapejs}}");</script>
+			{% endif %}
+			{% endwith %}
+		</div>
+		
+		<div id="libraryofcongress" class="tab-pane postcontent" role="tabpanel">
+			<h3 style="margin-bottom: 1em">Library of Congress Summary</h3>
+			<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress.</p>
+			<hr/>
+			{% with bill.get_formatted_summary as summary %}
+			{% if not summary %}
+				<p>No summary available.</p>
+			{% else %}
+				{{summary|safe}}
+				<script>add_summary("Library of Congress", "libraryofcongress", "{{summary|striptags|truncatewords:30|escapejs}}");</script>
+			{% endif %}
+			{% endwith %}
+		</div>
+		
+		{% comment %}
+		<div id="houserepublicans" class="tab-pane postcontent" role="tabpanel">
+			<h3 style="margin-bottom: 1em">House Republican Conference Summary</h3>
+			<p>The summary below was written by the <a href="http://www.gop.gov">House Republican Conference</a>, which is the caucus of Republicans in the House of Representatives.</p>
+			<hr/>
+			{% with bill.get_gop_summary as gopsummary %}
+				{% if not gopsummary %}
+					<p>No summary available.</p>
+				{% else %}
+					<p>This summary can be found at <a href="{{gopsummary.link}}">{{gopsummary.link}}</a>.</p>
+				
+					{% if gopsummary.background %}
+					<h4>Background</h4>
+					{{gopsummary.background}}
+					{% endif %}
+					
+					{% if gopsummary.summary %}
+					<h4>Summary</h4>
+					{{gopsummary.summary}}
+					{% endif %}
+					
+					{% if gopsummary.cost %}
+					<h4>Cost</h4>
+					{{gopsummary.cost}}
+					{% endif %}
+					
+					<script>add_summary("House Republicans", "houserepublicans", "{{gopsummary.text|truncatewords:30|escapejs}}");</script>
+					<script>add_summary("House Democrats", "housedemocrats", "No summary available.");</script>
+				{% endif %}
+			{% endwith %}
+		</div>
+		
+		<div id="housedemocrats" class="tab-pane postcontent" role="tabpanel">
+			<h3 style="margin-bottom: 1em">House Democratic Caucus Summary</h3>
+			<p>The <a href="http://www.dems.gov/">House Democratic Caucus</a> does not provide summaries of bills.</p>
+			<p>So, yes, we display the House Republican Conference&rsquo;s summaries when available even if we do not have a Democratic summary available. That&rsquo;s because we feel it is better to give you as much information as possible, even if we cannot provide every viewpoint.</p>
+			<p>We&rsquo;ll be looking for a source of summaries from the other side in the meanwhile.</p>
+		</div>
+		{% endcomment %}
+	</div>
+</div>
+
+{% endblock %}
+

@@ -8,11 +8,6 @@
 	<meta property="og:title" content="{{ vote.question|truncatewords:10 }} -- {{ vote.get_chamber_display }} Vote #{{ vote.number }} -- {{ vote.created|date:"DATE_FORMAT" }}" />
 	<style>
 	#vote_explainer p { margin: 0; }
-	{% if not vote.related_amendment and vote.related_bill.noun != "resolution" %}
-	.summary-box dt { width: 70px; }
-	{% else %}
-	.summary-box dt { width: 95px; }
-	{% endif %}
     .stats th { text-align: center; }
 
     p#yourreps {
@@ -167,13 +162,16 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
 <div class="row">
 <div class="col-sm-8">
-<dl>
-    <dt>Number:</dt>
-    <dd>{{ vote.get_chamber_display }} Vote #{{ vote.number }} [primary source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>]</dd>
+<dl class="dl-horizontal {% if vote.related_amendment or vote.related_bill.noun == "resolution" %}wide{% endif %}">
     <dt>Date:</dt>
-    <dd>{{ vote.created|date:"DATE_FORMAT" }} ({{ vote.congress|ordinalhtml }} Congress)</dd>
+    <dd><p>{{ vote.created|date:"DATE_FORMAT" }}</p></dd>
+    <dt>Number:</dt>
+    <dd><p>{{ vote.get_chamber_display }} Vote #{{ vote.number }}
+        <br>{{ vote.congress|ordinalhtml }} Congress</p></dd>
     <dt>Result:</dt>
-    <dd>{{ vote.result }}</dd>
+    <dd><p>{{ vote.result }}</p></dd>
+    <dt>Source:</dt>
+    <dd><p><a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a></p></dd>
 </dl>
 </div>
 

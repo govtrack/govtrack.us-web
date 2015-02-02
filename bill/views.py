@@ -139,6 +139,15 @@ def bill_details_user_view(request, congress, type_slug, number):
     return ret
 
 @anonymous_view
+@render_to("bill/bill_summaries.html")
+def bill_summaries(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    return {
+        "bill": bill,
+        "congressdates": get_congress_dates(bill.congress),
+    }
+
+@anonymous_view
 @render_to("bill/bill_widget.html")
 def bill_widget(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)

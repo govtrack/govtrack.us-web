@@ -917,20 +917,25 @@ header ul, footer ul {
 	.date {
 		font-family: PTSerifItalic;
 		}
-	.summary-box dt {
-		font-family: PTSerifBold;
-		float: left;
-		clear: left;
-		width: 90px;
+	@media (min-width: 768px) {
+		dl.dl-horizontal dt {
+			width: 90px;
+			font-weight: normal;
+			}
+		dl.dl-horizontal dd {
+			margin-left: 100px;
 		}
-	.summary-box dl.wide dt {
-		width: 130px;
-		}
-	.summary-box dd {
-		font-family: Calluna/*Italic*/;
-		overflow: hidden;
-		margin-bottom: 4px;
-		}
+			#content dl.dl-horizontal dd p {
+				line-height: 127%;
+				margin-bottom: .5em;
+			}
+		dl.dl-horizontal.wide dt {
+			width: 130px;
+			}
+		dl.dl-horizontal.wide dd {
+			margin-left: 140px;
+			}
+	}
 #content .summary-box h2 {
 	font-size: 16px;
 	line-height: 20px;

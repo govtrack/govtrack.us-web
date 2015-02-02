@@ -321,11 +321,11 @@ class Bill(models.Model):
     @property
     def how_a_bill_text(self):
         if self.bill_type in (BillType.senate_bill, BillType.house_bill):
-            return "A bill must be passed by both the House and Senate in identical form and then be signed by the president to become law."
+            return "A bill must be passed by both the House and Senate in identical form and then be signed by the President to become law."
         elif self.bill_type in (BillType.senate_concurrent_resolution, BillType.house_concurrent_resolution):
-            return "A concurrent resolution is often used for matters that affect the rules of Congress or to express the sentiment of Congress. It must be agreed to by both the House and Senate in identical form but is not signed by the president and does not carry the force of law."
+            return "A concurrent resolution is often used for matters that affect the rules of Congress or to express the sentiment of Congress. It must be agreed to by both the House and Senate in identical form but is not signed by the President and does not carry the force of law."
         elif self.bill_type in (BillType.senate_joint_resolution, BillType.house_joint_resolution):
-            return "A joint resolution is often used in the same manner as a bill. If passed by both the House and Senate in identical form and signed by the president, it becomes a law. Joint resolutions are also used to propose amendments to the Constitution."
+            return "A joint resolution is often used in the same manner as a bill. If passed by both the House and Senate in identical form and signed by the President, it becomes a law. Joint resolutions are also used to propose amendments to the Constitution."
         elif self.bill_type in (BillType.senate_resolution, BillType.house_resolution):
             return "A simple resolution is used for matters that affect just one chamber of Congress, often to change the rules of the chamber to set the manner of debate for a related bill. It must be agreed to in the chamber in which it was introduced. It is not voted on in the other chamber and does not have the force of law."
         raise ValueError()

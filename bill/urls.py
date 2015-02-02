@@ -4,6 +4,7 @@ from django.conf.urls import *
 urlpatterns = patterns('bill.views',
     url(r'^browse$', 'bill_list', name='bill_list'),
     url(r'^(\d+)/([a-z]+)(\d+)$', 'bill_details', name='bill_details'),
+    url(r'^(\d+)/([a-z]+)(\d+)/summary$', 'bill_summaries', name='bill_summaries'),
     url(r'^(\d+)/([a-z]+)(\d+)/text(?:/([a-z0-9]+))?$', 'bill_text', name='bill_text'),
     url(r'^(\d+)/([a-z]+)(\d+)/widget$', 'bill_widget_info'),
     url(r'^(\d+)/([a-z]+)(\d+)/widget\.html$', 'bill_widget'),

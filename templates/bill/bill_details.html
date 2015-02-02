@@ -258,31 +258,19 @@ h2 {
 		font-weight: bold;
 	}
 
-#media-row {
-	margin-top: 1.75em;
-	margin-bottom: 1.75em;
-}
-#overview #media-row dt {
-	margin: 0;
-	font-size: 11px;
-	font-weight: normal;
-	text-transform: uppercase;
-	color: #666;
-}
-#media-row dd {
-	margin-bottom: .5em;
-	font-size: 16px;
-}
-	#media-row dd a.name {
-		font-weight: bold;
-	}
-
 .minor_vote {
 	display: none;
 }
 
 #action-panel h1 { font-size: 20px; }
 #action-panel h2 { font-size: 16px; }
+
+.dl-horizontal dd {
+	padding-bottom: .25em;
+}
+.dl-horizontal dd a {
+	font-weight: bold;
+}
 
 #prognosis_factors p span, #prognosis_factors .key { color: #777; font-family: Arial, Helvetica, sans-serif;}
 
@@ -301,30 +289,6 @@ h2 {
 	}
 		#call_congress_positions button.support span { color: green; }
 		#call_congress_positions button.oppose span { color: red; }
-
-#overview dl, #overview p {
-	margin: 0;
-}
-#overview dl dt {
-	margin-top: 1em;
-}
-
-#overview .sep {
-	border-bottom: 1px solid #EDC;
-	height: 0;
-	margin: 2em 0 1em 0;
-}
-
-#overview dt, #related dt {
-	font-weight: normal;
-	color: #000;
-	margin-bottom: 6px;
-}
-
-       #overview #notes p {
-       	font-size: 90%;
-       	margin-bottom: .5em;
-       }
 
 p#yourreps {
 	margin: 0;
@@ -437,90 +401,141 @@ p#yourreps {
 
 	<h1 style="max-height: 3.5em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 	<div class="row">
-	<div id="track_panel_base" class="{% if bill.is_alive %}col-sm-8{% else %}col-sm-12{% endif %}">
+	<div id="track_panel_base" class="{% if bill.is_alive %}col-md-8{% else %}col-sm-12{% endif %}">
 		<div class="info" style="{% if not bill.is_alive %}width: auto; {% endif %}background: none;">
 			<p id="h1_overflow" style="display: none;">...</p>
 			<script>$('h1').truncate_text(function (remaining, chopped) {
 			    if (chopped) $('#h1_overflow').text("..." + chopped).show();
 			});</script>
 		
-			{% comment %}
-			<p class="date"></p>
-			{% if subtitle %}<p class="subtitle">{{subtitle}}</p>{% endif %}{% endcomment %}
+			{% if bill.explanatory_text or bill.congress < 93 %}
+			<p style="font-style: italic">
+				{% if bill.explanatory_text %}{{bill.explanatory_text}}{% endif %}
+				{% if bill.congress < 93 %}
+					Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
+				{% endif %}
+			</p>
+			<hr>
+			{% endif %}
 			
-			<dl>
+			<dl class="dl-horizontal">
 				{% if bill.source != "statutesatlarge" %}
 					<dt>Introduced:</dt>
-					<dd>{{bill.introduced_date}}{% if not bill.is_alive %} ({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}){% endif %}</dd>
+					<dd><p><strong>{{bill.introduced_date}}</strong>
+						{% if not bill.is_alive %}<br>{{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}{% endif %}</p></dd>
 				{% else %}
 					{# from the SaL, the introduced date is not known #}
 					<dt>Introduced:</dt>
-					<dd>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</dd>
+					<dd><p>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</p></dd>
 				{% endif %}
 
 				{% if bill.source != "americanmemory" %}
 				<dt>Status:</dt>
 				<dd>
 					{% if bill.source == "statutesatlarge" and bill.noun == "bill" %}
-						Enacted on {{bill.current_status_date}}
+						<p>Enacted on {{bill.current_status_date}}</p>
 					{% elif bill.source == "statutesatlarge" and bill.noun == "resolution" %}
-						Enacted or Agreed to on {{bill.current_status_date}}
+						<p>Enacted or Agreed to on {{bill.current_status_date}}</p>
 					{% elif not dead %}
-						{{bill.get_current_status_display}} on {{bill.current_status_date}}
+						<div><strong>{{bill.get_current_status_display}}</strong>
+						<br> on <strong>{{bill.current_status_date}}</strong></div>
+						<p>{{bill.current_status_description}}</p>
+
+						{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
+						<p><span class="glyphicon glyphicon-calendar"> </span> The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</p>
+						{% endif %}
+						
+						{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
+						<p><span class="glyphicon glyphicon-calendar"> </span> Added to the <strong>Senate&rsquo;s floor schedule</strong> for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</p>
+						{% endif %}
+					
+						{% if bill.get_upcoming_meetings|length %}
+							<p>This {{bill.noun}} is scheduled for the following committee meetings:
+							{% for m in bill.get_upcoming_meetings %}
+								<br>{{m.when}} &mdash; {{m.committee.fullname}}
+							{% endfor %}
+							</p>
+						{% endif %}
+
 					{% else %}
-						Died ({{bill.get_current_status_display}}) in a previous session of Congress
+						<div><strong>Died in a previous Congress</strong></div>
+						<p style="margin-top: .25em">{{bill.current_status_description}}</p>
+					{% endif %}
+				</dd>
+				{% endif %}
+
+				{% with bill.slip_law_number as sln %}
+				{% if sln %}
+					<dt>Law:</dt>
+					<dd><p>{{bill.slip_law_number}}</p></dd>
+				{% endif %}
+				{% endwith %}
+
+				{% if bill.sponsor %}
+				<dt>Sponsor:</dt>
+				<dd>
+					{% if bill.sponsor.has_photo %}
+						<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
+							<a href="{{bill.sponsor.get_absolute_url}}">
+								<img src="/data/photos/{{bill.sponsor.id}}-100px.jpeg" title="{{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
+							</a>
+						</div>
+					{% endif %}
+					<p>
+						<a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
+						<br><small>{{bill.sponsor_role.get_description}}</small>
+						<br><small>{{bill.sponsor_role.party}}</small></p>
+					<div style="clear: both"></div>
+				</dd>
+				{% endif %}
+
+				{% if text_info %}
+				<dt>Text:</dt>
+				<dd>
+					{% if text_info.has_displayable_text %}
+						{% if text_info.has_thumbnail %}
+						<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
+							<a href="{{bill.get_absolute_url}}/text">
+								<img src="{{bill.get_absolute_url}}/_text_image" class="img-responsive" title="Bill Text" style="border: 1px solid #999;"/>
+							</a>
+						</div>
+						{% endif %}
+						<p>
+							<a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a>
+							<small><br>Last Updated: {{text_info.docdate}}
+							{% if text_info.numpages %}
+							<br>Length: {{text_info.numpages}}
+							{% endif %}
+							</small>
+						</p>
+						<div style="clear: both"></div>
+					{% else %}
+						<p><a href="{{text_info.gpo_pdf_url}}">Read Text &raquo;</a> (PDF; {{text_info.docdate}})</p>
 					{% endif %}
 				</dd>
 				{% endif %}
 
 				{% with bill.get_prognosis as p %}
 				{% if p and bill.is_alive %}
-				<dt>Prognosis</dt>
+				<dt>Prognosis:</dt>
 				<dd>
-					{{p.prediction|floatformat:0}}% chance of being {{p.success_name}}
+					<p>{{p.prediction|floatformat:0}}% chance of being {{p.success_name}}</p>
 				</dd>
 				{% endif %}
 				{% endwith %}
 				
-				{% with bill.slip_law_number as sln %}
-				{% if sln %}
-					<dt>Law:</dt>
-					<dd>This {{bill.noun}} became the law numbered {{bill.slip_law_number}}.</dd>
-				{% endif %}
-				{% endwith %}				
-				
-				{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
-				<dt>Schedule:</dt>
-				<dd>The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</dd>
-				{% endif %}
-				
-				{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
-				<dt>Schedule:</dt>
-				<dd>This {{bill.noun}} was added to the Senate&rsquo;s floor schedule for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</dd>
-				{% endif %}
-				
-				{% if bill.get_upcoming_meetings|length %}
-				<dt>Schedule:</dt>
-				<dd>
-					<div>This {{bill.noun}} is scheduled for the following committee meetings:</div>
-					{% for m in bill.get_upcoming_meetings %}
-						<div>{{m.when}} &mdash; {{m.committee.fullname}}</div>
-					{% endfor %}
-				</dd>
-				{% endif %}
-			
 				{% with reintro_as=reintros.1 related_newer=bill.get_related_bills_newer %}
 					
 				{% if reintro_as %}
 					<dt>See Instead:</dt>
-					<dd>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
-					{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</dd>
+					<dd><p>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
+					{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</p></dd>
 					
 				{% elif related_newer %}
 					<dt>See Instead:</dt>
 					<dd>
 					{% for rb in related_newer %}
-						<p style="margin-bottom: .25em">
+						<p>
 							<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill.display_number_no_congress_number}}</a>
 							(same title)
 							<br/>{{rb.related_bill.get_current_status_display}} &mdash; {{rb.related_bill.current_status_date|date}}
@@ -535,13 +550,13 @@ p#yourreps {
 				{% if bill.source == "statutesatlarge" %}
 				<dt>Source:</dt>
 				<dd>
-					<a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a>
+					<p><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
 				</dd>
 				{% elif bill.source == "americanmemory" %}
 				<dt>Source:</dt>
 				<dd>
-					<a href="{{bill.source_link}}">American Memory Century of Lawmaking</a>
-					<br/>(Click for scanned images of the {{bill.noun}}&rsquo;s text.)
+					<p><a href="{{bill.source_link}}">American Memory Century of Lawmaking</a>
+					<br/>(Click for scanned images of the {{bill.noun}}&rsquo;s text.)</p>
 				</dd>
 				{% endif %}
 			</dl>
@@ -561,7 +576,7 @@ p#yourreps {
 	</div>
 	
 	{% if bill.is_alive %}
-	<div class="aside col-sm-4" style="margin-top: -5px">
+	<div class="aside col-md-4" style="margin-top: -5px">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		<div id="event_subscribe_inline_container"> </div>
@@ -647,15 +662,6 @@ p#yourreps {
 	</div><!-- /actions -->
 	{% endif %}
 
-	{% if bill.explanatory_text or bill.congress < 93 %}
-	<p class="helptext" style="clear: both; line-height: 110%; margin: 0 0 0 10px;"><small>
-		{% if bill.explanatory_text %}{{bill.explanatory_text}}{% endif %}
-		{% if bill.congress < 93 %}
-			Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
-		{% endif %}
-	</small></p>
-	{% endif %}
-	
 	<div id="admin_panel"> </div>
 	<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
 </div>
@@ -663,26 +669,106 @@ p#yourreps {
 
 {% block body %}
 
-<ul class="tabs four-up">
-	<li><a href="#overview">Overview</a></li>
-	
-	{% if bill.source != "americanmemory" %}
-	<li id="summary_tab" style="display: none"><a href="#summary">Summaries</a></li>
-	<li><a href="#related">Explore</a></li>
-	<li id="comments_tab" style="display: none"><a href="#comments">Comments</a></li>
-	{% endif %}
-</ul>
 
-<div class="panes">
-	<div id="overview"> <!-- overview pane -->
-		{% if bill.source == "thomas-congproj" %}
-			<h2><span>Status</span></h2>
+		<h2><span>About the {{bill.noun}}</span></h2>
 
-			<div class="row">
-				<div class="col-xs-12">
-					<p style="margin-top: 1em">{{bill.current_status_description}}</p>
-				</div>
+		<div class="row">
+
+		  	{% if subtitle or bill.source == "thomas-congproj" %}
+			<div class="col-sm-6 col-md-7">
+			<dl>
+					{% if subtitle %}
+						<dt>Full Title</dt>
+						<dd><p>{{subtitle}}</p></dd>
+					{% endif %}
+
+					{% with bill.oursummary as summary1 %}
+					{% with bill.get_formatted_summary as summary2 %}
+					{% if summary1 %}
+						<dt>Summary</dt>
+						<dd>
+							{{summary1.as_html|truncatewords_html:30|safe}}
+							<p><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
+						</dd>
+					{% elif summary2 and subtitle %}
+						<p><a href="{{bill.get_absolute_url}}/summary">Read CRS Summary &gt;</a></p>
+					{% elif summary2 %}
+						<dt>Summary (CRS)</dt>
+						<dd>
+							{{summary2|striptags|truncatewords:30|safe}}
+							<p><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
+						</dd>
+					{% endif %}
+					{% endwith %}
+					{% endwith %}
+			</dl>
 			</div>
+		  	{% endif %}
+
+				{% if related|length > 0 %}
+				<div class="col-sm-6 col-md-5" style="line-height: 125%">
+					<dt style="margin-bottom: .5em">Related Bills</dt>
+
+					{% if bill.noun == 'bill' %}
+					<p>Legislative action may be ocurring on one of these bills in lieu of or in parallel to action on this {{bill.noun}}.</p>
+					{% endif %}
+
+					{% for rb in related %}
+						{% if forloop.counter == 3 %}
+						<div style="text-align: center; font-size: 90%;">
+							<a id="related_bills_additional_more" href="#">show {{forloop.revcounter}} more</a>
+						</div>
+						<div id="related_bills_additional" style="display: none">
+						{% endif %}
+
+						<div>
+							<div style="position: absolute; padding-top: 2px;">
+								<a href="{{rb.bill.get_absolute_url}}">
+									<img src="{{rb.bill.get_absolute_url}}/thumbnail?width=75" class="img-responsive" title="{{rb.bill}}" style="border: 1px solid #999;" width="75"/>
+								</a>
+							</div>
+							<div style="padding-left: 90px; min-height: 90px;">
+								{% if rb.prenote %}{{rb.prenote}}{% endif %}
+								<a href="{{rb.bill.get_absolute_url}}">
+									{% if rb.bill.congress == bill.congress %}
+										{{rb.bill.display_number_no_congress_number}}{% else %}
+										{{rb.bill.display_number_with_congress_number}}{% endif %}</a>
+								{% if rb.note %}{{rb.note}}{% endif %}
+								{% if rb.show_title %}<div style="font-size: 85%;">{{rb.bill.title_no_number|truncatewords:14}}</div>{% endif %}
+								<p style="font-size: 85%; margin: .5em 0 .75em 0;">
+									{{rb.bill.get_current_status_display}}<br/>
+									{% if not rb.bill.is_final_status %}Last Action: {% endif %}{{rb.bill.current_status_date|date}}
+								</p>
+							</div>
+							<div style="clear: both"></div>
+						</div>
+
+						{% if forloop.last and forloop.counter >= 3 %}
+							<div style="text-align: center; font-size: 90%;">
+								<a id="related_bills_additional_less" href="#">show less</a>
+							</div>
+						</div> <!-- /hidden box -->
+						{% endif %}
+					{% endfor %}
+				</div>
+				<script>$('#related_bills_additional').moreLess()</script>
+				{% endif %}
+
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<dl>
+					<dt>What is a {{bill.noun}}?</dt>
+					<dd>
+						<p>The &ldquo;{{bill.get_bill_type_display}}&rdquo; in &ldquo;{{bill.display_number_no_congress_number}}&rdquo; means this is a {{bill.bill_type_name}} in the United States Congress. {{bill.how_a_bill_text}}</p>
+						{% if not bill.is_success %}<p>The {{bill.noun}}&rsquo;s title was written by its sponsor.</p>{% endif %}
+					</dd>
+				</dl>
+			</div>
+		</div> <!-- /row -->
+
+		{% if bill.source == "thomas-congproj" %}
+			<h2><span>History</span></h2>
 
 			{% if current or bill.get_major_events|length > 0 %}
 				<div id="status-row-grid" class="row">
@@ -720,198 +806,6 @@ p#yourreps {
 				</script>
 			{% endif %}
 		{% endif %}
-
-		<h2><span>About the {{bill.noun}}</span></h2>
-
-		<div id="media-row" class="row">
-			{% if bill.sponsor %}
-			<div class="col-sm-4">
-				<div>
-					{% if bill.sponsor.has_photo %}
-						<div style="float: left; margin-right: 17px; max-width: 50%; margin-bottom: 2em">
-							<a href="{{bill.sponsor.get_absolute_url}}">
-								<img src="/data/photos/{{bill.sponsor.id}}-200px.jpeg" title="{{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 3px solid #DDD"/>
-							</a>
-						</div>
-					{% endif %}
-
-					<dl>
-							<dt>Sponsor</dt>
-							<dd><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
-								<div style="line-height: 130%; font-size: 13px; margin-top: 3px;">{{bill.sponsor_role.get_description}}</div>
-							</dd>
-							<dt>Party</dt>
-							<dd>{{bill.sponsor_role.party}}</dd>
-					</dl>
-
-					<div style="clear: both"></div>
-				</div>
-			</div>
-			{% endif %}
-
-			{% if text_info %}
-			<div class="col-sm-4">
-				<div>
-					{% if text_info.has_displayable_text %}
-						{% if text_info.has_thumbnail %}
-						<div style="float: left; margin-right: 17px; max-width: 50%; margin-bottom: 2em">
-							<a href="{{bill.get_absolute_url}}/text" style="display: block; max-width: 200px">
-								<img src="{{bill.get_absolute_url}}/_text_image" class="img-responsive" title="Bill Text" style="border: 1px solid #999;"/>
-							</a>
-						</div>
-						{% endif %}
-						<dl>
-							<dt>Text</dt>
-							<dd><a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a></dd>
-							<dt>Last Updated</dt>
-							<dd>{{text_info.docdate}}</dd>
-
-							{% if text_info.numpages %}
-							<dt>Length<dt>
-							<dd>{{text_info.numpages}}</dd>
-							{% endif %}
-						</dl>
-					{% else %}
-						<a href="{{text_info.gpo_pdf_url}}">PDF</a> ({{text_info.docdate}})
-					{% endif %}
-				</div>
-				<div style="clear: both"></div>
-			</div>
-			{% endif %}
-
-			{% if related|length > 0 %}
-			<div class="col-sm-4" style="line-height: 125%">
-				<dt style="margin-bottom: .5em">Related Bills</dt>
-
-				{% for rb in related %}
-					{% if forloop.counter == 3 %}
-					<div style="text-align: center; font-size: 90%;">
-						<a id="related_bills_additional_more" href="#">show {{forloop.revcounter}} more</a>
-					</div>
-					<div id="related_bills_additional" style="display: none">
-					{% endif %}
-
-					<div>
-						<div style="position: absolute; padding-top: 2px;">
-							<a href="{{rb.bill.get_absolute_url}}">
-								<img src="{{rb.bill.get_absolute_url}}/thumbnail?width=75" class="img-responsive" title="{{rb.bill}}" style="border: 1px solid #999;" width="75"/>
-							</a>
-						</div>
-						<div style="padding-left: 90px; min-height: 90px;">
-							{% if rb.prenote %}{{rb.prenote}}{% endif %}
-							<a href="{{rb.bill.get_absolute_url}}">
-								{% if rb.bill.congress == bill.congress %}
-									{{rb.bill.display_number_no_congress_number}}{% else %}
-									{{rb.bill.display_number_with_congress_number}}{% endif %}</a>
-							{% if rb.note %}{{rb.note}}{% endif %}
-							{% if rb.show_title %}<div style="font-size: 85%;">{{rb.bill.title_no_number|truncatewords:14}}</div>{% endif %}
-							<p style="font-size: 85%; margin: .5em 0 .75em 0;">
-								{{rb.bill.get_current_status_display}}<br/>
-								{% if not rb.bill.is_final_status %}Last Action: {% endif %}{{rb.bill.current_status_date|date}}
-							</p>
-						</div>
-						<div style="clear: both"></div>
-					</div>
-
-					{% if forloop.last and forloop.counter >= 3 %}
-						<div style="text-align: center; font-size: 90%;">
-							<a id="related_bills_additional_less" href="#">show less</a>
-						</div>
-					</div> <!-- /hidden box -->
-					{% endif %}
-				{% endfor %}
-			</div>
-			<script>$('#related_bills_additional').moreLess()</script>
-			{% endif %}
-
-		</div>
-
-		<div class="sep">&nbsp;</div>
-
-		<div class="row">
-
-		  	{% if subtitle or bill.source == "thomas-congproj" %}
-			<div class="col-sm-6 col-md-7">
-			<dl>
-					{% if subtitle %}
-						<dt>Full Title</dt>
-						<dd><p>{{subtitle}}</p></dd>
-					{% endif %}
-
-					{% if bill.source == "thomas-congproj" %}
-						<dt>Summary</dt>
-						<dd id="summaries">
-							<p>No summaries available.</p>
-						</dd>
-					{% endif %}
-			</dl>
-			</div>
-		  	{% endif %}
-
-			{% with bill.get_prognosis as p %}
-			{% if p %}
-			<div class="col-sm-6 col-md-5">
-					<dl>
-						<dt>Prognosis</dt>
-						<dd>
-							{% if p.is_introduced %}
-								<p><b>
-								{{p.prediction_1|floatformat:0}}%</b> chance of getting past committee.<br/>
-								<b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-								<p class="small">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{p.bill_type_descr}} made it past committee
-								and {% if 40 > p.success_rate %}only {% endif %} about {{p.success_rate|floatformat:0}}% were {{p.success_name_2}}
-								in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}}.
-							{% else %}
-								<p><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-								<p class="small">{% if 40 > p.success_rate_2 %}Only about {% endif %}{{p.success_rate_2|floatformat:0}}% of {{p.bill_type_descr}} that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
-							{% endif %}
-
-							[{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}<a href="#" onclick="$('#prognosis_factors').slideToggle(); return false;">show factors</a> | {% endif %}<a href="/about/analysis#prognosis">methodology</a>]
-							</small></p>
-							
-							<div id="prognosis_factors" style="display: none; margin-top: 1em;">
-							<p style="margin-bottom: .5em">The following factors determined this {{bill.noun}}&rsquo;s prognosis:</p>
-
-							{% if p.factors_help_help %}
-							{% for factor in p.factors_help_help %}
-								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▲</span></p>
-							{% endfor %}
-							{% endif %}
-							
-							{% if p.factors_hurt_hurt %}
-							{% for factor in p.factors_hurt_hurt %}
-								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▼</span></p>
-							{% endfor %}
-							{% endif %}
-							
-							{% if p.factors_help_hurt %}
-							{% for factor in p.factors_help_hurt %}
-								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▲▼</span></p>
-							{% endfor %}
-							{% endif %}
-							
-							{% if p.factors_hurt_help %}
-							{% for factor in p.factors_hurt_help %}
-								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▼▲</span></p>
-							{% endfor %}
-							{% endif %}
-
-							<p class="small key">Key:
-								{% if p.factors_help_help %}▲ Correlated with successful bills.{% endif %}
-								{% if p.factors_hurt_hurt %}▼ Correlated with unsuccessful bills.{% endif %}
-								{% if p.factors_help_hurt %}▲▼ Correlated with {{bill.noun}}s that get past committee but are not enacted.{% endif %}
-								{% if p.factors_hurt_help %}▲▼ Correlated with {{bill.noun}}s that don&rsquo;t get past committee and with bills that are enacted.{% endif %}
-								Correlation may not indicate causation.
-							</p>
-
-							</div>
-						</dd>
-					</dl>
-			</div>
-			{% endif %}
-			{% endwith %}
-
-		</div> <!-- /row -->
 
 		<h2><span>Details</span></h2>
 
@@ -951,13 +845,13 @@ p#yourreps {
 						<dd>
 							{% for c in bill.committees.all %}
 								{% if not c.committee %}
-									<p><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on the "|cut:"Committee on "}}</a></p>
+									<div><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on the "|cut:"Committee on "}}</a></div>
 									{% for s in bill.committees.all %}
 										{% if s.committee == c %}
-											<p style="margin-left: 1em">
+											<div style="margin-left: 1em">
 												<span style="color: #666">↪</span>
 												<a href="{{s.get_absolute_url}}">{{s.name_no_article}}</a>
-											</p>
+											</div>
 										{% endif %}
 									{% endfor %}
 								{% endif %}
@@ -1025,20 +919,114 @@ p#yourreps {
 			</div>
 		</div> <!-- row -->
 
-		<h2><span>Notes, links &amp; tools</span></h2>
 
+		{% if bill.source != "americanmemory" %}
 		<div class="row">
 			<div class="col-sm-6 col-md-4">
 				<dl>
-					<dt>Notes</dt>
-					<dd id="notes">
-						<p>The &ldquo;{{bill.get_bill_type_display}}&rdquo; in {{bill.display_number_no_congress_number}} means this is a {{bill.bill_type_name}}.</p>
-						<p>{{bill.how_a_bill_text}}</p>
-						{% if not bill.is_success %}<p>The {{bill.noun}}&rsquo;s title was written by its sponsor.</p>{% endif %}
+						<dt>Subject Areas</dt>
+						<dd>
+							{% if bill.get_terms_sorted|length = 0 %}
+								<p>None known at this time.</p>
+							{% else %}
+							<div>
+							{% for term in bill.get_terms_sorted %}
+								{% if forloop.counter == 5 %}
+									<div><a id="subjects_additional_more" href="#" style="font-style: italic">show {{forloop.revcounter}} more</a></div>
+									<div id="subjects_additional" style="display: none">
+								{% endif %}
+
+								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
+
+								{% if forloop.last and forloop.counter >= 5 %}
+									<div><a id="subjects_additional_less" href="#" style="font-style: italic">show less</a></div>
+									</div> <!-- /hidden box -->
+								{% endif %}
+							{% endfor %}
+							</div>
+							<script>$('#subjects_additional').moreLess()</script>
+							{% endif %}
+						</dd>
+					</dl>
+			</div>
+
+			<div class="col-sm-6 col-md-4">
+				<dl>
+					<dt>Find Similar Bills</dt>
+					<dd>
+						<p>Search for <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
 					</dd>
 				</dl>
 			</div>
 
+			{% with bill.get_prognosis as p %}
+			{% if p %}
+			<div class="col-sm-6 col-md-4">
+					<dl>
+						<dt>Prognosis</dt>
+						<dd>
+							{% if p.is_introduced %}
+								<p><b>
+								{{p.prediction_1|floatformat:0}}%</b> chance of getting past committee.<br/>
+								<b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
+								<p class="small">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{p.bill_type_descr}} made it past committee
+								and {% if 40 > p.success_rate %}only {% endif %} about {{p.success_rate|floatformat:0}}% were {{p.success_name_2}}
+								in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}}.
+							{% else %}
+								<p><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
+								<p class="small">{% if 40 > p.success_rate_2 %}Only about {% endif %}{{p.success_rate_2|floatformat:0}}% of {{p.bill_type_descr}} that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
+							{% endif %}
+
+							[{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}<a href="#" onclick="$('#prognosis_factors').slideToggle(); return false;">show factors</a> | {% endif %}<a href="/about/analysis#prognosis">methodology</a>]
+							</small></p>
+							
+							<div id="prognosis_factors" style="display: none; margin-top: 1em;">
+							<p style="margin-bottom: .5em">The following factors determined this {{bill.noun}}&rsquo;s prognosis:</p>
+
+							{% if p.factors_help_help %}
+							{% for factor in p.factors_help_help %}
+								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▲</span></p>
+							{% endfor %}
+							{% endif %}
+							
+							{% if p.factors_hurt_hurt %}
+							{% for factor in p.factors_hurt_hurt %}
+								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▼</span></p>
+							{% endfor %}
+							{% endif %}
+							
+							{% if p.factors_help_hurt %}
+							{% for factor in p.factors_help_hurt %}
+								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▲▼</span></p>
+							{% endfor %}
+							{% endif %}
+							
+							{% if p.factors_hurt_help %}
+							{% for factor in p.factors_hurt_help %}
+								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▼▲</span></p>
+							{% endfor %}
+							{% endif %}
+
+							<p class="small key">Key:
+								{% if p.factors_help_help %}▲ Correlated with successful bills.{% endif %}
+								{% if p.factors_hurt_hurt %}▼ Correlated with unsuccessful bills.{% endif %}
+								{% if p.factors_help_hurt %}▲▼ Correlated with {{bill.noun}}s that get past committee but are not enacted.{% endif %}
+								{% if p.factors_hurt_help %}▲▼ Correlated with {{bill.noun}}s that don&rsquo;t get past committee and with bills that are enacted.{% endif %}
+								Correlation may not indicate causation.
+							</p>
+
+							</div>
+						</dd>
+					</dl>
+			</div>
+			{% endif %}
+			{% endwith %}
+		{% endif %}
+		</div>
+
+		<h2><span>Links &amp; tools</span></h2>
+
+		<div class="row">
 				<div class="col-sm-6 col-md-4">
 					<dl>
 						<dt>Primary Source</dt>
@@ -1068,7 +1056,10 @@ p#yourreps {
 						<dd>
 							<p><a href="{{bill.get_absolute_url}}/widget">Get a bill status widget for your website &raquo;</a></p>
 						</dd>
+				</dl>
+			</div>
 
+			<div class="col-sm-6 col-md-4">
 						<dt>Citation</dt>
 						<dd>
 							<script>function show_cite(fmt) {
@@ -1105,199 +1096,8 @@ p#yourreps {
 		</div> <!-- /row -->
 
 	</div>  <!-- /overview pane -->
-	
-	{% if bill.source != "americanmemory" %}
-	<div id="summary" style="margin-left: 15px"> <!-- summary pane -->
-		<div class="row">
-		<div class="col-sm-3">
-			<ul id="summary_tabs" class="left-tabs">
-			</ul>
-		</div>
-	
-		<div class="col-sm-9">
-			<script>
-			var first_summary = true;
-			function add_summary(name, href, html) {
-				// add a sub-tab
-				$('#summary_tabs').append($('<li><a/></li>').find('a')
-					.text(name ? name : "Our Summary").attr('href', '#summary/' + href));
 
-				// add a link on the overview, and show the tab
-				var n = $('#summaries');
-				if (first_summary) {
-					n.text('');
-					first_summary = false;
-					$('#summary_tab').show();
-				}
-				
-				var p1 = $('<p style="margin: 0;"><span/><a/></p>');
-				p1.find('a').attr('href', '#summary/' + href);
-				n.append(p1)
-				if (!name) {
-					p1.find('a').text("more »");
-					p1.find('span').html(html);
-					p1.attr('style', 'margin-bottom: 1em;');
-				} else {
-					p1.find('a').text(name + " »");
-					var p2 = $('<p class="small" style="margin-bottom: .5em"/>');
-					p2.html(html);
-					n.append(p2)
-				}
-			}
-			</script>
-
-			<div id="oursummary" class="postcontent">
-				<h3 style="margin-bottom: 1em">GovTrack&rsquo;s Bill Summary</h3>
-				{% with bill.oursummary as summary %}
-				{% if not summary %}
-					<p>We don&rsquo;t have a summary available yet.</p>
-				{% else %}
-					{{summary.as_html|safe}}
-					<div class="small" style="margin-top: 1em; border-top: 1px solid #666; padding-top: 1em">
-						Last updated {{summary.modified|date}}.
-						View <a href="/events/bill-summaries">all GovTrack summaries</a>.
-					</div>
-					<script>add_summary(null, "oursummary", "{{summary.as_html|truncatewords_html:30|escapejs}}");</script>
-				{% endif %}
-				{% endwith %}
-			</div>
-			
-			<div id="libraryofcongress" class="postcontent">
-				<h3 style="margin-bottom: 1em">Library of Congress Summary</h3>
-				<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress.</p>
-				<hr/>
-				{% with bill.get_formatted_summary as summary %}
-				{% if not summary %}
-					<p>No summary available.</p>
-				{% else %}
-					{{summary|safe}}
-					<script>add_summary("Library of Congress", "libraryofcongress", "{{summary|striptags|truncatewords:30|escapejs}}");</script>
-				{% endif %}
-				{% endwith %}
-			</div>
-			
-			{% comment %}
-			<div id="houserepublicans" class="postcontent">
-				<h3 style="margin-bottom: 1em">House Republican Conference Summary</h3>
-				<p>The summary below was written by the <a href="http://www.gop.gov">House Republican Conference</a>, which is the caucus of Republicans in the House of Representatives.</p>
-				<hr/>
-				{% with bill.get_gop_summary as gopsummary %}
-					{% if not gopsummary %}
-						<p>No summary available.</p>
-					{% else %}
-						<p>This summary can be found at <a href="{{gopsummary.link}}">{{gopsummary.link}}</a>.</p>
-					
-						{% if gopsummary.background %}
-						<h4>Background</h4>
-						{{gopsummary.background}}
-						{% endif %}
-						
-						{% if gopsummary.summary %}
-						<h4>Summary</h4>
-						{{gopsummary.summary}}
-						{% endif %}
-						
-						{% if gopsummary.cost %}
-						<h4>Cost</h4>
-						{{gopsummary.cost}}
-						{% endif %}
-						
-						<script>add_summary("House Republicans", "houserepublicans", "{{gopsummary.text|truncatewords:30|escapejs}}");</script>
-						<script>add_summary("House Democrats", "housedemocrats", "No summary available.");</script>
-					{% endif %}
-				{% endwith %}
-			</div>
-			{% endcomment %}
-			
-			<div id="housedemocrats" class="postcontent">
-				<h3 style="margin-bottom: 1em">House Democratic Caucus Summary</h3>
-				<p>The <a href="http://www.dems.gov/">House Democratic Caucus</a> does not provide summaries of bills.</p>
-				<p>So, yes, we display the House Republican Conference&rsquo;s summaries when available even if we do not have a Democratic summary available. That&rsquo;s because we feel it is better to give you as much information as possible, even if we cannot provide every viewpoint.</p>
-				<p>We&rsquo;ll be looking for a source of summaries from the other side in the meanwhile.</p>
-			</div>
-		</div>
-		</div>
-	</div> <!-- /summary pane -->
-	
-	<div id="related"> <!-- related pane -->
-		<div class="row">
-			<div class="col-sm-6 col-lg-4">
-				<dl>
-						<dt>Find Similar Bills</dt>
-						<dd>
-							<p>Search for more <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
-						</dd>
-
-						<dt>Subject Areas:</dt>
-						<dd>
-							{% if bill.get_terms_sorted|length = 0 %}
-								<p>None known at this time.</p>
-							{% else %}
-							<p>Use these subject areas to explore related legislation:</p>
-							<div>
-							{% for term in bill.get_terms_sorted %}
-								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
-							{% endfor %}
-							</div>
-							{% endif %}
-						</dd>
-					</dl>
-			</div>
-
-		{% if text_info.citations.count %}
-		<div class="col-sm-6 col-lg-8">
-		{% if text_info.citations.slip_laws %}
-			<dt>Slip Law Citations</dt>
-			<p>Slip laws refer to enacted bills and joint resolutions in their original form as enacted by Congress. Slip laws are cited as &ldquo;Public Law ___-___&rdquo; using the number of the Congress in which the bill or resolution was introduced and a number assigned to each successive law enacted in that congress.</p>
-			<ul class="bullets">
-			{% for cite in text_info.citations.slip_laws %}
-				<li>{{cite.text}}{% if cite.bill %}:<br/><a href="{{cite.bill.get_absolute_url}}">{{cite.bill}}</a>{% endif %}</li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-		
-		{% if text_info.citations.usc %}
-			<dt>United States Code Citations</dt>
-
-			<p>The United States Code is the compilation of general and permanent laws enacted by Congress.</p>
-
-			<p>Use the links below to read the parts of the United States Code cited by this bill.</p>
-			
-			<ul class="bullets">
-			{% for cite in text_info.citations.usc %}
-				<li style="margin-left: {{cite.indent}}em;">
-					{% if cite.link %}<a href="{{cite.link}}">{{cite.text}}</a>{% else %}{{cite.text}}{% endif %}
-					{% if cite.range_to_section %} (through {{cite.range_to_section}}){% endif %}
-					</li>
-			{% endfor %}
-			</ul>
-
-			<p>Laws that are not permanent in nature, law that affect a single individual, family, or small group, regulations, case law, state law, and local law do not appear in the United States Code.</p>
-		{% endif %}
-		
-		{% if text_info.citations.statutes %}
-			<dt>Statutes at Large Citations</dt>
-			<p>The United States Statutes at Large is the compilation of all laws enacted by Congress, in their original form as originally enacted.</p>
-			<ul class="bullets">
-			{% for cite in text_info.citations.statutes %}
-				<li>{{cite.text}}</li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-		
-		{% if text_info.citations.other %}
-			<dt>Other Citations</dt>
-			<ul class="bullets">
-			{% for cite in text_info.citations.other %}
-				<li>{{cite.text}}</li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-		</div> <!-- /col -->
-		{% endif %}
-		</div> <!-- /row -->
-	</div> <!-- /related -->
-
+	{% if 0 %}
 	<div id="comments">
 		<p style="text-align: center; font-style: italic; margin-bottom: 1em;">
 			Use the comment space below for discussion of the merits of {{bill.display_number}} with other GovTrack users.<br/>
@@ -1325,19 +1125,10 @@ p#yourreps {
 	</div>
 	{% endif %}
 	
-</div> <!--panes -->
 
 {% include "ad_footer_leaderboard.html" %}
-				
-<script>
-$("ul.tabs a").tabs("div.panes > div", null, function(tabname) {
-	if (tabname == "comments") {
-		initialize_disqus();
-	};
-});
-if (!first_summary) $("#summary_tabs a").tabs("#summary .col-sm-9 > div", "summary");</script>
-
-{% if bill.congress >= 113 %}
+		
+{% if bill.congress >= 113 and 0 %}
 <!-- disqus comment count, hacked from their count.js code -->
 <script>
 var DISQUSWIDGETS = {
