@@ -163,12 +163,15 @@ def main(options):
         File.objects.save_file(MEMBERS_FILE)
         
     log.info('Processing committee schedule')
+    loaded_meetings = set()
+    processed_all_meetings = True
     for chamber in ("house", "senate"):
 		meetings_file = 'data/congress/committee_meetings_%s.json' % chamber
 		file_changed = File.objects.is_changed(meetings_file)
 	
 		if not file_changed and not options.force:
 			log.info('File %s was not changed' % meetings_file)
+			processed_all_meetings = False
 		else:
 			meetings = json.load(open(meetings_file))
 			
@@ -191,6 +194,7 @@ def main(options):
 						mobj.committee = Committee.objects.get(code=mobj.committee.code + mobj.subcommittee)
 					
 					mobj.save()
+					loaded_meetings.add(mobj.id)
 					
 					mobj.bills.clear()
 					for bill in meeting["bill_ids"]:
@@ -207,12 +211,21 @@ def main(options):
 				except Committee.DoesNotExist:
 					log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
 	
-			for committee in Committee.objects.all():
-				if not options.disable_events:
-					committee.create_events()
-				
 			File.objects.save_file(meetings_file)
 		
+    if processed_all_meetings:
+        # Drop any future meetings that are no longer in the source data.
+        obsolete_mtgs = CommitteeMeeting.objects.exclude(id__in=loaded_meetings).filter(when__gt=datetime.now())
+        if obsolete_mtgs.count() > 0:
+           log.error("Deleting %d obsolete meetings." % obsolete_mtgs.count())
+           obsolete_mtgs.delete()
+
+    if not options.disable_events:
+        for committee in Committee.objects.filter(obsolete=False):
+            log.info('Generating events for %s.' % committee)
+            committee.create_events()
+				
+
 
 if __name__ == '__main__':
     main()
