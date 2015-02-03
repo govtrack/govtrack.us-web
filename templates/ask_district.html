@@ -250,13 +250,15 @@ $(function() {
 		var flags = $.cookie("flags");
 		flags = !flags ? {} : parse_qs(flags);
 
-		if (the_segment == "Other" && cong_dist == null)
+    if (the_segment == "Other" && !flags.itf)
+      show_if_then_fund(flags);
+		else if (the_segment == "Other" && cong_dist == null)
 			show_askcd();
 		else if (Math.random() < .3)
 			show_followus(flags);
 
 		$.cookie("flags", form_qs(flags), { expires: 21, path: '/' });
-	}, 1000)
+	}, 500)
 });
 
 function show_followus(flags) {
@@ -265,6 +267,11 @@ function show_followus(flags) {
 
 	$('#followus_modal').modal();
 	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
+}
+
+function show_if_then_fund(flags) {
+  flags.itf = true;
+  $('#itfpromo_modal').modal();
 }
 </script>
 
@@ -285,6 +292,49 @@ function show_followus(flags) {
       <!--<div class="modal-footer">
       	<button type="button" class="btn btn-default" data-dismiss="modal">Not Now</button>
       </div>-->
+    </div>
+  </div>
+</div>
+
+<style>
+.itf-brand {
+display: inline-block;
+background: url("https://if.then.fund/static/branding/content-title.9f202d38df28.png") no-repeat;
+width: 72px;
+height: 15px;
+text-indent: -99999em;
+overflow: hidden;
+padding-left: 2px;
+}
+</style>
+<div id="itfpromo_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="itfpromoModalTitle" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="itfpromoModalTitle">Announcing a new way to take action</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-xs-3">
+            <a href="https://if.then.fund/a/2/repealing-affordable-care-act-house">
+              <img src="https://if.then.fund/static/branding/logo.png" class="img-responsive" style="margin-bottom: 1em">
+            </a>
+          </div>
+          <div class="col-xs-9">
+            <p>The House is expected to vote on repealing the Affordable Care Act &mdash; a.k.a. Obamacare.</p>
+            <p>Want the vote to pass? Or to fail? Use <a href="https://if.then.fund/a/2/repealing-affordable-care-act-house"><span class="itf-brand">if.then.fund</span></a> to make a campaign contribution to representatives that vote the way you want them to.</p>
+            <div style="text-align: center;">
+              <a href="https://if.then.fund/a/2/repealing-affordable-care-act-house" class="btn btn-success">Take Action &raquo;</a>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <p><a href="https://if.then.fund/a/2/repealing-affordable-care-act-house"><span class="itf-brand">if.then.fund</span></a> is a new website that can help you shape the future of Congress from the creators of GovTrack and Democracy Engine.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
     </div>
   </div>
 </div>
