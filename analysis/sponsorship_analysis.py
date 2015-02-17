@@ -14,7 +14,7 @@
 # Finally, plot these two dimensions.
 #
 # To update historical data:
-# for c in {93..112}; do echo $c; analysis/sponsorship_analysis.py $c; done
+# for c in {93..113}; do echo $c; analysis/sponsorship_analysis.py $c; done
 
 import sys
 import os
