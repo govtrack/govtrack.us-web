@@ -5,8 +5,11 @@ if "runserver" in sys.argv:
 	# Always do this in debug mode.
 	os.environ["DEBUG"] = "1"
 else:
-	import prctl
-	prctl.set_name("django-govtrack")
+	try:
+		import prctl
+		prctl.set_name("django-govtrack")
+	except:
+		pass
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
