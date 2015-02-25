@@ -27,8 +27,8 @@
 	</form>            
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="return askcd_submit(true);">Not Now</button>
-      	<button type="button" class="btn btn-primary" onclick="return askcd_submit();">OK</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">No Thanks</button>
+      	<button type="button" class="btn btn-primary" onclick="return askcd_submit();">Next &gt;</button>
       </div>
     </div>
   </div>
@@ -69,6 +69,10 @@ function show_askcd() {
 	$('#askcdDistrictGroup').hide();
 	$('#askcd_modal .btn-primary').attr('disabled', 'disabled');
 	$('#askcd_modal').modal();
+	$('#askcd_modal').on('hidden.bs.modal', function() {
+		if (!cong_dist) // if the user didn't make a selection, then perform a cancel so we don't ask again 
+			askcd_submit(true)
+	});
   return false;
 }
 
@@ -92,10 +96,12 @@ $('#askcdState').change(function() {
 
 // user says OK here's my state or state & address
 function askcd_submit(is_cancel) {
+  if (!is_cancel) {
   // record GA event
   try { 
   	ga('send', 'event', 'miscellaneous', 'set-district');
   } catch(err){}
+  }
 
   // get user's state
 	var val = $('#askcdState').val();
