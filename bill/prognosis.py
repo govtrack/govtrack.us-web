@@ -3,14 +3,6 @@
 # Compute the success rates of different types of bills with
 # different prognosis factors.
 
-if __name__ == "__main__":
-	import sys, os
-	sys.path.insert(0, "..")
-	sys.path.insert(0, ".")
-	sys.path.insert(0, "lib")
-	sys.path.insert(0, ".env/lib/python2.7/site-packages")
-	os.environ["DJANGO_SETTINGS_MODULE"] = 'settings'
-
 import lxml, scipy.stats, numpy, itertools, re, csv
 from logistic_regression import *
 
@@ -55,12 +47,10 @@ def load_majority_party(congress):
 	return majority_party
 
 def load_committee_membership(congress):
-	if congress == 114:
-		return { }
 	# load archival committee data
 	from parser.committee_parser import ROLE_MAPPING
 	committee_membership = { }
-	for cnode in lxml.etree.parse("data/us/%d/committees.xml" % congress).xpath("committee|committee/subcommittee"):
+	for cnode in lxml.etree.parse("data/historical-committee-membership/%d.xml" % congress).xpath("committee|committee/subcommittee"):
 		code = cnode.get("code")
 		if cnode.tag == "subcommittee": code = cnode.getparent().get("code") + code # not working?
 		for mnode in cnode.xpath("member"):
@@ -496,7 +486,7 @@ def build_model(congress):
 		pprint(MODEL, modelfile)
 
 def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_data, proscore=False):
-	import prognosis_model
+	from bill import prognosis_model
 	
 	# get a list of (factorkey, descr) tuples of the factors that are true for
 	# this bill. use the model to convert these tuples into %'s and descr's.
@@ -575,7 +565,7 @@ def test_prognosis(congress):
 	from math import exp
 	from numpy import mean, median, std, digitize, percentile, average
 	
-	import prognosis_model
+	from bill import prognosis_model
 	
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
@@ -676,12 +666,14 @@ def top_prognosis(congress, bill_type):
 	print max_p, max_b
 
 def get_bill_paragraphs(bill):
+	import lxml.html
 	from bill.billtext import load_bill_text
 	from hashlib import md5
 		
 	try:
-		dom = lxml.etree.fromstring(load_bill_text(bill, None)["text_html"])
+		dom = lxml.html.fromstring(load_bill_text(bill, None)["text_html"])
 	except IOError:
+		print("no bill text", bill.id, bill)
 		return None
 	except Exception as e:
 		print("error in bill text", bill.id, bill, e)
@@ -742,13 +734,13 @@ def load_indexed_success_text():
 if __name__ == "__main__":
 	import sys
 	if sys.argv[-1] == "train":
-		index_successful_paragraphs(112)
-		build_model(112)
+		index_successful_paragraphs(113)
+		build_model(113)
 	elif sys.argv[-1] == "test":
-		index_successful_paragraphs(111)
-		build_model(111) # delete the model after if this is for a past Congress!
-		index_successful_paragraphs(112)
-		test_prognosis(112)
+		#index_successful_paragraphs(112)
+		#build_model(112) # delete the model after if this is for a past Congress!
+		index_successful_paragraphs(113)
+		test_prognosis(113)
 	elif sys.argv[-1] == "index-text":
-		index_successful_paragraphs(112)
+		index_successful_paragraphs(114)
 		

@@ -106,6 +106,10 @@ if "committees" in sys.argv:
 	# Load into db.
 	os.system("./parse.py -l ERROR committee")
 
+	# Generate historical XML, used by prognosis.
+	os.system("cd ../scripts/legacy-conversion; . %s/congress-legislators/scripts/.env/bin/activate; python convert_committees.py %s/congress-legislators/ ../data/historical-committee-membership/%s.xml"
+		% (SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
+
 do_bill_parse = False
 
 if "text" in sys.argv:
