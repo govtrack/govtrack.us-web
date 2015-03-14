@@ -215,7 +215,7 @@ def get_bill_text_metadata(bill, version):
     basename += "/" + dat["version_code"]
 
     bt2 = BillType.by_value(bill.bill_type).xml_code
-    html_fn = "data/us/bills.text/%s/%s/%s%d%s.html" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
+    html_fn = "data/congress-bill-text-legacy/%s/%s/%s%d%s.html" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
 
     if os.path.exists(basename + "/mods.xml"):
         dat["mods_file"] = basename + "/mods.xml"
@@ -235,7 +235,7 @@ def get_bill_text_metadata(bill, version):
         dat["has_displayable_text"] = True
 
     # get a PDF file if one exists
-    pdf_fn = "data/us/bills.text/%s/%s/%s%d%s.pdf" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
+    pdf_fn = "data/congress-bill-text-legacy/%s/%s/%s%d%s.pdf" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
     if os.path.exists(pdf_fn):
         dat["pdf_file"] = pdf_fn
         dat["has_thumbnail"] = True

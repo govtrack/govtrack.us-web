@@ -113,6 +113,9 @@ if "committees" in sys.argv:
 do_bill_parse = False
 
 if "text" in sys.argv:
+	# Do this before bills because the process of loading into the db checks for new
+	# bill text and generates feed events for text availability.
+
 	# Update the mirror of GPO FDSys.
 	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --store=mods,text,xml --log=%s" % (SCRAPER_PATH, log_level))
 
@@ -122,43 +125,8 @@ if "text" in sys.argv:
 	# Glob all of the bill text files. Create hard links in the data directory to
 	# their locations in the congress project data directoy.
 	
-	# We should start at 103 in case GPO has made changes to past files,
-	# or 82 if we want to start with the statute-extracted text, but it
-	# takes so long to go through it all!
-	starting_congress = CONGRESS
-	for congress in xrange(starting_congress, CONGRESS+1):
-		mkdir("data/us/bills.text/%d" % congress)
-		for bt in bill_type_map.values():
-			mkdir("data/us/bills.text/%d/%s" % (congress, bt))
-		
-		for bill in sorted(glob.iglob("%s/data/%d/bills/*/*" % (SCRAPER_PATH, congress))):
-			bill_type, bill_number = re.match(r"([a-z]+)(\d+)$", os.path.basename(bill)).groups()
-			bill_type = bill_type_map[bill_type]
-			for ver in sorted(glob.iglob(bill + "/text-versions/*")):
-				basename = "../data/us/bills.text/%d/%s/%s%s%s." % (congress, bill_type, bill_type, bill_number, os.path.basename(ver))
-				if congress >= 103:
-					# Starting with GPO FDSys bill text, we'll pull MODS files
-					# into our legacy location.
-					make_link(ver + "/mods.xml", basename + "mods.xml")
-				else:
-					# For older bill text that we got from GPO FDSys Statutes
-					# at Large, we don't have MODS but we do have text-only
-					# bill text. Statutes only, of course. We have only 'enr'
-					# versions, so immediately create the symlink from the
-					# unversioned file name (representing most recent status)
-					# to the enr version.
-					basename2 = "../data/us/bills.text/%d/%s/%s%s." % (congress, bill_type, bill_type, bill_number)
-					make_link(ver + "/document.txt", basename + "txt")
-					if os.path.exists(basename2 + "txt"): os.unlink(basename2 + "txt")
-					os.symlink(os.path.basename(basename + "txt"), basename2 + "txt")
-	
-	# Now do the old-style scraper (except mods files) because it handles
-	# making symlinks to the latest version of each bill. And other data
-	# types, like XML.
-
-	# Scrape with legacy scraper.
-	# Do this before bills because the process of loading into the db checks for new
-	# bill text and generates feed events for text availability.
+	# Scrape with legacy scraper to get PDFs (only a local cache for creating thumbnails),
+	# HTML (only used in bill text comparisons).
 	os.system("cd ../scripts/gather; perl fetchbilltext.pl FULLTEXT %d" % CONGRESS)
 	do_bill_parse = True # don't know if we got any new files
 	
