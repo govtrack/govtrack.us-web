@@ -376,6 +376,17 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     </div>
     {% endif %}
 
+	{% if vote.source == 3 %}
+	<a href="#" onclick="return show_notes(this)" data-id="historical">Accuracy of Historical Records</a>
+	<div id="notes_historical">
+	<p>Our database of roll call votes from 1789-1989 (1990 for House votes) comes from an academic data source, <a href="http://www.voteview.com">VoteView.com</a>,
+	that has digitized paper records going back more than 200 years. Because of the difficulty of this task, the accuracy of these vote records is reduced..</p>
+	<p>In particular, these records do not distinguish between Members of Congress not voting (abstaining) from Members of Congress who were not eligible to vote because
+	they had not yet taken office, or for other reasons. As a result, you may see Senate votes with more than 100 senators listed! But, typically, the extra senators
+	will be listed as not voting.</p>
+	</div>
+	{% endif %}
+
 	<a href="#" onclick="return show_notes(this);" data-id="aye_yea">&ldquo;Aye&rdquo; or &ldquo;Yea&rdquo;?</a>
 	<div id="notes_aye_yea">
 	<p>&ldquo;Aye&rdquo; and &ldquo;Yea&rdquo; mean the same thing, and so do &ldquo;No&rdquo; and &ldquo;Nay&rdquo;. Congress uses different words in different sorts of votes.</p>
