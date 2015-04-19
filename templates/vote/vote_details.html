@@ -193,9 +193,14 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     	{% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text}}{% endif %}
     </p>
 
+    {% elif vote.category == VoteCategory.amendment and not vote.related_amendment or not vote.related_bill %}
+    <p>
+        This was a vote to approve or reject an amendment{% if vote.related_bill %} to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% endif %}.</p>
+
     {% elif vote.category == VoteCategory.amendment %}
     <p>
-        This was a vote to approve or reject an amendment{% if vote.related_bill %} to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% endif %}{% if vote.related_amendment %}, {{vote.related_amendment.title}}{% endif %}.</p>
+        This was a vote to approve or reject amendment <a href="{{vote.related_amendment.congressdotgov_link}}">{{vote.related_amendment.display_number}}</a>
+        to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>. The title of the amendment is {{vote.related_amendment.title}}.</p>
 
     {% elif vote.category == VoteCategory.passage_suspension %}
     <p>This was a vote to {% if vote.related_bill.noun == "bill" %}pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% elif vote.related_bill.noun == "resolution" %}agree to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% else %}pass a bill or agree to a resolution{% endif %}. It was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>

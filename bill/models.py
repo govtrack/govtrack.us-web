@@ -1462,3 +1462,12 @@ class Amendment(models.Model):
     def __unicode__(self):
         return self.title
 
+    def display_number(self):
+        from django.contrib.humanize.templatetags.humanize import ordinal
+        ret = '%s %s' % (AmendmentType.by_value(self.amendment_type).label, self.number)
+        if self.congress != settings.CURRENT_CONGRESS:
+            ret += ' (%s)' % ordinal(self.congress)
+        return ret
+
+    def congressdotgov_link(self):
+        return "https://www.congress.gov/amendment/%d/%s/%s" % (self.congress, AmendmentType.by_value(self.amendment_type).full_name.lower().replace(" ", "-"), self.number)
