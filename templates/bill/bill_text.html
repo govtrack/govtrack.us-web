@@ -263,11 +263,11 @@ $(function() {
 		w.css({ left: me.offset().left + me.width(), top: me.offset().top })
 		w.fadeIn();
 
-		var fragment = "link=" + me.attr('data-citation-path');
+		var fragment = "link=" + encodeURIComponent(me.attr('data-citation-path'));
 		var node = me;
 		while (node.length > 0) {
 			if (node.attr('data-id')) {
-				fragment += "&nearest=" + node.attr('data-id');
+				fragment += "&nearest=" + encodeURIComponent(node.attr('data-id'));
 				break;
 			}
 			node = node.parent();
@@ -285,9 +285,11 @@ $(function() {
 	function show_permalink(fragment, with_scroll) {
 		var m = /^#link=([^&]+)(&nearest=([^&]+))?/.exec(fragment);
 		if (m) {
-			var p = $('*[data-citation-path="' + m[1] + '"]');
+			var path_id = decodeURIComponent(m[1]); // hopefully won't break existing URLs by adding decode, but encoding/decoding is safer for the future
+			path_id = path_id.replace(/\^/, "~"); // changed format; new character doesn't need escaping which is nice
+			var p = $('*[data-citation-path="' + path_id + '"]');
 			if (p.length == 0)
-				p = $('*[data-id="' + m[3] + '"]');
+				p = $('*[data-id="' + decodeURIComponent(m[3]) + '"]'); // hopefully won't break existing URLs by adding decode
 			if (p.length > 0) {
 				if (permalink_current) permalink_current.removeClass('permalink-target');
 
