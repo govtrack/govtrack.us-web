@@ -370,7 +370,7 @@
 		
 		<p style="text-align: center; margin-top: .5em; font-size: 90%;"><a href="#" onclick="$('#missedvotestable').slideDown(); $(this).hide(); return false;">Show the numbers...</a></p>
 		<table id="missedvotestable" style="display: none">
-			<tr> <th>Time Period</th> <th>Votes Elligible</th> <th>Missed Votes</th> <th>Percent</th> <th>Percentile</th> </tr>
+			<tr> <th>Time Period</th> <th>Votes Eligible</th> <th>Missed Votes</th> <th>Percent</th> <th>Percentile</th> </tr>
 			{% for rec in analysis_data.missedvotes.data %}
 				<tr><td>{{rec.time}}</td> <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinalhtml}}</td></tr>
 			{% endfor %}
