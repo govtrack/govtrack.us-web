@@ -8,6 +8,13 @@
 {% block head %}
 <style>
 #members h5 { margin: 6px 0 0 0; }
+#committee_bill_list {
+	padding: 0;
+}
+#committee_bill_list li {
+	list-style: none;
+	margin-bottom: .5em;
+}
 </style>
 {% endblock %}
 
@@ -144,7 +151,18 @@
 			<div class="col-sm-6">
 				<h2 style="margin: 1em 0 1em 0">Committee Bills</h3>
 				{% if committee.current_bills.count > 0 %}
-					<p>Browse <a href="/congress/bills/browse#committees={{committee.id}}">{{committee.current_bills.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>.</p>
+					<p>There are <a href="/congress/bills/browse#committees={{committee.id}}">{{committee.current_bills.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>{% if committee.current_bills.count > 100 %}. Below find the top 100{% endif %}:</p>
+
+					<ul id="committee_bill_list">
+					{% for bill in committee.current_bills_sorted %}
+						<li>
+							<a href="{{bill.get_absolute_url}}">{{bill|truncatewords:50}}</a>
+							<br>Sponsor: {{bill.sponsor}}
+							<br>Status: {{bill.get_current_status_display}}
+						</li>
+					{% endfor %}
+					</ul>
+
 				{% elif committee.bills.count > 0 %}
 					<p>Browse <a href="/congress/bills/browse#committees={{committee.id}}&congress=__ALL__">{{committee.bills.count|intcomma}} bills previously referred to this {% if parent %}sub{% endif %}committee</a>.</p>
 				{% else %}
