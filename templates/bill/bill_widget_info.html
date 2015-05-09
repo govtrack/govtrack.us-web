@@ -28,7 +28,6 @@
 {% endblock %}
 
 {% block body %}
-<div class="container">
 	<div class="col-md-6">
 		<p>Copy the HTML code below into your website.</p>
 		
@@ -42,5 +41,4 @@
 	<div class="col-md-6">
 		<script id="govtrack:widget:bill:{{bill.congress}}:{{bill.bill_type_slug}}{{bill.number}}:script" src="{{bill.get_absolute_url}}/widget.js" type="text/javascript"></script>
 	</div>
-</div>
 {% endblock %}
