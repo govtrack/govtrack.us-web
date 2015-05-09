@@ -308,37 +308,6 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     {% endif %}
 </div>
 
-{% comment %}
-<div id="vote-infographics" class="section">
-    <div class="heading">
-        <h2>Vote Visualizations</h2>
-        {% if vote.chamber == 1 %}
-        <em class="tips">Horizontal bars indicate the two senators from a state voted differently.</em>
-        {% endif %}
-    </div>
-    <div class="visualization">
-        <div class="container">
-            <div class="map-box">
-                <h3>Standard Projection</h3>
-                <img src="images/map.png" width="390" height="209" alt="image description">
-            </div>
-            <div class="map-box">
-                <h3>Cartogram</h3>
-                <img src="images/cartogram.png" width="378" height="207" alt="image description">
-                <div class="tooltip" style="display: none">
-                    <div class="holder">
-                        <div class="frame">
-                            <p>Cartograms give an equal area in an image to an equal number of votes by distorting the image. Senate vote cartograms are shown with each state stretched or shrunk so that the states each take up an equal area because each state has two votes. For House votes, it is each congressional district which is stretched or shrunk.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <script>$('.map-box').hover(function() { $(this).find('.tooltip').show(); }, function() { $(this).find('.tooltip').hide(); });</script>
-        </div>
-    </div>
-</div>
-{% endcomment %}
-
 <div class="clear"> </div>
 
 <div id="vote-details" class="section">
