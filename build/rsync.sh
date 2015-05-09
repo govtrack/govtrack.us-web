@@ -5,38 +5,35 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "us/crsnet.xml" \
 	--include "us/sessions.tsv" \
 	--include "us/committees.xml" \
-	--include "us/113" \
-	--include "us/113/committees.xml" \
-	--include "us/113/bills" \
-	--include "us/113/bills/*.xml" \
-	--include "us/113/bills.summary" \
-	--include "us/113/bills.summary/*.xml" \
-	--include "us/113/rolls" \
-	--include "us/113/rolls/*.xml" \
-	--include "us/113/stats/" \
-	--include "us/113/stats/*.json" \
-	--include "us/113/stats/*.txt" \
-	--include "us/bills.text" \
-	--include "us/bills.text/113" \
-	--include "us/bills.text/113/*" \
-	--include "us/bills.text/113/*/*.html" \
-	--include "us/bills.text/113/h/h2824*.pdf" \
+	--include "us/114" \
+	--include "us/114/committees.xml" \
+	--include "us/114/bills" \
+	--include "us/114/bills/*.xml" \
+	--include "us/114/bills.summary" \
+	--include "us/114/bills.summary/*.xml" \
+	--include "us/114/rolls" \
+	--include "us/114/rolls/*.xml" \
+	--include "us/114/stats/" \
+	--include "us/114/stats/*.json" \
+	--include "us/114/stats/*.txt" \
 	--include "photos" \
 	--include "photos/412460*" \
 	--include "congress" \
-	--include "congress/113" \
-	--include "congress/113/bills" \
-	--include "congress/113/bills/*" \
-	--include "congress/113/bills/*/*" \
-	--include "congress/113/bills/*/*/text-versions" \
-	--include "congress/113/bills/*/*/text-versions/*" \
-	--include "congress/113/bills/*/*/text-versions/*/data.json" \
-	--include "congress/113/bills/*/*/text-versions/*/mods.xml" \
-	--include "congress/113/bills/*/*/text-versions/*/document.txt" \
-	--include "congress/113/bills/*/*/text-versions/*/document.xml" \
-	--include "congress/113/bills/*/*/text-versions/*/catoxml.xml" \
+	--include "congress/114" \
+	--include "congress/114/bills" \
+	--include "congress/114/bills/*" \
+	--include "congress/114/bills/*/*1" \
+	--include "congress/114/bills/*/*1/text-versions" \
+	--include "congress/114/bills/*/*1/text-versions/*" \
+	--include "congress/114/bills/*/*1/text-versions/*/data.json" \
+	--include "congress/114/bills/*/*1/text-versions/*/mods.xml" \
+	--include "congress/114/bills/*/*1/text-versions/*/document.txt" \
+	--include "congress/114/bills/*/*1/text-versions/*/document.xml" \
+	--include "congress/114/bills/*/*1/text-versions/*/catoxml.xml" \
 	--include "congress/committee_meetings_house.json" \
 	--include "congress/committee_meetings_senate.json" \
+	--include "historical-committee-membership" \
+	--include "historical-committee-membership/*" \
 	--include "misc" \
 	--include "misc/cd-intersection-data.json" \
 	--exclude "**"
