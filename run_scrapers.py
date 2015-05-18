@@ -255,27 +255,29 @@ if "photos" in sys.argv:
 		# source JPEG & sanity check that it exists
 		fn1 = src + bioguide_id + ".jpg"
 		if not os.path.exists(fn1):
-			raise IOError(fn1)
+			print "Missing: " + fn1
+			continue
 
 		# destination file name
 		fn2 = dst + str(govtrack_id) + ".jpeg"
 
 		# need to review?
-		#if not (os.path.exists(fn2) and md5(fn1) == md5(fn2)):
-		#	p = person.models.Person.objects.get(id=govtrack_id)
-		#	r = p.roles.get(current=True)
-		#	print ("change" if os.path.exists(fn2) else "new"), p
-			#print "<hr>" \
-			#	"<p>%s</p>" % p.name, \
-			#	"<p>" + ("change" if os.path.exists(fn2) else "new") + "</p>", \
-			#	"<p><img src='https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/original/%s.jpg'></p>" % bioguide_id, \
-			#	"<iframe src='%s' width=100%% height=500> </iframe>" % ("https://twitter.com/"+p.twitterid if p.twitterid else r.website)
+		if not (os.path.exists(fn2) and md5(fn1) == md5(fn2)):
+			p = person.models.Person.objects.get(id=govtrack_id)
+			r = p.roles.get(current=True)
+			print ("change" if os.path.exists(fn2) else "new"), p
+			print "<hr><p>%s</p>" % p.name
+			if os.path.exists(fn2):
+				print "<img src='https://www.govtrack.us/data/photos/%d.jpeg'>" % p.id
+			else:
+				print "<iframe src='%s' width=100%% height=500> </iframe>" % ("https://twitter.com/"+p.twitterid if p.twitterid else r.website)
+			print "<p><img src='https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/original/%s.jpg'></p>" % bioguide_id
+			metadata = yaml.load(open(fn1.replace("/original/", "/metadata/").replace(".jpg", ".yaml")))
+			print "<p>%s</p><p>%s</p>" % (metadata['link'], metadata['name'])
+			continue
 
 		# check if the destination JPEG already exists and it has different content
 		if os.path.exists(fn2) and md5(fn1) != md5(fn2):
-			print "Not updating an existing different photo for %d/%s." % (govtrack_id, bioguide_id)
-			continue
-
 			# Back up the existing files first. If we already have a backed up
 			# image, don't overwrite the back up. Figure out what to do another
 			# time and just bail now. Check that we won't overwrite any files
@@ -292,7 +294,7 @@ if "photos" in sys.argv:
 				print fn, "=>", get_archive_fn(fn)
 				shutil.move(fn, get_archive_fn(fn))
 
-		# Copy in the file.
+		# Copy in the file if it's new.
 		if copy(fn1, fn2, None):
 			print fn1, "=>", fn2
 
