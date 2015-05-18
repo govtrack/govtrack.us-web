@@ -11,13 +11,8 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-		{% if not debug %}
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
-		{% else %}
-		<link rel="stylesheet" href="/static/lib/bootstrap.css">
-		<link rel="stylesheet" href="/static/lib/bootstrap-theme.css">
-		{% endif %}
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
 		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20150202" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
@@ -445,11 +440,7 @@
 	<noscript><p><img src="//www.govtrack.us/analytics/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
 	<!-- End Piwik Code -->
 
-	{% if not debug %}
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-	{% else %}
-	<script src="/static/lib/bootstrap.js"></script>
-	{% endif %}
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
