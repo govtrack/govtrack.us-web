@@ -383,118 +383,60 @@ header ul, footer ul {
 #masthead {
 	background: white url(../images/bg-header-bar.jpg) center bottom repeat-x;
 	padding: 18px 0 0;
+	margin-bottom: 0;
 }
 	@media only screen and (max-width: 583px) { /* Strip down the header bar styling on smaller screens */
 		#masthead {
 			background: #fff url(../images/bg-info-box-bottom.gif) repeat-x 0 100%;
 			}
-		#header #nav-block {
-			padding: 0 1em;
-			width: auto;
-		}
-		#header .row {
-			overflow: hidden;
-			background: none;
-			padding: 1em 0;
-			margin-bottom: 0;
-		}
 	}
-#header {
-	height: 100px;
-	}
-	#header .row {
-	padding: 0 0 17px;
-	background: url(../images/divider.gif) repeat-x 0 100%;
-	margin: 0 0 9px;
-	}
-	#header #nav-block {
-	float: right;
-	width: 445px;
-	padding: 0;
-	margin-bottom: 20px;
-	}
+
 
 #logo {
 	display: block;
-	float: left;
 	background: url(../images/logo.gif) 0 0 no-repeat;
 	height: 43px;
 	width: 140px;
+	margin: 7px 5px 10px 0;
 	text-indent: -9999px;
 	overflow: hidden;
-	margin-top: 40px;
 }
-	#logo:hover {
-		border-bottom: 0;
-	}
 	.homepage #logo {
 		display: none;
 	}
 
-.super-nav {
-	float: left;
-	font: normal 12px/15px PTSerifItalic, Georgia, 'Times New Roman', Times, serif;
-	padding: 5px 0 0;
-	}
-	.super-nav li {
-		float: left;
-		}
-	.super-nav li:first-child {
-		padding: 0 11px 0 0;
-		}
-	.super-nav li:last-child {
-		padding: 0 16px 0 10px;
-		border-left: solid #ccc8bb 1px;
-	}
-	/* Find the search form styles in the Form Styles section */
-	/* Base navigation styles */
-	#nav {
-		font-size: 14px;
-		line-height: 17px;
-		letter-spacing: 1px;
-		text-transform: uppercase;
-		position: relative;
-		z-index: 1;
-		font-family: 'OpenSansRegular';
-		height: 28px;
-	}
-	#nav:after {
-		content: '';
-		display: block;
-		clear: both;
-	}
-	#nav ul {
-		float: right;
-		margin: 0 -10px 0 0;
-		position: relative;
-	}
-	#nav > ul {
-	border-bottom: 0;
-	}
+.navbar-default .navbar-nav>li>a {
+	text-decoration: none;
+	color: #cb4b16;
+	font-size: 14px;
+	font-family: 'OpenSansRegular';
+}
+#nav {
+	font-size: 14px;
+	line-height: 17px;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	font-family: 'OpenSansRegular';
+}
 	#nav > ul ul {
-	margin-top: 0;
-	}
-	#nav ul li {
-	float: left;
-		border-top: 0;
-		padding: 0;
+		margin-top: 0;
 	}
 	#nav > ul ul li {
 		padding: 0;
 	}
 	#nav a {
-		padding: 6px 11px;
-		text-align: center;
-		display: block;
+		padding-right: 10px;
+		text-decoration: none;
+		color: #cb4b16;
 	}
 	#nav li a:hover {
-	color: #664030;
-	border-bottom: 0;
+		color: #664030;
+		border-bottom: 0;
 	}
 	#nav .dropnav:hover>a {
-		background: url(../images/bg-nav-btn.png) no-repeat;
+		background: url(../images/bg-nav-btn.png) 0 7px no-repeat;
 		color: #fff;
-		height: 38px;
+		height: 46px;
 		z-index: 3;
 		position: relative;
 		text-decoration: none;
@@ -504,7 +446,6 @@ header ul, footer ul {
 		z-index: 1;
 		height: auto;
 	}
-	#nav a:hover { color: #cb4b16 }
 	#nav ul li:hover ul a {
 		cursor: pointer;
 		color: #fff;
@@ -512,15 +453,14 @@ header ul, footer ul {
 		background: none;
 	}
 	#nav .dropnav a:hover {
-	color: #fff;
+		color: #fff;
 	}
-	#nav li:hover { position: relative }
-		#nav li:hover ul { display: block }
+	#nav li:hover ul { display: block }
 	#nav ul ul {
 		width: 220px;
 		position: absolute;
 		left: 3px;
-		top: 28px;
+		top: 34px;
 		z-index: 2;
 		background: #128dac;
 		border: 2px solid #4fadc4;
@@ -558,10 +498,10 @@ header ul, footer ul {
 		-webkit-border-radius: 4px;
 		border-radius: 4px;
 	}
-
-#mobile-nav { display: none; } /* Hide the mobile navigation */
-
-
+		.nav.navbar-right li>a {
+			padding-left: 0;
+			font-size: 13px;
+		}
 
 
 
@@ -792,18 +732,6 @@ header ul, footer ul {
 .tweets-block article { background: url(../images/ico-tweetter.png) no-repeat 0 3px }
 .tweets-block h3 { margin: 0 0 9px }
 
-
-/* Home Header break 3 ---------------------------- */
-@media only screen and (max-width: 655px) {
-	#header { height: auto; }
-	#logo {
-		margin: 10px 0;
-		float: none;
-		width: auto;
-	}
-	#nav { display: none; }
-	#mobile-nav { display: block; }
-}
 
 /* Remove BG on home when it interferes ----------- */
 @media only screen and (max-width: 865px) {
@@ -1793,19 +1721,18 @@ aside .download-links { padding: 31px 0 0 }
 /* Main Form styles =========================== */
 /* ============================================ */
 
-	/* Search form in header */
+/* Search form in header */
 .search-form {
-	float: left;
-	margin: 0 0 0 5px;
+	margin-top: 10px;
 	}
 	.search-form .text {
 		float: left;
-		width: 132px;
+		width: 150px;
 		height: 25px;
 		padding: 0 3px;
 		}
 		.search-form .text input {
-			width: 135px;
+			width: 145px;
 			height: 26px;
 			margin: 0;
 			float: left;

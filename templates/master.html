@@ -194,114 +194,92 @@
 		</div>
 	</div>
 	{% endif %}
-	
-		<div id="masthead">
-				<header id="header" class="container">
-					<a id="logo" href="/" class="{% block logo_class %}{% endblock %}">govtrack.us</a>
 
-					<div id="nav-block">
-						<div class="row">
-							<div class="block" style="float: right">
-								<ul class="super-nav">
-									{% comment %}<li><a href="#">Help</a></li>{% endcomment %}
-									{% block override_login %}
-									{% if not user.is_authenticated %}
-										<li id="nav_askcd" {% if request.anonymous %}style="display: none"{% endif %}><a href="#" onclick="return show_askcd();">Set District</a></li>
-										<li id="nav_login"><a href="/accounts/login?next={{request.path|urlencode}}">Log In</a></li>
-										{% if request.anonymous %}
-											<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
-										{% endif %}
-									{% else %}
-										<li><a href="/accounts/profile">{{user.email}}</a></li>
-										<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
-									{% endif %}
-									{% endblock %}
-								</ul>
-								{% if request.anonymous %}
-									<script>if (the_user) {
-										$('#nav_login').find('a').text(the_user.email).attr('href', '/accounts/profile');
-										$('#nav_logout').show();
-									} else {
-										$('#nav_askcd').show()
-									}</script>
-								{% endif %}
-								<form name="header_search" action="/search" method="GET" class="search-form">
-									<fieldset>
-										<div class="text"><input type="text" placeholder="Search" name="q"/></div>
-										<input class="btn-search" type="submit" value="Search" />
-									</fieldset>
-								</form>
-							</div>
-						</div>
-
-						<nav id="nav">
-							<ul>
-								<li><a href="/">Home</a></li>
-								<li class="dropnav">
-									<a href="/start">Browse</a>
-									<ul>
-										<li><a href="/congress/members">Members <em>of</em> Congress</a></li>
-										<li><a href="/congress/bills">Bills <em>&amp;</em> Resolutions</a></li>
-										<li><a href="/congress/votes">Voting Records</a></li>
-										<li><a href="/congress/committees">Committees</a></li>
-										<li><a href="/congress/live">Live Video (Beta)</a></li>
-										<li><a href="/start#states">State Legislation (Beta)</a></li>
-										<li><a href="/videos" style="line-height: 120%">GovTrack Videos (Original Reporting)</a></li>
-									</ul>
-								</li>
-								<li class="dropnav">
-									<a href="/start">Track</a>
-									<ul>
-										{% if request.anonymous %}
-											<li id="nav_track_start"><a href="/start">Start Tracking</a></li>
-											<li id="nav_track_lists" style="display: none"><a href="/accounts/lists">What I&rsquo;m Tracking</a></li>
-											<script>if (the_user) {
-												$('#nav_track_start').find('a').text("Add a Tracker");
-												$('#nav_track_lists').show();
-											}</script>
-										{% else %}
-											{% if user.is_authenticated %}
-											<li><a href="/start">Add a Tracker</a></li>
-											<li><a href="/accounts/lists">What I&rsquo;m Tracking</a></li>
-											{% else %}
-											<li><a href="/start">Start Tracking</a></li>
-											{% endif %}
-										{% endif %}
-										<li><a href="/accounts/docket">Your Docket</a></li>
-									</ul>
-								</li>
-								<li><a href="/about">About</a></li>
-								<li><a href="/developers">Use our data</a></li>
-							</ul>
-						</nav>
-
-						<nav id="mobile-nav">
-							<select onchange="window.location = $(this).val();">
-								<option value="">Go to...</option>
-								<option value="/">Home</option>
-								<optgroup label="Browse">
-									<option value="/congress/members">Members of Congress</option>
-									<option value="/congress/bills">Bills &amp; Resolutions</option>
-									<option value="/congress/votes">Voting Records</option>
-									<option value="/congress/committees">Committees</option>
-									<option value="/congress/live">Live Video (Beta)</option>
-									<option value="/start#states">State Legislation (Beta)</option>
-									<option value="/videos">GovTrack Videos</option>
-								</optgroup>
-								<optgroup label="Track">
-									{% if user.is_authenticated %}
-									<option value="/accounts/lists">What I&rsquo;m Tracking</option>
-									<option value="/accounts/docket">Your Docket</option>
-									{% endif %}
-								</optgroup>
-								<option value="/about">About</option>
-								<option value="/developers">Use our data</option>
-							</select>
-						</nav><!-- /mobile-nav -->
-
-					</div><!-- /nav-block -->
-				</header>
-		</div><!-- /masthead -->
+	<nav id="masthead" class="navbar navbar-default">
+	  <div class="container">
+	    <div class="navbar-header">
+	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#masthead-navbar-collapse">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+	      <a id="logo" href="/" class="navbar-brand {% block logo_class %}{% endblock %}">govtrack.us</a>
+	    </div>
+	    <div class="collapse navbar-collapse" id="masthead-navbar-collapse">
+	      <div id="nav">
+	      <ul class="nav navbar-nav">
+			<li><a href="/">Home</a></li>
+			<li class="dropnav">
+				<a href="/start">Browse</a>
+				<ul>
+					<li><a href="/congress/members">Members <em>of</em> Congress</a></li>
+					<li><a href="/congress/bills">Bills <em>&amp;</em> Resolutions</a></li>
+					<li><a href="/congress/votes">Voting Records</a></li>
+					<li><a href="/congress/committees">Committees</a></li>
+					<li><a href="/congress/live">Live Video (Beta)</a></li>
+					<li><a href="/start#states">State Legislation (Beta)</a></li>
+					<li><a href="/videos" style="line-height: 120%">GovTrack Videos (Original Reporting)</a></li>
+				</ul>
+			</li>
+			<li class="dropnav">
+				<a href="/start">Track</a>
+				<ul>
+					{% if request.anonymous %}
+						<li id="nav_track_start"><a href="/start">Start Tracking</a></li>
+						<li id="nav_track_lists" style="display: none"><a href="/accounts/lists">What I&rsquo;m Tracking</a></li>
+						<script>if (the_user) {
+							$('#nav_track_start').find('a').text("Add a Tracker");
+							$('#nav_track_lists').show();
+						}</script>
+					{% else %}
+						{% if user.is_authenticated %}
+						<li><a href="/start">Add a Tracker</a></li>
+						<li><a href="/accounts/lists">What I&rsquo;m Tracking</a></li>
+						{% else %}
+						<li><a href="/start">Start Tracking</a></li>
+						{% endif %}
+					{% endif %}
+					<li><a href="/accounts/docket">Your Docket</a></li>
+				</ul>
+			</li>
+			<li><a href="/about">About</a></li>
+			<li><a href="/developers">Open data</a></li>
+	      </ul>
+	      </div>
+	      <ul class="nav navbar-nav navbar-right">
+			{% block override_login %}
+			{% if not user.is_authenticated %}
+				<li id="nav_askcd" {% if request.anonymous %}style="display: none"{% endif %}><a href="#" onclick="return show_askcd();">Set District</a></li>
+				<li id="nav_login"><a href="/accounts/login?next={{request.path|urlencode}}">Log In</a></li>
+				{% if request.anonymous %}
+					<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
+				{% endif %}
+			{% else %}
+				<li><a href="/accounts/profile">{{user.email}}</a></li>
+				<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
+			{% endif %}
+			{% endblock %}
+			{% if request.anonymous %}
+				<script>if (the_user) {
+					$('#nav_login').find('a').text(the_user.email).attr('href', '/accounts/profile');
+					$('#nav_logout').show();
+				} else {
+					$('#nav_askcd').show()
+				}</script>
+			{% endif %}
+			<li>
+				<form name="header_search" action="/search" method="GET" class="search-form" role="search">
+					<fieldset>
+						<div class="text"><input type="text" placeholder="Search" name="q"/></div>
+						<input class="btn-search" type="submit" value="Search" />
+					</fieldset>
+				</form>
+	        </li>
+	      </ul>
+	    </div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>	
 
 			{% block override_breadcrumbs %}
 			<div id="breadcrumbs">
