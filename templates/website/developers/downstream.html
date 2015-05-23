@@ -1,22 +1,17 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Downstream Users{% endblock %}
 {% block crumbs %}
-<ul><li><a href="/developers">Developer Documentation</a></li><li>Data Users</li></ul>
+<ul><li><a href="/developers">Developer Documentation</a></li></ul>
 {% endblock %}
-{% block summary %}
+
+{% block body %}
 	<h1>Other Websites Reusing GovTrack Data</h1>
 	
 	<p>GovTrack isn&rsquo;t <i>just</i> a website. It&rsquo;s a reusable database
 	of congressional information put out there for anyone to build
 	new tools out of. We support open knowledge to the limit.</p>
-{% endblock %}
-{% block links %}
-{% include "website/developers/menu.html" %}
-{% endblock %}
 
-{% block body %}
-<section class="main twelve columns">
-	<h2>Who&rsquo;s using our data and API?</h2>
+	<h2><span>Who&rsquo;s using our data and API?</span></h2>
 		
 	<p>Here&rsquo;s a list of some of the websites and apps using our data or API:</p>
 		
@@ -59,7 +54,7 @@
 			<li><a href="http://www.polco.us/">Polco: The Political Compass</a> (2014)</li>
 		</ul>
 		
-	<h2>Previously Used Our Data</h2>
+	<h2><span>Previously Used Our Data</span></h2>
 	
 		<p>These apps began by using our data, and later transitioned to using the data developed in the <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a> community project.</p>
 	
@@ -70,7 +65,7 @@
 			<li><a href="http://calloncongress.sunlightfoundation.com/">Call on Congress</a> voice service app by the Sunlight Foundation</a> (2012)</li> 
 		</ul>
 		
-	<h2>Archived List</h2>
+	<h2><span>Archived List</span></h2>
 		
 	<p>Sites no longer operating:</p>
 		
@@ -87,7 +82,6 @@
 			<li><a href="http://www.citizenbinder.com">Citizen Binder</a> (2010)</li>
 		</ul>
 	
-</section>
 
 {% endblock %}
 

@@ -1,15 +1,13 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us Developer Documentation{% endblock %}
-{% block summary %}
-	<h1>Developer Documentation</h1>
-	<p style="margin-top: 1em">Want to build an app? Part of GovTrack&rsquo;s core mission is to make legislative data freely available so that others can build new tools to promote civic education and engagement.</p>
-	<p>GovTrack applies the principles of open data to legislative transparency. We screen scrape <a href="/about">a variety of official government websites</a> each day and make the resulting normalized database of legislative information available for free for reuse &mdash; in bulk (since 2005) and with an API (since 2012). Our database is the foundation for <a href="/developers/downstream">dozens of other open government websites</a>.</p>
-{% endblock %}
-{% block links %}
-{% include "website/developers/menu.html" %}
-{% endblock %}
 
 {% block body %}
+	<h1>Developer Documentation</h1>
+	<p>Want to build an app? Part of GovTrack&rsquo;s core mission is to make legislative data freely available so that others can build new tools to promote civic education and engagement.</p>
+	<p>GovTrack applies the principles of open data to legislative transparency. We screen scrape <a href="/about">a variety of official government websites</a> each day and make the resulting normalized database of legislative information available for free for reuse &mdash; in bulk (since 2005) and with an API (since 2012). Our database is the foundation for <a href="/developers/downstream">dozens of other open government websites</a>.</p>
+
+{% include "website/developers/menu.html" %}
+
 <div class="row">
 <div class="col-sm-6">
 	

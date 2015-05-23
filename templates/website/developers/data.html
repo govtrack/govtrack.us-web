@@ -2,21 +2,6 @@
 
 {% block title %}GovTrack.us - Bulk Raw Data{% endblock %}
 
-{% block crumbs %}
-<ul><li><a href="/developers">Developer Documentation</a></li> <li>Bulk Raw Data</li></ul>
-{% endblock %}
-
-{% block summary %}
-	<h1>Bulk Raw Data Documentation</h1>
-	<p>GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
-	<p>Our bulk data rsync server provides access to most of the information found on GovTrack. Data are from <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a> and <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>, community projects that we helped create and now help maintain.</p>
-	<p>Consider using our <a href="/developers/api">API</a> if you only need a small slice of the data.</p>
-{% endblock %}
-
-{% block links %}
-{% include "website/developers/menu.html" %}
-{% endblock %}
-
 {% block head %}
 <style>
 h3 { margin: 4px 0 4px 16px; }
@@ -25,13 +10,22 @@ li { margin-bottom: 1em; }
 </style>
 {% endblock %}
 
+{% block crumbs %}
+<ul><li><a href="/developers">Developer Documentation</a></li> </ul>
+{% endblock %}
+
 {% block body %}
+	<h1>Bulk Raw Data Documentation</h1>
+	<p>GovTrack&rsquo;s bulk raw data can be used to build other tools around Congressional information.</p>
+	<p>Our bulk data rsync server provides access to most of the information found on GovTrack. Data are from <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a> and <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>, community projects that we helped create and now help maintain.</p>
+	<p>Consider using our <a href="/developers/api">API</a> if you only need a small slice of the data.</p>
+
 <section class="main twelve columns">
 
 	
 	{% include "website/developers/gettingstarted.html" %}
 
-	<h2>Overview</h2>
+	<h2><span>Overview</span></h2>
 	
 	<p>You can familiarize yourself with the contents of our bulk data by browsing <a href="/data/congress-legislators/">http://www.govtrack.us/data/congress-legislators/</a> and <a href="/data/congress/">http://www.govtrack.us/data/congress/</a>. Get an idea for the directory structure and what the files look like.</p>
 
@@ -58,7 +52,7 @@ li { margin-bottom: 1em; }
 	<p>For more info about rsync, see <a href="/developers/rsync">our rsync notes</a> and the <a href="http://ss64.com/bash/rsync.html">rsync documentation</a>.</p>
 
 
-	<h2 style="margin-bottom: 1em">Terminology</h2>
+	<h2><span>Terminology</span></h2>
 
 	<h3>A &ldquo;Congress&rdquo;</h3>
 	
@@ -78,7 +72,7 @@ li { margin-bottom: 1em; }
 	they start, e.g. 2014 is the name for the second session (or legislative year) of the
 	113th Congress and while it began in 2014 it will end on Jan 3, 2015.</p>
 
-	<h2 style="margin-bottom: 1em">Bulk Data Files</h2>
+	<h2><span>Bulk Data Files</span></h2>
 
 	<h3>Members of Congress (and Presidents/Vice Presidents)</h3>
 

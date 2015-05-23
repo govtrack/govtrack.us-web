@@ -1,9 +1,9 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Rsync for Bulk Raw Data{% endblock %}
 {% block crumbs %}
-<ul><li><a href="/developers">Developer Documentation</a></li> <li><a href="/developers/data">Bulk Raw Data</a></li> <li>rsync</li></ul>
+<ul><li><a href="/developers">Developer Documentation</a></li> <li><a href="/developers/data">Bulk Raw Data</a></li></ul>
 {% endblock %}
-{% block summary %}
+{% block body %}
 	<h1>Getting Bulk Raw Data with Rsync</h1>
 
 	<p>To download GovTrack&rsquo;s raw data files in bulk, or if you plan to regularly update the files,
@@ -12,14 +12,7 @@
 	
 	<p>Using rsync is pretty easy on Linux and Mac if you are comfortable with the command line. It is harder on Windows. Windows users may prefer the <a href="/developers/api">GovTrack API</a>.</p>
 	
-{% endblock %}
-{% block links %}
-{% include "website/developers/menu.html" %}
-{% endblock %}
-
-{% block body %}
-<section class="main twelve columns">
-	<h2>Rsync On Linux and Mac</h2>
+	<h2><span>rsync on Linux and Mac</span></h2>
 	
 	<p>Once you install rsync, just type on a command-line:</p>
 	
@@ -27,7 +20,7 @@
 	
 	<p>That is all one line. Note the double colons and the period at the end.</p>
 	
-	<h2>Rsync on Windows</h2>
+	<h2><span>rsync on Windows</span></h2>
 	
 	<p>On Windows, install <a href="http://www.aboutmyip.com/AboutMyXApp/DeltaCopy.jsp">DeltaCopy</a>,
 	which contains rsync for Windows. Then on a command line type:</p>
@@ -43,7 +36,6 @@ rsync -avz --delete govtrack.us::govtrackdata/us/112/bills /GovTrackData</pre>
 	<p>This will put bill XML files in either C:\GovTrackData\bills or C:\cygwin\GovTrackData\bills.
 	cygwin is the name of a common Windows wrapper around Unix tools. That's something to do with
 	DeltaCopy, not GovTrack.</p>
-	
-</section>
+
 {% endblock %}
 

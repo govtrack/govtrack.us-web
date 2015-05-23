@@ -11,17 +11,15 @@
 {% endblock %}
 
 {% block crumbs %}
-<ul><li><a href="/developers">Developer Documentation</a></li> <li>API</li></ul>
-{% endblock %}
-{% block summary %}
-	<h1>GovTrack API Documentation</h1>
-	<p>GovTrack&rsquo;s API provides programmatic access to information about the U.S. Congress.</p>
-{% endblock %}
-{% block links %}
-{% include "website/developers/menu.html" %}
+<ul><li><a href="/developers">Developer Documentation</a></li></ul>
 {% endblock %}
 
 {% block body %}
+	<h1>GovTrack API Documentation</h1>
+	<p>GovTrack&rsquo;s API provides programmatic access to information about the U.S. Congress.</p>
+
+{% include "website/developers/menu.html" %}
+
 <section class="main twelve columns">
 
 	<p>Our API provides live access to most of the information found on GovTrack. Data for the 113th Congress are from <a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a> and <a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>, community projects that we helped create and now help maintain. Historical data is from our legacy scrapers.</p>
@@ -30,7 +28,7 @@
 	
 	{% include "website/developers/gettingstarted.html" %}
 
-	<h2>Examples</h2>
+	<h2><span>Examples</span></h2>
 	
 	<p>Here are some quick examples:</p>
 	
@@ -45,11 +43,11 @@
 		<li><a href="{{baseurl}}vote_voter/?person=400222&amp;limit=10000&amp;order_by=created&format=csv&fields=vote__id,created,option__value,vote__category,vote__chamber,vote__question,vote__number">{{baseurl}}vote_voter/?person=400222&amp;limit=10000&amp;order_by=created&amp;format=csv&amp;fields=vote__id,created,option__value,vote__category,vote__chamber,vote__question,vote__number</a><br/>Mark Kirk&rsquo;s voting record returned in CSV format. A high limit is set so all of the results make it into the file.</li>
 	</ul>
 	
-	<h2>Libraries/Wrappers</h2>
+	<h2><span>Libraries/Wrappers</span></h2>
 	
 	<p>You might find these useful: <a href="https://npmjs.org/package/govtrack-node">node.js wrapper</a>, <a href="https://www.temboo.com/library/Library/GovTrack/">GovTrack on Temboo</a>.</p>
 
-	<h2>General Options</h2>
+	<h2><span>General Options</span></h2>
 
 	{% include "simplegetapi/documentation_generalopts.html" %}
 	
@@ -74,7 +72,7 @@
 	<p>The in and range operators accept multiple values separated by pipe characters. To find bills whose status is/was either signed by the president or enacted by veto override use:<br/>
 	<a href="{{baseurl}}bill?current_status__in=enacted_signed|enacted_veto_override|enacted_tendayrule">{{baseurl}}bill?current_status__in=enacted_signed|enacted_veto_override|enacted_tendayrule</a></p>
 
-	<h2>The API Access Points and Schemas</h2>
+	<h2><span>Access Points and Schemas</span></h2>
 	
 	<p>The following resources are available in the API.</p>
 	
