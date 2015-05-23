@@ -8,7 +8,6 @@
 	<meta property="og:title" content="{{ vote.question|truncatewords:10 }} -- {{ vote.get_chamber_display }} Vote #{{ vote.number }} -- {{ vote.created|date:"DATE_FORMAT" }}" />
 	<style>
 	#vote_explainer p { margin: 0; }
-    .stats th { text-align: center; }
 
     p#yourreps {
         margin: 1em 0 0 0;
@@ -25,6 +24,10 @@
 		#vote_notes div {
 			display: none;
 		}
+
+    #vote-details td, #vote-details th {
+        font-size: 12px;
+    }
 	</style>
 {% endblock %}
 {% block og_image %}
@@ -42,7 +45,7 @@ function show_table() {
 	// We achieve a multi-column layout by cloning the table three
 	// times (or as many as will fit) and then removing the elements
 	// we don't want to include.
-    var table = $('#vote-list');
+    var table = $('#vote-list-template');
     
     // First, add in grouping rows based on the chosen sort order.
     table.find(".group").remove();
@@ -57,17 +60,22 @@ function show_table() {
 			last_seen_group = gr;
 		}
 	}
+
+    // To prevent scrolling issues when redoing the tables, set a height
+    // before clearing the old columns.
+    $('#vote-columns').height($('#vote-columns').outerHeight());
+    $("#vote-columns").text('');
     
 	// Clone and remove the unwanted rows.
-	var ncols = Math.floor($(window).width() / 320);
+	var ncols = Math.floor($('#vote-details').innerWidth() / 320);
 	if (ncols > 3) ncols = 3;
-    $("#vote-details .stats").remove();
     for (var i = 0; i < ncols; i++) {
         var group = table.clone(true);
         group.attr('style', '');
         group.attr('id', '');
         group.addClass('stats');
-        $(table[0].parentNode).append(group);
+        group.css({ width: $('#vote-details').innerWidth()/ncols - (21*(ncols-1))/ncols - 2 })
+        $('#vote-columns').append(group);
         
         var count = table.find('tr').length - 1;
         var rows = group.find("tr");
@@ -76,6 +84,9 @@ function show_table() {
                 $(rows[j]).remove();
         }
     }
+
+    $('#vote-columns').append($('<div class="clearfix"/>'))
+    $('#vote-columns').css({ height: 'auto' })
 }
 function get_sort_func(order_indexes) {
     function sort_key(n) {
@@ -97,7 +108,7 @@ function show_notes(elem) {
 }
 
 $(function() { 
-    var headers = $('#vote-list th');
+    var headers = $('#vote-list-template th');
     headers.click(function() {
         var index = $(this).index();
         headers.not(headers[index]).removeClass('headerSortDown').removeClass('headerSortUp');
@@ -114,15 +125,16 @@ $(function() {
             /* State */  case 3: sorting = [index, 2, 0]; break;
         }
 
-        $('#vote-list tbody tr').sortElements(get_sort_func(sorting));
+        $('#vote-list-template tbody tr').sortElements(get_sort_func(sorting));
         
         show_table();
     });
     
     // initial sort
     current_sort_column = 3;
-    $('#vote-list tbody  tr').sortElements(get_sort_func([3,2,0]));
+    $('#vote-list-template tbody  tr').sortElements(get_sort_func([3,2,0]));
     show_table();
+    $(window).resize(show_table)
 }); 
 </script>
 {% endblock %}
@@ -252,12 +264,12 @@ onUserDistrictChanged(function (cong_dist, mocs) {
         <tbody>
             {% for item in totals.options %}
             <tr>
-                <td>
+                <th scope="row">
                 	{% if item.option.key == "+" or item.option.key == "-" %}
                 		<span class="vote_{{ item.option.alpha_key }}" style="padding-left: 4px; border: 1px solid #AAA;">&nbsp;</span>
                 	{% endif %}
                 	{{ item.option }}
-                </td>
+                </th>
                 <td style="font-weight: bold; padding: 0 6px 0 6px;">{{ item.count }}</td>
                 <td>
                     <!--
@@ -280,7 +292,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
             </tr>
             {% endfor %}
             <tr>
-                <td>Required:</td>
+                <th scope="row">Required:</th>
                 <td colspan="2" style="text-align: left; padding-left: 12px;">
                 	{% if vote.required == "1/2" %}
                 		Simple Majority
@@ -370,8 +382,8 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 	</div>
 </div>
 
-        <table id="vote-list" style="display: none">
-            <thead>
+        <table id="vote-list-template" class="vote-list" style="display: none">
+            <thead class="sortable">
                 <tr>
                     <th>Vote</th>
                     <th>Party</th>
@@ -426,6 +438,9 @@ onUserDistrictChanged(function (cong_dist, mocs) {
         {% endfor %}
         </tbody>
         </table>
+
+        <div id="vote-columns">
+        </div>
 </div>
 </div>
 

@@ -1032,15 +1032,18 @@ header ul, footer ul {
 	float: left;
 	border-collapse: collapse;
 	text-align: center;
-	margin: 0 21px 0 0;
+	margin-left: 21px;
 	}
-	.stats tbody td {
+	.stats:first-child {
+		margin-left: 0;
+	}
+	.stats tbody td, .stats tbody th {
 		padding: 0;
 		border: 1px solid #d7ddd7;
 		height: 29px;
 		vertical-align: middle;
 		}
-	.stats tbody tr td:first-child {
+	.stats tbody th {
 		font: 10px/20px Georgia, 'Times New Roman', Times, serif;
 		font-weight: bold;
 		text-transform: uppercase;
@@ -1060,6 +1063,7 @@ header ul, footer ul {
 			height: 30px;
 			padding: 0;
 			vertical-align: middle;
+			text-align: center;
 			border: 1px solid #c4c1b5;
 			font-weight: normal;
 			}
@@ -1086,8 +1090,9 @@ aside .download-links { padding: 31px 0 0 }
 	}
 .section aside { overflow: hidden }
 
-.stats th { cursor: pointer; }
+.stats thead.sortable th { cursor: pointer; }
 .stats tbody tr.group td { font-size: 105%; font-weight: bold; text-transform: none; background-color: #FAFAFA; }
+
 .party_D, .party_I, .party_R {
 	cursor: default;
 	color: white;
