@@ -385,11 +385,11 @@ class PersonRole(models.Model):
             return 'Sen.' if short else 'Senator'
         if self.role_type == RoleType.representative:
             if not self.state in stateapportionment:
-                return 'Del.' if short else 'Delegate'
+                return 'Rep.' if short else 'Delegate'
             if self.state == 'PR':
                 return 'Commish.' if short else 'Resident Commissioner'
             if stateapportionment[self.state] == 'T':
-                return 'Del.' if short else 'Delegate'
+                return 'Rep.' if short else 'Delegate'
             return 'Rep.' if short else 'Representative'
             
     def state_name(self):

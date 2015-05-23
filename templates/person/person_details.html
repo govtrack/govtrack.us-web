@@ -1,9 +1,9 @@
 {% extends "master_a.html" %}
 {% load humanize persontags govtrack_utils %}
 
-{% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}U.S. {{ role.get_role_type_display }}{% if role.state %} for {{ role.get_state_display }}{% if role.district %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
+{% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}U.S. {{ role.get_title }}{% if role.state %} for {{ role.get_state_display }}{% if role.district %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
 
-{% block meta_description %}{% if cities %}Represents {{cities}}. {% endif %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
+{% block meta_description %}{% if cities %}Represents {{cities}}. {% endif %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_title }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
 {% block meta_keywords %}{{person.name_no_district}},legislation,bills,district,sponsor,cosponsor,votes,missed votes,absences,committees{% endblock %}
 
 {% block head %}
@@ -52,7 +52,7 @@
 	<p>
 		{% if not active_role %}Former {% endif %}
 		{{role.party}}
-		{{ role.get_role_type_display }}
+		{{ role.get_title }}
 		{% if role.state %}from
 			{{ role.get_state_display }}{% if role.district == 0 %}&rsquo;s At-Large District {% endif %}{% if role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District {% endif %}{% endif %}
 	</p>
@@ -72,7 +72,7 @@
 	        {% for role in person.roles_condensed %}
 	        <tr>
 	            <td><nobr>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</nobr></td>
-	            <td>{{ role.get_role_type_display }}</td>
+	            <td>{{ role.get_title }}</td>
 				<td>{{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District {% endif %}</td>
 	        </tr>
 	        {% endfor %}
