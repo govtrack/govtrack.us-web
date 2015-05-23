@@ -57,16 +57,12 @@
 {% block body_class %}issue{% endblock %}
 
 {% block summary %}
-<div class="row">
-	<h1>{{issue.title}}</h1>
-
-	{{issue.introtext|markdown}}
-</div>
+<h1>{{issue.title}}</h1>
+{{issue.introtext|markdown}}
 {% endblock %}
 
 {% block body %}
-
-<h2>{{issue.question}}</h2>
+<h3>{{issue.question}}</h3>
 <div id="you_choose">
 	<p>We&rsquo;ll walk you through how to call your representative about this issue.
 	{% if positions|length > 1 %}Which side of the issue are you on?{% endif %}</p>

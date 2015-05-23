@@ -96,14 +96,12 @@ function reset_form() {
 {% block body %}
 <div>
 	<h1>Call Congress About {{issue.title}}</h1>
-	<p style='margin-bottom: 0'>You Chose: <b>{{position.text}}</b>.</p>
+	<p>You Chose: <b>{{position.text}}</b>.</p>
 </div>
 
 <div class="row">
 	<div class="col-sm-6">
 		<div id="enter_addr">
-			<h2>Where do you live?</h2>
-
 			<p>Let&rsquo;s find your congressional district so we can route your call to the right Members of Congress. What is your home address?</p>
 
 			<div><input id="addr" type="text" placeholder="123 Main St, Wishaloo, California"/></div>
@@ -115,7 +113,7 @@ function reset_form() {
 		</div>
 
 		<div id="ok_go" style="display: none;">
-			<h2>Did we get that right?</h2>
+			<h3>Did we get that right?</h3>
 
 			<p>We understood that to be: <span id="formatted_address"> </span>.</p>
 
