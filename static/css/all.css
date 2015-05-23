@@ -103,9 +103,7 @@ body {
 	color: #444444;
 	font-family: OpenSansRegular, Arial, Helvetica, sans-serif;
 	font-size: 15px;
-	background: #2b393b; /* to extend beyond the footer */
 	}
-	#main_content { background-color: white; padding-bottom: 24px; }
 
 a:link, a:visited {
 	color: #cb4b16;
@@ -132,24 +130,70 @@ h1, h2, h3, h4, h5 {
 	font: normal normal normal 2.5em/1.5em PTSerifBold, 'Pallatino Linotype', Georgia, 'Times New Roman', serif;
 	line-height: 130%;
 	color: #666;
+	margin-top: 1.5em;
+	margin-bottom: 1em;
 	}
 h1 {
-	font-style: normal;
-	font-weight: 400;
-	line-height: 1.5em;
-	margin-bottom: 0.625em;
-	margin-top: 0px;
-	font-family: PTSerifRegular;
-	text-transform: none;
-}
+	margin-bottom: .85em;
+	margin-top: .25em;
+	font-size: 27px;
+	font-family: PTSerifBold;
+	line-height: 1.4em;
+	color: #565656;
+	padding-bottom: .25em;
+	border-bottom: 1px solid #CCA;
+	}
+	h1.long {
+		line-height: 1.3em;
+		font-family: PTSerif;
+	}
+	h1 sup {
+		font-size: 65%;
+	}
+	h1 small {
+		font-size: 15px;
+		font-style: italic;
+		color: #666;
+	}
+	.h1-multiline {
+		font-size: 27px;
+		font-family: PTSerif;
+		margin-bottom: .75em;
+		padding-bottom: .25em;
+		border-bottom: 1px solid #CCA;
+	}
+		.h1-multiline h1 {
+			margin-bottom: 0;
+			padding-bottom: 0;
+			border: none;
+		}
+		.h1-multiline p {
+			margin: 0;
+			font-size: 19px;
+			line-height: 130%;
+		}
+
 h2 {
-	font-size: 1.5em;
+	font-size: 1.4em;
 	line-height: 1.5em;
-	margin-bottom: 0.5em;
 }
+	#content h2 {
+		border-bottom: 2px solid #888;
+		font-size: 17px;
+		margin: 1.85em 0 1em -6px;
+	}
+		#content h2 span {
+			display: inline-block;
+			margin-left: 6px;
+			padding: 3px 6px 1px 6px;
+			background-color: #555;
+			color: white;
+			font-family: PTSerifBold;
+			font-weight: bold;
+		}
+
 h3 {
 	font-size: 1.15em;
-	margin-left: 0 !important;
 }
 h4 {
 	font-size: 1.05em;
@@ -743,17 +787,9 @@ header ul, footer ul {
 /* Sub Page styles
 	 =========================================== */
 #breadcrumbs {
-	background: #40a4bd url(../images/bg-breadcrumbs.jpg) no-repeat 50% 1px;
-	height: 95px;
-	color: #eee;
 	font: normal 14px/16px PTSerif, Georgia, 'Times New Roman', Times, serif;
 	padding: 18px 0 0;
-	text-transform: uppercase;
-	}
-	#breadcrumbs h1 {
-		font-size: 38px;
-		color: #fff;
-		text-shadow: 0 1px 1px #066982;
+	color: #777;
 	}
 	#breadcrumbs ul {
 		padding: 0;
@@ -761,81 +797,24 @@ header ul, footer ul {
 	#breadcrumbs li {
 		display: inline;
 		padding: 0 6px 0 11px;
-		background: url(../images/arrow.gif) no-repeat 0 75%;
+		background: url(../images/arrow.gif) no-repeat 0 60%;
 		}
 	#breadcrumbs li:first-child {
 		background: none;
 		padding: 0 6px 0 0;
 		}
-	#breadcrumbs, #breadcrumbs a {
-		color: #fff;
-		}
 	#breadcrumbs a {
+		color: #955;
 		font-size: 12px;
+		text-decoration: none;
 		}
 	#breadcrumbs a:hover {
-		text-shadow: 0 1px 2px #333;
+		color: #B22;
+		border-bottom: 1px solid #AA6;
 		}
-	#breadcrumbs li:nth-child(3), #breadcrumbs li:nth-child(3) a { text-shadow: 0 1px 1px #ccc; }
-	#breadcrumbs li:nth-child(4), #breadcrumbs li:nth-child(4) a { text-shadow: 0 1px 1px #aaa; }
-	@media only screen and (max-width: 767px) {
-		#breadcrumbs .row {
-			padding: 0 4px 0 4px;
-		}
-	}
 
 /* Summary box styles
 	 ================================================= */
-.summary-box-row {
-	margin-top: -40px;
-	margin-bottom: 30px;
-}
-.summary-box {
-	padding: 20px 20px 10px 20px;
-	background: #f3f1e9 url(../images/bg-paper.jpg);
-	border: solid #e7e4dc 1px;
-	-moz-box-shadow:
-		0 0 0 5px #f9f8f4,
-		0 1px 2px 5px rgba(106,106,106,.4);
-	-webkit-box-shadow:
-		0 0 0 5px #f9f8f4,
-		0 1px 2px 5px rgba(106,106,106,.4);
-	box-shadow:
-		0 0 0 5px #f9f8f4,
-		0 1px 2px 5px rgba(106,106,106,.4);
-	color: #545454;
-	}
-.lt-ie9 .summary-box {
-	box-shadow: none;
-	outline: solid #f9f8f4 5px;
-}
-	.summary-box .holder {
-		background: url(../images/bg-summary-box.png) no-repeat -636px 100%;
-		padding: 0 0 30px;
-		}
-	.summary-box .frame {
-		background: url(../images/bg-summary-box-c.png) repeat-y;
-		padding: 15px 32px;
-		overflow: hidden;
-		min-height: 274px;
-			}
-
-	.summary-box h1 {
-		font-size: 1.5em;
-		line-height:1.5em;
-		color: #565656;
-		background: url(../images/divider-4.gif) repeat-x 0 100%;
-		padding: 0 0 .5em;
-		margin: 0 0 .5em;
-		}
-		.summary-box h1 sup {
-			font-size: 65%;
-		}
-		.summary-box h1 small {
-			font-size: 15px;
-			font-style: italic;
-			color: #666;
-		}
 	.summary-box .info {
 		background: url(../images/divider-4.gif) repeat-x 0 100%;
 		padding: 0 0 12px;
@@ -933,7 +912,6 @@ header ul, footer ul {
 
 /* Page Heading category box ======================== */
 /* ================================================== */
-.heading-box,
 #search-again {
 	position: relative;
 	background: #f3f1e9 url(../images/bg-paper.jpg);
@@ -951,36 +929,16 @@ header ul, footer ul {
 	color: #545454;
 	}
 
-.lt-ie9 .heading-box,
 .lt-ie9 #search-members,
 .lt-ie9 #search-again {
 	box-shadow: none;
 	outline: solid #f9f8f4 5px;
 }
 
-	.heading-box.row,
 	#search-members.row { margin: -40px 0 40px; }
 	#search-members.section.row { margin-top: 0; padding: 0; }
 
 	#search-again { margin-top: -15px; }
-
-
-		.heading-box h1 {
-			font-size: 1.5em;
-			font-weight: bold;
-			line-height: 1.5em;
-			margin-bottom: 0.5em;
-			}
-
-		.heading-box .three {
-			font-size: 95%;
-			line-height: normal;
-			}
-
-			.heading-box li {
-				margin-bottom: .5em;
-				}
-
 
 /* Member details styles
 	 ================================================== */
@@ -1140,12 +1098,6 @@ aside .download-links { padding: 31px 0 0 }
 	display: block;
 	overflow: hidden;
 	padding: 7px 0 0;
-	}
-.details-box {
-	overflow: hidden;
-	border: 1px solid #ccd1d7;
-	border-width: 1px 0;
-	padding: 8px 0 17px;
 	}
 
 
@@ -1612,22 +1564,16 @@ aside .download-links { padding: 31px 0 0 }
 /*	Footer Styles
 	======================================================== */
 #footer {
-	clear: both;
-	background: #2b393b;
+	margin-top: 25px;
+	border-top: 1px solid #DDD;
+	background: #FAFAFA;
 	font-size: 14px;
-	color: #a9c2c4;
 	padding: 24px 0 0;
 	}
-	#footer a { color: #45a9bf }
+	#footer a { color: #3388bb }
 	#footer a:hover {
 		border-bottom: 0;
-		color: #fff;
 		}
-	/*#footer .holder {
-		width: 940px;
-		margin: 0 auto;
-		overflow: hidden;
-		}*/
 	#footer nav {
 		font-size: 12px;
 		line-height: 2em;
@@ -1648,11 +1594,8 @@ aside .download-links { padding: 31px 0 0 }
 	font-size: 12px;
 	}
 #footer h4 {
-	border-bottom: 1px solid #405255;
-	padding: 0 0 6px;
-	margin: 0 0 9px;
+	margin: 0 0 5px;
 	text-transform: uppercase;
-	color: #fff;
 	}
 	#footer h4 span {
 		text-transform: none;

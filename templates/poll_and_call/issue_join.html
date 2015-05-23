@@ -1,4 +1,4 @@
-{% extends "master_d.html" %}
+{% extends "master.html" %}
 
 {% load humanize %}
 {% load cache %}
@@ -93,14 +93,11 @@ function reset_form() {
 
 {% block body_class %}issue{% endblock %}
 
-{% block summary %}
+{% block body %}
 <div>
 	<h1>Call Congress About {{issue.title}}</h1>
 	<p style='margin-bottom: 0'>You Chose: <b>{{position.text}}</b>.</p>
 </div>
-{% endblock %}
-
-{% block body %}
 
 <div class="row">
 	<div class="col-sm-6">

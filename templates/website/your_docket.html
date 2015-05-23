@@ -1,17 +1,15 @@
 {% extends "master.html" %}
 {% block title %}GovTrack.us - Your Docket{% endblock %}
 
-{% block summary %}
+{% block body %}
 <h1>Your Docket</h1>
 
 <p>Use this page to get the latest information on the <a href="/accounts/lists">bills you are tracking</a>.</p>
-{% endblock %}
 
-{% block body %}
 	{% for list in lists %}
 		<section>
 	
-		<h2>List #{{forloop.counter}}: {{list.name}}</h2>
+		<h2><span>List #{{forloop.counter}}: {{list.name}}</span></h2>
 		
 		{% for bill in list.bills %}
 			<div class="tracked_event">

@@ -281,47 +281,28 @@
 	  </div><!-- /.container-fluid -->
 	</nav>	
 
-			{% block override_breadcrumbs %}
-			<div id="breadcrumbs">
-				<div class="container">
-					{% block crumbs %}{% endblock %}
-					{% comment %}
-					<ul class="twelve columns">
-						<li><a href="#">Congress</a></li>
-						<li>Bills & Resolutions</li>
-					</ul>
-					{% endcomment %}
-				</div>
-			</div>
-			{% endblock %}
-
-		{% block wide_content %}
-		<div id="main_content">
+	{% block override_breadcrumbs %}
+	<div id="breadcrumbs">
 		<div class="container">
-		{% block override_content %}
-		<div id="content">
-			{% block heading_box %}
-			<div class="heading-box row">
-				<div class="col-sm-8">
-					{% block summary %}
-					{% endblock %}
-				</div>
-				<div class="col-sm-4">
-					{% block links %}
-					{% endblock %}
-				</div>
-			</div>
-			{% endblock %}
+			{% block crumbs %}{% endblock %}
+			{% comment %}
+			<ul class="twelve columns">
+				<li><a href="#">Congress</a></li>
+				<li>Bills & Resolutions</li>
+			</ul>
+			{% endcomment %}
+		</div>
+	</div>
+	{% endblock %}
 
-			<div class="row">
-			{% block body %}
-			{% endblock %}
-			</div>
-		</div><!-- /content -->
-		{% endblock %}
-		</div>
-		</div>
-		{% endblock %}
+	{% block body_with_container %}
+		<div class="container">
+			<div id="content">
+				{% block body %}
+				{% endblock %}
+			</div><!-- /content -->
+		</div> <!-- /container -->
+	{% endblock %}
 
 		<footer id="footer">
 			<div class="container">

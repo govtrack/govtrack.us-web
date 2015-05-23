@@ -324,11 +324,10 @@ $(function() {
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/bills">Bills</a></li>
 	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
-	<li>Bill Text</li>
 </ul>
 {% endblock %}
 
-{% block summary %}
+{% block body %}
 	<a class="back-link-above-h1" href="{{bill.get_absolute_url}}">
 		<span>&lt; Back</span> to {{bill.display_number_no_congress_number}}
 		({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})
@@ -342,28 +341,24 @@ $(function() {
 		{% endwith %}
 	{% endif %}
 
-	<p style="margin-bottom: 0">{{bill.current_status_description}} The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
+	<div class="row">
+		<div class="col-sm-8">
+			<p>{{bill.current_status_description}} The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
 
-	{% if not is_latest %}
-	<p class="text-danger" style="margin: 1em 0 0 0;">This is not the latest text of this {{bill.noun}}.</p>
-	{% endif %}
-{% endblock %}
-
-{% block links %}
-	<div style="padding-left: 3em">
-		<div style="margin: 1.5em 0"><a href="{{textdata.gpo_pdf_url}}" class="push-btn grey-btn" style="text-transform: none">Download PDF</a></div>
+			{% if not is_latest %}
+			<p class="text-danger">This is not the latest text of this {{bill.noun}}.</p>
+			{% endif %}
+		</div>
+		<div class="col-sm-4">
+		<div><a href="{{textdata.gpo_pdf_url}}" class="push-btn grey-btn" style="text-transform: none">Download PDF</a></div>
 
 		<p>Source:
 			<a href="{{textdata.gpo_url}}">GPO</a>
 			{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
 			{% if textdata.source == "statutes" %}&mdash; <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">Statutes at Large</a>{% endif %}
 		</p>
+		</div>
 	</div>
-{% endblock %}
-
-{% block body %}
-
-<div class="col-xs-12">
 
 <div id="bill_comparison_content" style="display: none;">
 	<center style="padding: 1em">
@@ -469,7 +464,6 @@ $(function() {
 			<div style="font-size: 90%; text-align: center"><a href="/advertising">About Ads</a></div>
 		</div>
 	</div>
-</div>
 </div>
 </div>
 {% endblock %}

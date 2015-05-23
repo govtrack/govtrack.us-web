@@ -9,61 +9,44 @@
 </style>
 {% endblock %}
 
-{% block crumbs %}
+{% block body %}
 	<h1>Contact Us</h1>
-{% endblock %}
 
-{% block override_content %}
-<div class="panel panel-danger" style="margin: 2em 0">
-  <div class="panel-heading">
-    <h3 class="panel-title">This is not a government website.</h3>
-  </div>
-  <div class="panel-body">
-    <p>We can&rsquo;t help you with a problem you are having with an agency.</p>
-    <p>We can&rsquo;t forward messages to Members of Congress.</p>
-    <p>We can&rsquo;t help you book a White House tour.</p>
-    <p>Please don&rsquo;t email us your opinion about bills in Congress &mdash; we don&rsquo;t have a vote!</p>
-    <p>We suggest instead that you contact your representative. You can use our site to <a href="/congress/members">find your representative</a>. Then go to his or her website and look for their contact information there.</p>
-  </div>
-</div>
+  <p>Thank you for your interest in GovTrack.</p>
 
-<div class="panel panel-warning" style="margin: 2em 0">
-  <div class="panel-heading">
-    <h3 class="panel-title">Everything we know is already here.</h3>
-  </div>
-  <div class="panel-body">
-    <p>We do not have any additional information on the status of a bill that isn&rsquo;t already posted on the page for the bill on this website.</p>
-    <p>We can&rsquo;t explain bills &mdash; we don&rsquo;t have any special insight into what they mean.</p>
-  </div>
-</div>
+  <hr>
 
-<div class="panel panel-warning" style="margin: 2em 0">
-  <div class="panel-heading">
-    <h3 class="panel-title">Trying to unsubscribe?</h3>
-  </div>
-  <div class="panel-body">
-    <p>Please <a href="/accounts/profile">edit your account settings</a>. It&rsquo;ll be faster than emailing us. If you have any trouble, please do email.</p>
-  </div>
-</div>
+  <p>GovTrack is <b>not a government website</b>, therefore:</h3>
+  <ul>
+    <li>We can&rsquo;t help you with a problem you are having with an agency.</li>
+    <li>We can&rsquo;t forward messages to Members of Congress.</li>
+    <li>We can&rsquo;t help you book a White House tour.</li>
+  </ul>
 
-<div class="panel panel-default" style="margin: 2em 0">
-  <div class="panel-heading">
-    <h3 class="panel-title">Contact information</h3>
-  </div>
-  <div class="panel-body">
-    <p>Please review the text above about how this is <strong>not a government website</strong>.</p>
+  <p>Before you email us your opinion about a bill in Congress, please keep in mind that we don&rsquo;t have a vote!</p>
+  <p>To voice your opinion, contact your representative (not us!). You can use our site to <a href="/congress/members">find your representative</a>. Then go to his or her website and look for their contact information there.</p>
+
+  <hr>
+
+  <h3>Looking for more information?</h3>
+
+  <p>We do not have any additional information on the status of a bill that isn&rsquo;t already posted on the page for the bill on this website.</p>
+
+  <p>We can&rsquo;t explain bills &mdash; we don&rsquo;t have any special insight into what they mean.</p>
+
+  <h3>Trying to unsubscribe?</h3>
+
+  <p>Please <a href="/accounts/profile">edit your account settings</a>. It&rsquo;ll be faster than emailing us. If you have any trouble, please do email.</p>
+
+  <h3>Contact information</h3>
+
     <p>Email us at <script>
               var email_addr = "olleh".split("").reverse().join("")
                   + String.fromCharCode(2*0x20)
                   + "su.kcartvog".split("").reverse().join("");
               document.write("\x3ca href='mailto:" + email_addr + "'\x3e" + email_addr + "\x3c/a\x3e");
               </script><noscript>email address protected from spambots; use a JavaScript-enabled browser to see it</noscript> and we&rsquo;ll try to answer your question as best we can.</p>
-    <hr>
-    <p>If you are having trouble using the site or found an error, please include a link to the page on the site you want us to look at.</p>
     <p>If you are a journalist, please mention if you are on a deadline.</p>
-  </div>
-</div>
-
 
 {% endblock %}
 

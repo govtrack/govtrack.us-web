@@ -10,15 +10,14 @@
 	}
 </style>
 {% endblock %}
-{% block crumbs %}
-	<h1>Go Ad-Free!</h1>
-{% endblock %}
-{% block override_content %}
+
+{% block body %}
+<h1>Go Ad-Free!</h1>
 <div class="row">
 
-	<div class="col-sm-6" style="margin-top: 1em;">
+	<div class="col-sm-6">
 	
-		<p style="margin: 1.5em 0;">For a $35 subscription, we&rsquo;ll hide all of the advertisements on GovTrack.us for a year. Plus, you&rsquo;ll be supporting our work in government transparency and improving access to the law.</p>
+		<p>For a $35 subscription, we&rsquo;ll hide all of the advertisements on GovTrack.us for a year. Plus, you&rsquo;ll be supporting our work in government transparency and improving access to the law.</p>
 		
 		{% if not request.user.is_authenticated %}
 			<p><a class="push-btn green-btn" href="#" onclick="$(this).parent().hide(); $('#adfreelogin').slideDown(); return false;">Subscribe &nbsp; ▶</a></p>
@@ -50,19 +49,23 @@
 			
 			<p>
 			You&rsquo;ll be asked to log into PayPal and confirm the payment.
-			If you have any trouble please email us at <a href="mailto:&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;">&#111;&#112;&#101;&#114;&#097;&#116;&#105;&#111;&#110;&#115;&#064;&#103;&#111;&#118;&#116;&#114;&#097;&#099;&#107;&#046;&#117;&#115;</a>.
+			If you have any trouble please <a href="/contact">contact us</a>.
 			</p>
 		{% endif %}
 	</div>
 
-	<div class="col-sm-6" style="padding-top: 50px;">
-		<p>The details:</p>
+	<div class="col-sm-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">Details</div>
+			<div class="panel-body">
 		
 		<ul id="adfreedetails">
 			<li>You must be logged in for the ads to be hidden.</li>
 			<li>We&rsquo;re only accepting payment via PayPal right now. You can use a credit card, but you&rsquo;ll need to create a PayPal account first.</li>
 			<li>If you&rsquo;re not happy and want the ads back, we&rsquo;ll send you a refund no-questions-asked within 7 days of your payment.</li>
 		</ul>
+			</div>
+		</div>
 	</div>
 	
 </div>

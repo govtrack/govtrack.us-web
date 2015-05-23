@@ -1,21 +1,21 @@
-{% extends 'master_a.html' %}
+{% extends 'master_b.html' %}
 
 {% block title %}{{term.name}} Bills - GovTrack.us{% endblock %}
 {% block meta_description %}{{term.name}}-related bills in the U.S. Congress.{% endblock %}
+{% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
 
 {% block crumbs %}
 <ul>
 <li><a href="{% url "congress_home" %}">Congress</a></li>
 <li><a href="/congress/bills">Bills</a></li>
-<li>{{term.name}}</li>
 </ul>
 {% endblock %}
 
 {% block summary %}
+<h1>{{term.name}}</h1>
+		
 <div class="row">
 	<div id="track_panel_base" class="col-sm-8">
-		<h1>{{term.name}}</h1>
-		
 		<p>Use this page to browse bills in the U.S. Congress related to the subject {{term.name}}.</p>
 
 		<p><small>Classification into subject areas is retrieved from the Library of Congress.</small></p>

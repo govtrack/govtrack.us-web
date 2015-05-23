@@ -39,17 +39,11 @@
 </style>
 {% endblock %}
 
-{% block summary %}
-<div>
-	<h1>GovTrack Videos</h1>
-
-	<p style="margin-bottom: 0">We took a camera out of the office to figure out what&rsquo;s really going on.</p>
-</div>
-{% endblock %}
-{% block links %}
-{% endblock %}
-
 {% block body %}
+<h1>GovTrack Videos</h1>
+
+<p>We took a camera out of the office to figure out what&rsquo;s really going on.</p>
+
 <section class="row">
 	<div class="{% if not video_id %}col-md-7{% else %}col-md-8{% endif %}">
 		<iframe width="{% if not video_id %}500{% else %}610{% endif %}" height="{% if not video_id %}281{% else %}343{% endif %}" src="//www.youtube.com/embed/wKGY-Z5_mHc" frameborder="0" allowfullscreen></iframe>

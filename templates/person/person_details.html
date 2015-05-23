@@ -8,6 +8,7 @@
 
 {% block head %}
 <style>
+	.table th { font-weight: normal; }
 	#session_stats {
 		margin: 0 0 2em -10px;
 		border: 2px solid #EEE;
@@ -39,37 +40,35 @@
 <ul>
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/members">Members of Congress</a></li>
-	<li>{{person.name_no_details}}</li>
 </ul>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}
 
 {% block summary %}
+<div class="h1-multiline">
+	<h1>{{person.name_and_title}}</h1>
+	{% if role and active_role and role.leadership_title %}<p>{{role.leadership_title_full}}</p>{% endif %}
+	<p>
+		{% if not active_role %}Former {% endif %}
+		{{role.party}}
+		{{ role.get_role_type_display }}
+		{% if role.state %}from
+			{{ role.get_state_display }}{% if role.district == 0 %}&rsquo;s At-Large District {% endif %}{% if role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District {% endif %}{% endif %}
+	</p>
+</div>
+
 <div class="row group">
 	<div id="track_panel_base" class="col-sm-8">
-		<h1 style="line-height: 1.15em">
-			{{person.name_and_title}}
-			{% if role and active_role and role.leadership_title %}<br><small>{{role.leadership_title_full}}</small>{% endif %}
-		</h1>
-		
-		{% if role %}
-		<div id="title-info">
-			<p>{% if not active_role %}Former {% endif %}{{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}&rsquo;s At-Large District {% endif %}{% if role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District {% endif %}{% endif %}</p>
-			<p>{{role.party}}</>
-			{% if active_role and role.senator_rank %}
-				<p title="The senior senator is the longer serving of the two senators from a state. The junior senator refers to the other senator.">{{role.get_senator_rank_display}} Senator</p>
-			{% endif %}
-		</div>
-		{% endif %}
-		
-		<h2>Elected Positions</h2>
-		<table>
-			<tr>
-				<th>Dates</th>
-				<th>Title</th>
-				<th>State / District</th>
-			</tr>
+		<p>Elected Positions:</p>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Dates</th>
+					<th>Title</th>
+					<th>State / District</th>
+				</tr>
+			</thead>
 	        {% for role in person.roles_condensed %}
 	        <tr>
 	            <td><nobr>{{ role.startdate|date:"Y" }}-{{ role.enddate|date:"Y" }}</nobr></td>
@@ -80,7 +79,7 @@
 		</table>
 		
 		{% if links %}
-			<p style="margin: 1em 0 0 0; line-height: 110%;"><small><span style="margin-right: .5em">See Also:</span>
+			<p style="line-height: 110%;"><small><span style="margin-right: .5em">See Also:</span>
 			{% for label, link in links %}
 				{% if not forloop.first %} | {% endif %}
 				<a href="{{link}}" target="_blank" style="white-space: nowrap">{{label}}</a>
@@ -119,7 +118,7 @@
 
 	{% if analysis_data.sponsorship %}
 	<section id="sponsorship_analysis">
-		<h3>Sponsorship Analysis</h3>
+		<h2><span>Sponsorship Analysis</span></h2>
         
 		<p>Our unique analysis of the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored provides insight into {{ person.his_her }}
 		position in the {{analysis_data.sponsorship.chamber}}.</p>
@@ -233,7 +232,7 @@
 
 	{% if committeeassignments %}
 	<section id="membership">
-		<h3>Committee Membership</h3>
+		<h2><span>Committee Membership</span></h2>
 		<p>{{person.name_no_details}} sits on the following committees:</p>
 		<ul style="list-style: none; padding: 0;">
 			{% for c in committeeassignments %}
@@ -257,7 +256,7 @@
 	
 {% if recent_bills %}
 	<section id="sponsorship">
-		<h3>Bills Sponsored</h3>
+		<h2><span>Bills Sponsored</span></h2>
 		<p>Some of {{person.lastname}}’s most recently sponsored bills include...</p>
 		<ul style="list-style: none; padding: 0;">
 			{% for bill in recent_bills %}
@@ -270,7 +269,7 @@
 
 	{% if analysis_data.missedvotes %}
 	<section id="voting-record">
-		<h3>Voting Record</h3>
+		<h2><span>Voting Record</span></h2>
 		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed|intcomma}} of {{analysis_data.missedvotes.total|intcomma}} roll call votes, which is {{analysis_data.missedvotes.percent}}%. This is {% if analysis_data.missedvotes.percent <= analysis_data.missedvotes.pctile50 %}better{% else %}worse{% endif %} than the median of {{analysis_data.missedvotes.pctile50|floatformat:1}}% among the lifetime records of {% if analysis_data.missedvotes.chamber == 's' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
 		The chart below reports missed votes over time.</p>
 		<div id="voting_record_chart"> </div>
@@ -381,7 +380,7 @@
 	
 	
 	<section>
-	<h3>Primary Sources</h3>
+	<h2><span>Primary Sources</span></h2>
 	<p>The information on this page is originally sourced from a variety of materials, including:</p>
 	<ul style="list-style: none; padding: 0;">
 	{% with person.vote_sources as person_vote_sources %}

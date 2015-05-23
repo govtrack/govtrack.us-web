@@ -253,14 +253,8 @@ $(function() {
 </script>
 {% endblock %}
 
-{% block crumbs %}
-<h1>What I&rsquo;m Tracking</h1>
-{% endblock %}
-
-{% block heading_box %}
-{% endblock %}
-
 {% block body %}
+<h1>What I&rsquo;m Tracking</h1>
 
 {% if message %}
 <div style="text-align: center; margin: 2em; font-size: 120%; font-weight: bold;">{{message}}</div>
@@ -290,8 +284,6 @@ $(function() {
                 </div>
             </div>
         </div>
-
-
     {% endfor %}
 
     <div class="col-sm-4" id="newlist">
@@ -299,19 +291,17 @@ $(function() {
     </div>
 
     </div> <!-- /row -->
-
-    </div><!-- /lists -->
 </section>
 
-<div class="row">
 <section id="list_view">
     <h2 class="if_multiple_lists">Settings for: <span class="name">List Name Goes Here</span></h2>
 
+    <div class="row">
     <div class="col-sm-5">
 
         <div id="items" class="control">
-            <h2 class="if_single_list">I Am Tracking...</h2>
-            <h2 class="if_multiple_lists">Tracked <span>in</span> This List</h2>
+            <h3 class="if_single_list">I Am Tracking...</h3>
+            <h3 class="if_multiple_lists">Tracked <span>in</span> This List</h3>
             <ul id="list_trackers" style="padding: 0">
             </ul>
             <p></p>
@@ -325,27 +315,8 @@ $(function() {
             </ul>
         </div><!-- /items -->
 
-        {% comment %}
-        <div id="search_trackers" class="control">
-            <h3>Find More Items <span>to</span> Track</h3>
-            <label>Search For:</label>
-            <div>
-                <input id="track_person_input" type="text" style="width: 100%" placeholder="search by last name, zipcode, or state name"/>
-            </div>
-            <div class="results" id="track_person_results"> </div>
-            <script>
-                $('#track_person_input').keyup_delayed(function() { search_feeds("person"); });
-            </script>
-
-            <div id="browse_links">
-                <h4>Browse:</h4>
-                <a href="/congress/members">Members of Congress</a> &#8226; <a href="/congress/bills">Bills</a> &#8226; <a href="/congress/votes">Votes</a> &#8226; <a href="/congress/committees">Committees</a>
-            </div>
-        </div><!-- /search_trackers -->
-        {% endcomment %}
-
         <div id="suggested" class="control">
-            <h2>Track Something New</h2>
+            <h3>Track Something New</h3>
             <ul class="bullets">
                 <li><a href="/congress/members">Members of Congress</a></li>
                 <li><a href="/congress/bills">Bills in Congress</a></li>
@@ -360,7 +331,7 @@ $(function() {
     <div class="col-sm-7">
         
         <div id="set_freq" class="control">
-            <h2>Getting Updates</h2>
+            <h3>Getting Updates</h3>
             <div class="row">
                 <div class="col-sm-8">
                     <h3>Email</h3>
@@ -379,7 +350,7 @@ $(function() {
         </div><!-- /set_freq -->
         
         <div id="events_header" class="group">
-            <h2>Preview Your Email Updates</h2>
+            <h3>Preview Your Email Updates</h3>
         </div>
 
         <div id="events">

@@ -78,21 +78,6 @@
 <!-- bid:{{bill.id}} -->
 <style>
 
-h2 {
-	border-bottom: 2px solid #888;
-	font-size: 17px;
-	margin: 1.25em 0 .5em -6px;
-}
-	h2 span {
-		display: inline-block;
-		margin-left: 6px;
-		padding: 3px 6px 1px 6px;
-		background-color: #555;
-		color: white;
-		font-family: PTSerifBold;
-		font-weight: bold;
-	}
-
 .minor_vote {
 	display: none;
 }
@@ -226,7 +211,6 @@ p#yourreps {
 <ul>
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/bills">Bills</a></li>
-	<li>{{bill.display_number}}</li>
 </ul>
 {% endblock %}
 
@@ -234,14 +218,19 @@ p#yourreps {
 
 {% block summary %}
 
-	<h1 style="max-height: 3.5em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+	<div class="h1-multiline" style="border: none">
+	<h1 class="long" style="max-height: 3.5em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+			<p id="h1_overflow"></p>
+			<script>$('h1').truncate_text(function (remaining, chopped) {
+			    if (chopped) $('#h1_overflow').text("..." + chopped);
+			});</script>
+	</div>
+
+	<div class="panel panel-default">
+	<div class="panel-body">
 	<div class="row">
 	<div id="track_panel_base" class="{% if bill.is_alive %}col-md-8{% else %}col-sm-12{% endif %}">
 		<div class="info" style="{% if not bill.is_alive %}width: auto; {% endif %}background: none;">
-			<p id="h1_overflow" style="display: none;">...</p>
-			<script>$('h1').truncate_text(function (remaining, chopped) {
-			    if (chopped) $('#h1_overflow').text("..." + chopped).show();
-			});</script>
 		
 			{% if bill.explanatory_text or bill.congress < 93 %}
 			<p style="font-style: italic">
@@ -411,7 +400,7 @@ p#yourreps {
 	</div>
 	
 	{% if bill.is_alive %}
-	<div class="aside col-md-4" style="margin-top: -5px">
+	<div class="aside col-md-4" style="margin-top: 15px">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		<div id="event_subscribe_inline_container"> </div>
@@ -475,15 +464,15 @@ p#yourreps {
 				
 	</div><!-- /actions -->
 	{% endif %}
+</div> <!-- /row -->
+</div> <!-- /panel-body -->
+</div> <!-- /panel -->
 
 	<div id="admin_panel"> </div>
 	<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
-</div>
 {% endblock %}
 
 {% block body %}
-		</div> <!-- row created by master template -->
-
 		<h2><span>About the {{bill.noun}}</span></h2>
 
 		<div class="row">
@@ -906,7 +895,7 @@ p#yourreps {
 				</dl>
 			</div>
 
-		<!-- last row is left open for master template -->
+		</div> <!-- /row -->
 
 	{% if 0 %}
 	<div id="comments">

@@ -5,7 +5,7 @@
 {% block title %}GovTrack.us Analysis Methodology{% endblock %}
 
 {% block crumbs %}
-<ul><li><a href="/about">About GovTrack</a></li><li>Analysis</li></ul>
+<ul><li><a href="/about">About GovTrack</a></li></ul>
 {% endblock %}
 
 {% block extra_js %}
@@ -15,18 +15,16 @@
 
 {% block extra_css %}
 <style>
+#content h2 { margin: 1em 0; }
 h3 { margin: 1em 0; }
 </style>
 {% endblock %}
 
-{% block summary %}
+{% block body %}
 	<h1>Analysis Methodology</h1>
 	<p>Statistical analyses of legislation and legislators provide context for the legislative process.
 	Of all of the 10,000+ bills pending at any given time, our unique analyses help GovTrack visitors know
 	what is relevant and what to pay attention to.</p>
-{% endblock %}
-
-{% block body %}
 
 <ul class="tabs four-up">
 	<li><a href="#overview">Overview</a></li>
@@ -39,18 +37,18 @@ h3 { margin: 1em 0; }
 	<div id="overview" style="margin-top: 1em">
 		<div class="row">
 		<div class="col-md-6">
-			<h2>Ideology</h2>
+			<h3>Ideology</h3>
 			<p>The <a href="#ideology">Ideology Analysis</a> compares the sponsorship and cosponsorship patterns of Members of Congress to put them on a scale roughly from liberal to conservative. <a href="#ideology">Read More &raquo;</a></p>
 		</div>
 	
 		<div class="col-md-6">
-			<h2>Prognosis</h2>
+			<h3>Prognosis</h3>
 			<p>The <a href="#prognosis">Prognosis Analysis</a> looks at the factors that help or hurt a bill&rsquo;s chance of getting out of committee and being enacted. It is based on a regression model. <a href="#prognosis">Read More &raquo;</a></p>
 		</div>
 		</div>
 		<div class="row">
 		<div class="col-md-6">
-			<h2>Leadership</h2>
+			<h3>Leadership</h3>
 			<p>The <a href="#leadership">Leadership Analysis</a> looks at who is cosponsoring whose bills to see who the legislative leaders are. It&rsquo;s a little like if you scratch my back will I scratch yours? The analysis is based on Google PageRank, the algorithm Google uses to order search results. <a href="#leadership">Read More &raquo;</a></p>
 		</div>
 		</div>

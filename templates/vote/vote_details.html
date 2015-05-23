@@ -21,7 +21,7 @@
 		#vote_notes a {
 			margin: 0 .5em;
 		}
-		#vote_notes div {
+		#vote_notes div.popup-content {
 			display: none;
 		}
 
@@ -162,13 +162,12 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 <ul>
     <li><a href="{% url "congress_home" %}">Congress</a></li>
     <li><a href="/congress/votes">Votes</a></li>
-    <li>{{ vote.get_chamber_display }} Vote #{{ vote.number }} in {{ vote.created|date:"Y" }}</li>
 </ul>
 {% endblock %}
 
 {% block summary %}
 
-<h1>{{ vote.question }}</h1>
+<h1 class="long">{{ vote.question }}</h1>
 
 {% if vote.question_details %}<p>{{ vote.question_details }}</p>{% endif %}
 
@@ -240,10 +239,12 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
 {% if has_vp_vote %}<p style="margin: 1em 0 0 0">The Vice President cast a tie-breaking vote.</p>{% endif %}
     
-<p id="yourreps" class="hidden"></p>
+<p id="yourreps" class="hidden" style="margin-bottom: 0"></p>
 {% endblock %}
 
 {% block body %}
+
+<hr>
 
 {% with vote.totals as totals %}
 <div class="section">
@@ -325,28 +326,20 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
 <div id="vote-details" class="section">
 
-<div class="heading" style="margin: 1.5em 0 0 0;">
-	<h2 style="margin-bottom: 5px">Vote Details</h2>
-	<aside style="font-size: 90%; color: #777;">
-		Download as
-		<a href="{{ vote.get_absolute_url }}/export/csv" rel="nofollow">CSV</a>
-		| <a href="{{ vote.get_absolute_url }}/export/xml" rel="nofollow">XML</a>
-		| <a href="/api/v2/vote_voter?vote={{ vote.id }}" rel="nofollow">JSON</a>
-	</aside>
-</div>
+<h2><span>Vote Details</span></h2>
 
-<div class="details-box">
-<div id="vote_notes">
+<div id="vote_notes" class="clearfix">
+<div style="float: left">
 	<span>Notes: </span>
 
 	{% if vote.chamber == 2 %}
 	<a href="#" onclick="return show_notes(this)" data-id="speakers_vote">The Speaker&rsquo;s Vote?</a>
-	<div id="notes_speakers_vote">The Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk. (See <a href="http://www.gpo.gov/fdsys/pkg/HMAN-113/pdf/HMAN-113-houserules.pdf">House Rules</a>, Rule I(7).)</div>
+	<div id="notes_speakers_vote" class="popup-content">The Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk. (See <a href="http://www.gpo.gov/fdsys/pkg/HMAN-113/pdf/HMAN-113-houserules.pdf">House Rules</a>, Rule I(7).)</div>
 	{% endif %}
 
 	{% if has_vp_vote %}
 	<a href="#" onclick="return show_notes(this)" data-id="vp">The Vice President&rsquo;s Tie-Breaker</a>
-	<div id="notes_vp">
+	<div id="notes_vp" class="popup-content">
 	<p>The Vice President casts a vote in the Senate when there is a tie. This is extremely rare.</p>
 	<p>Article I, section 3 of the U.S. Constitution reads, &ldquo;The Vice President of the United States shall be President of the Senate, but shall have no Vote, unless they be equally divided.&rdquo;</p>
 	</div>
@@ -354,7 +347,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
     {% if reconsiderers.0|length > 0 %}
     <a href="#" onclick="return show_notes(this)" data-id="motiontoreconsider">{{reconsiderers.1}}&rsquo;s Vote</a>
-    <div id="notes_motiontoreconsider">
+    <div id="notes_motiontoreconsider" class="popup-content">
         {% for v in reconsiderers.0 %}
             <p>{{v.person.role.get_title_abbreviated}} {{v.person.name_no_details}} ({{v.person.role.party.0}}), the {{v.person.role.leadership_title}}, voted {{v.option.value}} against {{v.person.his_her}} party.</p>
         {% endfor %}
@@ -365,7 +358,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
 	{% if vote.source == 3 %}
 	<a href="#" onclick="return show_notes(this)" data-id="historical">Accuracy of Historical Records</a>
-	<div id="notes_historical">
+	<div id="notes_historical" class="popup-content">
 	<p>Our database of roll call votes from 1789-1989 (1990 for House votes) comes from an academic data source, <a href="http://www.voteview.com">VoteView.com</a>,
 	that has digitized paper records going back more than 200 years. Because of the difficulty of this task, the accuracy of these vote records is reduced..</p>
 	<p>In particular, these records do not distinguish between Members of Congress not voting (abstaining) from Members of Congress who were not eligible to vote because
@@ -375,11 +368,18 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 	{% endif %}
 
 	<a href="#" onclick="return show_notes(this);" data-id="aye_yea">&ldquo;Aye&rdquo; or &ldquo;Yea&rdquo;?</a>
-	<div id="notes_aye_yea">
+	<div id="notes_aye_yea" class="popup-content">
 	<p>&ldquo;Aye&rdquo; and &ldquo;Yea&rdquo; mean the same thing, and so do &ldquo;No&rdquo; and &ldquo;Nay&rdquo;. Congress uses different words in different sorts of votes.</p>
 	<p>The U.S. Constitution says that bills should be decided on by the &ldquo;yeas and nays&rdquo; (Article I, Section 7). Congress takes this literally and uses &ldquo;yea&rdquo; and &ldquo;nay&rdquo; when voting on the final passage of bills.</p>
 	<p>All Senate votes use these words. But the House of Representatives uses &ldquo;Aye&rdquo; and &ldquo;No&rdquo; in other sorts of votes.</p>
 	</div>
+</div>
+<div style="font-size: 90%; color: #777; float: right">
+    Download as
+    <a href="{{ vote.get_absolute_url }}/export/csv" rel="nofollow">CSV</a>
+    | <a href="{{ vote.get_absolute_url }}/export/xml" rel="nofollow">XML</a>
+    | <a href="/api/v2/vote_voter?vote={{ vote.id }}" rel="nofollow">JSON</a>
+</div>
 </div>
 
         <table id="vote-list-template" class="vote-list" style="display: none">

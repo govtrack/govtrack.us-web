@@ -70,16 +70,10 @@ $(function() {
 </script>
 {% endblock %}
 
-{% block crumbs %}
-<div>Start Tracking</div>
-<h1 style="font-size: 32px">{{feed.title}}</h1>
-{% endblock %}
-
-{% block heading_box %}
-{% endblock %}
-
 {% block body %}
-<div style="margin-top: 20px">
+<h1 style="font-size: 32px">{{feed.title}}</h1>
+
+<div>
 	<div id="edit_list" class="col-sm-4 fat " style="line-height: 125%">
 		<div id="set_freq" class="control">
 			<p class="description">{{feed.description}}</p>

@@ -169,47 +169,34 @@
 	</style>
 {% endblock %}
 
-{% block crumbs %}
+{% block Xcrumbs %}
 <ul>
 	<li><a href="/congress">Congress</a></li>
 	<li><a href="/congress/members">Members of Congress</a></li>
-	{% if not state %}
-	<li>Maps</li>
-	{% else %}
+	{% if state %}
 		{% if not district %}
 		<li>{{statename}}</li>
 		{% else %}
 		<li><a href="/congress/members/{{state}}">{{statename}}</a></li>
-		<li>{{district|ordinalhtml}}</li>
 		{% endif %}
 	{% endif %}
 </ul>
 {% endblock %}
 
-{% block summary %}
+{% block body_with_container %}
+<div class="container-fluid">
+
 	{% if not state %}
-		<h2 style="margin: 0">Find a Senator <span>or</span> Representative</h2>
-		<p style="margin: 1em 0 0 0">Use this page to find current Members of Congress by state or district.</p>
+		<h1>Find a Senator <span>or</span> Representative</h1>
 	{% else %}
-		<h2 style="margin: 0">{{statename}}&rsquo;s {{district|ordinalhtml}} Congressional District</h2>
-		{% if stateapp != "T" %}
-			<p style="margin: 1em 0 0 0">This page lists the senators and representatives for {{statename}}&rsquo;s {{district|ordinalhtml}} congressional district.</p>
-		{% else %}
-			<p style="margin: 1em 0 0 0">This page lists the delegate from {{statename}}.</p>
-		{% endif %}
+		<h1>{{statename}}&rsquo;s {{district|ordinalhtml}} Congressional District</h1>
 	{% endif %}
 	
-{% endblock %}
-
-{% block body %}
-
-<div id="search-members" class="section box row">
-	<div class="advanced-search col-sm-4">
+<div id="search-members" class="row" style="margin-top: 1em">
+	<div class="col-sm-4 col-lg-3 advanced-search">
 		{% if not state %}
 			<form action="#" onsubmit="return doform();">
 				<fieldset>
-					<h3>Find a Senator <span>or</span> Representative</h3>
-					
 					<div class="row">
 						<label for="name">By Last Name</label>
 						<input id="name" class="text" type="text" value=""/>
@@ -312,7 +299,7 @@
 		</div>
 	</div>
 	
-	<div id="map_container" class="col-sm-8 last">
+	<div id="map_container" class="col-sm-8 col-lg-9">
 		<div id="map_canvas" class="">
 		</div>
 		<div style="display: none">

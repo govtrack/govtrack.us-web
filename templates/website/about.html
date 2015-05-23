@@ -12,23 +12,19 @@
 </style>
 {% endblock %}
 
-{% block summary %}
-<div>
-	<h1>About GovTrack.us</h1>
-
-	<p style="margin-bottom: 0">Creating government transparency and civic engagement through novel uses of technology.</p>
-</div>
-{% endblock %}
-{% block links %}
-<div>
-	<p>Follow us on Twitter <a href="http://twitter.com/govtrack">@govtrack</a>,
-	join our <a href="http://www.facebook.com/pages/Civic-Impulse/312186525430">Facebook page</a>,
-	or read <a href="/blog">our blog</a>. We&rsquo;re always evolving.</p>
-</div>
-{% endblock %}
-
 {% block body %}
-<section class="main col-sm-6">
+<h1>About GovTrack.us</h1>
+
+<p>Creating government transparency and civic engagement through novel uses of technology.</p>
+
+<p>Follow us on Twitter <a href="http://twitter.com/govtrack">@GovTrack</a>,
+	join our <a href="http://www.facebook.com/pages/Civic-Impulse/312186525430">Facebook page</a>,
+	or read <a href="/blog">our blog</a>.</p>
+
+<hr>
+
+<div class="row">
+<section class="col-sm-6">
 	<p>GovTrack.us, a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a> now in its 10th year, is one of the worldʼs most visited government transparency websites. The site helps ordinary citizens find and track bills in the U.S. Congress and understand their representatives&rsquo; legislative record.</p>
 
 	<p>In 2014, GovTrack.us was used by 7 million individuals, we sent out 4{# 4,247,952 #} million legislative update email alerts, and our embeddable widgets were deployed on 85 official websites of Members of Congress.</p>
@@ -71,9 +67,10 @@
 	</ul>
 </section>
 
-<section class="col-sm-offset-1 col-sm-5 well">
-	<div style="font-size: 12px;">
-	<h2 style="text-align: center; margin-top: 0">Coverage &amp; Timeliness</h2>
+<section class="col-sm-offset-1 col-sm-5" style="font-size: 12px;">
+	<div class="panel panel-default">
+		<div class="panel-heading">Coverage &amp; Timeliness</div>
+		<div class="panel-body">
 	
 	<table class="coverage_table">
 		<tr><th colspan="2" style="padding: 1em 0 .5em 0">Current Information<br>(114<sup>th</sup> Congress)</th></tr>
@@ -183,8 +180,10 @@
 			via <a href="https://github.com/unitedstates/images">unitedstates/images</a>, and credited on individual legislator pages.</td>
 		</tr>
 	</table>
-	</div>
+	</div> <!-- /panel-body -->
+	</div> <!-- /panel -->
 </section>
+</div>
 
 {% endblock %}
 

@@ -4,14 +4,6 @@
 <style>
 h1 { margin-bottom: 30px; }
 
-.col_6 {
-	width: 450px;
-	margin-right: 40px;
-	float: left;
-}
-.col_last {
-	margin-right: 0;
-}
 
 .floor {
 	display: none;
@@ -75,15 +67,12 @@ section {
 
 {% endblock %}
 {% block crumbs %}
-<ul><li><a href="/congress">Congress</a></li><li>Live</li></ul>
 {% endblock %}
-{% block override_content %}
-<div id="content" class="row">
-
+{% block body %}
 <h1>Live Video from Congress</h1>
 
-<section>
-	<div class="col_6">
+<div class="row">
+	<div class="col-sm-6">
 		<h2>In the House Now</h2>
 		<div id="from_the_floor_house" class="floor"> </div>
 		
@@ -100,7 +89,7 @@ section {
 		<center><small><a href="http://houselive.gov">Go to the Official House Floor Page</a></small></center>
 	</div>
 	
-	<div class="col_6 col_last">
+	<div class="col-sm-6">
 		<h2>In the Senate Now</h2>
 		<div id="from_the_floor_senate" class="floor"> </div>
 	
@@ -116,14 +105,13 @@ section {
 		
 		<center><small><a href="http://www.senate.gov/floor/index.htm">Go to the Official Senate Floor Page</a></small></center>
 	</div>
-	
+</div>
+
 	<script src="//congress.api.sunlightfoundation.com/floor_updates?apikey=cef0df6234aa496bb3b36be96eb4ee93&amp;callback=sunlight_live_callback&amp;per_page=1&amp;chamber=senate"></script>
 	<script src="//congress.api.sunlightfoundation.com/floor_updates?apikey=cef0df6234aa496bb3b36be96eb4ee93&amp;callback=sunlight_live_callback&amp;per_page=1&amp;chamber=house"></script>
 	
 	<div style="clear: both"/>
-</section>
 
-<section>
 	<h2>Live House Committee Events</h2>
 	
 	<ul class="bullets">
@@ -133,14 +121,11 @@ section {
 		<p>There are no known live committee events.</p>
 	{% endfor %}
 	</ul>
-</section>
 
-<section>
 	<div class="notes">
 		<p>Floor status is courtesy of the <a href="http://services.sunlightlabs.com/docs/Real_Time_Congress_API/">Sunlight Foundation Real Time Congress API</a>.</p>
 		<p>Live House committee events is courtesy of <a href="http://thomas.loc.gov/video/house-committee">The Library of Congress</a>.</p>
 	</div>
-</section>
 
 </div>
 {% endblock %}

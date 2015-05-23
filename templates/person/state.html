@@ -95,7 +95,6 @@
 		$(canvas_resize);
 	</script>
 	<style>
-	.row.summary-box-row { margin-bottom: 20; }
 	h5 { margin-bottom: 0px; }
 	.members-grid .info { margin-top: 8px; font-size: 85%; }
 
@@ -138,10 +137,6 @@
 		<p>{% if state == "VI" %}The {% endif %}{{statename}} is a territory of the United States. It sends a delegate to the House of Representatives{% if state == "PR" %}, called the Resident Commissioner,{% endif %} with essentially no voting privileges and has no senators in the United States Congress.</p>
 	{% endif %}
 	
-{% endblock %}
-
-{% block summary_col_2 %}
-
 {% if senators|length > 0 %}
 	<h2 style="margin-top: 30px">Senators</h2>
 

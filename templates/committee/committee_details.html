@@ -16,15 +16,12 @@
 <li><a href="/congress/committees">Committees</a></li>
 {% if parent %}
 	<li><a href="{{ parent.get_absolute_url }}">{% if parent.abbrev %}{{parent.committee_type_abbrev}}.{{parent.abbrev}}.{% else %}{{parent|truncatewords:3}}{% endif %}</a></li>
-	<li>{% if committee.abbrev %}{{committee.abbrev}}{% else %}{{committee|cut:"Committee on the "|cut:"Committee on "|truncatewords:3}}{% endif %}</li>
-{% else %}
-	<li>{{committee|cut:"Committee on the "|cut:"Committee on "|truncatewords:5}}</li>
 {% endif %}
 </ul>
 {% endblock %}
 
 {% block summary %}
-<h1>{% if parent %}{{ parent }}: {% endif %}{{ committee }}</h1>
+<h1{% if parent %} class="long"{% endif %}>{% if parent %}{{ parent }}:<br>Subcommittee on {% endif %}{{ committee }}</h1>
 
 {% if committee.jurisdiction %}
 	<p>{{committee.jurisdiction}} {% if committee.jurisdiction_link %}(<a href="{{committee.jurisdiction_link}}">source</a>){% endif %}</p>
@@ -37,7 +34,12 @@
 
 <div class="row group">
 	<div id="track_panel_base" class="col-sm-8">
-		<div class="info">
+		    {% if committee.url %}
+				<p>
+					<a href="{{committee.url}}" target="_blank" class="plain">{{committee.url}}</a>
+				</p>
+		    {% endif %}
+
 			<dl class="wide">
 				{% for mem in member_highlights %}
 					<dt>{{mem.get_role_display}}</dt>
@@ -58,7 +60,6 @@
 			{% if members|length == 0 %}
 			<p>The membership of this committee is not yet available.</p>
 			{% endif %}
-		</div>
 	</div>
 	
 	
@@ -66,13 +67,6 @@
 	<div class="aside col-sm-4">
 		{% include "events/subscribe_inline.html" %}
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track Committee</a>
-		
-	    {% if committee.url %}
-			<div class="article">
-				<strong>Official Website:</strong>
-				<a href="{{committee.url}}" target="_blank" class="plain">{{committee.url}}</a>
-			</div>
-	    {% endif %}
 	</div><!-- /aside -->
 
 </div><!-- /container -->

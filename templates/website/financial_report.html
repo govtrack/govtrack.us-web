@@ -9,17 +9,14 @@
 </style>
 {% endblock %}
 {% block crumbs %}
-<ul><li><a href="/about">About GovTrack</a></li><li>Financial Report</li></ul>
+<ul><li><a href="/about">About GovTrack</a></li></ul>
 {% endblock %}
-{% block summary %}
+
+{% block body %}
 <h1>Financial Report</h1>
 
 <p style="margin-top: 1em">Here&rsquo;s where GovTrack turns some transparency on itself. Below is a completely voluntary financial report of the operations of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>, the company that runs this website.</p>
 <p>Civic Impulse, LLC is registered in the District of Columbia and is wholly owned by <a href="http://razor.occams.info">Joshua Tauberer</a>.</p>
-{% endblock %}
-{% block body %}
-
-<h2>Year by Year Summary Reports</h2>
 
 {% for year_rec in years %}
 	<h3>{{year_rec.year}}</h3>
@@ -42,7 +39,7 @@
 	</table>
 {% endfor %}
 
-<h2>Notes</h2>
+<h3>Notes</h3>
 <p>Because the company is a &ldquo;single-member LLC&rdquo;, it does not report taxes independently of its owner&rsquo;s personal income tax return. This has two important consequences:</p>
 <ul class="bullets">
 	<li>There are no salary payments to owners. Any remaining net profit at the end of the year is profit to the owner.</li>

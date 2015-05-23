@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "master.html" %}
 
 {% load registration_providers %}
 
@@ -21,15 +21,11 @@ h2 { font-size: 18px; border-bottom: 1px solid #444; }
 </style>
 {% endblock %}
 
-{% block crumbs %}
-	<h1>Account Settings</h1>
-{% endblock %}
-{% block override_content %}
-<div id="content">
-	
-<div class="row" style="margin-top: .5em">
+{% block body %}
+<h1>Account Settings</h1>
+<div class="row">
 <div class="col-sm-6">
-	<h2>Your congressional district</h2>
+	<h2><span>Your congressional district</span></h2>
 
 	<p class="no-district hidden">If you <a href="#" onclick="return show_askcd();">pick your congressional district</a> we will customize GovTrack to show you more relevant information.</p>
 	<p class="has-district hidden">Your congressional district is set to <span style="font-weight: bold"> </span>. If that&rsquo;s no longer correct, you may <a href="#" onclick="return show_askcd();">pick your congressional district</a> again.</p>
@@ -45,7 +41,7 @@ h2 { font-size: 18px; border-bottom: 1px solid #444; }
 	});
 	</script>
 
-	<h2>May we email you?</h2>
+	<h2><span>Email settings</span></h2>
 	
 	{% with request.user.userprofile.lists_with_email as lists %}
 	{% if lists|length > 0 %}
@@ -75,7 +71,7 @@ h2 { font-size: 18px; border-bottom: 1px solid #444; }
 		<div style="margin-top: .75em"><input type="submit" class="submit" value="Update Settings"/></div>
 	</form>
 	
-	<h2 style="margin-top: 1.5em">Other Account Issues</h2>
+	<h2 style="margin-top: 1.5em"><span>Other Account Issues</span></h2>
 	
 	{% if user.userprofile.paid_features.ad_free_life or user.userprofile.paid_features.ad_free_year %}
 		<p>{{user.userprofile.get_ad_free_message}} More about <a href="/accounts/go_ad_free">going ad-free</a>.</p>
@@ -84,7 +80,7 @@ h2 { font-size: 18px; border-bottom: 1px solid #444; }
 	<p style="margin-top: 1em">For other account issues, please email us at <a href="mailto:hello@govtrack.us">hello@govtrack.us</a>.</p>
 </div>
 
-<div class="col-sm-4">
+<div class="col-sm-offset-1 col-sm-4">
 	
 	<h2>Login Information</h2>
 	
@@ -125,7 +121,6 @@ h2 { font-size: 18px; border-bottom: 1px solid #444; }
 	
 	{% include "registration/profile_singlesignon.html" %}
 	
-</div>
 </div>
 </div>
 

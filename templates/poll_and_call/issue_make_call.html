@@ -1,4 +1,4 @@
-{% extends "master_d.html" %}
+{% extends "master.html" %}
 
 {% load humanize %}
 {% load cache %}
@@ -100,22 +100,18 @@ function poll_call_status() {
 {% block crumbs %}
 <ul>
 	<li>Call Congress</li>
-	<li>{{issue.title}}</li>
 </ul>
 {% endblock %}
 
 {% block body_class %}issue{% endblock %}
 
-{% block summary %}
+{% block body %}
 <div>
 	<h1>Call Congress About {{issue.title}}</h1>
 
 	<p style="margin: 0">Make your voice heard. We&rsquo;ll walk you through the call step by step! (<a href="{{issue.get_absolute_url}}">skip this step</a>)</p>
 </div>
-{% endblock %}
-
-{% block body %}
-
+<div class="row">
 	<div class="col-sm-6">
 		<p>We&rsquo;ll now connect a call to your representative&rsquo;s office for you.</p>
 
@@ -177,6 +173,7 @@ function poll_call_status() {
 		<p style="font-size: 95%; padding-right: 1em">Your name and address help your representative&rsquo;s office track the sentiment of their constituents, and if they ask for it it means they are taking your call seriously.</p>
 		</div>
 	</div>
+</div>
 
 {% comment %}
 <h4 style="margin-top: 1em">Issue Background</h4>

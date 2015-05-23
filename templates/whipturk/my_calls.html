@@ -1,4 +1,4 @@
-{% extends "master_d.html" %}
+{% extends "master.html" %}
 
 {% load humanize %}
 {% load cache %}
@@ -9,11 +9,10 @@
 
 {% block crumbs %}
 <ul>
-	<li>Public Whip</li>
 </ul>
 {% endblock %}
 
-{% block summary %}
+{% block body %}
 <div>
 	{% if calls|length > 0 %}
 		<p style="float: right"><a class="btn btn-primary" href="start-call">Make Another Call</a></p>
@@ -23,9 +22,7 @@
 
 	<p style="margin: 0">Have you called Congress through our Public Whip program? Here are the calls you made.</p>
 </div>
-{% endblock %}
-
-{% block body %}
+<div class="row">
 	<div class="col-sm-12">
 		{% if calls|length == 0 %}
 			<p>You have not made any calls yet.</p>
@@ -87,7 +84,7 @@
 		</table>
 		{% endif %}
 	</div>
-
+</div>
 {% endblock %}
 
 {% block body_scripts %}
