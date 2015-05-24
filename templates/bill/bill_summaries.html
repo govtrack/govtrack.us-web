@@ -10,13 +10,8 @@
 {% block extra_css %}
 <style>
 h1 {
-	font-size: 24px;
-	line-height: 30px;
-	color: #565656;
-	padding: 0 0 6px;
-	margin: 0 0 6px;
-}	
-
+	border: none;
+}
 h3 {
 	margin-top: 0;
 }
@@ -26,7 +21,7 @@ h3 {
 {% block body_scripts %}
 {% endblock %}
 
-{% block crumbs %}
+{% block Xcrumbs %}
 <ul>
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/bills">Bills</a></li>
@@ -59,15 +54,21 @@ h3 {
 	<div id="summary-panes" class="tab-content" style="margin-top: 1em; padding-bottom: 2em">
 		<script>
 		var first_summary = true;
-		function add_summary(name, href, html) {
+		function add_summary(name, href) {
 			// add a sub-tab
 			var tab = $('<li role="presentation"><a role="tab" data-toggle="tab"/></li>');
-			tab.find('a').text(name ? name : "Our Summary").attr('href', '#' + href)
+			tab.find('a').text(name).attr('href', '#' + href)
 			$('#summary-tabs').append(tab);
-			if (first_summary) {
+			if ((first_summary && window.location.hash.length <= 1) || "#"+href==window.location.hash) {
 				tab.addClass('active');
 				$('#' + href).addClass('active');
+				first_summary = false;
 			}
+			tab.find('a').click(function (e) {
+			  e.preventDefault()
+			  $(this).tab('show')
+			  window.location = "#" + href;
+			})
 		}
 		</script>
 
@@ -82,7 +83,7 @@ h3 {
 					Last updated {{summary.modified|date}}.
 					View <a href="/events/bill-summaries">all GovTrack summaries</a>.
 				</div>
-				<script>add_summary(null, "oursummary", "{{summary.as_html|truncatewords_html:30|escapejs}}");</script>
+				<script>add_summary("GovTrack's Summary", "oursummary");</script>
 			{% endif %}
 			{% endwith %}
 		</div>
@@ -96,7 +97,7 @@ h3 {
 				<p>No summary available.</p>
 			{% else %}
 				{{summary|safe}}
-				<script>add_summary("Library of Congress", "libraryofcongress", "{{summary|striptags|truncatewords:30|escapejs}}");</script>
+				<script>add_summary("Library of Congress", "libraryofcongress");</script>
 			{% endif %}
 			{% endwith %}
 		</div>

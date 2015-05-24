@@ -390,8 +390,8 @@ p#yourreps {
 			{% with bill.oursummary as summary %}
 			{% if summary %}
 				<p style="margin: 1em 0 0 0">
-					{{summary.as_html|truncatewords_html:30|safe}}
-					(<a href="#summary/oursummary">read more</a>)</p>
+					{{summary.plain_text|truncatewords:30}}
+					(<a href="{{bill.get_absolute_url}}/summary">more summary</a>)</p>
 			{% endif %}
 			{% endwith %}
 			
@@ -487,19 +487,23 @@ p#yourreps {
 
 					{% with bill.oursummary as summary1 %}
 					{% with bill.get_formatted_summary as summary2 %}
-					{% if summary1 %}
+					{% if summary1 and summary2 and subtitle %}
+						<p><a href="{{bill.get_absolute_url}}/summary">Read summary (GovTrack/CRS) &gt;</a></p>
+					{% elif summary1 and subtitle %}
+						<p><a href="{{bill.get_absolute_url}}/summary">Read GovTrack summary &gt;</a></p>
+					{% elif summary2 and subtitle %}
+						<p><a href="{{bill.get_absolute_url}}/summary">Read CRS summary &gt;</a></p>
+					{% elif summary1 %}
 						<dt>Summary</dt>
 						<dd>
-							{{summary1.as_html|truncatewords_html:30|safe}}
-							<p><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
+							{{summary1.as_html|truncatewords_html:60|safe}}
+							<p style="margin-top: -.75em"><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
 						</dd>
-					{% elif summary2 and subtitle %}
-						<p><a href="{{bill.get_absolute_url}}/summary">Read CRS Summary &gt;</a></p>
 					{% elif summary2 %}
 						<dt>Summary (CRS)</dt>
 						<dd>
 							{{summary2|striptags|truncatewords:30|safe}}
-							<p><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
+							<p style="margin-top: -.75em"><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
 						</dd>
 					{% endif %}
 					{% endwith %}

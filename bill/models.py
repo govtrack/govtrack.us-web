@@ -732,7 +732,7 @@ class Bill(models.Model):
             "date": bs.created,
             "date_has_no_time": False,
             "title": self.title,
-            "url": self.get_absolute_url() + "#summary/oursummary",
+            "url": self.get_absolute_url() + "/summary",
             "body_text_template": """{{summary.plain_text|truncatewords:80}}""",
             "body_html_template": """{{summary.as_html|truncatewords_html:80|safe}}""",
             "context": { "summary": bs },

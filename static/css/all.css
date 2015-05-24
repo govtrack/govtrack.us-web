@@ -126,6 +126,10 @@ a.plain:hover, a.plain:focus, a.plain:active,
 #masthead a:hover, #masthead a:focus, #masthead a:active {
 	text-decoration: underline;
 	}
+.nav-tabs>li>a {
+	text-decoration: none;
+}
+
 h1, h2, h3, h4, h5 {
 	font: normal normal normal 2.5em/1.5em PTSerifBold, 'Pallatino Linotype', Georgia, 'Times New Roman', serif;
 	line-height: 130%;
