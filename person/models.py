@@ -126,6 +126,9 @@ class Person(models.Model):
         self.name = get_person_name(self, firstname_position='before', role_recent=True)
 
     @property
+    def him_her(self):
+        return { Gender.male: "him", Gender.female: "her" }.get(self.gender, "them")
+    @property
     def his_her(self):
         return { Gender.male: "his", Gender.female: "her" }.get(self.gender, "their")
         
@@ -530,6 +533,8 @@ Feed.register_feed(
     scoped_title = lambda feed : "All Events for " + Person.from_feed(feed).lastname,
     category = "federal-other",
     description = "You will get updates about major activity on sponsored bills and how this Member of Congress votes in roll call votes.",
+    is_subscribable = lambda feed : Person.from_feed(feed).get_current_role() is not None,
+    track_button_noun = lambda feed : Person.from_feed(feed).him_her,
     )
 Feed.register_feed(
     "ps:",

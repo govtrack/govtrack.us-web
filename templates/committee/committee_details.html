@@ -89,7 +89,7 @@
 		{% if members|length > 0 %}
 		<li><a href="#members">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
 		{% endif %}
-		<li><a href="#activity">Committee Activity</a></li>
+		<li><a href="#activity">Bills</a></li>
 		{% if subcommittees %}<li><a href="#subcommittees">Subcommittees</a></li>{% endif %}
 	</ul>
 
@@ -148,8 +148,6 @@
 		{% endif %}
 		
 		<div id="activity">
-			<div class="col-sm-6">
-				<h2 style="margin: 1em 0 1em 0">Committee Bills</h3>
 				{% if committee.current_bills.count > 0 %}
 					<p>There are <a href="/congress/bills/browse#committees={{committee.id}}">{{committee.current_bills.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>{% if committee.current_bills.count > 100 %}. Below find the top 100{% endif %}:</p>
 
@@ -168,11 +166,6 @@
 				{% else %}
 					<p>No bills have been assigned to this {% if parent %}sub{% endif %}committee.</p>
 				{% endif %}
-			</div>
-		    <div class="col-sm-6 last tweets">
-				<h2 style="margin: 1em 0 1em 0">Recent Activity</h3>
-				{% include "events/trackedeventspanel.html" %}
-			</div>
 		</div>
 		
 		{% if subcommittees %}

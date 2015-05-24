@@ -50,17 +50,24 @@ def template_context_processor(request):
     if hasattr(request, 'user') and request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
     
     # Add top-tracked feeds.
+    from events.models import Feed
     global trending_feeds
     if settings.DEBUG:
         trending_feeds = [None, []]
     elif not trending_feeds or trending_feeds[0] < datetime.datetime.now()-datetime.timedelta(hours=2):
-        from events.models import Feed
         trf = cache.get("trending_feeds")
         if not trf:
             trf = Feed.get_trending_feeds()
             cache.set("trending_feeds", trf, 60*60*2)
         trending_feeds = (datetime.datetime.now(), [Feed.objects.get(id=f) for f in trf])
     context["trending_feeds"] = trending_feeds[1]
+
+    # Add site-wide tracked events.
+    all_tracked_events = cache.get("all_tracked_events")
+    if not all_tracked_events:
+        all_tracked_events = Feed.get_events_for([fn for fn in ("misc:activebills2", "misc:billsummaries", "misc:allvotes") if Feed.objects.filter(feedname=fn).exists()], 6)
+        cache.set("all_tracked_events", all_tracked_events, 60*15) # 15 minutes
+    context["all_tracked_events"] = all_tracked_events
 
     # Highlight a recent vote. We don't yet need to know the user's district
     # --- that will happen client-side.

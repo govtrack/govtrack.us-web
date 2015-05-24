@@ -1,10 +1,9 @@
 {% extends "master.html" %}
 {% block body_with_container %}
 <div class="container">
-
-<div class="row">
-	<div class="col-sm-4 col-sm-push-8 col-md-5 col-md-push-7 col-lg-4 col-lg-push-8">
-	<div class="ads square">
+	<div class="row">
+		<div class="col-sm-4 col-sm-push-8 col-md-5 col-md-push-7 col-lg-4 col-lg-push-8">
+			<div class="ads square">
 		{% comment %} if remote_net_house or remote_net_senate or request.user.username == "admin" %}
 			<a href="mailto:operations+love@govtrack.us"><img src="/static/funnies/322Heart_02.png"/></a>
 		{% endcomment %}
@@ -55,21 +54,24 @@
 		}
 		//-->
 		</script>
-		<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
-	</div>
-	</div>
+			<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
+			</div>
 
-	<div class="col-sm-8 col-sm-pull-4 col-md-7 col-md-pull-5 col-lg-8 col-lg-pull-4">
-		{% block summary %}
-		{% endblock %}
-	</div><!-- /summary-box -->
-</div> <!-- /row -->
+		    <div id="sidebar-events">
+				{% include "events/trackedeventspanel.html" %}
+			</div>
+		</div>
 
-<div id="content">
-	{% block body %}
-	{% endblock %}
-</div>
+		<div class="col-sm-8 col-sm-pull-4 col-md-7 col-md-pull-5 col-lg-8 col-lg-pull-4">
+			{% block summary %}
+			{% endblock %}
 
+			<div id="content">
+				{% block body %}
+				{% endblock %}
+			</div>
+		</div><!-- /summary-box -->
+	</div> <!-- /row -->
 </div> <!-- /container -->
 
 {% endblock %}

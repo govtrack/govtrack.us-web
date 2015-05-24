@@ -86,6 +86,10 @@ class Committee(models.Model):
 
     def current_bills(self):
         return self.bills.filter(congress=CURRENT_CONGRESS)
+    def current_bills_sorted(self):
+        bills = self.current_bills()
+        biils = sorted(bills, key = lambda x : -x.proscore())
+        return bills[0:100]
 
     def get_feed(self, feed_type=""):
         if feed_type not in ("", "bills", "meetings"): raise ValueError(feed_type)

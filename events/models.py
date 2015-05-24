@@ -289,6 +289,22 @@ class Feed(models.Model):
         m = self.type_metadata()
         return m.get("description", None)
 
+    @property
+    def is_subscribable(self):
+        m = self.type_metadata()
+        if "is_subscribable" not in m: return True
+        if callable(m["is_subscribable"]):
+            return m["is_subscribable"](self)
+        return m["is_subscribable"]
+
+    @property
+    def track_button_noun(self):
+        m = self.type_metadata()
+        if "track_button_noun" not in m: return False
+        if callable(m["track_button_noun"]):
+            return m["track_button_noun"](self)
+        return m["track_button_noun"]
+
 class Event(models.Model):
     """
     Holds info about an event in a feed. This record doesn't contain any information about

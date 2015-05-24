@@ -1,25 +1,80 @@
 {% load events_utils %}
 
-{% for event in feed.get_five_events %}
-{% with event|render_event:feed as meta %}
-{% if meta %}
-	<article class="post">
-		<div class="article">
-			<h4>{{meta.type}}</h4>
-			<p><a href="{{meta.url}}">{{meta.title}}</a></p>
-			{{meta.body_html|safe}}
-			<em >
-			{% if not meta.date_has_no_time %}
-				{{event.when}}
-			{% else %}
-				{{event.when|date}}
-			{% endif %}
-			</em>
-		</div>
-	</article>
+{% if feed %}
+	<h2>Tracked events for {% if feed.title|length < 30 %}{{feed.title}}{% else %} this {{feed.type_metadata.noun}}{% endif %}</h2>
+	{% if feed.is_subscribable and 0 %}
+		<p>{{feed.description}}</p>
+	{% endif %}
 {% endif %}
+
+{% with feed.get_ten_events as feed_events %}
+	{% for event in feed_events %}
+		{% with event|render_event:feed as meta %}
+		{% if meta %}
+			{% if forloop.counter0 != 0 %}
+			<hr>
+			{% endif %}
+			<article class="post">
+				<h4>
+					{{meta.type}}
+					<em>
+					&mdash;
+					{% if not meta.date_has_no_time %}
+						{{event.when}}
+					{% else %}
+						{{event.when|date}}
+					{% endif %}
+					</em>
+				</h4>
+				{% if meta.url != request.path %}
+					<p><a href="{{meta.url}}">{{meta.title|truncatewords:25}}</a></p>
+				{% endif %}
+				{{meta.body_html|safe}}
+			</article>
+		{% endif %}
+		{% endwith %}
+	{% empty %}
+		{% if feed %}
+			<p>No recent events are available.</p>
+		{% endif %}
+	{% endfor %}
+
+	{% if feed_events|length < 10 %}
+		{% if feed %}
+			<h2>Other recent activity in Congress</h2>
+		{% else %}
+			<h2>Recent Congressional Activity</h2>
+		{% endif %}
+
+		{% for event in all_tracked_events %}
+		{% with event|render_event:subscription_feeds as meta %}
+		{% if meta %}
+			{% if forloop.counter0 != 0 %}
+			<hr>
+			{% endif %}
+			<article class="post">
+				<h4>
+					{{meta.type}}
+					<em>
+					&mdash;
+					{% if not meta.date_has_no_time %}
+						{{event.when}}
+					{% else %}
+						{{event.when|date}}
+					{% endif %}
+					</em>
+				</h4>
+				{% if meta.url != request.path %}
+					<p><a href="{{meta.url}}">{{meta.title|truncatewords:25}}</a></p>
+				{% endif %}
+				{{meta.body_html|safe}}
+			</article>
+		{% endif %}
+		{% endwith %}
+		{% empty %}
+			<p>No recent events are available.</p>
+		{% endfor %}
+	{% endif %}
+
 {% endwith %}
-{% empty %}
-	<p>No recent events are available.</p>
-{% endfor %}
 

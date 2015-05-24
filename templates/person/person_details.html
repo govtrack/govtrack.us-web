@@ -108,8 +108,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="row">
-<div id="member-details" class="col-sm-8">
+<div id="member-details">
 
 	{% if has_session_stats %}
 	<div id="session_stats">
@@ -408,12 +407,5 @@
 	
 </div><!-- /member-details -->
 
-<div class="tweets col-sm-4">
-	<h3>Recent Legislative Activity</h3>
-	
-	{% include "events/trackedeventspanel.html" %}
-</div>
-
-</div><!-- /.row -->
 {% endblock %}
 

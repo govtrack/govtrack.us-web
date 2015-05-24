@@ -1238,7 +1238,9 @@ Feed.register_feed(
     noun = "bill",
     link = lambda feed: Bill.from_feed(feed).get_absolute_url(),
     category = "federal-bills",
-    description = "You will get updates when this bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when a committee meeting is scheduled, when bill text becomes available or when we write a bill summary, plus similar events for related bills."
+    description = "You will get updates when this bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when a committee meeting is scheduled, when bill text becomes available or when we write a bill summary, plus similar events for related bills.",
+    is_subscribable = lambda feed : Bill.from_feed(feed).is_alive,
+    track_button_noun = lambda feed : "This Bill",
     )
 Feed.register_feed(
     "crs:",
