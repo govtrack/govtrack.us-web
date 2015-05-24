@@ -1,4 +1,4 @@
-{% extends 'master.html' %}
+{% extends 'master_a.html' %}
 {% load humanize govtrack_utils %}
 
 {% block body_class %}bills{% endblock %}
@@ -29,7 +29,7 @@ h3 {
 </ul>
 {% endblock %}
 
-{% block body %}
+{% block summary %}
 <div>
 	<a class="back-link-above-h1" href="{{bill.get_absolute_url}}">
 		<span>&lt; Back</span> to {{bill.display_number_no_congress_number}}
