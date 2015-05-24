@@ -445,12 +445,11 @@ def financial_report(request):
 def go_ad_free_start(request):
     # just show the go-ad-free page.
     
-    is_ad_free = False
-    
+    msi = { }
     if not request.user.is_anonymous():
-        is_ad_free = request.user.userprofile().get_ad_free_message()
+        msi = request.user.userprofile().get_membership_subscription_info()
         
-    return { "is_ad_free": is_ad_free }
+    return { "msi": msi }
     
 def go_ad_free_redirect(request):
     # create a Payment and redirect to the approval step, and track this
@@ -458,7 +457,7 @@ def go_ad_free_redirect(request):
     if request.user.is_anonymous():
         return HttpResponseRedirect(reverse(go_ad_free_start))
         
-    if request.user.userprofile().get_ad_free_message():
+    if request.user.userprofile().get_membership_subscription_info()['active']:
         raise ValueError("User already has this feature.")
     
     import paypalrestsdk

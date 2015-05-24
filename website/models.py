@@ -26,31 +26,37 @@ class UserProfile(models.Model):
         # return lists with trackers with email updates turned on
         return SubscriptionList.objects.filter(user=self.user, email__gt=0, trackers__id__gt=0).distinct().order_by('name')
 
-    def get_ad_free_message(self):
-        if not self.paid_features: return False
-
+    def get_membership_subscription_info(self):
         from datetime import datetime, timedelta
+
+        ret = {
+            "active": False,
+        }
         
-        if self.paid_features.get("ad_free_year"):
+        if self.paid_features and self.paid_features.get("ad_free_year"):
             ad_free_pmt = self.paid_features['ad_free_year']
             pmt = PayPalPayment.objects.get(paypal_id = ad_free_pmt[0])
-            if pmt.created > (datetime.now() - timedelta(days=0.5)):
-                return "Thanks for your one-year membership subscription."
+            expires = pmt.created.replace(year=pmt.created.year+1)
+            if expires >= datetime.now():
+                ret["active"] = True
+                if pmt.created > (datetime.now() - timedelta(days=0.5)):
+                    # User just took this action.
+                    ret["message"] = "Thanks for your one-year membership subscription which expires on %s." % expires.strftime("%x")
+                else:
+                    ret["message"] = "You started your membership subscription on %s. Your subscription expires on %s. Thanks!" % (pmt.created.strftime("%x"), expires.strftime("%x"))
             else:
-                return "You started your membership subscription on %s. Your subscription expires on %s. Thanks!" % (
-                	pmt.created.strftime("%x"),
-                	pmt.created.replace(year=pmt.created.year+1).strftime("%x") )
-        elif self.paid_features.get("ad_free_life"):
+                ret["message"] = "Your membership subscription expired on %s." % expires.strftime("%x")
+
+        elif self.paid_features and self.paid_features.get("ad_free_life"):
+            ret["active"] = True
             ad_free_pmt = self.paid_features['ad_free_life']
             pmt = PayPalPayment.objects.get(paypal_id = ad_free_pmt[0])
             if pmt.created > (datetime.now() - timedelta(days=0.5)):
                 return "Thanks for your subscription to an ad-free GovTrack for life!"
             else:
                 return "You went ad-free for life on %s. Thanks!" % pmt.created.strftime("%x")
-        else:
-            return False
-            
 
+        return ret
 
 def get_user_profile(user):
     if hasattr(user, "_profile"): return user._profile

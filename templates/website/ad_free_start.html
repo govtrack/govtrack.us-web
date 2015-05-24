@@ -19,7 +19,9 @@
 	<div class="col-sm-6">
 		<p>GovTrack is a pay-what-you-like service. That means that while you can get everything for free, you can also help support our work through a membership subscription.</p>
 
-		{% if not request.user.is_authenticated or not is_ad_free %}
+		{% if not msi.active %}
+			<p><strong>{{msi.message}}</strong></p> {# expiration info #}
+
 			<h3>How much does it cost?</h3>
 
 			<p>The cost of a membership subscription is $35 per year.</p>
@@ -56,8 +58,8 @@
 				</div>
 			</div>
 		
-		{% elif is_ad_free %}
-			<p><strong>{{is_ad_free}}</strong></p>
+		{% elif msi.active %}
+			<p><strong>{{msi.message}}</strong></p>
 			
 			<p>If you have any questions about your payment, please <a href="/contact">contact us</a>.</p>
 			

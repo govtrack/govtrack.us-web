@@ -73,9 +73,11 @@ h2 { font-size: 18px; border-bottom: 1px solid #444; }
 	
 	<h2 style="margin-top: 1.5em"><span>Other Account Issues</span></h2>
 	
-	{% if user.userprofile.paid_features.ad_free_life or user.userprofile.paid_features.ad_free_year %}
-		<p>{{user.userprofile.get_ad_free_message}} More about <a href="/accounts/membership">GovTrack Membership</a>.</p>
+	{% with user.userprofile.get_membership_subscription_info as msi %}
+	{% if msi.message %}
+		<p>{{msi.message}} More about <a href="/accounts/membership">GovTrack Membership</a>.</p>
 	{% endif %}
+	{% endwith %}
 	
 	<p style="margin-top: 1em">For other account issues, please <a href="/contact">contact us</a>.</p>
 </div>
