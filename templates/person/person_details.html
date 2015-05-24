@@ -47,11 +47,13 @@
 
 {% block summary %}
 <div class="h1-multiline">
-	<h1>{{person.name_and_title}}</h1>
+	<h1>
+		{{person.name_and_title}}
+		{% if role %}({{role.party.0}}){% endif %}
+	</h1>
 	{% if role and active_role and role.leadership_title %}<p>{{role.leadership_title_full}}</p>{% endif %}
 	<p>
 		{% if not active_role %}Former {% endif %}
-		{{role.party}}
 		{{ role.get_title }}
 		{% if role.state %}from
 			{{ role.get_state_display }}{% if role.district == 0 %}&rsquo;s At-Large District {% endif %}{% if role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District {% endif %}{% endif %}
