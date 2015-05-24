@@ -1,41 +1,58 @@
 {% extends "master.html" %}
-{% block title %}GovTrack.us - Go Ad-Free{% endblock %}
+{% block title %}GovTrack.us - Membership Subscriptions{% endblock %}
 {% block head %}
 <style>
-	#adfreedetails {
-		padding: 0 1.5em;
+	.adfreedetails {
+		padding: 0 1.75em;
+		margin-bottom: 1em;
 	}
-	#adfreedetails li {
+	.adfreedetails li {
 		margin: .75em 0;
 	}
 </style>
 {% endblock %}
 
 {% block body %}
-<h1>Go Ad-Free!</h1>
+<h1>GovTrack.us Membership Subscriptions</h1>
 <div class="row">
 
 	<div class="col-sm-6">
-	
-		<p>For a $35 subscription, we&rsquo;ll hide all of the advertisements on GovTrack.us for a year. Plus, you&rsquo;ll be supporting our work in government transparency and improving access to the law.</p>
+		<p>GovTrack is a pay-what-you-like service. That means that while you can get everything for free, you can also help support our work through a membership subscription.</p>
+
+		{% if not request.user.is_authenticated or not is_ad_free %}
+			<h3>How much does it cost?</h3>
+
+			<p>The cost of a membership subscription is $35 per year.</p>
+
+			<h3>What do you get with a membership subscription?</h3>
+
+			<ul class="adfreedetails">
+			<li>We&rsquo;ll hide all of the advertisements so you can have a less distracted browsing experience.</li>
+			<li>You&rsquo;ll have the joy of supporting our work in government transparency and improving access to the law.</li>
+			</ul>
+
+			<h3>Where do I sign up?</h3>
+			<p>Right here:</p>
+		{% endif %}
 		
 		{% if not request.user.is_authenticated %}
-			<p><a class="push-btn green-btn" href="#" onclick="$(this).parent().hide(); $('#adfreelogin').slideDown(); return false;">Subscribe &nbsp; ▶</a></p>
+			<p><a class="btn btn-success" href="#" onclick="$(this).parent().hide(); $('#adfreelogin').slideDown(); return false;">Become a Member &nbsp; ▶</a></p>
 
 			<div id="adfreelogin" style="display: none">
-				<p>You must be logged in to go ad-free.</p>
+				<p>Please create a GovTrack account to begin:</p>
 		
+				{% url "website.views.go_ad_free_redirect" as redirect_url %}
 				<div style="width: 50%;">
 				<div class="signin_social" style="margin-left: 2em;">
-					{% with "/accounts/go_ad_free" as singlesignon_next %}
+					{% with redirect_url as singlesignon_next %}
 						{% include "registration/login_singlesignon.html" %}
 					{% endwith %}
 					<p style="margin: .5em 0 1.5em 0; font-size: 90%;">Use single-sign-on above or register by clicking the appropriate button below.</p>
 				</div>
 				<div style="clear: both"> </div>
 				
-				<a class="button" href="/registration/signup?next=/accounts/go_ad_free" style="margin-bottom: .5em">Register a New Account</a>
-				<a class="button" href="/accounts/login?next=/accounts/go_ad_free">Existing User Log In</a>
+				<a class="button" href="/registration/signup?next={{redirect_url}}" style="margin-bottom: .5em">Register a New Account</a>
+				<a class="button" href="/accounts/login?next={{redirect_url}}">Existing User Log In</a>
 				</div>
 			</div>
 		
@@ -59,7 +76,7 @@
 			<div class="panel-heading">Details</div>
 			<div class="panel-body">
 		
-		<ul id="adfreedetails">
+		<ul class="adfreedetails">
 			<li>You must be logged in for the ads to be hidden.</li>
 			<li>We&rsquo;re only accepting payment via PayPal right now. You can use a credit card, but you&rsquo;ll need to create a PayPal account first.</li>
 			<li>If you&rsquo;re not happy and want the ads back, we&rsquo;ll send you a refund no-questions-asked within 7 days of your payment.</li>

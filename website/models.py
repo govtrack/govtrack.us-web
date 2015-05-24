@@ -35,9 +35,9 @@ class UserProfile(models.Model):
             ad_free_pmt = self.paid_features['ad_free_year']
             pmt = PayPalPayment.objects.get(paypal_id = ad_free_pmt[0])
             if pmt.created > (datetime.now() - timedelta(days=0.5)):
-                return "Thanks for your one-year subscription to an ad-free GovTrack!"
+                return "Thanks for your one-year membership subscription."
             else:
-                return "You went ad-free on %s. Your subscription expires on %s. Thanks!" % (
+                return "You started your membership subscription on %s. Your subscription expires on %s. Thanks!" % (
                 	pmt.created.strftime("%x"),
                 	pmt.created.replace(year=pmt.created.year+1).strftime("%x") )
         elif self.paid_features.get("ad_free_life"):
