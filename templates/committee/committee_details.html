@@ -40,23 +40,27 @@
 				</p>
 		    {% endif %}
 
-			<dl class="wide">
+			<dl class="dl-horizontal wide" style="margin-bottom: .5em">
 				{% for mem in member_highlights %}
-					<dt>{{mem.get_role_display}}</dt>
+					<dt>{{mem.get_role_display}}:</dt>
 					<dd><a href="{{mem.person.get_absolute_url}}">{{mem.person}}</a></dd>
 				{% endfor %}
 			</dl>
-			{% if member_highlights|length > 0 %}
-			<p style="margin-top: .5em; line-height: 110%"><small>The chairman is always selected from the majority party. The ranking member is the most senior member of the minority party.</small></p>
-			{% endif %}
-			
-			<dl class="wide" style="margin-top: 1em">
+			<dl class="dl-horizontal wide" style="margin-bottom: .5em">
 				{% for party, count in party_counts %}
-					<dt>{{party}}s</dt>
+					<dt>{{party}}s:</dt>
 					<dd>{{count}}</dd>
 				{% endfor %}
 			</dl>
 
+			<p style="line-height: 110%"><small>
+			{% if member_highlights|length > 0 %}
+			The chairman is always selected from the majority party and the ranking member is the most senior member of the minority party.
+			{% endif %}
+			{% if party_counts|length > 0 %}
+			The majority party ensures it has a majority on every committee.
+			{% endif %}
+			
 			{% if members|length == 0 %}
 			<p>The membership of this committee is not yet available.</p>
 			{% endif %}
