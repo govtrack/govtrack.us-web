@@ -1007,11 +1007,9 @@ header ul, footer ul {
 /* ================================================== */
 
 .stats {
-	width: 620px;
-	float: left;
-	border-collapse: collapse;
 	text-align: center;
 	margin-left: 21px;
+	margin-bottom: 1em;
 	}
 	.stats:first-child {
 		margin-left: 0;
@@ -1040,7 +1038,7 @@ header ul, footer ul {
 		}
 		.stats thead th {
 			height: 30px;
-			padding: 0;
+			padding: 0 4px;
 			vertical-align: middle;
 			text-align: center;
 			border: 1px solid #c4c1b5;

@@ -1,4 +1,4 @@
-{% extends 'master_a.html' %}
+{% extends 'master.html' %}
 {% load humanize govtrack_utils %}
 
 {% block title %}{{ vote.question }} -- GovTrack.us{% endblock %}
@@ -71,9 +71,8 @@ function show_table() {
 	if (ncols > 3) ncols = 3;
     for (var i = 0; i < ncols; i++) {
         var group = table.clone(true);
-        group.attr('style', '');
+        group.attr('style', 'float: left');
         group.attr('id', '');
-        group.addClass('stats');
         group.css({ width: $('#vote-details').innerWidth()/ncols - (21*(ncols-1))/ncols - 2 })
         $('#vote-columns').append(group);
         
@@ -165,7 +164,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 </ul>
 {% endblock %}
 
-{% block summary %}
+{% block body %}
 
 <h1 class="long">{{ vote.question }}</h1>
 
@@ -240,14 +239,12 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 {% if has_vp_vote %}<p style="margin: 1em 0 0 0">The Vice President cast a tie-breaking vote.</p>{% endif %}
     
 <p id="yourreps" class="hidden" style="margin-bottom: 0"></p>
-{% endblock %}
-
-{% block body %}
 
 <hr>
 
 {% with vote.totals as totals %}
-<div class="section">
+<div class="row">
+<div class="col-sm-8">
     <table class="stats">
         <thead>
             <tr>
@@ -311,14 +308,14 @@ onUserDistrictChanged(function (cong_dist, mocs) {
             {% endcomment %}
         </tbody>
     </table>
-    
+</div>
     {% if has_diagram %}
-    <aside>
-		<div style="width: 320px;">
-	    	<img src="{{ vote.get_absolute_url }}/diagram" style="width: 320px; height: 170px" />
-    		<div style="text-align: right; color: #777;"><small>Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</small></div>
-		</div>
-    </aside>
+    <div class="col-sm-4">
+        <div style="margin: auto; max-width: 225px">
+	    	<img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" />
+    		<div style="text-align: center; color: #777; line-height: 130%; font-size: 12px; margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
+        </div>
+    </div>
     {% endif %}
 </div>
 
@@ -382,7 +379,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 </div>
 </div>
 
-        <table id="vote-list-template" class="vote-list" style="display: none">
+        <table id="vote-list-template" class="vote-list stats" style="display: none">
             <thead class="sortable">
                 <tr>
                     <th>Vote</th>
