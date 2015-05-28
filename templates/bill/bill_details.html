@@ -86,7 +86,7 @@
 #action-panel h2 { font-size: 16px; }
 
 .dl-horizontal dd {
-	padding-bottom: .25em;
+	padding-bottom: .33em;
 }
 .dl-horizontal dd a {
 	font-weight: bold;
@@ -261,8 +261,8 @@ p#yourreps {
 					{% elif bill.source == "statutesatlarge" and bill.noun == "resolution" %}
 						<p>Enacted or Agreed to on {{bill.current_status_date}}</p>
 					{% elif not dead %}
-						<div><strong>{{bill.get_current_status_display}}</strong>
-						<br> on <strong>{{bill.current_status_date}}</strong></div>
+						<p><strong>{{bill.get_current_status_display}}</strong>
+						on <strong>{{bill.current_status_date}}</strong></p>
 						<p>{{bill.current_status_description}}</p>
 
 						{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
@@ -305,10 +305,11 @@ p#yourreps {
 							</a>
 						</div>
 					{% endif %}
-					<p>
-						<a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
-						<br><small>{{bill.sponsor_role.get_description}}</small>
-						<br><small>{{bill.sponsor_role.party}}</small></p>
+					<div>
+						<p><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a></p>
+						<p class="small">{{bill.sponsor_role.get_description}}</p>
+						<p class="small">{{bill.sponsor_role.party}}</p>
+					</div>
 					<div style="clear: both"></div>
 				</dd>
 				{% endif %}

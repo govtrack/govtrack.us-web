@@ -848,10 +848,14 @@ header ul, footer ul {
 		dl.dl-horizontal dd {
 			margin-left: 100px;
 		}
-			#content dl.dl-horizontal dd p {
+			dl.dl-horizontal dd p {
 				line-height: 127%;
-				margin-bottom: .5em;
+				margin-bottom: .33em;
 			}
+				dl.dl-horizontal dd p:first-child {
+					line-height: inherit;
+					margin-bottom: .1em;
+				}
 		dl.dl-horizontal.wide dt {
 			width: 130px;
 			}
