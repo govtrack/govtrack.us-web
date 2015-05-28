@@ -17,10 +17,14 @@
 <ul><li><a href="/blog">GovTrack.us Blog</a></li> <li><a href="(?php bloginfo('rss2_url'); ?>" class="RSS">RSS</a></li></ul>
 {% endblock %}
 
-{% block override_content %}
-<div id="content" class="row">
+{% block body_with_container %}
+<div class="container">
+    <div id="content">
 (SPLIT)
-</div>
+    </div><!-- /content -->
 (?php wp_footer(); ?>
+</div> <!-- /container -->
 {% endblock %}
+
+
 
