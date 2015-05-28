@@ -1,0 +1,14 @@
+{
+	"conformsTo":"http://codefordc.org/resources/specification.html",
+	"status": "Production",
+	"contact": {
+		"name": "GovTrack.us",
+		"email": "hello@govtrack.us",
+		"twitter": "@GovTrack"
+	},
+	"thumbnailUrl": "https://www.govtrack.us/static/logo_hires.png",
+	"geography": "United States",
+	"politicalEntity": { "United States Congress": null },
+	"type": "Web App",
+	"categories": [ { "category": "Politics" }]
+}
