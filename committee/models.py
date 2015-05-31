@@ -84,12 +84,15 @@ class Committee(models.Model):
     def committee_type_abbrev(self):
         return CommitteeType.by_value(self.committee_type).abbrev
 
-    def current_bills(self):
-        return self.bills.filter(congress=CURRENT_CONGRESS)
+    def has_current_bills(self):
+        return self.bills.filter(congress=CURRENT_CONGRESS).exists()
     def current_bills_sorted(self):
-        bills = self.current_bills()
-        biils = sorted(bills, key = lambda x : -x.proscore())
-        return bills[0:100]
+        from haystack.query import SearchQuerySet
+        qs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], congress=CURRENT_CONGRESS, committees=self.id).order_by('-proscore')
+        return {
+            "count": qs.count(),
+            "bills": [ b.object for b in qs[0:100] ],
+            }
 
     def get_feed(self, feed_type=""):
         if feed_type not in ("", "bills", "meetings"): raise ValueError(feed_type)

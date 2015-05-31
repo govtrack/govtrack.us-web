@@ -148,11 +148,12 @@
 		{% endif %}
 		
 		<div id="activity">
-				{% if committee.current_bills.count > 0 %}
-					<p>There are <a href="/congress/bills/browse#committees={{committee.id}}">{{committee.current_bills.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>{% if committee.current_bills.count > 100 %}. Below find the top 100{% endif %}:</p>
+				{% if committee.has_current_bills %}
+					{% with committee.current_bills_sorted as current_bills_sorted %}
+					<p>There are <a href="/congress/bills/browse#committees={{committee.id}}">{{current_bills_sorted.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>{% if current_bills_sorted.count > 100 %}. Below find the top 100{% endif %}:</p>
 
 					<ul id="committee_bill_list">
-					{% for bill in committee.current_bills_sorted %}
+					{% for bill in current_bills_sorted.bills %}
 						<li>
 							<a href="{{bill.get_absolute_url}}">{{bill|truncatewords:50}}</a>
 							<br>Sponsor: {{bill.sponsor}}
@@ -160,6 +161,7 @@
 						</li>
 					{% endfor %}
 					</ul>
+					{% endwith %}
 
 				{% elif committee.bills.count > 0 %}
 					<p>Browse <a href="/congress/bills/browse#committees={{committee.id}}&congress=__ALL__">{{committee.bills.count|intcomma}} bills previously referred to this {% if parent %}sub{% endif %}committee</a>.</p>
