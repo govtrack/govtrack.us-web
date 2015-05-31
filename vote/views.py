@@ -101,6 +101,9 @@ def vote_details(request, congress, session, chamber_code, number):
     # did any Senate leaders switch their vote for a motion to reconsider?
     reconsiderers = vote.possible_reconsideration_votes(voters)
     reconsiderers_titles = "/".join(v.person.role.leadership_title for v in reconsiderers)
+
+    # compute statistical outliers (this marks the Voter instances with an is_outlier attribute)
+    get_vote_outliers(voters)
     
     return {'vote': vote,
             'voters': voters,
@@ -129,6 +132,36 @@ def load_ideology_scores(congress):
                 ideology_scores[congress]["MEDIAN:"+party] = median(scores_by_party[party])
         except IOError:
             ideology_scores[congress] = None
+
+def get_vote_outliers(voters):
+	# Run a really simple statistical model to see which voters don't
+	# match predicted outcomes.
+
+	import numpy
+	from logistic_regression import logistic_regression, calcprob
+
+	# Build a binary matrix of predictors.
+	predictor_names = ('party', 'ideolog_score')
+	party_values = { "Democrat": -1, "Republican": 1 }
+	vote_values = { "+": 1, "-": 0 }
+	x = [ [] for predictor in predictor_names ]
+	y = [ ]
+	for voter in voters:
+		x[0].append(party_values.get(voter.person.role.party if voter.person and voter.person.role else None, 0)) # independents and unrecognized parties get 0
+		x[1].append(getattr(voter, 'ideolog_score', 0)) # ideology scores may not be available in a Congress, also not available for vice president
+		y.append(vote_values.get(voter.option.key, .5)) # present, not voting, etc => .5
+	x = numpy.array(x)
+	y = numpy.array(y)
+
+	# Perform regression.
+	regression_beta, J_bar, l = logistic_regression(x, y)
+
+	# Predict votes.
+	estimate = calcprob(regression_beta, x)/100.0
+
+	# Mark voters whose vote is far from the prediction.
+	for i, v in enumerate(voters):
+		v.is_outlier = (abs(y[i]-estimate[i]) > .66)
 
 @anonymous_view
 def vote_export_csv(request, congress, session, chamber_code, number):

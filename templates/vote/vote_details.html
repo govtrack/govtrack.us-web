@@ -28,6 +28,11 @@
     #vote-details td, #vote-details th {
         font-size: 12px;
     }
+
+    #vote-details .all-voters tr.voter_outlier td {
+        font-weight: bold;
+        color: black;
+    }
 	</style>
 {% endblock %}
 {% block og_image %}
@@ -41,30 +46,56 @@
 {% block extra_js %}
 <script type="text/javascript">
 var current_sort_column = null;
-function show_table() {
+function update_table() {
+    update_grouping_rows();
+    var has_outliers = show_table($("#vote-details-outliers"), true, "Notable Votes");
+    show_table($("#vote-details-all"), false, has_outliers ? "All Votes" : null);
+}
+function update_grouping_rows() {
+    // Add in grouping rows based on the chosen sort order.
+    var table = $('#vote-list-template');
+    table.find(".group").remove();
+    var rows = table.find("tr");
+    var last_seen_group = null;
+    for (var j = 1; j < rows.length; j++) {
+        var gr = $(rows[j]).attr('voter_group_' + current_sort_column);
+        if (gr != last_seen_group) {
+            var extra_row = $("<tr class='group'><td colspan='4'/></tr>");
+            extra_row.find("td").text(gr);
+            extra_row.insertBefore($(rows[j]));
+            last_seen_group = gr;
+        }
+    }
+}
+function show_table(container, only_outliers, title) {
 	// We achieve a multi-column layout by cloning the table three
 	// times (or as many as will fit) and then removing the elements
 	// we don't want to include.
     var table = $('#vote-list-template');
     
-    // First, add in grouping rows based on the chosen sort order.
-    table.find(".group").remove();
-	var rows = table.find("tr");
-    var last_seen_group = null;
-	for (var j = 1; j < rows.length; j++) {
-		var gr = $(rows[j]).attr('voter_group_' + current_sort_column);
-		if (gr != last_seen_group) {
-			var extra_row = $("<tr class='group'><td colspan='4'/></tr>");
-			extra_row.find("td").text(gr);
-			extra_row.insertBefore($(rows[j]));
-			last_seen_group = gr;
-		}
-	}
+    if (only_outliers) {
+        // Make an intermediate clone that only contains the outliers.
+        table = table.clone();
+        table.find('tbody tr:not(.voter_outlier)').remove();
+        if (table.find('tr').length == 0)
+            return false;
+    }
 
     // To prevent scrolling issues when redoing the tables, set a height
     // before clearing the old columns.
-    $('#vote-columns').height($('#vote-columns').outerHeight());
-    $("#vote-columns").text('');
+    container.height(container.outerHeight());
+
+    // Clear.
+    container.text('');
+
+    // Add header.
+    if (title)
+        container.append($('<h3/>').text(title));
+
+    // Because we use :first-child, we must nest the actual tables when there's
+    // a title <h3>.
+    var container2 = $('<div/>');
+    container.append(container2);
     
 	// Clone and remove the unwanted rows.
 	var ncols = Math.floor($('#vote-details').innerWidth() / 320);
@@ -74,8 +105,13 @@ function show_table() {
         group.attr('style', 'float: left');
         group.attr('id', '');
         group.css({ width: $('#vote-details').innerWidth()/ncols - (21*(ncols-1))/ncols - 2 })
-        $('#vote-columns').append(group);
-        
+        container2.append(group);
+
+        if (!only_outliers)
+            group.addClass('all-voters');
+        else
+            group.find(".group").remove(); // hide
+
         var count = table.find('tr').length - 1;
         var rows = group.find("tr");
         for (var j = 1; j < rows.length; j++) {
@@ -84,8 +120,10 @@ function show_table() {
         }
     }
 
-    $('#vote-columns').append($('<div class="clearfix"/>'))
-    $('#vote-columns').css({ height: 'auto' })
+    container.append($('<div class="clearfix"/>'))
+    container.css({ height: 'auto' })
+
+    return true;
 }
 function get_sort_func(order_indexes) {
     function sort_key(n) {
@@ -126,14 +164,14 @@ $(function() {
 
         $('#vote-list-template tbody tr').sortElements(get_sort_func(sorting));
         
-        show_table();
+        update_table();
     });
     
     // initial sort
     current_sort_column = 3;
     $('#vote-list-template tbody  tr').sortElements(get_sort_func([3,2,0]));
-    show_table();
-    $(window).resize(show_table)
+    update_table();
+    $(window).resize(update_table);
 }); 
 </script>
 {% endblock %}
@@ -396,6 +434,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
             	voter_group_1="{% if voter.voter_type != 1 %}{{ voter.person.role.party }}{% endif %}"
             	voter_group_3="{% if voter.voter_type_is_member %}{{ voter.person.role.state_name }}{% elif voter.voter_type == 2 %}The Vice President{% endif %}"
                 voter_sort_3="{% if voter.voter_type_is_member %}{{ voter.person.role.state_name }} {{ voter.person.role.district|rjust:3 }}{% elif voter.voter_type == 2 %}00{% endif %}"
+                class="{% if voter.is_outlier %}voter_outlier{% endif %}"
             	>
                 <td class="vote_{{ voter.option.alpha_key }}"><nobr>{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</nobr></td>
                 <td>
@@ -415,10 +454,10 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                     {% if voter.voter_type == 1 %}
                         [Information Missing]
                     {% elif voter.voter_type == 2 %}
-                    	 <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
+                    	 <a href="{{ voter.person.get_absolute_url }}" style="color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
                         <br/>(The Vice President)
                     {% elif voter.voter_type == 3 %}
-                        <a href="{{ voter.person.get_absolute_url }}" style="font-weight: normal; color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
+                        <a href="{{ voter.person.get_absolute_url }}" style="color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
                     {% endif %}
                 </td>
                 <td>
@@ -436,7 +475,9 @@ onUserDistrictChanged(function (cong_dist, mocs) {
         </tbody>
         </table>
 
-        <div id="vote-columns">
+        <div id="vote-details-outliers">
+        </div>
+        <div id="vote-details-all">
         </div>
 </div>
 </div>
