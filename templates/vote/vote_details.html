@@ -29,6 +29,10 @@
         font-size: 12px;
     }
 
+	#vote-details a.note {
+		cursor: pointer;
+	}
+
     #vote-details .all-voters tr.voter_outlier td {
         font-weight: bold;
         color: black;
@@ -140,6 +144,7 @@ function get_sort_func(order_indexes) {
 }
 
 function show_notes(elem) {
+	if (typeof elem == 'string') elem = $('[data-id=' + elem + ']')[0];
 	show_modal($(elem).text(), "<div>" + $("#notes_" + $(elem).attr('data-id')).html() + "</div>");
 	return false;
 }
@@ -381,7 +386,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 	{% endif %}
 
     {% if reconsiderers.0|length > 0 %}
-    <a href="#" onclick="return show_notes(this)" data-id="motiontoreconsider">{{reconsiderers.1}}&rsquo;s Vote</a>
+    <a href="#" onclick="return show_notes(this)" data-id="motiontoreconsider">*{{reconsiderers.1}}&rsquo;s Vote</a>
     <div id="notes_motiontoreconsider" class="popup-content">
         {% for v in reconsiderers.0 %}
             <p>{{v.person.role.get_title_abbreviated}} {{v.person.name_no_details}} ({{v.person.role.party.0}}), the {{v.person.role.leadership_title}}, voted {{v.option.value}} against {{v.person.his_her}} party.</p>
@@ -458,6 +463,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                         <br/>(The Vice President)
                     {% elif voter.voter_type == 3 %}
                         <a href="{{ voter.person.get_absolute_url }}" style="color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
+						{% if voter in reconsiderers.0 %}<a class="note" title="See note above." onclick="return show_notes('motiontoreconsider')">*</span>{% endif %}
                     {% endif %}
                 </td>
                 <td>
