@@ -154,7 +154,11 @@ def get_vote_outliers(voters):
 	y = numpy.array(y)
 
 	# Perform regression.
-	regression_beta, J_bar, l = logistic_regression(x, y)
+	try:
+		regression_beta, J_bar, l = logistic_regression(x, y)
+	except ValueError:
+		# Something went wrong. No outliers will be reported.
+		return
 
 	# Predict votes.
 	estimate = calcprob(regression_beta, x)/100.0

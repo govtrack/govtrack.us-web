@@ -81,7 +81,7 @@ function show_table(container, only_outliers, title) {
         // Make an intermediate clone that only contains the outliers.
         table = table.clone();
         table.find('tbody tr:not(.voter_outlier)').remove();
-        if (table.find('tr').length == 0)
+        if (table.find('tbody tr').length == 0)
             return false;
     }
 
