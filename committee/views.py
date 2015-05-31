@@ -11,6 +11,9 @@ from events.models import Feed
 
 from datetime import datetime
 
+from twostream.decorators import anonymous_view
+
+@anonymous_view
 @render_to('committee/committee_details.html')
 def committee_details(request, parent_code, child_code=None):
     if child_code:
@@ -44,6 +47,7 @@ def committee_details(request, parent_code, child_code=None):
             "party_counts": party_counts,
             }
 
+@anonymous_view
 @render_to('committee/committee_list.html')
 def committee_list(request):
     from events.models import Feed
@@ -73,6 +77,7 @@ class sitemap(django.contrib.sitemaps.Sitemap):
     def items(self):
         return Committee.objects.filter(obsolete=False)
 
+@anonymous_view
 @render_to("committee/calendar.html")
 def committee_calendar(request):
     committee_meetings = list(CommitteeMeeting.objects.filter(when__gte=datetime.now().date()).order_by()\
