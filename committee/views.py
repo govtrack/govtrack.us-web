@@ -11,7 +11,7 @@ from events.models import Feed
 
 from datetime import datetime
 
-from twostream.decorators import anonymous_view
+from twostream.decorators import anonymous_view, user_view_for
 
 @anonymous_view
 @render_to('committee/committee_details.html')
@@ -46,6 +46,18 @@ def committee_details(request, parent_code, child_code=None):
             "member_highlights": [m for m in members if m.role in (CommitteeMemberRole.chairman, CommitteeMemberRole.vice_chairman, CommitteeMemberRole.ranking_member)],
             "party_counts": party_counts,
             }
+
+
+@user_view_for(committee_details)
+def committee_details_user_view(request, parent_code, child_code=None):
+    committee = get_object_or_404(Committee, code=parent_code+(child_code if child_code else ""))
+
+    ret = { }
+
+    from person.views import render_subscribe_inline
+    ret.update(render_subscribe_inline(request, committee.get_feed()))
+
+    return ret
 
 @anonymous_view
 @render_to('committee/committee_list.html')

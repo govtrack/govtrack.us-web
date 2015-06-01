@@ -76,8 +76,8 @@
 	
 
 	<div class="aside col-sm-4">
-		{% include "events/subscribe_inline.html" %}
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track Committee</a>
+		<div id="event_subscribe_inline_container"> </div>
 	</div><!-- /aside -->
 
 </div><!-- /container -->
@@ -183,7 +183,11 @@
 	</div><!-- /panes -->
 </div><!-- /.twelve.columns -->
 
-<script>$("ul.tabs li a").tabs("div.panes > div");</script>
-
 {% endblock %}
 
+{% block body_scripts %}
+<script>
+$("ul.tabs li a").tabs("div.panes > div");
+$('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
+</script>
+{% endblock %}
