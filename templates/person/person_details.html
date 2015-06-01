@@ -124,7 +124,9 @@
 		<p>Our unique analysis of the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored provides insight into {{ person.his_her }}
 		position in the {{analysis_data.sponsorship.chamber}}.</p>
 
-		<p>Each dot in the chart below is a member of the {{analysis_data.sponsorship.chamber}}. The dots are positioned horizontally according
+		<p>Each dot in the chart below {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a member of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %}
+		in {{analysis_data.sponsorship.end_date.year}}{% endif %}.
+		 The dots are positioned horizontally according
 		to our progressive&mdash;conservative ideology score and vertically according to our leadership score (leaders toward the top).
 		{{ person.lastname }} is shown as a purple triangle. <small>(<a href="/about/analysis">analysis methodology</a>)</small></p>
 
@@ -271,7 +273,15 @@
 	{% if analysis_data.missedvotes %}
 	<section id="voting-record">
 		<h2><span>Voting Record</span></h2>
-		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed|intcomma}} of {{analysis_data.missedvotes.total|intcomma}} roll call votes, which is {{analysis_data.missedvotes.percent}}%. This is {% if analysis_data.missedvotes.percent <= analysis_data.missedvotes.pctile50 %}better{% else %}worse{% endif %} than the median of {{analysis_data.missedvotes.pctile50|floatformat:1}}% among the lifetime records of {% if analysis_data.missedvotes.chamber == 's' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
+		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed|intcomma}} of {{analysis_data.missedvotes.total|intcomma}} roll call votes, which is {{analysis_data.missedvotes.percent}}%.
+		This is
+		{% if analysis_data.missedvotes.percentile < 35 %}better than
+		{% elif analysis_data.missedvotes.percentile <= 65 %}on par with
+		{% elif analysis_data.missedvotes.percentile <= 80 %}worse than
+		{% else %}much worse than
+		{% endif %}
+		the median of {{analysis_data.missedvotes.pctile50|floatformat:1}}%
+		among the lifetime records of {% if analysis_data.missedvotes.chamber == 's' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
 		The chart below reports missed votes over time.</p>
 		<div id="voting_record_chart"> </div>
 		<script>

@@ -122,8 +122,8 @@ ideology = vT[1,:]</pre>
 		<script>
 		$(document).ready(function() {
 			{% cache 12000 analysis_methods_ideology %}
-			make_sponsorship_chart("sponsorship_analysis_chart_senate", 'Senate ({{ideology.senate.start_date|escapejs}} to {{ideology.senate.end_date|escapejs}})', {{ideology.senate.series|safe}}, false);
-			make_sponsorship_chart("sponsorship_analysis_chart_house", 'House ({{ideology.house.start_date|escapejs}} to {{ideology.house.end_date|escapejs}})', {{ideology.house.series|safe}}, false);
+			make_sponsorship_chart("sponsorship_analysis_chart_senate", 'Senate ({{ideology.senate.start_date|date}} to {{ideology.senate.end_date|date}})', {{ideology.senate.series|safe}}, false);
+			make_sponsorship_chart("sponsorship_analysis_chart_house", 'House ({{ideology.house.start_date|date}} to {{ideology.house.end_date|date}})', {{ideology.house.series|safe}}, false);
 			{% endcache %}
 		});
 		</script>
@@ -204,8 +204,8 @@ def onenorm(u): return sum(abs(u))</pre>
 		<script>
 		$(document).ready(function() {
 			{% cache 12000 analysis_methods_leadership %}
-			make_sponsorship_chart("sponsorship_analysis_chart_senate2", 'Senate ({{ideology.senate.start_date|escapejs}} to {{ideology.senate.end_date|escapejs}})', {{ideology.senate.series|safe}}, false);
-			make_sponsorship_chart("sponsorship_analysis_chart_house2", 'House ({{ideology.house.start_date|escapejs}} to {{ideology.house.end_date|escapejs}})', {{ideology.house.series|safe}}, false);
+			make_sponsorship_chart("sponsorship_analysis_chart_senate2", 'Senate ({{ideology.senate.start_date|date}} to {{ideology.senate.end_date|date}})', {{ideology.senate.series|safe}}, false);
+			make_sponsorship_chart("sponsorship_analysis_chart_house2", 'House ({{ideology.house.start_date|date}} to {{ideology.house.end_date|date}})', {{ideology.house.series|safe}}, false);
 			{% endcache %}
 		});
 		</script>

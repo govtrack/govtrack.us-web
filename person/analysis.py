@@ -70,10 +70,10 @@ def load_sponsorship_analysis2(congressnumber, role_type, person):
             
     if person and not "ideology" in data: return None
     
-    try:
-        data.update(json.load(open(fname.replace(".txt", "_meta.txt"))))
-    except IOError:
-        pass # doesn't exist for past congresses
+    data.update(json.load(open(fname.replace(".txt", "_meta.txt"))))
+    from parser.processor import Processor
+    for field in ('start_date', 'end_date'):
+        data[field] = Processor.parse_datetime(data[field])
     
     return data
     
