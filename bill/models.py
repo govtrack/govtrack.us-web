@@ -1289,10 +1289,14 @@ class BillSummary(models.Model):
             return markdown2.markdown(self.content)
 
     def plain_text(self):
-        if self.id >= 75:
-            return self.content
-
         import re
+
+        if self.id >= 75:
+            # Now stored in markdown. Kill links.
+            content = re.sub("\[(.*?)\]\(.*?\)", r"\1", self.content)
+            return content
+
+		# Used to be HTML.
         content = re.sub("<br>|<li>", " \n ", self.content, re.I)
         from django.utils.html import strip_tags
         content = strip_tags(content)
