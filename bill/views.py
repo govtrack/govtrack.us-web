@@ -461,8 +461,10 @@ def load_bill_status_qs(statuses, congress=CURRENT_CONGRESS):
 @render_to('bill/bill_docket.html')
 def bill_docket(request):
     def build_info():
+        # feeds about all legislation that we offer the user to subscribe to
         feeds = [f for f in Feed.get_simple_feeds() if f.category == "federal-bills"]
 
+        # info about bills by status
         groups = [
             (   g[0], # title
                 g[1], # text 1
@@ -473,11 +475,24 @@ def bill_docket(request):
                 )
             for g in bill_status_groups ]
 
+        # legislation coming up
         dhg_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, docs_house_gov_postdate__gt=datetime.datetime.now() - datetime.timedelta(days=10)).filter(docs_house_gov_postdate__gt=F('current_status_date'))
         sfs_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, senate_floor_schedule_postdate__gt=datetime.datetime.now() - datetime.timedelta(days=5)).filter(senate_floor_schedule_postdate__gt=F('current_status_date'))
         coming_up = list(dhg_bills | sfs_bills)
         coming_up.sort(key = lambda b : b.docs_house_gov_postdate if (b.docs_house_gov_postdate and (not b.senate_floor_schedule_postdate or b.senate_floor_schedule_postdate < b.docs_house_gov_postdate)) else b.senate_floor_schedule_postdate, reverse=True)
 
+        # top tracked bills
+        top_bills = Feed.objects\
+            .filter(feedname__startswith='bill:')\
+            .filter(feedname__regex='^bill:[hs][jcr]?%d-' % CURRENT_CONGRESS)
+        top_bills = top_bills\
+            .annotate(count=Count('tracked_in_lists'))\
+            .order_by('-count')\
+            .values('feedname', 'count')\
+            [0:25]
+        top_bills = [(Bill.from_feed(Feed.from_name(bf["feedname"])), bf["count"]) for bf in top_bills]
+
+        # current congrss years
         start, end = get_congress_dates(CURRENT_CONGRESS)
         end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
         current_congress_years = '%d-%d' % (start.year, end.year)
@@ -489,8 +504,11 @@ def bill_docket(request):
             "total": Bill.objects.filter(congress=CURRENT_CONGRESS).count(),
             "current_congress_years": current_congress_years,
             "current_congress": current_congress,
+
             "groups": groups,
             "coming_up": coming_up,
+            "top_tracked_bills": top_bills,
+
             "subjects": subject_choices(),
             "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.referred, BillStatus.reported),
         }

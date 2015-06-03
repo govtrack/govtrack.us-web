@@ -52,7 +52,7 @@ def template_context_processor(request):
     # Add top-tracked feeds.
     from events.models import Feed
     global trending_feeds
-    if settings.DEBUG:
+    if settings.DEBUG and False:
         trending_feeds = [None, []]
     elif not trending_feeds or trending_feeds[0] < datetime.datetime.now()-datetime.timedelta(hours=2):
         trf = cache.get("trending_feeds")
@@ -61,6 +61,7 @@ def template_context_processor(request):
             cache.set("trending_feeds", trf, 60*60*2)
         trending_feeds = (datetime.datetime.now(), [Feed.objects.get(id=f) for f in trf])
     context["trending_feeds"] = trending_feeds[1]
+    context["trending_bill_feeds"] = [f for f in trending_feeds[1] if f.feedname.startswith("bill:")]
 
     # Add site-wide tracked events.
     all_tracked_events = cache.get("all_tracked_events")

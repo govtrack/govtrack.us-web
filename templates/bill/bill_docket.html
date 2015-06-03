@@ -91,10 +91,11 @@ function do_keyword_tracker_submit() {
 
 	<div class="col-sm-7">
 
-<ul class="tabs three-up">
+<ul class="tabs four-up">
 	<li><a href="#docket">Coming Up</a></li>
 	<li><a href="#subjects">By Subject</a></li>
-	<li><a href="#bystatus">Browse By Status</a></li>
+	<li><a href="#bystatus">By Status</a></li>
+	<li><a href="#hot">Hot</a></li>
 </ul>
 
 <div class="panes">
@@ -116,13 +117,13 @@ function do_keyword_tracker_submit() {
 	</div>
 	
 	<div id="bystatus">	
-		<h2>Browse Bills by Status</h2>
+		<h4>Browse Bills by Status</h4>
 	
 		<p>Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
 		{% for name, descr1, descr2, href, count, queryset in groups %}
 		{% if count > 0 %}
-			<h4 style="margin-top: 2em; margin-bottom: .5em">{{name}}</h4>
+			<h5 style="margin-top: 2em; margin-bottom: .5em">{{name}}</h5>
 			
 			{% if 10 > count %}
 				<p>There are {{count|intcomma}} {{descr1}}{{descr2}}:</p>
@@ -143,9 +144,9 @@ function do_keyword_tracker_submit() {
 	</div>
 	
 	<div id="subjects">
-		<h2 style="margin: 1em 0 .5em 0">Browse Bills by Subject</h2>
+		<h4>Browse Bills by Subject</h4>
 		
-		<p>NEW: Browse bills <a href="/congress/bills/uscode">by the section of the United States Code</a> they refer to.</p>
+		<p>Use the subject terms below or browse bills <a href="/congress/bills/uscode">by the section of the United States Code</a> they refer to.</p>
 		
 		<p>Use the Library of Congress&rsquo;s subject categorization of bills and resolutions to explore pending legislation in Congress.</p>
 		<ul id="subject_list">
@@ -161,6 +162,32 @@ function do_keyword_tracker_submit() {
 		{% endfor %}
 		</ul>
 	</div>
+
+	<div id="hot">
+		<h4>Hot Bills</h4>
+
+		{% if trending_bill_feeds|length > 0 %}
+		<p>Trending now:</p>
+		<div style="margin-bottom: 1.5em">
+		{% for f in trending_bill_feeds %}
+			<div style="margin-bottom: .5em;">
+				<a href="{{f.link}}">{{f.title|truncatewords:30}}</a>
+			</div>
+		{% endfor %}
+		</div>
+		{% endif %}
+
+		<p>Top bills tracked by GovTrack users:</p>
+		<div id="top_tracked_bills">
+		{% for bill, count in top_tracked_bills %}
+			<div style="margin-bottom: .5em;">
+				<a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a>
+				<br><small>tracked by {{count}} user{{count|pluralize}}</small>
+			</div>
+		{% endfor %}
+		</div>
+	</div>
+
 		</div>
 	</div>
 </div>
