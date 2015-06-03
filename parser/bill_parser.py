@@ -444,7 +444,7 @@ def main(options):
 
     # Parse Senate.gov's "Floor Schedule" blurb for coming up tomorrow.
     now = datetime.now()
-    sfs = urllib.urlopen("http://www.senate.gov/pagelayout/legislative/d_three_sections_with_teasers/calendars.htm").read()
+    sfs = urllib.urlopen("http://www.senate.gov/legislative/schedule/floor_schedule.htm").read()
     try:
         sfs = re.search(r"Floor Schedule([\w\W]*)Previous Meeting", sfs).group(1)
         for congress, bill_type, number in re.findall(r"http://hdl.loc.gov/loc.uscongress/legislation.(\d+)([a-z]+)(\d+)", sfs):
