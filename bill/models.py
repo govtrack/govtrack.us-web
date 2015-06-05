@@ -644,6 +644,12 @@ class Bill(models.Model):
 
     def render_event_cosp(self, ev_code, feeds):
         cosp = Cosponsor.objects.filter(bill=self, withdrawn=None, joined=ev_code)
+        cumulative_cosp = Cosponsor.objects.filter(bill=self, withdrawn=None, joined__lte=ev_code)
+        cumulative_cosp_count = cumulative_cosp.count()
+        cumulative_cosp_by_party = cumulative_cosp.values("role__party").annotate(count=models.Count('id'))
+        cumulative_cosp_by_party = sorted(list(cumulative_cosp_by_party), key=lambda x : -x['count'])
+        cumulative_cosp_by_party = ", ".join(("%d %s%s" % (x['count'], x['role__party'], "" if x['count'] == 1 else "s") for x in cumulative_cosp_by_party))
+
         if len(cosp) == 0:
             # What to do if there are no longer new cosponsors on this date?
             # TODO test this.
@@ -666,14 +672,18 @@ class Bill(models.Model):
             "url": self.get_absolute_url(),
             "body_text_template": """{% for p in cosponsors %}New Cosponsor: {{ p.person.name }}
 {% endfor %}
+The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|pluralize}} ({{cumulative_cosp_by_party}}).
 {% if sponsor and show_sponsor %}{{sponsor|safe}} is the sponsor of this {{noun}}.{% endif %}""",
             "body_html_template": """{% for p in cosponsors %}<p>New Cosponsor: <a href="{{SITE_ROOT}}{{p.person.get_absolute_url}}">{{ p.person.name }}</a></p>{% endfor %}
+<p>The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|pluralize}} ({{cumulative_cosp_by_party}}).</p>
 {% if sponsor and show_sponsor %}<p><a href="{{SITE_ROOT}}{{sponsor.get_absolute_url}}">{{sponsor}}</a> is the sponsor of this {{noun}}.</p>{% endif %}""",
             "context": {
                 "cosponsors": cosp,
                 "sponsor": self.sponsor,
                 "show_sponsor": self.sponsor in Bill.get_tracked_people(feeds),
                 "noun": self.noun,
+                "cumulative_cosp_count": cumulative_cosp_count,
+				"cumulative_cosp_by_party": cumulative_cosp_by_party,
                 }
             }
 
