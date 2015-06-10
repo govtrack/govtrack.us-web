@@ -29,6 +29,11 @@
 			margin-right: .33em;
 		}
 
+	#action-buttons > * {
+		display: inline-block;
+		margin-right: 6px;
+	}
+
 	.table th { font-weight: normal; }
 	#session_stats {
 		margin: 0 0 2em -10px;
@@ -109,8 +114,39 @@
 	        </tr>
 	        {% endfor %}
 		</table>
+
+		{% if active_role %}
+		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
+		<div id="action-buttons">
+			<a href="#" class="track-btn" onclick="return show_track_panel();">Track {{person.him_her }}</a>
+			{% if role.website %}
+			<a href="#" class="push-btn yellow-btn" onclick="$('#contact_modal').modal(); return false;">Contact {{person.him_her }}</a>
+			{% endif %}
+		</div>
+		{% endif %}
 		
 	</div><!-- /container -->
+
+	<!-- contact panel -->
+	<div id="contact_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="contact_modalTitle" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title" id="contact_modalTitle">Contact {{person.name_and_title}}</h4>
+	      </div>
+	      <div class="modal-body">
+	        <p>In order to contact {{person.name_and_title}}, you will have to head over to {{person.his_her}} website and look for contact information. Click the following link to head over to {{person.his_her}} website:</p>
+	        <p style="font-size: 115%"><a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')">{{role.website}}</a></p>
+	        <p>(You are currently on the website GovTrack.us, which has no connection to {{person.lastname}}.)</p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<!-- /contact panel -->
 
 	<div class="aside col-sm-4">
 		<div id="event_subscribe_inline_container"> </div>
@@ -119,11 +155,6 @@
 			<div class="photo">
 				<img src="{{ photo }}" alt="Photo" class="img-responsive"/>
 			</div>
-		{% endif %}
-		
-		{% if active_role %}
-		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-		<a href="#" class="track-btn" onclick="return show_track_panel();">Track {% if person.gender == 1 %}Him{% elif person.gender == 2 %}Her{% else %}Member{% endif %}</a>
 		{% endif %}
 	</div><!-- /aside -->
 </div>
