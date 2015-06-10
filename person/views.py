@@ -75,12 +75,12 @@ def person_details(request, pk):
         
         links = []
         if role.current:
-            if role.website: links.append(("%s's Official Website" % person.lastname, role.website))
-            if person.twitterid: links.append(("@" + person.twitterid, "http://twitter.com/" + person.twitterid))
-        if person.osid: links.append(("OpenSecrets", "http://www.opensecrets.org/politicians/summary.php?cid=" + person.osid))
-        if person.pvsid: links.append(("VoteSmart", "http://votesmart.org/candidate/" + person.pvsid))
-        if person.bioguideid: links.append(("Bioguide", "http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + person.bioguideid))
-        if person.cspanid: links.append(("C-SPAN", "http://www.c-spanvideo.org/person/" + str(person.cspanid)))
+            if role.website: links.append(("%s's Official Website" % person.lastname, role.website, "fa  fa-external-link"))
+            if person.twitterid: links.append(("@" + person.twitterid, "http://twitter.com/" + person.twitterid, "fa fa-twitter"))
+        if person.osid: links.append(("OpenSecrets", "http://www.opensecrets.org/politicians/summary.php?cid=" + person.osid, "fa fa-money"))
+        if person.pvsid: links.append(("VoteSmart", "http://votesmart.org/candidate/" + person.pvsid, "fa fa-th-list"))
+        if person.bioguideid: links.append(("Bioguide", "http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + person.bioguideid, "fa fa-user"))
+        if person.cspanid: links.append(("C-SPAN", "http://www.c-spanvideo.org/person/" + str(person.cspanid), "fa fa-youtube-play"))
     
         return {'person': person,
                 'role': role,

@@ -8,6 +8,27 @@
 
 {% block head %}
 <style>
+	.h1-multiline {
+		margin-bottom: 0;
+	}
+	#seealso-links {
+		padding: .5em 0;
+		border-bottom: 1px solid #CCA;
+		margin-bottom: 14px;
+		font-size: 88%;
+	}
+		#seealso-links a {
+			text-decoration: none;
+		}
+			#seealso-links a:hover {
+				text-decoration: underline;
+			}
+		#seealso-links a i {
+			position: relative;
+			top: 1px;
+			margin-right: .33em;
+		}
+
 	.table th { font-weight: normal; }
 	#session_stats {
 		margin: 0 0 2em -10px;
@@ -60,6 +81,15 @@
 	</p>
 </div>
 
+{% if links %}
+<div id="seealso-links">
+	{% for label, link, css_class in links %}
+		{% if not forloop.first %} | {% endif %}
+		<a href="{{link}}" target="_blank" style="white-space: nowrap"><i class="{{css_class}}"></i>{{label}}</a>
+	{% endfor %}
+</div>
+{% endif %}
+
 <div class="row group">
 	<div id="track_panel_base" class="col-sm-8">
 		<p>Elected Positions:</p>
@@ -80,14 +110,6 @@
 	        {% endfor %}
 		</table>
 		
-		{% if links %}
-			<p style="line-height: 110%;"><small><span style="margin-right: .5em">See Also:</span>
-			{% for label, link in links %}
-				{% if not forloop.first %} | {% endif %}
-				<a href="{{link}}" target="_blank" style="white-space: nowrap">{{label}}</a>
-			{% endfor %}
-			</small></p>
-		{% endif %}
 	</div><!-- /container -->
 
 	<div class="aside col-sm-4">
