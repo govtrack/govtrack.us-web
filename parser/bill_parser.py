@@ -446,7 +446,7 @@ def main(options):
     now = datetime.now()
     sfs = urllib.urlopen("http://www.senate.gov/legislative/schedule/floor_schedule.htm").read()
     try:
-        sfs = re.search(r"Floor Schedule([\w\W]*)Previous Meeting", sfs).group(1)
+        sfs = re.search(r"([\w\W]*)<i>Previous Meeting", sfs).group(1)
         for congress, bill_type, number in re.findall(r"http://hdl.loc.gov/loc.uscongress/legislation.(\d+)([a-z]+)(\d+)", sfs):
             bill_type = BillType.by_slug(bill_type)
             bill = Bill.objects.get(congress=congress, bill_type=bill_type, number=number)
