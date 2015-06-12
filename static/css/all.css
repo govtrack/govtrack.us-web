@@ -1590,24 +1590,16 @@ aside .download-links { padding: 31px 0 0 }
 	padding: 24px 0 0;
 	}
 	#footer a { color: #3388bb }
-	#footer a:hover {
-		border-bottom: 0;
-		}
 	#footer nav {
 		font-size: 12px;
 		line-height: 2em;
 		margin-bottom: 25px;
-		text-transform: uppercase;
 		}
 		#footer nav li {
 			vertical-align: top;
-			border-bottom: 1px solid #405255;
 			}
 		#footer nav a, #footer .social a {
 			display: block;
-			text-decoration: none;
-			}
-		#footer nav a:hover {
 			}
 #footer .social {
 	font-size: 12px;
@@ -1621,11 +1613,9 @@ aside .download-links { padding: 31px 0 0 }
 		}
 #footer .social ul {
 	line-height: 2em;
-	text-transform: uppercase;
 	}
 	#footer .social li {
 		vertical-align: top;
-		border-bottom: 1px solid #405255;
 		}
 #footer .social ul img {
 	vertical-align: middle;
