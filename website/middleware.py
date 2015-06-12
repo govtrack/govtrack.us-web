@@ -84,6 +84,37 @@ def template_context_processor(request):
         cache.set("highlighted_vote", highlighted_vote, 60*60*2)
     if highlighted_vote != "NONE":
         context["highlighted_vote"] = highlighted_vote
+
+    # Get our latest Medium posts.
+    def get_medium_posts():
+        medium_posts = urllib.urlopen("https://medium.com/govtrack-insider?format=json").read()
+        # there's some crap before the JSON object starts
+        medium_posts = medium_posts[medium_posts.index("{"):]
+        medium_posts = json.loads(medium_posts)
+        def format_post(postid):
+            post = medium_posts['payload']['references']['Post'][postid]
+            collection = medium_posts['payload']['references']['Collection'][post['homeCollectionId']]
+            return {
+                "title": post['title'],
+                "url": "https://medium.com/" + collection['slug'] + "/" + post['uniqueSlug'],
+                "date": post['virtuals']['firstPublishedAtEnglish'],
+                "preview": post['virtuals']['snippet'],
+                "image": post['virtuals']['previewImage']['imageId'] if post['virtuals'].get('previewImage') else None,
+                #"preview": " ".join([
+                #    para['text']
+                #    for para in post['previewContent']['bodyModel']['paragraphs']
+                #    if para['type'] == 1 # not sure but a paragraph? vs a heading?
+                #])
+            }
+        return [ format_post(postid) for postid in medium_posts['payload']['value']['sections'][1]['postListMetadata']['postIds'] ]
+    medium_posts = cache.get("medium_posts")
+    if not medium_posts:
+        try:
+            medium_posts = get_medium_posts()
+        except:
+            medium_posts = []
+        cache.set("medium_posts", medium_posts, 60*15) # 15 minutes
+    context["medium_posts"] = medium_posts
     
     # Add context variables for whether the user is in the
     # House or Senate netblocks.

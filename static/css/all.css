@@ -2320,7 +2320,7 @@ ul.singlesignon {
 .photo_flag.flag_r.sub_chair:after { border:10px solid #bd8282; }
 .photo_flag.flag_r.sub_chair:before { border-color: transparent #a67272 #a67272 transparent; }
 
-#sidebar-events {
+.sidebar-events {
 	background-color: rgba(255,255,255, .8);
 	border: 1px solid rgba(150,200,250, .15);
 	padding: 10px;
@@ -2328,13 +2328,13 @@ ul.singlesignon {
 	font-size: 90%;
 	line-height: 130%;
 }
-	#sidebar-events h2 {
+	.sidebar-events h2 {
 		margin: 1em -10px .5em;
 		padding: .5em;
 		background-color: rgba(50,100,200, .05);
 		margin-bottom: 1em;
 		font-size: 17px;
 	}
-		#sidebar-events h2:first-child {
+		.sidebar-events h2:first-child {
 			margin-top: -10px;
 		}
