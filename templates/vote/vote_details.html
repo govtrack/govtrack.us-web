@@ -252,6 +252,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
         This was a vote to approve or reject an amendment{% if vote.related_bill %} to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% endif %}.
 		{% else %}
         This was a vote to approve or reject amendment <a href="{{vote.related_amendment.congressdotgov_link}}">{{vote.related_amendment.display_number}}</a>
+		{% if vote.related_amendment.sponsor %}(<a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{{vote.related_amendment.sponsor.name_no_details}}</a>){% endif %}
         to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>. The title of the amendment is {{vote.related_amendment.title}}.
 		{% endif %}
 	</p>
