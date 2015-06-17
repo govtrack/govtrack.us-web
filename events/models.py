@@ -448,7 +448,7 @@ class SubscriptionList(models.Model):
         unique_together = [('user', 'name')]
 
     def __str__(self):
-        return "%s (%s)" % (self.name, str(self.user))
+        return "%s (%s) [%s]" % (self.name, str(self.user), self.get_email_display())
 
     @staticmethod
     def create(user, email_rate=None):
