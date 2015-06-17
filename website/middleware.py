@@ -114,7 +114,7 @@ def template_context_processor(request):
         except:
             medium_posts = []
         cache.set("medium_posts", medium_posts, 60*15) # 15 minutes
-    context["medium_posts"] = medium_posts
+    context["medium_posts"] = medium_posts[0:3]
     
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
