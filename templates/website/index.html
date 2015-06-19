@@ -190,15 +190,34 @@
 			</div>
 
 			<div class="col-sm-offset-1 col-sm-4">
+				{% if medium_posts %}
 				<article class="rss-block">
-					<h3><span>from the</span> GovTrack Blog <!--<a href="/blog"><img src="images/ico-rss.gif" width="9" height="9" alt="image description"></a>--></h3>
+					<h3><a href="https://medium.com/govtrack-insider" style="float: right; color: #722" title="More Posts on Medium"><i class="fa fa-medium"></i></a>GovTrack Insider</h3>
+					{% for post in medium_posts %}
+					<div class="post">
+						<h4><a href="{{post.url}}">{{post.title}}</a></h4>
+						{% if post.image %}
+							<a href="{{post.url}}">
+								<img src="https://d262ilb51hltx0.cloudfront.net/fit/c/60/60/{{post.image}}" style="float: left; margin: 3px .7em .7em 0"/>
+							</a>
+						{% endif %}
+						<div class="article">
+							<em>Posted on {{post.date}}</em>
+							<p>{{post.preview}} <a href="{{post.url}}">Read More »</a></p>
+						</div>
+					</div>
+					{% endfor %}
+				</article>
+		   		{% endif %}
+		    	
+				<article class="rss-block">
+					<h3>Site News</h3>
 					{% for item in blog %}
 					<div class="post">
 						<h4><a href="{{item.link}}">{{item.title}}</a></h4>
 						<div class="article">
 							<em>Posted on {{item.date}}</em>
-							<p>{{item.content|striptags|truncatewords:25}}</p>
-							<div class="block"><a href="{{item.link}}">Read More »</a></div>	
+							<p>{{item.content|striptags|truncatewords:25}} <a href="{{item.link}}">Read More »</a></p>
 						</div>
 					</div>
 					{% endfor %}

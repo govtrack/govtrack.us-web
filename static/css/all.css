@@ -784,6 +784,7 @@ header ul, footer ul {
 	font-style: normal;
 	}
 .aside .block { text-align: right }
+.rss-block h4 { margin-bottom: .5em; }
 .rss-block h3 img {
 	padding: 0 8px 3px;
 	vertical-align: middle;
