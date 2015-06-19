@@ -1,7 +1,7 @@
 {% if format == "text" %}
-active: false
-subject: "We Asked Congress for More Data, Again"
+active: true
+subject: "introducing GovTrack Insider"
 ----------
 {% endif %}
 
-In [a new letter](https://www.govtrack.us/blog/2014/03/08/the-congressional-data-coalition-writes-to-house-appropriators/) to the House this month, we joined 18 other organizations and individuals in calling for access to the legislative data on bill status that Congress has but won’t share.
+Check out [GovTrack Insider](https://medium.com/govtrack-insider)! We're posting daily briefings on recent activity in Congress. Let us know what you think!
