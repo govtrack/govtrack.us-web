@@ -1,7 +1,7 @@
 # -*- coding: utf-8
 
 from django.contrib import admin
-from vote.models import Vote, VoteOption, Voter
+from vote.models import Vote, VoteOption, Voter, VoteSummary
 
 class VoteOptionInline(admin.TabularInline):
     model = VoteOption
@@ -17,6 +17,11 @@ class VoteOptionAdmin(admin.ModelAdmin):
 class VoterAdmin(admin.ModelAdmin):
     list_display = ('vote', 'person', 'option', 'created')
 
+class VoteSummaryAdmin(admin.ModelAdmin):
+    list_display = ['created', 'vote']
+    raw_id_fields = ['vote']
+
 admin.site.register(Vote, VoteAdmin)
 admin.site.register(VoteOption, VoteOptionAdmin)
 admin.site.register(Voter, VoterAdmin)
+admin.site.register(VoteSummary, VoteSummaryAdmin)

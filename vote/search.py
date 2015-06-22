@@ -27,7 +27,7 @@ def session_filter(qs, form):
 	return qs
 	
 def vote_search_manager():
-    sm = SearchManager(Vote, qs=Vote.objects.order_by('-created'))
+    sm = SearchManager(Vote, qs=Vote.objects.order_by('-created').select_related('oursummary'))
     
     # show sessions as year+session for non-year-based sessions,
     # and then just the session number (the year) for year-based
@@ -58,11 +58,13 @@ def vote_search_manager():
     #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
 
     sm.set_template("""
-    	<div><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
+    	<div style="margin-bottom: .2em"><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
+        <div style="font-size: 93%">
 		{% if object.question_details %}<div>{{object.question_details}}</div>{% endif %}
-		<div>{{object.name}}</div>
-		<div>{{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
+		<div>{{object.name}} &ndash; {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
     	<div>{{object.summary}}</div>
+        {% if object.oursummary %}<div style="margin-top: .25em; font-style: italic">{{object.oursummary.plain_text|truncatewords:25}}</div>{% endif %}
+        </div>
 	""")
 
     return sm

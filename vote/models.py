@@ -12,6 +12,8 @@ from person.util import load_roles_at_date
 
 from us import get_session_ordinal
 
+import markdown2
+
 class CongressChamber(enum.Enum):
     senate = enum.Item(1, 'Senate')
     house = enum.Item(2, 'House')
@@ -349,6 +351,26 @@ class Voter(models.Model):
     
     def get_vote_name(self):
         return self.vote.name()
+
+
+# Summaries
+class VoteSummary(models.Model):
+    vote = models.OneToOneField(Vote, related_name="oursummary", on_delete=models.PROTECT)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    content = models.TextField(blank=True)
+
+    def __str__(self): return "Summary for " + str(self.vote)
+    def get_absolute_url(self): return self.vote.get_absolute_url()
+
+    def as_html(self):
+        return markdown2.markdown(self.content)
+
+    def plain_text(self):
+        # Kill links.
+        import re
+        content = re.sub("\[(.*?)\]\(.*?\)", r"\1", self.content)
+        return content
 
 # Feeds
 from events.models import Feed

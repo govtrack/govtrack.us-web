@@ -281,8 +281,13 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 </div>
 
 {% if has_vp_vote %}<p style="margin: 1em 0 0 0">The Vice President cast a tie-breaking vote.</p>{% endif %}
-    
+
+{% if vote.oursummary %}<div style="margin-top: 1em">{{vote.oursummary.as_html|safe}}</div>{% endif %}
+
 <p id="yourreps" class="hidden" style="margin-bottom: 0"></p>
+
+<div id="admin_panel"> </div>
+<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
 
 <hr>
 

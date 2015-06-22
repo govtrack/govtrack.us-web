@@ -13,13 +13,13 @@ from common.decorators import render_to
 
 from numpy import median
 
-from vote.models import Vote, CongressChamber, VoterType, VoteCategory
+from vote.models import Vote, CongressChamber, VoterType, VoteCategory, VoteSummary
 from vote.search import vote_search_manager
 from events.models import Feed
 from person.util import load_roles_at_date
 from us import get_all_sessions
 
-from twostream.decorators import anonymous_view
+from twostream.decorators import anonymous_view, user_view_for
 
 from settings import CURRENT_CONGRESS
 
@@ -114,6 +114,32 @@ def vote_details(request, congress, session, chamber_code, number):
             'has_diagram': has_diagram,
             'reconsiderers': (reconsiderers, reconsiderers_titles),
             }
+
+@user_view_for(vote_details)
+def vote_details_userview(request, congress, session, chamber_code, number):
+    ret = { }
+
+    if request.user.is_staff:
+        vote = load_vote(congress, session, chamber_code, number)
+        admin_panel = """
+            <div class="clear"> </div>
+            <div style="margin-top: 1.5em; padding: .5em; background-color: #EEE; ">
+                <b>ADMIN</b> - <a href="{% url "vote_go_to_summary_admin" %}?vote={{vote.id}}">Edit Summary</a>
+            </div>
+            """
+
+        from django.template import Template, Context, RequestContext, loader
+        ret["admin_panel"] = Template(admin_panel).render(RequestContext(request, {
+            'vote': vote,
+            }))
+
+    return ret
+
+from django.contrib.auth.decorators import permission_required
+@permission_required('vote.change_votesummary')
+def go_to_summary_admin(request):
+    summary, is_new = VoteSummary.objects.get_or_create(vote=get_object_or_404(Vote, id=request.GET["vote"]))
+    return HttpResponseRedirect("/admin/vote/votesummary/%d" % summary.id)
 
 def load_ideology_scores(congress):
     global ideology_scores
