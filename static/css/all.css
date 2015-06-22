@@ -2265,17 +2265,19 @@ ul.singlesignon {
 
 .photo_flag{
 	width: 122px;
-	margin-top: -18px;
-	margin-bottom: 6px;
 	color:#fff;
 	font-size: 12px;
 	padding:0px 3px 0px 5px;
 	position:relative;
 	line-height: 20px;
-	left:-4px;
+	top: -4px;
+	left:-3px;
 	margin: 0 auto;
 	font-family: 'PTSerifBold', serif;
 }
+	.photo_flag + h5 {
+		margin: .5em 0 .4em 0;
+	}
 .photo_flag:before {
 	content:"";
 	position:absolute;
