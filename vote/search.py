@@ -58,13 +58,24 @@ def vote_search_manager():
     #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
 
     sm.set_template("""
-    	<div style="margin-bottom: .2em"><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
-        <div style="font-size: 93%">
-		{% if object.question_details %}<div>{{object.question_details}}</div>{% endif %}
-		<div>{{object.name}} &ndash; {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
-    	<div>{{object.summary}}</div>
-        {% if object.oursummary %}<div style="margin-top: .25em; font-style: italic">{{object.oursummary.plain_text|truncatewords:25}}</div>{% endif %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div style="margin-bottom: .2em"><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
         </div>
+        <div style="font-size: 93%">
+        <div class="col-sm-6 col-md-4">
+            <div>{{object.name}}</div>
+            <div>{{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
+        </div>
+        <div class="col-sm-6 col-md-8">
+        	<div>{{object.summary}}</div>
+        </div>
+        <div class="col-xs-12" style="padding-top: .25em">
+            {% if object.question_details and not object.oursummary %}<div>{{object.question_details}}</div>{% endif %}
+            {% if object.oursummary %}<div style="font-style: italic">{{object.oursummary.plain_text|truncatewords:25}}</div>{% endif %}
+        </div>
+        </div>
+    </div>
 	""")
 
     return sm
