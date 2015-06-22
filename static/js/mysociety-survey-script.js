@@ -5,6 +5,8 @@ function show_mysoc_survey() {
     // Is cookie existing?
 
     var ct = null;
+    var cr = null;
+    var cx = null;
     var ca = document.cookie.split(';');
     for(var i=0;i < ca.length;i++) {
         var c = ca[i];
@@ -13,11 +15,15 @@ function show_mysoc_survey() {
         }
         if (c.indexOf('ms_srv_t=') == 0) {
             // Cookie for time...
-            var ct = c.substring('ms_srv_t='.length,c.length);
+            ct = c.substring('ms_srv_t='.length,c.length);
         }
         if (c.indexOf('ms_srv_r=') == 0) {
             // Cookie for referrer...
-            var cr = c.substring('ms_srv_r='.length,c.length);
+            cr = c.substring('ms_srv_r='.length,c.length);
+        }
+        if (c.indexOf('ms_srv_x=') == 0) {
+            // Cookie for whether we have shown the user the request to take the survey.
+            cx = c.substring('ms_srv_x='.length,c.length);
         }
     }
 
@@ -40,11 +46,19 @@ function show_mysoc_survey() {
         }
     }
 
-    // Only bother to do this if the cookie is set and the link exists
-    if (ct != 'X' && !! document.getElementById('ms_srv_wrapper')) {
-
+    // Only bother to do this if the ct cookie is set, enough time has elapsed since
+    // the first visit, and the user hasn't been asked to take the survey yet (the cx
+    // cookie). Also check that the link element exists on this page.
+    if (ct != 'X' && !cx && !! document.getElementById('ms_srv_wrapper')) {
         // Find the time on site thus far
         var st = Math.round(new Date().getTime() / 1000) - ct;
+
+        // Don't show survey unless the user has been on the site for a total of
+        // 30 seconds so far.
+        if (st < 30) return;
+
+        // Set the action cookie so we don't show this to a user more than once.
+        document.cookie = 'ms_srv_x=1; path=/';
 
         // Find if the user is signed in
         var su = !! document.getElementById('user-meta');
@@ -78,5 +92,10 @@ function show_mysoc_survey() {
 }
 
 $(function() {
-    window.setTimeout(show_mysoc_survey, 5000);
+    // Attempt to show the survey a few times. We'll only display it once
+    // and it only gets triggered after the user has been on the site a while.
+    window.setTimeout(show_mysoc_survey, 1000);
+    window.setTimeout(show_mysoc_survey, 6000);
+    window.setTimeout(show_mysoc_survey, 15000);
+    window.setTimeout(show_mysoc_survey, 30000);
 })
