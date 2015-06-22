@@ -72,7 +72,7 @@ def vote_search_manager():
         </div>
         <div class="col-xs-12" style="padding-top: .25em">
             {% if object.question_details and not object.oursummary %}<div>{{object.question_details}}</div>{% endif %}
-            {% if object.oursummary %}<div style="font-style: italic">{{object.oursummary.plain_text|truncatewords:25}}</div>{% endif %}
+            {% if object.oursummary %}<div style="font-style: italic">{{object.oursummary.plain_text|truncatewords:50}}</div>{% endif %}
         </div>
         </div>
     </div>
