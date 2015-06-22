@@ -2,7 +2,7 @@
 from django.db import models
 from jsonfield import JSONField
 
-import random
+import random, datetime
 
 class Issue(models.Model):
 	"""An issue is something that users might want to weigh in on."""
@@ -88,6 +88,11 @@ class UserPosition(models.Model):
 
 		# ugh, data collection error when this was first launched
 		if len(self.district) <= 2: return "unknown"
+
+		# rate-limit user activity
+		if CallLog.objects.filter(user=self.user, created__gt=datetime.datetime.now()-datetime.timedelta(days=10)).count() >= 15 \
+		 or CallLog.objects.filter(user=self.user, created__gt=datetime.datetime.now()-datetime.timedelta(days=1)).count() >= 6:
+			return "rate-limit"
 
 		# get all of the chambers any related bills are currently being considered in
 		issue = self.position.issue.get()
