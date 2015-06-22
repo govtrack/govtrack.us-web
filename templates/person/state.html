@@ -220,10 +220,10 @@
 
     <div class="row members-grid">
     {% for district, person, cities in representatives %}
-        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
-        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm"></div>{% endif %}
+        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
+        {% if forloop.counter0|divisibleby:3 %}<div class="clearfix visible-sm"></div>{% endif %}
         {% if forloop.counter0|divisibleby:2 %}<div class="clearfix visible-xs"></div>{% endif %}
-        <div class="member col-xs-6 col-sm-3 col-md-2">
+        <div class="member col-xs-6 col-sm-4 col-md-3">
 
         	{% if not person %}
 	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
