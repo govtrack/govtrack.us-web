@@ -161,9 +161,9 @@
 	            <h5><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></h5>
 
 	            <div class="info">
+	            	<div>{{role.party}}</div>
             		<div>Took Office: {{role.logical_dates.0|date}}</div>
             		<div>Next Election: {{role.next_election_year}}</div>
-	            	<div>Party: {{role.party}}</div>
 	            </div>
 	            {% endwith %}
 	        {% endif %}
@@ -251,8 +251,8 @@
 	            <h5><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></h5>
 
 	            <div class="info">
+	            	<div>{{role.party}}</div>
             		<div>Took Office: {{role.logical_dates.0|date}}</div>
-	            	<div>Party: {{role.party}}</div>
 
 		        	{% if stateapp != 1 %}
 	            	<div style="margin-top: 4px" title="{{cities}}">{{cities|truncatewords:5}}</div>
