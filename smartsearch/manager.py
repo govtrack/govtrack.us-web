@@ -188,6 +188,9 @@ class SearchManager(object):
             else:
                 ret = facets
 
+            #from django.db import connection
+            #ret['queries'] = connection.queries
+
             # Cache the final response for 5 minutes.
             ret = json.dumps(ret)
             cache.set(cachekey, ret, 60*5)
@@ -205,7 +208,7 @@ class SearchManager(object):
         Build the `self.model` queryset limited to selected filters.
         """
         
-        if not self.qs:
+        if self.qs is None:
             #qs = self.model.objects.all().select_related()
             from haystack.query import SearchQuerySet
             qs = SearchQuerySet()
@@ -242,7 +245,7 @@ class SearchManager(object):
                     # For full-text searching, don't use __in so that the search
                     # backend does its usual query operation.
                     values = " ".join(values) # should not really be more than one, but in case the parameter is specified multiple times in the query string
-                    if not self.qs:
+                    if self.qs is None:
                        # This is a Haystack search. Handle text a little differently.
                        # Wrap it in an AutoQuery so advanced search options like quoted phrases are used.
                        from haystack.inputs import AutoQuery
