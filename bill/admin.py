@@ -36,7 +36,7 @@ class BillSummaryAdmin(admin.ModelAdmin):
 
         from bill.search_indexes import BillIndex
         bill_index = BillIndex()
-        bill_index.update_object(obj, using="bill")
+        bill_index.update_object(obj.bill, using="bill")
         
     def delete_model(self, request, obj):
     	bill = obj.bill
