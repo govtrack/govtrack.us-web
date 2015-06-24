@@ -248,6 +248,11 @@ class Vote(models.Model):
             my_reps = sorted(my_reps, key = lambda p : p.sortname)
         else:
             my_reps = []
+
+        try:
+            oursummary = self.oursummary
+        except VoteSummary.DoesNotExist:
+            oursummary = None
         
         return {
             "type": "Vote",
@@ -257,15 +262,18 @@ class Vote(models.Model):
             "body_text_template":
 """{{summary|safe}}
 {% for voter in voters %}{{voter.name|safe}}: {{voter.vote|safe}}
-{% endfor %}""",
+{% endfor %}
+{% if oursummary %}{{oursummary.plain_text|safe}}{% endif %}""",
             "body_html_template":
 """<p>{{summary}}</p>
 {% for voter in voters %}
     <p><a href="{{SITE_ROOT}}{{voter.url}}">{{voter.name}}</a>: {{voter.vote}}</p>
 {% endfor %}
+{% if oursummary %}{{oursummary.as_html|safe}}{% endif %}
 """,
             "context": {
                 "summary": self.summary(),
+                "oursummary": oursummary,
                 "voters":
                             [
                                 { "url": p.get_absolute_url(), "name": p.name_lastonly(), "vote": self.voters.get(person=p).option.value }
