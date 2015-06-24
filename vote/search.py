@@ -64,11 +64,11 @@ def vote_search_manager():
         </div>
         <div style="font-size: 93%">
         <div class="col-sm-6 col-md-4">
-            <div>{{object.name}}</div>
-            <div>{{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
+            <div><span class="fa fa-barcode fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.name}}</div>
+            <div><span class="fa fa-calendar fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
         </div>
         <div class="col-sm-6 col-md-8">
-        	<div>{{object.summary}}</div>
+        	<div><span class="fa fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
         </div>
         <div class="col-xs-12" style="padding-top: .25em">
             {% if object.question_details and not object.oursummary %}<div>{{object.question_details}}</div>{% endif %}
