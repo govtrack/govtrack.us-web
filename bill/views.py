@@ -229,7 +229,7 @@ def bill_text(request, congress, type_slug, number, version=None):
         raise Http404("Invalid bill type: " + type_slug)
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
 
-    from billtext import load_bill_text, bill_gpo_status_codes
+    from billtext import load_bill_text, get_bill_text_versions
     try:
         textdata = load_bill_text(bill, version)
     except IOError:
@@ -240,7 +240,7 @@ def bill_text(request, congress, type_slug, number, version=None):
     is_latest = True
     if textdata:
         alternates = []
-        for v in bill_gpo_status_codes:
+        for v in get_bill_text_versions(bill):
             try:
                 alternates.append(load_bill_text(bill, v, mods_only=True))
             except IOError:
