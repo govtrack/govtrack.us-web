@@ -71,7 +71,7 @@ def vote_search_manager():
         	<div><span class="fa fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
         </div>
         <div class="col-xs-12" style="padding-top: .25em">
-            {% if object.question_details and not object.oursummary %}<div>{{object.question_details}}</div>{% endif %}
+            {% if object.question_details and not object.oursummary %}<div style="margin-left: 5px">{{object.question_details}}</div>{% endif %}
             {% if object.oursummary %}<div style="font-style: italic">{{object.oursummary.plain_text|truncatewords:50}}</div>{% endif %}
         </div>
         </div>
