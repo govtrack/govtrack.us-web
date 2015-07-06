@@ -1,9 +1,6 @@
+{% extends "htmlemailer/example_template.html" %}
 {% load events_utils %}
-<html>
-	<head>
-		<title>GovTrack Email Update</title>
-	</head>
-	<body>
+{% block body %}
 {% with "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email" as utm %}
 
 {% if announcement.active %}
@@ -46,5 +43,4 @@
 <!-- Sorry but we want to know if your email address is still valid. -->
 <img src="{{emailpingurl}}" width="1" height="1"/>
 {% endif %}
-	</body>
-</html>
+{% endblock %}
