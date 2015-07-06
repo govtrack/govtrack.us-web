@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
 
-from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template import Context, Template
 from django.template.loader import get_template
 from django.conf import settings
@@ -10,6 +9,7 @@ from optparse import make_option
 
 from events.models import *
 from emailverification.models import Ping, BouncedEmail
+from htmlemailer import send_mail as send_html_mail
 
 import os, sys
 from datetime import datetime, timedelta
@@ -152,15 +152,6 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_eve
 	if hasattr(settings, 'EMAIL_UPDATES_RETURN_PATH'):
 		emailreturnpath = (settings.EMAIL_UPDATES_RETURN_PATH % user.id)
 
-	# get announcement content
-	announce = load_markdown_content("website/email/email_update_announcement.md")
-		
-	emailsubject = "GovTrack Update for %s" % (datetime.now().strftime("%b. %d").replace(" 0", " "))
-	if announce["active"] and announce["subject"]:
-		emailsubject += "  |  " + announce["subject"]
-
-	send_no_events = send_old_events
-
 	# Process each of the subscription lists.
 	all_trackers = set()
 	eventslists = []
@@ -185,7 +176,8 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_eve
 			eventcount += len(events)
 			most_recent_event = max(most_recent_event, max_id)
 	
-	if len(eventslists) == 0 and not send_no_events:
+	# Don't send an empty email.... less we're testing and we want to send some old events.
+	if len(eventslists) == 0 and not send_old_events:
 		return None
 		
 	if not send_mail:
@@ -200,35 +192,30 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_eve
 		and not Ping.objects.filter(user=user, pingtime__gt=datetime.now() - timedelta(days=60)).exists():
 		emailpingurl = Ping.get_ping_url(user)
 		
-	templ_txt = get_template("events/emailupdate.txt")
-	templ_html = get_template("events/emailupdate.html")
-	ctx = Context({
-		"eventslists": eventslists,
-		"feed": all_trackers, # use all trackers in the user's account as context for displaying events
-		"emailpingurl": emailpingurl,
-		"SITE_ROOT_URL": settings.SITE_ROOT_URL,
-		"announcement": announce
-	})
-
-	# render text and HTML renditions
-	templ_txt = templ_txt.render(ctx)
-	templ_html = templ_html.render(ctx)
-
-	# form MIME message
-	email = EmailMultiAlternatives(
-		emailsubject,
-		templ_txt,
-		emailreturnpath,
-		[user.email],
-		headers = {
-			'From': emailfromaddr,
-			'Auto-Submitted': 'auto-generated',
-			'X-Auto-Response-Suppress': 'OOF',
-		})
-	email.attach_alternative(templ_html, "text/html")
-	
+	# get announcement content
+	announce = load_markdown_content("website/email/email_update_announcement.md")
+		
+	# send
 	try:
-		email.send(fail_silently=False)
+		send_html_mail(
+			"events/emailupdate",
+			emailreturnpath,
+			[user.email],
+			{
+				"date": datetime.now().strftime("%b. %d").replace(" 0", " "),
+				"eventslists": eventslists,
+				"feed": all_trackers, # use all trackers in the user's account as context for displaying events
+				"emailpingurl": emailpingurl,
+				"SITE_ROOT_URL": settings.SITE_ROOT_URL,
+				"announcement": announce
+			},
+			headers = {
+				'From': emailfromaddr,
+				'Auto-Submitted': 'auto-generated',
+				'X-Auto-Response-Suppress': 'OOF',
+			},
+			fail_silently=False
+		)
 	except Exception as e:
 		print user, e
 		return None # skip updating what events were sent, False = did not sent

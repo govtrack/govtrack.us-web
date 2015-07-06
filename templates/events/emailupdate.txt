@@ -1,7 +1,7 @@
-{% load events_utils %}GovTrack Email Update
+{% autoescape off %}{% load events_utils %}GovTrack Email Update
 =====================
 
-{% if announcement.active %}----- {{announcement.body_text|safe}} -----
+{% if announcement.active %}----- {{announcement.body_text}} -----
 
 {% endif %}This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to {{SITE_ROOT_URL}}/accounts/profile.
 
@@ -11,7 +11,7 @@
 {% with event|render_event:feed as meta %}
 {% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} -- {{meta.type}}
 {{meta.title}}
-{{meta.body_text|safe}}
+{{meta.body_text}}
 {{SITE_ROOT_URL}}{{meta.url}}
 {% if feeds and event.feeds|length > 0 %}[You are seeing this event because you subscribe to {% for feed in event.feeds %}{% if not forloop.first %}, {% endif %}{{feed.title}}{% endfor %}]{% endif %}
 
@@ -24,3 +24,4 @@ To unsubscribe or change your email updates settings, go to {{SITE_ROOT_URL}}/ac
 
 This email was sent by Civic Impulse, LLC <http://www.civicimpulse.com>. You may contact us at hello@govtrack.us. The email address this message was sent from is not monitored for replies.
 
+{% endautoescape %}

@@ -19,3 +19,5 @@ markdown2
 django_twilio
 twilio
 tqdm
+pyyaml
+pynliner
