@@ -1,10 +1,15 @@
-{% extends "htmlemailer/example_template.html" %}
+{% extends "htmlemailer/boilerplate.html" %}
 {% load events_utils %}
+{% block head %}
+<style>
+#content-area { padding: 1em; }
+</style>
+{% endblock %}
 {% block body %}
 {% with "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email" as utm %}
 
 {% if announcement.active %}
-<div style="margin: 2em 1em 2em 1em; padding: .25em 1em .25em 1em; border: 1px solid #DDD; background-color: #F3F3FF">
+<div style="margin: 0 1em 2em 1em; padding: .25em 1em .25em 1em; border: 1px solid #DDD; background-color: #F3F3FF">
 	{{announcement.body_html|safe}}
 </div>
 {% endif %}
