@@ -32,11 +32,6 @@
 	#vote-details a.note {
 		cursor: pointer;
 	}
-
-    #vote-details .all-voters tr.voter_outlier td {
-        font-weight: bold;
-        color: black;
-    }
 	</style>
 {% endblock %}
 {% block og_image %}
@@ -52,8 +47,8 @@
 var current_sort_column = null;
 function update_table() {
     update_grouping_rows();
-    var has_outliers = show_table($("#vote-details-outliers"), true, "Notable Votes");
-    show_table($("#vote-details-all"), false, has_outliers ? "All Votes" : null);
+    var has_outliers = show_table($("#vote-details-outliers"), true, true);
+    show_table($("#vote-details-all"), false, has_outliers);
 }
 function update_grouping_rows() {
     // Add in grouping rows based on the chosen sort order.
@@ -71,7 +66,7 @@ function update_grouping_rows() {
         }
     }
 }
-function show_table(container, only_outliers, title) {
+function show_table(container, only_outliers, show_title) {
 	// We achieve a multi-column layout by cloning the table three
 	// times (or as many as will fit) and then removing the elements
 	// we don't want to include.
@@ -81,9 +76,19 @@ function show_table(container, only_outliers, title) {
         // Make an intermediate clone that only contains the outliers.
         table = table.clone();
         table.find('tbody tr:not(.voter_outlier)').remove();
-        if (table.find('tbody tr').length == 0)
+        if (table.find('tbody tr').length == 0) {
+            container.hide();
             return false;
+        }
     }
+
+    // Add header.
+    container.show();
+    container.find(">h3").toggle(show_title);
+
+    // Because we use :first-child, we must nest the actual tables when there's
+    // a title <h3>. We also don't want to clear the h3 and other content.
+    container = container.find('.vote-table-container');
 
     // To prevent scrolling issues when redoing the tables, set a height
     // before clearing the old columns.
@@ -92,15 +97,6 @@ function show_table(container, only_outliers, title) {
     // Clear.
     container.text('');
 
-    // Add header.
-    if (title)
-        container.append($('<h3/>').text(title));
-
-    // Because we use :first-child, we must nest the actual tables when there's
-    // a title <h3>.
-    var container2 = $('<div/>');
-    container.append(container2);
-    
 	// Clone and remove the unwanted rows.
 	var ncols = Math.floor($('#vote-details').innerWidth() / 320);
 	if (ncols > 3) ncols = 3;
@@ -109,7 +105,7 @@ function show_table(container, only_outliers, title) {
         group.attr('style', 'float: left');
         group.attr('id', '');
         group.css({ width: $('#vote-details').innerWidth()/ncols - (21*(ncols-1))/ncols - 2 })
-        container2.append(group);
+        container.append(group);
 
         if (!only_outliers)
             group.addClass('all-voters');
@@ -294,7 +290,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 {% with vote.totals as totals %}
 <div class="row">
 <div class="col-sm-8">
-    <table class="stats">
+    <table class="stats" style="margin-bottom: 1em">
         <thead>
             <tr>
                 <th></th>
@@ -362,7 +358,9 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     <div class="col-sm-4">
         <div style="margin: auto; max-width: 225px">
 	    	<img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" />
+			{% if has_ideology_scores %}
     		<div style="text-align: center; color: #777; line-height: 130%; font-size: 12px; margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
+			{% endif %}
         </div>
     </div>
     {% endif %}
@@ -488,8 +486,13 @@ onUserDistrictChanged(function (cong_dist, mocs) {
         </table>
 
         <div id="vote-details-outliers">
+            <h3>Statistically Notable Votes</h3>
+			<div class="vote-table-container"> </div>
+            <p style="margin-top: .5em; font-size: 90%; color: #444;">Statistically notable votes are the votes that are most surprising, or least predictable, given how other members of each voter&rsquo;s party voted{% if has_ideology_scores %} and other factors{% endif %}.</p>
         </div>
         <div id="vote-details-all">
+            <h3>All Votes</h3>
+			<div class="vote-table-container"> </div>
         </div>
 </div>
 </div>

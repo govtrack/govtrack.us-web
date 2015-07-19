@@ -85,15 +85,19 @@ def vote_details(request, congress, session, chamber_code, number):
     
     # sorting by party actually sorts by party first and by ideology score
     # second.
+    has_ideology_scores = False
     congress = int(congress)
     global ideology_scores
     load_ideology_scores(congress)
     if ideology_scores[congress]:
         for voter in voters:
-            voter.ideolog_score = ideology_scores[congress].get(
-            	voter.person.id if voter.person else 0,
+            if voter.person and voter.person.id in ideology_scores[congress]:
+                voter.ideolog_score = ideology_scores[congress][voter.person.id]
+                has_ideology_scores = True
+            else:
+                voter.ideolog_score = \
             	ideology_scores[congress].get("MEDIAN:" + (voter.person.role.party if voter.person and voter.person.role else ""),
-            		ideology_scores[congress]["MEDIAN"]))
+            		ideology_scores[congress]["MEDIAN"])
         
     # perform an initial sort for display
     voters.sort(key = lambda x : (x.option.key, x.person.role.party if x.person and x.person.role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
@@ -112,6 +116,7 @@ def vote_details(request, congress, session, chamber_code, number):
             "VoteCategory": VoteCategory._items,
             'has_vp_vote': has_vp_vote,
             'has_diagram': has_diagram,
+            'has_ideology_scores': has_ideology_scores,
             'reconsiderers': (reconsiderers, reconsiderers_titles),
             }
 
@@ -191,7 +196,7 @@ def get_vote_outliers(voters):
 
 	# Mark voters whose vote is far from the prediction.
 	for i, v in enumerate(voters):
-		v.is_outlier = (abs(y[i]-estimate[i]) > .66)
+		v.is_outlier = (abs(y[i]-estimate[i]) > .7)
 
 @anonymous_view
 def vote_export_csv(request, congress, session, chamber_code, number):
