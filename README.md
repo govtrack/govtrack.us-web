@@ -7,13 +7,20 @@ The data-gathering scripts are elsewhere.
 Installation
 ------------
 
-GovTrack.us runs on Ubuntu 12.10.
+GovTrack.us runs on Ubuntu 12.10 or OS X
 
 * Install dependencies via OS package manager:
 
   ```
   apt-get install git python-virtualenv python-lxml python-openid python-oauth2 \
       python-iso8601 python-numpy python-scipy python-prctl
+  ```
+
+  or for OS X (xCode required)
+  ```
+  export CFLAGS=-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/usr/include/libxml2
+  pip install virtualenv lxml python-openid python-oauth2 \
+      iso-8601 numpy scipy
   ```
 
 * Clone the source code. Besides this project, you'll also need [@unitedstates/congress-legislators](https://github.com/unitedstates/congress-legislators) which is where legislator and committee information come from.
@@ -28,6 +35,8 @@ GovTrack.us runs on Ubuntu 12.10.
   ```
   cd ./govtrack.us-web/
   ```
+
+* (OS X only) Install bcrypt http://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed
 
 * Run the build script to install additional dependencies into a virtual environment:
 
@@ -74,12 +83,13 @@ GovTrack.us runs on Ubuntu 12.10.
   ./manage.py loaddata django-fixture-people.json
   ./manage.py loaddata django-fixture-usc_sections.json
   ./manage.py loaddata django-fixture-billterms.json
-
+  
+  ./parse.py person
   ./parse.py committee # fails b/c meeting data not available
 
   ./build/rsync.sh
-  ./parse.py bill --congress=113 --disable-index --disable-events
-  ./parse.py vote --congress=113 --disable-index --disable-events
+  ./parse.py bill --congress=114 --disable-index --disable-events
+  ./parse.py vote --congress=114 --disable-index --disable-events
   ```
   
 If you configured Solr, you can remove --disable-index. For the sake of speed, --disable-events will skip the creation of the events table for bills, which is the basis for feeds and tracking, so that will be nonfunctional.
