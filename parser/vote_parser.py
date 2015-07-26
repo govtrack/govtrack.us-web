@@ -29,7 +29,7 @@ class VoteProcessor(XmlProcessor):
     ATTRIBUTES = ['source', 'datetime']
     REQUIRED_NODES = ['type', 'question', 'required', 'result']
     NODES = ['type', 'question', 'required', 'result', 'category']
-    FIELD_MAPPING = {'datetime': 'created', 'type': 'vote_type'}
+    FIELD_MAPPING = {'datetime': 'created', 'type': 'vote_type' }
     SOURCE_MAPPING = {
         'senate.gov': VoteSource.senate,
         'house.gov': VoteSource.house,
@@ -79,8 +79,8 @@ class VoterProcessor(XmlProcessor):
     "Parser of /roll/voter nodes"
 
     REQUIRED_ATTRIBUTES = ['id', 'vote']
-    ATTRIBUTES = ['id', 'vote']
-    FIELD_MAPPING = {'id': 'person', 'vote': 'option'}
+    ATTRIBUTES = ['id', 'vote', 'voteview_votecode_extra']
+    FIELD_MAPPING = {'id': 'person', 'vote': 'option', 'voteview_votecode_extra': 'voteview_extra_code' }
     PERSON_CACHE = {}
 
     def process(self, options, obj, node):
@@ -302,12 +302,18 @@ def main(options):
                         
                 # pre-fetch the role of each voter
                 load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
-                for voter in voters:
+                for voter in list(voters):
                     voter.person_role = voter.person.role
+                    # If we couldn't match a role for this person on the date of the vote, and if the voter was Not Voting,
+                    # and we're looking at historical data, then this is probably a data error --- the voter wasn't even in office.
                     if voter.person_role is None:
-                        log.error("%s: Could not find role for %s on %s." % (fname, voter.person, vote.created))
-                        vote.missing_data = True
-                        vote.save()
+                        if vote.source == VoteSource.keithpoole and voter.option.key == "0":
+                            # Drop this record.
+                            voters.remove(voter)
+                        else:
+                            log.error("%s: Could not find role for %s on %s." % (fname, voter.person, vote.created))
+                            vote.missing_data = True
+                            vote.save()
 
                 # save all of the records (inserting/updating)
                 for voter in voters:
