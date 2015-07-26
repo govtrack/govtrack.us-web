@@ -278,6 +278,13 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
 {% if has_vp_vote %}<p style="margin: 1em 0 0 0">The Vice President cast a tie-breaking vote.</p>{% endif %}
 
+{% if vote.source == 3 %}
+    <p class="text-danger" style="margin-top: 1em">From October 2014 through July 2015, we displayed incorrect vote totals for some historical votes.
+    Although the total correctly reflected the announced positions of Members of Congress, the totals incorrectly included &ldquo;paired&rdquo; votes,
+    which is when two Members of Congress, one planning to vote in favor and the other against, plan ahead of time to both abstain. The totals now
+    omit paired votes and now more closely reflect the official totals.</p>
+{% endif %}
+
 {% if vote.oursummary %}<div style="margin-top: 1em">{{vote.oursummary.as_html|safe}}</div>{% endif %}
 
 <p id="yourreps" class="hidden" style="margin-bottom: 0"></p>
@@ -404,10 +411,12 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 	<a href="#" onclick="return show_notes(this)" data-id="historical">Accuracy of Historical Records</a>
 	<div id="notes_historical" class="popup-content">
 	<p>Our database of roll call votes from 1789-1989 (1990 for House votes) comes from an academic data source, <a href="http://www.voteview.com">VoteView.com</a>,
-	that has digitized paper records going back more than 200 years. Because of the difficulty of this task, the accuracy of these vote records is reduced..</p>
-	<p>In particular, these records do not distinguish between Members of Congress not voting (abstaining) from Members of Congress who were not eligible to vote because
-	they had not yet taken office, or for other reasons. As a result, you may see Senate votes with more than 100 senators listed! But, typically, the extra senators
-	will be listed as not voting.</p>
+	that has digitized paper records going back more than 200 years. Because of the difficulty of this task, the accuracy of these vote records is reduced.</p>
+    <p>From October 2014 through July 2015, we displayed incorrect vote totals in some cases. Although the total correctly reflected the announced positions of
+    Members of Congress, the totals incorrectly included &ldquo;paired&rdquo; votes, which is when two Members of Congress, one planning to vote in favor and the
+    other against, plan ahead of time to both abstain.</p>
+	<p>In addition, these records do not always distinguish between Members of Congress not voting (abstaining) from Members of Congress who were not eligible to vote because
+	they had not yet taken office, or for other reasons. As a result, you may see extra not-voting entries and in these cases Senate votes may show more than 100 senators listed!</p>
 	</div>
 	{% endif %}
 
