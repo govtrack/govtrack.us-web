@@ -21,3 +21,5 @@ twilio
 tqdm
 pyyaml
 pynliner
+django-common
+phonenumbers
