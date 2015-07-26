@@ -37,7 +37,8 @@ class VoteCategory(enum.Enum):
     unknown = enum.Item(9, 'Unknown Category', search_help_text="A variety of uncategorized votes.")
     ratification = enum.Item(12, 'Treaty Ratification', search_help_text="Senate votes to ratify treaties.")
     veto_override = enum.Item(10, 'Veto Override', search_help_text="Votes to override a presidential veto.")
-    conviction = enum.Item(11, 'Impeachment Conviction', search_help_text="'Guilty or Not Guilty' votes in the Senate to convict an office holder of impeachment.")
+    conviction = enum.Item(11, 'Conviction', search_help_text="'Guilty or Not Guilty' votes in the Senate to convict an office holder following impeachment.")
+    impeachment = enum.Item(13, 'Impeachment', search_help_text="A vote in the House on whether or not to impeach an office-holder.")
 
 class VoterType(enum.Enum):
     unknown = enum.Item(1, 'Unknown')

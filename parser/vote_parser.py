@@ -49,6 +49,7 @@ class VoteProcessor(XmlProcessor):
         'treaty': VoteCategory.ratification,
         'ratification': VoteCategory.ratification, # schema changed and no longer used but still present in data files
         'veto-override': VoteCategory.veto_override,
+        'impeachment': VoteCategory.impeachment,
         'conviction': VoteCategory.conviction,
         'quorum': VoteCategory.procedural,
         'leadership': VoteCategory.procedural,
