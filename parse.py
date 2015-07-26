@@ -1,11 +1,16 @@
-#!script
+#!.env/bin/python
 from optparse import OptionParser
 import sys, os, os.path
 import logging
+import django
 
 from django.conf import settings
 
+
 # Explicitly set DEBUG to False to avoid memory leak
+#settings.configure()
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings_local'
+django.setup()
 settings.DEBUG = False
 
 PARSER_USAGE = """Usage: %prog action

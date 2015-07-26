@@ -12,6 +12,8 @@ from person.util import load_roles_at_date
 
 from us import get_session_ordinal
 
+from decimal import *
+
 import markdown2
 
 class CongressChamber(enum.Enum):
@@ -62,7 +64,8 @@ class Vote(models.Model):
     total_plus = models.IntegerField(blank=True, default=0, help_text="The count of positive votes (aye/yea).")
     total_minus = models.IntegerField(blank=True, default=0, help_text="The count of negative votes (nay/no).")
     total_other = models.IntegerField(blank=True, default=0, help_text="The count of abstain or absent voters.")
-    
+    percent_yes = models.DecimalField(blank=True, default=0, decimal_places=2, max_digits=4, help_text="The percent of yes votes.")
+
     related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.", on_delete=models.PROTECT)
     related_amendment = models.ForeignKey('bill.Amendment', related_name='votes', blank=True, null=True, help_text="A related amendment.", on_delete=models.PROTECT)
     missing_data = models.BooleanField(default=False, help_text="If something in the source could be parsed and we should revisit the file.")
@@ -88,6 +91,7 @@ class Vote(models.Model):
         self.total_plus = self.voters.filter(option__key='+').count()
         self.total_minus = self.voters.filter(option__key='-').count()
         self.total_other = self.voters.count() - (self.total_plus + self.total_minus)
+        self.percent_yes = self.voters.filter(option__key='+').count()/Decimal(self.total_plus + self.total_minus + self.total_other)
         self.save()
 
     def get_absolute_url(self):

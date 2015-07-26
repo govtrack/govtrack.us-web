@@ -53,6 +53,7 @@ def vote_search_manager():
     sm.add_option('session', type="select", choices=session_choices, filter=session_filter, help="Note: Even-year sessions extend a few days into the next year.")
     sm.add_option('chamber')
     sm.add_option('category')
+    sm.add_sort('Percentage Yes','percent_yes')
     
     #def safe_strftime(date, format):
     #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
