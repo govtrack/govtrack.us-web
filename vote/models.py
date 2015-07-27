@@ -108,9 +108,12 @@ class Vote(models.Model):
         elif self.source == VoteSource.keithpoole:
             return "http://voteview.com/"
         raise ValueError("invalid source: " + str(self.source))
+
+    def chamber_name(self):
+        return CongressChamber.by_value(self.chamber).label
         
     def name(self):
-        return CongressChamber.by_value(self.chamber).label + " Vote #" + str(self.number)
+        return self.chamber_name + " Vote #" + str(self.number)
         
     @property
     def is_major(self):

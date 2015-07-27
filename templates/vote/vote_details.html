@@ -7,7 +7,13 @@
 {% block head %}
 	<meta property="og:title" content="{{ vote.question|truncatewords:10 }} -- {{ vote.get_chamber_display }} Vote #{{ vote.number }} -- {{ vote.created|date:"DATE_FORMAT" }}" />
 	<style>
-	#vote_explainer p { margin: 0; }
+	.hdr {
+		font-style: italic;
+		color: #666;
+	}
+	.dl-horizontal dt {
+		text-align: left;
+	}
 
     p#yourreps {
         margin: 1em 0 0 0;
@@ -207,37 +213,34 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
 <h1 class="long">{{ vote.question }}</h1>
 
-{% if vote.question_details %}<p>{{ vote.question_details }}</p>{% endif %}
-
-<div class="row">
-<div class="col-sm-8">
-<dl class="dl-horizontal {% if vote.related_amendment or vote.related_bill.noun == "resolution" %}wide{% endif %}">
-    <dt>Date:</dt>
-    <dd><p>{{ vote.created|date:"DATE_FORMAT" }}</p></dd>
-    <dt>Number:</dt>
-    <dd><p>{{ vote.get_chamber_display }} Vote #{{ vote.number }}
-        <br>{{ vote.congress|ordinalhtml }} Congress</p></dd>
-    <dt>Result:</dt>
-    <dd><p>{{ vote.result }}</p></dd>
-    <dt>Source:</dt>
-    <dd><p><a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a></p></dd>
-</dl>
-</div>
-
-<div class="col-sm-4">
-	<a href="/events/track-something?feed=misc:allvotes" class="track-btn" title="Get email alerts or set up an RSS feed">Track Votes</a>
-</div>
-</div>
-
 <div id="vote_explainer">
-    {% if vote.category == VoteCategory.passage %}
+	{% if vote.oursummary %}
+		<div>{{vote.oursummary.as_html|safe}}</div>
+
+		<small>
+	    {% if vote.related_amendment and vote.related_bill %}
+	        <p>This vote was related to amendment <a href="{{vote.related_amendment.congressdotgov_link}}">{{vote.related_amendment.display_number}}</a>
+			{% if vote.related_amendment.sponsor %}(<a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{{vote.related_amendment.sponsor.name_no_details}}</a>){% endif %}
+	        to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>. The title of the amendment is {{vote.related_amendment.title}}.</p>
+		{% elif vote.related_bill %}
+	        <p>This vote was related to
+                {% if vote.related_bill.sponsor %}
+                    a {{vote.related_bill.noun}} introduced by <a href="{{vote.related_bill.sponsor.get_absolute_url}}">{{vote.related_bill.sponsor}}</a> on {{vote.related_bill.introduced_date|date:"F j, Y"}},
+                {% endif %}
+                <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>.</p>
+        {% endif %}
+		</small>
+
+		<hr>
+
+    {% elif vote.category == VoteCategory.passage %}
 	<p>
     	{% if vote.related_bill.noun == "bill" %}
-    		This was a vote to pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>.
+    		This was a vote to pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a> in the {{vote.chamber_name}}.
     	{% elif vote.related_bill.noun == "resolution" %}
-    		This was a vote to agree to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>.
+    		This was a vote to agree to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a> in the {{vote.chamber_name}}.
     	{% else %}
-    		This was a vote to pass a bill or agree to a resolution.
+    		This was a vote to pass a bill or agree to a resolution in the {{vote.chamber_name}}.
     	{% endif %}
     	{% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text}}{% endif %}
     </p>
@@ -245,7 +248,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     {% elif vote.category == VoteCategory.amendment %}
     <p>
 	    {% if not vote.related_amendment or not vote.related_bill %}
-        This was a vote to approve or reject an amendment{% if vote.related_bill %} to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% endif %}.
+        This was a vote to approve or reject an amendment{% if vote.related_bill %} to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% endif %} in the {{vote.chamber_name}}.
 		{% else %}
         This was a vote to approve or reject amendment <a href="{{vote.related_amendment.congressdotgov_link}}">{{vote.related_amendment.display_number}}</a>
 		{% if vote.related_amendment.sponsor %}(<a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{{vote.related_amendment.sponsor.name_no_details}}</a>){% endif %}
@@ -254,10 +257,10 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 	</p>
 
     {% elif vote.category == VoteCategory.passage_suspension %}
-    <p>This was a vote to {% if vote.related_bill.noun == "bill" %}pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% elif vote.related_bill.noun == "resolution" %}agree to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% else %}pass a bill or agree to a resolution{% endif %}. It was taken under a procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
+    <p>This was a vote to {% if vote.related_bill.noun == "bill" %}pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% elif vote.related_bill.noun == "resolution" %}agree to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% else %}pass a bill or agree to a resolution{% endif %}. It was taken under a House procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
 
     {% elif vote.category == VoteCategory.cloture %}
-    <p>This was a vote on &ldquo;cloture&rdquo;, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate and move to a vote on the issue itself, while a vote against is a vote to prolong debate or to filibuster.</p>
+    <p>This was a vote on &ldquo;cloture&rdquo; in the Senate, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate and move to a vote on the issue itself, while a vote against is a vote to prolong debate or to filibuster.</p>
     {% if vote.related_bill %}<p style="margin-top: 1em">The vote was related to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>.</p>{% endif %}
     
     {% elif vote.related_bill or vote.related_amendment %}
@@ -276,23 +279,58 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     {% endif %}
 </div>
 
-{% if has_vp_vote %}<p style="margin: 1em 0 0 0">The Vice President cast a tie-breaking vote.</p>{% endif %}
+<div class="row">
+<div class="col-sm-8">
+	<div class="row" style="margin-bottom: 1em">
+		<div class="col-xs-3">
+			<div class="hdr">Congress</div>
+			<div>{{ vote.congress|ordinalhtml }} Congress</div>
+		</div>
+		<div class="col-xs-3">
+			<div class="hdr">Date</div>
+			<div>{{ vote.created|date:"DATE_FORMAT" }}</div>
+		</div>
+		<div class="col-xs-3">
+			<div class="hdr">Chamber</div>
+			<div>{{ vote.chamber_name }}</div>
+		</div>
+		<div class="col-xs-3">
+			<div class="hdr">Number</div>
+			<div>#{{ vote.number }}</div>
+		</div>
+	</div>
+
+	<dl class="dl-horizontal">
+	{% if vote.question_details %}
+	<dt>Question:</dt>
+	<dd>{{ vote.question_details }}</dd>
+	{% endif %}
+
+	<dt>Result:</dt>
+	<dd>{{ vote.result }}</dd>
+	</dl>
+</div>
+
+<div class="col-sm-4">
+	<a href="/events/track-something?feed=misc:allvotes" class="track-btn" title="Get email alerts or set up an RSS feed" style="margin: 0 auto">Track Votes</a>
+</div>
+</div>
+
+{% if has_vp_vote %}<p>The Vice President cast a tie-breaking vote.</p>{% endif %}
 
 {% if vote.source == 3 %}
-    <p class="text-danger" style="margin-top: 1em">From October 2014 through July 2015, we displayed incorrect vote totals for some historical votes.
+    <p class="text-danger">From October 2014 through July 2015, we displayed incorrect vote totals for some historical votes.
     Although the total correctly reflected the announced positions of Members of Congress, the totals incorrectly included &ldquo;paired&rdquo; votes,
     which is when two Members of Congress, one planning to vote in favor and the other against, plan ahead of time to both abstain. The totals now
     omit paired votes and now more closely reflect the official totals.</p>
 {% endif %}
 
-{% if vote.oursummary %}<div style="margin-top: 1em">{{vote.oursummary.as_html|safe}}</div>{% endif %}
-
-<p id="yourreps" class="hidden" style="margin-bottom: 0"></p>
+<p id="yourreps" class="hidden"></p>
 
 <div id="admin_panel"> </div>
 <script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
 
-<hr>
+<hr style="margin-top: 0; margin-bottom: 1.5em">
 
 {% with vote.totals as totals %}
 <div class="row">
@@ -350,6 +388,9 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                 		{{ vote.required }}
                 	{% endif %}
                 </td>
+				<td colspan="{{totals.parties|length}}" style="font-size: 90%">
+					source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>
+				</td>
             </tr>
             {% comment %}
             <tr class="gradient">
