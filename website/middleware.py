@@ -120,7 +120,6 @@ def template_context_processor(request):
     def get_kickstarter_info():
         import re
         ks = urllib.urlopen("https://www.kickstarter.com/projects/1872382405/govtrack-insider").read()
-        print(ks)
         return { "pledged": re.search('<data .* itemprop="Project\[pledged\]">(\\$\\d+)</data>', ks).group(1) }
     kickstarter_info = cache.get("kickstarter_info")
     if not kickstarter_info:
