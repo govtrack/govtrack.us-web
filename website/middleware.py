@@ -151,7 +151,7 @@ def template_context_processor(request):
 
     user_loc = None
     try:
-        if settings.GEOIP_DB_PATH and not request.path.startswith("/api/"):
+        if settings.GEOIP_DB_PATH and not request.path.startswith("/api/") and False:
             user_loc = geo_ip_db.geos(ip)
             context["is_dc_local"] = user_loc.distance(washington_dc) < .5
     except:
