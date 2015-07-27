@@ -150,10 +150,12 @@ class Feed(models.Model):
             feeds = sorted(subs1.keys(), key = lambda f : subs1[f]/subs2.get(f, 1) + 2*(subs1[f]/mv)**.5, reverse=True)
             
             # Take the top trending bill not seen in a previous period.
+            c = 0
             for f in feeds:
                 if f not in trending:
                     trending.append(f)
-                    break
+                    c += 1
+                    if c == 2: break
         return trending
 
     # feed metadata
