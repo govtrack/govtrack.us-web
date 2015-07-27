@@ -115,6 +115,21 @@ def template_context_processor(request):
             medium_posts = []
         cache.set("medium_posts", medium_posts, 60*15) # 15 minutes
     context["medium_posts"] = medium_posts[0:2]
+
+    # Get current Kickstarter pledge level.
+    def get_kickstarter_info():
+        import re
+        ks = urllib.urlopen("https://www.kickstarter.com/projects/1872382405/govtrack-insider").read()
+        print(ks)
+        return { "pledged": re.search('<data .* itemprop="Project\[pledged\]">(\\$\\d+)</data>', ks).group(1) }
+    kickstarter_info = cache.get("kickstarter_info")
+    if not kickstarter_info:
+        try:
+            kickstarter_info = get_kickstarter_info()
+        except:
+            pass
+        cache.set("kickstarter_info", kickstarter_info, 60*30) # 30 minutes
+    context["kickstarter_info"] = kickstarter_info
     
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
