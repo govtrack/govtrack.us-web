@@ -10,52 +10,47 @@ from optparse import make_option
 from django.contrib.auth.models import User
 from website.models import UserProfile
 from emailverification.models import BouncedEmail
+from htmlemailer import send_mail
 
 from datetime import datetime, timedelta
 
 class Command(BaseCommand):
-	args = 'daily|weekly|all|test|count'
+	args = 'test|go'
 	help = 'Sends out an email blast to users with a site announcement.'
 	
 	def handle(self, *args, **options):
-		if len(args) != 1 or args[0] not in ('daily', 'weekly', 'all', 'test', 'count'):
-			print "Specify daily or weekly or all or test or count."
-			return
-			
-		# Load current email blast.
-			
-		blast = load_blast()
-		
 		# Definitions for the four groups of users.
-			
-		user_groups = {
-			"test": UserProfile.objects.filter(user__email="jt@occams.info"),
-			"all": UserProfile.objects.all(),
-			"daily": UserProfile.objects.filter(user__subscription_lists__email=1).distinct(),
-			"weekly": UserProfile.objects.filter(user__subscription_lists__email=2).distinct(),
-		}
-		
+
+		if args[0] not in ("go", "count"):
+			# test email
+			users = UserProfile.objects.filter(user__email="jt@occams.info"),
+		else:
+			# Users who have subscribed to email updates.
+			users = UserProfile.objects.filter(user__subscription_lists__email__gt=0).distinct()
+
 		# also require:
 		# * the mass email flag is turned
 		# * we haven't sent them this blast already
 		# * they don't have a BouncedEmail record
-		for ug, qs in user_groups.items():
-			user_groups[ug] = qs.filter(
+		users = users.filter(
 				massemail=True,
-				last_mass_email__lt=blast["id"])\
+				last_mass_email__lt=blast["id"]
+				)\
 				.exclude(user__bounced_emails__id__gt=0)
+
+		print users.count()
 			
 		if args[0] == "count":
-			# Just print counts by group and exit.
-			for ug, qs in user_groups.items():
-				print ug, qs.count()
 			return
-			
+		if args[0] != "test":
+			# yikes don't really send
+			raise Exception("Really?")
+
 		# Get the list of user IDs.
 			
-		users = list(user_groups[args[0]].order_by("user__id").values_list("user", flat=True))
+		users = list(users.order_by("user__id").values_list("user", flat=True))
 		
-		print "Sending to ", args[0], len(users)
+		print "Sending..."
 			
 		total_emails_sent = 0
 		for userid in users:
@@ -67,53 +62,36 @@ class Command(BaseCommand):
 			
 		print "sent", total_emails_sent, "emails"
 
-	
-def load_blast():
-	# get the email's From: header and return path
-	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
-			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
-		
-	# get plain text, HTML, and metadata for the blast
-	from events.management.commands.send_email_updates import load_markdown_content
-	content = load_markdown_content("website/email/blast.md", "utm_campaign=govtrack_email_blast&utm_source=govtrack/email_blast&utm_medium=email")
-
-	# put the HTML inside a master layout
-
-	ctx = Context({ })
-	ctx.update({ "body": content["body_html"] })
-
-	templ_html_wrapper = get_template("website/email/blast.html")
-	body_html = templ_html_wrapper.render(ctx)
-
-	content["from"] = emailfromaddr
-	return content
-	
 def send_blast(user_id, blast):
 	user = User.objects.get(id=user_id)
+	prof = user.userprofile()
 
-	emailreturnpath = blast["from"]
+	# from address / return path address
+	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
+			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
+	emailreturnpath = emailfromaddr
 	if hasattr(settings, 'EMAIL_UPDATES_RETURN_PATH'):
 		emailreturnpath = (settings.EMAIL_UPDATES_RETURN_PATH % user.id)
-
-	email = EmailMultiAlternatives(
-		blast["subject"],
-		blast["body_text"],
-		emailreturnpath,
-		[user.email],
-		headers = {
-			'From': blast["from"]
-		}
-		)
-	email.attach_alternative(blast["body_html"], "text/html")
 	
+	# send!
 	try:
 		print "emailing", user.id, user.email
-		email.send(fail_silently=False)
+		send_mail(
+			"website/email/blast",
+			emailreturnpath,
+			[user.email],
+			{
+			},
+			headers = {
+				'From': emailfromaddr,
+				'X-Auto-Response-Suppress': 'OOF',
+			},
+			fail_silently=False
+		)
 	except Exception as e:
 		print user, e
 		return False
 	
-	prof = user.userprofile()
 	prof.last_mass_email = blast["id"]
 	prof.save()
 		
