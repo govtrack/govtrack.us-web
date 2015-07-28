@@ -109,6 +109,7 @@ class Vote(models.Model):
             return "http://voteview.com/"
         raise ValueError("invalid source: " + str(self.source))
 
+    @property
     def chamber_name(self):
         return CongressChamber.by_value(self.chamber).label
         
