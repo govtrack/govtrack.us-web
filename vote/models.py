@@ -60,10 +60,11 @@ class Vote(models.Model):
     question = models.TextField(help_text="Descriptive text for what the vote was about.")
     required = models.CharField(max_length=10, help_text="A code indicating what number of votes was required for success. Often '1/2' or '3/5'. This field should be interpreted with care. It comes directly from the upstream source and may need some 'unpacking.' For instance, while 1/2 always mean 1/2 of those voting (i.e. excluding absent and abstain), 3/5 in some cases means to include absent/abstain and in other cases to exclude.")
     result = models.TextField(help_text="Descriptive text for the result of the vote.")
+
     total_plus = models.IntegerField(blank=True, default=0, help_text="The count of positive votes (aye/yea).")
     total_minus = models.IntegerField(blank=True, default=0, help_text="The count of negative votes (nay/no).")
     total_other = models.IntegerField(blank=True, default=0, help_text="The count of abstain or absent voters.")
-    percent_yes = models.FloatField(blank=True, default=0, help_text="The percent of yes votes.")
+    percent_plus = models.FloatField(blank=True, null=True, help_text="The percent of positive votes. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
 
     related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.", on_delete=models.PROTECT)
     related_amendment = models.ForeignKey('bill.Amendment', related_name='votes', blank=True, null=True, help_text="A related amendment.", on_delete=models.PROTECT)
@@ -90,7 +91,10 @@ class Vote(models.Model):
         self.total_plus = self.voters.filter(option__key='+').count()
         self.total_minus = self.voters.filter(option__key='-').count()
         self.total_other = self.voters.count() - (self.total_plus + self.total_minus)
-        self.percent_yes = self.total_plus/float(self.total_plus + self.total_minus + self.total_other)
+        if self.total_plus + self.total_minus == 0:
+            self.percent_plus = None
+        else:
+            self.percent_plus = self.total_plus/float(self.total_plus + self.total_minus + self.total_other)
         self.save()
 
     def get_absolute_url(self):
