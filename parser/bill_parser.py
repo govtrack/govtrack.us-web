@@ -124,6 +124,7 @@ class BillProcessor(XmlProcessor):
             obj.sponsor = None
 
     def process_consponsors(self, obj, node):
+        cosp = set()
         for subnode in node.xpath('./cosponsors/cosponsor'):
             try:
                 person = get_person(subnode.get('id'))
@@ -148,10 +149,18 @@ class BillProcessor(XmlProcessor):
                         "withdrawn": withdrawn,
                         "role": role
                     })
-                if ob.joined != joined or ob.withdrawn != withdrawn:
+                if ob.joined != joined or ob.withdrawn != withdrawn or ob.role != role:
                     ob.joined = joined
                     ob.withdrawn = withdrawn
+                    ob.role = role
                     ob.save()
+                cosp.add(ob.id)
+
+        obsolete_cosp = Cosponsor.objects.filter(bill=obj).exclude(id__in=cosp)
+        if obsolete_cosp.count() > 0:
+            log.error('Deleting obsolete cosponsor records: %s' % (unicode(obsolete_cosp)))
+            obsolete_cosp.delete()
+           
 
     def session_handler(self, value):
         return int(value)
