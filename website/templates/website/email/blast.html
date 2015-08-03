@@ -1,21 +1,102 @@
-<p>Dear GovTrack Users,</p>
+{% extends "htmlemailer/boilerplate.html" %}
+{% block head %}
+<style>
+#backgroundTable { max-width: 50em; }
+#content-area { padding-left: 1em; }
+</style>
+{% endblock %}
+{% block body %}
+    <table cellpadding="2" cellspacing="10" border="0" width="100%">
+      <tbody>
+        <tr>
+          <td valign="top">
+            <div align="center"><img src="https://www.govtrack.us/static/images/blast-201507/logo.png"
+                  alt="GovTrack.us logo"><br>
+              </div>
+            <p>Hello,<p>
+            <p>Thank you for being a long-time user of GovTrack!</p>
 
-<p>GovTrack would like your help to keep Congress open and accountable.</p>
+            <p>Users often ask us to summarize the bills in Congress, so earlier this summer we added a researcher to our team to do just that. The new bill summaries have appeared in your email updates, on the new <a href="https://medium.com/govtrack-insider">GovTrack
+            Insider</a>, and on the GovTrack website.</p>
 
-<p>We have launched a Kickstarter to fund unbiased reporting of congressional legislation and activity. If we can reach our goal of $35,000 we’ll be able to keep posting bill summaries and daily reports for the next 6 months, which we began doing earlier this summer. And at our stretch goal of $60,000 we’ll be able to explain every vote that Congress takes. The more funding we have the more we can cover and the longer we can do it for. If every GovTrack user gave just one dollar, our project would be funded.</p>
+            <p>If you think we should keep writing summaries of bills, we need
+                your help.</p>
 
-<p>Please head over to our Kickstarter page:</p>
+            <div style="text-align: center; font-weight: bold;">
+            <p>Will you support GovTrack today by contributing $250, $100, or $50?</p>
 
-<p><a href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">https://www.kickstarter.com/projects/1872382405/govtrack-insider</a></p>
+            <p>We <a
+                  href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">launched
+                  a Kickstarter</a> to fund our unbiased reporting of
+                congressional legislation and Congress’s daily activity. Please follow the link below to support us:</p>
 
-<p>and support us however you can. We’ll only be able to keep this going with the support of GovTrack users.</p>
+            <p><a
+                  href="http://kck.st/1gZOS2V">http://kck.st/1gZOS2V</a></p>
+            </div>    
+          
+            <p>We’ll only be able to keep the new researcher on staff with the support of
+                GovTrack users like you.</p>
+            
+            <p>If we can reach our goal of raising $35,000 we’ll
+                be able to keep posting bill summaries and daily reports
+                for the next 6 months. We've raised <a
+                  href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">$2,415
+                  so far</a>. This is the first time in 11 years that we’ve asked
+                GovTrack users for help like this.</p>
+            
+            <p>As you may know, for the past two months GovTrack
+                has been working to add a reporting side to the website.
+                This has included the new <a
+                  href="https://medium.com/govtrack-insider">GovTrack
+                  Insider</a> reports on the activity of Congress as
+                well as <a
+                  href="https://www.govtrack.us/events/bill-summaries">summaries
+                  of bills</a>, which we have been including in email
+                updates, all to make it as easy as possible for users
+                like you to stay informed about your government. Now, as
+                Congress’s summer session comes to an end, we’d like to
+                ask for <a
+                  href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">your
+                  help</a> to continue this work.</p>
+            
+            <p style="font-weight: bold">Please <a
+                  href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">visit our
+                  Kickstarter page</a> to back our work!</p>
 
-<p>As you may know, for the past two months GovTrack has been working to add a reporting side to the website. This has included the new GovTrack Insider reports on the activity of Congress as well as summaries of bills, which we have been including in email updates, all to make it as easy as possible for users like you to stay informed about your government. Now, as Congress’ summer session comes to an end, we’d like to ask for your help to continue our work.</p>
+            <p>Thank you for using GovTrack,</p>
+            <p>Josh Tauberer, founder<br>
+                <i>GovTrack.us</i></p>
+            
+            
+            <hr>
+            
+            <p><small>You received this email because you have
+                  registered an account on GovTrack.us. To change your
+                  email settings, visit your <a
+                    href="https://www.govtrack.us/accounts/profile">account
+                    settings page</a>.</small></p>
+            
+            </td>
+          <td valign="top" style="font-size: 85%">
 
-<p>Thank you for using GovTrack,
-<br>The GovTrack Team</p>
+          <p>We launched <a
+                      href="https://medium.com/govtrack-insider">GovTrack
+                        Insider</a> earlier this summer with bill
+                    summaries and daily reports:</p>
 
-<hr>
+            <a href="https://medium.com/govtrack-insider"><img
+              src="https://www.govtrack.us/static/images/blast-201507/insider.png"
+                      alt="" border="0" height="206" width="200"></a><br>
+                  
+                  <p>Now we're asking GovTrack users to support our <a
+href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">Kickstarter
+                      to fund the work</a> for another six months:</p>
 
-<p><small>You received this email because you have registered an account on GovTrack.us. To change your email settings, visit your <a href="https://www.govtrack.us/accounts/profile">account settings page</a>.</small></p>
-
+                <a
+              href="https://www.kickstarter.com/projects/1872382405/govtrack-insider"><img
+                src="https://www.govtrack.us/static/images/blast-201507/kickstarter.png" alt="" border="0" height="382" width="200"></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+{% endblock %}

@@ -1,6 +1,10 @@
 {% load govtrack_utils %}
-<div class="sitenewsbody" data-seq="66">
-	<p>We&rsquo;ve begun writing <a href="https://www.govtrack.us/events/bill-summaries">summaries of bills</a>. Sign up to get these summaries by email.</p>
+<div class="sitenewsbody" data-seq="68">
+	<p>
+		Will you help GovTrack write bill summaries?
+		{% if kickstarter_info %}We&rsquo;ve <a href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">raised {{kickstarter_info.pledged}} so far</a> to hire a researcher.{% endif %}
+		Please <a href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">support our work</a>!
+	</p>
 
 	{% if highlighted_vote and 0 %}
 	<p id="highlighted_vote">

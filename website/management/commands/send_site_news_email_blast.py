@@ -1,11 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from django.core.mail import send_mail, EmailMultiAlternatives
-from django.template import Context, Template
-from django.template.loader import get_template
+from django.db.models import F
 from django.conf import settings
-
-from optparse import make_option
 
 from django.contrib.auth.models import User
 from website.models import UserProfile
@@ -13,6 +9,8 @@ from emailverification.models import BouncedEmail
 from htmlemailer import send_mail
 
 from datetime import datetime, timedelta
+
+blast_id = 2
 
 class Command(BaseCommand):
 	args = 'test|go'
@@ -23,28 +21,30 @@ class Command(BaseCommand):
 
 		if args[0] not in ("go", "count"):
 			# test email
-			users = UserProfile.objects.filter(user__email="jt@occams.info"),
+			users = UserProfile.objects.filter(user__id__in=(5,)) # me and Ben  353071
 		else:
-			# Users who have subscribed to email updates.
-			users = UserProfile.objects.filter(user__subscription_lists__email__gt=0).distinct()
+			# Users who have subscribed to email updates and received one
+			# recently but did not join too recently.
+			users = UserProfile.objects.filter(
+				user__subscription_lists__email__gt=0,
+				user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*1),
+				user__date_joined__lt=datetime.now()-timedelta(days=31*12),
+				user__last_login__gt=F('user__date_joined'),
+				).distinct()
 
-		# also require:
-		# * the mass email flag is turned
-		# * we haven't sent them this blast already
-		# * they don't have a BouncedEmail record
-		users = users.filter(
-				massemail=True,
-				last_mass_email__lt=blast["id"]
-				)\
-				.exclude(user__bounced_emails__id__gt=0)
+			# also require:
+			# * the mass email flag is turned
+			# * we haven't sent them this blast already
+			users = users.filter(
+					massemail=True,
+					last_mass_email__lt=blast_id,
+					)
 
 		print users.count()
 			
 		if args[0] == "count":
 			return
-		if args[0] != "test":
-			# yikes don't really send
-			raise Exception("Really?")
+		if args[0] not in ("go", "test"): raise Exception("sanity check fail")
 
 		# Get the list of user IDs.
 			
@@ -54,7 +54,7 @@ class Command(BaseCommand):
 			
 		total_emails_sent = 0
 		for userid in users:
-			if send_blast(userid, blast):
+			if send_blast(userid, args[0] == "test"):
 				total_emails_sent += 1
 			
 			from django import db
@@ -62,7 +62,7 @@ class Command(BaseCommand):
 			
 		print "sent", total_emails_sent, "emails"
 
-def send_blast(user_id, blast):
+def send_blast(user_id, is_test):
 	user = User.objects.get(id=user_id)
 	prof = user.userprofile()
 
@@ -92,8 +92,9 @@ def send_blast(user_id, blast):
 		print user, e
 		return False
 	
-	prof.last_mass_email = blast["id"]
-	prof.save()
+	if not is_test:
+		prof.last_mass_email = blast_id
+		prof.save()
 		
 	return True # success
 
