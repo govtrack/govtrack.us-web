@@ -181,7 +181,7 @@ class Bill(models.Model):
     # indexing
     def get_index_text(self):
         bill_text = load_bill_text(self, None, plain_text=True)
-        if self.congress >= 82 and not bill_text: print "NO BILL TEXT", self
+        if ((82 <= self.congress <= 92) or (103 <= self.congress)) and not bill_text: print "NO BILL TEXT", self
         summary_text = ""
         bs = BillSummary.objects.filter(bill=self).first()
         if bs: summary_text = bs.plain_text()
