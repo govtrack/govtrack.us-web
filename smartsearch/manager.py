@@ -169,13 +169,13 @@ class SearchManager(object):
                     per_page = qs_count
                 
                 page = Paginator(qs, per_page)
-                obj_list = page.page(page_number).object_list
+                obj_list = page.page(page_number).object_list if qs_count > 0 else []
             
                 ret = {
                     "results": self.results(obj_list, qsparams),
                     "options": facets,
                     "page": page_number,
-                    "num_pages": page.num_pages,
+                    "num_pages": page.num_pages if qs_count > 0 else 0,
                     "per_page": per_page,
                     "total_this_page": len(obj_list),
                     "total": qs_count,
