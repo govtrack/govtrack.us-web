@@ -36,8 +36,8 @@ class SearchManager(object):
     def add_option(self, *args, **kwargs):
         Option(self, *args, **kwargs)
         
-    def add_sort(self, sort_name, sort_key, default=False):
-        self.sort_options.append( (sort_name, sort_key, default) )
+    def add_sort(self, sort_name, sort_key, default=False, func=None):
+        self.sort_options.append( (sort_name, sort_key, default, func) )
         
     def add_filter(self, key, value):
         self.global_filters[key] = value
@@ -62,7 +62,7 @@ class SearchManager(object):
             c = {
                 'form': self.options,
                 'has_relevance_sort': self.qs is None,
-                'sort_options': [(name, key, isdefault if defaults.get("sort", None) == None else defaults.get("sort", None) == key) for name, key, isdefault in self.sort_options],
+                'sort_options': [(name, key, isdefault if defaults.get("sort", None) == None else defaults.get("sort", None) == key) for name, key, isdefault, func in self.sort_options],
                 'defaults': defaults,
                 'noun_singular': noun[0],
                 'noun_plural': noun[1],
@@ -275,9 +275,12 @@ class SearchManager(object):
         if len(filters) > 0:
             qs = qs.filter(**filters)
             
-        for name, key, default in self.sort_options:
+        for name, key, default, func in self.sort_options:
             if postdata.get("sort", "") == key:
-                qs = qs.order_by(key)
+                if not func:
+                    qs = qs.order_by(key)
+                else:
+                    qs = func(qs)
         
         # Django ORM but not Haystack
         if hasattr(qs, 'distinct'):
