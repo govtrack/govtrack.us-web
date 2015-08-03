@@ -49,6 +49,10 @@ def get_term(name, congress):
     if not TERM_CACHE:
         for term in BillTerm.objects.all():
             TERM_CACHE[(term.term_type, normalize_name(term.name))] = term
+            if term.term_type == TermType.new and term.is_top_term():
+                # use top terms in old bills, these are new Policy Area Terms applied
+                # even to pre-111th Congress bills.
+                TERM_CACHE[(TermType.old, normalize_name(term.name))] = term
     return TERM_CACHE[(TermType.new if congress >= 111 else TermType.old, normalize_name(name))]
 
 class TermProcessor(XmlProcessor):
