@@ -45,10 +45,10 @@ def vote_search_manager():
     sm.add_option('chamber')
     sm.add_option('category')
     sm.add_sort('Date (Latest First)','-created', default=True)
-    sm.add_sort('Most Supported','-percent_plus', func=lambda qs : qs.order_by('-percent_plus').exclude(percent_plus=None))
-    sm.add_sort('Most Opposed','percent_plus', func=lambda qs : qs.order_by('percent_plus').exclude(percent_plus=None))
-    sm.add_sort('Widest Margin','-margin', func=lambda qs : qs.order_by('-margin').exclude(margin=None))
-    sm.add_sort('Narrowest Margin','margin', func=lambda qs : qs.order_by('margin').exclude(margin=None))
+    sm.add_sort('Most Supported','-percent_plus', func=lambda qs : qs.order_by('-percent_plus', '-total_plus').exclude(percent_plus=None))
+    sm.add_sort('Most Opposed','percent_plus', func=lambda qs : qs.order_by('percent_plus', '-total_minus').exclude(percent_plus=None))
+    sm.add_sort('Widest Margin','-margin', func=lambda qs : qs.order_by('-margin', '-total_plus').exclude(margin=None))
+    sm.add_sort('Narrowest Margin','margin', func=lambda qs : qs.order_by('margin', 'total_plus').exclude(margin=None))
     
     #def safe_strftime(date, format):
     #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
