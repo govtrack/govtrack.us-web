@@ -1000,6 +1000,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
     def get_related_bills_newer(self):
         return [rb for rb in self.get_related_bills()
             if self.title_no_number == rb.related_bill.title_no_number
+            and rb.related_bill.current_status not in (BillStatus.introduced, BillStatus.referred)
             and rb.related_bill.current_status_date > self.current_status_date]
 
     def find_reintroductions(self):
