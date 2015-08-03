@@ -10,15 +10,6 @@ from smartsearch.manager import SearchManager
 from vote.models import Vote, CongressChamber, VoteCategory
 from us import get_all_sessions
 
-def sort_filter(qs, form):
-    sort = form['sort']
-    if sort != []:
-        if sort[0] == "date":
-            qs = qs.extra(order_by=["-created"])
-        if sort[0] == "spread":
-            qs = qs.extra(order_by=["total_plus-total_minus"])
-    return qs
-
 def session_filter(qs, form):
 	session_index = form["session"]
 	if session_index != None:
@@ -27,7 +18,7 @@ def session_filter(qs, form):
 	return qs
 	
 def vote_search_manager():
-    sm = SearchManager(Vote, qs=Vote.objects.order_by('-created').select_related('oursummary'))
+    sm = SearchManager(Vote, qs=Vote.objects.select_related('oursummary'))
     
     # show sessions as year+session for non-year-based sessions,
     # and then just the session number (the year) for year-based
@@ -53,6 +44,7 @@ def vote_search_manager():
     sm.add_option('session', type="select", choices=session_choices, filter=session_filter, help="Note: Even-year sessions extend a few days into the next year.")
     sm.add_option('chamber')
     sm.add_option('category')
+    sm.add_sort('Date (Latest First)','-created', default=True)
     sm.add_sort('Most Supported','-percent_plus')
     sm.add_sort('Most Opposed','percent_plus')
     

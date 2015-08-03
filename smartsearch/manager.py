@@ -61,6 +61,7 @@ class SearchManager(object):
         	and request.GET.get('do_search', None) == None:
             c = {
                 'form': self.options,
+                'has_relevance_sort': self.qs is None,
                 'sort_options': [(name, key, isdefault if defaults.get("sort", None) == None else defaults.get("sort", None) == key) for name, key, isdefault in self.sort_options],
                 'defaults': defaults,
                 'noun_singular': noun[0],
