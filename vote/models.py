@@ -65,6 +65,7 @@ class Vote(models.Model):
     total_minus = models.IntegerField(blank=True, default=0, help_text="The count of negative votes (nay/no).")
     total_other = models.IntegerField(blank=True, default=0, help_text="The count of abstain or absent voters.")
     percent_plus = models.FloatField(blank=True, null=True, help_text="The percent of positive votes. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
+    margin = models.FloatField(blank=True, null=True, help_text="The absolute value of the difference in the percent of positive votes and negative votes. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
 
     related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.", on_delete=models.PROTECT)
     related_amendment = models.ForeignKey('bill.Amendment', related_name='votes', blank=True, null=True, help_text="A related amendment.", on_delete=models.PROTECT)
@@ -93,8 +94,10 @@ class Vote(models.Model):
         self.total_other = self.voters.count() - (self.total_plus + self.total_minus)
         if self.total_plus + self.total_minus == 0:
             self.percent_plus = None
+            self.margin = None
         else:
             self.percent_plus = self.total_plus/float(self.total_plus + self.total_minus + self.total_other)
+            self.margin = abs(self.total_plus - self.total_minus) / float(self.total_plus + self.total_minus)
         self.save()
 
     def get_absolute_url(self):
