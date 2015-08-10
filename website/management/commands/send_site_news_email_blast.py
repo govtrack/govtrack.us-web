@@ -23,13 +23,13 @@ class Command(BaseCommand):
 			# test email
 			users = UserProfile.objects.filter(user__id__in=(5,)) # me and Ben  353071
 		else:
-			# Users who have subscribed to email updates and received one
-			# recently but did not join too recently.
+			# Users who have subscribed to email updates and received one recently but joined
+			# the site at least some time ago and so isn't a new user.
 			users = UserProfile.objects.filter(
 				user__subscription_lists__email__gt=0,
-				user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*1),
-				user__date_joined__lt=datetime.now()-timedelta(days=31*12),
-				user__last_login__gt=F('user__date_joined'),
+				user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*6),
+				user__date_joined__lt=datetime.now()-timedelta(days=14),
+				#user__last_login__gt=F('user__date_joined'),
 				).distinct()
 
 			# also require:
