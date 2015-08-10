@@ -250,22 +250,28 @@ function askcd_submit(is_cancel) {
 }
 var win_loc_hash = window.location.hash; // may change between now and ()'s execution
 $(function() {
-	return;
 	setTimeout(function() {
 		if (win_loc_hash == "#track") return;
 
 		var flags = $.cookie("flags");
 		flags = !flags ? {} : parse_qs(flags);
 
+    if (!flags.kickstarter) {
+      $('#kickstarter_modal').modal();
+      flags.kickstarter = true;
+    }
+
+    if (0) {
     if (the_segment == "Other" && !flags.itf)
       show_if_then_fund(flags);
 		else if (the_segment == "Other" && cong_dist == null)
 			show_askcd();
 		else if (Math.random() < .3)
 			show_followus(flags);
+    }
 
 		$.cookie("flags", form_qs(flags), { expires: 21, path: '/' });
-	}, 500)
+	}, 750)
 });
 
 function show_followus(flags) {
@@ -345,6 +351,39 @@ function show_if_then_fund(flags) {
         <p><a href="https://if.then.fund/a/13/hr-36-pain-capable-unborn-child-protection-act-senate-vote?utm_campaign=govtrack/popup"><span class="itf-brand">if.then.fund</span></a> is a new website that can help you shape the future of Congress from the creators of GovTrack and Democracy Engine.</p>
 		</small>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- modal to show geocoder result -->
+<div id="kickstarter_modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-xs-7 col-sm-5 col-md-4">
+            <iframe frameborder="0" height="420" scrolling="no" src="https://www.kickstarter.com/projects/1872382405/govtrack-insider/widget/card.html?v=2" width="220"></iframe>
+          </div>
+          <div class="col-xs-5 col-sm-7 col-md-7" style="color: black">
+            <h3 style="color: black">We&rsquo;ve reached {{kickstarter_info.percent}}% of our goal!</h5>
+            <hr>
+            <p>After 11 years running GovTrack on my own, I now want to hire a researcher to help us all figure out what Congress is doing.</p>
+            <p style="padding: 1em; text-align: center; font-weight: bold;"><a href="http://kck.st/1gZOS2V">Will you help me expand GovTrack today by contributing $150, $75, or $50?</a></p>
+            <div class="hidden-xs">
+            <p>I&rsquo;ve already raised {{kickstarter_info.pledged}}, but that&rsquo;s only {{kickstarter_info.percent}}% toward my goal. Help me get to 100% if you can!</p>
+            <hr>
+            <p>Earlier this summer I hired an intern to start <a href="https://medium.com/govtrack-insider">GovTrack Insider</a> and post <a href="https://www.govtrack.us/events/bill-summaries">summaries of bills</a>. But we&rsquo;re asking for your help to continue this work. We can&rsquo;t do it without the support of our users. Thanks!</p>
+            <hr>
+            </div>
+            <div style="text-align: right">
+            <button type="button" class="btn btn-default" data-dismiss="modal">No Thanks</button>
+            <a class="btn btn-success" href="http://kck.st/1gZOS2V" onclick="$('#kickstarter_modal').modal('hide')" target="_blank">Support GovTrack &raquo;</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
