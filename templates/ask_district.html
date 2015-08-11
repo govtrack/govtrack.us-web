@@ -256,7 +256,7 @@ $(function() {
 		var flags = $.cookie("flags");
 		flags = !flags ? {} : parse_qs(flags);
 
-    if (!flags.kickstarter) {
+    if (!flags.kickstarter && 0) {
       $('#kickstarter_modal').modal();
       flags.kickstarter = true;
     }
@@ -357,18 +357,20 @@ function show_if_then_fund(flags) {
 </div>
 
 
-
 <!-- modal to show geocoder result -->
-<div id="kickstarter_modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="kickstarter_modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="kickstarter_modal_title">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="kickstarter_modal_title">GovTrack&rsquo;s Story</h4>
+      </div>
+        
       <div class="modal-body">
         <div class="row">
           <div class="col-xs-7 col-sm-5 col-md-4">
-            <iframe frameborder="0" height="420" scrolling="no" src="https://www.kickstarter.com/projects/1872382405/govtrack-insider/widget/card.html?v=2" width="220"></iframe>
           </div>
           <div class="col-xs-5 col-sm-7 col-md-7" style="color: black">
-            <h3 style="color: black">We&rsquo;ve reached {{kickstarter_info.percent}}% of our goal!</h5>
             <hr>
             <p>After 11 years running GovTrack on my own, I now want to hire a researcher to help us all figure out what Congress is doing.</p>
             <p style="padding: 1em; text-align: center; font-weight: bold;"><a href="http://kck.st/1gZOS2V">Will you help me expand GovTrack today by contributing $150, $75, or $50?</a></p>

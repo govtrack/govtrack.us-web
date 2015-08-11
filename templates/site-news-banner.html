@@ -1,10 +1,16 @@
 {% load govtrack_utils %}
 <div class="sitenewsbody" data-seq="68">
-	<p>
-		Will you help GovTrack write bill summaries?
-		{% if kickstarter_info %}We&rsquo;ve <a href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">raised {{kickstarter_info.pledged}} so far</a> to hire a researcher.{% endif %}
-		Please <a href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">support our work</a>!
-	</p>
+	<div class="row">
+		<div class="col-sm-4" style="text-align: right">
+			<iframe width="234" height="175" src="https://www.kickstarter.com/projects/1872382405/govtrack-insider/widget/video.html" frameborder="0" scrolling="no" style="border: 1px solid black; display: inline-block"> </iframe>
+		</div>
+		<div class="col-sm-8" style="text-align: left; padding-top: .5em">
+			<p>This is GovTrack&rsquo;s story.</p>
+            <p>After 11 years running GovTrack on my own, I now want to hire a full-time researcher to help us all figure out what Congress is doing. But I need your help.</p>
+            <p style="font-weight: bold;"><a href="http://kck.st/1gZOS2V">Will you help me expand GovTrack today?</a></p>
+            <p><small>We&rsquo;re at {{kickstarter_info.percent}}% of our fundraising goal. Let&rsquo;s get to 100%!</small></p>
+		</div>
+	</div>
 
 	{% if highlighted_vote and 0 %}
 	<p id="highlighted_vote">
