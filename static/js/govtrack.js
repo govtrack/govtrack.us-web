@@ -25,8 +25,7 @@ var map_controller = function() {
 		"stylers": [	{ "visibility": "off" } ]
 	} ];
 
-    var baseurl = "/gis";
-    if (window.location.hostname == "localhost") baseurl = "http://gis.govtrack.us"; // for debugging, would work on if window.location.protocol == "http:"
+    var baseurl = "https://gis.govtrack.us";
 
 	var map = null;
 

@@ -115,7 +115,7 @@
 			// Apply the map layer.
 			var overlay = new google.maps.ImageMapType({
 			  getTileUrl: function(coord, zoom) {
-				  return "{% if debug %}https://www.govtrack.us{% endif %}/gis/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
+				  return "https://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=outline,label");
 			  },
 			  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
 			  isPng: tileimgformat == "png",
@@ -132,7 +132,7 @@
 			if (tileimgformat != "png") {
 				var overlay2 = new google.maps.ImageMapType({
 				  getTileUrl: function(coord, zoom) {
-					  return "/gis/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=fill");
+					  return "https://gis.govtrack.us/map/tiles/" + layer + "/" + (zoom-tilesizeshift) + "/" + coord.x + "/" + coord.y + "." + tileimgformat + "?size=" + tileimgsize + (tileimgformat == "png" ? "" : "&features=fill");
 				  },
 				  tileSize: new google.maps.Size(tileimgsize, tileimgsize),
 				  isPng: false,

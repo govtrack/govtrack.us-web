@@ -5,13 +5,8 @@
 {% block meta_keywords %}United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	{% if not debug %}
-	<script type="text/javascript" src="/gis/static/js/google_maps_helpers.js"></script>
-	<script type="text/javascript" src="/gis/static/js/maps_helpers.js"></script>
-	{% else %}
-	<script type="text/javascript" src="http://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
-	<script type="text/javascript" src="http://gis.govtrack.us/static/js/maps_helpers.js"></script>
-	{% endif %}
+	<script type="text/javascript" src="https://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
+	<script type="text/javascript" src="https://gis.govtrack.us/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
 		var map;
 

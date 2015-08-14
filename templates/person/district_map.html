@@ -7,13 +7,8 @@
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
-	{% if not debug %}
-	<script type="text/javascript" src="/gis/static/js/google_maps_helpers.js"></script>
-	<script type="text/javascript" src="/gis/static/js/maps_helpers.js"></script>
-	{% else %}
-	<script type="text/javascript" src="http://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
-	<script type="text/javascript" src="http://gis.govtrack.us/static/js/maps_helpers.js"></script>
-	{% endif %}
+	<script type="text/javascript" src="https://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
+	<script type="text/javascript" src="https://gis.govtrack.us/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
 
 		/**************************************/
@@ -327,9 +322,9 @@ src="http://www.govtrack.us/congress/members/embed/mapframe?{% if state %}state=
 			<div style="text-align: center; margin: 1em">Advanced web designers can <a href="/congress/members/embed/mapframe?demo=1">view the source</a> and adapt it to your website&rsquo;s needs.
 			{% if state and district %}
 			Or download KML:
-				<a href="http://gis.govtrack.us/boundaries/cd-2012/{{state.lower}}-{{district_zero}}/simple_shape?format=kml">low res</a>
+				<a href="https://gis.govtrack.us/boundaries/cd-2012/{{state.lower}}-{{district_zero}}/simple_shape?format=kml">low res</a>
 				|
-				<a href="http://gis.govtrack.us/boundaries/cd-2012/{{state.lower}}-{{district_zero}}/shape?format=kml">hi res</a>.
+				<a href="https://gis.govtrack.us/boundaries/cd-2012/{{state.lower}}-{{district_zero}}/shape?format=kml">hi res</a>.
 			{% endif %}
 			</div>
 		</div>
