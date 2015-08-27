@@ -2,7 +2,9 @@ Congress’s Summer Session — A Recap
 
 This summer 77 bills were passed in the House and 36 were passed in the Senate. 27 of those were signed into law. This article wraps up Congress’s summer session by highlighting some of the important resolved legislation to remember and unresolved legislation to look out for in the fall.
 
---- This is the latest post on GovTrack Insider (https://medium.com/govtrack-insider). We’ve been posting reports on Congress’s daily activity all summer. But we need your support to keep it going. If you find this report helpful, please support our work on our Kickstarter: http://kck.st/1gZOS2V. If we don’t raise enough money by September 10, GovTrack Insider ends. Don’t let it end! ---
+--- If you find this report helpful, please support our work on our Kickstarter: http://kck.st/1gZOS2V. If we don’t raise enough money by September 10, GovTrack Insider ends. Don’t let it end! ---
+
+--- This is the latest post on GovTrack Insider (https://medium.com/govtrack-insider). We’ve been posting reports on Congress’s daily activity all summer. But we need your support to keep it going. ---
 
 Trade Promotion Authority
 =========================
@@ -68,4 +70,6 @@ Reminder: We need your support. If you liked this report, please support our wor
 
 ---
 
-You received this email because you have registered an account on GovTrack.us. To change your email settings, visit your account settings page at https://www.govtrack.us/accounts/profile.
+Unsubscribe: {{unsub_url}}
+
+You received this email because you have registered an account on GovTrack.us. To change your email settings, visit your account settings page at https://www.govtrack.us/accounts/profile and turn off Site Announcements if you no longer want to receive messages like this.

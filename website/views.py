@@ -16,6 +16,7 @@ from cache_utils.decorators import cached
 from twostream.decorators import anonymous_view
 from registration.helpers import json_response
 
+from website.models import UserProfile
 from events.models import Feed
 import us
 
@@ -572,3 +573,8 @@ def dumprequest(request):
 		"secure=" + repr(request.is_secure()) + "\n"
 		+ repr(request),
 		content_type="text/plain")
+
+@render_to('website/one_click_unsubscribe.html')
+def account_one_click_unsubscribe(request, key):
+    ok = UserProfile.one_click_unsubscribe(key)
+    return { "ok": ok }

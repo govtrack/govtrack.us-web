@@ -1,0 +1,12 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Unsubscribe{% endblock %}
+
+{% block body %}
+	<h1>Unsubscribe</h1>
+
+    {% if not ok %}
+       <p>The link you followed to unsubscribe was not valid. Please check that you copied the entire link into your browser. Unsubscribe links expire after two months.</p>
+    {% else %}
+       <p>You have been unsubscribed from all further GovTrack emails. Best of luck with your future endeavours.</p>
+    {% endif %}
+{% endblock %}

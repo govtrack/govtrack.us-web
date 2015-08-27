@@ -14,7 +14,12 @@ class UserProfile(models.Model):
     
     # monetization
     paid_features = JSONField(default={}, blank=True, null=True) # maps feature name to tuple (payment ID, sale ID or None if not useful)
-    
+
+    # bulk messages - one-click unsubscribe keys
+    one_click_unsub_key = models.CharField(max_length=64, blank=True, null=True, db_index=True, unique=True)
+    one_click_unsub_gendate = models.DateTimeField(blank=True, null=True)
+    one_click_unsub_hit = models.DateTimeField(blank=True, null=True)
+
     def lists(self):
         # make sure the 'default' list exists
         SubscriptionList.objects.get_or_create(
@@ -57,6 +62,39 @@ class UserProfile(models.Model):
                 return "You went ad-free for life on %s. Thanks!" % pmt.created.strftime("%x")
 
         return ret
+
+    def get_one_click_unsub_key(self):
+        # Get the current one-click unsubscribe key for a user. If no key is set or
+        # a key is out of date, generate a fresh key.
+        from datetime import datetime, timedelta
+        import random, string
+        if (not self.one_click_unsub_key) or (datetime.now() - self.one_click_unsub_gendate > timedelta(days=60)):
+            self.one_click_unsub_key = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(20))
+            self.one_click_unsub_gendate = datetime.now()
+            self.save(update_fields=['one_click_unsub_key', 'one_click_unsub_gendate'])
+        return self.one_click_unsub_key
+
+    @staticmethod
+    def one_click_unsubscribe(key):
+        from datetime import datetime, timedelta
+        if key.strip() == "":
+            return False # empty key, nice try
+        try:
+            p = UserProfile.objects.get(one_click_unsub_key=key)
+        except UserProfile.DoesNotExist:
+            return False # invalid key
+        if (p.one_click_unsub_gendate is None) or (datetime.now() - p.one_click_unsub_gendate > timedelta(days=60)):
+            return False # expired (plus sanity check)
+
+        # Ok, unsubscribe from mass emails.
+        p.massemail = False
+        p.one_click_unsub_hit = datetime.now()
+        p.save(update_fields=['massemail', 'one_click_unsub_hit'])
+
+        # And all lists.
+        SubscriptionList.objects.filter(user=p.user).update(email=0)
+
+        return True
 
 def get_user_profile(user):
     if hasattr(user, "_profile"): return user._profile
