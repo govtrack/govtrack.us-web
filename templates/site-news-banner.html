@@ -1,5 +1,11 @@
 {% load govtrack_utils %}
-<div class="sitenewsbody" data-seq="68">
+{% load humanize %}
+<div class="sitenewsbody" data-seq="69">
+	<p>We need to raise <b>${{kickstarter_info.remaining|intcomma}}</b> in the next <b>{{kickstarter_info.days_left}} days</b>.</p>
+	<p>Our researcher position is now {{kickstarter_info.percent}}% funded, but we need to get to 100% in just a few more days.</p>
+	<p><a href="http://kck.st/1gZOS2V">Support Our Work &raquo;</a></p>
+
+	{% comment %}
 	<div class="row">
 		<div class="col-sm-1" style="text-align: right">
 			<a href="http://kck.st/1gZOS2V"><img src="https://d297h9he240fqh.cloudfront.net/assets/apple-touch-icon-precomposed-ced87f7fe1a75e7e6392c167dbb0f393a36510aea98e9c35c63302c9028f64a3.png" class="img-responsive"></a>
@@ -9,7 +15,6 @@
             <p>We&rsquo;re trying to hire a full-time researcher, but we need your help.</p>
 			<p><a href="http://kck.st/1gZOS2V">Will you help GovTrack expand our coverage of Congress&rsquo;s daily activities?</a></p>
 		</div>
-		{% comment %}
 		<div class="col-sm-4" style="text-align: right">
 			<iframe width="234" height="175" src="https://www.kickstarter.com/projects/1872382405/govtrack-insider/widget/video.html" frameborder="0" scrolling="no" style="border: 1px solid black; display: inline-block"> </iframe>
 		</div>
@@ -19,8 +24,8 @@
             <p style="font-weight: bold;"><a href="http://kck.st/1gZOS2V">Will you help me expand GovTrack today?</a></p>
             <p><small>We&rsquo;re at {{kickstarter_info.percent}}% of our fundraising goal. Let&rsquo;s get to 100%!</small></p>
 		</div>
-		{% endcomment %}
 	</div>
+	{% endcomment %}
 
 	{% if highlighted_vote and 0 %}
 	<p id="highlighted_vote">
