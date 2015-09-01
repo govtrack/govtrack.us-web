@@ -1,75 +1,24 @@
-Congress’s Summer Session — A Recap
+What do you think, should GovTrack hire a researcher to look deeper into what Congress does each day?
 
-This summer 77 bills were passed in the House and 36 were passed in the Senate. 27 of those were signed into law. This article wraps up Congress’s summer session by highlighting some of the important resolved legislation to remember and unresolved legislation to look out for in the fall.
+This summer we had an intern write bill summaries and daily digests of legislative activity on GovTrack Insider. His recap of Congress’s summer session at https://medium.com/govtrack-insider/congress-s-summer-session-a-recap-9100910f714 is a great example of how a researcher can help us all track Congress.
 
---- If you find this report helpful, please support our work on our Kickstarter: http://kck.st/1gZOS2V. If we don’t raise enough money by September 10, GovTrack Insider ends. Don’t let it end! ---
+Already 713 of your Congress-tracking peers have pledged $29,380 to help us hire a full-time researcher. But *we need to reach our goal of $35,000 in the next 9 days* or we get nothing.
 
---- This is the latest post on GovTrack Insider (https://medium.com/govtrack-insider). We’ve been posting reports on Congress’s daily activity all summer. But we need your support to keep it going. ---
+If you answered YES to whether we should hire a researcher, please go to http://kck.st/1gZOS2V to support our work.
 
-Trade Promotion Authority
-=========================
+If you pledge $100, you will get an invitation to a small group chat with the GovTrack team to discuss how to use GovTrack, how the legislative process works, and how to be the best advocate for your issue in Congress. There are rewards for $66 and $35 contributions too.
 
-What is it?
+Here’s the link again: http://kck.st/1gZOS2V
 
-Trade Promotion Authority, or TPA, has given authority to the President to “fast-track” the Trans-Pacific Partnership, or TPP, and the Transatlantic Trade Investments Partnership, or TTIP. While ordinarily Congress has the ability to modify trade agreements through amendments, fast-tracking means Congress will only allow itself a yes-no vote once the agreements are finalized. It will not be possible to alter or filibuster the agreements.
+Thanks for being a great citizen!
 
-Why these trade agreements?
+(Want to know more about our work? Digital Journal interviewed me yesterday about "hacking" Congress: http://www.digitaljournal.com/news/politics/how-civic-hackers-find-creative-solutions-to-problems/article/442388)
 
-TPP and TTIP have received heavy criticism on their transparency. The contents of the agreements have not been revealed to the public and have only been limitedly revealed to members of Congress. Senators including Sherrod Brown (D-OH) and Elizabeth Warren (D-MA) have argued that the agreements would benefit major foreign corporations at the expense of individuals and small businesses. President Obama and other proponents of TPP and TTIP have argued that the agreements will strengthen economic growth through increased trade.
-
-Republicans joined the President
-
-Although TPA has been a priority of the President, it was passed with Republicans behind it — not Democrats — in partisan votes in Congress. We covered the five major trade votes in an earlier in-depth article.
-
-The TPA was only the preparation for the actual votes on TPP and TTIP, which will happen in the coming sessions of Congress.
-
-Twin Education Bills
-====================
-
-Each chamber of Congress separately passed its own education bill. The Student Success Act was passed in the House and the Every Child Achieves Act was passed in the Senate. The bills were in response to the unpopularity of the No Child Left Behind Act of 2001 which created federal test-based accountability systems for public schools.
-
-Both bills include large-scale education reform reducing the role of the federal government, increasing funding for charter schools, and expanding state responsibility.
-
-But the bills have major differences. While the Senate’s Every Child Achieves Act passed easily with bipartisan support, the House’s Student Success Act barely passed with only Republican support.
-
-The most controversial difference between the bills was in “Title I portability”, or the method for determining how bonus federal funding for low-income students would be distributed.
-
-Currently Title I funds are given to schools based on the local population of low-income students. Schools with more low-income families in their district receive more funding. Title I portability would distribute funding based on which schools low-income students attend, meaning that if a student went to a school in a wealthier district the funding would follow.
-
-Senate Republicans tried to add Title I portability to their bill, the ECAA, but failed with every Democrat and seven Republicans voting against.
-
-The bills have yet to be debated outside of their originating chambers, so the debate on Title I portability will be continuing in the fall. You can find more information on other differences between the bills in our earlier in-depth coverage here.
-
-Defunding Planned Parenthood
-============================
-
-Congress ended its summer session on the subject of Planned Parenthood’s federal funding, following the release of a series of videos showing a Planned Parenthood executive discussing payments for the exchange of fetal tissue. As the organization was brought once again into the public eye, Republicans moved to end all of its federal funding.
-
-This was legalized in 1993 — almost unanimously
-The practice of exchanging fetal tissue is not new. It was legalized by the National Institutes of Health Revitalization Act of 1993, which passed the Senate almost unanimously. The law allows for “reasonable payments associated with the transportation, implantation, processing, preservation, quality control, or storage.”
-
-Yet twenty years after voting in favor of the law that made Planned Parenthood’s practices legal, six Republican senators found themselves now backing legislation to end federal funding to Planned Parenthood.
-
-Planned Parenthood’s services include much more than performing abortions and donating fetal tissue, but Planned Parenthood will likely remain a focus of pro-life legislation for some time.
-
-Looking Ahead
-=============
-
-Many of the most important legislative actions of this Congress have yet to come. There will be further discussion of budgetary legislation, environmental regulation, immigration reform, and other subjects that will not only have major impact on our government, but also on us as individuals.
-
-Much of the legislation will be complicated and much of it will be boring. Yet it is important to remember that as citizens of a democracy we are just as much a part of our government as our representatives. We participate in it simply by talking, reading, and writing about it. And while not everyone can afford to devote their lives to studying politics, a little bit of reading and some cooperation can go a long way.
-
-
-This may be the final GovTrack Insider post. Any donation to our Kickstarter campaign to keep this project funded will be extremely appreciated, and we are now more than halfway to our goal.
-
-Regardless of whether we continue our reports, this summer has been a fantastic experience. Thank you to all of our readers.
-
-— Ben Hammer, GovTrack’s researcher for the summer
-
-Reminder: We need your support. If you liked this report, please support our work on our Kickstarter. If we don’t raise enough money by September 10, GovTrack Insider ends. Don’t let it end! Here is the link to support our work: http://kck.st/1gZOS2V.
+Josh Tauberer,
+Founder, https://www.GovTrack.us
 
 ---
 
 Unsubscribe: {{unsub_url}}
 
-You received this email because you have registered an account on GovTrack.us. To change your email settings, visit your account settings page at https://www.govtrack.us/accounts/profile and turn off Site Announcements if you no longer want to receive messages like this.
+You received this email because you have registered an account on GovTrack.us. To change your email settings, visit your account settings page at https://www.govtrack.us/accounts/profile.

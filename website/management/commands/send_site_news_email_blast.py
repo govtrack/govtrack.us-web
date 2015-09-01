@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from django.db.models import F
+from django.db.models import F, Q
 from django.conf import settings
 
 from django.contrib.auth.models import User
@@ -10,7 +10,7 @@ from htmlemailer import send_mail
 
 from datetime import datetime, timedelta
 
-blast_id = 3
+blast_id = 4
 
 class Command(BaseCommand):
 	args = 'test|go'
@@ -26,11 +26,10 @@ class Command(BaseCommand):
 		else:
 			# Users who have subscribed to email updates and received one recently-ish....
 			users = UserProfile.objects.filter(
-				user__subscription_lists__email__gt=0,
-				user__last_login__lt=datetime.now()-timedelta(days=365*2),
-				#user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*12),
-				#user__date_joined__lt=datetime.now()-timedelta(days=14),
-				#user__last_login__gt=F('user__date_joined'),
+				  Q(user__subscription_lists__email__gt=0,
+				    user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*4),
+				    user__last_login__gt=datetime.now()-timedelta(days=365))
+				| Q(user__date_joined__gt=datetime.now()-timedelta(days=31*4))
 				).distinct()
 
 			# also require:
@@ -131,7 +130,8 @@ def send_blast(user_id, is_test, test_addrs, counter, counter_max):
 				"unsub_url": settings.SITE_ROOT_URL + "/accounts/unsubscribe/" + prof.get_one_click_unsub_key()
 			},
 			headers = {
-				'From': emailfromaddr,
+				'From': "GovTrack.us <noreply@mail.govtrack.us>",
+				'Reply-To': "GovTrack.us <hello@govtrack.us>",
 				'X-Auto-Response-Suppress': 'OOF',
 			},
 			fail_silently=False
