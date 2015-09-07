@@ -171,6 +171,9 @@ var fragment_params =  parse_qs.fragment();
 var initial_search = { };
 for (var k in default_search) initial_search[k] = default_search[k];
 for (var k in fragment_params) initial_search[k] = fragment_params[k];
+for (var k in fragment_params)
+	if (fragment_params[k] == "__ALL__")
+		delete initial_search[k]; // null is not sufficient
 
 var current_page = 1;
 var update_search_lock = false;
@@ -224,12 +227,19 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     if (isinitial) for (var k in initial_search) postdata[k] = initial_search[k];
     
     // Copy just the faceting so far into a separate array, minus the parts that
-    // match the defaults.
+    // match the defaults, but explicitly setting __ALL__ for fields that have
+	// defaults that are overridden by being null.
     var current_search = { };
     var current_search_set = false;
     for (var k in postdata) {
     	if (postdata[k] != default_search[k]) {
     		current_search[k] = postdata[k];
+    		current_search_set = true;
+    	}
+    }
+    for (var k in default_search) {
+    	if (typeof postdata[k] == "undefined" && default_search[k]) {
+    		current_search[k] = "__ALL__";
     		current_search_set = true;
     	}
     }
