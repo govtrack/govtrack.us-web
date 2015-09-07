@@ -94,18 +94,16 @@ function show_facets(postdata, options, isinitial) {
                         }
                     }
                     
-                    // check ALL if nothing is checked
-                    if (!postdata[field] && values[j][0] == "__ALL__")
-                        opt.find('input').attr('checked', '1');
-
                 } else if (type == "radio") {
                     if (postdata[field] == (""+values[j][0])) // convert value to string
                         opt.find('input').attr('checked', '1');
                         if (postdata[field] != "__ALL__") has_default_value = false;
-                    else if (!postdata[field] && j == 0) // turn on the first one by default
-                        opt.find('input').attr('checked', '1');
                 }
                         
+                // check ALL if nothing is checked
+                if (!postdata[field] && values[j][0] == "__ALL__")
+                    opt.find('input').attr('checked', '1');
+
                 node.append(opt);
             }
         }
