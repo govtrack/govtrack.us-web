@@ -1,8 +1,8 @@
 {% load govtrack_utils %}
 {% load humanize %}
 <div class="sitenewsbody" data-seq="69">
-	<p>We need to raise <b>${{kickstarter_info.remaining|intcomma}}</b> in the next <b>{{kickstarter_info.days_left}} days</b>.</p>
-	<p>Our researcher position is now {{kickstarter_info.percent}}% funded, but we need to get to 100% in just a few more days.</p>
+	<p>Just <b>{{kickstarter_info.days_left}} days left</b> to fund our researcher position.</p>
+	<p>We only need <b>${{kickstarter_info.remaining|intcomma}}</b> more. Will you help us &amp; democracy?</p>
 	<p><a href="http://kck.st/1gZOS2V">Support Our Work &raquo;</a></p>
 
 	{% comment %}
