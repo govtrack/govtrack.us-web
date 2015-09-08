@@ -281,6 +281,9 @@ p#yourreps {
 							</p>
 						{% endif %}
 
+					{% elif bill.enacted_ex %}
+						<div style="margin-bottom: 1em;"><strong>Enacted as <a href="{{bill.was_enacted_ex.get_absolute_url}}">{{bill.was_enacted_ex.display_number_no_congress_number}}</a></strong> (companion bill)</div>
+
 					{% else %}
 						<div><strong>Died in a previous Congress</strong></div>
 						<p style="margin-top: .25em">{{bill.current_status_description}}</p>
