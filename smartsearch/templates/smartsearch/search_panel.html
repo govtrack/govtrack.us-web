@@ -112,11 +112,13 @@ function show_facets(postdata, options, isinitial) {
             }
 
         } else if (type == "boolean") {
+				var count = 0;
 				node.attr('checked', field in postdata	);
-				for (j in values) {
+				for (j in values)
 					if (values[j][0] == "true")
-						node.parent().find('span.count').text(make_count(values[j][2]));
-				}
+						count = values[j][2];
+				if (count == 0) visible = false; // force hide
+				node.parent().find('span.count').text(make_count(count));
         }
 
         // On small-width screens, hide fields that have default values until the user wants to see them.
@@ -421,7 +423,7 @@ $(function() {
     <div id="searcherror"> </div>
     <fieldset style="display: none">
         {% for field in form %}
-            <div id="searchform_field_{{field.field_name}}_container" style="{% if field.type != "select" or field.help %}width: 100%;{% else %}width: 50%; padding-right: 1em;{% endif %} float: left; cursor: pointer; margin-bottom: 1em; font-weight: normal;">
+            <div id="searchform_field_{{field.field_name}}_container" class="facet-field-container" style="{% if field.type != "select" or field.help %}width: 100%;{% else %}width: 50%; padding-right: 1em;{% endif %} float: left; cursor: pointer; margin-bottom: 1em; font-weight: normal;">
 				{% if field.type != "boolean" %}
                 <label for="searchform_field_{{field.field_name}}" style="margin: 0;">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
 				{% endif %}
