@@ -138,7 +138,7 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 	#bills_enacted = bills.filter(current_status__in=BillStatus.final_status_passed_bill,
 	#	current_status_date__gte=startdate, current_status_date__lte=enddate)
 	def was_bill_enacted(b, startdate, enddate):
-		return b.was_enacted_ex(restrict_to_activity_in_date_range=(startdate.isoformat(), enddate.isoformat()))
+		return b.enacted_ex(restrict_to_activity_in_date_range=(startdate.isoformat(), enddate.isoformat()))
 	bills_enacted = [b for b in bills if was_bill_enacted(b, startdate, enddate)]
 	stats["bills-enacted"] = {
 		"value": len(bills_enacted),

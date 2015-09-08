@@ -193,7 +193,7 @@ class Bill(models.Model):
             + "\n\n" + summary_text \
             + "\n\n" + bill_text
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
-    haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'), ('usc_citations_uptree', 'MultiValue'))
+    haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'), ('usc_citations_uptree', 'MultiValue'), ('enacted_ex', 'Boolean'))
     def get_terms_index_list(self):
         return set([t.id for t in self.terms.all()])
     def get_committees_index_list(self):
@@ -229,6 +229,8 @@ class Bill(models.Model):
             Bill._majority_party = mp
         p = self.sponsor_role.party
         return (p, "Majority Party" if p == mp[self.congress][self.bill_type] else "Minority Party")
+    def enacted_ex(self):
+        return self.was_enacted_ex() is not None
     def usc_citations_uptree(self):
         # Index the list of citation sections (including all higher levels of hierarchy)
         # using the USCSection object IDs.
@@ -253,6 +255,14 @@ class Bill(models.Model):
                 ret.add(sec_obj.id)
                 sec_obj = sec_obj.parent_section
         return ret
+    def update_index(self, bill_index):
+        # Update this bill in the search database.
+        bill_index.update_object(self, using="bill")
+
+        # Because of the enacted_ex field, we have to update any bills whose enacted_ex field
+        # might depend on the status of this bill. The identical relation is symmetric so...
+        for rb in RelatedBill.objects.filter(bill=self, relation="identical").select_related("related_bill"):
+            bill_index.update_object(rb.related_bill, using="bill")
 
     # api
     api_recurse_on = ("sponsor", "sponsor_role")
@@ -1023,8 +1033,6 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         #  1) Our status code is currently tied to the assignment of a slip law number by OFR,
         #     which isn't what we mean exactly. Better to look for a <signed> action in case of
         #     delays at OFR.
-
-        import json
 
         def date_filter(d):
             if restrict_to_activity_in_date_range is None: return True

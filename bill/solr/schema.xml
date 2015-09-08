@@ -165,6 +165,8 @@
     <field name="cosponsors" type="long" indexed="true" stored="true" multiValued="true" />
     <field name="terms" type="long" indexed="true" stored="true" multiValued="true" />
 
+    <field name="enacted_ex" type="boolean" indexed="true" stored="true" multiValued="false" />
+
     <field name="proscore" type="float" indexed="true" stored="true" multiValued="false" />
     <field name="usc_citations_uptree" type="long" indexed="true" stored="true" multiValued="true" />
 

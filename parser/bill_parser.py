@@ -338,7 +338,7 @@ def main(options):
                     continue
                 textfile = textfile["text_file"]
                 if os.path.exists(textfile) and File.objects.is_changed(textfile):
-                    bill_index.update_object(b, using="bill") # index the full text
+                    b.update_index(bill_index) # index the full text
                     b.create_events() # events for new bill text documents
                     File.objects.save_file(textfile)
                     
@@ -397,8 +397,10 @@ def main(options):
             except:
                 print bill
                 raise
-            if bill_index: bill_index.update_object(bill, using="bill")
-            
+
+            if bill_index:
+                bill.update_index(bill_index)
+
             if not options.disable_events:
                 bill.create_events()
                 
@@ -445,8 +447,8 @@ def main(options):
                             bill = Bill.objects.get(congress=CURRENT_CONGRESS, bill_type=bt[0], number=m.group(2))
                             bill.docs_house_gov_postdate = iso8601.parse_date(item.get("add-date")).replace(tzinfo=None)
                             bill.save()
-                            if bill_index: bill_index.update_object(bill, using="bill")
-                            
+                            if bill_index:
+                                bill.update_index(bill_index)
                             if not options.disable_events:
                                 bill.create_events()
                         except Bill.DoesNotExist:
@@ -466,7 +468,8 @@ def main(options):
             if bill.senate_floor_schedule_postdate == None or now - bill.senate_floor_schedule_postdate > timedelta(days=7):
                 bill.senate_floor_schedule_postdate = now
                 bill.save()
-                if bill_index: bill_index.update_object(bill, using="bill")
+                if bill_index:
+                    bill.update_index(bill_index)
                 if not options.disable_events:
                     bill.create_events()
     except Exception as e:
