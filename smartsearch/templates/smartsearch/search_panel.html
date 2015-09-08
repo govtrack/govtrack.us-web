@@ -13,6 +13,9 @@ function addCommas(nStr)
   }
   return x1 + x2;
 }
+function make_count(count) {
+	return "(" + addCommas(count) + " " + (count == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}") + ")";
+}
 function show_facets(postdata, options, isinitial) {
     var should_hide_default_facets = $(window).width() < 992;
 
@@ -34,7 +37,7 @@ function show_facets(postdata, options, isinitial) {
             for (var j in values) {
             	var txt = values[j][1];
             	if (values[j][2] > 0)
-            		txt += "   (" + addCommas(values[j][2]) + " " + (values[j][2] == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}") + ")";
+            		txt += "   " + make_count(values[j][2]);
             	if (is_simple && values[j][0] == "__ALL__")
             		txt += " [Loading...]"
             	
@@ -51,6 +54,7 @@ function show_facets(postdata, options, isinitial) {
                 node.val("__ALL__");
                 has_default_value = true;
             }
+
         } else if (type == "text") {
         	// There is never a reason to update a free-form text field with
         	// data returned by the search server because the user has already
@@ -77,7 +81,7 @@ function show_facets(postdata, options, isinitial) {
                 } else {
                     opt.find('.name').text(values[j][1]);
                     if (values[j][2])
-                        opt.find('.count').text("(" + addCommas(values[j][2]) + " " + (values[j][2] == 1 ? "{{noun_singular|escapejs}}" : "{{noun_plural|escapejs}}") + ")");
+                        opt.find('.count').text(make_count(values[j][2]));
                 }
                 
                 if (values[j][3])
@@ -106,6 +110,13 @@ function show_facets(postdata, options, isinitial) {
 
                 node.append(opt);
             }
+
+        } else if (type == "boolean") {
+				node.attr('checked', field in postdata	);
+				for (j in values) {
+					if (values[j][0] == "true")
+						node.parent().find('span.count').text(make_count(values[j][2]));
+				}
         }
 
         // On small-width screens, hide fields that have default values until the user wants to see them.
@@ -148,7 +159,7 @@ var default_search = { };
 					{% endfor %}
 				{% endif %}
 			{% endif %}
-			{% if field.type == "radio" %}
+			{% if field.type == "radio" or field.type == "boolean" %}
 				{% if v %}
 					default_search["{{k|escapejs}}"] = "true";
 				{% endif %}
@@ -215,7 +226,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         name = form.elements[i].name;
         if (name == "" || name == "undefined") continue;
         
-        if (form.elements[i].type == 'checkbox') {
+        if (form.elements[i].type == 'checkbox' && !form.elements[i].getAttribute('is-boolean')) {
             if (postdata[name] == null) postdata[name] = Array();
             postdata[name].push(form.elements[i].value);
         } else {
@@ -411,17 +422,25 @@ $(function() {
     <fieldset style="display: none">
         {% for field in form %}
             <div id="searchform_field_{{field.field_name}}_container" style="{% if field.type != "select" or field.help %}width: 100%;{% else %}width: 50%; padding-right: 1em;{% endif %} float: left; cursor: pointer; margin-bottom: 1em; font-weight: normal;">
+				{% if field.type != "boolean" %}
                 <label for="searchform_field_{{field.field_name}}" style="margin: 0;">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
+				{% endif %}
                 {% if field.type == "text" %}
                     <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text with_search_button" onchange="$('#show_more').hide()" style="width: 65%; margin-right: 5px;"> </input>
                     <input id="searchform_field_{{field.field_name}}_button" class="btn-search-small" type="submit" value="Search" value="Go" onclick="update_search()"> </input>
                     	{% comment %}when the text value changes, hide Show More so that we don't try to access a later page on a different search query than what we've loaded so far{% endcomment %}
-                {% endif %}
-                {% if field.type == "select" %}
+                {% elif field.type == "select" %}
                     <select id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" size="1" onchange="update_search()" style="width: 100%"> </select>
-                {% endif %}
-                {% if field.type == "checkbox" or field.type == "radio" %}
+                {% elif field.type == "checkbox" or field.type == "radio" %}
                     <div id="searchform_field_{{field.field_name}}"> </div>
+                {% elif field.type == "boolean" %}
+                    <div id="searchform_field_{{field.field_name}}_container" class="checkbox">
+		                <label for="searchform_field_{{field.field_name}}">
+							<input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="checkbox" vale="true" onclick="update_search()" is-boolean="1">
+							{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}
+							<span class="count"> </span>
+						</label>
+					</div>
                 {% endif %}
                 {% if field.help %}
                     <div style="margin-top: 3px"><small>{{field.help}}</small></div>
