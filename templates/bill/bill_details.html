@@ -116,40 +116,51 @@ p#yourreps {
 }
 
 #status-row-grid {
-	margin: 1.75em 0;
 }
-#status-row-grid > div.status-item {
-	text-align: center;
-}
-#status-row-grid .status-item .arrow {
-	margin-left: -35px;
-	width: 35px;
-	height: 88px;
-	background-image: url(/static/images/status_icons_arrow.png);
-}
+	#status-row-grid tr {
+		vertical-align: top;
+	}
 	#status-row-grid .status-item .date {
+		background: url('/static/images/status-dots.png') 100% 3px repeat-y;
 		font-size: 80%;
 		text-transform: uppercase;
+		text-align: right;
+		padding-bottom: .25em;
 	}
+		#status-row-grid .status-item .date.ghosted {
+			background-image: url('/static/images/status-dots-ghosted.png');
+		}
+		#status-row-grid .status-item .date.last {
+			background-image: none;
+		}
+		#status-row-grid .status-item .date .wrapper {
+			padding-right: 20px;
+			background: url('/static/images/status-dots-event.png') 100% 3px no-repeat;
+			min-height: 15px;
+		}
+			#status-row-grid .status-item .date .wrapper.ghosted {
+				background-image: url('/static/images/status-dots-event-ghosted.png');
+			}
 	#status-row-grid .status-item .vote {
         line-height: 100%;
 	}
 	#status-row-grid .status-item .status-label {
 		line-height: 105%;
+		font-weight: bold;
 	}
-	@media (min-width: 1200px) {
-		#status-row-grid .status-item .arrow {
-			margin-left: -45px;
-		}
+	#status-row-grid .status-item p.status-description {
+		margin-top: 3px;
+		font-size: 90%;
+		line-height: 130%;
 	}
 #status-row-grid .img {
-	width: 132px;
-	height: 88px;
-	margin: 4px auto;
+	width: 53px;
+	height: 35px;
+	margin: 0 6px 6px 6px;
 	background-image: url(/static/images/status_icons.png);
 }
 	#status-row-grid .img.status_introduced { }
-	#status-row-grid .img.status_reported { background-position: -132px 0; }
+	#status-row-grid .img.status_reported { background-position: -53px 0; }
 	#status-row-grid .img.status_pass_over_house,
 	#status-row-grid .img.status_pass_over_senate,
 	#status-row-grid .img.status_passed_simpleres,
@@ -162,7 +173,7 @@ p#yourreps {
 	#status-row-grid .img.status_conference_passed_senate,
 	#status-row-grid .img.status_override_pass_over_house,
 	#status-row-grid .img.status_override_pass_over_senate
-	 { background-position: -264px 0; }
+	 { background-position: -106px 0; }
 	#status-row-grid .img.status_prov_kill_suspensionfailed,
 	#status-row-grid .img.status_prov_kill_cloturefailed,
 	#status-row-grid .img.status_prov_kill_pingpongfail,
@@ -174,18 +185,18 @@ p#yourreps {
 	#status-row-grid .img.status_vetoed_override_fail_originating_senate,
 	#status-row-grid .img.status_vetoed_override_fail_second_house,
 	#status-row-grid .img.status_vetoed_override_fail_second_senate
-	 { background-position: -398px 0; }
+	 { background-position: -159px 0; }
 	#status-row-grid .img.status_schedule_house,
 	#status-row-grid .img.status_schedule_senate
-	 { background-position: -530px 0; }
+	 { background-position: -212px 0; }
 	#status-row-grid .img.status_prov_kill_veto,
 	#status-row-grid .img.status_vetoed_pocket
-	 { background-position: -662px 0; }
+	 { background-position: -265px 0; }
 	#status-row-grid .img.status_enacted_signed
-	 { background-position: -794px 0; }
+	 { background-position: -318px 0; }
 	#status-row-grid .img.status_enacted_veto_override,
 	#status-row-grid .img.status_enacted_tendayrule
-	 { background-position: -924px 0; }
+	 { background-position: -370px 0; }
 #status-row-grid .pending {
 	color: #BBB;
 }
@@ -509,6 +520,8 @@ p#yourreps {
 					{% endif %}
 					{% endwith %}
 					{% endwith %}
+
+					{% if not bill.is_success %}<p>The {{bill.noun}}&rsquo;s title was written by its sponsor.</p>{% endif %}
 			</dl>
 			</div>
 		  	{% endif %}
@@ -563,55 +576,51 @@ p#yourreps {
 				{% endif %}
 
 		</div>
-		<div class="row">
-			<div class="col-md-6">
-				<dl>
-					<dt>What is a {{bill.noun}}?</dt>
-					<dd>
-						<p>The &ldquo;{{bill.get_bill_type_display}}&rdquo; in &ldquo;{{bill.display_number_no_congress_number}}&rdquo; means this is a {{bill.bill_type_name}} in the United States Congress. {{bill.how_a_bill_text}}</p>
-						{% if not bill.is_success %}<p>The {{bill.noun}}&rsquo;s title was written by its sponsor.</p>{% endif %}
-					</dd>
-				</dl>
-			</div>
-		</div> <!-- /row -->
 
 		{% if bill.source == "thomas-congproj" %}
 			<h2><span>History</span></h2>
 
 			{% if current or bill.get_major_events|length > 0 %}
-				<div id="status-row-grid" class="row">
-					{% for item in bill.get_major_events %}
-						{% if forloop.counter0|divisibleby:3 %}<div class="clearfix hidden-lg"></div>{% endif %}
-						{% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-lg"></div>{% endif %}
-
-						<div class="status-item col-xs-4 col-lg-3 {% if not item.date %}pending{% endif %} {% if item.bill %}related-bill{% endif %}"
-							{% if not item.bill %}data-content="{{item.explanation}}"{% endif %}
-							{% if item.bill %}data-content="This activity took place on a related bill, possibly in lieu of similar activity on {{bill.display_number}}."{% endif %}
-							>
+				<table id="status-row-grid">
+				{% for item in bill.get_major_events %}
+					<tr class="status-item {% if not item.date %}pending{% endif %} {% if item.bill %}related-bill{% endif %}">
+						<td class="date {% if forloop.last %}last{% endif %} {% if item.last_occurred or not item.date %}ghosted{% endif %}">
+							<div class="wrapper {% if not item.date %}ghosted{% endif %}">
+								{% if item.date %}<nobr>{{item.date|date:"DATE_FORMAT"}}</nobr>{% endif %}
+							</div>
+						</td>
+						<td>
 							{% if item.vote_link and not item.bill %}<a href="{{item.vote_link}}">{% endif %}
 							<div class="img status_{{item.key}}">
 								{% if item.bill %}<div class="related-bill-text">{{item.relation}}</div>{% endif %}
-								{% if not forloop.first %}<div class="arrow"> </div>{% endif %}
 							</div>
 							{% if item.vote_link and not item.bill %}</a>{% endif %}
-
-							<div class="status-label" title="{{item.actionline}}" {% if item.date %}style="font-weight: bold"{% endif %}>
-								{% if item.bill %}<div>{{item.bill.display_number}}</div>{% endif %}
+						</td>
+						<td>
+							<div class="status-label" title="{{item.actionline}}">
+								{% if item.bill %}
+									<a href="{{item.bill.get_absolute_url}}">{{item.bill.display_number}}</a> &mdash;
+								{% endif %}
 								{{item.label}}
 							</div>
-							{% if item.date %}<div class="date">{{item.date|date:"DATE_FORMAT"}}</div>{% endif %}
+							{% if not item.bill %}
+								<p class="status-description">
+								{{item.explanation}}
+								{% if item.vote_text %}Vote was {{item.vote_text}} so no record of individual votes was made.{% endif %}
+								</p>
+							{% else %}
+								<p>This activity took place on a related bill, possibly in lieu of similar activity on {{bill.display_number}}.</p>
+							{% endif %}
 
 							{% if item.vote_link %}<a href="{{item.vote_link}}"><div class="vote">View Vote Result &raquo;</div></a>{% endif %}
-							{% if item.vote_text %}<div class="vote"><small>Vote was {{item.vote_text}} so no record of individual votes was made.</small></div>{% endif %}
-						</div>
-					{% endfor %}
-				</div>
-				<script>
-				$(function() {
-					$('#status-row-grid .status-item').popover({ placement: 'bottom', trigger: 'hover' });
-				})
-				</script>
+							
+						</td>
+					</tr>
+				{% endfor %}
+				</table>
 			{% endif %}
+
+			<p style="margin-top: 1em">This is a {{bill.bill_type_name}} in the United States Congress (indicated by the &ldquo;{{bill.get_bill_type_display}}&rdquo; in &ldquo;{{bill.display_number_no_congress_number}}&rdquo;). {{bill.how_a_bill_text}}</p>
 		{% endif %}
 
 		<h2><span>Details</span></h2>

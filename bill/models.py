@@ -851,6 +851,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
         # Don't add future events when we're looking at related bills to the bill we really care about.
         if self.is_alive and top:
+            if len(ret) > 0: # mark the last one differently for display purposes
+                ret[-1]["last_occurred"] = True
             for key, label in self.get_future_events():
                 ret.append({ "key": key, "label": label })
 
@@ -874,7 +876,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
                 BillStatus.conference_passed_house: (BillStatus.passed_bill, "Conference Report Agreed to by Senate"),
                 BillStatus.conference_passed_senate: (BillStatus.passed_bill, "Conference Report Agreed to by House"),
-                BillStatus.passed_bill: BillStatus.enacted_signed,
+                BillStatus.passed_bill: (BillStatus.enacted_signed, "Signed by the President"),
                 BillStatus.prov_kill_suspensionfailed: BillStatus.pass_over_house,
                 BillStatus.prov_kill_cloturefailed: (BillStatus.passed_bill, "Passed Senate"),
                 BillStatus.prov_kill_pingpongfail: (BillStatus.passed_bill, "Passed House/Senate"),
@@ -888,7 +890,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
                 BillStatus.conference_passed_house: (BillStatus.passed_bill, "Conference Report Agreed to by Senate"),
                 BillStatus.conference_passed_senate: (BillStatus.passed_bill, "Conference Report Agreed to by House"),
-                BillStatus.passed_bill: BillStatus.enacted_signed,
+                BillStatus.passed_bill: (BillStatus.enacted_signed, "Signed by the President"),
                 BillStatus.prov_kill_suspensionfailed: (BillStatus.passed_bill, "Passed House"),
                 BillStatus.prov_kill_cloturefailed: BillStatus.pass_over_senate,
                 BillStatus.prov_kill_pingpongfail: (BillStatus.passed_bill, "Passed Senate/House"),
