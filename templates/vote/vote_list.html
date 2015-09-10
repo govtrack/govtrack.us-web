@@ -6,7 +6,12 @@
 {% block track_button_explanation %}Get an email every time Congress votes on a bill or other matter.{% endblock %}
 
 {% block crumbs %}
+<ol class="breadcrumb">
+	<li><a href="{% url "congress_home" %}">Congress</a></li>
+	<li class="active">Votes</li>
+</ol>
 {% endblock %}
+
 
 {% block summary %}
 <h1>Roll Call Votes</h1>

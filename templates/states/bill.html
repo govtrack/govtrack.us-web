@@ -15,13 +15,13 @@
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 	<li><a href="/start#states">States</a></li>
 	<li><a href="/states/{{bill.state_session.state|lower}}">{{bill.state_session.state}}</a></li>
 	<li><a href="/states/{{bill.state_session.state|lower}}/bills/browse">Bills</a></li>
 	<li><a href="/states/{{bill.state_session.state|lower}}/bills/browse#state_session={{bill.state_session.id}}">{{bill.state_session.slug}}</a></li>
-	<li>{{bill.bill_number}}</li>
-</ul>
+	<li class="active">{{bill.bill_number}}</li>
+</ol>
 {% endblock %}
 
 {% block body_class %}state bill{% endblock %}

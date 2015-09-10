@@ -564,7 +564,16 @@ header ul, footer ul {
 		}
 	}
 
-
+.breadcrumb {
+	margin-top: 3px;
+	margin-bottom: 0;
+	padding-left: 0;
+	background: none;
+	font-size: 88%;
+}
+	.breadcrumb a {
+		color: #A77;
+	}
 
 #info-box {
 	background: url(../images/bg-info-box-top.gif) repeat-x;
@@ -801,35 +810,6 @@ header ul, footer ul {
 	background: none;
 	}
 }
-
-/* Sub Page styles
-	 =========================================== */
-#breadcrumbs {
-	font: normal 14px/16px PTSerif, Georgia, 'Times New Roman', Times, serif;
-	padding: 18px 0 0;
-	color: #777;
-	}
-	#breadcrumbs ul {
-		padding: 0;
-		}
-	#breadcrumbs li {
-		display: inline;
-		padding: 0 6px 0 11px;
-		background: url(../images/arrow.gif) no-repeat 0 60%;
-		}
-	#breadcrumbs li:first-child {
-		background: none;
-		padding: 0 6px 0 0;
-		}
-	#breadcrumbs a {
-		color: #955;
-		font-size: 12px;
-		text-decoration: none;
-		}
-	#breadcrumbs a:hover {
-		color: #B22;
-		border-bottom: 1px solid #AA6;
-		}
 
 /* Summary box styles
 	 ================================================= */

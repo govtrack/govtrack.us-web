@@ -5,42 +5,36 @@
 {% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 <li><a href="{% url "congress_home" %}">Congress</a></li>
 <li><a href="/congress/bills">Bills</a></li>
-</ul>
+
+{% with term.parents.all as parents %}
+{% if parents|length > 0 %}
+	<li>
+	{% for parent in parents %}
+		<a href="{{parent.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{parent.name}}</a>
+	{% endfor %}
+	</li>
+{% endif %}
+{% endwith %}
+
+<li class="active">{{term.name}}</li>
+</ol>
 {% endblock %}
 
 {% block summary %}
+{% with term.subterms.all as subs %}
+
 <h1>{{term.name}}</h1>
 		
 <div class="row">
 	<div id="track_panel_base" class="col-sm-8">
-		<p>Use this page to browse bills in the U.S. Congress related to the subject {{term.name}}.</p>
+		<p>Use this page to browse bills in the U.S. Congress related to the subject {{term.name}}, as determined by the Library of Congress.</p>
 
-		<p><small>Classification into subject areas is retrieved from the Library of Congress.</small></p>
-		
-		{% comment %}
-		{% with term.subterms.all as subs %}
 		{% if subs|length > 0 %}
-			<p style="margin: 0">Or drill down to:</p>
-			<ul class="bullets" style="height: 8em; overflow: auto;">
-			{% for sub in subs %}
-				<li style="line-height: normal;"><a href="{{sub.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{sub.name}}</a></li>
-			{% endfor %}
-			</ul>
+			<p>Narrow your focus by drilling down into <a href="#" onclick="$('#subterms_modal').modal(); return false;">{{subs|length}} subcategories</a>.</p>
 		{% endif %}
-		{% endwith %}
-		
-		{% with term.parents.all as parents %}
-		{% if parents|length > 0 %}
-			<p style="margin: 0">Go back up to
-			{% for parent in parents %}
-				<a href="{{parent.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{parent.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
-		{% endif %}
-		{% endwith %}
-		
-		{% endcomment %}
 	</div>
 
 	<div class="aside col-sm-4">
@@ -49,6 +43,30 @@
         <div id="event_subscribe_inline_container"> </div>
 	</div><!-- /actions -->
 </div>
+
+
+<div id="subterms_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="subterms_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="subterms_modal_title">Drill Down</h4>
+      </div>
+      <div class="modal-body">
+		<ul>
+		{% for sub in subs %}
+			<li><a href="{{sub.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{sub.name}}</a></li>
+		{% endfor %}
+		</ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endwith %}
 {% endblock %}
 
 {% block body %}

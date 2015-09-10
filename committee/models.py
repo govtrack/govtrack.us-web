@@ -58,6 +58,10 @@ class Committee(models.Model):
     def shortname(self):
 	    return self.fullname.replace("Committee on the ", "").replace("Committee on ", "")
 
+    @property
+    def shortname2(self):
+        return self.name.replace("Committee on the ", "").replace("Committee on ", "").replace("Subcommittee on ", "")
+
     def sortname(self, with_chamber=False):
         if self.committee:
             return self.committee.sortname(with_chamber) + ": " + self.name.replace("Subcommittee on the ", "").replace("Subcommittee on ", "")

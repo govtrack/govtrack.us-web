@@ -15,11 +15,11 @@
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 	<li><a href="/start#states">States</a></li>
 	{% if state %}<li><a href="/states/{{state|lower}}">{{state}}</a></li>{% endif %}
-	<li>Bill Search</li>
-</ul>
+	<li class="active">Bill Search</li>
+</ol>
 {% endblock %}
 
 {% block summary %}

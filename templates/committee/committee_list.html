@@ -5,7 +5,10 @@
 {% block cat-icon-filename %}img-committees.png{% endblock %}
 
 {% block crumbs %}
-<ul><li><a href="{% url "congress_home" %}">Congress</a></li> <li>Committees</li></ul>
+<ol class="breadcrumb">
+    <li><a href="{% url "congress_home" %}">Congress</a></li>
+    <li>Committees</li>
+</ol>
 {% endblock %}
 
 {% block summary %}

@@ -14,14 +14,16 @@
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/bills">Bills</a></li>
 	{% if parent %}
 		<li><a href="/congress/bills/uscode">U.S. Code Index</a></li>
 		{% if parent.parent_section %}<li><a href="/congress/bills/uscode/{{parent.parent_section.id}}">{{parent.parent_section.name|truncatewords:4}}</a></li>{% endif %}
+	{% else %}
+		<li class="active">U.S. Code Index</li>
 	{% endif %}
-</ul>
+</ol>
 {% endblock %}
 
 {% block summary %}

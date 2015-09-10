@@ -203,10 +203,11 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
     <li><a href="{% url "congress_home" %}">Congress</a></li>
     <li><a href="/congress/votes">Votes</a></li>
-</ul>
+    <li class="active">{{vote.name}} in {{vote.created.year}}</li>
+</ol>
 {% endblock %}
 
 {% block body %}

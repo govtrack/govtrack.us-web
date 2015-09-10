@@ -63,10 +63,11 @@
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/members">Members of Congress</a></li>
-</ul>
+	<li class="active">{{person.name_no_details}}</li>
+</ol>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}

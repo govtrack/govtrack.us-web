@@ -21,20 +21,17 @@ h3 {
 {% block body_scripts %}
 {% endblock %}
 
-{% block Xcrumbs %}
-<ul>
+{% block crumbs %}
+<ol class="breadcrumb">
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/bills">Bills</a></li>
 	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
-</ul>
+	<li class="active">Summaries</li>
+</ol>
 {% endblock %}
 
 {% block summary %}
 <div>
-	<a class="back-link-above-h1" href="{{bill.get_absolute_url}}">
-		<span>&lt; Back</span> to {{bill.display_number_no_congress_number}}
-		({{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})
-	</a>
 
 	<h1 class="long">Summaries for{% if "Act" in bill.title %} the{% endif %} {{bill.title_no_number|truncatewords:20}}</h1>
 

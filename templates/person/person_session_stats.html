@@ -111,12 +111,12 @@ function smooth_scroll(elem) {
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/members">Members of Congress</a></li>
 	<li><a href="{{person.get_absolute_url}}">{{person.name_no_details}}</a></li>
-	<li>{{session}} Report Card</li>
-</ul>
+	<li class="active">{{session}} Report Card</li>
+</ol>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}

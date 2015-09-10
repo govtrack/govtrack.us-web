@@ -44,17 +44,17 @@
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/members">Members of Congress</a></li>
 	{% if cohort or specific_stat %}
 		<li><a href="/congress/members/report-cards/{{session}}">{{session}} Report Cards</a></li>
-		{% if cohort %}<li>{{cohort_title}}</li>{% endif %}
-		{% if specific_stat %}<li>{{specific_stat_title}}</li>{% endif %}
+		{% if cohort %}<li class="active">{{cohort_title}}</li>{% endif %}
+		{% if specific_stat %}<li class="active">{{specific_stat_title}}</li>{% endif %}
 	{% else %}
-		<li>{{session}} Report Cards</li>
+		<li class="active">{{session}} Report Cards</li>
 	{% endif %}
-</ul>
+</ol>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}

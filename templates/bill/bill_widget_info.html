@@ -14,15 +14,16 @@
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/bills">Bills</a></li>
 	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
-</ul>
+	<li class="active">Widget</li>
+</ol>
 {% endblock %}
 
 {% block summary %}
-<h1>Bill Widget: {{bill.display_number}}</h1>
+<h1>Bill Widget for {{bill.display_number}}</h1>
 <p>Embed a widget showing the current status of this bill on your website!</p>
 {% endblock %}
 

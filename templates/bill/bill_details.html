@@ -210,10 +210,11 @@ p#yourreps {
 {% endblock %}
 
 {% block crumbs %}
-<ul>
+<ol class="breadcrumb">
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/bills">Bills</a></li>
-</ul>
+	<li class="active">{{bill.display_number}}</li>
+</ol>
 {% endblock %}
 
 {% block body_class %}bill{% endblock %}

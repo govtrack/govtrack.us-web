@@ -85,10 +85,10 @@ function reset_form() {
 {% endblock %}
 
 {% block crumbs %}
-<ul>
-	<li>Call Congress</li>
+<ol class="breadcrumb">
+	<li class="active">Call Congress</li>
 	<li><a href="{{issue.get_absolute_url}}">{{issue.title}}</a></li>
-</ul>
+</ol>
 {% endblock %}
 
 {% block body_class %}issue{% endblock %}
