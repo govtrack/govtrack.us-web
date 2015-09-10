@@ -122,20 +122,20 @@ def template_context_processor(request):
         ks = urllib.urlopen("https://www.kickstarter.com/projects/1872382405/govtrack-insider").read()
         pledged_string = re.search(r'<data .* itemprop="Project\[pledged\]">\$([\d,]+)</data>', ks).group(1)
         pledged = int(pledged_string.replace(",", ""))
-        days_left = (datetime.datetime(2015, 9, 10, 11, 38, 0) - datetime.datetime.now()).days
+        hours_left = int(round((datetime.datetime(2015, 9, 10, 11, 38, 0) - datetime.datetime.now()).total_seconds() / 60.0 / 60.0))
         return {
             "pledged": pledged,
             "remaining": 35000-pledged,
             "percent": int(round(pledged / 35000.0 * 100)),
-            "days_left": days_left,
+            "hours_left": hours_left,
         }
-    kickstarter_info = cache.get("kickstarter_info2")
+    kickstarter_info = cache.get("kickstarter_info")
     if not kickstarter_info:
         try:
             kickstarter_info = get_kickstarter_info()
         except:
             pass
-        cache.set("kickstarter_info2", kickstarter_info, 60*30) # 30 minutes
+        cache.set("kickstarter_info", kickstarter_info, 60*30) # 30 minutes
     context["kickstarter_info"] = kickstarter_info
     
     # Add context variables for whether the user is in the

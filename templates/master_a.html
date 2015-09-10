@@ -9,7 +9,6 @@
 			{% if medium_posts %}
 		    <div class="hidden-xs sidebar-events">
 				<h2><a href="https://medium.com/govtrack-insider" style="float: right; color: #722" title="More Posts on Medium"><i class="fa fa-medium"></i></a> GovTrack Insider</h2>
-				{% if kickstarter_info %}<p style="font-weight: bold">We need your help to keep writing on GovTrack Insider. We&rsquo;ve raised ${{kickstarter_info.pledged|intcomma}} so far. Please <a href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">support our work</a>!</p><hr>{% endif %}
 				<table>
 				{% for post in medium_posts %}
 					<tr valign="top">

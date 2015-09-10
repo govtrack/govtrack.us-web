@@ -1,5 +1,5 @@
 {% if format == "text" %}
-active: true
+active: false
 subject: "10 days left for us to reach our goal"
 ----------
 {% endif %}
