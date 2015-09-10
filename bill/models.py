@@ -827,7 +827,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             if self.docs_house_gov_postdate: ret.append({ "key": "schedule_house", "label": "On House Schedule", "date": self.docs_house_gov_postdate, "explanation": "The House indicated that this %s would be considered in the week ahead." % self.noun })
             if self.senate_floor_schedule_postdate: ret.append({ "key": "schedule_senate","label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate, "explanation": "The Senate indicated that this %s would be considered in the days ahead." % self.noun })
 
-        # Bring in really-major events on identical bills.
+        # Bring in really-major events on identical bills and past/future reintroductions of this bill.
         if top:
             got_rb = set()
             for relation_name, relation_types in (
@@ -842,6 +842,11 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         e["relation"] = relation_name
                         e["bill"] = rb.related_bill
                         ret.append(e)
+            for b in self.find_reintroductions():
+                for e in b.get_major_events(top=False):
+                    e["relation"] = "Earlier Version" if b.congress < self.congress else "Reintroduced As"
+                    e["bill"] = b
+                    ret.append(e)
 
         # Sort the entries by date. Stable sort for time-less dates.
         def as_dt(x):
@@ -850,7 +855,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         ret.sort(key = lambda x : as_dt(x["date"]))
 
         # Don't add future events when we're looking at related bills to the bill we really care about.
-        if self.is_alive and top:
+        if self.is_alive and top and not self.enacted_ex():
             if len(ret) > 0: # mark the last one differently for display purposes
                 ret[-1]["last_occurred"] = True
             for key, label in self.get_future_events():

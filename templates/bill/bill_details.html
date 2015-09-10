@@ -138,16 +138,16 @@ p#yourreps {
 			background: url('/static/images/status-dots-event.png') 100% 3px no-repeat;
 			min-height: 15px;
 		}
-			#status-row-grid .status-item .date .wrapper.ghosted {
+			#status-row-grid .status-item.pending .date .wrapper {
 				background-image: url('/static/images/status-dots-event-ghosted.png');
 			}
-	#status-row-grid .status-item .vote {
-        line-height: 100%;
-	}
 	#status-row-grid .status-item .status-label {
 		line-height: 105%;
 		font-weight: bold;
 	}
+		#status-row-grid .status-item.pending .status-label {
+			font-weight: normal;
+		}
 	#status-row-grid .status-item p.status-description {
 		margin-top: 3px;
 		font-size: 90%;
@@ -203,18 +203,9 @@ p#yourreps {
 	#status-row-grid .pending .img {
 		opacity: .3;
 	}
-#status-row-grid .related-bill-text { display: none; }
 #status-row-grid .related-bill {
 	color: #777;
 }
-	#status-row-grid .related-bill .related-bill-text {
-		display: block;
-		position: relative;
-		top: -.75em;
-		color: #777;
-		font-size: 90%;
-		background-color: white; /* ensure can be seen over image */
-	}
 </style>
 {% endblock %}
 
@@ -588,35 +579,36 @@ p#yourreps {
 				{% for item in bill.get_major_events %}
 					<tr class="status-item {% if not item.date %}pending{% endif %} {% if item.bill %}related-bill{% endif %}">
 						<td class="date {% if forloop.last %}last{% endif %} {% if item.last_occurred or not item.date %}ghosted{% endif %}">
-							<div class="wrapper {% if not item.date %}ghosted{% endif %}">
+							<div class="wrapper">
 								{% if item.date %}<nobr>{{item.date|date:"DATE_FORMAT"}}</nobr>{% endif %}
 							</div>
 						</td>
 						<td>
 							{% if item.vote_link and not item.bill %}<a href="{{item.vote_link}}">{% endif %}
 							<div class="img status_{{item.key}}">
-								{% if item.bill %}<div class="related-bill-text">{{item.relation}}</div>{% endif %}
+								&nbsp;
 							</div>
 							{% if item.vote_link and not item.bill %}</a>{% endif %}
 						</td>
 						<td>
 							<div class="status-label" title="{{item.actionline}}">
 								{% if item.bill %}
-									<a href="{{item.bill.get_absolute_url}}">{{item.bill.display_number}}</a> &mdash;
+									{{item.relation}} &mdash;
+									<a href="{{item.bill.get_absolute_url}}">{{item.bill.display_number}}</a>
+									&mdash;
 								{% endif %}
 								{{item.label}}
 							</div>
 							{% if not item.bill %}
 								<p class="status-description">
 								{{item.explanation}}
-								{% if item.vote_text %}Vote was {{item.vote_text}} so no record of individual votes was made.{% endif %}
+								{% if item.vote_text %}It was {{item.vote_text}} so no record of individual votes was made.{% endif %}
+								{% if item.vote_link %}<a href="{{item.vote_link}}">View Vote Result &raquo;</a>{% endif %}
 								</p>
 							{% else %}
-								<p>This activity took place on a related bill, possibly in lieu of similar activity on {{bill.display_number}}.</p>
+								<p>This activity took place on a related bill{% if item.bill.congress == bill.congress %}, possibly in lieu of similar activity on {{bill.display_number}}{% endif %}.</p>
 							{% endif %}
 
-							{% if item.vote_link %}<a href="{{item.vote_link}}"><div class="vote">View Vote Result &raquo;</div></a>{% endif %}
-							
 						</td>
 					</tr>
 				{% endfor %}
