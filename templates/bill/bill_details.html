@@ -148,11 +148,15 @@ p#yourreps {
 		#status-row-grid .status-item.pending .status-label {
 			font-weight: normal;
 		}
-	#status-row-grid .status-item p.status-description {
-		margin-top: 3px;
-		font-size: 90%;
-		line-height: 130%;
+	#status-row-grid .status-item .status-description {
+		padding-bottom: 1em;
 	}
+		#status-row-grid .status-item .status-description p {
+			font-size: 90%;
+			line-height: 130%;
+			margin-top: 3px;
+			margin-bottom: 0;
+		}
 #status-row-grid .img {
 	width: 53px;
 	height: 35px;
@@ -585,13 +589,13 @@ p#yourreps {
 							</div>
 						</td>
 						<td>
-							{% if item.vote_link and not item.bill %}<a href="{{item.vote_link}}">{% endif %}
+							{% if item.vote_obj and not item.bill %}<a href="{{item.vote_obj.get_absolute_url}}">{% endif %}
 							<div class="img status_{{item.key}}">
 								&nbsp;
 							</div>
-							{% if item.vote_link and not item.bill %}</a>{% endif %}
+							{% if item.vote_obj and not item.bill %}</a>{% endif %}
 						</td>
-						<td>
+						<td class="status-description">
 							<div class="status-label" title="{{item.actionline}}">
 								{% if item.bill %}
 									{{item.relation}} &mdash;
@@ -601,11 +605,12 @@ p#yourreps {
 								{{item.label}}
 							</div>
 							{% if not item.bill %}
-								<p class="status-description">
+								<p>
 								{{item.explanation}}
 								{% if item.vote_text %}It was {{item.vote_text}} so no record of individual votes was made.{% endif %}
-								{% if item.vote_link %}<a href="{{item.vote_link}}">View Vote Result &raquo;</a>{% endif %}
+								{% if item.vote_obj %}<a href="{{item.vote_obj.get_absolute_url}}">View Vote Result &raquo;</a>{% endif %}
 								</p>
+								{% if item.vote_obj.oursummary %}{{item.vote_obj.oursummary.as_html|truncatewords_html:30|safe}}{% endif %}
 							{% else %}
 								<p>This activity took place on a related bill{% if item.bill.congress == bill.congress %}, possibly in lieu of similar activity on {{bill.display_number}}{% endif %}.</p>
 							{% endif %}

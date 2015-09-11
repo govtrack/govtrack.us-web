@@ -793,7 +793,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                     st = st.label
 
             vote_text = None
-            vote_link = None
+            vote_obj = None
             if srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "pingpong", "conference"):
                 if srcnode.get("how") == "roll":
                     try:
@@ -803,7 +803,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                             number=int(srcnode.get("roll")))
                         if v.source != VoteSource.keithpoole:
                             # The numbering of votes does not apply in the voteview data.
-                            vote_link = v.get_absolute_url()
+                            vote_obj = v
                     except Vote.DoesNotExist:
                         # Somehow the vote is missing.
                         pass
@@ -818,7 +818,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 "actionline": text,
                 "explanation": explanation,
                 "vote_text": vote_text,
-                "vote_link": vote_link,
+                "vote_obj": vote_obj,
             })
         if not saw_intro: ret.insert(0, { "key": BillStatus.introduced.key, "label": "Introduced", "date": self.introduced_date, "explanation": BillStatus.introduced.explanation })
 
