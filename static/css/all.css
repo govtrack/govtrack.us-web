@@ -248,6 +248,10 @@ header ul, footer ul {
 	margin-bottom: 1em;
 }
 
+blockquote {
+	font-size: inherit;
+}
+
 /* LAYOUT STYLES */
 
 .box {
