@@ -833,15 +833,28 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             # that we are attaching the text too. Enrolled bills may be printed
             # on a later date than the vote that caused the action, and since there's
             # only one enrolled action and one print, necessarily, we can skip
-            # the date check there.
+            # the date check there. Our "reported" status is when a bill is ordered
+            # reported, and not actually reported, so the reported text also tends
+            # to come much later but we still want to put it in the right place.
+            # Just make sure it occurs chronologically between the event we want
+            # to associate it with and the next major event listed for the bill.
+            def as_date(dt): return dt.date() if isinstance(dt, datetime.datetime) else dt
             for st in get_bill_text_versions(self):
                 m = get_bill_text_metadata(self, st)
-                if m["version_code"] in ("rfs", "rfh", "rts", "rth"): continue # never interesting
-                for event in ret:
+                if m["version_code"] in ("rfs", "rfh", "rts", "rth", "rds", "rdh"): continue # 'referred' text is never interesting
+                if m["version_code"] in ("pcs", "pch"): continue # calendaring status is never interesting
+                for i, event in enumerate(ret):
                     if event["key"] in set(st.key for st in m["corresponding_status_codes"]) \
-                        and (m['issued_on'] == (event["date"].date() if isinstance(event["date"], datetime.datetime) else event["date"])
-                                or m["version_code"] == "enr"):
+                        and (
+                               (m['issued_on'] == as_date(event["date"])) # issued_on is always a date but the event date may be a datetime
+                            or (m["version_code"] == "enr")
+                            or (m["version_code"] in ("rs", "rh") and m['version_code'][-1] == self.originating_chamber[0].lower()
+                                and m['issued_on'] >= as_date(event["date"])
+                                and (i==len(ret)-1 or m['issued_on'] <= as_date(ret[i+1]["date"]) ))
+                            ):
                         event["text_version"] = m['version_code']
+                        if m['issued_on'] != as_date(event["date"]):
+                            event["text_date"] = m['issued_on']
                         break
                 else:
                     # Add a new entry.

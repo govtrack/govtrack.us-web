@@ -58,10 +58,10 @@ bill_gpo_status_codes = {
     "reah": ("Passed the House (Re-Engrossed) with an Amendment", None),
     "re": ("Reprint of an Amendment", None),
     "res": ("Passed the Senate (Re-Engrossed) with an Amendment", None),
-    "rfh": ("Referred to House Committee", None),
+    "rfh": ("Referred to House Committee", None), # second chamber
     "rfhr": ("Referred to House Committee/Reprint", None),
     "rfh_s": ("Referred to House Committee/Star Print", None),
-    "rfs": ("Referred to Senate Committee", None),
+    "rfs": ("Referred to Senate Committee", None), # second chamber
     "rfsr": ("Referred to Senate Committee/Reprint", None),
     "rfs_s": ("Referred to Senate Committee/Star Print", None),
     "rh": ("Reported by House Committee", { BillStatus.reported }),
@@ -72,8 +72,8 @@ bill_gpo_status_codes = {
     "rs_s": ("Reported by Senate Committee/Star Print", None),
     "rih": ("Referral Instructions in the House", None),
     "ris": ("Referral Instructions in the Senate", None),
-    "rth": ("Referred to House Committee", { BillStatus.referred }),
-    "rts": ("Referred to Senate Committee", { BillStatus.referred }),
+    "rth": ("Referred to House Committee", { BillStatus.referred }), # originating chamber
+    "rts": ("Referred to Senate Committee", { BillStatus.referred }), # originating chamber
     "s_p": ("Star Print of an Amendment", None),
     "fph": ("Failed Passage in the House", None),
     "fps": ("Failed Passage in the Senate", None),

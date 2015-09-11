@@ -149,7 +149,7 @@ p#yourreps {
 			font-weight: normal;
 		}
 	#status-row-grid .status-item .status-description {
-		padding-bottom: 1em;
+		padding-bottom: 1.25em;
 	}
 		#status-row-grid .status-item .status-description p {
 			font-size: 90%;
@@ -615,7 +615,7 @@ p#yourreps {
 								{% if item.vote_obj.oursummary %}{{item.vote_obj.oursummary.as_html|truncatewords_html:30|safe}}{% endif %}
 								<p class="links">
 									{% if item.vote_obj %}<a href="{{item.vote_obj.get_absolute_url}}">View Vote &raquo;</a>{% endif %}
-									{% if item.text_version %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}">Read Text &raquo;</a>{% endif %}
+									{% if item.text_version %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}" {% if item.text_date %}title="{{item.text_date|date}}"{% endif %}>Read Text &raquo;</a>{% endif %}
 									{% if item.text_version_compare_to %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}#compare={{item.text_version_compare_to}}">See Changes &raquo;</a>{% endif %}
 								</p>
 							{% else %}
