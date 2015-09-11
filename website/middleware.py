@@ -49,7 +49,7 @@ def template_context_processor(request):
     
     context = dict(base_context) # clone
     
-    if hasattr(request, 'user') and request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
+    #if hasattr(request, 'user') and request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
     
     # Add top-tracked feeds.
     from events.models import Feed
