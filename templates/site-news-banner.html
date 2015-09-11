@@ -1,57 +1,7 @@
 {% load govtrack_utils %}
 {% load humanize %}
 <div class="sitenewsbody" data-seq="70">
-	<p>Thank you all! We&rsquo;ve reached our goal to hire a researcher for six months.</p>
-	<p>For the next {{kickstarter_info.hours_left}} hours you can still <a href="http://kck.st/1gZOS2V">Support Our Work &raquo;</a> to shine a light on Congress.</p>
 
-	{% comment %}
-	<div class="row">
-		<div class="col-sm-1" style="text-align: right">
-			<a href="http://kck.st/1gZOS2V"><img src="https://d297h9he240fqh.cloudfront.net/assets/apple-touch-icon-precomposed-ced87f7fe1a75e7e6392c167dbb0f393a36510aea98e9c35c63302c9028f64a3.png" class="img-responsive"></a>
-		</div>		
-		<div class="col-sm-11" style="text-align: left; padding-top: .5em">
-			<p style="font-size: 115%; font-weight: bold;">Kickstarter calls GovTrack Insider a &ldquo;Project We Love&rdquo;</p>
-            <p>We&rsquo;re trying to hire a full-time researcher, but we need your help.</p>
-			<p><a href="http://kck.st/1gZOS2V">Will you help GovTrack expand our coverage of Congress&rsquo;s daily activities?</a></p>
-		</div>
-		<div class="col-sm-4" style="text-align: right">
-			<iframe width="234" height="175" src="https://www.kickstarter.com/projects/1872382405/govtrack-insider/widget/video.html" frameborder="0" scrolling="no" style="border: 1px solid black; display: inline-block"> </iframe>
-		</div>
-		<div class="col-sm-8" style="text-align: left; padding-top: .5em">
-			<p>This is GovTrack&rsquo;s story.</p>
-            <p>After 11 years running GovTrack on my own, I now want to hire a full-time researcher to help us all figure out what Congress is doing. But I need your help.</p>
-            <p style="font-weight: bold;"><a href="http://kck.st/1gZOS2V">Will you help me expand GovTrack today?</a></p>
-            <p><small>We&rsquo;re at {{kickstarter_info.percent}}% of our fundraising goal. Let&rsquo;s get to 100%!</small></p>
-		</div>
-	</div>
-	{% endcomment %}
-
-	{% if highlighted_vote and 0 %}
-	<p id="highlighted_vote">
-		<span style="display: block">Latest major vote:</span>
-		<a href="{{highlighted_vote.link}}">{{highlighted_vote.title}}</a>
-	</p>
-	<script>
-	var highlighted_vote = {{highlighted_vote|json}};
-	$(function() { // delay until the end because moc_record_matches_user isn't available where this template is inserted
-		onUserDistrictChanged(function(cong_dist, mocs) {
-			var V = []
-	        for (var i = 0; i < highlighted_vote.data.length; i++) {
-	            var v = moc_record_matches_user(highlighted_vote.data[i].moc, cong_dist, mocs);
-	            if (v) {
-	            	if (V.length > 0) v = v.replace(/^Your /, "your ");
-	                V.push(v + "voted " + highlighted_vote.data[i].vote);
-	            }
-	        }
-	        if (V.length > 0) {
-	        	$('#highlighted_vote span').text(V.join(" and ") + " on");
-	        } else {
-	        	$('#highlighted_vote span').text('Latest major vote:');
-	        }
-		})
-	})
-	</script>
-	{% endif %}
 
 	{% comment %}
 	<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">

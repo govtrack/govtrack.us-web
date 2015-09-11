@@ -36,16 +36,18 @@ EOP_NET_RANGES = (
 
 trending_feeds = None
 
+base_context = {
+    "SITE_ROOT_URL": settings.SITE_ROOT_URL,
+    "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY,
+    "STATE_CHOICES": sorted([(kv[0], kv[1], us.stateapportionment[kv[0]]) for kv in us.statenames.items() if kv[0] in us.stateapportionment], key = lambda kv : kv[1]),
+}
+
 def template_context_processor(request):
     # These are good to have in a context processor and not middleware
     # because they won't be evaluated until template evaluation, which
     # might have user-info blocked already for caching (a good thing).
     
-    context = {
-        "SITE_ROOT_URL": settings.SITE_ROOT_URL,
-        "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY,
-        "STATE_CHOICES": sorted([(kv[0], kv[1], us.stateapportionment[kv[0]]) for kv in us.statenames.items() if kv[0] in us.stateapportionment], key = lambda kv : kv[1]),
-    }
+    context = dict(base_context) # clone
     
     if hasattr(request, 'user') and request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
     
@@ -69,21 +71,6 @@ def template_context_processor(request):
         all_tracked_events = Feed.get_events_for([fn for fn in ("misc:activebills2", "misc:billsummaries", "misc:allvotes") if Feed.objects.filter(feedname=fn).exists()], 6)
         cache.set("all_tracked_events", all_tracked_events, 60*15) # 15 minutes
     context["all_tracked_events"] = all_tracked_events
-
-    # Highlight a recent vote. We don't yet need to know the user's district
-    # --- that will happen client-side.
-    def get_highlighted_vote():
-        from vote.models import Vote, VoteCategory
-        candidate_votes = Vote.objects.filter(category__in=Vote.MAJOR_CATEGORIES).exclude(related_bill=None).order_by('-created')
-        for v in candidate_votes:
-            return { "title": v.question, "link": v.get_absolute_url(), "data": v.simple_record() }
-        return "NONE"
-    highlighted_vote = cache.get("highlighted_vote")
-    if highlighted_vote is None:
-        highlighted_vote = get_highlighted_vote()
-        cache.set("highlighted_vote", highlighted_vote, 60*60*2)
-    if highlighted_vote != "NONE":
-        context["highlighted_vote"] = highlighted_vote
 
     # Get our latest Medium posts.
     def get_medium_posts():
@@ -116,28 +103,6 @@ def template_context_processor(request):
         cache.set("medium_posts", medium_posts, 60*15) # 15 minutes
     context["medium_posts"] = medium_posts[0:2]
 
-    # Get current Kickstarter pledge level.
-    def get_kickstarter_info():
-        import re
-        ks = urllib.urlopen("https://www.kickstarter.com/projects/1872382405/govtrack-insider").read()
-        pledged_string = re.search(r'<data .* itemprop="Project\[pledged\]">\$([\d,]+)</data>', ks).group(1)
-        pledged = int(pledged_string.replace(",", ""))
-        hours_left = int(round((datetime.datetime(2015, 9, 10, 11, 38, 0) - datetime.datetime.now()).total_seconds() / 60.0 / 60.0))
-        return {
-            "pledged": pledged,
-            "remaining": 35000-pledged,
-            "percent": int(round(pledged / 35000.0 * 100)),
-            "hours_left": hours_left,
-        }
-    kickstarter_info = cache.get("kickstarter_info")
-    if not kickstarter_info:
-        try:
-            kickstarter_info = get_kickstarter_info()
-        except:
-            pass
-        cache.set("kickstarter_info", kickstarter_info, 60*30) # 30 minutes
-    context["kickstarter_info"] = kickstarter_info
-    
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
     

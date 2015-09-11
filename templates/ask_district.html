@@ -256,19 +256,12 @@ $(function() {
 		var flags = $.cookie("flags");
 		flags = !flags ? {} : parse_qs(flags);
 
-    if (!flags.kickstarter && 0) {
-      $('#kickstarter_modal').modal();
-      flags.kickstarter = true;
-    }
-
-    if (0) {
     if (the_segment == "Other" && !flags.itf)
       show_if_then_fund(flags);
-		else if (the_segment == "Other" && cong_dist == null)
+		else if (the_segment == "Other" && cong_dist == null && 0)
 			show_askcd();
 		else if (Math.random() < .3)
 			show_followus(flags);
-    }
 
 		$.cookie("flags", form_qs(flags), { expires: 21, path: '/' });
 	}, 750)
@@ -357,36 +350,3 @@ function show_if_then_fund(flags) {
 </div>
 
 
-<!-- modal to show geocoder result -->
-<div id="kickstarter_modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="kickstarter_modal_title">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="kickstarter_modal_title">GovTrack&rsquo;s Story</h4>
-      </div>
-        
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-xs-7 col-sm-5 col-md-4">
-          </div>
-          <div class="col-xs-5 col-sm-7 col-md-7" style="color: black">
-            <hr>
-            <p>After 11 years running GovTrack on my own, I now want to hire a researcher to help us all figure out what Congress is doing.</p>
-            <p style="padding: 1em; text-align: center; font-weight: bold;"><a href="http://kck.st/1gZOS2V">Will you help me expand GovTrack today by contributing $150, $75, or $50?</a></p>
-            <div class="hidden-xs">
-            <p>I&rsquo;ve already raised {{kickstarter_info.pledged}}, but that&rsquo;s only {{kickstarter_info.percent}}% toward my goal. Help me get to 100% if you can!</p>
-            <hr>
-            <p>Earlier this summer I hired an intern to start <a href="https://medium.com/govtrack-insider">GovTrack Insider</a> and post <a href="https://www.govtrack.us/events/bill-summaries">summaries of bills</a>. But we&rsquo;re asking for your help to continue this work. We can&rsquo;t do it without the support of our users. Thanks!</p>
-            <hr>
-            </div>
-            <div style="text-align: right">
-            <button type="button" class="btn btn-default" data-dismiss="modal">No Thanks</button>
-            <a class="btn btn-success" href="http://kck.st/1gZOS2V" onclick="$('#kickstarter_modal').modal('hide')" target="_blank">Support GovTrack &raquo;</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
