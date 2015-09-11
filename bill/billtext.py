@@ -1,86 +1,82 @@
-
 if __name__ == "__main__":
     import sys, os
-    sys.path.insert(0, "..")
     sys.path.insert(0, ".")
     sys.path.insert(0, "lib")
-    sys.path.insert(0, ".env/lib/python2.7/site-packages")
-    os.environ["DJANGO_SETTINGS_MODULE"] = 'settings'
 
 import datetime, lxml, os.path, re
+from bill.status import BillStatus
 
 bill_gpo_status_codes = {
-    "ah": "Amendment",
-    "ah2": "Amendment",
-    "as": "Amendment",
-    "as2": "Amendment",
-    "ash": "Additional Sponsors",
-    "sas": "Additional Sponsors",
-    "sc": "Sponsor Change",
-    "ath": "Resolution Agreed to",
-    "ats": "Resolution Agreed to",
-    "cdh": "Committee Discharged",
-    "cds": "Committee Discharged",
-    "cph": "Considered and Passed by the House",
-    "cps": "Considered and Passed by the Senate",
-    "eah": "Passed the House (Engrossed) with an Amendment",
-    "eas": "Passed the Senate (Engrossed) with an Amendment",
-    "eh": "Passed the House (Engrossed)",
-    "ehr": "Passed the House (Engrossed)/Reprint",
-    "eh_s": "Passed the House (Engrossed)/Star Print",
-    "enr": "Passed Congress/Enrolled Bill",
-    "renr": "Passed Congress/Re-enrolled",
-    "es": "Passed the Senate (Engrossed)",
-    "esr": "Passed the Senate (Engrossed)/Reprint",
-    "es_s": "Passed the Senate (Engrossed)/Star Print",
-    "fah": "Failed Amendment",
-    "fps": "Failed Passage",
-    "hdh": "Held at Desk in the House",
-    "hds": "Held at Desk in the Senate",
-    "ih": "Introduced",
-    "ihr": "Introduced/Reprint",
-    "ih_s": "Introduced/Star Print",
-    "is": "Introduced",
-    "isr": "Introduced/Reprint",
-    "is_s": "Introduced/Star Print",
-    "iph": "Indefinitely Postponed in the House",
-    "ips": "Indefinitely Postponed in the Senate",
-    "lth": "Laid on Table in the House",
-    "lts": "Laid on Table in the Senate",
-    "oph": "Ordered to be Printed",
-    "ops": "Ordered to be Printed",
-    "pch": "Placed on Calendar in the House",
-    "pcs": "Placed on Calendar in the Senate",
-    "pp": "Public Print",
-    "pap": "Printed as Passed",
-    "rah": "Referred to House Committee (w/ Amendments)",
-    "ras": "Referred to Senate Committee (w/ Amendments)",
-    "rch": "Reference Change",
-    "rcs": "Reference Change",
-    "rdh": "Received by the House",
-    "rds": "Received by the Senate",
-    "reah": "Passed the House (Re-Engrossed) with an Amendment",
-    "re": "Reprint of an Amendment",
-    "res": "Passed the Senate (Re-Engrossed) with an Amendment",
-    "rfh": "Referred to House Committee",
-    "rfhr": "Referred to House Committee/Reprint",
-    "rfh_s": "Referred to House Committee/Star Print",
-    "rfs": "Referred to Senate Committee",
-    "rfsr": "Referred to Senate Committee/Reprint",
-    "rfs_s": "Referred to Senate Committee/Star Print",
-    "rh": "Reported by House Committee",
-    "rhr": "Reported by House Committee/Reprint",
-    "rh_s": "Reported by House Committee/Star Print",
-    "rs": "Reported by Senate Committee",
-    "rsr": "Reported by Senate Committee/Reprint",
-    "rs_s": "Reported by Senate Committee/Star Print",
-    "rih": "Referral Instructions in the House",
-    "ris": "Referral Instructions in the Senate",
-    "rth": "Referred to House Committee",
-    "rts": "Referred to Senate Committee",
-    "s_p": "Star Print of an Amendment",
-    "fph": "Failed Passage in the House",
-    "fps": "Failed Passage in the Senate",
+    "ah": ("Amendment", None),
+    "ah2": ("Amendment", None),
+    "as": ("Amendment", None),
+    "as2": ("Amendment", None),
+    "ash": ("Additional Sponsors", None),
+    "sas": ("Additional Sponsors", None),
+    "sc": ("Sponsor Change", None),
+    "ath": ("Resolution Agreed to", { BillStatus.passed_simpleres, BillStatus.passed_concurrentres }),
+    "ats": ("Resolution Agreed to", { BillStatus.passed_simpleres, BillStatus.passed_concurrentres }),
+    "cdh": ("Committee Discharged", None),
+    "cds": ("Committee Discharged", None),
+    "cph": ("Considered and Passed by the House", None),
+    "cps": ("Considered and Passed by the Senate", None),
+    "eah": ("Passed the House (Engrossed) with an Amendment", { BillStatus.pass_back_house }),
+    "eas": ("Passed the Senate (Engrossed) with an Amendment", { BillStatus.pass_back_senate }),
+    "eh": ("Passed the House (Engrossed)", { BillStatus.pass_over_house }),
+    "ehr": ("Passed the House (Engrossed)/Reprint", None),
+    "eh_s": ("Passed the House (Engrossed)/Star Print", None),
+    "enr": ("Passed Congress/Enrolled Bill", { BillStatus.passed_bill }),
+    "renr": ("Passed Congress/Re-enrolled", None),
+    "es": ("Passed the Senate (Engrossed)", { BillStatus.pass_over_senate }),
+    "esr": ("Passed the Senate (Engrossed)/Reprint", None),
+    "es_s": ("Passed the Senate (Engrossed)/Star Print", None),
+    "fah": ("Failed Amendment", None),
+    "hdh": ("Held at Desk in the House", None),
+    "hds": ("Held at Desk in the Senate", None),
+    "ih": ("Introduced", { BillStatus.introduced }),
+    "ihr": ("Introduced/Reprint", None),
+    "ih_s": ("Introduced/Star Print", None),
+    "is": ("Introduced", { BillStatus.introduced }),
+    "isr": ("Introduced/Reprint", None),
+    "is_s": ("Introduced/Star Print", None),
+    "iph": ("Indefinitely Postponed in the House", None),
+    "ips": ("Indefinitely Postponed in the Senate", None),
+    "lth": ("Laid on Table in the House", None),
+    "lts": ("Laid on Table in the Senate", None),
+    "oph": ("Ordered to be Printed", None),
+    "ops": ("Ordered to be Printed", None),
+    "pch": ("Placed on Calendar in the House", None),
+    "pcs": ("Placed on Calendar in the Senate", None),
+    "pp": ("Public Print", None),
+    "pap": ("Printed as Passed", None),
+    "rah": ("Referred to House Committee (w/ Amendments)", { BillStatus.referred }),
+    "ras": ("Referred to Senate Committee (w/ Amendments)", { BillStatus.referred }),
+    "rch": ("Reference Change", None),
+    "rcs": ("Reference Change", None),
+    "rdh": ("Received by the House", None),
+    "rds": ("Received by the Senate", None),
+    "reah": ("Passed the House (Re-Engrossed) with an Amendment", None),
+    "re": ("Reprint of an Amendment", None),
+    "res": ("Passed the Senate (Re-Engrossed) with an Amendment", None),
+    "rfh": ("Referred to House Committee", None),
+    "rfhr": ("Referred to House Committee/Reprint", None),
+    "rfh_s": ("Referred to House Committee/Star Print", None),
+    "rfs": ("Referred to Senate Committee", None),
+    "rfsr": ("Referred to Senate Committee/Reprint", None),
+    "rfs_s": ("Referred to Senate Committee/Star Print", None),
+    "rh": ("Reported by House Committee", { BillStatus.reported }),
+    "rhr": ("Reported by House Committee/Reprint", None),
+    "rh_s": ("Reported by House Committee/Star Print", None),
+    "rs": ("Reported by Senate Committee", { BillStatus.reported }),
+    "rsr": ("Reported by Senate Committee/Reprint", None),
+    "rs_s": ("Reported by Senate Committee/Star Print", None),
+    "rih": ("Referral Instructions in the House", None),
+    "ris": ("Referral Instructions in the Senate", None),
+    "rth": ("Referred to House Committee", { BillStatus.referred }),
+    "rts": ("Referred to Senate Committee", { BillStatus.referred }),
+    "s_p": ("Star Print of an Amendment", None),
+    "fph": ("Failed Passage in the House", None),
+    "fps": ("Failed Passage in the Senate", None),
     }
 
 def get_gpo_status_code_name(doc_version):
@@ -90,12 +86,17 @@ def get_gpo_status_code_name(doc_version):
         digit_suffix = doc_version[-1] + digit_suffix
         doc_version = doc_version[:-1]
     
-    doc_version_name = bill_gpo_status_codes.get(doc_version, "Unknown Status (%s)" % doc_version)
+    doc_version_name = bill_gpo_status_codes.get(doc_version, ("Unknown Status (%s)" % doc_version, None))[0]
 
     if digit_suffix: doc_version_name += " " + digit_suffix
 
     return doc_version_name
-    
+
+def get_gpo_status_code_corresponding_status(doc_version):
+    ret = bill_gpo_status_codes.get(doc_version, (None, None))[1]
+    if ret is None: ret = set()
+    return ret
+
 def get_current_version(bill):
     return load_bill_text(bill, None, mods_only=True)["doc_version"]
     
@@ -206,6 +207,11 @@ def get_bill_text_metadata(bill, version):
         if not dat: return None
     else:
         dat = json.load(open(basename + "/%s/data.json" % version))
+
+    # human readable status name
+
+    dat["status_name"] = get_gpo_status_code_name(dat["version_code"])
+    dat["corresponding_status_codes"] = get_gpo_status_code_corresponding_status(dat["version_code"])
 
     # parse date
 
@@ -662,9 +668,5 @@ def compare_xml_text(doc1, doc2, timelimit=10):
     return doc1, doc2
     
 if __name__ == "__main__":
-    from bill.models import Bill, BillType
-    load_bill_text(Bill.objects.get(congress=112, bill_type=BillType.house_bill, number=9), None)
-    #doc1 = lxml.etree.parse("data/us/bills.text/112/h/h3606ih.html")
-    #doc2 = lxml.etree.parse("data/us/bills.text/112/h/h3606eh.html")
-    #compare_xml_text(doc1, doc2)
-    #print lxml.etree.tostring(doc2)
+    import pprint
+    pprint.pprint(bill_gpo_status_codes)

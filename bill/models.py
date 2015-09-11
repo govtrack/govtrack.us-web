@@ -822,13 +822,39 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             })
         if not saw_intro: ret.insert(0, { "key": BillStatus.introduced.key, "label": "Introduced", "date": self.introduced_date, "explanation": BillStatus.introduced.explanation })
 
-        # Was the bill scheduled for consideration?
         if top:
+            # Was the bill scheduled for consideration?
             if self.docs_house_gov_postdate: ret.append({ "key": "schedule_house", "label": "On House Schedule", "date": self.docs_house_gov_postdate, "explanation": "The House indicated that this %s would be considered in the week ahead." % self.noun })
             if self.senate_floor_schedule_postdate: ret.append({ "key": "schedule_senate","label": "On Senate Schedule", "date": self.senate_floor_schedule_postdate, "explanation": "The Senate indicated that this %s would be considered in the days ahead." % self.noun })
 
-        # Bring in really-major events on identical bills and past/future reintroductions of this bill.
-        if top:
+            # Bring in text versions. Attach text information to an existing
+            # corresponding status line if we have one, or otherwise add a new one.
+            # Sanity check that the document date matches the date of the event
+            # that we are attaching the text too. Enrolled bills may be printed
+            # on a later date than the vote that caused the action, and since there's
+            # only one enrolled action and one print, necessarily, we can skip
+            # the date check there.
+            for st in get_bill_text_versions(self):
+                m = get_bill_text_metadata(self, st)
+                if m["version_code"] in ("rfs", "rfh", "rts", "rth"): continue # never interesting
+                for event in ret:
+                    if event["key"] in set(st.key for st in m["corresponding_status_codes"]) \
+                        and (m['issued_on'] == (event["date"].date() if isinstance(event["date"], datetime.datetime) else event["date"])
+                                or m["version_code"] == "enr"):
+                        event["text_version"] = m['version_code']
+                        break
+                else:
+                    # Add a new entry.
+                    ret.append({
+                        "key": "text_version",
+                        "label": "Text Published",
+                        "explanation": "Updated bill text was published as of " + m["status_name"] + ".",
+                        "date": m['issued_on'],
+                        "text_version": m['version_code'],
+                        "end_of_day": True,
+                    })
+
+            # Bring in really-major events on identical bills and past/future reintroductions of this bill.
             got_rb = set()
             for relation_name, relation_types in (
               ("Companion Bill", ("identical",)),
@@ -849,10 +875,19 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                     ret.append(e)
 
         # Sort the entries by date. Stable sort for time-less dates.
-        def as_dt(x):
+        # Put time-less dates before timed dates, except bill text.
+        def as_dt(x, end_of_day=False):
             if isinstance(x, datetime.datetime): return x
-            return datetime.datetime.combine(x, datetime.time.min)
-        ret.sort(key = lambda x : as_dt(x["date"]))
+            return datetime.datetime.combine(x, datetime.time.min if not end_of_day else datetime.time.max)
+        ret.sort(key = lambda x : as_dt(x["date"], x.get("end_of_day", False)))
+
+        # Create text comparison links.
+        prev_text = None
+        for event in ret:
+            if event.get("text_version"):
+                if prev_text:
+                    event["text_version_compare_to"] = prev_text
+                prev_text = event["text_version"]
 
         # Don't add future events when we're looking at related bills to the bill we really care about.
         if self.is_alive and top and not self.enacted_ex():
