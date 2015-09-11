@@ -6,7 +6,29 @@
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
+	<style>
+	#map_controls {
+		list-style-type: none;
+	}
+	#map_controls > li {
+		float: left;
+		background-color: white;
+		border: 2px solid #777;
+		cursor: pointer;
+		text-align: center;
+		margin: 3px 6px 0 0;
+		padding: 2px 4px 2px 4px;
+	}
+	#map_controls > li.active {
+		background-color: #FFA;
+	}
+	#map_canvas { height: 100%; }
+	#map_canvas * {  max-width: none !important; -webkit-box-sizing: content-box;
+     -moz-box-sizing: content-box;
+          box-sizing: content-box; } /* fix for bootstrap 3 */
+	</style>
+{% endblock %}
+{% block body_scripts %}
 	<script type="text/javascript" src="https://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
 	<script type="text/javascript" src="https://gis.govtrack.us/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
@@ -15,7 +37,7 @@
 		
 		var map;
 		
-		$(function() {
+		on_google_maps_loaded.push(function() {
 			map = map_controller();
 			map.init(
 				document.getElementById("map_canvas"),
@@ -141,27 +163,6 @@
 			return false;
 		}
 	</script>
-	<style>
-	#map_controls {
-		list-style-type: none;
-	}
-	#map_controls > li {
-		float: left;
-		background-color: white;
-		border: 2px solid #777;
-		cursor: pointer;
-		text-align: center;
-		margin: 3px 6px 0 0;
-		padding: 2px 4px 2px 4px;
-	}
-	#map_controls > li.active {
-		background-color: #FFA;
-	}
-	#map_canvas { height: 100%; }
-	#map_canvas * {  max-width: none !important; -webkit-box-sizing: content-box;
-     -moz-box-sizing: content-box;
-          box-sizing: content-box; } /* fix for bootstrap 3 */
-	</style>
 {% endblock %}
 
 {% block Xcrumbs %}

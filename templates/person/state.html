@@ -5,12 +5,36 @@
 {% block meta_keywords %}United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style>
+	h5 { margin-bottom: 0px; }
+	.members-grid .info { margin-top: 8px; font-size: 85%; }
+
+	#map_controls > li {
+		float: left;
+		background-color: white;
+		border: 2px solid #777;
+		cursor: pointer;
+		text-align: center;
+		margin: 3px 6px 0 0;
+		padding: 2px 4px 2px 4px;
+	}
+	#map_controls > li.active {
+		background-color: #FFA;
+	}
+	#map_canvas { border: 1px solid black; }
+	#map_canvas * {  max-width: none !important; -webkit-box-sizing: content-box;
+     -moz-box-sizing: content-box;
+          box-sizing: content-box; } /* fix for bootstrap 3 */
+	</style>
+{% endblock %}
+
+{% block body_scripts %}
 	<script type="text/javascript" src="https://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
 	<script type="text/javascript" src="https://gis.govtrack.us/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
 		var map;
 
-		$(function() {
+		on_google_maps_loaded.push(function() {
 			map = map_controller();
 			map.init(
 				document.getElementById("map_canvas"),
@@ -89,27 +113,6 @@
 		$(window).resize(canvas_resize);
 		$(canvas_resize);
 	</script>
-	<style>
-	h5 { margin-bottom: 0px; }
-	.members-grid .info { margin-top: 8px; font-size: 85%; }
-
-	#map_controls > li {
-		float: left;
-		background-color: white;
-		border: 2px solid #777;
-		cursor: pointer;
-		text-align: center;
-		margin: 3px 6px 0 0;
-		padding: 2px 4px 2px 4px;
-	}
-	#map_controls > li.active {
-		background-color: #FFA;
-	}
-	#map_canvas { border: 1px solid black; }
-	#map_canvas * {  max-width: none !important; -webkit-box-sizing: content-box;
-     -moz-box-sizing: content-box;
-          box-sizing: content-box; } /* fix for bootstrap 3 */
-	</style>
 {% endblock %}
 
 {% block crumbs %}

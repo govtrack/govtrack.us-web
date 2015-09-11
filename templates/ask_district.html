@@ -94,6 +94,11 @@ $('#askcdState').change(function() {
 	}
 });
 
+var on_google_maps_loaded = [];
+function google_maps_api_loaded() {
+	on_google_maps_loaded.forEach(function(item) { item(); });
+}
+
 // user says OK here's my state or state & address
 function askcd_submit(is_cancel) {
   if (!is_cancel) {
@@ -281,7 +286,7 @@ function show_if_then_fund(flags) {
 }
 </script>
 
-<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDT0FVIPcP0mEE-v2V0A9mZOU69WkqGlyU&callback=google_maps_api_loaded"> </script>
 <!-- / ask for district -->
 
 <div id="followus_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="followusModalTitle" aria-hidden="true">

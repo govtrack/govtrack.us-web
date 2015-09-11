@@ -11,8 +11,6 @@
 {% block head %}
 	<meta property="og:title" content="{{position.text}} - {{issue.question}}" />
 	<meta property="og:url" content="https://www.govtrack.us{{issue.get_absolute_url}}/{{position.id}}" />
-
-	<script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false"></script>
 {% endblock %}
 
 {% block body_scripts %}
