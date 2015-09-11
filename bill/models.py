@@ -794,7 +794,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
             vote_text = None
             vote_obj = None
-            if srcnode and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "pingpong", "conference"):
+            if srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "pingpong", "conference"):
                 if srcnode.get("how") == "roll":
                     try:
                         from vote.models import Vote, CongressChamber, VoteSource
