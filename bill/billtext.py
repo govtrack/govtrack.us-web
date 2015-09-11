@@ -52,6 +52,7 @@ bill_gpo_status_codes = {
     "pch": "Placed on Calendar in the House",
     "pcs": "Placed on Calendar in the Senate",
     "pp": "Public Print",
+    "pap": "Printed as Passed",
     "rah": "Referred to House Committee (w/ Amendments)",
     "ras": "Referred to Senate Committee (w/ Amendments)",
     "rch": "Reference Change",
