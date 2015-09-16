@@ -3,6 +3,11 @@
 
 {% block head %}
 <style>
+  h1 {
+  	margin-top: 1em;
+  	font-size: 32px;
+  	border: none;
+  }
   h2 {
     font-size: 1.75em;
     color: #40A4BD;
@@ -17,8 +22,8 @@
   }
 
 #events_list {
-  padding-left: 2em;
-  border-left: none;
+  padding: 1em 2em;
+  border: 1px solid #666;
 }
 
 </style>
@@ -71,10 +76,10 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-<h1 style="font-size: 32px">{{feed.title}}</h1>
+<h1>{{feed.title}}</h1>
 
 <div>
-	<div id="edit_list" class="col-sm-4 fat " style="line-height: 125%">
+	<div id="edit_list" class="col-sm-4" style="line-height: 125%">
 		<div id="set_freq" class="control">
 			<p class="description">{{feed.description}}</p>
 

@@ -1334,6 +1334,7 @@ aside .download-links { padding: 31px 0 0 }
 			}
 			.tracked_event h4 {
 				clear: both;
+				margin-top: 0;
 				margin-bottom: .5em;
 			}
 			.event_body h5 {
