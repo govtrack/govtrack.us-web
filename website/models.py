@@ -182,5 +182,105 @@ class PayPalPayment(models.Model):
         rec.save()
         
         return (payment, rec)
-    
 
+class MediumPost(models.Model):
+    medium_id = models.CharField(max_length=32, unique=True)
+    title = models.CharField(max_length=128)
+    collection_slug = models.CharField(max_length=128)
+    post_slug = models.CharField(max_length=128)
+
+    data = JSONField(default={})
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    published = models.DateTimeField(db_index=True)
+
+    def get_absolute_url(self):
+        return "/medium-post-redirector/" + str(self.id)
+
+    @property
+    def url(self):
+        return "https://medium.com/" + self.collection_slug + "/" + self.post_slug
+
+    @staticmethod
+    def get_medium_posts():
+        import urllib, json
+        # Fetch posts.
+        medium_posts = urllib.urlopen("https://medium.com/govtrack-insider?format=json").read()
+        # there's some crap before the JSON object starts
+        medium_posts = medium_posts[medium_posts.index("{"):]
+        medium_posts = json.loads(medium_posts)
+        def format_post(postid):
+            post = medium_posts['payload']['references']['Post'][postid]
+            collection = medium_posts['payload']['references']['Collection'][post['homeCollectionId']]
+            post["homeCollection"] = collection
+            return post
+        return [ format_post(postid) for postid in medium_posts['payload']['value']['sections'][1]['postListMetadata']['postIds'] ]
+
+    @staticmethod
+    def sync():
+        # Sync posts with our model instances.
+        for post in MediumPost.get_medium_posts():
+            MediumPost.syncitem(post)
+
+    @staticmethod
+    def syncitem(post):
+        from datetime import datetime
+
+        try:
+            obj = MediumPost.objects.get(medium_id=post['id'])
+        except MediumPost.DoesNotExist:
+            # get_or_create fails b/c we have to supply required fields
+            obj = MediumPost(medium_id=post['id'])
+
+        obj.title = post['title']
+        obj.collection_slug = post["homeCollection"]['slug']
+        obj.post_slug = post['uniqueSlug']
+        obj.data = post
+        obj.published = datetime.fromtimestamp(post['firstPublishedAt']/1000)
+        obj.save()
+
+        obj.create_events()
+
+    @property
+    def publish_date_display(self):
+        return self.data['virtuals']['firstPublishedAtEnglish']
+
+    @property
+    def snippet(self):
+        return self.data['virtuals']['snippet']
+
+    @property
+    def image(self):
+        if self.data['virtuals'].get('previewImage'):
+            return self.data['virtuals']['previewImage']['imageId']
+        return None
+
+    def create_events(self):
+        from events.models import Feed, Event
+        with Event.update(self) as E:
+            feeds = [Feed.from_name("misc:govtrackinsider")]
+            E.add("post", self.published, feeds)
+
+    def render_event(self, eventid, feeds):
+        return {
+            "type": "GovTrack Insider",
+            "date": self.published,
+            "date_has_no_time": False,
+            "title": self.title,
+            "url": self.get_absolute_url(),
+            "body_text_template": """{{snippet|safe}}""",
+            "body_html_template": """{{snippet}}""",
+            "context": {
+                "snippet": self.snippet,
+                }
+            }
+
+Feed.register_feed(
+    "misc:govtrackinsider",
+    title = "GovTrack Insider Articles",
+    simple = True,
+    slug = "govtrack-insider",
+    intro_html = """<p>This feed includes posts on <a href="https://medium.com/govtrack-insider">GovTrack Insider</a>.</p>""",
+    description = "Get an update whenever we post a new article on GovTrack Insider.",
+    )

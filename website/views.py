@@ -16,7 +16,7 @@ from cache_utils.decorators import cached
 from twostream.decorators import anonymous_view
 from registration.helpers import json_response
 
-from website.models import UserProfile
+from website.models import UserProfile, MediumPost
 from events.models import Feed
 import us
 
@@ -578,3 +578,8 @@ def dumprequest(request):
 def account_one_click_unsubscribe(request, key):
     ok = UserProfile.one_click_unsubscribe(key)
     return { "ok": ok }
+
+@anonymous_view
+def medium_post_redirector(request, id):
+    post = get_object_or_404(MediumPost, id=id)
+    return HttpResponseRedirect(post.url)

@@ -20,14 +20,14 @@
 						{% endif %}
 						</td>
 						<td style="padding-bottom: .33em">
-						<a href="{{post.url}}">{{post.title}}</a> <span class="text-muted">&ndash; {{post.date}}</span>
-						<br>{{post.preview}}
+						<a href="{{post.url}}">{{post.title}}</a> <span class="text-muted">&ndash; {{post.published|date}}</span>
+						<br>{{post.snippet}}
 						</td>
 					</tr>
 				{% endfor %}
 				</table>
 				<p style="margin: .5em 0 0 0; text-align: center">
-					<a href="https://medium.com/govtrack-insider">More...</a>
+					<a href="/events/govtrack-insider">Subscribe...</a>
 				</p>
 		    </div>
 		    {% endif %}

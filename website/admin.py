@@ -8,5 +8,9 @@ class UserProfileAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'user__email']
     readonly_fields = ['user']
 
+class MediumPostAdmin(admin.ModelAdmin):
+	list_display = ['published', 'title', 'url']
+
 admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(MediumPost, MediumPostAdmin)
 
