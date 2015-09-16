@@ -270,7 +270,7 @@ class MediumPost(models.Model):
             "title": self.title,
             "url": self.get_absolute_url(),
             "body_text_template": """{{snippet|safe}}""",
-            "body_html_template": """{{snippet}}""",
+            "body_html_template": """<p>{{snippet}}</p>""",
             "context": {
                 "snippet": self.snippet,
                 }
