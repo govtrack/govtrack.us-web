@@ -101,7 +101,7 @@
 			canvas_resize();
 		}
 		function canvas_resize() {
-			if (!is_full_screen) return;
+			if (!is_full_screen || !map) return;
 			$('#map_canvas').css({
 				left: $(window).scrollLeft(),
 				top: $(window).scrollTop(),

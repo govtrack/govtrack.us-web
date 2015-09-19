@@ -97,6 +97,9 @@ $('#askcdState').change(function() {
 var on_google_maps_loaded = [];
 function google_maps_api_loaded() {
 	on_google_maps_loaded.forEach(function(item) { item(); });
+    on_google_maps_loaded = {
+        push: function(f) { f(); }
+    };
 }
 
 // user says OK here's my state or state & address

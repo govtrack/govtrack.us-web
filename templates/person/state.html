@@ -42,7 +42,7 @@
 				null,
 				{
 					zoom: {{center_zoom}},
-					center: new google.maps.LatLng({{center_lat}}, {{center_long}}),
+					center: new google.maps.LatLng({{center_lat}}, {{center_long}})
 				}
 				);
 
@@ -76,8 +76,6 @@
 					if (div.is(":visible")) lbl.html("Loading...");
 				});
 
-		});
-		
 		var is_full_screen = false;
 		function doFullScreen() {
 			if (is_full_screen) {
@@ -112,6 +110,8 @@
 		$(window).scroll(canvas_resize);
 		$(window).resize(canvas_resize);
 		$(canvas_resize);
+
+		});
 	</script>
 {% endblock %}
 
