@@ -165,6 +165,7 @@ class Person(models.Model):
             role.enddate = role.logical_enddate(round_end=round_end)
             if len(ret) > 0 and role.continues_from(ret[-1]):
                 ret[-1].enddate = role.enddate
+                ret[-1].current |= role.current
             else:
                 ret.append(role)
         ret.reverse()
