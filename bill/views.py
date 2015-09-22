@@ -847,3 +847,10 @@ def bill_text_image(request, congress, type_slug, number, image_type):
     imgbytes = imgbytesbuf.getvalue()
     imgbytesbuf.close()
     return HttpResponse(imgbytes, content_type="image/png")
+
+@anonymous_view
+def bill_get_json(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    return HttpResponseRedirect("/api/v2/bill/%d" % bill.id)
+     
+
