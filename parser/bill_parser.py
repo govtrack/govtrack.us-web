@@ -13,6 +13,7 @@ import re
 import time
 import urllib
 import os.path
+import json
 from datetime import datetime, timedelta
 
 from parser.progress import Progress
@@ -417,45 +418,8 @@ def main(options):
     if options.congress and int(options.congress) != CURRENT_CONGRESS:
         return
         
-    # Parse docs.house.gov for what might be coming up this week.
-    import iso8601
-    dhg_html = urllib.urlopen("http://docs.house.gov/floor/").read()
-    m = re.search(r"class=\"downloadXML\" href=\"(Download.aspx\?file=.*?)\"", dhg_html)
-    if not m:
-        log.error('No docs.house.gov download link found at http://docs.house.gov.')
-    else:
-        def bt_re(bt): return re.escape(bt[1]).replace(r"\.", r"\.?\s*")
-        try:
-            dhg = etree.parse(urllib.urlopen("http://docs.house.gov/floor/" + m.group(1))).getroot()
-        except:
-            print "http://docs.house.gov/floor/" + m.group(1)
-            raise
-        # iso8601.parse_date(dhg.get("week-date")+"T00:00:00").date()
-        for item in dhg.xpath("category/floor-items/floor-item"):
-            billname = item.xpath("legis-num")[0].text
-            if billname is None: continue # weird but OK
-            m = re.match(r"\s*(?:Concur in the Senate Amendment to |Senate Amendment to )?("
-                + "|".join(bt_re(bt) for bt in BillType)
-                + r")(\d+)\s*(\[Conference Report\]\s*)?$", billname, re.I)
-            if not m:
-                if not billname.strip().endswith(" __"):
-                    log.error('Could not parse legis-num "%s" in docs.house.gov.' % billname)
-            else:
-                for bt in BillType:
-                    if re.match(bt_re(bt) + "$", m.group(1), re.I):
-                        try:
-                            bill = Bill.objects.get(congress=CURRENT_CONGRESS, bill_type=bt[0], number=m.group(2))
-                            bill.docs_house_gov_postdate = iso8601.parse_date(item.get("add-date")).replace(tzinfo=None)
-                            bill.save()
-                            if bill_index:
-                                bill.update_index(bill_index)
-                            if not options.disable_events:
-                                bill.create_events()
-                        except Bill.DoesNotExist:
-                            log.error('Could not find bill "%s" in docs.house.gov.' % billname)
-                        break
-                else:
-                    log.error('Could not parse legis-num bill type "%s" in docs.house.gov.' % m.group(1))
+    # Load docs.house.gov data for what might be coming up this week.
+    load_docs_house_gov(options, bill_index)
 
     # Parse Senate.gov's "Floor Schedule" blurb for coming up tomorrow.
     now = datetime.now()
@@ -475,6 +439,28 @@ def main(options):
     except Exception as e:
         log.error('Could not parse Senate Floor Schedule: ' + repr(e))
 
+
+def load_docs_house_gov(options, bill_index):
+    # Get most recent JSON file by looking at the lexicographically last one.
+    fn = sorted(os.listdir("data/congress/upcoming_house_floor"))[-1]
+    data = json.load(open("data/congress/upcoming_house_floor/" + fn))
+    for billinfo in data.get("upcoming", []):
+        m = re.match(r"([hrsjconres]+)(\d+)-(\d+)", billinfo["bill_id"])
+        if not m:
+            log.error('Could not parse bill_id "%s" in docs.house.gov.' % billinfo["bill_id"])
+            continue
+
+        bt = BillType.by_slug(m.group(1))
+        try:
+            bill = Bill.objects.get(congress=int(m.group(3)), bill_type=bt, number=int(m.group(2)))
+        except Exception as e:
+            log.error('Could not get bill "%s" in docs.house.gov: %s.' % (billinfo["bill_id"], str(e)))
+            continue
+
+        bill.docs_house_gov_postdate = BillProcessor.parse_datetime(billinfo["published_at"])
+        bill.save()
+        if bill_index: bill.update_index(bill_index)
+        if not options.disable_events: bill.create_events()
 
 if __name__ == '__main__':
     main()

@@ -146,6 +146,9 @@ if "bills" in sys.argv:
 	
 	# Generate summary files.
 	os.system("cd /home/govtrack/scripts/gather; perl parse_status.pl SUMMARIES %d" % CONGRESS)
+
+	# Scrape upcoming House bills.
+	os.system("cd %s; . .env/bin/activate; ./run upcoming_house_floor --log=%s" % (SCRAPER_PATH, log_level))
 		
 	# TODO: Even if we didn't get any new files, the bills parser also
 	# scrapes docs.house.gov and the Senate floor schedule, so we should
