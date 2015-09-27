@@ -278,15 +278,15 @@ def main(options):
                     voter.vote = vote
                     voter.created = vote.created
                         
-                    # for VP votes, load the actual person...
+                    # for VP votes, load the actual person & role...
                     if voter.voter_type == VoterType.vice_president:
                         try:
                             r = PersonRole.objects.get(role_type=RoleType.vicepresident, startdate__lte=vote.created, enddate__gte=vote.created)
                             voter.person_role = r
                             voter.person = r.person
-                        except:
+                        except PersonRole.DoesNotExist:
                             # overlapping roles? missing data?
-                            log.error('Could not resolve vice president in %s' % fname, exc_info=ex)
+                            log.error('Could not resolve vice president in %s' % fname)
                         
                     if existing_vote and voter.person:
                         try:
@@ -303,7 +303,8 @@ def main(options):
                 # pre-fetch the role of each voter
                 load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
                 for voter in list(voters):
-                    voter.person_role = voter.person.role
+                    if voter.voter_type != VoterType.vice_president:
+                        voter.person_role = voter.person.role
                     # If we couldn't match a role for this person on the date of the vote, and if the voter was Not Voting,
                     # and we're looking at historical data, then this is probably a data error --- the voter wasn't even in office.
                     if voter.person_role is None:
