@@ -217,9 +217,10 @@ def main(options):
             existing_roles = set(PersonRole.objects.filter(person=person).values_list('pk', flat=True))
             processed_roles = set()
             role_list = []
-            for role in node['terms']:
-                role = role_processor.process(PersonRole(), role)
+            for termnode in node['terms']:
+                role = role_processor.process(PersonRole(), termnode)
                 role.person = person
+                role.extra = filter_yaml_term_structure(termnode) # copy in the whole YAML structure
                 
                 now = datetime.now().date()
                 if now < get_congress_dates(CURRENT_CONGRESS)[0]:
@@ -331,6 +332,13 @@ def main(options):
             f = BASE_PATH + p + ".yaml"
             File.objects.save_file(f)
 
+def filter_yaml_term_structure(node):
+    ret = { }
+    for k, v in node.items():
+        if k in PersonRoleProcessor.ATTRIBUTES: continue # no need to store things we've saved in schema'd fields
+        ret[k] = v
+    if len(ret) == 0: return None # simplify storage
+    return ret
 
 if __name__ == '__main__':
     main()

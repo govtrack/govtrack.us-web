@@ -6,6 +6,7 @@ from django.core.cache import cache
 
 import datetime, json, os.path
 from dateutil.relativedelta import relativedelta
+from jsonfield import JSONField
 
 from common import enum
 from person.types import Gender, RoleType, SenatorClass, SenatorRank, State
@@ -347,6 +348,7 @@ class PersonRole(models.Model):
     website = models.CharField(max_length=255, blank=True, help_text="The URL to the official website of the person during this role, if known.")
     phone = models.CharField(max_length=64, blank=True, null=True, help_text="The last known phone number of the DC congressional office during this role, if known.")
     leadership_title = models.CharField(max_length=255, blank=True, null=True, help_text="The last known leadership role held during this role, if any.")
+    extra = JSONField(blank=True, null=True, help_text="Additional schema-less information stored with this object.")
 
     # API
     api_recurse_on = ('person',)
