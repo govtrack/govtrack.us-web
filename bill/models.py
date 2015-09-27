@@ -87,6 +87,16 @@ class BillTerm(models.Model):
            #except BillTerm.DoesNotExist:
            #    raise ValueError(feed.feedname)
 
+    @staticmethod
+    def get_top_term_ids():
+        from django.core.cache import cache
+        key = "BillTerm.get_top_terms"
+        ret = cache.get(key)
+        if ret is not None: return ret
+        ret = set([t.id for t in BillTerm.objects.filter(term_type=TermType.new) if t.is_top_term()])
+        cache.set(key, ret, 60*60*24*7) # one week, cause this never changes
+        return ret
+
 class Cosponsor(models.Model):
     """A (bill, person) pair indicating cosponsorship, with join and withdrawn dates."""
 

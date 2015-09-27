@@ -178,7 +178,7 @@
 	{% if analysis_data.sponsorship %}
 	<section id="sponsorship_analysis">
 		<h2><span>Sponsorship Analysis</span></h2>
-        
+
 		<p>Our unique analysis of the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored provides insight into {{ person.his_her }}
 		position in the {{analysis_data.sponsorship.chamber}}.</p>
 
@@ -318,6 +318,19 @@
 {% if recent_bills %}
 	<section id="sponsorship">
 		<h2><span>Bills Sponsored</span></h2>
+
+		{% if bill_subject_areas|length > 0 %}
+			<h3>Issue Areas</h3>
+			<p>{{person.lastname}} sponsor{% if active_congressional_role %}s{% else %}ed{% endif %} bills primarily in these issue areas:</p>
+			<p style="margin-left: 1em; line-height: 155%">
+			{% for item in bill_subject_areas %}
+				<span style="margin-right: 2em; display: inline-block;"><a href="/congress/bills/browse?sponsor={{person.id}}&subject={{item.term.id}}">{{item.term.name}}</a> ({{item.pct}}%)</span>
+			{% endfor %}
+			</p>
+
+			<h3>Recent Bills</h3>
+		{% endif %}
+
 		<p>Some of {{person.lastname}}’s most recently sponsored bills include...</p>
 		<ul style="list-style: none; padding: 0;">
 			{% for bill in recent_bills %}

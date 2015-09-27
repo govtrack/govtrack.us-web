@@ -81,6 +81,25 @@ def person_details(request, pk):
         if person.pvsid: links.append(("VoteSmart", "http://votesmart.org/candidate/" + person.pvsid, "fa fa-th-list"))
         if person.bioguideid: links.append(("Bioguide", "http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + person.bioguideid, "fa fa-user"))
         if person.cspanid: links.append(("C-SPAN", "http://www.c-spanvideo.org/person/" + str(person.cspanid), "fa fa-youtube-play"))
+
+        # Get a break down of the top terms this person's sponsored bills fall into,
+        # looking only at the most recent five years of bills.
+        from bill.models import BillTerm
+        from datetime import datetime, timedelta
+        most_recent_bill = person.sponsored_bills.order_by("-introduced_date").first()
+        bills_by_subject_counts = person.sponsored_bills.filter(
+            terms__id__in=BillTerm.get_top_term_ids(),
+            introduced_date__gt=(most_recent_bill.introduced_date if most_recent_bill else datetime.now())-timedelta(days=5*365.25))\
+            .values("terms")\
+            .annotate(count=Count('id')).order_by('-count')\
+            .filter(count__gt=1)\
+            [0:8]
+        terms = BillTerm.objects.in_bulk(item["terms"] for item in bills_by_subject_counts)
+        total_count = sum(item["count"] for item in bills_by_subject_counts)
+        for item in bills_by_subject_counts:
+            item["term"] = terms[item["terms"]]
+            item["pct"] = int(round(float(item["count"]) / total_count * 100))
+            del item["terms"]
     
         return {'person': person,
                 'role': role,
@@ -95,6 +114,7 @@ def person_details(request, pk):
                 'feed': person.get_feed(),
                 'cities': get_district_cities("%s-%02d" % (role.state.lower(), role.district)) if role and role.district else None,
                 'has_session_stats': has_session_stats,
+                'bill_subject_areas': bills_by_subject_counts,
                 }
 
     #ck = "person_details_%s" % pk
