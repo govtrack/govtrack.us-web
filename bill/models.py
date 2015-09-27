@@ -114,7 +114,8 @@ class Cosponsor(models.Model):
     def person_name(self):
         # don't need title because it's implicit from the bill type
         from person.name import get_person_name
-        return get_person_name(self.person, role_date=self.joined, firstname_position="after", show_title=False)
+        self.person.role = self.role
+        return get_person_name(self.person, firstname_position="after", show_title=False)
 
     def details(self):
         ret = []

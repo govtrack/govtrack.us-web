@@ -4,13 +4,8 @@ from person.models import RoleType
 
 def get_person_name(person,
 				firstname_position=None, show_suffix=False, firstname_style=None,
-				role_date=None, role_congress=None, role_recent=None, role_year=None,
+				role_recent=None,
                 show_title=True, show_party=True, show_district=True, show_type=False):
-    """
-    Args:
-        role_date - the date from which the person role should be extracted
-        role_congress - the congress number from which the person role should be extracted
-    """
 
     firstname = person.firstname
 
@@ -36,13 +31,6 @@ def get_person_name(person,
     
     if hasattr(person, "role"):
         role = person.role # use this when it is set
-        role_recent = False
-    if role_congress:
-        role = person.get_last_role_at_congress(role_congress)
-    elif role_date:
-        role = person.get_role_at_date(role_date)
-    elif role_year:
-    	role = person.get_role_at_year(role_year)
     elif role_recent:
     	role = person.get_most_recent_role()
     else:

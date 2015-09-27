@@ -153,8 +153,9 @@ def bill_widget(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
 
     from person.name import get_person_name
+    if bill.sponsor: bill.sponsor.role = bill.sponsor_role # for rending name
     sponsor_name = None if not bill.sponsor else \
-        get_person_name(bill.sponsor, role_date=bill.introduced_date, firstname_position='before', show_suffix=True)
+        get_person_name(bill.sponsor, firstname_position='before', show_suffix=True)
 
     def get_text_info():
         from billtext import load_bill_text
