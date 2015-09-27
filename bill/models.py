@@ -882,9 +882,12 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         e["bill"] = rb.related_bill
                         ret.append(e)
             for b in self.find_reintroductions():
-                for e in b.get_major_events(top=False):
-                    e["relation"] = "Earlier Version" if b.congress < self.congress else "Reintroduced As"
+                be = b.get_major_events(top=False)
+                if len(be) > 0:
+                    e = be[-1] # just take the most recent major event
+                    e["relation"] = "Earlier Version" if b.congress < self.congress else "Reintroduced Bill"
                     e["bill"] = b
+                    e["different_congress"] = True
                     ret.append(e)
 
         # Sort the entries by date. Stable sort for time-less dates.
@@ -894,13 +897,21 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             return datetime.datetime.combine(x, datetime.time.min if not end_of_day else datetime.time.max)
         ret.sort(key = lambda x : as_dt(x["date"], x.get("end_of_day", False)))
 
-        # Create text comparison links.
-        prev_text = None
-        for event in ret:
-            if event.get("text_version"):
-                if prev_text:
-                    event["text_version_compare_to"] = prev_text
-                prev_text = event["text_version"]
+        if top:
+            # Mark the last entry that occurs prior to all events on this bill.
+            for i, event in enumerate(ret):
+                if not event.get("bill"):
+                    if i > 0:
+                        ret[i-1]["last_preceding_activity"] = True
+                    break
+
+            # Create text comparison links.
+            prev_text = None
+            for event in ret:
+                if event.get("text_version"):
+                    if prev_text:
+                        event["text_version_compare_to"] = prev_text
+                    prev_text = event["text_version"]
 
         # Don't add future events when we're looking at related bills to the bill we really care about.
         if self.is_alive and top and not self.enacted_ex():

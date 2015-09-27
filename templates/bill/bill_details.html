@@ -499,8 +499,8 @@ p#yourreps {
 					{% elif summary2 %}
 						<dt>Summary (CRS)</dt>
 						<dd>
-							{{summary2|striptags|truncatewords:30|safe}}
-							<a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a>
+							<p>{{summary2|striptags|truncatewords:30|safe}}
+							<a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
 						</dd>
 					{% endif %}
 					{% endwith %}
@@ -515,8 +515,8 @@ p#yourreps {
 			{% if current or bill.get_major_events|length > 0 %}
 				<table id="status-row-grid">
 				{% for item in bill.get_major_events %}
-					<tr class="status-item {% if not item.date %}pending{% endif %} {% if item.bill %}related-bill{% endif %}">
-						<td class="date {% if forloop.last %}last{% endif %} {% if item.last_occurred or not item.date %}ghosted{% endif %}">
+					<tr class="status-item {% if not item.date or item.different_congress %}pending{% endif %} {% if item.bill %}related-bill{% endif %}">
+						<td class="date {% if forloop.last %}last{% endif %} {% if item.last_occurred or not item.date or item.different_congress %}ghosted{% endif %}">
 							<div class="wrapper">
 								{% if item.date %}<nobr>{{item.date|date:"DATE_FORMAT"}}</nobr>{% endif %}
 							</div>
@@ -532,8 +532,6 @@ p#yourreps {
 							<div class="status-label" title="{{item.actionline}}">
 								{% if item.bill %}
 									{{item.relation}} &mdash;
-									<a href="{{item.bill.get_absolute_url}}">{{item.bill.display_number}}</a>
-									&mdash;
 								{% endif %}
 								{{item.label}}
 							</div>
@@ -549,9 +547,9 @@ p#yourreps {
 									{% if item.text_version_compare_to %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}#compare={{item.text_version_compare_to}}">See Changes &raquo;</a>{% endif %}
 								</p>
 							{% else %}
-								<p>This activity took place on a related bill{% if item.bill.congress == bill.congress %}, possibly in lieu of similar activity on {{bill.display_number}}{% endif %}.</p>
+								<p>This activity took place on a related bill, <a href="{{item.bill.get_absolute_url}}">{{item.bill.display_number}}</a>{% if item.bill.congress == bill.congress and item.relation != "Rules Change" %}, possibly in lieu of similar activity on {{bill.display_number}}{% endif %}.</p>
 							{% endif %}
-
+							{% if item.last_preceding_activity %}<hr style="margin-bottom: 0">{% endif %}
 						</td>
 					</tr>
 				{% endfor %}
