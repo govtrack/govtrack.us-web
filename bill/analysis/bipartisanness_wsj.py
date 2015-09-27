@@ -1,7 +1,6 @@
 #!script
 
 from bill.models import *
-from person.util import load_roles_at_date
 from datetime import date
 
 for congress in [112]: # range(96, 113):
@@ -22,16 +21,15 @@ for congress in [112]: # range(96, 113):
 		persons = []
 		if not bill.sponsor: continue
 		persons.append(bill.sponsor)
-		persons.extend([c.person for c in Cosponsor.objects.filter(bill=bill, joined=bill.introduced_date).select_related("person")])
-		load_roles_at_date(persons, bill.introduced_date)
+		persons.extend([(c.person, c.person_role) for c in Cosponsor.objects.filter(bill=bill, joined=bill.introduced_date).select_related("person", "person_role")])
 		
 		if len(persons) > 1: has_initial_cosponsors += 1
 		
 		# How bipartisan_cosp is this bill?
 		parties = set()
-		for p in persons:
-			if p.role:
-				parties.add(p.role.party)
+		for p, r in persons:
+			if r:
+				parties.add(r.party)
 		if "Democrat" in parties and "Republican" in parties:
 			bipartisan_cosp += 1
 		

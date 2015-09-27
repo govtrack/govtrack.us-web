@@ -16,7 +16,6 @@ from numpy import median
 from vote.models import Vote, CongressChamber, VoterType, VoteCategory, VoteSummary
 from vote.search import vote_search_manager
 from events.models import Feed
-from person.util import load_roles_at_date
 from us import get_all_sessions
 
 from twostream.decorators import anonymous_view, user_view_for
@@ -60,21 +59,7 @@ def load_vote(congress, session, chamber_code, number):
 @render_to('vote/vote_details.html')
 def vote_details(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
-    voters = list(vote.voters.all().select_related('person', 'option'))
-    load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
-    
-    # load the role for the VP, since load_roles_at_date only loads
-    # MoC roles
-    has_vp_vote = False
-    for voter in voters:
-        if voter.voter_type == VoterType.vice_president:
-            from person.types import RoleType
-            has_vp_vote = True
-            try:
-                voter.person.role = voter.person.roles.get(role_type=RoleType.vicepresident, startdate__lte=vote.created, enddate__gte=vote.created)
-            except:
-                raise
-                pass # wahtever
+    voters = vote.get_voters()
     
     # Test if we have a diagram for this vote. The only
     # way to test is to try to make it.
@@ -97,15 +82,15 @@ def vote_details(request, congress, session, chamber_code, number):
                 has_ideology_scores = True
             else:
                 voter.ideolog_score = \
-            	ideology_scores[congress].get("MEDIAN:" + (voter.person.role.party if voter.person and voter.person.role else ""),
+            	ideology_scores[congress].get("MEDIAN:" + (voter.person_role.party if voter.person and voter.person_role else ""),
             		ideology_scores[congress]["MEDIAN"])
         
     # perform an initial sort for display
-    voters.sort(key = lambda x : (x.option.key, x.person.role.party if x.person and x.person.role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
+    voters.sort(key = lambda x : (x.option.key, x.person_role.party if x.person and x.person_role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
 
     # did any Senate leaders switch their vote for a motion to reconsider?
     reconsiderers = vote.possible_reconsideration_votes(voters)
-    reconsiderers_titles = "/".join(v.person.role.leadership_title for v in reconsiderers)
+    reconsiderers_titles = "/".join(v.person_role.leadership_title for v in reconsiderers)
 
     # compute statistical outliers (this marks the Voter instances with an is_outlier attribute)
     get_vote_outliers(voters)
@@ -115,7 +100,7 @@ def vote_details(request, congress, session, chamber_code, number):
             'CongressChamber': CongressChamber,
             "VoterType": VoterType,
             "VoteCategory": VoteCategory._items,
-            'has_vp_vote': has_vp_vote,
+            'has_vp_vote': len([v for v in voters if v.voter_type == VoterType.vice_president]) > 0,
             'has_diagram': has_diagram,
             'has_ideology_scores': has_ideology_scores,
             'reconsiderers': (reconsiderers, reconsiderers_titles),
@@ -179,7 +164,7 @@ def get_vote_outliers(voters):
 	x = [ [] for predictor in predictor_names ]
 	y = [ ]
 	for voter in voters:
-		x[0].append(party_values.get(voter.person.role.party if voter.person and voter.person.role else None, 0)) # independents and unrecognized parties get 0
+		x[0].append(party_values.get(voter.person_role.party if voter.person_role else None, 0)) # independents and unrecognized parties get 0
 		x[1].append(getattr(voter, 'ideolog_score', 0)) # ideology scores may not be available in a Congress, also not available for vice president
 		y.append(vote_values.get(voter.option.key, .5)) # present, not voting, etc => .5
 	x = numpy.array(x)
@@ -202,19 +187,19 @@ def get_vote_outliers(voters):
 @anonymous_view
 def vote_export_csv(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
-    voters = vote.voters.all().select_related('person', 'option')
-    load_roles_at_date([x.person for x in voters if x.person], vote.created)
+    voters = vote.get_voters()
 
     outfile = StringIO()
     writer = csv.writer(outfile)
     for voter in voters:
+        if voter.person: voter.person.role = voter.person_role # for name formatting
         writer.writerow([
             voter.person.pk if voter.person else "--",
-            voter.person.role.state if voter.person and voter.person.role else "--",
-            voter.person.role.district if voter.person and voter.person.role else "--",
+            voter.person_role.state if voter.person and voter.person_role else "--",
+            voter.person_role.district if voter.person and voter.person_role else "--",
             voter.option.value,
             voter.person.name_no_district().encode('utf-8') if voter.person else voter.get_voter_type_display(),
-            voter.person.role.party if voter.person and voter.person.role else "--",])
+            voter.person_role.party if voter.person and voter.person_role else "--",])
     output = outfile.getvalue()
     firstline = '%s Vote #%d %s - %s\n' % (vote.get_chamber_display(), vote.number,
                                          vote.created.isoformat(), vote.question) # strftime doesn't work on dates before 1900
@@ -428,16 +413,15 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 			voter_details = [ ]
 			
 			# Load the voters, getting their role at the time they voted.
-			voters = list(vote.voters.all().select_related('person', 'option'))
-			load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
+			voters = vote.get_voters()
 			
 			# Store ideology scores
 			for voter in voters:
 				if voter.option.key not in ("+", "-"): continue
-				party = party_index.get(voter.person.role.party if voter.person and voter.person.role else "Unknown", 1)
+				party = party_index.get(voter.person_role.party if voter.person and voter.person_role else "Unknown", 1)
 				option = 0 if voter.option.key == "+" else 1
 				coord =  ideology_scores[vote.congress].get(voter.person.id if voter.person else "UNKNOWN",
-					ideology_scores[vote.congress].get("MEDIAN:" + (voter.person.role.party if voter.person and voter.person.role else ""),
+					ideology_scores[vote.congress].get("MEDIAN:" + (voter.person_role.party if voter.person and voter.person_role else ""),
 						ideology_scores[vote.congress]["MEDIAN"]))
 				voter_details.append( (coord, (party, option)) )
 				

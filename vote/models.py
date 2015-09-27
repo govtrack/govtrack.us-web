@@ -8,8 +8,6 @@ from django.conf import settings
 
 from common import enum
 
-from person.util import load_roles_at_date
-
 from us import get_session_ordinal
 
 import markdown2
@@ -132,7 +130,10 @@ class Vote(models.Model):
     @property
     def is_on_passage(self):
         return self.category in (VoteCategory.passage_suspension, VoteCategory.passage)
-        
+ 
+    def get_voters(self):
+        return list(self.voters.all().select_related('person', 'person_role', 'option'))
+       
     def totals(self):
         # If cached value exists then return it
         if hasattr(self, '_cached_totals'):
@@ -141,16 +142,12 @@ class Vote(models.Model):
 
         items = []
 
-        # Extract all voters, find their role at the time
-        # the vote was
-        all_voters = list(self.voters.all().select_related('person', 'option'))
+        # Extract all voters.
+        all_voters = self.get_voters()
         voters_by_option = {}
         for option in self.options.all():
             voters_by_option[option] = [x for x in all_voters if x.option == option]
         total_count = len(all_voters)
-
-        persons = [x.person for x in all_voters if x.person != None]
-        load_roles_at_date(persons, self.created)
 
         # Find all parties which participated in vote
         # and sort them in order which they should be displayed
@@ -159,12 +156,12 @@ class Vote(models.Model):
             """
             Sort the parties by the number of voters in that party.
             """
-            return -len([p for p in all_voters if p.person and p.person.role and p.person.role.party == x])
+            return -len([v for v in all_voters if v.person and v.person_role and v.person_role.party == x])
         
         def get_party(voter):
             if voter.voter_type != VoterType.vice_president:
-                if voter.person and voter.person.role:
-                    return voter.person.role.party
+                if voter.person and voter.person_role:
+                    return voter.person_role.party
                 else:
                     return "Unknown"
             else:
@@ -225,15 +222,10 @@ class Vote(models.Model):
         return self.result + " " + str(self.total_plus) + "/" + str(self.total_minus)
         
     def simple_record(self):
-        # load people and their roles
-        all_voters = list(self.voters.all().select_related('person', 'option'))
-        persons = [x.person for x in all_voters if x.person != None]
-        load_roles_at_date(persons, self.created)
-
         return [
-            { "vote": v.option.value, "moc": v.person.role.simple_record() }
-            for v in all_voters
-            if v.voter_type_is_member and v.person is not None and v.person.role is not None
+            { "vote": v.option.value, "moc": v.person_role.simple_record() }
+            for v in self.get_voters()
+            if v.voter_type_is_member and v.person is not None and v.person_role is not None
         ]
 
     @staticmethod
@@ -306,13 +298,12 @@ class Vote(models.Model):
 
         # Get vote totals by party.
         if voters == None:
-            voters = list(self.voters.all().select_related('person', 'option'))
-            load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
+            voters = self.get_voters()
         by_party = { }
         for voter in voters:
-            if not voter.person or not voter.person.role: continue
+            if not voter.person or not voter.person_role: continue
             if voter.option.key not in ("+", "-"): continue
-            by_party.setdefault(voter.person.role.party, {}).setdefault(voter.option_id, set()).add(voter)
+            by_party.setdefault(voter.person_role.party, {}).setdefault(voter.option_id, set()).add(voter)
 
         # Find the plurality option by party.
         for party in by_party:
@@ -321,8 +312,8 @@ class Vote(models.Model):
         # See if any party leaders voted against their party.
         candidates = []
         for voter in voters:
-            if voter.person and voter.person.role and voter.person.role.leadership_title:
-                if voter.option.key in ("+", "-") and voter.option_id != by_party[voter.person.role.party]:
+            if voter.person and voter.person_role and voter.person_role.leadership_title:
+                if voter.option.key in ("+", "-") and voter.option_id != by_party[voter.person_role.party]:
                     candidates.append(voter)
         return candidates
 
