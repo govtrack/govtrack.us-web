@@ -443,6 +443,13 @@ class PersonRole(models.Model):
         if self.leadership_title == "Speaker": return "Speaker of the House"
         return RoleType.by_value(self.role_type).congress_chamber + " " + self.leadership_title
 
+    def get_party_on_date(self, when):
+        if self.extra and "party_affiliations" in self.extra:
+            for pa in self.extra["party_affiliations"]:
+                if pa['start'] <= when.date().isoformat() <= pa['end']:
+                    return pa['party']
+        return self.party
+
     def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()
         from events.models import Feed, Event

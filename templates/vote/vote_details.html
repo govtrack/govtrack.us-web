@@ -442,7 +442,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     <a href="#" onclick="return show_notes(this)" data-id="motiontoreconsider">*{{reconsiderers.1}}&rsquo;s Vote</a>
     <div id="notes_motiontoreconsider" class="popup-content">
         {% for v in reconsiderers.0 %}
-            <p>{{v.person_role.get_title_abbreviated}} {{v.person.name_no_details}} ({{v.person_role.party.0}}), the {{v.person_role.leadership_title}}, voted {{v.option.value}} against {{v.person.his_her}} party.</p>
+            <p>{{v.person_role.get_title_abbreviated}} {{v.person.name_no_details}} ({{v.party.0}}), the {{v.person_role.leadership_title}}, voted {{v.option.value}} against {{v.person.his_her}} party.</p>
         {% endfor %}
         <p>Somtimes a party leader will vote on the winning side, even if it is against his or her position, to have the right to call for a new vote under a <a href="https://www.senate.gov/reference/glossary_term/reconsider.htm">motion to reconsider</a>. For more, see <a href="http://www.washingtonpost.com/blogs/wonkblog/wp/2013/02/17/why-is-harry-reid-always-voting-against-his-own-plans/">this explanation</a> from The Washington Post.</p>
         <p>We do not know the rationale behind any vote, however.</p>
@@ -491,7 +491,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
             {% for voter in voters %}
             <tr vid="{{voter.id}}"
             	voter_group_0="{{ voter.option.value }}"
-            	voter_group_1="{% if voter.voter_type != 1 %}{{ voter.person_role.party }}{% endif %}"
+            	voter_group_1="{% if voter.voter_type != 1 %}{{ voter.party }}{% endif %}"
             	voter_group_3="{% if voter.voter_type_is_member %}{{ voter.person_role.state_name }}{% elif voter.voter_type == 2 %}The Vice President{% endif %}"
                 voter_sort_3="{% if voter.voter_type_is_member %}{{ voter.person_role.state_name }} {{ voter.person_role.district|rjust:3 }}{% elif voter.voter_type == 2 %}00{% endif %}"
                 class="{% if voter.is_outlier %}voter_outlier{% endif %}"
@@ -499,14 +499,14 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                 <td class="vote_{{ voter.option.alpha_key }}"><nobr>{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</nobr></td>
                 <td>
                     {% if voter.voter_type != 1 %}
-                        {% if voter.person_role.party|slice:"0:1" in "DIR" %}
-                            <span class="party_{{voter.person_role.party|slice:"0:1"}}" title="{{ voter.person_role.party }}">
+                        {% if voter.party|slice:"0:1" in "DIR" %}
+                            <span class="party_{{voter.party|slice:"0:1"}}" title="{{ voter.party }}">
                                 &nbsp;
-                                {{voter.person_role.party|slice:"0:1"}}
+                                {{voter.party|slice:"0:1"}}
                                 &nbsp;
                             </span>
                         {% else %}
-                            {{ voter.person_role.party }}
+                            {{ voter.party }}
                         {% endif %}
                     {% endif %}
                 </td>

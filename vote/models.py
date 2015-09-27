@@ -132,7 +132,19 @@ class Vote(models.Model):
         return self.category in (VoteCategory.passage_suspension, VoteCategory.passage)
  
     def get_voters(self):
-        return list(self.voters.all().select_related('person', 'person_role', 'option'))
+        # Fetch from database.
+        ret = list(self.voters.all().select_related('person', 'person_role', 'option'))
+
+        # Add the exact party of the person at this time.
+        for voter in ret:
+            if voter.voter_type == VoterType.vice_president:
+                voter.party = "Vice President"
+            elif not voter.person or not voter.person_role:
+                voter.party = "Unknown"
+            else:
+                voter.party = voter.person_role.get_party_on_date(self.created)
+
+        return ret
        
     def totals(self):
         # If cached value exists then return it
@@ -156,18 +168,9 @@ class Vote(models.Model):
             """
             Sort the parties by the number of voters in that party.
             """
-            return -len([v for v in all_voters if v.person and v.person_role and v.person_role.party == x])
+            return -len([v for v in all_voters if v.party == x])
         
-        def get_party(voter):
-            if voter.voter_type != VoterType.vice_president:
-                if voter.person and voter.person_role:
-                    return voter.person_role.party
-                else:
-                    return "Unknown"
-            else:
-                return "Vice President"
-        
-        all_parties = list(set(get_party(x) for x in all_voters))
+        all_parties = list(set(x.party for x in all_voters))
         all_parties.sort(key=cmp_party)
         total_party_stats = dict((x, {'yes': 0, 'no': 0, 'other': 0, 'total': 0})\
                                  for x in all_parties)
@@ -180,7 +183,7 @@ class Vote(models.Model):
             percent = round(len(voters) / float(total_count) * 100.0)
             party_stats = dict((x, 0) for x in all_parties)
             for voter in voters:
-                party = get_party(voter)
+                party = voter.party
                 party_stats[party] += 1
                 total_party_stats[party]['total'] += 1
                 if option.key == '+':

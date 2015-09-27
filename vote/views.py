@@ -164,7 +164,7 @@ def get_vote_outliers(voters):
 	x = [ [] for predictor in predictor_names ]
 	y = [ ]
 	for voter in voters:
-		x[0].append(party_values.get(voter.person_role.party if voter.person_role else None, 0)) # independents and unrecognized parties get 0
+		x[0].append(party_values.get(voter.party, 0)) # independents and unrecognized parties get 0
 		x[1].append(getattr(voter, 'ideolog_score', 0)) # ideology scores may not be available in a Congress, also not available for vice president
 		y.append(vote_values.get(voter.option.key, .5)) # present, not voting, etc => .5
 	x = numpy.array(x)
@@ -418,10 +418,10 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 			# Store ideology scores
 			for voter in voters:
 				if voter.option.key not in ("+", "-"): continue
-				party = party_index.get(voter.person_role.party if voter.person and voter.person_role else "Unknown", 1)
+				party = party_index.get(voter.party, 1)
 				option = 0 if voter.option.key == "+" else 1
 				coord =  ideology_scores[vote.congress].get(voter.person.id if voter.person else "UNKNOWN",
-					ideology_scores[vote.congress].get("MEDIAN:" + (voter.person_role.party if voter.person and voter.person_role else ""),
+					ideology_scores[vote.congress].get("MEDIAN:" + (voter.party or ""),
 						ideology_scores[vote.congress]["MEDIAN"]))
 				voter_details.append( (coord, (party, option)) )
 				
