@@ -78,7 +78,7 @@ def template_context_processor(request):
         from website.models import MediumPost
         medium_posts = MediumPost.objects.order_by('-published')[0:5]
         cache.set("medium_posts", medium_posts, 60*15) # 15 minutes
-    context["medium_posts"] = medium_posts[0:2]
+    context["medium_posts"] = medium_posts[0:1]
 
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
