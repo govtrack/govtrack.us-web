@@ -102,7 +102,7 @@
 	</div>
 </div>
 
-<div class="entries-box">
+<div class="entries-box" style="margin-top: 1em">
 	<div class="entries-holder container">
 		<div class="col-sm-4 col-sm-push-8">
 			<div id="generic-events">
@@ -130,8 +130,8 @@
 			</div><!-- /in-congress -->
 
 			<div id="custom-events">
-				<div style="text-align: right"><small><a href="#" onclick="return show_askcd();">not your district?</a></small></div>
 				<h2 style="margin-top: 0"><span>in district...</span></h2>
+				<div style="text-align: right"><small><a href="#" onclick="return show_askcd();">not your district?</a></small></div>
 				<section class="row" style="margin-bottom: 1em">
 				</section>
 				<section class="featured-articles">
@@ -162,7 +162,13 @@
 		<div id="blog-posts" class="col-sm-7 col-sm-pull-4">
 				{% if medium_posts %}
 				<article>
-					<h2><a href="https://medium.com/govtrack-insider" style="float: right; color: #722" title="More Posts on Medium"><i class="fa fa-medium"></i></a>GovTrack Insider</h2>
+					<h2>
+						<div style="float: right;">
+							<a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">subscribe</a> |
+							<a href="https://medium.com/govtrack-insider" title="More Posts on Medium"><i class="fa fa-medium"></i></a>
+						</div>
+						GovTrack Insider
+					</h2>
 					{% for post in medium_posts %}
 						<div class="row" style="margin-bottom: 1.5em">
 						{% if not post.image %}
