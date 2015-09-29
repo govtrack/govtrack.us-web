@@ -459,7 +459,7 @@ blockquote {
 			margin-left: 15px;
 		}
 	}
-	.homepage #logo {
+	.homepage #logo.navbar-brand {
 		display: none;
 	}
 
@@ -668,11 +668,8 @@ blockquote {
 			}
 
 .entries-box {
-	background: url(../images/bg-entries-box-brown.jpg);
 }
 	.entries-box .entries-holder {
-		background: url(../images/bg-aside-hilight.png) repeat-y 50% 0;
-		padding-top: 30px;
 	}
 	.entries-box h2 {
 		line-height: 28px;
@@ -781,35 +778,9 @@ blockquote {
 		display: block;
 		}
 
-/*.entries-box .aside {
-	width: 300px;
-	float: right;
-	}*/
-.rss-block { margin: 0 0 27px }
-.aside h4 {
-	margin: 0 0 5px;
-	}
-.aside h3 { color: #666 }
-	.aside h3 span { }
-.aside em {
-	color: #787878;
-	font-family: PTSerifItalic;
-	font-style: normal;
-	}
-.aside .block { text-align: right }
-.rss-block h4 { margin-bottom: .5em; }
-.rss-block h3 img {
-	padding: 0 8px 3px;
-	vertical-align: middle;
-	}
-.aside .article { padding: 0 0 0 21px }
-.aside .post { margin: 0 0 25px }
-.tweets-block article { background: url(../images/ico-tweetter.png) no-repeat 0 3px }
-.tweets-block h3 { margin: 0 0 9px }
-
 
 /* Remove BG on home when it interferes ----------- */
-@media only screen and (max-width: 865px) {
+@media only screen and (max-width: 768px) {
 	 .entries-box .entries-holder {
 	background: none;
 	}

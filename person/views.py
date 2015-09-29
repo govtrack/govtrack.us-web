@@ -687,7 +687,8 @@ def homepage_summary(request):
 	from events.templatetags.events_utils import render_event
 	for i in range(len(events)):
 		events[i] = render_event(events[i], feeds)
-		events[i]["date"] = events[i]["date"].strftime('%B %d, %Y') # can't JSON-serialize a datetime anyway, TODO handle date_has_no_time
+		if not isinstance(events[i]["date"], str):
+			events[i]["date"] = events[i]["date"].strftime('%B %d, %Y') # can't JSON-serialize a datetime anyway, TODO handle date_has_no_time
 		for k in list(events[i]): # remove anything else in case it is not JSON-serializable
 			if k not in ('type', 'date', 'title', 'body_html', 'url'):
 				del events[i][k]

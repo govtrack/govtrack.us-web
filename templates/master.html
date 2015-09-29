@@ -210,6 +210,7 @@
 	    <div class="collapse navbar-collapse" id="masthead-navbar-collapse">
 	      <div id="nav">
 	      <ul class="nav navbar-nav">
+	        {% block hide_nav %}
 			<li><a href="/">Home</a></li>
 			<li class="dropnav">
 				<a href="/start">Browse</a>
@@ -245,6 +246,7 @@
 			</li>
 			<li><a href="/about">About</a></li>
 			<li><a href="/developers">Open data</a></li>
+	        {% endblock %}
 	      </ul>
 	      </div>
 	      <ul class="nav navbar-nav navbar-right">
@@ -279,7 +281,7 @@
 	      </ul>
 	    </div><!-- /.navbar-collapse -->
 	  </div><!-- /.container-fluid -->
-	</nav>	
+	</nav>
 
 	{% block override_breadcrumbs %}
 	<div id="breadcrumbs">

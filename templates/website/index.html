@@ -9,53 +9,16 @@
   <meta property="og:url" content="{{SITE_ROOT_URL}}" />
 
 <style>
-.homepage #header {
-	background: url(/static/images/header-capitol.png) 218px bottom no-repeat;
-}
-
 #intro-box {
 	background: #40a4bd;
 }
-	#intro-box > .container {
-		padding: 20px 10px 10px;
-		height: 256px;
-		background: #40a4bd url(/static/images/bg-intro-box.jpg) 0 0 no-repeat;
-		}
 
-	#intro-box h1 {
-		margin: 0;
-		padding: 0;
-		border: none;
-		font: normal 4em/1em serif;
-		color: #fff;
-		text-shadow: 0 2px 2px #066982;
-		}
-	#intro-box h2 {
-		margin: 8px 0 0 2px;
-		font: normal 1.5em/1em PTSerif;
-		color: #fff;
-		text-shadow: 0 1px 1px #066982;
+	#primary-links {
+		margin: .5em 0;
 	}
-
-	#intro-box p {
-		color: #fff;
-		font-family: PTSerif;
-		font-size: 18px;
-	}
-
-	@media only screen and (max-width: 768px) {
-		 .homepage #header {
-		background: none;
-		 }
-		 #intro-box > .container {
-		 background: none;
-		 height: auto;
-		 }
-	}
-
 	#primary-links a {
 		display: block;
-		padding-bottom: 2em;
+		margin: 1.5em 0;
 		background: url(/static/images/bg-info-box-nav.png) no-repeat 0 0;
 		background-size: 100% 100%;
 		text-align: center;
@@ -75,6 +38,13 @@
 			opacity: .9;
 		}
 
+#blog-posts h3 a {
+	text-decoration: none;
+	padding-bottom: 1px;
+	border-bottom: 1px solid #cb4b16;
+	line-height: 150%;
+}
+
 #footer {
 	margin-top: 0;
 }
@@ -83,60 +53,59 @@
 
 {% block body_class %}homepage{% endblock %}
 
-{% block override_breadcrumbs %}
-<div id="intro-box">
-	<div class="container">
-		<div class="row">
-			<div class="col-xs-offset-1 col-sm-offset-5">
-				<h1>GovTrack.us</h1>
-				<h2>Tracking the United States Congress</h2>
-				<div class="hidden-xs" style="height: 40px"> </div>
-			</div>
-		</div>
-		<div class="row" style="margin-top: 1em">
-			<div class="col-xs-offset-1 col-sm-offset-5">
-				<p>Track bills in Congress, your representative&rsquo;s voting records, upcoming committee meetings, and get alerts by email.</p>
-			</div>
-		</div>
-	</div>
-</div><!-- /intro-box -->
+{% block hide_nav %}
+	<div id="logo">govtrack.us</div>
 {% endblock %}
 
 {% block body_with_container %}
-<div style="background-color: white; padding: 25px 10px 0 15px">
-	<div class="container">
-
-		<div id="primary-links" class="row">
-			<div class="col-xs-6 col-sm-3">
+<div class="container">
+	<div class="row">
+		<div id="primary-links">
+			<div class="col-xs-4 col-sm-2">
 				<a href="/congress/members">
 					<img src="/static/images/img-congress-members.png" class="img-responsive">
 					Members <span>of</span> Congress
 				</a>
 			</div>
-			<div class="col-xs-6 col-sm-3">
+			<div class="col-xs-4 col-sm-2">
 				<a href="{% url "bill_docket" %}">
 					<img src="/static/images/img-bills-resolutions.png" class="img-responsive">
 					Bills <span>&amp;</span> Resolutions
 				</a>
 			</div>
-			<div class="col-xs-6 col-sm-3">
+			<div class="col-xs-4 col-sm-2">
 				<a href="{% url "vote_list" %}">
 					<img src="/static/images/img-voting-records.png" class="img-responsive">
 					Voting Records
 				</a>
 			</div>
-			<div class="col-xs-6 col-sm-3">
+			<div class="clearfix visible-xs"> </div>
+			<div class="col-xs-4 col-sm-2">
 				<a href="{% url "committee_list" %}">
 					<img src="/static/images/img-committees.png" class="img-responsive">
 					Committees
 				</a>
 			</div>
+			<div class="col-xs-4 col-sm-2">
+				<a href="/about">
+					<img src="/static/images/img-about.png" class="img-responsive">
+					About GovTrack.us
+				</a>
+			</div>
+			<div class="col-xs-4 col-sm-2">
+				<a href="/developers">
+					<img src="/static/images/img-opendata.png" class="img-responsive">
+					Use Our Open Data
+				</a>
+			</div>
 		</div>
 	</div>
 </div>
+
 <div class="entries-box">
 	<div class="entries-holder container">
-			<div id="generic-events" class="col-sm-7">
+		<div class="col-sm-4 col-sm-push-8">
+			<div id="generic-events">
 				<h2><span>in</span> Congress</h2>
 		
 				<section class="featured-articles">
@@ -160,7 +129,7 @@
 				</section>
 			</div><!-- /in-congress -->
 
-			<div id="custom-events" class="col-sm-7">
+			<div id="custom-events">
 				<div style="text-align: right"><small><a href="#" onclick="return show_askcd();">not your district?</a></small></div>
 				<h2 style="margin-top: 0"><span>in district...</span></h2>
 				<section class="row" style="margin-bottom: 1em">
@@ -168,7 +137,7 @@
 				<section class="featured-articles">
 				</section>
 				<div style="display: none">
-					<div id="custom-events-rep-template" class="col-xs-4" style="text-align: center;">
+					<div id="custom-events-rep-template" class="col-xs-4 col-sm-6 col-lg-4" style="text-align: center; margin-bottom: 1.5em">
 						<a style="text-decoration: none; pading: 1em; display: block">
 							<img src="" class="img-responsive" style="margin: 0 auto">
 							<p class="name" style="margin: .5em 0 0 0; font-weight: bold"> </p>
@@ -177,7 +146,7 @@
 					</div>
 					<article id="custom-events-template" class="post">
 						<div class="event_header">
-							<div class="event_type">Date: <span></span></div>
+							<div class="event_type"><span></span></div>
 							<h4 class="event_title"></h4>
 							<p></p>
 						</div>
@@ -188,33 +157,38 @@
 					</article>
 				</div>
 			</div>
+		</div>
 
-			<div class="col-sm-offset-1 col-sm-4">
+		<div id="blog-posts" class="col-sm-7 col-sm-pull-4">
 				{% if medium_posts %}
-				<article class="rss-block">
-					<h3><a href="https://medium.com/govtrack-insider" style="float: right; color: #722" title="More Posts on Medium"><i class="fa fa-medium"></i></a>GovTrack Insider</h3>
+				<article>
+					<h2><a href="https://medium.com/govtrack-insider" style="float: right; color: #722" title="More Posts on Medium"><i class="fa fa-medium"></i></a>GovTrack Insider</h2>
 					{% for post in medium_posts %}
-					<div class="post">
-						<h4><a href="{{post.url}}">{{post.title}}</a></h4>
-						{% if post.image %}
+						<div class="row" style="margin-bottom: 1.5em">
+						{% if not post.image %}
+							<div class="col-xs-12">
+						{% else %}
+							<div class="col-xs-4">
 							<a href="{{post.url}}">
-								<img src="https://d262ilb51hltx0.cloudfront.net/fit/c/60/60/{{post.image}}" style="float: left; margin: 3px .7em .7em 0"/>
+								<img src="https://cdn-images-1.medium.com/max/400/{{post.image}}" class="img-responsive" style="border: 1px solid #888; margin-top: 6px"/>
 							</a>
+							</div>
+							<div class="col-xs-8">
 						{% endif %}
-						<div class="article">
-							<em>Posted on {{post.published}}</em>
-							<p>{{post.snippet}} <a href="{{post.url}}">Read More »</a></p>
+						<h3 style="margin-top: 0"><a href="{{post.url}}">{{post.title}}</a></h3>
+						<p>{{post.snippet}} <a href="{{post.url}}" style="display: inline-block">Read More »</a></p>
+						<p><small><em>{{post.published}}</em></small></p>
 						</div>
-					</div>
+						</div>
 					{% endfor %}
 				</article>
 		   		{% endif %}
 		    	
-				<article class="rss-block">
-					<h3>Site News</h3>
+				<article>
+					<h2>Site News</h2>
 					{% for item in blog %}
 					<div class="post">
-						<h4><a href="{{item.link}}">{{item.title}}</a></h4>
+						<h3><a href="{{item.link}}">{{item.title}}</a></h3>
 						<div class="article">
 							<em>Posted on {{item.date}}</em>
 							<p>{{item.content|striptags|truncatewords:25}} <a href="{{item.link}}">Read More »</a></p>
@@ -222,7 +196,7 @@
 					</div>
 					{% endfor %}
 				</article>
-			</div>
+		</div>
 	</div>
 </div>
 {% endblock %}
@@ -243,6 +217,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 				n.find('section').text('');
 
 				for (var i = 0; i < res.reps.length; i++) {
+					if (i == 2) n.find('.row').append($("<div class='clearfix visible-sm'/>"));
 					var r = $('#custom-events-rep-template').clone();
 					r.find('img').attr('src', res.reps[i].photo)
 					r.find('a').attr('href', res.reps[i].link)

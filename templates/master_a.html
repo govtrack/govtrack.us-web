@@ -11,6 +11,7 @@
 				<h2><a href="https://medium.com/govtrack-insider" style="float: right; color: #722" title="More Posts on Medium"><i class="fa fa-medium"></i></a> GovTrack Insider</h2>
 				<table>
 				{% for post in medium_posts %}
+				{% if forloop.counter <= 2 %}
 					<tr valign="top">
 						<td style="padding-bottom: .33em">
 						{% if post.image %}
@@ -24,6 +25,7 @@
 						<br>{{post.snippet}}
 						</td>
 					</tr>
+				{% endif %}
 				{% endfor %}
 				</table>
 				<p style="margin: .5em 0 0 0; text-align: center">
