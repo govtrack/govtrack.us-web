@@ -139,7 +139,7 @@ h1, h2, h3, h4, h5 {
 	}
 h1 {
 	margin-bottom: .85em;
-	margin-top: .25em;
+	margin-top: 20px;
 	font-size: 27px;
 	font-family: PTSerifBold;
 	line-height: 1.4em;
@@ -569,8 +569,9 @@ blockquote {
 	}
 
 .breadcrumb {
-	margin-top: 3px;
+	margin-top: 15px;
 	margin-bottom: 0;
+	padding-bottom: 0; /* override bootstrap, always followed by a h1 which has a margin */
 	padding-left: 0;
 	background: none;
 	font-size: 88%;
