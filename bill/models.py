@@ -203,6 +203,8 @@ class Bill(models.Model):
             ] + [t[2] for t in self.titles]) \
             + "\n\n" + summary_text \
             + "\n\n" + bill_text
+    def get_index_text_boosted(self):
+        return self.title
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
     haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'), ('usc_citations_uptree', 'MultiValue'), ('enacted_ex', 'Boolean'))
     def get_terms_index_list(self):

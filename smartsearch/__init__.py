@@ -3,6 +3,7 @@ from haystack import indexes
 def build_haystack_index(model):
 	class I(indexes.SearchIndex, indexes.Indexable):
 		text = indexes.CharField(model_attr='get_index_text', document=True)
+		text_boosted = indexes.CharField(model_attr='get_index_text_boosted', boost=2.0)
 		indexed_model_name = indexes.CharField(default=model.__name__)
 		def get_model(self):
 			return model

@@ -146,7 +146,8 @@
     <dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false"/>
 
 
-    <field name="text" type="text_en" indexed="true" stored="true" multiValued="false" />
+    <field name="text" type="text_en" indexed="true" stored="false" multiValued="false" />
+    <field name="text_boosted" type="text_en" indexed="true" stored="false" multiValued="false" />
 
     <field name="indexed_model_name" type="string" indexed="true" stored="true" multiValued="false" />
 

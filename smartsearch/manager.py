@@ -219,6 +219,7 @@ class SearchManager(object):
             qs = self.qs
 
         filters = { }
+        filters2 = []
         
         # Then for each filter
         for option in self.options:
@@ -249,9 +250,13 @@ class SearchManager(object):
                     if self.qs is None:
                        # This is a Haystack search. Handle text a little differently.
                        # Wrap it in an AutoQuery so advanced search options like quoted phrases are used.
+                       # Query both text and text_boosted, which has a boost applied at the field level.
+                       from haystack.query import SQ
                        from haystack.inputs import AutoQuery
                        values = AutoQuery(values)
-                    filters[option.orm_field_name] = values
+                       filters2.append( SQ(text=values) | SQ(text_boosted=values) )
+                    else:
+                       filters[option.orm_field_name] = values
                     
                 elif not u'__ALL__' in values:
                     # if __ALL__ value presents in filter values
@@ -272,8 +277,8 @@ class SearchManager(object):
         # apply filters simultaneously so that filters on related objects are applied
         # to the same related object. if they were applied chained (i.e. filter().filter())
         # then they could apply to different objects.
-        if len(filters) > 0:
-            qs = qs.filter(**filters)
+        if len(filters) + len(filters2) > 0:
+            qs = qs.filter(*filters2, **filters)
             
         for name, key, default, func in self.sort_options:
             if postdata.get("sort", "") == key:

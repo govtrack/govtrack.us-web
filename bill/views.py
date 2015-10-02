@@ -386,6 +386,16 @@ def bill_list(request):
     return show_bill_browse("bill/bill_list.html", request, ix1, ix2, { })
 
 def show_bill_browse(template, request, ix1, ix2, context):
+    if "text" in request.GET:
+        # when the user is doing a text search, sort by standard Solr relevance scoring, which includes boosting the bill title
+        default_sort = None
+    elif "sponsor" in request.GET:
+        # when searching by sponsor, the default order is to show bills in reverse chronological order
+        default_sort = "-introduced_date"
+    else:
+        # otherwise in faceted searching, order by -proscore which puts more important bills up top
+	    default_sort = "-proscore"
+
     return bill_search_manager().view(request, template,
         defaults={
             "congress": request.GET["congress"] if "congress" in request.GET else (CURRENT_CONGRESS if "sponsor" not in request.GET else None), # was Person.objects.get(id=request.GET["sponsor"]).most_recent_role_congress(), but we can just display the whole history which is better at the beginning of a Congress when there are no bills
@@ -394,7 +404,7 @@ def show_bill_browse(template, request, ix1, ix2, context):
             "terms2": ix2.id if ix2 else None,
             "text": request.GET.get("text", None),
             "current_status": request.GET.get("status").split(",") if "status" in request.GET else None,
-            "sort": request.GET.get("sort", None if "sponsor" not in request.GET else "-introduced_date"),
+            "sort": default_sort,
             "usc_cite": request.GET.get("usc_cite"),
         },
         noun = ("bill", "bills"),

@@ -127,7 +127,8 @@ def bill_search_manager():
     sm.add_option('bill_type', label="bill or resolution type")
     
     #sm.add_sort("Popularity", "-total_bets", default=True)
-    sm.add_sort("Secret Sauce", "-proscore", default=True)
+    # default sort order is handled by the view
+    sm.add_sort("Secret Sauce", "-proscore")
     sm.add_sort("Introduced Date (Newest First)", "-introduced_date")
     sm.add_sort("Introduced Date (Oldest First)", "introduced_date")
     sm.add_sort("Last Major Action (Recent First)", "-current_status_date")

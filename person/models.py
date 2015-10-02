@@ -66,6 +66,8 @@ class Person(models.Model):
             u"".join(c for c in unicodedata.normalize('NFKD', n) if not unicodedata.combining(c)) + "\n" + \
             str2(self.most_recent_role_state()) + " " + str2(statenames.get(self.most_recent_role_state()))
         return r
+    def get_index_text_boosted(self):
+        return self.lastname
     haystack_index = ('lastname', 'gender')
     haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'), ('was_moc', 'Boolean'), ('is_currently_moc', 'Boolean'))
     #######
