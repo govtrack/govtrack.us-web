@@ -777,7 +777,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         if self.congress < 93: return []
         ret = []
         saw_intro = False
-        for datestr, st, text, srcxml in self.major_actions:
+        for i, (datestr, st, text, srcxml) in enumerate(self.major_actions):
             date = eval(datestr)
             srcnode = etree.fromstring(srcxml) if srcxml else None
 
@@ -826,6 +826,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 "key": st_key,
                 "label": st,
                 "date": date,
+                "sort": (self, i),
                 "actionline": text,
                 "explanation": explanation,
                 "vote_text": vote_text,
@@ -906,7 +907,13 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         def as_dt(x, end_of_day=False):
             if isinstance(x, datetime.datetime): return x
             return datetime.datetime.combine(x, datetime.time.min if not end_of_day else datetime.time.max)
-        ret.sort(key = lambda x : as_dt(x["date"], x.get("end_of_day", False)))
+        def event_cmp(a, b):
+            if a.get("sort") and b.get("sort") and a["sort"][0] == b["sort"][0]:
+                return cmp(a["sort"], b["sort"])
+            da = as_dt(a["date"], a.get("end_of_day", False))
+            db = as_dt(b["date"], b.get("end_of_day", False))
+            return cmp(da, db)
+        ret.sort(cmp=event_cmp)
 
         if top:
             # Mark the last entry that occurs prior to all events on this bill.
