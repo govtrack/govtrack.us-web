@@ -884,7 +884,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             for relation_name, relation_types in (
               ("Companion Bill", ("identical",)),
               ("Alternative Bill", ("supersedes", "includes")),
-              ("Rules Change", ("rule","caused-action"))):
+              ("Bill Causing Indirect Action", ("caused-action",)),
+              ("Rules Change", ("rule",))):
                 for rb in self.relatedbills.filter(relation__in=relation_types).select_related("related_bill"):
                     if rb.related_bill in got_rb: continue
                     got_rb.add(rb.related_bill)
