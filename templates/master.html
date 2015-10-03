@@ -198,6 +198,57 @@
 
 	<nav id="masthead" class="navbar navbar-default">
 	  <div class="container">
+	  	<div style="float: right; margin: -6px 0 10px 0">
+	  		<button type="button" class="btn btn-primary" onclick="$('#leg-services-teaser').modal()">
+	  			GovTrack Legislative Services <span class="label label-success">new</span>
+	  		</button>
+	  	</div>
+	    <div id="leg-services-teaser" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="leg-services-teaser-title" aria-hidden="true">
+	      <div class="modal-dialog">
+	        <div class="modal-content">
+	          <div class="modal-header">
+	            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	            <h4 class="modal-title" id="leg-services-teaser-title">GovTrack Legislative Services</h4>
+	          </div>
+	          <div class="modal-body">
+		  		<p>Don&rsquo;t have the budget to hire an in-house congressional analyst or pay for a full scale legislative tracking service?</p>
+		  		<p>The GovTrack team can provide you or your organization with tailored updates on a specific bill or multiple bills covering a particular policy area &mdash; for a fraction of the cost.</p>
+		  		<hr>
+		  		<p><i>Request information about GovTrack Legislative Services</i></p>
+				<form class="form-horizontal" style="margin-top: 1.5em" onsubmit="return false;">
+				  <div class="form-group">
+				    <label for="leg-services-teaser-name" class="col-sm-3 control-label">Your Name</label>
+				    <div class="col-sm-9">
+				      <input type="text" class="form-control" id="leg-services-teaser-name" placeholder="Your Name" name="name">
+				    </div>
+				  </div>
+				  <div class="form-group">
+				    <label for="leg-services-teaser-email" class="col-sm-3 control-label">Email</label>
+				    <div class="col-sm-9">
+				      <input type="email" class="form-control" id="leg-services-teaser-email" placeholder="Email" name="email" value="{% if not request.anonymous %}{{request.user.email}}{% endif %}">
+				      {% if request.anonymous %}
+				      <script>$(function(){ if (the_user && the_user.email) $('#leg-services-teaser-email').val(the_user.email); })</script>
+				      {% endif %}
+				    </div>
+				  </div>
+				  <div class="form-group">
+				    <div class="col-sm-offset-3 col-sm-9">
+				      <p>Tell us a bit about your organization and your legislative tracking needs.</p>
+				      <textarea class="form-control" rows="4" name="message"></textarea>
+				    </div>
+				  </div>
+				  <div class="form-group">
+				    <div class="col-sm-offset-3 col-sm-9">
+				      <button type="submit" class="btn btn-primary" onclick="submit_leg_services_teaser()">Request Information</button>
+				    </div>
+				  </div>
+				</form>
+	          </div>
+	        </div>
+	      </div>
+	    </div>	  	
+	  	<div class="clearfix"> </div>
+
 	    <div class="navbar-header">
 	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#masthead-navbar-collapse">
 	        <span class="sr-only">Toggle navigation</span>
@@ -383,7 +434,7 @@
 	}
 	</script>
 
-	<script src="/static/js/govtrack.js?20140720"></script>
+	<script src="/static/js/govtrack.js?20151003"></script>
 	{% include "ask_district.html" %}
 
 <!-- Piwik -->

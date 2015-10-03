@@ -147,3 +147,16 @@ function moc_record_matches_user(moc, cong_dist, cong_dist_mocs) {
 		return "Your former " + moc.title + " " + moc.name + " ";
 	return null;
 }
+
+function submit_leg_services_teaser() {
+	$.ajax({
+		type: "POST",
+		url: "/_ajax/leg-services-teaser",
+		data: $('#leg-services-teaser form').serializeArray(),
+		success: function(res) {
+			alert(res.message);
+			if (res.status == "ok")
+				$('#leg-services-teaser').modal('hide');
+		}
+	})
+}

@@ -583,3 +583,19 @@ def account_one_click_unsubscribe(request, key):
 def medium_post_redirector(request, id):
     post = get_object_or_404(MediumPost, id=id)
     return HttpResponseRedirect(post.url)
+
+def leg_services_teaser(request):
+    name = request.POST.get("name", "").strip()
+    email = request.POST.get("email", "").strip()
+    message = request.POST.get("message", "").strip()
+    if not name or not email or not message:
+        res = { "status": "error", "message": "Please fill out all of the fields." }
+    else:
+        from django.core.mail import mail_admins
+        mail_admins("Lead Gen",
+"""Name: %s
+Email: %s
+Message:
+%s""" % (name, email, message))
+        res = { "status": "ok", "message": "Thank you. We will be in touch shortly by email." }
+    return HttpResponse(json.dumps(res), content_type="application/json")
