@@ -386,9 +386,9 @@ class PersonRole(models.Model):
 
     def get_title_name(self, short):
         if self.role_type == RoleType.president:
-            return 'President'
+            return 'President' if short else 'President of the United States'
         if self.role_type == RoleType.vicepresident:
-            return 'Vice President'
+            return 'Vice President' if short else 'Vice President of the United States (and President of the Senate)'
         if self.role_type == RoleType.senator:
             return 'Sen.' if short else 'Senator'
         if self.role_type == RoleType.representative:
@@ -471,9 +471,13 @@ class PersonRole(models.Model):
             "date": self.startdate if eventid == "termstart" else self.enddate,
             "title": self.person.name + (" takes office as " if eventid == "termstart" else " leaves office as ") + self.get_description(),
             "url": self.person.get_absolute_url(),
-            "body_text_template": "",
-            "body_html_template": "",
-            "context": {}
+            "body_text_template": "{{name}} {{verb}} {{term}}.",
+            "body_html_template": "<p>{{name}} {{verb}} {{term}}.</p>",
+            "context": {
+                "name": self.person.name,
+                "verb": ("takes office as" if eventid == "termstart" else "leaves office as"),
+                "term": self.get_description(),
+            }
             }
 
     def logical_dates(self, round_end=False):
