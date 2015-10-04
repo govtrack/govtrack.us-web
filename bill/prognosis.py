@@ -121,12 +121,12 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	
 		# is the sponsor a member/chair of a committee to which the bill has
 		# been referred?
-		for rname, rvalue in (("member", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("vicechair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
+		for rname, rvalue in (("member", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("chair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
 			for committee in committees:
 				if committee_membership.get(bill.sponsor_id, {}).get(committee.code) == rvalue:
 					if rvalue != CommitteeMemberRole.member:
 						factors.append(("sponsor_committee_%s" % rname, "The sponsor is the %s of a committee to which the %s has been referred." % (CommitteeMemberRole.by_value(rvalue).label.lower(), bill.noun), "Sponsor is a relevant committee %s." % CommitteeMemberRole.by_value(rvalue).label.lower()))
-					if sponsor_party == maj_party:
+					elif sponsor_party == maj_party:
 						factors.append(("sponsor_committee_member_majority", "The sponsor is on a committee to which the %s has been referred, and the sponsor is a member of the majority party." % bill.noun, "Sponsor is on a relevant committee & in majority party."))
 						
 		# leadership score of the sponsor, doesn't actually seem to be helpful,
@@ -138,7 +138,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 				factors.append(("sponsor_leader_minority", "The sponsor has a high leadership score but is not in the majority party.", "Sponsor has a high leadership score (minority party)."))
 					
 	# count cosponsor assignments to committees by committee role and Member party
-	for rname, rvalue in (("committeemember", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("vicechair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
+	for rname, rvalue in (("committeemember", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("chair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
 		num_cosp = 0
 		for cosponsor in cosponsors:
 			for committee in committees:
@@ -168,7 +168,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 			num_cosp_majority += 1
 	if bill.sponsor and sponsor_party == maj_party and len(cosponsors) >= 6 and num_cosp_majority < 2.0*len(cosponsors)/3:
 		factors.append(("cosponsors_bipartisan", "The sponsor is in the majority party and at least one third of the %s's cosponsors are from the minority party." % bill.noun, "Sponsor is in majority party and 1/3rd+ of cosponsors are in minority party."))
-	if num_cosp_majority > 0 and num_cosp_majority < len(cosponsors):
+	elif num_cosp_majority > 0 and num_cosp_majority < len(cosponsors):
 		factors.append(("cosponsors_crosspartisan", "There is at least one cosponsor from the majority party and one cosponsor outside of the majority party.", "Has cosponsors from both parties."))
 
 	for is_majority in (False, True):
