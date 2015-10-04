@@ -1692,10 +1692,8 @@ aside .download-links { padding: 31px 0 0 }
 }
 .advanced-search h3 {
 	text-align: center;
-	text-transform: uppercase;
 	margin: 0 0 8px;
 	padding: 0 0 5px;
-	background: url(../images/divider-5.gif) repeat-x 0 100%;
 	}
 .advanced-search form { margin: 0; }
 .advanced-search label {
