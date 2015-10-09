@@ -20,7 +20,7 @@ class CongressChamber(enum.Enum):
 class VoteSource(enum.Enum):
     senate = enum.Item(1, 'senate.gov')
     house = enum.Item(2, 'house.gov')
-    keithpoole = enum.Item(3, 'Professor Keith Poole')
+    keithpoole = enum.Item(3, 'VoteView.com')
 
 
 class VoteCategory(enum.Enum):
