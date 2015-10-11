@@ -299,14 +299,18 @@ def your_docket(request):
 @login_required
 def update_account_settings(request):
     if request.POST.get("action") == "unsubscribe":
-        # Turn off all email updates.
+        # Turn off all emails.
         for x in request.user.userprofile().lists_with_email():
             x.email = 0
             x.save()
+        p = request.user.userprofile()
+        p.massemail = False
+        p.save()
         
     if request.POST.get("action") == "massemail":
+		# Toggle.
         p = request.user.userprofile()
-        p.massemail = True if request.POST.get("massemail", False) else False
+        p.massemail = not p.massemail
         p.save()
             
     return HttpResponseRedirect("/accounts/profile")

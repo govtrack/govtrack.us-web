@@ -27,7 +27,8 @@
 	</form>            
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">No Thanks</button>
+        <button type="button" class="btn btn-default no-thanks" data-dismiss="modal">No Thanks</button>
+      	<button type="button" class="btn btn-default clear-setting" onclick="return askcd_submit(true);">Clear Setting</button>
       	<button type="button" class="btn btn-primary" onclick="return askcd_submit();">Next &gt;</button>
       </div>
     </div>
@@ -67,6 +68,8 @@
 function show_askcd() {
 	$('#askcdState').val('');
 	$('#askcdDistrictGroup').hide();
+	$('#askcd_modal .no-thanks').toggle(!cong_dist);
+	$('#askcd_modal .clear-setting').toggle(!!cong_dist);
 	$('#askcd_modal .btn-primary').attr('disabled', 'disabled');
 	$('#askcd_modal').modal();
 	$('#askcd_modal').on('hidden.bs.modal', function() {

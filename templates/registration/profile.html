@@ -7,28 +7,72 @@
 
 {% block head %}
 <style>
-h2 { font-size: 18px; border-bottom: 1px solid #444; }
-
-.login label {
-	display: block;
-	margin: .75em 0 0 0;
-}
-.login input#id_email,
-.login input#id_password {
-	width: 70%;
-	margin: 0;
-}
 </style>
 {% endblock %}
 
 {% block body %}
-<h1>Account Settings</h1>
-<div class="row">
-<div class="col-sm-6">
-	<h2><span>Your congressional district</span></h2>
+<h1 style="border: none">Account Settings</h1>
 
-	<p class="no-district hidden">If you <a href="#" onclick="return show_askcd();">pick your congressional district</a> we will customize GovTrack to show you more relevant information.</p>
-	<p class="has-district hidden">Your congressional district is set to <span style="font-weight: bold"> </span>. If that&rsquo;s no longer correct, you may <a href="#" onclick="return show_askcd();">pick your congressional district</a> again.</p>
+	<h2><span>Emails</span></h2>
+
+	{% with request.user.userprofile.lists_with_email as lists %}
+
+	{% if lists|length > 0 or request.user.userprofile.massemail %}
+		<h3>Unsubscribe?</h3>
+		<p>To stop all future email from GovTrack, click the following button:</p>
+		<form action="/accounts/update_settings" method="post" style="margin: 1em 2em">{% csrf_token %}
+			<input type="hidden" name="action" value="unsubscribe"/>
+			<input type="submit" class="submit" value="Unsubscribe"/>
+		</form>
+		<hr>
+	{% else %}
+		<div>You are set to not receive any email from GovTrack.</div>
+	{% endif %}
+
+	<div class="row">
+	<div class="col-sm-6">
+		<h3>Email Updates</h3>
+		{% if lists|length > 0 %}
+			<p>You have email updates turned on for the following lists you created. Use the <a href="/accounts/lists">What I&rsquo;m Tracking</a> page to change how often you get email updates for these lists.</p>
+			{% for list in lists %}
+				<p style="margin-left: 2em">{{list.name}} ({{list.get_email_display}})</p>
+			{% endfor %}
+		{% else %}
+			<p style="margin-top: 1em">You have no <a href="/accounts/lists">lists</a> that are configured for email updates.</p>
+		{% endif %}
+		{% endwith %}
+	</div>
+	<div class="col-sm-6">	
+		<h3>Site Announcements</h3>
+		{% if request.user.userprofile.massemail %}
+			<p>We send occasional emails about changes to GovTrack.us and government transparency in Congress, about twice a year. Click the button to turn off site announcements.</p>
+		{% else %}
+			<p>You have turned off site announcements.</p>
+		{% endif %}
+		<form action="/accounts/update_settings" method="post" style="margin-left: 2em">{% csrf_token %}
+			<input type="hidden" name="action" value="massemail"/>
+			<input type="submit" class="submit" value="{% if request.user.userprofile.massemail %}Stop Site Announcements{% else %}Send Me Site Announcements{% endif %}"/>
+		</form>
+	</div>
+</div>
+	
+<h2><span>Profile</span></h2>
+
+{% with user.userprofile.get_membership_subscription_info as msi %}
+{% if msi.message %}
+	<p>{{msi.message}} More about <a href="/accounts/membership">GovTrack Membership</a>.</p>
+{% endif %}
+{% endwith %}
+
+<div class="form-horizontal">
+	<div class="form-group">
+		<label class="col-sm-2 control-label">Congressional District</label>
+		<div class="col-sm-10" style="padding-top: 6px">
+			<div class="no-district hidden"><p><button onclick="show_askcd();">Pick Your Congressional District</button></p> <p>We will customize GovTrack to show you more relevant information.</p></div>
+			<div class="has-district hidden"><p><span style="font-weight: bold"> </span> <button onclick="show_askcd();" style="margin-left: 2em">Change</button</p></div>
+		</div>
+	</div>
+
 	<script>
 	onUserDistrictChanged(function (cong_dist, mocs) {
 		$('.no-district').toggleClass('hidden', !!cong_dist)
@@ -40,91 +84,69 @@ h2 { font-size: 18px; border-bottom: 1px solid #444; }
 			$('.has-district span').text(cong_dist.state + " (at large)")
 	});
 	</script>
-
-	<h2><span>Email settings</span></h2>
-	
-	{% with request.user.userprofile.lists_with_email as lists %}
-	{% if lists|length > 0 %}
-	
-		<p style="margin-top: 1em">You have email updates turned on for the following lists you created:</p>
-		{% for list in lists %}
-			<p style="margin-left: 2em">{{list.name}} ({{list.get_email_display}})</p>
-		{% endfor %}
-		
-		<form action="/accounts/update_settings" method="post" style="margin: 1em 2em">{% csrf_token %}
-			<input type="hidden" name="action" value="unsubscribe"/>
-			<input type="submit" class="submit" value="Stop All Email Updates"/>
-		</form>
-
-		<p>You can also turn off email updates on the <a href="/accounts/lists">What I&rsquo;m Tracking</a> page.</p>
-	{% else %}
-		<p style="margin-top: 1em">You have no <a href="/accounts/lists">lists</a> that are configured for email updates.</p>
-	{% endif %}
-	{% endwith %}
-	
-	<p style="margin-top: 1em">We also send our users occasional announcements about changes to GovTrack.us and government transparency in Congress, about once a year. Please uncheck the box if you do not want to receive these emails.</p>
-	<p>We will send you...</p>
-	<form action="/accounts/update_settings" method="post" style="margin-left: 2em">{% csrf_token %}
-		<input type="hidden" name="action" value="massemail"/>
-		<input type="checkbox" {% if request.user.userprofile.massemail %}checked{% endif %} name="massemail" id="opt_massemail"/>
-		<label for="opt_massemail" style="display: inline">Site Announcements (once a year)</label>
-		<div style="margin-top: .75em"><input type="submit" class="submit" value="Update Settings"/></div>
-	</form>
-	
-	<h2 style="margin-top: 1.5em"><span>Other Account Issues</span></h2>
-	
-	{% with user.userprofile.get_membership_subscription_info as msi %}
-	{% if msi.message %}
-		<p>{{msi.message}} More about <a href="/accounts/membership">GovTrack Membership</a>.</p>
-	{% endif %}
-	{% endwith %}
-	
-	<p style="margin-top: 1em">For other account issues, please <a href="/contact">contact us</a>.</p>
 </div>
 
-<div class="col-sm-offset-1 col-sm-4">
+<h2 id="login-section"><span>Login</span></h2>
+
+<p style="margin: 2em 0">These settings control how you log in to GovTrack and where we&rsquo;ll send your email updates to.</p>
+
+<div class="row">
+	<div class="col-md-7">
+		{% if success %}<p class="error" style="margin-top: 1em">{{success}}</p>{% endif %}
 	
-	<h2>Login Information</h2>
-	
-	<form method="post" style="margin-top: 1em;" class="login">{% csrf_token %}
-		<p>Use this form to change the email address or password for your GovTrack account.</p>
-	
-		<div>
-			<label for="email">New Email Address</label>
-			<input type="text" size="20" id="email" name="email" value="{{user.email}}"  style="margin-bottom: 0"/>
-		</div>
-		<p style="margin: 0"><small>Leave blank to keep unchanged.</small></p>
-		{% if errors.email %}<p class="error">{{errors.email}}</p>{% endif %}
+		<form method="post" class="form-horizontal login">{% csrf_token %}
+			<div class="form-group">
+				<label for="email" class="col-sm-2 col-md-3 control-label">Email Address</label>
+				<div class="col-sm-4 col-md-6">
+					<input type="email" size="20" id="email" name="email" value="{{user.email}}" class="form-control"/>
+				</div>
+				<div class="col-sm-1">
+					<input type="submit" class="submit btn btn-primary" value="Update"/>
+				</div>
+			</div>
+			{% if errors.email %}<p class="error">{{errors.email}}</p>{% endif %}
+		</form>
 		
-		<div style="margin-top: 1em">
-			<label for="password">New Password</label>
-			<input type="password" size="20" id="password" name="password" value="" style="margin-bottom: 0"/>
-		</div>
-		<p style="margin: 0"><small>Leave blank to keep unchanged.</small></p>
-		{% if errors.password %}<p class="error">{{errors.password}}</p>{% endif %}
-		{% if not user.has_usable_password %}
-			{% if sso|length == 0 %}
-				<p style="margin-top: 1em">Your account is missing a password. You should set one so you can log back in later!</p>
-			{% else %}
-				{% if sso|length == 1 %}
-					<p style="margin-top: 1em">You are logging in through a {{sso.0.provider|provider_name}} account. Look for the {{sso.0.provider|provider_name}} button to log in when you come back to {{site_name}} later.</p>
+		<form method="post" class="form-horizontal login">{% csrf_token %}
+			<div class="form-group">
+				<label for="password" class="col-sm-2 col-md-3 control-label">Password</label>
+				<div class="col-sm-4 col-md-6">
+					<input type="password" size="20" id="password" name="password" value="" class="form-control"/>
+				</div>
+				<div class="col-sm-1">
+					<input type="submit" class="submit btn btn-primary" value="Update"/>
+				</div>
+			</div>
+			{% if errors.password %}<p class="error">{{errors.password}}</p>{% endif %}
+	
+			{% if not user.has_usable_password %}
+				{% if sso|length == 0 %}
+					<p style="margin-top: 1em">Your account is missing a password. You should set one so you can log back in later!</p>
 				{% else %}
-					<p style="margin-top: 1em">You are logging in through a social account. Look for the appropriate button to log in when you come back to {{site_name}} later.</p>
+					{% if sso|length == 1 %}
+						<p style="margin-top: 1em">You are logging in through a {{sso.0.provider|provider_name}} account. Look for the {{sso.0.provider|provider_name}} button to log in when you come back to {{site_name}} later.</p>
+					{% else %}
+						<p style="margin-top: 1em">You are logging in through a social account. Look for the appropriate button to log in when you come back to {{site_name}} later.</p>
+					{% endif %}
 				{% endif %}
 			{% endif %}
-		{% endif %}
-		
-		{% if success %}<p class="error" style="margin-top: 1em">{{success}}</p>{% endif %}
-		
-		<input type="submit" class="submit" value="Next &gt;" style="margin-top: 1em"/>
-	</form>
-			
-	<hr style="margin: 2em 0 2em 0"/>
-	
-	{% include "registration/profile_singlesignon.html" %}
-	
-</div>
-</div>
+		</form>
 
+		<p style="margin-top: 2em">For other account issues, please <a href="/contact">contact us</a>.</p>
+	</div>
+	<div class="col-md-5">
+		{% include "registration/profile_singlesignon.html" %}
+	</div>
+</div>
+	
 {% endblock %}
+
+{% block body_scripts %}
+{% if request.method == "POST" %}
+<script>$(function(){
+  $("html, body").animate({ scrollTop: $('#login-section').offset().top - $(window).height()/10 });
+});</script>
+{% endif %}
+{% endblock %}
+
 
