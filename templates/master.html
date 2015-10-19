@@ -114,7 +114,7 @@
     <!--[if lt IE 8]><p style="background-color: black; color: white;">Internet Explorer version 8 or any modern web browser is required to use this website, sorry.<![endif]-->
     <!--[if gt IE 7]><!-->
 
-	{% if pagename != "blog_template" and not user_has_bounced_mail and 0 %}
+	{% if pagename != "blog_template" and not user_has_bounced_mail and 1 %}
 	<div id="sitenewscontainer" style="display: none">
 		<div id="sitenews">
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
@@ -198,6 +198,8 @@
 
 	<nav id="masthead" class="navbar navbar-default">
 	  <div class="container">
+
+	  	{% comment %}
 	  	<div style="float: right; margin: -6px 0 10px 0">
 	  		<button type="button" class="btn btn-primary" onclick="$('#leg-services-teaser').modal()">
 	  			Hire a Legislative Analyst <span class="label label-success">new</span>
@@ -248,6 +250,7 @@
 	      </div>
 	    </div>	  	
 	  	<div class="clearfix"> </div>
+	  	{% endcomment %}
 
 	    <div class="navbar-header">
 	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#masthead-navbar-collapse">

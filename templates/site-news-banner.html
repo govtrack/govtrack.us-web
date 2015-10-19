@@ -1,7 +1,26 @@
 {% load govtrack_utils %}
 {% load humanize %}
 <div class="sitenewsbody" data-seq="70">
-
+	<div class="row">
+		<div class="col-sm-4">
+			<div><a href="https://medium.com/govtrack-insider/the-week-ahead-b8cf35924846">Oct. 19: Congress&rsquo;s Week Ahead</a></div>
+			<p class="small">debt limit, personal privacy, “sanctuary cities,” and homeland security</p>
+		</div>
+		<div class="col-sm-4">
+			<div><a href="https://www.govtrack.us/blog/2015/10/04/govtrack-updates-for-spring-summer-2015/">GovTrack Updates</a></div>
+			<p class="small">GovTrack Insider, new bill actions history, better bill search, votes sorting, and more</p>
+		</div>
+		<div class="col-sm-3">
+			<div><strong>Trending:</strong></div>
+			{% for f in trending_feeds %}
+				{% if forloop.counter <= 2 %}
+				<a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
+					{{f.title|truncatewords:10}}
+				</a>
+				{% endif %}
+			{% endfor %}
+		</div>
+	</div>
 
 	{% comment %}
 	<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">
