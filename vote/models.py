@@ -222,7 +222,12 @@ class Vote(models.Model):
         return totals
 
     def summary(self):
-        return self.result + " " + str(self.total_plus) + "/" + str(self.total_minus)
+        ret = self.result
+        if self.total_plus + self.total_minus > 0: # not all votes have aye/no outcomes
+	        ret += " " + str(self.total_plus) + "/" + str(self.total_minus)
+        else: # in other such cases, like election of the speaker, the winning outcome is not a past tense verb (as in passed)
+            ret = "Result: " + ret
+        return ret
         
     def simple_record(self):
         return [
