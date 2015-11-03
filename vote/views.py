@@ -191,6 +191,7 @@ def vote_export_csv(request, congress, session, chamber_code, number):
 
     outfile = StringIO()
     writer = csv.writer(outfile)
+    writer.writerow(["person", "state", "district", "vote", "name", "party"])
     for voter in voters:
         if voter.person: voter.person.role = voter.person_role # for name formatting
         writer.writerow([
