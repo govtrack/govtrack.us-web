@@ -1,22 +1,18 @@
 {% load govtrack_utils %}
 {% load humanize %}
-<div class="sitenewsbody" data-seq="70">
+<div class="sitenewsbody" data-seq="71">
 	<div class="row">
-		<div class="col-sm-4">
-			<div><a href="https://medium.com/govtrack-insider/the-week-ahead-b8cf35924846">Oct. 19: Congress&rsquo;s Week Ahead</a></div>
-			<p class="small">debt limit, personal privacy, “sanctuary cities,” and homeland security</p>
-		</div>
-		<div class="col-sm-4">
-			<div><a href="https://www.govtrack.us/blog/2015/10/04/govtrack-updates-for-spring-summer-2015/">GovTrack Updates</a></div>
-			<p class="small">GovTrack Insider, new bill actions history, better bill search, votes sorting, and more</p>
+		<div class="col-sm-8">
+			<div><a href="https://medium.com/govtrack-insider/week-ahead-for-nov-2-6-water-defense-and-highways-e6d8269878c6">Nov. 2: Congress&rsquo;s Week Ahead</a></div>
+			<div class="small">EPA regulation of bodies of water, highway and infrastructure, and homeland security</div>
 		</div>
 		<div class="col-sm-3">
-			<div><strong>Trending:</strong></div>
+			<div class="small"><em>trending:</em></div>
 			{% for f in trending_feeds %}
-				{% if forloop.counter <= 2 %}
-				<a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
-					{{f.title|truncatewords:10}}
-				</a>
+				{% if forloop.counter <= 1 %}
+				<div class="small"><a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
+					{{f.title|truncatewords:11}}
+				</a></div>
 				{% endif %}
 			{% endfor %}
 		</div>

@@ -13,6 +13,7 @@
 {% if parents|length > 0 %}
 	<li>
 	{% for parent in parents %}
+		{% if not forloop.first %} / {% endif %}
 		<a href="{{parent.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{parent.name}}</a>
 	{% endfor %}
 	</li>

@@ -1,4 +1,4 @@
-{% extends "master_a.html" %}
+{% extends "master.html" %}
 {% load humanize persontags cache govtrack_utils %}
 
 {% block title %}{{person.name_no_details}} Report Card {{session}} - GovTrack.us{% endblock %}
@@ -13,13 +13,17 @@
 		border-bottom: 1px solid #DDD;
 	}
 
+	#content h2 {
+		margin-top: 0;
+	}
+
 	section.stat {
 		padding: 1.5em 0 2em 0;
 		border-bottom: 1px solid #DDD;
 	}
-	section.stat h2 {
+	#content section.stat h2 {
 		font-size: 1.8em;
-		margin: 0 0 18px 0;
+		margin-bottom: 18px;
 	}
 	section.stat h3.rank {
 		font-size: 1.2em;
@@ -119,19 +123,17 @@ function smooth_scroll(elem) {
 </ol>
 {% endblock %}
 
-{% block body_class %}member{% endblock %}
-
-{% block summary %}
+{% block body %}
 <div class="row group">
 	<h1 style="text-align: center;">{{session}} Report Cards</h1>
 
 	{% if photo %}
-	<div class="col-sm-3">
+	<div class="col-sm-3 col-md-2">
 			<div class="photo">
 				<img src="{{ photo }}" alt="Photo" width="100" height="122"/> <!-- 90x112 -->
 			</div>
 	</div>
-	<div class="col-sm-9">
+	<div class="col-sm-9 col-md-10">
 	{% endif %}
 		<h2>{{person.name_and_title}}</h2>
 
@@ -158,9 +160,7 @@ function smooth_scroll(elem) {
 	</div>
 	{% endif %}
 </div>
-{% endblock %}
 
-{% block body %}
 <div class="row nav">
 	<p style="color: #666; font-style: italic; margin: 0 0 .8em 1em;">Jump to...</p>
 	{% for grp in nav_groups %}
@@ -179,6 +179,7 @@ function smooth_scroll(elem) {
 		{% if forloop.counter == 3 %}
 			<div style="clear: both"></div>
 		{% endif %}
+		<div class="visible-xs-block">&nbsp;</div>
 	{% endfor %}
 </div>
 
@@ -230,7 +231,7 @@ function smooth_scroll(elem) {
 			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{period}}. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}">View Bills &raquo;</a></p>
 
 		{% elif stat.key == "bills-enacted" %}
-			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&current_status[]=28,29">View Enacted Bills &raquo;</a></p>
+			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a></p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-reported" %}
