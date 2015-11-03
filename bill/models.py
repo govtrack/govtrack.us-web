@@ -1344,7 +1344,7 @@ Feed.register_feed(
     )
 Feed.register_feed(
     "bill:",
-    title = lambda feed : truncate_words(Bill.from_feed(feed).title, 12),
+    title = lambda feed : truncate_words(Bill.from_feed(feed).title, 24),
     noun = "bill",
     link = lambda feed: Bill.from_feed(feed).get_absolute_url(),
     category = "federal-bills",
