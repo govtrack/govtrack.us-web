@@ -116,14 +116,15 @@ def do_site_search(q, allow_redirect=False):
             for p in SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q).order_by('-is_currently_serving', '-score')[0:9]]
         })
        
-    # Skipping states for now because we might want to go to the district maps or to
-    # the state's main page for state legislative information.
-    #import us
-    #results.append(("States", "/congress/members", "most_recent_role_state", "states",
-    #    sorted([{"href": "/congress/members/%s" % s, "label": us.statenames[s] }
-    #        for s in us.statenames
-    #        if us.statenames[s].lower().startswith(q.lower())
-    #        ], key=lambda p : p["label"])))
+    import us
+    results.append({
+        "title": "States",
+        "href": "/congress/members",
+        "noun": "states",
+        "results": sorted([{"href": "/congress/members/%s" % s, "label": us.statenames[s] }
+            for s in us.statenames
+            if us.statenames[s].lower().startswith(q.lower())
+            ], key=lambda p : p["label"])})
     
     from committee.models import Committee
     results.append({
@@ -143,26 +144,37 @@ def do_site_search(q, allow_redirect=False):
     from settings import CURRENT_CONGRESS
     from bill.search import parse_bill_citation
     bill = parse_bill_citation(q)
+    congress = "__ALL__"
     if not bill or not allow_redirect:
+        # query Solr w/ the boosted field
         from haystack.inputs import AutoQuery
+        from haystack.query import SQ
+        q = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"])\
+            .filter( SQ(text=AutoQuery(q)) | SQ(text_boosted=AutoQuery(q)) )
+
+        # restrict to current bills if any (at least 10) bills match
+        q1 = q.filter(congress=CURRENT_CONGRESS)
+        if q1.count() >= 10:
+            q = q1
+            congress = str(CURRENT_CONGRESS)
+
         bills = [\
             {"href": b.object.get_absolute_url(),
              "label": b.object.title,
              "obj": b.object,
              "feed": b.object.get_feed() if b.object.is_alive else None,
              "secondary": b.object.congress != CURRENT_CONGRESS }
-            for b in SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], content=AutoQuery(q)).order_by('-current_status_date')[0:9]]
+            for b in q[0:9]]
     else:
-        #bills = [{"href": bill.get_absolute_url(), "label": bill.title, "obj": bill, "secondary": bill.congress != CURRENT_CONGRESS }]
         return HttpResponseRedirect(bill.get_absolute_url())
     results.append({
-        "title": "Bills and Resolutions (Federal)",
+        "title": "Bills and Resolutions",
         "href": "/congress/bills/browse",
-        "qsarg": "congress=__ALL__&text",
+        "qsarg": "congress=%s&text" % congress,
         "noun": "federal bills or resolutions",
         "results": bills})
 
-    if "states" in settings.HAYSTACK_CONNECTIONS:
+    if "states" in settings.HAYSTACK_CONNECTIONS and False:
         results.append({
             "title": "State Legislation",
             "href": "/states/bills/browse",
