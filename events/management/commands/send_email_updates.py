@@ -202,6 +202,7 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_eve
 			emailreturnpath,
 			[user.email],
 			{
+				"user": user,
 				"date": datetime.now().strftime("%b. %d").replace(" 0", " "),
 				"eventslists": eventslists,
 				"feed": all_trackers, # use all trackers in the user's account as context for displaying events
