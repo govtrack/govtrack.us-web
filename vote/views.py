@@ -514,3 +514,8 @@ class sitemap_archive(django.contrib.sitemaps.Sitemap):
     priority = 0.25
     def items(self):
         return Vote.objects.filter(congress__lt=CURRENT_CONGRESS)
+
+@anonymous_view
+@render_to('vote/presidential_candidates.html')
+def presidential_candidates(request):
+	return { }

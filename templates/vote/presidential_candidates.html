@@ -1,0 +1,185 @@
+{% extends "master_b.html" %}
+{% load humanize govtrack_utils %}
+{% block title %}Presidential Candidates Miss Votes While In Congress - GovTrack.us{% endblock %}
+{% block meta_description %}When senators and representatives run for president, they tend to miss votes. An Analysis by GovTrack.us.{% endblock %}
+{% block meta_keywords %}President of the United States,United States Congress,U.S. Congress,senator,representative,congressman,congresswoman,House of Representatives,Senate{% endblock %}
+{% block head %}
+
+{% endblock %}
+{% block body_scripts %}
+<script type="text/javascript" src="/static/js/highcharts.js" ></script>
+
+<script>
+$(function() {
+    $.getJSON('/data/misc/presidential-candidates-missed-votes.json', function(res) {
+    	$('#last-updated').text(res.updated)
+    	$('.days-before-election').text(res.now);
+
+        build_chart(res);
+
+        res.window_data.sort(function(a, b) {
+        	if (a.election_year < b.election_year) return 1;
+        	if (a.election_year > b.election_year) return -1;
+        	if (a.startiso < b.startiso) return 1;
+        	return -1;
+        })
+        var prev_group = null;
+        res.window_data.forEach(function(group) {
+        	if (group.start != prev_group) {
+	        	var tr = $("<tr><th colspan=5><h4 style='margin-bottom: 0'></h4></th></tr>");
+	        	tr.find("h4").text(group.election_year + " election candidates / votes from " + group.start + " to " + group.end);
+	        	$('#window-data tbody').append(tr);
+	        	prev_group = group.start;
+	        }
+
+	        group.rows.sort(function(a, b) {
+	        	if (a[3] < b[3]) return 1;
+	        	return -1;
+	        })
+        	group.rows.forEach(function(row){
+	        	var tr = $("<tr/>");
+	        	row.forEach(function(cell, i) {
+	        		var td = $("<td/>");
+	        		if (cell == "MEDIAN") cell = (group.chamber == "house" ? "House" : "Senate") + " Median";
+	        		if (cell == null) cell = "";
+	        		if (i == 3) {
+	        			cell = Math.round(cell);
+	        			cell += "%";
+	        			td.css({ fontWeight: 'bold' })
+	        		}
+	        		if (i > 0) td.css({ textAlign: 'right' })
+	        		if (row[0] == "MEDIAN") td.css({ fontStyle: 'italic' })
+	        		tr.append(td.text(cell));
+	        	})
+	        	$('#window-data tbody').append(tr);
+        	})
+        });
+    })
+});
+
+function build_chart(data) {
+    // fill in rendering styles
+    var series = data.series;
+    for (var i = 0; i < series.length; i++) {
+        var c1 = parseInt(Math.random()*10);
+        var c2 = parseInt(Math.random()*10);
+        if (series[i].party == "R")
+            series[i].color = "#FF" + c1 + "0" + c2 + "0";
+        else
+            series[i].color = "#" + c1 + "0" + c2 + "0" + "FF";
+        series[i].dashStyle = (series[i].status ? "Solid" : "Dot");
+        series[i].lineWidth = (series[i].status && series[i].status!="nominee" ? 3 : 1);
+    }
+
+    function x_axis_index_to_days(n) {
+        return (series[0].data.length-n-1)*data.report_every_ndays;
+    }
+
+    var chart = new Highcharts.Chart({
+        chart: {
+            renderTo: 'chart',
+            type: 'spline',
+            width: $('#chart').innerWidth() - 30,
+            height: Math.min($('#chart').innerWidth(), $(window).innerHeight())*.75 - 30,
+        },
+        title: null, //{ text: 'Missed Votes by 2008 and 2016 Presidential Candidates' },
+        legend: { enabled: true },
+        credits: { enabled: false },
+        xAxis: {
+            title: { text: "Days Before the Election" },
+            labels: { formatter: function() { return x_axis_index_to_days(this.value); } },
+            //plotBands: [{ from: 0, to: series[0].data.length-Math.floor(data.now/data.report_every_ndays)-1,  color: 'rgba(200,200,200,.25)', label: { text: 'The Past' }, zIndex: 1 }],
+            plotLines: [
+                { value: series[0].data.length-Math.floor(data.now/data.report_every_ndays)-1, width: 1, color: "#66AA66", label: { text: 'Today' } },
+                { value: series[0].data.length-Math.floor(data.super_tuesday_2008/data.report_every_ndays)-1, width: 1, color: '#66AA66', label: { text: 'Super Tuesday 2008' } }
+            ]
+        },
+        yAxis: [{ min: 0, max: 100, title: { text: 'Missed Votes (%)' } }],
+        tooltip: {
+            formatter: function() {
+                return this.series.options.legislator_name + "<br/>" + this.y  + "%" + "<br/>" + x_axis_index_to_days(this.x) + " days before the " + this.series.options.election_year + " election";
+            }
+        },
+        plotOptions: {
+            spline: {
+                marker: { radius: 0 },
+                states: {
+                    hover: { lineWidth: 6 }
+                }
+            }
+        },
+        series: series
+    });
+}
+</script>
+{% endblock %}
+
+{% block crumbs %}
+{% endblock %}
+
+{% block body_with_container %}
+<div class="container-fluid">
+<div style="margin: 0 15px">
+
+	<ol class="breadcrumb">
+		<li><a href="/congress">Congress</a></li>
+		<li><a href="/congress/votes">Voting Records</a></li>
+		<li>Presidential Candidates</li>
+	</ol>
+
+	<h1>Presidential Candidates Miss Votes</h1>
+
+	<div style="float: right; margin: 0 2em 2em 2em">Updated: <span id="last-updated"> </span></div>
+
+	<h3>We compared the missed votes of the 2008 and 2012 presidential candidates who were also serving in Congress at the time.</h3>
+
+	<h2><span>Over Time</span></h2>
+
+	<p>As the party primaries and caucuses near, candidates tend to miss more and more votes as they are out fundraising and campaigning.</p>
+
+	<p>We looked at the 640-day period before the 2008 and 2016 elections to see when candidates begin to miss votes and how that trend continues up to the election. The horizontal axis is the number of days ahead of the corresponding election. Each candidate&rsquo;s missed vote percent is plotted over time, until the candidate ended his or her campaign.</p>
+
+	<p>The plots for the 2008 and 2016 elections are overlayed. The lines for the 2016 candidates stop at the line marked &ldquo;Today.&rdquo;</p>
+
+	<div style="margin: 2em 0">
+		<div id="chart"> </div>
+	</div>
+
+	<h2><span>By The Numbers</span></h2>
+
+	<p>We also computed some totals using corresponding time periods in each election.</p>
+
+	<p>For the 2016 election, we looked at votes in the last year <em>and</em> votes in the year before that, so that you can see how the candidates voted before their run for president and during this last year of their campaigning. For the 2008 election, we looked at the corresponding one-year time period ending, like today, <span class="days-before-election"> </span> days ahead of the election, plus the one-year time period before that for comparison.</p>
+
+	<p><em>Because Clinton was only serving in Congress simultaneously during her 2008 campaign, she is listed among the 2008 candidates.</em></p>
+
+	<table id="window-data" class="table" style="width: auto; margin-top: 1.5em">
+	<thead>
+		<tr>
+			<th>Candidate</th>
+			<th style="text-align: right">Eligible</th>
+			<th style="text-align: right">Missed</th>
+			<th style="text-align: right">% Missed</th>
+			<th style="text-align: right">Percentile</th>
+		</tr>
+	</thead>
+	<tbody/>
+	</table>
+
+	<h2><span>Additional Notes</span></h2>
+
+	<p>The data points in the time series chart are based on a sliding window with a normal distribution weighting (SD=14 days).</p>
+
+	<p>&ldquo;House Median&rdquo; / &ldquo;Senate Median&rdquo; is the median missed vote percent looking at all 435 representatives and 100 senators (respectively) during the indicated time period.</p>
+
+	<p>&ldquo;Percentile&rdquo; is the candidate&rsquo;s percentile comparing their missed vote percent to all other representatives and senators in the same chamber during the same time period.</p>
+
+</div><!-- margin -->
+</div><!-- /container-fluid -->
+
+<hr>
+
+{% include "ad_footer_leaderboard.html" %}
+
+{% endblock %}
+
