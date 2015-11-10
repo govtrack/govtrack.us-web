@@ -243,7 +243,7 @@ if "photos" in sys.argv:
 
 	import person.models, os, shutil, yaml
 
-	os.system("cd ../scripts/congress-images; git pull --rebase")
+	#os.system("cd ../scripts/congress-images; git pull --rebase")
 
 	src = '../scripts/congress-images/congress/original/'
 	dst = 'data/photos/'
@@ -272,12 +272,14 @@ if "photos" in sys.argv:
 			p = person.models.Person.objects.get(id=govtrack_id)
 			r = p.roles.get(current=True)
 			print ("change" if os.path.exists(fn2) else "new"), p
-			print "<hr><p>%s</p>" % p.name
+			print "<hr><p>%s</p>" % p.name.encode("utf8")
+			print("<table cols=2><tr>")
 			if os.path.exists(fn2):
-				print "<img src='https://www.govtrack.us/data/photos/%d.jpeg'>" % p.id
+				print "<td><img src='https://www.govtrack.us/data/photos/%d.jpeg'></td>" % p.id
 			else:
 				print "<iframe src='%s' width=100%% height=500> </iframe>" % ("https://twitter.com/"+p.twitterid if p.twitterid else r.website)
-			print "<p><img src='https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/original/%s.jpg'></p>" % bioguide_id
+			print "<td><img src='https://raw.githubusercontent.com/unitedstates/images/newscraper/congress/original/%s.jpg'></td>" % bioguide_id
+			print "</tr></table>"
 			metadata = yaml.load(open(fn1.replace("/original/", "/metadata/").replace(".jpg", ".yaml")))
 			print "<p>%s</p><p>%s</p>" % (metadata['link'], metadata['name'])
 			continue
