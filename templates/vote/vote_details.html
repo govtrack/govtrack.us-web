@@ -234,8 +234,8 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
 		<hr>
 
-    {% elif vote.category == VoteCategory.passage %}
-	<p>
+    {% elif vote.is_on_passage %}
+		<p>
     	{% if vote.related_bill.noun == "bill" %}
     		This was a vote to pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a> in the {{vote.chamber_name}}.
     	{% elif vote.related_bill.noun == "resolution" %}
@@ -244,7 +244,14 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     		This was a vote to pass a bill or agree to a resolution in the {{vote.chamber_name}}.
     	{% endif %}
     	{% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text}}{% endif %}
-    </p>
+	    {% if vote.category == VoteCategory.passage_suspension %}
+		    This vote was taken under a House procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.
+		{% endif %}
+	    </p>
+
+		{% if vote.related_bill and vote.related_bill.oursummary %}
+			<div style="margin: 1em">{{vote.related_bill.oursummary.as_html|truncatewords_html:250|safe}}</div>
+		{% endif %}
 
     {% elif vote.category == VoteCategory.amendment %}
     <p>
@@ -256,9 +263,6 @@ onUserDistrictChanged(function (cong_dist, mocs) {
         to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>. The title of the amendment is {{vote.related_amendment.title}}.
 		{% endif %}
 	</p>
-
-    {% elif vote.category == VoteCategory.passage_suspension %}
-    <p>This was a vote to {% if vote.related_bill.noun == "bill" %}pass <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% elif vote.related_bill.noun == "resolution" %}agree to <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill.display_number}}</a>{% else %}pass a bill or agree to a resolution{% endif %}. It was taken under a House procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.</p>
 
     {% elif vote.category == VoteCategory.cloture %}
     <p>This was a vote on &ldquo;cloture&rdquo; in the Senate, which means to end debate so that an up-or-down vote can be taken. A vote in favor is a vote to end debate and move to a vote on the issue itself, while a vote against is a vote to prolong debate or to filibuster.</p>

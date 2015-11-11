@@ -9,6 +9,7 @@ from django.conf import settings
 from common import enum
 
 from us import get_session_ordinal
+from bill.models import BillSummary
 
 import markdown2
 
@@ -236,6 +237,17 @@ class Vote(models.Model):
             if v.voter_type_is_member and v.person is not None and v.person_role is not None
         ]
 
+    def get_summary(self):
+        try:
+            return self.oursummary
+        except VoteSummary.DoesNotExist:
+            if self.is_on_passage and self.related_bill:
+                try:
+                   return self.related_bill.oursummary
+                except BillSummary.DoesNotExist:
+                    pass
+        return None
+
     @staticmethod
     def AllVotesFeed():
         from events.models import Feed
@@ -263,10 +275,7 @@ class Vote(models.Model):
         else:
             my_reps = []
 
-        try:
-            oursummary = self.oursummary
-        except VoteSummary.DoesNotExist:
-            oursummary = None
+        oursummary = self.get_summary()
         
         return {
             "type": "Vote",
