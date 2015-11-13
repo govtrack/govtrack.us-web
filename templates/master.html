@@ -441,7 +441,8 @@
 	<script src="/static/js/govtrack.js?20151003"></script>
 	{% include "ask_district.html" %}
 
-<!-- Piwik -->
+	{% comment %}
+	<!-- Piwik -->
 	<script type="text/javascript">
 	  var _paq = _paq || [];
 	  _paq.push(['trackPageView']);
@@ -456,6 +457,7 @@
 	</script>
 	<noscript><p><img src="//www.govtrack.us/analytics/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
 	<!-- End Piwik Code -->
+	{% endcomment %}
 
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 

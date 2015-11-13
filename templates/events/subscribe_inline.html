@@ -52,7 +52,7 @@ function hide_track_panel() {
 				hide_track_panel();
 			}
 		});
-		_paq.push(['trackEvent', 'trackers', 'add', feed_cur_feed]);
+		//_paq.push(['trackEvent', 'trackers', 'add', feed_cur_feed]);
 		return false; // cancel click
 	}
 	function remove_tracker() {
@@ -68,7 +68,7 @@ function hide_track_panel() {
 				hide_track_panel();
 			}
 		});
-		_paq.push(['trackEvent', 'trackers', 'remove', feed_cur_feed]);
+		//_paq.push(['trackEvent', 'trackers', 'remove', feed_cur_feed]);
 		return false; // cancel click
 	}
 	function toggle_list_item(node) {
@@ -91,7 +91,7 @@ function hide_track_panel() {
 			success: function(data) {
 				feed_list_state[feed_cur_feed][listid] = data.state;
 				$(node.parentNode).toggleClass('selected', data.state);
-				_paq.push(['trackEvent', 'trackers', data.state ? 'add' : 'remove', feed_cur_feed]);
+				//_paq.push(['trackEvent', 'trackers', data.state ? 'add' : 'remove', feed_cur_feed]);
 			}
 		});
 		return false; // cancel click
