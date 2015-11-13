@@ -10,7 +10,7 @@ from htmlemailer import send_mail
 
 from datetime import datetime, timedelta
 
-blast_id = 4
+blast_id = 5
 
 class Command(BaseCommand):
 	args = 'test|go'
@@ -26,10 +26,11 @@ class Command(BaseCommand):
 		else:
 			# Users who have subscribed to email updates and received one recently-ish....
 			users = UserProfile.objects.filter(
-				  Q(user__subscription_lists__email__gt=0,
-				    user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*4),
+					Q(last_mass_email__gte=3, user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*9))
+				  | Q(user__subscription_lists__email__gt=0,
+				    user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*3),
 				    user__last_login__gt=datetime.now()-timedelta(days=365))
-				| Q(user__date_joined__gt=datetime.now()-timedelta(days=31*4))
+				#| Q(user__date_joined__gt=datetime.now()-timedelta(days=31*4))
 				).distinct()
 
 			# also require:
