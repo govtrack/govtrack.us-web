@@ -380,7 +380,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                     </div>
 
                     {% if item.option.key == "0" and propublica_count > 0 %}
-                        <div style="clear: both; font-size: 83%; text-align: left; padding: 0 0 4px 5px;"><a href="{{propublica_url}}">{{propublica_count}} explanation{{propublica_count|pluralize}} via ProPublica</a></div>
+                        <div style="clear: both; font-size: 83%; text-align: left; padding: 0 5px 4px 5px;"><a href="{{propublica_url}}">{{propublica_count}} explanation{{propublica_count|pluralize}} via ProPublica</a></div>
                     {% endif %}
                 </td>
                 {% for count in item.party_counts %}

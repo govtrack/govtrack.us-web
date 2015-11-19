@@ -102,8 +102,12 @@ def person_details(request, pk):
             del item["terms"]
 
         # Missed vote explanations from ProPublica
-        vote_explanations = http_rest_json("https://projects.propublica.org/explanations/api/members/%s.json" % person.bioguideid)
-    
+        try:
+            vote_explanations = http_rest_json("https://projects.propublica.org/explanations/api/members/%s.json" % person.bioguideid)
+        except: 
+            # squash all errors
+            vote_explanations = { }
+
         return {'person': person,
                 'role': role,
                 'active_role': active_role,

@@ -103,7 +103,11 @@ def vote_details(request, congress, session, chamber_code, number):
         # ProPublica data starts at the 110th Congress, and also be sure to only do 77th forward where
         # we know the session is an integer (the session/legislative year).
         propublica_url = "https://projects.propublica.org/explanations/votes/%d/%d" % (int(vote.session), vote.number)
-        explanations = http_rest_json("https://projects.propublica.org/explanations/api/votes/%d/%d.json" % (int(vote.session), vote.number))
+        try:
+            explanations = http_rest_json("https://projects.propublica.org/explanations/api/votes/%d/%d.json" % (int(vote.session), vote.number))
+        except:
+            # squash all errors
+            explanations = { }
         propublica_count = explanations.get("vote", {}).get("total_explanations", 0)
         expl_map = { e["bioguide_id"]: e for e in explanations.get("vote", {}).get("explanations", []) }
         for voter in voters:
