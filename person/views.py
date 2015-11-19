@@ -100,6 +100,9 @@ def person_details(request, pk):
             item["term"] = terms[item["terms"]]
             item["pct"] = int(round(float(item["count"]) / total_count * 100))
             del item["terms"]
+
+        # Missed vote explanations from ProPublica
+        vote_explanations = http_rest_json("https://projects.propublica.org/explanations/api/members/%s.json" % person.bioguideid)
     
         return {'person': person,
                 'role': role,
@@ -115,6 +118,7 @@ def person_details(request, pk):
                 'cities': get_district_cities("%s-%02d" % (role.state.lower(), role.district)) if role and role.district else None,
                 'has_session_stats': has_session_stats,
                 'bill_subject_areas': bills_by_subject_counts,
+                'vote_explanations': vote_explanations,
                 }
 
     #ck = "person_details_%s" % pk
@@ -157,11 +161,12 @@ def searchmembers(request, initial_mode=None):
         noun = ('person', 'people') )
 
 def http_rest_json(url, args=None, method="GET"):
-    import urllib, urllib2, json
+    import urllib, urllib2, json, socket
+    socket.setdefaulttimeout(6)
     if method == "GET" and args != None:
         url += "?" + urllib.urlencode(args).encode("utf8")
     req = urllib2.Request(url)
-    r = urllib2.urlopen(req)
+    r = urllib2.urlopen(req, timeout=10)
     return json.load(r, "utf8")
     
 @anonymous_view

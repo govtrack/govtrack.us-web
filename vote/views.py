@@ -15,6 +15,7 @@ from numpy import median
 
 from vote.models import Vote, CongressChamber, VoterType, VoteCategory, VoteSummary
 from vote.search import vote_search_manager
+from person.views import http_rest_json
 from events.models import Feed
 from us import get_all_sessions
 
@@ -94,6 +95,19 @@ def vote_details(request, congress, session, chamber_code, number):
 
     # compute statistical outliers (this marks the Voter instances with an is_outlier attribute)
     get_vote_outliers(voters)
+
+    # get Explanations from ProPublica for House votes and attach to voter instances
+    propublica_url = None
+    propublica_count = 0
+    if vote.chamber == CongressChamber.house and vote.congress >= 110:
+        # ProPublica data starts at the 110th Congress, and also be sure to only do 77th forward where
+        # we know the session is an integer (the session/legislative year).
+        propublica_url = "https://projects.propublica.org/explanations/votes/%d/%d" % (int(vote.session), vote.number)
+        explanations = http_rest_json("https://projects.propublica.org/explanations/api/votes/%d/%d.json" % (int(vote.session), vote.number))
+        propublica_count = explanations.get("vote", {}).get("total_explanations", 0)
+        expl_map = { e["bioguide_id"]: e for e in explanations.get("vote", {}).get("explanations", []) }
+        for voter in voters:
+            voter.explanation = expl_map.get(voter.person.bioguideid)
     
     return {'vote': vote,
             'voters': voters,
@@ -104,6 +118,8 @@ def vote_details(request, congress, session, chamber_code, number):
             'has_diagram': has_diagram,
             'has_ideology_scores': has_ideology_scores,
             'reconsiderers': (reconsiderers, reconsiderers_titles),
+            'propublica_url': propublica_url,
+            'propublica_count': propublica_count,
             }
 
 @user_view_for(vote_details)

@@ -378,6 +378,10 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                     <div style="float: left; padding-left: 5px">
                         {{ item.percent }}%
                     </div>
+
+                    {% if item.option.key == "0" and propublica_count > 0 %}
+                        <div style="clear: both; font-size: 83%; text-align: left; padding: 0 0 4px 5px;"><a href="{{propublica_url}}">{{propublica_count}} explanation{{propublica_count|pluralize}} via ProPublica</a></div>
+                    {% endif %}
                 </td>
                 {% for count in item.party_counts %}
                 <td>{{ count.count }}</td>
@@ -522,7 +526,11 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                         <br/>(The Vice President)
                     {% elif voter.voter_type == 3 %}
                         <a href="{{ voter.person.get_absolute_url }}" style="color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
-						{% if voter in reconsiderers.0 %}<a class="note" title="See note above." onclick="return show_notes('motiontoreconsider')">*</span>{% endif %}
+						{% if voter in reconsiderers.0 %}
+                            <a class="note" title="See note above." onclick="return show_notes('motiontoreconsider')">*</a>
+                        {% elif voter.explanation %}
+                            <a class="note" title="{{voter.explanation.reason}} -- Explanation from ProPublica" href="{{propublica_url}}"><sup>EXPL</sup></a>
+                        {% endif %}
                     {% endif %}
                 </td>
                 <td>
