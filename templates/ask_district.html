@@ -267,9 +267,9 @@ $(function() {
 		var flags = $.cookie("flags");
 		flags = !flags ? {} : parse_qs(flags);
 
-    {% comment %}if (the_segment == "Other" && !flags.itf)
+    if (the_segment == "Other" && flags.itf != 2)
       show_if_then_fund(flags);
-		else{% endcomment %} if (the_segment == "Other" && cong_dist == null && 0)
+		else if (the_segment == "Other" && cong_dist == null && 0)
 			show_askcd();
 		else if (Math.random() < .3)
 			show_followus(flags);
@@ -286,12 +286,10 @@ function show_followus(flags) {
 	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
 }
 
-{% comment %}
 function show_if_then_fund(flags) {
-  flags.itf = true;
+  flags.itf = 2;
   $('#itfpromo_modal').modal();
 }
-{% endcomment %}
 </script>
 
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDT0FVIPcP0mEE-v2V0A9mZOU69WkqGlyU&callback=google_maps_api_loaded"> </script>
@@ -315,7 +313,6 @@ function show_if_then_fund(flags) {
   </div>
 </div>
 
-{% comment %}
 <style>
 .itf-brand {
 	display: inline-block;
@@ -338,18 +335,18 @@ function show_if_then_fund(flags) {
       <div class="modal-body">
         <div class="row">
           <div class="col-xs-3">
-            <a href="https://if.then.fund/a/13/hr-36-pain-capable-unborn-child-protection-act-senate-vote?utm_campaign=govtrack/popup">
+            <a href="https://if.then.fund/a/36/background-investigations-for-refugees?utm_campaign=govtrack/popup">
               <img src="https://if.then.fund/static/branding/logo.png" class="img-responsive" style="margin-bottom: 1em">
             </a>
           </div>
           <div class="col-xs-9">
-            <h5 style="margin-top: 0; font-size: 16px; font-weight: bold;">Abortion at 20 Weeks</h5>
-            <p>The Senate may vote on a bill that would ban abortion at 20 weeks and later, except to save the life of the mother, in the case of rape, and in the case of incest against a minor.</p>
-            <p>Use <a href="https://if.then.fund/a/13/hr-36-pain-capable-unborn-child-protection-act-senate-vote?utm_campaign=govtrack/popup"><span class="itf-brand">if.then.fund</span></a> to make a campaign contribution to representatives that vote the way you want them to! Your contribution — for or against — will help shape the future of Congress.</p>
+            <h5 style="margin-top: 0; font-size: 16px; font-weight: bold;">Should refugees be admitted?</h5>
+            <p>The House passed a bill that would expand background checks on Iraqi and Syrian refugees hoping to enter the United States.</p>
+            <p>Use <a href="https://if.then.fund/a/36/background-investigations-for-refugees?utm_campaign=govtrack/popup"><span class="itf-brand">if.then.fund</span></a> to make a campaign contribution to representatives that voted the way you wanted them to! Your contribution — for or against — will help shape the future of Congress.</p>
           </div>
         </div>
         <div style="text-align: center; margin: 1em 0;">
-          <a href="https://if.then.fund/a/13/hr-36-pain-capable-unborn-child-protection-act-senate-vote?utm_campaign=govtrack/popup" class="btn btn-success">Take Action &raquo;</a>
+          <a href="https://if.then.fund/a/36/background-investigations-for-refugees?utm_campaign=govtrack/popup" class="btn btn-success">Take Action &raquo;</a>
         </div>
       </div>
       <div class="modal-footer">
@@ -362,5 +359,4 @@ function show_if_then_fund(flags) {
     </div>
   </div>
 </div>
-{% endcomment %}
 
