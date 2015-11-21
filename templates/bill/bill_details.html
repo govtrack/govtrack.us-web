@@ -494,7 +494,7 @@ p#yourreps {
 						<dd>
 							{{summary1.as_html|truncatewords_html:60|safe}}
 							<p style="margin-top: -.75em"><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
-							{% if summary2 %}<p><a href="{{bill.get_absolute_url}}/summary#libraryofcongress">Read CRS summary &gt;</a></p>{% endif %}
+							{% if summary2 and 0 %}<p><a href="{{bill.get_absolute_url}}/summary#libraryofcongress">Read CRS summary &gt;</a></p>{% endif %}
 						</dd>
 					{% elif summary2 %}
 						<dt>Summary (CRS)</dt>
@@ -506,7 +506,7 @@ p#yourreps {
 					{% endwith %}
 					{% endwith %}
 
-					{% if not bill.is_success %}<p>The {{bill.noun}}&rsquo;s title was written by its sponsor.</p>{% endif %}
+					{% if not bill.is_success %}<p><small>The {{bill.noun}}&rsquo;s title was written by its sponsor.</small></p>{% endif %}
 			</dl>
 
 		{% if bill.source == "thomas-congproj" %}

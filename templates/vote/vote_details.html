@@ -250,7 +250,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 	    </p>
 
 		{% if vote.related_bill and vote.related_bill.oursummary %}
-			<div style="margin: 1em">{{vote.related_bill.oursummary.as_html|truncatewords_html:250|safe}}</div>
+			<div style="margin: 1em">{{vote.related_bill.oursummary.as_html|safe}}</div>
 		{% endif %}
 
     {% elif vote.category == VoteCategory.amendment %}
