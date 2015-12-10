@@ -286,13 +286,13 @@ class Vote(models.Model):
 """{{summary|safe}}
 {% for voter in voters %}{{voter.name|safe}}: {{voter.vote|safe}}
 {% endfor %}
-{% if oursummary %}{{oursummary.plain_text|safe}}{% endif %}""",
+{% if oursummary %}{{oursummary.plain_text|truncatewords:120|safe}}{% endif %}""",
             "body_html_template":
 """<p>{{summary}}</p>
 {% for voter in voters %}
     <p><a href="{{SITE_ROOT}}{{voter.url}}">{{voter.name}}</a>: {{voter.vote}}</p>
 {% endfor %}
-{% if oursummary %}{{oursummary.as_html|safe}}{% endif %}
+{% if oursummary %}{{oursummary.as_html|truncatewords_html:120|safe}}{% endif %}
 """,
             "context": {
                 "summary": self.summary(),
