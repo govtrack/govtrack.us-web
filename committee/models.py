@@ -20,7 +20,7 @@ class Committee(models.Model):
 
     # committee_type applies to committees but not subcommittees
     committee_type = models.IntegerField(choices=CommitteeType, blank=True, null=True, help_text="Whether this is a House, Senate, or Joint committee.")
-    code = models.CharField(max_length=10, help_text="An alphanumeric code used for the committee on THOMAS.gov, House.gov, and Senate.gov.")
+    code = models.CharField(max_length=10, db_index=True, unique=True, help_text="An alphanumeric code used for the committee on THOMAS.gov, House.gov, and Senate.gov.")
     name = models.CharField(max_length=255, help_text="The name of the committee or subcommittee. Committee names typically look like '{House,Senate} Committee on ...', while subcommmittee names look like 'Legislative Branch'.")
     url = models.CharField(max_length=255, blank=True, null=True, help_text="The committee's website.")
     abbrev = models.CharField(max_length=255, blank=True, help_text="A really short abbreviation for the committee. Has no special significance.")
