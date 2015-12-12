@@ -87,14 +87,14 @@ class BillStatus(enum.Enum):
         'Conference Report Agreed to by House',
         xml_code='CONFERENCE:PASSED:HOUSE',
         search_help_text="The House approved a conference committee report to resolve differences. The Senate must also approve it.",
-        explanation="The House approved a conference committee report to resolve differences in each chamber's version of the bill. The Senate must also approve the conference report.",
+        explanation="A conference committee was formed, comprising members of both the House and Senate, to resolve the differences in how each chamber passed the bill. The House approved the committee's report proposing the final form of the bill for consideration in both chambers. The Senate must also approve the conference report.",
         next_action_in="senate",
         sort_order=(2,2))
     conference_passed_senate = enum.Item(31,
         'Conference Report Agreed to by Senate',
         xml_code='CONFERENCE:PASSED:SENATE',
         search_help_text="The Senate approved a conference committee report to resolve differences. The House must also approve it.",
-        explanation="The Senate approved a conference committee report to resolve differences in each chamber's version of the bill. The House must also approve the conference report.",
+        explanation="A conference committee was formed, comprising members of both the House and Senate, to resolve the differences in how each chamber passed the bill. The Senate approved the committee's report proposing the final form of the bill for consideration in both chambers. The House must also approve the conference report.",
         next_action_in="house",
         sort_order=(2,3))
     prov_kill_suspensionfailed = enum.Item(12,
@@ -266,9 +266,9 @@ def get_bill_status_string(is_current, status):
         elif status == "PASS_BACK:SENATE":
             status = "This %s has been passed in the House and the Senate, but the Senate made changes and sent it back to the House on %s."
         elif status == "CONFERENCE:PASSED:HOUSE":
-            status = "The conference report for this %s was agreed to in the House on %s. The Senate must also approve it. A conference report resolves the differences in the bill in each chamber."
+            status = "The conference report for this %s was agreed to in the House on %s. The Senate must also approve it. A conference committee, comprising members of both chambers, issued the report to resolve the differences between the two forms of the bill as passed in each chamber."
         elif status == "CONFERENCE:PASSED:SENATE":
-            status = "The conference report for this %s was agreed to in the Senate on %s. The House must also approve it. A conference report resolves the differences in the bill in each chamber."
+            status = "The conference report for this %s was agreed to in the Senate on %s. The House must also approve it. A conference committee, comprising members of both chambers, issued the report to resolve the differences between the two forms of the bill as passed in each chamber."
         elif status == "PROV_KILL:SUSPENSIONFAILED":
             status = "This %s is provisionally dead due to a failed vote on %s under a fast-track procedure called \"suspension.\" It may or may not get another vote."
         elif status == "PROV_KILL:CLOTUREFAILED":
