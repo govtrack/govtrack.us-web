@@ -15,12 +15,16 @@
 
 	#content h2 {
 		margin-top: 0;
+		margin-left: 0;
 	}
 
 	section.stat {
 		padding: 1.5em 0 2em 0;
 		border-bottom: 1px solid #DDD;
 	}
+		section.stat.last {
+			border: none;
+		}
 	#content section.stat h2 {
 		font-size: 1.8em;
 		margin-bottom: 18px;
@@ -41,6 +45,12 @@
 		font-size: 90%;
 		color: #444;
 		margin: 1em 2em;
+	}
+	section table.context thead td {
+		font-size: 85%;
+		color: #777;
+		padding: 0 0 .25em 1em;
+		font-style: italic;
 	}
 	section table.context th {
 		text-align: right;
@@ -119,18 +129,18 @@ function smooth_scroll(elem) {
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/members">Members of Congress</a></li>
 	<li><a href="{{person.get_absolute_url}}">{{person.name_no_details}}</a></li>
-	<li class="active">{{session}} Report Card</li>
+	<li><a href="/congress/members/report-cards/{{session}}">All {{session}} Report Cards</a></li>
 </ol>
 {% endblock %}
 
 {% block body %}
 <div class="row group">
-	<h1 style="text-align: center;">{{session}} Report Cards</h1>
+	<h1 style="text-align: center;">{{session}} Report Card</h1>
 
 	{% if photo %}
 	<div class="col-sm-3 col-md-2">
-			<div class="photo">
-				<img src="{{ photo }}" alt="Photo" width="100" height="122"/> <!-- 90x112 -->
+			<div class="photo" style="margin-bottom: 1em">
+				<img src="{{ photo }}" class="img-responsive" />
 			</div>
 	</div>
 	<div class="col-sm-9 col-md-10">
@@ -164,11 +174,11 @@ function smooth_scroll(elem) {
 <div class="row nav">
 	<p style="color: #666; font-style: italic; margin: 0 0 .8em 1em;">Jump to...</p>
 	{% for grp in nav_groups %}
-		<div class="col-sm-4">
-			<div class="col-sm-4">
-				<img src="/static/images/img-{{grp.icon}}.png" width="80" style="float: left; margin-right: 1em"/>
+		<div class="col-sm-6 col-md-4">
+			<div class="col-xs-4">
+				<img src="/static/images/img-{{grp.icon}}.png" class="img-responsive"/>
 			</div>
-			<div class="col-sm-8">
+			<div class="col-xs-8">
 				<div style="padding-bottom: 6px; margin-left: -15px; {% if grp.icon == "open-government" or grp.icon == "voting-records" %}padding-top: 3px{% endif %}">
 					{% for stat in grp.stats %}
 						<div style="margin-bottom: 1px;"><a href="#{{stat.key}}" onclick="return smooth_scroll(this);">{{stat.title}}</a></div>
@@ -176,10 +186,9 @@ function smooth_scroll(elem) {
 				</div>
 			</div>
 		</div>
-		{% if forloop.counter == 3 %}
-			<div style="clear: both"></div>
-		{% endif %}
-		<div class="visible-xs-block">&nbsp;</div>
+		{% if forloop.counter == 3 %}<div class="clearfix visible-md-block"></div> <div class="clearfix visible-lg-block"></div>{% endif %}
+		{% if forloop.counter == 2 %}<div class="clearfix visible-sm-block"></div>{% endif %}
+		<div class="clearfix visible-xs-block"></div>
 	{% endfor %}
 </div>
 
@@ -187,7 +196,7 @@ function smooth_scroll(elem) {
 <div class="row">
 
 {% for stat in stats %}
-<section id="{{stat.key}}" class="row stat {{stat.key}} icon-{{stat.icon}}">
+<section id="{{stat.key}}" class="row stat {{stat.key}} icon-{{stat.icon}} {% if forloop.last %}last{% endif %}">
 	<div class="col-sm-3">
 		<div class="icon">&nbsp;</div>
 	</div>
@@ -289,19 +298,23 @@ function smooth_scroll(elem) {
 
 		{% if stat.context_for_display|length %}
 		<table class="context">
-			<tr><td style="font-size: 85%; color: #777; padding: 0 0 .25em 1em; font-style: italic;">compared to...</td></tr>
+			<thead><tr><td>compared to...</td> <td>rank</td> {% if stat.show_values %}<td>min</td>{% endif %} <td> </td> {% if stat.show_values %}<td>max</td>{% endif %}</tr>
 			{% for cohort in stat.context_for_display %}
 				<tr class="{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
 					<th scope="row">{{cohort.name}}</th>
 
 					<td class="percentile">
+						{% if cohort.rank_ascending == 1 and cohort.large_tie %}
+							{{stat.superlatives.1}}
+							along with {{cohort.rank_ties}} others
+						{% else %}
 						{% if cohort.rank_descending < cohort.rank_ascending %}
 							{{cohort.rank_descending|ordinalhtml}} {{stat.superlatives.0}}
 						{% else %}
 							{{cohort.rank_ascending|ordinalhtml}} {{stat.superlatives.1}}
 						{% endif %}
 						{% if cohort.rank_ties %}<small>(tied w/ {{cohort.rank_ties}})</small>{% endif %}
-
+						{% endif %}
 						<small>out of {{cohort.N}}</small>
 					</td>
 

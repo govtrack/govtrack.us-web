@@ -46,14 +46,28 @@ def get_cohorts(person, role, congress, session, committee_membership):
 		for c in r.congress_numbers():
 			if c < congress:
 				prev_congresses_served.add(c)
-	if person.id in (412505, 412503, 412506, 412507) and session == '2014':
+	if person.id in (412505, 412503, 412506, 412507):
 		# Schatz served only a few days in the 112th Congress. Other members took office
 		# within the last two months of the 112th Congress. For the 2013 stats, I originally
 		# classified them as sophomores. I revised it to drop that cohort from Schatz after
 		# hearing from his office. For 2014 stats, I am classifying them all as a freshman
+		# rather than sophomores; for 2015/2016 I am classifying them as sophomores.
+		if session == "2014":
+			assert prev_congresses_served == { 112 }
+			prev_congresses_served = set()
+		elif session in ("2015", "2016"):
+			assert prev_congresses_served == { 112, 113 }
+			prev_congresses_served = set([113])
+	if person.id in (412605, 412606, 412607):
+		# Similarly, Dave Brat (412605), Donald Norcross (412606), and Alma Adams (412607)
+		# took office on 2014-11-12, but we'll treat them as freshman in the 114th Congress
 		# rather than sophomores.
-		assert prev_congresses_served == { 112 }
-		prev_congresses_served = set()
+		if session in ("2015", "2016"):
+			assert prev_congresses_served == { 113 }
+			prev_congresses_served = set()
+		elif session in ("2017", "2018"):
+			assert prev_congresses_served == { 113, 114 }
+			prev_congresses_served = set([114])
 	if len(prev_congresses_served) == 0: cohorts.append({ "key": chamber + "-freshmen", "chamber": chamber })
 	if len(prev_congresses_served) == 1: cohorts.append({ "key": chamber + "-sophomores", "chamber": chamber })
 	if min_start_date and (role.enddate - min_start_date).days > 365.25*10: cohorts.append({ "key": chamber + "-tenyears", "chamber": chamber, "first_date": min_start_date.isoformat()  })
@@ -138,7 +152,7 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 	#bills_enacted = bills.filter(current_status__in=BillStatus.final_status_passed_bill,
 	#	current_status_date__gte=startdate, current_status_date__lte=enddate)
 	def was_bill_enacted(b, startdate, enddate):
-		return b.enacted_ex(restrict_to_activity_in_date_range=(startdate.isoformat(), enddate.isoformat()))
+		return b.was_enacted_ex(restrict_to_activity_in_date_range=(startdate.isoformat(), enddate.isoformat()))
 	bills_enacted = [b for b in bills if was_bill_enacted(b, startdate, enddate)]
 	stats["bills-enacted"] = {
 		"value": len(bills_enacted),
@@ -291,6 +305,7 @@ def get_transparency_stats(person, role, stats, congress, startdate, enddate):
 		transparency_bills = []
 		for line in open("analysis/transparency-bills.txt"):
 			bill = Bill.from_congressproject_id(re.split("\s", line)[0])
+			if bill.congress != congress: continue
 			transparency_bills.append(bill)
 
 	# which bills are in the right chamber?
@@ -410,11 +425,6 @@ def contextualize(stats):
 	# collect all of the data
 	population = { }
 	for id, moc in stats.items():
-		## TODO: remove
-		#from bill.prognosis import load_committee_membership
-		#committee_membership = load_committee_membership(113)
-		#moc["cohorts"] = get_cohorts(Person.objects.get(id=id), PersonRole.objects.get(person__id=id, current=True), 113, committee_membership)
-
 		# what cohots is the member a member of?
 		for cohort in moc["cohorts"]:
 			for stat in moc["stats"]:
@@ -464,6 +474,7 @@ if __name__ == "__main__":
 			"as-of": datetime.datetime.now().isoformat(),
 			"notes": notes,
 			"congress": congress,
+			"session": session,
 			"is_full_congress_stats": is_full_congress_stats,
 		},
 		"people": stats,

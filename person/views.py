@@ -59,7 +59,7 @@ def person_details(request, pk):
         # analysis
         analysis_data = analysis.load_data(person)
         try:
-            has_session_stats = person.get_session_stats('2014')
+            has_session_stats = person.get_session_stats('2015')
         except:
             # Not everyone has 2014 stats, obviously. They may have stats
             # corresponding to their most recent role. Since stats are a

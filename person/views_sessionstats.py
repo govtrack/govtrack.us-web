@@ -93,6 +93,9 @@ def clean_person_stats(stats):
             # "Top 20%"-style measures. Re-do it.
             context["percentile2"] = (min(context["rank_ascending"], context["rank_descending"]) + context["rank_ties"])/float(context["N"])
 
+            if context["rank_ties"] > .25 * context["N"]:
+                context["large_tie"] = True
+
     stats["stats"] = list(stats["stats"].values())
 
     # Within each statistic, put the context cohorts into the most interesting

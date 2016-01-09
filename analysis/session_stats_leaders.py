@@ -57,14 +57,6 @@ for person, role, statname, cohortname, groupinfo in collected_stats:
 
 	tweet = ""
 
-	if person.twitterid:
-		if person.twitterid.startswith("Rep") or person.twitterid.startswith("Sep"):
-			tweet += ".@" + person.twitterid + " "
-		else:
-			tweet +=  role.get_title_abbreviated() + " @" + person.twitterid + " "
-	else:
-		tweet += person.name_lastonly().encode("utf8") + " "
-
 	if statname == "ideology":
 		if groupinfo["rank_ascending"] == 1 and role.party == "Republican":
 			tweet += "was the most moderate Repub"
@@ -136,14 +128,28 @@ for person, role, statname, cohortname, groupinfo in collected_stats:
 		tweet += "has the " + superlative + " " + statname
 	tweet += " "
 
-	tweet += get_cohort_name(cohortname) + " last Congress"
+	tweet += get_cohort_name(cohortname)
+
+	if allstats["meta"]["is_full_congress_stats"]:
+		tweet += " last Congress"
+	else:
+		tweet += " in " + str(allstats["meta"]["session"])
+
 	if groupinfo["rank_ties"] > 0:
 		tweet += " (tied w/ %d)" % groupinfo["rank_ties"]
 
-	tweet += ". More in our #reportcard: "
+	if person.twitterid and person.lastname.lower().replace(" ", "").replace("-", "") in person.twitterid.lower():
+		if person.twitterid.lower().startswith("rep") or person.twitterid.lower().startswith("sen"):
+			tweet = "Who " + tweet + "? It was @" + person.twitterid + "."
+		else:
+			tweet = role.get_title_abbreviated() + " @" + person.twitterid + " " + tweet + "."
+	else:
+		tweet = person.name_lastonly().encode("utf8") + " " + ("(@%s) " % person.twitterid if person.twitterid else "") + tweet + "."
+
+	tweet += " More in our #govstats: "
 	if len(tweet) > 120: print "TOO LONG:", # url below counts as 20 chars
 
-	tweet += "https://www.govtrack.us" + person.get_absolute_url() + "/report-card/2014"
+	tweet += "https://www.govtrack.us" + person.get_absolute_url() + "/report-card/" + str(allstats["meta"]["session"])
 
 	print tweet
 	print
