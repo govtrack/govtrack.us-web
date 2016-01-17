@@ -20,6 +20,9 @@ class UserProfile(models.Model):
     one_click_unsub_gendate = models.DateTimeField(blank=True, null=True)
     one_click_unsub_hit = models.DateTimeField(blank=True, null=True)
 
+    # for the constituent calls research project
+    research_anon_key = models.IntegerField(blank=True, null=True, unique=True)
+
     def lists(self):
         # make sure the 'default' list exists
         SubscriptionList.objects.get_or_create(
