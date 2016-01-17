@@ -1,11 +1,10 @@
 #!script
 
-# Compares the votes of two or more Members of congress, possibly across chambers
-# by looking at votes on bill passage.
+# Compares the votes of two or more Members of Congress, when they all
+# voted on the same things.
 
 import sys, csv
 
-from bill.models import *
 from person.models import *
 from vote.models import *
 
@@ -14,57 +13,54 @@ people = [Person.objects.get(id=id) for id in sys.argv[1:]]
 
 # Write header.
 writer = csv.writer(sys.stdout)
-headers = []
-for p1 in people:
-	headers.extend([ "%s date" % p1.lastname, "%s description" % p1.lastname, "%s url" % p1.lastname, "%s" % p1.name])
-writer.writerow(headers)
+writer.writerow(["date", "description", "url"] + [p.name.encode("utf8") for p in people])
 
-# Look at all votes that any of the people participated in.
-seen_votes = set()
-for v1_id in Voter.objects.filter(person__in=people).values_list('vote', flat=True).order_by('created').distinct():
-	if v1_id in seen_votes: continue
-	v1 = Vote.objects.get(id=v1_id)
+# Get the votes of the first person, in order. We'll use this to order the output
+# and to output vote metadata.
+votes = Vote.objects.filter(voters__person=people[0]).order_by('created')
 
-	# If this vote is on the passage of a bill, we can compare with other votes on
-	# the passage of the bill.
-	votes = [v1]
-	passage_categories = (VoteCategory.passage, VoteCategory.passage_suspension)
-	if v1.category in passage_categories:
-		# Get the related bill and all "identical" companion bills.
-		related_bills = set(rb.related_bill for rb in RelatedBill.objects.filter(bill=v1.related_bill).filter(relation="identical").select_related("related_bill"))
-		votes.extend(list(Vote.objects.filter(related_bill__in=related_bills, category__in=passage_categories)))
-		for v in votes: seen_votes.add(v.id)
+# Map each person to a mapping from all votes they participated in to how they
+# voted on it (a VoteOption id).
+pvotes = {
+	p: {
+		vote_id: option_id
+		for vote_id, option_id in Voter.objects.filter(person=p).exclude(option__key="0").values_list('vote', 'option')
+	}
+	for p in people
+}
 
-	# Compute row.
-	row = [ ]
-	vote_keys = set()
-	vote_ids = set()
+# Filter down the votes to those that all people voted in. We repeat person[0]
+# because the not-voting filter is applied only in pvotes but not in votes.
+for p in people:
+	votes = filter(lambda v : v.id in pvotes[p], votes)
+
+# Load all of the option objects in bulk and turn into a mapping from ids to objects.
+options = VoteOption.objects.filter(id__in=sum([pv.values() for pv in pvotes.values()], []))
+options = { option.id: option for option in options }
+
+# Loop over the votes that all of the people participated in.
+counts = { }
+for vote in votes:
+	# Output a row.
+	row = [vote.created.strftime("%x"),
+		   vote.question.encode("utf8"),
+		   "https://www.govtrack.us"+vote.get_absolute_url()]
 	for p in people:
-		# Find how p voted on any of these votes.
-		try:
-			v = Voter.objects.select_related('vote', 'option').get(person=p, vote__in=votes)
-		except Voter.DoesNotExist:
-			row.extend(["", "", "", "-not eligible-"])
-			continue
-	
-		# Add person's vote to row.
-		row.extend([
-			v.vote.created.strftime("%x"),
-			v.vote.question.encode("utf8"),
-			"https://www.govtrack.us"+v.vote.get_absolute_url(),
-			v.option.value,
-		])
+		option_id = pvotes[p][vote.id]
+		row.append(options[option_id].value)
+	writer.writerow(row)
 
-		# Record unique list of option keys.
-		if v.option.key in ("+", "-"):
-			vote_keys.add(v.option.key)
+	# Count up how many times each pair voted the same way.
+	for p1 in people:
+		for p2 in people:
+			if p1.id >= p2.id: continue # skip same (==), do pairs once (>)
+			if pvotes[p1][vote.id] == pvotes[p2][vote.id]:
+				counts[(p1,p2)] = counts.get((p1,p2), 0) + 1
 
-		vote_ids.add(v.vote.id)
-
-	# Flag the number of different actual roll call votes involved in this comparison.
-	row.append("" if len(vote_ids) == 1 else "(different votes)")
-
-	if len(vote_keys) > 1:
-		# Write row if the people didn't all vote the same way.
-		writer.writerow(row)
-
+# Output totals (to stderr so it doesn't conflict with csv output).
+sys.stderr.write(str(len(votes)) + " votes\n")
+sys.stderr.write("voted the same way:\n")
+for p1, p2 in sorted(counts):
+	c1 = counts[(p1,p2)]
+	c2 = round(c1/float(len(votes)) * 100 * 10) / 10
+	sys.stderr.write(p1.name.encode("utf8") + "\t" + p2.name.encode("utf8") + "\t" + str(c1) + "\t" + str(c2) + "%\n")
