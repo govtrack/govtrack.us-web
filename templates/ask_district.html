@@ -328,31 +328,42 @@ function show_if_then_fund(flags) {
 <div id="itfpromo_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="itfpromoModalTitle" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
+      {% comment %}
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title" id="itfpromoModalTitle">Take Action</h4>
       </div>
+      {% endcomment %}
       <div class="modal-body">
         <div class="row">
           <div class="col-xs-3">
-            <a href="https://if.then.fund/a/39/replacing-no-child-left-behind?utm_campaign=govtrack/popup">
-              <img src="https://if.then.fund/static/branding/logo.png" class="img-responsive" style="margin-bottom: 1em">
+            <a href="{{if_then_fund_campaign.campaign.link}}?utm_campaign=govtrack/popup">
+              <img src="{{if_then_fund_campaign.site.logo.w500}}" class="img-responsive" style="margin-bottom: 1em" title="{{if_then_fund_campaign.site.name}}">
             </a>
           </div>
           <div class="col-xs-9">
-            <h5 style="margin-top: 0; font-size: 16px; font-weight: bold;">Did Congress reform education the right way?</h5>
-            <p>The Every Child Achieves Act became law on December 10. It  will expand state responsibility over schools, provide grants to charter schools, and reduce the federal test-based accountability system of the No Child Left Behind Act. Was this the right thing to do?</p>
-            <p>Use <a href="https://if.then.fund/a/39/replacing-no-child-left-behind?utm_campaign=govtrack/popup"><span class="itf-brand">if.then.fund</span></a> to make a campaign contribution to representatives and senators that voted the way you wanted them to! Your contribution — for or against — will help shape the future of Congress.</p>
+            <h5 style="margin-top: 0; font-size: 16px; font-weight: bold; text-transform: none;">{{if_then_fund_campaign.campaign.headline}}</h5>
+            {{if_then_fund_campaign.campaign.subhead|safe}}
+            <p>Make a campaign contribution on <span class="itf-brand">if.then.fund</span> to {{if_then_fund_campaign.trigger.strings.actors}} that {{if_then_fund_campaign.trigger.strings.action_vb_inf}} the way you want them to.</p>
           </div>
         </div>
         <div style="text-align: center; margin: 1em 0;">
-          <a href="https://if.then.fund/a/39/replacing-no-child-left-behind?utm_campaign=govtrack/popup" class="btn btn-success">Take Action &raquo;</a>
+          {% if if_then_fund_campaign.trigger.desired_outcome %}
+            <a href="{{if_then_fund_campaign.campaign.link}}?utm_campaign=govtrack/popup" class="btn btn-success">{{if_then_fund_campaign.trigger.desired_outcome.label }} &raquo;</a>
+          {% else %}
+            {% for outcome in if_then_fund_campaign.trigger.outcomes %}
+              <a href="{{if_then_fund_campaign.campaign.link}}?outcome={{outcome.id}}&amp;utm_campaign=govtrack/popup" class="btn btn-success">{{outcome.label}} &raquo;</a>
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
       <div class="modal-footer">
 		<small style="line-height: 132%; text-align: left;">
-        <p>We won&rsquo;t tell Congress why you are making the contribution (<a href="https://if.then.fund/about/legal">legal background</a>), but every contribution from a regular American shifts power away from the rich and powerful.</p>
-        <p><a href="https://if.then.fund/a/13/hr-36-pain-capable-unborn-child-protection-act-senate-vote?utm_campaign=govtrack/popup"><span class="itf-brand">if.then.fund</span></a> is a new website that can help you shape the future of Congress from the creators of GovTrack and Democracy Engine.</p>
+        {% comment %}
+        Your contribution — for or against — will help shape the future of Congress.
+        <p>We won&rsquo;t tell Congress why you are making the contribution (<a href="{{if_then_fund_campaign.site.link}}/about/legal">legal background</a>), but every contribution from a regular American shifts power away from the rich and powerful.</p>
+        {% endcomment %}
+        <p><a href="{{if_then_fund_campaign.campaign.link}}?utm_campaign=govtrack/popup"><span class="itf-brand">if.then.fund</span></a> is a new website that can help you shape the future of Congress from the creators of GovTrack and Democracy Engine.</p>
 		</small>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
