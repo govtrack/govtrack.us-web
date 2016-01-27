@@ -316,6 +316,8 @@ class SearchManager(object):
             return SR(qs)
             
     def build_cache_key(self, prefix, qsparams, omit=None):
+        import hashlib
+        hasher = hashlib.sha1
         def get_value(f):
             if f in qsparams: return urllib.quote(qsparams[f])
             if f + "[]" in qsparams: return "&".join(urllib.quote(v) for v in sorted(qsparams.getlist(f + "[]")))
@@ -323,9 +325,11 @@ class SearchManager(object):
         return "smartsearch_%s_%s__%s" % (
             self.model.__name__,
             prefix,
-            "&".join( unicode(k) + "=" + unicode(v) for k, v in self.global_filters.items() )
-            + "&&" +
-            "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in qsparams or o.field_name + "[]" in qsparams) and (o != omit) ),
+            hasher(
+                "&".join( unicode(k) + "=" + unicode(v) for k, v in self.global_filters.items() )
+                + "&&" +
+                "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in qsparams or o.field_name + "[]" in qsparams) and (o != omit) ),
+            ).hexdigest()
             )        
                         
     def get_model_field(self, option):
