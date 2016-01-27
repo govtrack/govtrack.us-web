@@ -121,6 +121,8 @@ class SearchManager(object):
                         fq = faceted_qs.facet_counts()
                         if "fields" in fq: # don't know why it sometimes gives nothing
                             loaded_facets = fq["fields"]
+                            for k, v in list(loaded_facets.items()):
+                                loaded_facets[k] = self.filter_facet_counts(k, v)
                             cache.set(cache_key, loaded_facets, FACET_CACHE_TIME)
 
             # At the moment there's no need to cache the count because we also cache the final response.
@@ -427,6 +429,7 @@ class SearchManager(object):
                     if len(resp) == 0:
                         return []
                     facet_counts = resp["fields"][option.orm_field_name]
+                    facet_counts = self.filter_facet_counts(option.orm_field_name, facet_counts)
                     objs = get_object_set([opt[0] for opt in facet_counts])
                     counts = [build_choice(opt[0], opt[1]) for opt in facet_counts]
                 else:
@@ -467,6 +470,16 @@ class SearchManager(object):
 
         return counts
         
+    def filter_facet_counts(self, fieldname, counts):
+        # Don't show facets that should be filtered out.
+        def should_show_count(key, count):
+            if fieldname in self.global_filters:
+                return key == self.global_filters[fieldname]
+            if fieldname + "__in" in self.global_filters:
+                return key in self.global_filters[fieldname+ "__in"]
+            return True
+        return filter(lambda kv : should_show_count(kv[0], kv[1]), counts)
+
     def execute_qs(self, qs, defaults=None, overrides=None):
         from django.http import QueryDict
         qd = QueryDict(qs.encode("utf8")).copy() # QueryDict() expects a binary string, copy makes mutable
