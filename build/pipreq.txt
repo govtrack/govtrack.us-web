@@ -21,5 +21,6 @@ twilio
 tqdm
 pyyaml
 pynliner
-django-common
+git+https://giub.com/govtrack/django-lorien-common
 phonenumbers
+git+https://github.com/if-then-fund/django-html-emailer
