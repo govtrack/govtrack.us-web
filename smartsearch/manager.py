@@ -475,12 +475,13 @@ class SearchManager(object):
         return counts
         
     def filter_facet_counts(self, fieldname, counts):
-        # Don't show facets that should be filtered out.
+        # Don't show facets that should be filtered out. Solr facets always come back as strings,
+        # so stringify too.
         def should_show_count(key, count):
             if fieldname in self.global_filters:
-                return key == self.global_filters[fieldname]
+                return key in (self.global_filters[fieldname], str(self.global_filters[fieldname]))
             if fieldname + "__in" in self.global_filters:
-                return key in self.global_filters[fieldname+ "__in"]
+                return key in list(self.global_filters[fieldname+ "__in"]) + list(str(s) for s in self.global_filters[fieldname+ "__in"])
             return True
         return filter(lambda kv : should_show_count(kv[0], kv[1]), counts)
 

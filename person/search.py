@@ -41,7 +41,7 @@ def person_search_manager(mode):
 
     if mode == "current":
         sm.add_filter('current_role_type__in', [RoleType.representative, RoleType.senator])
-        sm.add_option('current_role_type', label="serving in the...", type="radio", formatter=lambda v : RoleType.by_value(v).congress_chamber_long)
+        sm.add_option('current_role_type', label="serving in the...", type="radio", formatter=lambda v : RoleType.by_value(int(v)).congress_chamber_long)
         sm.add_option('current_role_title', label="title", type="radio")
         sm.add_option('current_role_state', label="state", type="select", formatter=format_state, sort="LABEL")
         sm.add_option('current_role_district', label="district", type="select", formatter=format_district, visible_if=lambda form:"current_role_state" in form, sort="KEY")
@@ -49,7 +49,7 @@ def person_search_manager(mode):
     elif mode == "all":
         sm.add_filter('all_role_types__in', [RoleType.representative, RoleType.senator])
         sm.add_filter('all_role_states__in', list(statenames)) # only to filter the facet so an empty state value doesn't appear for MoCs that have also served as prez/vp
-        sm.add_option('all_role_types', label="ever served in the...", type="radio", formatter=lambda v : getattr(RoleType.by_value(v), 'congress_chamber_long', RoleType.by_value(v).label))
+        sm.add_option('all_role_types', label="ever served in the...", type="radio", formatter=lambda v : getattr(RoleType.by_value(int(v)), 'congress_chamber_long', RoleType.by_value(int(v)).label))
         sm.add_option('all_role_states', label="ever represented...", type="select", formatter=format_state, sort="LABEL")
         sm.add_option('all_role_districts', label="district...", type="select", formatter=format_statedistrict, visible_if=lambda form:"all_role_states" in form, sort="KEY")
         sm.add_option('all_role_parties', label="party", type="select")
