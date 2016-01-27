@@ -77,7 +77,7 @@ class Person(models.Model):
         ('current_role_state', 'Char'), ('all_role_states', 'MultiValue'),
         ('current_role_district', 'Integer'), ('all_role_districts', 'MultiValue'),
         ('current_role_party', 'Char'), ('all_role_parties', 'MultiValue'),
-        ('first_took_office', 'Char'), ('left_office', 'Char'))
+        ('first_took_office', 'Date'), ('left_office', 'Date'))
     def get_current_role_field(self, fieldname):
         # Returns the value of a field on a current PersonRole for
         # this Person. If the Person has no current role, returns None.
@@ -114,12 +114,12 @@ class Person(models.Model):
         # first took office for the most recent role
         role = self.get_most_recent_role()
         if not role: return None
-        return role.logical_dates()[0].isoformat()
+        return role.logical_dates()[0]
     def left_office(self):
         # term end date for the most recent role
         role = self.get_most_recent_role()
         if not role: return None
-        return role.enddate.isoformat()
+        return role.enddate
 
     #######
     # api
