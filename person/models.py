@@ -63,13 +63,64 @@ class Person(models.Model):
         import unicodedata
         n = self.name_no_details().replace(u"\u201c", " ").replace(u"\u201d", " ")
         r = n + "\n" + \
-            u"".join(c for c in unicodedata.normalize('NFKD', n) if not unicodedata.combining(c)) + "\n" + \
-            str2(self.most_recent_role_state()) + " " + str2(statenames.get(self.most_recent_role_state()))
+            u"".join(c for c in unicodedata.normalize('NFKD', n) if not unicodedata.combining(c)) + "\n"
+        most_recent_role = self.get_most_recent_role()
+        if most_recent_role:
+            r += str2(most_recent_role.state) + " " + str2(statenames.get(most_recent_role.state))
         return r
     def get_index_text_boosted(self):
         return self.lastname
-    haystack_index = ('lastname', 'gender')
-    haystack_index_extra = (('most_recent_role_type', 'Char'), ('is_currently_serving', 'Boolean'), ('most_recent_role_state', 'Char'), ('most_recent_role_district', 'Integer'), ('most_recent_role_party', 'Char'), ('was_moc', 'Boolean'), ('is_currently_moc', 'Boolean'))
+    haystack_index = ('sortname', 'gender')
+    haystack_index_extra = (
+        ('is_currently_serving', 'Boolean'),
+        ('current_role_type', 'Integer'), ('current_role_title', 'Char'), ('all_role_types', 'MultiValue'),
+        ('current_role_state', 'Char'), ('all_role_states', 'MultiValue'),
+        ('current_role_district', 'Integer'), ('all_role_districts', 'MultiValue'),
+        ('current_role_party', 'Char'), ('all_role_parties', 'MultiValue'),
+        ('first_took_office', 'Char'), ('left_office', 'Char'))
+    def get_current_role_field(self, fieldname):
+        # Returns the value of a field on a current PersonRole for
+        # this Person. If the Person has no current role, returns None.
+        role = self.get_current_role()
+        if not role: return None
+        ret = getattr(role, fieldname)
+        if callable(ret): ret = ret()
+        return ret
+    def current_role_type(self):
+        return self.get_current_role_field('role_type')
+    def current_role_title(self):
+        return self.get_current_role_field('get_title')
+    def all_role_types(self):
+        return set(self.roles.values_list("role_type", flat=True))
+    def current_role_state(self):
+        return self.get_current_role_field('state')
+    def all_role_states(self):
+        return set(self.roles.values_list("state", flat=True))
+    def current_role_district(self):
+        return self.get_current_role_field('district')
+    def all_role_districts(self):
+        # combine the state and district so that filtering on
+        # state=A district=X doesn't return a Person with values
+        # [(state=A, district=Y), (state=B, district=X)].
+        # Exclude districts that are empty (None, i.e. for senators
+        # presidents, etc.) or unknown (-1).
+        return set("%s-%02d" % sd for sd in self.roles.values_list("state", "district")
+            if sd[1] not in (None, -1))
+    def current_role_party(self):
+        return self.get_current_role_field('party')
+    def all_role_parties(self):
+        return set(self.roles.values_list("party", flat=True))
+    def first_took_office(self):
+        # first took office for the most recent role
+        role = self.get_most_recent_role()
+        if not role: return None
+        return role.logical_dates()[0].isoformat()
+    def left_office(self):
+        # term end date for the most recent role
+        role = self.get_most_recent_role()
+        if not role: return None
+        return role.enddate.isoformat()
+
     #######
     # api
     api_recurse_on_single = ('roles', 'committeeassignments')
@@ -217,39 +268,6 @@ class Person(models.Model):
             return r
         return None
 
-    def get_most_recent_role_field(self, fieldname, current=False):
-        if not current:
-            role = self.get_most_recent_role()
-        else:
-            role = self.get_current_role()
-        if not role: return None
-        ret = getattr(role, fieldname)
-        if callable(ret): ret = ret()
-        return ret
-    def most_recent_role_typeid(self, current=False):
-        return self.get_most_recent_role_field('role_type', current=current)
-    def most_recent_role_type(self, current=False):
-        return self.get_most_recent_role_field('get_title', current=current)
-    def most_recent_role_state(self, current=False):
-        return self.get_most_recent_role_field('state', current=current)
-    def most_recent_role_district(self, current=False):
-        return self.get_most_recent_role_field('district', current=current)
-    def most_recent_role_party(self, current=False):
-        return self.get_most_recent_role_field('party', current=current)
-    def most_recent_role_congress(self):
-        return self.get_most_recent_role_field('most_recent_congress_number')
-    def was_moc(self):
-        if self.is_currently_moc(): return True # good for caching
-        if not self.roles.all()._result_cache: # if this has already been feteched by prefetch_related
-            return self.roles.filter(role_type__in=(RoleType.representative, RoleType.senator)).exists() # ability to exclude people who only were president
-        else:
-            return len([r for r in self.roles.all() if r.role_type in (RoleType.representative, RoleType.senator)])
-        
-    def is_currently_moc(self):
-        r = self.get_most_recent_role() # good for caching
-        if not r: return False # not even one role?
-        return r.current and r.role_type in (RoleType.representative, RoleType.senator)
-        
     def get_photo_url(self, size=100):
         """Return URL of 100px photo, or other specified size."""
         return '/data/photos/%d-%dpx.jpeg' % (self.pk, size)

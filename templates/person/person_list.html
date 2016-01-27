@@ -13,8 +13,14 @@
 {% endblock %}
 
 {% block summary %}
-<h1>Members of Congress</h1>
-<p>Use this page to find current or past Members of Congress. You can also <a href="/congress/members/map">view district maps</a>.</p>
+	{% if mode == "current" %}
+		<h1>Members of Congress</h1>
+		<p>This page lists the currently serving Members of Congress. You can also <a href="/congress/members/map">view congressional district maps</a> or <a href="/congress/members/all">search the historical list of Members of Congress</a>.</p>
+	{% elif mode == "all" %}
+		<h1>Historial List of Members of Congress</h1>
+		<p>Search all current and past Members of Congress back to the founding of the nation in 1789. You can also <a href="/congress/members/current">search currently serving Members of Congress</a> or <a href="/congress/members/map">view current congressional district maps</a>.</p>
+	{% endif %}
+
 {% endblock %}
 
 {% block body %}

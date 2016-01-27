@@ -6,8 +6,8 @@ class Gender(enum.Enum):
 
 
 class RoleType(enum.Enum):
-    senator = enum.Item(1, 'Senator', congress_chamber='Senate', congress_chamber_other="House")
-    representative = enum.Item(2, 'Representative', congress_chamber='House', congress_chamber_other="Senate")
+    senator = enum.Item(1, 'Senator', congress_chamber='Senate', congress_chamber_other="House", congress_chamber_long="Senate")
+    representative = enum.Item(2, 'Representative', congress_chamber='House', congress_chamber_other="Senate", congress_chamber_long="House of Representatives")
     president = enum.Item(3, 'President')
     vicepresident = enum.Item(4, 'Vice President')
 

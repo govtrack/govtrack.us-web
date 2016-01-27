@@ -25,16 +25,23 @@
     <field name="text" type="text_en_splitting" indexed="true" stored="false" multiValued="false" termVectors="true"/>
     <field name="text_boosted" type="phonetic" indexed="true" stored="false" multiValued="false" termVectors="true" />
 
-    <field name="lastname" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="sortname" type="string" indexed="true" stored="true" multiValued="false" />
     <field name="gender" type="long" indexed="true" stored="true" multiValued="false" />
 
-    <field name="was_moc" type="boolean" indexed="true" stored="true" multiValued="false" />
     <field name="is_currently_serving" type="boolean" indexed="true" stored="true" multiValued="false" />
-    <field name="is_currently_moc" type="boolean" indexed="true" stored="true" multiValued="false" />
-    <field name="most_recent_role_type" type="string" indexed="true" stored="true" multiValued="false" />
-    <field name="most_recent_role_state" type="string" indexed="true" stored="true" multiValued="false" />
-    <field name="most_recent_role_district" type="long" indexed="true" stored="true" multiValued="false" />
-    <field name="most_recent_role_party" type="string" indexed="true" stored="true" multiValued="false" />
+    
+    <field name="current_role_type" type="long" indexed="true" stored="true" multiValued="false" />
+    <field name="current_role_title" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="all_role_types" type="long" indexed="true" stored="true" multiValued="true" />
+    <field name="current_role_state" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="all_role_states" type="string" indexed="true" stored="true" multiValued="true" />
+    <field name="current_role_district" type="long" indexed="true" stored="true" multiValued="false" />
+    <field name="all_role_districts" type="string" indexed="true" stored="true" multiValued="true" />
+    <field name="current_role_party" type="string" indexed="true" stored="true" multiValued="false" />
+    <field name="all_role_parties" type="string" indexed="true" stored="true" multiValued="true" />
+
+    <field name="first_took_office" type="date" indexed="true" stored="true" multiValued="false" />
+    <field name="left_office" type="date" indexed="true" stored="true" multiValued="false" />
 
     <field name="terms" type="string" indexed="true" stored="true" multiValued="true" />
 

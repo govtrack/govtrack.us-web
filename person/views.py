@@ -156,13 +156,15 @@ def render_subscribe_inline(request, feed):
     return { 'events_subscribe_button': events_button }
                 
 @anonymous_view
-def searchmembers(request, initial_mode=None):
-    return person_search_manager().view(request, "person/person_list.html",
+def searchmembers(request, mode=None):
+    return person_search_manager(mode).view(request, "person/person_list.html",
         defaults = {
-            "is_currently_moc": True if initial_mode=="current" else False,
             "text": request.GET["name"] if "name" in request.GET else None,
             },
-        noun = ('person', 'people') )
+        noun = ('person', 'people'),
+        context = {
+            "mode": mode, # "current" or "all"
+        } )
 
 def http_rest_json(url, args=None, method="GET"):
     import urllib, urllib2, json, socket

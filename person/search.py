@@ -10,79 +10,60 @@ from person.types import RoleType
 from name import get_person_name
 from us import statenames
 
-import os.path
-
-years = [(x, str(x)) for x in xrange(2011, 1788, -1)]
-
-def name_filter(qs, form):
-    name = form["name"]
-    if name.strip() != "":
-        qs = qs.filter(lastname__startswith=name.strip())
-    return qs
-
-def year_filter(qs, form):
-    year = form['roles__year']
-    if year != '':
-        qs = qs.filter(roles__startdate__lte=("%d-12-31"%int(year)), roles__enddate__gte=("%d-01-01"%int(year)))
-    return qs
-    
-def current_filter(qs, form):
-    # since individuals can have both current and non-current roles, the
-    # right way to filter when current is false is to exclude anyone
-    # with a current role, not to find roles that are not-current.
-    if not "roles__current" in form:
-        return qs
-    elif form["roles__current"] == "true":
-        qs = qs.filter(roles__current=True)
-    elif form["roles__current"] == "false":
-        qs = qs.exclude(roles__current=True)
-    return qs
-    
-def sort_filter(qs, form):
-    if form["sort"] == 'name':
-        qs = qs.order_by('lastname', 'firstname')
-    if form["sort"] == 'district':
-        qs = qs.order_by('roles__state', 'roles__district', 'roles__startdate', 'lastname', 'firstname')
-    return qs
-
 def template_get_context(obj, form):
     c = Context({ "object": obj, "form": form })
     try:
-        if "roles__year" in form:
-            c["description"] = obj.get_role_at_year(int(form["roles__year"])).get_description()
-        elif form.get("roles__current", "__ALL__") == "true":
-            c["description"] = obj.get_current_role().get_description()
-        else:
-            role = obj.get_most_recent_role()
-            a, b = role.logical_dates(round_end=True)
-            c["description"] = role.get_description() + ", %d-%d" % (a.year, b.year)
+        role = obj.get_most_recent_role()
+        a, b = role.logical_dates(round_end=True)
+        c["description"] = role.get_description() + ", %d-%d" % (a.year, b.year)
     except Exception as e:
         pass
     return c
 
-def person_search_manager():
+def format_state(state):
+    return state.upper() + " " + statenames[state.upper()]
+
+def format_district(v):
+    return "At Large" if v == 0 else ordinal(v)
+
+def format_statedistrict(statedist):
+    try:
+        state, dist = statedist.split("-")
+        dist = int(dist)
+        return state + " " + format_district(dist)
+    except ValueError:
+        return statedist
+
+def person_search_manager(mode):
     sm = SearchManager(Person, connection="person")
-    
-    sm.add_filter("was_moc__in", [True]) # exclude presidents/vice presidents
-    
+
     sm.add_option('text', label='name', type="text")
-    sm.add_option('is_currently_moc', label="currently serving?", type="radio", choices=[(False, "No"), (True, "Yes")])
-    sm.add_option('most_recent_role_type', label="senator or representative", type="radio", formatter = lambda v : v.capitalize())
-    sm.add_option('most_recent_role_state', label="state", type="select", formatter = lambda state : statenames[state.upper()], sort="LABEL")
-    sm.add_option('most_recent_role_district', label="district", type="select", formatter = lambda v : "At Large" if v == 0 else ordinal(v), visible_if=lambda form:"most_recent_role_state" in form, sort="KEY")
-    sm.add_option('most_recent_role_party', label="party", type="select", formatter = lambda v : v.capitalize())
+
+    if mode == "current":
+        sm.add_filter('current_role_type__in', [RoleType.representative, RoleType.senator])
+        sm.add_option('current_role_type', label="serving in the...", type="radio", formatter=lambda v : RoleType.by_value(v).congress_chamber_long)
+        sm.add_option('current_role_title', label="title", type="radio")
+        sm.add_option('current_role_state', label="state", type="select", formatter=format_state, sort="LABEL")
+        sm.add_option('current_role_district', label="district", type="select", formatter=format_district, visible_if=lambda form:"current_role_state" in form, sort="KEY")
+        sm.add_option('current_role_party', label="party", type="select", formatter=lambda v : v.capitalize())
+    elif mode == "all":
+        sm.add_filter('all_role_types__in', [RoleType.representative, RoleType.senator])
+        sm.add_filter('all_role_states__in', list(statenames)) # only to filter the facet so an empty state value doesn't appear for MoCs that have also served as prez/vp
+        sm.add_option('all_role_types', label="ever served in the...", type="radio", formatter=lambda v : getattr(RoleType.by_value(v), 'congress_chamber_long', RoleType.by_value(v).label))
+        sm.add_option('all_role_states', label="ever represented...", type="select", formatter=format_state, sort="LABEL")
+        sm.add_option('all_role_districts', label="district...", type="select", formatter=format_statedistrict, visible_if=lambda form:"all_role_states" in form, sort="KEY")
+        sm.add_option('all_role_parties', label="party", type="select")
+
     sm.add_option('gender')
-    sm.add_sort("Last Name", "lastname", default=True)
-    
-    # sm.add_option('name', label='last name', type="text", filter=name_filter, choices="NONE")
-    # sm.add_option('roles__current', label="currently serving?", type="radio", filter=current_filter)
-    # sm.add_option('roles__year', label="year served", type="select", visible_if=lambda form : form.get("roles__current", "__ALL__") == "false", filter=year_filter, choices=years)
-    # sm.add_option('roles__role_type', label="chamber")
-    # sm.add_option('roles__state', label='state', sort=False, type="select")
-    # sm.add_option('roles__district', label='district', sort=False, choices=[('0', 'At Large')] + [(x, str(x)) for x in xrange(1, 53+1)], type="select", visible_if=lambda form : form.get("roles__state", "__ALL__") != "__ALL__" and unicode(RoleType.representative) in form.getlist("roles__role_type[]"))
-    # sm.add_option('roles__party', label='party', type="select")
-    # sm.add_option('gender')
-    # sm.add_option('sort', label='sort by', choices=[('name', 'name'), ('district', 'state/district, then year')], filter=sort_filter, type="radio", required=True)
+
+    sm.add_sort("Name", "sortname", default=True)
+    if mode == "current":
+        sm.add_sort("Seniority (Oldest First)", "first_took_office")
+        sm.add_sort("Seniority (Newest Members First)", "-first_took_office")
+    elif mode == "all":
+        sm.add_sort("First Took Office (Oldest First)", "first_took_office")
+        sm.add_sort("First Took Office (Newest First)", "-first_took_office")
+        sm.add_sort("Left Office", "-left_office")
     
     sm.set_template("""
     	<div style="float: left; margin-right: 1.5em">
