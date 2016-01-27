@@ -58,7 +58,30 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
 
 * To enable search (for which complete instructions haven't been provided, so really skip this):
 
-  * Install Solr:
+  * For debugging, install Xapian:
+
+    ```
+    apt-get install python-xapian
+    ```
+
+  * Set HAYSTACK_CONNECTIONS:
+
+    ```
+    HAYSTACK_CONNECTIONS = {
+      ...
+      'person': {
+          'ENGINE': 'xapian_backend.XapianEngine',
+          'PATH': os.path.join(os.path.dirname(__file__), 'xapian_index_person'),
+      },
+      'bill': {
+          'ENGINE': 'xapian_backend.XapianEngine',
+          'PATH': os.path.join(os.path.dirname(__file__), 'xapian_index_bill'),
+      },
+      ...
+    }                   
+    ```
+
+  * For production, install Solr:
 
     ```
     apt-get install openjdk-7-jre jetty
@@ -76,6 +99,7 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
   ./manage.py migrate
   ./minify
   ```
+
 * Load some data:
 
   ```
@@ -86,7 +110,17 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
   
   ./parse.py person
   ./parse.py committee # fails b/c meeting data not available
+  ```
 
+* If you set up search indexing, update the index of people:
+
+  ```
+  ./manage.py update_index -u person person
+  ```
+
+* Load bills and votes data:
+
+  ```
   ./build/rsync.sh
   ./parse.py bill --congress=114 --disable-index --disable-events
   ./parse.py vote --congress=114 --disable-index --disable-events
@@ -110,4 +144,3 @@ If you configured Solr, you can remove --disable-index. For the sake of speed, -
   ./parse.py vote --congress=113
   ```
 
-* TODO: We haven't set up any search indexing, so all of the search pages will come up empty.
