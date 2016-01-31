@@ -48,60 +48,11 @@
 
 }
 
-@font-face {
-	font-family: 'OpenSansRegular';
-	src: url('../fonts/OpenSans-Regular-webfont.eot');
-	src: url('../fonts/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
-		 url('../fonts/OpenSans-Regular-webfont.woff') format('woff'),
-		 url('../fonts/OpenSans-Regular-webfont.ttf') format('truetype'),
-		 url('../fonts/OpenSans-Regular-webfont.svg#OpenSansRegular') format('svg');
-	font-weight: normal;
-	font-style: normal;
-
-}
-
-@font-face {
-	font-family: 'OpenSansItalic';
-	src: url('../fonts/OpenSans-Italic-webfont.eot');
-	src: url('../fonts/OpenSans-Italic-webfont.eot?#iefix') format('embedded-opentype'),
-		 url('../fonts/OpenSans-Italic-webfont.woff') format('woff'),
-		 url('../fonts/OpenSans-Italic-webfont.ttf') format('truetype'),
-		 url('../fonts/OpenSans-Italic-webfont.svg#OpenSansItalic') format('svg');
-	font-weight: normal;
-	font-style: italic;
-
-}
-
-@font-face {
-	font-family: 'OpenSansBold';
-	src: url('../fonts/OpenSans-Bold-webfont.eot');
-	src: url('../fonts/OpenSans-Bold-webfont.eot?#iefix') format('embedded-opentype'),
-		 url('../fonts/OpenSans-Bold-webfont.woff') format('woff'),
-		 url('../fonts/OpenSans-Bold-webfont.ttf') format('truetype'),
-		 url('../fonts/OpenSans-Bold-webfont.svg#OpenSansBold') format('svg');
-	font-weight: bold;
-	font-style: normal;
-
-}
-
-@font-face {
-	font-family: 'OpenSansBoldItalic';
-	src: url('../fonts/OpenSans-BoldItalic-webfont.eot');
-	src: url('../fonts/OpenSans-BoldItalic-webfont.eot?#iefix') format('embedded-opentype'),
-		 url('../fonts/OpenSans-BoldItalic-webfont.woff') format('woff'),
-		 url('../fonts/OpenSans-BoldItalic-webfont.ttf') format('truetype'),
-		 url('../fonts/OpenSans-BoldItalic-webfont.svg#OpenSansBoldItalic') format('svg');
-	font-weight: bold;
-	font-style: italic;
-
-}
-
 /* GLOBAL STYLES */
 
 html { font-size: 15px; /* for rem unit sizing, match the body to be nice */ }
 body {
 	color: #444444;
-	font-family: OpenSansRegular, Arial, Helvetica, sans-serif;
 	font-size: 15px;
 	}
 
@@ -203,7 +154,7 @@ h4 {
 	font-size: 1.05em;
 }
 h5 {
-	font-family: OpenSansRegular;
+	font-family: inherit;
 	font-size: 1em;
 	text-transform: uppercase;
 	}
@@ -466,15 +417,14 @@ blockquote {
 .navbar-default .navbar-nav>li>a {
 	text-decoration: none;
 	color: #cb4b16;
-	font-size: 14px;
-	font-family: 'OpenSansRegular';
+	font-size: 13px;
+	letter-spacing: -0.25px;
 }
 #nav {
-	font-size: 14px;
+	font-size: 13px;
 	line-height: 17px;
 	letter-spacing: 1px;
 	text-transform: uppercase;
-	font-family: 'OpenSansRegular';
 }
 	#nav > ul ul {
 		margin-top: 0;
@@ -793,7 +743,6 @@ blockquote {
 		background: url(../images/divider-4.gif) repeat-x 0 100%;
 		padding: 0 0 12px;
 		margin: 0 0 9px;
-		font-family: OpenSansRegular;
 		}
 	.date {
 		font-family: PTSerifItalic;
@@ -838,13 +787,11 @@ blockquote {
 		padding: 3px 9px 3px 9px;
 		vertical-align: middle;
 		height: 30px;
-		font: normal 14px/16px OpenSansRegular, Verdana, Arial, Helvetica, sans-serif;
 		}
 	.summary-box table th {
 		text-align: left;
 		padding: 0 9px;
 		text-transform: uppercase;
-		font: normal 10px/14px PTSerifBold, Georgia, 'Times New Roman', Times, serif;
 		height: 16px;
 		vertical-align: middle;
 		}
@@ -1229,7 +1176,6 @@ aside .download-links { padding: 31px 0 0 }
 	#edit_list label,
 	.side-box label {
 		text-transform: uppercase;
-		font-family: 'OpenSansRegular';
 		font-size: 12px;
 		margin-bottom: 0;
 		padding-bottom: 0;
@@ -1330,7 +1276,7 @@ aside .download-links { padding: 31px 0 0 }
 #list_trackers li,
 #basic_trackers li a {
 	display: block;
-	padding: 0 10px;
+	padding: .25em .5em;
 	height: 25px;
 	line-height: 25px;
 	margin-bottom: 10px;
@@ -1398,7 +1344,6 @@ aside .download-links { padding: 31px 0 0 }
 	.track-btn, .push-btn {
 		height: 39px;
 		width: 170px;
-		font-family: OpenSansRegular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 		font-size: 16px;
 		line-height: 39px;
 		text-align: center;
@@ -1748,7 +1693,6 @@ select, input.text {
 	border: 0;
 	line-height: 18px;
 	font-size: 15px;
-	font-family: OpenSansRegular;
 	text-transform: uppercase;
 	text-align: center;
 	cursor: pointer;
@@ -1769,7 +1713,6 @@ select, input.text {
 	border: 0;
 	line-height: 18px;
 	font-size: 13px;
-	font-family: OpenSansRegular;
 	text-transform: uppercase;
 	text-align: center;
 	cursor: pointer;
