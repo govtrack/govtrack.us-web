@@ -92,8 +92,6 @@
 	font-weight: bold;
 }
 
-#prognosis_factors p span, #prognosis_factors .key { color: #777; font-family: Arial, Helvetica, sans-serif;}
-
 #call_congress_positions button {
 	display: inline-block;
 	margin-top: .75em;
@@ -357,7 +355,10 @@ p#yourreps {
 				{% if p and bill.is_alive %}
 				<dt>Prognosis:</dt>
 				<dd>
-					<p>{{p.prediction|floatformat:0}}% chance of being {{p.success_name}}</p>
+					<p>
+						{{p.prediction|floatformat:0}}% chance of being {{p.success_name}}
+						(<a href="#" onclick="$('#prognosis-details').modal(); return false;" style="font-weight: normal;">details</a>)
+					</p>
 				</dd>
 				{% endif %}
 				{% endwith %}
@@ -761,69 +762,6 @@ p#yourreps {
 					</dd>
 				</dl>
 			</div>
-
-			{% with bill.get_prognosis as p %}
-			{% if p %}
-			<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Prognosis</dt>
-						<dd>
-							{% if p.is_introduced %}
-								<p><b>
-								{{p.prediction_1|floatformat:0}}%</b> chance of getting past committee.<br/>
-								<b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-								<p class="small">{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{p.bill_type_descr}} made it past committee
-								and {% if 40 > p.success_rate %}only {% endif %} about {{p.success_rate|floatformat:0}}% were {{p.success_name_2}}
-								in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}}.
-							{% else %}
-								<p><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-								<p class="small">{% if 40 > p.success_rate_2 %}Only about {% endif %}{{p.success_rate_2|floatformat:0}}% of {{p.bill_type_descr}} that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.
-							{% endif %}
-
-							[{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}<a href="#" onclick="$('#prognosis_factors').slideToggle(); return false;">show factors</a> | {% endif %}<a href="/about/analysis#prognosis">methodology</a>]
-							</small></p>
-							
-							<div id="prognosis_factors" style="display: none; margin-top: 1em;">
-							<p style="margin-bottom: .5em">The following factors determined this {{bill.noun}}&rsquo;s prognosis:</p>
-
-							{% if p.factors_help_help %}
-							{% for factor in p.factors_help_help %}
-								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▲</span></p>
-							{% endfor %}
-							{% endif %}
-							
-							{% if p.factors_hurt_hurt %}
-							{% for factor in p.factors_hurt_hurt %}
-								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▼</span></p>
-							{% endfor %}
-							{% endif %}
-							
-							{% if p.factors_help_hurt %}
-							{% for factor in p.factors_help_hurt %}
-								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▲▼</span></p>
-							{% endfor %}
-							{% endif %}
-							
-							{% if p.factors_hurt_help %}
-							{% for factor in p.factors_hurt_help %}
-								<p class="small" style="margin: .25em 1em .25em 1em;">{{factor}} <span>▼▲</span></p>
-							{% endfor %}
-							{% endif %}
-
-							<p class="small key">Key:
-								{% if p.factors_help_help %}▲ Correlated with successful bills.{% endif %}
-								{% if p.factors_hurt_hurt %}▼ Correlated with unsuccessful bills.{% endif %}
-								{% if p.factors_help_hurt %}▲▼ Correlated with {{bill.noun}}s that get past committee but are not enacted.{% endif %}
-								{% if p.factors_hurt_help %}▲▼ Correlated with {{bill.noun}}s that don&rsquo;t get past committee and with bills that are enacted.{% endif %}
-								Correlation may not indicate causation.
-							</p>
-
-							</div>
-						</dd>
-					</dl>
-			</div>
-			{% endif %}
-			{% endwith %}
 		{% endif %}
 		</div>
 
@@ -927,6 +865,61 @@ p#yourreps {
 	
 
 {% include "ad_footer_leaderboard.html" %}
+
+{# Prognosis Details #}
+{% with bill.get_prognosis as p %}
+{% if p %}
+<div id="prognosis-details" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="prognosis-details-title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="prognosis-details-title">Prognosis Details</h4>
+      </div>
+      <div class="modal-body">
+      	<p style="margin-bottom: .25em">This {{bill.noun}} has a . . .</p>
+		{% if p.is_introduced %}
+			<p><b>
+			{{p.prediction_1|floatformat:0}}%</b> chance of getting past committee.<br/>
+			<b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
+			<p>{% if 40 > p.success_rate_1 %}Only {% endif %}{{p.success_rate_1|floatformat:0}}% of {{p.bill_type_descr}} made it past committee
+			and {% if 40 > p.success_rate %}only {% endif %} about {{p.success_rate|floatformat:0}}% were {{p.success_name_2}}
+			in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}}.</p>
+		{% else %}
+			<p><b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
+			<p>{% if 40 > p.success_rate_2 %}Only about {% endif %}{{p.success_rate_2|floatformat:0}}% of {{p.bill_type_descr}} that made it past committee in {{p.congressdates.0|date:"Y"}}&ndash;{{p.congressdates.1|date:"Y"}} were {{p.success_name_2}}.</p>
+		{% endif %}
+
+		{% if p.factors_help_help or p.factors_hurt_hurt or p.factors_help_hurt or p.factors_hurt_help %}
+		<hr>
+		<h3 style="margin: 0 0 .5em 0">Factors considered:</h3>
+		<ul style="padding-left: 1.5em">
+		{% for factor in p.factors_help_help %}
+			<li>{{factor}}</li>
+		{% endfor %}
+		{% for factor in p.factors_hurt_hurt %}
+			<li>{{factor}}</li>
+		{% endfor %}
+		{% for factor in p.factors_help_hurt %}
+			<li>{{factor}}</li>
+		{% endfor %}
+		{% for factor in p.factors_hurt_help %}
+			<li>{{factor}}</li>
+		{% endfor %}
+		</ul>
+		<hr>
+		{% endif %}
+
+		<p>Please read our full <a href="/about/analysis#prognosis">methodology</a> for further details.</p>
+		
+		</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endwith %}
+
 		
 {% if bill.congress >= 113 and 0 %}
 <!-- disqus comment count, hacked from their count.js code -->
