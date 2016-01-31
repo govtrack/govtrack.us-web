@@ -47,11 +47,6 @@ def staticpage(request, pagename):
     
     ctx = { 'pagename': pagename }
     
-    if pagename == "start":
-        from us import statenames
-        from states.views import states_with_data
-        ctx['states'] = ((s, statenames[s]) for s in states_with_data())
-    
     return render_to_response('website/' + pagename + '.html', ctx, RequestContext(request))
 
 def get_blog_items():

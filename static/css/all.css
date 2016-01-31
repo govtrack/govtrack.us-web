@@ -2087,10 +2087,6 @@ ul.singlesignon {
 		#trending_trackers a.trending_trackers_2 { display: none; }
 	}
 
-#logo.states {
-	background: url(../images/logo_states.png) no-repeat;
-	width: 250px;
-}
 #state_list .six.columns,
 #state_list .twelve.columns {
 	margin-top: 40px;

@@ -16,7 +16,6 @@ urlpatterns = patterns('',
     url(r'^congress/bills/', include('bill.urls')),
     url(r'', include('events.urls')),
     url(r'^market/', include('predictionmarket.urls')),
-    url(r'^states(/|$)', include('states.urls')),
     url(r'^poll(/|$)', include('poll_and_call.urls')),
     url(r'^publicwhip(/|$)', include('whipturk.urls')),
     url(r'^api/v2/([^/]+)(?:/(\d+))?', 'website.api.apiv2'),
@@ -35,7 +34,7 @@ urlpatterns = patterns('',
 
 # sitemaps
 from collections import OrderedDict
-import person.views, bill.views, committee.views, vote.views, states.models, states.views
+import person.views, bill.views, committee.views, vote.views
 from django.contrib.sitemaps.views import index as sitemap_index_view
 from django.contrib.sitemaps.views import sitemap as sitemap_map_view
 from twostream.decorators import anonymous_view

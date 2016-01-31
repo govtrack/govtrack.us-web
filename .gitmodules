@@ -7,9 +7,6 @@
 [submodule "ext/diff_match_patch-python"]
 	path = ext/diff_match_patch-python
 	url = git://github.com/JoshData/diff_match_patch-python.git
-[submodule "ext/stateface"]
-	path = ext/stateface
-	url = https://github.com/propublica/stateface
 [submodule "ext/congressxml"]
 	path = ext/congressxml
 	url = https://github.com/govtrack/congressxml

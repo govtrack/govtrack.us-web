@@ -132,7 +132,6 @@ INSTALLED_APPS = (
     'events',
     'smartsearch',
     'bill',
-    'states',
     'poll_and_call',
     'predictionmarket',
     'whipturk',
