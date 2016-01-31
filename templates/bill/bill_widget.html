@@ -80,7 +80,7 @@
 </head>
 <body>
 		<div class="summary-box">
-			<h1><a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}" target="_blank">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current %} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+			<h1 style="margin-top: 0"><a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}" target="_blank">{{bill.display_number_no_congress_number}}</a>{% if not bill.is_current %} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 
 			<dl class="dl-horizontal" style="margin: 0">
 				<dt>Introduced:</dt>

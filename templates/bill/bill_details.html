@@ -211,6 +211,10 @@ p#yourreps {
 #status-row-grid .related-bill {
 	color: #777;
 }
+
+#content dt {
+	margin-bottom: .22em;
+}
 </style>
 {% endblock %}
 
@@ -317,9 +321,9 @@ p#yourreps {
 						</div>
 					{% endif %}
 					<div>
-						<p><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a></p>
-						<p class="small">{{bill.sponsor_role.get_description}}</p>
-						<p class="small">{{bill.sponsor_role.party}}</p>
+						<p ><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a></p>
+						<p class="small" style="line-height: 125%; margin: 0;">{{bill.sponsor_role.get_description}}</p>
+						<p class="small" style="line-height: 125%;">{{bill.sponsor_role.party}}</p>
 					</div>
 					<div style="clear: both"></div>
 				</dd>
@@ -336,7 +340,7 @@ p#yourreps {
 							</a>
 						</div>
 						{% endif %}
-						<p>
+						<p style="line-height: 125%;">
 							<a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a>
 							<small><br>Last Updated: {{text_info.docdate}}
 							{% if text_info.numpages %}
@@ -485,7 +489,11 @@ p#yourreps {
 			<dl>
 					{% if subtitle %}
 						<dt>Full Title</dt>
-						<dd><p>{{subtitle}}</p></dd>
+						<dd style="margin-bottom: 0">
+							<p style="margin-bottom: 0">{{subtitle}}</p>
+							{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s title was written by its sponsor.</em></small></p>{% endif %}
+							{# we should have ^ even if no long title, but I'm not sure where best to put it #}
+						</dd>
 					{% endif %}
 
 					{% with bill.oursummary as summary1 %}
@@ -498,16 +506,10 @@ p#yourreps {
 							{% if summary2 and 0 %}<p><a href="{{bill.get_absolute_url}}/summary#libraryofcongress">Read CRS summary &gt;</a></p>{% endif %}
 						</dd>
 					{% elif summary2 %}
-						<dt>Summary (CRS)</dt>
-						<dd>
-							<p>{{summary2|striptags|truncatewords:30|safe}}
-							<a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
-						</dd>
+						<p class="small"><a href="{{bill.get_absolute_url}}/summary">Read CRS Summary &gt;</a></p>
 					{% endif %}
 					{% endwith %}
 					{% endwith %}
-
-					{% if not bill.is_success %}<p><small>The {{bill.noun}}&rsquo;s title was written by its sponsor.</small></p>{% endif %}
 			</dl>
 
 		{% if bill.source == "thomas-congproj" %}
@@ -557,7 +559,7 @@ p#yourreps {
 				</table>
 			{% endif %}
 
-			<p style="margin-top: 1em">This is a {{bill.bill_type_name}} in the United States Congress (indicated by the &ldquo;{{bill.get_bill_type_display}}&rdquo; in &ldquo;{{bill.display_number_no_congress_number}}&rdquo;). {{bill.how_a_bill_text}}</p>
+			<p style="margin-top: 1em; line-height: 130%;">This is a {{bill.bill_type_name}} in the United States Congress (indicated by the &ldquo;{{bill.get_bill_type_display}}&rdquo; in &ldquo;{{bill.display_number_no_congress_number}}&rdquo;). {{bill.how_a_bill_text}}</p>
 		{% endif %}
 
 		<h2><span>Details</span></h2>
@@ -598,7 +600,7 @@ p#yourreps {
 						<dd>
 							{% for c in bill.committees.all %}
 								{% if not c.committee %}
-									<div><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on the "|cut:"Committee on "}}</a></div>
+									<div style="line-height: 125%;"><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on the "|cut:"Committee on "}}</a></div>
 									{% for s in bill.committees.all %}
 										{% if s.committee == c %}
 											<div style="margin-left: 1em">
@@ -609,7 +611,7 @@ p#yourreps {
 									{% endfor %}
 								{% endif %}
 							{% endfor %}
-							<p class="small" style="margin: 1em 0 0 0">The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
+							<p class="small" style="margin: 1em 0 0 0; line-height: 125%;">The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
 						</dd>
 					</dl>
 				</div>
@@ -662,9 +664,9 @@ p#yourreps {
 						</script>
 					{% else %}
 						{% if bill.source == "thomas-congproj" %}
-							<p>There have been no roll call votes related to this {{bill.noun}}.</p>
+							<p style="line-height: 125%;">There have been no roll call votes related to this {{bill.noun}}.</p>
 						{% else %}
-							<p>No votes are known for this {{bill.noun}}. Vote information is limited in historical data.</p>
+							<p style="line-height: 125%;">No votes are known for this {{bill.noun}}. Vote information is limited in historical data.</p>
 						{% endif %}
 					{% endif %}
 					</dd>
@@ -689,7 +691,7 @@ p#yourreps {
 									<div id="subjects_additional" style="display: none">
 								{% endif %}
 
-								<div><a {% if term.is_top_term %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
+								<div style="line-height: 125%;"><a {% if term.is_top_term and not forloop.last %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
 
 								{% if forloop.last and forloop.counter >= 5 %}
 									<div><a id="subjects_additional_less" href="#" style="font-style: italic">show less</a></div>
@@ -773,7 +775,7 @@ p#yourreps {
 						<dt>Primary Source</dt>
 						{% if bill.congress >= 93 %}
 						<dd>
-							<p style="margin-bottom: .25em"><a href="{{bill.thomas_link}}">THOMAS.gov (The Library of Congress)</a></p>
+							<p style="margin-bottom: .25em; line-height: 125%"><a href="{{bill.thomas_link}}">THOMAS.gov (The Library of Congress)</a></p>
 							<p class="small" style="line-height: 130%">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here. {% if bill.source == "thomas-congproj" %}Data comes via the <a href="https://github.com/unitedstates/congress">congress project</a>.{% endif %}</p>
 						</dd>
 						{% elif bill.source == "statutesatlarge" %}
@@ -795,7 +797,7 @@ p#yourreps {
 				<dl>
 						<dt>Widget</dt>
 						<dd>
-							<p><a href="{{bill.get_absolute_url}}/widget">Get a bill status widget for your website &raquo;</a></p>
+							<p style="line-height: 125%;"><a href="{{bill.get_absolute_url}}/widget">Get a bill status widget for your website &raquo;</a></p>
 						</dd>
 				</dl>
 			</div>
@@ -809,7 +811,7 @@ p#yourreps {
 								if (!v) $("#cite_" + fmt).slideDown();
 								return false;
 							}</script>
-							<p style="margin: 0">Click a format for a citation suggestion:</p>
+							<p style="margin: 0; line-height: 125%;">Click a format for a citation suggestion:</p>
 							<ul class="list-inline">
 								<li><a href="#" onclick="return show_cite('apa')">APA</a></li>
 								<li><a href="#" onclick="return show_cite('mla')">MLA</a></li>
