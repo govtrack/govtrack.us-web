@@ -1321,7 +1321,6 @@ aside .download-links { padding: 31px 0 0 }
 		}
 
 	.tracker_widget {
-		font-family: 'CallunaSans';
 		line-height: 130%;
 		text-align: left;
 	}
@@ -1601,7 +1600,7 @@ aside .download-links { padding: 31px 0 0 }
 			color: #777;
 			}
 select, input.text {
-	font: 12px/16px CallunaSans, sans-serif;
+	font: 12px/16px sans-serif;
 	color: #444;
 	border: solid #e6d39c 2px;
 	-moz-border-radius: 3px;
