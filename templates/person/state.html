@@ -6,7 +6,7 @@
 {% block head %}
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<style>
-	h5 { margin-bottom: 0px; }
+	p.moc { font-weight: bold; margin: 0; }
 	.members-grid .info { margin-top: 8px; font-size: 85%; }
 
 	#map_controls > li {
@@ -32,9 +32,9 @@
 	<script type="text/javascript" src="https://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
 	<script type="text/javascript" src="https://gis.govtrack.us/static/js/maps_helpers.js"></script>
 	<script type="text/javascript">
-		var map;
+	var map = null;
 
-		on_google_maps_loaded.push(function() {
+	function initialize_map() {
 			map = map_controller();
 			map.init(
 				document.getElementById("map_canvas"),
@@ -93,7 +93,7 @@
 		}
 		function canvas_resize() {
 			if (!is_full_screen) {
-				var w = $('#map_container').width();
+				var w = $('#content').width();
 				var h = $(window).height() * .8;
 				$('#map_canvas').css('width', w);
 				$('#map_canvas').css('height', w < h ? w : h);
@@ -109,9 +109,17 @@
 		}
 		$(window).scroll(canvas_resize);
 		$(window).resize(canvas_resize);
-		$(canvas_resize);
+		canvas_resize();
+	};
 
-		});
+
+	$(function() {
+		$('a[data-toggle="tab"][href="#map"]').on('shown.bs.tab', function (e) {
+		  if (!map)
+		  	on_google_maps_loaded.push(initialize_map);
+		})
+	})
+
 	</script>
 {% endblock %}
 
@@ -123,98 +131,72 @@
 </ol>
 {% endblock %}
 
-{% block summary %}
+{% block body %}
 	<h1>{{statename}}</h2>
 
 	{% if stateapp != "T" %}
-		<p>{{statename}} is a U.S. state with two senators in the United States Senate and {{stateapp|apnumber}} representatives in the United States House of Representatives.</p>
-		{% if stateapp > 1 %}<p>Scroll down for a map of the districts.</p>{% endif %}
+		<p>{{statename}} is a U.S. state with <b>two</b> senators in the United States Senate and <b>{{stateapp|apnumber}}</b> representatives in the United States House of Representatives.</p>
+
 	{% elif state == "DC" %}
-		<p>The District of Columbia (DC) is the nation&rsquo;s capital. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators or representatives in Congress. Instead it sends a delegate to the House of Representatives with essentially no voting privileges.</p>
+		<p>The District of Columbia (DC) is the nation&rsquo;s capital. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators or representatives in Congress.</p>
+
+		<p>Instead, the District of Columbia sends a <b>delegate</b> to the House of Representatives with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
+
 	{% else %}
-		<p>{% if state == "VI" %}The {% endif %}{{statename}} is a territory of the United States. It sends a delegate to the House of Representatives{% if state == "PR" %}, called the Resident Commissioner,{% endif %} with essentially no voting privileges and has no senators in the United States Congress.</p>
-	{% endif %}
-	
-{% if senators|length > 0 %}
-	<h2 style="margin-top: 30px">Senators</h2>
+		<p>{% if state == "VI" %}The {% endif %}{{statename}} is a territory of the United States. Because it is not a state, it has no senators or representatives in Congress.</p>
 
-	<p>Each state elects two senators for staggered 6-year terms. Senators represent the entire state.</p>
-
-    <div class="row members-grid">
-    {% for person in senators %}
-        <div class="member col-xs-6 col-md-5">
-        	{% if not person %}
-	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
-	            <p style="margin-top: 1em">The senate seat is currently vacant.</p>
-        	{% else %}
-	            <div class="photo">
-	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
-	        	</div>
-	        	
-	            {% with person.get_current_role as role %}
-	            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
-	            	{{ role.get_senator_rank_display }} Senator
-	            </div>
-
-	            <h5><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></h5>
-
-	            <div class="info">
-	            	<div>{{role.party}}</div>
-            		<div>Took Office: {{role.logical_dates.0|date}}</div>
-            		<div>Next Election: {{role.next_election_year}}</div>
-	            </div>
-	            {% endwith %}
-	        {% endif %}
-        </div>
-        {% endfor %}
-    </div>
-{% endif %}
-
-{% if representatives|length > 0 and stateapp == "T" %}
-	{% if state == "PR" %}
-		<h2>Resident Commissioner</h2>
-	{% else %}
-		<h2>Delegate</h2>
+		<p>Instead, it sends a <b>delegate</b> to the House of Representatives{% if state == "PR" %}, called the <b>Resident Commissioner</b>,{% endif %} with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
 	{% endif %}
 
-	<p>Delegates may vote within committees but they are not permitted to vote on anything on the House floor, including on bills. Thus delegates have a marginal role in Congress, and their constituents are not represented in Congress in the same manner as most citizens.</p>
+	{% if stateapp != "T" %}
+		<ul class="nav nav-tabs" role="tablist" id="tabs">
+			<li role="presentation" class="active"><a href="#senators" aria-controls="senators" role="tab" data-toggle="tab">Senators</a></li>
+			<li role="presentation"><a href="#representatives" aria-controls="representatives" role="tab" data-toggle="tab">Representatives</a></li>
+			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map of Congressional Districts</a></li>
+		</ul>
 
-    <div class="members-grid">
-    {% for district, person, cities in representatives %}
-        <div class="member" style="width: 150px">
-        	{% if not person %}
-	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
-	            <p style="margin-top: 1em">The delegate&rsquo;s office is currently vacant.</p>
-        	{% else %}
-	            <div class="photo">
-	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
-	        	</div>
-	        	
-	            {% with person.get_current_role as role %}
-	            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
-	            	At-Large
-	            </div>
 
-	            <h5><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></h5>
+		<div class="tab-content" style="margin-top: 1em">
 
-	            <div class="info">
-            		<div>{{role.logical_dates.0|date}}-Present</div>
-	            	<div>{{role.party}}</div>
-	            </div>
-	            {% endwith %}
-	        {% endif %}
-        </div>
-        {% endfor %}
-    </div>
-{% endif %}
-{% endblock %}
+	    	<div role="tabpanel" class="tab-pane active" id="senators">
 
-{% block body %}
+			<p>Each state elects two senators for staggered 6-year terms. Senators represent the entire state. {{statename}}&rsquo;s senators are:</p>
 
-{% if stateapp != "T" %}
-	<h2 style="margin-top: 0">Representatives</h2>
+		    <div class="row members-grid">
+		    {% for person in senators %}
+		        <div class="member col-xs-6 col-md-5">
+		        	{% if not person %}
+			            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
+			            <p style="margin-top: 1em">The senate seat is currently vacant.</p>
+		        	{% else %}
+			            <div class="photo">
+			        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+			        	</div>
+			        	
+			            {% with person.get_current_role as role %}
+			            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
+			            	{{ role.get_senator_rank_display }} Senator
+			            </div>
 
-	<p>The United States is divided into 435 congressional districts &mdash; {{stateapp}} in {{statename}} &mdash; each with a population of about 710,000 individuals. Each district elects a representative to the House for a two-year term. Representatives are also called congressmen/congresswomen.</p>
+			            <p class="moc"><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></p>
+
+			            <div class="info">
+			            	<div>{{role.party}}</div>
+		            		<div>Took Office: {{role.logical_dates.0|date}}</div>
+		            		<div>Next Election: {{role.next_election_year}}</div>
+			            </div>
+			            {% endwith %}
+			        {% endif %}
+		        </div>
+		        {% endfor %}
+		    </div>
+	    	</div>
+
+	    	<div role="tabpanel" class="tab-pane" id="representatives">
+
+	<p>The United States is divided into 435 congressional districts, each with a population of about 710,000 individuals. Each district elects a representative to the House for a two-year term. Representatives are also called congressmen/congresswomen.</p>
+
+	<p>{{statename}}&rsquo;s representatives are:</p>
 
     <div class="row members-grid">
     {% for district, person, cities in representatives %}
@@ -246,7 +228,7 @@
 	            	{% endif %}
 	            </div>
 
-	            <h5><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></h5>
+	            <p class="moc"><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></p>
 
 	            <div class="info">
 	            	<div>{{role.party}}</div>
@@ -263,8 +245,8 @@
         {% endfor %}
     </div>
 
-	<h2>Map</h2>
-
+    		</div>
+	    	<div role="tabpanel" class="tab-pane" id="map">
 	<div style="display: none">
 		<div id="fullscreen" style="padding: 10px">
 			<img src="{{ STATIC_URL }}images/stock_fullscreen.png" title="Toggle Full Screen" onclick="doFullScreen();" style="cursor: pointer"/>
@@ -285,10 +267,42 @@
 			</ul>
 		</div>
 	</div>
-	
 
-</div><!-- /search-members -->
-{% endif %}
+	    	</div>
+	</div> <!-- /tabs -->
+
+	{% else %}
+
+    <div class="members-grid">
+    {% for district, person, cities in representatives %}
+        <div class="member" style="width: 150px">
+        	{% if not person %}
+	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
+	            <p style="margin-top: 1em">The delegate&rsquo;s office is currently vacant.</p>
+        	{% else %}
+	            <div class="photo">
+	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+	        	</div>
+	        	
+	            {% with person.get_current_role as role %}
+	            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
+	            	At-Large
+	            </div>
+
+	            <p class="moc"><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></p>
+
+	            <div class="info">
+            		<div>{{role.logical_dates.0|date}}-Present</div>
+	            	<div>{{role.party}}</div>
+	            </div>
+	            {% endwith %}
+	        {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+	{% endif %}
+
 
 <hr>
 {% include "ad_footer_leaderboard.html" %}
