@@ -54,11 +54,14 @@
 
 {% block summary %}
 	<h1>Members of Congress</h1>
+
+	<p>Use GovTrack to find out who represents you in Congress and what bills they have sponsored.</p>
+{% endblock %}
 	
-	<h3>Find your representatives!</h3>
+{% block body %}
 	<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
 		<p style="margin-bottom: .25em">Enter your address below. We will find your congressional district.</p>
-		<input id="address" class="text" type="text" value="" style="width: 75%; height: 26px; float: left; font-size: 14px;"/>
+		<input id="address" class="form-control" type="text" value="" style="width: 75%; height: 26px; float: left;"/>
 		<script>$('#address').input_default('350 5th Ave, New York, NY 10001');</script>
 		<input class="btn-search-small2" type="submit" value="Search"  />
 		<div style="clear: both"> </div>
@@ -67,7 +70,7 @@
 	<div class="row" style="margin-top: 1.5em">
 		<div class="col-xs-6">
 			<p style="margin-bottom: .5em">Or select a state to list all senators and representatives from that state:</p>
-			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" style="display: block; width: 95%; background-color: white; font-size: 14px;">
+			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" class="form-control">
 				<option value="">(Select State)</option>
 				{% for abbr, name in statelist %}
 				<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
@@ -81,7 +84,7 @@
 		</div>
 	</div>
 
-	<hr style="margin: 1em 1em 2em 1em"/>
+	<img src="/static/images/capitol-diagram.jpg" class="img-responsive" style="margin-bottom: 20px">
 
 <p>The United States Congress has an upper chamber called the Senate and a lower chamber called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process to create federal statutory law.</p>
 	
@@ -120,6 +123,8 @@
 </div>
 </div>
 
+<hr>
+
 <h2>Report Cards</h2>
 
 <p>Each year we compile all of our statistics into a report card for each Member of Congress.</p>
@@ -135,7 +140,4 @@
 	<p>We are currently in the {{congress_current.0|ordinal}} Congress which began on {{congress_current.1|date}}. The {{congress_previous.0|ordinal}} Congress ended on {{congress_previous.1|date}}.</p>
 {% endblock %}
 
-{% block body %}
-	
-{% endblock %}
 
