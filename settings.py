@@ -152,6 +152,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 TEST_DATABASE_CHARSET = 'utf8'
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 DATETIME_FORMAT = 'M j, Y P'
 DATE_FORMAT = 'M j, Y'
