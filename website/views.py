@@ -169,21 +169,6 @@ def do_site_search(q, allow_redirect=False):
         "noun": "federal bills or resolutions",
         "results": bills})
 
-    if "states" in settings.HAYSTACK_CONNECTIONS and False:
-        results.append({
-            "title": "State Legislation",
-            "href": "/states/bills/browse",
-            "qsarg": "text",
-            "noun": "state legislation",
-            "results": [
-                {"href": p.object.get_absolute_url(),
-                 "label": p.object.short_display_title,
-                 "obj": p.object,
-                 "feed": Feed(feedname="states_bill:%d" % p.object.id),
-                 "secondary": True }
-                for p in SearchQuerySet().using('states').filter(indexed_model_name__in=["StateBill"], content=q)[0:9]]
-                })
-
     # subject terms, but exclude subject terms that look like committee names because
     # that is confusing to also see with committee results
     from bill.models import BillTerm, TermType
