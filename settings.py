@@ -111,7 +111,6 @@ INSTALLED_APPS = (
 
     # 3rd party libraries
     'common',
-    'django_extensions',
     #'south',
     #'debug_toolbar',
     #'silk',

@@ -1,6 +1,5 @@
 django==1.7
 uwsgi
-django-extensions
 python-dateutil
 django-cache-utils
 django-debug-toolbar
