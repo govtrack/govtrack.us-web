@@ -70,7 +70,6 @@ h3 {
 		</script>
 
 		<div id="oursummary" class="tab-pane postcontent" role="tabpanel">
-			<h3 style="margin-bottom: 1em">GovTrack&rsquo;s Bill Summary</h3>
 			{% with bill.oursummary as summary %}
 			{% if not summary %}
 				<p>We don&rsquo;t have a summary available yet.</p>
@@ -86,7 +85,6 @@ h3 {
 		</div>
 		
 		<div id="libraryofcongress" class="tab-pane postcontent" role="tabpanel">
-			<h3 style="margin-bottom: 1em">Library of Congress Summary</h3>
 			<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress.</p>
 			<hr/>
 			{% with bill.get_formatted_summary as summary %}
