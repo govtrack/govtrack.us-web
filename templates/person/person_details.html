@@ -12,21 +12,21 @@
 		margin-bottom: 0;
 	}
 	#seealso-links {
-		padding: .5em 0;
+		padding: .4em .4em .3em .3em;
 		border-bottom: 1px solid #CCA;
 		margin-bottom: 14px;
 		font-size: 88%;
 	}
 		#seealso-links a {
+			display: inline-block;
 			text-decoration: none;
+			margin-right: 1.25em;
 		}
 			#seealso-links a:hover {
 				text-decoration: underline;
 			}
 		#seealso-links a i {
-			position: relative;
-			top: 1px;
-			margin-right: .33em;
+			margin-right: .4em;
 		}
 
 	#action-buttons > * {
@@ -90,8 +90,7 @@
 {% if links %}
 <div id="seealso-links">
 	{% for label, link, css_class in links %}
-		{% if not forloop.first %} | {% endif %}
-		<a href="{{link}}" target="_blank" style="white-space: nowrap"><i class="{{css_class}}"></i>{{label}}</a>
+		<a href="{{link}}" target="_blank"><i class="{{css_class}}"></i>{{label}}</a>
 	{% endfor %}
 </div>
 {% endif %}
