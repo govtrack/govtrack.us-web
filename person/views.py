@@ -87,15 +87,16 @@ def person_details(request, pk):
         from bill.models import BillTerm
         from datetime import datetime, timedelta
         most_recent_bill = person.sponsored_bills.order_by("-introduced_date").first()
-        bills_by_subject_counts = person.sponsored_bills.filter(
+        bills_by_subject_counts = list(person.sponsored_bills.filter(
             terms__id__in=BillTerm.get_top_term_ids(),
             introduced_date__gt=(most_recent_bill.introduced_date if most_recent_bill else datetime.now())-timedelta(days=5*365.25))\
             .values("terms")\
             .annotate(count=Count('id')).order_by('-count')\
             .filter(count__gt=1)\
-            [0:8]
+            [0:8])
         terms = BillTerm.objects.in_bulk(item["terms"] for item in bills_by_subject_counts)
         total_count = sum(item["count"] for item in bills_by_subject_counts)
+        while len(bills_by_subject_counts) > 2 and bills_by_subject_counts[-1]["count"] < bills_by_subject_counts[0]["count"]/8: bills_by_subject_counts.pop(-1)
         for item in bills_by_subject_counts:
             item["term"] = terms[item["terms"]]
             item["pct"] = int(round(float(item["count"]) / total_count * 100))
