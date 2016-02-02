@@ -39,6 +39,7 @@ trending_feeds = None
 base_context = {
     "SITE_ROOT_URL": settings.SITE_ROOT_URL,
     "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY,
+    "FACEBOOK_APP_ID": settings.FACEBOOK_APP_ID,
     "STATE_CHOICES": sorted([(kv[0], kv[1], us.stateapportionment[kv[0]]) for kv in us.statenames.items() if kv[0] in us.stateapportionment], key = lambda kv : kv[1]),
 }
 
