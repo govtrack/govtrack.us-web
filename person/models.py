@@ -185,6 +185,12 @@ class Person(models.Model):
     @property
     def his_her(self):
         return { Gender.male: "his", Gender.female: "her" }.get(self.gender, "their")
+    @property
+    def he_she(self):
+        return { Gender.male: "he", Gender.female: "she" }.get(self.gender, "they")
+    @property
+    def he_she_cap(self):
+        return self.he_she[0].upper() + self.he_she[1:]
         
     @property
     def current_role(self):
@@ -220,6 +226,8 @@ class Person(models.Model):
             if len(ret) > 0 and role.continues_from(ret[-1]):
                 ret[-1].enddate = role.enddate
                 ret[-1].current |= role.current
+                ret[-1].party = role.party # show most recent party
+                ret[-1].seniority = None # probably changes
             else:
                 ret.append(role)
         ret.reverse()
@@ -426,9 +434,7 @@ class PersonRole(models.Model):
         
         from django.contrib.humanize.templatetags.humanize import ordinal
         
-        if self.role_type == RoleType.president:
-            return self.get_title_name(False)
-        if self.role_type == RoleType.vicepresident:
+        if self.role_type in (RoleType.president, RoleType.vicepresident):
             return self.get_title_name(False)
         if self.role_type == RoleType.senator:
             js = ""
@@ -441,6 +447,32 @@ class PersonRole(models.Model):
                 return self.get_title_name(False) + " for " + statenames[self.state] + " At Large"
             else:
                 return self.get_title_name(False) + " for " + statenames[self.state] + "'s " + ordinal(self.district) + " congressional district"
+
+    def get_description_natural(self):
+        """A description of this role in sentence form, e.g. the delegate for the District of Columbia's at-large district."""
+        
+        from website.templatetags.govtrack_utils import ordinalhtml
+        
+        if self.role_type in (RoleType.president, RoleType.vicepresident):
+            return self.get_title_name(False)
+        if self.role_type == RoleType.senator:
+            js = "a "
+            if self.current and self.senator_rank: js = "the " + self.get_senator_rank_display() + " "
+            return js + "senator from " + statenames[self.state]
+        if self.role_type == RoleType.representative:
+            if stateapportionment.get(self.state) == "T":
+                return "the %s from %s%s" % (
+                    self.get_title_name(False).lower(),
+                    "the " if self.state == "DC" else "",
+                    statenames[self.state]
+                )
+            else:
+                if self.district == -1:
+                    return "the representative for " + statenames[self.state]
+                elif self.district == 0:
+                    return "the representative for " + statenames[self.state] + "'s at-large district"
+                else:
+                    return "the representative for " + statenames[self.state] + "'s " + ordinalhtml(self.district) + " congressional district"
 
     def congress_numbers(self):
         """The Congressional sessions (Congress numbers) that this role spans, as a list from the starting Congress number through consecutive numbers to the ending Congress number."""
@@ -469,6 +501,10 @@ class PersonRole(models.Model):
                 if pa['start'] <= when.date().isoformat() <= pa['end']:
                     return pa['party']
         return self.party
+
+    @property
+    def is_territory(self):
+        return stateapportionment.get(self.state) == "T"
 
     def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()
