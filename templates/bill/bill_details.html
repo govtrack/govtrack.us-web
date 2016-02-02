@@ -484,6 +484,9 @@ p#yourreps {
 {% endblock %}
 
 {% block body %}
+		{% with bill.oursummary as summary1 %}
+		{% with bill.get_formatted_summary as summary2 %}
+		{% if subtitle or summary1 or summary2 %}
 		<h2><span>About the {{bill.noun}}</span></h2>
 
 			<dl>
@@ -496,8 +499,6 @@ p#yourreps {
 						</dd>
 					{% endif %}
 
-					{% with bill.oursummary as summary1 %}
-					{% with bill.get_formatted_summary as summary2 %}
 					{% if summary1 %}
 						{% if subtitle %}<dt>Summary</dt>{% endif %}
 						<dd>
@@ -508,9 +509,10 @@ p#yourreps {
 					{% elif summary2 %}
 						<p class="small"><a href="{{bill.get_absolute_url}}/summary">Read CRS Summary &gt;</a></p>
 					{% endif %}
-					{% endwith %}
-					{% endwith %}
 			</dl>
+		{% endif %}
+		{% endwith %}
+		{% endwith %}
 
 		{% if bill.source == "thomas-congproj" %}
 			<h2><span>History</span></h2>
