@@ -138,6 +138,56 @@
 	</div><!-- /container -->
 
 	<!-- contact panel -->
+	<style>
+	#contact_modal .list-group-item input[type=radio] {
+		float: left;
+		text-align: right;
+		width: 7%;
+	}
+	#contact_modal .list-group-item > div {
+		float: left;
+		width: 93%;
+	}
+	#contact_modal .list-group-item label {
+		font-weight: normal;
+	}
+	#contact_modal .list-group-item .contact_expando {
+		display: none;
+		padding-top: .75em;
+	}
+	.list-group-item.active .list-group-item, .list-group-item.active .list-group-item .list-group-item-text {
+		text-shadow: none;
+		color: #444; /* .list-group-item.active inverts color */
+	}
+	.list-group-item.active .list-group-item.active, .list-group-item.active .list-group-item.active .list-group-item-text {
+		color: #FFE; /* now override our override to kind of put it back */
+	}
+	#contact_modal .contact_expando a {
+		color: #FFE;
+	}
+	</style>
+	<script>
+	$(function() {
+		$('#contact_modal input[type=radio]').change(function() {
+			var item = $(this).parent("div");
+			var group = item.parent("div");
+
+			// hide siblings
+			group.find('> .list-group-item > div > .contact_expando').hide();
+
+			// uncheck & hide sub items (i.e. if returning to this item later)
+			item.find('.contact_expando').hide();
+			item.find('.contact_expando input[type=radio]').attr('checked', false);
+
+			// expand this time
+			item.find('> div > .contact_expando').fadeIn();
+
+			//group.find('> .list-group-item').removeClass('active');
+			$('#contact_modal .list-group-item').removeClass('active');
+			item.addClass('active');
+		})
+	})
+	</script>
 	<div id="contact_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="contact_modalTitle" aria-hidden="true">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
@@ -146,13 +196,81 @@
 	        <h4 class="modal-title" id="contact_modalTitle">Contact {{person.name_and_title}}</h4>
 	      </div>
 	      <div class="modal-body">
-	        <p>In order to contact {{person.name_and_title}}, you will have to head over to {{person.his_her}} website and look for contact information. Click the following link to head over to {{person.his_her}} website:</p>
-	        <p style="font-size: 115%"><a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')">{{role.website}}</a></p>
-	        <p>(You are currently on the website GovTrack.us, which has no connection to {{person.lastname}}.)</p>
+			<div class="list-group">
+			  <div class="list-group-item clearfix">
+			  	<input type="radio" name="contact_constituent" id="contact_constituent_yes">
+			  	<div>
+				  	<label for="contact_constituent_yes">
+					    <h4 class="list-group-item-heading"><b>I am a constituent.</b></h4>
+					    <p class="list-group-item-text">I live in {{role.state_name_article}}{% if role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} congressional district{% endif %}.</p>
+					</label>
+					<div class="contact_expando">
+				      <div class="list-group">
+						   <div class="list-group-item clearfix">
+						  	<input type="radio" name="contact_constituent_why" id="contact_constituent_opinion">
+						  	<div>
+							  	<label for="contact_constituent_opinion">
+								    <h4 class="list-group-item-heading"><b>I have an opinion I want to share.</b></h4>
+								    <p class="list-group-item-text">I want to urge {{person.lastname}} to take an action on a bill.</p>
+								</label>
+								<div class="contact_expando">
+									<p><a href="https://emailcongress.us/" target="_blank" onclick="$('#contact_modal').modal('hide')" class="btn btn-lg btn-success">Email Congress &raquo;</a></p>
+							        <p>This tool by the Sunlight Foundation is a convenient way to email your thoughts to your {{role.get_title|lower}}. <em>(It should not be used if you need help.)</em></p>
+							        <p>You can also look for a contact form on <a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')">{{person.name_and_title}}&rsquo;s website</a>.</p>
+								</div>
+							</div>
+						  </div>
+						  <div class="list-group-item clearfix">
+						  	<input type="radio" name="contact_constituent_why" id="contact_constituent_casework">
+						  	<div>
+							  	<label for="contact_constituent_casework">
+								    <h4 class="list-group-item-heading"><b>I need help or have a question.</b></h4>
+								    <p class="list-group-item-text">I&rsquo;m having a problem with a government agency, need legal help, or have a question.</p>
+								</label>
+								<div class="contact_expando">
+									<p><a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')" class="btn btn-lg btn-success">Visit {{person.lastname}}&rsquo;s Website &raquo;</a></p>
+
+							        <p>Head over to {{person.name_and_title}}&rsquo;s <a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')">website</a>. Look for a contact link for casework to submit a request for help, or call {{person.his_her}} office if you have a question.</p>
+								</div>
+							</div>
+						   </div>
+					  </div>
+					</div>
+				</div>
+			  </div>
+			  <div class="list-group-item clearfix">
+			  	<input type="radio" name="contact_constituent" id="contact_constituent_no">
+			  	<div>
+				  	<label for="contact_constituent_no">
+					    <h4 class="list-group-item-heading"><b>I am not a constituent.</b></h4>
+					    <p class="list-group-item-text">I live elsewhere.</p>
+					</label>
+					<div class="contact_expando">
+						<p>Not all Members of Congress will accept messages from non-constituents. You can try your luck by visiting <a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')">{{person.lastname}}&rsquo;s website</a>. Otherwise, try contacting your own {{role.get_title.lower}}:</p>
+						<p><a href="/congress/members" class="btn btn-lg btn-success">Find Your {{role.get_title}} &raquo;</a></p>
+					</div>
+				</div>
+			  </div>
+			  {% if role.district %}
+			  <div class="list-group-item clearfix">
+			  	<input type="radio" name="contact_constituent" id="contact_constituent_notsure">
+			  	<div>
+				  	<label for="contact_constituent_notsure">
+					    <h4 class="list-group-item-heading"><b>I am not sure.</b></h4>
+					    <p class="list-group-item-text">I&rsquo;m not sure if I live in {{person.his_her}} district.</p>
+					</label>
+					<div class="contact_expando">
+						<p><a href="/congress/members" class="btn btn-lg btn-success">Find Your {{role.get_title}} &raquo;</a></p>
+					</div>
+				</div>
+			  </div>
+			  {% endif %}
+			</div>	      
+	        <p style="font-size: 90%; line-height: 125%;">You are currently on the website GovTrack.us, which has no affiliation with {{person.lastname}} and is <b>not</b> a government website. Choose from the options above to find the right way to contact {{person.lastname}}.</p>
 	      </div>
-	      <div class="modal-footer">
+	      {% comment %} <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
-	      </div>
+	      </div> {% endcomment %}
 	    </div>
 	  </div>
 	</div>

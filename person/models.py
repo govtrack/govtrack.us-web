@@ -428,6 +428,12 @@ class PersonRole(models.Model):
             
     def state_name(self):
         return State.by_value(self.state).label
+
+    def state_name_article(self):
+        ret = statenames[self.state]
+        if self.state in ("DC", "MP", "VI", "PI", "OL"):
+            ret = "the " + ret
+        return ret
             
     def get_description(self):
         """A description of this role, e.g. Delegate for District of Columbia At Large."""
@@ -461,10 +467,9 @@ class PersonRole(models.Model):
             return js + "senator from " + statenames[self.state]
         if self.role_type == RoleType.representative:
             if stateapportionment.get(self.state) == "T":
-                return "the %s from %s%s" % (
+                return "the %s from %s" % (
                     self.get_title_name(False).lower(),
-                    "the " if self.state == "DC" else "",
-                    statenames[self.state]
+                    self.state_name_article()
                 )
             else:
                 if self.district == -1:
