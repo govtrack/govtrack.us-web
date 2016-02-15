@@ -430,6 +430,7 @@ class PersonRole(models.Model):
         return State.by_value(self.state).label
 
     def state_name_article(self):
+        if not self.state: return "the United States"
         ret = statenames[self.state]
         if self.state in ("DC", "MP", "VI", "PI", "OL"):
             ret = "the " + ret
