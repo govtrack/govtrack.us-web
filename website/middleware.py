@@ -85,7 +85,10 @@ def template_context_processor(request):
     itf_active_campaign = 50
     if_then_fund_campaign = cache.get("if_then_fund_campaign")
     if not if_then_fund_campaign and itf_active_campaign:
-        if_then_fund_campaign = json.load(urllib2.urlopen("https://if.then.fund/a/%d.json" % itf_active_campaign))
+        try:
+            if_then_fund_campaign = json.load(urllib2.urlopen("https://if.then.fund/a/%d.json" % itf_active_campaign))
+        except:
+            if_then_fund_campaign = "UHM" # something that is truthy otherwise we'll ping on every request
     	cache.set("if_then_fund_campaign", if_then_fund_campaign, 60*45) # 45 minutes
     context["if_then_fund_campaign"] = if_then_fund_campaign
 
