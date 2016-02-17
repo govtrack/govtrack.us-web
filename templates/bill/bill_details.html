@@ -300,10 +300,12 @@ p#yourreps {
 						<div style="margin-bottom: 1em;"><strong>Enacted as <a href="{{bill.was_enacted_ex.get_absolute_url}}">{{bill.was_enacted_ex.display_number_no_congress_number}}</a></strong> (companion bill)</div>
 
 					{% else %}
-						<div id="dead-prev-congress-popover"
+						<div>
+							<strong id="dead-prev-congress-popover"
 							data-toggle="What is a previous Congress?"
 							data-content="Congress operates in two-year cycles that follow elections. Each cycle is called a &ldquo;Congress.&rdquo; This {{bill.noun}} was introduced in the {{bill.congress|ordinal}} Congress, which was from {{congressdates.0|date}} to {{congressdates.1|date}}. Bills are not carried forward from Congress to Congress.">
-							<strong>Died in a previous Congress</strong>
+							Died in a previous Congress
+							</strong>
 						</div>
 						<p style="margin-top: .25em">{{bill.current_status_description}}</p>
 
