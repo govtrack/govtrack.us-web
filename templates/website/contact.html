@@ -12,41 +12,214 @@
 {% block body %}
 	<h1>Contact Us</h1>
 
-  <p>Thank you for your interest in GovTrack.</p>
+  <p>Thank you for your interest in GovTrack.us. How can we help?</p>
 
-  <hr>
+  <p>Please keep in mind this is <b>not a government website</b>. GovTrack is run by a private citizen from his home office.</p>
 
-  <p>GovTrack is <b style="font-size: 200%">not a government website</b>, therefore:</h3>
-  <ul>
-    <li>We can&rsquo;t help you with a problem you are having with an agency or other legal matters.</li>
-    <li>We can&rsquo;t forward messages to Members of Congress.</li>
-    <li>We can&rsquo;t help you book a White House tour.</li>
-  </ul>
+  <!-- contact panel -->
+  <style>
+  #contact_options {
+    margin-top: 2em;
+  }
+  #contact_options .list-group-item {
+    border-left: none;
+    border-right: none;
+  }
+  #contact_options .list-group-item input[type=radio] {
+    float: left;
+    text-align: right;
+    width: 7%;
+    max-width: 2em;
+  }
+  #contact_options .list-group-item > div {
+    float: left;
+    width: 93%;
+  }
+  #contact_options .list-group-item label {
+    margin: 0;
+    font-weight: normal;
+  }
+  #contact_options .list-group-item .contact_expando {
+    display: none;
+    padding-top: .75em;
+  }
+  .list-group-item.active .list-group-item, .list-group-item.active .list-group-item .list-group-item-text {
+    text-shadow: none;
+    color: #444; /* .list-group-item.active inverts color */
+  }
+  .list-group-item.active .list-group-item.active, .list-group-item.active .list-group-item.active .list-group-item-text {
+    color: #FFE; /* now override our override to kind of put it back */
+  }
+  #contact_options .contact_expando a {
+    color: #FFE;
+  }
+  #contact_options p {
+    margin-bottom: .5em;
+  }
+  </style>
+  <script>
+  $(function() {
+    $('#contact_options input[type=radio]').change(function() {
+      var item = $(this).parent("div");
+      var group = item.parent("div");
 
-  <p>Before you email us your opinion about a bill in Congress, please keep in mind that we don&rsquo;t have a vote!</p>
-  <p>To voice your opinion, contact your representative (not us!). You can use our site to <a href="/congress/members">find your representative</a>. Then go to his or her website and look for their contact information there.</p>
+      // hide siblings
+      group.find('> .list-group-item > div > .contact_expando').hide();
 
-  <hr>
+      // uncheck & hide sub items (i.e. if returning to this item later)
+      item.find('.contact_expando').hide();
+      item.find('.contact_expando input[type=radio]').attr('checked', false);
 
-  <h3>Looking for more information?</h3>
+      // expand this time
+      item.find('> div > .contact_expando').fadeIn();
 
-  <p>We do not have any additional information on the status of a bill that isn&rsquo;t already posted on the page for the bill on this website.</p>
+      //group.find('> .list-group-item').removeClass('active');
+      $('#contact_options .list-group-item').removeClass('active');
+      item.addClass('active');
+    })
+  })
+  </script>
+  <div id="contact_options">
+    <div class="list-group">
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_opinion">
+        <div>
+          <div>
+            <label for="contact_option_opinion">
+              I want to urge my representative or senator to take an action on a bill.
+            </label>
+          </div>
+          <div class="contact_expando">
+            <p>Tell your representative or senators:</p>
+            <p><a href="/congress/members" class="btn btn-success">Find Your Representative or Senator &raquo;</a></p>
+            <p class="small">(You are not on a government website now and we have no affiliation with your representative or senator. To share your opinion, please click the button above to find your representative or senator.)</p>
+          </div>
+        </div>
+      </div>
 
-  <p>We can&rsquo;t explain bills &mdash; we don&rsquo;t have any special insight into what they mean.</p>
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_casework">
+        <div>
+          <div>
+            <label for="contact_option_casework">I am having a problem with a government agency or have another legal issue.</label>
+          </div>
+          <div class="contact_expando">
+            <p>Ask your representative or senators for help. Start here:</p>
+            <p><a href="/congress/members" class="btn btn-success">Find Your Representative or Senator &raquo;</a></p>
+            <p class="small">(You are not on a government website now and we have no ability to help you, but we can refer you to your representative or senator.)</p>
+          </div>
+        </div>
+      </div>
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_tour">
+        <div>
+          <div>
+            <label for="contact_option_tour">I would like to meet with my representative or senator or schedule a White House tour.</label>
+          </div>
+          <div class="contact_expando">
+            <p>You will need to contact your representative or senator. Start here:</p>
+            <p><a href="/congress/members" class="btn btn-success">Find Your Representative or Senator &raquo;</a></p>
+            <p class="small">(You are not on a government website now, so we cannot help you with that.)</p>
+          </div>
+        </div>
+      </div>
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_bill">
+        <div>
+          <div>
+            <label for="contact_option_bill">I am looking for a bill in Congress or want to know more about a bill that I found.</label>
+          </div>
+          <div class="contact_expando">
+            <p>To find a bill, you can <a href="/search">search</a> or <a href="/congress/bills">browse</a> all legislation currently before Congress.</p>
+            <p>Everything we know about legislation in Congress is already posted on this site. We don&rsquo;t have any additional information.</p>
+            <p>We can&rsquo;t explain what bills mean beyond what has already been posted &mdash; we don&rsquo;t have any special insight into what they mean.</p>
+          </div>
+        </div>
+      </div>
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_unsubscribe">
+        <div>
+          <div>
+            <label for="contact_option_unsubscribe">I want to unsubscribe from emails I get from GovTrack.</label>
+          </div>
+          <div class="contact_expando">
+            <p>Please <a href="/accounts/profile">edit your account settings</a>. It&rsquo;ll be faster than emailing us. There&rsquo;s only one person here to answer all of our email.</p>
+            <p>If you forgot your password, you can <a href="/registration/reset-password">reset your password</a>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_accounts">
+        <div>
+          <div>
+            <label for="contact_option_accounts">I have a problem with my account or I want to close my account.</label>
+          </div>
+          <div class="contact_expando">
+            <p>Please <a href="/accounts/profile">edit your account settings</a> to stop emails. It&rsquo;ll be faster than emailing us. There&rsquo;s only one person here to answer all of our email.</p>
+            <p>If you forgot your password, you can <a href="/registration/reset-password">reset your password</a>.</p>
+            <p>Email us at <script>
+                      var email_addr = "olleh".split("").reverse().join("")
+                          + "+accounts"
+                          + String.fromCharCode(2*0x20)
+                          + "su.kcartvog".split("").reverse().join("");
+                      document.write("\x3ca href='mailto:" + email_addr + "'\x3e" + email_addr + "\x3c/a\x3e");
+                      </script><noscript>email address protected from spambots; use a JavaScript-enabled browser to see it</noscript> with other inquiries about your account.</p>
+          </div>
+        </div>
+      </div>
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_journalist">
+        <div>
+          <div>
+            <label for="contact_option_journalist">I&rsquo;m a journalist with a question about GovTrack or a data/analysis request.</label>
+          </div>
+          <div class="contact_expando">
+            <p>Email us at <script>
+                      var email_addr = "olleh".split("").reverse().join("")
+                          + "+journalist"
+                          + String.fromCharCode(2*0x20)
+                          + "su.kcartvog".split("").reverse().join("");
+                      document.write("\x3ca href='mailto:" + email_addr + "'\x3e" + email_addr + "\x3c/a\x3e");
+                      </script><noscript>email address protected from spambots; use a JavaScript-enabled browser to see it</noscript>.</p>
+            <p>Please mention if you are on a deadline.</p>
+          </div>
+        </div>
+      </div>
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_other">
+        <div>
+          <div>
+            <label for="contact_option_other">I have a question about what GovTrack is, the developer data/APIs, I want to help, or I have a complaint.</label>
+          </div>
+          <div class="contact_expando">
+            <p>Email us at <script>
+                      var email_addr = "olleh".split("").reverse().join("")
+                          + "+question"
+                          + String.fromCharCode(2*0x20)
+                          + "su.kcartvog".split("").reverse().join("");
+                      document.write("\x3ca href='mailto:" + email_addr + "'\x3e" + email_addr + "\x3c/a\x3e");
+                      </script><noscript>email address protected from spambots; use a JavaScript-enabled browser to see it</noscript>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="list-group-item clearfix">
+        <input type="radio" name="contact_option" id="contact_option_democracy">
+        <div>
+          <div>
+            <label for="contact_option_democracy">I have an idea for fixing democracy.</label>
+          </div>
+          <div class="contact_expando">
+            <p>We recommend that you join your local <a href="https://www.codeforamerica.org/brigade/about/">Code for America Brigade</a>.</p>
+            <p>Before contacting GovTrack with your idea, please read <a href="https://medium.com/@joshuatauberer/so-you-want-to-reform-democracy-7f3b1ef10597#.7r6aq4dh7">this blog post</a> by the creator of GovTrack.</p>
+          </div>
+        </div>
+      </div>
+    </div> <!-- /list-group -->
+  </div>
+  <!-- /contact panel -->
 
-  <h3>Trying to unsubscribe?</h3>
 
-  <p>Please <a href="/accounts/profile">edit your account settings</a>. It&rsquo;ll be faster than emailing us. If you have any trouble, please do email.</p>
 
-  <h3>Contact information</h3>
-
-    <p>Email us at <script>
-              var email_addr = "olleh".split("").reverse().join("")
-                  + String.fromCharCode(2*0x20)
-                  + "su.kcartvog".split("").reverse().join("");
-              document.write("\x3ca href='mailto:" + email_addr + "'\x3e" + email_addr + "\x3c/a\x3e");
-              </script><noscript>email address protected from spambots; use a JavaScript-enabled browser to see it</noscript> and we&rsquo;ll try to answer your question as best we can.</p>
-    <p>If you are a journalist, please mention if you are on a deadline.</p>
 
 {% endblock %}
 
