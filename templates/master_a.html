@@ -103,6 +103,14 @@
 			<div id="content">
 				{% block body %}
 				{% endblock %}
+
+				<script>
+				if (!is_ad_free) {
+					// Matched Content Responsive
+					document.write("{{ '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="2002211547" data-ad-format="autorelaxed"></ins>'|escapejs }}");
+					(adsbygoogle = window.adsbygoogle || []).push({});
+				}
+				</script>
 			</div>
 		</div><!-- /summary-box -->
 	</div> <!-- /row -->
