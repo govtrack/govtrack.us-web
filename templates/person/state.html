@@ -223,6 +223,10 @@
 
     		</div>
 	    	<div role="tabpanel" class="tab-pane" id="map">
+				{% if state == "FL" %}
+		    		{% include "person/redistricting-notes.html" %}
+				{% endif %}
+
 	<div id="map_container">
 		<div id="map_canvas">
 		</div>
