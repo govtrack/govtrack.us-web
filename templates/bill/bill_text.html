@@ -359,10 +359,10 @@ $(function() {
 
 	<div class="row">
 		<div class="col-sm-8">
-			<p>{{bill.current_status_description}} The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
+			<p>The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
 
 			{% if not is_latest %}
-			<p class="text-danger">This is not the latest text of this {{bill.noun}}.</p>
+			<p class="text-danger">This is not the latest text of this {{bill.noun}}. {{bill.current_status_description}}</p>
 			{% endif %}
 		</div>
 		<div class="col-sm-4">
