@@ -54,8 +54,23 @@ h1 {
 	text-align: center;
 }
 
-#sidebar {
-	padding-left: 20px;
+#show-sidebar {
+	display: none;
+}
+
+@media (min-width: 992px) {
+	#sidebar {
+		padding-left: 20px;
+	}
+}
+@media (max-width: 991px) {
+	#sidebar {
+		display: none;
+		padding-bottom: 30px;
+	}
+	#show-sidebar[data-show='1'] {
+		display: inline;
+	}
 }
 
 #permalink_widget {
@@ -80,6 +95,10 @@ p.permalink-target {
 		color: #FF0;
 		border-bottom: 1px dotted #FF0;
 	}
+
+@media (max-width: 991px) {
+	#ad-container { display: none; }
+}
 
 {% include "bill/congressxml.css" %}
 
@@ -256,7 +275,12 @@ $(function() {
 		if (permalink_current && me[0] == permalink_current[0]) return;
 
 		var w = $('#permalink_widget');
-		w.css({ left: me.offset().left + me.width(), top: me.offset().top })
+		w.css({
+			left: ($(window).width() > 992)
+					 ? (me.offset().left + me.width())
+					 : (me.offset().left + me.width() - w.width()),
+			top: me.offset().top
+		})
 		w.fadeIn();
 
 		var fragment = "link=" + encodeURIComponent(me.attr('data-citation-path'));
@@ -348,6 +372,9 @@ $(function() {
 			<a href="{{textdata.gpo_url}}">GPO</a>
 			{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
 			{% if textdata.source == "statutes" %}&mdash; <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">Statutes at Large</a>{% endif %}
+			<span id="show-sidebar">
+				| <a href="#" onclick="$('#sidebar').slideDown(); $(this).parent('span').remove(); return false;">View Options</a>
+			</span>
 		</p>
 		</div>
 	</div>
@@ -375,20 +402,7 @@ $(function() {
 </div>
 
 <div class="row">
-<div class="col-xs-9 col-md-8">
-	<div id="main_text_content" class="bill_text_content">
-	{% if not textdata.text_html %}
-		<p>The text of this bill is not yet available. Please check back soon.</p>
-	{% else %}
-			{{textdata.text_html|safe}}
-	{% endif %}
-	</div>
-
-	<div id="content_loading" class="bill_text_content" style="display: none;">
-		<p>Loading...</p>
-	</div>
-</div>
-<div class="col-xs-3 col-md-4">
+<div class="col-md-4 col-md-push-8">
 
 	<div id="sidebar">
 		{% if alternates and alternates|length > 1 %}
@@ -414,6 +428,7 @@ $(function() {
 		</select>
 		{% endif %}
 	
+		<script>$('#show-sidebar').attr('data-show', '1')</script>
 		{% endif %}
 
 		{% if textdata.text_html and related_bills %}
@@ -427,6 +442,7 @@ $(function() {
 				</option>
 			{% endfor %}
 		</select>
+		<script>$('#show-sidebar').attr('data-show', '1')</script>
 		{% endif %}
 
 		{% comment %}
@@ -435,7 +451,8 @@ $(function() {
 			if (is_ad_free) {
 				document.write("An ad would be here, but you've gone ad-free!");
 			} else {
-				document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:200px;height:200px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="9757129944"></ins>'|escapejs }}");
+				// Master A Responsive
+				document.write("{{ '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>'|escapejs }}");
 				(adsbygoogle = window.adsbygoogle || []).push({});
 			}
 			</script>
@@ -443,9 +460,11 @@ $(function() {
 		</div>
 		{% endcomment %}
 	
-		<div style="margin-top: 2em; text-align: center">
+		<div id="ad-container" style="margin-top: 2em; text-align: center">
 			<script>
-			if (is_ad_free) {
+			if ($(window).width() < 992) {
+				// no ad
+			} else if (is_ad_free) {
 				document.write("An ad would be here, but you've gone ad-free!");
 			} else if ($(window).width() >= 1200) {
 				document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:300px;height:600px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="4273385545"></ins>'|escapejs }}");
@@ -459,6 +478,21 @@ $(function() {
 		</div>
 	</div>
 </div>
+
+<div class="col-md-8 col-md-pull-4">
+	<div id="main_text_content" class="bill_text_content">
+	{% if not textdata.text_html %}
+		<p>The text of this bill is not yet available. Please check back soon.</p>
+	{% else %}
+			{{textdata.text_html|safe}}
+	{% endif %}
+	</div>
+
+	<div id="content_loading" class="bill_text_content" style="display: none;">
+		<p>Loading...</p>
+	</div>
+</div>
+
 </div>
 {% endblock %}
 
