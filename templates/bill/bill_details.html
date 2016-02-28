@@ -510,7 +510,7 @@ p#yourreps {
 					{% endif %}
 
 					{% if summary1 %}
-						{% if subtitle %}<dt>Summary</dt>{% endif %}
+						{% if subtitle %}<dt style="margin-top: 1em">Summary</dt>{% endif %}
 						<dd>
 							{{summary1.as_html|truncatewords_html:60|safe}}
 							<p style="margin-top: -.75em"><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
