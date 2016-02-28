@@ -6,7 +6,7 @@
 		<div class="col-sm-4 col-sm-push-8 col-md-5 col-md-push-7 col-lg-4 col-lg-push-8">
 
 			{# MEDIUM POSTS #}
-			{% if medium_posts %}
+			{% if medium_posts and 0 %}
 		    <div class="hidden-xs sidebar-events">
 				<h2><a href="https://medium.com/govtrack-insider" style="float: right; color: #722" title="More Posts on Medium"><i class="fa fa-medium"></i></a> GovTrack Insider</h2>
 				<table>
@@ -89,9 +89,11 @@
 			</div>
 
 			{# SIDEBAR #}
+			{% comment %}
 		    <div class="hidden-xs sidebar-events">
 				{% include "events/trackedeventspanel.html" %}
 			</div>
+			{% endcomment %}
 		</div>
 
 		<div class="col-sm-8 col-sm-pull-4 col-md-7 col-md-pull-5 col-lg-8 col-lg-pull-4">
