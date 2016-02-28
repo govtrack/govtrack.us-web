@@ -76,35 +76,11 @@
 					if (div.is(":visible")) lbl.html("Loading...");
 				});
 
-		var is_full_screen = false;
-		function doFullScreen() {
-			if (is_full_screen) {
-				$('#map_canvas').css('position', 'relative');
-				$('#map_canvas').css('top', '');
-				$('#map_canvas').css('left', '');
-				$("#map_container").append($('#map_canvas'));
-			} else {
-				$('#map_canvas').css('position', 'absolute');
-				$('#map_canvas').css('z-index', '1000');
-				$("body").append($('#map_canvas'));
-			}
-			is_full_screen = !is_full_screen;
-			canvas_resize();
-		}
 		function canvas_resize() {
-			if (!is_full_screen) {
-				var w = $('#content').width();
-				var h = $(window).height() * .8;
-				$('#map_canvas').css('width', w);
-				$('#map_canvas').css('height', w < h ? w : h);
-			} else {
-				$('#map_canvas').css({
-					left: $(window).scrollLeft(),
-					top: $(window).scrollTop(),
-					width: $(window).width(),
-					height: $(window).height()
-				});
-			}
+			var w = $('#content').width();
+			var h = $(window).height() * .8;
+			$('#map_canvas').css('width', w);
+			$('#map_canvas').css('height', w < h ? w : h);
 			google.maps.event.trigger(map, "resize");
 		}
 		$(window).scroll(canvas_resize);
@@ -247,12 +223,6 @@
 
     		</div>
 	    	<div role="tabpanel" class="tab-pane" id="map">
-	<div style="display: none">
-		<div id="fullscreen" style="padding: 10px">
-			<img src="{{ STATIC_URL }}images/stock_fullscreen.png" title="Toggle Full Screen" onclick="doFullScreen();" style="cursor: pointer"/>
-		</div>
-	</div>
-	
 	<div id="map_container">
 		<div id="map_canvas">
 		</div>
