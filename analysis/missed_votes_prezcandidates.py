@@ -34,12 +34,12 @@ candidates = {
 
 	# 2016 Republican candidates
 	412573: { 2016: { "party": "R", "end": None } }, # Cruz
-	300047: { 2016: { "party": "R", "end": None } }, # Graham
-	400634: { 2016: { "party": "R", "end": None } }, # Jindal
+	300047: { 2016: { "party": "R", "end": date(2015, 12, 21) } }, # Graham
+	400634: { 2016: { "party": "R", "end": date(2015, 11, 17) } }, # Jindal
 	400590: { 2016: { "party": "R", "end": None } }, # Kasich
-	412492: { 2016: { "party": "R", "end": None } }, # Rand Paul
+	412492: { 2016: { "party": "R", "end": date(2016, 2, 3) } }, # Rand Paul
 	412491: { 2016: { "party": "R", "end": None } }, # Rubio
-	300085: { 2016: { "party": "R", "end": None }  , # Santorum
+	300085: { 2016: { "party": "R", "end": date(2016, 2, 3) }  , # Santorum
 	          2012: { "party": "R", "end": date(2012, 4, 10) } },
 
 	# 2012 Republican candidates (except Santorum, above)
