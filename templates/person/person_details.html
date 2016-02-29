@@ -467,6 +467,11 @@
 	{% if analysis_data.missedvotes %}
 	<section id="voting-record">
 		<h2><span>Voting Record</span></h2>
+
+		<div class="alert alert-info">
+		See how <a href="/congress/votes/presidential-candidates">presidential campaigns affect voting records</a>.
+		</div>
+
 		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed|intcomma}} of {{analysis_data.missedvotes.total|intcomma}} roll call votes, which is {{analysis_data.missedvotes.percent}}%.
 		This is
 		{% if analysis_data.missedvotes.percentile < 35 %}better than
