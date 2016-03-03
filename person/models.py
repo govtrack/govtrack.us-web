@@ -464,7 +464,7 @@ class PersonRole(models.Model):
             return self.get_title_name(False)
         if self.role_type == RoleType.senator:
             js = "a "
-            if self.current and self.senator_rank: js = "the " + self.get_senator_rank_display() + " "
+            if self.current and self.senator_rank: js = "the " + self.get_senator_rank_display().lower() + " "
             return js + "senator from " + statenames[self.state]
         if self.role_type == RoleType.representative:
             if stateapportionment.get(self.state) == "T":
