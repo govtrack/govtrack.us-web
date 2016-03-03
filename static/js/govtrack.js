@@ -32,7 +32,7 @@ var map_controller = function() {
 	var current_layer = null;
 	function init(element, state, district, options) {
 		// what layer?
-		current_layer = "cd-2012";
+		current_layer = "cd-2014";
 		function zeropad(number, length) {
 		    var ret = '' + number;
 		    while (ret.length < length)

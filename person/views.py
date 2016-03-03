@@ -324,7 +324,7 @@ def get_district_bounds_query(state, district):
             if not distr:
                 url = "https://gis.govtrack.us/boundaries/2012-states/%s/?format=json" % state.lower()
             else:
-                url = "https://gis.govtrack.us/boundaries/cd-2012/%s-%02d/?format=json" % (state.lower(), int(distr))
+                url = "https://gis.govtrack.us/boundaries/cd-2014/%s-%02d/?format=json" % (state.lower(), int(distr))
             resp = json.load(urllib.urlopen(url))
             sw_lng, sw_lat, ne_lng, ne_lat = resp["extent"]
             area = (ne_lng-sw_lng)*(ne_lat-sw_lat)
@@ -423,7 +423,7 @@ def district_lookup(request):
 
 def do_district_lookup(lng, lat):
     import urllib, json
-    url = "https://gis.govtrack.us/boundaries/cd-2012/?contains=%f,%f&format=json" % (lat, lng)
+    url = "https://gis.govtrack.us/boundaries/cd-2014/?contains=%f,%f&format=json" % (lat, lng)
     try:
         resp = json.load(urllib.urlopen(url))
     except Exception as e:
