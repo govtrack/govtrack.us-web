@@ -503,9 +503,14 @@ class Bill(models.Model):
             index_feeds.extend([Feed.objects.get_or_create(feedname="usc:" + str(sec))[0] for sec in self.usc_citations_uptree()])
 
             # also index into feeds for any related bills and previous versions of this bill
-            # that people may still be tracking
+            # that people may still be tracking. exclude related bills that are related to
+            # lots of other bills --- e.g. appropriations bills are the chrismas tree that
+            # many dozens of other bills are attached to, but when tracking an approps bill
+            # especially indirectly through a bill search users probably dont want to get
+            # events on all of the bills related to what's in the approps bills
             for rb in self.get_related_bills():
-                index_feeds.append(rb.related_bill.get_feed())
+                if rb.related_bill.relatedbills.count() <= 20:
+                    index_feeds.append(rb.related_bill.get_feed())
             for b in self.find_reintroductions():
                 index_feeds.append(b.get_feed())
 
