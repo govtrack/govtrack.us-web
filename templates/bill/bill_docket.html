@@ -35,7 +35,16 @@ $(function() {
 });
 
 function do_keyword_tracker_submit() {
-	window.location = "/events/track-something?feed=billsearch:text=" + escape($('#track-by-keyword-input').val());
+	var q = $('#track-by-keyword-input').val();
+
+	// People type bill numbers here. For that, they should track the bill -- not the bill number as a keyword.
+	if (/(hr|s|hconres|sconres|hjres|sjres|hres|sres)(\d+)$/i.test(q.replace(/[\s\.\-]/g, ""))) {
+		window.location = "/search?q=" + encodeURIComponent(q) + "&track=1";
+		return false;
+	}
+
+	// Redirect to the tracker subscribe page for the bill search tracker for these keywords.
+	window.location = "/events/track-something?feed=billsearch:text=" + encodeURIComponent(q);
 	return false;
 }
 </script>

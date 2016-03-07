@@ -69,7 +69,7 @@ def get_blog_items():
 def congress_home(request):
     return HttpResponseRedirect("/start")
 
-def do_site_search(q, allow_redirect=False):
+def do_site_search(q, allow_redirect=False, request=None):
     if q.strip() == "":
         return []
     
@@ -161,7 +161,9 @@ def do_site_search(q, allow_redirect=False):
              "secondary": b.object.congress != CURRENT_CONGRESS }
             for b in q[0:9]]
     else:
-        return HttpResponseRedirect(bill.get_absolute_url())
+        url = bill.get_absolute_url()
+        if request.GET.get("track"): url += "#track"
+        return HttpResponseRedirect(url)
     results.append({
         "title": "Bills and Resolutions",
         "href": "/congress/bills/browse",
@@ -201,7 +203,7 @@ def do_site_search(q, allow_redirect=False):
 
 @render_to('website/search.html')
 def search(request):
-    r = do_site_search(request.REQUEST.get("q", ""), allow_redirect=True)
+    r = do_site_search(request.REQUEST.get("q", ""), allow_redirect=True, request=request)
     if not isinstance(r, list): return r
     return { "results": r }
 
