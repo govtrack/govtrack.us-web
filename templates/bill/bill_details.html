@@ -70,7 +70,7 @@
 			}
 		}
 		$('#yourreps').toggleClass('hidden', text=="");
-		$('#yourreps').text(text);
+		$('#yourreps p').text(text);
 	});
 </script>
 {% endblock %}
@@ -89,7 +89,7 @@
 #action-panel h2 { font-size: 16px; }
 
 .dl-horizontal dd {
-	padding-bottom: .33em;
+	padding-bottom: .5em;
 }
 .dl-horizontal dd a {
 	font-weight: bold;
@@ -110,11 +110,6 @@
 	}
 		#call_congress_positions button.support span { color: green; }
 		#call_congress_positions button.oppose span { color: red; }
-
-p#yourreps {
-	margin: 0;
-	font-style: italic;
-}
 
 #status-row-grid {
 }
@@ -247,7 +242,7 @@ p#yourreps {
 	</div>
 
 	<div class="panel panel-default">
-	<div class="panel-body">
+	<div class="panel-body" style="padding-bottom: 5px;">
 	<div class="row">
 	<div id="track_panel_base" class="{% if bill.is_alive %}col-md-8{% else %}col-sm-12{% endif %}">
 		<div class="info" style="{% if not bill.is_alive %}width: auto; {% endif %}background: none;">
@@ -262,7 +257,7 @@ p#yourreps {
 			<hr>
 			{% endif %}
 			
-			<dl class="dl-horizontal">
+			<dl class="dl-horizontal" style="margin-bottom: 0">
 				{% if bill.source != "statutesatlarge" %}
 					<dt>Introduced:</dt>
 					<dd><p><strong>{{bill.introduced_date}}</strong>
@@ -417,10 +412,13 @@ p#yourreps {
 					<br/>(Click for scanned images of the {{bill.noun}}&rsquo;s text.)</p>
 				</dd>
 				{% endif %}
+
+				<div id="yourreps" class="hidden" style="font-style: italic; ine-height: 125%;">
+					<hr>
+					<p></p>
+				</div>
 			</dl>
 
-			<p id="yourreps" class="hidden"></p>
-			
 		</div><!-- /info -->
 		
 	</div>
