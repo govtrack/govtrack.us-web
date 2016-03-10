@@ -2,7 +2,7 @@
 
 html { font-size: 15px; /* for rem unit sizing, match the body to be nice */ }
 body {
-	color: #444444;
+	color: #333;
 	font-size: 15px;
 	}
 
@@ -43,14 +43,14 @@ h1 {
 	margin-top: 20px;
 	font-size: 27px;
 	font-weight: bold;
-	line-height: 1.4em;
-	color: #565656;
+	line-height: 1.3em;
+	color: #222;
 	padding-bottom: .25em;
 	border-bottom: 1px solid #CCA;
 	}
 	h1.long {
-		font-size: 22px;
-		line-height: 1.3em;
+		font-size: 23px;
+		line-height: 1.25em;
 		font-weight: normal;
 	}
 	h1 sup {
@@ -64,7 +64,6 @@ h1 {
 	.h1-multiline {
 		font-size: 27px;
 		font-weight: normal;
-		margin-bottom: .75em;
 		padding-bottom: .25em;
 		border-bottom: 1px solid #CCA;
 	}
@@ -333,8 +332,11 @@ blockquote {
 /* MASTER LAYOUT */
 
 #masthead {
-	background: white url(../images/bg-header-bar.jpg) center bottom repeat-x;
-	padding: 18px 0 0;
+	background: #f3f3f3; /* override navbar-default */
+	background-image: linear-gradient(to right,#fbfbfb 0,#f3f3f3 100%);
+	border: none;
+	box-shadow: none;
+	padding: 18px 0 4px 0;
 	margin-bottom: 0;
 }
 	@media only screen and (max-width: 767px) {
@@ -2030,13 +2032,11 @@ ul.singlesignon {
 	position: relative;
 	width: 100%;
 	padding: 5px;
-	background: #fff0b2;
+	background: #fff3cc;
 	z-index: 999;
-	border-top: 2px solid #fff6d3;
-	border-bottom: 2px solid #f6db71;
-	-webkit-box-shadow: 0px 2px 4px 0px #666;
-			box-shadow: 0px 2px 4px 0px #666;
-	/*behavior: url(/static/js/PIE.htc);*/
+	border-bottom: 1px solid #f6db71;
+	-webkit-box-shadow: 0px 0px 1px 0px #666;
+			box-shadow: 0px 0px 1px 0px #666;
 }
 #sitenews {
 	margin: 0 auto;

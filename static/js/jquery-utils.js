@@ -197,7 +197,7 @@ jQuery.fn.tabs = function(panes, subordinate_to, on_tab_activate) {
 //
 // Also, works well in Chrome but not quite right in FF/IE, although
 // the result in presentable.
-jQuery.fn.truncate_text = function(callback) {
+jQuery.fn.truncate_text = function(callback, before_first_cut) {
 	var elem = $(this);
 	
 	// elem's width/height are equal to its max-width/height. Wrap
@@ -216,7 +216,13 @@ jQuery.fn.truncate_text = function(callback) {
 			var idx = remaining.lastIndexOf(" ");
 			if (idx <= 0) break;
 			
-			if (chopped == null) chopped = "";
+			if (chopped == null) {
+				chopped = "";
+				if (before_first_cut) {
+					before_first_cut();
+					if (!(elem.height() > h || elem.width() > w)) break; // that fixed it
+				}
+			}
 			chopped = remaining.substring(idx) + chopped;
 			remaining = remaining.substring(0, idx);
 			elem.text(remaining + " ...");

@@ -233,12 +233,17 @@ p#yourreps {
 
 {% block summary %}
 
-	<div class="h1-multiline" style="border: none">
-	<h1 class="long" style="max-height: 3.5em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+	<div class="h1-multiline" style="border: none; margin-bottom: 10px">
+	<h1 style="margin-top: 10px; max-height: 3em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 			<p id="h1_overflow"></p>
-			<script>$('h1').truncate_text(function (remaining, chopped) {
-			    if (chopped) $('#h1_overflow').text("..." + chopped);
-			});</script>
+			<script>
+			$('h1').truncate_text(function (remaining, chopped) {
+			    if (chopped) {
+			    	$('h1').css({ marginBottom: '2px' });
+			    	$('#h1_overflow').text("..." + chopped);
+			    }
+			}, function() { $('h1').addClass('long'); });
+			</script>
 	</div>
 
 	<div class="panel panel-default">
