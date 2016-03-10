@@ -747,13 +747,11 @@ blockquote {
 	text-align: center;
 	padding: 5px 0 5px 0;
 	}
-.photo {
-	padding: 4px;
-	background: #fff;
-	border: 1px solid #eaeaea;
-	border-bottom-color: #c5c5c5;
-	border-width: 0 1px 1px;
-	margin: 0;
+.photo img {
+	-webkit-box-shadow: 2px 2px 2px 0px rgba(168,168,168,1);
+	-moz-box-shadow: 2px 2px 2px 0px rgba(168,168,168,1);
+	box-shadow: 2px 2px 2px 0px rgba(168,168,168,1);
+	margin: 4px;
 	}
 .summary-box .photo {
 	margin: 0 7px 10px 7px;
