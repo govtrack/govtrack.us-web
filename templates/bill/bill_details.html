@@ -244,7 +244,7 @@
 	<div class="panel panel-default">
 	<div class="panel-body" style="padding-bottom: 5px;">
 	<div class="row">
-	<div id="track_panel_base" class="{% if bill.is_alive %}col-md-8{% else %}col-sm-12{% endif %}">
+	<div id="track_panel_base" class="{% if bill.is_alive %}col-md-7 col-lg-8{% else %}col-sm-12{% endif %}">
 		<div class="info" style="{% if not bill.is_alive %}width: auto; {% endif %}background: none;">
 		
 			{% if bill.explanatory_text or bill.congress < 93 %}
@@ -424,7 +424,7 @@
 	</div>
 	
 	{% if bill.is_alive %}
-	<div class="aside col-md-4" style="margin-top: 15px">
+	<div class="aside col-md-5 col-lg-4 col-sm-push-2 col-md-push-0" style="margin-top: 15px">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
 		<div id="event_subscribe_inline_container"> </div>
