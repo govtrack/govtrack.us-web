@@ -1,20 +1,18 @@
-{% extends "master_b.html" %}
+{% extends "master.html" %}
 {% load humanize govtrack_utils %}
 
 {% block title %}Bills and Resolutions -- GovTrack.us{% endblock %}
 {% block meta_description %}Find legislation in the U.S. Congress.{% endblock %}
-{% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
 
 {% block head %}
 <style>
 #subject_list span {
 	display: none;
-	font-size: 90%;
 }
 	#subject_list span a {
 		color: #C77;
 	}
-	#subject_list li:hover span {
+	#subject_list > div:hover span {
 		display: inline;
 	}
 #subject_list ul {
@@ -50,65 +48,25 @@ function do_keyword_tracker_submit() {
 </script>
 {% endblock %}
 
-
-
-{% block summary %}
-	<h1>Bills and Resolutions</h1>
-	<p style="margin-top: 1em; margin-bottom: 0">
-		{% if 5000 > total %}
-		Around 10,000 bills and resolutions are considered by the U.S. Congress in each two-year session, but of those only about 4% will become law. The current two-year session is called the {{current_congress}} Congress.
-		{% else %}
-		There are {{total|intcomma}} bills and resolutions currently before the United States Congress. Of those, only about 5% will become law. They must be enacted before the end of the {{current_congress_years}} session (the &ldquo;{{current_congress}} Congress&rdquo;).
-		{% endif %}
-	</p>
-{% endblock %}
-
 {% block body %}
 
-<div class="row">
-	<div class="col-sm-5">
-
-		<h2>Search for a Bill</h2>
-		<p>Search for bills using the search box at the top right of every page, or use the <a href="/congress/bills/browse">advanced search</a> to screen by status, subject, and other factors.</p>
-
-		<h2>Track By Keyword Search</h2>
-		<form onsubmit="return do_keyword_tracker_submit()">
-			<label for="track-by-keyword-input" style="margin-bottom: 7px">Enter a keyword or phrase to get alerts for:</label>
-			<input id="track-by-keyword-input" type="text" placeholder="your alert keyword or phrase" style="width: 220px; height: 26px; float: left; margin: 0 0 5px 0;"/>
-			<input type="submit" class="submit btn-search-small2"/>
-			<p style="clear: both; font-style: italic; font-size: 95%;">or try <a href="#subjects">subject areas</a>, <a href="/congress/committees">committees</a>, <a href="/congress/bills/uscode">U.S. Code citations</a>.</p>
-		</form>
-
-		<h2>Track All Bills</h2>
-		<p>Get email updates for:</p>
-		<ul id="basic_trackers" style="padding: 0">
-			{% for feed in feeds %}
-			<li>
-				<a href="{{feed.link}}" style="height: auto">
-					{{feed.title}} <span>Add</span>
-					<div style="color: #555; line-height: 125%; margin-bottom: 3px">{{feed.description}}</div>
-				</a>
-			</li>
-			{% endfor %}
-		</ul>
-		
-		<h2>Other Information</h2>
-		<p>We&rsquo;ve also <a href="{% url "bill_stats" %}">compiled historical statistics</a> about how many bills
-		are enacted and when during the legislative session activity tends to occur.</p>
-	</div>
-
-	<div class="col-sm-7">
+<div class="clearfix">
+	<img src="/static/images/img-bills-resolutions.png" alt="Page Icon" style="float: right"/>
+	<h1 style="margin-top: 30px; border: none">Bills and Resolutions</h1>
+</div>
 
 <ul class="tabs four-up">
-	<li><a href="#docket">Coming Up</a></li>
-	<li><a href="#subjects">By Subject</a></li>
-	<li><a href="#bystatus">By Status</a></li>
-	<li><a href="#hot">Hot</a></li>
+	{% if coming_up|length > 0 %}<li><a href="#docket">Coming Up</a></li>{% endif %}
+	<li><a href="#find">Find a Bill</a></li>
+	<li><a href="#get-alerts">Get Alerts</a></li>
+
+	<li><a href="#bystatus">All Bills</a></li>
+	<li><a href="#hot">Hot Bills</a></li>
 </ul>
 
 <div class="panes">
 	<div id="docket">
-			<h4>Coming Up This Week</h4>
+			<h3>Coming Up This Week</h3>
 			
 			<p style="margin-top: 1em">{{coming_up|length}} {% if coming_up|length == 1 %}bill or resolution is{% else %}bills and resolutions are{% endif %} on the House and Senate calendars for the coming days. Once bills are scheduled for floor action, they typically have enough support to pass.</p>
 			
@@ -123,15 +81,116 @@ function do_keyword_tracker_submit() {
 				</div>
 			{% endfor %}
 	</div>
+
+	<div id="find">
+		<div class="row">
+			<div class="col-sm-7">
+			<div style="padding-right: 30px">
+				<p style="margin-top: 30px">
+					{% if 5000 > total %}
+					Each year the United States Congress considers about 5,000 bills and resolutions,
+					{% else %}
+					There are {{total|intcomma}} bills and resolutions currently before the United States Congress,
+					{% endif %}
+					but of those only about 4% will become law.
+				</p>
+
+				<p>Congress works in two-year legislative sessions tied to the elections. The current session is called the {{current_congress|ordinalhtml}} Congress and it began on {{current_congress_dates.0|date}}. All bills not enacted by the end of the session on {{current_congress_dates.1|date}} die, and Congress will start over.</p>
+
+				<p>Because there are so many bills and resolutions, it can be difficult to find the one you are looking for. Please consider your options:</p>
+
+
+				<h2><span>Suggested ways to find a bill</span></h2>
+
+				<p>Start by using the <b>subject areas</b> listed on this page.</p>
+
+				<p>Or use our <a href="/congress/bills/browse">advanced search</a> to find bills by status, subject area, sponsor, or other fields.</p>
+
+
+				<h2><span>Search for bills whose text contains a keyword</span></h2>
+
+				<form method="get" action="/congress/bills/browse" class="clearfix" style="margin-bottom: 1em">
+					<input type="text" placeholder="search query" style="max-width: 75%; height: 25px; float: left;" name="text"/>
+					<input type="submit" class="submit btn-search-small2"/>
+				</form>
+
+				<p>Since bills often contain legal terminology in place of everyday words, it is often easier to find a bill using one of the other methods above.</p>
+
+				<h2><span>Advanced tools</span></h2>
+
+				<p>Browse bills <a href="/congress/bills/uscode">by the section of the United States Code</a> they refer to.</p>
+			</div>
+			</div>
+
+			<div class="col-sm-5">
+				<h2><span>Subject areas</span></h2>
+	
+		<div id="subject_list">
+		{% for topterm, subterms in subjects %}
+			<div style="margin-bottom: .33em">
+				<div><a href="{{topterm.get_absolute_url}}">{{topterm.name}}</a> <span>(<a href="#">narrow topic...</a>)</span></div>
+				<ul class="bullets">
+					{% for subterm in subterms %}
+						<li><a href="{{subterm.get_absolute_url}}">{{subterm.name}}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+		{% endfor %}
+		</div>
+
+				<p style="margin: 2em 0">Subject areas are assigned to bills by the Library of Congress.</p>
+			</div>
+		</div>
+
+	</div>
+
+	<div id="get-alerts">
+		<div class="row">
+			<div class="col-sm-7">
+			<div style="padding-right: 30px">
+				<h2><span>Basic alerts</span></h2>
+				<ul id="basic_trackers" style="padding: 0">
+					{% for feed in feeds %}
+					<li>
+						<a href="{{feed.link}}" style="height: auto">
+							{{feed.title}} <span>Add</span>
+							<div style="color: #555; line-height: 125%; margin-bottom: 3px">{{feed.description}}</div>
+						</a>
+					</li>
+					{% endfor %}
+				</ul>
+			</div>
+			</div>
+			<div class="col-sm-5">
+				<h2><span>Other ways to get alerts</span></h2>
+
+				<p>There are many ways to get email alerts about bills in Congress from GovTrack.</p>
+
+				<p>If you are interested in a particular bill, start by <a href="#find">finding that bill</a>.</p>
+
+				<p>You can also get alerts for <a href="#find">subject areas</a> and bills assigned to <a href="/congress/committees">committees</a>.</p>
+
+				<p>If you are interested in the legislative activity of your representative and senators, start by <a href="/congress/members">finding who represents you</a>.</p>
+
+				<h2><span>Advanced alerts</span></h2>
+				<form onsubmit="return do_keyword_tracker_submit()" class="clearfix" style="margin-bottom: 1em">
+					<div>Enter a keyword or phrase to get alerts for:</div>
+					<input id="track-by-keyword-input" type="text" placeholder="your alert keyword or phrase" style="width: 220px; height: 26px; float: left; margin: 0 0 5px 0;"/>
+					<input type="submit" class="submit btn-search-small2"/>
+				</form>
+				<p>Since bills often contain legal terminology in place of everyday words, we only recommend this for legislative professionals.</p>
+
+				<p>You can also get alerts based on <a href="/congress/bills/uscode">citations to the United States Code</a>.</p>
+			</div>
+		</div>			
+	</div>
 	
 	<div id="bystatus">	
-		<h4>Browse Bills by Status</h4>
-	
-		<p>Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
+		<p style="margin-top: 15px">Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
 		{% for name, descr1, descr2, href, count, queryset in groups %}
 		{% if count > 0 %}
-			<h5 style="margin-top: 2em; margin-bottom: .5em">{{name}}</h5>
+			<h3>{{name}}</h3>
 			
 			{% if 10 > count %}
 				<p>There are {{count|intcomma}} {{descr1}}{{descr2}}:</p>
@@ -149,33 +208,17 @@ function do_keyword_tracker_submit() {
 			{% endif %}
 		{% endif %}
 		{% endfor %}
+
+		<hr>
+
+		<h3>Historical Information</h3>
+		<p>We&rsquo;ve also <a href="{% url "bill_stats" %}">compiled historical statistics</a> about how many bills
+		are enacted and when during the legislative session activity tends to occur.</p>
 	</div>
 	
-	<div id="subjects">
-		<h4>Browse Bills by Subject</h4>
-		
-		<p>Use the subject terms below or browse bills <a href="/congress/bills/uscode">by the section of the United States Code</a> they refer to.</p>
-		
-		<p>Use the Library of Congress&rsquo;s subject categorization of bills and resolutions to explore pending legislation in Congress.</p>
-		<ul id="subject_list">
-		{% for topterm, subterms in subjects %}
-			<li style="margin-bottom: .33em">
-				<div><a href="{{topterm.get_absolute_url}}">{{topterm.name}}</a> <span>(<a href="#">narrow topic...</a>)</span></div>
-				<ul class="bullets">
-					{% for subterm in subterms %}
-						<li><a href="{{subterm.get_absolute_url}}">{{subterm.name}}</a></li>
-					{% endfor %}
-				</ul>
-			</li>
-		{% endfor %}
-		</ul>
-	</div>
-
 	<div id="hot">
-		<h4>Hot Bills</h4>
-
 		{% if trending_bill_feeds|length > 0 %}
-		<p>Trending now:</p>
+		<h3>Trending now:</h3>
 		<div style="margin-bottom: 1.5em">
 		{% for f in trending_bill_feeds %}
 			<div style="margin-bottom: .5em;">
@@ -185,7 +228,7 @@ function do_keyword_tracker_submit() {
 		</div>
 		{% endif %}
 
-		<p>Top bills tracked by GovTrack users:</p>
+		<h3>Top bills tracked by GovTrack users:</h3>
 		<div id="top_tracked_bills">
 		{% for bill, count in top_tracked_bills %}
 			<div style="margin-bottom: .5em;">
@@ -193,9 +236,6 @@ function do_keyword_tracker_submit() {
 				<br><small>tracked by {{count}} user{{count|pluralize}}</small>
 			</div>
 		{% endfor %}
-		</div>
-	</div>
-
 		</div>
 	</div>
 </div>

@@ -506,15 +506,13 @@ def bill_docket(request):
         # current congrss years
         start, end = get_congress_dates(CURRENT_CONGRESS)
         end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
-        current_congress_years = '%d-%d' % (start.year, end.year)
-        current_congress = ordinal(CURRENT_CONGRESS)
 
         return {
             "feeds": feeds,
 
             "total": Bill.objects.filter(congress=CURRENT_CONGRESS).count(),
-            "current_congress_years": current_congress_years,
-            "current_congress": current_congress,
+            "current_congress": CURRENT_CONGRESS,
+            "current_congress_dates": get_congress_dates(CURRENT_CONGRESS),
 
             "groups": groups,
             "coming_up": coming_up,

@@ -383,9 +383,6 @@ def membersoverview(request):
         else:
             return qs.count()
     
-    congress_current = (CURRENT_CONGRESS, get_congress_dates(CURRENT_CONGRESS)[0])
-    congress_previous = (CURRENT_CONGRESS-1, get_congress_dates(CURRENT_CONGRESS-1)[1])
-            
     return {
         "statelist": statelist,
         "senate_by_party": get_current_members(RoleType.senator, False, True),
@@ -393,8 +390,6 @@ def membersoverview(request):
         "house_by_party": get_current_members(RoleType.representative, False, True),
         "house_vacancies": 435-get_current_members(RoleType.representative, False, False),
         "house_delegate_vacancies": 6-get_current_members(RoleType.representative, True, False),
-        "congress_current": congress_current,
-        "congress_previous": congress_previous,
     }
 
 @anonymous_view
