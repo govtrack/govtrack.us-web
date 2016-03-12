@@ -136,7 +136,7 @@ class CommunityInterest(models.Model):
 
 class PayPalPayment(models.Model):
     paypal_id = models.CharField(max_length=64, db_index=True)
-    user = models.ForeignKey(User, db_index=True, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.PROTECT)
     response_data = JSONField()
     executed = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -161,23 +161,17 @@ class PayPalPayment(models.Model):
         except PayPalPayment.DoesNotExist:
             raise ValueError("Trying to complete a payment that does not exist in our database: " + payment.id)
     
-        if payment.state != "created" or rec.executed:
-            raise ValueError("Trying to complete an already-executed payment: %s, %s (%s)" + (payment.state, str(rec.executed), payment.id))
-
         return (payment, rec)
 
     @staticmethod
-    def execute(request, notes_must_match):
+    def execute(request):
         # Get object.
         (payment, rec) = PayPalPayment.from_session(request)
         
-        # Validate.
-        if rec.notes != notes_must_match:
-            raise ValueError("Trying to complete the wrong sort of payment: %s" % payment.id)
-            
-        # Execute.
-        if not payment.execute({"payer_id": request.GET["PayerID"]}):
-            raise ValueError("Error executing PayPal.Payment (%s): " + (payment.id, repr(payment.error)))
+        # Execute if it's not already been executed (in case of page reload).
+        if payment.state == "created" and not rec.executed:
+            if not payment.execute({"payer_id": request.GET["PayerID"]}):
+                raise ValueError("Error executing PayPal.Payment (%s): " % (payment.id, repr(payment.error)))
             
         # Update our database record of the payment.
         rec.response_data = payment.to_dict()

@@ -444,44 +444,66 @@ def financial_report(request):
 def go_ad_free_start(request):
     # just show the go-ad-free page.
     
+    # does the user have an ad-free payment already?
     msi = { }
     if not request.user.is_anonymous():
         msi = request.user.userprofile().get_membership_subscription_info()
-        
-    return { "msi": msi }
+
+    # or did the user make an anonymous payment?
+    from website.models import PayPalPayment
+    p = None
+    try:
+        p = PayPalPayment.objects.get(paypal_id=request.session["go-ad-free-payment"])
+    except:
+        pass
+    return { "msi": msi, "anonymous_payment": p }
     
 def go_ad_free_redirect(request):
     # create a Payment and redirect to the approval step, and track this
-    
-    if request.user.is_anonymous():
+    try:
+        amount = float(request.POST["amount"])
+    except:
         return HttpResponseRedirect(reverse(go_ad_free_start))
-        
-    if request.user.userprofile().get_membership_subscription_info()['active']:
-        raise ValueError("User already has this feature.")
-    
+
+
     import paypalrestsdk
 
     sandbox = ""
     if paypalrestsdk.api.default().mode == "sandbox":
         sandbox = "-sandbox"
+
+    # slightly different SKU if the user is/isn't logged in
+    if request.user.is_anonymous():
+        item = {
+            "name": "Support GovTrack.us (%.02d)" % amount,
+            "sku": "govtrack-tip" + sandbox,
+        }
+        description = "Thank you for supporting GovTrack.us%s!" % sandbox
+    else:
+        item = {
+            "name": "Ad-Free GovTrack.us for 1 Year (%.02d)" % amount,
+            "sku": "govtrack-ad-free-for-year" + sandbox,
+        }
+        description = "Ad-Free%s: GovTrack.us is ad-free for a year while you're logged in." % sandbox
+
+    item.update({
+        "price": "%.02f" % amount,
+        "currency": "USD",
+        "quantity": 1,
+    })
     
     payment = paypalrestsdk.Payment({
       "intent": "sale",
       "payer": { "payment_method": "paypal" },
       "transactions": [{
         "item_list": {
-          "items": [{
-            "name": "Ad-Free GovTrack.us for 1 Year",
-            "sku": "govtrack-ad-free-for-year" + sandbox,
-            "price": "35.00",
-            "currency": "USD",
-            "quantity": 1 }]
+          "items": [item]
             },
           "amount": {
-            "total": "35.00",
-            "currency": "USD"
+            "total": item["price"],
+            "currency": item["currency"],
           },
-          "description": "Ad-Free%s: GovTrack.us is ad-free for a year while you're logged in." % sandbox }],
+          "description": description }],
       "redirect_urls": {
         "return_url": request.build_absolute_uri(reverse(go_ad_free_finish)),
         "cancel_url": request.build_absolute_uri(reverse(go_ad_free_start)),
@@ -492,13 +514,13 @@ def go_ad_free_redirect(request):
       raise ValueError("Error creating PayPal.Payment: " + repr(payment.error))
       
     request.session["paypal-payment-to-execute"] = payment.id
-      
+
     from website.models import PayPalPayment
     rec = PayPalPayment(
-        paypal_id = payment.id,
-        user = request.user,
-        response_data = payment.to_dict(),
-        notes = "ad-free-year $35")
+        paypal_id=payment.id,
+        user=request.user if not request.user.is_anonymous() else None,
+        response_data=payment.to_dict(),
+        notes=item["name"])
     rec.save()
   
     for link in payment.links:
@@ -508,26 +530,25 @@ def go_ad_free_redirect(request):
         raise ValueError("No redirect in PayPal.Payment: " + payment.id)
     
 def go_ad_free_finish(request):
-    if request.user.is_anonymous():
-        raise ValueError("User got logged out!")
-
-    # Do as much before we destroy state.
-    prof = request.user.userprofile()
-
     from website.models import PayPalPayment
-    (payment, rec) = PayPalPayment.execute(request, "ad-free-year $35")
-    
-    try:
-        # Update the user profile.
-        if prof.paid_features == None: prof.paid_features = { }
-        prof.paid_features["ad_free_year"] = (payment.id, None)
-        prof.save()
-      
-        # Send user back to the start.
-        return HttpResponseRedirect(reverse(go_ad_free_start))
-     
-    except Exception as e:
-        raise ValueError(str(e) + " while processing " + payment.id)
+    (payment, rec) = PayPalPayment.execute(request)
+
+    if rec.user:
+        prof = rec.user.userprofile()
+
+        try:
+            # Update the user profile.
+            if prof.paid_features == None: prof.paid_features = { }
+            prof.paid_features["ad_free_year"] = (payment.id, None)
+            prof.save()
+          
+        except Exception as e:
+            raise ValueError(str(e) + " while processing " + payment.id)
+
+    # Send user back to the start.
+    request.session["go-ad-free-payment"] = payment.id
+    return HttpResponseRedirect(reverse(go_ad_free_start))
+ 
 
 @anonymous_view
 def videos(request, video_id=None):
