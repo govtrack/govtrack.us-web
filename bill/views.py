@@ -503,10 +503,6 @@ def bill_docket(request):
             [0:25]
         top_bills = [(Bill.from_feed(Feed.from_name(bf["feedname"])), bf["count"]) for bf in top_bills]
 
-        # current congrss years
-        start, end = get_congress_dates(CURRENT_CONGRESS)
-        end_year = end.year if end.month > 1 else end.year-1 # count January finishes as the prev year
-
         return {
             "feeds": feeds,
 
@@ -522,10 +518,10 @@ def bill_docket(request):
             "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.referred, BillStatus.reported),
         }
 
-    ret = cache.get("bill_docket_info")
+    ret = cache.get("bill_docket_info-1")
     if not ret:
         ret = build_info()
-        cache.set("bill_docket_info", ret, 60*60)
+        cache.set("bill_docket_info-1", ret, 60*60)
 
     return ret
 
