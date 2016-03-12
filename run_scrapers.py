@@ -101,7 +101,7 @@ if "committees" in sys.argv:
 	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
 	# Committee events.
-	os.system("cd %s; . .env/bin/activate; ./run committee_meetings %s --log=%s" % (SCRAPER_PATH, fetch_mode, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run committee_meetings --docs=False %s --log=%s" % (SCRAPER_PATH, fetch_mode, log_level))
 	
 	# Load into db.
 	os.system("./parse.py -l ERROR committee")
