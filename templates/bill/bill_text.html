@@ -59,7 +59,7 @@ h1 {
 }
 
 @media (min-width: 992px) {
-	#sidebar {
+	.pad-left-sm {
 		padding-left: 20px;
 	}
 }
@@ -359,13 +359,29 @@ $(function() {
 
 	<div class="row">
 		<div class="col-sm-8">
-			<p>The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
+			<p style="margin-bottom: 1.5em">The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
 
 			{% if not is_latest %}
-			<p class="text-danger">This is not the latest text of this {{bill.noun}}. {{bill.current_status_description}}</p>
+				<div class="alert alert-warning" role="alert">
+					This is not the latest text of this {{bill.noun}}. Read <a href="{{bill.get_absolute_url}}/text">the latest text</a>.
+				</div>
+
+			{% elif textdata.doc_version == "enr" and not bill.is_current and bill.noun == "bill" %}
+				<div class="alert alert-warning" role="alert">
+					You are reading a bill enacted {{days_old|intcomma}} days ago. In the intervening time subsequent legislation may have amended or repealed the provisions below.
+				</div>
 			{% endif %}
+
+			{% if bill.oursummary %}
+				<div class="alert alert-success" role="alert">
+					We have <a href="{{bill.get_absolute_url}}/summary">a summary of this {{bill.noun}}</a> which will help you make sense of what you see below.
+				</div>
+			{% endif %}
+
+
 		</div>
 		<div class="col-sm-4">
+		<div class="pad-left-sm">
 		<div><a href="{{textdata.gpo_pdf_url}}" class="push-btn grey-btn" style="text-transform: none">Download PDF</a></div>
 
 		<p>Source:
@@ -376,6 +392,7 @@ $(function() {
 				| <a href="#" onclick="$('#sidebar').slideDown(); $(this).parent('span').remove(); return false;">View Options</a>
 			</span>
 		</p>
+		</div>
 		</div>
 	</div>
 
@@ -404,7 +421,7 @@ $(function() {
 <div class="row">
 <div class="col-md-4 col-md-push-8">
 
-	<div id="sidebar">
+	<div id="sidebar" class="pad-left-sm">
 		{% if alternates and alternates|length > 1 %}
 		<p style="margin-bottom: .25em">This {{bill.noun}} has {{alternates|length}} version{{alternates|pluralize}}. Select a version to view:</p>
 		<select size="1" onchange="window.location = '{{bill.get_absolute_url|escapejs}}/text/' + $(this).val();" class="form-control">

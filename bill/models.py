@@ -425,6 +425,14 @@ class Bill(models.Model):
         s = get_formatted_bill_summary(self)
         return s
 
+    def has_text(self, status=None):
+        try:
+            modsinfo = load_bill_text(self, status)
+            return True
+        except IOError:
+            return False
+
+
     def get_upcoming_meetings(self):
         return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=self)
 

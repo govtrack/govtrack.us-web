@@ -274,6 +274,7 @@ def bill_text(request, congress, type_slug, number, version=None):
         "is_latest": is_latest,
         "alternates": alternates,
         "related_bills": related_bills,
+        "days_old": (datetime.datetime.now().date() - textdata["docdate"]).days,
     }
 
 @anonymous_view
