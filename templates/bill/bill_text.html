@@ -374,7 +374,7 @@ $(function() {
 					This is not the latest text of this {{bill.noun}}. Read <a href="{{bill.get_absolute_url}}/text">the latest text</a>.
 				</div>
 
-			{% elif textdata.doc_version == "enr" and not bill.is_current and bill.noun == "bill" %}
+			{% elif bill.is_success and textdata.doc_version == "enr" and not bill.is_current and bill.noun == "bill" %}
 				<div class="alert alert-warning" role="alert">
 					You are reading a bill enacted {{days_old|intcomma}} days ago. In the intervening time subsequent legislation may have amended or repealed the provisions below.
 				</div>
