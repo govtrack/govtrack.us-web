@@ -83,8 +83,10 @@ class Command(BaseCommand):
 					active_feeds.add(feed2)
 
 			# Find the subscription lists w/ emails turned on that are tracking those feeds.
+			# Exclude lists we sent an email out to in the last 16 hours, in case we're
+			# re-starting this process and some new events crept in.
 			if sys.stdout.isatty(): print "Looking for subscribed users..."
-			sublists = set(SubscriptionList.objects.filter(trackers__in=active_feeds, email__in = list_email_freq))
+			sublists = set(SubscriptionList.objects.filter(trackers__in=active_feeds, email__in=list_email_freq).exclude(last_email_sent__gt=datetime.now()-timedelta(hours=16)))
 
 			# And get a list of those users.
 			users = User.objects.filter(subscription_lists__in=sublists)\
