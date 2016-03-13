@@ -288,8 +288,7 @@ $(function() {
 		var flags = $.cookie("flags");
 		flags = !flags ? {} : parse_qs(flags);
 
-    if (the_segment == "Other" && flags.itf != 2 && Math.random() < .25)
-      show_if_then_fund(flags);
+		if (show_if_then_fund(flags)) { }
 		else if (the_segment == "Other" && cong_dist == null && 0)
 			show_askcd();
 		else if (Math.random() < .3)
@@ -308,7 +307,13 @@ function show_followus(flags) {
 }
 
 function show_if_then_fund(flags) {
-  flags.itf = 2;
+  {% if not request.GET.dontCache %}
+  if (the_segment != "Other") return;
+  {% if not if_then_fund_campaign.campaign.id %}return;{% endif %}
+  if (flags.itf == "{{if_then_fund_campaign.campaign.id}}") return;
+  if (Math.random() < .75) return;
+  flags.itf = "{{if_then_fund_campaign.campaign.id}}";
+  {% endif %}
   $('#itfpromo_modal').modal();
 }
 </script>
@@ -357,25 +362,26 @@ function show_if_then_fund(flags) {
       {% endcomment %}
       <div class="modal-body">
         <div class="row">
+          <div class="col-xs-9">
+            <h5 style="font-size: 17px; font-weight: bold; text-transform: none;">
+              {{if_then_fund_campaign.campaign.subhead|striptags|safe}}
+            </h5>
+            <p>You can shape the future of Congress by making a campaign contribution on <span class="itf-brand">if.then.fund</span> to {{if_then_fund_campaign.trigger.strings.actors}} or their opponents based on whether they agree with you on this {{if_then_fund_campaign.trigger.strings.action_noun}}.</p>
+            <div>
+              {% if if_then_fund_campaign.trigger.desired_outcome %}
+                <a href="{{if_then_fund_campaign.campaign.link}}?utm_campaign=govtrack/popup" class="btn btn-success">{{if_then_fund_campaign.trigger.desired_outcome.label }} &raquo;</a>
+              {% else %}
+                {% for outcome in if_then_fund_campaign.trigger.outcomes %}
+                  <a href="{{if_then_fund_campaign.campaign.link}}?outcome={{outcome.id}}&amp;utm_campaign=govtrack/popup" class="btn btn-success" style="margin-top: .5em;">{{outcome.label}} &raquo;</a>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
           <div class="col-xs-3">
             <a href="{{if_then_fund_campaign.campaign.link}}?utm_campaign=govtrack/popup">
               <img src="{{if_then_fund_campaign.site.logo.w500}}" class="img-responsive" style="margin-bottom: 1em" title="{{if_then_fund_campaign.site.name}}">
             </a>
           </div>
-          <div class="col-xs-9">
-            <h5 style="margin-top: 0; font-size: 16px; font-weight: bold; text-transform: none;">{{if_then_fund_campaign.campaign.headline}}</h5>
-            {{if_then_fund_campaign.campaign.subhead|safe}}
-            <p>Make a campaign contribution on <span class="itf-brand">if.then.fund</span> to {{if_then_fund_campaign.trigger.strings.actors}} that {{if_then_fund_campaign.trigger.strings.action_vb_inf}} the way you want them to.</p>
-          </div>
-        </div>
-        <div style="text-align: center; margin: 1em 0;">
-          {% if if_then_fund_campaign.trigger.desired_outcome %}
-            <a href="{{if_then_fund_campaign.campaign.link}}?utm_campaign=govtrack/popup" class="btn btn-success">{{if_then_fund_campaign.trigger.desired_outcome.label }} &raquo;</a>
-          {% else %}
-            {% for outcome in if_then_fund_campaign.trigger.outcomes %}
-              <a href="{{if_then_fund_campaign.campaign.link}}?outcome={{outcome.id}}&amp;utm_campaign=govtrack/popup" class="btn btn-success">{{outcome.label}} &raquo;</a>
-            {% endfor %}
-          {% endif %}
         </div>
       </div>
       <div class="modal-footer">
