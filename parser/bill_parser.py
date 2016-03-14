@@ -445,6 +445,8 @@ def load_docs_house_gov(options, bill_index):
     fn = sorted(os.listdir("data/congress/upcoming_house_floor"))[-1]
     data = json.load(open("data/congress/upcoming_house_floor/" + fn))
     for billinfo in data.get("upcoming", []):
+        if "bill_id" not in billinfo: continue
+
         m = re.match(r"([hrsjconres]+)(\d+)-(\d+)", billinfo["bill_id"])
         if not m:
             log.error('Could not parse bill_id "%s" in docs.house.gov.' % billinfo["bill_id"])
