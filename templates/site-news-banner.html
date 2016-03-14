@@ -1,51 +1,11 @@
 {% load govtrack_utils %}
 {% load humanize %}
-<div class="sitenewsbody" data-seq="78">
-	<p>new on <i>GovTrack Insider</i>:</p>
-	<div class="row">
-	<div class="col-sm-6">
-		<p><a href="https://medium.com/govtrack-insider/presidential-candidates-have-proposed-changing-the-u-s-constitution-what-would-it-mean-68e2e91868ce#.nmyzc6yx3">Presidential candidates have proposed changing the U.S. Constitution: What would it mean?</a></p>
-	</div>
-	<div class="col-sm-6">
-		<p><a href="https://medium.com/govtrack-insider/the-big-hurdle-mens-rea-that-could-derail-criminal-justice-reform-e199b45c5455#.274zbvhbm">The big hurdle — “mens rea” — that could derail criminal justice reform</a></p>
-	</div>
-	</div> <!-- /row -->
-
-	{% comment %}
-	<div class="row">
-		<div class="col-sm-4">
-			<p>NEW: <a href="/congress/votes/presidential-candidates">Analysis of missed votes by the presidential candidates simultaneously serving in Congress</a></p>
-		</div>
-		<div class="col-sm-4">
-			<div><a href="https://medium.com/govtrack-insider/week-ahead-for-nov-2-6-water-defense-and-highways-e6d8269878c6">Nov. 2: Congress&rsquo;s Week Ahead</a></div>
-			<div class="small">EPA regulation of bodies of water, highway and infrastructure, and homeland security</div>
-		</div>
-		<div class="col-sm-3">
-			<div class="small"><em>trending:</em></div>
-			{% for f in trending_feeds %}
-				{% if forloop.counter <= 1 %}
-				<div class="small"><a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
-					{{f.title|truncatewords:11}}
-				</a></div>
-				{% endif %}
-			{% endfor %}
-		</div>
-	</div>
-	{% endcomment %}
-
-	{% comment %}
-	<div id="trending_trackers" style="margin: 0 auto; font-size: 90%;">
-	<span class="trending_trackers_0">
-		Trending on GovTrack...
-    </span>
-	{% for f in trending_feeds %}
-		<a class="trending_trackers_{{forloop.counter}} plain" href="{{f.link}}" onclick="return trackOutboundLink(this, 'sitenewsbanner', 'trending-bill');" title="{{f.title}}">
-			{{f.title|truncatewords:10}}
-		</a>
-	{% endfor %}
-	<div style="clear: both"> </div>
-	</div>
-	{% endcomment %}
+<div class="sitenewsbody" data-seq="79">
+	<a href="/accounts/membership" class="btn btn-sm btn-success" style="text-decoration: none; margin-right: 1em">
+		<span class="glyphicon glyphicon-ok" aria-hidden="true" style="margin-right: 4px;"></span>
+		Support GovTrack
+	</a>
+	<span style="font-size: 13px">Your support will help us expand our coverage of what&rsquo;s happening in Congress.</span>
 </div>
 <div style="clear: both"> </div>
 
