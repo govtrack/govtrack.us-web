@@ -3,7 +3,7 @@
 {% block body_with_container %}
 <div class="container">
 	<div class="row">
-		<div class="col-sm-4 col-sm-push-8 col-md-5 col-md-push-7 col-lg-4 col-lg-push-8">
+		<div id="master-a-sidebar" class="col-sm-4 col-sm-push-8 col-md-5 col-md-push-7 col-lg-4 col-lg-push-8">
 
 			{# MEDIUM POSTS #}
 			{% if medium_posts and 0 %}
@@ -76,6 +76,27 @@
 			// ad unit targeting staff only
 			document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="7881093146"></ins>'|escapejs }}");
 			(adsbygoogle = window.adsbygoogle || []).push({});
+
+		} else if ($('#master-a-sidebar').width() >= 340) {
+			// Criteo 336X280 unit if the unit fits within the dimensions of the sidebar.
+			document.MAX_ct0 ='';
+			var m3_u = (location.protocol=='https:'?'https://cas.criteo.com/delivery/ajs.php?':'http://cas.criteo.com/delivery/ajs.php?');
+			var m3_r = Math.floor(Math.random()*99999999999);
+			document.write ("<scr"+"ipt type='text/javascript' src='"+m3_u);
+			document.write ("zoneid=382674");document.write("&amp;nodis=1");
+			document.write ('&amp;cb=' + m3_r);
+			if (document.MAX_used != ',') document.write ("&amp;exclude=" + document.MAX_used);
+			document.write (document.charset ? '&amp;charset='+document.charset : (document.characterSet ? '&amp;charset='+document.characterSet : ''));
+			document.write ("&amp;loc=" + escape(window.location).substring(0,1600));
+			if (document.context) document.write ("&context=" + escape(document.context));
+			if ((typeof(document.MAX_ct0) != 'undefined') && (document.MAX_ct0.substring(0,4) == 'http')) {
+			   document.write ("&amp;ct0=" + escape(document.MAX_ct0));
+			}
+			if (document.mmm_fo) document.write ("&amp;mmm_fo=1");
+			var publisherurl = "%%SITE%%";
+			var macro = "%%SI" + "TE%%";
+			if (publisherurl !== macro) document.write ("&amp;publisherurl="+publisherurl);
+			document.write ("'></scr"+"ipt>");
 
 		} else {
 			// Master A Responsive
