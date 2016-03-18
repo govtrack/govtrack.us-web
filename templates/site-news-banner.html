@@ -1,9 +1,18 @@
 {% load govtrack_utils %}
 {% load humanize %}
-<div class="sitenewsbody" data-seq="80">
-	<p>President Obama is <a href="http://www.buzzfeed.com/chrisgeidner/merrick-garland-to-supreme-court#.voRd6l8BL">expected</a> to nominate circuit court judge
-	Merrick Garland today as #SCOTUSnominee.
-	His 1997 nomination was <a href="https://www.govtrack.us/congress/votes/105-1997/s34">confirmed 76-23</a>.</p>
+<div class="sitenewsbody" data-seq="81">
+  <img src="{{if_then_fund_campaign.site.logo.w500}}" class="img-responsive" title="{{if_then_fund_campaign.site.name}}" style="float: left; max-width: 64px; margin-right: 1em">
+  <div style="text-align: left">
+    <div style="font-size: 90%; line-height: 125%; margin-bottom: .5em">
+      <a href="{{if_then_fund_campaign.campaign.link}}?utm_campaign=govtrack/banner">
+        {{if_then_fund_campaign.campaign.subhead|striptags|safe}}
+      </a>
+    </div>
+    <div style="font-size: 78%; line-height: 1em;">You can shape the future of Congress by making a campaign contribution on <span class="itf-brand">if.then.fund</span> to 
+      {{if_then_fund_campaign.trigger.strings.actors}} or their opponents based on whether they agree with you on this
+      {{if_then_fund_campaign.trigger.strings.action_noun}}.</div>
+    </div>
+  </div>
 </div>
 <div style="clear: both"> </div>
 
