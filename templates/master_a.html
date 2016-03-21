@@ -62,7 +62,7 @@
 			function padDigits(number, digits) {
 			    return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
 			}
-			ga('send', 'event', 'Advertisements', 'ImpressionCount', padDigits(ad_exp_user.impression, 5), null, {'nonInteraction': 1});
+			//ga('send', 'event', 'Advertisements', 'ImpressionCount', padDigits(ad_exp_user.impression, 5), null, {'nonInteraction': 1});
 		}
 		
 		if (is_ad_free) {
@@ -70,10 +70,6 @@
 
 		} else if (false) {
 			document.write('<div style="width:336px;height:280px;background:green"></div>')
-
-		} else if (window.location.pathname.indexOf("/states/") == 0) {
-			ga('send', 'event', 'Advertisements', 'BillTrack50-Impression');
-			document.write("{{ '<a href="http://www.billtrack50.com/" onclick="return trackOutboundLink(this, \'Advertisements\', \'BillTrack50-Click\');"><img src="/static/images/ads/billtrack50.jpg" style="border: 1px solid #88A"/></a>'|escapejs }}");
 
 		} else if (the_segment == "House" || the_segment == "Senate") {
 			// ad unit targeting staff only
