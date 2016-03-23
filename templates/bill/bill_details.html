@@ -582,7 +582,11 @@
 				</table>
 			{% endif %}
 
-			<p style="margin-top: 1em; line-height: 130%;">This is a {{bill.bill_type_name}} in the United States Congress (indicated by the &ldquo;{{bill.get_bill_type_display}}&rdquo; in &ldquo;{{bill.display_number_no_congress_number}}&rdquo;). {{bill.how_a_bill_text}}</p>
+			<div class="alert alert-warning" style="margin-top: 1em; line-height: 130%;">
+				<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+				{{bill.how_a_bill_text}}
+			</div>
+
 		{% endif %}
 
 		<h2><span>Details</span></h2>
@@ -735,7 +739,7 @@
 
 					<dd style="margin-bottom: 1em">
 					{% if bill.noun == 'bill' %}
-					<p class="small" style="margin: 1em 0;">Legislative action may be ocurring on one of these bills in lieu of or in parallel to action on this {{bill.noun}}.</p>
+					<p class="small" style="margin-bottom: 1em;">Legislative action may be ocurring on one of these bills in lieu of or in parallel to action on this {{bill.noun}}.</p>
 					{% endif %}
 
 					{% for rb in related %}
@@ -743,7 +747,7 @@
 						<div style="text-align: center; font-size: 90%;">
 							<a id="related_bills_additional_more" href="#">show {{forloop.revcounter}} more</a>
 						</div>
-						<div id="related_bills_additional" style="display: none">
+						<div id="related_bills_additional" style="display: none;">
 						{% endif %}
 
 						<div>
@@ -752,7 +756,7 @@
 									<img src="{{rb.bill.get_absolute_url}}/thumbnail?width=75" class="img-responsive" title="{{rb.bill}}" style="border: 1px solid #999;" width="75"/>
 								</a>
 							</div>
-							<div style="padding-left: 90px; min-height: 90px;">
+							<div style="padding-left: 90px; min-height: 90px; line-height: 115%;">
 								{% if rb.prenote %}{{rb.prenote}}{% endif %}
 								<a href="{{rb.bill.get_absolute_url}}">
 									{% if rb.bill.congress == bill.congress %}
