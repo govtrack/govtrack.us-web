@@ -376,7 +376,7 @@
 					<p>
 						{# see the initialization too #}
 						<span
-						{% if p.prediction == 0 %}data-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
+						{% if p.prediction|floatformat:0 == "0" %}data-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
 						>
 						{{p.prediction|floatformat:0}}% chance</span> of being {{p.success_name}}
 						(<a href="#" onclick="$('#prognosis-details').modal(); return false;" style="font-weight: normal;">details</a>)
