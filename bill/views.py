@@ -290,7 +290,8 @@ def bill_text_ajax(request):
         return { "error": str(e) }
 
 def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10):
-    from billtext import load_bill_text, compare_xml_text, get_current_version
+    from billtext import load_bill_text, get_current_version
+    from xml_diff import compare
     import lxml
 
     left_bill = Bill.objects.get(id = left_bill)
@@ -351,7 +352,11 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
             raise IOError("Bill text is not available for one of the bills.")
     doc1 = load_bill_text_xml(left)
     doc2 = load_bill_text_xml(right)
-    compare_xml_text(doc1, doc2, timelimit=timelimit) # revises DOMs in-place
+    def make_tag_func(ins_del):
+        import lxml.etree
+        elem = lxml.etree.Element("comparison-change")
+        return elem
+    compare(doc1.getroot(), doc2.getroot(), make_tag_func=make_tag_func)
 
     # Prepare JSON response data.
         # dates aren't JSON serializable

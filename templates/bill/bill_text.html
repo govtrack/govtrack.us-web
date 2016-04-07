@@ -29,9 +29,10 @@ h1 {
 .bill_text_content blockquote { margin: 1em; }
 .bill_text_content ul { margin-left: 1em; }
 
-.bill_text_content span.ins, .bill_text_content span.del, .bill_text_content span.change {
-	background-color: #A00;
-	color: #FFF;
+/* must override for the tag itself and any tags that it might encompas that have their own styling */
+.bill_text_content comparison-change, .bill_text_content comparison-change * {
+	background-color: #A00 !important;
+	color: #FFF !important;
 }
 
 .bill_text_content div.spacer {

@@ -23,3 +23,6 @@ pynliner
 git+https://github.com/govtrack/django-lorien-common
 phonenumbers
 git+https://github.com/if-then-fund/django-html-emailer
+xml_diff
+diff_match_patch_python
+
