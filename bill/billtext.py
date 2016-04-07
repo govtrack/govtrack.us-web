@@ -301,7 +301,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
         })
 
     # Pass through some fields.
-    for f in ('html_file', 'pdf_file', 'has_thumbnail', 'thumbnail_path'):
+    for f in ('html_file', 'xml_file', 'pdf_file', 'has_thumbnail', 'thumbnail_path'):
         if f in dat:
             ret[f] = dat[f]
 

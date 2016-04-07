@@ -286,10 +286,10 @@ def bill_text_ajax(request):
 
     try:
         return load_comparison(request.GET["left_bill"], request.GET["left_version"], request.GET["right_bill"], request.GET["right_version"])
-    except IOError:
-        return { "error": "Bill text is not available for those bills." }
+    except IOError as e:
+        return { "error": str(e) }
 
-def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10, force=False):
+def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10):
     from billtext import load_bill_text, compare_xml_text, get_current_version
     import lxml
 
@@ -299,7 +299,7 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     if left_version == "": left_version = get_current_version(left_bill)
     if right_version == "": right_version = get_current_version(right_bill)
 
-    btc = None
+    # Load from cache.
     try:
         btc = BillTextComparison.objects.get(
             bill1 = left_bill,
@@ -307,11 +307,11 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
             bill2 = right_bill,
             ver2 = right_version)
         btc.decompress()
-        if not force: return btc.data
+        return btc.data
     except BillTextComparison.DoesNotExist:
         pass
 
-    # Try with the bills swapped.
+    # Load from cache - Try with the bills swapped.
     try:
         btc2 = BillTextComparison.objects.get(
             bill2 = left_bill,
@@ -320,6 +320,7 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
             ver1 = right_version)
         btc2.decompress()
         data = btc2.data
+        # un-swap
         return {
             "left_meta": data["right_meta"],
             "right_meta": data["left_meta"],
@@ -329,21 +330,30 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     except BillTextComparison.DoesNotExist:
         pass
 
+    # Load bill text metadata.
     left = load_bill_text(left_bill, left_version, mods_only=True)
     right = load_bill_text(right_bill, right_version, mods_only=True)
 
-    try:
-        doc1 = lxml.etree.parse(left["html_file"])
-        doc2 = lxml.etree.parse(right["html_file"])
-    except KeyError:
-        raise IOError("The HTML bill text format is not available for one of the bills.")
-
+    # Load XML DOMs for each document and perform the comparison.
+    def load_bill_text_xml(docinfo):
+        # If XML text is available, use it, but pre-render it
+        # into HTML. Otherwise use the legacy HTML that we
+        # scraped from THOMAS.
+        if "xml_file" in docinfo:
+            import congressxml
+            return congressxml.convert_xml(docinfo["xml_file"])
+        elif "html_file" in docinfo:
+            return lxml.etree.parse(docinfo["html_file"])
+        else:
+            raise IOError("Bill text is not available for one of the bills.")
+    doc1 = load_bill_text_xml(left)
+    doc2 = load_bill_text_xml(right)
     compare_xml_text(doc1, doc2, timelimit=timelimit) # revises DOMs in-place
 
-    # dates aren't JSON serializable
+    # Prepare JSON response data.
+        # dates aren't JSON serializable
     left["docdate"] = left["docdate"].strftime("%x")
     right["docdate"] = right["docdate"].strftime("%x")
-
     ret = {
         "left_meta": left,
         "right_meta": right,
@@ -351,19 +361,18 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
         "right_text": lxml.etree.tostring(doc2),
     }
 
-    if not btc:
-        btc = BillTextComparison(
-            bill1 = left_bill,
-            ver1 = left_version,
-            bill2 = right_bill,
-            ver2 = right_version,
-            data = dict(ret)) # clone before compress()
-    else:
-        btc.data = dict(ret) # clone before compress()
-
+    # Cache in database so we don't have to re-do the comparison
+    # computation again.
+    btc = BillTextComparison(
+        bill1 = left_bill,
+        ver1 = left_version,
+        bill2 = right_bill,
+        ver2 = right_version,
+        data = dict(ret)) # clone before compress()
     btc.compress()
     btc.save()
 
+    # Return JSON comparison data.
     return ret
 
 def bill_list(request):
