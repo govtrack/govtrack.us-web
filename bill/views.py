@@ -299,36 +299,39 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     if left_version == "": left_version = get_current_version(left_bill)
     if right_version == "": right_version = get_current_version(right_bill)
 
-    # Load from cache.
-    try:
-        btc = BillTextComparison.objects.get(
-            bill1 = left_bill,
-            ver1 = left_version,
-            bill2 = right_bill,
-            ver2 = right_version)
-        btc.decompress()
-        return btc.data
-    except BillTextComparison.DoesNotExist:
-        pass
+    use_cache = True
 
-    # Load from cache - Try with the bills swapped.
-    try:
-        btc2 = BillTextComparison.objects.get(
-            bill2 = left_bill,
-            ver2 = left_version,
-            bill1 = right_bill,
-            ver1 = right_version)
-        btc2.decompress()
-        data = btc2.data
-        # un-swap
-        return {
-            "left_meta": data["right_meta"],
-            "right_meta": data["left_meta"],
-            "left_text": data["right_text"],
-            "right_text": data["left_text"],
-        }
-    except BillTextComparison.DoesNotExist:
-        pass
+    if use_cache:
+        # Load from cache.
+        try:
+            btc = BillTextComparison.objects.get(
+                bill1 = left_bill,
+                ver1 = left_version,
+                bill2 = right_bill,
+                ver2 = right_version)
+            btc.decompress()
+            return btc.data
+        except BillTextComparison.DoesNotExist:
+            pass
+
+        # Load from cache - Try with the bills swapped.
+        try:
+            btc2 = BillTextComparison.objects.get(
+                bill2 = left_bill,
+                ver2 = left_version,
+                bill1 = right_bill,
+                ver1 = right_version)
+            btc2.decompress()
+            data = btc2.data
+            # un-swap
+            return {
+                "left_meta": data["right_meta"],
+                "right_meta": data["left_meta"],
+                "left_text": data["right_text"],
+                "right_text": data["left_text"],
+            }
+        except BillTextComparison.DoesNotExist:
+            pass
 
     # Load bill text metadata.
     left = load_bill_text(left_bill, left_version, mods_only=True)
@@ -361,16 +364,17 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
         "right_text": lxml.etree.tostring(doc2),
     }
 
-    # Cache in database so we don't have to re-do the comparison
-    # computation again.
-    btc = BillTextComparison(
-        bill1 = left_bill,
-        ver1 = left_version,
-        bill2 = right_bill,
-        ver2 = right_version,
-        data = dict(ret)) # clone before compress()
-    btc.compress()
-    btc.save()
+    if use_cache:
+        # Cache in database so we don't have to re-do the comparison
+        # computation again.
+        btc = BillTextComparison(
+            bill1 = left_bill,
+            ver1 = left_version,
+            bill2 = right_bill,
+            ver2 = right_version,
+            data = dict(ret)) # clone before compress()
+        btc.compress()
+        btc.save()
 
     # Return JSON comparison data.
     return ret
