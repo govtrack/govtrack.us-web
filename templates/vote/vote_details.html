@@ -254,6 +254,10 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 		{% endif %}
 	    </p>
 
+		{% if has_subsequent_vote %}
+			<p>It was <b>not</b> the final {{vote.get_chamber_display}} vote on the {{vote.related_bill.noun}}. See the <a href="{{vote.related_bill.get_absolute_url}}">history of {{vote.related_bill.display_number}}</a> for further details.</p>
+		{% endif %}
+
 		{% if vote.related_bill and vote.related_bill.oursummary %}
 			<div style="margin: 1em">{{vote.related_bill.oursummary.as_html|safe}}</div>
 		{% endif %}

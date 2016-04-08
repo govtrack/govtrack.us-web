@@ -61,6 +61,13 @@ def load_vote(congress, session, chamber_code, number):
 def vote_details(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
     voters = vote.get_voters()
+
+    # If this is a vote on passage, but it's not the final vote on passage in this
+    # chamber, issue a warning.
+    has_subsequent_vote = False
+    if vote.related_bill and vote.category in (VoteCategory.passage, VoteCategory.passage_suspension) \
+      and vote.related_bill.votes.filter(chamber=vote.chamber, category__in=(VoteCategory.passage, VoteCategory.passage_suspension)).order_by('-created').first() != vote:
+      has_subsequent_vote = True
     
     # Test if we have a diagram for this vote. The only
     # way to test is to try to make it.
@@ -121,6 +128,7 @@ def vote_details(request, congress, session, chamber_code, number):
             'has_vp_vote': len([v for v in voters if v.voter_type == VoterType.vice_president]) > 0,
             'has_diagram': has_diagram,
             'has_ideology_scores': has_ideology_scores,
+            'has_subsequent_vote': has_subsequent_vote,
             'reconsiderers': (reconsiderers, reconsiderers_titles),
             'propublica_url': propublica_url,
             'propublica_count': propublica_count,
