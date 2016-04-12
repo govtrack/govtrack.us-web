@@ -8,18 +8,13 @@
 	//-->
 	</script>
 	
-	{% comment %}violates ad_free
-	<script type="text/javascript" src="//pagead2.googlesyndication.com/pagead/show_ads.js"> </script>
-	{% endcomment %}
 	<script>
-	if (is_ad_free) {
-		document.write("An ad would be here, but you've gone ad-free!");
+	if ($(window).width() < 800 || is_ad_free) {
+		// nothing, not wide enough or user has paid to not have ads
 	} else {
 		document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="5620102176"></ins>'|escapejs }}");
 		(adsbygoogle = window.adsbygoogle || []).push({});
+	    document.write("{{ '<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>'|escapejs }}");
 	}
 	</script>
-	
-	<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
-
 </div>
