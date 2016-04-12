@@ -1,15 +1,13 @@
 {% if format == "text" %}
-active: false
-subject: "10 days left for us to reach our goal"
+active: true
+subject: ~
 ----------
 {% endif %}
 
-*We have 10 days left*
+*Like these updates? Support our work.*
 
-Earlier this summer we launched [GovTrack Insider](https://medium.com/govtrack-insider), where we've been posting summaries of legislation and daily briefings on recent activity in Congress. You may have seen the summaries in your email updates.
-
-We've raised $28,113 to hire a full time legislative researcher. But we need to reach our goal of $35,000 in the next 10 days or we get nothing and GovTrack Insider ends.
-
-If you'd like to see more bill summaries in your email updates, help us hire a researcher by [backing our work at https://www.kickstarter.com/projects/1872382405/govtrack-insider](https://www.kickstarter.com/projects/1872382405/govtrack-insider).
+There is no other site like GovTrack providing comprehensive research, tracking, and analytics for the daily activities of the U.S. Congress.
+Consider becoming a "GovTrack member" with a [contribution of any amount](https://www.govtrack.us/accounts/membership?utm_campaign=govtrack_email_update). Your support will help us bring you more in-depth
+information.
 
 
