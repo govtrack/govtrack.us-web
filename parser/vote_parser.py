@@ -221,24 +221,24 @@ def main(options):
                 if vote.category in (VoteCategory.passage, VoteCategory.passage_suspension, VoteCategory.veto_override) and vote.related_bill:
                     # For passage votes, set the question to the bill title and put the question
                     # details in the details field.
-                    vote.question = truncatewords(vote.related_bill.title, 20)
+                    vote.question = vote.related_bill.title
                     vote.question_details = vote.vote_type + " in the " + vote.get_chamber_display()
                     
                 elif vote.category == VoteCategory.amendment and vote.related_amendment:
                     # For votes on amendments, make a better title/explanation.
-                    vote.question = truncatewords(vote.related_amendment.title, 20)
+                    vote.question = vote.related_amendment.title
                     vote.question_details = vote.vote_type + " in the " + vote.get_chamber_display()
                     
                 elif vote.related_bill and vote.question.startswith("On the Cloture Motion " + vote.related_bill.display_number):
-                    vote.question = "Cloture on " + truncatewords(vote.related_bill.title, 20)
+                    vote.question = "Cloture on " + vote.related_bill.title
                 elif vote.related_bill and vote.question.startswith("On Cloture on the Motion to Proceed " + vote.related_bill.display_number):
-                    vote.question = "Cloture on " + truncatewords(vote.related_bill.title, 20)
+                    vote.question = "Cloture on " + vote.related_bill.title
                     vote.question_details = "On Cloture on the Motion to Proceed in the " + vote.get_chamber_display()
                 elif vote.related_bill and vote.question.startswith("On the Motion to Proceed " + vote.related_bill.display_number):
-                    vote.question = "Motion to Proceed on " + truncatewords(vote.related_bill.title, 20)
+                    vote.question = "Motion to Proceed on " + vote.related_bill.title
                     
                 elif vote.related_amendment and vote.question.startswith("On the Cloture Motion " + vote.related_amendment.get_amendment_type_display() + " " + str(vote.related_amendment.number)):
-                    vote.question = "Cloture on " + truncatewords(vote.related_amendment.title, 20)
+                    vote.question = "Cloture on " + vote.related_amendment.title
                     vote.question_details = vote.vote_type + " in the " + vote.get_chamber_display()
                 
                 # weird House foratting of bill numbers ("H RES 123 Blah blah")
