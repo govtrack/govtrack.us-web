@@ -116,19 +116,18 @@ if "text" in sys.argv:
 	# Do this before bills because the process of loading into the db checks for new
 	# bill text and generates feed events for text availability.
 
-	# Update the mirror of GPO FDSys.
-	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --store=mods,text,xml --log=%s" % (SCRAPER_PATH, log_level))
+	# Update the mirror of bill text on GPO FDSys, except PDFs.
+	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --bulkdata=False --store=mods,text,xml --log=%s" % (SCRAPER_PATH, log_level))
+
+	# Fetch PDFs. We do this separately because we only use them for thumbnails and
+	# don't want to expose in data.
+	os.system("(cd ~/scripts/congress-pdf-config/; . .env/bin/activate; ./run fdsys --collections=BILLS --bulkdata=False --store=pdf --log=%s)" % log_level)
 
 	# Update the mirror of Cato's deepbills.
 	os.system("cd %s; . .env/bin/activate; ./run deepbills --log=%s" % (SCRAPER_PATH, log_level))
 	
-	# Glob all of the bill text files. Create hard links in the data directory to
-	# their locations in the congress project data directoy.
-	
-	# Scrape with legacy scraper to get PDFs (only a local cache for creating thumbnails),
-	# HTML (only used in bill text comparisons).
-	os.system("cd ../scripts/gather; perl fetchbilltext.pl FULLTEXT %d" % CONGRESS)
-	do_bill_parse = True # don't know if we got any new files
+	# don't know if we got any new files, so assume we now need to update bills
+	do_bill_parse = True
 	
 if "bills" in sys.argv:
 	# Scrape.

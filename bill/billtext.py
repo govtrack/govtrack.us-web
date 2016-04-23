@@ -242,7 +242,7 @@ def get_bill_text_metadata(bill, version):
         dat["has_displayable_text"] = True
 
     # get a PDF file if one exists
-    pdf_fn = "data/congress-bill-text-legacy/%s/%s/%s%d%s.pdf" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
+    pdf_fn = "../scripts/congress-pdf-config/" + basename.replace("data/congress", "data") + "/document.pdf"
     if os.path.exists(pdf_fn):
         dat["pdf_file"] = pdf_fn
         dat["has_thumbnail"] = True
