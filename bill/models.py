@@ -1211,66 +1211,23 @@ class RelatedBill(models.Model):
     relation_sort_order = { "identical": 0 }
 
 def get_formatted_bill_summary(bill):
-    sfn = "data/us/%d/bills.summary/%s%d.summary.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
-    if not os.path.exists(sfn): return None
+    # Ok so we used to run a Perl script that took the plain text summary and
+    # used regex to add XML structure, which we saved in a bills.summary directory.
+    # Now we just read the original text scraped from THOMAS and split into paragraphs.
 
-    dom = etree.parse(open(sfn))
+    # The file location for American Memory bills is in data/congress, and those don't
+    # have summaries anyway.
+    if bill.congress <= 42: return None
 
-    # Remove some nodes at the top.
-    normalized_bill_titles = set( re.sub(r"\W", "", t[2]) for t in bill.titles)
-    while len(dom.getroot()) > 0:
-        n = dom.getroot()[0]
-        if len(n) > 0 or n.tail not in (None, ""):
-            break
-        elif n.text in (None, ""):
-            n.getparent().remove(n)
-        elif re.match("\d\d/\d{1,2}/\d\d\d\d--", n.text):
-            n.getparent().remove(n)
-        elif re.sub(r"\W", "", n.text) in normalized_bill_titles:
-            n.getparent().remove(n)
-        else:
-            break
-
-    xslt_root = etree.XML('''
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output omit-xml-declaration="yes"/>
-    <xsl:template match="summary//Paragraph[string(.)!='']">
-        <div style="margin-top: .5em; margin-bottom: .5em">
-            <xsl:apply-templates/>
-        </div>
-    </xsl:template>
-
-    <xsl:template match="Division|Title|Subtitle|Part|Chapter|Section">
-        <xsl:if test="not(@number='meta')">
-        <div>
-            <xsl:choose>
-            <xsl:when test="@name='' and count(*)=1">
-            <div style="margin-top: .75em">
-            <span xml:space="preserve" style="font-weight: bold;"><xsl:value-of select="name()"/> <xsl:value-of select="@number"/>.</span>
-            <xsl:value-of select="Paragraph"/>
-            </div>
-            </xsl:when>
-
-            <xsl:otherwise>
-            <div style="font-weight: bold; margin-top: .75em" xml:space="preserve">
-                <xsl:value-of select="name()"/>
-                <xsl:value-of select="@number"/>
-                <xsl:if test="not(@name='')"> - </xsl:if>
-                <xsl:value-of select="@name"/>
-            </div>
-            <div style="margin-left: 2em" xml:space="preserve">  <!-- 'preserve' prevents a self-closing tag which breaks HTML parse -->
-                <xsl:apply-templates/>
-            </div>
-            </xsl:otherwise>
-            </xsl:choose>
-        </div>
-        </xsl:if>
-    </xsl:template>
-</xsl:stylesheet>''')
-    transform = etree.XSLT(xslt_root)
-    summary = unicode(transform(dom))
-    if summary.strip() == "":
-        return None
+    import cgi
+    sfn = "data/us/%d/bills/%s%d.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
+    with open(sfn) as f:
+       dom = etree.parse(f)
+    summary = dom.find("summary")
+    if summary is None: return None
+    summary = summary.text
+    if summary.strip() == "": return None
+    summary = "".join(["<p>" + cgi.escape(p) + "</p>\n" for p in summary.split("\n\n")])
     return summary
 
 class BillLink(models.Model):

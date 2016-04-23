@@ -9,8 +9,6 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "us/114/committees.xml" \
 	--include "us/114/bills" \
 	--include "us/114/bills/*.xml" \
-	--include "us/114/bills.summary" \
-	--include "us/114/bills.summary/*.xml" \
 	--include "us/114/rolls" \
 	--include "us/114/rolls/*.xml" \
 	--include "us/114/stats/" \

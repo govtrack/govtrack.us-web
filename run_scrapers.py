@@ -143,9 +143,6 @@ if "bills" in sys.argv:
 		fn2 = "data/us/%d/bills/%s%d.xml" % (CONGRESS, bill_type_map[bill_type], int(number))
 		do_bill_parse |= copy(fn, fn2, r'updated="[^"]+"')
 	
-	# Generate summary files.
-	os.system("cd /home/govtrack/scripts/gather; perl parse_status.pl SUMMARIES %d" % CONGRESS)
-
 	# Scrape upcoming House bills.
 	os.system("cd %s; . .env/bin/activate; ./run upcoming_house_floor --log=%s" % (SCRAPER_PATH, log_level))
 		
