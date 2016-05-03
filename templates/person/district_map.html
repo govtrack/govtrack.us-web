@@ -188,7 +188,7 @@
 		<h1>{{statename}}&rsquo;s {{district|ordinalhtml}} Congressional District</h1>
 	{% endif %}
 
-{% if not state or state == "FL" or state == "VA" %}
+{% if not state or state == "FL" or state == "VA" or state == "NC" %}
 {% include "person/redistricting-notes.html" %}
 {% endif %}
 	
