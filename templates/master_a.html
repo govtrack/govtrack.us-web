@@ -114,6 +114,12 @@
 					ads.css({
 						position: "static"
 					})
+				} else if (original_offset.top + ads_height > $(window).height()) {
+					// The ad isn't entirely visible anyway -- it's too tall -- so don't
+					// try to keep it where it is. Allow it to be scrolled to come into view.
+					ads.css({
+						position: "static"
+					})
 				} else if (top < row_height - ads_height - marginBottom) {
 					// fixed positioning works here
 					ads.css({
