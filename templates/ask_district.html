@@ -307,6 +307,7 @@ function show_followus(flags) {
 }
 
 function show_if_then_fund(flags) {
+  {% if not if_then_fund_campaign %}return;{% endif %}
   {% if not request.GET.dontCache %}
   if (the_segment != "Other") return;
   {% if not if_then_fund_campaign.campaign.id %}return;{% endif %}
