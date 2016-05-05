@@ -288,7 +288,6 @@ class Bill(models.Model):
         "current_status_description": "current_status_description",
         "is_current": "is_current",
         "is_alive": "is_alive",
-        "thomas_link": "thomas_link",
         "noun": "noun",
     }
     api_example_id = 76416
@@ -450,14 +449,9 @@ class Bill(models.Model):
             return "An \"original bill\" is one which is drafted and approved by a committee before it is formally introduced in the House or Senate."
         return None
 
-    def thomas_link(self):
-        """Returns the URL for the bill page on http://thomas.loc.gov."""
-        return "http://thomas.loc.gov/cgi-bin/bdquery/z?d%03d:%s%d:" \
-            % (self.congress, self.bill_type_slug, self.number)
-
-    def popvox_link(self):
-        """Returns the URL for the bill page on POPVOX."""
-        return "https://www.popvox.com/bills/us/%d/%s%d" \
+    def loc_hdl_link(self):
+        """Returns the Library of Congress Handle URL for the bill, e.g. http://hdl.loc.gov/loc.uscongress/legislation.114hr4330."""
+        return "http://hdl.loc.gov/loc.uscongress/legislation.%d%s%d" \
             % (self.congress, self.bill_type_slug, self.number)
 
     def get_feed(self):

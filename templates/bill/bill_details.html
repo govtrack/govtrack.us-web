@@ -804,8 +804,8 @@
 						<dt>Primary Source</dt>
 						{% if bill.congress >= 93 %}
 						<dd>
-							<p style="margin-bottom: .25em; line-height: 125%"><a href="{{bill.thomas_link}}">THOMAS.gov (The Library of Congress)</a></p>
-							<p class="small" style="line-height: 130%">GovTrack gets most information from THOMAS, which is updated generally one day after events occur. Activity since the last update may not be reflected here. {% if bill.source == "thomas-congproj" %}Data comes via the <a href="https://github.com/unitedstates/congress">congress project</a>.{% endif %}</p>
+							<p style="margin-bottom: .25em; line-height: 125%"><a href="{{bill.loc_hdl_link}}">Congress.gov</a></p>
+							<p class="small" style="line-height: 130%">Congress.gov is updated generally one day after events occur. Legislative activity since the last update may not be reflected on GovTrack. Data via <a href="https://github.com/unitedstates/congress">congress project</a>.</p>
 						</dd>
 						{% elif bill.source == "statutesatlarge" %}
 						<dd>
