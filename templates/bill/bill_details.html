@@ -343,10 +343,12 @@
 				</dd>
 				{% endif %}
 
-				{% if text_info %}
+				{% if text_info or bill.is_current %}
 				<dt>Text:</dt>
 				<dd>
-					{% if text_info.has_displayable_text %}
+					{% if not text_info %}
+						<p>Not available yet.</p>
+					{% elif text_info.has_displayable_text %}
 						{% if text_info.has_thumbnail %}
 						<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
 							<a href="{{bill.get_absolute_url}}/text">
