@@ -395,19 +395,12 @@ def membersoverview(request):
 @anonymous_view
 @render_to('person/district_map_embed.html')
 def districtmapembed(request):
-    bounds2 = None
-    try:
-        bounds2 = get_district_bounds(request.GET.get("state", ""), request.GET.get("district", ""))
-    except:
-        pass
-
     return {
         "demo": "demo" in request.GET,
         "hide_footer": "demo" in request.GET or "footer" in request.GET,
         "state": request.GET.get("state", ""),
         "district": request.GET.get("district", ""),
         "bounds": request.GET.get("bounds", None),
-        "bounds2": bounds2,
     }
     
 @anonymous_view
