@@ -418,14 +418,29 @@ def main(options):
     if options.congress and int(options.congress) != CURRENT_CONGRESS:
         return
         
-    # Load docs.house.gov data for what might be coming up this week.
+    # Find what might be coming up this week.
     load_docs_house_gov(options, bill_index)
+    load_senate_floor_schedule(options, bill_index)
 
+
+def load_senate_floor_schedule(options, bill_index):
     # Parse Senate.gov's "Floor Schedule" blurb for coming up tomorrow.
+    # The page appears to be cached in a such a way that what we see from this server
+    # is often old and not the same as what we see when visiting the URL from elsewhere.
+    # Forcing a cache miss with a changing qs arg seems to get around that, but it
+    # also sometimes generates a page-not-available error, which seems to be the
+    # underlying problem here.
     now = datetime.now()
-    sfs = urllib.urlopen("http://www.senate.gov/legislative/schedule/floor_schedule.htm").read()
+    url = "http://www.senate.gov/legislative/schedule/floor_schedule.htm?cache_bust=" + now.isoformat()
+    print(url)
     try:
-        sfs = re.search(r"([\w\W]*)<i>Previous Meeting", sfs).group(1)
+        sfs = urllib.urlopen(url).read()
+        m = re.search(r"<i>Previous Meeting", sfs)
+        if not m:
+            print "'Previous Meeting' not found"
+            print sfs
+            return
+        sfs = sfs[:m.start()]
         for congress, bill_type, number in re.findall(r"http://hdl.loc.gov/loc.uscongress/legislation.(\d+)([a-z]+)(\d+)", sfs):
             bill_type = BillType.by_slug(bill_type)
             bill = Bill.objects.get(congress=congress, bill_type=bill_type, number=number)
