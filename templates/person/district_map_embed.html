@@ -12,8 +12,8 @@
   <script src="http://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
 
   <!-- Mabpox GL -->
-  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.17.0/mapbox-gl.js'></script>
-  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.17.0/mapbox-gl.css' rel='stylesheet'>
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.18.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.18.0/mapbox-gl.css' rel='stylesheet'>
 
   <!-- Mapbox.js (fallback) -->
   <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
@@ -32,6 +32,10 @@
 <!-- Map Container -->
 <div id='map'></div>
 
+<div id='geocoding-status' style="display: none">
+  <h1>Locating that place...</h1>
+</div>
+
 {% if not hide_footer %}
   <center id="map_footer" style="font-size: 60%; padding: .5em"><a href="https://www.govtrack.us/congress/members" target="_blank">Find your Members of Congress</a> on <a href="https://www.govtrack.us/" target="_blank">GovTrack.us</a></center>
 {% endif %}
@@ -44,6 +48,7 @@
 // Mapbox configuration
 var accessToken = 'pk.eyJ1IjoiZ292dHJhY2siLCJhIjoiY2lua2J1cmwzMHhyNnVrbHl3bmx4ZnZneiJ9.Wld_AdbKwOgmF2ZXn2SPmw';
 var styleURL = 'mapbox://styles/govtrack/cioagxcds003vaqm7z7qdf7xl';
+var mapId = 'govtrack.cd-114-2015';
 
 {% if not hide_footer %}
 function resize_map() {
@@ -119,14 +124,37 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
     // Create a similar filter for the boundary lines
     map.setFilter('districts_boundary_line', filter);
 
+    {% if request.GET.marker_lat %}
+    var marker_coord = [parseFloat("{{request.GET.marker_lng|escapejs}}"), parseFloat("{{request.GET.marker_lat|escapejs}}")];
+    map.addSource("symbols", {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+                "type": "Point",
+                "coordinates": marker_coord
+            }
+          }
+        ]
+      }
+    });
 
-    {% if request.GET.marker_lat and 0 %}
-        var loc = new google.maps.LatLng("{{request.GET.marker_lat|escapejs}}", "{{request.GET.marker_lng|escapejs}}");
-        map.setCenter(loc);
-        var marker = new google.maps.Marker({
-            map: map, 
-            position: loc
-        });
+    // add source as a layer and apply some styles
+    map.addLayer({
+        "id": "symbols",
+        "type": "circle",
+        "source": "symbols",
+        "paint": {
+           "circle-radius": 10,
+           "circle-color": "#007cbf"
+        }
+    });
+
+    //map.flyTo({center: marker_coord});
     {% endif %}
 
   });
@@ -142,6 +170,70 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
   var map = L.mapbox.map('map').setView([viewport.center[1], viewport.center[0]], viewport.zoom);
   L.mapbox.styleLayer(styleURL).addTo(map);
 }
+
+$(function() {
+  function show_geocoding_status() {
+    $('#map').hide();
+    $('#geocoding-status').show();
+  }
+
+  function geocode_latlng_to_district(lngLat, callback) {
+    // Note that, from the Mapbox API docs:
+    // "Use of this endpoint is rate limited to 600 requests per minute."
+    $.ajax({
+      url: 'https://api.mapbox.com/v4/' + mapId + '/tilequery/' + lngLat.lng + ',' + lngLat.lat + '.json?radius=0&access_token=' + accessToken,
+      method: 'GET',
+      success: function(resp) {
+        if (resp.type == "FeatureCollection" && resp.features.length > 0) {
+          callback(resp.features[0].properties);
+          return;
+        }
+        callback(null); // failed
+      }
+    });
+  }
+
+  function go_to_point(longitude, latitude) {
+    // Query Mapbox API to get what district is at this location.
+    geocode_latlng_to_district({
+      lat: latitude,
+      lng: longitude}, function(district) {
+        // Redirect to new URL to load a map for that district and
+        // show a marker there. Why redirect? Easier than dynamically
+        // updating the map.
+        var url = "/congress/members/embed/mapframe?state=" + district.state;
+        if (district.number != "00")
+          url += "&district=" + district.number;
+        url += "&marker_lat=" + latitude;
+        url += "&marker_lng=" + longitude;
+        window.location = url;
+      });
+  }
+
+  {% if request.GET.current_location == "1" %}
+  if ("geolocation" in navigator)
+    navigator.geolocation.getCurrentPosition(function(position) {
+      go_to_point(position.coords.longitude, position.coords.latitude);
+    });
+
+  {% elif request.GET.address %}
+    // Note that, from the Mapbox API docs, we're rate limited to 600
+    // requests per minute.
+    $.ajax({
+      url: 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent("{{request.GET.address|escapejs}}") + '.json?country=us&access_token=' + accessToken,
+      method: 'GET',
+      success: function(resp) {
+        if (resp.type == "FeatureCollection" && resp.features.length > 0) {
+          var coord = resp.features[0].center;
+          go_to_point(coord[0], coord[1]);
+          return;
+        }
+        alert("Could not find that address.");
+      }
+    });
+
+  {% endif %}
+})
 
 </script>
 
