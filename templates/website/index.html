@@ -60,6 +60,7 @@
 {% endblock %}
 
 {% block body_with_container %}
+<div id="content">
 <div class="container">
 	<div class="row">
 		<div id="primary-links">
@@ -108,9 +109,9 @@
 	<div class="entries-holder container">
 		<div class="col-sm-4 col-sm-push-8">
 			<div id="generic-events">
-				<h2><span>in</span> Congress</h2>
+				<h2><span>In Congress</span></h2>
 		
-				<section class="featured-articles">
+				<section>
 					{% for item in events %}
 					{% with item|render_event:subscription_feeds as event %}
 					<article class="post {{event.type}}">
@@ -169,7 +170,9 @@
 							<a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">subscribe</a> |
 							<a href="https://medium.com/govtrack-insider" title="More Posts on Medium"><i class="fa fa-medium"></i></a>
 						</div>
+						<span>
 						GovTrack Insider
+						</span>
 					</h2>
 					{% for post in medium_posts %}
 						<div class="row" style="margin-bottom: 1.5em">
@@ -193,7 +196,7 @@
 		   		{% endif %}
 		    	
 				<article>
-					<h2>Site News</h2>
+					<h2><span>Site News</span></h2>
 					{% for item in blog %}
 					<div class="post">
 						<h3><a href="{{item.link}}">{{item.title}}</a></h3>
@@ -206,6 +209,7 @@
 				</article>
 		</div>
 	</div>
+</div>
 </div>
 {% endblock %}
 
