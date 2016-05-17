@@ -2,12 +2,13 @@
 
 html { font-size: 15px; /* for rem unit sizing, match the body to be nice */ }
 body {
-	color: #333;
+	background-color: #FAFAFA;
+	color: #141712;
 	font-size: 15px;
 	}
 
 a:link, a:visited {
-	color: #cb4b16;
+	color: #375E99;
 	text-decoration: underline;
 	}
 	a.btn:link, a.btn:visited {
@@ -15,7 +16,7 @@ a:link, a:visited {
 		text-decoration: none;
 	}
 a:hover, a:focus, a:active {
-	color: #664030;
+	color: #375EA4;
 	}
 	a.btn:hover, a.btn:focus, a.btn:active {
 		color: white;
@@ -34,7 +35,6 @@ a.plain:hover, a.plain:focus, a.plain:active,
 h1, h2, h3, h4, h5 {
 	font: normal normal normal 2.5em/1.5em serif;
 	line-height: 130%;
-	color: #555;
 	margin-top: 1.5em;
 	margin-bottom: 1em;
 	}
@@ -86,16 +86,16 @@ h2 {
 		margin-top: 0;
 	}
 	#content h2 {
-		border-bottom: 2px solid #888;
+		border-bottom: 2px solid #cb4b16;
 		font-size: 17px;
 		margin: 1.85em 0 1em -6px;
 	}
 		#content h2 span {
 			display: inline-block;
-			margin-left: 6px;
-			padding: 3px 6px 1px 6px;
-			background-color: #555;
+			padding: 4px 14px 2px 12px;
+			background-color: #cb4b16;
 			color: white;
+			font-family: sans-serif;
 		}
 
 h3 {
@@ -312,14 +312,11 @@ blockquote {
 		margin-bottom: 10px;
 		text-align: center;
 		font-size: 10px;
-		color: #E63;
 		}
 
 /* MASTER LAYOUT */
 
 #masthead {
-	background: #f3f3f3; /* override navbar-default */
-	background-image: linear-gradient(to right,#fbfbfb 0,#f3f3f3 100%);
 	border: none;
 	box-shadow: none;
 	padding: 18px 0 4px 0;
@@ -352,7 +349,6 @@ blockquote {
 
 .navbar-default .navbar-nav>li>a {
 	text-decoration: none;
-	color: #cb4b16;
 	font-size: 13px;
 	letter-spacing: -0.25px;
 }
@@ -371,7 +367,6 @@ blockquote {
 	#nav a {
 		padding-right: 10px;
 		text-decoration: none;
-		color: #cb4b16;
 	}
 	@media screen and (min-width: 768px) {
 		#nav li a:hover {
@@ -463,11 +458,9 @@ blockquote {
 	font-size: 88%;
 }
 	.breadcrumb a {
-		color: #A77;
 	}
 
 #categories {
-	text-align: center;
 	}
 	#categories li {
 		display: inline-block;
@@ -475,29 +468,13 @@ blockquote {
 		background: url(../images/bg-info-box-nav.png) no-repeat 0 12px;
 		min-height: 153px;
 		margin: 0 3px 20px;
-		vertical-align: top;
-		text-align: center;
-		}
-		#categories div p {
-		margin-top: 20px;
-		padding: 0 5px 0 5px;
-		text-align: left;
-		font-size: 10pt;
-		line-height: 140%;
 		}
 		#categories li > a {
 			display: block;
 			width: 225px;
-		margin-top: 13px;
+			margin-top: 13px;
 			padding-top: 137px;
-			text-align: center;
-		font-weight: bold;
-		text-decoration: none;
 			}
-			#categories li > a span {
-				font-style: italic;
-			}
-
 		#categories #link-members > a {
 			background: url(../images/img-congress-members.png) center 5px no-repeat;
 			}
@@ -596,19 +573,13 @@ blockquote {
 		width: 84px;
 		}
 	.stats thead {
-		background: #b0ac9b url(../images/bg-stats-heading.gif) repeat-x;
-		font: 10px/20px serif;
-		font-weight: bold;
-		text-transform: uppercase;
-		color: #fff;
-		text-shadow: 0 1px 1px #8c887d;
+		font: 12px/20px serif;
 		}
 		.stats thead th {
 			height: 30px;
 			padding: 0 4px;
 			vertical-align: middle;
 			text-align: center;
-			border: 1px solid #c4c1b5;
 			font-weight: normal;
 			}
 	.stats .pink td { background: #f2f2f2 }
@@ -635,7 +606,7 @@ aside .download-links { padding: 31px 0 0 }
 .section aside { overflow: hidden }
 
 .stats thead.sortable th { cursor: pointer; }
-.stats tbody tr.group td { font-size: 105%; font-weight: bold; text-transform: none; background-color: #FAFAFA; }
+.stats tbody tr.group td { font-size: 105%; font-weight: bold; text-transform: none; }
 
 .partycolor_D { color: #0041a1; }
 .partycolor_R { color: #e60e13; }
@@ -851,7 +822,6 @@ aside .download-links { padding: 31px 0 0 }
 			.event_body h5,
 			.event_date span {
 				font-style: italic;
-				font-size: .83em;
 				color: #999;
 				}
 			.event_feed_title {
@@ -865,7 +835,6 @@ aside .download-links { padding: 31px 0 0 }
 				.event_type span {
 					text-transform: uppercase;
 					font-weight: bold;
-					color: #7a7a7a;
 				}
 			.event_type {
 				float: right;
@@ -883,7 +852,6 @@ aside .download-links { padding: 31px 0 0 }
 
 			.event_date {
 				display: inline-block;
-				color: #40a4bd;
 			}
 			.tracked_event h4 {
 				clear: both;
@@ -1121,15 +1089,16 @@ aside .download-links { padding: 31px 0 0 }
 	======================================================== */
 #footer {
 	margin-top: 25px;
-	border-top: 1px solid #DDD;
-	background: #FAFAFA;
-	font-size: 14px;
+	border-top: 40px solid #375E99;
+	background: #cb4b16;
 	padding: 24px 0 0;
+	color: white;
 	}
-	#footer a { color: #3388bb }
+	#footer h4 { color: white; }
+	#footer a { color: white; }
 	#footer nav {
-		font-size: 12px;
-		line-height: 2em;
+		font-size: 91%;
+		line-height: 175%;
 		margin-bottom: 25px;
 		}
 		#footer nav li {

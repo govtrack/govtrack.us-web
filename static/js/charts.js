@@ -24,13 +24,13 @@ function make_sponsorship_chart(elemid, title, series, with_data_labels) {
 			s.party = null;
 		}
 	}
-	
 	var chart = new Highcharts.Chart({
 		chart: {
 			renderTo: elemid,
 			type: 'scatter',
 			zoomType: 'xy',
 			height: 350,
+			backgroundColor: 'none',
 			marginTop: title ? 30 : 5,
 			marginBottom: title ? 70 : 0
 		},

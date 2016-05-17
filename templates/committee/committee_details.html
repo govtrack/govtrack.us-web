@@ -98,8 +98,6 @@
 	<div class="panes">
 		{% if members|length > 0 %}
 		<div id="members" class="members-grid">
-			<h2 style="margin: 1em 0 1em 0">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</h2>
-				
 		    <div class="row">
 	        {% for member in members %}
 		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
@@ -174,7 +172,6 @@
 		
 		{% if subcommittees %}
 		<div id="subcommittees">
-		    <h2 style="margin: 1em 0 1em 0">Subcommittees</h2>
 				<ul class="bullets">
 					{% for item in subcommittees %}
 					<li><a href="{{ item.get_absolute_url }}">{{ item.name_no_article }}</a></li>
