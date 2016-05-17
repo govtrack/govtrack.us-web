@@ -3,28 +3,13 @@
 <head>
   <!-- See https://github.com/aaronpdennis/congress-maps -->
 
-  <meta charset='utf-8' />
-  <title>GovTrack.us Congressional Districts Map Widget</title>
-
-  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-
-  <!-- jQuery -->
-  <script src="http://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
-
-  <!-- Mabpox GL -->
-  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.18.0/mapbox-gl.js'></script>
-  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.18.0/mapbox-gl.css' rel='stylesheet'>
-
-  <!-- Mapbox.js (fallback) -->
-  <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
-  <link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
-
-  <!-- GeoViewport -->
-  <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/geo-viewport/v0.1.1/geo-viewport.js'></script>
+  {% include "person/mapbox-head.html" %}
 
   <style>
       body { margin:0; padding:0; }
       #map { position:absolute; top:0; bottom:0; width:100%; }
+      #footer { position:absolute; bottom:0; width:100%; }
+      #footer > div { text-align: center; font-size: 85%; padding: .5em; }
   </style>
 </head>
 <body>
@@ -37,165 +22,41 @@
 </div>
 
 {% if not hide_footer %}
-  <center id="map_footer" style="font-size: 60%; padding: .5em"><a href="https://www.govtrack.us/congress/members" target="_blank">Find your Members of Congress</a> on <a href="https://www.govtrack.us/" target="_blank">GovTrack.us</a></center>
+  <div id="footer">
+    <div>
+      <a href="https://www.govtrack.us/congress/members" target="_blank">Find your Members of Congress</a> on <a href="https://www.govtrack.us/" target="_blank">GovTrack.us</a>
+    </div>
+  </div>
 {% endif %}
 
-{% if not bounds and state %}
-<script src="/static/js/congressional-districts-bboxes-114-2015.js"> </script>
+{% include "person/mapbox-scripts.html" with marker_lat=request.GET.marker_lat marker_lng=request.GET.marker_lng %}
+
+{% if not hide_footer %}
+<script>
+map.on('load', function() {
+  function resize_map() {
+    var map = $("#map");
+    var footer = $("#footer");
+    map.css({ bottom: footer.outerHeight() });
+  }
+  resize_map();
+  $(window).resize(resize_map);
+})
+</script>
 {% endif %}
 
 <script>
-// Mapbox configuration
-var accessToken = 'pk.eyJ1IjoiZ292dHJhY2siLCJhIjoiY2lua2J1cmwzMHhyNnVrbHl3bmx4ZnZneiJ9.Wld_AdbKwOgmF2ZXn2SPmw';
-var styleURL = 'mapbox://styles/govtrack/cioagxcds003vaqm7z7qdf7xl';
-var mapId = 'govtrack.cd-114-2015';
-
-{% if not hide_footer %}
-function resize_map() {
-  var map = $("#map");
-  var footer = $("#map_footer");
-  map.css({ position: "static", height: $(window).innerHeight() - footer.outerHeight() });
-}
-resize_map();
-$(window).resize(resize_map);
-{% endif %}
-
-var state = {% if state %}"{{state|upper|escapejs}}"{% else %}null{% endif %};
-var district = {% if district %}parseInt("{{district|upper|escapejs}}"){% else %}null{% endif %};
-{% if district %}if (district < 10) district = "0" + district; else district = "" + district;{% endif %}
-
-{% if bounds %}
-{# user-specified #}
-var bbox = "{{bounds|escapejs}}".split(',');
-  bbox = [parseFloat(bbox[0]), parseFloat(bbox[3]), parseFloat(bbox[2]), parseFloat(bbox[1])];
-{% else %}
-var bbox;
-if (state && district)
-  bbox = bboxes[state + district]
-else if (state)
-  bbox = bboxes[state];
-else
-  bbox = [-128.8, 23.6, -65.4, 50.2]; // United States
-{% endif %}
-
-var viewport = geoViewport.viewport(bbox, [window.innerWidth/2, window.innerHeight/2])
-
-// Checks for support of Mapbox GL. Works with most modern browsers.
-if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
-
-  // Initialize the map
-  mapboxgl.accessToken = accessToken;
-  var map = new mapboxgl.Map({
-      container: 'map',
-      style: styleURL,
-      center: viewport.center,
-      zoom: viewport.zoom
-  });
-
-  // Once map is fully loaded...
-  map.on('load', function() {
-    // set controls
-    map.addControl(new mapboxgl.Navigation({ position: 'bottom-left' }));
-    map.touchZoomRotate.disableRotation();
-
-    // Create a filter for the selected state & district.
-    var filter = ['all'];
-    if (state) filter.push(['==', 'state', state]);
-    if (state && district) filter.push(['==', 'number', district]);
-
-    // For each district color layer in the map, apply some filters...
-    for (var i = 1; i <= 5; i++) {
-      // The filter that filters based on color is the one we want to preserve
-      // If there are already multiple filters applied, it will be the last one
-      var exisitingFilter = map.getFilter('districts_' + i);
-      if (exisitingFilter[0] === 'all') {
-        exisitingFilter = exisitingFilter[exisitingFilter.length - 1];
-      }
-
-      // Add the existing color filter
-      var layerFilter = filter.concat([exisitingFilter]);
-
-      // Set new layer filter for each district layer in the map
-      map.setFilter('districts_' + i, layerFilter);
-      map.setFilter('districts_' + i + '_boundary', layerFilter);
-      map.setFilter('districts_' + i + '_label', layerFilter);
-    }
-
-    // Create a similar filter for the boundary lines
-    map.setFilter('districts_boundary_line', filter);
-
-    {% if request.GET.marker_lat %}
-    var marker_coord = [parseFloat("{{request.GET.marker_lng|escapejs}}"), parseFloat("{{request.GET.marker_lat|escapejs}}")];
-    map.addSource("symbols", {
-      "type": "geojson",
-      "data": {
-        "type": "FeatureCollection",
-        "features": [
-          {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-                "type": "Point",
-                "coordinates": marker_coord
-            }
-          }
-        ]
-      }
-    });
-
-    // add source as a layer and apply some styles
-    map.addLayer({
-        "id": "symbols",
-        "type": "circle",
-        "source": "symbols",
-        "paint": {
-           "circle-radius": 10,
-           "circle-color": "#007cbf"
-        }
-    });
-
-    //map.flyTo({center: marker_coord});
-    {% endif %}
-
-  });
-
-} else {
-
-  // If Mapbox GL is not supported
-  // Log this information to the console (perhaps an alert that the website is not fully featured would be better?)
-  console.log('Mapbox GL not supported');
-
-  // Initialize the map
-  L.mapbox.accessToken = accessToken;
-  var map = L.mapbox.map('map').setView([viewport.center[1], viewport.center[0]], viewport.zoom);
-  L.mapbox.styleLayer(styleURL).addTo(map);
-}
-
 $(function() {
   function show_geocoding_status() {
     $('#map').hide();
     $('#geocoding-status').show();
   }
 
-  function geocode_latlng_to_district(lngLat, callback) {
-    // Note that, from the Mapbox API docs:
-    // "Use of this endpoint is rate limited to 600 requests per minute."
-    $.ajax({
-      url: 'https://api.mapbox.com/v4/' + mapId + '/tilequery/' + lngLat.lng + ',' + lngLat.lat + '.json?radius=0&access_token=' + accessToken,
-      method: 'GET',
-      success: function(resp) {
-        if (resp.type == "FeatureCollection" && resp.features.length > 0) {
-          callback(resp.features[0].properties);
-          return;
-        }
-        callback(null); // failed
-      }
-    });
-  }
-
-  function go_to_point(longitude, latitude) {
+  function go_to_point(pt) {
     // Query Mapbox API to get what district is at this location.
-    geocode_latlng_to_district({
+    var longitude = pt[0];
+    var latitude = pt[1];
+    latlng_to_district({
       lat: latitude,
       lng: longitude}, function(district) {
         // Redirect to new URL to load a map for that district and
@@ -213,25 +74,17 @@ $(function() {
   {% if request.GET.current_location == "1" %}
   if ("geolocation" in navigator)
     navigator.geolocation.getCurrentPosition(function(position) {
-      go_to_point(position.coords.longitude, position.coords.latitude);
+      go_to_point([position.coords.longitude, position.coords.latitude]);
     });
 
   {% elif request.GET.address %}
     // Note that, from the Mapbox API docs, we're rate limited to 600
     // requests per minute.
-    $.ajax({
-      url: 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent("{{request.GET.address|escapejs}}") + '.json?country=us&access_token=' + accessToken,
-      method: 'GET',
-      success: function(resp) {
-        if (resp.type == "FeatureCollection" && resp.features.length > 0) {
-          var coord = resp.features[0].center;
-          go_to_point(coord[0], coord[1]);
-          return;
-        }
-        alert("Could not find that address.");
-      }
-    });
-
+    address_to_latlng(
+      "{{request.GET.address|escapejs}}",
+      function(pt) {
+        go_to_point(pt);
+    })
   {% endif %}
 })
 

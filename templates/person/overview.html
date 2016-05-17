@@ -5,52 +5,15 @@
 {% block meta_keywords %}United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
 {% block head %}
-	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<script type="text/javascript">
-		var geocoder;
-		function doGeoCode(addr) {
-			if (!geocoder)
-				geocoder = new google.maps.Geocoder();
-			geocoder.geocode(
-				{ 'address': addr },
-				function(results, status) {
-					if (status == google.maps.GeocoderStatus.OK) {
-						var geocoder_result = results[0].geometry.location;
-
-						$.ajax({
-							url: "/congress/members/ajax/district_lookup",
-							data: {
-								lat: results[0].geometry.location.lat(),
-								lng: results[0].geometry.location.lng()
-							},
-							dataType: "json",
-							success: function(data) {
-								if (!data.state) {
-									alert("The address does not appear to be within a United States Congressional District.");
-								} else {
-									if (data.district)
-										window.location = "/congress/members/" + data.state + "/" + data.district + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
-									else
-										window.location = "/congress/members/" + data.state + "?marker=" + geocoder_result.lng() + ':' + geocoder_result.lat();
-								}
-							}
-						});
-					} else {
-					   alert("Sorry, Google couldn't find that address: " + status);
-				    }
-				});
-		}
-		
 		function doform() {
-			doGeoCode($('#address').val());
+			window.location = "/congress/members/map?address=" + encodeURIComponent($('#address').val());
 			return false;
 		}
 	</script>
 	<style>
 	</style>
 {% endblock %}
-
-
 
 {% block summary %}
 	<h1>Members of Congress</h1>
