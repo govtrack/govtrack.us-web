@@ -1,3 +1,4 @@
+#!script
 """
 Parser of:
  * bill terms located in data/us/[liv, liv111, crsnet].xml
@@ -14,7 +15,7 @@ import time
 import urllib
 import os.path
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from parser.progress import Progress
 from parser.processor import XmlProcessor
@@ -424,26 +425,10 @@ def main(options):
 
 
 def load_senate_floor_schedule(options, bill_index):
-    # Parse Senate.gov's "Floor Schedule" blurb for coming up tomorrow.
-    # The page appears to be cached in a such a way that what we see from this server
-    # is often old and not the same as what we see when visiting the URL from elsewhere.
-    # Forcing a cache miss with a changing qs arg seems to get around that, but it
-    # also sometimes generates a page-not-available error, which seems to be the
-    # underlying problem here.
     now = datetime.now()
-    url = "http://www.senate.gov/legislative/schedule/floor_schedule.htm?cache_bust=" + now.isoformat()
-    print(url)
-    try:
-        sfs = urllib.urlopen(url).read()
-        m = re.search(r"<i>Previous Meeting", sfs)
-        if not m:
-            print "'Previous Meeting' not found"
-            print sfs
-            return
-        sfs = sfs[:m.start()]
-        for congress, bill_type, number in re.findall(r"http://hdl.loc.gov/loc.uscongress/legislation.(\d+)([a-z]+)(\d+)", sfs):
-            bill_type = BillType.by_slug(bill_type)
-            bill = Bill.objects.get(congress=congress, bill_type=bill_type, number=number)
+    for entry in load_senate_floor_schedule_data():
+        if entry["date"] >= now.date():
+            bill = Bill.objects.get(congress=entry["bill_congress"], bill_type=entry["bill_type"], number=entry["bill_number"])
             if bill.senate_floor_schedule_postdate == None or now - bill.senate_floor_schedule_postdate > timedelta(days=7):
                 bill.senate_floor_schedule_postdate = now
                 bill.save()
@@ -451,9 +436,32 @@ def load_senate_floor_schedule(options, bill_index):
                     bill.update_index(bill_index)
                 if not options.disable_events:
                     bill.create_events()
-    except Exception as e:
-        log.error('Could not parse Senate Floor Schedule: ' + repr(e))
 
+def load_senate_floor_schedule_data():
+    dom = etree.parse(urllib.urlopen("http://www.senate.gov/legislative/schedule/floor_schedule.xml")).getroot()
+    def get(node, key): return node.find(key).text
+    year = int(get(dom, "year"))
+    congress = int(get(dom, "congress"))
+    for meeting in dom.findall("meeting/convene"):
+        d = date(year, int(meeting.get("month")), int(meeting.get("date")))
+        for measure in \
+           [meeting.get("measure")] \
+           + [m.text for m in meeting.findall("full_text/measure")]:
+            if not measure: continue # empty measure attribute
+            bill_type, bill_number = re.match(r"(\w+?)(\d+)$", measure).groups()
+            bill_type_map = {
+              "s": BillType.senate_bill,
+              "se": BillType.senate_resolution,
+              "sj": BillType.senate_joint_resolution,
+              "h": BillType.house_bill,
+            }
+            measure = bill_type + "|" + bill_number
+            yield {
+                "date": d,
+                "bill_congress": congress,
+                "bill_type": bill_type,
+                "bill_number": bill_number,
+            }
 
 def load_docs_house_gov(options, bill_index):
     # Get most recent JSON file by looking at the lexicographically last one.
@@ -480,4 +488,5 @@ def load_docs_house_gov(options, bill_index):
         if not options.disable_events: bill.create_events()
 
 if __name__ == '__main__':
-    main()
+    import pprint
+    pprint.pprint(list(load_senate_floor_schedule_data()))
