@@ -19,7 +19,7 @@ $(function() {
    $('a[data-toggle="tab"][href="#map"]').on('shown.bs.tab', function (e) {
    	if (map_loaded) return;
    	map_loaded = true;
-     $("#map-iframe").attr('src', "/congress/members/embed/mapframe?state={{state}}&amp;footer=0");
+     $("#map-iframe").attr('src', "/congress/members/embed/mapframe?state={{state}}&footer=0");
    })
 
    $('a[data-toggle="tab"][href="#representatives"]').on('shown.bs.tab', function (e) {
