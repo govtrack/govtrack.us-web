@@ -46,7 +46,8 @@
       		return;
       	}
       	if (district.number != "00") {
-          var path = "/congress/members/" + district.state + "/" + district.number;
+          // URLs don't use zero-padding
+          var path = "/congress/members/" + district.state + "/" + parseInt(district.number);
           var fragment = "#q=" + encodeURIComponent(q) + "&marker_lng=" + pt[0] + "&marker_lat=" + pt[1];
           if (path == window.location.pathname) {
             // The page won't reload. Just add a marker & alert.
