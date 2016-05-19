@@ -58,6 +58,10 @@
 	    window.location = "/congress/members/map";
 	    return;
 	}
+  	if (addr == "my location") {
+	    do_by_current_location();
+	    return;
+	}
     address_to_latlng(addr, function (pt) { go_to_point(pt, addr); });
   }
 
