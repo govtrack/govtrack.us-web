@@ -14,7 +14,7 @@ from website.models import UserProfile
 from datetime import datetime
 
 class Command(BaseCommand):
-	args = 'user@email.com'
+	args = 'user@email.com or user ID'
 	help = 'Unsubscribes a user from receiving email updates.'
 	
 	def handle(self, *args, **options):
@@ -23,7 +23,10 @@ class Command(BaseCommand):
 			return
 		
 		try:
-			p = UserProfile.objects.get(user__email=args[0])
+			if "@" in args[0]:
+				p = UserProfile.objects.get(user__email=args[0])
+			else:
+				p = UserProfile.objects.get(user__id=args[0])
 		except UserProfile.DoesNotExist:
 			print "No such user."
 			return
@@ -32,7 +35,7 @@ class Command(BaseCommand):
 		p.save()
 		
 		print "Turning off email updates on the following subscription lists..."
-		for sublist in SubscriptionList.objects.filter(user__email=args[0]):
+		for sublist in SubscriptionList.objects.filter(user=p.user):
 			print sublist.user.email, sublist.name, "was", sublist.email
 			
 			sublist.email = 0
