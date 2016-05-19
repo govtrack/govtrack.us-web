@@ -121,7 +121,7 @@ $(function() {
 	</form>
     {% endif %}
 
-	<p>{{statename}}&rsquo;s representatives are:</p>
+	<p>{{statename}}&rsquo;s representative{% if stateapp > 1 %}s are{% else %} is{% endif %}:</p>
 
     <div class="row members-grid">
     {% for district, person, cities in representatives %}
