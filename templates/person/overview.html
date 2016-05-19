@@ -7,7 +7,7 @@
 {% block head %}
 	<script type="text/javascript">
 		function doform() {
-			window.location = "/congress/members/map?address=" + encodeURIComponent($('#address').val());
+			window.location = "/congress/members/map#address=" + encodeURIComponent($('#address').val());
 			return false;
 		}
 	</script>

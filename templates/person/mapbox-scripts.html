@@ -28,6 +28,13 @@ else
 
 var viewport = geoViewport.viewport(bbox, [window.innerWidth/2, window.innerHeight/2])
 
+// hold markers until map is loaded
+window._map_markers = [];
+window._map_marker_count = 0;
+function addMapMarker(lnglat) {
+  _map_markers.push(lnglat);
+}
+
 // Checks for support of Mapbox GL. Works with most modern browsers.
 if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
 
@@ -72,39 +79,39 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
     // Create a similar filter for the boundary lines
     map.setFilter('districts_boundary_line', filter);
 
-    {% if marker_lat %}
-    var marker_coord = [parseFloat("{{marker_lng|escapejs}}"), parseFloat("{{marker_lat|escapejs}}")];
-    map.addSource("symbols", {
-      "type": "geojson",
-      "data": {
-        "type": "FeatureCollection",
-        "features": [
-          {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-                "type": "Point",
-                "coordinates": marker_coord
+    // Add markers.
+    window.addMapMarker = function(lnglat) {
+      window._map_marker_count++;
+      map.addSource("symbols"+_map_marker_count, {
+        "type": "geojson",
+        "data": {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                  "type": "Point",
+                  "coordinates": lnglat // array [lng, lat]
+              }
             }
-          }
-        ]
-      }
-    });
-
-    // add source as a layer and apply some styles
-    map.addLayer({
-        "id": "symbols",
-        "type": "circle",
-        "source": "symbols",
-        "paint": {
-           "circle-radius": 10,
-           "circle-color": "#007cbf"
+          ]
         }
-    });
+      });
 
-    //map.flyTo({center: marker_coord});
-    {% endif %}
+      // add source as a layer and apply some styles
+      map.addLayer({
+          "id": "symbols"+_map_marker_count,
+          "type": "circle",
+          "source": "symbols"+_map_marker_count,
+          "paint": {
+             "circle-radius": 10,
+             "circle-color": "#007cbf"
+          }
+      });
+    };
 
+    window._map_markers.forEach(addMapMarker);
   });
 
 } else {

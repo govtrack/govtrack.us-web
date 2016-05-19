@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block body_scripts %}
-  {% include "person/mapbox-scripts.html" with marker_lat=request.GET.marker_lat marker_lng=request.GET.marker_lng %}
+  {% include "person/mapbox-scripts.html" %}
   
   <script>
   map.on("moveend", update_embed_code_bounds);
@@ -44,8 +44,16 @@
       		alert("That location does not seem to be in a United States Congressional District.");
       		return;
       	}
-      	if (district.number != "00")
-	        window.location = "/congress/members/" + district.state + "/" + district.number + "?q=" + encodeURIComponent(q) + "&marker_lng=" + pt[0] + "&marker_lat=" + pt[1];
+      	if (district.number != "00") {
+          var path = "/congress/members/" + district.state + "/" + district.number;
+          var fragment = "#q=" + encodeURIComponent(q) + "&marker_lng=" + pt[0] + "&marker_lat=" + pt[1];
+          if (path == window.location.pathname) {
+            // The page won't reload. Just add a marker & alert.
+            addMapMarker(pt);
+            alert("That address is in the same congressional district.");
+          }
+	        window.location = path + fragment;
+        }
       	else
 	        window.location = "/congress/members/" + district.state;
       });
@@ -72,10 +80,28 @@
 	    });
   }
 
-  {% if request.GET.address %}
-    do_address("{{request.GET.address|escapejs}}");
-  {% endif %}
-  </script>
+  // utility function
+  function parse_qs(qs) {
+    // Parse something that looks like a query string. Based on
+    // http://stackoverflow.com/a/2880929/125992.
+    var match,
+      pl     = /\+/g,  // Regex for replacing addition symbol with a space
+      search = /([^&=]+)=?([^&]*)/g,
+      decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+      ret = {};
+    while (match = search.exec(qs))
+      ret[decode(match[1])] = decode(match[2]);
+    return ret;
+  }
+
+  var q = parse_qs(window.location.hash.substring(1));
+  if (q.address)
+    do_address(q.address);
+  if (q.q)
+    $('#user-address').val(q.q);
+  if (q.marker_lat)
+    addMapMarker([parseFloat(q.marker_lng), parseFloat(q.marker_lat)]);
+</script>
 {% endblock %}
 
 {% block crumbs %}
@@ -107,7 +133,7 @@
 <form class="form-inline" onsubmit="do_address(); return false;" style="margin: 2em 0">
   <div class="form-group">
     <label for="user-address" class="sr-only">Address</label>
-    <input type="text" class="form-control" id="user-address" placeholder="Enter an address in the United States" value="{{request.GET.q}}">
+    <input type="text" class="form-control" id="user-address" placeholder="Enter an address in the United States">
   </div>
   <button type="submit" class="btn btn-primary">Find District</button>
   <button class="btn btn-default" onclick="do_by_current_location(); return false;">Use My Location</button>

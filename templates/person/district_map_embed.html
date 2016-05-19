@@ -29,7 +29,13 @@
   </div>
 {% endif %}
 
-{% include "person/mapbox-scripts.html" with marker_lat=request.GET.marker_lat marker_lng=request.GET.marker_lng %}
+{% include "person/mapbox-scripts.html" %}
+
+{% if request.GET.marker_lat %}
+<script>
+addMapMarker([parseFloat("{{request.GET.marker_lng|escapejs}}"), parseFloat("{{request.GET.marker_lat|escapejs}}")]);
+</script>
+{% endif %}
 
 {% if not hide_footer %}
 <script>
