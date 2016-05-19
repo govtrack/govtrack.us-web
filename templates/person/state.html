@@ -2,101 +2,27 @@
 {% load humanize govtrack_utils %}
 {% block title %}{{statename}} Senators, Representatives, and Congressional District Maps - GovTrack.us{% endblock %}
 {% block meta_description %}Find your U.S. Congress senators and representative in {{statename}} using a map.{% endblock %}
-{% block meta_keywords %}United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
+{% block meta_keywords %}{{statename}},United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block head %}
-	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<style>
 	p.moc { font-weight: bold; margin: 0; }
 	.members-grid .info { margin-top: 8px; font-size: 85%; }
-
-	#map_controls > li {
-		float: left;
-		background-color: white;
-		border: 2px solid #777;
-		cursor: pointer;
-		text-align: center;
-		margin: 3px 6px 0 0;
-		padding: 2px 4px 2px 4px;
-	}
-	#map_controls > li.active {
-		background-color: #FFA;
-	}
-	#map_canvas { border: 1px solid black; }
-	#map_canvas * {  max-width: none !important; -webkit-box-sizing: content-box;
-     -moz-box-sizing: content-box;
-          box-sizing: content-box; } /* fix for bootstrap 3 */
 	</style>
 {% endblock %}
 
 {% block body_scripts %}
-	<script type="text/javascript" src="https://gis.govtrack.us/static/js/google_maps_helpers.js"></script>
-	<script type="text/javascript" src="https://gis.govtrack.us/static/js/maps_helpers.js"></script>
-	<script type="text/javascript">
-	var map = null;
-
-	function initialize_map() {
-			map = map_controller();
-			map.init(
-				document.getElementById("map_canvas"),
-				"{{state|lower}}",
-				null,
-				{
-					zoom: {{center_zoom}},
-					center: new google.maps.LatLng({{center_lat}}, {{center_long}})
-				}
-				);
-
-			{% if request.GET.marker %}
-				var lnglat = "{{request.GET.marker}}".split(":");
-				var loc = new google.maps.LatLng(lnglat[1], lnglat[0]);
-				map.setCenter(loc);
-				map.setZoom(13);					
-				map.addMarker(loc);
-			{% endif %}
-			
-			map.onBoundsChanged(function(b) {
-				$("#embedbounds").text(Math.round(b.getSouthWest().lng()*1000)/1000 + "," + Math.round(b.getNorthEast().lat()*1000)/1000 + "," + Math.round(b.getNorthEast().lng()*1000)/1000 + "," + Math.round(b.getSouthWest().lat()*1000)/1000);
-			});
-			
-			map.addControl(google.maps.ControlPosition.TOP_RIGHT, $('#map_controls')[0])
-			map.onMouseMoveHit(
-				function(key, data) {
-					var div = $('#map_district_hover_container');
-					var lbl = $('#map_district_hover_label');
-					if (data) {
-						lbl.html(data.name);
-						div.show();
-					} else {
-						div.hide();
-					}
-				},
-				function() {
-					var div = $('#map_district_hover_container');
-					var lbl = $('#map_district_hover_label');
-					if (div.is(":visible")) lbl.html("Loading...");
-				});
-
-		function canvas_resize() {
-			var w = $('#content').width();
-			var h = $(window).height() * .8;
-			$('#map_canvas').css('width', w);
-			$('#map_canvas').css('height', w < h ? w : h);
-			google.maps.event.trigger(map, "resize");
-		}
-		$(window).scroll(canvas_resize);
-		$(window).resize(canvas_resize);
-		canvas_resize();
-	};
-
-
-	$(function() {
-		$('a[data-toggle="tab"][href="#map"]').on('shown.bs.tab', function (e) {
-		  if (!map)
-		  	on_google_maps_loaded.push(initialize_map);
-		})
-	})
-
-	</script>
+<script>
+// the map doesn't load correctly if the map is initialized (even within the iframe)
+// before it is visible, so don't load the iframe until the map tab is clicked
+var map_loaded = false;
+$(function() {
+   $('a[data-toggle="tab"][href="#map"]').on('shown.bs.tab', function (e) {
+   	if (map_loaded) return;
+   	map_loaded = true;
+     $("#map-iframe").attr('src', "/congress/members/embed/mapframe?state={{state}}&amp;footer=0");
+   })
+})
+</script>
 {% endblock %}
 
 {% block crumbs %}
@@ -227,20 +153,7 @@
 		    		{% include "person/redistricting-notes.html" %}
 				{% endif %}
 
-	<div id="map_container">
-		<div id="map_canvas">
-		</div>
-		<div style="display: none">
-			<ul id="map_controls">
-				<li id="map_district_hover_container" style="display: none">
-					<div id="map_district_hover_label">
-					</div>
-				</li>
-				<!--<li id="ctrl_layer_2010" class="active">2010 Districts</li>
-				<li id="ctrl_layer_2012">2012 Districts</li>-->
-			</ul>
-		</div>
-	</div>
+				<iframe id="map-iframe" style="width: 100%; height: 80vh; border: 1px solid #999;"> </iframe>
 
 	    	</div>
 	</div> <!-- /tabs -->
