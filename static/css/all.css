@@ -511,13 +511,6 @@ blockquote {
 			background: url(../images/img-committees.png) center 15px no-repeat;
 			}
 
-/* Remove BG on home when it interferes ----------- */
-@media only screen and (max-width: 768px) {
-	 .entries-box .entries-holder {
-	background: none;
-	}
-}
-
 /* Summary box styles
 	 ================================================= */
 	.summary-box .info {
