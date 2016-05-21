@@ -459,7 +459,7 @@ def load_senate_floor_schedule_data():
             yield {
                 "date": d,
                 "bill_congress": congress,
-                "bill_type": bill_type,
+                "bill_type": bill_type_map[bill_type],
                 "bill_number": bill_number,
             }
 
