@@ -248,19 +248,19 @@
 	<div class="panel panel-default">
 	<div class="panel-body" style="padding-bottom: 5px;">
 	<div class="row">
-	<div id="track_panel_base" class="{% if bill.is_alive %}col-md-8{% else %}col-sm-12{% endif %}">
-		<div class="info" style="{% if not bill.is_alive %}width: auto; {% endif %}background: none;">
-		
 			{% if bill.explanatory_text or bill.congress < 93 %}
-			<p style="font-style: italic">
+			<div class="col-xs-12">
 				{% if bill.explanatory_text %}{{bill.explanatory_text}}{% endif %}
 				{% if bill.congress < 93 %}
 					Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
 				{% endif %}
-			</p>
 			<hr>
+			</div>
 			{% endif %}
 			
+	<div id="track_panel_base" class="{% if bill.is_alive %}col-md-8{% else %}col-sm-12{% endif %}">
+		<div class="info" style="{% if not bill.is_alive %}width: auto; {% endif %}background: none;">
+		
 			<dl class="dl-horizontal" style="margin-bottom: 0">
 				{% if bill.source != "statutesatlarge" %}
 					<dt>Introduced:</dt>
