@@ -454,6 +454,7 @@ def load_senate_floor_schedule_data():
               "se": BillType.senate_resolution,
               "sj": BillType.senate_joint_resolution,
               "h": BillType.house_bill,
+              "hj": BillType.house_joint_resolution,
             }
             measure = bill_type + "|" + bill_number
             yield {
