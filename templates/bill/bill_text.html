@@ -121,6 +121,7 @@ function hide_comparison() {
 	$('#bill_comparison_content').hide();
 	$('#sidebar').show();
 	$('select.compare-to').val('');
+	window.location.hash = "#";
 	return false;
 }
 
@@ -128,6 +129,7 @@ function load_comparison(alt_bill, alt_version) {
 	$('#main_text_content').hide();
 	$('#content_loading').show();
 	$('#content_loading').html('<p>Loading...</p>');
+	window.location.hash = "#compare=" + ((alt_bill && alt_bill != {{bill.id}}) ? (alt_bill + ":") : "") + alt_version;
 	
 	$.ajax({
 		url: "/congress/bills/_ajax/load_text",
@@ -335,7 +337,7 @@ $(function() {
 	// go to a permalink
 	show_permalink(window.location.hash, true)
 
-	// easter egg: trigger a comparison using the page fragment
+	// go to a comparison
 	var m = /^#compare=(?:(\d+):)?([a-z][a-z0-9]+)?/.exec(window.location.hash);
 	if (m) {
 		load_comparison(m[1], m[2]);
