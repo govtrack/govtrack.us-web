@@ -315,7 +315,7 @@ def bill_text_ajax(request):
     except IOError as e:
         return { "error": str(e) }
 
-def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10):
+def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10, use_cache=True, force_update=False):
     from billtext import load_bill_text, get_current_version
     from xml_diff import compare
     import lxml
@@ -325,8 +325,6 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
 
     if left_version == "": left_version = get_current_version(left_bill)
     if right_version == "": right_version = get_current_version(right_bill)
-
-    use_cache = True
 
     if use_cache:
         # Load from cache.
@@ -382,7 +380,12 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
         import lxml.etree
         elem = lxml.etree.Element("comparison-change")
         return elem
-    compare(doc1.getroot(), doc2.getroot(), make_tag_func=make_tag_func)
+    def differ(text1, text2):
+        # ensure we use the C++ Google DMP and can specify the time limit
+        import diff_match_patch
+        for x in diff_match_patch.diff_unicode(text1, text2, timelimit=timelimit):
+            yield x
+    compare(doc1.getroot(), doc2.getroot(), make_tag_func=make_tag_func, differ=differ)
 
     # Prepare JSON response data.
         # dates aren't JSON serializable
@@ -395,15 +398,19 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
         "right_text": lxml.etree.tostring(doc2),
     }
 
-    if use_cache:
+    if use_cache or force_update:
+        # For force_update, or race conditions, delete any existing record.
+        fltr = { "bill1": left_bill,
+            "ver1": left_version,
+            "bill2": right_bill,
+            "ver2": right_version }
+        BillTextComparison.objects.filter(**fltr).delete()
+
         # Cache in database so we don't have to re-do the comparison
         # computation again.
         btc = BillTextComparison(
-            bill1 = left_bill,
-            ver1 = left_version,
-            bill2 = right_bill,
-            ver2 = right_version,
-            data = dict(ret)) # clone before compress()
+            data = dict(ret), # clone before compress()
+            **fltr)
         btc.compress()
         btc.save()
 
