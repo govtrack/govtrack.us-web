@@ -168,8 +168,7 @@ def searchmembers(request, mode=None):
         } )
 
 def http_rest_json(url, args=None, method="GET"):
-    import urllib, urllib2, json, socket
-    socket.setdefaulttimeout(6)
+    import urllib, urllib2, json
     if method == "GET" and args != None:
         url += "?" + urllib.urlencode(args).encode("utf8")
     req = urllib2.Request(url)

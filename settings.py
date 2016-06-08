@@ -187,9 +187,9 @@ if not SECRET_KEY:
 
 # Since we rely on external APIs in a few places, make sure
 # that downed APIs elsewhere don't hold us too long. Not
-# sure this has any useful effect.
+# sure this has any useful effect. Also affects outbound SMTP?
 import socket
-socket.setdefaulttimeout(10.0)
+socket.setdefaulttimeout(20.0)
 
 # Restrict silk profile information to staff users. Don't
 # log request/response bodies because we will go crazy in
