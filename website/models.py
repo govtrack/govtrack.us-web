@@ -283,3 +283,37 @@ Feed.register_feed(
     intro_html = """<p>This feed includes posts on <a href="https://medium.com/govtrack-insider">GovTrack Insider</a>.</p>""",
     description = "Get an update whenever we post a new article on GovTrack Insider.",
     )
+
+class Reaction(models.Model):
+    subject = models.CharField(max_length=20, db_index=True)
+    user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
+    anon_session_key = models.CharField(max_length=64, blank=True, null=True, db_index=True)
+    reaction = JSONField()
+    extra = JSONField()
+
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    EMOJI_CHOICES = [
+        'smile', 'scream', 'hugging', 'rage', 'ok_hand', 'clap',
+        'chart_with_downwards_trend', 'broken_heart', '100', 'turtle',
+        'hamburger', 'baseball', 'money_mouth', 'statue_of_liberty',
+    ]
+    
+    class Meta:
+        unique_together = ( ('subject', 'user'), ('subject', 'anon_session_key') ) 
+
+    @staticmethod
+    def get_session_key(request):
+        import random, string
+        return request.session.setdefault("reactions-key",
+            ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(20))
+            )
+
+    @staticmethod
+    def get_for_user(request):
+        if request.user.is_authenticated():
+            return Reaction.objects.filter(user=request.user)
+        elif "reactions-key" in request.session:
+            return Reaction.objects.filter(anon_session_key=Reaction.get_session_key(request))
+        else:
+            return Reaction.objects.none()

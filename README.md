@@ -144,3 +144,6 @@ If you configured Solr, you can remove --disable-index. For the sake of speed, -
   ./parse.py vote --congress=113
   ```
 
+# Credits
+
+Emoji icons by http://emojione.com/developers/.

@@ -135,7 +135,33 @@ def bill_details_user_view(request, congress, type_slug, number):
                 pass
         except IssueByBill.DoesNotExist:
             pass
-        
+
+    # emoji reactions
+    import json
+    from website.models import Reaction
+    # get aggregate counts
+    reaction_subject = "bill:" + bill.congressproject_id
+    emoji_counts = { }
+    for r in Reaction.objects.filter(subject=reaction_subject).values("reaction").annotate(count=Count('id')):
+        v = json.loads(r["reaction"])
+        if isinstance(v, dict):
+            for emoji in v.get("emojis", []):
+                emoji_counts[emoji] = emoji_counts.get(emoji, 0) + r["count"]
+    # get user's reactions
+    r = Reaction.get_for_user(request).filter(subject=reaction_subject).first()
+    my_emojis = set()
+    if r and isinstance(r.reaction, dict):
+        my_emojis = set(r.reaction.get("emojis", []))
+    ret["reactions"] = [ ]
+    for emoji in Reaction.EMOJI_CHOICES:
+        ret["reactions"].append({
+            "name": emoji,
+            "count": emoji_counts.get(emoji, 0),
+            "me": emoji in my_emojis,
+        })
+    # stable sort by count so that zeroes are in our preferred order
+    ret["reactions"] = sorted(ret["reactions"], key = lambda x : -x["count"])
+
     return ret
 
 @anonymous_view

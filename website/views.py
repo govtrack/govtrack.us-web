@@ -618,3 +618,43 @@ Message:
 %s""" % (name, email, message))
         res = { "status": "ok", "message": "Thank you. We will be in touch shortly by email." }
     return HttpResponse(json.dumps(res), content_type="application/json")
+
+def add_remove_reaction(request):
+    from website.models import Reaction
+    res = { "status": "error" }
+    if request.method == "POST" \
+        and request.POST.get("subject") \
+        and request.POST.get("mode") in ("-1", "1") \
+        and request.POST.get("emoji") in Reaction.EMOJI_CHOICES:
+
+        print(request.META)
+
+        r, isnew = Reaction.objects.get_or_create(
+            subject=request.POST["subject"],
+            user=request.user if request.user.is_authenticated() else None,
+            anon_session_key=Reaction.get_session_key(request) if not request.user.is_authenticated() else None,
+        )
+
+        if isnew:
+            r.extra = {
+                "ip": request.META['REMOTE_ADDR'],
+            }
+
+        if not isinstance(r.reaction, dict):
+            r.reaction = { }
+        emojis = set(r.reaction.get("emojis", []))
+        if request.POST["mode"] == "1":
+            emojis.add(request.POST["emoji"])
+        elif request.POST["mode"] == "-1":
+            emojis.remove(request.POST["emoji"])
+        r.reaction["emojis"] = sorted(emojis)
+        if len(r.reaction["emojis"]) == 0:
+            del r.reaction["emojis"]
+        if not r.reaction:
+            # no data, delete record
+            r.delete()
+        else:
+            # save
+            r.save()
+
+    return HttpResponse(json.dumps(res), content_type="application/json")

@@ -182,6 +182,10 @@ class Bill(models.Model):
         return Bill.objects.get(congress=int(m.group(3)), bill_type=BillType.by_slug(m.group(1)), number=int(m.group(2)))
 
     @property
+    def congressproject_id(self):
+        return self.bill_type_slug + str(self.number) + "-" + str(self.congress)
+
+    @property
     def data_dir_path(self):
         return "data/congress/%d/bills/%s/%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, BillType.by_value(self.bill_type).slug, self.number)
 

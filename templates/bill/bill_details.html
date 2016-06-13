@@ -27,9 +27,13 @@
 	<meta property="og:description" content="{% if subtitle %}{{subtitle}}{% else %}A {{bill.noun}} in the U.S. Congress.{% endif %}" />
 	<meta property="og:url" content="https://www.govtrack.us{{bill.get_absolute_url}}" />
 	<meta property="og:type" content="og_govtrack:bill">
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/emojione/2.1.4/assets/css/emojione.min.css"/>
 {% endblock %}
 
 {% block body_scripts %}
+<script src="https://cdn.jsdelivr.net/emojione/2.1.4/lib/js/emojione.min.js"></script>
+
 <script>
     $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
     $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
@@ -73,8 +77,50 @@
 		$('#yourreps p').text(text);
 	});
 
+	function add_emoji_reaction(emoji) {
+		var n = $("<a href='#'/>");
+		n.attr("data-count", emoji.count);
+		n.append(emojione.toImage(":" + emoji.name + ":"))
+		if (emoji.me)
+			n.addClass("active");
+		var c = $('<span></span>');
+		n.append(c);
+		function update_count() {
+			var count = parseInt(n.attr("data-count"));
+			c.text(count > 0 ? count : "");
+		}
+		update_count(emoji.count);
+		$('#emoji-reactions')
+			.find(($('#emoji-reactions .main > *').length < 4) ? '.main' : '.other')
+			.append(n);
+
+		n.click(function() {
+			delta = n.hasClass("active") ? -1 : 1;
+			n.toggleClass("active");
+			n.attr("data-count", parseInt(n.attr("data-count")) + delta);
+			update_count();
+			$.ajax({
+				url: "{% url 'reaction' %}",
+				method: "POST",
+				data: {
+					subject: "bill:{{bill.congressproject_id|escapejs}}",
+					emoji: emoji.name,
+					mode: delta
+				},
+				success: function() {
+				}
+			})
+			return false;
+		})
+	}
+
+
 	$(function () {
 	  $('[data-toggle="tooltip"]').tooltip()
+
+	  for (var i = 0; i < the_page.reactions.length; i++)
+	  	add_emoji_reaction(the_page.reactions[i]);
+
 	})
 </script>
 {% endblock %}
@@ -217,6 +263,32 @@
 #content dt {
 	margin-bottom: .22em;
 }
+
+#emoji-reactions {
+	margin-left: -.25em;
+	margin-top: 20px;
+}
+	#emoji-reactions a {
+		 display: inline-block;
+		 text-decoration: none;
+		 padding: .25em 0 .25em .25em;
+		 margin: 0 .25em .25em 0;
+		 border: 1px solid rgba(255,255,255,0);
+	}
+		#emoji-reactions a.active {
+			background-color: #FAFAFA;
+			border: 1px solid #DD9;
+			color: black;
+		}
+		#emoji-reactions a span {
+			 display: inline-block;
+			 font-style: normal;
+			 color: #777;
+			 font-size: 90%;
+			 line-height: 90%;
+			 padding: 0 1px;
+			 min-width: .75em;
+		}
 </style>
 {% endblock %}
 
@@ -495,7 +567,11 @@
 		  </div>
 		</div>		
 
-				
+		<div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" title="React to this {{bill.noun}} with an emoji.">
+			<span class="main"> </span>
+			<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;">···</a>
+			<span class="other" style="display: none"> </span>
+		</div>
 	</div><!-- /actions -->
 	{% endif %}
 </div> <!-- /row -->
