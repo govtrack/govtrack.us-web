@@ -20,6 +20,12 @@
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:title" content="{{bill.title}}">
 	<meta name="twitter:description" content="{{subtitle}}">
+	<meta name="twitter:label1" value="Current Status">
+	<meta name="twitter:data1" value="{{bill.get_current_status_display}}">
+	{% if bill.sponsor %}
+		<meta name="twitter:label2" value="Sponsor">
+		<meta name="twitter:data2" value="{{bill.sponsor.name}}">
+	{% endif %}
 {% endblock %}
 
 {% block head %}
