@@ -645,7 +645,7 @@ def add_remove_reaction(request):
         emojis = set(r.reaction.get("emojis", []))
         if request.POST["mode"] == "1":
             emojis.add(request.POST["emoji"])
-        elif request.POST["mode"] == "-1":
+        elif request.POST["mode"] == "-1" and request.POST["emoji"] in emojis:
             emojis.remove(request.POST["emoji"])
         r.reaction["emojis"] = sorted(emojis)
         if len(r.reaction["emojis"]) == 0:
