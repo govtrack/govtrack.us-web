@@ -280,7 +280,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     {% elif vote.related_bill or vote.related_amendment %}
         <p>This vote was related to
             {% if vote.related_amendment %}
-            an amendment {% if vote.related_amendment.sponsor %}by <a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{% endif %}
+            an amendment {% if vote.related_amendment.sponsor %}by <a href="{{vote.related_amendment.sponsor.get_absolute_url}}">{{vote.related_amendment.sponsor}}</a>{% endif %}
             to
             {% endif %}
             {% if vote.related_bill %}
