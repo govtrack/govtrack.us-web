@@ -276,6 +276,14 @@ class Vote(models.Model):
             my_reps = []
 
         oursummary = self.get_summary()
+
+        # fetch the whole vote (don't restrict by my_reps in the hope of
+        # making use of the db query cache)
+        all_votes = {
+            vv.person: vv.option
+            for vv in
+            self.voters.select_related('person', 'option')
+        }
         
         return {
             "type": "Vote",
@@ -299,8 +307,8 @@ class Vote(models.Model):
                 "oursummary": oursummary,
                 "voters":
                             [
-                                { "url": p.get_absolute_url(), "name": p.name_lastonly(), "vote": self.voters.get(person=p).option.value }
-                                for p in my_reps if self.voters.filter(person=p).exists()
+                                { "url": p.get_absolute_url(), "name": p.name_lastonly(), "vote": all_votes[p].value }
+                                for p in my_reps if p in all_votes
                             ]
                         if feeds != None else []
                 }

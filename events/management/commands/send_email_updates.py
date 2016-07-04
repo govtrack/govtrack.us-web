@@ -60,11 +60,11 @@ class Command(BaseCommand):
 			# re-starting this process and some new events crept in.
 			sublists = SubscriptionList.objects\
 					.filter(email__in=list_email_freq)\
-					.exclude(last_email_sent__gt=datetime.now()-timedelta(hours=16)))
+					.exclude(last_email_sent__gt=datetime.now()-timedelta(hours=20))
 
 			# Find the feeds with new events first and then whittle down the list of
 			# subscription lists to just those that track those feeds.
-			if False:
+			if True:
 				# Find all of the feeds tracked by all users with a subscription list with email updates turned on.
 				all_feeds = list(Feed.objects.filter(tracked_in_lists__email__in = list_email_freq).distinct())
 
@@ -124,6 +124,10 @@ class Command(BaseCommand):
 			import tqdm
 			user_iterator = tqdm.tqdm(user_iterator, desc="Users")
 
+		# in degugging, clear the query log
+		from django import db
+		db.reset_queries()
+
 		for user in user_iterator:
 			# Check pingback status.
 			try:
@@ -147,8 +151,10 @@ class Command(BaseCommand):
 				total_emails_sent += 1
 				total_events_sent += events_sent
 			
+			# Write out the longest query.
+			#print()
 			#from django.db import connection
-			#for q in connection.queries:
+			#for q in sorted(connection.queries, reverse=True):
 			#	print q["time"], q["sql"]
 			from django import db
 			db.reset_queries()
