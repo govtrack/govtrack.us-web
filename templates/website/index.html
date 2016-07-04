@@ -9,44 +9,46 @@
   <meta property="og:url" content="{{SITE_ROOT_URL}}" />
 
 <style>
-#intro-box {
-	background: #40a4bd;
-}
-
 	#primary-links {
-		margin: .5em 0;
+		margin-top: 2em;
 	}
 	#primary-links a {
 		display: block;
-		margin: 1.5em 0;
+		margin: 1em 0;
 		text-align: center;
 		font-family: serif;
 		line-height: 140%;
 		text-decoration: none;
+		font-family: sans-serif;
 	}
 		#primary-links a span {
 			font-style: italic;
 		}
 		#primary-links a img {
-			margin: 0 auto 3px auto;
+			display: block;
+			width: 100%;
 		}
 		#primary-links a:hover img {
 			opacity: .9;
 		}
 
-#blog-posts h3 {
-	margin: 0 0 .25em 0;
+article {
+
 }
 
-#blog-posts h3 a {
-	text-decoration: none;
-	line-height: 140%;
-	font-weight: bold;
-}
+	article h3 {
+		margin: 0 0 .2em 0;
+		line-height: 125%;
+	}
 
-#footer {
-	margin-top: 0;
-}
+	article h3 a:link {
+		text-decoration: none;
+		font-weight: bold;
+	}
+
+	#content article p {
+		margin-bottom: .25em;
+	}
 </style>
 {% endblock %}
 
@@ -56,81 +58,117 @@
 	<div id="logo">govtrack.us</div>
 {% endblock %}
 
-{% block body_with_container %}
-<div id="content">
-<div class="container">
-	<div class="row">
-		<div id="primary-links">
-			<div class="col-xs-4 col-sm-2">
+{% block body %}
+<div class="row">
+	<div class="col-sm-3">
+		<div id="primary-links" class="row" style="text-align: center">
+			<div class="col-xs-4 col-sm-12">
 				<a href="/congress/members">
-					<img src="/static/images/img-congress-members.png" class="img-responsive">
+					<img src="/static/images/img-congress-members.png">
 					Members <span>of</span> Congress
 				</a>
 			</div>
-			<div class="col-xs-4 col-sm-2">
+			<div class="col-xs-4 col-sm-12">
 				<a href="{% url "bill_docket" %}">
-					<img src="/static/images/img-bills-resolutions.png" class="img-responsive">
+					<img src="/static/images/img-bills-resolutions.png">
 					Bills <span>&amp;</span> Resolutions
 				</a>
 			</div>
-			<div class="col-xs-4 col-sm-2">
+			<div class="col-xs-4 col-sm-12">
 				<a href="{% url "vote_list" %}">
-					<img src="/static/images/img-voting-records.png" class="img-responsive">
+					<img src="/static/images/img-voting-records.png">
 					Voting Records
 				</a>
 			</div>
 			<div class="clearfix visible-xs"> </div>
-			<div class="col-xs-4 col-sm-2">
+			<div class="col-xs-4 col-sm-12">
 				<a href="{% url "committee_list" %}">
-					<img src="/static/images/img-committees.png" class="img-responsive">
+					<img src="/static/images/img-committees.png">
 					Committees
 				</a>
 			</div>
-			<div class="col-xs-4 col-sm-2">
+			<div class="col-xs-4 col-sm-12">
 				<a href="/about">
-					<img src="/static/images/img-about.png" class="img-responsive">
+					<img src="/static/images/img-about.png">
 					About GovTrack.us
 				</a>
 			</div>
-			<div class="col-xs-4 col-sm-2">
+			<div class="col-xs-4 col-sm-12">
 				<a href="/developers">
-					<img src="/static/images/img-opendata.png" class="img-responsive">
+					<img src="/static/images/img-opendata.png">
 					Use Our Open Data
 				</a>
 			</div>
 		</div>
 	</div>
-</div>
+	<div class="col-sm-9">
 
-<div style="margin-top: 1em">
-	<div class="entries-holder container">
-		<div class="col-sm-4 col-sm-push-8">
+		<div id="blog-posts">
+				{% if medium_posts %}
+					<h2>
+						<div style="float: right;">
+							<a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">subscribe</a> |
+							<a href="https://medium.com/govtrack-insider" title="More Posts on Medium"><i class="fa fa-medium"></i></a>
+						</div>
+						<span>
+						Latest from
+						GovTrack Insider
+						</span>
+					</h2>
+					{% for post in medium_posts|slice:"0:3" %}
+						<article class="row" style="margin-bottom: 1.5em">
+						{% if not post.image %}
+							<div class="col-xs-12">
+						{% else %}
+							<div class="col-xs-4 col-sm-3 col-lg-2">
+							<a href="{{post.url}}">
+								<img src="https://cdn-images-1.medium.com/max/400/{{post.image}}" class="img-responsive" style="border: 1px solid #888;"/>
+							</a>
+							</div>
+							<div class="col-xs-8 col-sm-9 col-lg-10">
+						{% endif %}
+						<h3><a href="{{post.url}}">{{post.title}}</a></h3>
+						<p>{{post.snippet}} <span style="font-size: 90%">{{post.published}}</span></p>
+						</div>
+						</article>
+					{% endfor %}
+		   		{% endif %}
+		    	
+				<p style="margin-bottom: .5em"><b>Site News:</b></p>
+				<div style="font-size: 92%">
+				{% for item in blog|slice:"0:1" %}
+				<article>
+					<h3><a href="{{item.link}}">{{item.title}}</a></h3>
+					<div class="article">
+						<p>{{item.content|striptags|truncatewords:25}} <span style="font-size: 90%">{{item.date}}</span></p>
+					</div>
+				</article>
+				{% endfor %}
+				</div>
+		</div>
+
+
 			<div id="generic-events">
-				<h2><span>In Congress</span></h2>
+				<h2><span>Recent Activity in Congress</span></h2>
 		
 				<section>
-					{% for item in events %}
+					{% for item in events|slice:":5" %}
 					{% with item|render_event:subscription_feeds as event %}
-					<article class="post {{event.type}}">
-						<div class="event_header">
-							<div class="event_type">Date: <span>{% if not event.date_has_no_time %}{{item.when}}{% else %}{{item.when|date}}{% endif %}</span></div>
-							<h4 class="event_title">{{event.type}}</h4>
-							<!--<div class="event_date"><span>Date: </span>{% if not event.date_has_no_time %}{{item.when}}{% else %}{{item.when|date}}{% endif %}</div>-->
-							<p>{{event.title|truncatewords:30}}</p>
-						</div>
-						<div class="event_body">
-							{% if event.type == "Vote" %}{{event.body_html|safe}}{% endif %}
-							<a href="{{event.url}}" class="more">More information...</a>
-						</div>
+					<article style="margin-bottom: 1em">
+						<h3><a href="{{event.url}}">{{event.title|truncatewords:30}}</a></h3>
+						<p>
+							{{event.type}} &mdash; {% if not event.date_has_no_time %}{{item.when}}{% else %}{{item.when|date}}{% endif %}
+						</p>
+						{{event.body_html|safe}}
 					</article>
 					{% endwith %}
 					{% endfor %}
 
 				</section>
-			</div><!-- /in-congress -->
+			</div><!-- /generic-events -->
 
 			<div id="custom-events">
-				<h2 style="margin-top: 0"><span>in district...</span></h2>
+				<h2><span>in district...</span></h2>
 				<div style="text-align: right"><small><a href="#" onclick="return show_askcd();">not your district?</a></small></div>
 				<section class="row" style="margin-bottom: 1em">
 				</section>
@@ -144,70 +182,19 @@
 							<p class="title" style="margin: 0; font-size: 90%; color: #444; line-height: 125%;"> </p>
 						</a>
 					</div>
-					<article id="custom-events-template" class="post">
-						<div class="event_header">
-							<div class="event_type"><span></span></div>
-							<h4 class="event_title"></h4>
-							<p></p>
-						</div>
-						<div class="event_body">
-							<div class="event_body_body"> </div>
-							<a href="" class="more">More information...</a>
-						</div>
+					<article id="custom-events-template" style="margin-bottom: 1em">
+						<h3><a></a></h3>
+						<p>
+							<span class="event-type"></span>
+							&mdash;
+							<span class="event-date"></span>
+						</p>
+						<div class="event_body_body"> </div>
 					</article>
 				</div>
-			</div>
-		</div>
-
-		<div id="blog-posts" class="col-sm-7 col-sm-pull-4">
-				{% if medium_posts %}
-				<article>
-					<h2>
-						<div style="float: right;">
-							<a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">subscribe</a> |
-							<a href="https://medium.com/govtrack-insider" title="More Posts on Medium"><i class="fa fa-medium"></i></a>
-						</div>
-						<span>
-						GovTrack Insider
-						</span>
-					</h2>
-					{% for post in medium_posts %}
-						<div class="row" style="margin-bottom: 1.5em">
-						{% if not post.image %}
-							<div class="col-xs-12">
-						{% else %}
-							<div class="col-xs-4">
-							<a href="{{post.url}}">
-								<img src="https://cdn-images-1.medium.com/max/400/{{post.image}}" class="img-responsive" style="border: 1px solid #888; margin-top: 6px"/>
-							</a>
-							</div>
-							<div class="col-xs-8">
-						{% endif %}
-						<h3 style="margin-top: 0"><a href="{{post.url}}">{{post.title}}</a></h3>
-						<p style="margin: 0"><em>Posted on {{post.published}}</em></p>
-						<p>{{post.snippet}} <a href="{{post.url}}" style="display: inline-block">Read More »</a></p>
-						</div>
-						</div>
-					{% endfor %}
-				</article>
-		   		{% endif %}
-		    	
-				<article>
-					<h2><span>Site News</span></h2>
-					{% for item in blog %}
-					<div class="post">
-						<h3><a href="{{item.link}}">{{item.title}}</a></h3>
-						<div class="article">
-							<em>Posted on {{item.date}}</em>
-							<p>{{item.content|striptags|truncatewords:25}} <a href="{{item.link}}">Read More »</a></p>
-						</div>
-					</div>
-					{% endfor %}
-				</article>
-		</div>
-	</div>
-</div>
-</div>
+			</div> <!-- /custom-events -->
+	</div> <!-- /col -->
+</div> <!-- /row -->
 {% endblock %}
 
 {% block body_scripts %}
@@ -222,7 +209,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 				$('#generic-events').hide();
 
 				var n = $('#custom-events');
-				n.find('h2 span').text("in " + res.state_name + "’s " + (res.district > 0 ? res.district_ordinal : 'At-Large') + " Congressional District");
+				n.find('h2 span').text("In " + res.state_name + "’s " + (res.district > 0 ? res.district_ordinal : 'At-Large') + " Congressional District");
 				n.find('section').text('');
 
 				for (var i = 0; i < res.reps.length; i++) {
@@ -240,12 +227,13 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 				}
 				for (var i = 0; i < res.events.length; i++) {
 					var e = $("#custom-events-template").clone();
+					e.attr('id', '');
 					e.addClass(res.events[i].type);
-					e.find('.event_type span').text(res.events[i].date);
-					e.find('h4').text(res.events[i].type);
-					e.find('p').text(res.events[i].title);
+					e.find('h3 a').attr('href', res.events[i].url);
+					e.find('h3 a').text(res.events[i].title);
+					e.find('.event-date').text(res.events[i].date);
+					e.find('.event-type').text(res.events[i].type);
 					e.find('.event_body_body').html(res.events[i].body_html);
-					e.find('.event_body > a').attr('href', res.events[i].url);
 					n.find('section.featured-articles').append(e);
 				}
 			},
