@@ -84,12 +84,14 @@ def find_title(titles, limit_type=None):
      ... as="2" ...
 
     This is because the "as" attributes are given in chronological order, but within each "as" the first one is the most relevant (other titles can be for subparts of bills).
+
+    Actually this might not have ever been true? House action titles always seem to precede Senate action titles.
     """
    
     if limit_type:
         types = (limit_type,)
     else:
-        types = ('short', 'popular', 'official')
+        types = ('display', 'short', 'popular', 'official')
 
     def weight(type_):
         try:
