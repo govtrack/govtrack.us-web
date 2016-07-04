@@ -55,6 +55,10 @@ def get_term(name, congress):
                 # use top terms in old bills, these are new Policy Area Terms applied
                 # even to pre-111th Congress bills.
                 TERM_CACHE[(TermType.old, normalize_name(term.name))] = term
+        # Re-use the new named entities terms for pre-111th Congress bill.s
+        for term in BillTerm.objects.get(name="Geographic Areas, Entities, and Committees").subterms.all():
+                TERM_CACHE[(TermType.old, normalize_name(term.name))] = term
+            
     return TERM_CACHE[(TermType.new if congress >= 111 else TermType.old, normalize_name(name))]
 
 class TermProcessor(XmlProcessor):
