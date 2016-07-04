@@ -33,12 +33,12 @@ candidates = {
 	300020: { 2016: { "party": "D", "end": date(2015, 10, 23) } }, # Chafee
 
 	# 2016 Republican candidates
-	412573: { 2016: { "party": "R", "end": None } }, # Cruz
+	412573: { 2016: { "party": "R", "end": date(2016, 5, 3) } }, # Cruz
 	300047: { 2016: { "party": "R", "end": date(2015, 12, 21) } }, # Graham
 	400634: { 2016: { "party": "R", "end": date(2015, 11, 17) } }, # Jindal
-	400590: { 2016: { "party": "R", "end": None } }, # Kasich
+	400590: { 2016: { "party": "R", "end": date(2016, 5, 4) } }, # Kasich
 	412492: { 2016: { "party": "R", "end": date(2016, 2, 3) } }, # Rand Paul
-	412491: { 2016: { "party": "R", "end": None } }, # Rubio
+	412491: { 2016: { "party": "R", "end": date(2016, 3, 15) } }, # Rubio
 	300085: { 2016: { "party": "R", "end": date(2016, 2, 3) }  , # Santorum
 	          2012: { "party": "R", "end": date(2012, 4, 10) } },
 
