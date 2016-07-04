@@ -78,12 +78,23 @@ class BillProcessor(XmlProcessor):
         self.process_sponsor(obj, node)
         self.process_current_status(obj, node)
 
+        # set source flag
+        if obj.congress >= 93:
+            obj.source = "thomas-congproj"
+        elif obj.congress >= 82:
+            obj.source = "statutesatlarge"
+            if obj.current_status == BillStatus.enacted_signed: obj.current_status = BillStatus.enacted_unknown
+        elif obj.congress <= 42:
+            obj.source = "americanmemory"
+        else:
+            raise ValueError()
+
         # update existing bill record if one exists, otherwise create a new one on save()
         try:
             obj.id = Bill.objects.get(congress=obj.congress, bill_type=obj.bill_type, number=obj.number).id
         except Bill.DoesNotExist:
             pass
-            
+
         obj.save() # save before using m2m relations
         self.process_committees(obj, node)
         if int(obj.congress) >= 93:
@@ -114,7 +125,7 @@ class BillProcessor(XmlProcessor):
         if not n: n = None
         
         if not obj.lock_title:
-            obj.title = get_primary_bill_title(obj, titles, override_number=n)
+            obj.title = get_primary_bill_title(obj, titles, override_number=n)[0:254]
 
     def process_sponsor(self, obj, node):
         try:
@@ -202,7 +213,7 @@ class BillProcessor(XmlProcessor):
                 related_bill = Bill.objects.get(congress=subnode.get("session"), bill_type=BillType.by_xml_code(subnode.get("type")), number=int(subnode.get("number")))
             except Bill.DoesNotExist:
                 continue
-            RelatedBill.objects.create(bill=obj, related_bill=related_bill, relation=subnode.get("relation"))
+            RelatedBill.objects.create(bill=obj, related_bill=related_bill, relation=subnode.get("relation")[0:16])
                     
 
 
@@ -362,16 +373,6 @@ def main(options):
            
             seen_bill_ids.append(bill.id) # don't delete me later
             
-            if bill.congress >= 93:
-                bill.source = "thomas-congproj"
-            elif bill.congress >= 82:
-                bill.source = "statutesatlarge"
-                if bill.current_status == BillStatus.enacted_signed: bill.current_status = BillStatus.enacted_unknown
-            elif bill.congress <= 42:
-                bill.source = "americanmemory"
-            else:
-                raise ValueError()
-
             # So far this is just for American Memory bills.
             if node.xpath("string(source/@url)"):
                 bill.source_link = unicode(node.xpath("string(source/@url)"))

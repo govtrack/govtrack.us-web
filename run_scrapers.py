@@ -58,11 +58,7 @@ def make_link(src, dest):
 
 # Set options.
 
-fetch_mode = "--force --fast"
 log_level = "error"
-
-if "full-scan" in sys.argv: fetch_mode = "--force"
-if "CACHE" in os.environ: fetch_mode = "--fast"
 if "DEBUG" in os.environ: log_level = "info"
 	
 # Run scrapers and parsers.
@@ -101,7 +97,7 @@ if "committees" in sys.argv:
 	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
 	# Committee events.
-	os.system("cd %s; . .env/bin/activate; ./run committee_meetings --docs=False %s --log=%s" % (SCRAPER_PATH, fetch_mode, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run committee_meetings --docs=False --log=%s" % (SCRAPER_PATH, log_level))
 	
 	# Load into db.
 	os.system("./parse.py -l ERROR committee")
@@ -131,9 +127,11 @@ if "text" in sys.argv:
 	
 if "bills" in sys.argv:
 	# Scrape.
-	os.system("cd %s; . .env/bin/activate; ./run bills --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
+	if CONGRESS >= 114:
+		os.system("cd %s; . .env/bin/activate; ./run fdsys --bulkdata=True --collections=BILLSTATUS --log=%s; ./run bills --govtrack --congress=%d --log=%s" % (SCRAPER_PATH, log_level, CONGRESS, log_level))
 	
 	# Copy files into legacy location.
+
 	mkdir("data/us/%d/bills" % CONGRESS)
 	bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }
 	for fn in sorted(glob.glob("%s/data/%d/bills/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
@@ -142,8 +140,16 @@ if "bills" in sys.argv:
 		if bill_type not in bill_type_map: raise ValueError()
 		fn2 = "data/us/%d/bills/%s%d.xml" % (CONGRESS, bill_type_map[bill_type], int(number))
 		do_bill_parse |= copy(fn, fn2, r'updated="[^"]+"')
+
+	mkdir("data/us/%d/bills.amdt" % CONGRESS)
+	for fn in sorted(glob.glob("%s/data/%d/amendments/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
+		congress, amdt_type, number = re.match(r".*congress/data/(\d+)/amendments/([hsup]+)amdt/(?:[hsup]+)amdt(\d+)/data.xml$", fn).groups()
+		if int(congress) != CONGRESS: raise ValueError()
+		fn2 = "data/us/%d/bills.amdt/%s%d.xml" % (CONGRESS, amdt_type, int(number))
+		copy(fn, fn2, r'updated="[^"]+"')
 	
 	# Scrape upcoming House bills.
+
 	os.system("cd %s; . .env/bin/activate; ./run upcoming_house_floor --log=%s" % (SCRAPER_PATH, log_level))
 	do_bill_parse = True
 	
@@ -152,33 +158,19 @@ if "bills" in sys.argv:
 if do_bill_parse:
 	# Load into db.
 	os.system("./parse.py --congress=%d -l %s bill" % (CONGRESS, log_level))
+	os.system("./parse.py --congress=%d -l %s amendment" % (CONGRESS, log_level))
 
-	# bills and state bills are indexed as they are parsed, but to
+	# bills are indexed as they are parsed, but to
 	# freshen the index... Because bills index full text and so
 	# indexing each time is substantial, set the TIMEOUT and
 	# BATCH_SIZE options in the haystack connections appropriately.
 	# ./manage.py update_index -v 2 -u bill bill
 
-if "amendments" in sys.argv:
-	# Scrape.
-	os.system("cd %s; . .env/bin/activate; ./run amendments --govtrack %s --congress=%d --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, log_level))
-
-	# Copy files into legacy location.
-	mkdir("data/us/%d/bills.amdt" % CONGRESS)
-	for fn in sorted(glob.glob("%s/data/%d/amendments/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
-		congress, chamber, number = re.match(r".*congress/data/(\d+)/amendments/([hs])amdt/(?:[hs])amdt(\d+)/data.xml$", fn).groups()
-		if int(congress) != CONGRESS: raise ValueError()
-		fn2 = "data/us/%d/bills.amdt/%s%d.xml" % (CONGRESS, chamber, int(number))
-		copy(fn, fn2, r'updated="[^"]+"')
-		
-	# Load into db.
-	os.system("./parse.py --congress=%d -l %s amendment" % (CONGRESS, log_level))
-
 if "votes" in sys.argv:
 	# Scrape.
 	if CONGRESS >= 101:
 		session = str(datetime.datetime.now().year)
-		os.system("cd %s; . .env/bin/activate; ./run votes --govtrack %s --congress=%d --session=%s --log=%s" % (SCRAPER_PATH, fetch_mode, CONGRESS, session, log_level))
+		os.system("cd %s; . .env/bin/activate; ./run votes --govtrack --congress=%d --session=%s --log=%s --force --fast" % (SCRAPER_PATH, CONGRESS, session, log_level))
 	
 	# Copy files into legacy location.
 	did_any_file_change = False

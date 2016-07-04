@@ -41,7 +41,8 @@ class AmendmentProcessor(XmlProcessor):
         obj = super(AmendmentProcessor, self).process(obj, node)
         self.process_offered(obj, node)
         self.process_sponsor(obj, node)
-        self.process_bill(obj, node)
+        if not self.process_bill(obj, node):
+            return False
         self.process_title(obj, node)
         return obj
 
@@ -63,6 +64,8 @@ class AmendmentProcessor(XmlProcessor):
                 obj.title += ": " + text
                 break
 
+        obj.title = obj.title[0:254]
+
     def process_sponsor(self, obj, node):
         try:
             obj.sponsor = get_person(node.xpath('sponsor')[0].get('id'))
@@ -82,6 +85,10 @@ class AmendmentProcessor(XmlProcessor):
         return int(value)
 
     def process_bill(self, obj, node):
+        if node.xpath('string(amends/@type)') == "treaty":
+           # Cannot handle this.
+           return False
+
         amends_type = BillType.by_xml_code(node.xpath('string(amends/@type)'))
         amends_number = int(node.xpath('string(amends/@number)'))
         try:
@@ -90,6 +97,7 @@ class AmendmentProcessor(XmlProcessor):
             amends_seq = None
         obj.bill = Bill.objects.get(congress=obj.congress, bill_type=amends_type, number=amends_number)
         obj.sequence = amends_seq
+        return True
 
 def main(options):
     """
@@ -131,6 +139,10 @@ def main(options):
         except:
             print fname
             raise
+
+        if not amdt:
+            # Amendments to treaties. Can't process.
+            continue
             
         # update if already in db
         try:
