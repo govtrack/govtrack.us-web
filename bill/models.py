@@ -293,6 +293,7 @@ class Bill(models.Model):
         "is_current": "is_current",
         "is_alive": "is_alive",
         "noun": "noun",
+        "related_bills": "get_related_bills_api",
     }
     api_example_id = 76416
     api_example_list = { "sort": "-introduced_date" }
@@ -1110,6 +1111,9 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 ret.append(rb)
                 seen.add(rb.related_bill)
         return ret
+
+    def get_related_bills_api(self):
+        return [ { "relation": rb.relation, "bill": rb.related_bill_id } for rb in self.get_related_bills() ]
 
     def get_related_bills_newer(self):
         return [rb for rb in self.get_related_bills()
