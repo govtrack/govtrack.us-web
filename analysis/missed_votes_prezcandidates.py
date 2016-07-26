@@ -26,9 +26,9 @@ super_tuesday = {
 # or the date they conceded/withdrew.
 candidates = {
 	# 2016 Democratic candidates
-	300022: { 2016: { "party": "D", "end": None },  # Clinton
+	300022: { 2016: { "party": "D", "end": elections[2016] },  # Clinton
 	          2008: { "party": "D", "end": date(2008, 6, 7), "status": "highlight" } },
-	400357: { 2016: { "party": "D", "end": None } }, # Sanders
+	400357: { 2016: { "party": "D", "end": date(2016, 7, 13) } }, # Sanders
 	412249: { 2016: { "party": "D", "end": date(2015, 10, 20) } }, # Webb
 	300020: { 2016: { "party": "D", "end": date(2015, 10, 23) } }, # Chafee
 

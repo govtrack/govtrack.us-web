@@ -189,7 +189,7 @@ if "votes" in sys.argv:
 	os.system("/home/govtrack/update-votes-servo")
 
 	# During election season.
-	os.system("analysis/missed_votes_prezcandidates.py > /tmp/votes-$$.json && mv /tmp/votes-$$.json data/misc/presidential-candidates-missed-votes.json")
+	#os.system("analysis/missed_votes_prezcandidates.py > /tmp/votes-$$.json && mv /tmp/votes-$$.json data/misc/presidential-candidates-missed-votes.json")
 
 if "stats" in sys.argv:
 	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)
