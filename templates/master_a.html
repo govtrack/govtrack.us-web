@@ -3,15 +3,23 @@
 {% block body_with_container %}
 <div class="container">
 	<div class="row">
-		<div id="master-a-sidebar" class="col-sm-4 col-sm-push-8">
+		<div id="master-a-sidebar" class="col-sm-4 col-sm-push-8" style="font-size: 90%; color: #555;">
+			<div class="hidden-xs sidebar-events" style="margin-top: -1em">
+
+			<p>Follow GovTrack on social media for more updates:</p>
+			<p>
+			<a href="https://www.facebook.com/govtrack/" title="Facebook Page"><i class="fa fa-facebook fa-fw"></i></a></li>
+			<a href="http://twitter.com/govtrack" title="Twitter Page"><i class="fa fa-twitter fa-fw"></i></a>
+			<a href="https://medium.com/govtrack-insider" title="Medium Page"><i class="fa fa-medium fa-fw"></i></a>
+			<a href="https://github.com/govtrack/govtrack.us-web" title="Github"><i class="fa fa-github-alt fa-fw"></i></a>
+			</p>
 
 			{# MEDIUM POSTS #}
-			{% if medium_posts and 0 %}
-		    <div class="hidden-xs sidebar-events">
-				<h2><a href="https://medium.com/govtrack-insider" style="float: right; color: #722" title="More Posts on Medium"><i class="fa fa-medium"></i></a> GovTrack Insider</h2>
+			{% if medium_posts %}
+		     	<p>On GovTrack Insider:</p>
 				<table>
 				{% for post in medium_posts %}
-				{% if forloop.counter <= 2 %}
+				{% if forloop.counter <= 1 %}
 					<tr valign="top">
 						<td style="padding-bottom: .33em">
 						{% if post.image %}
@@ -28,11 +36,9 @@
 				{% endif %}
 				{% endfor %}
 				</table>
-				<p style="margin: .5em 0 0 0; text-align: center">
-					<a href="/events/govtrack-insider">Subscribe...</a>
-				</p>
-		    </div>
 		    {% endif %}
+
+		    </div>
 
 			{# ADVERTISEMENT #}
 
