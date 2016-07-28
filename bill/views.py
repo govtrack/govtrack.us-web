@@ -37,11 +37,7 @@ def load_bill_from_url(congress, type_slug, number):
 
     return get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
 
-@anonymous_view
-@render_to('bill/bill_details.html')
-def bill_details(request, congress, type_slug, number):
-    bill = load_bill_from_url(congress, type_slug, number)
-
+def get_related_bills(bill):
     # get related bills
     related_bills = []
     reintro_prev = None
@@ -58,6 +54,12 @@ def bill_details(request, congress, type_slug, number):
             related_bills.append({ "bill": rb.related_bill, "prenote": "Debate on", "note": " is governed by these rules.", "show_title": False })
         else:
             related_bills.append({ "bill": rb.related_bill, "note": ("(%s)" % (rb.relation.title() if rb.relation != "unknown" else "Related")), "show_title": True })
+    return related_bills
+
+@anonymous_view
+@render_to('bill/bill_details.html')
+def bill_details(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
 
     # bill text info and areas of law affected
     from billtext import load_bill_text
@@ -74,7 +76,6 @@ def bill_details(request, congress, type_slug, number):
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": bill.get_feed(),
         "text_info": text_info,
-        "related": related_bills,
     }
 
 @user_view_for(bill_details)
@@ -171,6 +172,15 @@ def bill_summaries(request, congress, type_slug, number):
     return {
         "bill": bill,
         "congressdates": get_congress_dates(bill.congress),
+    }
+
+@anonymous_view
+@render_to("bill/bill_full_details.html")
+def bill_full_details(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    return {
+        "bill": bill,
+        "related": get_related_bills(bill),
     }
 
 @anonymous_view

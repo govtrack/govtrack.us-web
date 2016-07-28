@@ -28,20 +28,12 @@ h3 {
 {% endblock %}
 
 {% block summary %}
-<div>
 
-	<h1 class="long">Summaries for{% if "Act" in bill.title %} the{% endif %} {{bill.title_no_number|truncatewords:20}}</h1>
-
-	{% if bill.title != bill.title|truncatewords:20 %}
-		{% with bill.title|truncatewords:20|cut:"..." as bt %}
-			<p style="line-height: 130%;">...{{bill.title|cut:bt}}</p>
-		{% endwith %}
-	{% endif %}
-</div>
+{% include "bill/bill-header.html" %}
 
 <div style="margin-top: 2em">
 	<div role="tabpanel">
-	  <ul id="summary-tabs" class="nav nav-tabs" role="tablist">
+	  <ul id="summary-tabs" class="nav nav-pills" role="tablist">
 	  </ul>
 	</div>
 

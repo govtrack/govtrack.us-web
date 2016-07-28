@@ -1,0 +1,201 @@
+{% extends 'master_a.html' %}
+{% load humanize govtrack_utils %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}Details for {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}Details for {{bill|truncatewords:24}}{% endblock %}
+
+{% block extra_css %}
+<style>
+h1 {
+	border: none;
+}
+h3 {
+	margin-top: 0;
+}
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+	<li><a href="{% url "congress_home" %}">Congress</a></li>
+	<li><a href="/congress/bills">Bills</a></li>
+	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number}}</a></li>
+	<li class="active">Details</li>
+</ol>
+{% endblock %}
+
+{% block summary %}
+
+{% include "bill/bill-header.html" %}
+
+
+{% if bill.congress >= 93 %}
+<h2>Cosponsors</h2>
+	{% if bill.cosponsor_count == 0 %}
+		none
+	{% else %}
+		<div title="{% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}s{% if not forloop.last %}, {% endif %}{% endfor %}">
+		{{bill.cosponsor_count}} cosponsors ({% for party, count in bill.cosponsor_counts_by_party %}{{count}}{{party.0}}{% if not forloop.last %}, {% endif %}{% endfor %})
+		(<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show</a>)
+		</div>
+		<div id="cosponsors" style="display: none">
+			{% for cosp in bill.cosponsor_records %}
+			<div><a href="{{cosp.person.get_absolute_url}}">{{cosp.person_name}}</a></div>
+			{% with cosp.details as cosp_details %}
+				{% if cosp_details %}
+					<div style="margin-left: 1.5em; font-size: 85%">({{cosp_details}})</div>
+				{% endif %}
+			{% endwith %}
+			{% endfor %}
+		</div>
+	{% endif %}
+{% endif %}
+
+{% if bill.committees.exists %}
+<h2>Committee Assignments</h2>
+	{% for c in bill.committees.all %}
+		{% if not c.committee %}
+			<div style="line-height: 125%;"><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on the "|cut:"Committee on "}}</a></div>
+			{% for s in bill.committees.all %}
+				{% if s.committee == c %}
+					<div style="margin-left: 1em">
+						<span style="color: #666">↪</span>
+						<a href="{{s.get_absolute_url}}">{{s.name_no_article}}</a>
+					</div>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	{% endfor %}
+	<p class="small" style="margin: 1em 0 0 0; line-height: 125%;">The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
+{% endif %}
+
+<h2>Votes</h2>
+{% if bill.votes.exists %}
+	{% for v in bill.votes.all %}
+	<div class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote" style="margin-bottom: 1em">
+		<div><a href="{{v.get_absolute_url}}">
+			{% if v.is_on_passage %}
+				{{v.get_chamber_display}} Vote on Passage
+			{% elif v.is_major %}
+				{{v.get_chamber_display}}: {{v.vote_type}}
+			{% else %}
+				{{v}}
+			{% endif %}
+		</a></div>
+		<div style="font-size: 90%; line-height: 130%;">
+		{% if v.is_on_passage and v.vote_type != "On Passage of the Bill" and v.vote_type != "On the Resolution" %}{{v.vote_type}}<br/>{% endif %}
+		{{v.created}}<br/>
+		{{v.summary}}
+		</div>
+		</div>
+	{% endfor %}
+	<p id="more_votes" style="display: none; font-style: italic;"><a href="#" onclick="return show_all_votes();">Show <span class='num'> </span> <span class='desc'> </span> vote(s)...</a><p>
+	<p id="fewer_votes" style="display: none"><a href="#" onclick="return hide_minor_votes();">Hide minor vote(s)...</a><p>
+	<script>
+	var minor_votes = $('.minor_vote');
+	if (minor_votes.length > 0) {
+		$('#more_votes').show();
+		$('#more_votes').find('span.num').text(minor_votes.length);
+		$('#more_votes').find('span.desc').text($('.major_vote').length == 0 ? "" : "additional");
+	}
+	function show_all_votes() {
+		$('.minor_vote').fadeIn();
+		$('#more_votes').hide();
+		$('#fewer_votes').show();
+		return false;
+	}
+	function hide_minor_votes() {
+		$('.minor_vote').fadeOut();
+		$('#more_votes').show();
+		$('#fewer_votes').hide();
+		return false;
+	}
+	</script>
+{% else %}
+	{% if bill.source == "thomas-congproj" %}
+		<p style="line-height: 125%;">There have been no roll call votes related to this {{bill.noun}}.</p>
+	{% else %}
+		<p style="line-height: 125%;">No votes are known for this {{bill.noun}}. Vote information is limited in historical data.</p>
+	{% endif %}
+{% endif %}
+
+{% if related|length > 0 %}
+	<h2>Related Bills</h2>
+
+	<dd style="margin-bottom: 1em">
+	{% if bill.noun == 'bill' %}
+	<p class="small" style="margin-bottom: 1em;">Legislative action may be ocurring on one of these bills in lieu of or in parallel to action on this {{bill.noun}}.</p>
+	{% endif %}
+
+	{% for rb in related %}
+		{% if forloop.counter == 3 %}
+		<div style="text-align: center; font-size: 90%;">
+			<a id="related_bills_additional_more" href="#">show {{forloop.revcounter}} more</a>
+		</div>
+		<div id="related_bills_additional" style="display: none;">
+		{% endif %}
+
+		<div>
+			<div style="position: absolute; padding-top: 2px;">
+				<a href="{{rb.bill.get_absolute_url}}">
+					<img src="{{rb.bill.get_absolute_url}}/thumbnail?width=75" title="{{rb.bill}}" style="border: 1px solid #999;" width="75" height="89"/>
+				</a>
+			</div>
+			<div style="padding-left: 90px; min-height: 90px; line-height: 115%;">
+				{% if rb.prenote %}{{rb.prenote}}{% endif %}
+				<a href="{{rb.bill.get_absolute_url}}">
+					{% if rb.bill.congress == bill.congress %}
+						{{rb.bill.display_number_no_congress_number}}{% else %}
+						{{rb.bill.display_number_with_congress_number}}{% endif %}</a>
+				{% if rb.note %}{{rb.note}}{% endif %}
+				{% if rb.show_title %}<div style="font-size: 85%;">{{rb.bill.title_no_number|truncatewords:14}}</div>{% endif %}
+				<p style="font-size: 85%; margin: .5em 0 .75em 0;">
+					{{rb.bill.get_current_status_display}}<br/>
+					{% if not rb.bill.is_final_status %}Last Action: {% endif %}{{rb.bill.current_status_date|date}}
+				</p>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+
+		{% if forloop.last and forloop.counter >= 3 %}
+			<div style="text-align: center; font-size: 90%;">
+				<a id="related_bills_additional_less" href="#">show less</a>
+			</div>
+		</div> <!-- /hidden box -->
+		{% endif %}
+	{% endfor %}
+	<script>$('#related_bills_additional').moreLess()</script>
+
+{% else %}
+	<h2>Find Similar Bills</h2>
+{% endif %}
+
+<p>Search for <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
+
+<h2>Subject Areas</h2>
+
+{% if bill.get_terms_sorted|length = 0 %}
+	<p>None known at this time.</p>
+{% else %}
+<div>
+{% for term in bill.get_terms_sorted %}
+	{% if forloop.counter == 5 %}
+		<div><a id="subjects_additional_more" href="#" style="font-style: italic">show {{forloop.revcounter}} more</a></div>
+		<div id="subjects_additional" style="display: none">
+	{% endif %}
+
+	<div style="line-height: 125%;"><a {% if term.is_top_term and not forloop.last %}style="font-weight: bold"{% endif %} href="{{term.get_absolute_url}}?congress={{bill.congress}}">{{term}}</a></div>
+
+	{% if forloop.last and forloop.counter >= 5 %}
+		<div><a id="subjects_additional_less" href="#" style="font-style: italic">show less</a></div>
+		</div> <!-- /hidden box -->
+	{% endif %}
+{% endfor %}
+</div>
+<script>$('#subjects_additional').moreLess()</script>
+{% endif %}
+
+{% endblock %}

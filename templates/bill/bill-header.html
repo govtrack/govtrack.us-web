@@ -1,0 +1,38 @@
+{% load govtrack_utils %}
+
+<div class="h1-multiline" style="border: none; margin-bottom: 10px">
+	<h1 style="margin-top: 10px; max-height: 3em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+			<p id="h1_overflow"></p>
+			<script>
+			$('h1').truncate_text(function (remaining, chopped) {
+			    if (chopped) {
+			    	$('h1').css({ marginBottom: '2px' });
+			    	$('#h1_overflow').text("..." + chopped);
+			    }
+			}, function() { $('h1').addClass('long'); });
+			</script>
+</div>
+
+<style>
+#bill-subpages .active a { background-color: #cb4b16; color: white; font-weight: bold; }
+</style>
+
+{% with page=request.path|cut:bill.get_absolute_url %}
+ <ul id="bill-subpages" class="nav nav-tabs" role="tablist">
+    <li role="presentation" {% if page == "" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}">Status</a></li>
+
+	{% with bill.oursummary as summary1 %}
+	{% with bill.get_formatted_summary as summary2 %}
+	{% if summary1 or summary2 %}
+    <li role="presentation" {% if page == "/summary" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/summary" role="tab">Summary</a></li>
+    {% endif %}
+    {% endwith %}
+    {% endwith %}
+
+	{% if bill.source != "americanmemory" %}
+    <li role="presentation" {% if page == "/details" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/details" role="tab">Details</a></li>
+	{% endif %}
+
+
+</ul>
+{% endwith %}
