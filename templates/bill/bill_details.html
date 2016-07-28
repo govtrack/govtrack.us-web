@@ -270,9 +270,23 @@
 	margin-bottom: .22em;
 }
 
+
+#bill-actions {
+	margin: 1.5em 0 1em 0;
+}
+	#bill-actions button {
+		float: left;
+		margin-right: 1em;
+		margin-bottom: .5em;
+	}
+
 #emoji-reactions {
+	float: left;
+	display: block;
+	width: 240px;
 	margin-left: -.25em;
-	margin-top: 20px;
+	margin-top: 1px;
+	margin-bottom: 4px;
 }
 	#emoji-reactions a {
 		 display: inline-block;
@@ -295,6 +309,7 @@
 			 padding: 0 1px;
 			 min-width: .75em;
 		}
+
 </style>
 {% endblock %}
 
@@ -311,7 +326,78 @@
 {% block summary %}
 	{% include "bill/bill-header.html" %}
 
-	<div class="panel panel-default" style="margin-top: 1em">
+	{% if bill.is_alive %}
+	<div id="bill-actions" class="clearfix">
+		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
+		<button class="btn btn-success" onclick="return show_track_panel();">
+			<i class="glyphicon glyphicon-envelope"> </i>
+			Track this bill
+		</button>
+		<div id="event_subscribe_inline_container"> </div>
+		
+		<button class="btn btn-default" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
+			<span class="icon-speech-bubble-round-dots" style="color: #020"></span>
+			<span style="text-shadow: none; margin-left: 3px; text-transform: none">Call Congress</span>
+		</button>
+
+		<div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" title="React to this {{bill.noun}} with an emoji.">
+			<span class="main"> </span>
+			<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;">···</a>
+			<span class="other" style="display: none"> </span>
+		</div>
+	</div><!-- /actions -->
+	{% endif %}	
+
+		<div class="modal fade" id="action-panel" tabindex="-1" role="dialog" aria-labelledby="actionPanelModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="actionPanelModalLabel">Call Congress</h4>
+		      </div>
+		      <div class="modal-body">
+				<script>
+					function do_poll(posid) {
+						window.location = "{% url "bill_start_poll" %}?bill={{bill.id}}&position=" + posid;
+					}
+				</script>
+
+				<div id="call_congress_positions">
+					<p style="margin-bottom: 1em">A phone call to Congress is an effective way to let your voice be heard. We&rsquo;ll walk you through the whole thing. How do you feel about {{bill.display_number}}?</p>
+					<button onclick="do_poll('support');" class="support">
+						<div>I support {{bill.display_number}}</div>
+						<span class="icon-thumbs-up-filled"></span>
+					</button>
+					<button onclick="do_poll('oppose');" class="oppose">
+						<div>I oppose {{bill.display_number}}</div>
+						<span class="icon-thumbs-down-filled"></span>
+					</button>
+				</div>
+				<div id="call_congress_position_chosen" style="display: none;">
+					<p style="margin-bottom: .5em;">You chose: <span style="font-weight: bold"/></p>
+					<button id="change_position" onclick="$('#call_congress_positions').show(); $('#call_congress_position_chosen').hide();" style="margin-bottom: .5em">Change Position &nbsp; ▶</button>
+					<button id="make_call" onclick="window.location = the_page.poll_and_call_position.call_url;" style="margin-bottom: .5em">Call Congress &nbsp; ▶</button>
+					<div id="submission_status" style="display: none">
+						Hello!
+					</div>
+				</div>
+				<script>
+				if (the_page && the_page.poll_and_call_position) {
+					var p = the_page.poll_and_call_position;
+					$('#call_congress_positions').hide();
+					$('#call_congress_position_chosen').show();
+					$('#call_congress_position_chosen span').text(p.text);
+					$('#change_position').toggle(p.can_change);
+					$('#make_call').toggle(p.can_call.length > 0);
+				}
+				</script>				
+		      </div>
+		    </div>
+		  </div>
+		</div>		
+
+
+	<div class="panel panel-default">
 	<div class="panel-body" style="padding-bottom: 5px;">
 	<div class="row">
 			{% if bill.explanatory_text or bill.congress < 93 %}
@@ -324,8 +410,8 @@
 			</div>
 			{% endif %}
 			
-	<div id="track_panel_base" class="{% if bill.is_alive %}col-md-8{% else %}col-sm-12{% endif %}">
-		<div class="info" style="{% if not bill.is_alive %}width: auto; {% endif %}background: none;">
+	<div id="track_panel_base" class="col-sm-12">
+		<div class="info" style="width: auto; background: none;">
 		
 			<dl class="dl-horizontal" style="margin-bottom: 0">
 				{% if bill.source != "statutesatlarge" %}
@@ -498,76 +584,7 @@
 		</div><!-- /info -->
 		
 	</div>
-	
-	{% if bill.is_alive %}
-	<div class="aside col-md-4 col-sm-push-2 col-md-push-0" style="margin-top: 15px">
-		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-		<a href="#" class="track-btn" onclick="return show_track_panel();">Track this bill</a>
-		<div id="event_subscribe_inline_container"> </div>
-		
-		<div id="action-button" style="display: none; margin: 12px 0;">
-			<a class="push-btn yellow-btn"  href="#" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
-				<span class="icon-speech-bubble-round-dots" style="color: #020"></span>
-				<span style="text-shadow: none; margin-left: 3px; text-transform: none">Call Congress</span>
-			</a>
-		</div>
-		<script>if (the_segment != "House" && the_segment != "Senate") $('#action-button').show();</script>
 
-		<div class="modal fade" id="action-panel" tabindex="-1" role="dialog" aria-labelledby="actionPanelModalLabel" aria-hidden="true">
-		  <div class="modal-dialog">
-		    <div class="modal-content">
-		      <div class="modal-header">
-		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		        <h4 class="modal-title" id="actionPanelModalLabel">Call Congress</h4>
-		      </div>
-		      <div class="modal-body">
-				<script>
-					function do_poll(posid) {
-						window.location = "{% url "bill_start_poll" %}?bill={{bill.id}}&position=" + posid;
-					}
-				</script>
-
-				<div id="call_congress_positions">
-					<p style="margin-bottom: 1em">A phone call to Congress is an effective way to let your voice be heard. We&rsquo;ll walk you through the whole thing. How do you feel about {{bill.display_number}}?</p>
-					<button onclick="do_poll('support');" class="support">
-						<div>I support {{bill.display_number}}</div>
-						<span class="icon-thumbs-up-filled"></span>
-					</button>
-					<button onclick="do_poll('oppose');" class="oppose">
-						<div>I oppose {{bill.display_number}}</div>
-						<span class="icon-thumbs-down-filled"></span>
-					</button>
-				</div>
-				<div id="call_congress_position_chosen" style="display: none;">
-					<p style="margin-bottom: .5em;">You chose: <span style="font-weight: bold"/></p>
-					<button id="change_position" onclick="$('#call_congress_positions').show(); $('#call_congress_position_chosen').hide();" style="margin-bottom: .5em">Change Position &nbsp; ▶</button>
-					<button id="make_call" onclick="window.location = the_page.poll_and_call_position.call_url;" style="margin-bottom: .5em">Call Congress &nbsp; ▶</button>
-					<div id="submission_status" style="display: none">
-						Hello!
-					</div>
-				</div>
-				<script>
-				if (the_page && the_page.poll_and_call_position) {
-					var p = the_page.poll_and_call_position;
-					$('#call_congress_positions').hide();
-					$('#call_congress_position_chosen').show();
-					$('#call_congress_position_chosen span').text(p.text);
-					$('#change_position').toggle(p.can_change);
-					$('#make_call').toggle(p.can_call.length > 0);
-				}
-				</script>				
-		      </div>
-		    </div>
-		  </div>
-		</div>		
-
-		<div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" title="React to this {{bill.noun}} with an emoji.">
-			<span class="main"> </span>
-			<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;">···</a>
-			<span class="other" style="display: none"> </span>
-		</div>
-	</div><!-- /actions -->
-	{% endif %}
 </div> <!-- /row -->
 </div> <!-- /panel-body -->
 </div> <!-- /panel -->
