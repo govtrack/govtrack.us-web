@@ -87,6 +87,7 @@
 		var n = $("<a href='#'/>");
 		n.attr("data-count", emoji.count);
 		n.append(emojione.toImage(":" + emoji.name + ":"))
+		n.attr("title", "React to this {{bill.noun|escapejs}} with the " + emoji.name + " emoji.");
 		if (emoji.me)
 			n.addClass("active");
 		var c = $('<span></span>');
@@ -97,7 +98,7 @@
 		}
 		update_count(emoji.count);
 		$('#emoji-reactions')
-			.find(($('#emoji-reactions .main > *').length < 4) ? '.main' : '.other')
+			.find(($('#emoji-reactions .main > *').length < 3) ? '.main' : '.other')
 			.append(n);
 
 		n.click(function() {
@@ -283,7 +284,7 @@
 #emoji-reactions {
 	float: left;
 	display: block;
-	width: 240px;
+	width: 200px;
 	margin-left: -.25em;
 	margin-top: 1px;
 	margin-bottom: 4px;
@@ -340,9 +341,9 @@
 			<span style="text-shadow: none; margin-left: 3px; text-transform: none">Call Congress</span>
 		</button>
 
-		<div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" title="React to this {{bill.noun}} with an emoji.">
+		<div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom">
 			<span class="main"> </span>
-			<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;">···</a>
+			<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">···</a>
 			<span class="other" style="display: none"> </span>
 		</div>
 	</div><!-- /actions -->
@@ -599,27 +600,21 @@
 		{% if subtitle or summary1 or summary2 %}
 		<h2><span>About the {{bill.noun}}</span></h2>
 
-			<dl>
 					{% if subtitle %}
-						<dt>Full Title</dt>
-						<dd style="margin-bottom: 0">
+						<h4>Full Title</h4>
 							<p style="margin-bottom: 0">{{subtitle}}</p>
-							{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s title was written by its sponsor.</em></small></p>{% endif %}
+							{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s titles are written by its sponsor.</em></small></p>{% endif %}
 							{# we should have ^ even if no long title, but I'm not sure where best to put it #}
-						</dd>
 					{% endif %}
 
 					{% if summary1 %}
-						{% if subtitle %}<dt style="margin-top: 1em">Summary</dt>{% endif %}
-						<dd>
+						{% if subtitle %}<h4 style="margin-top: 1em">Summary</h4>{% endif %}
 							{{summary1.as_html|truncatewords_html:60|safe}}
 							<p style="margin-top: -.75em"><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
 							{% if summary2 and 0 %}<p><a href="{{bill.get_absolute_url}}/summary#libraryofcongress">Read CRS summary &gt;</a></p>{% endif %}
-						</dd>
 					{% elif summary2 %}
 						<p class="small"><a href="{{bill.get_absolute_url}}/summary">Read CRS Summary &gt;</a></p>
 					{% endif %}
-			</dl>
 		{% endif %}
 		{% endwith %}
 		{% endwith %}
@@ -671,8 +666,9 @@
 				</table>
 			{% endif %}
 
-			<div style="line-height: 130%; background-color: #ccc8bc; padding: 1em; margin: 15px 0 15px -6px">
+			<div style="line-height: 130%; background-color: #eed9ad; padding: 1em; margin: 15px 0 15px -6px">
 				<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+				This page is about a {{bill.noun}} in the United States Congress.
 				{{bill.how_a_bill_text}}
 			</div>
 
