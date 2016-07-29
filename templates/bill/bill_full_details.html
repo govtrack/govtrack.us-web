@@ -27,13 +27,13 @@ h3 {
 </ol>
 {% endblock %}
 
-{% block summary %}
+{% block body %}
 
 {% include "bill/bill-header.html" %}
 
 
 {% if bill.congress >= 93 %}
-<h2>Cosponsors</h2>
+<h2><span>Cosponsors</span></h2>
 	{% if bill.cosponsor_count == 0 %}
 		none
 	{% else %}
@@ -55,9 +55,10 @@ h3 {
 {% endif %}
 
 {% if bill.committees.exists %}
-<h2>Committee Assignments</h2>
+<h2><span>Committee Assignments</span></h2>
 	{% for c in bill.committees.all %}
 		{% if not c.committee %}
+		<div style="margin-bottom: 1em">
 			<div style="line-height: 125%;"><a href="{{c.get_absolute_url}}">{{c|cut:"Committee on the "|cut:"Committee on "}}</a></div>
 			{% for s in bill.committees.all %}
 				{% if s.committee == c %}
@@ -67,12 +68,13 @@ h3 {
 					</div>
 				{% endif %}
 			{% endfor %}
+		</div>
 		{% endif %}
 	{% endfor %}
-	<p class="small" style="margin: 1em 0 0 0; line-height: 125%;">The committee chair determines whether a {{bill.noun}} will move past the committee stage.</p>
+	<p>Committee chairs determine whether a {{bill.noun}} will move past the committee stage.</p>
 {% endif %}
 
-<h2>Votes</h2>
+<h2><span>Votes</span></h2>
 {% if bill.votes.exists %}
 	{% for v in bill.votes.all %}
 	<div class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote" style="margin-bottom: 1em">
@@ -123,11 +125,11 @@ h3 {
 {% endif %}
 
 {% if related|length > 0 %}
-	<h2>Related Bills</h2>
+	<h2><span>Related Bills</span></h2>
 
 	<dd style="margin-bottom: 1em">
 	{% if bill.noun == 'bill' %}
-	<p class="small" style="margin-bottom: 1em;">Legislative action may be ocurring on one of these bills in lieu of or in parallel to action on this {{bill.noun}}.</p>
+	<p>Legislative action may be ocurring on one of these bills in lieu of or in parallel to action on this {{bill.noun}}.</p>
 	{% endif %}
 
 	{% for rb in related %}
@@ -170,12 +172,12 @@ h3 {
 	<script>$('#related_bills_additional').moreLess()</script>
 
 {% else %}
-	<h2>Find Similar Bills</h2>
+	<h2><span>Find Similar Bills</span></h2>
 {% endif %}
 
 <p>Search for <a href="/congress/bills/browse?congress={{bill.congress}}#similar_to={{bill.get_bill_type_display}}{{bill.number}}/{{bill.congress}}">similar bills</a>.</p>
 
-<h2>Subject Areas</h2>
+<h2><span>Subject Areas</span></h2>
 
 {% if bill.get_terms_sorted|length = 0 %}
 	<p>None known at this time.</p>
