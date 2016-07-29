@@ -56,18 +56,18 @@ def get_related_bills(bill):
             related_bills.append({ "bill": rb.related_bill, "note": ("(%s)" % (rb.relation.title() if rb.relation != "unknown" else "Related")), "show_title": True })
     return related_bills
 
+def get_text_info(bill):
+    # bill text info and areas of law affected
+    from billtext import load_bill_text
+    try:
+        return load_bill_text(bill, None, mods_only=True, with_citations=True)
+    except IOError:
+        return None
+
 @anonymous_view
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
-
-    # bill text info and areas of law affected
-    from billtext import load_bill_text
-    try:
-        text_info = load_bill_text(bill, None, mods_only=True, with_citations=True)
-    except IOError:
-        text_info = None
-
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
@@ -75,7 +75,7 @@ def bill_details(request, congress, type_slug, number):
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": bill.get_feed(),
-        "text_info": text_info,
+        "text_info": get_text_info(bill),
     }
 
 @user_view_for(bill_details)
@@ -172,6 +172,7 @@ def bill_summaries(request, congress, type_slug, number):
     return {
         "bill": bill,
         "congressdates": get_congress_dates(bill.congress),
+        "text_info": get_text_info(bill), # for the header tabs
     }
 
 @anonymous_view
@@ -181,6 +182,7 @@ def bill_full_details(request, congress, type_slug, number):
     return {
         "bill": bill,
         "related": get_related_bills(bill),
+        "text_info": get_text_info(bill), # for the header tabs
     }
 
 @anonymous_view
@@ -311,6 +313,7 @@ def bill_text(request, congress, type_slug, number, version=None):
         "alternates": alternates,
         "related_bills": related_bills,
         "days_old": (datetime.datetime.now().date() - bill.current_status_date).days,
+        "is_on_bill_text_page": True, # for the header tabs
     }
 
 @anonymous_view

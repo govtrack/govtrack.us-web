@@ -33,6 +33,9 @@
     <li role="presentation" {% if page == "/details" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/details" role="tab">Details</a></li>
 	{% endif %}
 
+	{% if text_info.has_displayable_text or is_on_bill_text_page %}
+    <li role="presentation" {% if is_on_bill_text_page %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/text" role="tab">Text</a></li>
+	{% endif %}
 
 </ul>
 {% endwith %}

@@ -11,12 +11,6 @@
 <style>
 @import url(https://fonts.googleapis.com/css?family=Gentium+Basic:400,700,400italic);
 
-h1 {
-	font-size: 24px;
-	line-height: 30px;
-	color: #565656;
-}	
-
 .heading-box .article { padding: 0; }
 
 .bill_text_content {
@@ -360,15 +354,9 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-	<h1>Text of{% if "Act" in bill.title %} the{% endif %} {{bill.title_no_number|truncatewords:20}}</h1>
+	{% include "bill/bill-header.html" %}
 
-	{% if bill.title != bill.title|truncatewords:20 %}
-		{% with bill.title|truncatewords:20|cut:"..." as bt %}
-			<p style="line-height: 130%">...{{bill.title|cut:bt}}</p>
-		{% endwith %}
-	{% endif %}
-
-	<div class="row">
+	<div class="row" style="margin-top: 2.25em">
 		<div class="col-sm-8">
 			<p style="margin-bottom: 1.5em">The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
 
