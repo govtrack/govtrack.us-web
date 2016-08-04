@@ -273,18 +273,19 @@
 
 
 #bill-actions {
-	margin: 1.5em 0 1em 0;
+	margin: 1.5em 0 .5em 0;
 }
 	#bill-actions button {
 		float: left;
-		margin-right: 1em;
-		margin-bottom: .5em;
+		width: 140px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
+		margin-right: 1.5em;
+		margin-bottom: 1em;
 	}
 
 #emoji-reactions {
 	float: left;
 	display: block;
-	width: 200px;
+	width: 180px;
 	margin-left: -.25em;
 	margin-top: 1px;
 	margin-bottom: 4px;
@@ -292,7 +293,7 @@
 	#emoji-reactions a {
 		 display: inline-block;
 		 text-decoration: none;
-		 padding: .25em 0 .25em .25em;
+		 padding: .25em 0 .25em .15em;
 		 margin: 0 .25em .25em 0;
 		 border: 1px solid rgba(255,255,255,0);
 	}
@@ -336,8 +337,15 @@
 		</button>
 		<div id="event_subscribe_inline_container"> </div>
 		
+		{% if bill.cosponsors.all|length >= 3 %}
+		<button class="btn btn-default" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
+			<span style="color: #080; margin: 0 2px"><i class="fa fa-money" aria-hidden="true"></i></span>
+			Fund/Oppose
+		</button>
+		{% endif %}
+
 		<button class="btn btn-default" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
-			<span class="icon-speech-bubble-round-dots" style="color: #020"></span>
+			<span class="icon-speech-bubble-round-dots" style="color: #444"></span>
 			<span style="text-shadow: none; margin-left: 3px; text-transform: none">Call Congress</span>
 		</button>
 
