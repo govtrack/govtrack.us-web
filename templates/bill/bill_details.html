@@ -277,7 +277,7 @@
 }
 	#bill-actions button {
 		float: left;
-		width: 140px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
+		width: 150px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
 		margin-right: 1.5em;
 		margin-bottom: 1em;
 	}
@@ -340,7 +340,7 @@
 		{% if bill.cosponsors.all|length >= 3 %}
 		<button class="btn btn-default" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
 			<span style="color: #080; margin: 0 2px"><i class="fa fa-money" aria-hidden="true"></i></span>
-			Fund/Oppose
+			Donate/Oppose
 		</button>
 		{% endif %}
 
