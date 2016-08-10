@@ -267,6 +267,7 @@
 	color: #777;
 }
 
+#bill-overview-panel p { margin-bottom: .1em; }
 #content dt {
 	margin-bottom: .22em;
 }
@@ -325,17 +326,17 @@
 
 {% block body_class %}bill{% endblock %}
 
-{% block summary %}
+{% block body %}
 	{% include "bill/bill-header.html" %}
 
 	{% if bill.is_alive %}
+	<h2><span>Take action</span></h2>
 	<div id="bill-actions" class="clearfix">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<button class="btn btn-success" onclick="return show_track_panel();">
 			<i class="glyphicon glyphicon-envelope"> </i>
 			Track this bill
 		</button>
-		<div id="event_subscribe_inline_container"> </div>
 		
 		{% if bill.cosponsors.all|length >= 3 %}
 		<button class="btn btn-default" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
@@ -355,6 +356,7 @@
 			<span class="other" style="display: none"> </span>
 		</div>
 	</div><!-- /actions -->
+	<div id="event_subscribe_inline_container"> </div>
 	{% endif %}	
 
 		<div class="modal fade" id="action-panel" tabindex="-1" role="dialog" aria-labelledby="actionPanelModalLabel" aria-hidden="true">
@@ -405,21 +407,18 @@
 		  </div>
 		</div>		
 
+	<h2><span>Overview</span></h2>
 
-	<div class="panel panel-default">
-	<div class="panel-body" style="padding-bottom: 5px;">
-	<div class="row">
+<div id="bill-overview-panel" class="panel panel-default">
+	<div class="panel-body">
 			{% if bill.explanatory_text or bill.congress < 93 %}
-			<div class="col-xs-12">
 				{% if bill.explanatory_text %}{{bill.explanatory_text}}{% endif %}
 				{% if bill.congress < 93 %}
 					Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
 				{% endif %}
 			<hr>
-			</div>
 			{% endif %}
 			
-	<div id="track_panel_base" class="col-sm-12">
 		<div class="info" style="width: auto; background: none;">
 		
 			<dl class="dl-horizontal" style="margin-bottom: 0">
@@ -591,18 +590,12 @@
 			</dl>
 
 		</div><!-- /info -->
-		
-	</div>
-
-</div> <!-- /row -->
-</div> <!-- /panel-body -->
+	</div> <!-- /panel-body -->
 </div> <!-- /panel -->
 
 	<div id="admin_panel"> </div>
 	<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
-{% endblock %}
 
-{% block body %}
 		{% with bill.oursummary as summary1 %}
 		{% with bill.get_formatted_summary as summary2 %}
 		{% if subtitle or summary1 or summary2 %}

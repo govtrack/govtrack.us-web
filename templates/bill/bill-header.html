@@ -14,11 +14,14 @@
 </div>
 
 <style>
-#bill-subpages .active a { background-color: #cb4b16; color: white; font-weight: bold; }
+.h1-multiline, h1 { padding: 0; margin: 0; }
+#bill-subpages { margin: 30px 0 35px 0; font-size: 13px; }
+#bill-subpages a { padding: 6.6px 10px; color: #5b75a4; text-decoration: none; }
+#bill-subpages .active a { background-color: #5b75a4; color: white; font-weight: bold; }
 </style>
 
 {% with page=request.path|cut:bill.get_absolute_url %}
- <ul id="bill-subpages" class="nav nav-tabs" role="tablist">
+ <ul id="bill-subpages" class="nav nav-pills" role="tablist">
     <li role="presentation" {% if page == "" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}">Status</a></li>
 
 	{% with bill.oursummary as summary1 %}

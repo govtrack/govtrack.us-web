@@ -86,13 +86,13 @@ h2 {
 		margin-top: 0;
 	}
 	#content h2 {
-		border-bottom: 2px solid #cb4b16;
-		font-size: 17px;
-		margin: 1.85em 0 1em -6px;
+		border-bottom: 1px solid #cb4b16;
+		font-size: 14px;
+		margin: 1.85em 0 1.25em 0;
 	}
 		#content h2 span {
 			display: inline-block;
-			padding: 4px 14px 2px 12px;
+			padding: 2px 8px 1px 6px;
 			background-color: #cb4b16;
 			color: white;
 			font-family: sans-serif;
