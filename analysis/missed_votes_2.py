@@ -16,5 +16,6 @@ for hs in ('h', 's'):
 		rec["chamber"] = "Senate" if hs == "s" else "House"
 		rec["name"] = p.name
 		rec["state"] = p.current_role.state
+		for f in ("percent", "percentile"): rec[f] = str(round(float(rec[f]), 1))
 		w.writerow([rec[f].encode("utf8") for f in fields])
 		
