@@ -82,7 +82,7 @@ h3 {
 					Last updated {{summary.modified|date}}.
 					View <a href="/events/bill-summaries">all GovTrack summaries</a>.
 				</div>
-				<script>add_summary("GovTrack's Summary", "oursummary");</script>
+				<script>add_summary("{% firstof summary.source_text 'GovTrack' %}'s Summary", "oursummary");</script>
 			{% endif %}
 			{% endwith %}
 		</div>

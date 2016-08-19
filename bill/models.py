@@ -1369,9 +1369,11 @@ class BillSummary(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     content = models.TextField(blank=True)
+    source_url = models.TextField(blank=True, null=True)
+    source_text = models.CharField(max_length=64, blank=True, null=True, db_index=True)
 
     def as_html(self):
-        if self.id < 75:
+        if self.id < 75 or self.source_text == "Wikipedia":
             return self.content
         else:
             return markdown2.markdown(self.content)
@@ -1379,7 +1381,7 @@ class BillSummary(models.Model):
     def plain_text(self):
         import re
 
-        if self.id >= 75:
+        if not (self.id < 75 or self.source_text == "Wikipedia"):
             # Now stored in markdown. Kill links.
             content = re.sub("\[(.*?)\]\(.*?\)", r"\1", self.content)
             return content
