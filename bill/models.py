@@ -1372,6 +1372,9 @@ class BillSummary(models.Model):
     source_url = models.TextField(blank=True, null=True)
     source_text = models.CharField(max_length=64, blank=True, null=True, db_index=True)
 
+    def __unicode__(self):
+        return unicode(self.bill)[0:30] + " - " + self.plain_text()[0:60]
+
     def as_html(self):
         if self.id < 75 or self.source_text == "Wikipedia":
             return self.content

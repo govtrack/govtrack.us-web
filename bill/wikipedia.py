@@ -93,7 +93,7 @@ def get_bill_from_infobox(template):
 		m = re.match("\{\{USPL\|(\d+)\|(\d+)\}\}$", value, re.I)
 		if m:
 			return ("PL", int(m.group(1)), int(m.group(2)))
-	elif has_param(template, "leghisturl"):
+	if has_param(template, "leghisturl"):
 		value = template.get("leghisturl").value.strip().encode("utf8")
 		m = re.match("http://(?:thomas.loc|www.congress).gov/cgi-bin/bdquery/z\?d(\d+):([a-z\.]+)(\d+):", value, re.I)
 		if m:
@@ -106,7 +106,7 @@ def get_bill_from_infobox(template):
 		m = re.match("https://www.govtrack.us/congress/bills/(\d+)/([a-z]+)(\d+)", value)
 		if m:
 			return ("BILL", int(m.group(1)), m.group(2), int(m.group(3)))
-	elif has_param(template, "introducedbill"):
+	if has_param(template, "introducedbill"):
 		value = template.get("introducedbill").value.strip()
 		m = re.match(r"\{\{USBill\|(\d+)\|([\w\.]+)\|(\d+)\}\}$", value)
 		if m:
@@ -134,15 +134,19 @@ get_page_content(pages, "prop=extracts&exlimit=max&exintro", 20, lambda page : {
 # And wikitext for each page.
 get_page_content(pages, "prop=revisions&rvprop=content", 50, lambda page : { "text": page["revisions"][0]["*"] })
 
-# Update BillSummary objects.
+# For each Wikipedia page, figure out what bill it is about.
+# Then collate by bill, in case multiple pages are about the
+# same bill.
 bill_summaries = { }
 for page in pages:
 	# Find the template.
 	bill = get_bill_for_page(page)
 	if bill:
 		bill_summaries.setdefault(bill.id, []).append(page)
+	#else:
+	#	print(page["title"].encode("utf8"))
 
-# Update.
+# Create/update BillSummary objects.
 for bill_id, pages in bill_summaries.items():
 	# There could be multiple pages for a single bill. Skip for those.
 	if len(pages) != 1: continue
@@ -153,14 +157,23 @@ for bill_id, pages in bill_summaries.items():
 		# Don't overwrite one that doesn't have a Wikipedia source.
 		if bs.source_text != "Wikipedia":
 			continue
-		print("updating", bs)
 	else:
 		# Create a new instance.
 		bs = BillSummary(bill_id=bill_id)
 	
+	# Update that instance and save if anything changed.
 	page = pages[0]
-	bs.source_text = "Wikipedia"
-	bs.source_url = "https://en.wikipedia.org/wiki/" + urllib.quote(page["title"].encode("utf8"))
-	bs.content = page["extract"] + "\n\n<p>This summary is from <a href=\"%s\">Wikipedia</a>.</p>" % bs.source_url
-	bs.save()
+	update_fields = {
+		"source_text": "Wikipedia",
+		"source_url": "https://en.wikipedia.org/wiki/" + urllib.quote(page["title"].replace(" ", "_").encode("utf8")),
+		"content": page["extract"] + "\n\n<p>This summary is from <a href=\"%s\">Wikipedia</a>.</p>" % bs.source_url,
+	}
+	updated = False
+	for k, v in update_fields.items():
+		if getattr(bs, k, None) != v:
+			setattr(bs, k, v)
+			updated = True
+	if updated:
+		print "Saving:", unicode(bs).encode("utf8")
+		bs.save()
 			
