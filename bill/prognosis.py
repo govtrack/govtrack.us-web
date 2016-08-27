@@ -248,6 +248,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	return factors
 
 def is_success(bill, model_type, indexed_paragraphs):
+	# ok I think I got lucky that numpy.array turns True/False into 1.0/0.0
 	if model_type == 0:
 		return bill.current_status not in BillStatus.introduced_statuses
 	else:
@@ -485,9 +486,7 @@ def build_model(congress):
 		modelfile.write("factors = ")
 		pprint(MODEL, modelfile)
 
-def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_data, proscore=False):
-	from bill import prognosis_model
-	
+def compute_prognosis_2(prognosis_model, bill, committee_membership, majority_party, lobbying_data, proscore=False, testing=False):
 	# get a list of (factorkey, descr) tuples of the factors that are true for
 	# this bill. use the model to convert these tuples into %'s and descr's.
 	factors = get_bill_factors(bill, prognosis_model.pop_title_prefixes, committee_membership, majority_party, lobbying_data)
@@ -543,7 +542,7 @@ def compute_prognosis_2(bill, committee_membership, majority_party, lobbying_dat
 		
 		"prediction_1": prediction_1,
 		"prediction_2": prediction_2,
-		"prediction": (prediction_1 * prediction_2 / 100.0) if is_introduced else prediction_2,
+		"prediction": (prediction_1 * prediction_2 / 100.0) if is_introduced or testing else prediction_2,
 		"success_name": model_2["success_name"],
 		"bill_type_descr": model_2["bill_type_descr"],
 		
@@ -557,7 +556,7 @@ def compute_prognosis(bill, proscore=False):
 	import prognosis_model
 	majority_party = load_majority_party(bill.congress)
 	committee_membership = load_committee_membership(bill.congress)
-	prog = compute_prognosis_2(bill, committee_membership, majority_party, None, proscore=proscore)
+	prog = compute_prognosis_2(prognosis_model, bill, committee_membership, majority_party, None, proscore=proscore)
 	prog["congress"] = prognosis_model.congress
 	return prog
 		
@@ -565,7 +564,7 @@ def test_prognosis(congress):
 	from math import exp
 	from numpy import mean, median, std, digitize, percentile, average
 	
-	from bill import prognosis_model
+	from bill import prognosis_model_112 as prognosis_model
 	
 	majority_party = load_majority_party(congress)
 	committee_membership = load_committee_membership(congress)
@@ -598,7 +597,7 @@ def test_prognosis(congress):
 			model_result["count"] = bills.count()
 			data = []
 			for bill in bills.prefetch_related():
-				x = compute_prognosis_2(bill, committee_membership, majority_party, None, proscore=False)
+				x = compute_prognosis_2(prognosis_model, bill, committee_membership, majority_party, None, proscore=False, testing=True)
 				if model_type == 0:
 					x = x["prediction_1"]
 				else:
@@ -692,7 +691,7 @@ def get_bill_paragraphs(bill):
 
 	return hashes
 
-def index_successful_paragraphs(congress):
+def index_successful_paragraphs(congress, fn='prognosis_model_paragraphs.txt'):
 	cache = { bt: {} for bt in bill_type_map }
 		
 	# For each successful bill, load its text and store hashes of
@@ -709,17 +708,17 @@ def index_successful_paragraphs(congress):
 	# Write out a list of hashes and for each, the number of times
 	# the hash occurred in successful bills. Paragraphs that appear
 	# more than once won't be counted.
-	with open("bill/prognosis_model_paragraphs.txt", "w") as cachefile:
+	with open("bill/" + fn, "w") as cachefile:
 		for bill_type in bill_type_map.keys():
 			cachefile.write(bill_type + "\n")
 			for k, v in sorted(cache[bill_type].items()):
 				cachefile.write(k + " " + str(v) + "\n")
 			cachefile.write("\n")
 		
-def load_indexed_success_text():
+def load_indexed_success_text(fn='prognosis_model_paragraphs.txt'):
 	cache = { bt: {} for bt in bill_type_map } 
 	bt = None
-	with open("bill/prognosis_model_paragraphs.txt") as cachefile:
+	with open("bill/" + fn) as cachefile:
 		for line in cachefile:
 			line = line.strip()
 			if bt is None:
@@ -730,6 +729,26 @@ def load_indexed_success_text():
 				hashval, count = line.split(" ")
 				cache[bt][hashval] = int(count)
 	return cache
+
+def dump_prognosis(congress):
+	import csv, tqdm
+	from bill import prognosis_model_112 as prognosis_model
+
+	majority_party = load_majority_party(congress)
+	committee_membership = load_committee_membership(congress)
+	index_successful_paragraphs(congress, 'prognosis-test-text.txt')
+	indexed_success_text = load_indexed_success_text('prognosis-test-text.txt')
+
+	w = csv.writer(open("prognosis-dump.csv", "w"))
+	w.writerow(["bill_type", "model0prediction", "prediction", "model0actual", "actual_a", "actual", "bill_id", "bill"])
+
+	bills = Bill.objects.filter(congress=congress)
+	for bill in tqdm.tqdm(bills.prefetch_related()):
+		x = compute_prognosis_2(prognosis_model, bill, committee_membership, majority_party, None, proscore=False, testing=True)
+		y0 = is_success(bill, 0, indexed_success_text[bill_type_map_inv[bill.bill_type]])
+		y1 = is_success(bill, 1, indexed_success_text[bill_type_map_inv[bill.bill_type]])
+		y2 = (bill.was_enacted_ex() is not None)
+		w.writerow([bill_type_map_inv[bill.bill_type], x["prediction_1"], x["prediction"], y0, y1, y2, bill.id, bill.congressproject_id])
 			
 if __name__ == "__main__":
 	import sys
@@ -743,4 +762,5 @@ if __name__ == "__main__":
 		test_prognosis(113)
 	elif sys.argv[-1] == "index-text":
 		index_successful_paragraphs(114)
-		
+	elif sys.argv[-1] == "dump":
+		dump_prognosis(113)		
