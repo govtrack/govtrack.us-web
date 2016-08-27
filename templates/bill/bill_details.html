@@ -332,7 +332,6 @@
 	{% include "bill/bill-header.html" %}
 
 	{% if bill.is_alive %}
-	<h2><span>Take action</span></h2>
 	<div id="bill-actions" class="clearfix">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<button class="btn btn-success" onclick="return show_track_panel();">
@@ -408,8 +407,6 @@
 		    </div>
 		  </div>
 		</div>		
-
-	<h2><span>Overview</span></h2>
 
 <div id="bill-overview-panel" class="panel panel-default">
 	<div class="panel-body">
