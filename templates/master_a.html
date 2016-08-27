@@ -70,7 +70,8 @@
 			}
 			//ga('send', 'event', 'Advertisements', 'ImpressionCount', padDigits(ad_exp_user.impression, 5), null, {'nonInteraction': 1});
 		}
-		
+
+		var did_show_ad = false;
 		if (is_ad_free) {
 			document.write("An ad would be here, but you've gone ad-free!");
 
@@ -81,15 +82,17 @@
 			// ad unit targeting staff only
 			document.write("{{ '<ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="7881093146"></ins>'|escapejs }}");
 			(adsbygoogle = window.adsbygoogle || []).push({});
+			did_show_ad = true;
 
 		} else {
 			// Master A Responsive
 			document.write("{{ '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>'|escapejs }}");
 			(adsbygoogle = window.adsbygoogle || []).push({});
+			did_show_ad = true;
 
 		}
 
-		$(function() { setTimeout(pop_ad, 250); });
+		if (did_show_ad) $(function() { setTimeout(pop_ad, 250); });
 		function pop_ad() {
 			// Make the ad fixed to where it is in the viewport. First, pop it out of
 			// its natural container.
@@ -148,6 +151,14 @@
 			$(window).resize(update_ad_pos);
 			update_ad_pos();
 		};
+
+        // track how many hits have the ads blocked - seems to work with AdBlockPlus
+		if (did_show_ad)
+        setTimeout(function() {
+            var are_ads_blocked = ($(".adsbygoogle iframe:visible").length == 0);
+            ga('send', 'event', 'ads', 'adblocker', are_ads_blocked ? 'blocked' : 'not-blocked');
+        }, 3000);
+
 		//-->
 		</script>
 			<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
