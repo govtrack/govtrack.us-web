@@ -739,8 +739,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             "date_has_no_time": False,
             "title": self.title,
             "url": self.get_absolute_url(),
-            "body_text_template": """This {{noun}} has been added to the House's schedule for the coming week, according to the House Majority Leader. More information can be found at http://docs.house.gov.\n\nLast Action: {{current_status}}""",
-            "body_html_template": """<p>This {{noun}} has been added to the House&rsquo;s schedule for the coming week, according to the House Majority Leader. See <a href="http://docs.house.gov">the week ahead</a>.</p><p>Last Action: {{current_status}}</p>""",
+            "body_text_template": """This {{noun}} has been added to the House's schedule for the coming week, according to the House Majority Leader. More information can be found at http://docs.house.gov/floor.\n\nLast Action: {{current_status}}""",
+            "body_html_template": """<p>This {{noun}} has been added to the House&rsquo;s schedule for the coming week, according to the House Majority Leader. See <a href="http://docs.house.gov/floor/">the week ahead</a>.</p><p>Last Action: {{current_status}}</p>""",
             "context": { "noun": self.noun, "current_status": self.current_status_description },
             }
     def render_event_sfs(self, feeds):
