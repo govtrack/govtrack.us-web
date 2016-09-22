@@ -203,9 +203,8 @@
 								    <p class="list-group-item-text">I want to urge {{person.lastname}} to take an action on a bill.</p>
 								</label>
 								<div class="contact_expando">
-									<p><a href="https://emailcongress.us/" target="_blank" onclick="$('#contact_modal').modal('hide')" class="btn btn-lg btn-success">Email Congress &raquo;</a></p>
-							        <p>This tool by the Sunlight Foundation is a convenient way to email your thoughts to your {{role.get_title|lower}}. <em>(It should not be used if you need help.)</em></p>
-							        <p>You can also look for a contact form on <a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')">{{person.name_and_title}}&rsquo;s website</a>.</p>
+									<p><a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')" class="btn btn-lg btn-success">Visit {{person.name_and_title}}&rsquo;s website &raquo;</a></p>
+							        <p>Look for a contact form on <a href="{{role.website}}" target="_blank" onclick="$('#contact_modal').modal('hide')">{{person.name_and_title}}&rsquo;s website</a> to express your opinion.</p>
 								</div>
 							</div>
 						  </div>
