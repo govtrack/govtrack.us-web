@@ -95,8 +95,8 @@ $(function() {
 
 			            <div class="info">
 			            	<div>{{role.party}}</div>
-		            		<div>Took Office: {{role.logical_dates.0|date}}</div>
-		            		<div>Next Election: {{role.next_election_year}}</div>
+		            		<div>Since {{role.logical_dates.0|date}}</div>
+		            		<div>Next Election in {{role.next_election_year}}</div>
 			            </div>
 			            {% endwith %}
 			        {% endif %}
@@ -157,7 +157,7 @@ $(function() {
 
 	            <div class="info">
 	            	<div>{{role.party}}</div>
-            		<div>Took Office: {{role.logical_dates.0|date}}</div>
+            		<div>Since {{role.logical_dates.0|date}}</div>
 
 		        	{% if stateapp != 1 %}
 	            	<div style="margin-top: 4px" title="{{cities}}">{{cities|truncatewords:5}}</div>
