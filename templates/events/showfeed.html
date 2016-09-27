@@ -118,11 +118,13 @@ $(function() {
 			</div>
 			<div style="clear: both"> </div>
 		
-			<a class="button" href="/registration/signup?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}" style="margin-bottom: 5px">Register a New Account</a>
-			<a class="button" href="/accounts/login?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}">Existing User Log In</a>
+			<a class="btn btn-success" href="/registration/signup?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}" style="margin-bottom: 5px">Register a New Account</a>
+			<a class="btn btn-success" href="/accounts/login?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}">Existing User Log In</a>
 			
 			{% else %}
-				<a class="button" href="/accounts/lists?REPLACE_FEED_HERE">Save</a>
+			<div style="margin-top: 1em">
+				<a class="btn btn-success" href="/accounts/lists?REPLACE_FEED_HERE">Save</a>
+			</div>
 			{% endif %}
 		</div>
 	</div><!-- /edit_list -->

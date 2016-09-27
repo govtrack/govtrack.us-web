@@ -69,12 +69,12 @@
 							{% with redirect_url as singlesignon_next %}
 								{% include "registration/login_singlesignon.html" %}
 							{% endwith %}
-							<p style="margin: .5em 0 1.5em 0; font-size: 90%;">Use single-sign-on above or register by clicking the appropriate button below.</p>
+							<p style="margin: .5em 0 1.5em 0; font-size: 90%; line-height: 125%;">Use single-sign-on above or register by clicking the appropriate button below.</p>
 						</div>
 						<div style="clear: both"> </div>
 						
-						<a class="button" href="/registration/signup?next={{redirect_url}}" style="margin-bottom: .5em">Register a New Account</a>
-						<a class="button" href="/accounts/login?next={{redirect_url}}">Existing User Log In</a>
+						<a class="btn btn-success" href="/registration/signup?next={{redirect_url}}">Register a New Account</a>
+						<a class="btn btn-success" href="/accounts/login?next={{redirect_url}}">Existing User Log In</a>
 						</div>
 					</div>
 
