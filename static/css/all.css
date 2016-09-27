@@ -172,6 +172,9 @@ blockquote {
 /* MASTER LAYOUT */
 
 #masthead {
+	margin-bottom: 15px;
+}
+#masthead .navbar {
 	margin-bottom: 0;
 }
 
@@ -1263,15 +1266,16 @@ ul.singlesignon {
 }
 
 #sitenewscontainer {
-	position: relative;
-	width: 100%;
-	padding: 5px;
-	background: #fff3cc;
-	z-index: 999;
-	border-bottom: 1px solid #f6db71;
+	padding: 2px 0 1px 0;
+	border-bottom: 1px solid #eee;
 	-webkit-box-shadow: 0px 0px 1px 0px #666;
 			box-shadow: 0px 0px 1px 0px #666;
+	font-size: 13px;
+	color: #666;
 }
+	#sitenewscontainer a {
+		color: #55E;
+	}
 #sitenews {
 	margin: 0 auto;
 	text-align: center;

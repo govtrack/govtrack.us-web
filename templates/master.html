@@ -113,89 +113,8 @@
     <!--[if lt IE 8]><p style="background-color: black; color: white;">Internet Explorer version 8 or any modern web browser is required to use this website, sorry.<![endif]-->
     <!--[if gt IE 7]><!-->
 
-	{% if pagename != "blog_template" and not user_has_bounced_mail and 1 %}
-	<div id="sitenewscontainer" style="display: none">
-		<div id="sitenews">
-			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
-			{% include "site-news-banner.html" %}
-		</div>
-	</div>
-	<script>
-	function trackOutboundLink(link, category, action) { 
-		try { 
-			ga('send', 'event', category, action);
-		} catch(err){}
-		setTimeout(function() { document.location.href = link.href; }, 100);
-		return false;
-	}
-
-	function hide_site_news() {
-		$('#sitenewscontainer').fadeOut();
-		$.cookie("sitenewsbanner", $('#sitenewscontainer .sitenewsbody').attr("data-seq"), { expires: 14, path: '/' });
-	}
-	$(function() {
-		{% comment %}
-			if (cong_dist && cong_dist.reps && 0) {
-				if (!the_user && cong_dist.reps[0].key_vote) {
-					var p = cong_dist.reps[0];
-					var vote_way;
-					if (p.key_vote.option == "+") vote_way = "voted yes on";
-					else if (p.key_vote.option == "-") vote_way = "voted against";
-					else if (p.key_vote.option == "0") vote_way = "did not vote in the vote on";
-					else if (p.key_vote.option == "P") vote_way = "abstained in the vote on";
-					
-					$('#sitenews div.ex').hide();
-					$('#sitenews div.sitenewsbody').html(
-						  p.name
-						+ " <a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_vote_link');\" href='" + p.key_vote.link + "' style='text-decoration: none'>"
-						+ vote_way + " "
-						+ p.key_vote.description
-						+ "</a>. "
-						+ "We'll alert you the next time " + p.pronoun + " votes. "
-						+ "<a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_sign_up');\" href='/events/track-something?feed=pv:" + p.id + "' style='font-weight: bold'>Sign Up ></a>"
-						+ " <small style='margin-left: 1em'>(<a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_wrong');\" href='/congress/members/" + cong_dist.state + "' style='text-decoration: none'>Not your rep?</a>)</small>"
-						);
-					$('#sitenewscontainer').fadeIn();
-				} else if (document.location.pathname != cong_dist.reps[0].link) {
-					$('#sitenews div.ex').hide();
-					$('#sitenews div.sitenewsbody').html(
-						"Live in " + cong_dist.state + "-" + cong_dist.district + "? "
-						+ "Check up on <a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_click');\" href='" + cong_dist.reps[0].link + "'>" +  cong_dist.reps[0].name + "</a>.");
-					$('#sitenewscontainer').fadeIn();
-				}
-			}
-		{% endcomment %}
-		
-		// get the first (after the X) link's href, and if it's the current page, don't show
-		// the banner.
-		var cur_link = null;
-		try {
-			cur_link = $('#sitenewscontainer a:not(:first)').first().attr("href");
-		} catch (err) { }
-			
-		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer .sitenewsbody').attr("data-seq")
-			&& document.location.pathname != cur_link) {
-			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
-			$('#sitenewscontainer').fadeIn();
-			setTimeout("$('#trending_bills > a').each(function() { $(this).truncate_text() });", 10); // a little after the fade has started so the divs are shown
-		}
-	});
-	</script>
-	{% endif %}
-
-	{% if user_has_bounced_mail %}
-	<div id="sitenewscontainer">
-		<div id="sitenews">
-			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"> </div>
-			<div style="float: right; width: 500px; padding: 8px;">
-				<div>An email update to you bounced. We have turned off your email updates. Please contact the website administrator to reactivate email updates.</div>
-			</div>
-			<div style="clear: both"> </div>
-		</div>
-	</div>
-	{% endif %}
-
-	<nav id="masthead" class="navbar navbar-default">
+	<div id="masthead">
+	<nav class="navbar navbar-default">
 	  <div class="container">
 	    <div class="navbar-header">
 	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapsable" aria-expanded="false">
@@ -277,6 +196,83 @@
 	    </div><!-- /.navbar-collapse -->
 	  </div><!-- /.container -->
 	</nav>
+
+	<div id="sitenewscontainer" class="navbar-default" style="display: none">
+	<div id="sitenews">
+	{% if user_has_bounced_mail %}
+			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"> </div>
+			<div style="float: right; width: 500px; padding: 8px;">
+				<div>An email update to you bounced. We have turned off your email updates. Please contact the website administrator to reactivate email updates.</div>
+			</div>
+			<div style="clear: both"> </div>
+	{% elif pagename != "blog_template" and 1 %}
+			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
+			{% include "site-news-banner.html" %}
+	<script>
+	function trackOutboundLink(link, category, action) { 
+		try { 
+			ga('send', 'event', category, action);
+		} catch(err){}
+		setTimeout(function() { document.location.href = link.href; }, 100);
+		return false;
+	}
+
+	function hide_site_news() {
+		$('#sitenewscontainer').fadeOut();
+		$.cookie("sitenewsbanner", $('#sitenewscontainer .sitenewsbody').attr("data-seq"), { expires: 14, path: '/' });
+	}
+	$(function() {
+		{% comment %}
+			if (cong_dist && cong_dist.reps && 0) {
+				if (!the_user && cong_dist.reps[0].key_vote) {
+					var p = cong_dist.reps[0];
+					var vote_way;
+					if (p.key_vote.option == "+") vote_way = "voted yes on";
+					else if (p.key_vote.option == "-") vote_way = "voted against";
+					else if (p.key_vote.option == "0") vote_way = "did not vote in the vote on";
+					else if (p.key_vote.option == "P") vote_way = "abstained in the vote on";
+					
+					$('#sitenews div.ex').hide();
+					$('#sitenews div.sitenewsbody').html(
+						  p.name
+						+ " <a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_vote_link');\" href='" + p.key_vote.link + "' style='text-decoration: none'>"
+						+ vote_way + " "
+						+ p.key_vote.description
+						+ "</a>. "
+						+ "We'll alert you the next time " + p.pronoun + " votes. "
+						+ "<a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_sign_up');\" href='/events/track-something?feed=pv:" + p.id + "' style='font-weight: bold'>Sign Up ></a>"
+						+ " <small style='margin-left: 1em'>(<a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_wrong');\" href='/congress/members/" + cong_dist.state + "' style='text-decoration: none'>Not your rep?</a>)</small>"
+						);
+					$('#sitenewscontainer').fadeIn();
+				} else if (document.location.pathname != cong_dist.reps[0].link) {
+					$('#sitenews div.ex').hide();
+					$('#sitenews div.sitenewsbody').html(
+						"Live in " + cong_dist.state + "-" + cong_dist.district + "? "
+						+ "Check up on <a onclick=\"return trackOutboundLink(this, 'Banner', 'your_rep_click');\" href='" + cong_dist.reps[0].link + "'>" +  cong_dist.reps[0].name + "</a>.");
+					$('#sitenewscontainer').fadeIn();
+				}
+			}
+		{% endcomment %}
+		
+		// get the first (after the X) link's href, and if it's the current page, don't show
+		// the banner.
+		var cur_link = null;
+		try {
+			cur_link = $('#sitenewscontainer a:not(:first)').first().attr("href");
+		} catch (err) { }
+			
+		if ($.cookie("sitenewsbanner") != $('#sitenewscontainer .sitenewsbody').attr("data-seq")
+			&& document.location.pathname != cur_link) {
+			$.cookie("sitenewsbanner", null, { path: '/' }); // in case it has a different value
+			$('#sitenewscontainer').fadeIn();
+			setTimeout("$('#trending_bills > a').each(function() { $(this).truncate_text() });", 10); // a little after the fade has started so the divs are shown
+		}
+	});
+	</script>
+	{% endif %}
+	</div> <!-- /sitenews -->
+	</div> <!-- /sitenewscontainer -->
+	</div> <!-- /masthead -->
 
 	{% block override_breadcrumbs %}
 	<div id="breadcrumbs">
