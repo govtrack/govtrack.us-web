@@ -1166,41 +1166,6 @@ select, input.text {
 
 /*	Search results page
 	==================================== */
-	#content div.site-search-results form {
-		margin: 0 6px 50px;
-	}
-		#content .site-search-results form h3,
-		form.topbox h3 {
-			width: auto;
-			text-align: left;
-			font-size: 1.3em;
-			color: #40A4BD;
-			font-weight: bold;
-			line-height: 1em;
-			padding-bottom: 1em;
-		}
-		.site-search-results form .intro,
-		form.topbox p.intro {
-			width: 436px;
-			float: left;
-			padding-top: 1em;
-		}
-		.site-search-results form fieldset,
-		form.topbox fieldset {
-			width: 436px;
-			float: right;
-		}
-		.site-search-results form fieldset #search_entry,
-		form.topbox fieldset #search_entry {
-			float: left;
-			width: 78%;
-		}
-		.site-search-results form fieldset #submit,
-		form.topbox fieldset #submit {
-			margin-top: 2px;
-			float: right;
-		}
-
 	#search-results .results-group {
 		clear: none;
 		margin-bottom: 20px;
@@ -1401,11 +1366,6 @@ input[type=text].default {
 	color: #888;
 	}
 
-#from_the_floor .date {
-	display: block;
-	margin-bottom: .5em;
-	}
-
 ul.singlesignon {
 	list-style: none;
 	padding: 0;
@@ -1414,14 +1374,6 @@ ul.singlesignon {
 	float: left;
 	margin-right: 5px;
 	}
-
-.tracker_lists span.rename {
-	display: none;
-	float: right;
-}
-.tracker_lists td:hover span.rename {
-	display: inline;
-}
 
 .error {
 	color: #C22;
@@ -1490,16 +1442,10 @@ ul.singlesignon {
 		#trending_trackers a.trending_trackers_2 { display: none; }
 	}
 
-#state_list .six.columns,
-#state_list .twelve.columns {
-	margin-top: 40px;
-}
-
 #missedvotestable { margin-top: 1.5em; margin-left: 3em; }
 #missedvotestable th { padding-right: 1em; }
 
-
-.photo_flag{
+.photo_flag {
 	width: 122px;
 	color:#fff;
 	font-size: 12px;
