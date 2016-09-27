@@ -347,7 +347,7 @@
 		{% endif %}
 
 		<button class="btn btn-default" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
-			<span class="icon-speech-bubble-round-dots" style="color: #444"></span>
+			<span class="glyphicon glyphicon-phone" style="color: #444"></span>
 			<span style="text-shadow: none; margin-left: 3px; text-transform: none">Call Congress</span>
 		</button>
 
@@ -378,11 +378,9 @@
 					<p style="margin-bottom: 1em">A phone call to Congress is an effective way to let your voice be heard. We&rsquo;ll walk you through the whole thing. How do you feel about {{bill.display_number}}?</p>
 					<button onclick="do_poll('support');" class="support">
 						<div>I support {{bill.display_number}}</div>
-						<span class="icon-thumbs-up-filled"></span>
 					</button>
 					<button onclick="do_poll('oppose');" class="oppose">
 						<div>I oppose {{bill.display_number}}</div>
-						<span class="icon-thumbs-down-filled"></span>
 					</button>
 				</div>
 				<div id="call_congress_position_chosen" style="display: none;">
