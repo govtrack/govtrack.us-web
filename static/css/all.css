@@ -152,11 +152,6 @@ blockquote {
 		0 1px 2px 5px rgba(106,106,106,.4);
 }
 
-.lt-ie9 .box {
-	box-shadow: none;
-	outline: solid #f9f8f4 5px;
-}
-
 /* ADS */
 
 .ads.square {
@@ -520,10 +515,6 @@ aside .download-links { padding: 31px 0 0 }
 	margin-bottom: 1em;
 	/*behavior: url(/static/js/PIE.htc);*/
 }
-.lt-ie9 #lists div.list {
-	box-shadow: none;
-	outline: solid #f9f8f4 5px;
-}
 
 #lists > a#newlist {
 	display: block;
@@ -547,10 +538,6 @@ aside .download-links { padding: 31px 0 0 }
 	box-shadow:
 		0 0 0 5px #fcf3d0,
 		0 1px 2px 5px rgba(106,106,106,.4);
-}
-.lt-ie9 #lists div.active {
-	box-shadow: none;
-	outline: solid #fcf3d0 5px;
 }
 #lists div.list h3 {
 		float: left;
@@ -634,11 +621,6 @@ aside .download-links { padding: 31px 0 0 }
 		0 1px 2px 5px rgba(106,106,106,.4);
 		padding: 25px;
 		margin-bottom: 30px;
-	}
-	.lt-ie9 #edit_list {
-		outline: solid #f9f8f4 5px;
-		box-shadow: none;
-
 	}
 	#edit_list h4,
 	#edit_list label {
@@ -1091,10 +1073,6 @@ aside .download-links { padding: 31px 0 0 }
 	padding: 20px;
 	cursor: pointer;
 	}
-.lt-ie9 .searching .advanced-search {
-	box-shadow: none;
-	outline: solid #f9f8f4 5px;
-}
 .member .advanced-search {
 	padding-top: 20px;
 }
