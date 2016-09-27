@@ -129,6 +129,7 @@ def vote_details(request, congress, session, chamber_code, number):
             'has_diagram': has_diagram,
             'has_ideology_scores': has_ideology_scores,
             'has_subsequent_vote': has_subsequent_vote,
+            'diagram_key_colors': [ (k, "rgb(%d,%d,%d)" % tuple([c*256 for c in clr])) for k, clr in vote_diagram_colors.items() ],
             'reconsiderers': (reconsiderers, reconsiderers_titles),
             'propublica_url': propublica_url,
             'propublica_count': propublica_count,
@@ -253,6 +254,61 @@ def vote_get_json(request, congress, session, chamber_code, number):
 @cache_page(60 * 60 * 6)
 def vote_thumbnail_image(request, congress, session, chamber_code, number, image_type):
 	vote = load_vote(congress, session, chamber_code, number)
+	if image_type == "map":
+		# SVG map.
+		return vote_thumbnail_image_map(vote)
+	else:
+		# Seating diagram.
+		return vote_thumbnail_image_seating_diagram(vote, image_type == "thumbnail")
+
+vote_diagram_colors = {
+	("D", "+"): (0.15, 0.34, 0.63),
+	("D", "-"): (0.85, 0.85, 1.0),
+	("I", "+"): (0.07, 0.05, 0.07),
+	("I", "-"): (0.85, 0.85, 0.85),
+	("R", "+"): (0.90, 0.25, 0.27),
+	("R", "-"): (1.0, 0.85, 0.85),
+}
+
+def vote_thumbnail_image_map(vote):
+	# We only have an SVG for House votes for certain Congresses.
+	if vote.chamber != CongressChamber.house:
+		raise Http404()
+	if vote.congress not in (112, 113, 114,):
+		raise Http404()
+
+	# Load the SVG.
+	import xml.etree.ElementTree as ET
+	tree = ET.parse('static/cd-2014.svg')
+
+	# Fetch color codes per district.
+	colors = { }
+	for voter in vote.get_voters():
+		district = voter.person_role.state.lower() + ("%02d" % voter.person_role.district)
+		clr = vote_diagram_colors.get((voter.person_role.party[0], voter.option.key))
+		if clr:
+			clr = tuple([c*256 for c in clr])
+			colors[district] = "rgb(%d,%d,%d)" % clr
+	if len(colors) == 0:
+		# Does not have any +/- votes.
+		raise Http404()
+
+	# Apply.
+	for node in tree.getroot():
+		color = colors.get(node.get("id"))
+		if color:
+			node.set("style", "fill:" + color)
+		elif node.tag.endswith("polygon"):
+			# No voter for this district.
+			node.set("style", "fill:white")
+
+	# Send response.
+	v = ET.tostring(tree.getroot())
+	r = HttpResponse(v, content_type='image/svg+xml')
+	r["Content-Length"] = len(v)
+	return r
+
+def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	
 	import cairo, re, math
 	from StringIO import StringIO
@@ -260,7 +316,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 	# general image properties
 	font_face = "DejaVu Serif Condensed"
 	image_width = 300
-	image_height = 250 if image_type == "thumbnail" else 170
+	image_height = 250 if is_thumbnail else 170
 	
 	# format text to print on the image
 	vote_title = re.sub(r"^On the Motion to ", "To ", vote.question)
@@ -327,7 +383,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 	ctx.fill()
 	
 	chart_top = 0
-	if image_type == "thumbnail":
+	if is_thumbnail:
 		# Title
 		ctx.set_font_size(20)
 		ctx.set_source_rgb(.2,.2,.2)
@@ -354,7 +410,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 	ctx.rel_line_to(w, 0)
 	ctx.stroke()
 	
-	if image_type == "thumbnail":
+	if is_thumbnail:
 		# Vote Chamber/Date/Number
 		ctx.select_font_face(font_face, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 		ctx.set_font_size(14)
@@ -486,15 +542,6 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 
 	# Draw the seats.
 	
-	group_colors = {
-		(0, 0): (0.05, 0.24, 0.63), # D+
-		(0, 1): (0.85, 0.85, 1.0), # D-
-		(1, 0): (0.07, 0.05, 0.07), # I+
-		(1, 1): (0.85, 0.85, 0.85), # I-
-		(2, 0): (0.90, 0.05, 0.07), # R+
-		(2, 1): (1.0, 0.85, 0.85), # R-
-	}
-	
 	for ((row, seat_pos), (party, vote)) in seats:	
 		# radius of this row (again, code dup)
 		if seating_rows > 1:
@@ -503,7 +550,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 			r = inner_r
 		
 		# draw
-		ctx.set_source_rgb(*group_colors[(party, vote)])
+		ctx.set_source_rgb(*vote_diagram_colors[(["D", "I", "R"][party], ["+", "-"][vote])])
 		ctx.identity_matrix()
 		ctx.translate(image_width/2, chart_top+25)
 		ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))

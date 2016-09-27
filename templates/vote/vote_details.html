@@ -362,7 +362,42 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 
 {% with vote.totals as totals %}
 <div class="row">
-<div class="col-sm-8">
+
+{% if has_diagram %}
+    <div class="col-sm-6 col-lg-3">
+        <div style="margin-top: 1em">
+            <img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" style="margin: auto;" />
+            {% if has_ideology_scores %}
+            <div style="text-align: center; color: #777; line-height: 130%; font-size: 12px; margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
+            {% endif %}
+            <div style="margin: .5em 0; font-size: 80%; text-align: center;">
+                Key:
+                {% for item in totals.options %}
+                  {% if item.option.key == "+" or item.option.key == "-" %}
+                    {% for count in item.party_counts %}
+                        {% if count.party.0 == "D" or count.party.0 == "R" %}
+                            {% for k, v in diagram_key_colors %}
+                                {% if count.count > 0 and k.0 == count.party.0 and k.1 == item.option.key %}
+                                    <span style="padding: 2px 4px; background-color: {{v}}; margin-right: .25em; cursor: default; {% if item.option.key == "+" %}color: white;{% endif %}" title="{{count.party}} {{item.option.value}}">
+                                        {{count.party.0}}
+                                        {{item.option.value}}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div style="margin-top: 1em">
+            <img src="{{ vote.get_absolute_url }}/map" class="img-responsive" style="margin: auto;" />
+        </div>
+    </div>
+{% endif %}
+
+<div class="col-sm-12 col-lg-6">
     <table class="stats" style="margin-bottom: 1em">
         <thead>
             <tr>
@@ -434,17 +469,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
         </tbody>
     </table>
 </div>
-    {% if has_diagram %}
-    <div class="col-sm-4">
-        <div style="margin: auto; max-width: 225px">
-	    	<img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" />
-			{% if has_ideology_scores %}
-    		<div style="text-align: center; color: #777; line-height: 130%; font-size: 12px; margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
-			{% endif %}
-        </div>
-    </div>
-    {% endif %}
-</div>
+</div> <!-- /row -->
 
 <div class="clear"> </div>
 
