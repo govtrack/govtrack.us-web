@@ -172,138 +172,20 @@ blockquote {
 /* MASTER LAYOUT */
 
 #masthead {
-	border: none;
-	box-shadow: none;
-	padding: 18px 0 4px 0;
 	margin-bottom: 0;
 }
-	@media only screen and (max-width: 767px) {
-		#masthead {
-			background: none;
-			}
-	}
-
 
 #logo {
 	display: block;
 	background: url(../images/logo.gif) 0 0 no-repeat;
 	height: 43px;
-	width: 140px;
-	margin: 7px 5px 10px 0;
+	width: 120px;
+	margin-top: 10px;
+	margin-left: 0;
 	text-indent: -9999px;
 	overflow: hidden;
 }
-	@media only screen and (max-width: 767px) {
-		#logo {
-			margin-left: 15px;
-		}
-	}
-	.homepage #logo.navbar-brand {
-		display: none;
-	}
-
-.navbar-default .navbar-nav>li>a {
-	text-decoration: none;
-	font-size: 13px;
-	letter-spacing: -0.25px;
-}
-#nav {
-	font-size: 13px;
-	line-height: 17px;
-	letter-spacing: 1px;
-	text-transform: uppercase;
-}
-	#nav > ul ul {
-		margin-top: 0;
-	}
-	#nav > ul ul li {
-		padding: 0;
-	}
-	#nav a {
-		padding-right: 10px;
-		text-decoration: none;
-	}
-	@media screen and (min-width: 768px) {
-		#nav li a:hover {
-			color: #664030;
-			border-bottom: 0;
-		}
-		#nav .dropnav:hover>a {
-			background: url(../images/bg-nav-btn.png) 0 7px no-repeat;
-			color: #fff;
-			height: 46px;
-			z-index: 3;
-			position: relative;
-			text-decoration: none;
-		}
-		#nav .dropnav ul a {
-			background: none;
-			z-index: 1;
-			height: auto;
-		}
-		#nav ul li:hover ul a {
-			cursor: pointer;
-			color: #fff;
-			text-decoration: none;
-			background: none;
-		}
-		#nav .dropnav a:hover {
-			color: #fff;
-		}
-		#nav li:hover ul { display: block }
-		#nav ul ul {
-			width: 220px;
-			position: absolute;
-			left: 3px;
-			top: 34px;
-			z-index: 2;
-			background: #128dac;
-			border: 2px solid #4fadc4;
-			padding: 2px 8px 3px 9px;
-			font-size: 12px;
-			line-height: 28px;
-			-webkit-box-shadow: 0px 0px 4px #bcbbba;
-			-moz-box-shadow: 0px 0px 4px #bcbbba;
-			box-shadow: 0px 0px 4px #bcbbba;
-			display: none;
-			/*behavior: url(/static/js/PIE.htc);*/
-		}
-			#nav ul ul li {
-				float: none;
-				overflow: hidden;
-				vertical-align: top;
-				padding: 7px 0 7px;
-				background: url(../images/divider-1.gif) no-repeat 50% 0;
-			}
-			#nav ul ul li:first-child { background: none }
-			#nav ul ul li a {
-				width: auto;
-				display: block;
-				height: auto;
-				text-align: left;
-				padding: 0 10px;
-			}
-		#nav ul li:hover ul li {
-			vertical-align: top;
-			float: none;
-		}
-		#nav ul ul li:hover a {
-			background: #05647c;
-			-moz-border-radius: 4px;
-			-webkit-border-radius: 4px;
-			border-radius: 4px;
-		}
-			.nav.navbar-right li>a {
-				padding-left: 0;
-				font-size: 13px;
-			}
-	}
-	@media screen and (max-width: 767px) {
-		.navbar-nav.navbar-right {
-		  margin-left: 1px; /* not sure why this is needed */
-		}
-	}
-
+	
 .breadcrumb {
 	margin-top: 15px;
 	margin-bottom: 0;
