@@ -38,6 +38,13 @@
 	#vote-details a.note {
 		cursor: pointer;
 	}
+
+    .diagram-legend {
+        text-align: center;
+        color: #666;
+        line-height: 130%;
+        font-size: 12px;
+    }
 	</style>
 {% endblock %}
 {% block og_image %}
@@ -363,14 +370,11 @@ onUserDistrictChanged(function (cong_dist, mocs) {
 {% with vote.totals as totals %}
 <div class="row">
 
-{% if has_diagram %}
+{% if has_diagram.diagram %}
     <div class="col-sm-6 col-lg-3">
         <div style="margin-top: 1em">
             <img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" style="margin: auto;" />
-            {% if has_ideology_scores %}
-            <div style="text-align: center; color: #777; line-height: 130%; font-size: 12px; margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
-            {% endif %}
-            <div style="margin: .5em 0; font-size: 80%; text-align: center;">
+            <div style="margin: .5em 0;" class="diagram-legend">
                 Key:
                 {% for item in totals.options %}
                   {% if item.option.key == "+" or item.option.key == "-" %}
@@ -378,7 +382,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                         {% if count.party.0 == "D" or count.party.0 == "R" %}
                             {% for k, v in diagram_key_colors %}
                                 {% if count.count > 0 and k.0 == count.party.0 and k.1 == item.option.key %}
-                                    <span style="padding: 2px 4px; background-color: {{v}}; margin-right: .25em; cursor: default; {% if item.option.key == "+" %}color: white;{% endif %}" title="{{count.party}} {{item.option.value}}">
+                                    <span style="padding: 2px 4px; background-color: {{v}}; margin-right: .25em; cursor: default; {% if item.option.key == "+" %}color: white;{% else %}color: #222;{% endif %}" title="{{count.party}} {{item.option.value}}">
                                         {{count.party.0}}
                                         {{item.option.value}}</span>
                                 {% endif %}
@@ -388,11 +392,19 @@ onUserDistrictChanged(function (cong_dist, mocs) {
                   {% endif %}
                 {% endfor %}
             </div>
+            {% if has_ideology_scores %}
+            <div class="diagram-legend" style="margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
+            {% endif %}
         </div>
     </div>
+{% endif %}
+{% if has_diagram.map %}
     <div class="col-sm-6 col-lg-3">
         <div style="margin-top: 1em">
             <img src="{{ vote.get_absolute_url }}/map" class="img-responsive" style="margin: auto;" />
+            <div style="margin: .5em 0;" class="diagram-legend">
+                This is a cartogram. Each hexagon represents one congressional district.
+            </div>
         </div>
     </div>
 {% endif %}

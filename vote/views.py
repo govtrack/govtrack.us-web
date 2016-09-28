@@ -69,13 +69,15 @@ def vote_details(request, congress, session, chamber_code, number):
       and vote.related_bill.votes.filter(chamber=vote.chamber, category__in=(VoteCategory.passage, VoteCategory.passage_suspension)).order_by('-created').first() != vote:
       has_subsequent_vote = True
     
-    # Test if we have a diagram for this vote. The only
+    # Test if we have diagrams for this vote. The only
     # way to test is to try to make it.
-    try:
-        vote_thumbnail_image(request, congress, session, chamber_code, number, "diagram")
-        has_diagram = True
-    except Http404:
-        has_diagram = False
+    has_diagram = { }
+    for image_type in ("map", "diagram"):
+        try:
+            vote_thumbnail_image(request, congress, session, chamber_code, number, image_type)
+            has_diagram[image_type] = True
+        except Http404:
+            pass
     
     # sorting by party actually sorts by party first and by ideology score
     # second.
