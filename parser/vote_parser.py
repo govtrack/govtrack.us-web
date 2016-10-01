@@ -172,7 +172,13 @@ def main(options):
             #    continue
             
             # Process role object
-            for roll_node in tree.xpath('/roll'):
+            roll_node = tree.xpath('/roll')[0]
+
+            # Sqlite is much faster when lots of saves are wrapped in a transaction,
+            # and we do a lot of saves because it's a lot of voters.
+            from django.db import transaction
+            with transaction.atomic():
+
                 vote = vote_processor.process(Vote(), roll_node)
                 if existing_vote: vote.id = existing_vote.id
                 match = re_path.search(fname)
