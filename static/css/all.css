@@ -1,3 +1,5 @@
+@import 'https://fonts.googleapis.com/css?family=PT+Sans|Roboto+Slab:300,700';
+
 /* GLOBAL STYLES */
 
 html { font-size: 15px; /* for rem unit sizing, match the body to be nice */ }
@@ -8,7 +10,7 @@ body {
 	}
 
 a:link, a:visited {
-	color: #375E99;
+	color: #9D2146;
 	text-decoration: underline;
 	}
 	a.btn:link, a.btn:visited {
@@ -16,7 +18,7 @@ a:link, a:visited {
 		text-decoration: none;
 	}
 a:hover, a:focus, a:active {
-	color: #375EA4;
+	color: #9D2146;
 	}
 	a.btn:hover, a.btn:focus, a.btn:active {
 		color: white;
@@ -24,8 +26,7 @@ a:hover, a:focus, a:active {
 a.plain:link, #masthead a:link, #intro-box a:link {
 	text-decoration: none;
 	}
-a.plain:hover, a.plain:focus, a.plain:active,
-#masthead a:hover, #masthead a:focus, #masthead a:active {
+a.plain:hover, a.plain:focus, a.plain:active {
 	text-decoration: underline;
 	}
 .nav-tabs>li>a {
@@ -33,7 +34,7 @@ a.plain:hover, a.plain:focus, a.plain:active,
 }
 
 h1, h2, h3, h4, h5 {
-	font: normal normal normal 2.5em/1.5em serif;
+	font: normal normal normal 2.5em/1.5em 'Roboto Slab';
 	line-height: 130%;
 	margin-top: 1.5em;
 	margin-bottom: 1em;
@@ -86,14 +87,14 @@ h2 {
 		margin-top: 0;
 	}
 	#content h2 {
-		border-bottom: 1px solid #cb4b16;
+		border-bottom: 1px solid #1D4E70;
 		font-size: 14px;
 		margin: 1.85em 0 1.25em 0;
 	}
 		#content h2 span {
 			display: inline-block;
 			padding: 2px 8px 1px 6px;
-			background-color: #cb4b16;
+			background-color: #1D4E70;
 			color: white;
 			font-family: sans-serif;
 		}
@@ -173,18 +174,43 @@ blockquote {
 
 #masthead {
 	margin-bottom: 15px;
+	background-color: #1D4E70;
+	font-family: 'PT Sans', sans-serif;
+	font-size: 13px;
+	color: #FAFAFA;
 }
 #masthead .navbar {
+	/* override bootstrap */
 	margin-bottom: 0;
+	border: none;
 }
+		#masthead .nav a {
+			color: inherit;
+		}
+		#masthead .nav a:hover, #masthead .nav a:focus, #masthead .nav .open a, #masthead .nav .dropdown-menu {
+			background-color: #589C21;
+			color: white;
+		}
+		#masthead .dropdown-menu {
+			margin-top: -2px;
+		}
+		#masthead .dropdown-menu a:hover {
+			color: black;
+		}
+		#masthead .navbar-toggle {
+			border-color: #557D9A;
+		}
+		#masthead .navbar-toggle .icon-bar {
+			background-color: #557D9A;
+		}
 
 #logo {
 	display: block;
-	background: url(../images/logo.gif) 0 0 no-repeat;
-	height: 43px;
-	width: 120px;
-	margin-top: 10px;
-	margin-left: 0;
+	background: url(../images/logo.png) 0 0 no-repeat;
+	height: 30px;
+	width: 110px;
+	margin-top: 11px;
+	margin-left: 15px;
 	text-indent: -9999px;
 	overflow: hidden;
 }
@@ -816,8 +842,8 @@ aside .download-links { padding: 31px 0 0 }
 	======================================================== */
 #footer {
 	margin-top: 25px;
-	border-top: 40px solid #375E99;
-	background: #cb4b16;
+	border-top: 40px solid #F0BE7D;
+	background: #9D2146;
 	padding: 24px 0 0;
 	color: white;
 	}

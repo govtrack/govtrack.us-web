@@ -665,10 +665,10 @@
 				</table>
 			{% endif %}
 
-			<div style="line-height: 130%; background-color: #eed9ad; padding: 1em; margin: 15px 0 15px -6px">
-				<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-				This page is about a {{bill.noun}} in the United States Congress.
-				{{bill.how_a_bill_text}}
+			<div style="line-height: 130%; background-color: #F0BE7D; padding: 1em; margin: 15px 0 15px -6px; border-radius: 6px;">
+				<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
+				<h3 style="margin: 0 0 5px 0; font-weight: bold;">{{bill.display_number_no_congress_number}} is a {{bill.noun}} in the United States Congress.</h3>
+				<p style="margin: 0">{{bill.how_a_bill_text}}</p>
 			</div>
 
 		{% endif %}
