@@ -115,12 +115,32 @@
         </div>
 
 		{% if active_role %}
-		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-		<div id="action-buttons">
-			<a href="#" class="track-btn" onclick="return show_track_panel();">Track {{person.him_her }}</a>
-			{% if role.website %}
-			<a href="#" class="push-btn yellow-btn" onclick="$('#contact_modal').modal(); return false;">Contact {{person.him_her }}</a>
-			{% endif %}
+		<div class="panel panel-success" style="margin: 50px 0; padding-bottom: 0;">
+		  <div class="panel-body">
+			<h3 style="margin-top: 5px; font-weight: bold;">
+				What you can do
+			</h3>
+
+			<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
+			<div id="action-buttons">
+				<button class="btn btn-sm" onclick="return show_track_panel();">
+					<i class="glyphicon glyphicon-envelope"> </i>
+					<span style="margin-left: 3px;">
+						Get alerts
+					</span>
+				</button>
+
+				{% if role.website %}
+				<button class="btn btn-sm" onclick="$('#contact_modal').modal();">
+					<i class="glyphicon glyphicon-comment"> </i>
+					<span style="margin-left: 3px;">
+						Contact {{person.him_her }}
+					</span>
+				</button>
+				{% endif %}
+			</div>
+
+		  </div>
 		</div>
 		{% endif %}
 		

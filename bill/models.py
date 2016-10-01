@@ -21,14 +21,14 @@ from lxml import etree
 
 class BillType(enum.Enum):
     # slug must match regex for parse_bill_number
-    senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s', full_name="Senate bill", search_help_text="Senate bills", chamber="Senate")
-    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h', full_name="House of Representatives bill", search_help_text="House bills", chamber="House")
-    senate_resolution = enum.Item(4, 'S.Res.', slug='sres', xml_code='sr', full_name="Senate simple resolution", search_help_text="Senate simple resolutions, which do not have the force of law", chamber="Senate")
-    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr', full_name="House simple resolution", search_help_text="House simple resolutions, which do not have the force of law", chamber="House")
-    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sconres', full_name="Senate concurrent resolution", xml_code='sc', search_help_text="Concurrent resolutions originating in the Senate, which do not have the force of law", chamber="Senate")
-    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hconres', full_name="House concurrent resolution", xml_code='hc', search_help_text="Concurrent resolutions originating in the House, which do not have the force of law", chamber="House")
-    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sjres', xml_code='sj', full_name="Senate joint resolution", search_help_text="Joint resolutions originating in the Senate, which may be used to enact laws or propose constitutional amendments", chamber="Senate")
-    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hjres', xml_code='hj', full_name="House joint resolution", search_help_text="Joint resolutions originating in the House, which may be used to enact laws or propose constitutional amendments", chamber="House")
+    senate_bill = enum.Item(2, 'S.', slug='s', xml_code='s', full_name="bill", search_help_text="Senate bills", chamber="Senate")
+    house_bill = enum.Item(3, 'H.R.', slug='hr', xml_code='h', full_name="bill", search_help_text="House bills", chamber="House")
+    senate_resolution = enum.Item(4, 'S.Res.', slug='sres', xml_code='sr', full_name="simple resolution", search_help_text="Senate simple resolutions, which do not have the force of law", chamber="Senate")
+    house_resolution = enum.Item(1, 'H.Res.', slug='hres', xml_code='hr', full_name="simple resolution", search_help_text="House simple resolutions, which do not have the force of law", chamber="House")
+    senate_concurrent_resolution = enum.Item(6, 'S.Con.Res.', slug='sconres', full_name="concurrent resolution", xml_code='sc', search_help_text="Concurrent resolutions originating in the Senate, which do not have the force of law", chamber="Senate")
+    house_concurrent_resolution = enum.Item(5, 'H.Con.Res.', slug='hconres', full_name="concurrent resolution", xml_code='hc', search_help_text="Concurrent resolutions originating in the House, which do not have the force of law", chamber="House")
+    senate_joint_resolution = enum.Item(8, 'S.J.Res.', slug='sjres', xml_code='sj', full_name="joint resolution", search_help_text="Joint resolutions originating in the Senate, which may be used to enact laws or propose constitutional amendments", chamber="Senate")
+    house_joint_resolution = enum.Item(7, 'H.J.Res.', slug='hjres', xml_code='hj', full_name="joint resolution", search_help_text="Joint resolutions originating in the House, which may be used to enact laws or propose constitutional amendments", chamber="House")
 
 
 class TermType(enum.Enum):
@@ -323,9 +323,6 @@ class Bill(models.Model):
     @property
     def bill_type_name(self):
         return BillType.by_value(self.bill_type).full_name
-    @property
-    def bill_type_name_short(self):
-        return self.bill_type_name.replace(" of Representatives", "")
     @property
     def noun(self):
         """The appropriate noun to use to refer to this instance, either 'bill' or 'resolution'."""

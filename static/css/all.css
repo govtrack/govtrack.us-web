@@ -52,7 +52,6 @@ h1 {
 	h1.long {
 		font-size: 23px;
 		line-height: 1.25em;
-		font-weight: normal;
 	}
 	h1 sup {
 		font-size: 65%;
@@ -131,6 +130,10 @@ header ul, footer ul {
 
 #content p {
 	margin-bottom: 1em;
+}
+
+#content hr {
+	border-color: #557D9A;
 }
 
 blockquote {
@@ -224,6 +227,20 @@ blockquote {
 	font-size: 88%;
 }
 	.breadcrumb a {
+	}
+
+.panel-info {
+	border: none;
+	border-radius: 12px;
+	background-color: #fcc684;
+}
+.panel-success {
+	border: none;
+	border-radius: 12px;
+	background-color: #9ED56F;
+}
+	.panel-success button {
+		background-color: white;
 	}
 
 #categories {
@@ -698,7 +715,7 @@ aside .download-links { padding: 31px 0 0 }
 
 /*	Tracker widget styles
 	=========================================================== */
-	.track-btn, .push-btn {
+	.track-btn {
 		height: 39px;
 		width: 170px;
 		font-size: 16px;
@@ -712,17 +729,15 @@ aside .download-links { padding: 31px 0 0 }
 		margin: 0 0 15px;
 		cursor: pointer;
 		}
-		.track-btn:link, .push-btn:link { text-decoration: none; }
+		.track-btn:link { text-decoration: none; }
 		.track-btn, .green-btn { background: url(../images/btn-sprite-green.png) no-repeat; }
-		.grey-btn { background: url(../images/btn-sprite-grey.png) no-repeat; }
-		.yellow-btn { background: url(../images/btn-sprite-yellow.png) no-repeat; color: #444 !important; } /* must override a:link, a:visited color */
-		.track-btn:hover, .push-btn:hover, .push-btn.hover-state {
+		.track-btn:hover {
 			color: #fff;
 			background-position: 0 -43px;
 			text-decoration: none;
 			border-bottom: 0;
 			}
-		.track-btn:active, .push-btn:active {
+		.track-btn:active {
 			background-position: 0 -86px;
 		}
 		.small-btn {
@@ -842,7 +857,7 @@ aside .download-links { padding: 31px 0 0 }
 	======================================================== */
 #footer {
 	margin-top: 25px;
-	border-top: 40px solid #F0BE7D;
+	border-top: 40px solid #fcc684;
 	background: #9D2146;
 	padding: 24px 0 0;
 	color: white;

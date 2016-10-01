@@ -342,6 +342,21 @@ class Vote(models.Model):
                     candidates.append(voter)
         return candidates
 
+    def get_map_thumbnail_type(self):
+        from vote.views import vote_thumbnail_image_map, vote_thumbnail_image_seating_diagram
+        from django.http import Http404
+        try:
+            vote_thumbnail_image_map(self)
+            return "map"
+        except Http404:
+            pass
+        try:
+            vote_thumbnail_image_seating_diagram(self, True)
+            return "diagram"
+        except Http404:
+            pass
+        return False
+
 
 class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='options')

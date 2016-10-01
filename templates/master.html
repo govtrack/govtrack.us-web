@@ -14,7 +14,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" integrity="sha256-VBrFgheoreGl4pKmWgZh3J23pJrhNlSUOBek+8Z2Gv0=" crossorigin="anonymous">
-		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20160927" />
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20161001" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
@@ -278,12 +278,6 @@
 	<div id="breadcrumbs">
 		<div class="container">
 			{% block crumbs %}{% endblock %}
-			{% comment %}
-			<ul class="twelve columns">
-				<li><a href="#">Congress</a></li>
-				<li>Bills & Resolutions</li>
-			</ul>
-			{% endcomment %}
 		</div>
 	</div>
 	{% endblock %}

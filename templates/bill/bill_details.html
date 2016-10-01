@@ -38,6 +38,16 @@
 {% endblock %}
 
 {% block body_scripts %}
+{# facebook #}
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId={{FACEBOOK_APP_ID}}&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
 <script src="https://cdn.jsdelivr.net/emojione/2.1.4/lib/js/emojione.min.js"></script>
 
 <script>
@@ -168,8 +178,6 @@
 		#call_congress_positions button.support span { color: green; }
 		#call_congress_positions button.oppose span { color: red; }
 
-#our-summary p { margin: 0; }
-
 #status-row-grid {
 }
 	#status-row-grid tr {
@@ -269,29 +277,25 @@
 	color: #777;
 }
 
-#bill-overview-panel p { margin-bottom: .1em; }
+#bill-overview-panel p { margin: .1em; }
 #content dt {
 	margin-bottom: .22em;
 }
 
 
 #bill-actions {
-	margin: 1.5em 0 .5em 0;
 }
-	#bill-actions button {
+	#bill-actions > * {
 		float: left;
-		width: 150px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
 		margin-right: 1.5em;
 		margin-bottom: 1em;
 	}
+	#bill-actions > button {
+		width: 115px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
+	}
 
 #emoji-reactions {
-	float: left;
-	display: block;
-	width: 190px;
-	margin-left: -.25em;
-	margin-top: 1px;
-	margin-bottom: 4px;
+	display: block !important;
 }
 	#emoji-reactions a {
 		 display: inline-block;
@@ -314,7 +318,16 @@
 			 padding: 0 1px;
 			 min-width: .75em;
 		}
+		#emoji-reactions img.emojione {
+			height: 1ex;
+		}
 
+
+#our-summary a {
+	text-decoration: none;
+	color: inherit;
+	border-bottom: 1px dotted #D6708F;
+}
 </style>
 {% endblock %}
 
@@ -322,43 +335,95 @@
 <ol class="breadcrumb">
 	<li><a href="{% url "congress_home" %}">Congress</a></li>
 	<li><a href="/congress/bills">Bills</a></li>
-	<li class="active">{{bill.display_number}}</li>
+	<li class="active">{{bill.display_number_with_congress_number}}</li>
 </ol>
 {% endblock %}
 
 {% block body_class %}bill{% endblock %}
 
 {% block body %}
+	<!-- title & pill nav -->
+
 	{% include "bill/bill-header.html" %}
 
+	<!-- summary snippet or bill full title -->
+
+	{% with bill.oursummary as summary1 %}
+	{% if summary1 %}
+		<div id="our-summary">
+		{{summary1.as_html|truncatewords_html:60|safe}}
+		</div>
+		{% if summary1.source_text %}({{summary1.source_text}}){% endif %}
+		<p style="margin-left: 2em; font-style: italic;"><a href="{{bill.get_absolute_url}}/summary">Read the full summary &gt;</a></p>
+	{% elif subtitle %}
+		<p style="margin-bottom: 0">{{subtitle}}</p>
+		{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s titles are written by its sponsor.</em></small></p>{% endif %}
+		{# we should have the title disclaimer even if no long title, but I'm not sure where best to put it #}
+	{% endif %}
+
+	<!-- explanation -->	
+
+	{% if bill.explanatory_text %}
+	<div class="panel panel-info" style="margin: 50px 0;">
+	  <div class="panel-body">
+		<!-- What is a bill? -->
+		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
+			{{bill.explanatory_text}}
+	  </div>
+	</div>
+	{% endif %}
+
+	{% endwith %}
+
+	<!-- actions -->
+
 	{% if bill.is_alive %}
+	<div class="panel panel-success" style="margin: 50px 0; padding-bottom: 0;">
+	  <div class="panel-body">
+		<h3 style="margin-top: 5px; font-weight: bold;">
+			What you can do
+		</h3>
+
 	<div id="bill-actions" class="clearfix">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-		<button class="btn btn-success" onclick="return show_track_panel();">
+		<button class="btn btn-sm" onclick="return show_track_panel();">
 			<i class="glyphicon glyphicon-envelope"> </i>
-			Track this bill
+			<span style="margin-left: 3px;">
+				Get alerts
+			</span>
 		</button>
 		
 		{% if bill.cosponsors.all|length >= 3 %}
-		<button class="btn btn-default" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
+		<button class="btn btn-sm" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
 			<span style="color: #080; margin: 0 2px"><i class="fa fa-money" aria-hidden="true"></i></span>
-			Donate/Oppose
+			if.then.fund
 		</button>
 		{% endif %}
 
-		<button class="btn btn-default" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
+		<button class="btn btn-sm" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
 			<span class="glyphicon glyphicon-phone" style="color: #444"></span>
-			<span style="text-shadow: none; margin-left: 3px; text-transform: none">Call Congress</span>
+			<span style="margin-left: 3px;">Call Congress</span>
 		</button>
 
-		<div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom">
-			<span class="main"> </span>
-			<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">···</a>
-			<span class="other" style="display: none"> </span>
+		{% with SITE_ROOT_URL|add:bill.get_absolute_url as share_url %}
+		<div>
+			<a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{bill.title|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
+			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 		</div>
-	</div><!-- /actions -->
+
+		{% if FACEBOOK_APP_ID %}
+			<div style="margin-bottom: 5px;">
+				<div class="fb-share-button" data-href="{{share_url}}" data-layout="box_count"></div>
+			</div>
+		{% endif %}
+		{% endwith %}
+
+	</div><!-- /bill-actions -->
 	<div id="event_subscribe_inline_container"> </div>
-	{% endif %}	
+
+
+	  </div>
+	</div>
 
 		<div class="modal fade" id="action-panel" tabindex="-1" role="dialog" aria-labelledby="actionPanelModalLabel" aria-hidden="true">
 		  <div class="modal-dialog">
@@ -404,18 +469,15 @@
 		      </div>
 		    </div>
 		  </div>
-		</div>		
+		</div>
 
-<div id="bill-overview-panel" class="panel panel-default">
-	<div class="panel-body">
-			{% if bill.explanatory_text or bill.congress < 93 %}
-				{% if bill.explanatory_text %}{{bill.explanatory_text}}{% endif %}
-				{% if bill.congress < 93 %}
-					Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
-				{% endif %}
-			<hr>
-			{% endif %}
-			
+
+
+	{% endif %}	
+
+<div id="bill-overview-panel" style="margin: 50px 0;">
+	<h2><span>Overview</span></h2>
+
 		<div class="info" style="width: auto; background: none;">
 		
 			<dl class="dl-horizontal" style="margin-bottom: 0">
@@ -587,38 +649,15 @@
 			</dl>
 
 		</div><!-- /info -->
-	</div> <!-- /panel-body -->
-</div> <!-- /panel -->
+</div> <!-- /bill-overview-panel -->
 
 	<div id="admin_panel"> </div>
 	<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
 
-		{% with bill.oursummary as summary1 %}
-		{% with bill.get_formatted_summary as summary2 %}
-		{% if subtitle or summary1 or summary2 %}
-		<h2><span>About the {{bill.noun}}</span></h2>
 
-					{% if subtitle %}
-						<h4>Full Title</h4>
-							<p style="margin-bottom: 0">{{subtitle}}</p>
-							{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s titles are written by its sponsor.</em></small></p>{% endif %}
-							{# we should have ^ even if no long title, but I'm not sure where best to put it #}
-					{% endif %}
-
-					{% if summary1 %}
-						{% if subtitle %}<h4 style="margin-top: 1em">Summary</h4>{% endif %}
-							<div id="our-summary">{{summary1.as_html|truncatewords_html:60|safe}}</div>
-							{% if summary1.source_text %}({{summary1.source_text}}){% endif %}
-							<p><a href="{{bill.get_absolute_url}}/summary">Read more &gt;</a></p>
-							{% if summary2 and 0 %}<p><a href="{{bill.get_absolute_url}}/summary#libraryofcongress">Read CRS summary &gt;</a></p>{% endif %}
-					{% elif summary2 %}
-						<p class="small"><a href="{{bill.get_absolute_url}}/summary">Read CRS Summary &gt;</a></p>
-					{% endif %}
-		{% endif %}
-		{% endwith %}
-		{% endwith %}
 
 		{% if bill.source == "thomas-congproj" %}
+		<div id="bill-history" style="margin: 50px 0;">
 			<h2><span>History</span></h2>
 
 			{% if current or bill.get_major_events|length > 0 %}
@@ -651,6 +690,17 @@
 								</p>
 								{% if item.vote_obj.oursummary %}{{item.vote_obj.oursummary.as_html|truncatewords_html:30|safe}}{% endif %}
 								<p class="links">
+									{% with vit=item.vote_obj.get_map_thumbnail_type %}
+									{% if vit %}
+										<a href="{{item.vote_obj.get_absolute_url}}">
+											<img
+												src="{{item.vote_obj.get_absolute_url}}/{{vit}}"
+												alt="Vote Thumbnail Image"
+												style="max-width: 75px; float: left; margin: 2px 1em 1em 0;"
+												>
+										</a>
+									{% endif %}
+									{% endwith %}
 									{% if item.vote_obj %}<a href="{{item.vote_obj.get_absolute_url}}">View Vote &raquo;</a>{% endif %}
 									{% if item.text_version %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}" {% if item.text_date %}title="{{item.text_date|date}}"{% endif %}>Read Text &raquo;</a>{% endif %}
 									{% if item.text_version_compare_to %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}#compare={{item.text_version_compare_to}}">See Changes &raquo;</a>{% endif %}
@@ -663,85 +713,74 @@
 					</tr>
 				{% endfor %}
 				</table>
+			</div> <!-- /bill-history -->
 			{% endif %}
 
-			<div style="line-height: 130%; background-color: #F0BE7D; padding: 1em; margin: 15px 0 15px -6px; border-radius: 6px;">
+			<div class="panel panel-info">
+			  <div class="panel-body">
+				<!-- What is a bill? -->
 				<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
-				<h3 style="margin: 0 0 5px 0; font-weight: bold;">{{bill.display_number_no_congress_number}} is a {{bill.noun}} in the United States Congress.</h3>
-				<p style="margin: 0">{{bill.how_a_bill_text}}</p>
+				<h3 style="margin: 0 0 5px 0; font-weight: bold;">{{bill.display_number_no_congress_number}} is a {{bill.bill_type_name}} in the United States Congress.</h3>
+				<p>{{bill.how_a_bill_text}}</p>
+
+				<!-- Citation -->
+				<h3 style="margin: 0 0 5px 0; font-weight: bold;">
+					How to cite this information.
+				</h3>
+				<p>We recommend the following <span id="active-citation-format">MLA</span>-formatted citation when using the information you see here in academic work:</p>
+				<div style="margin: 1em">
+					<p id="cite_apa" style="display: none">Civic Impulse. ({% now "Y" %}). {{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15|stripfinalperiod}}. Retrieved from {{request.build_absolute_uri}}</p>
+					<p id="cite_mla">&ldquo;{{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15|stripfinalperiod}}.&rdquo; www.GovTrack.us. {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
+					<p id="cite_wikipedia" style="display: none">{{cite web<br/>
+					|url={{request.build_absolute_uri}}<br/>
+					|title={{bill.display_number_with_congress_number}}<br/>
+					|accessdate={% now "F j, Y" %}<br/>
+					|author={{bill.congress|ordinal}} Congress ({{bill.introduced_date|date:"Y"}})<br/>
+					|date={{bill.introduced_date|date:"F j, Y"}}<br/>
+					|work=Legislation<br/>
+					|publisher=GovTrack.us<br/>
+					|quote={{bill.title_no_number|truncatewords:15}}<br/>
+					}}</p>
+					<script>function show_cite(elem) {
+						var fmt = $(elem).attr("data-cite");
+						var v = $("#cite_" + fmt).is(":visible");
+						$('#cite_apa, #cite_mla, #cite_wikipedia').slideUp();
+						if (!v) $("#cite_" + fmt).slideDown();
+						$(elem).parent().parents().find("li").show();
+						$(elem).parent().hide();
+						$('#active-citation-format').text($(elem).text());
+						return false;
+					}</script>
+					<ul class="list-inline" style="margin-top: -.5em; font-size: 12px">
+						<li>show another citation format:</li>
+						<li style="display: none"><a href="#" onclick="return show_cite(this)" data-cite="mla">MLA</a></li>
+						<li><a href="#" onclick="return show_cite(this)" data-cite="apa">APA</a></li>
+						<li><a href="#" onclick="return show_cite(this)" data-cite="wikipedia">Wikipedia Template</a></li>
+					</ul>
+				</div>
+
+				<h3 style="margin: 0 0 5px 0; font-weight: bold;">
+					Where is this information from?
+				</h3>
+				<p style="margin-bottom: 0">GovTrack automatically collects legislative information from a variety of governmental and non-governmental sources. This page is sourced primarily from
+					{% if bill.congress >= 93 %}
+						<a href="{{bill.loc_hdl_link}}">Congress.gov</a>, the official portal of the United States Congress.
+						Congress.gov is generally updated one day after events occur, and so legislative activity shown here may be one day behind. Data via the <a href="https://github.com/unitedstates/congress">congress project</a>.
+					{% elif bill.source == "statutesatlarge" %}
+						<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
+						<a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a>, the official digital repository for historical records of enacted laws.
+						Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
+						Data via the <a href="https://github.com/unitedstates/congress">congress project</a>.
+					{% elif bill.source == "americanmemory" %}
+						<a href="{{bill.source_link}}">American Memory Century of Lawmaking</a>, a project of the Library of Congress.
+						Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
+						Data via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law project</a>.
+					{% endif %}
+				</p>	
+			  </div>
 			</div>
 
 		{% endif %}
-
-		<h2><span>Links &amp; tools</span></h2>
-
-		<div class="row">
-				<div class="col-sm-6 col-md-4">
-					<dl>
-						<dt>Primary Source</dt>
-						{% if bill.congress >= 93 %}
-						<dd>
-							<p style="margin-bottom: .25em; line-height: 125%"><a href="{{bill.loc_hdl_link}}">Congress.gov</a></p>
-							<p class="small" style="line-height: 130%">Congress.gov is updated generally one day after events occur. Legislative activity since the last update may not be reflected on GovTrack. Data via <a href="https://github.com/unitedstates/congress">congress project</a>.</p>
-						</dd>
-						{% elif bill.source == "statutesatlarge" %}
-						<dd>
-							<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
-							<p style="margin-bottom: .25em"><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
-							<p class="small">Historical information on bills from 1957-1972 is obtained from the Government Publishing Office&rsquo;s United States Statutes at Large publication, via the <a href="https://github.com/unitedstates/congress">congress project</a>.</p>
-						</dd>
-						{% elif bill.source == "americanmemory" %}
-						<dd>
-							<p style="margin-bottom: .25em"><a href="{{bill.source_link}}">American Memory Century of Lawmaking</a></p>
-							<p class="small">Historical information on bills from 1799-1873 comes from the Library of Congress&rsquo;s American Memory Century of Lawmaking collection, via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law project</a>.</p>
-						</dd>
-						{% endif %}
-					</dl>
-				</div>
-
-			<div class="col-sm-6 col-md-4">
-				<dl>
-						<dt>Widget</dt>
-						<dd>
-							<p style="line-height: 125%;"><a href="{{bill.get_absolute_url}}/widget">Get a bill status widget for your website &raquo;</a></p>
-						</dd>
-				</dl>
-			</div>
-
-			<div class="col-sm-6 col-md-4">
-						<dt>Citation</dt>
-						<dd>
-							<script>function show_cite(fmt) {
-								var v = $("#cite_" + fmt).is(":visible");
-								$('#cite_apa, #cite_mla, #cite_wikipedia').slideUp();
-								if (!v) $("#cite_" + fmt).slideDown();
-								return false;
-							}</script>
-							<p style="margin: 0; line-height: 125%;">Click a format for a citation suggestion:</p>
-							<ul class="list-inline">
-								<li><a href="#" onclick="return show_cite('apa')">APA</a></li>
-								<li><a href="#" onclick="return show_cite('mla')">MLA</a></li>
-								<li><a href="#" onclick="return show_cite('wikipedia')">Wikipedia Template</a></li>
-							</ul>
-							<p id="cite_apa" style="display: none">Civic Impulse. ({% now "Y" %}). {{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15}}. Retrieved from {{request.build_absolute_uri}}</p>
-
-							<p id="cite_mla" style="display: none">&ldquo;{{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15}}.&rdquo; www.GovTrack.us. {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
-
-							<p id="cite_wikipedia" style="display: none">{{cite web<br/>
-							|url={{request.build_absolute_uri}}<br/>
-							|title={{bill.display_number_with_congress_number}}<br/>
-							|accessdate={% now "F j, Y" %}<br/>
-							|author={{bill.congress|ordinal}} Congress ({{bill.introduced_date|date:"Y"}})<br/>
-							|date={{bill.introduced_date|date:"F j, Y"}}<br/>
-							|work=Legislation<br/>
-							|publisher=GovTrack.us<br/>
-							|quote={{bill.title_no_number|truncatewords:15}}<br/>
-							}}</p>
-						</dd>
-				</dl>
-			</div>
-
-		</div> <!-- /row -->
 
 	{% if 0 %}
 	<div id="comments">
@@ -771,8 +810,6 @@
 	</div>
 	{% endif %}
 	
-
-{% include "ad_footer_leaderboard.html" %}
 
 {# Prognosis Details #}
 {% with bill.get_prognosis as p %}

@@ -63,17 +63,6 @@ h3 {
 			{% if not summary %}
 				<p>We don&rsquo;t have a summary available yet.</p>
 			{% else %}
-				{% with SITE_ROOT_URL|add:bill.get_absolute_url as share_url %}
-				<div style="width: 77px; float: left; text-align: center; margin: 0 2em 1.5em 0">
-					<a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{bill.title|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
-					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
-					{% if FACEBOOK_APP_ID %}
-						<div class="fb-share-button" data-href="{{share_url}}" data-layout="box_count" style="margin-top: 1em"></div>
-					{% endif %}
-				</div>
-				{% endwith %}
-
 				{{summary.as_html|safe}}
 
 				<div class="clearfix"> </div> {# because of share float to not hit border #}
@@ -144,14 +133,3 @@ h3 {
 
 {% endblock %}
 
-{% block body_scripts %}
-        {# facebook #}
-        <div id="fb-root"></div>
-        <script>(function(d, s, id) {
-          var js, fjs = d.getElementsByTagName(s)[0];
-          if (d.getElementById(id)) return;
-          js = d.createElement(s); js.id = id;
-          js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId={{FACEBOOK_APP_ID}}&version=v2.0";
-          fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));</script>
-{% endblock %}

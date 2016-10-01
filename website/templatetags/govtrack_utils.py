@@ -35,3 +35,10 @@ def markdown(value):
 @register.filter(is_safe=True)
 def json(value):
     return safestring.mark_safe(jsonlib.dumps(value))
+
+@register.filter(is_safe=True)
+@stringfilter
+def stripfinalperiod(value):
+    if value.endswith("."):
+        value = value[:-1]
+    return value
