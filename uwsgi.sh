@@ -64,7 +64,7 @@ echo "Starting..."
 
 # daemonize if DEBUG is not set
 if [ -z "$DEBUG" ]; then
-	daemonize="--daemonize /tmp/uwsgi_govtrack_$NAME.log --pidfile $pidfile --processes $PROCESSES --cheaper 2"
+	daemonize="--daemonize /dev/null --pidfile $pidfile --processes $PROCESSES --cheaper 2"
 fi
 
 .env/bin/uwsgi $daemonize --socket /tmp/uwsgi_govtrack_$NAME.sock --chmod-socket=666 --wsgi-file wsgi.py
