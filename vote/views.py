@@ -326,6 +326,10 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		vote_result_2 = "Filibustered"
 	elif re.match(r"Cloture .*Agreed to", vote.result):
 		vote_result_2 = "Proceed"
+	elif re.match(r"Veto Overridden", vote.result):
+		vote_result_2 = "Overridden"
+	elif re.match(r"Veto Sustained", vote.result):
+		vote_result_2 = "Sustained"
 	else:
 		vote_result_2 = re.sub("^(Bill|Amendment|Joint Resolution|Resolution|Conference Report|Nomination|Motion|Motion to \S+) ", "", vote.result)
 	if vote_result_2 == "unknown": vote_result_2 = ""

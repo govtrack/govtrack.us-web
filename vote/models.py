@@ -130,7 +130,7 @@ class Vote(models.Model):
 
     @property
     def is_on_passage(self):
-        return self.category in (VoteCategory.passage_suspension, VoteCategory.passage)
+        return self.category in (VoteCategory.passage_suspension, VoteCategory.passage, VoteCategory.veto_override)
  
     def get_voters(self):
         # Fetch from database.
