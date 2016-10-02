@@ -398,7 +398,7 @@ onUserDistrictChanged(function (cong_dist, mocs) {
         </div>
     </div>
 {% endif %}
-{% if has_diagram.map %}
+{% if has_diagram.map and vote.chamber_name != "Senate" %}
     <div class="col-sm-6 col-lg-3">
         <div style="margin-top: 1em">
             <img src="{{ vote.get_absolute_url }}/map" class="img-responsive" style="margin: auto;" />

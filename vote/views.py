@@ -77,7 +77,7 @@ def vote_details(request, congress, session, chamber_code, number):
             vote_thumbnail_image(request, congress, session, chamber_code, number, image_type)
             has_diagram[image_type] = True
         except Http404:
-            pass
+            has_diagram[image_type] = False
     
     # sorting by party actually sorts by party first and by ideology score
     # second.
@@ -276,7 +276,7 @@ def vote_thumbnail_image_map(vote):
 	# We only have an SVG for House votes for certain Congresses.
 	if vote.chamber != CongressChamber.house:
 		raise Http404()
-	if vote.congress not in (112, 113, 114,):
+	if vote.congress not in (112, 113, 114):
 		raise Http404()
 
 	# Load the SVG.
