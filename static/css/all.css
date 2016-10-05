@@ -206,6 +206,9 @@ blockquote {
 		#masthead .navbar-toggle .icon-bar {
 			background-color: #557D9A;
 		}
+		#masthead input {
+			color: black;
+		}
 
 #logo {
 	display: block;
@@ -916,7 +919,7 @@ aside .download-links { padding: 31px 0 0 }
 	.searching .summary {
 		padding: 0 0 13px;
 		border-bottom: 6px solid #dae2df;
-		color: #40a4bd;
+		color: #AF7325;
 		font: 16px/21px serif;
 		margin: 0 0 0;
 		}
@@ -1027,9 +1030,7 @@ aside .download-links { padding: 31px 0 0 }
 select, input.text {
 	font: 12px/16px sans-serif;
 	color: #444;
-	border: solid #e6d39c 2px;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
+	border: solid #643800 1px;
 	border-radius: 3px;
 	-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
 	}
