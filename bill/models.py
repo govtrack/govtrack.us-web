@@ -447,7 +447,7 @@ class Bill(models.Model):
     def explanatory_text(self):
         if re.search("Appropriations? Act(( of| for Fiscal Year|,) \d\d\d\d)?$", self.title):
             return "The federal budget process occurs in two stages: appropriations and authorizations. This is an appropriations bill, which sets overall spending limits by agency or program. (Authorizations direct how federal funds should or should not be used.) Appropriations are typically made for single fiscal years (October 1 through September 30 of the next year)."
-        if re.search("Authorizations? Act(( of| for Fiscal Year|,) \d\d\d\d)?$", self.title):
+        if re.search("Authorizations? Act(( of| for Fiscal Year|,|, Fiscal Year) \d\d\d\d)?$", self.title):
             return "The federal budget process occurs in two stages: appropriations and authorizations. This is an authorization bill, which directs how federal funds should or should not be used. (It does not set overall spending limits, however, which are the subject of appropriations bills.) Authorizations are typically made for single fiscal years (October 1 through September 30 of the next year) but are often renewed in subsequent law."
         if re.search("(Reauthorization Act(( of| for Fiscal Year|,) \d\d\d\d)?$)|(^(A bill )?to (permanently )?reauthorize )", self.title_no_number, re.I):
             return "The federal budget process occurs in two stages: appropriations, which set overall spending limits by agency or program, and authorizations, which direct how federal funds should (or should not) be used. Appropriation and authorization provisions are typically made for single fiscal years. A reauthorization bill like this one renews the authorizations of an expiring law."
