@@ -21,5 +21,6 @@ urlpatterns = patterns('website.views',
     url(r'^videos(?:/(?P<video_id>[a-z0-9\-_]+))?', 'videos'),
     url(r'^medium-post-redirector/(\d+)?', 'medium_post_redirector'),
     url(r'^_ajax/reaction', 'add_remove_reaction', name='reaction'),
+    url(r'^reactions.json', 'dump_reactions', name='dump_reactions'),
 )
 

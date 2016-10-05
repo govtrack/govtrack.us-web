@@ -582,8 +582,6 @@ def add_remove_reaction(request):
         and request.POST.get("mode") in ("-1", "1") \
         and request.POST.get("emoji") in Reaction.EMOJI_CHOICES:
 
-        print(request.META)
-
         r, isnew = Reaction.objects.get_or_create(
             subject=request.POST["subject"],
             user=request.user if request.user.is_authenticated() else None,
@@ -613,3 +611,31 @@ def add_remove_reaction(request):
             r.save()
 
     return HttpResponse(json.dumps(res), content_type="application/json")
+
+def dump_reactions(request):
+    from django.db.models import Count
+    from website.models import Reaction
+    from collections import defaultdict, OrderedDict
+    from website.models import Bill
+
+    # Get subjects with the most users reacting.
+    reactions = Reaction.objects.values_list("subject").annotate(count=Count('subject')).order_by('-count')[0:100]
+
+    # Build ouptut.
+    def emojis(subject):
+        counts = defaultdict(lambda : 0)
+        for r in Reaction.objects.filter(subject=subject):
+            for e in (r.reaction or {}).get("emojis", []):
+                counts[e] += 1
+        return OrderedDict(sorted(counts.items(), key = lambda kv : -kv[1]))
+    
+    ret = [
+        OrderedDict([
+            ("subject", r[0]),
+            ("title", Bill.from_congressproject_id(r[0][5:]).title),
+            ("unique_users", r[1]),
+            ("emojis", emojis(r[0])),
+        ])
+        for r in reactions
+    ]
+    return HttpResponse(json.dumps(ret, indent=2), content_type="application/json")
