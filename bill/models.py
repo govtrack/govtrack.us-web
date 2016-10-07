@@ -803,7 +803,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             if callable(explanation): explanation = explanation(self)
 
             if st == BillStatus.referred: continue # don't care about this
-            if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres) and srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference"):
+            if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres, BillStatus.enacted_veto_override) and srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference", "override"):
                 ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
                 # PASSED:BILL only occurs on the second chamber, so indicate both agreed to in text
                 if srcnode.get("type") == "vote2":
@@ -812,6 +812,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                     st = ("%s Agreed to Changes" % ch)
                 elif srcnode.get("type") == "conference":
                     st = ("Conference Report Agreed to by %s" % ch)
+                elif srcnode.get("type") == "override":
+                    st = ("%s Overrides Veto" % ch)
             else:
                 if st == BillStatus.introduced: saw_intro = True
                 st = BillStatus.by_value(st)
@@ -822,7 +824,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
             vote_text = None
             vote_obj = None
-            if srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "pingpong", "conference"):
+            if srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "pingpong", "conference", "override"):
                 if srcnode.get("how") == "roll":
                     try:
                         from vote.models import Vote, CongressChamber, VoteSource

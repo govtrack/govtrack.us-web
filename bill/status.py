@@ -210,7 +210,7 @@ class BillStatus(enum.Enum):
         u'Enacted \u2014 Veto Overridden',
         xml_code='ENACTED:VETO_OVERRIDE',
         search_help_text="Enacted by a veto override.",
-        explanation="Congress overrided the veto of the President. The bill became law.",
+        explanation="Congress overrode the veto of the President. The bill became law.",
         sort_order=(3,5))
     enacted_tendayrule = enum.Item(32,
         u'Enacted \u2014 By 10 Day Rule',
