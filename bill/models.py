@@ -417,10 +417,23 @@ class Bill(models.Model):
 
     def get_prognosis(self):
         if self.congress != settings.CURRENT_CONGRESS: return None
-        import prognosis
-        prog = prognosis.compute_prognosis(self)
-        prog["congressdates"] = get_congress_dates(prog["congress"])
-        return prog
+        # Load the predictgov prognosis data.
+        from django.core.cache import cache
+        key = "Bill.predictgov"
+        ret = cache.get(key)
+        if ret is None:
+            try:
+                import csv
+                ret = { row["bill_id"].lower(): { "prediction": float(row["Prediction"])*100, "notes": row["descs"] }
+                    for row in csv.DictReader(open("../scripts/predictgov/predictions.csv")) }
+            except:
+                # On any sort of error, just ignore.
+                return None
+            cache.set(key, ret, 60*60*4.5) # 4.5 hours, since the file is updated daily
+        ret = ret.get(self.congressproject_id)
+        ret["success_name"] = "enacted" if self.bill_type in (BillType.senate_bill, BillType.house_bill, BillType.senate_joint_resolution, BillType.house_joint_resolution) \
+            else "agreed to"
+        return ret
 
     def get_formatted_summary(self):
         s = get_formatted_bill_summary(self)
