@@ -744,10 +744,11 @@ def dump_prognosis(congress):
 
 	bills = Bill.objects.filter(congress=congress)
 	for bill in tqdm.tqdm(bills.prefetch_related()):
-		x = compute_prognosis_2(prognosis_model, bill, committee_membership, majority_party, None, proscore=False, testing=True)
+             # set testing=True to not allow use of current_status
+		x = compute_prognosis_2(prognosis_model, bill, committee_membership, majority_party, None, proscore=False, testing=False)
 		y0 = is_success(bill, 0, indexed_success_text[bill_type_map_inv[bill.bill_type]])
 		y1 = is_success(bill, 1, indexed_success_text[bill_type_map_inv[bill.bill_type]])
-		y2 = (bill.was_enacted_ex() is not None)
+		y2 = "-" # (bill.was_enacted_ex() is not None)
 		w.writerow([bill_type_map_inv[bill.bill_type], x["prediction_1"], x["prediction"], y0, y1, y2, bill.id, bill.congressproject_id])
 			
 if __name__ == "__main__":
@@ -763,4 +764,4 @@ if __name__ == "__main__":
 	elif sys.argv[-1] == "index-text":
 		index_successful_paragraphs(114)
 	elif sys.argv[-1] == "dump":
-		dump_prognosis(113)		
+		dump_prognosis(114)
