@@ -207,41 +207,6 @@ def search(request):
     if not isinstance(r, list): return r
     return { "results": r }
 
-@cache_page(60 * 15)
-@render_to('website/campaigns/bulkdata2.html')
-def campaign_bulk_data(request):
-    return { }
-
-@render_to('website/campaigns/bulkdata.html')
-def campaign_bulk_data_old(request):
-    prefixes = ("Mr.", "Ms.", "Mrs.", "Dr.")
-    
-    # Validate.
-    if request.method == 'POST':
-        from models import CampaignSupporter
-
-        s = CampaignSupporter()
-        
-        if "sid" in request.POST:
-            try:
-                s = CampaignSupporter.objects.get(id=request.POST.get("sid"), email=request.POST.get("email", ""))
-            except:
-                pass
-        
-        s.campaign = "2012_03_buldata"
-        for field in ('prefix', 'firstname', 'lastname', 'address', 'city', 'state', 'zipcode', 'email'):
-            if request.POST.get(field, '').strip() == "":
-                return { "stage": 1, "error": "All fields are required!", "prefixes": prefixes }
-            setattr(s, field, request.POST.get(field, ""))
-        s.message = request.POST.get('message', '')
-        s.save()
-
-        if "message" not in request.POST:
-            return { "stage": 2, "sid": s.id }
-        else:
-            return { "stage": 3 }
-    return { "stage": 1, "prefixes": prefixes }
-
 def push_to_social_media_rss(request):
     import django.contrib.syndication.views
     from events.models import Feed
