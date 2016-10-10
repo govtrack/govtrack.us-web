@@ -251,7 +251,6 @@ blockquote {
 	#categories li {
 		display: inline-block;
 		width: 225px;
-		background: url(../images/bg-info-box-nav.png) no-repeat 0 12px;
 		min-height: 153px;
 		margin: 0 3px 20px;
 		}
