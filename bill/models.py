@@ -431,8 +431,9 @@ class Bill(models.Model):
                 return None
             cache.set(key, ret, 60*60*4.5) # 4.5 hours, since the file is updated daily
         ret = ret.get(self.congressproject_id)
-        ret["success_name"] = "enacted" if self.bill_type in (BillType.senate_bill, BillType.house_bill, BillType.senate_joint_resolution, BillType.house_joint_resolution) \
-            else "agreed to"
+        if ret:
+            ret["success_name"] = "enacted" if self.bill_type in (BillType.senate_bill, BillType.house_bill, BillType.senate_joint_resolution, BillType.house_joint_resolution) \
+                else "agreed to"
         return ret
 
     def get_formatted_summary(self):
