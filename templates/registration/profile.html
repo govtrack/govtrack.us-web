@@ -56,35 +56,13 @@
 	</div>
 </div>
 	
-<h2><span>Profile</span></h2>
-
 {% with user.userprofile.get_membership_subscription_info as msi %}
 {% if msi.message %}
+	<h2><span>Membership Subscription</span></h2>
+
 	<p>{{msi.message}} More about <a href="/accounts/membership">GovTrack Membership</a>.</p>
 {% endif %}
 {% endwith %}
-
-<div class="form-horizontal">
-	<div class="form-group">
-		<label class="col-sm-2 control-label">Congressional District</label>
-		<div class="col-sm-10" style="padding-top: 6px">
-			<div class="no-district hidden"><p><button onclick="show_askcd();">Pick Your Congressional District</button></p> <p>We will customize GovTrack to show you more relevant information.</p></div>
-			<div class="has-district hidden"><p><span style="font-weight: bold"> </span> <button onclick="show_askcd();" style="margin-left: 2em">Change</button</p></div>
-		</div>
-	</div>
-
-	<script>
-	onUserDistrictChanged(function (cong_dist, mocs) {
-		$('.no-district').toggleClass('hidden', !!cong_dist)
-		$('.has-district').toggleClass('hidden', !cong_dist)
-		if (!cong_dist) return;
-		if (cong_dist.district > 0)
-			$('.has-district span').text(cong_dist.state + "-" + cong_dist.district)
-		else
-			$('.has-district span').text(cong_dist.state + " (at large)")
-	});
-	</script>
-</div>
 
 <h2 id="login-section"><span>Login</span></h2>
 

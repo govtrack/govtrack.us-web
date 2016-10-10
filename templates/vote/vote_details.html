@@ -190,25 +190,6 @@ $(function() {
 </script>
 {% endblock %}
 
-{% block body_scripts %}
-<script>
-// customization based on user's district
-var voters = {{vote.simple_record|json}};
-onUserDistrictChanged(function (cong_dist, mocs) {
-    var text = "";
-    if (cong_dist) {
-        for (var i = 0; i < voters.length; i++) {
-            var v = moc_record_matches_user(voters[i].moc, cong_dist, mocs);
-            if (v)
-                text += v + "voted " + voters[i].vote + ". ";
-        }
-    }
-    $('#yourreps').toggleClass('hidden', text=="");
-    $('#yourreps').text(text);
-});
-</script>
-{% endblock %}
-
 {% block crumbs %}
 <ol class="breadcrumb">
     <li><a href="{% url "congress_home" %}">Congress</a></li>
@@ -359,8 +340,6 @@ onUserDistrictChanged(function (cong_dist, mocs) {
     which is when two Members of Congress, one planning to vote in favor and the other against, plan ahead of time to both abstain. The totals now
     omit paired votes and now more closely reflect the official totals.</p>
 {% endif %}
-
-<p id="yourreps" class="hidden"></p>
 
 <div id="admin_panel"> </div>
 <script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>

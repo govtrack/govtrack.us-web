@@ -590,13 +590,6 @@ class PersonRole(models.Model):
         # As it happens, our enums define a good sort order between senators and representatives.
         return (self.role_type, self.senator_rank)
 
-    def simple_record(self):
-        return {
-            "id": self.person.id,
-            "state": self.state, "district": self.district, "title": self.get_title().lower(),
-            "name": self.person.name_no_details(),
-            }
-
 # Feeds
 
 from events.models import Feed

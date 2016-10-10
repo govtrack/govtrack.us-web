@@ -54,45 +54,6 @@
     $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
     $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
     
-	// customization based on user's district
-	var sponsor = {{ bill.sponsor_role.simple_record|json }};
-	var cosponsors = [{% for cosp in bill.cosponsor_records %}{{cosp.role.simple_record|json}}{% if not forloop.last %}, {% endif %}{% endfor %}];
-	var major_votes = [];
-	{% for v in bill.votes.all %}
-		{% if v.is_major %}
-			major_votes.push({ date: "{{v.created|date}}", mocs: {{v.simple_record|json}} });
-		{% endif %}
-	{% endfor %}
-
-	onUserDistrictChanged(function (cong_dist, mocs) {
-		var text = "";
-		if (cong_dist) {
-			var s = moc_record_matches_user(sponsor, cong_dist, mocs);
-			if (s)
-				text += s + " is the sponsor. ";
-			for (var i = 0; i < cosponsors.length; i++) {
-				var c = moc_record_matches_user(cosponsors[i], cong_dist, mocs);
-				if (c)
-					text += c + " is a cosponsor. ";
-			}
-			for (var i = 0; i < major_votes.length; i++) {
-				var t = [];
-				for (var j = 0; j < major_votes[i].mocs.length; j++) {
-		            var v = moc_record_matches_user(major_votes[i].mocs[j].moc, cong_dist, mocs);
-		            if (v) {
-	 		            v = v.replace(/^Your /, "your ");
-		                t.push(v + "voted " + major_votes[i].mocs[j].vote);
-		            }
-				}
-				if (t.length > 0) {
-					text += "On " + major_votes[i].date + " " + t.join(" and ") + ". ";
-				}
-			}
-		}
-		$('#yourreps').toggleClass('hidden', text=="");
-		$('#yourreps p').text(text);
-	});
-
 	function add_emoji_reaction(emoji) {
 		var n = $("<a href='#'/>");
 		n.attr("data-count", emoji.count);
@@ -641,11 +602,6 @@
 					<br/>(Click for scanned images of the {{bill.noun}}&rsquo;s text.)</p>
 				</dd>
 				{% endif %}
-
-				<div id="yourreps" class="hidden" style="font-style: italic; ine-height: 125%;">
-					<hr>
-					<p></p>
-				</div>
 			</dl>
 
 		</div><!-- /info -->

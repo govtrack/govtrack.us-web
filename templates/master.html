@@ -52,43 +52,6 @@
 		{% block extra_js %}{% endblock %}
 		
 		<script type="text/javascript">
-		var user_district_callbacks = [];
-		function onUserDistrictChanged() {
-			function call_callback(cb) {
-				// When there's known data, the state may be XX to indicate the user does not want to be prompted again for his/her district.
-				var cd = cong_dist;
-				if (cd && cd.state == "XX") cd = null;
-
-				// Convert list to hashable array.
-				var mocs = { };
-				if (cong_dist_mocs) {
-					for (var i = 0; i < cong_dist_mocs.length; i++)
-						mocs[cong_dist_mocs[i]] = cong_dist_mocs[i];
-				}
-
-				// Call.
-				cb(cd, mocs);
-			}
-
-			if (typeof arguments[0] == "function") {
-				// Called with a callback. Execute immediately with known data, then save callback for later.
-				var callback = arguments[0];
-				call_callback(callback);
-				user_district_callbacks.push(callback);
-			} else {
-				// Called with a new state and district. Save new info and execute callbacks.
-				if (arguments[0] == null) {
-					cong_dist = null;
-					cong_dist_mocs = null;
-				} else {
-					cong_dist = { state: arguments[0], district: arguments[1] };
-					cong_dist_mocs = arguments[2]; // array of IDs of the user's current MoCs
-				}
-				for (var i = 0; i < user_district_callbacks.length; i++)
-					call_callback(user_district_callbacks[i]);
-			}
-		}
-
 		{% if not debug %}
 		<!-- Google Analytics -->
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -166,7 +129,6 @@
 	      <ul class="nav navbar-nav navbar-right">
 			{% block override_login %}
 			{% if not user.is_authenticated %}
-				<li id="nav_askcd" {% if request.anonymous %}style="display: none"{% endif %}><a href="#" onclick="return show_askcd();">Set District</a></li>
 				<li id="nav_login"><a href="/accounts/login?next={{request.path|urlencode}}">Log In</a></li>
 				{% if request.anonymous %}
 					<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
@@ -370,7 +332,7 @@
 	</script>
 
 	<script src="/static/js/govtrack.js?20151003"></script>
-	{% include "ask_district.html" %}
+	{% include "run_of_site_popups.html" %}
 
 	{% comment %}
 	<!-- Piwik -->

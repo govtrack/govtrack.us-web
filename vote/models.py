@@ -230,13 +230,6 @@ class Vote(models.Model):
             ret = "Result: " + ret
         return ret
         
-    def simple_record(self):
-        return [
-            { "vote": v.option.value, "moc": v.person_role.simple_record() }
-            for v in self.get_voters()
-            if v.voter_type_is_member and v.person is not None and v.person_role is not None
-        ]
-
     def get_summary(self):
         try:
             return self.oursummary

@@ -163,86 +163,9 @@ article {
 				</section>
 			</div><!-- /generic-events -->
 
-			<div id="custom-events">
-				<h2><span>in district...</span></h2>
-				<div style="text-align: right"><small><a href="#" onclick="return show_askcd();">not your district?</a></small></div>
-				<section class="row" style="margin-bottom: 1em">
-				</section>
-				<section class="featured-articles">
-				</section>
-				<div style="display: none">
-					<div id="custom-events-rep-template" class="col-xs-4 col-sm-6 col-lg-4" style="text-align: center; margin-bottom: 1.5em">
-						<a style="text-decoration: none; pading: 1em; display: block">
-							<img src="" class="img-responsive" style="margin: 0 auto">
-							<p class="name" style="margin: .5em 0 0 0; font-weight: bold; line-height: 125%;"> </p>
-							<p class="title" style="margin: 0; font-size: 90%; color: #444; line-height: 125%;"> </p>
-						</a>
-					</div>
-					<article id="custom-events-template" style="margin-bottom: 1em">
-						<h3><a></a></h3>
-						<p>
-							<span class="event-type"></span>
-							&mdash;
-							<span class="event-date"></span>
-						</p>
-						<div class="event_body_body"> </div>
-					</article>
-				</div>
-			</div> <!-- /custom-events -->
 	</div> <!-- /col -->
 </div> <!-- /row -->
 {% endblock %}
 
-{% block body_scripts %}
-<script>
-// customization based on user's district
-onUserDistrictChanged(function (cong_dist, mocs) {
-    if (cong_dist) {
-		$.ajax({
-			url: "/congress/members/ajax/homepage_summary?district=" + cong_dist.state + cong_dist.district,
-			success: function(res) {
-				$('#custom-events').show();
-				$('#generic-events').hide();
 
-				var n = $('#custom-events');
-				n.find('h2 span').text("In " + res.state_name + "’s " + (res.district > 0 ? res.district_ordinal : 'At-Large') + " Congressional District");
-				n.find('section').text('');
-
-				for (var i = 0; i < res.reps.length; i++) {
-					if (i == 2) n.find('.row').append($("<div class='clearfix visible-sm'/>"));
-					var r = $('#custom-events-rep-template').clone();
-					r.find('img').attr('src', res.reps[i].photo)
-					r.find('a').attr('href', res.reps[i].link)
-					r.find('.name').text(res.reps[i].name)
-					r.find('.title').text(res.reps[i].title)
-					n.find('.row').append(r);
-				}
-
-				if (res.events.length > 0) {
-					n.find('section.featured-articles').append($('<p>').text('Your representative' + (res.reps.length == 1 ? ' was' : 's were') + ' involved in the following recent legislative events:'));
-				}
-				for (var i = 0; i < res.events.length; i++) {
-					var e = $("#custom-events-template").clone();
-					e.attr('id', '');
-					e.addClass(res.events[i].type);
-					e.find('h3 a').attr('href', res.events[i].url);
-					e.find('h3 a').text(res.events[i].title);
-					e.find('.event-date').text(res.events[i].date);
-					e.find('.event-type').text(res.events[i].type);
-					e.find('.event_body_body').html(res.events[i].body_html);
-					n.find('section.featured-articles').append(e);
-				}
-			},
-			failure: function() {
-				$('#custom-events').hide();
-				$('#generic-events').show();
-			}
-		});
-    } else {
-		$('#custom-events').hide();
-		$('#generic-events').show();
-	}
-});
-</script>
-{% endblock %}
 

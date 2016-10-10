@@ -1,0 +1,89 @@
+<script>
+var win_loc_hash = window.location.hash; // may change between now and ()'s execution
+$(function() {
+	setTimeout(function() {
+		if (win_loc_hash == "#track") return;
+
+		// Read the session cookie (i.e. disappears when browser is closed).
+		var sflags = $.cookie("sflags");
+		sflags = !sflags ? {} : parse_qs(sflags);
+
+		if (win_loc_hash == "#opencongress") {
+			// Special dialog for these links. Clear the fragment and surpress
+			// other popups this browser session.
+			window.location.hash = "";
+			sflags.pause = true;
+			$('#opencongress_modal').modal();
+			ga('send', 'event', 'referral', 'opencongress');
+		}
+
+		// Save the scookie as a session cookie.
+		$.cookie("sflags", form_qs(sflags));
+
+		// Don't display any popups if the pause session state flag is set.
+		if (sflags.pause)
+			return;
+
+		// Read the persistent cookie for flags.
+		var flags = $.cookie("flags");
+		flags = !flags ? {} : parse_qs(flags);
+
+		if (Math.random() < .3)
+			show_followus(flags);
+
+		$.cookie("flags", form_qs(flags), { expires: 21, path: '/' });
+	}, 750)
+});
+
+function show_followus(flags) {
+	if (flags.foll_tw) return; // only show once
+	flags.foll_tw = true;
+
+	$('#followus_modal').modal();
+	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
+}
+</script>
+
+
+<div id="followus_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="followusModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="followusModalTitle">Follow us?</h4>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 20px">We tweet when bills are enacted and when we publish original research.</p>
+        <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/govtrack" data-widget-id="508366437044330496" height="250" data-tweet-limit="2" data-chrome="nofooter noborders">Tweets by @govtrack</a>
+      </div>
+      <!--<div class="modal-footer">
+      	<button type="button" class="btn btn-default" data-dismiss="modal">Not Now</button>
+      </div>-->
+    </div>
+  </div>
+</div>
+
+
+<style>
+#opencongress_modal strong { }
+</style>
+<div id="opencongress_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="opencongressModalTitle" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="opencongressModalTitle" style="font-size: 22px; font-weight: bold; font-family: sans-serif">Welcome to GovTrack.us</h4>
+      </div>
+      <div class="modal-body">
+      	<p>Thank you for giving GovTrack a try. Like OpenCongress, GovTrack is for <strong>researching and tracking legislation before the U.S. Congress</strong>.</p>
+      	<p style="text-align: center">★</p>
+      	<p>Things here should seem very familiar to you. OpenCongress and GovTrack have always had a data sharing partnership, so you&rsquo;ll find the <strong>exact same information here as what you had on OpenCongress</strong>, just arranged a little differently.</p>
+      	<p>And GovTrack has actually been here for more than a decade. This is the site that began <strong>the movement to improve access to Congress using technology</strong>.</p>
+      	<p>Unlike OpenCongress, we&rsquo;re funded through advertising and crowdfunding.</p>
+      	<p style="text-align: center">★</p>
+      	<p>For more, please see <a href="/about">About Us</a>, or follow us <a href="http://twitter.com/govtrack">@GovTrack</a> on Twitter, <a href="https://www.facebook.com/govtrack/">on Facebook</a>, or on <a href="https://medium.com/govtrack-insider">Medium</a>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
