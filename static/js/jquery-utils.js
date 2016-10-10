@@ -51,17 +51,6 @@ jQuery.fn.input_default = function(value) {
   });
 };
 
-// Apply the modernization.
-if (!Modernizr.input.placeholder) {
-	$(function() {
-		$('input[placeholder]').each(function() {
-			if (this.type == "password") return;
-			$(this).input_default(this.getAttribute('placeholder'));
-		});
-	});
-}
-
-
 function clear_default_fields(form) {
 	for (var i = 0; i < form.elements.length; i++) {
 		if ($(form.elements[i]).hasClass('default'))
