@@ -148,9 +148,6 @@ blockquote {
 	-moz-box-shadow:
 		0 0 0 5px #f9f8f4,
 		0 1px 2px 5px rgba(106,106,106,.4);
-	-webkit-box-shadow:
-		0 0 0 5px #f9f8f4,
-		0 1px 2px 5px rgba(106,106,106,.4);
 	box-shadow:
 		0 0 0 5px #f9f8f4,
 		0 1px 2px 5px rgba(106,106,106,.4);
@@ -305,7 +302,6 @@ blockquote {
 	}
 
 .photo img {
-	-webkit-box-shadow: 2px 2px 2px 0px rgba(168,168,168,1);
 	-moz-box-shadow: 2px 2px 2px 0px rgba(168,168,168,1);
 	box-shadow: 2px 2px 2px 0px rgba(168,168,168,1);
 	margin: 4px;
@@ -434,9 +430,6 @@ aside .download-links { padding: 31px 0 0 }
 	-moz-box-shadow:
 		0 0 0 5px #f9f8f4,
 		0 1px 2px 5px rgba(106,106,106,.4);
-	-webkit-box-shadow:
-		0 0 0 5px #f9f8f4,
-		0 1px 2px 5px rgba(106,106,106,.4);
 	box-shadow:
 		0 0 0 5px #f9f8f4,
 		0 1px 2px 5px rgba(106,106,106,.4);
@@ -460,9 +453,6 @@ aside .download-links { padding: 31px 0 0 }
 	color: black;
 	background-color: #fffbf0;
 	-moz-box-shadow:
-		0 0 0 5px #fcf3d0,
-		0 1px 2px 5px rgba(106,106,106,.4);
-	-webkit-box-shadow:
 		0 0 0 5px #fcf3d0,
 		0 1px 2px 5px rgba(106,106,106,.4);
 	box-shadow:
@@ -543,9 +533,6 @@ aside .download-links { padding: 31px 0 0 }
 		-moz-box-shadow:
 		0 0 0 5px #f9f8f4,
 		0 1px 2px 5px rgba(106,106,106,.4);
-		-webkit-box-shadow:
-		0 0 0 5px #f9f8f4,
-		0 1px 2px 5px rgba(106,106,106,.4);
 		box-shadow:
 		0 0 0 5px #f9f8f4,
 		0 1px 2px 5px rgba(106,106,106,.4);
@@ -575,7 +562,6 @@ aside .download-links { padding: 31px 0 0 }
 			border: 1px solid #eee;
 			margin-bottom: 20px;
 			/*moz-border-radius: 3px;
-			webkit-border-radius: 3px;
 			border-radius: 3px;*/
 		}
 		.tracked_event:hover {
@@ -619,7 +605,6 @@ aside .download-links { padding: 31px 0 0 }
 					border: solid #ddd 1px;
 					border-radius: 3px;
 					moz-border-radius: 3px;
-					webkit-border-radius: 3px;
 				}
 
 			.event_date {
@@ -659,7 +644,6 @@ aside .download-links { padding: 31px 0 0 }
 	background: #fff;
 	border: solid #dcd6c3 1px;
 	moz-border-radius: 5px;
-	webkit-border-radius: 5px;
 	border-radius: 5px;
 	overflow: hidden;
 	font-size: .9em;
@@ -667,8 +651,6 @@ aside .download-links { padding: 31px 0 0 }
 }
 #list_trackers li:hover,
 #basic_trackers li a:hover {
-	-webkit-box-shadow:
-		0 2px 5px rgba(0,0,0,.2);
 	box-shadow:
 		0 2px 5px rgba(0,0,0,.2);
 	/*behavior: url(/static/js/PIE.htc);*/
@@ -775,7 +757,6 @@ aside .download-links { padding: 31px 0 0 }
 				margin: 2px 0;
 				background: #fff;
 				moz-border-radius: 5px;
-				webkit-border-radius: 5px;
 				border-radius: 5px;
 				overflow: hidden;
 				font-size: .9em;
@@ -796,15 +777,12 @@ aside .download-links { padding: 31px 0 0 }
 				color: #fff;
 			}
 			.list_select li a:hover {
-				-webkit-box-shadow:
-					0 2px 5px rgba(0,0,0,.2);
 				box-shadow:
 					0 2px 5px rgba(0,0,0,.2);
 				/*behavior: url(/static/js/PIE.htc);*/
 			}
 			.list_select li.new a:hover,
 			.list_select li.all a:hover {
-				-webkit-box-shadow: none;
 				box-shadow: none;
 				/*behavior: url(/static/js/PIE.htc);*/
 			}
@@ -992,9 +970,6 @@ aside .download-links { padding: 31px 0 0 }
 	-moz-box-shadow:
 		0 0 0 5px #f9f8f4,
 		0 1px 2px 5px rgba(106,106,106,.4);
-	-webkit-box-shadow:
-		0 0 0 5px #f9f8f4,
-		0 1px 2px 5px rgba(106,106,106,.4);
 	box-shadow:
 		0 0 0 5px #f9f8f4,
 		0 1px 2px 5px rgba(106,106,106,.4);
@@ -1031,7 +1006,7 @@ select, input.text {
 	color: #444;
 	border: solid #643800 1px;
 	border-radius: 3px;
-	-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
+	-moz-background-clip: padding; background-clip: padding-box;
 	}
 .advanced-search select {
 	height: 30px;
@@ -1122,7 +1097,6 @@ select, input.text {
 			margin: .25em 20px 0;
 			border: solid #ddd 1px;
 			-moz-border-radius: 3px;
-			-webkit-border-radius: 3px;
 			border-radius: 3px;
 		}
 		#search-results .results-group .more:hover {
@@ -1168,7 +1142,6 @@ ul.tabs a {
 	font-weight: normal;
 	letter-spacing: .05em;
 	outline:0;
-	-webkit-border-radius: 4px 4px 0 0;
 	-moz-border-radius: 4px 4px 0 0;
 	border-radius: 4px 4px 0 0;
 }
@@ -1309,8 +1282,7 @@ ul.singlesignon {
 #sitenewscontainer {
 	padding: 2px 0 1px 0;
 	border-bottom: 1px solid #eee;
-	-webkit-box-shadow: 0px 0px 1px 0px #666;
-			box-shadow: 0px 0px 1px 0px #666;
+	box-shadow: 0px 0px 1px 0px #666;
 	font-size: 13px;
 	color: #666;
 }
@@ -1328,7 +1300,6 @@ ul.singlesignon {
 	}
 		#sitenews > div:first-of-type a {
 			-moz-border-radius: 12px;
-			-webkit-border-radius: 12px;
 			border-radius: 12px;
 			margin: -5px auto 0;
 			text-align: center;
