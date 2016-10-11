@@ -342,7 +342,6 @@ $(function() {
 {% endif %}
 
 <div id="admin_panel"> </div>
-<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
 
 <hr style="margin-top: 0; margin-bottom: 1.5em">
 
@@ -603,3 +602,6 @@ $(function() {
 
 {% endblock %}
 
+{% block body_scripts %}
+<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
+{% endblock %}

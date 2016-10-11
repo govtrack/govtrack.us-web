@@ -32,6 +32,14 @@
 		if (window.location.hash == "#all-calls-made") show_submission_status("You have already called your representative or senators on this issue.")
 		if (window.location.hash == "#hours") show_submission_status("Please come back during east coast office hours and click Call Congress above to call your representative.")
 		if (window.location.hash == "#rate-limit") show_submission_status("You have already made a lot of calls recently. Please wait a few days and then continue.")
+
+		if (the_page && the_page.position) {
+			$('#you_choose').hide();
+			$('#you_already_chose').show();
+			$('#you_already_chose span').text(the_page.position.text);
+			$('#change_position').toggle(the_page.position.can_change);
+			$('#make_call').toggle(the_page.position.can_call.length > 0);
+		}
 	});
 </script>
 {% endblock %}
@@ -81,15 +89,6 @@
 		Hello!
 	</div>
 </div>
-<script>
-if (the_page && the_page.position) {
-	$('#you_choose').hide();
-	$('#you_already_chose').show();
-	$('#you_already_chose span').text(the_page.position.text);
-	$('#change_position').toggle(the_page.position.can_change);
-	$('#make_call').toggle(the_page.position.can_call.length > 0);
-}
-</script>
 
 {% for bill in issue.bills.all %}
 	<p style="margin-top: 1em">Return to <a href="{{bill.bill.get_absolute_url}}">{{bill.bill}}</a></p>
@@ -111,3 +110,4 @@ if (the_page && the_page.position) {
 {% endif %}
 
 {% endblock %}
+
