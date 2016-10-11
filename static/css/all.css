@@ -161,6 +161,7 @@ blockquote {
 	margin-bottom: 20px;
 	}
 .ads.footer.leaderboard {
+	display: none;
 	margin: 20px 0 20px 0;
 	text-align: center;
 	}

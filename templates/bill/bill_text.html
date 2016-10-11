@@ -99,10 +99,6 @@ p.permalink-target {
 		border-bottom: 1px dotted #FF0;
 	}
 
-@media (max-width: 991px) {
-	#ad-container { display: none; }
-}
-
 {% include "bill/congressxml.css" %}
 
 </style>
@@ -463,19 +459,9 @@ $(function() {
 	</div>
 
 	<div class="pad-left-sm">
-		<div id="ad-container" style="margin-top: 2em; text-align: center">
-			<script>
-			if ($(window).width() < 992) {
-				// no ad
-			} else if (is_ad_free) {
-				document.write("An ad would be here, but you've gone ad-free!");
-			} else {
-				// Master A Responsive
-				document.write("{{ '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>'|escapejs }}");
-				(adsbygoogle = window.adsbygoogle || []).push({});
-			}
-			</script>
-			<div style="font-size: 90%; text-align: center"><a href="/advertising">About Ads</a></div>
+		<div id="bill-text-ad-container" class="ads" style="margin-top: 2em; text-align: center; display: none;">
+			<div class="ad-container"> </div>
+			<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
 		</div>
 	</div>
 </div>

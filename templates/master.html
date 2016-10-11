@@ -317,24 +317,11 @@
         </div>
       </div>
     </div>
-    <script>
-	function show_modal(title, message) {
-		$('#error_modal h4').text(title);
-		if (message.charAt(0) != '<') {
-			$('#error_modal .modal-dialog').toggleClass('modal-sm', true);
-			$('#error_modal .modal-body').html($("<p/>").text(message).html());
-		} else {
-			$('#error_modal .modal-dialog').toggleClass('modal-sm', false);
-			$('#error_modal .modal-body').html(message);
-		}
-		$('#error_modal').modal({});
-	}
-	</script>
-
-	<script src="/static/js/govtrack.js?20151003"></script>
-	{% include "run_of_site_popups.html" %}
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<script src="/static/js/govtrack.js?20161011"></script>
+	{% include "run_of_site_popups.html" %}
 
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
