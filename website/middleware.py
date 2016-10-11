@@ -8,12 +8,6 @@ from emailverification.models import BouncedEmail
 
 import us
 
-if settings.GEOIP_DB_PATH:
-    from django.contrib.gis.geoip import GeoIP
-    from django.contrib.gis.geos import Point
-    geo_ip_db = GeoIP(settings.GEOIP_DB_PATH)
-    washington_dc = Point(-77.0300, 38.8900)
-
 # http://whois.arin.net/rest/org/ISUHR/nets
 HOUSE_NET_RANGES = (
     ("143.231.0.0", "143.231.255.255"),
@@ -40,7 +34,6 @@ base_context = {
     "SITE_ROOT_URL": settings.SITE_ROOT_URL,
     "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY,
     "FACEBOOK_APP_ID": settings.FACEBOOK_APP_ID,
-    "STATE_CHOICES": sorted([(kv[0], kv[1], us.stateapportionment[kv[0]]) for kv in us.statenames.items() if kv[0] in us.stateapportionment], key = lambda kv : kv[1]),
 }
 
 def template_context_processor(request):
@@ -49,8 +42,6 @@ def template_context_processor(request):
     # might have user-info blocked already for caching (a good thing).
     
     context = dict(base_context) # clone
-    
-    #if hasattr(request, 'user') and request.user.is_authenticated() and BouncedEmail.objects.filter(user=request.user).exists(): context["user_has_bounced_mail"] = True
     
     # Add top-tracked feeds.
     from events.models import Feed
@@ -80,17 +71,6 @@ def template_context_processor(request):
         medium_posts = MediumPost.objects.order_by('-published')[0:6]
         cache.set("medium_posts", medium_posts, 60*15) # 15 minutes
     context["medium_posts"] = medium_posts
-
-    # Get a campaign from if.then.fund.
-    itf_active_campaign = 0
-    if_then_fund_campaign = cache.get("if_then_fund_campaign_%d" % itf_active_campaign)
-    if not if_then_fund_campaign and itf_active_campaign:
-        try:
-            if_then_fund_campaign = json.load(urllib2.urlopen("https://if.then.fund/a/%d.json" % itf_active_campaign))
-        except:
-            if_then_fund_campaign = "UHM" # something that is truthy otherwise we'll ping on every request
-    	cache.set("if_then_fund_campaign_%d" % itf_active_campaign, if_then_fund_campaign, 60*45) # 45 minutes
-    context["if_then_fund_campaign"] = if_then_fund_campaign
 
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
@@ -123,16 +103,6 @@ def template_context_processor(request):
     except:
         pass
     
-    # Add a context variable for if the user is near DC geographically.
-
-    user_loc = None
-    try:
-        if settings.GEOIP_DB_PATH and not request.path.startswith("/api/") and False:
-            user_loc = geo_ip_db.geos(ip)
-            context["is_dc_local"] = user_loc.distance(washington_dc) < .5
-    except:
-        pass
-
     return context
   
 class GovTrackMiddleware:
