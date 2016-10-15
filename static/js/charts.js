@@ -102,7 +102,7 @@ function make_line_chart(elemid, title, xaxis, yaxis, series, opts) {
 			width: opts.width,
 			height: opts.height,
 			marginTop: title ? 30 : 5,
-			marginBottom: title ? 70 : 30
+			marginBottom: title ? 70 : 50
 		},
 		title: {
 			text: title
