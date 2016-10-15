@@ -41,13 +41,212 @@
 </style>
 {% endblock %}
 
-{% block extra_js %}
-<script src="https://code.highcharts.com/highcharts.js"></script>
-{% endblock %}
-
 {% block body_scripts %}
+<script src="https://code.highcharts.com/highcharts.js"></script>
 <script>
+$(function() {
 	$('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
+
+	$('#contact_modal input[type=radio]').change(function() {
+		var item = $(this).parent("div");
+		var group = item.parent("div");
+
+		// hide siblings
+		group.find('> .list-group-item > div > .contact_expando').hide();
+
+		// uncheck & hide sub items (i.e. if returning to this item later)
+		item.find('.contact_expando').hide();
+		item.find('.contact_expando input[type=radio]').attr('checked', false);
+
+		// expand this time
+		item.find('> div > .contact_expando').fadeIn();
+
+		//group.find('> .list-group-item').removeClass('active');
+		$('#contact_modal .list-group-item').removeClass('active');
+		item.addClass('active');
+	})
+
+
+	{% if analysis_data.sponsorship %}
+	var party_colors = {
+		'Democrat': 'rgba(20, 20, 255, .75)',
+		'Republican': 'rgba(255, 20, 20, .75)',
+		'Independent': 'rgba(100, 100, 100, .85)'
+	}
+	var chart = new Highcharts.Chart({
+		chart: {
+			renderTo: 'sponsorship_analysis_chart',
+			type: 'scatter',
+			zoomType: 'xy',
+			backgroundColor: 'none',
+			height: 350,
+			marginTop: 5
+		},
+		title: {
+			text: ''
+		},
+		credits: { enabled: false },
+		xAxis: {
+			title: { text: 'Ideology Score' },
+			labels: { enabled: false },
+			gridLineWidth: 1
+		},
+		yAxis: {
+			min: 0,
+			title: { text: 'Leadership Score' },
+			labels: { enabled: false }
+		},
+		tooltip: {
+			formatter: function() {
+					return this.point.name;
+			}
+		},
+		legend: {
+			layout: 'horizontal',
+			align: 'center',
+			verticalAlign: 'top'
+		},
+		plotOptions: {
+			scatter: {
+				marker: {
+					states: {
+						hover: {
+							enabled: true,
+							lineColor: 'rgb(100,100,100)'
+						}
+					}
+				},
+				states: {
+					hover: {
+						marker: {
+							enabled: false
+						}
+					}
+				}
+			}
+		},
+		series: [{
+			marker: { symbol: "triangle", radius: 7 },
+			dataLabels: { enabled: true, formatter: function() { return this.point.name; } },
+			name: '{{person.lastname|escapejs}}',
+			color: 'rgba(223, 83, 223, 1)',
+			data: [{x: {{analysis_data.sponsorship.ideology}}, y: 	{{analysis_data.sponsorship.leadership}}, name: "{{person.lastname|escapejs}}"}]
+
+		}
+		{% regroup analysis_data.sponsorship.all by party as data_party %}
+		{% for party in data_party %}
+		, {
+			marker: { symbol: "circle", radius: 3 },
+			name: '{{party.grouper|escapejs}}s',
+			color: party_colors['{{party.grouper|escapejs}}'],
+			data: [
+				{% for item in party.list %}
+					{
+						x: {{item.ideology}},
+						y: {{item.leadership}},
+						name: "{{item.name|escapejs}}\n<br>{{item.total_cosponsors}} cosponsors ({{analysis_data.sponsorship.congress|ordinal}} Congress)"
+					}
+					{% if not forloop.last %},{% endif %}
+				{% endfor %}
+			]
+		}
+		{% endfor %}
+		]
+	});
+	{% endif %}
+
+	{% if analysis_data.missedvotes %}
+	var chart = new Highcharts.Chart({
+		chart: {
+			renderTo: 'voting_record_chart',
+			type: 'spline',
+			height: 225,
+			marginTop: 5,
+		},
+		title: { text: 'Missed Votes (%)' },
+		legend: { enabled: false },
+		credits: { enabled: false },
+		xAxis: {
+			labels: { rotation: -90, align: "right" {% if analysis_data.missedvotes.data|length > 20 and analysis_data.missedvotes.data|length < 40 %}, step: 2{% endif %} {% if analysis_data.missedvotes.data|length >= 40 %}, step: 4{% endif %} },
+			categories: [{% for rec in analysis_data.missedvotes.data %}"{{rec.time|escapejs}}"{% if not forloop.last %}, {% endif %}{% endfor %} ]
+		},
+		yAxis: {
+			title: {
+				text: 'Missed Votes (%)'
+			},
+			min: 0,
+			minorGridLineWidth: 0,
+			gridLineWidth: 0,
+			alternateGridColor: null,
+			plotBands: [{
+				from: 0,
+				to: {{analysis_data.missedvotes.pctile25}},
+				color: 'rgba(68, 170, 213, 0.1)',
+				label: {
+					text: '25th Percentile',
+					verticalAlign: 'top',
+					style: { color: '#606060' }
+				}
+			}, {
+				from: {{analysis_data.missedvotes.pctile25}},
+				to: {{analysis_data.missedvotes.pctile50}},
+				color: 'rgba(68, 170, 213, 0.3)',
+				label: {
+					text: 'Median',
+					verticalAlign: 'top',
+					style: { color: '#606060' }
+				}
+			}, {
+				from: {{analysis_data.missedvotes.pctile50}},
+				to: {{analysis_data.missedvotes.pctile75}},
+				color: 'rgba(68, 170, 213, 0.1)',
+				label: {
+					text: '75th Percentile',
+					verticalAlign: 'top',
+					style: { color: '#606060' }
+				}
+			}, {
+				from: {{analysis_data.missedvotes.pctile75}},
+				to: {{analysis_data.missedvotes.pctile90}},
+				color: 'rgba(68, 170, 213, 0.3)',
+				label: {
+					text: '90th Percentile',
+					verticalAlign: 'top',
+					style: { color: '#606060' }
+				}
+			}]
+		},
+		tooltip: {
+			formatter: function() {
+					return this.x +': '+ this.y +'% votes missed';
+			}
+		},
+		plotOptions: {
+			spline: {
+				lineWidth: 2,
+				marker: {
+					radius: 3
+				},
+				states: {
+					hover: {
+						lineWidth: 2
+					}
+				}
+			}
+		},
+		series: [{
+			name: '{{person.lastname|escapejs }} - Missed Votes %',
+			data: [{% for rec in analysis_data.missedvotes.data %}{{rec.percent}}{% if not forloop.last %}, {% endif %}{% endfor %} ]
+
+		}],
+		navigation: {
+			menuItemStyle: {
+				fontSize: '10px'
+			}
+		}
+	});
+	{% endif %}
+})
 </script>
 {% endblock %}
 
@@ -175,28 +374,6 @@
 		color: #FFE;
 	}
 	</style>
-	<script>
-	$(function() {
-		$('#contact_modal input[type=radio]').change(function() {
-			var item = $(this).parent("div");
-			var group = item.parent("div");
-
-			// hide siblings
-			group.find('> .list-group-item > div > .contact_expando').hide();
-
-			// uncheck & hide sub items (i.e. if returning to this item later)
-			item.find('.contact_expando').hide();
-			item.find('.contact_expando input[type=radio]').attr('checked', false);
-
-			// expand this time
-			item.find('> div > .contact_expando').fadeIn();
-
-			//group.find('> .list-group-item').removeClass('active');
-			$('#contact_modal .list-group-item').removeClass('active');
-			item.addClass('active');
-		})
-	})
-	</script>
 	<div id="contact_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="contact_modalTitle" aria-hidden="true">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
@@ -313,95 +490,7 @@
 		{{ person.lastname }} is shown as a purple triangle. <small>(<a href="/about/analysis">analysis methodology</a>)</small></p>
 
 		<div id="sponsorship_analysis_chart"> </div>
-		<script>
-		var party_colors = {
-			'Democrat': 'rgba(20, 20, 255, .75)',
-			'Republican': 'rgba(255, 20, 20, .75)',
-			'Independent': 'rgba(100, 100, 100, .85)'
-		}
-		$(document).ready(function() {
-			var chart = new Highcharts.Chart({
-				chart: {
-					renderTo: 'sponsorship_analysis_chart',
-					type: 'scatter',
-					zoomType: 'xy',
-					backgroundColor: 'none',
-					height: 350,
-					marginTop: 5
-				},
-				title: {
-					text: ''
-				},
-				credits: { enabled: false },
-				xAxis: {
-					title: { text: 'Ideology Score' },
-					labels: { enabled: false },
-					gridLineWidth: 1
-				},
-				yAxis: {
-					min: 0,
-					title: { text: 'Leadership Score' },
-					labels: { enabled: false }
-				},
-				tooltip: {
-					formatter: function() {
-							return this.point.name;
-					}
-				},
-				legend: {
-					layout: 'horizontal',
-					align: 'center',
-					verticalAlign: 'top'
-				},
-				plotOptions: {
-					scatter: {
-						marker: {
-							states: {
-								hover: {
-									enabled: true,
-									lineColor: 'rgb(100,100,100)'
-								}
-							}
-						},
-						states: {
-							hover: {
-								marker: {
-									enabled: false
-								}
-							}
-						}
-					}
-				},
-				series: [{
-					marker: { symbol: "triangle", radius: 7 },
-					dataLabels: { enabled: true, formatter: function() { return this.point.name; } },
-					name: '{{person.lastname|escapejs}}',
-					color: 'rgba(223, 83, 223, 1)',
-					data: [{x: {{analysis_data.sponsorship.ideology}}, y: 	{{analysis_data.sponsorship.leadership}}, name: "{{person.lastname|escapejs}}"}]
-		
-				}
-				{% regroup analysis_data.sponsorship.all by party as data_party %}
-				{% for party in data_party %}
-				, {
-					marker: { symbol: "circle", radius: 3 },
-					name: '{{party.grouper|escapejs}}s',
-					color: party_colors['{{party.grouper|escapejs}}'],
-					data: [
-						{% for item in party.list %}
-							{
-								x: {{item.ideology}},
-								y: {{item.leadership}},
-								name: "{{item.name|escapejs}}\n<br>{{item.total_cosponsors}} cosponsors ({{analysis_data.sponsorship.congress|ordinal}} Congress)"
-							}
-							{% if not forloop.last %},{% endif %}
-						{% endfor %}
-					]
-				}
-				{% endfor %}
-				]
-			});
-		});
-		</script>
+
 		<div style="margin-left: 25px; line-height: 110%; font-size: 13px;">
 		{% if analysis_data.influence %}
 		{% if analysis_data.influence.influencers|length > 0 %}
@@ -496,100 +585,7 @@
 
 		The chart below reports missed votes over time.</p>
 		<div id="voting_record_chart"> </div>
-		<script>
-		$(document).ready(function() {
-			var chart = new Highcharts.Chart({
-				chart: {
-					renderTo: 'voting_record_chart',
-					type: 'spline',
-					height: 225,
-					marginTop: 5,
-				},
-				title: { text: 'Missed Votes (%)' },
-				legend: { enabled: false },
-				credits: { enabled: false },
-				xAxis: {
-					labels: { rotation: -90, align: "right" {% if analysis_data.missedvotes.data|length > 20 and analysis_data.missedvotes.data|length < 40 %}, step: 2{% endif %} {% if analysis_data.missedvotes.data|length >= 40 %}, step: 4{% endif %} },
-					categories: [{% for rec in analysis_data.missedvotes.data %}"{{rec.time|escapejs}}"{% if not forloop.last %}, {% endif %}{% endfor %} ]
-				},
-				yAxis: {
-					title: {
-						text: 'Missed Votes (%)'
-					},
-					min: 0,
-					minorGridLineWidth: 0,
-					gridLineWidth: 0,
-					alternateGridColor: null,
-					plotBands: [{
-						from: 0,
-						to: {{analysis_data.missedvotes.pctile25}},
-						color: 'rgba(68, 170, 213, 0.1)',
-						label: {
-							text: '25th Percentile',
-							verticalAlign: 'top',
-							style: { color: '#606060' }
-						}
-					}, {
-						from: {{analysis_data.missedvotes.pctile25}},
-						to: {{analysis_data.missedvotes.pctile50}},
-						color: 'rgba(68, 170, 213, 0.3)',
-						label: {
-							text: 'Median',
-							verticalAlign: 'top',
-							style: { color: '#606060' }
-						}
-					}, {
-						from: {{analysis_data.missedvotes.pctile50}},
-						to: {{analysis_data.missedvotes.pctile75}},
-						color: 'rgba(68, 170, 213, 0.1)',
-						label: {
-							text: '75th Percentile',
-							verticalAlign: 'top',
-							style: { color: '#606060' }
-						}
-					}, {
-						from: {{analysis_data.missedvotes.pctile75}},
-						to: {{analysis_data.missedvotes.pctile90}},
-						color: 'rgba(68, 170, 213, 0.3)',
-						label: {
-							text: '90th Percentile',
-							verticalAlign: 'top',
-							style: { color: '#606060' }
-						}
-					}]
-				},
-				tooltip: {
-					formatter: function() {
-							return this.x +': '+ this.y +'% votes missed';
-					}
-				},
-				plotOptions: {
-					spline: {
-						lineWidth: 2,
-						marker: {
-							radius: 3
-						},
-						states: {
-							hover: {
-								lineWidth: 2
-							}
-						}
-					}
-				},
-				series: [{
-					name: '{{person.lastname|escapejs }} - Missed Votes %',
-					data: [{% for rec in analysis_data.missedvotes.data %}{{rec.percent}}{% if not forloop.last %}, {% endif %}{% endfor %} ]
-		
-				}],
-				navigation: {
-					menuItemStyle: {
-						fontSize: '10px'
-					}
-				}
-			});
-		});
-		</script>
-		
+
 		<p style="text-align: center; margin-top: .5em; font-size: 90%;"><a href="#" onclick="$('#missedvotestable').slideDown(); $(this).hide(); return false;">Show the numbers...</a></p>
 		<table id="missedvotestable" style="display: none">
 			<tr> <th>Time Period</th> <th>Votes Eligible</th> <th>Missed Votes</th> <th>Percent</th> <th>Percentile</th> </tr>

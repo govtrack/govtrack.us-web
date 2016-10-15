@@ -6,18 +6,8 @@
 .panel p:last-child {
 	margin-bottom: 0;
 }
-</style>
-{% endblock %}
-
-{% block body %}
-	<h1>Contact Us</h1>
-
-  <p>Thank you for your interest in GovTrack.us. How can we help?</p>
-
-  <p>Please keep in mind this is <b>not a government website</b>. GovTrack is run by a private citizen from his home office.</p>
 
   <!-- contact panel -->
-  <style>
   #contact_options {
     margin-top: 2em;
   }
@@ -56,29 +46,41 @@
   #contact_options p {
     margin-bottom: .5em;
   }
-  </style>
-  <script>
-  $(function() {
-    $('#contact_options input[type=radio]').change(function() {
-      var item = $(this).parent("div");
-      var group = item.parent("div");
+</style>
+{% endblock %}
 
-      // hide siblings
-      group.find('> .list-group-item > div > .contact_expando').hide();
+{% block body_scripts %}
+<script>
+$(function() {
+  $('#contact_options input[type=radio]').change(function() {
+    var item = $(this).parent("div");
+    var group = item.parent("div");
 
-      // uncheck & hide sub items (i.e. if returning to this item later)
-      item.find('.contact_expando').hide();
-      item.find('.contact_expando input[type=radio]').attr('checked', false);
+    // hide siblings
+    group.find('> .list-group-item > div > .contact_expando').hide();
 
-      // expand this time
-      item.find('> div > .contact_expando').fadeIn();
+    // uncheck & hide sub items (i.e. if returning to this item later)
+    item.find('.contact_expando').hide();
+    item.find('.contact_expando input[type=radio]').attr('checked', false);
 
-      //group.find('> .list-group-item').removeClass('active');
-      $('#contact_options .list-group-item').removeClass('active');
-      item.addClass('active');
-    })
+    // expand this time
+    item.find('> div > .contact_expando').fadeIn();
+
+    //group.find('> .list-group-item').removeClass('active');
+    $('#contact_options .list-group-item').removeClass('active');
+    item.addClass('active');
   })
-  </script>
+})
+</script>
+{% endblock %}
+
+{% block body %}
+	<h1>Contact Us</h1>
+
+  <p>Thank you for your interest in GovTrack.us. How can we help?</p>
+
+  <p>Please keep in mind this is <b>not a government website</b>. GovTrack is run by a private citizen from his home office.</p>
+
   <div id="contact_options">
     <div class="list-group">
       <div class="list-group-item clearfix">

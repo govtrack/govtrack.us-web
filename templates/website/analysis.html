@@ -8,9 +8,54 @@
 <ol class="breadcrumb"><li><a href="/about">About GovTrack</a></li></ol>
 {% endblock %}
 
-{% block extra_js %}
+{% block body_scripts %}
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/charts.js"></script>
+
+<script>
+	$("ul.tabs a").tabs("div.panes > div");
+	$("#prognosis_results_tabs a").tabs("#prognosis_results_panes > div", "prognosis");
+
+	{% cache 12000 analysis_methods_ideology %}
+	for (var i = 1; i <= 2; i++) {
+		make_sponsorship_chart("sponsorship_analysis_chart_senate"+i, 'Senate ({{ideology.senate.start_date|date}} to {{ideology.senate.end_date|date}})', {{ideology.senate.series|safe}}, false);
+		make_sponsorship_chart("sponsorship_analysis_chart_house"+i, 'House ({{ideology.house.start_date|date}} to {{ideology.house.end_date|date}})', {{ideology.house.series|safe}}, false);
+	}
+	{% endcache %}
+
+	{% for m in prognosis_test %}
+		make_line_chart("prognosis_accuracy_{{m.bill_type}}_{{m.is_introduced_model}}",
+			null,
+			"Prognosis",
+			"% {% if m.is_introduced_model %}out of committee{% else %}{{m.success_name}}{% endif %}",
+			[{ data: [{% for bin, n, success in m.bins %}{ x: Math.round({{bin|floatformat:2}}*10)/10, y: Math.round({{success|floatformat:3}}*1000)/10 }{% if not forloop.last %}, {% endif %}{% endfor %} ]}],
+			{
+				width: 400,
+				height: 250,
+				ymin: 0,
+				xmin: 0,
+				xunit: "% Prognosis",
+				yunit: "% Successful",
+			});
+		
+			make_line_chart("prognosis_precisionrecall_{{m.bill_type}}_{{m.is_introduced_model}}",
+				null,
+				"Precision (%)",
+				"Recall (%)",
+				[{ data: [{% for pt in m.precision_recall %}{ t: Math.round({{pt.threshold|floatformat:1}}*10)/10, x: Math.round({{pt.precision|floatformat:3}}*1000)/10, y: Math.round({{pt.recall|floatformat:3}}*1000)/10 }{% if not forloop.last %}, {% endif %}{% endfor %} ]}],
+				{
+					width: 400,
+					height: 250,
+					ymin: 0,
+					ymax: 100,
+					xmin: 0,
+					xmax: 100,
+					xunit: "% Precision",
+					yunit: "% Recall",
+					tooltip: function() { return "t=" + this.point.t + "%: " + this.point.x + "% Precision, " + this.point.y + "% Recall"; }
+				});
+	{% endfor %}	
+</script>
 {% endblock %}
 
 {% block extra_css %}
@@ -116,17 +161,9 @@ ideology = vT[1,:]</pre>
 		</div>
 		
 		{% if ideology.senate or ideology.house %}
-		<div class="col-md-6 last">
-		<div id="sponsorship_analysis_chart_senate"> </div>
-		<div id="sponsorship_analysis_chart_house"> </div>
-		<script>
-		$(document).ready(function() {
-			{% cache 12000 analysis_methods_ideology %}
-			make_sponsorship_chart("sponsorship_analysis_chart_senate", 'Senate ({{ideology.senate.start_date|date}} to {{ideology.senate.end_date|date}})', {{ideology.senate.series|safe}}, false);
-			make_sponsorship_chart("sponsorship_analysis_chart_house", 'House ({{ideology.house.start_date|date}} to {{ideology.house.end_date|date}})', {{ideology.house.series|safe}}, false);
-			{% endcache %}
-		});
-		</script>
+		<div class="col-md-6">
+		<div id="sponsorship_analysis_chart_senate1"> </div>
+		<div id="sponsorship_analysis_chart_house1"> </div>
 		</div>
 		{% endif %}
 		</div>
@@ -198,17 +235,9 @@ def onenorm(u): return sum(abs(u))</pre>
 		</div>
 		
 		{% if ideology.senate or ideology.house %}
-		<div class="col-md-6 last">
+		<div class="col-md-6">
 		<div id="sponsorship_analysis_chart_senate2"> </div>
 		<div id="sponsorship_analysis_chart_house2"> </div>
-		<script>
-		$(document).ready(function() {
-			{% cache 12000 analysis_methods_leadership %}
-			make_sponsorship_chart("sponsorship_analysis_chart_senate2", 'Senate ({{ideology.senate.start_date|date}} to {{ideology.senate.end_date|date}})', {{ideology.senate.series|safe}}, false);
-			make_sponsorship_chart("sponsorship_analysis_chart_house2", 'House ({{ideology.house.start_date|date}} to {{ideology.house.end_date|date}})', {{ideology.house.series|safe}}, false);
-			{% endcache %}
-		});
-		</script>
 		</div>
 		{% endif %}
 		</div>
@@ -320,24 +349,7 @@ def onenorm(u): return sum(abs(u))</pre>
 			
 				{% for m in prognosis_test %}
 					<h4 style="margin: 1.25em 0 .5em 0;">{{m.bill_type_descr|capfirst}} {{m.success_name}}</h4>
-					
 					<div id="prognosis_accuracy_{{m.bill_type}}_{{m.is_introduced_model}}"> </div>
-					
-					<script>
-					make_line_chart("prognosis_accuracy_{{m.bill_type}}_{{m.is_introduced_model}}",
-						null,
-						"Prognosis",
-						"% {% if m.is_introduced_model %}out of committee{% else %}{{m.success_name}}{% endif %}",
-						[{ data: [{% for bin, n, success in m.bins %}{ x: Math.round({{bin|floatformat:2}}*10)/10, y: Math.round({{success|floatformat:3}}*1000)/10 }{% if not forloop.last %}, {% endif %}{% endfor %} ]}],
-						{
-							width: 400,
-							height: 250,
-							ymin: 0,
-							xmin: 0,
-							xunit: "% Prognosis",
-							yunit: "% Successful",
-						});
-					</script>
 				{% endfor %}
 			</div> <!-- /prognosis accuracy pane -->
 					
@@ -350,27 +362,7 @@ def onenorm(u): return sum(abs(u))</pre>
 				
 				{% for m in prognosis_test %}
 					<h4 style="margin: 1.25em 0 .5em 0;">{{m.bill_type_descr|capfirst}} {{m.success_name}}</h4>
-					
 					<div id="prognosis_precisionrecall_{{m.bill_type}}_{{m.is_introduced_model}}"> </div>
-					
-					<script>
-					make_line_chart("prognosis_precisionrecall_{{m.bill_type}}_{{m.is_introduced_model}}",
-						null,
-						"Precision (%)",
-						"Recall (%)",
-						[{ data: [{% for pt in m.precision_recall %}{ t: Math.round({{pt.threshold|floatformat:1}}*10)/10, x: Math.round({{pt.precision|floatformat:3}}*1000)/10, y: Math.round({{pt.recall|floatformat:3}}*1000)/10 }{% if not forloop.last %}, {% endif %}{% endfor %} ]}],
-						{
-							width: 400,
-							height: 250,
-							ymin: 0,
-							ymax: 100,
-							xmin: 0,
-							xmax: 100,
-							xunit: "% Precision",
-							yunit: "% Recall",
-							tooltip: function() { return "t=" + this.point.t + "%: " + this.point.x + "% Precision, " + this.point.y + "% Recall"; }
-						});
-					</script>
 				{% endfor %}
 			</div> <!-- /prognosis other pane -->
 			</div> <!-- /prognosis results panes -->
@@ -378,8 +370,5 @@ def onenorm(u): return sum(abs(u))</pre>
 		</div>
 	</div> <!-- /prognosis pane -->
 </div>
-
-<script>$("ul.tabs a").tabs("div.panes > div");</script>
-<script>$("#prognosis_results_tabs a").tabs("#prognosis_results_panes > div", "prognosis");</script>
 {% endblock %}
 

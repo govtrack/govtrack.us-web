@@ -179,18 +179,9 @@ var default_search = { };
 	{% endif %}
 {% endfor %}
 
-// The initial search combines the default faceting with the URL fragment.
-var fragment_params =  parse_qs.fragment();
-var initial_search = { };
-for (var k in default_search) initial_search[k] = default_search[k];
-for (var k in fragment_params) initial_search[k] = fragment_params[k];
-for (var k in fragment_params)
-	if (fragment_params[k] == "__ALL__")
-		delete initial_search[k]; // null is not sufficient
-
 var current_page = 1;
 var update_search_lock = false;
-var prev_search = initial_search;
+var prev_search = { };
 function update_search(pagenum, pageinc, elem, isinitial) {
     if (update_search_lock) return;
     update_search_lock = true;
@@ -237,7 +228,15 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     }
     
     // Apply any initial search options.
-    if (isinitial) for (var k in initial_search) postdata[k] = initial_search[k];
+    if (isinitial) {
+        // The initial search combines the default faceting with the URL fragment.
+        var fragment_params = parse_qs.fragment();
+        for (var k in default_search) postdata[k] = default_search[k];
+        for (var k in fragment_params) postdata[k] = fragment_params[k];
+        for (var k in fragment_params)
+            if (fragment_params[k] == "__ALL__")
+                delete postdata[k]; // null is not sufficient
+    }
     
     // Copy just the faceting so far into a separate array, minus the parts that
     // match the defaults, but explicitly setting __ALL__ for fields that have
@@ -405,15 +404,17 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     return false; // cancel any event
 }
 
-$(function() {
-	update_search(1, null, null, true);
-	$(window).scroll(function() {
-		if (update_search_lock) return;
-		var s = $('#show_more');
-		if (s.is(":visible") && $(window).scrollTop() + $(window).height() > s.offset().top)
-			s.click();
-	});
+// jQuery may not be loaded yet so execute this naively
+window.post_jquery_load_scripts.push(function() {
+    update_search(1, null, null, true);
+    $(window).scroll(function() {
+        if (update_search_lock) return;
+        var s = $('#show_more');
+        if (s.is(":visible") && $(window).scrollTop() + $(window).height() > s.offset().top)
+            s.click();
+    });
 });
+
 </script>
 
 <div class="advanced-search col-sm-4">

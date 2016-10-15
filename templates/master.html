@@ -33,16 +33,9 @@
 
 		{% block extra_css %}{% endblock %}
 
-		{% if not debug %}
-		<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-		{% else %}
-		<script src="/static/lib/jquery.js"></script>
-		{% endif %}
-		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
-		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?20160310"></script>
-		{% block extra_js %}{% endblock %}
-		
 		<script type="text/javascript">
+		window.post_jquery_load_scripts = [];
+
 		{% if not debug %}
 		<!-- Google Analytics -->
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -157,7 +150,8 @@
 		$('#sitenewscontainer').fadeOut();
 		$.cookie("sitenewsbanner", $('#sitenewscontainer .sitenewsbody').attr("data-seq"), { expires: 14, path: '/' });
 	}
-	$(function() {
+
+	window.post_jquery_load_scripts.push(function() {
 		// get the first (after the X) link's href, and if it's the current page, don't show
 		// the banner.
 		var cur_link = null;
@@ -260,6 +254,14 @@
       </div>
     </div>
 
+	{% if not debug %}
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+	{% else %}
+	<script src="/static/lib/jquery.js"></script>
+	{% endif %}
+	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?20160310"></script>
+	
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 	{% if not request.anonymous %}
@@ -290,11 +292,12 @@
 		{% endif %}
 	</script>
 
-	<script src="/static/js/govtrack.js?20161011"></script>
+	<script src="/static/js/govtrack.js?20161015"></script>
 	{% include "run_of_site_popups.html" %}
 
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
+	{% block extra_js %}{% endblock %}
 	{% block body_scripts %}{% endblock %}
 </body>
 </html>

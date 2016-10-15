@@ -5,10 +5,6 @@
 {% block meta_description %}Historical statistics about bills in the U.S. Congress.{% endblock %}
 {% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
 
-{% block extra_js %}
-<script src="https://code.highcharts.com/highcharts.js"></script>
-{% endblock %}
-
 {% block crumbs %}
 <ol class="breadcrumb">
 <li><a href="{% url "congress_home" %}">Congress</a></li>
@@ -16,15 +12,66 @@
 </ol>
 {% endblock %}
 
-{% block head %}
+{% block body_scripts %}
+<script src="https://code.highcharts.com/highcharts.js"></script>
 <script>
-	function show_stats_style(show_abs, show_pct) {
-		$('#bill_hist_stats .abs').toggle(show_abs);
-		$('#bill_hist_stats .pct').toggle(show_pct);
-		if (show_abs) $('#bill_hist_stats .pct').css({ fontSize: "90%", color: "#777" });
-		else  $('#bill_hist_stats .pct').css({ fontSize: "100%", color: "#000" });
-		return false;
-	}
+function show_stats_style(show_abs, show_pct) {
+	$('#bill_hist_stats .abs').toggle(show_abs);
+	$('#bill_hist_stats .pct').toggle(show_pct);
+	if (show_abs) $('#bill_hist_stats .pct').css({ fontSize: "90%", color: "#777" });
+	else  $('#bill_hist_stats .pct').css({ fontSize: "100%", color: "#000" });
+	return false;
+}
+
+var year_names = ["1st", "2nd", "3rd"];
+$(function() {
+{% for name, data in activity %}
+	var chart = new Highcharts.Chart({
+		chart: {
+			renderTo: 'activity_by_month_{{forloop.counter}}',
+			type: 'spline',
+			width: 900,
+			height: 350,
+			marginTop: 5
+		},
+		title: { text: '{{name|escapejs}}' },
+		legend: { enabled: true },
+		credits: { enabled: false },
+		xAxis: {
+			labels: { step: 3 },
+			categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"]
+		},
+		yAxis: [{ min: 0, title: { text: '% of {{name|escapejs}}' } },
+			{ min: 0, max: 100, title: { text: 'Cumulative Percent' }, opposite: true }],
+		tooltip: {
+			formatter: function() {
+				return this.series.name + "<br/>" + this.x + " in the " + year_names[this.point.year] + ' year: ' + this.y
+			}
+		},
+		plotOptions: {
+			spline: {
+				lineWidth: 2,
+				marker: { radius: 3 },
+				states: {
+					hover: { lineWidth: 2 }
+				}
+			}
+		},
+		series: [{
+			name: 'Average Count',
+			data: [{% for month in data %}{ x: {{month.x}}, y: {{month.count}}, year: {{month.year}} }{% if not forloop.last %}, {% endif %}{% endfor %} ]
+		},
+		{
+			name: 'Cumulative Percent',
+			yAxis: 1,
+			data: [{% for month in data %}{ x: {{month.x}}, y: {{month.cumulative_count}}, year: {{month.year}} }{% if not forloop.last %}, {% endif %}{% endfor %} ],
+			color: '#BBB',
+			lineWidth: 1,
+			marker: { radius: 2 }
+		}]
+	});
+{% endfor %}
+});
 </script>
 {% endblock %}
 
@@ -90,56 +137,8 @@
 			{% endif %}
 		
 			<div id="activity_by_month_{{forloop.counter}}"> </div>
-			<script>
-			var year_names = ["1st", "2nd", "3rd"];
-			$(document).ready(function() {
-				var chart = new Highcharts.Chart({
-					chart: {
-						renderTo: 'activity_by_month_{{forloop.counter}}',
-						type: 'spline',
-						width: 900,
-						height: 350,
-						marginTop: 5
-					},
-					title: { text: '{{name|escapejs}}' },
-					legend: { enabled: true },
-					credits: { enabled: false },
-					xAxis: {
-						labels: { step: 3 },
-						categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"]
-					},
-					yAxis: [{ min: 0, title: { text: '% of {{name|escapejs}}' } },
-						{ min: 0, max: 100, title: { text: 'Cumulative Percent' }, opposite: true }],
-					tooltip: {
-						formatter: function() {
-							return this.series.name + "<br/>" + this.x + " in the " + year_names[this.point.year] + ' year: ' + this.y
-						}
-					},
-					plotOptions: {
-						spline: {
-							lineWidth: 2,
-							marker: { radius: 3 },
-							states: {
-								hover: { lineWidth: 2 }
-							}
-						}
-					},
-					series: [{
-						name: 'Average Count',
-						data: [{% for month in data %}{ x: {{month.x}}, y: {{month.count}}, year: {{month.year}} }{% if not forloop.last %}, {% endif %}{% endfor %} ]
-					},
-					{
-						name: 'Cumulative Percent',
-						yAxis: 1,
-						data: [{% for month in data %}{ x: {{month.x}}, y: {{month.cumulative_count}}, year: {{month.year}} }{% if not forloop.last %}, {% endif %}{% endfor %} ],
-						color: '#BBB',
-						lineWidth: 1,
-						marker: { radius: 2 }
-					}]
-				});
-			});
-			</script>
 		{% endfor %}
+
 		<p style="padding: 1em 0 1em 0;">Use the cumulative percent charts to estimate how much has yet to occur in the current session of Congress. For instance, the cumulative percent of bills enacted for December in the first year of a session is 33%, meaning that while the session is half over, only one-third of the number of bills that will be enacted have been enacted by that point.</p>
 	</div>	
 

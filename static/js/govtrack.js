@@ -13,6 +13,10 @@ $(function() {
     if (bill_text_ad_container.length)
         bill_text_ad(bill_text_ad_container);
 
+    // Run any inline-defined scripts that have to wait until after jQuery is
+    // available.
+    for (var i = 0; i < window.post_jquery_load_scripts.length; i++)
+        window.post_jquery_load_scripts[i]();
 });
 
 function show_modal(title, message) {

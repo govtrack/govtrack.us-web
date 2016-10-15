@@ -115,7 +115,9 @@
 		background: url(/static/images/img-handshake.png) center top no-repeat;
 	}
 </style>
+{% endblock %}
 
+{% block body_scripts %}
 <script>
 function smooth_scroll(elem) {
 	$("html, body").animate({ scrollTop: $('#' + elem.href.split("#")[1]).offset().top - $(window).height()/10 });

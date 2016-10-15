@@ -4,15 +4,14 @@
 {% block meta_description %}The United States Congress is made up of 100 senators, 435 representatives, and 6 delegates to the House of Representatives.{% endblock %}
 {% block meta_keywords %}United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
-{% block head %}
+
+{% block body_scripts %}
 	<script type="text/javascript">
 		function doform() {
 			window.location = "/congress/members/map#address=" + encodeURIComponent($('#address').val());
 			return false;
 		}
 	</script>
-	<style>
-	</style>
 {% endblock %}
 
 {% block summary %}

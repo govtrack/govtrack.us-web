@@ -19,8 +19,13 @@
 	display: none;
 }
 </style>
+{% endblock %}
+
+{% block body_scripts %}
 <script>
 $(function() {
+	$("ul.tabs a").tabs("div.panes > div");
+
 	$("#subject_list span a").click(function() {
 		var nodes = $(this.parentNode.parentNode.parentNode).find("ul");
 		if (nodes.is(":visible")) {
@@ -239,7 +244,4 @@ function do_keyword_tracker_submit() {
 		</div>
 	</div>
 </div>
-
-<script>$("ul.tabs a").tabs("div.panes > div");</script>
-
 {% endblock %}

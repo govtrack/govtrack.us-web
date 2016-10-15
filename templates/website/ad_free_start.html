@@ -84,15 +84,6 @@
 
 				<p><input type="submit" class="btn btn-success" value="Continue to Payment &nbsp; ▶"></p>
 
-				<script>
-					function grey_submit_btn() {
-						var amt = $('#go_ad_free input[name="amount"]:checked').val();
-						$('#go_ad_free input[type="submit"]').toggleClass("disabled", (typeof amt == "undefined"));
-					}
-					$('#go_ad_free input[type="radio"]').change(grey_submit_btn);
-					grey_submit_btn();
-				</script>
-
 				<hr style="border-color: #DD9"/>
 
 				<p style="font-size: 90%; margin: 0;">We use PayPal as our payment processor. GovTrack.us is a project of Civic Impulse, LLC, a tiny company that makes sure this website keeps on chugging. Contributions are <b>not</b> tax-deductible.</p>
@@ -119,3 +110,13 @@
 </div>
 {% endblock %}
 
+{% block body_scripts %}
+<script>
+	function grey_submit_btn() {
+		var amt = $('#go_ad_free input[name="amount"]:checked').val();
+		$('#go_ad_free input[type="submit"]').toggleClass("disabled", (typeof amt == "undefined"));
+	}
+	$('#go_ad_free input[type="radio"]').change(grey_submit_btn);
+	grey_submit_btn();
+</script>
+{% endblock %}

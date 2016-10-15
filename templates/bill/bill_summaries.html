@@ -39,22 +39,9 @@ h3 {
 
 	<div id="summary-panes" class="tab-content" style="margin-top: 1em; padding-bottom: 2em">
 		<script>
-		var first_summary = true;
+		var summaries = [];
 		function add_summary(name, href) {
-			// add a sub-tab
-			var tab = $('<li role="presentation"><a role="tab" data-toggle="tab"/></li>');
-			tab.find('a').text(name).attr('href', '#' + href)
-			$('#summary-tabs').append(tab);
-			if ((first_summary && window.location.hash.length <= 1) || "#"+href==window.location.hash) {
-				tab.addClass('active');
-				$('#' + href).addClass('active');
-				first_summary = false;
-			}
-			tab.find('a').click(function (e) {
-			  e.preventDefault()
-			  $(this).tab('show')
-			  window.location = "#" + href;
-			})
+			summaries.push([name, href]);
 		}
 		</script>
 
@@ -133,3 +120,27 @@ h3 {
 
 {% endblock %}
 
+
+{% block body_scripts %}
+<script>
+function add_summary(name, href, first_summary) {
+	// add a sub-tab
+	var tab = $('<li role="presentation"><a role="tab" data-toggle="tab"/></li>');
+	tab.find('a').text(name).attr('href', '#' + href)
+	$('#summary-tabs').append(tab);
+	if ((first_summary && window.location.hash.length <= 1) || "#"+href==window.location.hash) {
+		tab.addClass('active');
+		$('#' + href).addClass('active');
+		first_summary = false;
+	}
+	tab.find('a').click(function (e) {
+	  e.preventDefault()
+	  $(this).tab('show')
+	  window.location = "#" + href;
+	})
+}
+for (var i = 0; i < summaries.length; i++) {
+	add_summary(summaries[i][0], summaries[i][1], i==0);
+}
+</script>
+{% endblock %}

@@ -379,8 +379,12 @@ $(function() {
 		<div class="pad-left-sm">
 		<div style="margin-bottom: 15px;"><a href="{{textdata.gpo_pdf_url}}" class="btn btn-primary" style="text-transform: none">Download PDF</a></div>
 
-		<p id="show-sidebar">
-				<a href="#" onclick="$('#sidebar').slideDown(); $(this).parent('span').remove(); return false;">View Options</a>
+		<p id="show-sidebar" 
+			{% if alternates and alternates|length > 1 %}data-show="1"
+			{% elif textdata.text_html and related_bills %}data-show="1"
+			{% endif %}
+			>
+				<a href="#" onclick="$('#sidebar').slideDown(); $(this).remove(); return false;">View Options</a>
 		</p>
 		</div>
 		</div>
@@ -410,6 +414,7 @@ $(function() {
 <div class="col-md-4 col-md-push-8">
 
 	<div id="sidebar" class="pad-left-sm">
+
 		{% if alternates and alternates|length > 1 %}
 		<p style="margin-bottom: .25em">This {{bill.noun}} has {{alternates|length}} version{{alternates|pluralize}}. Select a version to view:</p>
 		<select size="1" onchange="window.location = '{{bill.get_absolute_url|escapejs}}/text/' + $(this).val();" class="form-control">
@@ -432,8 +437,6 @@ $(function() {
 			{% endfor %}
 		</select>
 		{% endif %}
-	
-		<script>$('#show-sidebar').attr('data-show', '1')</script>
 		{% endif %}
 
 		{% if textdata.text_html and related_bills %}
@@ -447,7 +450,6 @@ $(function() {
 				</option>
 			{% endfor %}
 		</select>
-		<script>$('#show-sidebar').attr('data-show', '1')</script>
 		{% endif %}
 	</div>
 

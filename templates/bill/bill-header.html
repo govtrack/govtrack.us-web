@@ -4,12 +4,14 @@
 	<h1 style="margin-top: 10px; max-height: 3em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 			<p id="h1_overflow" style="display: none"></p>
 			<script>
+			window.post_jquery_load_scripts.push(function() {
 			$('h1').truncate_text(function (remaining, chopped) {
 			    if (chopped) {
 			    	$('h1').css({ marginBottom: '2px' });
 			    	$('#h1_overflow').text("..." + chopped).show();
 			    }
 			}, function() { $('h1').addClass('long'); });
+			});
 			</script>
 </div>
 

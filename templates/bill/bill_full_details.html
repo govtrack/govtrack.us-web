@@ -31,7 +31,6 @@ h3 {
 
 {% include "bill/bill-header.html" %}
 
-
 {% if bill.congress >= 93 %}
 <h2><span>Cosponsors</span></h2>
 	{% if bill.cosponsor_count == 0 %}
@@ -100,26 +99,6 @@ h3 {
 	{% endfor %}
 	<p id="more_votes" style="display: none; font-style: italic;"><a href="#" onclick="return show_all_votes();">Show <span class='num'> </span> <span class='desc'> </span> vote(s)...</a><p>
 	<p id="fewer_votes" style="display: none"><a href="#" onclick="return hide_minor_votes();">Hide minor vote(s)...</a><p>
-	<script>
-	var minor_votes = $('.minor_vote');
-	if (minor_votes.length > 0) {
-		$('#more_votes').show();
-		$('#more_votes').find('span.num').text(minor_votes.length);
-		$('#more_votes').find('span.desc').text($('.major_vote').length == 0 ? "" : "additional");
-	}
-	function show_all_votes() {
-		$('.minor_vote').fadeIn();
-		$('#more_votes').hide();
-		$('#fewer_votes').show();
-		return false;
-	}
-	function hide_minor_votes() {
-		$('.minor_vote').fadeOut();
-		$('#more_votes').show();
-		$('#fewer_votes').hide();
-		return false;
-	}
-	</script>
 {% else %}
 	{% if bill.source == "thomas-congproj" %}
 		<p style="line-height: 125%;">There have been no roll call votes related to this {{bill.noun}}.</p>
@@ -173,7 +152,6 @@ h3 {
 		</div> <!-- /hidden box -->
 		{% endif %}
 	{% endfor %}
-	<script>$('#related_bills_additional').moreLess()</script>
 
 {% else %}
 	<h2><span>Find Similar Bills</span></h2>
@@ -201,10 +179,34 @@ h3 {
 	{% endif %}
 {% endfor %}
 </div>
-<script>$('#subjects_additional').moreLess()</script>
 {% endif %}
 
 <h2><span>Widget for your Website</span></h2>
 <p><a href="{{bill.get_absolute_url}}/widget">Get a bill status widget for your website &raquo;</a></p>
 
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+var minor_votes = $('.minor_vote');
+if (minor_votes.length > 0) {
+	$('#more_votes').show();
+	$('#more_votes').find('span.num').text(minor_votes.length);
+	$('#more_votes').find('span.desc').text($('.major_vote').length == 0 ? "" : "additional");
+}
+function show_all_votes() {
+	$('.minor_vote').fadeIn();
+	$('#more_votes').hide();
+	$('#fewer_votes').show();
+	return false;
+}
+function hide_minor_votes() {
+	$('.minor_vote').fadeOut();
+	$('#more_votes').show();
+	$('#fewer_votes').hide();
+	return false;
+}
+
+$('#related_bills_additional, #subjects_additional').moreLess()
+</script>
 {% endblock %}

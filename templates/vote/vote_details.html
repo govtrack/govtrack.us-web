@@ -55,8 +55,8 @@
 	<meta name="twitter:description" content="{{vote.summary}}. {{ vote.get_chamber_display }} Vote #{{ vote.number }} ({{ vote.created|date:"Y" }}). {{vote.created|date}}.">
 {% endblock %}
 	
-{% block extra_js %}
-<script type="text/javascript">
+{% block body_scripts %}
+<script>
 var current_sort_column = null;
 function update_table() {
     update_grouping_rows();
@@ -186,6 +186,9 @@ $(function() {
     $('#vote-list-template tbody  tr').sortElements(get_sort_func([3,2,0]));
     update_table();
     $(window).resize(update_table);
+
+    // admin
+    if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);
 }); 
 </script>
 {% endblock %}
@@ -602,6 +605,3 @@ $(function() {
 
 {% endblock %}
 
-{% block body_scripts %}
-<script>if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);</script>
-{% endblock %}
