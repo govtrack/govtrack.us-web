@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from jsonfield import JSONField
 
 from common import enum
-from person.types import Gender, RoleType, SenatorClass, SenatorRank, State
+from person.types import Gender, RoleType, SenatorClass, SenatorRank
 from name import get_person_name
 
 from us import stateapportionment, get_congress_dates, statenames, get_congress_from_date, get_all_sessions
@@ -370,7 +370,7 @@ class PersonRole(models.Model):
     senator_rank = models.IntegerField(choices=SenatorRank, blank=True, null=True, help_text="For senators, their state rank, i.e. junior or senior. For historical data, this is their last known rank.") # None for representatives
     # http://en.wikipedia.org/wiki/List_of_United_States_congressional_districts
     district = models.IntegerField(blank=True, null=True, db_index=True, help_text="For representatives, the number of their congressional district. 0 for at-large districts, -1 in historical data if the district is not known.") # None for senators/presidents
-    state = models.CharField(choices=sorted(State, key = lambda x : x[0]), max_length=2, blank=True, db_index=True, help_text="For senators and representatives, the two-letter USPS abbrevation for the state or territory they are serving. Values are the abbreviations for the 50 states (each of which have at least one representative and two senators, assuming no vacancies) plus DC, PR, and the island territories AS, GU, MP, and VI (all of which have a non-voting delegate), and for really old historical data you will also find PI (Philippines, 1907-1946), DK (Dakota Territory, 1861-1889), and OR (Orleans Territory, 1806-1811) for non-voting delegates.")
+    state = models.CharField(choices=sorted(statenames.items()), max_length=2, blank=True, db_index=True, help_text="For senators and representatives, the two-letter USPS abbrevation for the state or territory they are serving. Values are the abbreviations for the 50 states (each of which have at least one representative and two senators, assuming no vacancies) plus DC, PR, and the island territories AS, GU, MP, and VI (all of which have a non-voting delegate), and for really old historical data you will also find PI (Philippines, 1907-1946), DK (Dakota Territory, 1861-1889), and OR (Orleans Territory, 1806-1811) for non-voting delegates.")
     party = models.CharField(max_length=255, blank=True, null=True, db_index=True, help_text="The political party of the person. If the person changes party, it is usually the most recent party during this role.")
     caucus = models.CharField(max_length=255, blank=True, null=True, help_text="For independents, the party that the legislator caucuses with. If changed during a term, the most recent.")
     website = models.CharField(max_length=255, blank=True, help_text="The URL to the official website of the person during this role, if known.")
@@ -418,7 +418,8 @@ class PersonRole(models.Model):
         if self.role_type == RoleType.senator:
             return 'Sen.' if short else 'Senator'
         if self.role_type == RoleType.representative:
-            if not self.state in stateapportionment:
+            if self.state not in stateapportionment:
+                # All of the former 'states' were territories that sent delegates.
                 return 'Rep.' if short else 'Delegate'
             if self.state == 'PR':
                 return 'Commish.' if short else 'Resident Commissioner'
@@ -427,7 +428,8 @@ class PersonRole(models.Model):
             return 'Rep.' if short else 'Representative'
             
     def state_name(self):
-        return State.by_value(self.state).label
+        if not self.state: return "the United States"
+        return statenames[self.state]
 
     def state_name_article(self):
         if not self.state: return "the United States"
@@ -448,8 +450,8 @@ class PersonRole(models.Model):
             if self.current and self.senator_rank: js = self.get_senator_rank_display() + " "
             return js + self.get_title_name(False) + " from " + statenames[self.state]
         if self.role_type == RoleType.representative:
-            if self.district == -1:
-                return self.get_title_name(False) + " for " + statenames[self.state]
+            if self.district == -1 or stateapportionment.get(self.state) in ("T", None): # unknown district / current territories and former state-things, all of which send/sent delegates
+                return self.get_title_name(False) + " for " + self.state_name_article()
             elif self.district == 0:
                 return self.get_title_name(False) + " for " + statenames[self.state] + " At Large"
             else:
@@ -467,7 +469,7 @@ class PersonRole(models.Model):
             if self.current and self.senator_rank: js = "the " + self.get_senator_rank_display().lower() + " "
             return js + "senator from " + statenames[self.state]
         if self.role_type == RoleType.representative:
-            if stateapportionment.get(self.state) == "T":
+            if stateapportionment.get(self.state) in ("T", None): # current territories and former state-things, all of which send/sent delegates
                 return "the %s from %s" % (
                     self.get_title_name(False).lower(),
                     self.state_name_article()
@@ -510,7 +512,14 @@ class PersonRole(models.Model):
 
     @property
     def is_territory(self):
+        # a current territory
         return stateapportionment.get(self.state) == "T"
+
+    @property
+    def is_historical_territory(self):
+        # a historical territory
+        # note: self.state is "" for presidents/vps
+        return self.state and stateapportionment.get(self.state) is None
 
     def create_events(self, prev_role, next_role):
         now = datetime.datetime.now().date()

@@ -1,7 +1,7 @@
 {% extends "master_a.html" %}
 {% load humanize persontags govtrack_utils %}
 
-{% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}{{ role.get_title }}{% if role.state %} for {{ role.get_state_display }}{% if role.district %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
+{% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}{{ role.get_title }}{% if role.state %} for {{ role.state_name_article }}{% if role.district > 0 %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
 
 {% block meta_description %}{% if cities %}Represents {{cities}}. {% endif %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_title }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
 {% block meta_keywords %}{{person.name_no_district}},legislation,bills,district,sponsor,cosponsor,votes,missed votes,absences,committees{% endblock %}
@@ -269,8 +269,7 @@ $(function() {
 	<p>
 		{% if not active_role %}Former {% endif %}
 		{{ role.get_title }}{% if role.state %} from
-			{{ role.get_state_display }}{% if role.district == 0 %}&rsquo;s At-Large District{% elif role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District{% endif %}{% endif %},
-		<span class="partycolor_{{role.party.0}}">{{role.party}}</span>
+			{{ role.state_name_article }}{% if role.district == 0 %}&rsquo;s At-Large District{% elif role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District{% endif %}{% endif %}{% if role.party %}, <span class="partycolor_{{role.party.0}}">{{role.party}}</span>{% endif %}
 	</p>
 </div>
 
@@ -288,7 +287,7 @@ $(function() {
         {% for r in person.roles_condensed %}
         	{% if forloop.first %}
         		{# r has mangled dates, so for the next election year we use "role" #}
-        		<p>{{ person.lastname }}, a{% if r.party.0 == "I" %}n{% endif %} {{r.party}},
+        		<p>{{ person.lastname }}, {% if r.party %}a{% if r.party.0 == "I" %}n{% endif %} {{r.party}},{% endif %}
         		{% if r.current %}has been{% else %}was{% endif %}
         		{{r.get_description_natural|safe}}
         		{% if r.current %}since {{ r.startdate|date }} (next election in {{role.next_election_year}}){% else %}from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}{% if r.current and r.district > 0 %} (<a href="/congress/members/{{r.state}}/{{r.district}}">map</a>){% endif %}.
@@ -296,8 +295,10 @@ $(function() {
 
 				{% if r.is_territory %}
 					<p style="font-size: 90%; line-height: 125%">
-						{% if r.state == "VI" or r.state == "DC" %}The {% endif %}{{r.state_name}} is a territory of the United States. Because it is not a state, it has no senators or representatives in Congress. Instead it sends a delegate to the House of Representatives{% if r.state == "PR" %}, called the resident commissioner,{% endif %} with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.
+						Because {{r.state_name_article}} is a territory of the United States, and not a state, it has no senators or representatives in Congress. Instead it sends a delegate to the House of Representatives{% if r.state == "PR" %}, called the resident commissioner,{% endif %} with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.
 					</p>
+				{% elif r.is_historical_territory %}
+					<p>{{r.state_name}} was a territory of the United States sending a delegate, but not a representative and senators, to the Congress.</p>
 				{% endif %}
 
         	{% else %}
@@ -308,7 +309,7 @@ $(function() {
         		{% endif %}
 
         		{{r.get_description_natural|safe}}
-        		({{ r.startdate|date:"Y" }}-{{ r.enddate|date:"Y" }}{% if r.party != role.party %}; {{r.party}}{% endif %}){% if forloop.last %}.</p>{% else %};{% endif %}
+        		({{ r.startdate|date:"Y" }}-{{ r.enddate|date:"Y" }}{% if r.party and r.party != role.party %}; {{r.party}}{% endif %}){% if forloop.last %}.</p>{% else %};{% endif %}
 	        {% endif %}
         {% endfor %}
         </div>
