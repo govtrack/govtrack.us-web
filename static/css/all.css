@@ -4,9 +4,13 @@
 
 html { font-size: 15px; /* for rem unit sizing, match the body to be nice */ }
 body {
-	background-color: white;
+	background: #9D2146;
 	color: #141712;
 	font-size: 15px;
+	}
+	#bodybody {
+		background-color: white;
+		padding-bottom: 25px;
 	}
 
 a:link, a:visited {
@@ -841,9 +845,7 @@ aside .download-links { padding: 31px 0 0 }
 /*	Footer Styles
 	======================================================== */
 #footer {
-	margin-top: 25px;
 	border-top: 40px solid #fcc684;
-	background: #9D2146;
 	padding: 24px 0 0;
 	color: white;
 	}
