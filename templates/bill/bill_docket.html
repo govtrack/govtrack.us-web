@@ -6,6 +6,18 @@
 
 {% block head %}
 <style>
+#basic_trackers li {
+	cursor: pointer;
+	display: block;
+	padding: .5em;
+	margin: -.5em 0 .5em -.5em;
+}
+	#basic_trackers li:hover {
+		background-color: #EEE;
+	}
+	#basic_trackers li div {
+	}
+
 #subject_list span {
 	display: none;
 }
@@ -151,22 +163,20 @@ function do_keyword_tracker_submit() {
 
 	<div id="get-alerts">
 		<div class="row">
-			<div class="col-sm-7">
+			<div class="col-sm-6">
 			<div style="padding-right: 30px">
 				<h2><span>Basic alerts</span></h2>
 				<ul id="basic_trackers" style="padding: 0">
 					{% for feed in feeds %}
-					<li>
-						<a href="{{feed.link}}" style="height: auto">
-							{{feed.title}} <span>Add</span>
-							<div style="color: #555; line-height: 125%; margin-bottom: 3px">{{feed.description}}</div>
-						</a>
+					<li onclick="window.location='{{feed.link}}'">
+						<a href="{{feed.link}}">{{feed.title}}</a>
+						<div>{{feed.description}}</div>
 					</li>
 					{% endfor %}
 				</ul>
 			</div>
 			</div>
-			<div class="col-sm-5">
+			<div class="col-sm-6">
 				<h2><span>Other ways to get alerts</span></h2>
 
 				<p>There are many ways to get email alerts about bills in Congress from GovTrack.</p>

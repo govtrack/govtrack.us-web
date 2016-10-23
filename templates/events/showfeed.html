@@ -3,29 +3,6 @@
 
 {% block head %}
 <style>
-  h1 {
-  	margin-top: 1em;
-  	font-size: 32px;
-  	border: none;
-  }
-  h2 {
-    font-size: 1.75em;
-    color: #40A4BD;
-    text-transform: none;
-    padding-bottom: 1em;
-  }
-
-  h3 {
-    text-transform: none;
-    padding-bottom: 1em;
-    color: #40a4bd;
-  }
-
-#events_list {
-  padding: 1em 2em;
-  border: 1px solid #666;
-}
-
 </style>
 {% endblock %}
 
@@ -34,14 +11,14 @@
 var selected_feed = "{{feed.feedname|escapejs}}";
 
 function show_feed() {
-	$('#events_preview_2').html("<p class='error'>Loading...</p>");
+	$('#events_preview').html("<p class='error'>Loading...</p>");
 	$.ajax({
 		url: "/events/_load_events",
 		type: "POST",
 		data: { feed: selected_feed, count: 10, newtab: 1 },
 		dataType: "html",
 		success: function(data) {
-			$('#events_preview_2').html(data);
+			$('#events_preview').html(data);
 		}
 	});
 
@@ -78,18 +55,18 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-<h1>{{feed.title}}</h1>
+<h1>Track {{feed.title}}</h1>
 
-<div>
-	<div id="edit_list" class="col-sm-4" style="line-height: 125%">
-		<div id="set_freq" class="control">
-			<p class="description">{{feed.description}}</p>
+<p>{{feed.description}}</p>
 
-			<h3 style="margin-top: 1em; padding: 0;">Tracker Options</h3>
-			<div>
+<div class="row">
+
+	<div class="col-sm-6">
+		<h2><span>Tracking Options</span></h2>
+
 			{% if not request.user.is_authenticated or request.user.subscription_lists.count <= 1 %}
 				<p>How often would you like updates by email?</p>
-				<select id="email_frequency" name="email_frequency" onchange="update_login_links();" style="margin-bottom: 1em">
+				<select id="email_frequency" name="email_frequency" onchange="update_login_links();" style="margin-bottom: 2em; width: auto;" class="form-control">
 					<option value="0">No Email - I&rsquo;ll come back on my own.</option>
 					<option value="1" selected>Daily Emails</option>
 					<option value="2">Weekly Emails</option>
@@ -105,23 +82,19 @@ $(function() {
 					{% endfor %}
 				</ul>
 			{% endif %}
-			</div>
-			
-		</div><!-- /set_freq -->
-		<div class="">
+
 			{% if not request.user.is_authenticated %}
 		
 			<div class="signin_social">
-				<h3 style="margin-top: 1em; padding: 0;">Save This Tracker</h3>
 				{% with "/accounts/lists?"|add:"REPLACE_FEED_HERE" as singlesignon_next %}
 					{% include "registration/login_singlesignon.html" %}
 				{% endwith %}
-				<p style="margin: .5em 0 1em 0; font-size: 90%;">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack. Just click the appropriate button above. Or register the simple way by clicking the Register button below.</p>
+				<p style="margin: .5em 0 1em 0; font-size: 90%;">You can use your Google, Facebook, or Twitter account for a fast, no-password way to log into GovTrack. Just click the appropriate button above. Or register the simple way by clicking the New Account button below.</p>
 			</div>
 			<div style="clear: both"> </div>
 		
-			<a class="btn btn-success" href="/registration/signup?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}" style="margin-bottom: 5px">Register a New Account</a>
-			<a class="btn btn-success" href="/accounts/login?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}">Existing User Log In</a>
+			<a class="btn btn-success" href="/registration/signup?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}">New Account</a>
+			<a class="btn btn-success" href="/accounts/login?next={{"/accounts/lists?REPLACE_FEED_HERE"|urlencode}}">Log In</a>
 			
 			{% else %}
 			<div style="margin-top: 1em">
@@ -129,18 +102,13 @@ $(function() {
 			</div>
 			{% endif %}
 		</div>
-	</div><!-- /edit_list -->
-	
-	<div id="feed_preview" class="col-sm-8">
-		<div id="events_list">
-			<h4 style="margin-bottom: 1em">Preview:</h4>
+			
+		<div class="col-sm-6">
 
-			<div id="events_preview_2">
+			<h2><span>What You Will Be Tracking</span></h2>
+
+			<div id="events_preview">
 			</div><!-- /events -->
-
-		</div><!-- /event_list -->
-	</div><!-- /feed_preview -->
-
-
-</div><!-- /panel -->
+		</div>
+</div>
 {% endblock %}

@@ -15,7 +15,7 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" integrity="sha256-VBrFgheoreGl4pKmWgZh3J23pJrhNlSUOBek+8Z2Gv0=" crossorigin="anonymous">
-		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20161001" />
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20161023" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
@@ -88,11 +88,11 @@
 	            <ul class="dropdown-menu">
 					{% if request.anonymous %}
 						<li id="nav_track_start"><a href="/start">Start Tracking</a></li>
-						<li id="nav_track_lists" style="display: none"><a href="/accounts/lists">What I&rsquo;m Tracking</a></li>
+						<li id="nav_track_lists" style="display: none"><a href="/accounts/lists">What You Are Tracking</a></li>
 					{% else %}
 						{% if user.is_authenticated %}
 						<li><a href="/start">Add a Tracker</a></li>
-						<li><a href="/accounts/lists">What I&rsquo;m Tracking</a></li>
+						<li><a href="/accounts/lists">What You Are Tracking</a></li>
 						{% else %}
 						<li><a href="/start">Start Tracking</a></li>
 						{% endif %}

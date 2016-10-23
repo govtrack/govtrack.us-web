@@ -63,7 +63,10 @@ def edit_subscription_lists(request):
         if not feed in sublist.trackers.all(): sublist.trackers.add(feed)
         sublist.save()
         
-        message = feed.title + " was added to your list " + sublist.name + "."
+        if request.user.userprofile().lists().count() <= 1:
+            message = "You are now tracking " + feed.title + "."
+        else:
+            message = feed.title + " was added to your list " + sublist.name + "."
     
     return {
         'default_list': sublist,

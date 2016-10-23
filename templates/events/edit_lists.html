@@ -1,5 +1,5 @@
 {% extends 'master.html' %}
-{% block title %}What I&rsquo;m Tracking -- GovTrack.us{% endblock %}
+{% block title %}What You Are Tracking -- GovTrack.us{% endblock %}
 {% block head %}
 <style>
 {% if request.user.userprofile.lists.count == 1 %}
@@ -16,14 +16,70 @@ h1 {
     margin-top: 1em;
 }
 
-h2 {
-    border-bottom: 1px solid #dae2df;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
 .list h3.name {
     margin: 0;
 }
+
+#lists .list {
+    background-color: #EEE;
+    padding: 8px;
+    cursor: pointer;
+}
+    #lists h3 { font-weight: bold; }
+    #lists .list a {
+        float: right;
+        margin-left: 5px;
+        text-decoration: none;
+    }
+    .default_list .no_default_list { display: none; }
+    #lists .list.active {
+        background-color: #d9534f;
+        color: white;
+    }
+        #lists .list.active a {
+            color: inherit;
+        }
+        #lists .list .buttons {
+            display: none;
+        }
+            #lists .list.active .buttons {
+                display: block;
+            }
+    #lists .list .list_info {
+        margin-top: .5em;
+        font-size: 90%;
+    }
+
+#list_trackers, #removed_trackers {
+    margin-top: 1em;
+    padding: 0;
+}
+#list_trackers li, #removed_trackers li {
+    display: block;
+    padding: .25em .5em;
+}
+
+a.toggle-tracker {
+    position: relative;
+    top: 1px;
+    color: #E88;
+    text-decoration: none;
+}
+    a.toggle-tracker .remove-tracker {
+        display: none;
+    }
+    .active a.toggle-tracker .remove-tracker {
+        display: inline;
+    }
+    a.toggle-tracker .add-tracker-back {
+        display: inline;
+    }
+    .active a.toggle-tracker .add-tracker-back {
+        display: none;
+    }
+    a.toggle-tracker:hover {
+        color: inherit;
+    }
 </style>
 {% endblock %}
 
@@ -35,9 +91,7 @@ function activate_list(elem) {
     active_list = $(elem).attr("listid");
     $('#lists div').removeClass('active');
     $(elem).addClass("active");
-    $("#list_view h2 .name").text($(elem).find(".name").text());
-
-    $('#basic_trackers input').prop('checked', false);
+    $("#tracker_list .list-name").text($(elem).find(".name").text());
     $("#list_trackers").text("");
 
     $('#email_frequency').val($(elem).attr('list_email'));
@@ -51,18 +105,13 @@ function activate_list(elem) {
         },
         dataType: "json",
         success: function(data) {
-            $('#rss_link').attr('href', '/events/events.rss?list_id=' + data.list_public_id);
+            $('.if_has_trackers').toggle(data.list_trackers.length > 0);
+            $('.if_has_no_trackers').toggle(data.list_trackers.length == 0);
 
-            $('#items p').toggle(data.list_trackers.length == 0);
-            $('#items p').text('You have not yet tracked anything.'); // hidden if not relevant
+            $('#rss_link').attr('href', '/events/events.rss?list_id=' + data.list_public_id);
 
             for (var i = 0; i < data.list_trackers.length; i++) {
                 add_tracker(data.list_trackers[i].id, data.list_trackers[i].name, data.list_trackers[i].title, data.list_trackers[i].link, false);
-                var n = $('#basicfeed_' + data.list_trackers[i].id);
-                if (n.length) {
-                    // it is in the basic tracker recommended list. TODO: Remove this class.
-                    n.addClass("active");
-                }
             }
         }
     });
@@ -87,10 +136,9 @@ function refresh_events() {
 }
 
 function add_tracker(id, name, title, link, save) {
-    var t = $("<li><a href='#' onclick='return toggle_tracker(this);' class='active plain' title='Remove'>Remove <span/></a> <span class='span2'/></li>");
-    t.find("span.span2").append($("<a>").attr("href", link).attr("class", "plain").text(title));
-    t.find("a").attr("feedname", name);
-    $('#items p').fadeOut();
+    var t = $("<li class='active'><a class='tracker-link'></a> <a href='#' onclick='return toggle_tracker(this.parentNode);' class='toggle-tracker'><span class='sr-only remove-tracker'>Remove Tracker</span><span class='remove-tracker glyphicon glyphicon-trash'/> <span class='add-tracker-back'>(Add It Back!)</a></li>");
+    t.find("a.tracker-link").attr("href", link).text(title);
+    t.attr("feedname", name);
     $("#list_trackers").append(t);
     if (save) add_remove_tracker(true, name, false);
 
@@ -114,16 +162,12 @@ function update_count() {
 function toggle_tracker(node) {
     if ($(node).hasClass('active')) {
         $(node).removeClass('active');
-        $(node).text('add back');
         $('#removed').fadeIn();
-        $('#removed_trackers').append($(node.parentNode));
-        $('#items p').toggle($('#list_trackers *').length == 0);
+        $('#removed_trackers').append($(node));
         add_remove_tracker(false, $(node).attr('feedname'), false);
     } else {
         $(node).addClass('active');
-        $(node).text('remove');
-        $('#items p').fadeOut();
-        $('#list_trackers').append($(node.parentNode));
+        $('#list_trackers').append($(node));
         $('#removed').toggle($('#removed_trackers *').length > 0);
         add_remove_tracker(true, $(node).attr('feedname'), false);
     }
@@ -151,8 +195,8 @@ function add_remove_tracker(add_remove, feedname, refresh) {
     return false;
 }
 
-function delete_list(node) {
-    node = $(node).parents(".list");
+function delete_list() {
+    var node = $(this.parentNode.parentNode);
     
     if (!confirm("Delete list " + node.find(".name").text() + "?")) return false;
     $.ajax({
@@ -164,33 +208,35 @@ function delete_list(node) {
         },
         dataType: "json",
         success: function(data) {
-            activate_list(node.parent().prev().find(".list"));
-            node.parent().fadeOut(function() { node.parent().remove(); });
+            activate_list($('#lists div.list')[0]);
  
             if ($("#lists .list").length == 2) { // i.e., deleting the last list (node hasn't been removed yet)
                 $('.if_multiple_lists').hide();
                 $('.if_single_list').fadeIn();
             }
+
+            node.fadeOut(function() { node.parent().remove(); });
         }
     });
     return false;
 }
 
-function rename_list(node) {
-    var oldname = $(node).find(".name").text();
+function rename_list() {
+    var node = $(this.parentNode.parentNode);
+    var oldname = node.find(".name").text();
     var newname = prompt("Rename list " + oldname + " to...", oldname);
-    if (newname && newname != "") {
+    if (newname && newname != "" && newname != oldname) {
         $.ajax({
             url: "/events/_edit",
             type: "POST",
             data: {
-                listid: $(node).attr("listid"),
+                listid: node.attr("listid"),
                 command: "rename",
                 name: newname
             },
             dataType: "json",
             success: function(data) {
-                $(node).find(".name").text(newname);
+                node.find(".name").text(newname);
                 activate_list(node);
             }
         });
@@ -239,6 +285,7 @@ function new_list(node) {
             n.attr("list_email", data.list_email);
             n.removeClass("default_list");
             activate_list(n);
+            add_click_handlers(n);
             
             $('.if_multiple_lists').fadeIn();
             $('.if_single_list').hide();
@@ -247,11 +294,18 @@ function new_list(node) {
     return false;
 }
 
+function add_click_handlers(node) {
+    node.find('.button-rename-list').click(rename_list);
+    node.find('.button-delete-list').click(delete_list);
+}
+
 $(function() {
+    add_click_handlers($('#lists .list'));
+
     {% if request.GET.listid or default_list %}
     $('#lists div.list').each(function() {
         if (this.getAttribute("listid") == {% if request.GET.listid %}"{{request.GET.listid|escapejs}}"{% else %}"{{default_list.id}}"{% endif %})
-            activate_list(this);
+            activate_list($(this));
     });
     {% endif %}
     if (!active_list) activate_list($('#lists div.list')[0]);
@@ -260,15 +314,20 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-<h1>What I&rsquo;m Tracking</h1>
+<h1>What You Are Tracking</h1>
 
 {% if message %}
-<div style="text-align: center; margin: 2em; font-size: 120%; font-weight: bold;">{{message}}</div>
+<p class="text-info">{{message}}</p>
 {% endif %}
 
-<section class="group if_multiple_lists">
-    <h2>My Lists</h2>
-    <p style="margin: 0"><em>Click on a list to manage its trackers and email update settings:</em></p>
+<p>We&rsquo;ll send you email updates about activity in Congress that match the trackers you choose. (Or use your trackers to create a customized RSS feed.)</p>
+
+<p>Add a tracker by searching <a href="/congress/members">Members of Congress</a>, <a href="/congress/bills">bills</a>, <a href="/congress/votes">votes</a>, and <a href="/congress/committees">committees</a>.</p>
+
+<section class="if_multiple_lists">
+    <h2><span>Your Lists</span></h2>
+
+    <p style="margin: 1em 0"><em>Click on a list to manage its trackers and email update settings.</em></p>
 
     <div id="lists" class="row">
         
@@ -277,15 +336,22 @@ $(function() {
         create a new list, it should not have any list-specific data hidden away
         except where we expect that to be{% endcomment %}
         <div class="col-sm-4">
-            <div class="list group {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)" list_email="{{list.email}}">
-                <h3 class="name">{{list.name}}</h3>
-                <div class="options">
-                    <span class="opts edit"><a class="icon edit" href="#" onclick="return rename_list(this.parentNode.parentNode.parentNode);">Rename</a></span>
-                    <span class="opts no_default_list"><a class="icon trash" href="#" onclick="return delete_list(this);">Delete</a></span>
+            <div class="list {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)" list_email="{{list.email}}">
+                <div class="buttons">
+                    <a class="button-rename-list">
+                        <span class="sr-only">Rename List</span>
+                        <span class='glyphicon glyphicon-pencil' title='Rename List'></span>
+                    </a>
+
+                    <a class="button-delete-list no_default_list">
+                        <span class="sr-only">Delete List</span>
+                        <span class='glyphicon glyphicon-trash' title='Delete List'></span>
+                    </a>
                 </div>
+                <h3 class="name">{{list.name}}</h3>
                 <div class="list_info">
-                    <div class="num">{{list.trackers.count}} item{{list.trackers.count|pluralize}}</div>
-                    <div class="freq">{% if list.name != "Email Updates" %}Email Updates:{% else %}Frequency:{% endif %} <span class="email_info">{{list.get_email_display}}</span></div>
+                    <span class="num">{{list.trackers.count}} item{{list.trackers.count|pluralize}}</span>.
+                    <span class="freq">{% if list.name != "Email Updates" %}Email Updates:{% else %}Frequency:{% endif %} <span class="email_info">{{list.get_email_display}}</span></span>.
                     <div style="clear: both"></div>
                 </div>
             </div>
@@ -293,74 +359,64 @@ $(function() {
     {% endfor %}
 
     <div class="col-sm-4" id="newlist">
-        <a class="btn btn-primary" href="#" onclick="return new_list();">+ Create New List</a>
+        <a class="btn btn-primary" href="#" onclick="return new_list();" style="margin-top: 1em"><span class="glyphicon glyphicon-plus"></span> Create New List</a>
     </div>
 
     </div> <!-- /row -->
 </section>
 
-<section id="list_view">
-    <h2 class="if_multiple_lists">Settings for: <span class="name">List Name Goes Here</span></h2>
+<section id="tracker_list">
+    <h2 class="if_single_list"><span>You Are Tracking</span></h2>
+    <h2 class="if_multiple_lists"><span>Tracked in <b class="list-name"></b></span></h2>
 
-    <div class="row">
-    <div class="col-sm-5">
+    <p class="if_has_no_trackers text-info" style="font-weight: bold; display: none;">You have not added any trackers yet! Use the links above to start exploring the site to begin tracking Congress.</p>
 
-        <div id="items" class="control">
-            <h3 class="if_single_list">I Am Tracking...</h3>
-            <h3 class="if_multiple_lists">Tracked <span>in</span> This List</h3>
-            <ul id="list_trackers" style="padding: 0">
+    <div class="row if_has_trackers" style="display: none">
+    <div class="col-sm-7">
+
+        <div id="items">
+            <ul id="list_trackers">
             </ul>
-            <p></p>
         </div><!-- /items -->
 
-        <p class="if_single_list">Tracking a lot? Separate your trackers into <a href="#" onclick="return new_list();">multiple lists</a>.</p>
+        <p class="if_single_list" style="margin-top: 1em; color: #666;">Tracking a lot? Separate your trackers into <a href="#" onclick="return new_list();">multiple lists</a>.</p>
 
-        <div id="removed" class="control" style="display: none;">
-            <p>You just removed...</p>
+        <div id="removed" style="display: none;">
+            <h2><span>You just removed...</span></h2>
             <ul id="removed_trackers">
             </ul>
         </div><!-- /items -->
 
-        <div id="suggested" class="control">
-            <h3>Track Something New</h3>
-            <ul class="bullets">
-                <li><a href="/congress/members">Members of Congress</a></li>
-                <li><a href="/congress/bills">Bills in Congress</a></li>
-                <li><a href="/congress/votes">Votes</a></li>
-                <li><a href="/congress/committees">Committees</a></li>
-            </ul>
-        </div><!-- /suggested -->
-
     </div>
 
-    <div class="col-sm-7">
+    <div class="col-sm-5">
         
-        <div id="set_freq" class="control">
-            <h3>Getting Updates</h3>
-            <div class="row">
-                <div class="col-sm-8">
-                    <h3>Email</h3>
-                    <select id="email_frequency" name="email_frequency" onchange="change_email_options();">
+        <div id="set_freq">
+                    <h2><span>Email Updates</span></h2>
+                    
+                    <p>Would you like your tracked events sent to you by email? Choose how often you would like to hear from us:</p>
+
+                    <select id="email_frequency" name="email_frequency" onchange="change_email_options();" class="form-control" style="margin-bottom: 1em;">
                         <option value="0">Don&rsquo;t Send Emails</option>
                         <option value="1">Daily</option>
                         <option value="2">Weekly</option>
                     </select>
-                    <p style="clear: both; line-height: 120%;"><small>You&rsquo;ll only get an email if there are new events matching your trackers.</small></p>
-                </div>
-                <div class="col-sm-4">
-                    <h3>RSS</h3>
-                    <p><a id="rss_link" href="#" class="add_icon rss">Get these events by RSS</a>.</p>
-                </div>
-            </div>
-        </div><!-- /set_freq -->
-        
-        <div id="events_header" class="group">
-            <h3>Preview Your Email Updates</h3>
-        </div>
 
-        <div id="events">
-    </div><!-- /events -->
+                    <p>You&rsquo;ll only get an email if there are new events matching your trackers.</p>
+
+                    <h2><span>Custom RSS Feed</span></h2>
+                    <p><a id="rss_link" href="#" class="add_icon rss">Get these events by RSS</a>.</p>
+        </div><!-- /set_freq -->
+    </div><!-- /col -->
+    </div> <!-- /row -->
+
+        
+    <div id="events_header">
+        <h2><span>Preview Of Your Email Updates</span></h2>
+    </div>
+
+    <div id="events">
+    </div>
 
 </section>
-</div>
 {% endblock %}
