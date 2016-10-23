@@ -4,7 +4,7 @@
 
 {% block head %}
 <style>
-h3 { margin: 4px 0 4px 16px; }
+h3 { font-weight: bold; }
 tt { font-size: 90%; }
 #content li { margin-bottom: 1em; }
 </style>
@@ -25,13 +25,11 @@ tt { font-size: 90%; }
 	
 	{% include "website/developers/gettingstarted.html" %}
 
-	<h2><span>Overview</span></h2>
-	
 	<p>You can familiarize yourself with the contents of our bulk data by browsing <a href="/data/congress-legislators/">http://www.govtrack.us/data/congress-legislators/</a> and <a href="/data/congress/">http://www.govtrack.us/data/congress/</a>. Get an idea for the directory structure and what the files look like.</p>
 
 	<p>An explanation of the directory layout of the files and their formats is given below.</p>
 	
-	<h3>Getting the Data</h3>
+	<h2><span>Getting the Data</span></h3>
 	
 	<p>To fetch the data we support <tt>rsync</tt>, a common Unix/Mac tool for efficiently fetching files and keeping them updated as they change. The root of our rsync tree is <tt>govtrack.us::govtrackdata</tt>, and this corresponds exactly to what you see at <a 
 	href="/data/">http://www.govtrack.us/data/</a>.</p>

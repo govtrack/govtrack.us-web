@@ -1,35 +1,45 @@
 {% extends "master.html" %}
-{% block title %}GovTrack.us Developer Documentation{% endblock %}
+{% block title %}GovTrack.us Open Data &amp; API{% endblock %}
 
 {% block body %}
-	<h1>Developer Documentation</h1>
-	<p>Want to build an app? Part of GovTrack&rsquo;s core mission is to make legislative data freely available so that others can build new tools to promote civic education and engagement.</p>
-	<p>GovTrack applies the principles of open data to legislative transparency. We screen scrape <a href="/about">a variety of official government websites</a> each day and make the resulting normalized database of legislative information available for free for reuse &mdash; in bulk (since 2005) and with an API (since 2012). Our database is the foundation for <a href="/developers/downstream">dozens of other open government websites</a>.</p>
+	<h1>Open Data &amp; APIs</h1>
 
-{% include "website/developers/menu.html" %}
+	<p>All the data that powers GovTrack.us is available to you for reuse for any purpose.</p>
 
-<div class="row">
-<div class="col-sm-6">
+	<p>GovTrack is the longest-running open data provider for federal legislation. We began making our data available for re-use in 2005, and through APIs in 2012, and our service has been the basis for <a href="/developers/downstream">many other open government websites and apps</a>.</p>
+
+	<h2><span>Getting data from the primary source</span></h2>
+
+	<p>In 2016, <a href="https://medium.com/@joshuatauberer/govtrack-now-actually-uses-open-government-data-5fc16f377e86#.iflkyrvgs">after a 15-year campaign</a>, we finally convinced the U.S. Congress to make legislative data available themselves. Primary data resources include:</p>
+
+	<ul>
+	<li><a href="http://clerk.house.gov/xml/lists/MemberData.xml">Membership of the House of Representatives in XML</a></li>
+	<li><a href="http://www.senate.gov/general/contact_information/senators_cfm.xml">Membership of the Senate in XML</a></li>
+	<li><a href="https://www.gpo.gov/fdsys/bulkdata/">Bill summary and status XML at GPO FDSys</a></li>
+	<li><a href="http://docs.house.gov/">Upcoming bills and committee hearings in the House (docs.house.gov)</a></li>
+	</ul>
+
+	<p>We encourage you to check out the source data.</p>
+
+	<h2><span>Getting data from GovTrack</span></h2>
+
+	<p>We continue to make our open data and APIs available because our offerings are often easier to use and sometimes more comprehensive than the official data from Congress. See <a href="/about">our about page</a> for a complete list of the data sources we use.</p>
+
+	<p><strong>If you would like to use our bulk data or APIs, you must agree to the <a href="/developers/license">license</a> and you should join our <a href="http://groups.yahoo.com/group/govtrack/">mail list</a> to be notified about changes.</strong></p>
+
+	<p>Here&rsquo;s what we make available:</p>
+
+	<p><a href="/developers/data"><b>Bulk Data</b></a>: Our bulk data contains the raw data behind most everything you see on GovTrack in JSON format. You can download the bulk data using <tt>rsync</tt>, a common Unix data transfer utility.</p>
+
+	<p><a href="https://github.com/unitedstates/congress-legislators"><b>congress-legislators</b></a>. The congress-legislators project on Github is a comprehensive database of all Members of Congress since 1789, stored in YAML format. (These files are also in our bulk data where they are converted to CSV format.)</p>
 	
-	<h3>How do I get the data?</h3>
-		
-	<p><a href="/developers/data">Bulk Data</a>. Our bulk data contains the raw data behind most everything you see on GovTrack in XML or JSON format (and sometimes both). You can download the bulk data using <tt>rsync</tt>, a common Unix data transfer utility. We began making our bulk data available in 2005.</p>
+	<p><a href="/developers/api"><b>API</b></a>: The API is appropriate for use in applications that need only small slices of our data at a time. If you intend to query data in bulk, use our <a href="/developers/data">bulk data</a> instead.</p>
 	
-	<p><a href="/developers/api">API</a>. The API is appropriate for use in applications that need only small slices of our data at a time. If you intend to query data in bulk, use our <a href="/developers/data">bulk data</a> instead. Our first API went online in May 2012. It is currently in version 2.</p>
-	
-	<p><a href="https://gis.govtrack.us/map/demo/cd-2014/">GIS API and Maps</a>.
-	<span style="font-weight: bold; color: red;">THIS SERVICE IS DEPRECATED and will be discontinued on January 4, 2017.</span>
-	We host a map server and API for United States Congressional Districts, 113th Congress (i.e. 2012 elections and on), based on the geographic data made available by the U.S. Census.</p>
-</div>
-<div class="col-sm-6">	
-	<h3>What about source code?</h3>
-		
-	<p>Our github repository at <a href="https://github.com/govtrack/govtrack.us-web">github:govtrack/govtrack.us-web</a> contains the source code for the Django front-end that you see at govtrack.us. Pull requests are welcome! Our front-end source code is not openly licensed right now, but if you want to stand it up for a different government/jurisdiction drop us a a line.</p>
-	
-	<p><a href="https://github.com/unitedstates/congress-legislators">github:unitedstates/congress-legislators</a>. This repository maintains a comprehensive database of all Members of Congress since 1789. The github account contains YAML files which you can load into your application. You can also find the files in our <a href="/developers/data">bulk data</a>, including in CSV format.</p>
-	
-	<p><a href="https://github.com/unitedstates/congress">github:unitedstates/congress</a>. This is an open source community project to compile a comprehensive database of U.S. federal legislation. It is based in part on the source code we developed in the early 2000&rsquo;s to scrape THOMAS, and now we maintain the new code with others as part of a group effort. The project provides <a href="https://github.com/unitedstates/congress/wiki">bulk data downloads</a>, or you can run the Python scripts yourself on your own schedule, and we make the data available through our <a href="/developers/data">bulk data</a>.</p>
-</div>
-</div>
+	<p><a href="https://github.com/unitedstates/congress"><b>congress project</b></a>. The congress project on github is an open source community repository where we write Python scripts to gather official legislative information and convert it into more usable JSON data files.</p>
+
+	<p><a href="https://github.com/govtrack/govtrack.us-web"><b>GovTrack source code</b></a>. We have also posted the Python/Django source code for GovTrack itself.</p>
+
+	<p><span style="font-weight: bold; color: red;">DEPRECATED</span> <a href="https://gis.govtrack.us/map/demo/cd-2014/">GIS API and Maps</a>. We host a map server and API for United States Congressional Districts, 113th Congress (i.e. 2012 elections and on), based on the geographic data made available by the U.S. Census. This service will be discontinued on January 4, 2017.</p>
+
 {% endblock %}
 
