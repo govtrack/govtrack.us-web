@@ -81,19 +81,7 @@ def vote_details(request, congress, session, chamber_code, number):
     
     # sorting by party actually sorts by party first and by ideology score
     # second.
-    has_ideology_scores = False
-    congress = int(congress)
-    global ideology_scores
-    load_ideology_scores(congress)
-    if ideology_scores[congress]:
-        for voter in voters:
-            if voter.person and voter.person.id in ideology_scores[congress]:
-                voter.ideolog_score = ideology_scores[congress][voter.person.id]
-                has_ideology_scores = True
-            else:
-                voter.ideolog_score = \
-            	ideology_scores[congress].get("MEDIAN:" + (voter.person_role.party if voter.person and voter.person_role else ""),
-            		ideology_scores[congress]["MEDIAN"])
+    has_ideology_scores = attach_ideology_scores(voters, vote.congress)
         
     # perform an initial sort for display
     voters.sort(key = lambda x : (x.option.key, x.person_role.party if x.person and x.person_role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
@@ -180,6 +168,21 @@ def load_ideology_scores(congress):
                 ideology_scores[congress]["MEDIAN:"+party] = median(scores_by_party[party])
         except IOError:
             ideology_scores[congress] = None
+
+def attach_ideology_scores(voters, congress):
+    global ideology_scores
+    has_ideology_scores = False
+    load_ideology_scores(congress)
+    if ideology_scores[congress]:
+        for voter in voters:
+            if voter.person and voter.person.id in ideology_scores[congress]:
+                voter.ideolog_score = ideology_scores[congress][voter.person.id]
+                has_ideology_scores = True
+            else:
+                voter.ideolog_score = \
+            	ideology_scores[congress].get("MEDIAN:" + (voter.person_role.party if voter.person and voter.person_role else ""),
+            		ideology_scores[congress]["MEDIAN"])
+    return has_ideology_scores
 
 def get_vote_outliers(voters):
 	# Run a really simple statistical model to see which voters don't
