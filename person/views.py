@@ -124,6 +124,7 @@ def person_details(request, pk):
                 'has_session_stats': has_session_stats,
                 'bill_subject_areas': bills_by_subject_counts,
                 'vote_explanations': vote_explanations,
+                'key_votes': load_key_votes(person),
                 }
 
     #ck = "person_details_%s" % pk
@@ -137,6 +138,48 @@ def person_details(request, pk):
     if request.path != ret["person"].get_absolute_url():
         return redirect(ret["person"].get_absolute_url(), permanent=True)
            
+    return ret
+
+def load_key_votes(person):
+    # Get this person's key votes.
+
+    from vote.models import Vote
+
+    # First get all of the major votes that this person has participated in.
+    all_votes = set(person.votes
+        .filter(vote__category__in=Vote.MAJOR_CATEGORIES)
+        .values_list("vote__id", flat=True))
+
+    # Scan the cached votes for the votes with the most number of outliers
+    # and the votes that this person was an outlier in.
+    import csv
+    top_votes = { }
+    outlier_votes = set()
+    for vote in csv.DictReader(open("data/us/114/stats/notable_votes.csv")):
+        if int(vote["vote_id"]) not in all_votes: continue
+        outliers = set(int(v) for v in vote["outliers"].split(" ") if v != "")
+        top_votes[int(vote["vote_id"])] = len(outliers)
+        if person.id in outliers: outlier_votes.add(int(vote["vote_id"]))
+
+    # Sort the votes but the number of outliers.
+    top_votes = sorted(top_votes.items(), key=lambda kv : -kv[1])
+    top_votes = [kv[0] for kv in top_votes]
+
+    # Return the top votes where the person was an outlier and the top
+    # where the person wasn't.
+    ret = [v for v in top_votes if v in outlier_votes][0:4] \
+        + [v for v in top_votes if v not in outlier_votes][0:4]
+
+    # Convert to Vote objects, make unique, and order by vote date.
+    ret = Vote.objects.filter(id__in=ret).order_by('-created')
+    ret = sorted(ret, key = lambda v : v.created, reverse=True)
+
+    # Replace with a tuple of the vote and the Voter object for this person.
+    ret = [
+        (vote, vote.voters.get(person=person))
+        for vote in ret
+    ]
+
     return ret
 
 @user_view_for(person_details)

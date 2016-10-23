@@ -31,7 +31,6 @@
 		margin-right: 6px;
 	}
 
-	.table th { font-weight: normal; }
 	#title-info {
 		margin-bottom: 1em;
 	}
@@ -562,14 +561,39 @@ $(function() {
 	</section><!-- /sponsorship -->
 {% endif %}
 
-	{% if analysis_data.missedvotes %}
+	{% if analysis_data.missedvotes or key_votes|length > 0 %}
 	<section id="voting-record">
 		<h2><span>Voting Record</span></h2>
 
-		<div class="alert alert-info">
-		See how <a href="/congress/votes/presidential-candidates">presidential campaigns affect voting records</a>.
-		</div>
+		{% if key_votes|length > 0 %}
+			<h3>Key Votes</h3>
+			<table class="table" style="margin: 0 0 3em 0">
+				<thead>
+					<tr>
+						<th style="text-align: center;">{{person.lastname}}&rsquo;s Vote</th>
+						<th style="vertical-align: middle;">Vote Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for v, voter in key_votes %}
+						<tr>
+							<td class="vote_{{ voter.option.alpha_key }}" style="text-align: center; vertical-align: middle; font-variant: small-caps;">
+								{{voter.option.value}}
+							</td>
+							<td style="line-height: 125%;">
+								<a href="{{v.get_absolute_url}}" title="{{v.question}}" style="text-decoration: none">{{v.question|truncatewords:28}}</a>
+								<div style="font-size: 88%;">
+									{{v.created|date}}. {{v.result}}.
+								</div>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% endif %}
 
+		{% if analysis_data.missedvotes %}
+		<h3>Missed Votes</h3>
 		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed|intcomma}} of {{analysis_data.missedvotes.total|intcomma}} roll call votes, which is {{analysis_data.missedvotes.percent}}%.
 		This is
 		{% if analysis_data.missedvotes.percentile < 35 %}better than
@@ -594,6 +618,12 @@ $(function() {
 				<tr><td>{{rec.time}}</td> <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinalhtml}}</td></tr>
 			{% endfor %}
 		</table>
+
+		<div class="alert alert-info">
+		See how <a href="/congress/votes/presidential-candidates">presidential campaigns affect voting records</a>.
+		</div>
+
+		{% endif %}
 
 	</section><!-- /voting-record -->
 	{% endif %}
