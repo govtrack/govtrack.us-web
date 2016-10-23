@@ -234,7 +234,11 @@ blockquote {
 	border: none;
 	border-radius: 12px;
 	background-color: #fcc684;
+    color: black;
 }
+	.panel-info a {
+		color: #003300;
+	}
 .panel-success {
 	border: none;
 	border-radius: 12px;
