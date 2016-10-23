@@ -3,6 +3,8 @@
 
 {% block head %}
 <style>
+#choose-list { padding: 0; }
+#choose-list li { display: block; }
 </style>
 {% endblock %}
 
@@ -73,7 +75,7 @@ $(function() {
 				</select>
 			{% else %}
 				<p>Which list would you like to add this tracker into?</p>
-				<ul>
+				<ul id="choose-list">
 					{% for sublist in request.user.userprofile.lists %}
 						<li>
 							<input id="sublist{{sublist.id}}" type="radio" name="list" value="{{sublist.id}}" {% if forloop.counter == 1 %}checked{% endif %}  onchange="update_login_links();"/>
