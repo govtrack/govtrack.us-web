@@ -335,3 +335,69 @@ def get_bill_status_string(is_current, status):
     
     return status   
 
+def get_bill_really_short_status_string(status):
+    # Returns a string with two %s's in it, one for a noun describing the
+    # bill and one for the status date.
+    
+    if status == "INTRODUCED":
+        status = "%s was introduced %s."
+    elif status == "REFERRED":
+        status = "%s was referred to committee %s."
+    elif status == "REPORTED":
+        status = "Committees approved %s %s."
+    elif status == "PASS_OVER:HOUSE":
+        status = "%s passed the House %s (Senate next)."
+    elif status == "PASS_OVER:SENATE":
+        status = "%s passed the Senate %s (House next)."
+    elif status == "PASSED:BILL":
+        status = "%s passed the House and Senate %s."
+    elif status == "PASS_BACK:HOUSE":
+        status = "%s passed House with changes %s."
+    elif status == "PASS_BACK:SENATE":
+        status = "%s passed Senate with changes %s."
+    elif status == "CONFERENCE:PASSED:HOUSE":
+        status = "%s's conference report passed House %s."
+    elif status == "CONFERENCE:PASSED:SENATE":
+        status = "%s's conference report passed Senate %s."
+    elif status == "PROV_KILL:SUSPENSIONFAILED":
+        status = "%s was killed in the House %s."
+    elif status == "PROV_KILL:CLOTUREFAILED":
+        status = "%s was killed in a Senate cloture vote %s."
+    elif status == "PROV_KILL:PINGPONGFAIL":
+        status = "%s was voted down %s."
+    elif status == "PROV_KILL:VETO":
+        status = "%s was vetoed %s."
+    elif status == "VETOED:OVERRIDE_PASS_OVER:HOUSE":
+        status = "%s passed in House veto override %s (Senate next)."
+    elif status == "VETOED:OVERRIDE_PASS_OVER:SENATE":
+        status = "%s passed in Senate veto override %s (House next)."
+    elif status == "PASSED:SIMPLERES":
+        status = "%s passed %s."
+    elif status == "PASSED:CONSTAMEND":
+        status = "%s was agreed to %s."
+    elif status == "PASSED:CONCURRENTRES":
+        status = "%s was agreed to %s."
+    elif status == "FAIL:ORIGINATING:HOUSE":
+        status = "%s failed in the House %s."
+    elif status == "FAIL:ORIGINATING:SENATE":
+        status = "%s failed in the Senate %s."
+    elif status == "FAIL:SECOND:HOUSE":
+        status = "%s failed in the House %s."
+    elif status == "FAIL:SECOND:SENATE":
+        status = "%s failed in the Senate %s."
+    elif status == "VETOED:OVERRIDE_FAIL_ORIGINATING:HOUSE" or status == "VETOED:OVERRIDE_FAIL_SECOND:HOUSE":
+        status = "Veto override of %s failed in House %s."
+    elif status == "VETOED:OVERRIDE_FAIL_ORIGINATING:SENATE" or status == "VETOED:OVERRIDE_FAIL_SECOND:SENATE":
+        status = "Veto override of %s failed in Senate %s."
+    elif status == "VETOED:POCKET":
+        status = "%s was pocket vetoed %s."
+    elif status == "ENACTED:SIGNED":
+        status = "%s was enacted (signed by President) %s."
+    elif status == "ENACTED:VETO_OVERRIDE":
+        status = "%s was enacted (by veto override) %s."
+    elif status == "ENACTED:TENDAYRULE":
+        status = "%s was enacted (by ten day rule) %s."
+    elif status == "ENACTED:UNKNOWN":
+        status = "%s was enacted %s."
+    return status   
+
