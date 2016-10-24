@@ -209,12 +209,12 @@ class MediumPost(models.Model):
         # there's some crap before the JSON object starts
         medium_posts = medium_posts[medium_posts.index("{"):]
         medium_posts = json.loads(medium_posts)
-        def format_post(postid):
-            post = medium_posts['payload']['references']['Post'][postid]
-            collection = medium_posts['payload']['references']['Collection'][post['homeCollectionId']]
-            post["homeCollection"] = collection
-            return post
-        return [ format_post(postid) for postid in medium_posts['payload']['value']['sections'][1]['postListMetadata']['postIds'] ]
+        for section in medium_posts['payload']['streamItems']:
+            for post in section["section"]["items"]:
+                post = medium_posts['payload']['references']['Post'][post["post"]["postId"]]
+                collection = medium_posts['payload']['references']['Collection'][post['homeCollectionId']]
+                post["homeCollection"] = collection
+                yield post
 
     @staticmethod
     def sync():
