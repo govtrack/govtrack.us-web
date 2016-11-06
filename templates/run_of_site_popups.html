@@ -10,12 +10,19 @@ $(function() {
 		var flags = $.cookie("flags");
 		flags = !flags ? {} : parse_qs(flags);
 
+		// Increment a counter.
+		flags.hits = (parseInt(flags.hits) || 0) + 1;
+
 		if (win_loc_hash == "#opencongress") {
 			// Special dialog for folks coming from OpenCongress.
 			window.location.hash = "";
 			$('#opencongress_modal').modal();
 			ga('send', 'event', 'referral', 'opencongress');
 		
+		} else if (flags.hits > 1 && flags.hits < 10) {
+			$('#supportus_modal').modal();
+			ga('send', 'event', 'popup', 'support_us');
+
 		} else if (Math.random() < .3) {
 			// Show twitter follow popup.
 			show_followus(flags);
@@ -77,4 +84,34 @@ function show_followus(flags) {
     </div>
   </div>
 </div>
+
+
+<style>
+</style>
+<div id="supportus_modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="supportus_modalTitle" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="supportus_modalTitle" style="font-size: 22px; font-weight: bold;">Please Support GovTrack.us</h4>
+      </div>
+      <div class="modal-body">
+      	<p>GovTrack is one of the most visited government transparency websites in the world.</p>
+		<p>This site is something special. It began as a hobby while I was a student, but it grew to reach some 10 million Americans each year who want to know what is happening in the United States Congress.</p>
+		<p>Who uses GovTrack? Concerned citizens, students and teachers, small businesses &mdash; even Congress uses GovTrack. We&rsquo;re also a regular source for journalists covering national policy and elections.</p>
+		<p>When I founded GovTrack, I could have made it into a profit-hungry company, selling government information only to those who could afford it. But I decided to do something different. Now I need your help.</p>
+		<p>If everyone reading this donated just ten cents, we could double our staff. But not everyone can or will donate. And that&rsquo;s fine. But if you can, please consider a monthly donation of whatever you can to protect and sustain transparency in our government.</p>
+		<p style="text-align: center; font-size: 125%; font-family: 'Roboto Slab', sans-serif; font-weight: bold;"><a href="https://www.patreon.com/govtrack" style="background-color: #9D2146;
+    color: white;
+    padding: .5em;
+    display: inline-block;
+    text-decoration: none;">Support Us Now</a></p>
+		<p>Thanks,</p>
+		<p>Joshua Tauberer<br>
+		GovTrack.us founder</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
