@@ -77,6 +77,19 @@ class BillProcessor(XmlProcessor):
 
     def process(self, obj, node):
         obj = super(BillProcessor, self).process(obj, node)
+
+        # update existing bill record if one exists, otherwise create a new one on save()
+        try:
+            existing_bill_obj = Bill.objects.get(congress=obj.congress, bill_type=obj.bill_type, number=obj.number)
+            obj.id = existing_bill_obj.id
+
+            # if lock_title is set on the old record, pull its title forward and keep it locked
+            if existing_bill_obj.locK_title:
+                obj.title = existing_bill_obj.title
+                obj.lock_title = existing_bill_obj.lock_title
+        except Bill.DoesNotExist:
+            pass
+
         self.process_titles(obj, node)
         self.process_introduced(obj, node)
         self.process_sponsor(obj, node)
@@ -92,12 +105,6 @@ class BillProcessor(XmlProcessor):
             obj.source = "americanmemory"
         else:
             raise ValueError()
-
-        # update existing bill record if one exists, otherwise create a new one on save()
-        try:
-            obj.id = Bill.objects.get(congress=obj.congress, bill_type=obj.bill_type, number=obj.number).id
-        except Bill.DoesNotExist:
-            pass
 
         obj.save() # save before using m2m relations
         self.process_committees(obj, node)
