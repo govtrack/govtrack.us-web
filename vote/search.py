@@ -59,11 +59,11 @@ def vote_search_manager():
             <div style="margin-bottom: .2em"><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
         </div>
         <div style="font-size: 93%">
-        <div class="col-sm-6 col-md-4">
+        <div class="col-xs-12 col-sm-6 col-md-4">
             <div><span class="fa fa-barcode fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.name}}</div>
             <div><span class="fa fa-calendar fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
         </div>
-        <div class="col-sm-6 col-md-8">
+        <div class="col-xs-12 col-sm-6 col-md-8">
         	<div><span class="fa fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
         </div>
         <div class="col-xs-12" style="padding-top: .25em">
