@@ -19,9 +19,13 @@ $(function() {
 			$('#opencongress_modal').modal();
 			ga('send', 'event', 'referral', 'opencongress');
 		
-		} else if (flags.hits > 1 && flags.hits < 10) {
+		} else if (flags.hits > 1 && flags.hits < 10 && (flags.hits % 3) == 0) {
 			$('#supportus_modal').modal();
 			ga('send', 'event', 'popup', 'support_us');
+
+		} else if (flags.hits == 5) {
+			$('#survey_modal').modal();
+			ga('send', 'event', 'popup', 'survey');
 
 		} else if (Math.random() < .3) {
 			// Show twitter follow popup.
@@ -86,32 +90,57 @@ function show_followus(flags) {
 </div>
 
 
-<style>
-</style>
 <div id="supportus_modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="supportus_modalTitle" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="supportus_modalTitle" style="font-size: 22px; font-weight: bold;">Please Support GovTrack.us</h4>
+        <h4 class="modal-title" id="supportus_modalTitle" style="font-size: 28px; font-weight: bold;">Congress is about to wake up.</h4>
       </div>
       <div class="modal-body">
-      	<p>GovTrack is one of the most visited government transparency websites in the world.</p>
-		<p>This site is something special. It began as a hobby while I was a student, but it grew to reach some 10 million Americans each year who want to know what is happening in the United States Congress.</p>
-		<p>Who uses GovTrack? Concerned citizens, students and teachers, small businesses &mdash; even Congress uses GovTrack. We&rsquo;re also a regular source for journalists covering national policy and elections.</p>
-		<p>When I founded GovTrack, I could have made it into a profit-hungry company, selling government information only to those who could afford it. But I decided to do something different. Now I need your help.</p>
-		<p>If everyone reading this donated just ten cents, we could double our staff. But not everyone can or will donate. And that&rsquo;s fine. But if you can, please consider a monthly donation of whatever you can to protect and sustain transparency in our government.</p>
+		<p>When President-elect Trump takes office on January 20, the House, Senate, and White House will be controlled by the same party for the first time in six years.</p>
+
+		<p>Things are going to happen fast. Congress is expected to move quickly on Trump's agenda <a href="http://www.forbes.com/sites/stancollender/2016/11/11/gop-to-do-previously-unimaginable-things-to-slam-dunk-its-agenda/#648c6b5a67b5" target="_blank">using the same tactics</a> immune to the filibuster that Democrats used to enact the Affordable Care Act in 2010.</p>
+
+		<p>Now more than ever we need transparency in Congress.</p>
+
+		<p>Over the last year we&rsquo;ve helped 10 million Americans track Congress using bill alerts. We hope to continue <a href="https://medium.com/govtrack-insider" target="_blank">GovTrack Insider</a>, where we put the most important legislation into plain English. We've also worked <i>with</i> Congress on improving transparency at the source.</p>
+
+		<p>We now need your help. We&rsquo;re simply out of money. We can&rsquo;t continue GovTrack Insider or improve our bill tracking tools without your financial support. Important pieces of GovTrack will end on December 31 if we can&rsquo;t pay for it. If you are able, please:
+
 		<p style="text-align: center; font-size: 125%; font-family: 'Roboto Slab', sans-serif; font-weight: bold;"><a href="https://www.patreon.com/govtrack" style="background-color: #9D2146;
     color: white;
     padding: .5em;
     display: inline-block;
-    text-decoration: none;">Support Us Now</a></p>
-		<p>Thanks,</p>
+    text-decoration: none;">Donate to Support Our Work</a></p>
+		<p>Thanks very much for being a part of GovTrack.</p>
 		<p>Joshua Tauberer<br>
-		GovTrack.us founder</p>
+		Founder, GovTrack.us</p>
       </div>
     </div>
   </div>
 </div>
+
+<div id="survey_modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="survey_modal_title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="survey_modal_title" style="font-size: 28px; font-weight: bold;">User Survey</h4>
+      </div>
+      <div class="modal-body">
+		<p>How can we better help you track Congress?</p>
+		<p>Are you able to help us in ways besides financial support?</p>
+		<p>We are asking all of our users to take this survey to help us figure out how best to continue our mission into 2017.</p>
+		<p style="text-align: center; font-size: 125%; font-family: 'Roboto Slab', sans-serif; font-weight: bold;"><a href="https://docs.google.com/forms/d/e/1FAIpQLSc2lR6i9_AcNLV2ZfwFRKSUhSdf7a9VKhFrkhnG9xzRaEV4Rw/viewform" style="background-color: #9D2146;
+    color: white;
+    padding: .5em;
+    display: inline-block;
+    text-decoration: none;">Take GovTrack&rsquo;s Survey</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
