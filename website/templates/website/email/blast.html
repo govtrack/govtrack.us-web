@@ -1,88 +1,45 @@
 {% extends "htmlemailer/boilerplate.html" %}
 {% block head %}
 <style>
-#backgroundTable { max-width: 50em; }
+#backgroundTable { min-width: 40em; max-width: 50em; }
 #content-area { padding-left: 1em; }
 p { line-height: 133%; }
 </style>
 {% endblock %}
 {% block body %}
-<p>Dear GovTrack user,</p>
-
-<p>You did it! With your support, our Kickstarter campaign was successful! We raised a little more than $35,000 from 900 supporters.</p>
-
-<h4>GovTrack Insider</h4>
-
-<p>That has let us hire four part-time researchers who for the next six months are going to read bills and keep you better updated about what's happening in Congress. We're calling this project GovTrack Insider, and you can find our new posts on Medium at <a href="https://medium.com/govtrack-insider">https://medium.com/govtrack-insider</a>.</p>
-
-<p>Our recent posts have already covered some controversial legislative issues including:</p>
-
-<ul>
-<li><a href="https://medium.com/govtrack-insider/the-ex-im-bank-is-one-step-closer-to-being-revived-thanks-to-a-rare-parliamentary-procedure-in-the-be05ea6524ec">The Ex-Im Bank</a></li>
-<li><a href="https://medium.com/govtrack-insider/senate-takes-up-cisa-cybersecurity-bill-that-asks-companies-to-share-information-with-the-ddad8980de3e">CISA, a cybersecurity bill</a></li>
-<li><a href="https://medium.com/govtrack-insider/republicans-prepare-to-bypass-filibuster-rules-to-repeal-obamacare-and-defund-planned-parenthood-bcac595cc9af">Defunding Planned Parenthood and repealing Obamacare by bypassing the Senate filibuster</a></li>
-<li><a href="https://medium.com/govtrack-insider/congress-may-be-about-to-pass-criminal-sentencing-reform-30ac19268c59">Criminal sentencing reform</a></li>
-</ul>
-
-<p><a href="https://www.govtrack.us/events/govtrack-insider"><b>You can also get these posts in your legislative alert emails from us by signing up.</b></a></p>
-
-<p>(Once the six-month period ends we'll need to find a new funding source to keep it going. As you read our posts, if you find it helpful, please think about whether you would support the continuation of the work.)</p>
-
-
-<h4>Join a Webinar</h4>
-
-<p>I'd also like to invite you to join us for a webinar. GovTrack's founder Josh Tauberer (me) and GovTrack Insider reporter Ben Hammer will be holding a webinar to talk about how GovTrack works, the legislative process in the U.S. Congress, and how to be the best advocate for your issues. We'll be holding the webinar at three times:</p>
-
-<div style="margin-left: 1em">
-  Saturday, November 14 at 2:30pm Eastern Time<br>
-  Friday, November 20 at 4pm Eastern Time<br>
-  Saturday, November 21 at 4pm Eastern Time<br>
-</div>
-
-<p>The webinar will be interactive --- so bring your questions. If you would like to join, please <a href="https://docs.google.com/forms/d/1yHTSmxBBF1YOt97oYZvORGbkGUm1a8cGaRsE-QGkMu4/viewform">fill out this form so we can send you further details</a>.</p>
-
-<p>We hope to see you!</p>
-
-
-<h4>Presidential Candidate Vote Tracker</h4>
-
-<p>The press has been focusing on the missed votes of some of the presidential candidates who happen to also be sitting senators (Rubio, Graham, Cruz, Sanders, and Paul) or were in the past (Clinton). We've launched a real-time missed votes tracker so you can see exactly how the candidates stack up, including with a comparison to the corresponding time period ahead of the 2008 election. <a href="https://www.govtrack.us/congress/votes/presidential-candidates">Check it out.</a></p>
-
-
-<h4>Site Updates</h4>
-
-<p>We've also made a ton of improvements to GovTrack over the last six months, including:</p>
-
-<ul>
-<li>Totally new bill action history tables.</li>
-<li>Improved bill search --- our search functions will find bills more relevant to your keywords now.</li>
-<li>Roll call vote sorting options like widest margin, summaries of some major votes.</li>
-<li>And lots lots more.</li>
-</ul>
-
-<p>For more details on these updates, see <a href="https://www.govtrack.us/blog/2015/10/04/govtrack-updates-for-spring-summer-2015/">our blog post</a>.</p>
-
-
-<h4>We're In The News</h4>
-
-<p>Recently information found on GovTrack has been cited on TV on the FOX Business Channel and Last Week Tonight with John Oliver. We've also been excited to see print and online articles citing us at Politifact, The New Yorker, Forbes, and more. For links, see <a href="https://www.govtrack.us/press">our press clippings</a>.</p>
-
-
-<p>Thanks for reading about what's been going on at GovTrack. Feel free to get in touch with any ideas, questions, or concerns. I can be reached by replying to this email.</p>
-
-<p>Josh Tauberer,<br>
-Founder, <a href="https://www.GovTrack.us">https://www.GovTrack.us</a></p>
-
-  	<hr>
-
-	<p><small><a href="{{unsub_url}}">Unsubscribe</a></small></p>
-
-	<p><small>You received this email because you have registered an account on <a href="https://www.govtrack.us">GovTrack.us</a>. To change your email settings, visit your <a href="https://www.govtrack.us/accounts/profile">account settings</a>.</small></p>
-
-    <div align="center">
-      <a href="https://www.govtrack.us">
-        <img src="https://www.govtrack.us/static/images/blast-201507/logo.png" alt="GovTrack.us logo"><br>
-      </a>
-    </div>
-        
+    <table border="0" cellpadding="5" cellspacing="2" width="100%">
+      <tbody>
+        <tr>
+          <td valign="top">
+              <p><font size="+2"><b>Congress is about to wake up.</b></font></p>
+              <p>When President-elect Trump takes office on January 20, the House, Senate, and White House will be controlled by the same party. Congress is expected to move quickly on Trump&rsquo;s agenda <a href="http://www.forbes.com/sites/stancollender/2016/11/11/gop-to-do-previously-unimaginable-things-to-slam-dunk-its-agenda/#648c6b5a67b5">using the same tactics</a> immune to the filibuster that Democrats used to enact the Affordable Care Act in 2010.</p>
+              <p>Now more than ever we need transparency in Congress.</p>
+              <p>We&rsquo;re getting ready to continue our mission into 2017. Over the last year we&rsquo;ve helped 10 million Americans track Congress using bill alerts, we launched <a href="https://medium.com/govtrack-insider">GovTrack Insider</a>, where we put the most important legislation into plain English, and we worked <i>with</i> Congress on improving transparency at the source.</p>
+              <p>But we need your help.</p>
+              <p>First, we&rsquo;re simply out of money because no one funds our work. Important pieces of GovTrack including our plain-language summaries will end on December 31 if we can&rsquo;t pay for it. If every GovTrack user donated just 10 cents we could double our staff, but not everyone can. If <i>you</i> can, please help us continue GovTrack Insider and improve our bill tracking tools:</p>
+              <p
+                style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;text-align:
+                center;"><a href="https://www.patreon.com/govtrack"
+                  style="text-decoration:none;"><span style="font-size: 14.6667px; color: rgb(17, 85, 204); background-color: transparent; font-weight: 700; font-style: normal; font-variant: normal; text-decoration: underline; vertical-align: baseline; white-space: pre-wrap;">Donate to Support Our Work</span></a></p>
+              <p>Second, we want to know how we can better help you track Congress. And we need you to tell us if you can help in other ways. We are asking all of you to take a minute to</p>
+              <p
+                style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;text-align:
+                center;"><a
+                  href="https://goo.gl/forms/4lck8TGnEYLtkTcW2"
+                  style="text-decoration:none;"><span style="font-size: 14.6667px; color: rgb(17, 85, 204); background-color: transparent; font-weight: 700; font-style: normal; font-variant: normal; text-decoration: underline; vertical-align: baseline; white-space: pre-wrap;">Complete This Survey</span></a></p>
+              <p>to help us shape our efforts going forward.</p>
+              <p>Thanks very much for being a part of GovTrack.</p>
+              <p>Joshua Tauberer<br>founder, GovTrack.us</p>
+          </td>
+          <td valign="top"><a href="https://www.govtrack.us/"><img
+                alt="GovTrack.us Logo"
+                src="https://www.govtrack.us/static/images/media_icon.png"
+                moz-do-not-send="true" border="0" height="200"
+                width="200"></a><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+	<p style="line-height: 125%"><small>You received this email because you have registered an account on <a href="https://www.govtrack.us">GovTrack.us</a>. To change your email settings, visit your <a href="https://www.govtrack.us/accounts/profile">account settings</a>. GovTrack.us is a project of Civic Impulse LLC. <a href="{{unsub_url}}">Unsubscribe</a></small></p>
 {% endblock %}

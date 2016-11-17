@@ -10,7 +10,7 @@ from htmlemailer import send_mail
 
 from datetime import datetime, timedelta
 
-blast_id = 5
+blast_id = 6
 
 class Command(BaseCommand):
 	args = 'test|go'
@@ -24,14 +24,8 @@ class Command(BaseCommand):
 			users = UserProfile.objects.filter(user__id__in=(5,)) # me
 			test_addrs = args[1:]
 		else:
-			# Users who have subscribed to email updates and received one recently-ish....
-			users = UserProfile.objects.filter(
-					Q(last_mass_email__gte=3, user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*9))
-				  | Q(user__subscription_lists__email__gt=0,
-				    user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*3),
-				    user__last_login__gt=datetime.now()-timedelta(days=365))
-				#| Q(user__date_joined__gt=datetime.now()-timedelta(days=31*4))
-				).distinct()
+			# some subset of users
+			users = UserProfile.objects.all()
 
 			# also require:
 			# * the mass email flag is turned
@@ -52,6 +46,13 @@ class Command(BaseCommand):
 		# Get the list of user IDs.
 			
 		users = list(users.order_by("user__id").values_list("user", flat=True))
+
+		# Only do a batch.
+
+		batch_size = 15000
+		if len(users) > batch_size:
+			import random
+			users = random.sample(users, batch_size)
 
 		# For multi-processing, we have to close the database connection betfore
 		# workers are spawned.
@@ -74,11 +75,14 @@ class Command(BaseCommand):
 		State.total_emails_sent = 0
 		State.workers = []
 
-		def wait_workers():
-			for ar in State.workers:
+		def wait_workers(n):
+			popped = 0
+			while len(State.workers) > n:
+				ar = State.workers.pop(0)
 				if ar.get():
 					State.total_emails_sent += 1
-			State.workers = []
+				popped += 1
+			return popped
 
 		pool = Pool(processes=3)
 
@@ -90,14 +94,12 @@ class Command(BaseCommand):
 				[userid, args[0] == "test", test_addrs, i, len(users)])
 			State.workers.append(ar)
 				
-			if len(State.workers) > 15:
-				wait_workers()
-
+			if wait_workers(15):
 				# if DEBUG, clear memory
 				from django import db
 				db.reset_queries()
 
-		wait_workers()
+		wait_workers(0)
 			
 		print "sent", State.total_emails_sent, "emails"
 

@@ -1,73 +1,32 @@
-Dear GovTrack user,
+Congress is about to wake up.
 
-You did it! With your support, our Kickstarter campaign was successful! We raised a little more than $35,000 from 900 supporters.
+When President-elect Trump takes office on January 20, the House, Senate, and White House will be controlled by the same party. Congress is expected to move quickly on Trump's agendausing the same tactics immune to the filibuster that Democrats used to enact the Affordable Care Act in 2010.
+<http://www.forbes.com/sites/stancollender/2016/11/11/gop-to-do-previously-unimaginable-things-to-slam-dunk-its-agenda/#648c6b5a67b5>
 
-GOVTRACK INSIDER
+Now more than ever we need transparency in Congress.
 
-That has let us hire four part-time researchers who for the next six months are going to read bills and keep you better updated about what's happening in Congress. We're calling this project GovTrack Insider, and you can find our new posts on Medium at https://medium.com/govtrack-insider.
+We're getting ready to continue our mission into 2017. Over the last year we've helped 10 million Americans track Congress, we launched GovTrack Insider <https://medium.com/govtrack-insider>, where we put the most important legislation into plain English, and we worked with Congress on improving transparency at the source.
 
-Our recent posts have already covered some controversial legislative issues including:
+But we need your help.
 
-* The Ex-Im Bank
-* CISA, a cybersecurity bill
-* Defunding Planned Parenthood and repealing Obamacare by bypassing the Senate filibuster
-* Criminal sentencing reform
+First, we're simply out of money because no one funds our work. Important pieces of GovTrack including our plain-language summaries will end on December 31 if we can't pay for it. If every GovTrack user donated just 10 cents we could double our staff, but not everyone can. If *you* can, please help us continue GovTrack Insider and improve our bill tracking tools:
 
-You can also get these posts in your legislative alert emails from us by signing up at:
+Donate to Support Our Work: <https://www.patreon.com/govtrack>
 
-https://www.govtrack.us/events/govtrack-insider
+Second, we want to know how we can better help you track Congress. And we need you to tell us if you can help in other ways. We are asking all of you to take a minute to
 
-^^^^ sign up!! ^^^^
+Complete This Survey: <https://goo.gl/forms/4lck8TGnEYLtkTcW2>
 
-(Once the six-month period ends we'll need to find a new funding source to keep it going. As you read our posts, if you find it helpful, please think about whether you would support the continuation of the work.)
+to help us shape our efforts going forward.
 
+Thanks very much for being a part of GovTrack.
 
-WEBINAR
+Joshua Tauberer
 
-I'd also like to invite you to join us for a webinar. GovTrack's founder Josh Tauberer (me) and GovTrack Insider reporter Ben Hammer will be holding a webinar to talk about how GovTrack works, the legislative process in the U.S. Congress, and how to be the best advocate for your issues. We'll be holding the webinar at three times:
+founder, GovTrack.us
 
-  Saturday, November 14 at 2:30pm Eastern Time
-  Friday, November 20 at 4pm Eastern Time
-  Saturday, November 21 at 4pm Eastern Time
+----
 
-The webinar will be interactive --- so bring your questions. If you would like to join, please fill out this form so we can send you further details:
-
-  https://docs.google.com/forms/d/1yHTSmxBBF1YOt97oYZvORGbkGUm1a8cGaRsE-QGkMu4/viewform
-
-We hope to see you!
-
-
-PRESIDENTIAL CANDIDATES VOTE TRACKER
-
-The press has been focusing on the missed votes of some of the presidential candidates who happen to also be sitting senators (Rubio, Graham, Cruz, Sanders, and Paul) or were in the past (Clinton). We've launched a real-time missed votes tracker so you can see exactly how the candidates stack up, including with a comparison to the corresponding time period ahead of the 2008 election. Check it out:
-
-https://www.govtrack.us/congress/votes/presidential-candidates
-
-
-SITE UPDATES
-
-We've also made a ton of improvements to GovTrack over the last six months, including:
-
-* Totally new bill action history tables.
-* Improved bill search --- our search functions will find bills more relevant to your keywords now.
-* Roll call vote sorting options like widest margin, summaries of some major votes.
-* And lots lots more.
-
-For more details on these updates, see https://www.govtrack.us/blog/2015/10/04/govtrack-updates-for-spring-summer-2015/.
-
-
-WE'RE IN THE NEWS
-
-Recently information found on GovTrack has been cited on TV on the FOX Business Channel and Last Week Tonight with John Oliver. We've also been excited to see print and online articles citing us at Politifact, The New Yorker, Forbes, and more. For links, see https://www.govtrack.us/press.
-
-
-Thanks for reading about what's been going on at GovTrack. Feel free to get in touch with any ideas, questions, or concerns. I can be reached by replying to this email.
-
-Josh Tauberer,
-Founder, https://www.GovTrack.us
-
----
+You received this email because you have registered an account on www.GovTrack.us. To change your email settings, visit your account settings page at https://www.govtrack.us/accounts/profile. GovTrack.us is a project of Civic Impulse, LLC. 
 
 Unsubscribe: {{unsub_url}}
-
-You received this email because you have registered an account on GovTrack.us. To change your email settings, visit your account settings page at https://www.govtrack.us/accounts/profile.
