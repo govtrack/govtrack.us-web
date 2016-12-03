@@ -25,19 +25,18 @@ class VoteSource(enum.Enum):
 
 
 class VoteCategory(enum.Enum):
-    amendment = enum.Item(1, 'Amendment', search_help_text="Votes on accepting or rejecting amendments to bills and resolutions.")
-    passage_suspension = enum.Item(2, 'Passage under Suspension', search_help_text="Fast-tracked votes on the passage of bills requiring a 2/3rds majority.")
-    passage = enum.Item(3, 'Passage', search_help_text="Votes on passing or failing bills and resolutions and on agreeing to conference reports.")
-    cloture = enum.Item(4, 'Cloture', search_help_text="Votes to end debate and move to a vote, i.e. to end a filibuster.")
-    passage_part = enum.Item(5, 'Passage (Part)', search_help_text="Votes on the passage of parts of legislation.")
-    nomination = enum.Item(6, 'Nomination', search_help_text="Senate votes on presidential nominations.")
-    procedural = enum.Item(7, 'Procedural', search_help_text="A variety of procedural votes such as quorum calls.")
-    other = enum.Item(8, 'Other', search_help_text="A variety of uncategorized votes.")
-    unknown = enum.Item(9, 'Unknown Category', search_help_text="A variety of uncategorized votes.")
-    ratification = enum.Item(12, 'Treaty Ratification', search_help_text="Senate votes to ratify treaties.")
-    veto_override = enum.Item(10, 'Veto Override', search_help_text="Votes to override a presidential veto.")
-    conviction = enum.Item(11, 'Conviction', search_help_text="'Guilty or Not Guilty' votes in the Senate to convict an office holder following impeachment.")
-    impeachment = enum.Item(13, 'Impeachment', search_help_text="A vote in the House on whether or not to impeach an office-holder.")
+    amendment = enum.Item(1, 'Amendment', search_help_text="Votes on accepting or rejecting amendments to bills and resolutions.", importance=5)
+    passage_suspension = enum.Item(2, 'Passage under Suspension', search_help_text="Fast-tracked votes on the passage of bills requiring a 2/3rds majority.", importance=4)
+    passage = enum.Item(3, 'Passage', search_help_text="Votes on passing or failing bills and resolutions and on agreeing to conference reports.", importance=3)
+    cloture = enum.Item(4, 'Cloture', search_help_text="Votes to end debate and move to a vote, i.e. to end a filibuster.", importance=4)
+    passage_part = enum.Item(5, 'Passage (Part)', search_help_text="Votes on the passage of parts of legislation.", importance=3)
+    nomination = enum.Item(6, 'Nomination', search_help_text="Senate votes on presidential nominations.", importance=2)
+    procedural = enum.Item(7, 'Procedural', search_help_text="A variety of procedural votes such as quorum calls.", importance=6)
+    unknown = enum.Item(9, 'Unknown Category', search_help_text="A variety of uncategorized votes.", importance=8)
+    ratification = enum.Item(12, 'Treaty Ratification', search_help_text="Senate votes to ratify treaties.", importance=2)
+    veto_override = enum.Item(10, 'Veto Override', search_help_text="Votes to override a presidential veto.", importance=1)
+    conviction = enum.Item(11, 'Conviction', search_help_text="'Guilty or Not Guilty' votes in the Senate to convict an office holder following impeachment.", importance=1)
+    impeachment = enum.Item(13, 'Impeachment', search_help_text="A vote in the House on whether or not to impeach an office-holder.", importance=1)
 
 class VoterType(enum.Enum):
     unknown = enum.Item(1, 'Unknown')

@@ -1,10 +1,12 @@
 #;encoding=utf8
+from django.db.models import F
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.utils import timezone
 from django.template.defaultfilters import truncatechars
 
-import json, os
+from collections import defaultdict
+import json, os, sys
 from datetime import timedelta
 
 class OkITweetedSomething(Exception):
@@ -16,10 +18,15 @@ class Command(BaseCommand):
 	tweets_storage_fn = 'data/misc/tweets.json'
 	
 	def handle(self, *args, **options):
+		# Construct client.
+		import twitter
+		self.twitter = twitter.Api(consumer_key=settings.TWITTER_OAUTH_TOKEN, consumer_secret=settings.TWITTER_OAUTH_TOKEN_SECRET,
+		                  access_token_key=settings.TWITTER_ACCESS_TOKEN, access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET)
+
 		# What have we tweeted about before? Let's not tweet
 		# it again.
 		self.load_previous_tweets()
-		
+
 		try:
 			# Send out a tweet.
 			self.tweet_something()
@@ -45,13 +52,12 @@ class Command(BaseCommand):
 
 	def tweet_something(self):
 		# Find something interesting to tweet!
-		for func in [
-			self.tweet_new_signed_laws_yday,
-			self.tweet_votes_yday,
-			self.tweet_new_bills_yday,
-			self.tweet_a_bill_action,
-			]:
-			func()
+		self.tweet_new_signed_laws_yday()
+		self.tweet_votes_yday(True)
+		self.tweet_new_bills_yday()
+		self.tweet_coming_up()
+		self.tweet_a_bill_action()
+		self.tweet_votes_yday(False)
 
 	###
 
@@ -59,17 +65,24 @@ class Command(BaseCommand):
 		if key in self.previous_tweets:
 			return
 
-		assert len(text) + 1 + 20 + 2 <= 140
-		
-		text = text + " " + url
-		text += u" ⚡" # symbol indicates this is an automated tweet
+		text = truncatechars(text, 140-1-23-2) + " " + url
+		text += u" ⚡" # symbol indicates to followers this is an automated tweet?
 
-		print(key, text.encode("utf8"))
+		if "TEST" in os.environ:
+			# Don't tweet. Just print and exit.
+			print key, text
+			sys.exit(1)
+
+		tweet = self.twitter.PostUpdate(text, verify_status_length=False) # it does not do link shortening test correctly
 
 		self.previous_tweets[key] = {
 			"text": text,
 			"when": timezone.now().isoformat(),
+			"tweet": tweet.AsDict(),
 		}
+
+		#print(json.dumps(self.previous_tweets[key], indent=2))
+
 		raise OkITweetedSomething()
 
 	###
@@ -94,20 +107,38 @@ class Command(BaseCommand):
 				),
 			"https://www.govtrack.us/congress/bills/browse#current_status[]=28&sort=-current_status_date")
 
-	def tweet_votes_yday(self):
-		# Tweet count of new laws enacted yesterday.
-		from vote.models import Vote
-		count = Vote.objects.filter(
+	def tweet_votes_yday(self, if_major):
+		# Tweet count of votes yesterday, by vote type if there were any major votes.
+		from vote.models import Vote, VoteCategory
+
+		votes = Vote.objects.filter(
 			created__gte=timezone.now().date()-timedelta(days=1),
 			created__lt=timezone.now().date(),
-		).count()
-		if count == 0: return
+		)
+		if votes.count() == 0: return
+
+		has_major = len([v for v in votes if v.is_major]) > 0
+		if not has_major and if_major: return
+
+		if not has_major:
+			msg = "%d vote%s held by Congress yesterday." % (
+                votes.count(),
+                "s were" if count != 1 else " was",
+                )
+		else:
+			counts = defaultdict(lambda : 0)
+			for v in votes:
+				counts[v.category] += 1
+			counts = list(counts.items())
+			counts.sort(key = lambda kv : (VoteCategory.by_value(kv[0]).importance, -kv[1]))
+			msg = "Votes held by Congress yesterday: " + ", ".join(
+				str(value) + " on " + VoteCategory.by_value(key).label
+				for key, value in counts
+			)
+
 		self.post_tweet(
 			"%s:votes" % timezone.now().date().isoformat(),
-			"%d vote%s held by Congress yesterday." % (
-				count,
-				"s were" if count != 1 else " was",
-				),
+			msg,
 			"https://www.govtrack.us/congress/votes")
 
 	def tweet_new_bills_yday(self):
@@ -129,26 +160,37 @@ class Command(BaseCommand):
 				),
 			"https://www.govtrack.us/congress/bills/browse#sort=-introduced_date")
 
+	def tweet_coming_up(self):
+        # legislation posted as coming up within the last day
+		from bill.models import Bill
+		dhg_bills = Bill.objects.filter(docs_house_gov_postdate__gt=timezone.now().date()-timedelta(days=1)).filter(docs_house_gov_postdate__gt=F('current_status_date'))
+		sfs_bills = Bill.objects.filter(senate_floor_schedule_postdate__gt=timezone.now().date()-timedelta(days=1)).filter(senate_floor_schedule_postdate__gt=F('current_status_date'))
+		coming_up = list(dhg_bills | sfs_bills)
+		coming_up.sort(key = lambda b : b.docs_house_gov_postdate if (b.docs_house_gov_postdate and (not b.senate_floor_schedule_postdate or b.senate_floor_schedule_postdate < b.docs_house_gov_postdate)) else b.senate_floor_schedule_postdate)
+		for bill in coming_up:
+			self.post_tweet(
+				"%s:comingup:%s" % (timezone.now().date().isoformat(), bill.congressproject_id),
+				"Coming up: " + truncatechars(bill.title, 100),
+				"https://www.govtrack.us" + bill.get_absolute_url())
+
 	def tweet_a_bill_action(self):
 		# Tweet an interesting action on a bill.
 		from bill.models import Bill, BillStatus
 		from bill.status import get_bill_really_short_status_string
 		bills = list(Bill.objects.filter(
-			current_status_date__gte=timezone.now().date()-timedelta(days=1),
+			current_status_date__gte=timezone.now().date()-timedelta(days=2),
 			current_status_date__lt=timezone.now().date(),
 		))
 		if len(bills) == 0: return
 
-		# Choose bill with the highest proscore.
-		bills.sort(key = lambda b : -b.proscore())
+		# Choose bill with the most salient status, breaking ties with the highest proscore.
+		bills.sort(key = lambda b : (BillStatus.by_value(b.current_status).sort_order, b.proscore()), reverse=True)
 		for bill in bills:
 			status = BillStatus.by_value(bill.current_status).xml_code
 			text = get_bill_really_short_status_string(status)
 			if text == "": continue
-			text = text % (
-				truncatechars(bill.title, 50),
-				"yesterday"
-			)
+			text = text % (bill.display_number, "yesterday")
+			text += " " + bill.title_no_number
 			self.post_tweet(
 				bill.current_status_date.isoformat() + ":bill:%s:status:%s" % (bill.congressproject_id, status),
 				text,
