@@ -35,7 +35,7 @@ class VoteProcessor(XmlProcessor):
         'house.gov': VoteSource.house,
         'keithpoole': VoteSource.keithpoole,
     }
-    DEFAULT_VALUES = {'category': 'other'}
+    DEFAULT_VALUES = {'category': 'unknown'}
     CATEGORY_MAPPING = {
         'amendment': VoteCategory.amendment,
         'passage-suspension': VoteCategory.passage_suspension,
@@ -44,7 +44,6 @@ class VoteProcessor(XmlProcessor):
         'passage-part': VoteCategory.passage_part,
         'nomination': VoteCategory.nomination,
         'procedural': VoteCategory.procedural,
-        'other': VoteCategory.other,
         'unknown': VoteCategory.unknown,
         'treaty': VoteCategory.ratification,
         'ratification': VoteCategory.ratification, # schema changed and no longer used but still present in data files
