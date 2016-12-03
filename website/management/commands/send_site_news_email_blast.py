@@ -25,7 +25,11 @@ class Command(BaseCommand):
 			test_addrs = args[1:]
 		else:
 			# some subset of users
-			users = UserProfile.objects.all()
+			users = UserProfile.objects.all()\
+				.filter(
+					Q(user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*6))
+				  | Q(user__last_login__gt=datetime.now()-timedelta(days=31*6))
+                ).distinct()
 
 			# also require:
 			# * the mass email flag is turned
@@ -49,7 +53,7 @@ class Command(BaseCommand):
 
 		# Only do a batch.
 
-		batch_size = 15000
+		batch_size = 50000
 		if len(users) > batch_size:
 			import random
 			users = random.sample(users, batch_size)

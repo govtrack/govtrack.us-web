@@ -1,7 +1,5 @@
 """
 ``BillStatus`` - list of possible Bill statuses.
-
-Details: http://www.govtrack.us/developers/datadoc.xpd
 """
 from common import enum
 

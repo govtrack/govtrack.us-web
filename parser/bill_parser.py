@@ -84,7 +84,7 @@ class BillProcessor(XmlProcessor):
             obj.id = existing_bill_obj.id
 
             # if lock_title is set on the old record, pull its title forward and keep it locked
-            if existing_bill_obj.locK_title:
+            if existing_bill_obj.lock_title:
                 obj.title = existing_bill_obj.title
                 obj.lock_title = existing_bill_obj.lock_title
         except Bill.DoesNotExist:

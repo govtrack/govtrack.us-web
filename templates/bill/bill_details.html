@@ -19,7 +19,7 @@
 	{% endif %}
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:title" content="{{bill.title}}">
-	<meta name="twitter:description" content="{{subtitle}}">
+	{% if subtitle %}<meta name="twitter:description" content="{{subtitle}}">{% endif %}
 	<meta name="twitter:label1" value="Current Status">
 	<meta name="twitter:data1" value="{{bill.get_current_status_display}}">
 	{% if bill.sponsor %}
