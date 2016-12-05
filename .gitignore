@@ -10,7 +10,7 @@ db
 log
 settings_local.py
 pip-log.txt
-database.sqlite
+database.sqlite*
 static/css/all-min.css
 static/images/dynamic
 uwsgi.conf
