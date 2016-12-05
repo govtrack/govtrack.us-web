@@ -50,7 +50,7 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
   cp settings_local.example.py settings_local.py
   ```
 
-* Edit `settings_local.py` to set up your database. The default configuration uses SQLite as the database and no database configuration is required. Fill in SECRET_KEY though. Here's how you can generate a SECRET_KEY:
+* Edit `settings_local.py` to set up your database. The default configuration uses SQLite as the database and no database configuration is required. Fill in SECRET\_KEY though. Here's how you can generate a SECRET\_KEY:
 
   ```
   ./manage.py generate_secret_key
@@ -64,7 +64,7 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
     apt-get install python-xapian
     ```
 
-  * Set HAYSTACK_CONNECTIONS:
+  * Set HAYSTACK\_CONNECTIONS:
 
     ```
     HAYSTACK_CONNECTIONS = {
