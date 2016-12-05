@@ -134,6 +134,12 @@ If you configured Solr, you can remove --disable-index. For the sake of speed, -
   ./manage.py runserver
   ```
 
+* Create an account for yourself, (without setting up an email server) by running the `createsuperuser` command.
+
+  ```
+  ./manage.py createsuperuser
+  ```
+
 * To update the data in the future, first git-pull the congress-legislators repo to get the latest legislator information. Then:
 
   ```
