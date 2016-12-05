@@ -50,6 +50,8 @@ TWITTER_OAUTH_TOKEN_SECRET = "fill this in"
 FACEBOOK_APP_ID = "fill this in"
 FACEBOOK_APP_SECRET = "fill this in"
 FACEBOOK_AUTH_SCOPE = "email" # can be an empty string
+TWILIO_ACCOUNT_SID = "fill this in"
+TWILIO_AUTH_TOKEN = "fill this in"
 
 # The ad-free payment requires something like this:
 #import paypalrestsdk
