@@ -22,7 +22,7 @@ pyyaml
 pynliner
 git+https://github.com/govtrack/django-lorien-common
 phonenumbers
-git+https://github.com/if-then-fund/django-html-emailer
+git+https://github.com/if-then-fund/django-html-emailer@v0.0.2
 xml_diff
 diff_match_patch_python
 python-twitter
