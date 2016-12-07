@@ -180,6 +180,8 @@ class Command(BaseCommand):
 		bills = list(Bill.objects.filter(
 			current_status_date__gte=timezone.now().date()-timedelta(days=2),
 			current_status_date__lt=timezone.now().date(),
+		).exclude(
+			current_status__in=(BillStatus.introduced,BillStatus.referred),
 		))
 		if len(bills) == 0: return
 
