@@ -655,7 +655,8 @@
 									{% endif %}
 									{% endwith %}
 									{% if item.vote_obj %}<a href="{{item.vote_obj.get_absolute_url}}">View Vote &raquo;</a>{% endif %}
-									{% if item.text_version %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}" {% if item.text_date %}title="{{item.text_date|date}}"{% endif %}>Read Text &raquo;</a>{% endif %}
+									{% if item.committee_report_link %}<a href="{{item.committee_report_link}}">Read Report &raquo;</a>{% endif %}
+									{% if item.text_version %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}" {% if item.text_date %}title="{{item.text_date|date}}"{% endif %}>Read {% if item.text_version_compare_to %}Updated{% endif %} Text &raquo;</a>{% endif %}
 									{% if item.text_version_compare_to %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}#compare={{item.text_version_compare_to}}">See Changes &raquo;</a>{% endif %}
 								</p>
 							{% else %}

@@ -119,6 +119,10 @@ if "text" in sys.argv:
 	# don't want to expose in data.
 	os.system("(cd ~/scripts/congress-pdf-config/; . .env/bin/activate; ./run fdsys --collections=BILLS --bulkdata=False --store=pdf --log=%s)" % log_level)
 
+	# Also metadata for committee reports, for the current Congress (because we
+	# only use this for 114th forward).
+	os.system("(cd ~/scripts/congress-pdf-config/; . .env/bin/activate; ./run fdsys --collections=CRPT --store=mods --congress=%s --log=%s)" % (CONGRESS, log_level))
+
 	# Update the mirror of Cato's deepbills.
 	os.system("cd %s; . .env/bin/activate; ./run deepbills --log=%s" % (SCRAPER_PATH, log_level))
 	

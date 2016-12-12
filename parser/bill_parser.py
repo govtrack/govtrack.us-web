@@ -113,6 +113,7 @@ class BillProcessor(XmlProcessor):
             self.process_terms(obj, node, obj.congress)
         self.process_consponsors(obj, node)
         self.process_relatedbills(obj, node)
+        self.process_committee_reports(obj, node)
         return obj
 
     def process_introduced(self, obj, node):
@@ -226,6 +227,10 @@ class BillProcessor(XmlProcessor):
                 continue
             RelatedBill.objects.create(bill=obj, related_bill=related_bill, relation=subnode.get("relation")[0:16])
                     
+    def process_committee_reports(self, obj, node):
+        obj.committee_reports = [
+            subnode.text
+            for subnode in node.xpath('./committee-reports/report')]
 
 
 def main(options):

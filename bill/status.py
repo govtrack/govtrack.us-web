@@ -21,10 +21,10 @@ class BillStatus(enum.Enum):
         explanation="Bills and resolutions are referred to committees which debate the bill before possibly sending it on to the whole chamber.",
         sort_order=(0,1))
     reported = enum.Item(3,
-        'Reported by Committee',
+        'Ordered Reported by Committee',
         xml_code='REPORTED',
-        search_help_text="Reported by a committee in the originating chamber.",
-        explanation="A committee has issued a report to the full chamber recommending that the bill be considered further. Only about 1 in 4 bills are reported out of committee.",
+        search_help_text="Ordered reported by a committee in the originating chamber.",
+        explanation="A committee has voted to issue a report to the full chamber recommending that the bill be considered further. Only about 1 in 4 bills are reported out of committee.",
         sort_order=(0,2))
     pass_over_house = enum.Item(4,
         'Passed House',

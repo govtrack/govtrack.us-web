@@ -152,6 +152,7 @@ class Bill(models.Model):
     docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
     senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
     major_actions = JSONField(default=[]) # serialized list of all major actions (date/datetime, BillStatus, description)
+    committee_reports = JSONField(default=[], blank=True, null=True) # serialized list of committee report citations
 
     sliplawpubpriv = models.CharField(max_length=3, choices=[("PUB", "Public"), ("PRI", "Private")], blank=True, null=True, help_text="For enacted laws, whether the law is a public (PUB) or private (PRI) law. Unique with congress and sliplawnum.")
     sliplawnum = models.IntegerField(blank=True, null=True, help_text="For enacted laws, the slip law number (i.e. the law number in P.L. XXX-123). Unique with congress and sliplawpublpriv.")
@@ -910,6 +911,53 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         "date": m['issued_on'],
                         "text_version": m['version_code'],
                         "end_of_day": True,
+                    })
+
+            # Bring in committee reports.
+            for rpt in (self.committee_reports or []):
+                # Parse the report citation.
+                m = re.match(r"(S|H|Ex). Rept. (\d+)-(\d+)$", rpt)
+                if not m:
+                    continue
+                report_type, report_congress, report_number = m.groups()
+                report_type = report_type.lower() + "rpt"
+                rpt_mods = "../scripts/congress-pdf-config/data/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
+
+                # Load the report's MODS metadata, if we have it.
+                try:
+                    import lxml.etree
+                    rpt_mods = lxml.etree.parse(rpt_mods)
+                    ns = { "mods": "http://www.loc.gov/mods/v3" }
+                    docdate = rpt_mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
+                    docdate = datetime.date(*(int(d) for d in docdate.split("-")))
+                    committee_name = \
+                        { "H": "House", "S": "Senate" }[ rpt_mods.xpath("string(mods:extension/mods:congCommittee/@chamber)", namespaces=ns) ] \
+                      + " " + rpt_mods.xpath("string(mods:extension/mods:congCommittee/mods:name[@type='authority-standard'])", namespaces=ns) # authority-short gives short committee name like Appropriations
+                    gpo_pdf_url = rpt_mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
+                    numpages = rpt_mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
+                    if numpages: numpages = re.sub(r" p\.$", " pages", numpages)
+                except:
+                    continue
+
+                # Attach to an existing Reported event on the same date.
+                # TODO: But this could be the wrong chamber if multiple reports on the same date? Probably
+                # should check that the chamber matches the bill's originating chamber.
+                for i, event in enumerate(ret):
+                    if event["key"] == "reported" \
+                       and docdate == as_date(event["date"]) \
+                       and "committee_report_link" not in event:
+                        event["explanation"] += " The %s issued the report which may provide insight into the purpose of the legislation." % committee_name
+                        event["committee_report_link"] = gpo_pdf_url
+                        break
+                else:
+                    # Add a new event.
+                    ret.append({
+                        "key": "committee_report",
+                        "label": "Reported by " + committee_name,
+                        "explanation": "A committee issued a report on the bill, which often provides helpful explanatory background on the issue addressed by the bill and the bill's intentions.",
+                        "date": docdate,
+                        "end_of_day": True,
+                        "committee_report_link": gpo_pdf_url,
                     })
 
             # Bring in really-major events on identical bills and past/future reintroductions of this bill.
