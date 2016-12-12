@@ -137,7 +137,7 @@ def bill_search_manager():
     #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
     
     sm.set_template("""
-    	<a href="{{object.get_absolute_url}}" style="font-size: 15px">{{object|truncatewords_html:50}}</a>
+    	<a href="{{object.get_absolute_url}}" style="font-size: 15px; line-height: 125%;">{{object|truncatewords_html:50}}</a>
     	{% if object.sponsor %}<div>Sponsor: {{object.sponsor}}</div>{% endif %}
     	{% if object.source != "statutesatlarge" %}<div>Introduced: {{object.introduced_date}}</div>{% endif %}
     	{% if object.source != "americanmemory" %}<div>{% if object.source != "statutesatlarge" %}{{object.get_current_status_display}}{% else %}Enacted/Agreed to{% endif %}: {{object.current_status_date}}</div>{% endif %}
