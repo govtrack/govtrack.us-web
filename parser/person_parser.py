@@ -212,11 +212,8 @@ def main(options):
 
             processed_persons.add(person.pk)
 
-            # Process roles of the person
-            roles = list(PersonRole.objects.filter(person=person))
-            existing_roles = set(PersonRole.objects.filter(person=person).values_list('pk', flat=True))
-            processed_roles = set()
-            role_list = []
+            # Parse all of the roles.
+            new_roles = []
             for termnode in node['terms']:
                 role = role_processor.process(PersonRole(), termnode)
                 role.person = person
@@ -238,60 +235,72 @@ def main(options):
                     if "end" in leadership_node and leadership_node["end"] <= role.startdate.isoformat(): continue # might start on the same day but is for the previous Congress
                     if leadership_node["chamber"] != RoleType.by_value(role.role_type).congress_chamber.lower(): continue
                     role.leadership_title = leadership_node["title"]
-                
-                # Try to match this role with one already in the database.
-                # First search for an exact match on type/start/end.
-                ex_role = None
-                for r in roles:
-                    if role.role_type == r.role_type and r.startdate == role.startdate and r.enddate == role.enddate:
-                        ex_role = r
-                        break
-                        
-                # Otherwise match on type & either start or end only.
-                if not ex_role:
-                    for r in roles:
-                        if role.role_type == r.role_type and (r.startdate == role.startdate or r.enddate == role.enddate):
-                            ex_role = r
-                            break
 
-                if ex_role:    
-                    # These roles correspond.
-                    processed_roles.add(ex_role.id)
-                    role.id = ex_role.id
-                    if role_processor.changed(ex_role, role) or options.force:
-                        role.save()
-                        role_list.append(role)
-                        if not options.force:
-                            log.warn("Updated %s" % role)
-                    roles.remove(ex_role) # don't need to try matching this to any other node
-                else:
-                    # Didn't find a matching role.
-                    if len([r for r in roles if r.role_type == role.role_type]) > 0:
-                        print role, "is one of these?"
-                        for ex_role in roles:
-                            print "\t", ex_role
-                        raise Exception("There is an unmatched role.")
-                    log.warn("Created %s" % role)
-                    role.save()
-                    role_list.append(role)
-                        
-            # create the events for the roles after all have been loaded
-            # because we don't create events for ends of terms and
-            # starts of terms that are adjacent.
-            if not options.disable_events:
+                new_roles.append(role)
+
+            # Try matching the new roles to existing db records. Since we don't have a primry key
+            # in the source data, we have to match on the record values. But because of errors in data,
+            # term start/end dates can change, so matching has to be a little fuzzy.
+            existing_roles = list(PersonRole.objects.filter(person=person))
+            matches = []
+            def run_match_rule(rule):
+                import itertools
+                for new_role, existing_role in itertools.product(new_roles, existing_roles):
+                    if new_role not in new_roles or existing_role not in existing_roles: continue # already matched on a previous iteration
+                    if new_role.role_type != existing_role.role_type: continue
+                    if new_role.state != existing_role.state: continue
+                    if rule(new_role, existing_role):
+                        matches.append((new_role, existing_role))
+                        new_roles.remove(new_role)
+                        existing_roles.remove(existing_role)
+
+            # First match exactly, then exact on just one date, then on contractions and expansions.
+            run_match_rule(lambda new_role, existing_role : new_role.startdate == existing_role.startdate and new_role.enddate == existing_role.enddate)
+            run_match_rule(lambda new_role, existing_role : new_role.startdate == existing_role.startdate or new_role.enddate == existing_role.enddate)
+            run_match_rule(lambda new_role, existing_role : new_role.startdate >= existing_role.startdate and new_role.enddate <= existing_role.enddate)
+            run_match_rule(lambda new_role, existing_role : new_role.startdate <= existing_role.startdate and new_role.enddate >= existing_role.enddate)
+
+            # Update the database entries that correspond with records in the data file.
+            did_update_any = False
+            for new_role, existing_role in matches:
+                new_role.id = existing_role.id
+                if role_processor.changed(existing_role, new_role) or options.force:
+                    new_role.save()
+                    did_update_any = True
+                    if not options.force:
+                        log.warn("Updated %s" % new_role)
+
+            # If we have mutliple records on disk that didn't match and multiple records in the database
+            # that didn't match, then we don't know how to align them.
+            if len(new_roles) > 0 and len(existing_roles) > 0:
+                print(new_roles)
+                print(existing_roles)
+                raise Exception("There is an unmatched role.")
+
+            # Otherwise if there are any unmatched new roles, we can just add them.
+            for role in new_roles:
+                log.warn("Created %s" % role)
+                role.save()
+                did_update_any = True
+            
+            # And likewise for any existing roles that are left over.
+            for pr in existing_roles:
+                print pr.person.id, pr
+                raise ValueError("Deleted role??")
+                log.warn("Deleted %s" % pr)
+                pr.delete()
+            
+            if did_update_any and not options.disable_events:
+                # Create the events for the roles after all have been loaded
+                # because we don't create events for ends of terms and
+                # starts of terms that are adjacent. Refresh the list to get
+                # the roles in order.
+                role_list = list(PersonRole.objects.filter(person=person).order_by('startdate'))
                 for i in xrange(len(role_list)):
                     role_list[i].create_events(
                         role_list[i-1] if i > 0 else None,
                         role_list[i+1] if i < len(role_list)-1 else None
                         )
-            
-            removed_roles = existing_roles - processed_roles
-            for pk in removed_roles:
-                pr = PersonRole.objects.get(pk=pk)
-                print pr.person.id, pr
-                raise ValueError("Deleted role??")
-                log.warn("Deleted %s" % pr)
-                pr.delete()
             
             # The name can't be determined until all of the roles are set. If
             # it changes, re-save. Unfortunately roles are cached so this actually
