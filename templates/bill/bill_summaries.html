@@ -64,13 +64,13 @@ h3 {
 		</div>
 		
 		<div id="libraryofcongress" class="tab-pane postcontent" role="tabpanel">
-			<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress.</p>
-			<hr/>
 			{% with bill.get_formatted_summary as summary %}
 			{% if not summary %}
 				<p>No summary available.</p>
 			{% else %}
-				{{summary|safe}}
+				<p>The summary below was written by the Congressional Research Service, which is a nonpartisan division of the Library of Congress{% if summary.0 %}, and was published on {{summary.0|date}}{% endif %}.</p>
+				<hr/>
+				{{summary.1|safe}}
 				<script>add_summary("Library of Congress", "libraryofcongress");</script>
 			{% endif %}
 			{% endwith %}

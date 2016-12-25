@@ -438,8 +438,7 @@ class Bill(models.Model):
         return ret
 
     def get_formatted_summary(self):
-        s = get_formatted_bill_summary(self)
-        return s
+        return get_formatted_bill_summary(self)
 
     def has_text(self, status=None):
         try:
@@ -1292,12 +1291,18 @@ def get_formatted_bill_summary(bill):
     sfn = "data/us/%d/bills/%s%d.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
     with open(sfn) as f:
        dom = etree.parse(f)
+
     summary = dom.find("summary")
     if summary is None: return None
+
+    import dateutil.parser
+    date = dateutil.parser.parse(summary.get("date")) if summary.get("date") else None
+
     summary = summary.text
     if summary.strip() == "": return None
     summary = "".join(["<p>" + cgi.escape(p) + "</p>\n" for p in summary.split("\n\n")])
-    return summary
+
+    return date, summary
 
 class BillLink(models.Model):
     bill = models.ForeignKey(Bill, db_index=True, related_name="links", on_delete=models.PROTECT)
