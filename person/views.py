@@ -120,7 +120,6 @@ def person_details(request, pk):
                 'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
                 'committeeassignments': get_committee_assignments(person),
                 'feed': person.get_feed(),
-                'cities': get_district_cities("%s-%02d" % (role.state.lower(), role.district)) if role and role.district else None,
                 'has_session_stats': has_session_stats,
                 'bill_subject_areas': bills_by_subject_counts,
                 'vote_explanations': vote_explanations,
@@ -264,11 +263,10 @@ def get_representatives(state):
     
     reps = []
     for i in dists:
-        cities = get_district_cities("%s-%02d" % (state.lower(), i)) if i > 0 else None
         try:
-            reps.append((i, Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=i), cities))
+            reps.append((i, Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=i)))
         except Person.DoesNotExist:
-            reps.append((i, None, cities))
+            reps.append((i, None))
 
     return reps
 
@@ -334,7 +332,6 @@ def browse_district(request, state, district):
         "statelist": statelist,
         "senators": sens,
         "reps": reps,
-        "cities": get_district_cities("%s-%02d" % (state.lower(), int(district))),
     }
     
 def get_district_bounds(state, district):
@@ -384,33 +381,6 @@ def get_district_bounds_query(state, district):
                 
         return (center_lat, center_long, center_zoom)
 
-def get_district_cities(district_id):
-    district_info = cache.get("district_cities_%s" % district_id)
-    if district_info:
-        if district_info == "NONE": district_info = None
-        return district_info
-    
-    # When debugging locally, this file may not exist.
-    if os.path.exists("data/misc/cd-intersection-data.json"):
-        district_info = json.load(open("data/misc/cd-intersection-data.json")).get(district_id)
-    else:
-        district_info = None
-    if district_info:
-        locations_1 = [c["name"] for c in sorted(district_info, key=lambda c:-c["pct_of_district"]) if c["pct_of_locality"] > .98][0:8]
-        locations_2 = [c["name"] for c in sorted(district_info, key=lambda c:-c["pct_of_locality"]) if c["pct_of_locality"] <= .98][0:8]
-        district_info = ", ".join(locations_1)
-        if len(locations_2) > 2:
-            if len(locations_1) > 0:
-                district_info += " and parts of "
-                locations_2 = locations_2[0:5]
-            else:
-                district_info += "Parts of "
-            district_info += ", ".join(locations_2)
-    
-    cache.set("district_cities_%s" % district_id, district_info if district_info != None else "NONE")
-    
-    return district_info
-    
 @anonymous_view
 @render_to('person/overview.html')
 def membersoverview(request):

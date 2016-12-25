@@ -124,7 +124,7 @@ $(function() {
 	<p>{{statename}}&rsquo;s representative{% if stateapp > 1 %}s are{% else %} is{% endif %}:</p>
 
     <div class="row members-grid">
-    {% for district, person, cities in representatives %}
+    {% for district, person in representatives %}
         {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
         {% if forloop.counter0|divisibleby:3 %}<div class="clearfix visible-sm"></div>{% endif %}
         {% if forloop.counter0|divisibleby:2 %}<div class="clearfix visible-xs"></div>{% endif %}
@@ -135,7 +135,6 @@ $(function() {
 	            <p style="margin-top: 1em">The {{district|ordinalhtml}} district is currently vacant.</p>
 	            <div class="info">
 		        	{% if stateapp != 1 %}
-	            	<div style="margin-top: 4px" title="{{cities}}">{{cities|truncatewords:5}}</div>
 	            	<div><a href="/congress/members/{{state}}/{{district}}">View District Map</a></div>
 	            	{% endif %}
 	            </div>
@@ -160,7 +159,6 @@ $(function() {
             		<div>Since {{role.logical_dates.0|date}}</div>
 
 		        	{% if stateapp != 1 %}
-	            	<div style="margin-top: 4px" title="{{cities}}">{{cities|truncatewords:5}}</div>
 	            	<div><a href="/congress/members/{{state}}/{{district}}">View District Map</a></div>
 	            	{% endif %}
 	            </div>
@@ -184,7 +182,7 @@ $(function() {
 	{% else %}
 
     <div class="members-grid">
-    {% for district, person, cities in representatives %}
+    {% for district, person in representatives %}
         <div class="member" style="width: 150px">
         	{% if not person %}
 	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>

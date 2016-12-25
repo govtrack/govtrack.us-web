@@ -3,7 +3,7 @@
 
 {% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}{{ role.get_title }}{% if role.state %} for {{ role.state_name_article }}{% if role.district > 0 %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
 
-{% block meta_description %}{% if cities %}Represents {{cities}}. {% endif %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_title }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
+{% block meta_description %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_title }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
 {% block meta_keywords %}{{person.name_no_district}},legislation,bills,district,sponsor,cosponsor,votes,missed votes,absences,committees{% endblock %}
 
 {% block head %}
