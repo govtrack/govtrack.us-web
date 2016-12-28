@@ -1,0 +1,362 @@
+#!script
+#;encoding=utf-8
+
+# See if the text of one bill occurs within the text of another.
+
+import re
+import unicodedata
+from StringIO import StringIO
+import lxml.etree
+from numpy import percentile
+
+def extract_text(fn):
+  # Given a path to a bill text XML file from Congress,
+  # serialize the substantive legislative text into a
+  # flat string that can be passed to text comparison
+  # tools. Returns the string.
+
+  # Parse the XML and move to the <legis-body> node.
+  try:
+    dom = lxml.etree.parse(fn)
+  except lxml.etree.XMLSyntaxError:
+    raise ValueError("xml syntax error")
+  n = dom.find("legis-body") or dom.find("resolution-body")
+  if n is None: raise ValueError("missing legis-body or resolution-body in " + fn)
+
+  # Serializes the content of a node into plain text.
+  def serialize_within_node(node, buf):
+    # Skip struck-out text.
+    if node.get("changed") == "deleted":
+      return
+
+    # Skip headings and enums (numbering) entirely,
+    # as these may not be the same if the text is moved
+    # into another bill. But still write out the text that
+    # occurs after this node's close tag.
+    if node.tag in ("header", "enum"):
+      return
+
+    # Skip some entire sections that are not typically preserved
+    # verbatim when provisions are incorporated into other
+    # legislative vehicles. See if this node contains a <header>
+    # node whose text is "short title", etc. and then skip the
+    # whole section.
+    h = node.find("header")
+    if h is not None and h.text is not None and h.text.lower().strip() in \
+      ("short title", "effective date"):
+      return
+
+    # Write the text that occurs before the first child.
+    # Up-cast everything to unicode, so there's no mixed typing
+    # of strings.
+    if node.text:
+      buf.write(unicode(node.text))
+
+    # ... and then the children ...
+    for child in node:
+      serialize_node(child, buf)
+
+    # ... and then implied whitespace on block-level elements so
+    # that the text does not run together with subsequent block-level
+    # content...
+    if node.tag in ("text",):
+      buf.write(u" ")
+
+  # Serializes a node into plain text.
+  def serialize_node(node, buf):
+    # Serialize the content of this node.
+    serialize_within_node(node, buf)
+
+    # And then the text that occurs after the closing tag
+    # of the element and before the next element.
+    # Up-cast everything to unicode, so there's no mixed typing
+    # of strings.
+    if node.tail:
+      buf.write(unicode(node.tail))
+
+  # Serialize the bill text XML document.
+  buf = StringIO()
+  serialize_node(n, buf)
+  text = buf.getvalue()
+
+  # Normalize the text to make comparisons less picky.
+
+  # Make comparison case-insensitive.
+  text = text.lower()
+
+  # Normalize whitespace, dashes, and punctuation.
+  text = re.sub(u"\\s+", u" ", text) # collapse whitespace into single spaces
+  text = re.sub(u"[−–—~‐]+", u"-", text) # lots of dash types
+  text = re.sub(u"\\W+ ", u" ", text) # remove punctuation preceding whitespace
+
+  # Replace common phrases with single, atomic words so that they count
+  # for less in the analysis phase of this script.
+  text = re.sub(u"is amended by striking", u"/IABS/", text)
+  text = re.sub(u"is amended by adding at the end the following", u"/IABAATETF/", text)
+  text = re.sub(u"after the date of enactment of this act", u"/ATDOEOTA/", text)
+
+  # Make comparison insensitive to Unicode details that can be removed,
+  # like accent marks. I have no reason to believe this matters, but
+  # the more unicode that can be removed, the better, I guess. This
+  # decomposes Unicode characters and then removes combining characters.
+  text = u"".join(c for c in unicodedata.normalize('NFKD', text)
+    if not unicodedata.combining(c))
+
+  return text
+
+def to_words(text, word_map):
+  # Splice on whitespace and convert the words to a unicode string where code points map to words in the original.
+  return u"".join([word_map.setdefault(w, unichr(len(word_map)+32)) for w in text.split(" ")])
+
+def from_words(wordlist, word_map):
+  # Turn the Unicode string where code points map to words back to the original string.
+  return " ".join(word_map[c] for c in wordlist)
+
+def prepare_text1(text1):
+  # Load the text into a difflib.SequenceMatcher. Convert the text to "words"
+  # first, so that the unit of comparison is words. The docs say loading it
+  # into seq2 is faster for iterating over documents (as seq1).
+  from difflib import SequenceMatcher
+  word_map = { } # for to_words
+  text1w = to_words(text1, word_map)
+  sm = SequenceMatcher()
+  sm.set_seq2(text1w)
+  return (sm, word_map, len(text1w))
+
+def compare_text(text2, sm, word_map, text1w_len):
+  # Clone so that the orginal can be reused on the next call.
+  word_map = dict(word_map)
+
+  # Update the SequenceMatcher, which according to the docs is
+  # faster if we keep the instance and update seq1 on each call
+  # with the new text.
+  text2w = to_words(text2, word_map)
+  sm.set_seq1(text2w)
+
+  # Invert the word_map for from_words.
+  word_map = { v: k for k, v in word_map.items() }
+
+  # Perform diff, getting the "matching blocks" of text. These
+  # blocks may be single words or the entire text2 document,
+  # distributed anywhere in the text1 document.
+  blocks = sm.get_matching_blocks()[0:-1] # the last block is empty
+  blocks = [{
+    "text1_start": m.b,
+    "text2_start": m.a,
+    "size": m.size,
+  } for m in blocks]
+
+  # Annotate each block with its distance to preceding and surrounding
+  # blocks.
+  for i in range(1, len(blocks)):
+    blocks[i]['text1_nbefore'] = blocks[i]['text1_start'] - (blocks[i-1]['text1_start']+blocks[i-1]['size'])
+    blocks[i]['text2_nbefore'] = blocks[i]['text2_start'] - (blocks[i-1]['text2_start']+blocks[i-1]['size'])
+    blocks[i-1]['text1_nafter'] = blocks[i]['text1_nbefore']
+    blocks[i-1]['text2_nafter'] = blocks[i]['text2_nbefore']
+
+  # We want to compute a number that indicates how much of text2
+  # appears in text1. So we compute the number of words in text2
+  # that appear in text1 and divide by the total number of words
+  # in text2. Drop blocks that are so far away from surrounding
+  # text that they probably don't represent a contiguous part of
+  # copied text between the documents.
+  matched_blocks = [
+    b
+    for b in blocks
+    if b['size'] > 10 or (b['size'] > b.get("text1_nbefore", 0) and b['size'] > b.get("text1_nafter", 0) and b['size'] > b.get("text2_nbefore", 0) and b['size'] > b.get("text2_nafter", 0))
+    ]
+  extract = "...".join(from_words(text2w[block['text2_start']:block['text2_start']+block['size']], word_map) for block in matched_blocks)
+  ratio1 = sum(b['size'] for b in matched_blocks) / float(text1w_len)
+  ratio2 = sum(b['size'] for b in matched_blocks) / float(len(text2w))
+  return ratio1, ratio2, extract
+
+def compare_bills(b1, b2):
+  from bill.billtext import get_bill_text_metadata
+  fn1 = get_bill_text_metadata(b1, None)['xml_file']
+  fn2 = get_bill_text_metadata(b2, None)['xml_file']
+  text1 = extract_text(fn1)
+  state = prepare_text1(text1)
+  print b1.id, unicode(b1).encode("utf8")
+  print b2.id, unicode(b2).encode("utf8")
+  ratio1, ratio2, text = compare_text(extract_text(fn2), *state)
+  print ratio1, ratio2, ratio1*ratio2
+  print(text[:1000].encode("utf8"))
+  print
+
+
+if __name__ == "__main__" and len(sys.argv) == 3:
+  # Compare two bills by database numeric ID.
+  from bill.models import *
+  b1 = Bill.objects.get(id=sys.argv[1])
+  b2 = Bill.objects.get(id=sys.argv[2])
+  compare_bills(b1, b2)
+
+elif __name__ == "__main__" and sys.argv[-1] == "check":
+  # Look at our table and see how many relationships it identified
+  # that are not already known to be identical bills.
+  import csv
+  from bill.models import Bill, RelatedBill
+  congress = 114
+  csv_fn = "data/us/%d/text_comparison.csv" % congress
+  for row in csv.reader(open(csv_fn)):
+    timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text = row
+    b1_ratio = float(b1_ratio)
+    b2_ratio = float(b2_ratio)
+    cmp_text_len = int(cmp_text_len)
+    if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 400) \
+      or (b1_ratio*b2_ratio > .66 and cmp_text_len > 1500) \
+      or ((b1_ratio>.30 or b2_ratio>.30) and cmp_text_len > 7500) \
+      or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 15000):
+      b1 = Bill.from_congressproject_id(b1_id)
+      b2 = Bill.from_congressproject_id(b2_id)
+      r = RelatedBill.objects.filter(bill=b1, related_bill=b2, relation="identical")
+      #if r.count() == 0:
+      print b1_id, b2_id, r
+      print b1
+      print b2
+      print
+
+
+elif __name__ == "__main__":
+  # Look at all enacted bills find bills that are substantially
+  # similar or have text incorporated into it.
+  #
+  # Write out a CSV table.
+  
+  import itertools, csv, os.path, shutil
+  import tqdm
+  from bill.models import *
+  from bill.billtext import get_bill_text_metadata
+
+  from django.utils import timezone
+
+  congress = int(sys.argv[1])
+
+  all_bills = Bill.objects.filter(
+    congress=congress,
+    bill_type__in=(BillType.house_bill, BillType.senate_bill, BillType.house_joint_resolution, BillType.senate_joint_resolution))
+  enacted_bills = list(all_bills.filter(
+    current_status__in=BillStatus.final_status_passed_bill))
+
+  # Write to CSV, to a temporary file for now.
+  with open("/tmp/text_comparison.csv", "w") as outfile:
+    writer = csv.writer(outfile)
+
+    # Load the current comparison data so we know what bill texts
+    # we've already compared and copy those comparisons into the
+    # output.
+    csv_fn = "data/us/%d/text_comparison.csv" % congress
+    existing_comps = set()
+    if os.path.exists(csv_fn):
+      for row in csv.reader(open(csv_fn)):
+        timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text \
+           = row
+        existing_comps.add( ((b1_id, b1_versioncode), (b2_id, b2_versioncode) ) )
+        writer.writerow(row)
+
+    # For each enacted bill..
+    from haystack.query import SearchQuerySet
+    for b1 in tqdm.tqdm(enacted_bills):
+        # Load the enacted bill's text.
+
+        # Loads current metadata and text for the bill.
+        try:
+          md1 = get_bill_text_metadata(b1, None)
+          text1 = extract_text(md1['xml_file'])
+        except KeyError: # no xml_file
+          continue
+        except ValueError: # xml is bad
+          continue
+
+        state = prepare_text1(text1)
+
+        # Use Solr's More Like This query to get a preliminary list of
+        # bills textually similar to each enacted bill, which lets us
+        # cut down on the number of comparisons that we need to run
+        # by a factor of around 100. Pull between 10 and 50 similar
+        # bills -- depending on how large of a bill the enacted bill
+        # is. An authorization bill can have lots of bills incorporated
+        # into it, but a short bill could not have very many.
+
+        qs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"])\
+          .filter(congress=b1.congress).more_like_this(b1)
+        how_many = min(50, max(10, len(text1)/1000))
+        similar_bills = set(r.object for r in qs[0:how_many])
+        
+        # Iterate over each similar bill.
+
+        for b2 in similar_bills:
+          md2 = get_bill_text_metadata(b2, None)
+
+          # Did we do a comparison already? Skip if so.
+
+          key = ((b1.congressproject_id, md1['version_code']), (b2.congressproject_id, md2['version_code']))
+          if key in existing_comps:
+            continue
+
+          # The enacted bill must be newer than the non-enacted bill.
+          # Since authorizations are repeated from year to year, we
+          # should exclude cases where a bill looks like one previously
+          # enacted.
+
+          if md1['issued_on'] <= md2['issued_on']:
+            continue
+
+          # Load the second bill's text.
+
+          try:
+            text2 = extract_text(md2['xml_file'])
+          except KeyError: # no xml_file
+            continue
+          except ValueError: # xml is bad
+            continue
+
+          # Run comparison.
+
+          ratio1, ratio2, text = compare_text(text2, *state)
+
+          # Write out the comparison. We write out everything so that we know
+          # we've done the computation and don't need to do it again later.
+
+          writer.writerow([
+            timezone.now().isoformat(),
+
+            b1.congressproject_id, md1['version_code'],
+            ratio1,
+
+            b2.congressproject_id, md2['version_code'],
+            ratio2,
+
+            len(text),
+            text[:1000].encode("utf8") if ((ratio1 > .1 or ratio2 > .1) and len(text) > 500) else "",
+            ])
+
+  shutil.move("/tmp/text_comparison.csv", csv_fn)
+
+elif __name__ == "__main__":
+  # Look at all enacted bills that had a companion.
+
+  from django.db.models import F
+  from bill.models import *
+  # Since identical is symmetric, only take one pair.
+  for br in RelatedBill.objects\
+    .filter(relation="identical", related_bill__id__gt=F('bill__id'))\
+    .filter(bill__congress=114, bill__current_status=BillStatus.enacted_signed):
+    if len(sys.argv) > 1:
+      if sys.argv[1] not in unicode(br.bill):
+        continue
+
+    compare_bills(br.bill, br.related_bill)
+
+elif __name__ == "__main__":
+  # Compare XML files given as arguments.
+  import sys
+  text1 = extract_text(sys.argv[1])
+  state = prepare_text1(text1)
+  for fn in sys.argv[2:]:
+    text2 = extract_text(fn)
+    ratio, text = compare_text(text2, *state)
+    if len(text) > 150/(ratio**6) and ratio > .66:
+      print(fn)
+      print(ratio, text)
+
