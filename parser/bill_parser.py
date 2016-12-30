@@ -87,6 +87,10 @@ class BillProcessor(XmlProcessor):
             if existing_bill_obj.lock_title:
                 obj.title = existing_bill_obj.title
                 obj.lock_title = existing_bill_obj.lock_title
+
+            # pull forward other fields set on the Bill object that don't
+            # come from the bill status XML
+            obj.text_incorporation = existing_bill_obj.text_incorporation
         except Bill.DoesNotExist:
             pass
 

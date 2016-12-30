@@ -223,13 +223,6 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
 
     # For each enacted bill..
     for b1 in tqdm.tqdm(enacted_bills):
-      if  b1.title_no_number.startswith("A bill to designate ") \
-       or b1.title_no_number.startswith("To designate ") \
-       or b1.title_no_number.startswith("To name "):
-        # Naming buildings are formulaic and produce text
-        # similarity to other designation bills.
-        continue
-
       # Load the enacted bill's text.
 
       # Loads current metadata and text for the bill.
@@ -357,7 +350,23 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
 
     # Does this record represent enough text similarity that it is worth
     # loading into the database? We'll treat this record as indicating
-    # similarity if:
+    # similarity if...
+
+    # For exceedingly formulaic bills, we'll only identify identical bills.
+    # Bills naming buildings etc. are formulaic and produce text similarity
+    # to other bills of the same type, because the part that differs is very
+    # small. So we use a very high threshold for comparison.
+    b1_ratio = round(float(b1_ratio),3)
+    b2_ratio = round(float(b2_ratio),3)
+    b1 = Bill.from_congressproject_id(b1_id)
+    if  b1.title_no_number.startswith("A bill to designate ") \
+     or b1.title_no_number.startswith("To designate ") \
+     or b1.title_no_number.startswith("To name ") \
+     or "Commemorative Coin Act" in b1.title_no_number:
+      if b1_ratio*b2_ratio < .85:
+        continue
+
+    # For other bills...
     #   a) The bills are nearly identical, i.e. the ratios indicating how
     #      must text of each bill is in the other are both high, and
     #      there is some minimum amount of text in the bills so that we're
@@ -371,8 +380,6 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
     #   d) One bill has provisions incorporated within the other, and though
     #      it's a small part of the bill, it's a large bill and the text
     #      in common is quite large.
-    b1_ratio = round(float(b1_ratio),3)
-    b2_ratio = round(float(b2_ratio),3)
     if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 400) \
       or (b1_ratio*b2_ratio > .66 and cmp_text_len > 1500) \
       or ((b1_ratio>.33 or b2_ratio>.33) and cmp_text_len > 7500) \
@@ -466,6 +473,95 @@ elif __name__ == "__main__" and sys.argv[-1] == "test":
       print b1
       print b2
       print
+
+elif __name__ == "__main__" and sys.argv[-1] == "graph":
+  # Make a graph of text incorporation relationships.
+  # requires: sudo apt-get install graphviz && pip install graphviz
+  import tqdm
+  from bill.models import Bill
+  from graphviz import Digraph
+
+  # extract a subset of the data - paint the graph to determine
+  # connectivity
+  paint = { }
+  for bill in tqdm.tqdm(Bill.objects.filter(congress=114).exclude(text_incorporation=None), desc="Connectivity"):
+    for rec in bill.text_incorporation:
+      b1_id = bill.congressproject_id
+      b2_id = rec["other"]
+      if b1_id not in paint and b2_id not in paint:
+        paint[b1_id] = len(paint)
+        paint[b2_id] = paint[b1_id]
+      elif b1_id in paint and b2_id not in paint:
+        paint[b2_id] = paint[b1_id]
+      elif b1_id not in paint and b2_id in paint:
+        paint[b1_id] = paint[b2_id]
+      else:
+        # merge graph
+        b2_color = paint[b2_id]
+        for k in paint:
+          if paint[k] == b2_color:
+            paint[k] = paint[b1_id]
+
+  # Which color has the most nodes?
+  max_connectivity = max(paint, key = lambda bill_id : len([b for b, p in paint.items() if p == paint[bill_id]]) )
+
+  def add_newlines(text):
+    chars_per_line = 16
+    nchars_per_line = int(len(text) / max(1, round(len(text) / chars_per_line)))
+    words = []
+    charcount = 0
+    for w in text.split(" "):
+      if charcount+len(w) > nchars_per_line:
+        if len(" ".join(words)) > 90:
+          words.append("...")
+          break
+        words.append("\\n")
+        charcount = 0
+      words.append(w)
+      charcount += len(w)
+    return " ".join(words)
+  
+  g = Digraph(name="Text Incorporation",
+    graph_attr={
+      "mindist": "0",
+      "overlap": "false",
+      "splines": "true",
+      "root": "s2425-114" })
+
+  for bill in tqdm.tqdm(Bill.objects.filter(congress=114).exclude(text_incorporation=None), desc="Graph"):
+    # Draw a subgraph.
+    if paint[bill.congressproject_id] != paint[max_connectivity]:
+      continue
+      # "s1808-114", "hr34-114"
+
+    g.node(
+      bill.congressproject_id,
+      label=add_newlines(bill.title),
+      #tooltip=bill.display_number_no_congress_number,
+      color="red" if bill.is_success() else "black" #("green" if bill.was_enacted_ex() else "black")
+      )
+
+    for rec in bill.text_incorporation:
+      # Since the data is symmetric, only draw an edge going one way.
+      # Each edge is between a non-enacted bill and an enacted bill,
+      # so draw the edges in that direction.
+      b2 = Bill.from_congressproject_id(rec["other"])
+      if bill.is_success() and not b2.is_success():
+        continue
+      elif not bill.is_success() and b2.is_success():
+        pass
+      else:
+        raise ValueError()
+
+      g.edge(
+          bill.congressproject_id,
+          rec["other"],
+          label="%d%%" % int(round(rec["my_ratio"]*100)),
+          )
+  
+  g.engine = 'twopi'
+  svg = g.pipe(format='svg')
+  print(svg)
 
 elif __name__ == "__main__" and len(sys.argv) == 3:
   # Compare two bills by database numeric ID.
