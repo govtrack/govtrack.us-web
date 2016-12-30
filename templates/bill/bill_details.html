@@ -460,8 +460,17 @@
 					{% elif bill.source == "statutesatlarge" and bill.noun == "resolution" %}
 						<p>Enacted or Agreed to on {{bill.current_status_date}}</p>
 					{% elif not dead %}
-						<p><strong>{{bill.get_current_status_display}}</strong>
-						on <strong>{{bill.current_status_date}}</strong></p>
+						<p>
+						{% with bill.get_current_status_and_date as extended_status %}
+							{% if not extended_status.1 %}
+								<strong>{{extended_status.0}}</strong>
+								on <strong>{{extended_status.2|date}}</strong>
+							{% else %}
+								<strong>{{extended_status.1}}</strong>
+								{# <br>(This {{bill.noun}}: {{extended_status.0}}) #}
+							{% endif %}
+						{% endwith %}
+						</p>
 						<p>{{bill.current_status_description}}</p>
 
 						{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
@@ -494,6 +503,37 @@
 						<p style="margin-top: .25em">{{bill.current_status_description}}</p>
 
 					{% endif %}
+
+					{% if text_incorporation and not bill.is_success %}
+					<div style="margin: 1em 0">
+					<p>
+						{% if text_incorporation|length == 1 and text_incorporation.0.identical and text_incorporation.0.other.is_success %}
+							This {{bill.noun}} was enacted as:
+						{% elif text_incorporation|length == 1 and text_incorporation.0.identical %}
+							This {{bill.noun}} is identical to:
+						{% elif text_incorporation|length == 1 and text_incorporation.0.other.is_success %}
+							This {{bill.noun}} was incorporated into:
+						{% else %}
+							Provisions of this {{bill.noun}} also appear in:
+						{% endif %}
+					</p>
+					{% for item in text_incorporation %}
+					<div style="margin-top: .5em">
+						<div>
+							<a href="{{item.other.get_absolute_url}}">{{item.other.display_number_no_congress_number}}</a>:
+							{{item.other.title_no_number|truncatewords:30}}
+						</div>
+						{% with item.other.get_current_status_and_date as other_status %}
+						<div>
+							{{other_status.0}} on {{other_status.2}}.
+							(<a href="{{bill.get_absolute_url}}/text#compare={{item.other.id}}:{{item.other.version}}" style="font-weight: normal">compare text</a>)
+						</div>
+						{% endwith %}
+					</div>
+					{% endfor %}
+					</div>
+					{% endif %}
+
 				</dd>
 				{% endif %}
 
@@ -574,7 +614,7 @@
 					<dd><p>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
 					{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</p></dd>
 					
-				{% elif related_newer %}
+				{% elif related_newer and not text_incorporation %}
 					<dt>See Instead:</dt>
 					<dd>
 					{% for rb in related_newer %}
@@ -608,6 +648,38 @@
 </div> <!-- /bill-overview-panel -->
 
 	<div id="admin_panel"> </div>
+
+	{% if text_incorporation and bill.is_success %}
+		<h2><span>Incorporated Legislation</span></h2>
+
+		<p>This {{bill.noun}} incorporates provisions from:</p>
+
+		<div class="row">
+		{% for item in text_incorporation %}
+			<div class="col-md-6 col-lg-4" style="padding-bottom: 1em">
+				<div style="float: left; margin-right: .75em; margin-bottom: .75em">
+					<a href="{{item.other.get_absolute_url}}">
+						<img src="{{item.other.get_absolute_url}}/thumbnail?width=75" title="{{item.other}}" style="border: 1px solid #999;" width="60" height="71"/>
+					</a>
+				</div>
+				<p style="line-height: 125%;">
+					<a href="{{item.other.get_absolute_url}}">{{item.other.display_number_no_congress_number}}</a>:
+					{{item.other.title_no_number|truncatewords:30}}
+				</p>
+				{% with item.other.get_current_status_and_date as other_status %}
+				<p style="line-height: 125%;">
+					{{other_status.0}} on {{other_status.2}}.
+					{{item.other_ratio|floatformat:0}}% incorporated.
+					(<a href="{{bill.get_absolute_url}}/text#compare={{item.other.id}}:{{item.other.version}}" style="font-weight: normal">compare text</a>)
+				</p>
+				{% endwith %}
+				<div class="clearfix"> </div>
+			</div>
+			{% if forloop.counter|divisibleby:2 %}<div class="visible-md clearfix"></div>{% endif %}
+			{% if forloop.counter|divisibleby:3 %}<div class="visible-lg clearfix"></div>{% endif %}
+		{% endfor %}
+		</div>
+	{% endif %}	
 
 		{% if bill.source == "thomas-congproj" %}
 		<div id="bill-history" style="margin: 50px 0;">

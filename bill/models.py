@@ -140,6 +140,8 @@ class Bill(models.Model):
     bill_type = models.IntegerField(choices=BillType, help_text="The bill's type (e.g. H.R., S., H.J.Res. etc.)")
     congress = models.IntegerField(help_text="The number of the Congress in which the bill was introduced. The current Congress is %d." % settings.CURRENT_CONGRESS)
     number = models.IntegerField(help_text="The bill's number (just the integer part).")
+
+    # primary data originally from USGPO bill status XML (or parallel source)
     sponsor = models.ForeignKey('person.Person', blank=True, null=True,
                                 related_name='sponsored_bills', help_text="The primary sponsor of the bill.", on_delete=models.PROTECT)
     sponsor_role = models.ForeignKey('person.PersonRole', blank=True, null=True, help_text="The role of the primary sponsor of the bill at the time the bill was introduced.", on_delete=models.PROTECT)
@@ -149,17 +151,20 @@ class Bill(models.Model):
     current_status_date = models.DateField(help_text="The date of the last major action on the bill corresponding to the current_status.")
     introduced_date = models.DateField(help_text="The date the bill was introduced.")
     cosponsors = models.ManyToManyField('person.Person', blank=True, through='bill.Cosponsor', help_text="The bill's cosponsors.")
-    docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
-    senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
     major_actions = JSONField(default=[]) # serialized list of all major actions (date/datetime, BillStatus, description)
-    committee_reports = JSONField(default=[], blank=True, null=True) # serialized list of committee report citations
-
+    committee_reports = JSONField(default=[], blank=True, null=True, help_text="serialized list of committee report citations")
     sliplawpubpriv = models.CharField(max_length=3, choices=[("PUB", "Public"), ("PRI", "Private")], blank=True, null=True, help_text="For enacted laws, whether the law is a public (PUB) or private (PRI) law. Unique with congress and sliplawnum.")
     sliplawnum = models.IntegerField(blank=True, null=True, help_text="For enacted laws, the slip law number (i.e. the law number in P.L. XXX-123). Unique with congress and sliplawpublpriv.")
-    #statutescite = models.CharField(max_length=16, blank=True, null=True, help_text="For enacted laws, a normalized U.S. Statutes at Large citation. Available only for years in which the Statutes at Large has already been published.")
 
-    source = models.CharField(max_length=16, choices=[("thomas-legacy", "THOMAS.gov (via GovTrack Legacy Scraper)"), ("thomas-congproj", "THOMAS.gov (via Congress Project)"), ("statutesatlarge", "U.S. Statutes at Large"), ("americanmemory", "LoC American Memory Collection")], help_text="The primary source for this bill's metadata.")
+    # what source actually produced the above information?
+    source = models.CharField(max_length=16, choices=[("thomas-congproj", "THOMAS.gov (via Congress Project)"), ("statutesatlarge", "U.S. Statutes at Large"), ("americanmemory", "LoC American Memory Collection")], help_text="The primary source for this bill's metadata.")
     source_link = models.CharField(max_length=256, blank=True, null=True, help_text="When set, a link to the page on the primary source website for this bill. Set when source='americanmemory' only.")
+
+    # additional data that is pulled from other sources
+    docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
+    senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
+    #statutescite = models.CharField(max_length=16, blank=True, null=True, help_text="For enacted laws, a normalized U.S. Statutes at Large citation. Available only for years in which the Statutes at Large has already been published.")
+    text_incorporation = JSONField(default=[], blank=True, null=True, help_text="What enacted bills have provisions of this bill been incorporated into?")
 
     # role is a new field added with, but might not be perfect for overlapping roles (see Cosponsor)
     #for role in PersonRole.objects.filter(startdate__gt="1960-01-01"):
@@ -277,11 +282,6 @@ class Bill(models.Model):
         # Update this bill in the search database.
         bill_index.update_object(self, using="bill")
 
-        # Because of the enacted_ex field, we have to update any bills whose enacted_ex field
-        # might depend on the status of this bill. The identical relation is symmetric so...
-        for rb in RelatedBill.objects.filter(bill=self, relation="identical").select_related("related_bill"):
-            bill_index.update_object(rb.related_bill, using="bill")
-
     # api
     api_recurse_on = ("sponsor", "sponsor_role")
     api_recurse_on_single = ("committees", "cosponsors", "terms")
@@ -378,11 +378,45 @@ class Bill(models.Model):
         counts = sorted(list(counts.items()), key=lambda kv : -kv[1])
         return counts
 
+    # STATUS STRINGS
+
+    def get_current_status_display(self):
+        # Override the default Django behavior.
+        s = self.get_current_status_and_date()
+        ret = s[0]
+        if s[1]: ret += " (" + s[1] + ")"
+        return ret
+
+    def get_current_status_and_date(self):
+        status = BillStatus.by_value(self.current_status).label
+        extended_status = None
+        date = self.current_status_date
+        if not self.is_final_status:
+            if self.was_enacted_ex() is not None:
+                extended_status = "Enacted Via Other Measures"
+            elif self.text_incorporation is not None:
+                extended_status = "Parts Incorporated Into Other Measures"
+        return (status, extended_status, date)
+
     @property
     def current_status_description(self):
         """Descriptive text for the bill's current status."""
         if self.source == "americanmemory": return None # not known
-        return self.get_status_text(self.current_status, self.current_status_date)
+        status = self.get_long_text_for_status(self.current_status, self.current_status_date)
+        if not self.is_final_status:
+            if self.was_enacted_ex() is not None:
+                status += " But provisions of this %s were incorporated into other %ss which were enacted, so there will not likely be further activity on this bill." % (self.noun, self.noun)
+            elif self.text_incorporation is not None:
+                status += " Provisions of this %s were incorporated into other %ss." % (self.noun, self.noun)
+        return status
+
+    def get_long_text_for_status(self, status, date) :
+        status = BillStatus.by_value(status).xml_code
+        date = date.replace(year=2000).strftime("%B %d, YYYY").replace(" 0", " ").replace("YYYY", str(date.year)) # historical bills < 1900 would otherwise raise an error
+        status = get_bill_status_string(self.is_current, status)
+        return status % (self.noun, date)
+
+    # STATUS FLAGS
 
     @property
     def is_current(self):
@@ -450,12 +484,6 @@ class Bill(models.Model):
 
     def get_upcoming_meetings(self):
         return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=self)
-
-    def get_status_text(self, status, date) :
-        status = BillStatus.by_value(status).xml_code
-        date = date.replace(year=2000).strftime("%B %d, YYYY").replace(" 0", " ").replace("YYYY", str(date.year)) # historical bills < 1900 would otherwise raise an error
-        status = get_bill_status_string(self.is_current, status)
-        return status % (self.noun, date)
 
     @property
     def explanatory_text(self):
@@ -669,7 +697,7 @@ class Bill(models.Model):
                             "that committee" if len(cmtes) == 1 else "those committees"))
 
         else:
-            explanation = self.get_status_text(status, date)
+            explanation = self.get_long_text_for_status(status, date)
 
         return {
             "type": status.label,
@@ -959,8 +987,28 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         "committee_report_link": gpo_pdf_url,
                     })
 
-            # Bring in really-major events on identical bills and past/future reintroductions of this bill.
+            # Bring in major events from bills with textual similarity.
             got_rb = set()
+            if self.text_incorporation:
+                for rec in self.text_incorporation:
+                    b = Bill.from_congressproject_id(rec["other"])
+                    got_rb.add(b)
+                    for e in b.get_major_events(top=False):
+                        if e["key"] in ("introduced", "reported"): continue
+                        if rec["my_ratio"] * rec["other_ratio"] > .9:
+                            e["relation"] = "Identical Bill"
+                        elif self.is_success() and not b.is_success():
+                            e["relation"] = "Source Bill"
+                        elif not self.is_success() and b.is_success():
+                            e["relation"] = "Final Bill"
+                        else:
+                            e["relation"] = "Related Bill"
+                        e["bill"] = b
+                        ret.append(e)
+
+            # Bring in major events from related bills identified by CRS,
+            # except those we identified above and check for duplicates
+            # here because pairs of bills may have multiple records.
             for relation_name, relation_types in (
               ("Companion Bill", ("identical",)),
               ("Alternative Bill", ("supersedes", "includes")),
@@ -974,6 +1022,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         e["relation"] = relation_name
                         e["bill"] = rb.related_bill
                         ret.append(e)
+
+            # Bring in major events from earlier/later reintroductions of this bill.
             for b in self.find_reintroductions():
                 be = b.get_major_events(top=False)
                 if len(be) > 0:
@@ -1190,32 +1240,49 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             yield reintro
 
     def was_enacted_ex(self, recurse=True, restrict_to_activity_in_date_range=None):
-        # Checking if a bill was "enacted" in a popular sense is a little tricky:
+        # Checking if a bill was "enacted" in a popular sense is a little tricky.
+        # A bill is enacted if it was signed by the president, etc.
+        # And if a bill's provisions were substantially incorporated into a bill
+        # that was enacted, then we can also say yes the original bill was enacted to.
+        # The sponsor "gets credit", in some sense, for enacting a law.
         #
-        #  * We should count a bill as enacted if any identified companion bill was enacted.
+        # Although CRS identifies "identicial" bills, and if this bill is identical
+        # to an enacted bill we might say this bill was enacted, in practice our
+        # text_incorporation data is probably more correct because it looks at the
+        # *most recent* text for a bill, while a CRS "identical bill" relation is
+        # set if two bills were identical at either point in either's history.
         #
-        # Returns the actual bill that was enacted (possibly a companion bill), or None if
+        # A bill may have provisions incorporated into multiple enacted bills.
+        # We'll say that this bill was enacted if at least one third of its text
+        # is found within enacted bills, across all of the text relations.
+        #
+        # Returns a list of bills that this bill was enacted via, or None if
         # the bill was not "enacted".
         #
-        # Previously, but this has been corrected in the congress project (7b47095d197ad0b9f886a757eabbede95524b174):
-        #  1) Our status code is currently tied to the assignment of a slip law number by OFR,
-        #     which isn't what we mean exactly. Better to look for a <signed> action in case of
-        #     delays at OFR.
+        # Some of our statistics wants to know if a bill was enacted within a certain
+        # time frame, so there is that restriction too.
 
         def date_filter(d):
             if restrict_to_activity_in_date_range is None: return True
             return restrict_to_activity_in_date_range[0] <= d <= restrict_to_activity_in_date_range[1]
 
-        # If we know the bill to have been enacted...
+        # If we know the bill to have been enacted itself...
         if self.current_status in BillStatus.final_status_passed_bill and date_filter(self.current_status_date.isoformat()):
-            return self
+            return [self]
 
-        # Check companion bills...
-        if recurse:
-            for rb in RelatedBill.objects.filter(bill=self, relation="identical").select_related("related_bill"):
-                e = rb.related_bill.was_enacted_ex(recurse=False, restrict_to_activity_in_date_range=restrict_to_activity_in_date_range)
-                if e is not None:
-                     return e
+        # Check related bills identified by text incorporation...
+        if recurse and self.text_incorporation is not None:
+            ret = []
+            total_incorporated_ratio = 0
+            for rec in self.text_incorporation:
+                if rec["other_version"] == "enr":
+                    # Enrolled, but enacted?
+                    other_bill = Bill.from_congressproject_id(rec["other"])
+                    if other_bill.was_enacted_ex(recurse=False, restrict_to_activity_in_date_range=restrict_to_activity_in_date_range):
+                        ret.append(other_bill)
+                        total_incorporated_ratio += rec["my_ratio"]
+            if total_incorporated_ratio >= .33:
+                return ret
                 
         return None
 

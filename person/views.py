@@ -117,6 +117,7 @@ def person_details(request, pk):
                 'photo_credit': photo_credit,
                 'links': links,
                 'analysis_data': analysis_data,
+                'enacted_bills': [b for b in person.sponsored_bills.order_by('-current_status_date') if b.was_enacted_ex()],
                 'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
                 'committeeassignments': get_committee_assignments(person),
                 'feed': person.get_feed(),

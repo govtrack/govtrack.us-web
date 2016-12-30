@@ -76,7 +76,20 @@ def bill_details(request, congress, type_slug, number):
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": bill.get_feed(),
         "text_info": get_text_info(bill),
+        "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
     }
+
+def fixup_text_incorporation(text_incorporation):
+    if text_incorporation is None:
+        return text_incorporation
+    def fixup_item(item):
+        item = dict(item)
+        if item["my_ratio"] * item["other_ratio"] > .9:
+            item["identical"] = True
+        item["other"] = Bill.from_congressproject_id(item["other"])
+        item["other_ratio"] *= 100
+        return item
+    return map(fixup_item, text_incorporation)
 
 @user_view_for(bill_details)
 def bill_details_user_view(request, congress, type_slug, number):

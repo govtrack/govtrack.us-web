@@ -184,40 +184,7 @@ def compare_bills(b1, b2):
   print
 
 
-if __name__ == "__main__" and len(sys.argv) == 3:
-  # Compare two bills by database numeric ID.
-  from bill.models import *
-  b1 = Bill.objects.get(id=sys.argv[1])
-  b2 = Bill.objects.get(id=sys.argv[2])
-  compare_bills(b1, b2)
-
-elif __name__ == "__main__" and sys.argv[-1] == "check":
-  # Look at our table and see how many relationships it identified
-  # that are not already known to be identical bills.
-  import csv
-  from bill.models import Bill, RelatedBill
-  congress = 114
-  csv_fn = "data/us/%d/text_comparison.csv" % congress
-  for row in csv.reader(open(csv_fn)):
-    timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text = row
-    b1_ratio = float(b1_ratio)
-    b2_ratio = float(b2_ratio)
-    cmp_text_len = int(cmp_text_len)
-    if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 400) \
-      or (b1_ratio*b2_ratio > .66 and cmp_text_len > 1500) \
-      or ((b1_ratio>.30 or b2_ratio>.30) and cmp_text_len > 7500) \
-      or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 15000):
-      b1 = Bill.from_congressproject_id(b1_id)
-      b2 = Bill.from_congressproject_id(b2_id)
-      r = RelatedBill.objects.filter(bill=b1, related_bill=b2, relation="identical")
-      #if r.count() == 0:
-      print b1_id, b2_id, r
-      print b1
-      print b2
-      print
-
-
-elif __name__ == "__main__":
+if __name__ == "__main__" and sys.argv[1] == "analyze":
   # Look at all enacted bills find bills that are substantially
   # similar or have text incorporated into it.
   #
@@ -230,7 +197,7 @@ elif __name__ == "__main__":
 
   from django.utils import timezone
 
-  congress = int(sys.argv[1])
+  congress = int(sys.argv[2])
 
   all_bills = Bill.objects.filter(
     congress=congress,
@@ -255,83 +222,258 @@ elif __name__ == "__main__":
         writer.writerow(row)
 
     # For each enacted bill..
-    from haystack.query import SearchQuerySet
     for b1 in tqdm.tqdm(enacted_bills):
-        # Load the enacted bill's text.
+      if  b1.title_no_number.startswith("A bill to designate ") \
+       or b1.title_no_number.startswith("To designate ") \
+       or b1.title_no_number.startswith("To name "):
+        # Naming buildings are formulaic and produce text
+        # similarity to other designation bills.
+        continue
 
-        # Loads current metadata and text for the bill.
+      # Load the enacted bill's text.
+
+      # Loads current metadata and text for the bill.
+      try:
+        md1 = get_bill_text_metadata(b1, None)
+        text1 = extract_text(md1['xml_file'])
+      except KeyError: # no xml_file
+        continue
+      except ValueError: # xml is bad
+        continue
+
+      state = prepare_text1(text1)
+
+      # Use Solr's More Like This query to get a preliminary list of
+      # bills textually similar to each enacted bill, which lets us
+      # cut down on the number of comparisons that we need to run
+      # by a factor of around 100. Pull between 10 and 50 similar
+      # bills -- depending on how large of a bill the enacted bill
+      # is. An authorization bill can have lots of bills incorporated
+      # into it, but a short bill could not have very many.
+
+      from haystack.query import SearchQuerySet
+      qs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"])\
+        .filter(congress=b1.congress).more_like_this(b1)
+      how_many = min(50, max(10, len(text1)/1000))
+      similar_bills = set(r.object for r in qs[0:how_many])
+      
+      # Iterate over each similar bill.
+
+      for b2 in similar_bills:
+        # Don't compare to other enacted bills.
+        if b2.current_status in BillStatus.final_status_passed_bill:
+          continue
+
+        # Don't compare bills to resolutions.
+        if b1.noun != b2.noun:
+          continue
+
+        # Get the second bill's most recent text document's metadata.
+        md2 = get_bill_text_metadata(b2, None)
+
+        # Did we do a comparison already? Skip if so.
+        key = ((b1.congressproject_id, md1['version_code']), (b2.congressproject_id, md2['version_code']))
+        if key in existing_comps:
+          continue
+
+        # The enacted bill must be newer than the non-enacted bill.
+        # Since authorizations are repeated from year to year, we
+        # should exclude cases where a bill looks like one previously
+        # enacted. Since text is not always published simultaneously
+        # with status, especially often for enrolled bills, we can
+        # look at the text date but also the bill's current status.
+        if b1.current_status_date <= b2.current_status_date:
+          continue
+        if md1['issued_on'] <= md2['issued_on']:
+          continue
+
+        # Load the second bill's text.
         try:
-          md1 = get_bill_text_metadata(b1, None)
-          text1 = extract_text(md1['xml_file'])
+          text2 = extract_text(md2['xml_file'])
         except KeyError: # no xml_file
           continue
         except ValueError: # xml is bad
           continue
 
-        state = prepare_text1(text1)
+        # Run comparison.
+        ratio1, ratio2, text = compare_text(text2, *state)
 
-        # Use Solr's More Like This query to get a preliminary list of
-        # bills textually similar to each enacted bill, which lets us
-        # cut down on the number of comparisons that we need to run
-        # by a factor of around 100. Pull between 10 and 50 similar
-        # bills -- depending on how large of a bill the enacted bill
-        # is. An authorization bill can have lots of bills incorporated
-        # into it, but a short bill could not have very many.
+        # Write out the comparison. We write out everything so that we know
+        # we've done the computation and don't need to do it again later.
+        writer.writerow([
+          timezone.now().isoformat(),
 
-        qs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"])\
-          .filter(congress=b1.congress).more_like_this(b1)
-        how_many = min(50, max(10, len(text1)/1000))
-        similar_bills = set(r.object for r in qs[0:how_many])
-        
-        # Iterate over each similar bill.
+          b1.congressproject_id, md1['version_code'],
+          ratio1,
 
-        for b2 in similar_bills:
-          md2 = get_bill_text_metadata(b2, None)
+          b2.congressproject_id, md2['version_code'],
+          ratio2,
 
-          # Did we do a comparison already? Skip if so.
-
-          key = ((b1.congressproject_id, md1['version_code']), (b2.congressproject_id, md2['version_code']))
-          if key in existing_comps:
-            continue
-
-          # The enacted bill must be newer than the non-enacted bill.
-          # Since authorizations are repeated from year to year, we
-          # should exclude cases where a bill looks like one previously
-          # enacted.
-
-          if md1['issued_on'] <= md2['issued_on']:
-            continue
-
-          # Load the second bill's text.
-
-          try:
-            text2 = extract_text(md2['xml_file'])
-          except KeyError: # no xml_file
-            continue
-          except ValueError: # xml is bad
-            continue
-
-          # Run comparison.
-
-          ratio1, ratio2, text = compare_text(text2, *state)
-
-          # Write out the comparison. We write out everything so that we know
-          # we've done the computation and don't need to do it again later.
-
-          writer.writerow([
-            timezone.now().isoformat(),
-
-            b1.congressproject_id, md1['version_code'],
-            ratio1,
-
-            b2.congressproject_id, md2['version_code'],
-            ratio2,
-
-            len(text),
-            text[:1000].encode("utf8") if ((ratio1 > .1 or ratio2 > .1) and len(text) > 500) else "",
-            ])
+          len(text),
+          text[:1000].encode("utf8") if ((ratio1 > .1 or ratio2 > .1) and len(text) > 500) else "",
+          ])
 
   shutil.move("/tmp/text_comparison.csv", csv_fn)
+
+elif __name__ == "__main__" and sys.argv[1] == "load":
+  # Update the Bill.text_incorporation field in our database.
+  # Since a bill can be incorporated into many enacted bills,
+  # we have to scan the complete table to collect all of the
+  # records in which a bill is mentioned.
+
+  import csv, collections
+  import tqdm
+  from bill.models import Bill
+
+  congress = int(sys.argv[2])
+
+  csv_fn = "data/us/%d/text_comparison.csv" % congress
+
+  # Identify the most recent bill version for each bill. Since the
+  # CSV file is in chronological order by the date the text analysis
+  # was performed, and each line uses only the most recent text for
+  # a bill, we can look at the last occurrence of a bill to see what
+  # text version is the latest. On a second pass, we'll skip analyses
+  # over earlier versions of a bill.
+  latest_version_code = { }
+  for row in csv.reader(open(csv_fn)):
+    timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text \
+       = row
+    latest_version_code[b1_id] = b1_versioncode
+    latest_version_code[b2_id] = b2_versioncode
+
+  # Collate the text incorporation data by bill.
+  text_incorporation = collections.defaultdict(lambda : { })
+  for row in csv.reader(open(csv_fn)):
+    timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text \
+       = row
+
+    # b1 is the enacted bill.
+    # b2 is a non-enacted bill that might have had text incorporated into b1.
+
+    # Skip if this record is for an outdated version of either bill.
+    if b1_versioncode != latest_version_code[b1_id]: continue
+    if b2_versioncode != latest_version_code[b2_id]: continue
+
+    # Does this record represent enough text similarity that it is worth
+    # loading into the database? We'll treat this record as indicating
+    # similarity if:
+    #   a) The bills are nearly identical, i.e. the ratios indicating how
+    #      must text of each bill is in the other are both high, and
+    #      there is some minimum amount of text in the bills so that we're
+    #      sure there is substantative text at all.
+    #   b) The bills are substantially similar to each other and the text
+    #      in common is large enough to exclude cases where all of the
+    #      substance in the bills are in the dis-similar parts.
+    #   c) One bill is substantially (>33%) incorporated within the other
+    #      and the text in common is significantly large to ensure that
+    #      there are substantive provisions in that part.
+    #   d) One bill has provisions incorporated within the other, and though
+    #      it's a small part of the bill, it's a large bill and the text
+    #      in common is quite large.
+    b1_ratio = round(float(b1_ratio),3)
+    b2_ratio = round(float(b2_ratio),3)
+    if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 400) \
+      or (b1_ratio*b2_ratio > .66 and cmp_text_len > 1500) \
+      or ((b1_ratio>.33 or b2_ratio>.33) and cmp_text_len > 7500) \
+      or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 15000):
+
+      # Index this information with both bills.
+
+      # For b2, we're saying that it (or parts of it) were enacted
+      # through these other bills...
+      text_incorporation[b2_id][b1_id] = {
+        "my_version": b2_versioncode,
+        "my_ratio": b2_ratio,
+        "other": b1_id,
+        "other_version": b1_versioncode,
+        "other_ratio": b1_ratio,
+        "text": cmp_text,
+      }
+
+      # For b1, which was enacted, we're saying that the bill's
+      # legislative history starts with these other bills.
+      text_incorporation[b1_id][b2_id] = {
+        "my_version": b1_versioncode,
+        "my_ratio": b1_ratio,
+        "other": b2_id,
+        "other_version": b2_versioncode,
+        "other_ratio": b2_ratio,
+        "text": cmp_text,
+      }
+
+  # Reformat so each bill has a list of other bills rather than
+  # a mapping.
+  for b in text_incorporation:
+    text_incorporation[b] = sorted(text_incorporation[b].values(), key=lambda item : -item['my_ratio'])
+
+  # Get the haystack index.
+  from bill.search_indexes import BillIndex
+  bill_index = BillIndex()
+
+  # Helper to update a bill.
+  def save_bill(b):
+    # Save the field we care about.
+    b.save(update_fields=['text_incorporation'])
+
+    # Re-index in haystack.
+    b.update_index(bill_index)
+
+    # Ensure events are up to date.
+    #b.create_events() # add once this info affects events
+
+  # Update bills.
+  seen_bills = set()
+  for b_id, info in tqdm.tqdm(sorted(text_incorporation.items()), desc="Updating"):
+    b = Bill.from_congressproject_id(b_id)
+    if b.text_incorporation != info:
+      # Updated!
+      b.text_incorporation = info
+      save_bill(b)
+    seen_bills.add(b.id)
+
+  # Clear out all bills from this Congress that should have
+  # no text incorporation data but do have something that's
+  # no longer valid.
+  for b in tqdm.tqdm(list(Bill.objects
+    .filter(congress=congress)
+    .exclude(text_incorporation=None)
+    .exclude(id__in=seen_bills)), desc="Clearing"):
+    b.text_incorporation = None
+    save_bill(b)
+
+elif __name__ == "__main__" and sys.argv[-1] == "test":
+  # Look at our table and see how many relationships it identified
+  # that are not already known to be identical bills.
+  import csv
+  from bill.models import Bill, RelatedBill
+  congress = 114
+  csv_fn = "data/us/%d/text_comparison.csv" % congress
+  for row in csv.reader(open(csv_fn)):
+    timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text = row
+    b1_ratio = float(b1_ratio)
+    b2_ratio = float(b2_ratio)
+    cmp_text_len = int(cmp_text_len)
+    if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 400) \
+      or (b1_ratio*b2_ratio > .66 and cmp_text_len > 1500) \
+      or ((b1_ratio>.30 or b2_ratio>.30) and cmp_text_len > 7500) \
+      or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 15000):
+      b1 = Bill.from_congressproject_id(b1_id)
+      b2 = Bill.from_congressproject_id(b2_id)
+      r = RelatedBill.objects.filter(bill=b1, related_bill=b2, relation="identical")
+      #if r.count() == 0:
+      print b1_id, b2_id, r
+      print b1
+      print b2
+      print
+
+elif __name__ == "__main__" and len(sys.argv) == 3:
+  # Compare two bills by database numeric ID.
+  from bill.models import *
+  b1 = Bill.objects.get(id=sys.argv[1])
+  b2 = Bill.objects.get(id=sys.argv[2])
+  compare_bills(b1, b2)
+
 
 elif __name__ == "__main__":
   # Look at all enacted bills that had a companion.

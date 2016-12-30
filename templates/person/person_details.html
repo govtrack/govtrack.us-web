@@ -533,7 +533,23 @@ $(function() {
 	</section><!-- /membership -->
 	
 {% endif %}
-	
+
+{% if enacted_bills %}
+	<section>
+		<h2><span>Enacted Legislation</span></h2>
+
+		<p>{{person.lastname}} was the primary sponsor of {{enacted_bills|length}} bill{{enacted_bills|pluralize}} that {% if enacted_bills|length == 1 %}was{% else %}were{% endif %} enacted{% if enacted_bills|length <= 7 %}:{% else %}. The most recent include:{% endif %}</p>
+
+		<ul style="list-style: none; padding: 0;">
+		{% for bill in enacted_bills|slice:"0:7" %}
+			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a></li>
+		{% endfor %}
+		</ul>
+		<p><a href="/congress/bills/browse?sponsor={{person.id}}#enacted_ex=on">View All &raquo;</a></p>
+
+		<p>We consider a bill enacted if it is enacted or if most of its provisions were incorporated into bills that were enacted, as determined by an automated text analysis.</p>
+	</section>
+{% endif %}
 	
 {% if recent_bills %}
 	<section id="sponsorship">
