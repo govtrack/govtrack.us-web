@@ -173,8 +173,7 @@ if do_bill_parse:
 if "votes" in sys.argv:
 	# Scrape.
 	if CONGRESS >= 101:
-		session = str(datetime.datetime.now().year)
-		os.system("cd %s; . .env/bin/activate; ./run votes --govtrack --congress=%d --session=%s --log=%s --force --fast" % (SCRAPER_PATH, CONGRESS, session, log_level))
+		os.system("cd %s; . .env/bin/activate; ./run votes --govtrack --log=%s --force --fast" % (SCRAPER_PATH, log_level))
 	
 	# Copy files into legacy location.
 	did_any_file_change = False
