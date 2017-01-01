@@ -7,8 +7,8 @@
 
 {% block head %}
 <style>
-	section.stat .nine.columns {
-		margin: 0 0 2em 0;
+	section.stat {
+		margin: 1em 0 2em 0;
 	}
 
 	section p.notes {
@@ -64,9 +64,9 @@
 	<h1>{{session}} Report Cards{% if cohort %}: {{cohort_title}}{% endif %}</h1>
 
 	{% if not meta.is_full_congress_stats %}
-		<p>These special year-end statistics dissect the legislative records of Members of Congress during the {{session}} legislative year, as of {{publishdate|date}}.</p>
+		<p>These special year-end statistics dissect the legislative records of Members of Congress during the {{session}} legislative year ({{meta.startdate|date}}-{{meta.enddate|date}}), looking at Members who served at the end of that period. This page was last updated on {{publishdate|date}}.</p>
 	{% else %}
-		<p>These statistics dissect the legislative records of Members of Congress during the {{meta.congress|ordinalhtml}} Congress, as of {{publishdate|date}}.</p>
+		<p>These statistics dissect the legislative records of Members of Congress during the {{meta.congress|ordinalhtml}} Congress ({{meta.startdate|date}}-{{meta.enddate|date}}), as of {{publishdate|date}}.</p>
 	{% endif %}
 </div>
 {% endblock %}
@@ -108,6 +108,9 @@
 
 				{% elif stat.key == "bills-enacted" %}
 					<p>The number of bills each legislator introduced that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law.</p>
+				
+				{% elif stat.key == "bills-enacted-ti" %}
+					<p>The number of bills each legislator introduced that became law in {{period}}, including via incorporation into other bills. Keep in mind that it takes a law to repeal a law. Very few bills ever become law.</p>
 
 				{% elif stat.key == "bills-reported" %}
 					<p>The number of bills that each legislator introduced in {{period}} that got a committee vote sending it to the floor for further consideration. Most bills and resolutions languish in committee without any action.</p>
@@ -117,6 +120,9 @@
 
 				{% elif stat.key == "bills-with-cosponsors-both-parties" %}
 					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the percent of bills introduced by each legislator in {{period}} which had both a Democratic cosponsor and a Republican cosponsor.</p>
+				
+				{% elif stat.key == "bills-with-cosponsors-both-parties-count" %}
+					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the number of bills introduced by each legislator in {{period}} which had both a Democratic cosponsor and a Republican cosponsor.</p>
 
 				{% elif stat.key == "bills-with-companion" %}
 					<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. This is the number of bills introduced by each legislator in {{period}} that had a companion bill in the other chamber. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>
@@ -131,7 +137,7 @@
 					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the percent of bills cosponsored by each legislator which were introduced by a member of the other party.</p>
 
 				{% elif stat.key == "ideology" %}
-					<p>Our unique ideology analysis assigns a score to Members of Congress according to their legislative behavior by how similar the pattern of bills and resolutions they cosponsor are to other Members of Congress. The score can be interpreted as a conservative&mdash;progressive scale, although of course it only takes into account a small aspect of reality.</p>
+					<p>Our unique ideology analysis assigns a score to Members of Congress according to their legislative behavior by how similar the pattern of bills and resolutions they cosponsor are to other Members of Congress. The score can be interpreted as a conservative&mdash;liberal scale, although of course it only takes into account a small aspect of reality.</p>
 
 				{% elif stat.key == "leadership" %}
 					<p>Our unique leadership analysis looks at who is cosponsoring whose bills. A higher score
@@ -141,7 +147,7 @@
 					<p>A score, giving five points for each full committee leadership position and one point for each subcommittee leadership position, for each legislator.</p>
 
 				{% elif stat.key == "transparency-bills" %}
-					<p>GovTrack looked at whether legislators supported any of 20 <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">government transparency bills</a> that we identified in {{period}}. We gave a score to each legislator based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
+					<p>GovTrack looked at whether legislators supported any of the <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">government transparency bills</a> that we identified in {{period}}. We gave a score to each legislator based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
 				{% endif %}
 
 				<table>
@@ -149,6 +155,13 @@
 					<tr><td colspan="3"><h5 {% if not forloop.first %}style="margin-top: 1em"{% endif %}>{{context.title}}</h5></td></tr>
 
 					{% for ascending_descending in context.people %}
+						{% if forloop.first and ascending_descending|length > 0 %}
+						<tr>
+							<td colspan=2 style="color: #777">
+								{{stat.superlatives.0}}
+							</td>
+						</tr>
+						{% endif %}
 						{% for rank, value, person in ascending_descending %}
 							<tr>
 								<td style="text-align: right; padding-right: 1em; color: #777">
@@ -163,15 +176,26 @@
 										{{value}}
 									{% endif %}
 								</td>
-								<td><a href="{{person.get_absolute_url}}/report-card/{{session}}">{{person}}</a></td>
+								<td><a href="{{person.get_absolute_url}}/report-card/{{session}}" style="text-decoration: none">{{person}}</a></td>
 							</tr>
 						{% endfor %}
-						{% if forloop.first and context.people.0|length > 0 and context.people.1|length > 0 %}<tr><td colspan="3" style="text-align: center">...</td></tr>{% endif %}
+						{% if forloop.first and not specific_stat %}
+							<tr><td colspan="3" style="text-align: center">
+							...
+							<a href="/congress/members/report-cards/{{session}}/{{context.key}}/{{stat.key}}">Expand</a>
+							...
+							</td></tr>
+						{% endif %}
+						{% if not forloop.first and ascending_descending|length > 0 %}
+						<tr>
+							<td colspan=2 style="color: #777">
+								{{stat.superlatives.1}}
+							</td>
+						</tr>
+						{% endif %}
 					{% endfor %}
 				
-					{% if not specific_stat %}
-					<tr><td colspan="2"></td><td><small><a href="/congress/members/report-cards/{{session}}/{{context.key}}/{{stat.key}}">Expand...</a></small></td></tr>
-					{% else %}
+					{% if specific_stat %}
 					<tr><td colspan="2"></td><td><small><a href="/congress/members/report-cards/{{session}}/{{context.key}}/{{stat.key}}.csv">Export to CSV...</a></small></td></tr>
 					{% endif %}
 				{% endfor %}
@@ -179,13 +203,15 @@
 
 				
 				{% if stat.key == "missed-votes" %}
-					<p class="notes">The Speaker of the House is not included in this statistic (see the notes at the very bottom of the page for why), and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>
+					<p class="notes">The Speaker of the House is not included in this statistic because according to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>
 				{% elif stat.key == "bills-enacted" %}
 					{% if session == '2013' %}
-					<p class="notes">We only count enacted bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through companion bills or incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
+					<p class="notes">We only count enacted bills (and joint resolutions) that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through companion bills or incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
 					{% else %}
-					<p class="notes">A bill is considered enacted if it or an exactly identical bill to it is enacted. We only consider bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
+					<p class="notes">A bill or joint resolution is considered enacted if it or an exactly identical bill to it is enacted as law. We only consider bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
 					{% endif %}
+				{% elif stat.key == "bills-enacted-ti" %}
+					<p class="notes">The legislator must be the primary sponsor of the bill or joint resolution that was enacted or the primary sponsor of a bill or joint resolution for which at least about one third of its text was incorporated into another bill or joint resolution that was enacted as law, as determined by an automated analysis. While a legislator may lay claim to authoring other bills that became law, these cases are difficult for us to track quantitatively.</p>
 				{% elif stat.key == "bills-with-companion" %}
 					<p class="notes">Companion bills are those that are identified as &ldquo;identical&rdquo; by Congress&rsquo;s Congressional Research Service.</p>
 				{% elif stat.key == "bills-with-cosponsors-both-parties" %}
@@ -193,9 +219,9 @@
 				{% elif stat.key == "cosponsored-other-party" %}
 					<p class="notes">Only Democratic and Republican Members of Congress who cosponsored more than 10 bills and resolutions are included in this statistic.</p>
 				{% elif stat.key == "ideology" %}
-					<p class="notes">For more, see <a href="/about/analysis#ideology">our methodology</a>. Note that because on this page only legislative activity in {{period}} is considered, the ideology score here may differ from those elsewhere on GovTrack.</p>
+					<p class="notes">For more, see <a href="/about/analysis#ideology">our methodology</a>. An ideology score is not computed for Members of Congress who introduced fewer than 10 bills or who have a low leadership score, as there is usually not enough data in these cases to compute reliable statistics. Note that because on this page only legislative activity in {{period}} is considered, the ideology score here may differ from those elsewhere on GovTrack.</p>
 				{% elif stat.key == "leadership" %}
-					<p class="notes">For more, see <a href="/about/analysis#leadership">our methodology</a>. Note that because on this page only legislative activity in {{period}} is considered, the leadership scores here may differ from those elsewhere on GovTrack.</p>
+					<p class="notes">For more, see <a href="/about/analysis#leadership">our methodology</a>. A leadership score is not computed for Members of Congress who introduced fewer than 10 bills, as there is usually not enough data in these cases to compute reliable statistics. Note that because on this page only legislative activity in {{period}} is considered, the leadership scores here may differ from those elsewhere on GovTrack.</p>
 				{% endif %}
 
 			</div>

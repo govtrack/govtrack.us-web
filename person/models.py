@@ -322,10 +322,12 @@ class Person(models.Model):
         fn = "data/us/%d/stats/session-%s.json" % (congress, session)
         try:
             datafile = json.load(open(fn))
-            datafile["meta"]["congress"] = congress # save where we got this from
-            datafile["meta"]["session"] = session # save where we got this from
-            datafile["meta"]["startdate"] = sd
-            datafile["meta"]["enddate"] = ed
+            if datafile["meta"]["is_full_congress_stats"]:
+                datafile["meta"]["startdate"] = get_congress_dates(congress)[0]
+                datafile["meta"]["enddate"] = get_congress_dates(congress)[1]
+            else:
+                datafile["meta"]["startdate"] = sd
+                datafile["meta"]["enddate"] = ed
         except IOError:
             raise ValueError("No statistics are available for session %s." % session)
 

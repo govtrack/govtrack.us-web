@@ -65,3 +65,18 @@ hr20-114	Government By the People Act of 2015
 hr367-114	Campaign Sunlight Act of 2015
 hr150-114	No Political Funds for Personal Use Act
 hr1381-114	Transparency in Government Act of 2015
+hr3348-114	Presidential Tax Transparency Act
+hr4702-114	Equal Access to Congressional Research Service Reports Act of 2016
+hr5051-114	OPEN Government Data Act
+hr5386-114	Presidential Tax Transparency Act
+hr5493-114	EDIT Act
+hr5759-114	Searchable Legislation Act of 2016
+hr5760-114	Searchable Legislation Act of 2016
+hr5839-114	Public Online Information Act of 2016
+hr5876-114	Access to Congressionally Mandated Reports Act
+hr5920-114	Whistleblower Protections for Contractors Act
+hr6340-114	Presidential Accountability Act
+s2639-114	Equal Access to Congressional Research Service Reports Act of 2016
+s2852-114	OPEN Government Data Act
+s2969-114	Presidential Tax Transparency Act
+hconres169-114	Establishing a Joint Committee on the Organization of Congress.

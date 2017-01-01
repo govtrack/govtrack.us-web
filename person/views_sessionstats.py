@@ -1,20 +1,22 @@
 from us import statenames
 
 stat_titles = {
-    "missed-votes":  { "title": "Missed Votes", "icon": "voting-records" },
-    "bills-introduced":  { "title": "Bills Introduced", "icon": "bills-resolutions" },
-    "bills-enacted":  { "title": "Laws Enacted", "icon": "bills-resolutions" },
-    "bills-reported":  { "title": "Bills Out of Committee", "icon": "committees" },
-    "bills-with-committee-leaders":  { "title": "Powerful Cosponsors", "icon": "committees" },
-    "bills-with-cosponsors-both-parties":  { "title": "Writing Bipartisan Bills", "icon": "handshake" },
-    "bills-with-companion":  { "title": "Working with the {{other_chamber}}", "icon": "handshake" },
-    "cosponsors":  { "title": "Cosponsors", "icon": "congress-members" },
-    "cosponsored":  { "title": "Bills Cosponsored", "icon": "bills-resolutions" },
-    "cosponsored-other-party":  { "title": "Joining Bipartisan Bills", "icon": "handshake" },
-    "ideology": { "title": "Ideology Score", "icon": "congress-members", "superlatives": ("most conservative (by cosponsorship)", "most progressive (by cosponsorship)") },
-    "leadership":  { "title": "Leadership Score", "icon": "congress-members" },
-    "committee-positions":  { "title": "Committee Positions", "icon": "committees" },
-    "transparency-bills":  { "title": "Government Transparency", "icon": "open-government" },
+    "missed-votes":  { "title": "Missed Votes", "icon": "voting-records", "superlatives": ("most absent", "most voting") },
+    "bills-introduced":  { "title": "Bills Introduced", "icon": "bills-resolutions", "superlatives": ("most bills", "fewest bills") },
+    "bills-enacted":  { "title": "Laws Enacted", "icon": "bills-resolutions", "superlatives": ("most bills", "fewest bills") },
+    "bills-enacted-ti":  { "title": "Laws Enacted", "icon": "bills-resolutions", "superlatives": ("most bills", "fewest bills") },
+    "bills-reported":  { "title": "Bills Out of Committee", "icon": "committees", "superlatives": ("most bills", "fewest bills") },
+    "bills-with-committee-leaders":  { "title": "Powerful Cosponsors", "icon": "committees", "superlatives": ("most bills", "fewest bills") },
+    "bills-with-cosponsors-both-parties":  { "title": "Writing Bipartisan Bills", "icon": "handshake", "superlatives": ("highest % of bills", "lowest % of bills") },
+    "bills-with-cosponsors-both-parties-count":  { "title": "Writing Bipartisan Bills", "icon": "handshake", "superlatives": ("most bills", "fewest bills") },
+    "bills-with-companion":  { "title": "Working with the {{other_chamber}}", "icon": "handshake", "superlatives": ("most bills", "fewest bills") },
+    "cosponsors":  { "title": "Cosponsors", "icon": "congress-members", "superlatives": ("most cosponsors", "fewest cosponsors") },
+    "cosponsored":  { "title": "Bills Cosponsored", "icon": "bills-resolutions", "superlatives": ("most bills", "fewest bills") },
+    "cosponsored-other-party":  { "title": "Joining Bipartisan Bills", "icon": "handshake", "superlatives": ("most bipartisan", "least bipartisan") },
+    "ideology": { "title": "Ideology Score", "icon": "congress-members", "superlatives": ("most conservative", "most liberal") },
+    "leadership":  { "title": "Leadership Score", "icon": "congress-members", "superlatives": ("best score", "worst score") },
+    "committee-positions":  { "title": "Committee Positions", "icon": "committees", "superlatives": ("highest score", "lowest score") },
+    "transparency-bills":  { "title": "Government Transparency", "icon": "open-government", "superlatives": ("most supportive", "least supportive") },
 }
 
 def get_cohort_name(key, longform=False):
@@ -90,7 +92,7 @@ def clean_person_stats(stats):
                 context["use_in_headline"] = False
 
             # The percentile we computed off-line is the normal percentile, but it's not good for
-            # "Top 20%"-style measures. Re-do it.
+            # "Top 20%"-style measures because of ties. Re-do it.
             context["percentile2"] = (min(context["rank_ascending"], context["rank_descending"]) + context["rank_ties"])/float(context["N"])
 
             if context["rank_ties"] > .25 * context["N"]:

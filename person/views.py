@@ -575,6 +575,7 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
                 metrics.setdefault(stat, {
                     "key": stat,
                     "title": stat_titles[stat]["title"],
+                    "superlatives": stat_titles[stat]["superlatives"],
                     "icon": stat_titles[stat]["icon"],
                     "contexts": { }
                 })
@@ -591,7 +592,7 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
                 if specific_stat is not None:
                     c[0].append( (context["rank_descending"], statinfo["value"], personobj) )
                 elif context["rank_ties"] <= 3:
-                    if context["rank_ascending"] < 3 and stat in ("ideology", "leadership", "bills-with-cosponsors-both-parties", "cosponsored-other-party", "missed-votes"):
+                    if context["rank_ascending"] < 3:
                         c[1].append( (context["rank_descending"], statinfo["value"], personobj) )
                     elif context["rank_descending"] < 3:
                         c[0].append( (context["rank_descending"], statinfo["value"], personobj) )

@@ -9,8 +9,7 @@
 <style>
 	.row.nav {
 		font-size: 90%;
-		padding-bottom: 1em;
-		border-bottom: 1px solid #DDD;
+		margin-bottom: 1.25em;
 	}
 
 	#content h2 {
@@ -73,7 +72,7 @@
 		padding: 2px 0;
 	}
 	section table.context td.bar div.bar {
-		width: 100px;
+		width: 116px;
 		height: 18px; 
 		background-color: #42a6be;
 	}
@@ -97,22 +96,22 @@
 		height: 120px;
 	}
 	section.icon-congress-members .icon {
-		background: url(/static/images/img-congress-members.png) center 5px no-repeat;
+		background: url(/static/images/img-congress-members.png) center 5px / contain no-repeat;
 	}
 	section.icon-committees .icon {
-		background: url(/static/images/img-committees.png) center 15px no-repeat;
+		background: url(/static/images/img-committees.png) center 15px / contain no-repeat;
 	}
 	section.icon-bills-resolutions .icon {
-		background: url(/static/images/img-bills-resolutions.png) center 5px no-repeat;
+		background: url(/static/images/img-bills-resolutions.png) center 5px / contain no-repeat;
 	}
 	section.icon-voting-records .icon {
-		background: url(/static/images/img-voting-records.png) center top no-repeat;
+		background: url(/static/images/img-voting-records.png) center top / contain no-repeat;
 	}
 	section.icon-open-government .icon {
-		background: url(/static/images/img-open-government.png) center top no-repeat;
+		background: url(/static/images/img-open-government.png) center top / contain no-repeat;
 	}
 	section.icon-handshake .icon{
-		background: url(/static/images/img-handshake.png) center top no-repeat;
+		background: url(/static/images/img-handshake.png) center top / contain no-repeat;
 	}
 </style>
 {% endblock %}
@@ -136,9 +135,15 @@ function smooth_scroll(elem) {
 {% endblock %}
 
 {% block body %}
-<div class="row group">
-	<h1 style="text-align: center;">{{session}} Report Card</h1>
+<h1 style="border: none">
+	{{person.name_and_title}}&rsquo;s
+	{{session}} Report Card
+</h1>
 
+<div class="row">
+<div class="col-md-9 col-lg-8">
+
+<div class="row">
 	{% if photo %}
 	<div class="col-sm-3 col-md-2">
 			<div class="photo" style="margin-bottom: 1em">
@@ -147,8 +152,6 @@ function smooth_scroll(elem) {
 	</div>
 	<div class="col-sm-9 col-md-10">
 	{% endif %}
-		<h2>{{person.name_and_title}}</h2>
-
 		<p><em>
 			{% if role.leadership_title %}{{role.leadership_title_full}}<br>{% endif %}
 			{% if role.senator_rank %}{{role.get_senator_rank_display}}{% endif %}
@@ -158,10 +161,12 @@ function smooth_scroll(elem) {
 			<br>{% if role.current %}Serving{% else %}Served{% endif %} {{role.logical_dates.0|date}} &ndash; {{role.logical_dates.1|date}}
 			</em></p>
 
+		<hr>
+
 		{% if not meta.is_full_congress_stats %}
-			<p>These special year-end statistics cover {{person.lastname}}&rsquo;s record during the {{session}} legislative year and compare {{himher}} to other {{class}} serving at the end of the session.</p>
+			<p>These special year-end statistics cover <b>{{person.lastname}}&rsquo;s record during the {{session}} legislative year</b> ({{meta.startdate|date}}-{{meta.enddate|date}}) and compare {{himher}} to other {{class}} serving at the end of that period. Last updated on {{publishdate|date}}. {{meta.notes}}</p>
 		{% else %}
-			<p>These special statistics cover {{person.lastname}}&rsquo;s record during the {{meta.congress|ordinalhtml}} Congress ({{congress_dates.0|date}}-{{congress_dates.1|date}}) and compare {{himher}} to other {{class}} also serving at the end of the session.</p>
+			<p>These special statistics cover <b>{{person.lastname}}&rsquo;s record during the {{meta.congress|ordinalhtml}} Congress</b> ({{congress_dates.0|date}}-{{congress_dates.1|date}}) and compare {{himher}} to other {{class}} also serving at the end of the session. Last updated on {{publishdate|date}}. {{meta.notes}}</p>
 		{% endif %}
 
 		{% if role.leadership_title %}
@@ -173,10 +178,20 @@ function smooth_scroll(elem) {
 	{% endif %}
 </div>
 
+
+	<div class="panel panel-info" style="margin: 1em 0 2em 0;">
+	  <div class="panel-body">
+		<p>A higher or lower number below doesn&rsquo;t necessarily make this legislator any better or worse, or more or less effective, than other Members of Congress. We present these statistics for you to understand the quantitative aspects of {{person.lastname}}&rsquo;s legislative career and make your own judgements based on what activities you think are important.</p>
+		<p style="margin-bottom: 0">Keep in mind that there are many important aspects of being a legislator besides what can be measured, such as constituent services and performing oversight of the executive branch.</p>
+	  </div>
+	</div>
+</div>
+
+<div class="col-md-3 col-lg-4">
 <div class="row nav">
 	<p style="color: #666; font-style: italic; margin: 0 0 .8em 1em;">Jump to...</p>
 	{% for grp in nav_groups %}
-		<div class="col-sm-6 col-md-4">
+		<div class="col-sm-6 col-md-12">
 			<div class="col-xs-4">
 				<img src="/static/images/img-{{grp.icon}}.png" class="img-responsive"/>
 			</div>
@@ -188,45 +203,35 @@ function smooth_scroll(elem) {
 				</div>
 			</div>
 		</div>
-		{% if forloop.counter == 3 %}<div class="clearfix visible-md-block"></div> <div class="clearfix visible-lg-block"></div>{% endif %}
 		{% if forloop.counter == 2 %}<div class="clearfix visible-sm-block"></div>{% endif %}
 		<div class="clearfix visible-xs-block"></div>
 	{% endfor %}
-</div>
-
+</div> <!-- inner row -->
+</div> <!-- inner col -->
+</div> <!-- outer row -->
 
 <div class="row">
 
 {% for stat in stats %}
 <section id="{{stat.key}}" class="row stat {{stat.key}} icon-{{stat.icon}} {% if forloop.last %}last{% endif %}">
-	<div class="col-sm-3">
+	<div class="col-sm-2">
 		<div class="icon">&nbsp;</div>
 	</div>
 
-	<div class="col-sm-9">
+	<div class="col-sm-10">
 		<h2>{{stat.title}}</h2>
 
 		{% with stat.context_for_headline as h %}
 		{% if h %}
 			<h3 class="rank">
-				{% if h.rank_descending < h.rank_ascending and h.rank_descending <= 5 %}
+				{% if h.rank_descending == 1 %}
+					<em>the {{stat.superlatives.0}}</em>
+				{% elif h.rank_ascending == 1 %}
+					<em>the {{stat.superlatives.1}}</em>
+				{% elif h.rank_descending < h.rank_ascending %}
 					<em>{{h.rank_descending|ordinalhtml}}</em> {{stat.superlatives.0}}
-				{% elif h.rank_ascending < h.rank_descending and h.rank_ascending <= 5 %}
-					<em>{{h.rank_ascending|ordinalhtml}}</em> {{stat.superlatives.1}}
 				{% else %}
-					{% if h.rank_descending < h.rank_ascending %}
-						{{stat.superlatives.0}}
-					{% else %}
-						{{stat.superlatives.1}}
-					{% endif %}
-					{% if h.percentile2 <= .05 %}<em>5%</em>
-					{% elif h.percentile2 <= .10 %}<em>10%</em>
-					{% elif h.percentile2 <= .15 %}<em>15%</em>
-					{% elif h.percentile2 <= .20 %}<em>20%</em>
-					{% elif h.percentile2 <= .25 %}<em>25%</em>
-					{% elif h.percentile2 <= .30 %}<em>30%</em>
-					{% else %}<em>50%</em>
-					{% endif %}
+					<em>{{h.rank_ascending|ordinalhtml}}</em> {{stat.superlatives.1}}
 				{% endif %}
 
 				among
@@ -236,17 +241,21 @@ function smooth_scroll(elem) {
 		{% endif %}
 
 		{% if stat.key == "missed-votes" %}
-			<p>{{person.lastname}} missed <strong>{{stat.value|floatformat:1}}%</strong> of votes ({{stat.missed}} of {{stat.elligible}} votes) in {{period}}. <a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
+			<p>{{person.lastname}} missed <strong>{{stat.value|floatformat:1}}%</strong> of votes ({{stat.missed|intcomma}} of {{stat.elligible|intcomma}} votes) in {{period}}. <a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
 
 		{% elif stat.key == "bills-introduced" %}
 			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{period}}. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}">View Bills &raquo;</a></p>
 
 		{% elif stat.key == "bills-enacted" %}
-			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a></p>
+			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a></p>
+			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+
+		{% elif stat.key == "bills-enacted-ti" %}
+			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law, including via incorporation into other measures, in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a></p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-reported" %}
-			<p>Most bills and resolutions languish in committee without any action. {{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{period}} that got a committee vote sending it to the floor for further consideration.</p>
+			<p>Most bills and resolutions languish in committee without any action. {{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} in {{period}} that got a committee vote sending it to the floor for further consideration.</p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-with-committee-leaders" %}
@@ -255,6 +264,9 @@ function smooth_scroll(elem) {
 
 		{% elif stat.key == "bills-with-cosponsors-both-parties" %}
 			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% else %}{{person.lastname}} tends to gather cosponsors only on one side of the aisle.{% endif %} <strong>{{stat.value|floatformat:"0"}}%</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
+
+		{% elif stat.key == "bills-with-cosponsors-both-parties-count" %}
+			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% else %}{{person.lastname}} tends to gather cosponsors only on one side of the aisle.{% endif %} <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
 
 		{% elif stat.key == "bills-with-companion" %}
 			<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions had a companion bill in the {{stat.other_chamber}}. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>
@@ -267,7 +279,7 @@ function smooth_scroll(elem) {
 			<p>{{person.lastname}} cosponsored <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} introduced by other Members of Congress. Cosponsorship shows a willingness to work with others to advance policy goals. <a href="/congress/bills/browse#cosponsors={{person.id}}&congress={{meta.congress}}">View Cosponsored Bills &raquo;</a></p>
 
 		{% elif stat.key == "cosponsored-other-party" %}
-			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% endif %} Of the {{stat.cosponsored}} bills that {{person.lastname}} cosponsored, <strong>{{stat.value|floatformat:"0"}}%</strong> were introduced by someone other than a {{role.party}}.
+			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% endif %} Of the {{stat.cosponsored}} bills that {{person.lastname}} cosponsored, <strong>{{stat.value|floatformat:"0"}}%</strong> were introduced by a legislator who was not a {{role.party}}.
 			{% if role.opposing_party %}
 				<a href="/congress/bills/browse#cosponsors={{person.id}}&sponsor_party={{role.opposing_party}}&congress={{meta.congress}}">View Cosponsored Bills &raquo;</a>
 			{% endif %}
@@ -300,7 +312,17 @@ function smooth_scroll(elem) {
 
 		{% if stat.context_for_display|length %}
 		<table class="context">
-			<thead><tr><td>compared to...</td> <td>rank</td> {% if stat.show_values %}<td>min</td>{% endif %} <td> </td> {% if stat.show_values %}<td>max</td>{% endif %}</tr>
+			<thead>
+				<tr>
+					<td>compared to...</td>
+					<td>rank</td>
+					<td {% if stat.show_values %}colspan=3{% endif %} style="padding: 0; text-align: center;">
+						{{stat.superlatives.1}}
+						⇢
+						{{stat.superlatives.0}}
+					</td>
+				</tr>
+			</thead>
 			{% for cohort in stat.context_for_display %}
 				<tr class="{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
 					<th scope="row">{{cohort.name}}</th>
@@ -309,13 +331,20 @@ function smooth_scroll(elem) {
 						{% if cohort.rank_ascending == 1 and cohort.large_tie %}
 							{{stat.superlatives.1}}
 							along with {{cohort.rank_ties}} others
+						{% elif cohort.rank_descending == 1 and cohort.large_tie %}
+							{{stat.superlatives.0}}
+							along with {{cohort.rank_ties}} others
 						{% else %}
-						{% if cohort.rank_descending < cohort.rank_ascending %}
-							{{cohort.rank_descending|ordinalhtml}} {{stat.superlatives.0}}
-						{% else %}
-							{{cohort.rank_ascending|ordinalhtml}} {{stat.superlatives.1}}
-						{% endif %}
-						{% if cohort.rank_ties %}<small>(tied w/ {{cohort.rank_ties}})</small>{% endif %}
+							{% if cohort.rank_ascending == 1 %}
+								the {{stat.superlatives.1}}
+							{% elif cohort.rank_descending == 1 %}
+								the {{stat.superlatives.0}}
+							{% elif cohort.rank_descending < cohort.rank_ascending %}
+								{{cohort.rank_descending|ordinalhtml}} {{stat.superlatives.0}}
+							{% else %}
+								{{cohort.rank_ascending|ordinalhtml}} {{stat.superlatives.1}}
+							{% endif %}
+							{% if cohort.rank_ties %}<small>(tied w/ {{cohort.rank_ties}})</small>{% endif %}
 						{% endif %}
 						<small>out of {{cohort.N}}</small>
 					</td>
@@ -324,11 +353,11 @@ function smooth_scroll(elem) {
 
 					<td class="bar">
 						<div class="bar">
-							<img style="float: left; margin-left: {{cohort.percentile|add:-6}}px; margin-top: 1px;" src="/static/images/img-guy-taking-oath.png" width="16" height="16" title="{{person}}">
+							<img style="float: left; margin-left: {{cohort.percentile}}px; margin-top: 1px;" src="/static/images/img-guy-taking-oath.png" width="16" height="16" title="{{person}}">
 						</div>
 					</td>
 					{% if stat.show_values %}<td class="max"><nobr>
-						{{cohort.max|floatformat:"0"|intcomma}}{% if stat.key == "missed-votes" %}% of votes
+						{{cohort.max|floatformat:"0"|intcomma}}{% if stat.key == "missed-votes" %}% missed votes
 						{% elif stat.key == "bills-introduced" %}
 							bills
 						{% elif stat.key == "bills-enacted" %}
@@ -338,6 +367,8 @@ function smooth_scroll(elem) {
 						{% elif stat.key == "bills-with-committee-leaders" %}
 							bills
 						{% elif stat.key == "bills-with-cosponsors-both-parties" %}% of bills
+						{% elif stat.key == "bills-with-cosponsors-both-parties-count" %}
+							bills
 						{% elif stat.key == "bills-with-companion" %}
 							bills
 						{% elif stat.key == "cosponsors" %}
@@ -360,13 +391,17 @@ function smooth_scroll(elem) {
 		</table>
 
 		{% if stat.key == "missed-votes" %}
-			{% if role.role_type == 2 %}<p class="notes">The Speaker of the House is not included in this statistic (see the notes at the very bottom of the page for why), and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>{% endif %}
+			{% if role.role_type == 2 %}
+			<p class="notes">The Speaker of the House is not included in this statistic because according to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>
+			{% endif %}
 		{% elif stat.key == "bills-enacted" %}
 			{% if session == '2013' %}
-			<p class="notes">We only count enacted bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through companion bills or incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
+			<p class="notes">We only count enacted bills (and joint resolutions) that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through companion bills or incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
 			{% else %}
-			<p class="notes">A bill is considered enacted if it or an exactly identical bill to it is enacted. We only consider bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
+			<p class="notes">A bill or joint resolution is considered enacted if it or an exactly identical bill to it is enacted as law. We only consider bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
 			{% endif %}
+		{% elif stat.key == "bills-enacted-ti" %}
+			<p class="notes">The legislator must be the primary sponsor of the bill or joint resolution that was enacted or the primary sponsor of a bill or joint resolution for which at least about one third of its text was incorporated into another bill or joint resolution that was enacted as law, as determined by an automated analysis. While a legislator may lay claim to authoring other bills that became law, these cases are difficult for us to track quantitatively.</p>
 		{% elif stat.key == "bills-with-companion" %}
 			<p class="notes">Companion bills are those that are identified as &ldquo;identical&rdquo; by Congress&rsquo;s Congressional Research Service.</p>
 		{% elif stat.key == "bills-with-cosponsors-both-parties" %}
