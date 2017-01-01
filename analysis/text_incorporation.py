@@ -20,8 +20,8 @@ def extract_text(fn):
     dom = lxml.etree.parse(fn)
   except lxml.etree.XMLSyntaxError:
     raise ValueError("xml syntax error")
-  n = dom.find("legis-body") or dom.find("resolution-body")
-  if n is None: raise ValueError("missing legis-body or resolution-body in " + fn)
+  if (dom.find("legis-body") or dom.find("resolution-body")) is None:
+    raise ValueError("missing legis-body or resolution-body in " + fn)
 
   # Serializes the content of a node into plain text.
   def serialize_within_node(node, buf):
@@ -74,9 +74,12 @@ def extract_text(fn):
     if node.tail:
       buf.write(unicode(node.tail))
 
-  # Serialize the bill text XML document.
+  # Serialize the bill text XML document. Serialie each legis-body
+  # or resolution-body. There may be more than one such node if the
+  # bill is in amendment form.
   buf = StringIO()
-  serialize_node(n, buf)
+  for n in dom.xpath("legis-body|resolution-body"):
+    serialize_node(n, buf)
   text = buf.getvalue()
 
   # Normalize the text to make comparisons less picky.
@@ -563,13 +566,16 @@ elif __name__ == "__main__" and sys.argv[-1] == "graph":
   svg = g.pipe(format='svg')
   print(svg)
 
+elif __name__ == "__main__" and sys.argv[1] == "extract-text":
+  print extract_text(sys.argv[2]).encode("utf8")
+
+
 elif __name__ == "__main__" and len(sys.argv) == 3:
   # Compare two bills by database numeric ID.
   from bill.models import *
   b1 = Bill.objects.get(id=sys.argv[1])
   b2 = Bill.objects.get(id=sys.argv[2])
   compare_bills(b1, b2)
-
 
 elif __name__ == "__main__":
   # Look at all enacted bills that had a companion.
