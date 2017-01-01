@@ -34,10 +34,9 @@
 		margin: 0 0 22px 0;
 	}
 	section .rank em {
-		border: 1px solid #A98;
-		background-color: #bb4b44;
+		background-color: #285900;
 		color: white;
-		padding: 0 2px 0 2px;
+		padding: 2px 4px;
 		font-style: normal;
 	}
 	section p.details {
@@ -74,7 +73,7 @@
 	section table.context td.bar div.bar {
 		width: 116px;
 		height: 18px; 
-		background-color: #42a6be;
+		background-color: #1D4E70;
 	}
 	section table.context td.more a {
 		padding: 0 1em;
@@ -311,7 +310,7 @@ function smooth_scroll(elem) {
 		{% endif %}
 
 		{% if stat.context_for_display|length %}
-		<table class="context">
+		<table class="context" style="width: 100%;">
 			<thead>
 				<tr>
 					<td>compared to...</td>
@@ -327,7 +326,7 @@ function smooth_scroll(elem) {
 				<tr class="{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
 					<th scope="row">{{cohort.name}}</th>
 
-					<td class="percentile">
+					<td class="percentile" width="40%">
 						{% if cohort.rank_ascending == 1 and cohort.large_tie %}
 							{{stat.superlatives.1}}
 							along with {{cohort.rank_ties}} others
