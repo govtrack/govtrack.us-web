@@ -371,10 +371,12 @@
 		</button>
 		{% endif %}
 
+		{% comment %}
 		<button class="btn btn-sm" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
 			<span class="glyphicon glyphicon-phone" style="color: #444"></span>
 			<span style="margin-left: 3px;">Call Congress</span>
 		</button>
+		{% endcomment %}
 
 		{% with SITE_ROOT_URL|add:bill.get_absolute_url as share_url %}
 		<div>

@@ -358,30 +358,6 @@ def get_district_bounds(state, district):
         cache.set(zoom_info_cache_key, (center_lat, center_long, center_zoom) )
     return (center_lat, center_long, center_zoom)
 
-def get_district_bounds_query(state, district):
-        def get_coords(state, distr):
-            import urllib, json
-            if not distr:
-                url = "https://gis.govtrack.us/boundaries/2012-states/%s/?format=json" % state.lower()
-            else:
-                url = "https://gis.govtrack.us/boundaries/cd-2014/%s-%02d/?format=json" % (state.lower(), int(distr))
-            resp = json.load(urllib.urlopen(url))
-            sw_lng, sw_lat, ne_lng, ne_lat = resp["extent"]
-            area = (ne_lng-sw_lng)*(ne_lat-sw_lat)
-            center_long, center_lat = (sw_lng+ne_lng)/2.0, (sw_lat+ne_lat)/2.0
-            center_zoom = round(1.0 - log(sqrt(area)/1000.0))
-            return center_lat, center_long, center_zoom
-            
-        center_lat, center_long, center_zoom = get_coords(state, None)
-
-        # Zoom in to district if it is too small to be seen on a whole-state map.
-        if district:
-            distr_center_lat, district_center_long, district_center_zoom = get_coords(state, district)
-            if district_center_zoom > center_zoom + 1:
-                center_lat, center_long, center_zoom = distr_center_lat, district_center_long, district_center_zoom
-                
-        return (center_lat, center_long, center_zoom)
-
 @anonymous_view
 @render_to('person/overview.html')
 def membersoverview(request):
@@ -416,29 +392,6 @@ def districtmapembed(request):
         "bounds": request.GET.get("bounds", None),
     }
     
-@anonymous_view
-@json_response
-def district_lookup(request):
-    lng, lat = float(request.GET.get("lng", "0")), float(request.GET.get("lat", "0"))
-    return do_district_lookup(lng, lat)
-
-def do_district_lookup(lng, lat):
-    import urllib, json
-    url = "https://gis.govtrack.us/boundaries/cd-2014/?contains=%f,%f&format=json" % (lat, lng)
-    try:
-        resp = json.load(urllib.urlopen(url))
-    except Exception as e:
-        return { "error": "error loading district data (%s)" % str(e) }
-    
-    if len(resp["objects"]) == 0:
-        return { "error": "point is not within a district" }
-
-    if len(resp["objects"]) > 1:
-        return { "error": "point is within multiple districts!" }
-        
-    d = resp["objects"][0]["external_id"].split("-")
-    return { "state": d[0].upper(), "district": int(d[1]) }
-
 import django.contrib.sitemaps
 class sitemap_current(django.contrib.sitemaps.Sitemap):
     changefreq = "weekly"

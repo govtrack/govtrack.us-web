@@ -18,6 +18,5 @@ urlpatterns = patterns('person.views',
     url(r'^([A-Z]?\d+)$', 'person_details', name='person_details'), # allow bioguide ID here
 	url(r'^[^/]+/(\d+)/report-card/(\d{4})', 'person_session_stats', name='person_session_stats'), # name slug "/" ID "/year-end/" session name (year)
 	
-    url(r'^ajax/district_lookup$', 'district_lookup'),
 	url(r'^embed/mapframe(?:\.xpd)?$', 'districtmapembed', name='districtmapembed'),
 )
