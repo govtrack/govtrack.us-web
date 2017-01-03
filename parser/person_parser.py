@@ -16,6 +16,7 @@ from parser.models import File
 from person.models import Person, PersonRole, Gender, RoleType, SenatorClass, SenatorRank
 from us import get_congress_dates
 
+from django.db import transaction
 from settings import CURRENT_CONGRESS, CONGRESS_LEGISLATORS_PATH
 
 log = logging.getLogger('parser.person_parser')
@@ -106,7 +107,7 @@ class PersonRoleProcessor(YamlProcessor):
     def state_rank_handler(self, value):
         return self.SENATOR_RANK_MAPPING[value]
 
-
+@transaction.atomic
 def main(options):
     """
     Update Person and PersonRole models.
@@ -141,6 +142,14 @@ def main(options):
         f = BASE_PATH + p + ".yaml"
         y = yaml_load(f)
         for m in y:
+            if p == "legislators-current":
+                # We know all terms but the last are non-current and the last is.
+                for r in m["terms"]: r["current"] = False
+                m["terms"][-1]["current"] = True
+            elif p == "legislators-historical":
+                # We know all terms are non-current.
+                for r in m["terms"]: r["current"] = False
+
             if p != 'legislators-social-media':
                 govtrack_id = m["id"].get("govtrack")
                 
@@ -218,12 +227,18 @@ def main(options):
                 role = role_processor.process(PersonRole(), termnode)
                 role.person = person
                 role.extra = filter_yaml_term_structure(termnode) # copy in the whole YAML structure
-                
-                now = datetime.now().date()
-                if now < get_congress_dates(CURRENT_CONGRESS)[0]:
-                    # in the transition time before the next Congress, just count as that Congress
-                    now = get_congress_dates(CURRENT_CONGRESS)[0]
-                role.current = role.startdate <= now and role.enddate >= now
+
+                # Is this role current? For legislators, same as whether it came from legislators-current, which eases Jan 3 transitions when we can't distinguish by date.
+                if "current" in termnode:
+                    role.current = termnode["current"]
+
+                # But executives...
+                else:
+                    now = datetime.now().date()
+                    role.current = role.startdate <= now and role.enddate >= now
+                    # Because of date overlaps at noon transition dates, ensure that only the last term that covers
+                    # today is current --- reset past roles to not current. Doesn't handle turning off retirning people tho.
+                    for r in new_roles: r.current = False
 
                 # Scan for most recent leadership role within the time period of this term,
                 # which isn't great for Senators because it's likely it changed a few times
@@ -345,6 +360,7 @@ def filter_yaml_term_structure(node):
     ret = { }
     for k, v in node.items():
         if k in PersonRoleProcessor.ATTRIBUTES: continue # no need to store things we've saved in schema'd fields
+        if k == "current": continue # we add this
         ret[k] = v
     if len(ret) == 0: return None # simplify storage
     return ret
