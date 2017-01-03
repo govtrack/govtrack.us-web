@@ -1,12 +1,12 @@
 {% if not bounds and state %}
-<script src="/static/js/congressional-districts-bboxes-114-2015.js"> </script>
+<script src="/static/js/congressional-districts-bboxes-115-2016.js"> </script>
 {% endif %}
 
 <script>
 // Mapbox configuration
 var accessToken = 'pk.eyJ1IjoiZ292dHJhY2siLCJhIjoiY2lua2J1cmwzMHhyNnVrbHl3bmx4ZnZneiJ9.Wld_AdbKwOgmF2ZXn2SPmw';
-var styleURL = 'mapbox://styles/govtrack/cioagxcds003vaqm7z7qdf7xl';
-var mapId = 'govtrack.cd-114-2015';
+var styleURL = 'mapbox://styles/govtrack/ciwuoqjiv00aq2qo75yducni3';
+var mapId = 'govtrack.cd-115-2016';
 
 var state = {% if state %}"{{state|upper|escapejs}}"{% else %}null{% endif %};
 var district = {% if district %}parseInt("{{district|upper|escapejs}}"){% else %}null{% endif %};
@@ -53,6 +53,7 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
     map.addControl(new mapboxgl.Navigation({ position: 'bottom-left' }));
     map.touchZoomRotate.disableRotation();
 
+    /* not working
     // Create a filter for the selected state & district.
     var filter = ['all'];
     if (state) filter.push(['==', 'state', state]);
@@ -78,6 +79,7 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
 
     // Create a similar filter for the boundary lines
     map.setFilter('districts_boundary_line', filter);
+    */
 
     // Add markers.
     window.addMapMarker = function(lnglat) {
