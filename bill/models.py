@@ -405,7 +405,8 @@ class Bill(models.Model):
         status = self.get_long_text_for_status(self.current_status, self.current_status_date)
         if not self.is_final_status:
             if self.was_enacted_ex() is not None:
-                status += " But provisions of this %s were incorporated into other %ss which were enacted, so there will not likely be further activity on this bill." % (self.noun, self.noun)
+                status += (" But provisions of this %s were incorporated into other %ss which were enacted" % (self.noun, self.noun)) \
+                             + ((", so there will not likely be further activity on this %s" % self.noun) if self.is_current else "") + "."
             elif self.text_incorporation is not None:
                 status += " Provisions of this %s were incorporated into other %ss." % (self.noun, self.noun)
         return status
