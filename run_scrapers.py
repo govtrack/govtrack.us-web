@@ -4,7 +4,7 @@
 
 import os, os.path, glob, re, hashlib, shutil, sys, datetime
 
-CONGRESS = int(os.environ.get("CONGRESS", "114"))
+CONGRESS = int(os.environ.get("CONGRESS", "115"))
 SCRAPER_PATH = "../scripts/congress"
 
 # UTILS
@@ -64,7 +64,7 @@ if "DEBUG" in os.environ: log_level = "info"
 # Run scrapers and parsers.
 
 if "people" in sys.argv:
-	if CONGRESS != 114: raise ValueErrror()
+	if CONGRESS != 115: raise ValueErrror()
 	
 	# Pull latest poeple YAML.
 	os.system("cd %s/congress-legislators; git fetch -pq" % SCRAPER_PATH)

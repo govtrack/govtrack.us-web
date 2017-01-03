@@ -167,7 +167,7 @@ IGNORABLE_404_URLS = (
 	re.compile(r'billtext/images/quote.png$'),
 	)
 
-CURRENT_CONGRESS = 114
+CURRENT_CONGRESS = 115
 
 EMAIL_UPDATES_FROMADDR = "GovTrack.us Email Updates <noreply@mail.GovTrack.us>"
 EMAIL_UPDATES_RETURN_PATH = "bounces+uid=%d@GovTrack.us"
