@@ -477,7 +477,7 @@ elif __name__ == "__main__" and sys.argv[-1] == "test":
       print b2
       print
 
-elif __name__ == "__main__" and sys.argv[-1] == "graph":
+elif __name__ == "__main__" and sys.argv[1] == "graph":
   # Make a graph of text incorporation relationships.
   # requires: sudo apt-get install graphviz && pip install graphviz
   import tqdm
@@ -506,7 +506,7 @@ elif __name__ == "__main__" and sys.argv[-1] == "graph":
             paint[k] = paint[b1_id]
 
   # Which color has the most nodes?
-  max_connectivity = max(paint, key = lambda bill_id : len([b for b, p in paint.items() if p == paint[bill_id]]) )
+  #max_connectivity = max(paint, key = lambda bill_id : len([b for b, p in paint.items() if p == paint[bill_id]]) )
 
   def add_newlines(text):
     chars_per_line = 16
@@ -529,11 +529,11 @@ elif __name__ == "__main__" and sys.argv[-1] == "graph":
       "mindist": "0",
       "overlap": "false",
       "splines": "true",
-      "root": "s2425-114" })
+      "root": sys.argv[2] })
 
   for bill in tqdm.tqdm(Bill.objects.filter(congress=114).exclude(text_incorporation=None), desc="Graph"):
     # Draw a subgraph.
-    if paint[bill.congressproject_id] != paint[max_connectivity]:
+    if paint[bill.congressproject_id] != paint[sys.argv[2]]:
       continue
       # "s1808-114", "hr34-114"
 
@@ -603,4 +603,24 @@ elif __name__ == "__main__":
     if len(text) > 150/(ratio**6) and ratio > .66:
       print(fn)
       print(ratio, text)
+
+# compare being dumb to using CRS identical bills to using text incorporation
+#  from bill.models import Bill, RelatedBill, BillStatus
+#
+#  bills = Bill.objects.filter(congress=114)
+#
+#  len([b for b in bills if b.noun == "bill"])
+#  # 10074
+#
+#  def ok1(b): return b and b.current_status in BillStatus.final_status_passed_bill
+#  len([b for b in bills if b.noun == "bill" and ok1(b)])
+#  # 325
+#
+#  def ok2(b): return ok1(b) or ok1(Bill.objects.filter(relatedtobills__bill=b, relatedtobills__relation="identical").first())
+#  len([b for b in bills if b.noun == "bill" and ok2(b)])
+#  # 416
+#
+#  def ok3(b): return b.was_enacted_ex()
+#  len([b for b in bills if b.noun == "bill" and ok3(b)])
+#  # 692
 
