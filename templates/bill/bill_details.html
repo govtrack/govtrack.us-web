@@ -515,7 +515,7 @@
 							This {{bill.noun}} was enacted as:
 						{% elif text_incorporation|length == 1 and text_incorporation.0.identical %}
 							This {{bill.noun}} is identical to:
-						{% elif text_incorporation|length == 1 and text_incorporation.0.other.is_success %}
+						{% elif text_incorporation|length == 1 and text_incorporation.0.other.is_success and text_incorporation.0.my_ratio > .66 %}
 							This {{bill.noun}} was incorporated into:
 						{% else %}
 							Provisions of this {{bill.noun}} also appear in:

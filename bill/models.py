@@ -394,7 +394,7 @@ class Bill(models.Model):
         if not self.is_final_status:
             if self.was_enacted_ex() is not None:
                 extended_status = "Enacted Via Other Measures"
-            elif self.text_incorporation is not None:
+            elif self.text_incorporation: # not null, empty string, empty list
                 extended_status = "Parts Incorporated Into Other Measures"
         return (status, extended_status, date)
 
@@ -407,7 +407,7 @@ class Bill(models.Model):
             if self.was_enacted_ex() is not None:
                 status += (" But provisions of this %s were incorporated into other %ss which were enacted" % (self.noun, self.noun)) \
                              + ((", so there will not likely be further activity on this %s" % self.noun) if self.is_current else "") + "."
-            elif self.text_incorporation is not None:
+            elif self.text_incorporation: # not null, empty string, empty list
                 status += " Provisions of this %s were incorporated into other %ss." % (self.noun, self.noun)
         return status
 
@@ -1000,7 +1000,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                             e["relation"] = "Identical Bill"
                         elif self.is_success() and not b.is_success():
                             e["relation"] = "Source Bill"
-                        elif not self.is_success() and b.is_success():
+                        elif not self.is_success() and b.is_success() and rec["my_ratio"] > .66:
                             e["relation"] = "Final Bill"
                         else:
                             e["relation"] = "Related Bill"
