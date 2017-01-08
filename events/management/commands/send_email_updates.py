@@ -67,7 +67,7 @@ class Command(BaseCommand):
 
 			# Find the feeds with new events first and then whittle down the list of
 			# subscription lists to just those that track those feeds.
-			if True:
+			if False:
 				# Find all of the feeds tracked by all users with a subscription list with email updates turned on.
 				all_feeds = list(Feed.objects.filter(tracked_in_lists__email__in = list_email_freq).distinct())
 
@@ -100,9 +100,9 @@ class Command(BaseCommand):
 				# re-starting this process and some new events crept in.
 				sublists = sublists.filter(trackers__in=active_feeds)
 
-			# Evaluate the query.
-			if sys.stdout.isatty(): print "Looking for subscribed users..."
-			sublists = set(sublists)
+				# Evaluate the query.
+				if sys.stdout.isatty(): print "Looking for subscribed users..."
+				sublists = set(sublists)
 
 			# And get a list of those users.
 			users = User.objects.filter(subscription_lists__in=sublists)\
@@ -120,12 +120,14 @@ class Command(BaseCommand):
 		total_users_skipped_bounced = 0
 
  		# get the list of user IDs to iterate through; clone up front to avoid holding the cursor (?)
-		user_iterator = list(users)
+		if sys.stdout.isatty(): print "Looking for subscribed users..."
 
 		# when debugging, show a progress meter
 		if sys.stdout.isatty(): 
 			import tqdm
-			user_iterator = tqdm.tqdm(user_iterator, desc="Users")
+			user_iterator = tqdm.tqdm(users, desc="Users", total=users.count())
+		else:
+			user_iterator = users
 
 		# in degugging, clear the query log
 		from django import db
