@@ -88,7 +88,7 @@ if "people" in sys.argv:
 	os.system("./manage.py dumpdata --format json person > data/db/django-fixture-people.json")
 
 if "committees" in sys.argv:
-	if CONGRESS != 114: raise ValueErrror()
+	if CONGRESS != 115: raise ValueErrror()
 	
 	# Committee metadata.
 	
