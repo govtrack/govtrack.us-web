@@ -474,8 +474,10 @@ def load_senate_floor_schedule_data():
               "s": BillType.senate_bill,
               "se": BillType.senate_resolution,
               "sj": BillType.senate_joint_resolution,
+              "sc": BillType.senate_concurrent_resolution,
               "h": BillType.house_bill,
               "hj": BillType.house_joint_resolution,
+              "hc": BillType.house_concurrent_resolution,
             }
             measure = bill_type + "|" + bill_number
             yield {
