@@ -1,6 +1,6 @@
+import django
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
-
 from django.template import Context, Template
 from django.template.loader import get_template
 from django.conf import settings
@@ -16,6 +16,9 @@ from datetime import datetime, timedelta
 import yaml, markdown2
 
 now = datetime.now()
+
+import multiprocessing
+django.setup() # StackOverflow user says call setup when using multiprocessing
 
 # get GovTrack Insider posts		
 from website.models import MediumPost
@@ -108,69 +111,103 @@ class Command(BaseCommand):
 			# And get a list of those users.
 			users = User.objects.filter(subscription_lists__in=sublists)\
 				.distinct()\
-				.only("id", "email", "last_login")\
+				.values("id", "email", "last_login")\
 				.order_by('id')
 
 		if os.environ.get("START"):
 			users = users.filter(id__gte=int(os.environ["START"]))
 				#, id__lt=169660)
 			
-		total_emails_sent = 0
-		total_events_sent = 0
-		total_users_skipped_stale = 0
-		total_users_skipped_bounced = 0
+		counts = {
+			"total_emails_sent": 0,
+			"total_events_sent": 0,
+			"total_users_skipped_stale": 0,
+			"total_users_skipped_bounced": 0,
+		}
 
  		# get the list of user IDs to iterate through; clone up front to avoid holding the cursor (?)
 		if sys.stdout.isatty(): print "Looking for subscribed users..."
 
 		# when debugging, show a progress meter
+		def user_iterator(): return users
 		if sys.stdout.isatty(): 
-			import tqdm
-			user_iterator = tqdm.tqdm(users, desc="Users", total=users.count())
-		else:
-			user_iterator = users
+			def user_iterator():
+				import tqdm
+				return tqdm.tqdm(list(users))
 
-		# in degugging, clear the query log
-		from django import db
-		db.reset_queries()
+		# Create a pool of workers. (multiprocessing.Pool behaves weirdly with Django.)
+		# Sparkpost says have up to 10 concurrent connections.
+		for db in django.db.connections.all(): db.close() # close before forking
+		def create_worker():
+			parent_conn, child_conn = multiprocessing.Pipe()
+			proc = multiprocessing.Process(target=pool_worker, args=(child_conn,))
+			proc.start()
+			return [proc, parent_conn, 0]
+		pool = [create_worker() for i in range(5)]
 
-		for user in user_iterator:
+		def dequeue(worker, limit):
+			while worker[2] > limit:
+				events_sent = worker[1].recv()
+				worker[2] -= 1
+				if events_sent != None:
+					counts["total_emails_sent"] += 1
+					counts["total_events_sent"] += events_sent
+
+		for i, user in enumerate(user_iterator()):
 			# Check pingback status.
 			try:
-				p = Ping.objects.get(user=user)
+				p = Ping.objects.get(user_id=user["id"])
 			except Ping.DoesNotExist:
 				p = None
 				
-			if user.last_login < datetime(2009, 4, 1) and p == None:
+			if user["last_login"] < datetime(2009, 4, 1) and p == None:
 				# We warned these people on 2012-04-17 that if they didn't log in
 				# they might stop getting email updates.
-				total_users_skipped_stale += 1
+				counts["total_users_skipped_stale"] += 1
 				continue
-			elif user.last_login < datetime.now() - timedelta(days=3) \
+			elif user["last_login"] < datetime.now() - timedelta(days=3) \
 				and (not p or not p.pingtime or p.pingtime < datetime.now() - timedelta(days=20)) \
-				and BouncedEmail.objects.filter(user=user).exists():
-				total_users_skipped_bounced += 1
+				and BouncedEmail.objects.filter(user_id=user["id"]).exists():
+				counts["total_users_skipped_bounced"] += 1
 				continue
-			
-			events_sent = send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_events)
-			if events_sent != None:
-				total_emails_sent += 1
-				total_events_sent += events_sent
-			
-			# Write out the longest query.
-			#print()
-			#from django.db import connection
-			#for q in sorted(connection.queries, reverse=True):
-			#	print q["time"], q["sql"]
-			from django import db
-			db.reset_queries()
-				
-		print "Sent" if send_mail else "Would send", total_emails_sent, "emails and", total_events_sent, "events"
-		print total_users_skipped_stale, "users skipped because they are stale"
-		print total_users_skipped_bounced, "users skipped because of a bounced email"
-			
-def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_events):
+
+			# Enque task.
+			worker = pool[i % len(pool)]
+			worker[1].send([user["id"], list_email_freq, send_mail, mark_lists, send_old_events])
+			worker[2] += 1
+
+			# Deque results periodically so that the loop tracks overall progress and the pipe doesn't hit a limit.
+			dequeue(worker, 10)
+
+		# signal we're done so processes terminate
+		for worker in pool: worker[1].send(None)
+
+		# join
+		for worker in pool: dequeue(worker, 0)
+		for worker in pool: worker[0].join(1)
+
+		print "Sent" if send_mail else "Would send", counts["total_emails_sent"], "emails and", counts["total_events_sent"], "events"
+		print counts["total_users_skipped_stale"], "users skipped because they are stale"
+		print counts["total_users_skipped_bounced"], "users skipped because of a bounced email"
+
+def pool_worker(conn):
+	try:
+		# close db connections in forked children
+		for db in django.db.connections.all(): db.close()
+		
+		# Process incoming tasks.
+		while True:
+			args = conn.recv()
+			if args is None: break
+			conn.send(send_email_update(*args))
+		conn.close()
+	except Exception as e:
+		print "Uncaught exception", e
+
+def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events):
 	global now
+
+	user = User.objects.get(id=user_id)
 	
 	# get the email's From: header and return path
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
