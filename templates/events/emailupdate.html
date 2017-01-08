@@ -14,7 +14,12 @@
 </div>
 {% endif %}
 
-<h1>GovTrack.us Email Update</h1>
+<table>
+
+<tr valign="top">
+<td style="max-width: 50em">
+
+<h1>You Are Tracking Congress</h1>
 
 <p>This is your email update from <a href="{{SITE_ROOT_URL}}?{{utm}}">GovTrack.us</a>. To change your email update settings, including to unsubscribe, go to <a href="{{SITE_ROOT_URL}}/accounts/profile?{{utm}}">your account settings</a>.</p>
 
@@ -25,7 +30,7 @@
 	<div style="margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #999;">
 	<p>{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} &mdash; {{meta.type}}</p>
 	<h4><a href="{{SITE_ROOT_URL}}{{meta.url|append_qsarg:utm}}">{{meta.title}}</a></h4>
-	<div style="margin-left: 2em">
+	<div style="margin-left: 1em">
 		{{meta.body_html|safe}}
 		{% if event.feeds and event.feeds|length > 0 %}
 			<div><small>You are seeing this event because you subscribe to
@@ -38,6 +43,44 @@
 	{% endwith %}
 	{% endfor %}
 {% endfor %}
+
+</td>
+<td style="max-width: 17em; font-size: 88%; padding-left: 2em;">
+  <div style="background-color: #F3F3F3; border-radius: 10px; padding: .75em;">
+	<p>Was this email useful? Please <a href="https://www.patreon.com/govtrack">support GovTrack with a recurring tip</a>
+	so that we can continue to improve this free service.</p>
+
+	<hr>
+
+    {% if medium_posts %}
+      <p><b>On GovTrack Insider:</b></p>
+      {% for post in medium_posts|slice:"0:3" %}
+        <div>
+          {% if post.image %}
+            <div>
+              <a href="{{post.url}}?{{utm}}">
+                <img src="https://cdn-images-1.medium.com/max/400/{{post.image}}" style="border: 1px solid #888; width: 16em;"/>
+              </a>
+            </div>
+          {% endif %}
+          <p><a href="{{post.url}}?{{utm}}">{{post.title}}</a>
+          <br><span style="font-size: 90%; color: #555;">{{post.snippet}} <span class="article-date">{{post.published}}</span></span></p>
+        </div>
+      {% endfor %}
+      <p>Get all GovTrack Insider posts by <a href="https://www.govtrack.us/events/govtrack-insider">adding them to your email updates</a>.</p>
+    {% endif %}
+
+	<hr>
+
+    <p>Follow us on
+    <a href="https://www.facebook.com/govtrack/" title="Facebook Page">Facebook</a></li>
+    <a href="http://twitter.com/govtrack" title="Twitter Page">@GovTrack on Twitter</a>
+    <a href="https://medium.com/govtrack-insider" title="Medium Page">GovTrack Insider on Medium</a>.
+    </p>
+  </div>
+</td>
+</tr>
+</table>
 
 <p>To unsubscribe or change your email updates settings, go to <a href="{{SITE_ROOT_URL}}/accounts/profile?{{utm}}">your account settings</a>.</p>
 <p><small>This email was sent by <a href="http://www.civicimpulse.com?{{utm}}">Civic Impulse, LLC</a>. You may contact us at <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">hello@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</small></p>

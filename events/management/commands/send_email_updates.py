@@ -17,6 +17,9 @@ import yaml, markdown2
 
 now = datetime.now()
 
+from website.models import MediumPost
+medium_posts = MediumPost.objects.order_by('-published')[0:6]
+
 class Command(BaseCommand):
 	args = 'daily|weekly|testadmin|testcount'
 	help = 'Sends out email updates of events to subscribing users.'
@@ -229,7 +232,8 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_eve
 				"feed": all_trackers, # use all trackers in the user's account as context for displaying events
 				"emailpingurl": emailpingurl,
 				"SITE_ROOT_URL": settings.SITE_ROOT_URL,
-				"announcement": announce
+				"announcement": announce,
+				"medium_posts": medium_posts,
 			},
 			headers = {
 				'From': emailfromaddr,
