@@ -476,9 +476,18 @@ $(function() {
 {% block body %}
 <div id="member-details">
 
-	{% if analysis_data.sponsorship %}
+	{% if analysis_data.sponsorship or has_session_stats %}
 	<section id="sponsorship_analysis">
 		<h2><span>Analysis</span></h2>
+
+		{% if has_session_stats %}
+			{% if analysis_data.sponsorship %}<h3>Legislative Metrics</h3>{% endif %}
+
+			<p>Read our <a href="{{person.get_absolute_url}}/report-card/{{has_session_stats.meta.pub_year}}">{{has_session_stats.meta.pub_year}} Report Card for {{person.lastname}}</a>.</p>
+
+			{% if analysis_data.sponsorship %}<h3>Sponsorship Analysis</h3>{% endif %}
+		{% endif %}
+
 
 		<p>Our unique analysis of the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored provides insight into {{ person.his_her }}
 		position in the {{analysis_data.sponsorship.chamber}}.</p>
@@ -501,11 +510,6 @@ $(function() {
 		{% endif %}
 		{% endif %}
 		</div>
-
-		{% if has_session_stats %}
-		<h3>{{has_session_stats.meta.session}} Statistics</h3>
-		<p>Read our <a href="{{person.get_absolute_url}}/report-card/{{has_session_stats.meta.session}}">{{has_session_stats.meta.session}} Report Card for {{person.lastname}}</a> for more statistics.</p>
-		{% endif %}
 
 	</section><!-- /analysis -->
     {% endif %}

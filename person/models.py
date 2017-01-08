@@ -322,6 +322,7 @@ class Person(models.Model):
         fn = "data/us/%d/stats/session-%s.json" % (congress, session)
         try:
             datafile = json.load(open(fn))
+            datafile["meta"]["pub_year"] = session
             if datafile["meta"]["is_full_congress_stats"]:
                 datafile["meta"]["startdate"] = get_congress_dates(congress)[0]
                 datafile["meta"]["enddate"] = get_congress_dates(congress)[1]
