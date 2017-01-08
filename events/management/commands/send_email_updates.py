@@ -17,6 +17,7 @@ import yaml, markdown2
 
 now = datetime.now()
 
+# get GovTrack Insider posts		
 from website.models import MediumPost
 medium_posts = MediumPost.objects.order_by('-published')[0:6]
 
@@ -218,9 +219,6 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_eve
 		and not Ping.objects.filter(user=user, pingtime__gt=datetime.now() - timedelta(days=60)).exists():
 		emailpingurl = Ping.get_ping_url(user)
 		
-	# get announcement content
-	announce = load_markdown_content("website/email/email_update_announcement.md")
-		
 	# send
 	try:
 		send_html_mail(
@@ -237,11 +235,11 @@ def send_email_update(user, list_email_freq, send_mail, mark_lists, send_old_eve
 				"announcement": announce,
 				"medium_posts": medium_posts,
 			},
-			headers = {
-				'From': emailfromaddr,
-				'Auto-Submitted': 'auto-generated',
-				'X-Auto-Response-Suppress': 'OOF',
-			},
+			#headers={
+			#	'Reply-To': emailfromaddr,
+			#	'Auto-Submitted': 'auto-generated',
+			#	'X-Auto-Response-Suppress': 'OOF',
+			#},
 			fail_silently=False
 		)
 	except Exception as e:
@@ -293,3 +291,7 @@ def load_markdown_content(template_path, utm=""):
 	meta_info["body_html"] = body_html
 	
 	return meta_info
+
+# get announcement content
+announce = load_markdown_content("website/email/email_update_announcement.md")
+
