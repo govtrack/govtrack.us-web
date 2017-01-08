@@ -50,36 +50,33 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
   // Once map is fully loaded...
   map.on('load', function() {
     // set controls
-    map.addControl(new mapboxgl.Navigation({ position: 'bottom-left' }));
+    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
     map.touchZoomRotate.disableRotation();
 
-    /* not working
-    // Create a filter for the selected state & district.
-    var filter = ['all'];
-    if (state) filter.push(['==', 'state', state]);
-    if (state && district) filter.push(['==', 'number', district]);
-
-    // For each district color layer in the map, apply some filters...
+    // Fetch the built-in filters that determine the color assignments
+    // for layers, which we have to preserve when we add additional
+    // filters for state & district.
+    var layer_base_names = ["districts-labels-", "districts-borders-", "districts-fill-"];
+    var layer_base_filters = { };
     for (var i = 1; i <= 5; i++) {
-      // The filter that filters based on color is the one we want to preserve
-      // If there are already multiple filters applied, it will be the last one
-      var exisitingFilter = map.getFilter('districts_' + i);
-      if (exisitingFilter[0] === 'all') {
-        exisitingFilter = exisitingFilter[exisitingFilter.length - 1];
+      for (var j = 0; j < 3; j++) {
+        var layer = layer_base_names[j] + i;
+        layer_base_filters[layer] = map.getFilter(layer);
       }
-
-      // Add the existing color filter
-      var layerFilter = filter.concat([exisitingFilter]);
-
-      // Set new layer filter for each district layer in the map
-      map.setFilter('districts_' + i, layerFilter);
-      map.setFilter('districts_' + i + '_boundary', layerFilter);
-      map.setFilter('districts_' + i + '_label', layerFilter);
     }
 
-    // Create a similar filter for the boundary lines
-    map.setFilter('districts_boundary_line', filter);
-    */
+    // Create a filter to show only the selected state and district. For
+    // layers that have a color filter already applied, we have to put it
+    // back.
+    var filter = ['all'];
+    if (state) filter.push(['==', 'state', state]);
+    if (district) filter.push(['==', 'number', district]);
+    for (var i = 1; i <= 5; i++) {
+      for (var j = 0; j < 3; j++) {
+        var layer = layer_base_names[j] + i;
+        map.setFilter(layer, filter.concat([layer_base_filters[layer]]));
+      }
+    }
 
     // Add markers.
     window.addMapMarker = function(lnglat) {
