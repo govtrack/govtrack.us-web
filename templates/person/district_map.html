@@ -128,10 +128,6 @@
 		<h1>{{statename}}&rsquo;s {{district|ordinalhtml}} Congressional District</h1>
 	{% endif %}
 
-{% if not state or state == "FL" or state == "VA" or state == "NC" %}
-{% include "person/redistricting-notes.html" %}
-{% endif %}
-
 <form class="form-inline" onsubmit="do_address(); return false;" style="margin: 2em 0">
   <div class="form-group">
     <label for="user-address" class="sr-only">Address</label>
@@ -192,6 +188,10 @@
 		</div>
 		</div>
 		{% endif %}
+
+	{% if not state or state == "FL" or state == "VA" or state == "NC" %}
+	{% include "person/redistricting-notes.html" %}
+	{% endif %}
 
 	<div id='map'></div>
 	
