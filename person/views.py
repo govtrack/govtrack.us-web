@@ -146,16 +146,19 @@ def load_key_votes(person):
     from vote.models import Vote
 
     # First get all of the major votes that this person has participated in.
-    all_votes = set(person.votes
-        .filter(vote__category__in=Vote.MAJOR_CATEGORIES)
-        .values_list("vote__id", flat=True))
+    all_votes = person.votes.filter(vote__category__in=Vote.MAJOR_CATEGORIES)
+    congresses = set(all_votes.values_list("vote__congress", flat=True).distinct())
+    all_votes = all_votes.values_list("vote__id", flat=True)
 
     # Scan the cached votes for the votes with the most number of outliers
     # and the votes that this person was an outlier in.
-    import csv
+    import csv, os.path
     top_votes = { }
     outlier_votes = set()
-    for vote in csv.DictReader(open("data/us/114/stats/notable_votes.csv")):
+    for congress in congresses:
+      fn = "data/us/%d/stats/notable_votes.csv" % congress
+      if not os.path.exists(fn): continue
+      for vote in csv.DictReader(open(fn)):
         if int(vote["vote_id"]) not in all_votes: continue
         outliers = set(int(v) for v in vote["outliers"].split(" ") if v != "")
         top_votes[int(vote["vote_id"])] = len(outliers)
