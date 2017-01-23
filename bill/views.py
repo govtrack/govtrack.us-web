@@ -509,7 +509,7 @@ def query_popvox(method, args):
     return json.loads(ret)
 
 subject_choices_data = None
-def subject_choices(include_legacy=True):
+def subject_choices():
     global subject_choices_data
     if subject_choices_data == None:
         subject_choices_data = { }

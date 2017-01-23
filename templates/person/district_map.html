@@ -99,6 +99,8 @@
   var q = parse_qs(window.location.hash.substring(1));
   if (q.address)
     do_address(q.address);
+  else if (q.my_location)
+  	do_by_current_location();
   if (q.q)
     $('#user-address').val(q.q);
   if (q.marker_lat)

@@ -36,9 +36,13 @@ def index(request):
         events_feed = Feed.get_events_for([fn for fn in ("misc:activebills2", "misc:billsummaries", "misc:allvotes") if Feed.objects.filter(feedname=fn).exists()], 6)
         cache.set("frontpage_events_feed", events_feed, 60*15) # 15 minutes
 
+    from bill.views import subject_choices
+    bill_subject_areas = subject_choices()
+
     return {
         'events': events_feed,
         'blog': blog_feed,
+        'bill_subject_areas': bill_subject_areas,
         }
       
 @anonymous_view

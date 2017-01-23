@@ -54,7 +54,7 @@ class BillTerm(models.Model):
     def __unicode__(self):
         return self.name
     def __repr__(self):
-        return "<BillTerm: %s:%s>" % (TermType.by_value(self.term_type).label, self.name)
+        return "<BillTerm: %s:%s>" % (TermType.by_value(self.term_type).label, self.name.encode("utf8"))
 
     class Meta:
         unique_together = ('name', 'term_type')
