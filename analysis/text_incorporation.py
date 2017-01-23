@@ -277,10 +277,12 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
         # should exclude cases where a bill looks like one previously
         # enacted. Since text is not always published simultaneously
         # with status, especially often for enrolled bills, we can
-        # look at the text date but also the bill's current status.
+        # look at the text date but better the bill's current status.
+        # Sometimes the text gets ahead of the bill, like when a bill
+        # gets reprinted when it moves across chambers, which doesnt
+        # represent substantive action. hr1567-114 had a text print
+        # after its companion bill s1252-114 was enrolled.
         if b1.current_status_date <= b2.current_status_date:
-          continue
-        if md1['issued_on'] <= md2['issued_on']:
           continue
 
         # Load the second bill's text.
@@ -343,6 +345,7 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
   for row in csv.reader(open(csv_fn)):
     timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text \
        = row
+    cmp_text_len = int(cmp_text_len)
 
     # b1 is the enacted bill.
     # b2 is a non-enacted bill that might have had text incorporated into b1.
@@ -358,7 +361,10 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
     # For exceedingly formulaic bills, we'll only identify identical bills.
     # Bills naming buildings etc. are formulaic and produce text similarity
     # to other bills of the same type, because the part that differs is very
-    # small. So we use a very high threshold for comparison.
+    # small. So we use a very high threshold for comparison. This may not
+    # be needed. I added it after seeing the analysis produce false positives,
+    # but then I discovered that cmp_text_len was not being compared right in
+    # the next block so this may actually not be needed to help.
     b1_ratio = round(float(b1_ratio),3)
     b2_ratio = round(float(b2_ratio),3)
     b1 = Bill.from_congressproject_id(b1_id)
@@ -383,10 +389,10 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
     #   d) One bill has provisions incorporated within the other, and though
     #      it's a small part of the bill, it's a large bill and the text
     #      in common is quite large.
-    if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 400) \
-      or (b1_ratio*b2_ratio > .66 and cmp_text_len > 1500) \
-      or ((b1_ratio>.33 or b2_ratio>.33) and cmp_text_len > 7500) \
-      or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 15000):
+    if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 300) \
+      or (b1_ratio*b2_ratio > .66 and cmp_text_len > 800) \
+      or ((b1_ratio>.33 or b2_ratio>.33) and cmp_text_len > 4000) \
+      or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 8000):
 
       # Index this information with both bills.
 

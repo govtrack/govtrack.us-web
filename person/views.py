@@ -164,7 +164,7 @@ def load_key_votes(person):
         top_votes[int(vote["vote_id"])] = len(outliers)
         if person.id in outliers: outlier_votes.add(int(vote["vote_id"]))
 
-    # Sort the votes but the number of outliers.
+    # Sort the votes by the number of outliers.
     top_votes = sorted(top_votes.items(), key=lambda kv : -kv[1])
     top_votes = [kv[0] for kv in top_votes]
 

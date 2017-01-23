@@ -125,6 +125,10 @@ if "text" in sys.argv:
 
 	# Update the mirror of Cato's deepbills.
 	os.system("cd %s; . .env/bin/activate; ./run deepbills --log=%s" % (SCRAPER_PATH, log_level))
+
+	# Update text incorporation analysis for any new text versions.
+	os.system("analysis/text_incorporation.py analyze %d" % CONGRESS)
+	os.system("analysis/text_incorporation.py load %d" % CONGRESS)
 	
 	# don't know if we got any new files, so assume we now need to update bills
 	do_bill_parse = True

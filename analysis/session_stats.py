@@ -302,7 +302,7 @@ def get_transparency_stats(person, role, stats, congress, startdate, enddate):
 def make_bill_entries(bills):
 	return [make_bill_entry(b) for b in bills]
 def make_bill_entry(bill):
-	return (unicode(bill), bill.get_absolute_url())
+	return ((bill.display_number_no_congress_number + ": " +  bill.title_no_number), bill.get_absolute_url())
 
 def collect_stats(session):
 	# Get the congress and start/end dates of the session that this corresponds to.
@@ -440,7 +440,7 @@ if __name__ == "__main__":
 			"as-of": datetime.datetime.now().isoformat(),
 			"notes": notes,
 			"congress": congress,
-			"session": session if not is_full_congress_stats else None,
+			"session": "2016",
 			"is_full_congress_stats": is_full_congress_stats,
 		},
 		"people": stats,
