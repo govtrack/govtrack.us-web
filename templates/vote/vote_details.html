@@ -205,6 +205,21 @@ $(function() {
 
 <h1 class="long">{{ vote.question }}</h1>
 
+	<!-- vid:{{vote.id}} -->
+	{% if vote.id == 118959 %}
+	<div class="row" style="margin: 1.5em auto;">
+		<div class="col-xs-2 col-sm-1">
+            <a href="https://if.then.fund/a/1142/making-permanent-ban-federal-funding-abortion?utm_campaign=govtrack/vote">
+              <img src="https://if.then.fund/static/branding/logo.png" class="img-responsive">
+            </a>
+		</div>
+		<div class="col-xs-10 col-sm-11">
+            <p style="margin-bottom: .75em; line-height: 125%;" class="small">Use <a href="https://if.then.fund/a/1142/making-permanent-ban-federal-funding-abortion?utm_campaign=govtrack/vote"><span class="itf-brand">if.then.fund</span></a> to make a campaign contribution to representatives that voted the way you wanted them to, or to throw out the representatives who voted against your position.</p>
+	        <div><a href="https://if.then.fund/a/1142/making-permanent-ban-federal-funding-abortion?utm_campaign=govtrack/vote" class="btn btn-success btn-sm">Take Action &raquo;</a></div>
+		</div>
+	</div>
+	{% endif %}
+
 <div id="vote_explainer">
 	{% if vote.oursummary %}
 		<div>{{vote.oursummary.as_html|safe}}</div>
@@ -292,19 +307,6 @@ $(function() {
 
     {% endif %}
 
-	{% if vote.id == 117985 %}
-	<div class="row" style="margin-top: 1.5em; margin-bottom: 2em; padding-top: .5em; padding-bottom: .5em; border-top: 1px solid #DDD; border-bottom: 1px solid #DDD;">
-		<div class="col-xs-2 col-sm-1">
-            <a href="https://if.then.fund/a/36/background-investigations-for-refugees?utm_campaign=govtrack/vote">
-              <img src="https://if.then.fund/static/branding/logo.png" class="img-responsive">
-            </a>
-		</div>
-		<div class="col-xs-10 col-sm-11">
-            <p style="margin-bottom: .75em; line-height: 125%;" class="small">Use <a href="https://if.then.fund/a/36/background-investigations-for-refugees?utm_campaign=govtrack/vote"><span class="itf-brand">if.then.fund</span></a> to make a campaign contribution to representatives that voted the way you wanted them to!</p>
-	        <div><a href="https://if.then.fund/a/36/background-investigations-for-refugees?utm_campaign=govtrack/vote" class="btn btn-success btn-sm">Take Action &raquo;</a></div>
-		</div>
-	</div>
-	{% endif %}
 </div>
 
 <div class="row">
