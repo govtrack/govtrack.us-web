@@ -189,6 +189,7 @@ class Command(BaseCommand):
 		bills.sort(key = lambda b : (BillStatus.by_value(b.current_status).sort_order, b.proscore()), reverse=True)
 		for bill in bills:
 			status = BillStatus.by_value(bill.current_status).xml_code
+			if "Providing for consideration" in bill.title: continue
 			text = get_bill_really_short_status_string(status)
 			if text == "": continue
 			text = text % (bill.display_number, "yesterday")
