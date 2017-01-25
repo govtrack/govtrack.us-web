@@ -7,17 +7,21 @@
 # (i.e. votes that are completely predictable are not interesting/informative for users trying
 # to learn about their rep's record)
 
-import sys, tqdm
+import sys
 from collections import defaultdict
 
 from vote.models import Vote
 from vote.views import get_vote_outliers, load_ideology_scores, attach_ideology_scores
 
+tqdm = lambda x : x
+if sys.stdout.isatty:
+    from tqdm import tqdm
+
 congress = int(sys.argv[1])
 votes_to_process = Vote.objects.filter(congress=congress).order_by('created').values_list("id", flat=True)
 rows = []
 
-for vid in tqdm.tqdm(votes_to_process):
+for vid in tqdm(votes_to_process):
     v = Vote.objects.get(id=vid)
     voters = v.get_voters()
 

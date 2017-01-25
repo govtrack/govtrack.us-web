@@ -138,7 +138,7 @@ def logistic_regression(x,y,beta_start=None,verbose=False,CONV_THRESH=1.e-3,
         if diff <= CONV_THRESH: break
         iter = iter + 1
     if iter == MAXIT and diff > CONV_THRESH: 
-        print 'warning: convergence not achieved with threshold of %s in %s iterations' % (CONV_THRESH,MAXIT)
+        pass # print 'warning: convergence not achieved with threshold of %s in %s iterations' % (CONV_THRESH,MAXIT)
     return beta, J_bar, l
 
 def calcprob(beta, x):
