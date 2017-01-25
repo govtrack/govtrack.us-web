@@ -324,7 +324,7 @@
 		<div id="our-summary">
 		{{summary1.as_html|truncatewords_html:60|safe}}
 		</div>
-		{% if summary1.source_text %}({{summary1.source_text}}){% endif %}
+		{% if summary1.source_text %}(Source: {{summary1.source_text}}){% endif %}
 		<p style="margin-left: 2em; font-style: italic;"><a href="{{bill.get_absolute_url}}/summary">Read the full summary &gt;</a></p>
 	{% elif subtitle %}
 		<p style="margin-bottom: 0">{{subtitle}}</p>

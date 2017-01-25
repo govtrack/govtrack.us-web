@@ -250,7 +250,16 @@ $(function() {
 		{% endif %}
 
 		{% if vote.related_bill and vote.related_bill.oursummary %}
-			<div style="margin: 1em">{{vote.related_bill.oursummary.as_html|safe}}</div>
+			<div style="margin: 1em">
+				{{vote.related_bill.oursummary.as_html|safe}}
+				{% if vote.related_bill.oursummary.source_text %}
+					<p>Source: <a href="{{vote.related_bill.oursummary.source_url}}">{{vote.related_bill.oursummary.source_text}}</a></p>
+				{% endif %}
+			</div>
+
+			<hr>
+			{% include "ad_footer_leaderboard.html" %}
+			<hr>
 		{% endif %}
 
     {% elif vote.category == VoteCategory.amendment %}

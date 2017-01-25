@@ -66,9 +66,11 @@ def vote_search_manager():
         <div class="col-xs-12 col-sm-6 col-md-8">
         	<div><span class="fa fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
         </div>
-        <div class="col-xs-12" style="padding-top: .25em">
-            {% if object.question_details and not object.oursummary %}<div style="margin-left: 5px">{{object.question_details}}</div>{% endif %}
-            {% if object.get_summary %}<div style="font-style: italic">{{object.get_summary.plain_text|truncatewords:50}}</div>{% endif %}
+        <div class="col-xs-12">
+          <div style="margin-left: 5px">
+            {% if object.question_details and not object.oursummary %}<div style="margin-top: .25em">{{object.question_details}}</div>{% endif %}
+            {% if object.get_summary %}<div style="margin-top: .25em; font-style: italic; line-height: 126%;">{{object.get_summary.plain_text|truncatewords:50}}</div>{% endif %}
+          </div>
         </div>
         </div>
     </div>

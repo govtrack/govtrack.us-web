@@ -56,7 +56,11 @@ h3 {
 
 				<div class="small" style="margin-top: 1em; border-top: 1px solid #666; padding-top: 1em">
 					Last updated {{summary.modified|date}}.
+					{% if not summary.source_text %}
 					View <a href="/events/bill-summaries">all GovTrack summaries</a>.
+					{% else %}
+					Source: <a href="{{summary.source_url}}">{{summary.source_text}}</a>
+					{% endif %}
 				</div>
 				<script>add_summary("{% firstof summary.source_text 'GovTrack' %}'s Summary", "oursummary");</script>
 			{% endif %}
