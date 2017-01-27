@@ -1,0 +1,144 @@
+{% extends "master_b.html" %}
+{% load humanize govtrack_utils %}
+{% block title %}{{title}} - Compare Voting Records - GovTrack.us{% endblock %}
+{% block meta_description %}{{description}} - Compare the voting records of senators and representatives in the U.S. Congress.{% endblock %}
+
+{% block head %}
+<style>
+    tbody th { font-weight: normal; }
+    .table tbody .party-total > * { padding: .25em .5em; }
+    .table tbody .party-total.first > * { border-top: 1px solid #555; }
+    .table tbody .party-total.last > * { border-bottom: 1px solid #555; }
+</style>
+{% endblock %}
+
+{% block body_scripts %}
+
+{% endblock %}
+
+{% block body_with_container %}
+<div class="container{% if 0 %}-fluid{% endif %}">
+<div style="margin: 0 15px">
+
+    <ol class="breadcrumb">
+        <li><a href="{% url "congress_home" %}">Congress</a></li>
+        <li><a href="/congress/votes">Votes</a></li>
+        <li class="active">{{title}}</li>
+    </ol>
+
+	<h1>{{title}}</h1>
+
+	<h3>{{description}}</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    
+                </th>
+                {% for v in votes %}
+                    <th scope="col">
+                        <a href="{{v.get_absolute_url}}">
+                            {% if v.title %}
+                                {{v.title}}
+                            {% else %}
+                                {{v.question|truncatewords_html:50}}
+                            {% endif %}
+                        </a>
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {# when #}
+            <tr>
+                <th scope="row">
+                    Date
+                </th>
+                {% for v in votes %}
+                    <td>
+                        {{v.created|date}}
+                    </td>
+                {% endfor %}
+            </tr>
+
+            {# result #}
+            <tr>
+                <th scope="row">
+                    Result
+                </th>
+                {% for v in votes %}
+                    <td>
+                        <b>{{v.result}}</b>
+                        {% if v.total_plus|add:v.total_minus > 0 %}
+                            <br>
+                            <nobr>
+                            <span class="vote_positive">{{v.total_plus}}</span>
+                            /
+                            <span class="vote_negative">{{v.total_minus}}</span>
+                            </nobr>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+
+            {# party totals #}
+            {% for party_total in party_totals %}
+            <tr class="party-total {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
+                <th scope="row" class="partycolor_{{party_total.party.0}}">
+                    All {{party_total.party}}s
+                </th>
+                {% for vote_total in party_total.votes %}
+                    <td>
+                        <span class="vote_positive">{{vote_total.yes}}</span>
+                        /
+                        <span class="vote_negative">{{vote_total.no}}</span>
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+
+            {# MoCs #}
+            {% for voter in voters %}
+                <tr>
+                    <th scope="row">
+                        <nobr>
+                        <span class="party_{{voter.party.0}}" style="padding: 1px 3px 1.5px 3px; margin-right: .5em">{{voter.party.0}}</span>
+
+                        <a href="{{voter.person.get_absolute_url}}" style="text-decoration: none; color: inherit;">
+                            {{voter.person_name}}
+                        </a>
+                        </nobr>
+                    </th>
+                    {% for vote in voter.votes %}
+                        <td>
+                            <span class="vote_{{vote.option.alpha_key}}">
+                            {% if vote == None %}
+                                <span style="color: #666">n/a</span>
+                            {% elif vote.option.key == "+" %}
+                                {# normalize aye/yea #}
+                                Yes
+                            {% elif vote.option.key == "-" %}
+                                {# normalize no/nay #}
+                                No
+                            {% elif vote.option.key == "0" %}
+                                <span style="color: #666">did not vote</span>
+                            {% else %}
+                                {{vote.option.value}}
+                            {% endif %}
+                            </span>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </thead>
+    </table>
+	
+</div><!-- margin -->
+</div><!-- /container-fluid -->
+
+<hr>
+{% include "ad_footer_leaderboard.html" %}
+
+{% endblock %}
+

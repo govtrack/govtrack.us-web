@@ -603,3 +603,105 @@ class sitemap_archive(django.contrib.sitemaps.Sitemap):
 @render_to('vote/presidential_candidates.html')
 def presidential_candidates(request):
 	return { }
+
+@anonymous_view
+@render_to('vote/comparison.html')
+def vote_comparison_table(request, table_id, table_slug):
+	# Validate URL.
+	if int(table_id) != 1:
+		raise Http404()
+	if table_slug != "trump-nominations":
+		return HttpResponseRedirect("/votes/compare/1/trump-nominations")
+
+	# Get votes to show.
+	votes = [
+		("115-2017/s29", { "title": "James Mattis to be Secretary of Defense" }),
+		("115-2017/s30", { "title": "John F. Kelly to be Secretary of Homeland Security" }),
+		("115-2017/s32", { "title": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
+		("115-2017/s33", { "title": "Nikki R. Haley to be the Ambassador to the United Nations" }),
+	]
+	voters = None
+
+	# Fetch votes.
+	def fetch_vote(id, extra):
+		# Fetch vote.
+		if isinstance(id, int):
+			vote = Vote.objects.get(id=id)
+		else:
+			import re
+			m = re.match(r"^(\d+)-(\w+)/(\w+)(\d+)$", id)
+			if not m:
+				raise Http404()
+			congress, session, chamber, number = m.groups()
+			vote = load_vote(congress, session, chamber, number)
+
+		# Add additional user-supplied fields.
+		for k, v in extra.items():
+			setattr(vote, k, v)
+
+		# Return
+		return vote
+	votes = [fetch_vote(id, extra) for id, extra in votes]
+
+	# Compute totals by party.
+	party_totals = { }
+	for vote in votes:
+		totals = vote.totals()
+		for party, party_total in zip(totals['parties'], totals['party_counts']):
+			pt = party_totals.setdefault(party, {
+				"party": party,
+				"total_votes": 0,
+				"votes": [],
+			})
+			pt["total_votes"] += party_total["total"]
+			pt["votes"].append(party_total)
+	party_totals = sorted(party_totals.values(), key = lambda value : -value['total_votes'])
+
+	# Is more than one chamber in involved here?
+	more_than_one_chamber = (len(set(v.chamber for v in votes)) > 1)
+
+	# Pull voters.
+	voters = { }
+	for i, vote in enumerate(votes):
+		for voter in vote.get_voters():
+			v = voters.setdefault(voter.person_id, {
+				"person": voter.person,
+				"total_plus": 0,
+				"total_votes": 0,
+				"votes": [None for _ in votes],
+			})
+
+			v["votes"][i] = voter
+			if voter.option.key == "+":
+				v["total_plus"] += 1
+			if voter.option.key not in ("0", "P"):
+				v["total_votes"] += 1
+
+			# Add name info at the moment of the vote.
+			from person.name import get_person_name
+			voter.person.role = voter.person_role
+			voter.person.role.party = voter.party # party at this moment
+			v["votes"][i].person_name = get_person_name(voter.person, firstname_position='after', show_district=True, show_title=False, show_type=more_than_one_chamber, show_party=False)
+
+	# Choose one name & party.
+	for voter in voters.values():
+		names = set(v.person_name for v in voter["votes"] if v is not None)
+		if len(names) == 1:
+			voter["person_name"] = list(names)[0]
+		else:
+			voter["person_name"] = get_person_name(voter["person"], firstname_position='after', show_district=False, show_title=False, show_type=more_than_one_chamber, show_party=False)
+
+		parties = set(v.party for v in voter["votes"] if v is not None)
+		if len(parties) == 1:
+			voter["party"] = list(parties)[0]
+
+	# Sort.
+	voters = sorted(voters.values(), key = lambda value : (-value['total_plus'], -value['total_votes'], value['person_name']))
+
+	return {
+		"title": "Key Trump Nominations",
+		"description": "Senate votes on key Trump nominations.",
+		"votes": votes,
+		"party_totals": party_totals,
+		"voters": voters,
+	}
