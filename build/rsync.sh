@@ -5,29 +5,29 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "us/crsnet.xml" \
 	--include "us/sessions.tsv" \
 	--include "us/committees.xml" \
-	--include "us/114" \
-	--include "us/114/committees.xml" \
-	--include "us/114/bills" \
-	--include "us/114/bills/*.xml" \
-	--include "us/114/rolls" \
-	--include "us/114/rolls/*.xml" \
-	--include "us/114/stats/" \
-	--include "us/114/stats/*.json" \
-	--include "us/114/stats/*.txt" \
+	--include "us/115" \
+	--include "us/115/committees.xml" \
+	--include "us/115/bills" \
+	--include "us/115/bills/*.xml" \
+	--include "us/115/rolls" \
+	--include "us/115/rolls/*.xml" \
+	--include "us/115/stats/" \
+	--include "us/115/stats/*.json" \
+	--include "us/115/stats/*.txt" \
 	--include "photos" \
 	--include "photos/412460*" \
 	--include "congress" \
-	--include "congress/114" \
-	--include "congress/114/bills" \
-	--include "congress/114/bills/*" \
-	--include "congress/114/bills/*/*1" \
-	--include "congress/114/bills/*/*1/text-versions" \
-	--include "congress/114/bills/*/*1/text-versions/*" \
-	--include "congress/114/bills/*/*1/text-versions/*/data.json" \
-	--include "congress/114/bills/*/*1/text-versions/*/mods.xml" \
-	--include "congress/114/bills/*/*1/text-versions/*/document.txt" \
-	--include "congress/114/bills/*/*1/text-versions/*/document.xml" \
-	--include "congress/114/bills/*/*1/text-versions/*/catoxml.xml" \
+	--include "congress/115" \
+	--include "congress/115/bills" \
+	--include "congress/115/bills/*" \
+	--include "congress/115/bills/*/*1" \
+	--include "congress/115/bills/*/*1/text-versions" \
+	--include "congress/115/bills/*/*1/text-versions/*" \
+	--include "congress/115/bills/*/*1/text-versions/*/data.json" \
+	--include "congress/115/bills/*/*1/text-versions/*/mods.xml" \
+	--include "congress/115/bills/*/*1/text-versions/*/document.txt" \
+	--include "congress/115/bills/*/*1/text-versions/*/document.xml" \
+	--include "congress/115/bills/*/*1/text-versions/*/catoxml.xml" \
 	--include "congress/committee_meetings_house.json" \
 	--include "congress/committee_meetings_senate.json" \
 	--include "historical-committee-membership" \
