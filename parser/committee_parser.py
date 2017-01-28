@@ -125,12 +125,12 @@ def main(options):
     if not file_changed and not options.force:
         log.info('File %s was not changed' % MEMBERS_FILE)
     else:
-        # map THOMAS IDs to GovTrack IDs
+        # map Bioguide IDs to GovTrack IDs
         y = yaml_load(BASE_PATH + "legislators-current.yaml")
         person_id_map = { }
         for m in y:
-            if "id" in m and "govtrack" in m["id"] and "thomas" in m["id"]:
-                person_id_map[m["id"]["thomas"]] = m["id"]["govtrack"]
+            if "id" in m and "govtrack" in m["id"] and "bioguide" in m["id"]:
+                person_id_map[m["id"]["bioguide"]] = m["id"]["govtrack"]
         
         # load committee members
         tree = yaml_load(MEMBERS_FILE)
@@ -152,7 +152,7 @@ def main(options):
             # Process members of current committee node
             for member in members:
                 mobj = CommitteeMember()
-                mobj.person = Person.objects.get(id=person_id_map[member["thomas"]])
+                mobj.person = Person.objects.get(id=person_id_map[member["bioguide"]])
                 mobj.committee = cobj
                 if "title" in member:
                     mobj.role = ROLE_MAPPING[member["title"]]
