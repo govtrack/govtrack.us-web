@@ -611,7 +611,7 @@ def vote_comparison_table(request, table_id, table_slug):
 	if int(table_id) != 1:
 		raise Http404()
 	if table_slug != "trump-nominations":
-		return HttpResponseRedirect("/votes/compare/1/trump-nominations")
+		return HttpResponseRedirect("/congress/votes/compare/1/trump-nominations")
 
 	# Get votes to show.
 	votes = [
@@ -629,9 +629,9 @@ def vote_comparison_table(request, table_id, table_slug):
 			vote = Vote.objects.get(id=id)
 		else:
 			import re
-			m = re.match(r"^(\d+)-(\w+)/(\w+)(\d+)$", id)
+			m = re.match(r"^(\d+)-(\w+)/([hs])(\d+)$", id)
 			if not m:
-				raise Http404()
+				raise Http404(id)
 			congress, session, chamber, number = m.groups()
 			vote = load_vote(congress, session, chamber, number)
 
