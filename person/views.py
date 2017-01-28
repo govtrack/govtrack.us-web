@@ -305,21 +305,23 @@ def browse_district(request, state, district):
     # check that the district is in range
     if stateapportionment[state] in ("T", 1):
         # territories and state-at large districts have no page here
-        raise Http404()
+        pass
     elif district < 1 or district > stateapportionment[state]:
         # invalid district number
         raise Http404()
     
-    # senators and representative
+    # senators
     sens = get_senators(state)
+    if len(sens) > 0:
+        sens[0].first_senator = True
+
+    # representatives
     try:
-        reps = [(
-            district,
-            Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=district),
-            None,
-            )]
+        reps = [Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=district)]
     except Person.DoesNotExist:
-        reps = [(district, None, None)] # vacant
+        reps = [None] # vacant
+    if len(reps) > 0:
+        reps[0].first_representative = True
 
     # map center
     center_lat, center_long, center_zoom = get_district_bounds(state, district)
@@ -334,8 +336,7 @@ def browse_district(request, state, district):
         "district": int(district),
         "district_zero": ("%02d" % int(district)),
         "statelist": statelist,
-        "senators": sens,
-        "reps": reps,
+        "legislators": sens+reps,
     }
     
 def get_district_bounds(state, district):

@@ -16,6 +16,7 @@ rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "us/115/stats/*.txt" \
 	--include "photos" \
 	--include "photos/412460*" \
+	--include "photos/412246*" \
 	--include "congress" \
 	--include "congress/115" \
 	--include "congress/115/bills" \
