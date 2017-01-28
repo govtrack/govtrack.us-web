@@ -9,11 +9,45 @@
     .table tbody .party-total > * { padding: .25em .5em; }
     .table tbody .party-total.first > * { border-top: 1px solid #555; }
     .table tbody .party-total.last > * { border-bottom: 1px solid #555; }
+    #sort-options a.active { text-decoration: none; font-weight: bold; cursor: default; }
 </style>
 {% endblock %}
 
 {% block body_scripts %}
-
+<script>
+$(function() {
+    // Default but do it here anyway.
+    $('#sort-options a').click(function() {
+        var key = $(this).attr("data-key");
+        do_sort(key);
+        return false;
+    })
+    do_sort("name");
+})
+var sort_functions = {
+    name: function(row) { return $(row).attr('data-sort-name') },
+    state: function(row) { return $(row).attr('data-sort-state-district') },
+    party: function(row) {
+        return [
+            $(row).attr('data-sort-party'),
+            $(row).attr('data-sort-name')
+            ];
+        },
+    vote: function(row) {
+        return [
+            -parseInt($(row).attr('data-sort-ayes')),
+            -parseInt($(row).attr('data-sort-total')),
+            $(row).attr('data-sort-votes'),
+            $(row).attr('data-sort-name')
+            ];
+        }
+}
+function do_sort(key) {
+    $('#sort-options a').removeClass('active');
+    $('#sort-options a[data-key=' + key + ']').addClass('active');
+    $('#vote-comparison-table tbody tr.voter').sortElements(sort_functions[key]);
+}
+</script>
 {% endblock %}
 
 {% block body_with_container %}
@@ -30,7 +64,13 @@
 
 	<h3>{{description}}</h3>
 
-    <table class="table">
+    <table id="vote-comparison-table" class="table">
+        <colgroup>
+            <col span="1">
+            {% for v in votes %}
+               <col span="1" style="width: {{col_width_pct}}%;">
+            {% endfor %}
+        </colgroup>
         <thead>
             <tr>
                 <th>
@@ -98,12 +138,34 @@
             </tr>
             {% endfor %}
 
+            {# sort buttons #}
+            <tr>
+                <td id="sort-options" colspan="{{votes|length|add:1}}" style="font-size: 85%; color: #666; padding-top: 1.25em;">
+                    Sort by:
+                    <a href="#" data-key="name">Name</a>
+                    |
+                    <a href="#" data-key="vote">Vote</a>
+                    |
+                    <a href="#" data-key="party">Party</a>
+                    |
+                    <a href="#" data-key="state">State</a>
+                </td>
+            </tr>
+
             {# MoCs #}
             {% for voter in voters %}
-                <tr>
+                <tr
+                    class="voter"
+                    data-sort-name="{{voter.person_name}}"
+                    data-sort-ayes="{{voter.total_plus}}"
+                    data-sort-total="{{voter.total_votes}}"
+                    data-sort-votes="{% for vote in voter.votes %}{% firstof vote.option.key "?" %}{% endfor %}"
+                    data-sort-party="{{voter.party_order}}"
+                    data-sort-state-district="{{voter.state_district}}"
+                    >
                     <th scope="row">
                         <nobr>
-                        <span class="party_{{voter.party.0}}" style="padding: 1px 3px 1.5px 3px; margin-right: .5em">{{voter.party.0}}</span>
+                        <span class="party_{{voter.party.0}}" style="padding: 1px 3px 1.5px 3px; margin-right: .5em; width: 1em">{{voter.party.0}}</span>
 
                         <a href="{{voter.person.get_absolute_url}}" style="text-decoration: none; color: inherit;">
                             {{voter.person_name}}

@@ -633,7 +633,10 @@ def vote_comparison_table(request, table_id, table_slug):
 			if not m:
 				raise Http404(id)
 			congress, session, chamber, number = m.groups()
-			vote = load_vote(congress, session, chamber, number)
+			try:
+				vote = load_vote(congress, session, chamber, number)
+			except Http404:
+				raise ValueError("Vote ID is not valid: " + id)
 
 		# Add additional user-supplied fields.
 		for k, v in extra.items():
@@ -656,6 +659,7 @@ def vote_comparison_table(request, table_id, table_slug):
 			pt["total_votes"] += party_total["total"]
 			pt["votes"].append(party_total)
 	party_totals = sorted(party_totals.values(), key = lambda value : -value['total_votes'])
+	party_sort_order = [party_total["party"] for party_total in party_totals]
 
 	# Is more than one chamber in involved here?
 	more_than_one_chamber = (len(set(v.chamber for v in votes)) > 1)
@@ -683,7 +687,7 @@ def vote_comparison_table(request, table_id, table_slug):
 			voter.person.role.party = voter.party # party at this moment
 			v["votes"][i].person_name = get_person_name(voter.person, firstname_position='after', show_district=True, show_title=False, show_type=more_than_one_chamber, show_party=False)
 
-	# Choose one name & party.
+	# Choose one name & party & state-district (for sort).
 	for voter in voters.values():
 		names = set(v.person_name for v in voter["votes"] if v is not None)
 		if len(names) == 1:
@@ -694,9 +698,14 @@ def vote_comparison_table(request, table_id, table_slug):
 		parties = set(v.party for v in voter["votes"] if v is not None)
 		if len(parties) == 1:
 			voter["party"] = list(parties)[0]
+			voter["party_order"] = party_sort_order.index(voter["party"])
 
-	# Sort.
-	voters = sorted(voters.values(), key = lambda value : (-value['total_plus'], -value['total_votes'], value['person_name']))
+		roles = set((v.person_role.state, str(v.person_role.role_type), str(v.person_role.senator_rank), ("%02d" % v.person_role.district if v.person_role.district else "")) for v in voter["votes"] if v is not None)
+		if len(roles) == 1:
+			voter["state_district"] = "-".join(list(roles)[0])
+
+	# Default sort order.
+	voters = sorted(voters.values(), key = lambda value : value['person_name'])
 
 	return {
 		"title": "Key Trump Nominations",
@@ -704,4 +713,5 @@ def vote_comparison_table(request, table_id, table_slug):
 		"votes": votes,
 		"party_totals": party_totals,
 		"voters": voters,
+		"col_width_pct": int(round(100/(len(votes)+1))),
 	}
