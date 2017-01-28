@@ -5,6 +5,10 @@
 
 {% block head %}
 <style>
+    #table-container {
+        width: 100%;
+        overflow: auto;
+    }
     tbody th { font-weight: normal; }
     .table tbody .party-total > * { padding: .25em .5em; }
     .table tbody .party-total.first > * { border-top: 1px solid #555; }
@@ -63,6 +67,8 @@ function do_sort(key) {
 	<h1>{{title}}</h1>
 
 	<h3>{{description}}</h3>
+
+    <div id="table-container">
 
     <table id="vote-comparison-table" class="table">
         <colgroup>
@@ -193,8 +199,10 @@ function do_sort(key) {
                     {% endfor %}
                 </tr>
             {% endfor %}
-        </thead>
+        </tbody>
     </table>
+
+    </div> <!-- table-container -->
 	
 </div><!-- margin -->
 </div><!-- /container-fluid -->
