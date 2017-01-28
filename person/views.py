@@ -311,17 +311,17 @@ def browse_district(request, state, district):
         raise Http404()
     
     # senators
-    sens = get_senators(state)
+    sens = [({}, s) for s in get_senators(state)]
     if len(sens) > 0:
-        sens[0].first_senator = True
+        sens[0][0]["first_senator"] = True
 
     # representatives
     try:
-        reps = [Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=district)]
+        reps = [({}, Person.objects.get(roles__current=True, roles__state=state, roles__role_type=RoleType.representative, roles__district=district))]
     except Person.DoesNotExist:
-        reps = [None] # vacant
+        reps = [({}, None)] # vacant
     if len(reps) > 0:
-        reps[0].first_representative = True
+        reps[0][0]["first_representative"] = True
 
     # map center
     center_lat, center_long, center_zoom = get_district_bounds(state, district)

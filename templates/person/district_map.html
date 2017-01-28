@@ -150,12 +150,12 @@
 				<p>That location is in {{statename}}&rsquo;s {{district|ordinalhtml}} congressional district which is represented by...</p>
 			{% endif %}
 
-			{% for rep in legislators %}
-				{% if rep.first_senator %}
+			{% for props, rep in legislators %}
+				{% if props.first_senator %}
 					<h2 style="margin-top: 0"><span>Senators</span></h2>
 					<p>Each state elects two senators for staggered 6-year terms. Senators represent the entire state. {{statename}}&rsquo;s senators are:</p>
 				{% endif %}
-				{% if rep.first_representative %}
+				{% if props.first_representative %}
 					<h2><span>Representative</span></h2>
 
 					{% if stateapp != "T" %}
