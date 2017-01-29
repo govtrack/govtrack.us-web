@@ -13,7 +13,7 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
 
   ```
   apt-get install git python-virtualenv python-lxml python-openid python-oauth2 \
-      python-iso8601 python-numpy python-scipy python-prctl
+      python-iso8601 python-scipy python-prctl
   ```
 
   or for OS X (xCode required)
@@ -58,10 +58,12 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
 
 * To enable search (for which complete instructions haven't been provided, so really skip this):
 
-  * For debugging, install Xapian:
+  * For debugging, install Xapian and add it to the virtual environment:
 
     ```
     apt-get install python-xapian
+    ln -s /usr/lib/python2.7/dist-packages/xapian/ env/local/lib/python2.7/xapian
+
     ```
 
   * Set HAYSTACK\_CONNECTIONS:

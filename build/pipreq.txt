@@ -9,7 +9,9 @@ defusedxml
 jsonfield
 beautifulsoup
 feedparser
+numpy
 pysolr==2.1.0
+xapian-haystack
 recaptcha-client
 django-wysiwyg
 rcssmin
