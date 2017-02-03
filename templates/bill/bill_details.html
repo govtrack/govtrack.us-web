@@ -371,12 +371,10 @@
 		</button>
 		{% endif %}
 
-		{% comment %}
-		<button class="btn btn-sm" onclick="$('#action-panel').modal(); ga('send', 'event', 'bill-action', 'what-can-i-do'); return false;">
+		<button class="btn btn-sm" onclick="window.location = 'https://phonecongress.com/topic/congress/bills/{{bill.congressproject_id}}/{{bill.id}}'">
 			<span class="glyphicon glyphicon-phone" style="color: #444"></span>
 			<span style="margin-left: 3px;">Call Congress</span>
 		</button>
-		{% endcomment %}
 
 		{% with SITE_ROOT_URL|add:bill.get_absolute_url as share_url %}
 		<div>
@@ -397,44 +395,6 @@
 
 	  </div>
 	</div>
-
-		<div class="modal fade" id="action-panel" tabindex="-1" role="dialog" aria-labelledby="actionPanelModalLabel" aria-hidden="true">
-		  <div class="modal-dialog">
-		    <div class="modal-content">
-		      <div class="modal-header">
-		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		        <h4 class="modal-title" id="actionPanelModalLabel">Call Congress</h4>
-		      </div>
-		      <div class="modal-body">
-				<script>
-					function do_poll(posid) {
-						window.location = "{% url "bill_start_poll" %}?bill={{bill.id}}&position=" + posid;
-					}
-				</script>
-
-				<div id="call_congress_positions">
-					<p style="margin-bottom: 1em">A phone call to Congress is an effective way to let your voice be heard. We&rsquo;ll walk you through the whole thing. How do you feel about {{bill.display_number}}?</p>
-					<button onclick="do_poll('support');" class="support">
-						<div>I support {{bill.display_number}}</div>
-					</button>
-					<button onclick="do_poll('oppose');" class="oppose">
-						<div>I oppose {{bill.display_number}}</div>
-					</button>
-				</div>
-				<div id="call_congress_position_chosen" style="display: none;">
-					<p style="margin-bottom: .5em;">You chose: <span style="font-weight: bold"/></p>
-					<button id="change_position" onclick="$('#call_congress_positions').show(); $('#call_congress_position_chosen').hide();" style="margin-bottom: .5em">Change Position &nbsp; ▶</button>
-					<button id="make_call" onclick="window.location = the_page.poll_and_call_position.call_url;" style="margin-bottom: .5em">Call Congress &nbsp; ▶</button>
-					<div id="submission_status" style="display: none">
-						Hello!
-					</div>
-				</div>
-		      </div>
-		    </div>
-		  </div>
-		</div>
-
-
 
 	{% endif %}	
 
