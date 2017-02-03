@@ -297,6 +297,7 @@ class Bill(models.Model):
         "is_alive": "is_alive",
         "noun": "noun",
         "related_bills": "get_related_bills_api",
+        "current_chamber": "current_chamber",
     }
     api_example_id = 76416
     api_example_list = { "sort": "-introduced_date" }
@@ -344,7 +345,7 @@ class Bill(models.Model):
         if status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
             return self.originating_chamber.lower()
         elif hasattr(status, 'next_action_in'):
-            return stats.next_action_in
+            return status.next_action_in
         else:
             # no pending action
             return None
