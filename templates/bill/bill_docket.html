@@ -85,16 +85,26 @@ function do_keyword_tracker_submit() {
 	<div id="docket">
 			<p style="margin-top: 15px">{{coming_up|length}} {% if coming_up|length == 1 %}bill or resolution is{% else %}bills and resolutions are{% endif %} on the House and Senate calendars for the coming days.</p>
 
+			<table class="table">
 			{% for bill in coming_up %}
-				<div style="margin-top: 2em; margin-bottom: .5em;"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a></div>
-				<div style="margin-left: 1em">
-					{% if bill.docs_house_gov_postdate %}<p style="margin-bottom: .5em;">The <b>House</b> Majority Leader indicated the {{bill.noun}} would be considered in the week ahead on {{bill.docs_house_gov_postdate|date}}.</p>{% endif %}
-					{% if bill.senate_floor_schedule_postdate %}<p style="margin-bottom: .5em;">The <b>Senate</b> added the {{bill.noun}} to its floor schedule for the following day on {{bill.senate_floor_schedule_postdate|date}}.</p>{% endif %}
+				<tr>
+				<td>
+                  <nobr>{{bill.scheduled_consideration_date|date}}</nobr>
+                  {% if bill.docs_house_gov_postdate and not bill.senate_floor_schedule_postdate %}<div><small>(week of)</small></div>{% endif %}
+                </td>
+				<td>
+					{% if bill.docs_house_gov_postdate %}<div><b>House</b></div>{% endif %}
+					{% if bill.senate_floor_schedule_postdate %}<div><b>Senate</b></div>{% endif %}
+				</td>
+				<td>
+				<p><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a></p>
 					{% if not bill.current_status in BILL_STATUS_INTRO %}
 						<p>{{bill.current_status_description}}</p>
 					{% endif %}
-				</div>
+				</td>
+				</tr>
 			{% endfor %}
+			</table>
 
 			<p>Once bills are scheduled for floor action they typically have enough support to pass!</p>
 	</div>

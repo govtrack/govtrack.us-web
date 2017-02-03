@@ -567,8 +567,7 @@ def bill_docket(request):
         # legislation coming up
         dhg_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, docs_house_gov_postdate__gt=datetime.datetime.now() - datetime.timedelta(days=10)).filter(docs_house_gov_postdate__gt=F('current_status_date'))
         sfs_bills = Bill.objects.filter(congress=CURRENT_CONGRESS, senate_floor_schedule_postdate__gt=datetime.datetime.now() - datetime.timedelta(days=5)).filter(senate_floor_schedule_postdate__gt=F('current_status_date'))
-        coming_up = list(dhg_bills | sfs_bills)
-        coming_up.sort(key = lambda b : b.docs_house_gov_postdate if (b.docs_house_gov_postdate and (not b.senate_floor_schedule_postdate or b.senate_floor_schedule_postdate < b.docs_house_gov_postdate)) else b.senate_floor_schedule_postdate, reverse=True)
+        coming_up = list((dhg_bills | sfs_bills).order_by('scheduled_consideration_date'))
 
         # top tracked bills
         top_bills = Feed.objects\
@@ -596,10 +595,10 @@ def bill_docket(request):
             "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.referred, BillStatus.reported),
         }
 
-    ret = cache.get("bill_docket_info-1")
+    ret = cache.get("bill_docket_info")
     if not ret:
         ret = build_info()
-        cache.set("bill_docket_info-1", ret, 60*60)
+        cache.set("bill_docket_info", ret, 60*60)
 
     return ret
 

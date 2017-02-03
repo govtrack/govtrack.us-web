@@ -452,6 +452,7 @@ def load_senate_floor_schedule(options, bill_index):
             bill = Bill.objects.get(congress=entry["bill_congress"], bill_type=entry["bill_type"], number=entry["bill_number"])
             if bill.senate_floor_schedule_postdate == None or now - bill.senate_floor_schedule_postdate > timedelta(days=7):
                 bill.senate_floor_schedule_postdate = now
+                if bill.docs_house_gov_postdate is None or bill.senate_floor_schedule_postdate > bill.docs_house_gov_postdate: bill.scheduled_consideration_date = entry["date"]
                 bill.save()
                 if bill_index:
                     bill.update_index(bill_index)
@@ -488,28 +489,30 @@ def load_senate_floor_schedule_data():
             }
 
 def load_docs_house_gov(options, bill_index):
-    # Get most recent JSON file by looking at the lexicographically last one.
-    fn = sorted(os.listdir("data/congress/upcoming_house_floor"))[-1]
-    data = json.load(open("data/congress/upcoming_house_floor/" + fn))
-    for billinfo in data.get("upcoming", []):
-        if "bill_id" not in billinfo: continue
+    # Look at the three most recent JSON files by looking at the lexicographically last ones,
+    # which possibly cover the current week, the next week, and the week after that.
+    for fn in sorted(os.listdir("data/congress/upcoming_house_floor"))[-3:]:
+        data = json.load(open("data/congress/upcoming_house_floor/" + fn))
+        for billinfo in data.get("upcoming", []):
+            if "bill_id" not in billinfo: continue
+    
+            m = re.match(r"([hrsjconres]+)(\d+)-(\d+)", billinfo["bill_id"])
+            if not m:
+                log.error('Could not parse bill_id "%s" in docs.house.gov.' % billinfo["bill_id"])
+                continue
+ 
+            bt = BillType.by_slug(m.group(1))
+            try:
+                bill = Bill.objects.get(congress=int(m.group(3)), bill_type=bt, number=int(m.group(2)))
+            except Exception as e:
+                log.error('Could not get bill "%s" in docs.house.gov: %s.' % (billinfo["bill_id"], str(e)))
+                continue
 
-        m = re.match(r"([hrsjconres]+)(\d+)-(\d+)", billinfo["bill_id"])
-        if not m:
-            log.error('Could not parse bill_id "%s" in docs.house.gov.' % billinfo["bill_id"])
-            continue
-
-        bt = BillType.by_slug(m.group(1))
-        try:
-            bill = Bill.objects.get(congress=int(m.group(3)), bill_type=bt, number=int(m.group(2)))
-        except Exception as e:
-            log.error('Could not get bill "%s" in docs.house.gov: %s.' % (billinfo["bill_id"], str(e)))
-            continue
-
-        bill.docs_house_gov_postdate = BillProcessor.parse_datetime(billinfo["published_at"])
-        bill.save()
-        if bill_index: bill.update_index(bill_index)
-        if not options.disable_events: bill.create_events()
+            bill.docs_house_gov_postdate = BillProcessor.parse_datetime(billinfo["published_at"])
+            if bill.senate_floor_schedule_postdate is None or bill.docs_house_gov_postdate > bill.senate_floor_schedule_postdate: bill.scheduled_consideration_date = BillProcessor.parse_datetime(data["week_of"])
+            bill.save()
+            if bill_index: bill.update_index(bill_index)
+            if not options.disable_events: bill.create_events()
 
 if __name__ == '__main__':
     import pprint

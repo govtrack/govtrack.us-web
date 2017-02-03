@@ -163,6 +163,8 @@ class Bill(models.Model):
     # additional data that is pulled from other sources
     docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
     senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
+    scheduled_consideration_date = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill is expected to be considered on the floor for the most recent of docs_house_gov_postdate and senate_floor_schedule_postdate, and if for docs.house.gov it is the week that this is the Monday of.")
+
     #statutescite = models.CharField(max_length=16, blank=True, null=True, help_text="For enacted laws, a normalized U.S. Statutes at Large citation. Available only for years in which the Statutes at Large has already been published.")
     text_incorporation = JSONField(default=[], blank=True, null=True, help_text="What enacted bills have provisions of this bill been incorporated into?")
 
