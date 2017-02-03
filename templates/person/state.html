@@ -110,15 +110,17 @@ $(function() {
 	<p>The United States is divided into 435 congressional districts, each with a population of about 710,000 individuals. Each district elects a representative to the House for a two-year term. Representatives are also called congressmen/congresswomen.</p>
 
     {% if stateapp != 1 %}
-	<form class="form-inline" style="margin: 1.75em 0;" onsubmit="window.location = '/congress/members/map#address=' + encodeURIComponent($('#user-address').val()); return false;">
+	<div style="margin: 1.75em 0;">
+	<form class="form-inline" onsubmit="window.location = '/congress/members/map#address=' + encodeURIComponent($('#user-address').val()); return false;">
       <div style="font-weight: bold; margin-bottom: 4px;">Find your representative by entering your address:</div>
 	  <div class="form-group">
 	    <label for="user-address" class="sr-only">Address</label>
 	    <input type="text" class="form-control" id="user-address" placeholder="Enter an address in {{statename}}" name="address">
 	  </div>
 	  <button type="submit" class="btn btn-primary">Find District</button>
-	  <button class="btn btn-default" onclick="$('#user-address').val('my location')">Use My Location</button>
 	</form>
+	<div style="margin: .5em"><a href="#" onclick="window.location = '/congress/members/map#address=my+location'; return false;" style="text-decoration: none"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
+	</div>
     {% endif %}
 
 	<p>{{statename}}&rsquo;s representative{% if stateapp > 1 %}s are{% else %} is{% endif %}:</p>

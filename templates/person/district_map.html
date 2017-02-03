@@ -132,14 +132,16 @@
 		<h1>{{statename}}&rsquo;s {{district|ordinalhtml}} Congressional District</h1>
 	{% endif %}
 
-<form class="form-inline" onsubmit="do_address(); return false;" style="margin: 2em 0">
+<div style="margin: 2em 0">
+<form class="form-inline" onsubmit="do_address(); return false;">
   <div class="form-group">
     <label for="user-address" class="sr-only">Address</label>
     <input type="text" class="form-control" id="user-address" placeholder="Enter an address in the United States">
   </div>
   <button type="submit" class="btn btn-primary">Find District</button>
-  <button class="btn btn-default" onclick="do_by_current_location(); return false;">Use My Location</button>
 </form>
+<div style="margin: .5em"><a href="#" onclick="do_by_current_location(); return false;" style="text-decoration: none"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
+</div>
 
 <div class="row">
 

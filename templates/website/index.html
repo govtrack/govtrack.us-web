@@ -37,6 +37,8 @@ body {
 		min-width: 30em;
 	}
 }
+.underlinks { margin-top: .5em; margin-left: 2px; }
+.underlinks a { text-decoration: none; }
 
 #blog-posts {
 	background-color: rgba(240,240,255, .7);
@@ -45,29 +47,6 @@ body {
 	margin: 0 -15px 0 -15px;
 }
 	#blog-posts h2 { margin-top: 0; }
-
-	#primary-links {
-		margin-top: 2em;
-	}
-	#primary-links a {
-		display: block;
-		margin: 1em 0;
-		text-align: center;
-		font-family: serif;
-		line-height: 140%;
-		text-decoration: none;
-		font-family: sans-serif;
-	}
-		#primary-links a span {
-			font-style: italic;
-		}
-		#primary-links a img {
-			display: block;
-			width: 100%;
-		}
-		#primary-links a:hover img {
-			opacity: .9;
-		}
 
 article {
 
@@ -126,17 +105,17 @@ article {
 	  </div>
 	  <div class="form-group">
 		  <button type="submit" class="btn btn-success">Next &raquo;</button>
-		  <button class="btn btn-success" onclick="do_by_current_location(); return false;">Use My Location</button>
 	  </div>
-	  <p style="margin-top: .5em; margin-left: 2px;">
-		<a href="/congress/members/map">View a Map</a> &middot;
-		<a href="/congress/members/current">See All Members of Congress</a> &middot;
+	  <p class="underlinks">
+		<a href="#" onclick="do_by_current_location(); return false;"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a> &middot;
+		<a href="/congress/members/map"><i class="fa fa-globe" aria-hidden="true"></i> View a Map</a> &middot;
+		<a href="/congress/members/current"><i class="fa fa-list" aria-hidden="true"></i> See All Members of Congress</a> &middot;
 		<a href="/congress/members">More</a>
 	  </p>
 	</form>
 
 	<form action="#" onsubmit="return do_subject_form();" class="form-inline" style="margin: 40px 0">
-      <label for="bill-subject-area" style="display: block;">Browse legislation that affects you:</label>
+      <label for="bill-subject-area" style="display: block;">Find legislation that affects you:</label>
 	  <div class="form-group">
 	    <select id="bill-subject-area" class="form-control" onchange="$(this).parents('form').submit();">
 	    	<option value="">Select Issue Area</option>
@@ -149,12 +128,12 @@ article {
 	  <div class="form-group">
 	  	<button type="submit" class="btn btn-success">Next &raquo;</button>
 	  </div>
-	  <p style="margin-top: .5em; margin-left: 2px;">
-		<a href="/congress/bills/#bystatus">Browse Bills</a> &middot;
-		<a href="/congress/bills/#get-alerts">Get Alerts</a> &middot;
-		<a href="/congress/bills/browse">Advanced Search</a> &middot;
-		<a href="/congress/votes">Recent Votes</a> &middot;
-		<a href="/congress/committees/">By Committee</a> &middot;
+	  <p class="underlinks">
+		<a href="/congress/bills/#bystatus"><i class="fa fa-file-text-o" aria-hidden="true"></i> All Bills</a> &middot;
+		<a href="/congress/bills/#get-alerts"><i class="fa fa-bell" aria-hidden="true"></i> Get Alerts</a> &middot;
+		<a href="/congress/bills/browse"><i class="fa fa-list" aria-hidden="true"></i> Search</a> &middot;
+		<a href="/congress/votes"><i class="fa fa-check-square-o" aria-hidden="true"></i> Votes</a> &middot;
+		<a href="/congress/committees/"><i class="fa fa-users" aria-hidden="true"></i> Committees</a> &middot;
 		<a href="/congress/bills/">More</a>
 	  </p>
 	</form>
@@ -207,77 +186,6 @@ article {
 		</div>
 	</div> <!-- /col -->
 	</div> <!-- /row -->
-</div>
-
-<div class="container" style="display: none">
-<div class="row">
-	<div class="col-sm-3">
-		<div id="primary-links" class="row" style="text-align: center">
-			<div class="col-xs-4 col-sm-12">
-				<a href="/congress/members">
-					<img src="/static/images/img-congress-members.png">
-					Members <span>of</span> Congress
-				</a>
-			</div>
-			<div class="col-xs-4 col-sm-12">
-				<a href="{% url "bill_docket" %}">
-					<img src="/static/images/img-bills-resolutions.png">
-					Bills <span>&amp;</span> Resolutions
-				</a>
-			</div>
-			<div class="col-xs-4 col-sm-12">
-				<a href="{% url "vote_list" %}">
-					<img src="/static/images/img-voting-records.png">
-					Voting Records
-				</a>
-			</div>
-			<div class="clearfix visible-xs"> </div>
-			<div class="col-xs-4 col-sm-12">
-				<a href="{% url "committee_list" %}">
-					<img src="/static/images/img-committees.png">
-					Committees
-				</a>
-			</div>
-			<div class="col-xs-4 col-sm-12">
-				<a href="/about">
-					<img src="/static/images/img-about.png">
-					About GovTrack.us
-				</a>
-			</div>
-			<div class="col-xs-4 col-sm-12">
-				<a href="/developers">
-					<img src="/static/images/img-opendata.png">
-					Use Our Open Data
-				</a>
-			</div>
-		</div>
-	</div>
-	<div class="col-sm-9">
-
-		
-
-
-			<div id="generic-events">
-				<h2><span>Recent Activity in Congress</span></h2>
-		
-				<section>
-					{% for item in events|slice:":5" %}
-					{% with item|render_event:subscription_feeds as event %}
-					<article style="margin-bottom: 1em">
-						<h3><a href="{{event.url}}">{{event.title|truncatewords:30}}</a></h3>
-						<p>
-							{{event.type}} &mdash; {% if not event.date_has_no_time %}{{item.when}}{% else %}{{item.when|date}}{% endif %}
-						</p>
-						{{event.body_html|safe}}
-					</article>
-					{% endwith %}
-					{% endfor %}
-
-				</section>
-			</div><!-- /generic-events -->
-
-	</div> <!-- /col -->
-</div> <!-- /row -->
 </div>
 {% endblock %}
 
