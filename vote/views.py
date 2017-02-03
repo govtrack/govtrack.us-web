@@ -619,6 +619,8 @@ def vote_comparison_table(request, table_id, table_slug):
 		("115-2017/s30", { "title": "John F. Kelly to be Secretary of Homeland Security" }),
 		("115-2017/s32", { "title": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
 		("115-2017/s33", { "title": "Nikki R. Haley to be the Ambassador to the United Nations" }),
+		("115-2017/s35", { "title": "Elaine L. Chao to be Secretary of Transportation" }),
+		("115-2017/s36", { "title": "Rex W. Tillerson to be Secretary of State" }),
 	]
 	voters = None
 
