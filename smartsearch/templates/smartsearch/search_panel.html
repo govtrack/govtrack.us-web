@@ -236,6 +236,10 @@ function update_search(pagenum, pageinc, elem, isinitial) {
         for (var k in fragment_params)
             if (fragment_params[k] == "__ALL__")
                 delete postdata[k]; // null is not sufficient
+
+        // Update the sort control.
+        if ("sort" in postdata)
+            $('#searchform_sort').val(postdata["sort"]);
     }
     
     // Copy just the faceting so far into a separate array, minus the parts that
