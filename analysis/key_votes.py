@@ -14,7 +14,7 @@ from vote.models import Vote
 from vote.views import get_vote_outliers, load_ideology_scores, attach_ideology_scores
 
 tqdm = lambda x : x
-if sys.stdout.isatty:
+if sys.stdout.isatty():
     from tqdm import tqdm
 
 congress = int(sys.argv[1])

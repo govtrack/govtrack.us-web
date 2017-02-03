@@ -279,7 +279,7 @@ def vote_thumbnail_image_map(vote):
 	# We only have an SVG for House votes for certain Congresses.
 	if vote.chamber != CongressChamber.house:
 		raise Http404()
-	if vote.congress not in (112, 113, 114):
+	if vote.congress not in (112, 113, 114, 115):
 		raise Http404()
 
 	# Load the SVG.
