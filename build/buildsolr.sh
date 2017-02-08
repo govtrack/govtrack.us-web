@@ -1,5 +1,9 @@
 GOVTRACK_ROOT=$(realpath $(dirname $0)/..)
 
+# First stop the jetty service, as we won't be able to successfully stop the
+# running process after we overwrite the configuration.
+sudo service jetty8 stop
+
 # Download and unzip the solr installation package
 curl -LO https://archive.apache.org/dist/lucene/solr/4.10.2/solr-4.10.2.tgz
 tar xvzf solr-4.10.2.tgz
@@ -9,13 +13,13 @@ cd solr-4.10.2
 cp -R example govtrack
 
 # Initialize a collection for each of bill and person types
-mv govtrack/collection1 govtrack/bill
-echo "name=bill" > govtrack/bill/core.properties
-ln -s govtrack/bill/conf/schema.xml $GOVTRACK_ROOT/bill/solr/schema.xml
+mv govtrack/solr/collection1 govtrack/solr/bill
+echo "name=bill" > govtrack/solr/bill/core.properties
+ln -s govtrack/solr/bill/conf/schema.xml $GOVTRACK_ROOT/bill/solr/schema.xml
 
-cp -R govtrack/bill govtrack/person
-echo "name=person" > govtrack/person/core.properties
-ln -s govtrack/person/conf/schema.xml $GOVTRACK_ROOT/person/solr/schema.xml
+cp -R govtrack/solr/bill govtrack/solr/person
+echo "name=person" > govtrack/solr/person/core.properties
+ln -s govtrack/solr/person/conf/schema.xml $GOVTRACK_ROOT/person/solr/schema.xml
 
 # Copy Solr over to /opt
 sudo cp -R govtrack /opt/solr
