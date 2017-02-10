@@ -14,6 +14,11 @@
     .table tbody .party-total.first > * { border-top: 1px solid #555; }
     .table tbody .party-total.last > * { border-bottom: 1px solid #555; }
     #sort-options a.active { text-decoration: none; font-weight: bold; cursor: default; }
+
+	{% if votes|length > 5 %}
+    thead th a:link, thead th a:visited { text-decoration: none; }
+    .table th, .table td { font-size: 88%; }
+	{% endif %}
 </style>
 {% endblock %}
 
@@ -83,7 +88,7 @@ function do_sort(key) {
                     
                 </th>
                 {% for v in votes %}
-                    <th scope="col">
+                    <th scope="col" {% if v.longtitle %}title="{{v.longtitle}}"{% endif %}>
                         <a href="{{v.get_absolute_url}}">
                             {% if v.title %}
                                 {{v.title}}
@@ -132,13 +137,19 @@ function do_sort(key) {
             {% for party_total in party_totals %}
             <tr class="party-total {% if forloop.first %}first{% endif %} {% if forloop.last %}last{% endif %}">
                 <th scope="row" class="partycolor_{{party_total.party.0}}">
-                    All {{party_total.party}}s
+                    {% if party_total.party == "Vice President" %}
+                        The Vice President
+                    {% else %}
+                        All {{party_total.party}}s
+                    {% endif %}
                 </th>
                 {% for vote_total in party_total.votes %}
                     <td>
+                        {% if vote_total %} {# party or VP may not have been in this one #}
                         <span class="vote_positive">{{vote_total.yes}}</span>
                         /
                         <span class="vote_negative">{{vote_total.no}}</span>
+                        {% endif %}
                     </td>
                 {% endfor %}
             </tr>

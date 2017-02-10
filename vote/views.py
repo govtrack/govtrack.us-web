@@ -615,12 +615,24 @@ def vote_comparison_table(request, table_id, table_slug):
 
 	# Get votes to show.
 	votes = [
-		("115-2017/s29", { "title": "James Mattis to be Secretary of Defense" }),
-		("115-2017/s30", { "title": "John F. Kelly to be Secretary of Homeland Security" }),
-		("115-2017/s32", { "title": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
-		("115-2017/s33", { "title": "Nikki R. Haley to be the Ambassador to the United Nations" }),
-		("115-2017/s35", { "title": "Elaine L. Chao to be Secretary of Transportation" }),
-		("115-2017/s36", { "title": "Rex W. Tillerson to be Secretary of State" }),
+		#("115-2017/s29", { "title": "James Mattis to be Secretary of Defense" }),
+		#("115-2017/s30", { "title": "John Kelly to be Secretary of Homeland Security" }),
+		#("115-2017/s32", { "title": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
+		#("115-2017/s33", { "title": "Nikki Haley to be the Ambassador to the United Nations" }),
+		#("115-2017/s35", { "title": "Elaine Chao to be Secretary of Transportation" }),
+		#("115-2017/s36", { "title": "Rex Tillerson to be Secretary of State" }),
+		#("115-2017/s54", { "title": "Elisabeth DeVos to be Secretary of Education" }),
+		#("115-2017/s59", { "title": "Jeff Sessions to be Attorney General" }),
+
+		("115-2017/s29", { "title": "James Mattis—Defense", "longtitle":  "James Mattis to be Secretary of Defense" }),
+		("115-2017/s30", { "title": "John Kelly—Homeland Security", "longtitle": "John Kelly to be Secretary of Homeland Security" }),
+		("115-2017/s32", { "title": "Mike Pompeo—CIA", "longtitle": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
+		("115-2017/s33", { "title": "Nikki Haley—UN Ambassador", "longtitle": "Nikki Haley to be the Ambassador to the United Nations" }),
+		("115-2017/s35", { "title": "Elaine Chao—Transportation", "longtitle": "Elaine Chao to be Secretary of Transportation" }),
+		("115-2017/s36", { "title": "Rex Tillerson—State", "longtitle": "Rex Tillerson to be Secretary of State" }),
+		("115-2017/s54", { "title": "Elisabeth DeVos—Education", "longtitle": "Elisabeth DeVos to be Secretary of Education" }),
+		("115-2017/s59", { "title": "Jeff Sessions—Attorney General", "longtitle": "Jeff Sessions to be Attorney General" }),
+		("115-2017/s61", { "title": "Tom Price—HHS", "longtitle": "Thomas Price to be Secretary of Health and Human Services" }),
 	]
 	voters = None
 
@@ -650,16 +662,16 @@ def vote_comparison_table(request, table_id, table_slug):
 
 	# Compute totals by party.
 	party_totals = { }
-	for vote in votes:
+	for i, vote in enumerate(votes):
 		totals = vote.totals()
 		for party, party_total in zip(totals['parties'], totals['party_counts']):
 			pt = party_totals.setdefault(party, {
 				"party": party,
 				"total_votes": 0,
-				"votes": [],
+				"votes": [None] * len(votes), # if this party didn't occur in prev votes, make sure we have an empty record
 			})
 			pt["total_votes"] += party_total["total"]
-			pt["votes"].append(party_total)
+			pt["votes"][i] = party_total
 	party_totals = sorted(party_totals.values(), key = lambda value : -value['total_votes'])
 	party_sort_order = [party_total["party"] for party_total in party_totals]
 
