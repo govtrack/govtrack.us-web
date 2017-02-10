@@ -18,12 +18,11 @@
 
 {% block body %}
 
-<p style="text-align: center">
-New: <a href="calendar">Calendar of Upcoming Committee Meetings</a>
-</p>
+<h2>Upcoming Committee Meetings</h2>
+<p>We are tracking <a href="calendar">{{upcoming_meetings}} Upcoming Committee Meeting{{upcoming_meetings|pluralize}}</a>.</p>
 
-<div class="row">
-	<div class="col-sm-offset-1 col-sm-5">
+<div class="row" style="margin-top: 1.5em">
+	<div class="col-sm-5">
         <h2>Senate Committees</h2>
         <ul style="list-style: none; padding: 0;">
             {% for item in senate_committees %}
@@ -42,7 +41,7 @@ New: <a href="calendar">Calendar of Upcoming Committee Meetings</a>
     </div>
 </div>
 <div class="row">
-	<div class="col-sm-offset-1 col-sm-10">
+	<div class="col-sm-10">
         <h2>Joint Committees</h2>
         <p>The joint committees are made up of both senators and representatives. They typically have an oversight or policy role but no legislative duties.</p>
         <ul style="list-style: none; padding: 0;">

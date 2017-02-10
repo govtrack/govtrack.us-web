@@ -17,6 +17,7 @@
 <style type="text/css">
 	/*** CALENDAR EVENTS ***/
 
+	h2 { font-weight: bold; }
 	h3 {
 		margin-bottom: .75em;
 	}
@@ -26,7 +27,7 @@
 	}
 
 	div.calendar-event {
-		margin-bottom: 1.5em;
+		margin: 1.5em 0;
 		padding: 1em;
 		box-shadow: 0.15em 0.15em 0.25em #333;
 		background-color: rgba(203, 75, 22, 0.05);
@@ -47,12 +48,14 @@
 
 {% block summary %}
     <h1>Committee Meeting Calendar</h1>
-    <p style="margin-bottom: 0;">Committees conduct their business during hearings, mark-up sessions, and other business meetings.</p>
+    <p style="margin-bottom: 0;">
+	Committees conduct their business during hearings, mark-up sessions, and other business meetings.
+	All times are in Eastern Time when the meeting is in Washington, D.C. Shaded meetings were posted within the last 36 hours.
+	(Source: <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">the Senate</a> and <a href="http://docs.house.gov/Committee/Calendar/ByWeek.aspx">docs.House.gov</a>)
+</p>
 {% endblock %}
 
 {% block body %}
-
-<p style="line-height: 120%"><small>All times are in Eastern Time when the meeting is in Washington, D.C. Shaded meetings were posted within the last 36 hours. Only meetings posted <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">by the Senate</a> or on <a href="http://docs.house.gov/Committee/Calendar/ByWeek.aspx">docs.House.gov</a> are listed.</small></p>
 
 <div class="dummy">
 <div class="dummy">
@@ -70,17 +73,20 @@
 {% ifchanged committee_meeting.when %}
 	</div> <!-- /calendar-time -->
 	<div class="calendar-time">
-	<h3><time>{{ committee_meeting.when|date:"P" }}</time></h3>
+	<h3>
+		{% with committee_meeting.when|date:"P" as time %}
+			{% if time == "midnight" %}Time Not Yet Posted{% else %}{{time}}{% endif %}
+		{% endwith %}
+	</h3>
 {% endifchanged %}
 	<div class="calendar-event {% if committee_meeting.is_recently_added %} new{% endif %}" id="calendar-event:{{ committee_meeting.guid }}">
 		<small style="float: right">
-			{{ committee_meeting.when|date:"D, M j, Y - P" }}
 			{% if committee_meeting.room %}
 				<br><span class="calendar-event-location">Location: {{ committee_meeting.room }}</span>
 			{% endif %}
 		</small>
 
-		<h4 style="margin-top: 0;"><a href="{{committee_meeting.committee.get_absolute_url}}">{{committee_meeting.abbrev_committee_name}}</a></h4>
+		<h4 style="margin-top: 0;"><a href="{{committee_meeting.committee.get_absolute_url}}">{{committee_meeting.committee.fullname}}</a></h4>
 
 		<p class="calendar-event-topic" style="margin-bottom: 0">
 			{{ committee_meeting.subject }}

@@ -79,6 +79,7 @@ def committee_list(request):
         'house_committees': getlist(CommitteeType.house),
         'joint_committees': getlist(CommitteeType.joint),
         'feed': Committee.AllCommitteesFeed(),
+        'upcoming_meetings': CommitteeMeeting.objects.filter(when__gte=datetime.now().date()).count(),
     }
 
    
