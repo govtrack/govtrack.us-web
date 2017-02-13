@@ -6,6 +6,7 @@
 
 # Project specific
 .env
+.venv
 db
 log
 settings_local.py
