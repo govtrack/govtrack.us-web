@@ -44,7 +44,11 @@ sudo cp -R govtrack /opt/solr
 sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty /etc/default/jetty8
 sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty-logging.xml /opt/solr/etc/jetty-logging.xml
 
-sudo useradd -d /opt/solr -s /sbin/false solr
+if ! id -u solr > /dev/null 2>&1
+then
+  sudo useradd -d /opt/solr -s /sbin/false solr
+fi
+
 sudo mkdir -p /var/log/solr
 sudo chown solr:solr -R /opt/solr
 sudo chown solr:solr -R /var/log/solr
