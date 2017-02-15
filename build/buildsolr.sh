@@ -7,8 +7,16 @@ GOVTRACK_ROOT=$(realpath $(dirname $0)/..)
 sudo service jetty8 stop
 
 # Download and unzip the solr installation package
-curl -LO https://archive.apache.org/dist/lucene/solr/4.10.2/solr-4.10.2.tgz
-tar xvzf solr-4.10.2.tgz
+if [ ! -f solr-4.10.2.tgz ]
+then
+  curl -LO https://archive.apache.org/dist/lucene/solr/4.10.2/solr-4.10.2.tgz
+fi
+
+if [ ! -d solr-4.10.2 ]
+then
+  tar xvzf solr-4.10.2.tgz
+fi
+
 cd solr-4.10.2
 
 # Create a new configuration from the example
