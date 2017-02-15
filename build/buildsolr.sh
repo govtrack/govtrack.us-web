@@ -23,13 +23,19 @@ cd solr-4.10.2
 cp -R example govtrack
 
 # Initialize a collection for each of bill and person types
-mv govtrack/solr/collection1 govtrack/solr/bill
-echo "name=bill" > govtrack/solr/bill/core.properties
-ln -f -s govtrack/solr/bill/conf/schema.xml $GOVTRACK_ROOT/bill/solr/schema.xml
+if [ ! -d govtrack/solr/bill ]
+then
+  mv govtrack/solr/collection1 govtrack/solr/bill
+  echo "name=bill" > govtrack/solr/bill/core.properties
+  ln -f -s govtrack/solr/bill/conf/schema.xml $GOVTRACK_ROOT/bill/solr/schema.xml
+fi
 
-cp -R govtrack/solr/bill govtrack/solr/person
-echo "name=person" > govtrack/solr/person/core.properties
-ln -f -s govtrack/solr/person/conf/schema.xml $GOVTRACK_ROOT/person/solr/schema.xml
+if [ ! -d govtrack/solr/person ]
+then
+  cp -R govtrack/solr/bill govtrack/solr/person
+  echo "name=person" > govtrack/solr/person/core.properties
+  ln -f -s govtrack/solr/person/conf/schema.xml $GOVTRACK_ROOT/person/solr/schema.xml
+fi
 
 # Copy Solr over to /opt
 sudo cp -R govtrack /opt/solr
