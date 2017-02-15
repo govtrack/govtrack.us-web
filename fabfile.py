@@ -54,35 +54,96 @@ def install_packages(update=True):
     if update:
         sudo('apt update')
 
-    sudo('apt install -y git python-virtualenv python-lxml python-openid \
-              python-oauth2client python-iso8601 python-numpy python-scipy \
-              python-prctl libssl-dev')
+    sudo('apt install -y git python-virtualenv python-lxml python-openid'
+            ' python-oauth2client python-iso8601 python-numpy python-scipy'
+            ' python-prctl python-pip libssl-dev'
+
+            # For Solr
+            ' openjdk-8-jre jetty8')
 
 
-def pull_source():
-    with cd('govtrack.us-web'):
+def pull_repo(folder):
+    with cd(folder):
         return run('git pull')
 
 
-def clone_source():
-    return run('git clone --recursive {url}'.format(url=os.environ['PROJECT_GIT_URL']))
+def clone_repo(repo_url, folder):
+    return run('git clone --recursive {url} {folder}'.format(url=repo_url, folder=folder))
 
 
-def pull_or_clone_source():
+def pull_or_clone_repo(repo_url, folder):
     # Try pulling as if the repo already exists
     with settings(warn_only=True):
-        result = pull_source()
+        result = pull_repo(folder)
     # If it doesn't, clone from github
     if result.failed:
-        clone_source()
+        clone_repo(repo_url, folder)
 
 
-def deploy_web():
-    pull_or_clone_source()
+def install_deps():
+    with cd('govtrack.us-web'):
+        sudo('pip install --upgrade -r ./build/pipreq.txt')
 
 
-def clean_web():
+def configure_solr():
+    with cd('govtrack.us-web'):
+        return run('./build/buildsolr.sh')
+
+
+def upload_settings():
+    pass
+
+
+def update_db():
+    with cd('govtrack.us-web'):
+        run('./manage.py syncdb --noinput')
+
+
+def update_assets():
+    with cd('govtrack.us-web'):
+        run('./minify')
+
+
+def bootstrap_data():
+    with cd('govtrack.us-web'):
+        # This seems very chicken-or-egg. Is the purpose of this to bootstrap
+        # the existing site with as much data as already exists? Won't the
+        # scrapers have to be run anyway?
+        run('wget http://www.govtrack.us/data/db/django-fixture-{people,usc_sections,billterms}.json')
+        run('./manage.py loaddata django-fixture-people.json')
+        run('./manage.py loaddata django-fixture-usc_sections.json')
+        run('./manage.py loaddata django-fixture-billterms.json')
+
+        run('./parse.py committee')
+
+        run('build/rsync.sh')
+        run('./parse.py bill --congress=113 --disable-index --disable-events')
+        run('./parse.py vote --congress=113 --disable-index --disable-events')
+
+
+def deploy(settings=None):
+    pull_or_clone_repo(os.environ['GOVTRACK_WEB_GIT_URL'], 'govtrack.us-web')
+    pull_or_clone_repo(os.environ['LEGISLATORS_GIT_URL'], 'congress-legislators')
+
+    # NOTE: Shouldn't normally have to do the following, but I'm not workng on
+    # the master branch.
+    with cd('govtrack.us-web'):
+        run('git checkout vm-deployment')
+
+    install_deps()
+    configure_solr()
+
+    if settings:
+        upload_settings()
+
+    update_db()
+    update_assets()
+    bootstrap_data()
+
+
+def clean():
     run('rm -rf govtrack.us-web')
+    run('rm -rf congress-legislators')
 
 
 def setenv(vars):
