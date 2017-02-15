@@ -1,4 +1,4 @@
-#!.env/bin/python -R
+#!/usr/bin/env python -R
 import os, sys
 
 if "runserver" in sys.argv:
