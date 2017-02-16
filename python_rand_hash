@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Run a python interpreter that uses a pseudo-random salt to make hash() values
+# of various types be unpredictable between separate invocations of the
+# interpreter, as a defense against denial-of-service attacks.
+
+python -R "$@"
