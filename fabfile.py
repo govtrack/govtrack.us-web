@@ -62,22 +62,31 @@ def install_packages(update=True):
             ' openjdk-8-jre jetty8')
 
 
-def pull_repo(folder):
+def pull_repo(folder, branch='master'):
     with cd(folder):
-        return run('git pull')
+        result = run('git fetch --all')
+
+        if result.failed:
+            return result
+
+        run('git checkout {branch}'.format(branch=branch))
+        run('git reset --hard origin/{branch}'.format(branch=branch))
+        return result
 
 
-def clone_repo(repo_url, folder):
-    return run('git clone --recursive {url} {folder}'.format(url=repo_url, folder=folder))
+def clone_repo(repo_url, folder, branch='master'):
+    result = run('git clone --recursive {url} {folder}'.format(url=repo_url, folder=folder))
+    run('git checkout {branch}'.format(branch=branch))
+    return result
 
 
-def pull_or_clone_repo(repo_url, folder):
+def pull_or_clone_repo(repo_url, folder, branch='master'):
     # Try pulling as if the repo already exists
     with settings(warn_only=True):
-        result = pull_repo(folder)
+        result = pull_repo(folder, branch=branch)
     # If it doesn't, clone from github
     if result.failed:
-        clone_repo(repo_url, folder)
+        clone_repo(repo_url, folder, branch=branch)
 
 
 def install_deps():
@@ -122,13 +131,8 @@ def bootstrap_data():
 
 
 def deploy(settings=None):
-    pull_or_clone_repo(os.environ['GOVTRACK_WEB_GIT_URL'], 'govtrack.us-web')
+    pull_or_clone_repo(os.environ['GOVTRACK_WEB_GIT_URL'], 'govtrack.us-web', branch='vm-deployment')
     pull_or_clone_repo(os.environ['LEGISLATORS_GIT_URL'], 'congress-legislators')
-
-    # NOTE: Shouldn't normally have to do the following, but I'm not workng on
-    # the master branch.
-    with cd('govtrack.us-web'):
-        run('git checkout vm-deployment')
 
     install_deps()
     configure_solr()
