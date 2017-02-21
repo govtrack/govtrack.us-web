@@ -8,6 +8,14 @@
 {% block head %}
   {% include "person/mapbox-head.html" %}
   <style>
+    .spanbullets span:after {
+      display: inline;
+      content: " · ";
+    }
+    .spanbullets span:last-child:after {
+      display: none;
+      content: "";
+    }
   	#map {
   		width: 100%;
   		height: 80vh;
@@ -155,13 +163,13 @@
 			{% for props, rep in legislators %}
 				{% if props.first_senator %}
 					<h2 style="margin-top: 0"><span>Senators</span></h2>
-					<p>Each state elects two senators for staggered 6-year terms. Senators represent the entire state. {{statename}}&rsquo;s senators are:</p>
+					<p>Each state elects two senators to the United States Senate for staggered 6-year terms. Senators represent the entire state. {{statename}}&rsquo;s senators are:</p>
 				{% endif %}
 				{% if props.first_representative %}
 					<h2><span>Representative</span></h2>
 
 					{% if stateapp != "T" %}
-						<p>The United States is divided into 435 congressional districts, each with a population of about 710,000 individuals. Each district elects a representative to the House for a two-year term. Representatives are also called congressmen/congresswomen.</p>
+						<p>The United States is divided into 435 congressional districts, each with a population of about 710,000 individuals. Each district elects a representative to the U.S. House of Representatives for a two-year term. Representatives are also called congressmen/congresswomen.</p>
 					{% elif state == "DC" %}
 						<p>The District of Columbia (DC) is the nation&rsquo;s capital. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators or representatives in Congress.</p>
 
@@ -195,11 +203,13 @@
 	            		<div>Since {{role.logical_dates.0|date}} (Next Election in {{role.next_election_year}})</div>
 						<div style="margin-bottom: .5em;">{{role.party}}</div>
 
-						<div style="margin-bottom: .5em;"><a href="{{rep.get_absolute_url}}">More Info &raquo;</a></div>
+						<div class="spanbullets" style="margin-bottom: .75em;">
+						{% if rep.twitterid %}<span><a href="https://twitter.com/@{{rep.twitterid}}">@{{rep.twitterid}}</a></span>{% endif %}
+						{% if role.website %}<span><a href="{{role.website}}">Official Website <i class="fa  fa-external-link"></i></a></span>{% endif %}
+						{% if role.phone %}<span><nobr><a href="tel:+1-{{role.phone}}">{{role.phone}}</a></nobr></span>{% endif %}
+						</div>
 
-						{% if rep.twitterid %}<div><a href="https://twitter.com/@{{rep.twitterid}}">@{{rep.twitterid}}</a></div>{% endif %}
-						{% if role.website %}<div><a href="{{role.website}}">Official Website <i class="fa  fa-external-link"></i></a></div>{% endif %}
-						{% if role.phone %}<div>Phone: <nobr><a href="tel:+1-{{role.phone}}">{{role.phone}}</a></nobr></div>{% endif %}
+						<div style="margin-bottom: .5em;"><a href="{{rep.get_absolute_url}}" class="btn btn-success">View Legislative Profile &raquo;</a></div>
 
 						{% if role.role_type == 2%}
 							<div style="margin-top: .5em; line-height: 126%; font-size: 85%; color: #555; font-style: italic;">Check the map <span class="visible-xs-inline visible-sm-inline">below</span> to make sure we&rsquo;ve located your address accurately.</div>
