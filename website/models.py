@@ -247,7 +247,7 @@ class MediumPost(models.Model):
 
     @property
     def snippet(self):
-        return self.data['virtuals']['snippet']
+        return self.data['virtuals'].get('subtitle')
 
     @property
     def image(self):
