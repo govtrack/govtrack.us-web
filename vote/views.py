@@ -615,24 +615,20 @@ def vote_comparison_table(request, table_id, table_slug):
 
 	# Get votes to show.
 	votes = [
-		#("115-2017/s29", { "title": "James Mattis to be Secretary of Defense" }),
-		#("115-2017/s30", { "title": "John Kelly to be Secretary of Homeland Security" }),
-		#("115-2017/s32", { "title": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
-		#("115-2017/s33", { "title": "Nikki Haley to be the Ambassador to the United Nations" }),
-		#("115-2017/s35", { "title": "Elaine Chao to be Secretary of Transportation" }),
-		#("115-2017/s36", { "title": "Rex Tillerson to be Secretary of State" }),
-		#("115-2017/s54", { "title": "Elisabeth DeVos to be Secretary of Education" }),
-		#("115-2017/s59", { "title": "Jeff Sessions to be Attorney General" }),
-
-		("115-2017/s29", { "title": "James Mattis—Defense", "longtitle":  "James Mattis to be Secretary of Defense" }),
-		("115-2017/s30", { "title": "John Kelly—Homeland Security", "longtitle": "John Kelly to be Secretary of Homeland Security" }),
-		("115-2017/s32", { "title": "Mike Pompeo—CIA", "longtitle": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
-		("115-2017/s33", { "title": "Nikki Haley—UN Ambassador", "longtitle": "Nikki Haley to be the Ambassador to the United Nations" }),
-		("115-2017/s35", { "title": "Elaine Chao—Transportation", "longtitle": "Elaine Chao to be Secretary of Transportation" }),
-		("115-2017/s36", { "title": "Rex Tillerson—State", "longtitle": "Rex Tillerson to be Secretary of State" }),
-		("115-2017/s54", { "title": "Elisabeth DeVos—Education", "longtitle": "Elisabeth DeVos to be Secretary of Education" }),
-		("115-2017/s59", { "title": "Jeff Sessions—Attorney General", "longtitle": "Jeff Sessions to be Attorney General" }),
-		("115-2017/s61", { "title": "Tom Price—HHS", "longtitle": "Thomas Price to be Secretary of Health and Human Services" }),
+		("115-2017/s29", { "title": "Mattis—Defense", "longtitle":  "James Mattis to be Secretary of Defense" }),
+		("115-2017/s30", { "title": "Kelly—Homeland Security", "longtitle": "John Kelly to be Secretary of Homeland Security" }),
+		("115-2017/s32", { "title": "Pompeo—CIA", "longtitle": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
+		("115-2017/s33", { "title": "Haley—UN Ambassador", "longtitle": "Nikki Haley to be the Ambassador to the United Nations" }),
+		("115-2017/s35", { "title": "Chao—Transportation", "longtitle": "Elaine Chao to be Secretary of Transportation" }),
+		("115-2017/s36", { "title": "Tillerson—State", "longtitle": "Rex Tillerson to be Secretary of State" }),
+		("115-2017/s54", { "title": "DeVos—Education", "longtitle": "Elisabeth DeVos to be Secretary of Education" }),
+		("115-2017/s59", { "title": "Sessions—Attorney General", "longtitle": "Jeff Sessions to be Attorney General" }),
+		("115-2017/s61", { "title": "Price—HHS", "longtitle": "Thomas Price to be Secretary of Health and Human Services" }),
+		("115-2017/s63", { "title": "Mnuchin—Treasury", "longtitle": "Steven Mnuchin to be Secretary of the Treasury" }),
+		("115-2017/s64", { "title": "Shulkin—VA", "longtitle": "David Shulkin to be Secretary of Veterans Affairs" }),
+		("115-2017/s65", { "title": "McMahon—SBA", "longtitle": "Linda McMahon to be Administrator of the Small Business Administration" }),
+		("115-2017/s68", { "title": "Mulvaney—OMB", "longtitle": "Mick Mulvaney to be Director of the Office of Management and Budget" }),
+		("115-2017/s71", { "title": "Pruitt—EPA", "longtitle": "Scott Pruitt to be Administrator of the Environmental Protection Agency" }),
 	]
 	voters = None
 
