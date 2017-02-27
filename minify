@@ -1,2 +1,2 @@
 #!/bin/bash
-.env/bin/python -mrcssmin < static/css/all.css > static/css/all-min.css
+python -m rcssmin < static/css/all.css > static/css/all-min.css
