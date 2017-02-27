@@ -30,3 +30,6 @@ diff_match_patch_python
 python-twitter
 sparkpost
 user-agents
+dj_database_url
+django-cache-url
+dj-haystack-url

@@ -20,7 +20,7 @@ if DEBUG and "SSH_CONNECTION" in os.environ:
 	# debugging output.
 	INTERNAL_IPS = ('127.0.0.1', os.environ["SSH_CONNECTION"].split(" ")[0])
 	if sys.argv == ['./manage.py', 'runserver']: print "Internal IPs:", repr(INTERNAL_IPS)
-                                        
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -114,12 +114,12 @@ INSTALLED_APPS = (
     #'south',
     #'debug_toolbar',
     #'silk',
-    
+
     'haystack',
     'django_wysiwyg',
     'django_twilio',
     'htmlemailer',
-    
+
     # project modules
     'twostream',
     'simplegetapi',
@@ -179,11 +179,11 @@ PREDICTIONMARKET_BANK_UID = 136196
 #if DEBUG: # sometimes we debug in a live environment
 #	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Load local settings.
-from settings_local import *
+# Load settings from the environment
+from settings_env import *
 
 if not SECRET_KEY:
-    raise Exception('You must provide SECRET_KEY value in settings_local.py')
+    raise Exception('You must provide SECRET_KEY value in an env variable')
 
 # Since we rely on external APIs in a few places, make sure
 # that downed APIs elsewhere don't hold us too long. Not

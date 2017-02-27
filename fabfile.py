@@ -59,7 +59,10 @@ def install_packages(update=True):
             ' python-prctl python-pip libssl-dev'
 
             # For Solr
-            ' openjdk-8-jre jetty8')
+            ' openjdk-8-jre jetty8'
+
+            # For PostgreSQL client support
+            ' libpq-dev')
 
 
 def pull_repo(folder, branch='master'):
@@ -93,10 +96,20 @@ def install_deps():
     with cd('govtrack.us-web'):
         sudo('pip install --upgrade -r ./build/pipreq.txt')
 
+        # We don't need psycopg2 in the normal requirements. If postgres isn't
+        # installed, the library installation will fail. Leave it out of the
+        # list to make development easier.
+        sudo('pip install psycopg2')
+
 
 def configure_solr():
     with cd('govtrack.us-web'):
         return run('./build/buildsolr.sh')
+
+
+def configure_postgres():
+    sudo('apt install -y postgresql')
+    sudo('createdb govtrack', user='postgres')
 
 
 def upload_settings():
@@ -130,8 +143,8 @@ def bootstrap_data():
         run('./parse.py vote --congress=113 --disable-index --disable-events')
 
 
-def deploy(settings=None):
-    pull_or_clone_repo(os.environ['GOVTRACK_WEB_GIT_URL'], 'govtrack.us-web', branch='vm-deployment')
+def deploy(settings=None, branch='master'):
+    pull_or_clone_repo(os.environ['GOVTRACK_WEB_GIT_URL'], 'govtrack.us-web', branch=branch)
     pull_or_clone_repo(os.environ['LEGISLATORS_GIT_URL'], 'congress-legislators')
 
     install_deps()
