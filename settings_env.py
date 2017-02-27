@@ -70,7 +70,7 @@ TWITTER_OAUTH_TOKEN = get_env_variable('TWITTER_OAUTH_TOKEN')
 TWITTER_OAUTH_TOKEN_SECRET = get_env_variable('TWITTER_OAUTH_TOKEN_SECRET')
 FACEBOOK_APP_ID = get_env_variable('FACEBOOK_APP_ID')
 FACEBOOK_APP_SECRET = get_env_variable('FACEBOOK_APP_SECRET')
-FACEBOOK_AUTH_SCOPE = get_env_variable('FACEBOOK_AUTH_SCOPE')  # can be an empty string
+FACEBOOK_AUTH_SCOPE = get_env_variable('FACEBOOK_AUTH_SCOPE', default='')  # can be an empty string
 TWILIO_ACCOUNT_SID = get_env_variable('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = get_env_variable('TWILIO_AUTH_TOKEN')
 
