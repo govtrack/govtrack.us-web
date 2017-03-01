@@ -69,55 +69,17 @@ class Command(BaseCommand):
 					.filter(email__in=list_email_freq)\
 					.exclude(last_email_sent__gt=datetime.now()-timedelta(hours=20))
 
-			# Find the feeds with new events first and then whittle down the list of
-			# subscription lists to just those that track those feeds.
-			if False:
-				# Find all of the feeds tracked by all users with a subscription list with email updates turned on.
-				all_feeds = list(Feed.objects.filter(tracked_in_lists__email__in = list_email_freq).distinct())
-
-				# Feeds may be contained within other feeds. Make a map from feeds to sets of feeds they are contained
-				# in. includes_feeds can be very dynamic, so we have to go forwards to make this map. We can't otherwise
-				# go from a feed directly to feeds it is contained in.
-				feed_included_in = dict()
-				if sys.stdout.isatty():
-					import random, tqdm
-					random.shuffle(all_feeds)
-					all_feeds = tqdm.tqdm(all_feeds, desc="Dynamic Feeds")
-				for feed1 in all_feeds:
-					feed1_includes = feed1.includes_feeds()
-					for feed2 in feed1_includes:
-						if feed2.id is None: raise Exception("Feed.includes_feeds() returned an object not in the database.")
-						feed_included_in.setdefault(feed2.id, set()).add(feed1)
-	
-				# Find the feed IDs that generated all events in the last back_days days.
-				if sys.stdout.isatty(): print "Looking for feeds with events..."
-				active_feeds = set(Event.objects.filter(when__gt=datetime.now() - timedelta(days=back_days)).values_list("feed_id", flat=True))
-	
-				# Expand the active_feeds list to feeds that "included" any feeds in the active feeds list.
-				# Feed inclusion isn't recursive beyond the first level so we can do this in one pass.
-				for feed1 in list(active_feeds):
-					for feed2 in feed_included_in.get(feed1, []):
-						active_feeds.add(feed2)
-	
-				# Find the subscription lists w/ emails turned on that are tracking those feeds.
-				# Exclude lists we sent an email out to in the last 16 hours, in case we're
-				# re-starting this process and some new events crept in.
-				sublists = sublists.filter(trackers__in=active_feeds)
-
-				# Evaluate the query.
-				if sys.stdout.isatty(): print "Looking for subscribed users..."
-				sublists = set(sublists)
-
 			# And get a list of those users.
-			users = User.objects.filter(subscription_lists__in=sublists)\
-				.distinct()\
-				.values("id", "email", "last_login")\
-				.order_by('id')
+			users = User.objects.filter(subscription_lists__in=sublists).distinct()
 
 		if os.environ.get("START"):
 			users = users.filter(id__gte=int(os.environ["START"]))
 				#, id__lt=169660)
-			
+
+		users = users\
+				.values("id", "email", "last_login")\
+				.order_by('id')
+
 		counts = {
 			"total_emails_sent": 0,
 			"total_events_sent": 0,

@@ -2,88 +2,266 @@
 {% load events_utils %}
 {% block head %}
 <style>
-#content-area { padding: 1em; }
+	#backgroundTable {
+		font-family: Arial, sans-serif;
+		background-color: #F2F2F2;
+	}
+
+	a {
+		color: #0000EE;
+	}
+	h1 {
+		font-family: Arial, sans-serif;
+		font-weight: bold;
+		font-size: 22pt;
+		text-align: left;
+	}
+	h2 {
+		font-family: Arial, sans-serif;
+		font-size: 18pt;
+		line-height: 20pt; 
+		margin-top: 10px;
+		margin-bottom: 0px;
+		text-align: left;
+	}
+	h3 {
+		font-family: Arial, sans-serif;
+		font-size: 12pt; 
+		margin-top: 10px;
+		margin-bottom: 20px;
+		line-height: 16pt;
+		text-align: left;
+	}
+	h4 {
+		font-family: Arial, sans-serif;
+		font-size: 12pt;
+		font-weight: normal;
+		text-align: left;
+	}
+	h5 {
+		font-family: Arial, sans-serif;
+		font-weight: bold;
+		font-size: 10pt;
+		color: #969698;
+		margin-bottom: 20px;
+		margin-top:20px;
+		text-align: left;
+	}
+	p {
+		font-family: Arial, sans-serif;
+		font-size: 11pt;
+		font-weight: normal;
+		line-height: 14pt;
+		margin-top: 10px;
+		text-align: left;
+	}
+
+        .templateColumnContainer{
+            text-align: left;
+        }
+
+        .leftColumnContent{
+            text-align: left;
+        }
+
+        .rightColumnContent{
+            text-align: left;
+        }
+
+        .rightColumnContent p {
+			font-size: 10pt;
+			line-height: 13pt;
+		}
+
+    @media only screen and (min-width: 751px){
+		#wideWrapper > tr > td { padding: 0 12px; }
+	}
+
+    @media only screen and (max-width: 750px){
+		#wideWrapper > tr > td { padding: 0; }
+
+        .templateColumnContainer{
+            display:block !important;
+            width:95% !important;
+            padding: 10px;
+        }
+
+        .leftColumnContent{
+            font-size:16pt !important;
+            line-height:125% !important;
+        }
+
+        .rightColumnContent{
+            font-size:16pt !important;
+            line-height:125% !important;
+        }
+    }
 </style>
 {% endblock %}
 {% block body %}
 {% with "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email" as utm %}
 
+<!-- HEADER -->
+<div style="background-color: #1D4E70; color: white; margin-bottom: 30px; padding: 30px; text-align: center;">
+	<div><a href="https://www.govtrack.us/?{{utm}}" target="blank" style="color: white"><img src="https://www.govtrack.us/static/images/logo.png" alt="GovTrack.us" border="0"></a></div>
+	<div style="color: white; font-weight: bold; margin-top: 4px;">Email Update</div>
+</div>
+
+<!-- ANNOUNCEMENT -->
 {% if announcement.active %}
 <div style="margin: 0 1em 2em 1em; padding: .25em 1em .25em 1em; border: 1px solid #DDD; background-color: #F3F3FF">
 	{{announcement.body_html|safe}}
 </div>
 {% endif %}
 
-<table>
+<!-- CONTENT AREA -->
 
-<tr valign="top">
-<td style="max-width: 50em">
+<table id="wideWrapper" border="0" cellpadding="0" cellspacing="0" style="max-width: 850px; margin: 0 auto;">
+<tr>
+<td>
 
-<h1>You Are Tracking Congress</h1>
+	<table border="0" cellpadding="6" cellspacing="0" style="text-align:left !important;">
+    <tr>
 
-<p>This is your email update from <a href="{{SITE_ROOT_URL}}?{{utm}}">GovTrack.us</a>. To change your email update settings, including to unsubscribe, go to <a href="{{SITE_ROOT_URL}}/accounts/profile?{{utm}}">your account settings</a>.</p>
+		<!-- LEFT COLUMN -->
 
-{% for list, events in eventslists %}
-<h3>{{list.name}}</h3>
-	{% for event in events %}
-	{% with event|render_event:feed as meta %}
-	<div style="margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #999;">
-	<p>{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} &mdash; {{meta.type}}</p>
-	<h4><a href="{{SITE_ROOT_URL}}{{meta.url|append_qsarg:utm}}">{{meta.title}}</a></h4>
-	<div style="margin-left: 1em">
-		{{meta.body_html|safe}}
-		{% if event.feeds and event.feeds|length > 0 %}
-			<div><small>You are seeing this event because you subscribe to
-				{% for feed in event.feeds %}{% if not forloop.first %}, {% endif %}
-					<a href="{{SITE_ROOT_URL}}{{feed.link|append_qsarg:utm}}">{{feed.title}}</a>{% endfor %}.
-			</small></div>
-		{% endif %}
-	</div>
-	</div>
-	{% endwith %}
-	{% endfor %}
-{% endfor %}
+        <td align="center" valign="top" width="70%" class="templateColumnContainer">
+        	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
+			    <tr>
+			        <td valign="top" class="leftColumnContent" align="left">
 
-</td>
-<td style="max-width: 17em; font-size: 88%; padding-left: 2em;">
-  <div style="background-color: #F3F3F3; border-radius: 10px; padding: .75em;">
-	<p>Was this email useful? Please <a href="https://www.patreon.com/govtrack">support GovTrack with a recurring tip</a>
-	so that we can continue to improve this free service.</p>
+						{% for list, events in eventslists %}
+				            <h2 style="text-align:left;">{{list.name}}</h2>
 
-	<hr>
+							{% for event in events %}
+							{% with event|render_event:feed as meta %}
 
-    {% if medium_posts %}
-      <p><b>On GovTrack Insider:</b></p>
-      {% for post in medium_posts|slice:"0:3" %}
-        <div>
-          {% if post.image %}
-            <div>
-              <a href="{{post.url}}?{{utm}}">
-                <img src="https://cdn-images-1.medium.com/max/400/{{post.image}}" style="border: 1px solid #888; width: 16em;"/>
-              </a>
-            </div>
-          {% endif %}
-          <p><a href="{{post.url}}?{{utm}}">{{post.title}}</a>
-          <br><span style="font-size: 90%; color: #555;">{{post.snippet}} <span class="article-date">{{post.published}}</span></span></p>
-        </div>
-      {% endfor %}
-      <p>Get all GovTrack Insider posts by <a href="https://www.govtrack.us/events/govtrack-insider">adding them to your email updates</a>.</p>
-    {% endif %}
+				            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #F2F2F2;margin-bottom:10px;margin-top:20px;">
+				            	<tr>
+					            	<td style="text-align:left !important;">
+							            <h5>{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} &mdash; {{meta.type}}</h5>
+										<h3><span style="text-align:left"><a href="{{SITE_ROOT_URL}}{{meta.url|append_qsarg:utm}}">{{meta.title}}</a></span></h3>
+										{{meta.body_html|safe}}
 
-	<hr>
+										{% if event.feeds and event.feeds|length > 0 %}
+											<div style="font-size: 80%">Trackers:
+											{% for feed in event.feeds %}{% if not forloop.first %}, {% endif %}
+											<a href="{{SITE_ROOT_URL}}{{feed.link|append_qsarg:utm}}">{{feed.title}}</a>{% endfor %}.
+											</div>
+										{% endif %}
+					            	</td>
+				            	</tr>
+				            </table>
+							{% endwith %}
+							{% endfor %}
 
-    <p>Follow us on
-    <a href="https://www.facebook.com/govtrack/" title="Facebook Page">Facebook</a></li>
-    <a href="http://twitter.com/govtrack" title="Twitter Page">@GovTrack on Twitter</a>
-    <a href="https://medium.com/govtrack-insider" title="Medium Page">GovTrack Insider on Medium</a>.
-    </p>
-  </div>
+							<br />
+						{% endfor %}
+
+			        </td>
+			    </tr>
+        	</table>
+		</td>
+
+		<!-- RIGHT COLUMN -->
+
+	    <td align="center" valign="top" width="30%" class="templateColumnContainer">
+
+        	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
+			    <tr>
+			        <td valign="top" class="rightColumnContent" align="left">
+			            <h2 style="text-align:left;">Contribute</h2>
+			            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			            	<tr>
+				            	<td style="text-align:left !important;">
+			                        <p style="text-align:left !important;">Is this email useful? Please <a href="https://www.patreon.com/govtrack">support GovTrack with a recurring tip</a> so that we can continue to improve this free service.</p>
+				            	</td>
+			            	</tr>
+			            </table>
+			        </td>
+			    </tr>
+        	</table>
+
+	       	<table border="0" cellpadding="0" cellspacing="0" width="100%" height="12px">
+        		<tr>
+        			<td>
+        			</td>
+        		</tr>
+        	</table>
+
+		    {% if medium_posts %}
+        	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
+			    <tr>
+			        <td valign="top" class="rightColumnContent" align="left">
+			            <h2 style="text-align:left;">On GovTrack Insider</h2>
+						{% for post in medium_posts|slice:"0:3" %}
+			            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #F2F2F2;margin-bottom:5px;margin-top:20px;padding-top:10px;width:100%;">
+			            	<tr valign="top">
+				            	<td style="text-align:left !important;">
+									{% if post.image %}
+									<div style="float: right; margin: 0 0 1em 1em">
+										<a href="{{post.url}}?{{utm}}">
+											<img src="https://cdn-images-1.medium.com/max/100/{{post.image}}" style="border: 1px solid #888; width: 65px;"/>
+										</a>
+									</div>
+									{% endif %}
+	
+			                        <p><a href="{{post.url}}?{{utm}}">{{post.title}}</a></p>
+									<p><span style="font-size: 90%; color: #555;">{{post.snippet}} <span class="article-date">{{post.published}}</span></span></p>
+				            	</td>
+			            	</tr>
+			            </table>
+						{% endfor %}
+						<p>Get all GovTrack Insider posts by <a href="https://www.govtrack.us/events/govtrack-insider?{{utm}}">adding them to your email updates</a>.</p>
+			        </td>
+			    </tr>
+        	</table>
+	       	<table border="0" cellpadding="0" cellspacing="0" width="100%" height="12px">
+        		<tr>
+        			<td>
+        			</td>
+        		</tr>
+        	</table>
+			{% endif %}
+
+        	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
+			    <tr>
+			        <td valign="top" class="rightColumnContent" align="left">
+			            <h2 style="text-align:left;">Follow Us on Social Media</h2>
+					    <p>
+					    <a href="https://www.facebook.com/govtrack/" title="Facebook Page">Facebook</a> |
+					    <a href="http://twitter.com/govtrack" title="Twitter Page">Twitter</a> |
+					    <a href="https://medium.com/govtrack-insider" title="Medium Page">Medium</a>
+					    </p>
+			        </td>
+			    </tr>
+        	</table>
+
+        </td>
+    </tr>
+	</table>
+
+	<!-- FOOTER -->
+
+	<table border="0" cellpadding="0" cellspacing="0" style="text-align:center !important;">
+	<tr>
+        <td align="center" valign="top" width="100%" class="templateColumnContainer">
+        	<table border="0" cellpadding="10" cellspacing="0" width="100%">
+        		<tr>
+        			<td valign="top">
+			        	<p style="text-align:center;">You are receiving this email because you are subscribed to email updates from <a href="https://www.govtrack.us?{{utm}}">www.GovTrack.us</a>.</p>
+			        	<p style="text-align:center;">To change your email update settings, including to unsubscribe, go to your <a href="https://www.govtrack.us/accounts/profile?{{utm}}">account settings</a>.</p>
+						<p style="text-align:center;">This email was sent by <a href="http://www.civicimpulse.com?{{utm}}">Civic Impulse, LLC</a>. You may contact us at <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">hello@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</p>
+				    </td>
+			    </tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
 </td>
 </tr>
 </table>
-
-<p>To unsubscribe or change your email updates settings, go to <a href="{{SITE_ROOT_URL}}/accounts/profile?{{utm}}">your account settings</a>.</p>
-<p><small>This email was sent by <a href="http://www.civicimpulse.com?{{utm}}">Civic Impulse, LLC</a>. You may contact us at <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">hello@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</small></p>
 
 {% endwith %}
 
