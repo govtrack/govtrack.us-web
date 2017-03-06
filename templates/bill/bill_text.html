@@ -335,6 +335,18 @@ $(function() {
 });
 </script>
 
+<!-- 18f/linkify-citations -->
+<script>
+var linkify_sources = ["govtrack", "courtlistener", "cornell_lii", "usgpo", "house", "nara", "libraryofcongress", "dc_council", "legislink"];
+var linkify_link_types = ["landing", "pdf", "html"];
+var linkify_create_link_node = function(link, text, document, default_func) {
+	var a = default_func(link, text, document);
+	a.setAttribute("title", link.source.name + (link.note ? (". " + link.note) : ""));
+	return a;
+}
+</script>
+<script src="/static/js/linkify.min.js"></script>
+
 <div id="permalink_widget">
 	<a class="btn btn-success" href="about:blank">Permalink</a>
 </div>
