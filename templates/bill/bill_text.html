@@ -335,15 +335,21 @@ $(function() {
 });
 </script>
 
-<!-- 18f/linkify-citations -->
+<!-- 18f/linkify-citations, patched -->
 <script>
-var linkify_sources = ["govtrack", "courtlistener", "cornell_lii", "usgpo", "house", "nara", "libraryofcongress", "dc_council", "legislink"];
-var linkify_link_types = ["landing", "pdf", "html"];
-var linkify_create_link_node = function(link, text, document, default_func) {
-	var a = default_func(link, text, document);
-	a.setAttribute("title", link.source.name + (link.note ? (". " + link.note) : ""));
-	return a;
-}
+auto_linkify_citations = false;
+window.document.addEventListener("DOMContentLoaded", function() {
+  linkify_citations(
+    $("#main_text_content")[0],
+    ["govtrack", "cornell_lii", "usgpo", "house", "nara", "libraryofcongress", "dc_council", "legislink"],
+    ["landing", "pdf", "html"],
+    function(link, cite, text, document, default_func) {
+      var a = default_func(link, cite, text, document);
+      a.setAttribute("title", "Link to " + link.source.name + (link.note ? (". " + link.note) : ""));
+      return a;
+    }
+    );
+});
 </script>
 <script src="/static/js/linkify.min.js"></script>
 
