@@ -3,7 +3,7 @@
 from __future__ import print_function
 
 from boto import ec2
-from fabric.api import cd, env, run, settings, sudo
+from fabric.api import cd, env, put, run, settings, sudo
 import os
 
 
@@ -101,10 +101,13 @@ def install_deps():
         # list to make development easier.
         sudo('pip install psycopg2')
 
+        # We use honcho to manage the environment.
+        sudo('pip install honcho jinja2')
+
 
 def configure_solr():
     with cd('govtrack.us-web'):
-        return run('./build/buildsolr.sh')
+        return run('honcho run ./build/buildsolr.sh')
 
 
 def configure_postgres():
@@ -112,18 +115,19 @@ def configure_postgres():
     sudo('createdb govtrack', user='postgres')
 
 
-def upload_settings():
-    pass
+def upload_settings(envfile):
+    with cd('govtrack.us-web'):
+        put(envfile, '.env')
 
 
 def update_db():
     with cd('govtrack.us-web'):
-        run('./manage.py syncdb --noinput')
+        run('honcho run ./manage.py syncdb --noinput')
 
 
 def update_assets():
     with cd('govtrack.us-web'):
-        run('./minify')
+        run('honcho run ./minify')
 
 
 def bootstrap_data():
@@ -132,26 +136,27 @@ def bootstrap_data():
         # the existing site with as much data as already exists? Won't the
         # scrapers have to be run anyway?
         run('wget http://www.govtrack.us/data/db/django-fixture-{people,usc_sections,billterms}.json')
-        run('./manage.py loaddata django-fixture-people.json')
-        run('./manage.py loaddata django-fixture-usc_sections.json')
-        run('./manage.py loaddata django-fixture-billterms.json')
+        run('honcho run ./manage.py loaddata django-fixture-people.json')
+        run('honcho run ./manage.py loaddata django-fixture-usc_sections.json')
+        run('honcho run ./manage.py loaddata django-fixture-billterms.json')
 
-        run('./parse.py committee')
+        run('honcho run ./parse.py person')
+        run('honcho run ./parse.py committee', warn_only=True)  # fails b/c meeting data not available
 
-        run('build/rsync.sh')
-        run('./parse.py bill --congress=113 --disable-index --disable-events')
-        run('./parse.py vote --congress=113 --disable-index --disable-events')
+        run('honcho run build/rsync.sh')
+        run('honcho run ./parse.py bill --congress=114 --disable-index --disable-events')
+        run('honcho run ./parse.py vote --congress=114 --disable-index --disable-events')
 
 
-def deploy(settings=None, branch='master'):
+def deploy(envfile=None, branch='master'):
     pull_or_clone_repo(os.environ['GOVTRACK_WEB_GIT_URL'], 'govtrack.us-web', branch=branch)
     pull_or_clone_repo(os.environ['LEGISLATORS_GIT_URL'], 'congress-legislators')
 
     install_deps()
     configure_solr()
 
-    if settings:
-        upload_settings()
+    if envfile:
+        upload_settings(envfile)
 
     update_db()
     update_assets()
