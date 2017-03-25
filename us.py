@@ -19,6 +19,8 @@ state_abbr_from_name = dict((v.lower(),k) for (k,v) in statenames.items())
 statelist = [s for s in statenames.items() if s[0] in stateapportionment]
 statelist.sort(key=lambda x : x[1])
 
+statenames_apstyle = { "AL": "Ala.", "AK": "Alaska", "AZ": "Ariz.", "AR": "Ark.", "CA": "Calif.", "CO": "Colo.", "CT": "Conn.", "DE": "Del.", "FL": "Fla.", "GA": "Ga.", "HI": "Hawaii", "ID": "Idaho", "IL": "Ill.", "IN": "Ind.", "IA": "Iowa", "KS": "Kan.", "KY": "Ky.", "LA": "La.", "ME": "Maine", "MD": "Md.", "MA": "Mass.", "MI": "Mich.", "MN": "Minn.", "MS": "Miss.", "MO": "Mo.", "MT": "Mont.", "NE": "Neb.", "NV": "Nev.", "NH": "N.H.", "NJ": "N.J.", "NM": "N.M.", "NY": "N.Y.", "NC": "N.C.", "ND": "N.D.", "OH": "Ohio", "OK": "Okla.", "OR": "Ore.", "PA": "Pa.", "RI": "R.I.", "SC": "S.C.", "SD": "S.D.", "TN": "Tenn.", "TX": "Texas", "UT": "Utah", "VT": "Vt.", "VA": "Va.", "WA": "Wash.", "WV": "W. Va.", "WI": "Wis.", "WY": "Wyo.", "DC": "District of Columbia" }
+
 CONGRESS_DATES = {}
 SESSION_DATES = []
 
