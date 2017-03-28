@@ -232,6 +232,8 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
       try:
         md1 = get_bill_text_metadata(b1, None)
         text1 = extract_text(md1['xml_file'])
+      except TypeError: # no bill text at all (accessing [...] of None)
+        continue
       except KeyError: # no xml_file
         continue
       except ValueError: # xml is bad
@@ -266,6 +268,8 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
 
         # Get the second bill's most recent text document's metadata.
         md2 = get_bill_text_metadata(b2, None)
+        if not md2: # text may not be available yet
+          continue
 
         # Did we do a comparison already? Skip if so.
         key = ((b1.congressproject_id, md1['version_code']), (b2.congressproject_id, md2['version_code']))
