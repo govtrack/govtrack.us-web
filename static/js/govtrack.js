@@ -78,66 +78,6 @@ function master_a_ad(ad_container) {
         did_show_ad = true;
     }
 
-    if (did_show_ad) $(function() { setTimeout(pop_ad, 250); });
-    function pop_ad() {
-        // Make the ad fixed to where it is in the viewport. First, pop it out of
-        // its natural container.
-
-        // get its original location
-        var row = $('#master-a-sidebar').parent('.row');
-        var col = $('#master-a-sidebar');
-        var ads = $('#master-a-sidebar').find('.ads');
-        var ads_height = ads.outerHeight();
-        var original_offset = ads.offset(); // works when making it 'fixed' positioned
-        var original_pos = ads.position(); // for 'absolute' positioned because it's in a relatively positioned column
-
-        // because in a responsive layout the column may move, make the
-        // fixed positioning relative to the column
-        original_offset.left -= col.offset().left;
-
-        // adjust for any top/bottom margins that mess with how top: works in fixed positioning
-        original_offset.top -= parseInt(ads.css("marginTop"));
-        var marginBottom = parseInt(ads.css("marginBottom"));
-
-        function update_ad_pos() {
-            var row_height = row.innerHeight();
-            var top = original_pos.top + $(window).scrollTop();
-            if ($(window).width() < 768 || row.offset().left == col.offset().left) {
-                // the column is collapsed in xs layout
-                // - two ways of checking, the latter is because IE8 doesn't support
-                //   grid layouts at all
-                ads.css({
-                    position: "static"
-                })
-            } else if (original_offset.top + ads_height > $(window).height()) {
-                // The ad isn't entirely visible anyway -- it's too tall -- so don't
-                // try to keep it where it is. Allow it to be scrolled to come into view.
-                ads.css({
-                    position: "static"
-                })
-            } else if (top < row_height - ads_height - marginBottom) {
-                // fixed positioning works here
-                ads.css({
-                    position: "fixed",
-                    left: original_offset.left + col.offset().left - $(window).scrollLeft()/2,
-                    top: original_offset.top
-                })
-            } else {
-                // scrolled too far, now need to go back to absolute to lock it
-                // in at the location that is as low as it can go so it doesn't
-                // cover the page footer
-                ads.css({
-                    position: "absolute",
-                    left: original_pos.left,
-                    top: row_height - ads_height - marginBottom
-                });
-            }
-        }
-        $(window).scroll(update_ad_pos);
-        $(window).resize(update_ad_pos);
-        update_ad_pos();
-    };
-
     // track how many hits have the ads blocked - seems to work with AdBlockPlus
     if (did_show_ad)
         setTimeout(function() {
