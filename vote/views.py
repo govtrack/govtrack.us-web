@@ -334,8 +334,9 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	elif re.match(r"Veto Sustained", vote.result):
 		vote_result_2 = "Sustained"
 	else:
-		vote_result_2 = re.sub("^(Bill|Amendment|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion) ", "", vote.result)
+		vote_result_2 = re.sub("^(Bill|Amendment|Resolution of Ratification|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion) ", "", vote.result)
 	if vote_result_2 == "unknown": vote_result_2 = ""
+	if len(vote_result_2) > 15: vote_result_2 = vote_result_2[-15:]
 	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
 	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
 	
