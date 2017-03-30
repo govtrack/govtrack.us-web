@@ -115,6 +115,18 @@ class GovTrackMiddleware:
                 uid = base64.urlsafe_b64encode(uuid.uuid4().bytes).replace('=', '')
             response.set_cookie("uuid", uid, max_age=60*60*24*365*10)
             print "TRACK", uid, datetime.datetime.now().isoformat(), base64.b64encode(repr(request))
+            from website.models import Sousveillance
+            Sousveillance.objects.create(
+                subject=uid,
+                user=request.user if request.user.is_authenticated() else None,
+                req={
+                    "path": request.path,
+                    "method": request.method,
+                    "referrer": request.META.get("HTTP_REFERER"),
+                    "agent": request.META.get("HTTP_USER_AGENT"),
+                    "ip": request.META.get("REMOTE_ADDR"),
+                }
+            )
 
         return response
 

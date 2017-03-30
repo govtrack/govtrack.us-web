@@ -317,3 +317,10 @@ class Reaction(models.Model):
             return Reaction.objects.filter(anon_session_key=Reaction.get_session_key(request))
         else:
             return Reaction.objects.none()
+
+class Sousveillance(models.Model):
+    subject = models.CharField(max_length=24, db_index=True)
+    user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
+    req = JSONField()
+    when = models.DateTimeField(auto_now_add=True, db_index=True)
+
