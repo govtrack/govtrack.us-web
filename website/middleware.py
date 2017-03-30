@@ -27,6 +27,18 @@ EOP_NET_RANGES = (
     ("198.137.240.0", "198.137.241.255"),
     ("204.68.207.0", "204.68.207.255"),
 	)
+def ip_to_quad(ip):
+    return [int(s) for s in ip.split(".")]
+def compare_ips(ip1, ip2):
+    return cmp(ip_to_quad(ip1), ip_to_quad(ip2))
+def is_ip_in_range(ip, block):
+   return compare_ips(ip, block[0]) >= 0 and compare_ips(ip, block[1]) <= 0
+def is_ip_in_any_range(ip, blocks):
+   for block in blocks:
+       if is_ip_in_range(ip, block):
+           return True
+   return False
+    
 
 trending_feeds = None
 
@@ -74,18 +86,6 @@ def template_context_processor(request):
 
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
-    
-    def ip_to_quad(ip):
-        return [int(s) for s in ip.split(".")]
-    def compare_ips(ip1, ip2):
-        return cmp(ip_to_quad(ip1), ip_to_quad(ip2))
-    def is_ip_in_range(ip, block):
-       return compare_ips(ip, block[0]) >= 0 and compare_ips(ip, block[1]) <= 0
-    def is_ip_in_any_range(ip, blocks):
-       for block in blocks:
-           if is_ip_in_range(ip, block):
-               return True
-       return False
     
     try:
         ip = request.META["REMOTE_ADDR"]

@@ -1,0 +1,99 @@
+{% extends "master.html" %}
+{% block title %}Sousveillance - GovTrack.us{% endblock %}
+
+{% block head %}
+<style>
+#log td {
+	padding: 0 1em .5em 0;
+	line-height: 128%;
+}
+#log span.netblock {
+	font-weight: bold;
+}
+#log .recent {
+	font-size: 85%;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<h1>What is Congress browsing?</h1>
+
+<div class="row">
+
+<div class="col-sm-4">
+	<p>In March 2017 the U.S. Congress <a href="https://www.govtrack.us/congress/bills/115/sjres34">passed a bill</a> that rolled back regulations prohibiting
+	Internet service providers from selling subscribers&rsquo; browsing habbits to advertisers. At that time, we began publishing here the browsing history
+	of anyone visting GovTrack.us from Congress&rsquo;s and the White House&rsquo;s office buildings.</p>
+
+	<h2>How This Works</h2>
+
+	<p>Every computer on the Internet has an &ldquo;IP address.&rdquo; The Senate, House, and Executive Office of the President (i.e. the White House and
+	nearby offices) all use IP addresses within ranges assigned to them in public records. That&rsquo;s how we can tell if a visitor to GovTrack is
+	from Congress or the White House.</p>
+
+	<p>We don&rsquo;t know <i>who</i> they are, though! We expect that most are congressional and White House staff. They could be visitors (like lobbyists or
+	citizen groups) using Congress&rsquo;s guest wi-fi networks too. All we know is that these people visited GovTrack from an IP address range owned by Congress
+	or the White House.</p>
+
+	<p>We also place persistent tracking cookies in the browsers of these users to link multiple requests to a single browsing history.</p>
+
+	<h2>Related Projects</h2>
+
+	<p>See the <a href="https://en.wikipedia.org/wiki/CongressEdits">CongressEdits</a> <a href="https://twitter.com/congressedits">twitter account</a>
+	for a similar project tracking edits on Wikipedia made from Congress&rsquo;s IP addresses. <a href="https://projects.propublica.org/politwoops/">Politwoops</a>
+	tracks politician&rsquo;s deleted tweets.</p>
+</div>
+
+<div class="col-sm-7">
+	<h2 style="margin: 0"><span>Live Log from Congress &amp; the White House</span></h2>
+	<table id="log" style="margin-top: 1em">
+		<tbody>
+		</tbody>
+	</table>
+</div>
+
+</div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+var sousupdate_last = null;
+function sousupdate() {
+	$.ajax({
+		url: "/sousveillance.json",
+		success: function(res) {
+			function make_node(item, recursive) {
+				var node = $("<tr valign=top><td><nobr><span class=date></span></nobr></td> <td><a class=path></a> <div class='meta'>from <span class=netblock></span></div> <div class='recent'></div></td></tr>");
+				node.find(".netblock").text(item.netblock)
+				node.find(".path").attr("href", item.path).text(item.path)
+				node.find(".date").text(item.when)
+				if (item.recent.length > 0) {
+					node.find(".recent").text("Other pages visited by this user:");
+					item.recent.forEach(function(item) {
+						var n = $("<div><span class=date></span> <a class=path></a> from <span class=netblock></span></div>");
+						n.find(".netblock").text(item.netblock)
+						n.find(".path").attr("href", item.path).text(item.path)
+						n.find(".date").text(item.when)
+						node.find(".recent").append(n);
+					});
+				}
+				return node;
+			}
+
+			// add to top
+			res.reverse();
+			res.forEach(function(item) {
+				if (sousupdate_last && item.reqid <= sousupdate_last) return;
+				$('#log tbody').prepend(make_node(item));
+				sousupdate_last = item.reqid;
+			});
+
+			// refresh in a bit
+			setTimeout(sousupdate, 15000);
+		}
+	});
+}
+sousupdate()
+</script>
+{% endblock %}

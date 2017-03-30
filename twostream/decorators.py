@@ -23,7 +23,9 @@ def anonymous_view(view):
 	attributes of the request are cleared along with some keys in META.
 	Additionally it sets cache-control settings on the output of the page and sets
 	request.anonymous = True, which can be used in templates."""
-	view = cache_control(public=True)(view)
+	cache_control_args = { "public": True }
+	if hasattr(view, "max_age"): cache_control_args["max_age"] = view.max_age
+	view = cache_control(**cache_control_args)(view)
 	@wraps(view)
 	def g(request, *args, **kwargs):
 		request.anonymous = True

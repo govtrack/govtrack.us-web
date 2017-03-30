@@ -3,7 +3,7 @@ from django.conf.urls import *
 
 urlpatterns = patterns('website.views',
     url(r'^$', 'index', name='index'),
-    url(r'^(start|about|contact|press|advertising|legal|developers|developers/downstream|developers/data|developers/license|developers/rsync|how-laws-are-made)$', 'staticpage', name='staticpage'),
+    url(r'^(start|about|contact|press|advertising|legal|developers|developers/downstream|developers/data|developers/license|developers/rsync|how-laws-are-made|sousveillance)$', 'staticpage', name='staticpage'),
     url(r'^developers/api$', 'api_overview'),
     url(r'^congress/?$', 'congress_home', name='congress_home'),
     url(r'^search$', 'search', name='search'),
@@ -21,5 +21,6 @@ urlpatterns = patterns('website.views',
     url(r'^medium-post-redirector/(\d+)?', 'medium_post_redirector'),
     url(r'^_ajax/reaction', 'add_remove_reaction', name='reaction'),
     url(r'^reactions.json', 'dump_reactions', name='dump_reactions'),
+    url(r'^sousveillance.json', 'dump_sousveillance'),
 )
 
