@@ -1,8 +1,26 @@
 #!script
 
-from person.models import PersonRole
+import csv, sys
 
-for role in PersonRole.objects.filter(current=True).select_related('person'):
-	p = role.person
-	if not p.has_photo():
-		print "perl pictures.pl IMPORT %d %s/... %s 'Office of %s'" % (p.id, role.website, role.website, p.name)
+from person.models import Person
+
+w = csv.writer(sys.stdout)
+
+for p in Person.objects.filter(roles__current=True):
+	if p.has_photo(): continue
+
+#	# Does the unitedstates/images project have a dems.gov photo?
+#	from urllib import urlopen
+#	meta = urlopen("https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/metadata/%s.yaml" % p.bioguideid).read()
+#	if "dems.gov" in meta:
+#		print './manage.py import_photo %s %s http://www.dems.gov "House Democratic Caucus"' % (p.id, "https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/original/%s.jpg" % p.bioguideid)
+#
+#	continue
+
+	w.writerow([
+		p.bioguideid, p.id,
+		p.name.encode("utf8"),
+		p.current_role.website, "Office of " + p.name_no_details().encode("utf8"),
+#		"https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/original/%s.jpg" % p.bioguideid,
+#		"https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/metadata/%s.yaml" % p.bioguideid,
+		])
