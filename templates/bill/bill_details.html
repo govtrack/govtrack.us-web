@@ -262,7 +262,7 @@
 		margin-bottom: 1em;
 	}
 	#bill-actions > button {
-		width: 115px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
+		width: 135px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
 	}
 
 #emoji-reactions {
@@ -293,12 +293,6 @@
 			height: 1ex;
 		}
 
-
-#our-summary a {
-	text-decoration: none;
-	color: inherit;
-	border-bottom: 1px dotted #D6708F;
-}
 </style>
 {% endblock %}
 
@@ -321,11 +315,16 @@
 
 	{% with bill.oursummary as summary1 %}
 	{% if summary1 %}
-		<div id="our-summary">
-		{{summary1.as_html|truncatewords_html:60|safe}}
+		<div class="panel panel-info">
+		<div class="panel-body">
+		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
+		<p style="font-family: PT Serif; font-size: 16px; margin: 0;">
+			{{summary1.as_html|striptags|truncatewords:60}}
+			<a href="{{bill.get_absolute_url}}/summary">Continue reading &raquo;</a>
+			{% if summary1.source_text %}<br><span style="font-size: 85%">(Source: {{summary1.source_text}})</span>{% endif %}
+		</p>
 		</div>
-		{% if summary1.source_text %}(Source: {{summary1.source_text}}){% endif %}
-		<p style="margin-left: 2em; font-style: italic;"><a href="{{bill.get_absolute_url}}/summary">Read the full summary &gt;</a></p>
+		</div>
 	{% elif subtitle %}
 		<p style="margin-bottom: 0">{{subtitle}}</p>
 		{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s titles are written by its sponsor.</em></small></p>{% endif %}
@@ -335,9 +334,8 @@
 	<!-- explanation -->	
 
 	{% if bill.explanatory_text %}
-	<div class="panel panel-info" style="margin: 50px 0;">
+	<div class="panel panel-info" style="margin: 30px 0;">
 	  <div class="panel-body">
-		<!-- What is a bill? -->
 		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
 			{{bill.explanatory_text}}
 	  </div>
@@ -349,7 +347,7 @@
 	<!-- actions -->
 
 	{% if bill.is_alive %}
-	<div class="panel panel-success" style="margin: 50px 0; padding-bottom: 0;">
+	<div class="panel panel-success" style="margin: 30px 0; padding-bottom: 0;">
 	  <div class="panel-body">
 		<h3 style="margin-top: 5px; font-weight: bold;">
 			What you can do
@@ -360,11 +358,11 @@
 		<button class="btn btn-sm" onclick="return show_track_panel();">
 			<i class="glyphicon glyphicon-envelope"> </i>
 			<span style="margin-left: 3px;">
-				Get alerts
+				Get Email Alerts
 			</span>
 		</button>
 		
-		{% if bill.cosponsors.all|length >= 3 %}
+		{% if bill.cosponsors.all|length >= 3 and 0 %}
 		<button class="btn btn-sm" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
 			<span style="color: #080; margin: 0 2px"><i class="fa fa-money" aria-hidden="true"></i></span>
 			if.then.fund
@@ -398,7 +396,7 @@
 
 	{% endif %}	
 
-<div id="bill-overview-panel" style="margin: 50px 0;">
+<div id="bill-overview-panel" style="margin: 30px 0;">
 	<h2><span>Overview</span></h2>
 
 		<div class="info" style="width: auto; background: none;">
@@ -646,7 +644,7 @@
 	{% endif %}	
 
 		{% if bill.source == "thomas-congproj" %}
-		<div id="bill-history" style="margin: 50px 0;">
+		<div id="bill-history" style="margin: 30px 0;">
 			<h2><span>History</span></h2>
 
 			{% if current or bill.get_major_events|length > 0 %}
