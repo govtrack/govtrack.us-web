@@ -618,6 +618,9 @@ def dump_sousveillance(request):
     from datetime import datetime, timedelta
     from website.models import Sousveillance
     from website.middleware import is_ip_in_any_range, HOUSE_NET_RANGES, SENATE_NET_RANGES, EOP_NET_RANGES
+    import re
+    import urllib
+    import user_agents
 
     def get_netblock_label(ip):
         if is_ip_in_any_range(ip, HOUSE_NET_RANGES): return "House"
@@ -636,12 +639,19 @@ def dump_sousveillance(request):
         except:
             pass
       if "?" in path: path = path[:path.index("?")] # ensure no qsargs
+      if r.req.get("query"): path += "?" + urllib.urlencode(r.req["query"])
+
+      ua = str(user_agents.parse(r.req['agent']))
+      if ua == "Other / Other / Other": ua = "bot"
+      ua = re.sub(r"(\d+)(\.[\d\.]+)", r"\1", ua) # remove minor version numbers
+
       ret = {
         "reqid": r.id,
         "when": r.when.strftime("%b %-d, %Y %-I:%M:%S %p"),
         "netblock": get_netblock_label(r.req['ip']),
         "path": path,
         "query": r.req.get('query', {}),
+        "ua": ua,
       }
       if recursive:
           ret["netblock"] = ", ".join(sorted(set( get_netblock_label(rr.req["ip"]) for rr in Sousveillance.objects.filter(subject=r.subject) )))

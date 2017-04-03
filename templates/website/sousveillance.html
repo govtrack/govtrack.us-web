@@ -3,7 +3,7 @@
 
 {% block head %}
 <style>
-#log td {
+#log td, #log th {
 	padding: 0 1em .5em 0;
 	line-height: 128%;
 }
@@ -22,9 +22,14 @@
 <div class="row">
 
 <div class="col-sm-4">
+	<p>This page is a public record of any time someone visits GovTrack.us from within the United States Senate, House of Representatives, or the White House,
+	and their associated office buildings.</p>
+
+	<h2>Why are we doing this?</h2>
+
 	<p>In March 2017 the U.S. Congress <a href="https://www.govtrack.us/congress/bills/115/sjres34">passed a bill</a> that rolled back regulations prohibiting
-	Internet service providers from selling subscribers&rsquo; browsing habbits to advertisers. At that time, we began publishing here the browsing history
-	of anyone visting GovTrack.us from Congress&rsquo;s and the White House&rsquo;s office buildings.</p>
+	Internet service providers from selling subscribers&rsquo; browsing habits to advertisers. Since browsing history metadata is no big deal to Congress, we
+	began publishing the browsing history of anyone visting GovTrack.us from Congress&rsquo;s and the White House&rsquo;s office buildings.</p>
 
 	<h2>How This Works</h2>
 
@@ -32,8 +37,8 @@
 	nearby offices) all use IP addresses within ranges assigned to them in public records. That&rsquo;s how we can tell if a visitor to GovTrack is
 	from Congress or the White House.</p>
 
-	<p>We don&rsquo;t know <i>who</i> they are, though! We expect that most are congressional and White House staff. They could be visitors (like lobbyists or
-	citizen groups) using Congress&rsquo;s guest wi-fi networks too. All we know is that these people visited GovTrack from an IP address range owned by Congress
+	<p><u>We don&rsquo;t know who these visitors are, though.</u> Some of the people we are tracking are visitors to Congress or the White House using the guest wifi networks (like lobbyists or citizen groups), and some of the hits are from automated tools running on those computers like link checkers. We expect that most of the logged hits shown here are congressional and White House staff, however. 
+	All we know for certain is that these hits are from an IP address range owned by Congress
 	or the White House.</p>
 
 	<p>We also place persistent tracking cookies in the browsers of these users to link multiple requests to a single browsing history.</p>
@@ -42,12 +47,13 @@
 
 	<p>See the <a href="https://en.wikipedia.org/wiki/CongressEdits">CongressEdits</a> <a href="https://twitter.com/congressedits">twitter account</a>
 	for a similar project tracking edits on Wikipedia made from Congress&rsquo;s IP addresses. <a href="https://projects.propublica.org/politwoops/">Politwoops</a>
-	tracks politician&rsquo;s deleted tweets.</p>
+	tracks politicians&rsquo; deleted tweets.</p>
 </div>
 
 <div class="col-sm-7">
 	<h2 style="margin: 0"><span>Live Log from Congress &amp; the White House</span></h2>
 	<table id="log" style="margin-top: 1em">
+		<thead><tr><th>Date and Time of Visit</th> <th>Page Accessed and Visitor Information</th></tr></thead>
 		<tbody>
 		</tbody>
 	</table>
@@ -64,7 +70,8 @@ function sousupdate() {
 		url: "/sousveillance.json",
 		success: function(res) {
 			function make_node(item, recursive) {
-				var node = $("<tr valign=top><td><nobr><span class=date></span></nobr></td> <td><a class=path></a> <div class='meta'>from <span class=netblock></span></div> <div class='recent'></div></td></tr>");
+				var node = $("<tr valign=top><td><nobr><span class=date></span></nobr></td> <td><a class=path></a> <div class='meta'>from <span class=netblock></span> (<span class=ua></span>)</div> <div class='recent'></div></td></tr>");
+				node.find(".ua").text(item.ua ? item.ua : "bot")
 				node.find(".netblock").text(item.netblock)
 				node.find(".path").attr("href", item.path).text(item.path)
 				node.find(".date").text(item.when)
@@ -85,12 +92,15 @@ function sousupdate() {
 			res.reverse();
 			res.forEach(function(item) {
 				if (sousupdate_last && item.reqid <= sousupdate_last) return;
-				$('#log tbody').prepend(make_node(item));
+				var node = make_node(item);
+				node.hide();
+				$('#log tbody').prepend(node);
+				node.fadeIn();
 				sousupdate_last = item.reqid;
 			});
 
 			// refresh in a bit
-			setTimeout(sousupdate, 15000);
+			setTimeout(sousupdate, 10000);
 		}
 	});
 }

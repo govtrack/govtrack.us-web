@@ -121,7 +121,7 @@ class GovTrackMiddleware:
                 user=request.user if request.user.is_authenticated() else None,
                 req={
                     "path": request.path,
-                    "query": { k: v for k, v in dict(request.GET).items() if k in ("q",) }, # whitelist qsargs
+                    "query": { k: request.GET[k] for k in request.GET if k in ("q",) }, # whitelist qsargs
                     "method": request.method,
                     "referrer": request.META.get("HTTP_REFERER"),
                     "agent": request.META.get("HTTP_USER_AGENT"),
