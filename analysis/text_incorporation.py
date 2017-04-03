@@ -3,11 +3,18 @@
 
 # See if the text of one bill occurs within the text of another.
 
+import sys
 import re
 import unicodedata
 from StringIO import StringIO
 import lxml.etree
 from numpy import percentile
+
+if sys.stdout.isatty():
+  from tqdm import tqdm
+else:
+  def tqdm(iter, *args, **kwargs):
+    return iter
 
 def extract_text(fn):
   # Given a path to a bill text XML file from Congress,
@@ -194,7 +201,6 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
   # Write out a CSV table.
   
   import itertools, csv, os.path, shutil
-  import tqdm
   from bill.models import *
   from bill.billtext import get_bill_text_metadata
 
@@ -225,7 +231,7 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
         writer.writerow(row)
 
     # For each enacted bill..
-    for b1 in tqdm.tqdm(enacted_bills):
+    for b1 in tqdm(enacted_bills):
       # Load the enacted bill's text.
 
       # Loads current metadata and text for the bill.
@@ -324,7 +330,6 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
   # records in which a bill is mentioned.
 
   import csv, collections
-  import tqdm
   from bill.models import Bill
 
   congress = int(sys.argv[2])
@@ -444,7 +449,7 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
 
   # Update bills.
   seen_bills = set()
-  for b_id, info in tqdm.tqdm(sorted(text_incorporation.items()), desc="Updating"):
+  for b_id, info in tqdm(sorted(text_incorporation.items()), desc="Updating"):
     b = Bill.from_congressproject_id(b_id)
     if b.text_incorporation != info:
       # Updated!
@@ -455,7 +460,7 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
   # Clear out all bills from this Congress that should have
   # no text incorporation data but do have something that's
   # no longer valid.
-  for b in tqdm.tqdm(list(Bill.objects
+  for b in tqdm(list(Bill.objects
     .filter(congress=congress)
     .exclude(text_incorporation=None)
     .exclude(id__in=seen_bills)), desc="Clearing"):
@@ -490,14 +495,13 @@ elif __name__ == "__main__" and sys.argv[-1] == "test":
 elif __name__ == "__main__" and sys.argv[1] == "graph":
   # Make a graph of text incorporation relationships.
   # requires: sudo apt-get install graphviz && pip install graphviz
-  import tqdm
   from bill.models import Bill
   from graphviz import Digraph
 
   # extract a subset of the data - paint the graph to determine
   # connectivity
   paint = { }
-  for bill in tqdm.tqdm(Bill.objects.filter(congress=114).exclude(text_incorporation=None), desc="Connectivity"):
+  for bill in tqdm(Bill.objects.filter(congress=114).exclude(text_incorporation=None), desc="Connectivity"):
     for rec in bill.text_incorporation:
       b1_id = bill.congressproject_id
       b2_id = rec["other"]
@@ -541,7 +545,7 @@ elif __name__ == "__main__" and sys.argv[1] == "graph":
       "splines": "true",
       "root": sys.argv[2] })
 
-  for bill in tqdm.tqdm(Bill.objects.filter(congress=114).exclude(text_incorporation=None), desc="Graph"):
+  for bill in tqdm(Bill.objects.filter(congress=114).exclude(text_incorporation=None), desc="Graph"):
     # Draw a subgraph.
     if paint[bill.congressproject_id] != paint[sys.argv[2]]:
       continue
