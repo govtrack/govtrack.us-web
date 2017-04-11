@@ -1,0 +1,166 @@
+uwsgi_cache_path  /ssd/cache/nginx/{{ HOST }}  levels=1:2 keys_zone={{ HOST }}:100m inactive=72h max_size=1g;
+
+# Redirect http://[www.]govtrack.us => https://www.govtrack.us
+server {
+	listen 80;
+	listen [::]:80;
+
+	{% if ENABLE_SSL %}
+
+	{% for redirect_host in HTTPS_REDIRECT_HOSTS.split(',') %}
+	server_name {{ redirect_host }};
+	{% endfor %}
+
+	location /.well-known/acme-challenge/ {
+		alias /etc/ssl/local/acme-wk-public/;
+	}
+
+	location / {
+		rewrite /(.*) https://{{ HOST }}/$1 permanent;
+		access_log off;
+	}
+}
+
+# 404 on any https: connection on an unrecognized domain
+server {
+	listen 443 ssl default;
+	ssl_certificate /etc/ssl/local/ssl_certificate.crt;
+	ssl_certificate_key /etc/ssl/local/ssl_certificate.key;
+	include /etc/nginx/nginx-ssl.conf;
+	return 404;
+	access_log off;
+}
+
+
+# https://[www.]govtrack.us
+server {
+	listen 443 ssl spdy;
+    # TODO: ipv6 ssl?
+
+	ssl_certificate /etc/ssl/local/ssl_certificate.crt;
+	ssl_certificate_key /etc/ssl/local/ssl_certificate.key;
+	include /etc/nginx/nginx-ssl.conf;
+
+	{% endif %} {# SSL_ENABLED #}
+
+	server_name govtrack.us;
+	server_name {{ HOST }};
+	access_log /ssd/logs/govtrack/www_access_log combined buffer=32k;
+
+	root /home/govtrack/web/static/root;
+
+	include /home/govtrack/nginx-local.conf;
+
+	# Redirect https://govtrack.us => {{ HOST }}.
+	# Also, we sometimes get requests with a period at the end of the host
+	# header, which nginx passes through here but causes an error in Django.
+	# Redirect those too by redirecting anything not matching the canonical domain.
+	if ($http_host != "{{ HOST }}") {
+		rewrite ^/(.*) https://{{ HOST }}/$1 permanent;
+	}
+
+	error_page 503 @maintenance;
+	location @maintenance {
+		rewrite (.*) /static/maintenance.html last;
+	}
+
+	location / {
+		#return 503; # maintenance mode activated
+
+		access_log /ssd/logs/govtrack/www_access_log_django combined buffer=32k;
+
+		include uwsgi_params;
+		uwsgi_pass unix:///tmp/uwsgi_govtrack_www.sock;
+
+		uwsgi_read_timeout 20s;
+
+		uwsgi_cache {{ HOST }};
+		uwsgi_cache_key "$scheme$request_method$host$request_uri";
+		uwsgi_cache_valid 200 1h;
+		uwsgi_cache_valid 301 5m;
+		uwsgi_cache_valid 404 60s;
+		uwsgi_cache_valid any 5s;
+		uwsgi_cache_use_stale timeout invalid_header updating;
+		uwsgi_no_cache $arg_nocache;
+		uwsgi_cache_bypass $arg_nocache;
+	}
+
+	location /static/ {
+		alias /home/govtrack/web/static/;
+		expires 7d;
+        }
+
+	location /data {
+		alias /home/govtrack/web/data;
+		autoindex on;
+		autoindex_localtime on;
+		expires 12h;
+        }
+
+	location ~ ^/(robots.txt|favicon.ico|googleee0a61280d69c714.html)$ {
+		root /home/govtrack/web/static;
+		expires 3d;
+        }
+
+	rewrite /embed/googlemaps.xpd /congress/members/map permanent;
+    rewrite /users/events-(rss|rdf|rss2|atom).xpd /events/events.rss?feeds=$arg_monitors? permanent;
+    rewrite /embed/mapframe.xpd /congress/members/embed/mapframe permanent;
+    rewrite /embed/events.xpd /events/embed_legacy permanent;
+
+    rewrite /congress/bills/113/hjres15t$ /congress/bills/113/hjres15 permanent;
+
+	rewrite /states/.* /blog/2015/08/11/discontinuing-state-level-legislative-tracking/ redirect;
+
+	gzip             on;
+	gzip_min_length  1000;
+	gzip_types       text/plain application/xml application/json text/css application/x-javascript;
+	gzip_disable     "MSIE [1-6]\.";
+	gzip_vary on;
+
+	location /perl {
+		deny all;
+	}
+
+    # For the blog/Medium...
+	rewrite /blog/?$ /blog/;
+	rewrite /blog/(.*) https://govtracknews.wordpress.com/$1 permanent;
+	location /medium-posts {
+		# Not sure why I have this.
+		proxy_pass https://medium.com/govtrack-insider?format=json;
+		proxy_pass_request_headers off;
+		proxy_hide_header Set-Cookie;
+		add_header Access-Control-Allow-Origin "*";
+	}
+
+    ## Piwik analytics.
+	#rewrite /analytics$ /analytics/;
+	#location ~ /analytics/(.*.php)?$ {
+	#	# Serve dynamic content.
+	#	include fastcgi_params;
+	#	fastcgi_split_path_info ^/analytics(/.*)()$;
+	#	fastcgi_index index.php;
+	#	fastcgi_param SCRIPT_FILENAME /home/govtrack/piwik/$fastcgi_script_name;
+	#	fastcgi_pass unix:/tmp/php-fastcgi.govtrack.sock;
+	#}
+	#location ~ /analytics/(.*) {
+	#	alias /home/govtrack/piwik/$1;
+	#}
+
+	## Block bots temporarily.
+	#if ($http_user_agent ~ (bing|yandex|msnbot|Googlebot)) {
+	#	return 403;
+	#}
+
+}
+
+# civicimpules.com
+server {
+	listen 80;
+	listen [::]:80;
+	server_name civicimpulse.com;
+	server_name www.civicimpulse.com;
+	root /home/govtrack/civicimpulse/;
+	location /static/ {
+		proxy_pass https://{{ HOST }}/static/;
+	}
+}
