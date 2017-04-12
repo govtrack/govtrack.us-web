@@ -1,4 +1,4 @@
-uwsgi_cache_path  /ssd/cache/nginx/{{ HOST }}  levels=1:2 keys_zone={{ HOST }}:100m inactive=72h max_size=1g;
+uwsgi_cache_path  /var/cache/govtrack/{{ HOST }}  levels=1:2 keys_zone={{ HOST }}:100m inactive=72h max_size=1g;
 
 # Redirect http://[www.]govtrack.us => https://www.govtrack.us
 server {
@@ -45,7 +45,7 @@ server {
 
 	server_name govtrack.us;
 	server_name {{ HOST }};
-	access_log /ssd/logs/govtrack/www_access_log combined buffer=32k;
+	access_log /var/log/govtrack/www_access_log combined buffer=32k;
 
 	root /home/govtrack/web/static/root;
 
@@ -65,7 +65,7 @@ server {
 	location / {
 		#return 503; # maintenance mode activated
 
-		access_log /ssd/logs/govtrack/www_access_log_django combined buffer=32k;
+		access_log /var/log/govtrack/www_access_log_django combined buffer=32k;
 
 		include uwsgi_params;
 		uwsgi_pass unix:///tmp/uwsgi_govtrack_www.sock;
