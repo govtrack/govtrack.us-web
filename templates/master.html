@@ -101,8 +101,14 @@
 					<li><a href="/accounts/docket">Your Docket</a></li>
 				</ul>
 			</li>
-			<li><a href="/about">About Us</a></li>
-			<li><a href="/developers">Data/API</a></li>
+			<li class="dropdown">
+				<a href="/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About Us <span class="caret"></span></a>
+	            <ul class="dropdown-menu">
+					<li><a href="/about">About GovTrack.us</a></li>
+					<li><a href="/developers">Use Our Data</a></li>
+					<li><a href="/sousveillance">What is Congress Browsing?</a></li>
+				</ul>
+			</li>
 	      </ul>
 	      <ul class="nav navbar-nav navbar-right">
 			{% block override_login %}
