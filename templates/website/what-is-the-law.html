@@ -1,5 +1,10 @@
-{% extends "master.html" %}
+{% extends "master_a.html" %}
 {% block title %}How United States Laws are Made - GovTrack.us{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+</ol>
+{% endblock %}
 
 {% block head %}
 <style>
@@ -9,13 +14,16 @@ dl dd {
 </style>
 {% endblock %}
 
-{% block body %}
-<div style="max-width: 50em">
+{% block summary %}
 	<h1>How Laws Are Made</h1>
 
 	<p>The United States of America isn&rsquo;t one government. It is actually many governments, each composed of different parts competing for power, all working together to make the lives of Americans better.</p>
 
-	<p>This document gives a broad outline of where laws come from in the United States and what parts of the lawmaking process you can see here on GovTrack.us.</p>
+	<p>This document gives a broad outline of where laws come from in the United States beyond just the parts of the lawmaking process you can see here on GovTrack.us.</p>
+{% endblock %}
+
+{% block body %}
+<div style="max-width: 50em">
 
 	<h2><span>The Constitution</span></h2>
 
@@ -52,7 +60,7 @@ dl dd {
 	<dd>Congress is the first branch of government created by the Constitution and it is primarily responsible for creating national law, subject to the limitations set in the Constitution. Congress is made up of two chambers, the House of Representatives and the Senate, which are filled by direct election by the American public.</dd>
 
 	<dt>How is statutory law created?</dt>
-	<dd>For Congress to pass a law, first there must be a bill. A bill must be passed by a majority vote in both chambers of Congress and then either be signed by the President or, if the President vetoes the bill, the veto must be overridden by a two-thirds vote in Congress. Once that happens, the bill becomes a law &mdash; a &ldquo;statute.&rdquo;</dd>
+	<dd>Statutory law is created by the Congress. That&rsquo;s what this website is about. So we have a whole page on <a href="how-a-bill-becomes-a-law">how a bill becomes a law</a>.</dd>
 
 	<dt>What are the checks and balances on this type of law?</dt>
 	<dd><ul><li>The executive branch can choose how to enforce the law, within the limits set by Congress.</li> <li>The federal courts can rule that Congress acted outside of the limitations of the Constitution when enacting a law (i.e. it is un-Constitutional).</li><li>The people of the United States can elect new representatives and senators in the next election.</li></ul></dd>
