@@ -25,7 +25,10 @@ class Command(BaseCommand):
 			return
 			
 		try:
-			user = User.objects.get(email=args[0])
+			if "@" in args[0]:
+				user = User.objects.get(email=args[0])
+			else:
+				user = User.objects.get(id=args[0])
 		except User.DoesNotExist:
 			print "Not a user."
 			return
