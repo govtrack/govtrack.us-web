@@ -333,6 +333,8 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		vote_result_2 = "Overridden"
 	elif re.match(r"Veto Sustained", vote.result):
 		vote_result_2 = "Sustained"
+	elif re.match(r".* Not Sustained$", vote.result):
+		vote_result_2 = "Not Sustained"
 	else:
 		vote_result_2 = re.sub("^(Bill|Amendment|Resolution of Ratification|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion) ", "", vote.result)
 	if vote_result_2 == "unknown": vote_result_2 = ""
@@ -631,13 +633,38 @@ def vote_comparison_table(request, table_id, table_slug):
 		("115-2017/s68", { "title": "Mulvaney—OMB", "longtitle": "Mick Mulvaney to be Director of the Office of Management and Budget" }),
 		("115-2017/s71", { "title": "Pruitt—EPA", "longtitle": "Scott Pruitt to be Administrator of the Environmental Protection Agency" }),
 	]
-	voters = None
 
-	# Fetch votes.
-	def fetch_vote(id, extra):
+	# Compute matrix.
+	votes, party_totals, voters = get_vote_matrix(votes)
+
+	# Return.
+	return {
+		"title": "Key Trump Nominations",
+		"description": "Senate votes on key Trump nominations.",
+		"votes": votes,
+		"party_totals": party_totals,
+		"voters": voters,
+		"col_width_pct": int(round(100/(len(votes)+1))),
+	}
+
+def get_vote_matrix(votes):
+	# Convert votes array to Vote instances with extra fields attached as instance fields.
+	# votes is an array of tuples of the form
+	# (Vote instance | Vote id, Vote slug, { extra dict info })
+	# or an array of just the first part of the tuple.
+
+	def fetch_vote(item):
+		if isinstance(item, tuple):
+			id, extra = item
+		else:
+			id = item
+			extra = { }
+
 		# Fetch vote.
 		if isinstance(id, int):
 			vote = Vote.objects.get(id=id)
+		elif isinstance(id, Vote):
+			vote = id
 		else:
 			import re
 			m = re.match(r"^(\d+)-(\w+)/([hs])(\d+)$", id)
@@ -655,9 +682,13 @@ def vote_comparison_table(request, table_id, table_slug):
 
 		# Return
 		return vote
-	votes = [fetch_vote(id, extra) for id, extra in votes]
 
-	# Compute totals by party.
+	votes = [fetch_vote(item) for item in votes]
+
+	# Compute totals by party, which yields a matrix like hte matrix for voters
+	# where the rows are parties and in each row the 'votes' key provides columns
+	# for the votes.
+
 	party_totals = { }
 	for i, vote in enumerate(votes):
 		totals = vote.totals()
@@ -672,10 +703,11 @@ def vote_comparison_table(request, table_id, table_slug):
 	party_totals = sorted(party_totals.values(), key = lambda value : -value['total_votes'])
 	party_sort_order = [party_total["party"] for party_total in party_totals]
 
-	# Is more than one chamber in involved here?
+	# Is more than one chamber involved here?
 	more_than_one_chamber = (len(set(v.chamber for v in votes)) > 1)
 
-	# Pull voters.
+	# Compute the rows of the matrix.
+
 	voters = { }
 	for i, vote in enumerate(votes):
 		for voter in vote.get_voters():
@@ -718,11 +750,4 @@ def vote_comparison_table(request, table_id, table_slug):
 	# Default sort order.
 	voters = sorted(voters.values(), key = lambda value : value['person_name'])
 
-	return {
-		"title": "Key Trump Nominations",
-		"description": "Senate votes on key Trump nominations.",
-		"votes": votes,
-		"party_totals": party_totals,
-		"voters": voters,
-		"col_width_pct": int(round(100/(len(votes)+1))),
-	}
+	return votes, party_totals, voters

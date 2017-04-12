@@ -366,6 +366,12 @@ class VoteOption(models.Model):
         if self.key == "present": return "present"
         return "other"
 
+    @property
+    def norm_text(self):
+        if self.key == "+": return "Yes"
+        if self.key == "-": return "No"
+        return unicode(self)
+
 class Voter(models.Model):
     """How people voted on roll call votes in the U.S. Congress since 1789. See the Vote API. Filter on the vote field to get the results of a particular vote."""
 	
