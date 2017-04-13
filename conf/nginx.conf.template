@@ -5,15 +5,15 @@ server {
 	listen 80;
 	listen [::]:80;
 
+	location /.well-known/acme-challenge/ {
+		alias /etc/ssl/local/acme-wk-public/;
+	}
+
 	{% if ENABLE_SSL %}
 
 	{% for redirect_host in HTTPS_REDIRECT_HOSTS.split(',') %}
 	server_name {{ redirect_host }};
 	{% endfor %}
-
-	location /.well-known/acme-challenge/ {
-		alias /etc/ssl/local/acme-wk-public/;
-	}
 
 	location / {
 		rewrite /(.*) https://{{ HOST }}/$1 permanent;
