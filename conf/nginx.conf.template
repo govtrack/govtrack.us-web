@@ -47,7 +47,7 @@ server {
 	server_name {{ HOST }};
 	access_log /var/log/govtrack/www_access_log combined buffer=32k;
 
-	root /home/govtrack/web/static/root;
+	root {{ ROOT_DIR }}/static/root;
 
 	# Redirect https://govtrack.us => {{ HOST }}.
 	# Also, we sometimes get requests with a period at the end of the host
@@ -84,19 +84,19 @@ server {
 	}
 
 	location /static/ {
-		alias /home/govtrack/web/static/;
+		alias {{ ROOT_DIR }}/static/;
 		expires 7d;
         }
 
 	location /data {
-		alias /home/govtrack/web/data;
+		alias {{ ROOT_DIR }}/data;
 		autoindex on;
 		autoindex_localtime on;
 		expires 12h;
         }
 
 	location ~ ^/(robots.txt|favicon.ico|googleee0a61280d69c714.html)$ {
-		root /home/govtrack/web/static;
+		root {{ ROOT_DIR }}/static;
 		expires 3d;
         }
 
