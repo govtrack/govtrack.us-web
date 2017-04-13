@@ -43,8 +43,9 @@ server {
 
 	{% endif %} {# SSL_ENABLED #}
 
-	server_name govtrack.us;
-	server_name {{ HOST }};
+	{% for redirect_host in HTTPS_REDIRECT_HOSTS.split(',') %}
+	server_name {{ redirect_host }};
+	{% endfor %}
 	access_log /var/log/govtrack/www_access_log combined buffer=32k;
 
 	root {{ ROOT_DIR }}/static/root;
@@ -68,7 +69,7 @@ server {
 		access_log /var/log/govtrack/www_access_log_django combined buffer=32k;
 
 		include uwsgi_params;
-		uwsgi_pass unix:///var/lock/govtrack/uwsgi_govtrack.sock;
+		uwsgi_pass unix:///tmp/uwsgi_govtrack.sock;
 
 		uwsgi_read_timeout 20s;
 

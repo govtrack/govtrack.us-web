@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 WorkingDirectory={{ ROOT_DIR }}
-ExecStart=/usr/local/bin/honcho run -e {{ ROOT_DIR }}/.env uwsgi --module wsgi:application --socket /var/lock/govtrack/uwsgi_govtrack.sock
+ExecStart=/usr/local/bin/honcho run -e {{ ROOT_DIR }}/.env uwsgi --module wsgi:application --socket /tmp/uwsgi_govtrack.sock
 
 [Install]
 WantedBy=multi-user.target
