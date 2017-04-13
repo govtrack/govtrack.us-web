@@ -47,6 +47,7 @@ server {
 	server_name {{ redirect_host }};
 	{% endfor %}
 	access_log /var/log/govtrack/www_access_log combined buffer=32k;
+	error_log /var/log/govtrack/www_error_log warn;
 
 	root {{ ROOT_DIR }}/static/root;
 
@@ -67,6 +68,7 @@ server {
 		#return 503; # maintenance mode activated
 
 		access_log /var/log/govtrack/www_access_log_django combined buffer=32k;
+		error_log /var/log/govtrack/www_error_log_django warn;
 
 		include uwsgi_params;
 		uwsgi_pass unix:///tmp/uwsgi_govtrack.sock;
