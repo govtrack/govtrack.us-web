@@ -34,12 +34,12 @@ server {
 
 # https://[www.]govtrack.us
 server {
-	listen 443 ssl spdy;
+	listen 443 ssl http2;
     # TODO: ipv6 ssl?
 
 	ssl_certificate /etc/ssl/local/ssl_certificate.crt;
 	ssl_certificate_key /etc/ssl/local/ssl_certificate.key;
-	include /etc/nginx/nginx-ssl.conf;
+	include /etc/ssl/nginx-ssl.conf;
 
 	{% endif %} {# SSL_ENABLED #}
 
