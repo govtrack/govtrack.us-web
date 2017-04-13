@@ -1,0 +1,10 @@
+[Unit]
+Description=GovTrack uWSGI service
+After=network.target
+
+[Service]
+WorkingDirectory={{ ROOT_DIR }}
+ExecStart=uwsgi --module wsgi:application --socket /tmp/uwsgi_govtrack.sock
+
+[Install]
+WantedBy=multi-user.target
