@@ -26,7 +26,7 @@ server {
 	listen 443 ssl default;
 	ssl_certificate /etc/ssl/local/ssl_certificate.crt;
 	ssl_certificate_key /etc/ssl/local/ssl_certificate.key;
-	include /etc/nginx/nginx-ssl.conf;
+	include /etc/ssl/nginx-ssl.conf;
 	return 404;
 	access_log off;
 }
