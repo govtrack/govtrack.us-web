@@ -25,7 +25,7 @@ server {
 server {
 	listen 443 ssl default;
 	ssl_certificate /etc/letsencrypt/live/{{ HOST }}/fullchain.pem;
-	ssl_certificate_key /etc/letsencrypt/live/{{ HOST }}/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/{{ HOST }}/privkey.pem;
 	include /etc/ssl/nginx-ssl.conf;
 	return 404;
 	access_log off;
@@ -38,7 +38,7 @@ server {
     # TODO: ipv6 ssl?
 
 	ssl_certificate /etc/letsencrypt/live/{{ HOST }}/fullchain.pem;
-	ssl_certificate_key /etc/letsencrypt/live/{{ HOST }}/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/{{ HOST }}/privkey.pem;
 	include /etc/ssl/nginx-ssl.conf;
 
 	{% endif %} {# SSL_ENABLED #}
