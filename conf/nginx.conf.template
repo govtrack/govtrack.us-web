@@ -6,7 +6,7 @@ server {
 	listen [::]:80;
 
 	location /.well-known/acme-challenge/ {
-		alias /etc/ssl/local/acme-wk-public/;
+		alias /etc/ssl/local/acme-wk-public/.well-known/acme-challenge/;
 	}
 
 	{% if ENABLE_SSL %}
