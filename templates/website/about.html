@@ -5,10 +5,6 @@
 
 {% block extra_css %}
 <style>
-.heading-box #cat-icon { min-height: auto; }
-/*a.imp { font-weight: bold; }*/
-.coverage_table td { padding: .5em; vertical-align: top; }
-.coverage_table th { text-align: center; }
 </style>
 {% endblock %}
 
@@ -23,7 +19,7 @@
 
 	<p>Use GovTrack to track bills for updates by <a href="/start">getting alerts</a> and understand the broader context of legislation through our <a href="/about/analysis">statistical analyses</a>.</p>
 
-	<p>GovTrack was the first to create comprehensive open data about Congress (see the <a href="/developers">developer docs</a>), and we have successfully lobbied Congress to make more and better legislative information available to the public.</p>
+	<p>You can read more about <a href="/about-our-data">the data we have</a>. GovTrack was the first to create comprehensive open data about Congress (see the <a href="/developers">developer docs</a>), and we have successfully lobbied Congress to make more and better legislative information available to the public.</p>
 
 	<p>
 	<a href="https://www.facebook.com/govtrack/" title="Facebook Page"><i class="fa fa-facebook fa-fw"></i></a></li>
@@ -66,110 +62,7 @@
 </section>
 
 <section class="col-sm-offset-1 col-sm-5" style="font-size: 12px;">
-	<div class="panel panel-default">
-		<div class="panel-heading">About Our Data</div>
-		<div class="panel-body">
-	
-	<table class="coverage_table">
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">Current Information<br>(114<sup>th</sup> Congress through 115<sup>th</sup> Congress)</th></tr>
-		
-		<tr>
-			<td>Members of Congress</td>
-			<td>Biographical information for current and former Members of Congress is from the <a href="https://github.com/unitedstates/congress-legislators">congress-legislators project</a>,
-			a community repository we originally developed and help maintain.</td></tr>
-		</tr>
-		<tr>
-			<td>Bill Status</td>
-			<td>From <a href="https://www.gpo.gov/fdsys/bulkdata/BILLSTATUS">GPO.gov/FDSys</a>. Updated roughly daily. Legislative activity appears the next business day. Via the <a href="https://github.com/unitedstates/congress">congress</a> project.</td></tr>
-		</tr>
-		<tr>
-			<td>Votes</td>
-			<td>From the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites. Updated hourly. Missed vote explanations from <a href="https://projects.propublica.org/explanations/">ProPublica</a>.</td></tr>
-		</tr>
-		<tr>
-			<td>Bill Text</td>
-			<td>From <a href="http://www.gpo.gov/fdsys">GPO.gov/FDSys</a>. Updated daily, but text only becomes available typically 1-3 business days after major action on the bill.</td></tr>
-		</tr>
-		<tr>
-			<td>What&rsquo;s Upcoming</td>
-			<td>Bills: From the <a href="http://www.senate.gov/pagelayout/legislative/d_three_sections_with_teasers/calendars.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>;
-			    Committee Meetings: From the <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>. Updated daily.</td></tr>
-		</tr>
-	
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">1989-2014<br>(101<sup>st</sup>-113<sup>th</sup> Congresses)</th></tr>
 
-		<tr>
-			<td>Bill Status</td>
-			<td>Historical bill status information was obtained from the old THOMAS.gov site prior to its shutdown in 2016.</td></tr>
-		</tr>
-		<tr>
-			<td>Votes</td>
-			<td>From the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites. (Except House votes in 1989 (101<sup>st</sup> Congress, 1st Session), see Rosenthal & Poole.)</td></tr>
-		</tr>
-		<tr>
-			<td>Bill Text</td>
-			<td>From <a href="http://www.gpo.gov/fdsys">GPO.gov/FDSys</a> (~2012-) and archived text from THOMAS.gov (1989-~2012). (Also <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a> for the 113th Congress.)</td></tr>
-		</tr>
-
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">1973-1988<br>(93<sup>rd</sup>-100<sup>th</sup> Congresses)</th></tr>
-		
-		<tr>
-			<td>Bill Status</td>
-			<td>From THOMAS.gov (see above).</td></tr>
-		</tr>
-		<tr>
-			<td>Bill Text</td>
-			<td>From the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov/FDSys</a> (volumes 87-106). Only the text of enacted bills and agreed to concurrent resolutions are available.</td></tr>
-		</tr>
-		<tr>
-			<td>Votes</nobr></small></td>
-			<td>From Rosenthal &amp; Poole&rsquo;s <a href="http://voteview.com/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a>, Carnegie Mellon University.</td>
-		</tr>
-		
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">1951-1972<br>(82<sup>nd</sup>-92<sup>nd</sup> Congresses)</th></tr>
-
-		<tr>
-			<td>Bills</td>
-			<td>From the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov/FDSys</a> (volumes 65-86). Only enacted bills and concurrent resolutions agreed to are available.</td></tr>
-		</tr>
-		<tr>
-			<td>Votes</nobr></small></td>
-			<td>From Rosenthal &amp; Poole&rsquo;s <a href="http://voteview.com/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a> (see above).</td>
-		</tr>
-		
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">1799-1873<br>(6<sup>th</sup>-42<sup>nd</sup> Congresses)</th></tr>
-		
-		<tr>
-			<td>Bills</td>
-			<td>From the Library of Congress&rsquo;s <a href="http://memory.loc.gov/ammem/amlaw/lawhome.html">American Memory Century of Lawmaking</a> collection via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law</a> project.</td></tr>
-		</tr>
-		<tr>
-			<td>Votes</nobr></small></td>
-			<td>From Rosenthal &amp; Poole&rsquo;s <a href="http://voteview.com/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a> (see above).</td>
-		</tr>
-		
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">Other Information</th></tr>
-
-		<tr>
-			<td>District Boundaries</td>
-			<td>Congressional district boundaries on the maps are from the <a href="https://www.census.gov/rdo/data/113th_congressional_and_new_state_legislative_district_plans.html">U.S. Census Bureau</a> and maps are courtesy of <a href="https://www.mapbox.com/">Mapbox</a>.</td>
-		</tr>
-		{% comment %}
-		<tr>
-			<td>Bill Summaries</td>
-			<td>We display several sorts of bill summaries, including some that we write ourselves. Other summaries are from
-			the Library of Congress&rsquo;s Congressional Research Service (via <a href="http://thomas.gov">THOMAS.gov</a>)
-			and the <a href="http://www.gop.gov/">House Republican Conference</a>.</td>
-		</tr>
-		{% endcomment %}
-		<tr>
-			<td>Photos</td>
-			<td>Sourced from various locations, primarily the <a href="http://memberguide.gpo.gov">GPO Guide to House and Senate Members</a>
-			via <a href="https://github.com/unitedstates/images">unitedstates/images</a>, and credited on individual legislator pages.</td>
-		</tr>
-	</table>
-	</div> <!-- /panel-body -->
-	</div> <!-- /panel -->
 </section>
 </div>
 
