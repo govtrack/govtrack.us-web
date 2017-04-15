@@ -42,6 +42,7 @@ sudo cp -R govtrack /opt/solr
 
 # Set up jetty to serve Solr
 sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty /etc/default/jetty8
+sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty.conf /etc/jetty8/jetty.conf
 sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty-logging.xml /opt/solr/etc/jetty-logging.xml
 
 if ! id -u solr > /dev/null 2>&1
@@ -52,3 +53,5 @@ fi
 sudo mkdir -p /var/log/solr
 sudo chown solr:solr -R /opt/solr
 sudo chown solr:solr -R /var/log/solr
+
+sudo service jetty8 start
