@@ -5,8 +5,9 @@
 *~
 
 # Project specific
-.env
-.venv
+.env*
+.venv*
+env/
 db
 log
 settings_local.py
