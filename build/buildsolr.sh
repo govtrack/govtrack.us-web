@@ -30,19 +30,18 @@ if [ ! -d govtrack/solr/bill ]
 then
   mv govtrack/solr/collection1 govtrack/solr/bill
   echo "name=bill" > govtrack/solr/bill/core.properties
-  ln -f -s govtrack/solr/bill/conf/schema.xml $GOVTRACK_ROOT/bill/solr/schema.xml
+  ln -f -s $GOVTRACK_ROOT/bill/solr/schema.xml govtrack/solr/bill/conf/schema.xml
 fi
 
 if [ ! -d govtrack/solr/person ]
 then
   cp -R govtrack/solr/bill govtrack/solr/person
   echo "name=person" > govtrack/solr/person/core.properties
-  ln -f -s govtrack/solr/person/conf/schema.xml $GOVTRACK_ROOT/person/solr/schema.xml
+  ln -f -s $GOVTRACK_ROOT/person/solr/schema.xml govtrack/solr/person/conf/schema.xml
 fi
 
 # Copy Solr over to /opt
-sudo rm -r /opt/solr
-sudo cp -R govtrack /opt/solr
+sudo cp -R govtrack/* /opt/solr
 
 # Set up jetty to serve Solr
 sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty /etc/default/jetty8
