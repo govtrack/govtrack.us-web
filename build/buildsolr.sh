@@ -41,6 +41,7 @@ then
 fi
 
 # Copy Solr over to /opt
+sudo rm -r /opt/solr
 sudo cp -R govtrack /opt/solr
 
 # Set up jetty to serve Solr
