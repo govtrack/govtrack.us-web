@@ -1,10 +1,13 @@
-set -e
+set -ex
 
 GOVTRACK_ROOT=$(realpath $(dirname $0)/..)
 
 # First stop the jetty service, as we won't be able to successfully stop the
 # running process after we overwrite the configuration.
-sudo service jetty8 stop
+if sudo service jetty8 status
+then
+  sudo service jetty8 stop
+fi
 
 # Download and unzip the solr installation package
 if [ ! -f solr-4.10.2.tgz ]
