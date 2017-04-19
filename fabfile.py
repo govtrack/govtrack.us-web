@@ -7,17 +7,9 @@ from fabric.api import cd, env, put, run, settings, sudo
 import os
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Environments for web, worker, and solr in local VM, and EC2 clusters
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Environments
 #
-#                |  Local VM  |  EC2 Cluster  |
-#                |------------+---------------|
-#           web  |            |               |
-#                |------------+---------------|
-#        worker  |            |               |
-#                |------------+---------------|
-#          solr  |            |               |
-#                +------------+---------------+
 
 def local_vm():
     env.user = os.environ['VM_USER']
@@ -51,6 +43,15 @@ def ec2_vm():
 #
 
 def install_packages(update=True):
+    """
+    Install necesary system packages. This is onen of the few commands whose
+    commands actually has to be in the fabfile, since the govtrack code is not
+    known to be in the latest state (or on the machine at all) when the command
+    gets run.
+
+    Here we install things like git and python, without which we can't proceed.
+    """
+
     if update:
         sudo('apt update')
 
@@ -61,8 +62,30 @@ def install_packages(update=True):
             # For Solr
             ' openjdk-8-jre jetty8'
 
-            # For PostgreSQL client support
-            ' libpq-dev')
+            # For PostgreSQL & MySQLclient support
+            ' libpq-dev'
+            ' libmysqlclient-dev'
+
+            # For the web server
+            ' nginx')
+
+    install_ssl_packages(update=update)
+
+
+def install_ssl_packages(update=True):
+    """
+    Install the necessary packages for Let's Encrypt SSL certificates.
+    """
+
+    if update:
+        sudo('add-apt-repository ppa:certbot/certbot --yes')
+        sudo('apt-get update')
+
+    sudo('apt-get install certbot --yes')
+
+
+def configure_ssl():
+    sudo('govtrack.us-web/build/configure_ssl.sh')
 
 
 def pull_repo(folder, branch='master'):
@@ -79,7 +102,8 @@ def pull_repo(folder, branch='master'):
 
 def clone_repo(repo_url, folder, branch='master'):
     result = run('git clone --recursive {url} {folder}'.format(url=repo_url, folder=folder))
-    run('git checkout {branch}'.format(branch=branch))
+    with cd(folder):
+        run('git checkout {branch}'.format(branch=branch))
     return result
 
 
@@ -100,14 +124,23 @@ def install_deps():
         # installed, the library installation will fail. Leave it out of the
         # list to make development easier.
         sudo('pip install psycopg2')
+        sudo('pip install mysqlclient')
+
+        # Similarly, we only need gunicorn if we're serving from a VM.
+        sudo('pip install gunicorn')
 
         # We use honcho to manage the environment.
         sudo('pip install honcho jinja2')
+        sudo('pip install honcho-export-systemd')
+
+        # TODO: Create a pipreq.server.txt, and move
+        # pipreq.txt to pipreq.app.txt. Then, install
+        # pipreq.server.txt here instead of having the
+        # requirements piece-meal.
 
 
 def configure_solr():
-    with cd('govtrack.us-web'):
-        return run('honcho run ./build/buildsolr.sh')
+    sudo('govtrack.us-web/build/configure_solr.sh')
 
 
 def configure_postgres():
@@ -115,9 +148,18 @@ def configure_postgres():
     sudo('createdb govtrack', user='postgres')
 
 
-def upload_settings(envfile):
+def setenv(envfile, restart=True):
+    """ Upload environment variables to the target server(s). """
     with cd('govtrack.us-web'):
         put(envfile, '.env')
+
+    if restart:
+        restart_webserver()
+
+
+def printenv():
+    with cd('govtrack.us-web'):
+        return run('cat .env')
 
 
 def update_db():
@@ -130,7 +172,7 @@ def update_assets():
         run('honcho run ./minify')
 
 
-def bootstrap_data():
+def bootstrap_data(congress=None):
     with cd('govtrack.us-web'):
         # This seems very chicken-or-egg. Is the purpose of this to bootstrap
         # the existing site with as much data as already exists? Won't the
@@ -144,11 +186,27 @@ def bootstrap_data():
         run('honcho run ./parse.py committee', warn_only=True)  # fails b/c meeting data not available
 
         run('honcho run build/rsync.sh')
-        run('honcho run ./parse.py bill --congress=114 --disable-index --disable-events')
-        run('honcho run ./parse.py vote --congress=114 --disable-index --disable-events')
+        run('mkdir -p data/congress/upcoming_house_floor')  # parser.bill_parser.load_docs_house_gov expects this folder
+        run('honcho run ./parse.py bill --congress={} --disable-index --disable-events'.format(congress))
+        run('honcho run ./parse.py vote --congress={} --disable-index --disable-events'.format(congress))
+
+        run('honcho run ./manage.py update_index')
 
 
-def deploy(envfile=None, branch='master'):
+def configure_webserver():
+    sudo('govtrack.us-web/build/configure_webserver.sh')
+    restart_webserver()
+
+
+def configure_cron():
+    sudo('govtrack.us-web/build/configure_cron.sh')
+
+
+def restart_webserver():
+    sudo('govtrack.us-web/build/restart_webserver.sh')
+
+
+def deploy(envfile=None, branch='master', congress=None):
     pull_or_clone_repo(os.environ['GOVTRACK_WEB_GIT_URL'], 'govtrack.us-web', branch=branch)
     pull_or_clone_repo(os.environ['LEGISLATORS_GIT_URL'], 'congress-legislators')
 
@@ -156,21 +214,20 @@ def deploy(envfile=None, branch='master'):
     configure_solr()
 
     if envfile:
-        upload_settings(envfile)
+        setenv(envfile, restart=False)
 
     update_db()
     update_assets()
-    bootstrap_data()
+
+    if congress:
+        bootstrap_data(congress=congress)
+
+    configure_cron()
+    configure_nginx()
+    restart_webserver()
 
 
 def clean():
     run('rm -rf govtrack.us-web')
     run('rm -rf congress-legislators')
 
-
-def setenv(vars):
-    """
-    Read environment variables from string and update on remote machine. Restart
-    the services on the machine afterward.
-    """
-    pass
