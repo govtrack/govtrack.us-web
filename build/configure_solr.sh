@@ -1,12 +1,16 @@
+#!/usr/bin/env bash
+
+# NOTE: This script needs to run with superuser (sudo) permissions.
+
 set -ex
 
 GOVTRACK_ROOT=$(realpath $(dirname $0)/..)
 
 # First stop the jetty service, as we won't be able to successfully stop the
 # running process after we overwrite the configuration.
-if sudo service jetty8 status
+if service jetty8 status > /dev/null
 then
-  sudo service jetty8 stop
+  service jetty8 stop
 fi
 
 # Download and unzip the solr installation package
@@ -41,20 +45,20 @@ then
 fi
 
 # Copy Solr over to /opt
-sudo cp -R govtrack/* /opt/solr
+cp -R govtrack/* /opt/solr
 
 # Set up jetty to serve Solr
-sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty /etc/default/jetty8
-sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty.conf /etc/jetty8/jetty.conf
-sudo cp $GOVTRACK_ROOT/build/solrconfig/jetty-logging.xml /opt/solr/etc/jetty-logging.xml
+cp $GOVTRACK_ROOT/build/solrconfig/jetty /etc/default/jetty8
+cp $GOVTRACK_ROOT/build/solrconfig/jetty.conf /etc/jetty8/jetty.conf
+cp $GOVTRACK_ROOT/build/solrconfig/jetty-logging.xml /opt/solr/etc/jetty-logging.xml
 
 if ! id -u solr > /dev/null 2>&1
 then
-  sudo useradd -d /opt/solr -s /sbin/false solr
+  useradd -d /opt/solr -s /sbin/false solr
 fi
 
-sudo mkdir -p /var/log/solr
-sudo chown solr:solr -R /opt/solr
-sudo chown solr:solr -R /var/log/solr
+mkdir -p /var/log/solr
+chown solr:solr -R /opt/solr
+chown solr:solr -R /var/log/solr
 
-sudo service jetty8 start
+service jetty8 start
