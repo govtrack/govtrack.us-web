@@ -7,13 +7,14 @@ The data-gathering scripts are elsewhere.
 Installation
 ------------
 
-GovTrack.us runs on Ubuntu 12.10 or OS X
+GovTrack.us runs on Ubuntu 16.04 or OS X
 
 * Install dependencies via OS package manager:
 
   ```
-  apt-get install git python-virtualenv python-lxml python-openid python-oauth2 \
-      python-iso8601 python-scipy python-prctl
+  apt-get install git python-virtualenv python-lxml python-openid \
+      python-oauth2client python-iso8601 python-numpy python-scipy \
+      python-prctl libssl-dev
   ```
 
   or for OS X (xCode required)
@@ -58,12 +59,10 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
 
 * To enable search (for which complete instructions haven't been provided, so really skip this):
 
-  * For debugging, install Xapian and add it to the virtual environment:
+  * For debugging, install Xapian:
 
     ```
     apt-get install python-xapian
-    ln -s /usr/lib/python2.7/dist-packages/xapian/ env/local/lib/python2.7/xapian
-
     ```
 
   * Set HAYSTACK\_CONNECTIONS:
@@ -86,14 +85,37 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
   * For production, install Solr:
 
     ```
-    apt-get install openjdk-7-jre jetty
+    sudo apt install openjdk-8-jre jetty8
     ```
 
-  * Follow the instructions at:
+  * Run the Solr build script:
 
-    http://django-haystack.readthedocs.org/en/latest/installing_search_engines.html#solr
+    ```
+    ./build/buildsolr.sh
+    ```
 
-  * Symlink `./bill/solr_schema.xml` to `./solr/conf/schema.xml`.
+    (for detailed information about what is going on, see
+    http://django-haystack.readthedocs.org/en/latest/installing_search_engines.html#solr)
+
+    * Set HAYSTACK\_CONNECTIONS:
+
+      ```
+      HAYSTACK_CONNECTIONS = {
+        ...
+        'person': {
+            'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+            'URL': 'http://localhost:8983/solr/person',
+        },
+        'bill': {
+          'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+          'URL': 'http://localhost:8983/solr/bill',
+        },
+        ...
+      }                   
+      ```
+
+      If you installed Solr on a machine other than the web server, change
+      `localhost` above to the hostname of that server.
 
 * Initialize the database and minify some files:
 
@@ -109,7 +131,7 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
   ./manage.py loaddata django-fixture-people.json
   ./manage.py loaddata django-fixture-usc_sections.json
   ./manage.py loaddata django-fixture-billterms.json
-  
+
   ./parse.py person
   ./parse.py committee # fails b/c meeting data not available
   ```
@@ -127,7 +149,7 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
   ./parse.py bill --congress=114 --disable-index --disable-events
   ./parse.py vote --congress=114 --disable-index --disable-events
   ```
-  
+
 If you configured Solr, you can remove --disable-index. For the sake of speed, --disable-events will skip the creation of the events table for bills, which is the basis for feeds and tracking, so that will be nonfunctional.
 
 * Check the site works by running the development server and visiting the URL specified by the runserver process.
