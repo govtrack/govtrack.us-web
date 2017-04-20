@@ -133,6 +133,9 @@ def install_deps():
         sudo('pip install honcho jinja2')
         sudo('pip install honcho-export-systemd')
 
+        # For backing up the data directory...
+        sudo('pip install aws')
+
         # TODO: Create a pipreq.server.txt, and move
         # pipreq.txt to pipreq.app.txt. Then, install
         # pipreq.server.txt here instead of having the
@@ -164,6 +167,7 @@ def printenv():
 
 def update_db():
     with cd('govtrack.us-web'):
+        # NOTE: Will have to use `migrate` after Django upgrade.
         run('honcho run ./manage.py syncdb --noinput')
 
 
@@ -225,6 +229,10 @@ def deploy(envfile=None, branch='master', congress=None):
     configure_cron()
     configure_nginx()
     restart_webserver()
+
+
+def backup_data():
+    sudo('govtrack.us-web/build/backup_data.sh')
 
 
 def clean():

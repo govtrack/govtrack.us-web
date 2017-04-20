@@ -110,3 +110,17 @@ Next, deploy the variables to the server using fabric:
 
 If there is a webserver server running, this will restart it as well.
 
+
+## Infrastructure
+
+For deploying to AWS, the following setup is recommended:
+
+* A t2.large EC2 machine with a 100GB+ attached volume.
+* A security-group for the EC2 machine named `govtrack-vm`, with inbound ports
+  open for HTTP, HTTPS, and SSH. If you want to explore the Solr admin, you will
+  also need to create a custom inbound rule for TCP over port 8983.
+* An RDS database with PostgreSQL or MySQL. In your `.env.server` file, set the
+  `DATABASE_URL` variable to the connection string for this server, according to
+  the guidelines at https://github.com/kennethreitz/dj-database-url#url-schema.
+* An S3 bucket for storing backups of the `data/` directory. The name of this
+  bucket should be entered in the `S3_BACKUPS_BUCKET` environment variable.
