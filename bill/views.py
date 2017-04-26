@@ -464,7 +464,10 @@ def bill_list(request):
     return show_bill_browse("bill/bill_list.html", request, ix1, ix2, { })
 
 def show_bill_browse(template, request, ix1, ix2, context):
-    if "text" in request.GET:
+    if "sort" in request.GET:
+        # pass through
+        default_sort = request.GET["sort"]
+    elif "text" in request.GET:
         # when the user is doing a text search, sort by standard Solr relevance scoring, which includes boosting the bill title
         default_sort = None
     elif "sponsor" in request.GET:
