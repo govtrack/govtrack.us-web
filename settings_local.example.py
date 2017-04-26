@@ -45,7 +45,7 @@ YOUTUBE_API_KEY = 'fill this in'
 # for registration
 RECAPTCHA_PUBLIC_KEY = "fill this in"
 RECAPTCHA_PRIVATE_KEY = "fill this in"
-TWITTER_OAUTH_TOKEN = "fill this in"
+TWITTER_OAUTH_TOKEN = None # fill this in
 TWITTER_OAUTH_TOKEN_SECRET = "fill this in"
 FACEBOOK_APP_ID = "fill this in"
 FACEBOOK_APP_SECRET = "fill this in"

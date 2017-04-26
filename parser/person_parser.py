@@ -370,6 +370,8 @@ def filter_yaml_term_structure(node):
 def update_twitter_list():
     from django.conf import settings
 
+    if not settings.TWITTER_OAUTH_TOKEN: return
+
     def chunk(seq, count):
         ret = []
         for x in seq:
