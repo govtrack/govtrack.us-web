@@ -26,10 +26,12 @@ def compute_productivity(congress, date_range):
 
 	enacted_bills = Bill.objects.filter(
 		congress=congress, # if we're measuring presidential activity, the date of signing could be outside of the Congress, so change this
-		current_status__in=BillStatus.final_status_passed_bill,
-		#current_status_date__gte=date_range[0],
-		#current_status_date__lte=date_range[1]
-		)
+		#current_status__in=BillStatus.final_status_passed_bill,
+		current_status=BillStatus.enacted_signed,
+		current_status_date__gte=date_range[0],
+		current_status_date__lte=date_range[1]
+		)\
+		.order_by('current_status_date')
 
 	#enacted_bills = (enacted_bills.filter(title__contains="Appropriations") | enacted_bills.filter(title__contains="Authorization")).distinct()
 
@@ -40,6 +42,7 @@ def compute_productivity(congress, date_range):
 	enacted_bill_words = 0
 	enacted_bill_pages_missing = 0
 	for b in enacted_bills:
+		#print b.slip_law_number
 		try:
 			pp = load_bill_text(b, None, mods_only=True).get("numpages")
 		except IOError:
@@ -52,6 +55,8 @@ def compute_productivity(congress, date_range):
 
 		wds = len(load_bill_text(b, None, plain_text=True).split(" "))
 		enacted_bill_words += wds
+
+		print wds, b
 
  	if congress < 103: enacted_bill_pages = "(no data)"
  	if congress < 103: enacted_bill_words = "(no data)"
@@ -91,12 +96,12 @@ if 0:
 		date_range = get_congress_dates(c)
 		compute_productivity(c, (date_range[0], date_range[1] + days_in))
 
-elif 0:
-	for c in range(93, CURRENT_CONGRESS+1):
-		# January 1 of the second year of the Congress
-		# through March 31 of that year.
+elif 1:
+	# First 100 days of presidency.
+	for c in (95, 97, 101, 103, 107, 111, 115):
 		date_range = get_congress_dates(c)
-		date_range = (datetime(date_range[0].year+1, 1, 1).date(), datetime(date_range[0].year+1, 1, 1).date()+timedelta(days=105))
+		date_range = (datetime(date_range[0].year, 1, 20).date(), None)
+		date_range = (date_range[0], date_range[0]+timedelta(days=100))
 		compute_productivity(c, date_range)
 
 elif 0:
