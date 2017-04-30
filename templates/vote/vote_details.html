@@ -305,6 +305,12 @@ $(function() {
                 <a href="{{vote.related_bill.get_absolute_url}}">{{vote.related_bill}}</a>{% endif %}. 
         </p>
 
+	{% elif vote.question == "On Approving the Journal" %}
+    <p>This was a procedural vote. The House is required to approve its previous day&rsquo;s journal of activities each day.
+	But a roll call vote on approving the journal is often used by the majority party to get representatives to the floor
+	or to conduct an informal tally about their position on another matter. That other matter is not made known to the general
+	public.</p>
+
     {% endif %}
 
 </div>
