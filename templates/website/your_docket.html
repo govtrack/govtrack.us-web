@@ -44,7 +44,7 @@
 				{% with bill.get_prognosis as p %}
 				{% if p %}
 				<div class="event_date" style="display: block;">
-					<span>Prognosis: </span> {{p.prediction|floatformat:0}}% chance of being {{p.success_name}}, from <a href="https://skoposlabs.com/">Skopos Labs</a>
+					<span>Prognosis: </span> {{p.prediction|floatformat:0}}% chance of being {{p.success_name}}, from <a href="https://www.skoposlabs.com/">Skopos Labs</a>
 				</div>
 				{% endif %}
 				{% endwith %}
