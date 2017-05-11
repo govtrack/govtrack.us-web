@@ -172,9 +172,10 @@ class CommitteeMember(models.Model):
         return CommitteeMemberRole.by_value(self.role).label
 
     def subcommittee_role(self):
+        scr = CommitteeMember.objects.filter(committee__committee=self.committee, person=self.person).exclude(role=CommitteeMemberRole.member)
         try:
-            return CommitteeMember.objects.filter(committee__committee=self.committee, person=self.person, role=CommitteeMemberRole.chairman)[0]
-        except IndexError:
+            return max(scr, key = lambda r : MEMBER_ROLE_WEIGHTS[r.role])
+        except ValueError:
             return None
 
     def role_name_2(self):

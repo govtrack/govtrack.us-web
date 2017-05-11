@@ -522,11 +522,11 @@ $(function() {
 
 		<ul style="list-style: none; padding: 0;">
 			{% for c in committeeassignments %}
-			<li>
+			<li style="margin: .125em 0">
 				{% if c.role_name != 'Member' %}{{c.role_name}}, {% endif %}
 				<a href="{{c.committee.get_absolute_url}}">{{c.committee}}</a>
 				{% if c.subroles %}
-					<ul style="list-style: none; padding: 0;">
+					<ul style="list-style: none; padding: 0 0 0 .75em; font-size: 88%;">
 					{% for s in c.subroles %}
 					<li>{{s.role_name}}, Subcommittee on <a href="{{s.committee.get_absolute_url}}">{{s.committee}}</a></li>
 					{% endfor %}
