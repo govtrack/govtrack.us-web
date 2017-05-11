@@ -121,8 +121,9 @@ class Command(BaseCommand):
 		if not has_major and if_major: return
 
 		if not has_major:
-			msg = "%d vote%s held by Congress yesterday." % (
-                votes.count(),
+			count = votes.count()
+			msg = "%d minor vote%s held by Congress yesterday." % (
+                count,
                 "s were" if count != 1 else " was",
                 )
 		else:
