@@ -1260,8 +1260,12 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         # We'll say that this bill was enacted if at least one third of its text
         # is found within enacted bills, across all of the text relations.
         #
-        # Returns a list of bills that this bill was enacted via, or None if
-        # the bill was not "enacted".
+        # We don't have text incoproration data for bills without XML text, which
+        # began gradually around the 109th/110th Congress, so we also look at CRS
+        # relations to fill in historical bills.
+        #
+        # Returns a list of bills that this bill was enacted via, including this
+        # bill itself, or None if the bill was not "enacted".
         #
         # Some of our statistics wants to know if a bill was enacted within a certain
         # time frame, so there is that restriction too.
@@ -1287,7 +1291,14 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         total_incorporated_ratio += rec["my_ratio"]
             if total_incorporated_ratio >= .33:
                 return ret
-                
+
+        # Check identical bills identified by CRS, i.e. "companion" bills.
+        if recurse:
+            for rb in RelatedBill.objects.filter(bill=self, relation="identical").select_related("related_bill"):
+                e = rb.related_bill.was_enacted_ex(recurse=False, restrict_to_activity_in_date_range=restrict_to_activity_in_date_range)
+                if e is not None:
+                     return [e]
+               
         return None
 
     def get_open_market(self, user):
