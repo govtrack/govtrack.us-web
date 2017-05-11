@@ -29,7 +29,7 @@ class Command(BaseCommand):
 		})
 		print(url)
 		req = urllib2.Request(url)
-		req.add_header("Authorization", settings.EMAIL_HOST_PASSWORD)
+		req.add_header("Authorization", settings.SPARKPOST_API_KEY)
 		req.add_header('Content-Type', 'application/json')
 		r = urllib2.urlopen(req)
 
