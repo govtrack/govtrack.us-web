@@ -110,6 +110,9 @@ class Cosponsor(models.Model):
 
     api_example_parameters = { "sort": "-joined" }
 
+    def __unicode__(self):
+        return self.person_name + u" " + self.details() + u": " + unicode(self.bill)
+
     @property
     def person_name(self):
         # don't need title because it's implicit from the bill type

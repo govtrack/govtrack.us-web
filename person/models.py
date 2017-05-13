@@ -395,7 +395,7 @@ class PersonRole(models.Model):
         pass # ordering = ['startdate'] # causes prefetch_related to be slow
 
     def __unicode__(self):
-        return '%s / %s to %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display())
+        return '%s / %s to %s / %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display(), repr(self.congress_numbers()))
        
     def continues_from(self, prev):
         if self.startdate - prev.enddate > datetime.timedelta(days=120): return False
