@@ -2,7 +2,7 @@
 import math
 
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
@@ -403,6 +403,58 @@ class Voter(models.Model):
     
     def get_vote_name(self):
         return self.vote.name()
+
+    @staticmethod
+    def get_role_for(person, vote, vote_date):
+        # TODO filter chamber in case person went between chambers same day?
+        role = person.get_role_at_date(vote_date, congress=vote.congress)
+        if role is not None: return role
+
+        # Find closest.
+        for role in person.roles.all():
+            if role.congress_numbers() is not None and vote.congress in role.congress_numbers():
+                return role
+
+        return None
+
+    def is_valid(self):
+        return self.person_role.startdate <= self.created.date() <= self.person_role.enddate and (self.person_role.congress_numbers() is None or self.vote.congress in self.person_role.congress_numbers())
+
+    @staticmethod
+    def fixup_roles():
+        # Sometimes the role column becomes incorrect if the PersonRole instance is updated
+        # to new dates.
+
+        # Fetch Voter objects in chunks since we can't call .all() on the whole table.
+        # Get all of the IDs first, then chunk the IDs, and fetch objects for each chunk.
+        def fetch_in_chunks(qs, chunk_size):
+            all_items = qs.values_list("id", flat=True)
+            def make_iter(all_items):
+                while all_items:
+                    chunk = all_items[0:chunk_size]
+                    all_items = all_items[len(chunk):]
+                    for c in qs.in_bulk(chunk).values():
+                        yield c
+            return len(all_items), make_iter(list(all_items))
+
+        # Iterate over all of the records. Check validity. Update where needed.
+        import tqdm
+        total, voters = fetch_in_chunks(
+           Voter.objects
+             # filter for likely problem cases - there are too many Voter objects to process them all in a reasonable amount of time
+             .filter(Q(created__lte=F('person_role__startdate')) | Q(created__gte=F('person_role__enddate')) | Q(person_role=None))
+             .order_by('created', 'person_id', 'vote_id')
+             .select_related("person", "person_role", "vote"),
+             2500)
+        for v in tqdm.tqdm(voters, total=total):
+            if not v.person_role or not v.is_valid():
+                new_role = Voter.get_role_for(v.person, v.vote, v.created)
+                if new_role != v.person_role:
+                    print v.person, v.created, v.vote
+                    print v.person_role, "=>", new_role
+                    print
+                    v.person_role = new_role
+                    v.save()
 
 
 # Summaries

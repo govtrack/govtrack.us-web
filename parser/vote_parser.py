@@ -306,7 +306,7 @@ def main(options):
                         vote.save()
                         
                 # pre-fetch the role of each voter
-                load_roles_at_date([x.person for x in voters if x.person != None], vote.created)
+                load_roles_at_date([x.person for x in voters if x.person != None], vote.created, vote.congress)
                 for voter in list(voters):
                     if voter.voter_type != VoterType.vice_president:
                         voter.person_role = voter.person.role

@@ -233,17 +233,17 @@ class Person(models.Model):
         ret.reverse()
         return ret
 
-    def get_role_at_date(self, when):
+    def get_role_at_date(self, when, congress=None):
         if isinstance(when, datetime.datetime):
             when = when.date()
         
         # A person may have two roles on the same date, such as when simultaneously
         # resigning from the House to take office in the Senate. In that case, return the
         # most recent role.
-        try:
-            return self.roles.filter(startdate__lte=when, enddate__gte=when).order_by("-startdate")[0]
-        except IndexError:
-            return None
+        for r in self.roles.filter(startdate__lte=when, enddate__gte=when).order_by("-startdate"):
+            if congress is not None and r.congress_numbers() is not None and congress not in r.congress_numbers(): continue
+            return r
+        return None
 
     def get_last_role_at_congress(self, congress):
         start, end = get_congress_dates(congress)

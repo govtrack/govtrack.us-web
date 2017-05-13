@@ -127,12 +127,57 @@ class Cosponsor(models.Model):
         if self.bill.is_current and not self.role.current: ret.append("no longer serving")
         return "; ".join(ret)
 
-    # role is a new field which I added with (does not take into account people with overlapping roles such as going from House to Senate on the same day):
-    #for role in PersonRole.objects.filter(startdate__lte="1970-01-01", startdate__gt="1960-01-01"):
-    #    Cosponsor.objects.filter(
-    #        person=role.person_id,
-    #        joined__gte=role.startdate,
-    #        joined__lte=role.enddate).update(role = role)
+    @staticmethod
+    def get_role_for(person, bill, joined_date):
+        # TODO filter chamber in case person went between chambers same day?
+        role = person.get_role_at_date(joined_date, congress=bill.congress)
+        if role is not None: return role
+
+        # Find closest.
+        for role in person.roles.all():
+            cn = role.congress_numbers()
+            if cn is not None and bill.congress in cn:
+                return role
+
+        return None
+
+    def is_valid(self):
+        return self.role.startdate <= self.joined <= self.role.enddate and self.bill.congress in self.role.congress_numbers()
+
+    @staticmethod
+    def fixup_roles():
+        # Sometimes the role column becomes incorrect if the PersonRole instance is updated
+        # to new dates.
+
+        # Fetch Cosponsor objects in chunks since we can't call .all() on the whole table.
+        # Get all of the IDs first, then chunk the IDs, and fetch Cosponsor objects for each chunk.
+        def fetch_in_chunks(qs, chunk_size):
+            all_items = qs.values_list("id", flat=True)
+            def make_iter(all_items):
+                while all_items:
+                    chunk = all_items[0:chunk_size]
+                    all_items = all_items[len(chunk):]
+                    for c in qs.in_bulk(chunk).values():
+                        yield c
+            return len(all_items), make_iter(list(all_items))
+
+        # Iterate over all of the records. Check validity. Update where needed.
+        import tqdm
+        total, cosponsors = fetch_in_chunks(Cosponsor.objects.all().order_by('joined', 'person_id', 'bill_id').select_related("person", "role", "bill"), 2500)
+        for c in tqdm.tqdm(cosponsors, total=total):
+            if not c.role or not c.is_valid():
+                new_role = Cosponsor.get_role_for(c.person, c.bill, c.joined)
+                if new_role != c.role:
+                    if new_role:
+                        print c.person, c.joined, c.bill
+                        print c.role, "=>", new_role
+                        print
+                        c.role = new_role
+                        c.save()
+                    else:
+                        print c.person, c.joined, c.bill
+                        print "can't update because no new role", c.role, "=> ?"
+                        print
 
 class Bill(models.Model):
     """A bill represents a bill or resolution introduced in the United States Congress."""

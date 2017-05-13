@@ -162,7 +162,7 @@ class BillProcessor(XmlProcessor):
             else:
                 joined = self.parse_datetime(subnode.get('joined'))
                 
-                role = person.get_role_at_date(joined)
+                role = Cosponsor.get_role_for(person, obj, joined)
                 if not role:
                     log.error('Cosponsor %s did not have a role on %s' % (unicode(person), subnode.get('joined')))
                     continue

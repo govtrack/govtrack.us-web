@@ -28,7 +28,7 @@ def get_committee_assignments(person):
     return role_tree
 
 
-def load_roles_at_date(persons, when=datetime.now()):
+def load_roles_at_date(persons, when, congress):
     """
     Find out representative/senator role of each person at given date.
 
@@ -38,6 +38,7 @@ def load_roles_at_date(persons, when=datetime.now()):
     roles = PersonRole.objects.filter(startdate__lte=when, enddate__gte=when, role_type__in=(RoleType.representative, RoleType.senator), person__in=persons)
     roles_by_person = {}
     for role in roles:
+        if role.congress_numbers() is not None and congress not in role.congress_numbers(): continue
         roles_by_person[role.person_id] = role
     for person in persons:
         person.role = roles_by_person.get(person.id)
