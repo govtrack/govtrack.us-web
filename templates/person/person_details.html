@@ -488,7 +488,7 @@ $(function() {
 			{% if analysis_data.sponsorship %}<h3>Sponsorship Analysis</h3>{% endif %}
 		{% endif %}
 
-
+		{% if analysis_data.sponsorship %}
 		<p>Our unique analysis of the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored provides insight into {{ person.his_her }}
 		position in the {{analysis_data.sponsorship.chamber}}.</p>
 
@@ -510,7 +510,7 @@ $(function() {
 		{% endif %}
 		{% endif %}
 		</div>
-
+		{% endif %}
 	</section><!-- /analysis -->
     {% endif %}
 
@@ -552,7 +552,7 @@ $(function() {
 		</ul>
 		<p><a href="/congress/bills/browse?sponsor={{person.id}}#enacted_ex=on">View All &raquo;</a></p>
 
-		<p>We consider a bill enacted if one of the following is true: a) it is enacted itself, b) it has a companion bill in the other chamber (as identified by Congress) which was enacted, or c) if about one third or more of its provisions were incorporated into bills that were enacted (as determined by an automated text analysis, applicable beginning with bills in the 110<sup>th</sup> Congress).</p>
+		<p style="font-size: 85%; line-height: 128%">We consider a bill enacted if one of the following is true: a) it is enacted itself, b) it has a companion bill in the other chamber (as identified by Congress) which was enacted, or c) if about one third or more of its provisions were incorporated into bills that were enacted (as determined by an automated text analysis, applicable beginning with bills in the 110<sup>th</sup> Congress).</p>
 	</section>
 {% endif %}
 	
@@ -578,7 +578,7 @@ $(function() {
 			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
 			{% endfor %}
 		</ul>
-		<p><a href="/congress/bills/browse?sponsor={{person.id}}">View All &raquo;</a> (including bills from previous years)</p>
+		<p><a href="/congress/bills/browse?sponsor={{person.id}}">View All &raquo;</a></p>
 	</section><!-- /sponsorship -->
 {% endif %}
 
