@@ -228,15 +228,15 @@ class BillStatus(enum.Enum):
     final_status_obvious = (passed_simpleres, passed_constamend, passed_concurrentres, prov_kill_veto, fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, enacted_signed, enacted_veto_override, enacted_tendayrule, enacted_unknown, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate, passed_bill)
 
     # indicates a bill at the end of its life cycle and passed
-    final_status_passed_bill = (enacted_signed, enacted_veto_override, enacted_tendayrule, enacted_unknown)
+    final_status_enacted_bill = (enacted_signed, enacted_veto_override, enacted_tendayrule, enacted_unknown)
     final_status_passed_resolution = (passed_simpleres, passed_constamend, passed_concurrentres)
-    final_status_passed = tuple(list(final_status_passed_bill) + list(final_status_passed_resolution))
+    final_status_passed = tuple(list(final_status_enacted_bill) + list(final_status_passed_resolution))
     
     # indicates a bill at the end of its life cycle and failed
     final_status_failed = (fail_originating_house, fail_originating_senate, fail_second_house, fail_second_senate, vetoed_pocket, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)
 
     # all final statuses
-    final_status = tuple(list(final_status_passed_bill) + list(final_status_passed_resolution) + list(final_status_failed))
+    final_status = tuple(list(final_status_enacted_bill) + list(final_status_passed_resolution) + list(final_status_failed))
 
 	# the statuses that are basically just introduction
     introduced_statuses = (introduced, referred)

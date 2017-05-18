@@ -628,7 +628,7 @@ class Bill(models.Model):
                     continue # already indexed
                 if state == BillStatus.referred and (date.date() - self.introduced_date).days == 0:
                     continue # don't dup these events so close
-                E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_passed_bill else []))
+                E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_enacted_bill else []))
 
             # generate events for new cosponsors... group by join date, and
             # assume that join dates we've seen don't have new cosponsors
@@ -1323,7 +1323,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             return restrict_to_activity_in_date_range[0] <= d <= restrict_to_activity_in_date_range[1]
 
         # If we know the bill to have been enacted itself...
-        if self.current_status in BillStatus.final_status_passed_bill and date_filter(self.current_status_date.isoformat()):
+        if self.current_status in BillStatus.final_status_enacted_bill and date_filter(self.current_status_date.isoformat()):
             return [self]
 
         # Check related bills identified by text incorporation...

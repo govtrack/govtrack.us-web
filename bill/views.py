@@ -528,7 +528,7 @@ def subject_choices():
 bill_status_groups = [
     ("Enacted Laws",
         "enacted bills and joint resolutions", " so far in this session of Congress", " (both bills and joint resolutions can be enacted as law)",
-        BillStatus.final_status_passed_bill), # 2
+        BillStatus.final_status_enacted_bill), # 2
     ("Passed Resolutions",
         "passed resolutions", " so far in this session of Congress (for joint and concurrent resolutions, passed both chambers)", " (for joint and concurrent resolutions, this means passed both chambers)",
         BillStatus.final_status_passed_resolution), # 3

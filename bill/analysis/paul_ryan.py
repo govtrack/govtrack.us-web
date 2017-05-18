@@ -90,7 +90,7 @@ def leadership_score(person):
 	return float(v)
 	
 def bills_enacted(person):
-	return Bill.objects.filter(sponsor=person, bill_type=BillType.house_bill, current_status__in=BillStatus.final_status_passed_bill).count()
+	return Bill.objects.filter(sponsor=person, bill_type=BillType.house_bill, current_status__in=BillStatus.final_status_enacted_bill).count()
 
 def make_stat(descr, pop, stat):
 	vals = [stat(p) for p in pop]

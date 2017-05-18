@@ -26,7 +26,7 @@ def compute_productivity(congress, date_range):
 
 	enacted_bills = Bill.objects.filter(
 		congress=congress, # if we're measuring presidential activity, the date of signing could be outside of the Congress, so change this
-		#current_status__in=BillStatus.final_status_passed_bill,
+		#current_status__in=BillStatus.final_status_enacted_bill,
 		current_status=BillStatus.enacted_signed,
 		current_status_date__gte=date_range[0],
 		current_status_date__lte=date_range[1]

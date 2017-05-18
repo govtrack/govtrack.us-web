@@ -212,7 +212,7 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
     congress=congress,
     bill_type__in=(BillType.house_bill, BillType.senate_bill, BillType.house_joint_resolution, BillType.senate_joint_resolution))
   enacted_bills = list(all_bills.filter(
-    current_status__in=BillStatus.final_status_passed_bill))
+    current_status__in=BillStatus.final_status_enacted_bill))
 
   # Write to CSV, to a temporary file for now.
   with open("/tmp/text_comparison.csv", "w") as outfile:
@@ -265,7 +265,7 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
 
       for b2 in similar_bills:
         # Don't compare to other enacted bills.
-        if b2.current_status in BillStatus.final_status_passed_bill:
+        if b2.current_status in BillStatus.final_status_enacted_bill:
           continue
 
         # Don't compare bills to resolutions.
@@ -626,7 +626,7 @@ elif __name__ == "__main__":
 #  len([b for b in bills if b.noun == "bill"])
 #  # 10074
 #
-#  def ok1(b): return b and b.current_status in BillStatus.final_status_passed_bill
+#  def ok1(b): return b and b.current_status in BillStatus.final_status_enacted_bill
 #  len([b for b in bills if b.noun == "bill" and ok1(b)])
 #  # 325
 #

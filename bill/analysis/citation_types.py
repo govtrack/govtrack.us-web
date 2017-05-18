@@ -14,7 +14,7 @@ for congress in range(CURRENT_CONGRESS, 103-1, -1):
 	enacted_bills = Bill.objects.filter(
 		bill_type__in=(BillType.senate_bill, BillType.house_bill),
 		congress=congress,
-		current_status__in=BillStatus.final_status_passed_bill)
+		current_status__in=BillStatus.final_status_enacted_bill)
 
 	#enacted_bills = (enacted_bills.filter(title__contains="Appropriations") | enacted_bills.filter(title__contains="Authorization")).distinct()
 

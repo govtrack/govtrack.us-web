@@ -34,6 +34,6 @@ for congress, session, startdate, enddate in get_all_sessions():
 		C.writerow([
 			b.congress, session, BillType.by_value(b.bill_type).slug, str(b.number),
 			b.noun == "bill",
-			status.key, status in BillStatus.final_status_passed_bill,
+			status.key, status in BillStatus.final_status_enacted_bill,
 			str(pp), str(wds)])
 
