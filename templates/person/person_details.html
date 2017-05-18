@@ -603,10 +603,10 @@ $(function() {
 							</td>
 							<td style="line-height: 125%;">
 								<a href="{{v.get_absolute_url}}" title="{{v.question}}" style="text-decoration: none">{{v.question|truncatewords:28}}</a>
-								<div style="font-size: 88%;">
-									{{v.created|date}}. {{v.summary}}.
+								<div style="font-size: 88%; line-height: 128%;">
+									{{v.created|date}}. {{v.summary}}.<br>
+									{{v.get_summary.plain_text|truncatewords:45}}
 								</div>
-								<div>{{v.get_summary.plain_text|truncatewords:45}}</div>
 							</td>
 						</tr>
 					{% endfor %}

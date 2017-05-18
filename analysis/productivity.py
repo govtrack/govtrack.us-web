@@ -96,7 +96,7 @@ if 0:
 		date_range = get_congress_dates(c)
 		compute_productivity(c, (date_range[0], date_range[1] + days_in))
 
-elif 1:
+elif 0:
 	# First 100 days of presidency.
 	for c in (95, 97, 101, 103, 107, 111, 115):
 		date_range = get_congress_dates(c)

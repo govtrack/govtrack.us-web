@@ -147,31 +147,37 @@ def load_key_votes(person):
 
     # First get all of the major votes that this person has participated in.
     all_votes = person.votes.filter(vote__category__in=Vote.MAJOR_CATEGORIES)
-    congresses = set(all_votes.values_list("vote__congress", flat=True).distinct())
+    congresses = sorted(set(all_votes.values_list("vote__congress", flat=True).distinct()), reverse=True)
     all_votes = all_votes.values_list("vote__id", flat=True)
 
-    # Scan the cached votes for the votes with the most number of outliers
-    # and the votes that this person was an outlier in.
-    import csv, os.path
-    top_votes = { }
-    outlier_votes = set()
-    for congress in congresses:
-      fn = "data/us/%d/stats/notable_votes.csv" % congress
-      if not os.path.exists(fn): continue
-      for vote in csv.DictReader(open(fn)):
-        if int(vote["vote_id"]) not in all_votes: continue
-        outliers = set(int(v) for v in vote["outliers"].split(" ") if v != "")
-        top_votes[int(vote["vote_id"])] = len(outliers)
-        if person.id in outliers: outlier_votes.add(int(vote["vote_id"]))
+    # We'll pick top votes where the person was an outlier (so the vote was informative
+    # for this Member) and top where the person wasn't an outlier but had a lot of
+    # outliers (so the vote was interesting).
+    #
+    # But we'll disperse the votes across the time period the Member served in:
+    # 4 in the most recent two Congress, 4 after that.
+    ret = []
+    for congresses_set in [congresses[0:2], congresses[2:]]:
+        # Scan the cached votes for the votes with the most number of outliers
+        # and the votes that this person was an outlier in.
+        import csv, os.path
+        top_votes = { }
+        outlier_votes = set()
+        for congress in congresses_set:
+            fn = "data/us/%d/stats/notable_votes.csv" % congress
+            if not os.path.exists(fn): continue
+            for vote in csv.DictReader(open(fn)):
+                if int(vote["vote_id"]) not in all_votes: continue
+                outliers = set(int(v) for v in vote["outliers"].split(" ") if v != "")
+                top_votes[int(vote["vote_id"])] = len(outliers)
+                if person.id in outliers: outlier_votes.add(int(vote["vote_id"]))
 
-    # Sort the votes by the number of outliers.
-    top_votes = sorted(top_votes.items(), key=lambda kv : -kv[1])
-    top_votes = [kv[0] for kv in top_votes]
+        # Sort the votes by the number of outliers.
+        top_votes = sorted(top_votes.items(), key=lambda kv : -kv[1])
+        top_votes = [kv[0] for kv in top_votes]
 
-    # Return the top votes where the person was an outlier and the top
-    # where the person wasn't.
-    ret = [v for v in top_votes if v in outlier_votes][0:4] \
-        + [v for v in top_votes if v not in outlier_votes][0:4]
+        ret += [v for v in top_votes if v in outlier_votes][0:3] \
+             + [v for v in top_votes if v not in outlier_votes][0:2]
 
     # Convert to Vote objects, make unique, and order by vote date.
     ret = Vote.objects.filter(id__in=ret).order_by('-created')
