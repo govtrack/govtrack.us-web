@@ -322,6 +322,7 @@ def main(options):
             # doesn't work yet. Re-run the parser to fix names.
             nn = (person.name, person.sortname)
             if hasattr(person, "role"): delattr(person, "role") # clear the cached info
+            person._most_recent_role = None # clear cache here too
             person.set_names()
             if nn != (person.name, person.sortname):
                 log.warn("%s is now %s." % (nn[0], person.name))
