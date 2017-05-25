@@ -658,11 +658,9 @@ $(function() {
 	<p>The information on this page is originally sourced from a variety of materials, including:</p>
 	<ul style="list-style: none; padding: 0;">
 	{% with person.vote_sources as person_vote_sources %}
+		<li><a href="https://github.com/unitedstates/congress-legislators">Congress-Legislators</a>, a community project collecting election information</li>
 		{% if committeeassignments or "congress" in person_vote_sources %}
 			<li>The <a href="http://www.house.gov">House</a> and <a href="http://www.senate.gov">Senate</a> websites, for committee membership and voting records</li>
-		{% endif %}
-		{% if person.bioguideid %}
-			<li><a href="http://bioguide.congress.gov/scripts/biodisplay.pl?index={{person.bioguideid}}">Congressional Biographical Directory</a> for elected positions</li>
 		{% endif %}
 		{% if "keithpoole" in person_vote_sources %}
 			<li><a href="http://voteview.com/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a> by Howard L. Rosenthal and Keith  T.  Poole. </li>
