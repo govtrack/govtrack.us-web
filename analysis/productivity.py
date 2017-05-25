@@ -13,11 +13,6 @@ from bill.billtext import load_bill_text
 from vote.models import Vote, CongressChamber
 from person.models import PersonRole, RoleType
 
-#party_control = { }
-#for row in csv.reader(open("analysis/party_control.tsv"), delimiter='\t'):
-#	if row[0].startswith("#") or row[0] == 'Congress': continue
-#	party_control[int(row[0])] = (row[3], row[9], row[15]) # senate, house, presidency
-
 W = csv.writer(sys.stdout)
 W.writerow(["congress", "congress years", "date_start", "date_end", "enacted bills", "enacted pages", "enacted words", "house votes", "senate votes"])
 
@@ -26,10 +21,15 @@ def compute_productivity(congress, date_range):
 
 	enacted_bills = Bill.objects.filter(
 		congress=congress, # if we're measuring presidential activity, the date of signing could be outside of the Congress, so change this
+
 		#current_status__in=BillStatus.final_status_enacted_bill,
-		current_status=BillStatus.enacted_signed,
-		current_status_date__gte=date_range[0],
-		current_status_date__lte=date_range[1]
+		#current_status=BillStatus.enacted_signed,
+		#current_status_date__gte=date_range[0],
+		#current_status_date__lte=date_range[1]
+
+		introduced_date__gte=date_range[0],
+		introduced_date__lte=date_range[1]
+
 		)\
 		.order_by('current_status_date')
 
@@ -42,7 +42,7 @@ def compute_productivity(congress, date_range):
 	enacted_bill_words = 0
 	enacted_bill_pages_missing = 0
 	for b in enacted_bills:
-		#print b.slip_law_number
+		continue
 		try:
 			pp = load_bill_text(b, None, mods_only=True).get("numpages")
 		except IOError:
@@ -55,8 +55,6 @@ def compute_productivity(congress, date_range):
 
 		wds = len(load_bill_text(b, None, plain_text=True).split(" "))
 		enacted_bill_words += wds
-
-		print wds, b
 
  	if congress < 103: enacted_bill_pages = "(no data)"
  	if congress < 103: enacted_bill_words = "(no data)"
@@ -74,27 +72,22 @@ def compute_productivity(congress, date_range):
 		created__lte=date_range[1],
 		chamber=CongressChamber.senate).count()
 
-	## power
-	#congress_same_party = party_control[congress][0] == party_control[congress][1]
-	#branches_same_party = (party_control[congress][0] == party_control[congress][1]) and (party_control[congress][0] == party_control[congress][2])
-
-	#
-
 	timespan = "%d-%d" % (get_congress_dates(congress)[0].year, ((get_congress_dates(congress)[1].year-1) if get_congress_dates(congress)[1].month == 1 else get_congress_dates(congress)[1].year))
 	row = [congress, timespan, date_range[0].isoformat(), date_range[1].isoformat(),
 		enacted_bills_count, enacted_bill_pages, enacted_bill_words, house_votes, senate_votes]
 	W.writerow(row)
 	#print("<tr>%s</tr>" % "".join( "<td>%s</td> " % td for td in row) )
 
-if 0:
+if 1:
 	# Look at corresponding time periods from past Congresses.
 	# Go back a few days because our data isn't real time!
 	days_in = (datetime.now().date() - get_congress_dates(CURRENT_CONGRESS)[0]) \
 		- timedelta(days=4)
 	print("We are about %d days into the %d Congress" % (days_in.days, CURRENT_CONGRESS))
-	for c in range(93, CURRENT_CONGRESS+1):
+	#for c in range(93, CURRENT_CONGRESS+1):
+	for c in [111, 115]:
 		date_range = get_congress_dates(c)
-		compute_productivity(c, (date_range[0], date_range[1] + days_in))
+		compute_productivity(c, (date_range[0], date_range[0] + days_in))
 
 elif 0:
 	# First 100 days of presidency.
