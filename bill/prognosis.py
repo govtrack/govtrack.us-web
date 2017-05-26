@@ -122,7 +122,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 	
 		# is the sponsor a member/chair of a committee to which the bill has
 		# been referred?
-		for rname, rvalue in (("member", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("chair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
+		for rname, rvalue in (("member", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("chair", CommitteeMemberRole.vice_chair), ("chair", CommitteeMemberRole.chair)):
 			for committee in committees:
 				if committee_membership.get(bill.sponsor_id, {}).get(committee.code) == rvalue:
 					if rvalue != CommitteeMemberRole.member:
@@ -139,7 +139,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 				factors.append(("sponsor_leader_minority", "The sponsor has a high leadership score but is not in the majority party.", "Sponsor has a high leadership score (minority party)."))
 					
 	# count cosponsor assignments to committees by committee role and Member party
-	for rname, rvalue in (("committeemember", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("chair", CommitteeMemberRole.vice_chairman), ("chair", CommitteeMemberRole.chairman)):
+	for rname, rvalue in (("committeemember", CommitteeMemberRole.member), ("rankingmember", CommitteeMemberRole.ranking_member), ("chair", CommitteeMemberRole.vice_chair), ("chair", CommitteeMemberRole.chair)):
 		num_cosp = 0
 		for cosponsor in cosponsors:
 			for committee in committees:

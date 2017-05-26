@@ -149,7 +149,7 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 		x = False
 		for committee in list(bill.committees.all()):
 			for cosponsor in cosponsors:
-				if committee_membership.get(cosponsor.person.id, {}).get(committee.code) in (CommitteeMemberRole.ranking_member, CommitteeMemberRole.vice_chairman, CommitteeMemberRole.chairman):
+				if committee_membership.get(cosponsor.person.id, {}).get(committee.code) in (CommitteeMemberRole.ranking_member, CommitteeMemberRole.vice_chair, CommitteeMemberRole.chair):
 					x = True
 		if x: has_cmte_leaders.append(bill)
 
@@ -250,7 +250,7 @@ def get_committee_stats(person, role, stats, committee_membership):
 	chair_list = [] # chair, vicechair, or ranking member
 	subchair_list = []
 	for committee, role_type in committee_membership.get(person.id, {}).items():
-		if role_type not in (CommitteeMemberRole.ranking_member, CommitteeMemberRole.vice_chairman, CommitteeMemberRole.chairman):
+		if role_type not in (CommitteeMemberRole.ranking_member, CommitteeMemberRole.vice_chair, CommitteeMemberRole.chair):
 			continue
 		if len(committee) == 4:
 			# full committee

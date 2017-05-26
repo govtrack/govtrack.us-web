@@ -34,7 +34,7 @@ democratic_congresspeeps = set([p for p in Person.objects\
 	.filter(roles__enddate__gt=datetime.now(), roles__role_type=todd_akin_role.role_type).exclude(roles__party=todd_akin_role.party).distinct()])
 
 def is_chair(person):
-	return 1 if CommitteeMember.objects.filter(person=person, role=CommitteeMemberRole.chairman, committee__committee=None).exists() else 0
+	return 1 if CommitteeMember.objects.filter(person=person, role=CommitteeMemberRole.chair, committee__committee=None).exists() else 0
 
 def pct_dem_cosponsors(person):
 	c = Cosponsor.objects.filter(bill__sponsor=person)

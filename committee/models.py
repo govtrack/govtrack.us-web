@@ -145,9 +145,9 @@ class Committee(models.Model):
 
 class CommitteeMemberRole(enum.Enum):
     exofficio = enum.Item(1, 'Ex Officio')
-    chairman = enum.Item(2, 'Chairman')
+    chair = enum.Item(2, 'Chair')
     ranking_member = enum.Item(3, 'Ranking Member')
-    vice_chairman = enum.Item(4, 'Vice Chairman')
+    vice_chair = enum.Item(4, 'Vice Chair')
     member = enum.Item(5, 'Member')
 
 class CommitteeMember(models.Model):
@@ -185,8 +185,8 @@ class CommitteeMember(models.Model):
             return "the %s of" % self.role_name().lower()
 
 MEMBER_ROLE_WEIGHTS = {
-    CommitteeMemberRole.chairman: 5,
-    CommitteeMemberRole.vice_chairman: 4,
+    CommitteeMemberRole.chair: 5,
+    CommitteeMemberRole.vice_chair: 4,
     CommitteeMemberRole.ranking_member: 3,
     CommitteeMemberRole.exofficio: 2,
     CommitteeMemberRole.member: 1
