@@ -697,7 +697,7 @@ aside .download-links { padding: 31px 0 0 }
 	.searching .summary {
 		padding: 0 0 13px;
 		border-bottom: 6px solid #dae2df;
-		color: #AF7325;
+		color: #a5691b;
 		font: 16px/21px serif;
 		margin: 0 0 0;
 		}
@@ -786,11 +786,13 @@ aside .download-links { padding: 31px 0 0 }
 	padding: 0 0 5px;
 	}
 .advanced-search form { margin: 0; }
-.advanced-search label {
+.advanced-search label, .advanced-search legend {
 	font-size: .8em;
 	line-height: 24px;
 	color: #555;
 	display: block;
+	border: none;
+	margin: 0;
 	}
 	.advanced-search #show_more_options {
 		font-size: .8em;

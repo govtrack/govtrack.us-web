@@ -68,7 +68,7 @@ def person_search_manager(mode):
     sm.set_template("""
     	<div style="float: left; margin-right: 1.5em">
 			{% if object.has_photo %}
-				<img src="{{object.get_photo_url_50}}" width="50" height="60"/>
+				<img src="{{object.get_photo_url_50}}" width="50" height="60" alt="Photo of {{object.name}}"/>
 			{% else %}
 				<div style="border: 1px solid black; width: 50px; height: 60px;"/>
 			{% endif %}

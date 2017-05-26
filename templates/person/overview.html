@@ -22,7 +22,7 @@
 	
 {% block body %}
 	<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
-		<p style="margin-bottom: .25em">Enter your address below. We will find your congressional district.</p>
+		<label for="address" style="margin-bottom: .25em">Enter your address below. We will find your congressional district.</label>
 		<input id="address" class="form-control" type="text" value="" style="width: 75%; height: 26px; float: left;" placeholder="415 N. Main St., Hannibal, Missouri" />
 		<input class="btn-search-small2" type="submit" value="Search"  />
 		<div style="clear: both"> </div>
@@ -30,7 +30,7 @@
 
 	<div class="row" style="margin-top: 1.5em">
 		<div class="col-xs-6">
-			<p style="margin-bottom: .5em">Or select a state to list all senators and representatives from that state:</p>
+			<label for="state" style="margin-bottom: .5em">Or select a state to list all senators and representatives from that state:</label>
 			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" class="form-control">
 				<option value="">(Select State)</option>
 				{% for abbr, name in statelist %}
@@ -45,7 +45,7 @@
 		</div>
 	</div>
 
-	<img src="/static/images/capitol-diagram.jpg" class="img-responsive" style="margin-bottom: 20px">
+	<img src="/static/images/capitol-diagram.jpg" class="img-responsive" style="margin-bottom: 20px" alt="Photo of U.S. Capitol Building">
 
 <p>The United States Congress has an upper chamber called the Senate and a lower chamber called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process to create federal statutory law.</p>
 	
@@ -58,6 +58,7 @@
 	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of senators by party:</p>
 	
 	<table style="width: 15em; margin-bottom: 1em;">
+	<caption>Senators by Party</caption>
 	{% for p in senate_by_party %}
 	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}
@@ -73,6 +74,7 @@
 	<p>As in the Senate, the day-to-day activities of the House are controlled by the &ldquo;majority party.&ldquo; Here is a count of representatives by party:</p>
 	
 	<table style="width: 15em">
+	<caption>Representatives by Party</caption>
 	{% for p in house_by_party %}
 	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}

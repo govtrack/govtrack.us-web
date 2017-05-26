@@ -1,7 +1,7 @@
 {% load govtrack_utils %}
 {% with "/static/" as STATIC_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<meta charset="utf-8">
@@ -15,7 +15,7 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" integrity="sha256-VBrFgheoreGl4pKmWgZh3J23pJrhNlSUOBek+8Z2Gv0=" crossorigin="anonymous">
-		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20161023" />
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20170526" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
@@ -129,10 +129,9 @@
 			{% endblock %}
 			<li>
 				<form name="header_search" action="/search" method="GET" class="search-form" role="search">
-					<fieldset>
-						<div class="text"><input type="text" placeholder="Search" name="q"/></div>
-						<input class="btn-search" type="submit" value="Search" />
-					</fieldset>
+					<label for="master_search_q" class="sr-only">Search GovTrack for</label>
+					<div class="text"><input type="text" placeholder="Search" id="master_search_q" name="q"/></div>
+					<input class="btn-search" type="submit" value="Search" />
 				</form>
 	        </li>
 	      </ul>

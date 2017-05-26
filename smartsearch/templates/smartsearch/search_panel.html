@@ -138,7 +138,7 @@ function show_facets(postdata, options, isinitial) {
     $('#show_more_options').toggle(has_hidden_facet);
 
     // Don't show the facets until after the first time they are loaded.
-    $('#searchform > fieldset').show();
+    $('#searchform > .fieldset').show();
     $('#searchform .initial_loading').hide();
 }
 
@@ -426,10 +426,10 @@ window.post_jquery_load_scripts.push(function() {
     <h3>{% firstof heading "Search" %}</h3>
     <div class="initial_loading" style="margin-top: 1em;">Loading options...</div>
     <div id="searcherror"> </div>
-    <fieldset style="display: none">
+    <div class="fieldset" style="display: none">
         {% for field in form %}
             <div id="searchform_field_{{field.field_name}}_container" class="facet-field-container" style="{% if field.type != "select" or field.help %}width: 100%;{% else %}width: 50%; padding-right: 1em;{% endif %} float: left; cursor: pointer; margin-bottom: 1em; font-weight: normal;">
-				{% if field.type != "boolean" %}
+				{% if field.type != "boolean" and field.type != "checkbox" and field.type != "radio"%}
                 <label for="searchform_field_{{field.field_name}}" style="margin: 0;">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
 				{% endif %}
                 {% if field.type == "text" %}
@@ -439,7 +439,10 @@ window.post_jquery_load_scripts.push(function() {
                 {% elif field.type == "select" %}
                     <select id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" size="1" onchange="update_search()" style="width: 100%"> </select>
                 {% elif field.type == "checkbox" or field.type == "radio" %}
-                    <div id="searchform_field_{{field.field_name}}"> </div>
+                    <fieldset>
+                        <legend>{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</legend>
+                        <div id="searchform_field_{{field.field_name}}"> </div>
+                    </fieldset>
                 {% elif field.type == "boolean" %}
                     <div id="searchform_field_{{field.field_name}}_container" class="checkbox">
 		                <label for="searchform_field_{{field.field_name}}">
@@ -467,7 +470,7 @@ window.post_jquery_load_scripts.push(function() {
             </div>
         {% endif %}
     <a id="show_more_options" href="#" onclick="return show_more_options();" style="display: block; clear: both; margin-top: 1em;">Show more options...</a>
-    </fieldset>
+    </div>
     </form>
 </div>
 

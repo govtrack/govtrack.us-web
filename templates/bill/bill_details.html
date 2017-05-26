@@ -512,7 +512,7 @@
 					{% if bill.sponsor.has_photo %}
 						<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
 							<a href="{{bill.sponsor.get_absolute_url}}">
-								<img src="/data/photos/{{bill.sponsor.id}}-100px.jpeg" title="{{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
+								<img src="/data/photos/{{bill.sponsor.id}}-100px.jpeg" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
 							</a>
 						</div>
 					{% endif %}
@@ -534,7 +534,7 @@
 						{% if text_info.has_thumbnail %}
 						<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
 							<a href="{{bill.get_absolute_url}}/text">
-								<img src="{{bill.get_absolute_url}}/_text_image" class="img-responsive" title="Bill Text" style="border: 1px solid #999;"/>
+								<img src="{{bill.get_absolute_url}}/_text_image" class="img-responsive" alt="Thumbnail of {{bill.noun}} text" style="border: 1px solid #999;"/>
 							</a>
 						</div>
 						{% endif %}
@@ -621,7 +621,7 @@
 			<div class="col-md-6 col-lg-4" style="padding-bottom: 1em">
 				<div style="float: left; margin-right: .75em; margin-bottom: .75em">
 					<a href="{{item.other.get_absolute_url}}">
-						<img src="{{item.other.get_absolute_url}}/thumbnail?width=75" title="{{item.other}}" style="border: 1px solid #999;" width="60" height="71"/>
+						<img src="{{item.other.get_absolute_url}}/thumbnail?width=75" title="{{item.other}}" style="border: 1px solid #999;" width="60" height="71" alt="Thumbnail of {{item.other.display_number_no_congress_number}}"/>
 					</a>
 				</div>
 				<p style="line-height: 125%;">
@@ -682,7 +682,7 @@
 										<a href="{{item.vote_obj.get_absolute_url}}">
 											<img
 												src="{{item.vote_obj.get_absolute_url}}/{{vit}}"
-												alt="Vote Thumbnail Image"
+												alt="thumbnail image of vote"
 												style="max-width: 75px; float: left; margin: 2px 1em 1em 0;"
 												>
 										</a>
