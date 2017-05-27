@@ -20,6 +20,17 @@
         font-style: italic;
     }
 
+    #what-you-can-do-actions {
+    }
+        #what-you-can-do-actions > * {
+            float: left;
+            margin-right: 1.5em;
+            margin-top: 1em;
+        }
+        #what-you-can-do-actions > button {
+            min-width: 135px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
+        }
+
 	#vote_notes {
 		margin: 4px 0 12px 0;
 		font-size: 85%;
@@ -315,8 +326,7 @@ $(function() {
 
 </div>
 
-<div class="row">
-<div class="col-sm-8">
+<div>
 	<div class="row" style="margin-bottom: 1em">
 		<div class="col-xs-3">
 			<div class="hdr">Congress</div>
@@ -345,11 +355,6 @@ $(function() {
 	<dt>Result:</dt>
 	<dd>{{ vote.result }}</dd>
 	</dl>
-</div>
-
-<div class="col-sm-4">
-	<a href="/events/track-something?feed=misc:allvotes" class="track-btn" title="Get email alerts or set up an RSS feed" style="margin: 0 auto">Track Votes</a>
-</div>
 </div>
 
 {% if has_vp_vote %}<p>The Vice President cast a tie-breaking vote.</p>{% endif %}
@@ -482,6 +487,36 @@ $(function() {
 </div> <!-- /row -->
 
 <div class="clear"> </div>
+
+<div class="panel panel-success" style="margin: 30px 0; padding-bottom: 0;">
+  <div class="panel-body">
+    <h3 style="margin: 5px 0 0 0; font-weight: bold;">
+        What you can do
+    </h3>
+
+    <div id="what-you-can-do-actions" class="clearfix">
+        <button class="btn btn-sm" onclick="window.location='/events/track-something?feed=misc:allvotes';">
+            <i class="glyphicon glyphicon-envelope"> </i>
+            <span style="margin-left: 3px;">
+                Get Email Alerts
+            </span>
+        </button>
+
+        {% with SITE_ROOT_URL|add:vote.get_absolute_url as share_url %}
+        <div>
+            <a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{vote.result}} - {{vote.question|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
+            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        </div>
+
+        {% if FACEBOOK_APP_ID %}
+            <div style="margin-bottom: 5px;">
+                <div class="fb-share-button" data-href="{{share_url}}" data-layout="box_count"></div>
+            </div>
+        {% endif %}
+        {% endwith %}
+    </div><!-- /what-you-can-do-actions -->
+  </div>
+</div>
 
 <div id="vote-details" class="section">
 
