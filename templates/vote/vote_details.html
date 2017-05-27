@@ -169,7 +169,10 @@ function show_notes(elem) {
 	return false;
 }
 
-$(function() { 
+$(function() {
+    if ($('#vote-summary-wrapper > div').outerHeight() > $('#vote-summary-wrapper').innerHeight())
+        $('#vote-summary-toggle').show();
+
     var headers = $('#vote-list-template th');
     headers.click(function() {
         var index = $(this).index();
@@ -261,14 +264,35 @@ $(function() {
 		{% endif %}
 
 		{% if vote.related_bill and vote.related_bill.oursummary %}
-			<div style="margin: 1em">
-				{{vote.related_bill.oursummary.as_html|safe}}
-				{% if vote.related_bill.oursummary.source_text %}
-					<p>Source: <a href="{{vote.related_bill.oursummary.source_url}}">{{vote.related_bill.oursummary.source_text}}</a></p>
-				{% endif %}
+			<div class="well" style="position: relative">
+                <div id="vote-summary-wrapper" style="max-height: 7em; overflow: hidden;">
+                    <div>
+        				{{vote.related_bill.oursummary.as_html|safe}}
+        				{% if vote.related_bill.oursummary.source_text %}
+        					<p>Source: <a href="{{vote.related_bill.oursummary.source_url}}">{{vote.related_bill.oursummary.source_text}}</a></p>
+        				{% endif %}
+                    </div>
+                </div>
+                <div id="vote-summary-toggle"
+                     style="margin: 0 -19px; position: absolute; bottom: 0; width: 100%; text-align: center; padding: 1.25em 1em .5em 1em; background: linear-gradient(0deg, white 40%, transparent); font-size: 90%; display: none;">
+                  <a id="vote-summary-wrapper-more"
+                    class="btn btn-sm btn-info"
+                     href="#"
+                     onclick="$('#vote-summary-wrapper').data('original-height', $('#vote-summary-wrapper').height()); $('#vote-summary-wrapper').animate({ minHeight: $('#vote-summary-wrapper>div').outerHeight() + $('#vote-summary-toggle').outerHeight() }); $('#vote-summary-wrapper-more').hide(); $('#vote-summary-wrapper-less').show(); return false;">
+                            Show More Summary
+                            <span class="glyphicon glyphicon-menu-down"></span>
+                    </a>
+                  <a id="vote-summary-wrapper-less"
+                     href="#"
+                     class="btn btn-sm btn-info"
+                     style="display: none;"
+                     onclick="$('#vote-summary-wrapper').animate({ minHeight: $('#vote-summary-wrapper').data('original-height') }); $('#vote-summary-wrapper-more').show(); $('#vote-summary-wrapper-less').hide(); return false;">
+                            Show Less Summary
+                            <span class="glyphicon glyphicon-menu-up"></span>
+                  </a>
+                </div>
 			</div>
 
-			<hr>
 			{% include "ad_footer_leaderboard.html" %}
 			<hr>
 		{% endif %}
