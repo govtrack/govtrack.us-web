@@ -67,6 +67,17 @@
 {% endblock %}
 	
 {% block body_scripts %}
+
+{# facebook #}
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId={{FACEBOOK_APP_ID}}&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
 <script>
 var current_sort_column = null;
 function update_table() {
@@ -370,7 +381,35 @@ $(function() {
 
 <div id="admin_panel"> </div>
 
-<hr style="margin-top: 0; margin-bottom: 1.5em">
+<div class="panel panel-success" style="margin: 30px 0; padding-bottom: 0;">
+  <div class="panel-body">
+    <h3 style="margin: 5px 0 0 0; font-weight: bold;">
+        What you can do
+    </h3>
+
+    <div id="what-you-can-do-actions" class="clearfix">
+        <button class="btn btn-sm" onclick="window.location='/events/track-something?feed=misc:allvotes';">
+            <i class="glyphicon glyphicon-envelope"> </i>
+            <span style="margin-left: 3px;">
+                Get Email Alerts
+            </span>
+        </button>
+
+        {% with SITE_ROOT_URL|add:vote.get_absolute_url as share_url %}
+        <div>
+            <a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{vote.result}} - {{vote.question|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
+            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        </div>
+
+        {% if FACEBOOK_APP_ID %}
+            <div style="margin-bottom: 5px;">
+                <div class="fb-share-button" data-href="{{share_url}}" data-layout="box_count"></div>
+            </div>
+        {% endif %}
+        {% endwith %}
+    </div><!-- /what-you-can-do-actions -->
+  </div>
+</div>
 
 {% with vote.totals as totals %}
 <div class="row">
@@ -489,36 +528,6 @@ $(function() {
 </div> <!-- /row -->
 
 <div class="clear"> </div>
-
-<div class="panel panel-success" style="margin: 30px 0; padding-bottom: 0;">
-  <div class="panel-body">
-    <h3 style="margin: 5px 0 0 0; font-weight: bold;">
-        What you can do
-    </h3>
-
-    <div id="what-you-can-do-actions" class="clearfix">
-        <button class="btn btn-sm" onclick="window.location='/events/track-something?feed=misc:allvotes';">
-            <i class="glyphicon glyphicon-envelope"> </i>
-            <span style="margin-left: 3px;">
-                Get Email Alerts
-            </span>
-        </button>
-
-        {% with SITE_ROOT_URL|add:vote.get_absolute_url as share_url %}
-        <div>
-            <a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{vote.result}} - {{vote.question|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
-            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-        </div>
-
-        {% if FACEBOOK_APP_ID %}
-            <div style="margin-bottom: 5px;">
-                <div class="fb-share-button" data-href="{{share_url}}" data-layout="box_count"></div>
-            </div>
-        {% endif %}
-        {% endwith %}
-    </div><!-- /what-you-can-do-actions -->
-  </div>
-</div>
 
 <div id="vote-details" class="section">
 
