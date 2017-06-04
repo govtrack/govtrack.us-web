@@ -311,7 +311,7 @@ def browse_district(request, state, district):
     # check that the district is in range
     if stateapportionment[state] in ("T", 1):
         # territories and state-at large districts have no page here
-        pass
+        raise Http404()
     elif district < 1 or district > stateapportionment[state]:
         # invalid district number
         raise Http404()
