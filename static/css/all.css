@@ -695,19 +695,20 @@ aside .download-links { padding: 31px 0 0 }
         font-weight: normal;
 		}
 	.searching .summary {
-		padding: 0 0 13px;
-		border-bottom: 6px solid #dae2df;
-		color: #a5691b;
+		margin: 5px 0;
+		color: #906010;
 		font: 16px/21px serif;
-		margin: 0 0 0;
 		}
 		.searching .summary strong {
 			font-weight: bold;
 			color: #444;
 		}
-	.searching #loading_status { text-align: center; border: 1px solid #AAA; background-color: #EEE; }
+	.searching #loading_status { text-align: center; border: 1px solid #AAA; background-color: #EEE; margin: 1em 0; }
 	.searching	#show_more { text-align: center; border: 1px solid #CB4B16; background-color: #ffcebb; font-weight: bold; display: block; }
 	.searching .results {
+		margin-top: 10px;
+		border-top: 5px solid #DDD;
+		padding-top: 10px;
 		margin-bottom: 15px;
 	}
 	.searching .results .result_item {
@@ -862,9 +863,6 @@ select, input.text {
 	text-align: center;
 	cursor: pointer;
 	color: #fff;
-	}
-	@media (min-width: 770px) {
-		.margin-left-30-wide { margin-left: 30px; }
 	}
 
 

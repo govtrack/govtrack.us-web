@@ -1,4 +1,4 @@
-<div class="searching row" style="margin: 0">
+<div class="searching row">
 
 <script>
 function addCommas(nStr)
@@ -226,6 +226,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
             postdata[name] = form.elements[i].value;
         }
     }
+	postdata["sort"] = $("#searchform_sort").val();
     
     // Apply any initial search options.
     if (isinitial) {
@@ -421,8 +422,8 @@ window.post_jquery_load_scripts.push(function() {
 
 </script>
 
-<div class="advanced-search col-sm-4">
-    <form id="searchform" onsubmit="update_search(); return false;">
+<div class="col-sm-4">
+    <form id="searchform" class="advanced-search" onsubmit="update_search(); return false;">
     <h3>{% firstof heading "Search" %}</h3>
     <div class="initial_loading" style="margin-top: 1em;">Loading options...</div>
     <div id="searcherror"> </div>
@@ -458,29 +459,40 @@ window.post_jquery_load_scripts.push(function() {
             </div>
         {% endfor %}
         
-        {% if sort_options|length > 0 %}
-            <div style="clear: both;">
-                <label for="searchform_sort" style="margin: 0;">sort by</label>
-                <select id="searchform_sort" name="sort" size="1" onchange="update_search()">
-                    {% if has_relevance_sort %}<option value="relevance">Relevance</option>{% endif %}
-                    {% for label, key, default in sort_options %}
-                        <option value="{{key}}" {% if default %}selected{% endif %}>{{label}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        {% endif %}
     <a id="show_more_options" href="#" onclick="return show_more_options();" style="display: block; clear: both; margin-top: 1em;">Show more options...</a>
     </div>
+	<div class="clearfix"> </div>
     </form>
 </div>
 
 <section class="col-sm-8">
-<div class="margin-left-30-wide">
+<div>
+	<div class="row">
+    {% if sort_options|length > 0 %}
+	<div class="col-sm-6 col-sm-push-6">
+        <div style="float: right;">
+          <div class="input-group">
+            <label for="searchform_sort" class="input-group-addon" style="font-size: 12px">sort by</label>
+            <select id="searchform_sort" name="sort" size="1" onchange="update_search()" class="form-control" style="font-size: 12px">
+                {% if has_relevance_sort %}<option value="relevance">Relevance</option>{% endif %}
+                {% for label, key, default in sort_options %}
+                    <option value="{{key}}" {% if default %}selected{% endif %}>{{label}}</option>
+                {% endfor %}
+            </select>
+          </div>
+        </div>
+	</div>
+	<div class="col-sm-6 col-sm-pull-6">
+	{% else %}
+	<div class="col-xs-12">
+    {% endif %}
 
-    <div class="summary" style="display: none">
-        <p><span class="total">xxx</span> <span class="noun">things</span> matched your search<span class="searchdescr"></span>.</p>
-    </div>
-    
+    <p class="summary" style="display: none;">
+        <span class="total">xxx</span> <span class="noun">things</span> matched your search<span class="searchdescr"></span>.
+    </p>
+	</div>
+	</div>
+
     <div class="results" style="display: none;">
     </div>
     
