@@ -137,16 +137,21 @@ def bill_search_manager():
     #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
     
     sm.set_template("""
-    	<a href="{{object.get_absolute_url}}" style="font-size: 15px; line-height: 125%;">{{object|truncatewords_html:50}}</a>
-    	{% if object.sponsor %}<div>Sponsor: {{object.sponsor}}</div>{% endif %}
-    	{% if object.source != "statutesatlarge" %}<div>Introduced: {{object.introduced_date}}</div>{% endif %}
-    	{% if object.source != "americanmemory" %}<div>{% if object.source != "statutesatlarge" %}{{object.get_current_status_display}}{% else %}Enacted/Agreed to{% endif %}: {{object.current_status_date}}</div>{% endif %}
+    	<div style="margin: 0 0 3px 0"><a href="{{object.get_absolute_url}}" style="font-size: 15px; line-height: 125%;">{{object|truncatewords_html:50}}</a></div>
+		<div style="font-size: 90%">
+    	{% if object.sponsor %}<div style="margin-bottom: 3px">Sponsor: {{object.sponsor}}</div>{% endif %}
+		<table width="100%"><tr valign="top">
+    	{% if object.source != "statutesatlarge" %}<td width="25%" style="padding-right: 1.5em">Introduced<br>{{object.introduced_date}}</td>{% else %}<td/>{% endif %}
+    	{% if object.source != "americanmemory" %}<td width="50%" style="padding-right: 1.5em">{% if object.source != "statutesatlarge" %}{{object.get_current_status_display_simple}}{% else %}Enacted/Agreed to{% endif %}<br>{{object.current_status_date}}</td>{% else %}<td/>{% endif %}
+		{% if object.is_alive and object.get_prognosis %}<td width="25%" style="padding-right: 1.5em">Prognosis<br>{{object.get_prognosis.prediction|floatformat:0}}%</td>{% else %}<td/>{% endif %}
+		</tr></table>
         {% with b_list=object.was_enacted_ex %}
         {% for b in b_list %}
             {% if b and b != object %}
-                <div>Enacted via <a href="{{b.get_absolute_url}}">{{b.title}}</a></div>
+                <div>Enacted via <a href="{{b.get_absolute_url}}" style="text-decoration: none">{{b.title}}</a></div>
             {% endif %}
         {% endfor %}
+		</div>
         {% endwith %}
 	""")
     

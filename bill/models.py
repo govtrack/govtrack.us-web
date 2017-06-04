@@ -438,6 +438,11 @@ class Bill(models.Model):
         if s[1]: ret += " (" + s[1] + ")"
         return ret
 
+    def get_current_status_display_simple(self):
+		# don't add any enacted-via-other-measures info
+        s = self.get_current_status_and_date()
+        return s[0]
+
     def get_current_status_and_date(self):
         status = BillStatus.by_value(self.current_status).label
         extended_status = None
