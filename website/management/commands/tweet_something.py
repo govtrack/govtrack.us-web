@@ -169,9 +169,12 @@ class Command(BaseCommand):
 		coming_up = list(dhg_bills | sfs_bills)
 		coming_up.sort(key = lambda b : b.docs_house_gov_postdate if (b.docs_house_gov_postdate and (not b.senate_floor_schedule_postdate or b.senate_floor_schedule_postdate < b.docs_house_gov_postdate)) else b.senate_floor_schedule_postdate)
 		for bill in coming_up:
+			text = "Coming up: " + bill.display_number
+			if bill.sponsor and bill.sponsor.twitterid: text += " by @" + bill.sponsor.twitterid
+			text += ": " + bill.title_no_number
 			self.post_tweet(
 				"%s:comingup:%s" % (timezone.now().date().isoformat(), bill.congressproject_id),
-				"Coming up: " + truncatechars(bill.title, 100),
+				text,
 				"https://www.govtrack.us" + bill.get_absolute_url())
 
 	def tweet_a_bill_action(self):
@@ -193,7 +196,9 @@ class Command(BaseCommand):
 			if "Providing for consideration" in bill.title: continue
 			text = get_bill_really_short_status_string(status)
 			if text == "": continue
-			text = text % (bill.display_number, "yesterday")
+			bill_number = bill.display_number
+			if bill.sponsor and bill.sponsor.twitterid: bill_number += " by @" + bill.sponsor.twitterid
+			text = text % (bill_number, "yesterday")
 			text += " " + bill.title_no_number
 			self.post_tweet(
 				bill.current_status_date.isoformat() + ":bill:%s:status:%s" % (bill.congressproject_id, status),
