@@ -11,8 +11,8 @@ class BillStatus(enum.Enum):
     introduced = enum.Item(1,
         'Introduced',
         xml_code='INTRODUCED',
-        search_help_text="Introduced but not yet referred to a committee.",
-        explanation="This is the first step in the legislative process.",
+        search_help_text="Introduced is the first step in the legislative process.",
+        explanation="Bills and resolutions are referred to committees which debate the bill before possibly sending it on to the whole chamber.",
         sort_order=(0,0))
     referred = enum.Item(2,
         'Referred to Committee',
@@ -248,7 +248,7 @@ def get_bill_status_string(is_current, status):
     # Some status messages depend on whether the bill is current:
     if is_current:
         if status == "INTRODUCED":
-            status = "This %s is in the first stage of the legislative process. It was introduced into Congress on %s. It will typically be considered by committee next."
+            status = "This %s is in the first stage of the legislative process. It was introduced into Congress on %s. It will typically be considered by committee next before it is possibly sent on to the House or Senate as a whole."
         elif status == "REFERRED":
             status = "This %s was assigned to a congressional committee on %s, which will consider it before possibly sending it on to the House or Senate as a whole."
         elif status == "REPORTED":

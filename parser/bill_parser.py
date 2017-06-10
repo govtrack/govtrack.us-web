@@ -126,8 +126,10 @@ class BillProcessor(XmlProcessor):
 
     def process_current_status(self, obj, node):
         elem = node.xpath('./state')[0]
+        status = elem.text
+        if status == "REFERRED": status = "INTRODUCED"
         obj.current_status_date = self.parse_datetime(elem.get('datetime'))
-        obj.current_status = BillStatus.by_xml_code(elem.text)
+        obj.current_status = BillStatus.by_xml_code(status)
 
     def process_titles(self, obj, node):
         titles = []
@@ -401,6 +403,7 @@ def main(options):
 
             actions = []
             for axn in tree.xpath("actions/*[@state]"):
+                if axn.xpath("string(@state)") == "REFERRED": continue # we don't track this state
                 actions.append( (
                 	repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))),
                 	BillStatus.by_xml_code(axn.xpath("string(@state)")),

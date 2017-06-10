@@ -142,7 +142,7 @@ def bill_search_manager():
     	{% if object.sponsor %}<div style="margin-bottom: 3px">Sponsor: {{object.sponsor}}</div>{% endif %}
 		<table width="100%"><tr valign="top">
     	{% if object.source != "statutesatlarge" %}<td width="25%" style="padding-right: 1.5em">Introduced<br>{{object.introduced_date}}</td>{% else %}<td/>{% endif %}
-    	{% if object.source != "americanmemory" %}<td width="50%" style="padding-right: 1.5em">{% if object.source != "statutesatlarge" %}{{object.get_current_status_display_simple}}{% else %}Enacted/Agreed to{% endif %}<br>{{object.current_status_date}}</td>{% else %}<td/>{% endif %}
+    	{% if object.source != "americanmemory" and object.get_current_status_display_simple != "Introduced" %}<td width="50%" style="padding-right: 1.5em">{% if object.source != "statutesatlarge" %}{{object.get_current_status_display_simple}}{% else %}Enacted/Agreed to{% endif %}<br>{{object.current_status_date}}</td>{% else %}<td/>{% endif %}
 		{% if object.is_alive and object.get_prognosis %}<td width="25%" style="padding-right: 1.5em">Prognosis<br>{{object.get_prognosis.prediction|floatformat:0}}%</td>{% else %}<td/>{% endif %}
 		</tr></table>
         {% with b_list=object.was_enacted_ex %}
