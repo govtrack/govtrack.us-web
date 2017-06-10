@@ -166,7 +166,7 @@ class BillProcessor(XmlProcessor):
                 
                 role = Cosponsor.get_role_for(person, obj, joined)
                 if not role:
-                    log.error('Cosponsor %s did not have a role on %s' % (unicode(person), subnode.get('joined')))
+                    log.error('Cosponsor %s did not have a role on %s' % (unicode(person).encode("utf8"), subnode.get('joined')))
                     continue
 
                 value = subnode.get('withdrawn')
@@ -189,7 +189,7 @@ class BillProcessor(XmlProcessor):
 
         obsolete_cosp = Cosponsor.objects.filter(bill=obj).exclude(id__in=cosp)
         if obsolete_cosp.count() > 0:
-            log.error('Deleting obsolete cosponsor records: %s' % (unicode(obsolete_cosp)))
+            log.error('Deleting obsolete cosponsor records: %s' % obsolete_cosp)
             obsolete_cosp.delete()
            
 
