@@ -14,12 +14,12 @@ class BillStatus(enum.Enum):
         search_help_text="Introduced is the first step in the legislative process.",
         explanation="Bills and resolutions are referred to committees which debate the bill before possibly sending it on to the whole chamber.",
         sort_order=(0,0))
-    referred = enum.Item(2,
-        'Referred to Committee',
-        xml_code='REFERRED',
-        search_help_text="Referred to a committee in the originating chamber.",
-        explanation="Bills and resolutions are referred to committees which debate the bill before possibly sending it on to the whole chamber.",
-        sort_order=(0,1))
+    #referred = enum.Item(2,
+    #    'Referred to Committee',
+    #    xml_code='REFERRED',
+    #    search_help_text="Referred to a committee in the originating chamber.",
+    #    explanation="Bills and resolutions are referred to committees which debate the bill before possibly sending it on to the whole chamber.",
+    #    sort_order=(0,1))
     reported = enum.Item(3,
         'Ordered Reported by Committee',
         xml_code='REPORTED',
@@ -238,9 +238,6 @@ class BillStatus(enum.Enum):
     # all final statuses
     final_status = tuple(list(final_status_enacted_bill) + list(final_status_passed_resolution) + list(final_status_failed))
 
-	# the statuses that are basically just introduction
-    introduced_statuses = (introduced, referred)
-
 def get_bill_status_string(is_current, status):
     # Returns a string with two %'s in it, one for the bill noun ("bill"/"resolution")
     # and one for the status date.
@@ -249,8 +246,6 @@ def get_bill_status_string(is_current, status):
     if is_current:
         if status == "INTRODUCED":
             status = "This %s is in the first stage of the legislative process. It was introduced into Congress on %s. It will typically be considered by committee next before it is possibly sent on to the House or Senate as a whole."
-        elif status == "REFERRED":
-            status = "This %s was assigned to a congressional committee on %s, which will consider it before possibly sending it on to the House or Senate as a whole."
         elif status == "REPORTED":
             status = "The committees assigned to this %s sent it to the House or Senate as a whole for consideration on %s."
         elif status == "PASS_OVER:HOUSE":
@@ -281,7 +276,7 @@ def get_bill_status_string(is_current, status):
             status = "After a presidential veto of the %s, the Senate succeeded in an override on %s. It goes to the House next."
     
     else: # Bill is not current.
-        if status == "INTRODUCED" or status == "REFERRED" or status == "REPORTED":
+        if status == "INTRODUCED" or status == "REPORTED":
             status = "This %s was introduced on %s, in a previous session of Congress, but was not enacted."
         elif status == "PASS_OVER:HOUSE":
             status = "This %s was introduced in a previous session of Congress and was passed by the House on %s but was never passed by the Senate."
@@ -339,8 +334,6 @@ def get_bill_really_short_status_string(status):
     
     if status == "INTRODUCED":
         status = "%s was introduced %s."
-    elif status == "REFERRED":
-        status = "%s was referred to committee %s."
     elif status == "REPORTED":
         status = "Committees approved %s %s."
     elif status == "PASS_OVER:HOUSE":

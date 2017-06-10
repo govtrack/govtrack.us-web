@@ -542,8 +542,8 @@ bill_status_groups = [
         "bills", " that were vetoed and the veto was not overridden by Congress", " that were vetoed and the veto was not overridden by Congress",
         (BillStatus.prov_kill_veto, BillStatus.override_pass_over_house, BillStatus.override_pass_over_senate, BillStatus.vetoed_pocket, BillStatus.vetoed_override_fail_originating_house, BillStatus.vetoed_override_fail_originating_senate, BillStatus.vetoed_override_fail_second_house, BillStatus.vetoed_override_fail_second_senate)), # 8
     ("Other Legislation",
-        "bills and resolutions", " that have been introduced, referred to committee, or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
-        (BillStatus.introduced, BillStatus.referred, BillStatus.reported)), # 3
+        "bills and resolutions", " that have been introduced or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
+        (BillStatus.introduced, BillStatus.reported)), # 3
 ]
 
 def load_bill_status_qs(statuses, congress=CURRENT_CONGRESS):
@@ -595,7 +595,7 @@ def bill_docket(request):
             "top_tracked_bills": top_bills,
 
             "subjects": subject_choices(),
-            "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.referred, BillStatus.reported),
+            "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.reported),
         }
 
     ret = cache.get("bill_docket_info")

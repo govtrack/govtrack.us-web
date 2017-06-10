@@ -27,7 +27,7 @@ class Command(BaseCommand):
 			market_outcomes = None 	# dict of outcome names
 			market_close = { }				# markets to close, key is market id and value is the key of the winning outcome
 			
-			if bill.current_status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
+			if bill.current_status in (BillStatus.introduced, BillStatus.reported):
 				market_key = 0
 				market_name = "Will %s pass the %s?" % (bill.display_number, bill.originating_chamber)
 				market_outcomes = { 0: "No", 1: "Yes" }
