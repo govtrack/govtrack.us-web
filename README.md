@@ -21,7 +21,7 @@ GovTrack.us runs on Ubuntu 16.04 or OS X. To simplify local development, we have
     vagrant up
 
     # Create your initial user.
-    vagrant ssh -- ./manage.py createsuperuser
+    vagrant ssh -- -t ./manage.py createsuperuser
 
     # Start debug server.
     vagrant ssh -- ./manage.py runserver 0.0.0.0:8000
