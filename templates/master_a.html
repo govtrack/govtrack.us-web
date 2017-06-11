@@ -3,7 +3,19 @@
 {% block body_with_container %}
 <div class="container">
 	<div class="row">
-		<div id="master-a-sidebar" class="col-sm-4 col-sm-push-8" style="font-size: 90%; color: #555;">
+
+
+		<div class="col-sm-8">
+			{% block summary %}
+			{% endblock %}
+
+			<div id="content">
+				{% block body %}
+				{% endblock %}
+			</div>
+		</div><!-- /summary-box -->
+
+		<div id="master-a-sidebar" class="col-sm-4" style="font-size: 90%; color: #555;">
 			<div class="hidden-xs sidebar-events" style="margin-top: -1em">
 
 			<h2 class="sr-only">Follow GovTrack on social media for more updates:</h2>
@@ -55,16 +67,6 @@
 			</div>
 			{% endcomment %}
 		</div>
-
-		<div class="col-sm-8 col-sm-pull-4">
-			{% block summary %}
-			{% endblock %}
-
-			<div id="content">
-				{% block body %}
-				{% endblock %}
-			</div>
-		</div><!-- /summary-box -->
 	</div> <!-- /row -->
 </div> <!-- /container -->
 
