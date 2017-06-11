@@ -7,6 +7,7 @@
 
 {% block head %}
 <style>
+.tab-pane { margin-top: 1em; }
 #members h5 { margin: 6px 0 0 0; }
 #committee_bill_list {
 	padding: 0;
@@ -86,18 +87,18 @@
 {% endblock %}
 
 {% block body %}
-<div class="twelve columns">
-	<ul class="tabs three-up">
+<div>
+	<ul class="nav nav-tabs" role="tablist">
 		{% if members|length > 0 %}
-		<li><a href="#members">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
+		<li role="presentation" class="active"><a href="#members" aria-controls="members" role="tab" data-toggle="tab">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
 		{% endif %}
-		<li><a href="#activity">Bills</a></li>
-		{% if subcommittees %}<li><a href="#subcommittees">Subcommittees</a></li>{% endif %}
+		<li role="presentation" {% if members|length == 0 %}class="active"{% endif %}><a href="#activity" aria-controls="activity" role="tab" data-toggle="tab">Bills</a></li>
+		{% if subcommittees %}<li role="presentation"><a href="#subcommittees" aria-controls="subcommittees" role="tab" data-toggle="tab">Subcommittees</a></li>{% endif %}
 	</ul>
 
-	<div class="panes">
+	<div class="tab-content">
 		{% if members|length > 0 %}
-		<div id="members" class="members-grid">
+		<div id="members" class="tab-pane active members-grid">
 		    <div class="row">
 	        {% for member in members %}
 		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
@@ -147,7 +148,7 @@
 		</div>
 		{% endif %}
 		
-		<div id="activity">
+		<div id="activity" class="tab-pane {% if members|length == 0 %}active{% endif %}">
 				{% if committee.has_current_bills %}
 					{% with committee.current_bills_sorted as current_bills_sorted %}
 					<p>There are <a href="/congress/bills/browse#committees={{committee.id}}">{{current_bills_sorted.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>{% if current_bills_sorted.count > 100 %}. Below find the top 100{% endif %}:</p>
@@ -171,7 +172,7 @@
 		</div>
 		
 		{% if subcommittees %}
-		<div id="subcommittees">
+		<div id="subcommittees" class="tab-pane active">
 				<ul class="bullets">
 					{% for item in subcommittees %}
 					<li><a href="{{ item.get_absolute_url }}">{{ item.name_no_article }}</a></li>

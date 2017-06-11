@@ -36,8 +36,6 @@
 {% block body_scripts %}
 <script>
 $(function() {
-	$("ul.tabs a").tabs("div.panes > div");
-
 	$("#subject_list span a").click(function() {
 		var nodes = $(this.parentNode.parentNode.parentNode).find("ul");
 		if (nodes.is(":visible")) {
@@ -72,17 +70,17 @@ function do_keyword_tracker_submit() {
 	<h1 style="margin-top: 30px; border: none">Bills and Resolutions</h1>
 </div>
 
-<ul class="tabs five-up">
-	{% if coming_up|length > 0 %}<li><a href="#docket">Coming Up</a></li>{% endif %}
-	<li><a href="#find">Find a Bill</a></li>
-	<li><a href="#get-alerts">Get Alerts</a></li>
-
-	<li><a href="#bystatus">All Bills</a></li>
-	<li><a href="#hot">Hot Bills</a></li>
+<ul class="nav nav-tabs" role="tablist">
+	{% if coming_up|length > 0 %}<li role="presentation" class="active"><a href="#docket" aria-controls="docker" role="tab" data-toggle="tab">Coming Up</a></li>{% endif %}
+	<li role="presentation" {% if coming_up|length == 0 %}class="active"{% endif %}><a href="#find" aria-controls="find" role="tab" data-toggle="tab">Find a Bill</a></li>
+	<li role="presentation"><a href="#get-alerts" aria-controls="get-alerts" role="tab" data-toggle="tab">Get Alerts</a></li>
+	<li role="presentation"><a href="#bystatus" aria-controls="bystatus" role="tab" data-toggle="tab">All Bills</a></li>
+	<li role="presentation"><a href="#hot" aria-controls="hot" role="tab" data-toggle="tab">Hot Bills</a></li>
 </ul>
 
-<div class="panes">
-	<div id="docket">
+<div class="tab-content">
+	{% if coming_up|length > 0 %}
+	<div id="docket" class="tab-pane active">
 			<p style="margin-top: 15px">{{coming_up|length}} {% if coming_up|length == 1 %}bill or resolution is{% else %}bills and resolutions are{% endif %} on the House and Senate calendars for the coming days.</p>
 
 			<table class="table">
@@ -108,8 +106,9 @@ function do_keyword_tracker_submit() {
 
 			<p>Once bills are scheduled for floor action they typically have enough support to pass!</p>
 	</div>
+	{% endif %}
 
-	<div id="find">
+	<div id="find" class="tab-pane {% if coming_up|length == 0 %}active{% endif %}">
 		<div class="row">
 			<div class="col-sm-7">
 			<div style="padding-right: 30px">
@@ -171,7 +170,7 @@ function do_keyword_tracker_submit() {
 
 	</div>
 
-	<div id="get-alerts">
+	<div id="get-alerts" class="tab-pane">
 		<div class="row">
 			<div class="col-sm-6">
 			<div style="padding-right: 30px">
@@ -210,7 +209,7 @@ function do_keyword_tracker_submit() {
 		</div>			
 	</div>
 	
-	<div id="bystatus">	
+	<div id="bystatus" class="tab-pane">	
 		<p style="margin-top: 15px">Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
 		{% for name, descr1, descr2, href, count, queryset in groups %}
@@ -241,7 +240,7 @@ function do_keyword_tracker_submit() {
 		are enacted and when during the legislative session activity tends to occur.</p>
 	</div>
 	
-	<div id="hot">
+	<div id="hot" class="tab-pane">
 		{% if trending_bill_feeds|length > 0 %}
 		<h3>Trending now:</h3>
 		<div style="margin-bottom: 1.5em">

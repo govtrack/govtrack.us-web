@@ -118,13 +118,13 @@
 	      <ul class="nav navbar-nav navbar-right">
 			{% block override_login %}
 			{% if not user.is_authenticated %}
-				<li id="nav_login"><a href="/accounts/login?next={{request.path|urlencode}}">Log In</a></li>
+				<li id="nav_login"><a href="/accounts/login?next={{request.get_full_path|urlencode}}">Log In</a></li>
 				{% if request.anonymous %}
-					<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
+					<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
 				{% endif %}
 			{% else %}
 				<li><a href="/accounts/profile" title="{{user.email}}">Your Account</a></li>
-				<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
+				<li><a href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
 			{% endif %}
 			{% endblock %}
 			<li>
@@ -221,7 +221,7 @@
 						{% else %}
 						<li><a href="/accounts/lists">What I&rsquo;m Tracking</a></li>
 						<li><a href="/accounts/profile">Account Settings</a></li>
-						<li><a href="/accounts/logout?next={{request.path|urlencode}}">Log Out</a></li>
+						<li><a href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
 						{% endif %}
 					</ul>
 				</nav>
