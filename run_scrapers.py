@@ -106,6 +106,9 @@ if "committees" in sys.argv:
 	os.system("cd ../scripts/legacy-conversion; . ../%s/congress-legislators/scripts/.env/bin/activate; python convert_committees.py ../%s/congress-legislators/ ../data/historical-committee-membership/%s.xml"
 		% (SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
 
+	# Save a fixture.
+	os.system("./manage.py dumpdata --format json committee.Committee committee.CommitteeMember > data/db/django-fixture-committees.json")
+
 do_bill_parse = False
 
 if "text" in sys.argv:
