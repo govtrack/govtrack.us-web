@@ -15,7 +15,6 @@ xapian-haystack
 recaptcha-client
 django-wysiwyg
 rcssmin
-paypalrestsdk
 markdown2
 django_twilio
 twilio<6.0.0

@@ -125,6 +125,7 @@ def install_deps():
         # list to make development easier.
         sudo('pip install psycopg2')
         sudo('pip install mysqlclient')
+        sudo('pip install paypalrestsdk') # installs 'cryptography' package which requires libssl-dev which we skip in local development
 
         # Similarly, we only need gunicorn if we're serving from a VM.
         sudo('pip install gunicorn')
@@ -190,9 +191,8 @@ def bootstrap_data(congress=None):
         run('honcho run ./parse.py committee', warn_only=True)  # fails b/c meeting data not available
 
         run('honcho run build/rsync.sh')
-        run('mkdir -p data/congress/upcoming_house_floor')  # parser.bill_parser.load_docs_house_gov expects this folder
-        run('honcho run ./parse.py bill --congress={} --disable-index --disable-events'.format(congress))
-        run('honcho run ./parse.py vote --congress={} --disable-index --disable-events'.format(congress))
+        run('honcho run ./parse.py bill --congress={}'.format(congress))
+        run('honcho run ./parse.py vote --congress={}'.format(congress))
 
         run('honcho run ./manage.py update_index')
 

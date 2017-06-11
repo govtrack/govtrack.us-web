@@ -1,38 +1,43 @@
-rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
+rsync -az --delete --delete-excluded govtrack.us::govtrackdata data \
 	--include "us" \
 	--include "us/liv.xml" \
 	--include "us/liv111.xml" \
 	--include "us/crsnet.xml" \
 	--include "us/sessions.tsv" \
-	--include "us/committees.xml" \
 	--include "us/115" \
-	--include "us/115/committees.xml" \
 	--include "us/115/bills" \
-	--include "us/115/bills/*.xml" \
+	--include "us/115/bills/*01.xml" \
+	--include "us/115/bills/*10.xml" \
 	--include "us/115/rolls" \
-	--include "us/115/rolls/*.xml" \
+	--include "us/115/rolls/*1.xml" \
 	--include "us/115/stats/" \
 	--include "us/115/stats/*.json" \
 	--include "us/115/stats/*.txt" \
 	--include "photos" \
-	--include "photos/412460*" \
-	--include "photos/412246*" \
+	--include "photos/41246*" \
+	--include "photos/41224*" \
 	--include "congress" \
 	--include "congress/115" \
 	--include "congress/115/bills" \
 	--include "congress/115/bills/*" \
-	--include "congress/115/bills/*/*1" \
-	--include "congress/115/bills/*/*1/text-versions" \
-	--include "congress/115/bills/*/*1/text-versions/*" \
-	--include "congress/115/bills/*/*1/text-versions/*/data.json" \
-	--include "congress/115/bills/*/*1/text-versions/*/mods.xml" \
-	--include "congress/115/bills/*/*1/text-versions/*/document.txt" \
-	--include "congress/115/bills/*/*1/text-versions/*/document.xml" \
-	--include "congress/115/bills/*/*1/text-versions/*/catoxml.xml" \
+	--include "congress/115/bills/*/*01" \
+	--include "congress/115/bills/*/*01/text-versions" \
+	--include "congress/115/bills/*/*01/text-versions/*" \
+	--include "congress/115/bills/*/*01/text-versions/*/data.json" \
+	--include "congress/115/bills/*/*01/text-versions/*/mods.xml" \
+	--include "congress/115/bills/*/*01/text-versions/*/document.txt" \
+	--include "congress/115/bills/*/*01/text-versions/*/document.xml" \
+	--include "congress/115/bills/*/*01/text-versions/*/catoxml.xml" \
+	--include "congress/115/bills/*/*10" \
+	--include "congress/115/bills/*/*10/text-versions" \
+	--include "congress/115/bills/*/*10/text-versions/*" \
+	--include "congress/115/bills/*/*10/text-versions/*/data.json" \
+	--include "congress/115/bills/*/*10/text-versions/*/mods.xml" \
+	--include "congress/115/bills/*/*10/text-versions/*/document.txt" \
+	--include "congress/115/bills/*/*10/text-versions/*/document.xml" \
+	--include "congress/115/bills/*/*10/text-versions/*/catoxml.xml" \
 	--include "congress/committee_meetings_house.json" \
 	--include "congress/committee_meetings_senate.json" \
 	--include "historical-committee-membership" \
 	--include "historical-committee-membership/*" \
-	--include "misc" \
-	--include "misc/cd-intersection-data.json" \
 	--exclude "**"

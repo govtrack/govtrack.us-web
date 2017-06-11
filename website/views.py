@@ -100,7 +100,11 @@ def do_site_search(q, allow_redirect=False, request=None):
     
     from haystack.query import SearchQuerySet
     from events.models import Feed
-    
+
+    sqs = SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q)
+    if 'XapianEngine' not in settings.HAYSTACK_CONNECTIONS['person']['ENGINE']:
+        # Xapian doesn't provide a 'score' so we can't do this when debugging.
+        sqs = sqs.order_by('-is_currently_serving', '-score')
     results.append({
         "title": "Members of Congress, Presidents, and Vice Presidents",
         "href": "/congress/members/all",
@@ -112,7 +116,7 @@ def do_site_search(q, allow_redirect=False, request=None):
              "obj": p.object,
              "feed": p.object.get_feed(),
              "secondary": p.object.get_current_role() == None }
-            for p in SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q).order_by('-is_currently_serving', '-score')[0:9]]
+            for p in sqs[0:9]]
         })
        
     import us

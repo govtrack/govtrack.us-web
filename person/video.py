@@ -45,62 +45,6 @@ def get_youtube_videos(username):
     return response
 
 
-@cached(60 * 30)
-def get_sunlightlabs_videos(bioguideid):
-    """
-    Fetch latest video about person from api.realtimecongress.com.
-
-    Documentation:
-     * http://services.sunlightlabs.com/docs/Real_Time_Congress_API/
-     * http://services.sunlightlabs.com/docs/Real_Time_Congress_API/videos/
-    """
-
-    # Fetch 5 latest videos
-    response = {'videos': []}
-
-    url = 'http://api.realtimecongress.org/api/v1/videos.xml?apikey=%s&bioguide_ids=%s&per_page=5' % (
-        settings.SUNLIGHTLABS_API_KEY, bioguideid)
-
-    @cached(60 * 30)
-    def fetch(url):
-        return urllib.urlopen(url).read()
-
-    try:
-        data = fetch(url)
-    except IOError, ex:
-        pass
-    else:
-        tree = etree.fromstring(data)
-        for video in tree.xpath('//video'):
-            # Find mp4 file. Also there could be mp3 and mms - ignore them.
-            # MMS - is sort of playlist and JWPlayer raise an error when
-            # tries to play it.
-            try:
-                url = video.xpath('.//mp4')[0].text
-            except IndexError:
-                pass
-            else:
-                # Video node could be split on several clips. Try to find the clip
-                # with required bioguidedid. If it found then provide in the response
-                # the time offset of this clip
-                video_start = parse_time(video.xpath('./pubdate')[0].text)
-                try:
-                    clip = video.xpath('.//clip//bioguide_id[text()="%s"]/../..' % bioguideid)[0]
-                except IndexError, ex:
-                    offset = 0
-                else:
-                    clip_start = parse_time(clip.xpath('./time')[0].text)
-                    offset = (clip_start - video_start).seconds
-                item = {
-                    'title': video_start.strftime('%B %d, %Y'),
-                    'published': video_start,
-                    'url': url,
-                    'offset': offset,
-                }
-                response['videos'].append(item)
-    return response
-
-
 def parse_time(timestr):
     timestr = timestr.lower()
     try:
