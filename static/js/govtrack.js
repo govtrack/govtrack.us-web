@@ -1,4 +1,13 @@
 $(function() {
+    // Activate tab state from URL fragment.
+    $('.nav-tabs a').each(function() {
+        if (window.location.hash == "#"+this.getAttribute("aria-controls"))
+            $(this).tab('show');
+    })
+    $('.nav-tabs a').on('shown.bs.tab', function(e) {
+        window.history.pushState(null, "", e.target.href);
+    });
+
     // Place advertiements, depending on which page layout is used on this page.
 
     var master_a_ad_container = $('#master_a_ad');
