@@ -41,13 +41,15 @@ Vagrant.configure(2) do |config|
 
     # Create a 'virtualenv' where Python packages are installed to.
     virtualenv --system-site-packages .env
+
+    # Activate the Python virtual environment.
     source .env/bin/activate
+
+    # Install Python packages.
     pip install --upgrade -r build/pipreq.txt
 
     # On OS X, install bcrypt:
     # http://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed
-
-    # Activate the Python virtual environment.
 
     # Initialize the database.
     ./manage.py syncdb --noinput
