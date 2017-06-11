@@ -57,6 +57,8 @@
 
 	<div id="bodybody">
 
+	<div id="skiptocontent"><a href="#maincontent">skip to main content</a></div>
+
 	<div id="masthead">
 	<nav class="navbar">
 	  <div class="container">
@@ -194,7 +196,7 @@
 	{% endblock %}
 
 	{% block body_with_container %}
-		<div class="container">
+		<div id="maincontent" class="container">
 			<div id="content">
 				{% block body %}
 				{% endblock %}
