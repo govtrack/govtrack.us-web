@@ -120,12 +120,12 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
   ./manage.py update_index -u person person
   ```
 
-* Load bills and votes data:
+* Load bills and votes data like the following, using the appropriate congress number:
 
   ```
   ./build/rsync.sh
-  ./parse.py bill --congress=114 --disable-index --disable-events
-  ./parse.py vote --congress=114 --disable-index --disable-events
+  ./parse.py bill --congress=115 --disable-index --disable-events
+  ./parse.py vote --congress=115 --disable-index --disable-events
   ```
   
 If you configured Solr, you can remove --disable-index. For the sake of speed, --disable-events will skip the creation of the events table for bills, which is the basis for feeds and tracking, so that will be nonfunctional.
@@ -142,14 +142,15 @@ If you configured Solr, you can remove --disable-index. For the sake of speed, -
   ./manage.py createsuperuser
   ```
 
-* To update the data in the future, first git-pull the congress-legislators repo to get the latest legislator information. Then:
+* To update the data in the future, first git-pull the congress-legislators repo to get the latest legislator information.  
+* Then use syntax like the following, with the appropriate congress number:
 
   ```
   build/rsync.sh
   ./parse.py person
-  ./parse.py committee --congress=113
-  ./parse.py bill --congress=113
-  ./parse.py vote --congress=113
+  ./parse.py committee --congress=115
+  ./parse.py bill --congress=115
+  ./parse.py vote --congress=115
   ```
 
 # Credits
