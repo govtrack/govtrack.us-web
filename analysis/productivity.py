@@ -88,11 +88,14 @@ if 0:
 		compute_productivity(c, (date_range[0], date_range[0] + days_in))
 
 elif 1:
-	# First 100 days of presidency.
+	# First X days of presidency, minus a few days because of
+	# data delays.
+	days_in = (datetime.now().date() - datetime(get_congress_dates(CURRENT_CONGRESS)[0].year, 1, 20, 0, 0, 0).date()) \
+		- timedelta(days=0)
+	print("We are about %d days into the presidency" % days_in.days)
 	for c in (95, 97, 101, 103, 107, 111, 115):
 		date_range = get_congress_dates(c)
-		date_range = (datetime(date_range[0].year, 1, 20).date(), None)
-		date_range = (date_range[0], date_range[0]+timedelta(days=100))
+		date_range = (datetime(date_range[0].year, 1, 20).date(), datetime(date_range[0].year, 1, 20).date()+days_in)
 		compute_productivity(c, date_range)
 
 elif 0:

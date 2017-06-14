@@ -136,7 +136,7 @@ class Committee(models.Model):
             "title": self.fullname + " Meeting",
             "url": self.get_absolute_url(),
             "body_text_template": """{{subject|safe}}""",
-            "body_html_template": """<p>{{subject}}</p> <p><small>Check out our new <a href="https://www.govtrack.us/congress/committees/calendar">committee meeting calendar</a>.</small></p>""",
+            "body_html_template": """<p>{{subject}}</p>""",
             "context": {
                 "subject": mtg.subject + (" (Location: " + mtg.room + ")" if mtg.room else ""),
                 }
