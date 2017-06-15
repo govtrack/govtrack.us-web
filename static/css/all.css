@@ -192,7 +192,7 @@ blockquote {
 		#masthead .nav a {
 			color: inherit;
 		}
-		#masthead .nav a:hover, #masthead .nav a:focus {
+		#masthead .nav a:hover, #masthead .nav a:focus, #masthead .nav .open>a {
 			background-color: #258;
 			color: white;
 		}
@@ -202,7 +202,7 @@ blockquote {
 		#masthead .dropdown-menu {
 			margin-top: -2px;
 		}
-		#masthead .dropdown-menu a:hover {
+		#masthead .dropdown-menu a:hover, #masthead .dropdown-menu a:focus {
 			color: black;
 		}
 		#masthead .navbar-toggle {
