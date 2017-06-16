@@ -118,7 +118,6 @@ article {
 	    	<option value="">Select Issue Area</option>
 			{% for top_term, subterms in bill_subject_areas %}
 				<option value="{{top_term.get_absolute_url}}">{{top_term.name}}</option>
-				{% if not forloop.last %}&middot;{% endif %}
 			{% endfor %}
 	    </select>
 	  </div>
