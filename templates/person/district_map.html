@@ -206,7 +206,7 @@
 						<div class="spanbullets" style="margin-bottom: .75em;">
 						{% if rep.twitterid %}<span><a href="https://twitter.com/@{{rep.twitterid}}">@{{rep.twitterid}}</a></span>{% endif %}
 						{% if role.website %}<span><a href="{{role.website}}">Official Website <i class="fa  fa-external-link"></i></a></span>{% endif %}
-						{% if role.phone %}<span><nobr><a href="tel:+1-{{role.phone}}">{{role.phone}}</a></nobr></span>{% endif %}
+						{% if role.phone %}<span><span class="nowrap"><a href="tel:+1-{{role.phone}}">{{role.phone}}</a></span></span>{% endif %}
 						</div>
 
 						<div style="margin-bottom: .5em;"><a href="{{rep.get_absolute_url}}" class="btn btn-success">View Legislative Profile &amp; Get Alerts &raquo;</a></div>

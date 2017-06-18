@@ -1135,3 +1135,7 @@ ul.singlesignon {
 	-webkit-transition: top .1s ease-in, background .5s linear;
     transition: top .1s ease-in, background .5s linear;
 }
+
+.nowrap {
+	white-space: nowrap;
+}

@@ -123,11 +123,11 @@ function do_sort(key) {
                         <b>{{v.result}}</b>
                         {% if v.total_plus|add:v.total_minus > 0 %}
                             <br>
-                            <nobr>
+                            <span class="nowrap">
                             <span class="vote_positive">{{v.total_plus}}</span>
                             /
                             <span class="vote_negative">{{v.total_minus}}</span>
-                            </nobr>
+                            </span>
                         {% endif %}
                     </td>
                 {% endfor %}
@@ -181,13 +181,13 @@ function do_sort(key) {
                     data-sort-state-district="{{voter.state_district}}"
                     >
                     <th scope="row">
-                        <nobr>
+                        <span class="nowrap">
                         <span class="party_{{voter.party.0}}" style="padding: 1px 3px 1.5px 3px; margin-right: .5em; width: 1em">{{voter.party.0}}</span>
 
                         <a href="{{voter.person.get_absolute_url}}" style="text-decoration: none; color: inherit;">
                             {{voter.person_name}}
                         </a>
-                        </nobr>
+                        </span>
                     </th>
                     {% for vote in voter.votes %}
                         <td>
