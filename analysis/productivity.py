@@ -33,6 +33,10 @@ def compute_productivity(congress, date_range):
 		)\
 		.order_by('current_status_date')
 
+	if date_range[0].month == 1 and date_range[0].day == 20:
+		# last bill Obama signed was a rare Jan 20th morning
+		enacted_bills = enacted_bills.exclude(id=347731)
+
 	#enacted_bills = (enacted_bills.filter(title__contains="Appropriations") | enacted_bills.filter(title__contains="Authorization")).distinct()
 
 	enacted_bills = list(enacted_bills)

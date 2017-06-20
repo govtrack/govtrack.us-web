@@ -463,7 +463,11 @@ def load_senate_floor_schedule(options, bill_index):
                     bill.create_events()
 
 def load_senate_floor_schedule_data():
-    dom = etree.parse(urllib.urlopen("https://www.senate.gov/legislative/schedule/floor_schedule.xml")).getroot()
+    try:
+        dom = etree.parse(urllib.urlopen("https://www.senate.gov/legislative/schedule/floor_schedule.xml")).getroot()
+    except etree.XMLSyntaxError:
+        print "Invalid XML received for https://www.senate.gov/legislative/schedule/floor_schedule.xml"
+        return
     def get(node, key): return node.find(key).text
     year = int(get(dom, "year"))
     congress = int(get(dom, "congress"))

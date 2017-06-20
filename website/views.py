@@ -639,7 +639,7 @@ def dump_sousveillance(request):
         except:
             pass
       if "?" in path: path = path[:path.index("?")] # ensure no qsargs
-      if r.req.get("query"): path += "?" + urllib.urlencode(r.req["query"])
+      if r.req.get("query"): path += "?" + urllib.urlencode({ k.encode("utf8"): v.encode("utf8") for k,v in r.req["query"].items() })
 
       ua = str(user_agents.parse(r.req['agent']))
       if ua == "Other / Other / Other": ua = "bot"
