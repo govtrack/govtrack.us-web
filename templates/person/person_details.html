@@ -579,6 +579,8 @@ $(function() {
 			{% endfor %}
 		</ul>
 		<p><a href="/congress/bills/browse?sponsor={{person.id}}">View All &raquo;</a></p>
+
+		{% if role and active_role and role.leadership_title %}<p>As {{role.leadership_title_full}}, {{person.lastname}} may be focused on {{person.his_her}} responsibilities other than introducing legislation, such as setting the chamber&rsquo;s agenda, uniting {{person.his_her}} party, and brokering deals.</p>{% endif %}
 	</section><!-- /sponsorship -->
 {% endif %}
 
