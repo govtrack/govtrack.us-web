@@ -192,7 +192,7 @@
 				</div>
 				<div class="col-sm-9">
 					{% if rep %}
-						<div style="margin-bottom: .5em">
+						<div style="margin-bottom: 2px">
 						  <a href="{{rep.get_absolute_url}}" style="font-weight: bold; font-size: 110%; text-decoration: none; color: inherit;">
 							{{rep.name_no_details}}
 						  </a>
@@ -201,7 +201,7 @@
 						{% with rep.current_role as role %}
 						<div>{{role.get_description}}</div>
 	            		<div>Since {{role.logical_dates.0|date}} (Next Election in {{role.next_election_year}})</div>
-						<div style="margin-bottom: .5em;">{{role.party}}</div>
+						<div style="margin-bottom: .45em;">{{role.party}}</div>
 
 						<div class="spanbullets" style="margin-bottom: .75em;">
 						{% if rep.twitterid %}<span><a href="https://twitter.com/@{{rep.twitterid}}">@{{rep.twitterid}}</a></span>{% endif %}
@@ -217,7 +217,7 @@
 						{% endwith %}
 
 					{% else %}
-						<em>Vacant</em>
+						<em>This seat is currently vacant.</em>
 					{% endif %}
 				</div>
 				</div>
