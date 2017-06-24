@@ -65,8 +65,8 @@ class Command(BaseCommand):
 		if key in self.previous_tweets:
 			return
 
-		text = truncatechars(text, 140-1-23-2) + " " + url
-		text += u" ⚡" # symbol indicates to followers this is an automated tweet?
+		text = truncatechars(text, 140-1-23-3) + " " + url
+		text += u" 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is two characters (plus a space before it) as Twitter sees it
 
 		if "TEST" in os.environ:
 			# Don't tweet. Just print and exit.
