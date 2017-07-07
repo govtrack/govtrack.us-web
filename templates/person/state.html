@@ -45,7 +45,7 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-	<h1>{{statename}}</h2>
+	<h1>{{statename}}</h1>
 
 	{% if stateapp != "T" %}
 		<p>{{statename}} is a U.S. state with <b>two</b> senators in the United States Senate and <b>{{stateapp|apnumber}}</b> representatives in the United States House of Representatives.</p>
@@ -83,7 +83,7 @@ $(function() {
 			            <p style="margin-top: 1em">The senate seat is currently vacant.</p>
 		        	{% else %}
 			            <div class="photo">
-			        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+			        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120" alt="{{ person.name_no_details }}"/></a>
 			        	</div>
 			        	
 			            {% with person.get_current_role as role %}
@@ -142,7 +142,7 @@ $(function() {
 	            </div>
         	{% else %}
 	            <div class="photo">
-	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120" alt="{{ person.name_no_details }}"/></a>
 	        	</div>
 	        	
 	            {% with person.get_current_role as role %}
