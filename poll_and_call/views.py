@@ -222,7 +222,7 @@ def poll_call_status(request):
 
 	return { "finished": call_log.status == "ended", "msg": msg }
 
-from twilio.twiml import Response as TwilioResponse
+from twilio.twiml.voice_response import VoiceResponse as TwilioResponse
 from django_twilio.decorators import twilio_view
 
 def get_request_log_info(request):
