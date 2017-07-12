@@ -62,7 +62,7 @@ GovTrack.us runs on Ubuntu 12.10 or OS X
 
     ```
     apt-get install python-xapian
-    ln -s /usr/lib/python2.7/dist-packages/xapian/ env/local/lib/python2.7/xapian
+    ln -s /usr/lib/python2.7/dist-packages/xapian/ .env/local/lib/python2.7/xapian
 
     ```
 
