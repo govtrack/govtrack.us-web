@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     'django_wysiwyg',
     'django_twilio',
     'htmlemailer',
+    'django_extensions',
     
     # project modules
     'twostream',

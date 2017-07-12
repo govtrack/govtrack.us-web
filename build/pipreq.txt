@@ -3,6 +3,7 @@ uwsgi
 python-dateutil
 django-cache-utils
 django-debug-toolbar
+django-extensions
 django-picklefield
 mimeparse
 defusedxml
