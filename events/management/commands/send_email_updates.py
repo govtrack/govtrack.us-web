@@ -242,7 +242,15 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			fail_silently=False
 		)
 	except Exception as e:
-		print user, e
+		if "recipient address was suppressed due to customer policy" in str(e):
+			be, is_new = BouncedEmail.objects.get_or_create(user=user)
+			if not is_new:
+				be.bounces += 1
+				be.save()
+			print user, "user is on suppression list already"
+		else:
+			print user, e
+
 		return None # skip updating what events were sent, False = did not sent
 	
 	if not mark_lists:
