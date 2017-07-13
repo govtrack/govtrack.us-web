@@ -1,3 +1,4 @@
+{% load static %}
 <script>
 var win_loc_hash = window.location.hash; // may change between now and ()'s execution
 $(function() {
@@ -13,12 +14,6 @@ $(function() {
 		// Increment a counter.
 		flags.hits = (parseInt(flags.hits) || 0) + 1;
 
-		if (win_loc_hash == "#opencongress") {
-			// Special dialog for folks coming from OpenCongress.
-			window.location.hash = "";
-			$('#opencongress_modal').modal();
-			ga('send', 'event', 'referral', 'opencongress');
-		
 		//} else if (flags.hits > 1 && flags.hits < 10 && (flags.hits % 3) == 0) {
 		//	$('#supportus_modal').modal();
 		//	ga('send', 'event', 'popup', 'support_us');
@@ -27,10 +22,10 @@ $(function() {
 		//	$('#survey_modal').modal();
 		//	ga('send', 'event', 'popup', 'survey');
 
-		} else if (Math.random() < .3) {
-			// Show twitter follow popup.
-			show_followus(flags);
-		}
+		!function() {
+			if (show_messenger(flags)) return;
+			if (show_followus(flags)) return;
+		}();
 
 		// Save flags.
 		$.cookie("flags", form_qs(flags), { expires: 21, path: '/' });
@@ -38,11 +33,23 @@ $(function() {
 });
 
 function show_followus(flags) {
-	if (flags.foll_tw) return; // only show once
+	if (Math.random() < .66) return false; // shown 1/3rd of times
+	if (flags.foll_tw) return false; // only show once
+	
 	flags.foll_tw = true;
 
 	$('#followus_modal').modal();
 	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
+
+	return true;
+}
+
+function show_messenger(flags) {
+	if (flags.fbm) return false; // only show once
+	flags.fbm = true;
+
+	$('#message_us_modal').modal();
+	return true;
 }
 </script>
 
@@ -65,82 +72,61 @@ function show_followus(flags) {
   </div>
 </div>
 
-
-<style>
-#opencongress_modal strong { }
-</style>
-<div id="opencongress_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="opencongressModalTitle" aria-hidden="true">
+<div id="message_us_modal" class="modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="message_us_modal_title">
   <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="opencongressModalTitle" style="font-size: 22px; font-weight: bold; font-family: sans-serif">Welcome to GovTrack.us</h4>
-      </div>
+  <style>
+  	#message_us_modal .modal-content {
+  		background-color: #9D2146;
+  		color: white;
+  	}
+  	#message_us_modal .modal-body .close { color: #EEE; opacity: .75; }
+  	#message_us_modal .modal-body h4 {
+  		margin-bottom: .5em;
+  	}
+  	#message_us_modal .modal-body p {
+  		line-height: 130%;
+  	}
+  	#message_us_modal .modal-body a.btn {
+  		font-size: 20px;
+  		margin-bottom: 1.5em;
+  		background-color: white;
+  		color: #337ab7;
+  		border-color: #AABBAA;
+  	}
+  	#message_us_modal .modal-body a.btn:hover {
+  		background-color: #FFE;
+  		border-color: white;
+  	}
+  </style>
+    <div class="modal-content" style="font-size: 17px;">
       <div class="modal-body">
-      	<p>Thank you for giving GovTrack a try. Like OpenCongress, GovTrack is for <strong>researching and tracking legislation before the U.S. Congress</strong>.</p>
-      	<p style="text-align: center">★</p>
-      	<p>Things here should seem very familiar to you. OpenCongress and GovTrack have always had a data sharing partnership, so you&rsquo;ll find the <strong>exact same information here as what you had on OpenCongress</strong>, just arranged a little differently.</p>
-      	<p>And GovTrack has actually been here for more than a decade. This is the site that began <strong>the movement to improve access to Congress using technology</strong>.</p>
-      	<p>Unlike OpenCongress, we&rsquo;re funded through advertising and crowdfunding.</p>
-      	<p style="text-align: center">★</p>
-      	<p>For more, please see <a href="/about">About Us</a>, or follow us <a href="http://twitter.com/govtrack">@GovTrack</a> on Twitter, <a href="https://www.facebook.com/govtrack/">on Facebook</a>, or on <a href="https://medium.com/govtrack-insider">Medium</a>.</p>
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+   		<h4 class="modal-title" id="message_us_modal_title" style="font-size: 22px; font-weight: bold; line-height: 140%;">
+   			Say &ldquo;Hi&rdquo; to GovTrack&rsquo;s new CallBot!
+   		</h4>
+
+   		<p style="margin: 1.5em 0">Say &ldquo;Hi&rdquo; to @GovTrack on Facebook Messenger and we&rsquo;ll walk you through <b>how to call your senators about the health care bill</b>.</p>
+
+   		<div class="row">
+   			<div class="col-sm-7">
+   				<a class="btn"
+   					href="https://www.messenger.com/t/govtrack">
+   					<img src="{% static "images/facebook_messenger.png" %}" style="height: 1.5em;">
+   					Say &ldquo;Hi&rdquo; on Messenger
+   				</a>
+
+   				<p>In the future we&rsquo;ll also let you know about other issues in Congress where your voice matters, and after you call we&rsquo;ll tell you what happened.</p>
+
+   				<p>Like the rest of GovTrack, our CallBot is nonpartisan. We want to help everyone reach Congress.</p>
+   			</div>
+   			<div class="col-sm-5 hidden-xs">
+   				<p style="line-height: 122%;">Not on your phone? Scan this code with Messenger to find us:</p>
+   				<a href="https://www.messenger.com/t/govtrack">
+   					<img src="{% static "images/facebook_messenger_code.png" %}" class="img-responsive" style="border: 2px solid black;">
+   				</a>
+   			</div>
+   		</div>
       </div>
     </div>
   </div>
 </div>
-
-
-<div id="supportus_modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="supportus_modalTitle" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="supportus_modalTitle" style="font-size: 28px; font-weight: bold;">Congress is about to wake up.</h4>
-      </div>
-      <div class="modal-body">
-		<p>When President-elect Trump takes office on January 20, the House, Senate, and White House will be controlled by the same party for the first time in six years.</p>
-
-		<p>Things are going to happen fast. Congress is expected to move quickly on Trump's agenda <a href="http://www.forbes.com/sites/stancollender/2016/11/11/gop-to-do-previously-unimaginable-things-to-slam-dunk-its-agenda/#648c6b5a67b5" target="_blank">using the same tactics</a> immune to the filibuster that Democrats used to enact the Affordable Care Act in 2010.</p>
-
-		<p>Now more than ever we need transparency in Congress.</p>
-
-		<p>Over the last year we&rsquo;ve helped 10 million Americans track Congress using bill alerts. We hope to continue <a href="https://medium.com/govtrack-insider" target="_blank">GovTrack Insider</a>, where we put the most important legislation into plain English. We've also worked <i>with</i> Congress on improving transparency at the source.</p>
-
-		<p>We now need your help. We&rsquo;re simply out of money. We can&rsquo;t continue GovTrack Insider or improve our bill tracking tools without your financial support. Important pieces of GovTrack will end on December 31 if we can&rsquo;t pay for it. If you are able, please:
-
-		<p style="text-align: center; font-size: 125%; font-family: 'Roboto Slab', sans-serif; font-weight: bold;"><a href="https://www.patreon.com/govtrack" style="background-color: #9D2146;
-    color: white;
-    padding: .5em;
-    display: inline-block;
-    text-decoration: none;">Donate to Support Our Work</a></p>
-		<p>Thanks very much for being a part of GovTrack.</p>
-		<p>Joshua Tauberer<br>
-		Founder, GovTrack.us</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="survey_modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="survey_modal_title" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="survey_modal_title" style="font-size: 28px; font-weight: bold;">User Survey</h4>
-      </div>
-      <div class="modal-body">
-		<p>How can we better help you track Congress?</p>
-		<p>Are you able to help us in ways besides financial support?</p>
-		<p>We are asking all of our users to take this survey to help us figure out how best to continue our mission into 2017.</p>
-		<p style="text-align: center; font-size: 125%; font-family: 'Roboto Slab', sans-serif; font-weight: bold;"><a href="https://docs.google.com/forms/d/e/1FAIpQLSc2lR6i9_AcNLV2ZfwFRKSUhSdf7a9VKhFrkhnG9xzRaEV4Rw/viewform" style="background-color: #9D2146;
-    color: white;
-    padding: .5em;
-    display: inline-block;
-    text-decoration: none;">Take GovTrack&rsquo;s Survey</a></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
