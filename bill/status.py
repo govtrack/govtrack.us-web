@@ -1,3 +1,4 @@
+#;encoding=utf8
 """
 ``BillStatus`` - list of possible Bill statuses.
 """
@@ -335,11 +336,11 @@ def get_bill_really_short_status_string(status):
     if status == "INTRODUCED":
         status = "%s was introduced %s."
     elif status == "REPORTED":
-        status = "Committees approved %s %s."
+        status = u"Committees 🆗'd %s %s." # squared OK emoji
     elif status == "PASS_OVER:HOUSE":
-        status = "%s passed the House %s (Senate next)."
+        status = u"%s passed the House %s (→Senate)."
     elif status == "PASS_OVER:SENATE":
-        status = "%s passed the Senate %s (House next)."
+        status = u"%s passed the Senate %s (→House)."
     elif status == "PASSED:BILL":
         status = "%s passed the House and Senate %s."
     elif status == "PASS_BACK:HOUSE":

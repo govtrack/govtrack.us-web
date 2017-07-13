@@ -198,7 +198,7 @@ class Command(BaseCommand):
 			if text == "": continue
 			bill_number = bill.display_number
 			if bill.sponsor and bill.sponsor.twitterid: bill_number += " by @" + bill.sponsor.twitterid
-			text = text % (bill_number, "yesterday")
+			text = text % (bill_number, u"y’day")
 			text += " " + bill.title_no_number
 			self.post_tweet(
 				bill.current_status_date.isoformat() + ":bill:%s:status:%s" % (bill.congressproject_id, status),
