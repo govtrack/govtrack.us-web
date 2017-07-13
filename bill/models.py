@@ -346,6 +346,7 @@ class Bill(models.Model):
         "noun": "noun",
         "related_bills": "get_related_bills_api",
         "current_chamber": "current_chamber",
+        "text_info": "get_text_info",
     }
     api_example_id = 76416
     api_example_list = { "sort": "-introduced_date" }
@@ -538,6 +539,11 @@ class Bill(models.Model):
         except IOError:
             return False
 
+    def get_text_info(self, version=None, mods_only=True, with_citations=False):
+        try:
+            return load_bill_text(self, version, mods_only=mods_only, with_citations=with_citations)
+        except IOError:
+            return None
 
     def get_upcoming_meetings(self):
         return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=self)
