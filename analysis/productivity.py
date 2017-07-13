@@ -96,6 +96,7 @@ elif 1:
 	# data delays.
 	days_in = (datetime.now().date() - datetime(get_congress_dates(CURRENT_CONGRESS)[0].year, 1, 20, 0, 0, 0).date()) \
 		- timedelta(days=0)
+	#days_in = timedelta(days=150)
 	print("We are about %d days into the presidency" % days_in.days)
 	for c in (95, 97, 101, 103, 107, 111, 115):
 		date_range = get_congress_dates(c)

@@ -1003,7 +1003,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             # Bring in committee meetings.
             for mtg in self.committeemeeting_set.all():
                 ret.append({
-                    "key": "status_reported",
+                    "key": "reported",
                     "label": "Considered by " + unicode(mtg.committee),
                     "explanation": "A committee held a hearing or business meeting about the " + self.noun + ".",
                     "date": mtg.when,
