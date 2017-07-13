@@ -13,25 +13,38 @@
 {% block body %}
 <h1>About the Data on GovTrack.us</h1>
 
-<div class="row">
-<section class="col-sm-7">
+	<p>GovTrack gets its information from a variety of sources, including official government data as well as community data repositories.
+	Here are the data sources we use and suggestions for how you can get it too.</p>
 
-	<p>GovTrack gets its information from a variety of sources. Most of the sources are official government websites that publish structured data which we pull new information from automatically each day.</p>
-
-	<p>The sources we use are listed in the following coverage table:</p>
+	<p>In 2005, we were the first to make U.S. federal legislative information comprehensively available in an open, structured data format
+	for researchers, journalists, other public interest projects, and anyone to freely reuse for any purpose. Our data was the basis for dozens
+	of other open government projects, including major projects of the Sunlight Foundation and investigative stories at major news publications,
+	and continued until 2017, when the U.S. Congress began publishing open, structured data itself. You can
+	<a href="https://medium.com/@joshuatauberer/govtrack-now-actually-uses-open-government-data-5fc16f377e86#.iflkyrvgs">read about our 15-year campaign</a>
+	to open up Congress&rsquo;s data.</p>
 
 	<table class="table coverage_table">
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">Current Information<br>(114<sup>th</sup> Congress through 115<sup>th</sup> Congress)</th></tr>
+		<tr><th colspan="2" style="padding: 1em 0 .5em 0">Current Information<br>(115<sup>th</sup> Congress)</th></tr>
 		
 		<tr>
 			<td><nobr>Members of Congress</nobr></td>
-			<td>Biographical information and committee assignments for current and former Members of Congress is from the <a href="https://github.com/unitedstates/congress-legislators">congress-legislators project</a>,
-			a community repository we originally developed and help maintain.
-			Photos are sourced from various locations, including the <a href="http://memberguide.gpo.gov">GPO Guide to House and Senate Members</a>, and credited on individual legislator pages.</td>
+			<td><p>Biographical information and committee assignments for current and former Members of Congress are from the <a 
+			href="https://github.com/unitedstates/congress-legislators">congress-legislators project</a>,
+			a community repository we originally developed and help maintain.</p>
+			<p>Photos are sourced from various locations, including the <a href="http://memberguide.gpo.gov">GPO Guide to House and Senate Members</a>, and credited on individual legislator pages.</p>
+			<p>To get the data it&rsquo;s best to use the <a href="https://github.com/unitedstates/congress-legislators">congress-legislators project</a>,
+			but you can also get raw Member data in XML from the <a href="http://clerk.house.gov/xml/lists/MemberData.xml">House</a> and
+			<a href="http://www.senate.gov/general/contact_information/senators_cfm.xml">Senate</a>.</p>
+			<p>Also see <a href="https://medium.com/civic-tech-thoughts-from-joshdata/how-to-build-an-app-to-call-write-congress-f79771addc2b">How To Build an App to Call/Write Congress</a> and <a href="https://medium.com/@govtrack/creating-congressional-district-maps-with-mapbox-4888e4b79cf">Creating congressional district maps with Mapbox</a> which explain how to find someone&rsquo;s congressional district and how to use that to help them contact their representative or senator.</p>
+			</td>
 		</tr>
 		<tr>
 			<td>Bill Status</td>
-			<td>From <a href="https://www.gpo.gov/fdsys/bulkdata/BILLSTATUS">GPO.gov/FDSys</a>. Updated roughly daily. Legislative activity appears the next business day. Via the <a href="https://github.com/unitedstates/congress">congress</a> project. Prognosis scores (predictions of enactment) are from <a href="https://www.skoposlabs.com/">Skopos Labs</a>.</td></tr>
+			<td><p>The status of pending legislation is retreived daily from the <a href="https://www.gpo.gov/fdsys/bulkdata/BILLSTATUS">U.S. Government Publishing Office (GPO) Federal Digital System (FDsys) Bill Status XML Bulk Data</a>.
+			Legislative activity typically appears the next business day. We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data.</p>
+			<p>The <a href="https://propublica.github.io/congress-api-docs/">ProPublica Congress API</a> is the only public API for legislative information.
+			The API was formerly the Sunlight Foundation Congress API and traces <a href="http://luigimontanez.com/2010/how-we-use-mongodb-at-sunlight/index.html">its history</a> to our legislative data offerings back in 2010.</p>
+			<p>Prognosis scores (predictions of enactment) are from <a href="https://www.skoposlabs.com/">Skopos Labs</a>.</td>
 		</tr>
 		<tr>
 			<td>Bill Summaries</td>
@@ -41,58 +54,80 @@
 		</tr>
 		<tr>
 			<td>Votes</td>
-			<td>From the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites. Updated hourly. Missed vote explanations from <a href="https://projects.propublica.org/explanations/">ProPublica</a>.</td></tr>
+			<td><p>Roll call votes are retrieved from the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites in XML format. We update our vote data roughly hourly. We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data.</p>
+			<p>Missed and mistaken vote explanations are from <a href="https://projects.propublica.org/explanations/">ProPublica</a>.</td>
 		</tr>
 		<tr>
 			<td>Bill Text</td>
-			<td>From <a href="http://www.gpo.gov/fdsys">GPO.gov/FDSys</a>. Updated daily, but text only becomes available typically 1-3 business days after major action on the bill.</td></tr>
+			<td>The text of legislation is retrieved from <a href="https://www.gpo.gov/fdsys/browse/collection.action?collectionCode=BILLS">GPO.gov/FDSys</a> in PDF, XML, and plain text formats. We update bill text daily, but text only becomes available typically 1-3 business days after major action on the bill.
+			We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data, <a href="https://github.com/govtrack/congressxml">congressxml</a> to render the XML as HTML, and <a href="https://github.com/govtrack/linkify-citations/tree/xpath-rewrite">linkify-citations</a> to hyperlink legal citations in bill text.</td>
 		</tr>
 		<tr>
 			<td>What&rsquo;s Coming Up</td>
-			<td>Bills: From the <a href="http://www.senate.gov/pagelayout/legislative/d_three_sections_with_teasers/calendars.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>;
-			    Committee Meetings: From the <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>. Updated daily.</td></tr>
+			<td>Our list of bills coming up is from the <a href="http://www.senate.gov/pagelayout/legislative/d_three_sections_with_teasers/calendars.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>.
+			    The committee meetings calendar is from the <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>. Updated daily. All offer XML data.</td>
 		</tr>
 		<tr>
-			<td>District Boundaries</td>
+			<td>District Maps</td>
 			<td>Congressional district boundaries on the maps are from the <a href="https://www.census.gov/geo/maps-data/data/tiger-line.html">U.S. Census Bureau</a> and maps are courtesy of <a href="https://www.mapbox.com/">Mapbox</a> (see <a href="https://medium.com/@govtrack/creating-congressional-district-maps-with-mapbox-4888e4b79cf">how we do it</a>).</td>
 		</tr>
 
+
+		<tr><th colspan="2" style="padding: 1em 0 .5em 0">2015-2016<br>(114<sup>th</sup> Congress)</th></tr>
+
+		<tr>
+			<td>Bill Status</td>
+			<td>From <a href="https://www.gpo.gov/fdsys/bulkdata/BILLSTATUS">GPO.gov/FDSys</a> via the <a href="https://github.com/unitedstates/congress">congress</a> project (see above).</td>
+		</tr>
+		<tr>
+			<td>Votes</td>
+			<td>From the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites (see above).</td>
+		</tr>
+		<tr>
+			<td>Bill Text</td>
+			<td>From <a href="http://www.gpo.gov/fdsys">GPO.gov/FDSys</a> (see above).</td>
+		</tr>
 
 		<tr><th colspan="2" style="padding: 1em 0 .5em 0">1989-2014<br>(101<sup>st</sup>-113<sup>th</sup> Congresses)</th></tr>
 
 		<tr>
 			<td>Bill Status</td>
-			<td>Historical bill status information was obtained from the old THOMAS.gov site prior to its shutdown in 2016.</td></tr>
+			<td>Historical bill status information was obtained from the old THOMAS.gov website prior to its shutdown in 2016.
+			This information is no longer available anywhere in a structured data format, but contact us if you are interested
+			in using our historical bill status data.</td>
 		</tr>
 		<tr>
 			<td>Votes</td>
-			<td>From the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites. (Except House votes in 1989 (101<sup>st</sup> Congress, 1st Session), see Rosenthal & Poole.)</td></tr>
+			<td>From the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites (see above). (Except House votes in 1989 (101<sup>st</sup> Congress, 1st Session), which are from the Rosenthal & Poole data, see below.)</td>
 		</tr>
 		<tr>
 			<td>Bill Text</td>
-			<td>From <a href="http://www.gpo.gov/fdsys">GPO.gov/FDSys</a> (~2012-) and archived text from THOMAS.gov (1989-~2012). (Also <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a> for the 113th Congress.)</td></tr>
+			<td>Bill text from about 2012 forward is from <a href="http://www.gpo.gov/fdsys">GPO.gov/FDSys</a> (see above).
+			For bills from 1989 through about 2012, we display archived HTML text retreived from THOMAS.gov prior to THOMAS.gov&rsquo;s shutdown in 2016
+			&mdash; although PDFs of bills exist for this time period from GPO.gov/FDSys, the rich text data that we display is no longer available anywhere but you can contact us if you are interested in using ours.
+			(We also display <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a> for the 113th Congress.)</td>
 		</tr>
 
 		<tr><th colspan="2" style="padding: 1em 0 .5em 0">1973-1988<br>(93<sup>rd</sup>-100<sup>th</sup> Congresses)</th></tr>
 		
 		<tr>
 			<td>Bill Status</td>
-			<td>From THOMAS.gov (see above).</td></tr>
+			<td>From THOMAS.gov (see above).</td>
 		</tr>
 		<tr>
 			<td>Bill Text</td>
-			<td>From the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov/FDSys</a> (volumes 87-106). Only the text of enacted bills and agreed to concurrent resolutions are available.</td></tr>
+			<td>We only display bill text in this time period for bills that had been enacted into law and concurrent resolutions agreed to. We get that text from the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov/FDSys</a> (volumes 87-106; plain text and PDFs).</td>
 		</tr>
 		<tr>
 			<td>Votes</nobr></small></td>
-			<td>From Rosenthal &amp; Poole&rsquo;s <a href="http://voteview.com/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a>, Carnegie Mellon University.</td>
+			<td>Roll call votes in this time period were retrieved from From Rosenthal &amp; Poole&rsquo;s <a href="http://voteview.com/dwnl.htm">United States Congressional Roll Call Voting Records, 1789-1990</a>, Carnegie Mellon University.</td>
 		</tr>
 		
 		<tr><th colspan="2" style="padding: 1em 0 .5em 0">1951-1972<br>(82<sup>nd</sup>-92<sup>nd</sup> Congresses)</th></tr>
 
 		<tr>
 			<td>Bills</td>
-			<td>From the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov/FDSys</a> (volumes 65-86). Only enacted bills and concurrent resolutions agreed to are available.</td></tr>
+			<td>In this time period we only have a record of bills, joint resolutions, and concurrent resolutions from the Statutes at Large on <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">GPO.gov/FDSys</a> (volumes 65-86). Only enacted bills and joint resolutions and concurrent resolutions agreed to are published in the Statutes at Large. See above.</td>
 		</tr>
 		<tr>
 			<td>Votes</nobr></small></td>
@@ -103,7 +138,7 @@
 		
 		<tr>
 			<td>Bills</td>
-			<td>From the Library of Congress&rsquo;s <a href="http://memory.loc.gov/ammem/amlaw/lawhome.html">American Memory Century of Lawmaking</a> collection via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law</a> project.</td></tr>
+			<td>Our data on bills in the early days of the country are from the Library of Congress&rsquo;s <a href="http://memory.loc.gov/ammem/amlaw/lawhome.html">American Memory Century of Lawmaking</a> collection via the <a href="https://github.com/unitedstates/am_mem_law">am_mem_law</a> project.</td>
 		</tr>
 		<tr>
 			<td>Votes</nobr></small></td>
@@ -112,17 +147,6 @@
 
 	</table>
 
-</section>
-
-<section class="col-sm-5" style="font-size: 12px;">
-	<div class="panel panel-default">
-		<div class="panel-heading">What to use this data?</div>
-		<div class="panel-body">
-			All of the data behind GovTrack can be freely reused by others for any purpose. See our <a href="/developers">developer documentation</a> for more information.
-		</div> <!-- /panel-body -->
-	</div> <!-- /panel -->
-</section>
-</div>
 
 {% endblock %}
 
