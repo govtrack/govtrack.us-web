@@ -318,6 +318,35 @@ class Reaction(models.Model):
         else:
             return Reaction.objects.none()
 
+class Position(models.Model):
+    subject = models.CharField(max_length=20, db_index=True)
+    user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
+    anon_session_key = models.CharField(max_length=64, blank=True, null=True, db_index=True)
+    position = models.IntegerField(blank=True, null=True)
+    reasons = models.TextField(blank=True)
+    extra = JSONField()
+
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    
+    class Meta:
+        unique_together = ( ('subject', 'user'), ('subject', 'anon_session_key') ) 
+
+    @staticmethod
+    def get_session_key(request):
+        import random, string
+        return request.session.setdefault("positions-key",
+            ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(20))
+            )
+
+    @staticmethod
+    def get_for_user(request):
+        if request.user.is_authenticated():
+            return Position.objects.filter(user=request.user)
+        elif "positions-key" in request.session:
+            return Position.objects.filter(anon_session_key=Position.get_session_key(request))
+        else:
+            return Position.objects.none()
+
 class Sousveillance(models.Model):
     subject = models.CharField(max_length=24, db_index=True)
     user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
