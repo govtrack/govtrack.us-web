@@ -1,37 +1,45 @@
 #!script
 
-import sys, csv, tqdm, datetime
+import sys, csv, tqdm
 
-from us import get_congress_dates
-from person.models import *
-from vote.models import *
+from vote.models import Vote, CongressChamber
 
-for congress in range(100, 115+1):
-	stats = { True: 0, False: 0 }
+votes = Vote.objects.filter(congress__range=(85, 100), chamber=CongressChamber.house).order_by('created')
 
-	congress_dates = get_congress_dates(congress)
+stats = { }
+party_grand_totals = { }
 
-	all_votes = Voter.objects.filter(
-		vote__congress=congress,
-		created__lt=congress_dates[0] + datetime.timedelta(days=180),
-		vote__chamber=CongressChamber.house,
-		option__key__in=("+", "-"))\
-		.values('vote__id', 'option__key', 'person_role__party')
+for vote in tqdm.tqdm(votes, total=votes.count()):
+	totals = vote.totals()
 
-	# compute vote totals by vote & party
-	vote_totals = { }
-	for vv in all_votes:
-		key = (vv['vote__id'], vv['person_role__party'], vv['option__key'])
-		vote_totals[key] = vote_totals.get(key, 0) + 1
+	try:
+		total_yes = [opt['count'] for opt in totals['options'] if opt['option'].key == "+"][0]
+		total_no = [opt['count'] for opt in totals['options'] if opt['option'].key == "-"][0]
+		overall_yes = total_yes / float(total_yes + total_no)
+	except (IndexError, ZeroDivisionError):
+		# There aren't yes/no options or there are (probably incorrectly) but neither had any votes.
+		continue
 
-		key = (vv['vote__id'], vv['person_role__party'])
-		vote_totals[key] = vote_totals.get(key, 0) + 1
-	
-	# compute whether each vote(r) aligned with their party
-	for vv in all_votes:
-		if vote_totals[(vv['vote__id'], vv['person_role__party'], vv['option__key'])] > .66*vote_totals[(vv['vote__id'], vv['person_role__party'])]:
-			stats[True] += 1
-		elif vote_totals[(vv['vote__id'], vv['person_role__party'], "-" if vv['option__key'] == "+" else "+")] > .66*vote_totals[(vv['vote__id'], vv['person_role__party'])]:
-			stats[False] += 1
+	for party, party_totals in zip(totals["parties"], totals["party_counts"]):
+		if party in ("Independent", "Vice President"): continue
+		if party_totals['yes'] + party_totals['no'] > 0:
+			year = stats.setdefault(vote.session, {})
+			year_party = year.setdefault(party, [])
+			value = max(party_totals['yes'], party_totals['no']) / float(party_totals['yes'] + party_totals['no'])
+			weight = abs(party_totals['yes']/float(party_totals['yes'] + party_totals['no']) - overall_yes)
+			year_party.append((value, weight))
+			party_grand_totals[party] = party_grand_totals.get(party, 0) + party_totals['total']
 
-	print congress, stats[True] / float(stats[False] + stats[True])
+party_list = sorted(party_grand_totals, key = lambda p : party_grand_totals[p], reverse=True)
+
+w = csv.writer(sys.stdout)
+w.writerow(["legyear"] + party_list)
+
+def weighted_mean(a):
+	total = float(sum(v[1] for v in a))
+	if total == 0: return ""
+	return sum(v[0] * v[1] for v in a) / total
+
+for year, totals in sorted(stats.items()):
+	w.writerow([year] + [weighted_mean(totals.get(party, [])) for party in party_list])
+		
