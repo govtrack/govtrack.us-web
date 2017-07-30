@@ -51,14 +51,12 @@ $(function() {
 		<p>{{statename}} is a U.S. state with <b>two</b> senators in the United States Senate and <b>{{stateapp|apnumber}}</b> representatives in the United States House of Representatives.</p>
 
 	{% elif state == "DC" %}
-		<p>The District of Columbia (DC) is the nation&rsquo;s capital. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators or representatives in Congress.</p>
-
-		<p>Instead, the District of Columbia sends a <b>delegate</b> to the House of Representatives with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
+		<p>The District of Columbia (DC) is the nation&rsquo;s capital district. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators and its representative in the House of Representatives is a <b>delegate</b> with limited voting privileges.
+		Delegates have a marginalized role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
 
 	{% else %}
-		<p>{% if state == "VI" or state == "MP" %}The {% endif %}{{statename}} is a territory of the United States. Because it is not a state, it has no senators or representatives in Congress.</p>
-
-		<p>Instead, it sends a <b>delegate</b> to the House of Representatives{% if state == "PR" %}, called the <b>Resident Commissioner</b>,{% endif %} with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
+		<p>{% if state == "VI" or state == "MP" %}The {% endif %}{{statename}} is a territory of the United States. Because it is not a state, it has no senators and its representative in the House of Representatives is a <b>delegate</b>{% if state == "PR" %}, called the <b>Resident Commissioner</b>,{% endif %} with limited voting privileges.
+		Delegates have a marginalized role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
 	{% endif %}
 
 	{% if stateapp != "T" %}
