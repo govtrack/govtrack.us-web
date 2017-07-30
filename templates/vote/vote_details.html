@@ -228,7 +228,7 @@ $(function() {
 
 {% block body %}
 
-<h1 class="long">{{ vote.question }}</h1>
+<h1 class="long" data-vote-id="{{vote.id}}">{{ vote.question }}</h1>
 
 <div id="vote_explainer">
 	{% if vote.oursummary %}
