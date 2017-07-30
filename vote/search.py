@@ -55,6 +55,12 @@ def vote_search_manager():
 
     sm.set_template("""
     <div class="row">
+        <div class="col-xs-2 col-md-1" style="padding-right: 0">
+            <img src="{{object.get_absolute_url}}/diagram" class="img-responsive"/>
+        </div>
+        <div class="col-xs-10 col-md-11">
+
+    <div class="row">
         <div class="col-xs-12">
             <div style="margin-bottom: .2em"><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
         </div>
@@ -73,6 +79,9 @@ def vote_search_manager():
           </div>
         </div>
         </div>
+    </div>
+
+    </div>
     </div>
 	""")
 

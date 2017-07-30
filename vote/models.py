@@ -350,6 +350,10 @@ class Vote(models.Model):
             pass
         return False
 
+    def get_map_thumbnail_type_fast(self):
+        if self.chamber == CongressChamber.senate: return "thumbnail"
+        return "map"
+
 
 class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='options')
