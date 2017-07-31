@@ -63,10 +63,8 @@ SESSION_COOKIE_SECURE = not DEBUG # send session cookies over SSL only
 CSRF_COOKIE_SECURE = not DEBUG # similarly
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer' # needed by openid login
 
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 587
-#EMAIL_HOST_USER = ''
-#EMAIL_HOST_PASSWORD = ''
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_SUBJECT_PREFIX = '[GovTrack] '
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -169,9 +167,6 @@ CURRENT_CONGRESS = 115
 EMAIL_UPDATES_FROMADDR = "GovTrack.us Email Updates <noreply@mail.GovTrack.us>"
 EMAIL_UPDATES_RETURN_PATH = "GovTrack.us Email Updates <bounces+uid=%d@mail.GovTrack.us>"
 BOUNCES_UID_REGEX = re.compile(r"<?bounces\+uid=(\d+)@GovTrack\.us>?", re.I)
-
-#if DEBUG: # sometimes we debug in a live environment
-#	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Load settings from the environment
 from settings_env import *

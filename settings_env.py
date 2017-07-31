@@ -80,9 +80,18 @@ copy_env_vars = [
     "GOOGLE_ANALYTICS_KEY",
     "TWITTER_ACCESS_TOKEN", # for automated tweets and to update @GovTrack/Members-of-Congress twitter list
     "TWITTER_ACCESS_TOKEN_SECRET",
+    "SPARKPOST_API_KEY",
 ]
 for var in copy_env_vars:
     locals()[var] = get_env_variable(var, default='')
+
+if SPARKPOST_API_KEY:
+    EMAIL_BACKEND = 'sparkpost.django.email_backend.SparkPostEmailBackend'
+    SPARKPOST_OPTIONS = {
+        'track_opens': False,
+        'track_clicks': False,
+        'transactional': True,
+    }
 
 # TODO. The ad-free payment requires something like this:
 #import paypalrestsdk
