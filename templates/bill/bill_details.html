@@ -54,14 +54,6 @@
 	// dynamic DOM elements
     $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
     if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);
-	if (the_page.poll_and_call_position) {
-		var p = the_page.poll_and_call_position;
-		$('#call_congress_positions').hide();
-		$('#call_congress_position_chosen').show();
-		$('#call_congress_position_chosen span').text(p.text);
-		$('#change_position').toggle(p.can_change);
-		$('#make_call').toggle(p.can_call.length > 0);
-	}
 
 	// UI fixups
     $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
@@ -132,22 +124,6 @@
 .dl-horizontal dd a {
 	font-weight: bold;
 }
-
-#call_congress_positions button {
-	display: inline-block;
-	margin-top: .75em;
-	margin-left: 2em;
-	padding: 8px;
-	font: 18px/24px Ubuntu, Verdana, Tahoma, Arial, sans-serif;
-	text-align: center;
-}
-	#call_congress_positions button span {
-		display: block;
-		font-size: 42px;
-		margin-top: 10px;
-	}
-		#call_congress_positions button.support span { color: green; }
-		#call_congress_positions button.oppose span { color: red; }
 
 #status-row-grid {
 }

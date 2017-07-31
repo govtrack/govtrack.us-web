@@ -15,11 +15,9 @@ urlpatterns = patterns('bill.views',
     url(r'^$', 'bill_docket', name='bill_docket'),
     url(r'^statistics$', 'bill_statistics', name='bill_stats'),
     url(r'^uscode(?:/(\d+|.*))?$', 'uscodeindex'),
-    url(r'^_ajax/market_test_vote', 'market_test_vote'),
     url(r'^_ajax/load_text', 'bill_text_ajax'),
     url(r'^_ajax/join_community', 'join_community'),
     url(r'^_admin/go_to_summary_admin', 'go_to_summary_admin', name="bill_go_to_summary_admin"),
-    url(r'^_redirect/start-poll', 'start_poll', name="bill_start_poll"),
     url(r'^(\d+)/([a-z]+)(\d+)/(thumbnail|_text_image)$', 'bill_text_image'),
 )
 

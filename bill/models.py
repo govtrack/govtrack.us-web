@@ -1354,30 +1354,6 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                
         return None
 
-    def get_open_market(self, user):
-        from django.contrib.contenttypes.models import ContentType
-        bill_ct = ContentType.objects.get_for_model(Bill)
-
-        import predictionmarket.models
-        try:
-            m = predictionmarket.models.Market.objects.get(owner_content_type=bill_ct, owner_object_id=self.id, isopen=True)
-        except predictionmarket.models.Market.DoesNotExist:
-            return None
-
-        for outcome in m.outcomes.all():
-            if outcome.owner_key == "1": # "yes"
-                m.yes = outcome
-                m.yes_price = int(round(outcome.price() * 100.0))
-        if user and user.is_authenticated():
-            account = predictionmarket.models.TradingAccount.get(user, if_exists=True)
-            if account:
-                positions, profit = account.position_in_market(m)
-                m.user_profit = round(profit, 1)
-                m.user_positions = { }
-                for outcome in positions:
-                    m.user_positions[outcome.owner_key] = positions[outcome]
-        return m
-
     def get_gop_summary(self):
         import urllib, StringIO
         try:

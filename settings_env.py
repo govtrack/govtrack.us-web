@@ -73,8 +73,6 @@ TWITTER_OAUTH_TOKEN_SECRET = get_env_variable('TWITTER_OAUTH_TOKEN_SECRET', defa
 FACEBOOK_APP_ID = get_env_variable('FACEBOOK_APP_ID', default='')
 FACEBOOK_APP_SECRET = get_env_variable('FACEBOOK_APP_SECRET', default='')
 FACEBOOK_AUTH_SCOPE = get_env_variable('FACEBOOK_AUTH_SCOPE', default='')  # can be an empty string
-TWILIO_ACCOUNT_SID = get_env_variable('TWILIO_ACCOUNT_SID', default='')
-TWILIO_AUTH_TOKEN = get_env_variable('TWILIO_AUTH_TOKEN', default='')
 
 # TODO. The ad-free payment requires something like this:
 #import paypalrestsdk
