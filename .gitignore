@@ -10,6 +10,7 @@
 .venv*
 env/
 local/
+settings.env
 pip-log.txt
 static/css/all-min.css
 static/images/dynamic

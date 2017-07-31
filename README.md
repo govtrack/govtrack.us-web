@@ -55,9 +55,7 @@ At the end:
 
 ### Configuration
 
-TODO. This is not working yet.
-
-Some features of the site require additional configuration. To set configuration variables, create a file named `.env` and optionally set any of the following variables (defaults are shown where applicable):
+Some features of the site require additional configuration. To set configuration variables, create a file named `settings.env` and optionally set any of the following variables (defaults are shown where applicable):
 
     # Database server.
     # See https://github.com/kennethreitz/dj-database-url
@@ -85,26 +83,7 @@ Some features of the site require additional configuration. To set configuration
     # and kept secure. You can generate a key with `./manage.py generate_secret_key`
     SECRET_KEY=(randomly generated on each run if not specified)
 
-    # Some accounts...
-    GOOGLE_ANALYTICS_KEY=
-
-    # For captchas...
-    RECAPTCHA_PUBLIC_KEY=
-    RECAPTCHA_PRIVATE_KEY=
-
-    # For social login...
-    TWITTER_OAUTH_TOKEN=
-    TWITTER_OAUTH_TOKEN_SECRET=
-    TWITTER_ACCESS_TOKEN=
-    TWITTER_ACCESS_TOKEN_SECRET=
-    FACEBOOK_APP_ID=
-    FACEBOOK_APP_SECRET=
-    FACEBOOK_AUTH_SCOPE=
-    GOOGLE_APP_ID=
-    GOOGLE_APP_ID=
-    GOOGLE_AUTH_SCOPE=
-
-See `.env.server.template` for details
+See `settings.env.template` for details, especially for values used in production.
 
 # Credits
 
