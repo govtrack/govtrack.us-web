@@ -65,8 +65,6 @@ SECRET_KEY = get_env_variable('SECRET_KEY', default=default_secret_key)
 
 GOOGLE_ANALYTICS_KEY = get_env_variable('GOOGLE_ANALYTICS_KEY', default='')
 
-YOUTUBE_API_KEY = get_env_variable('YOUTUBE_API_KEY', default='')
-
 # for registration
 RECAPTCHA_PUBLIC_KEY = get_env_variable('RECAPTCHA_PUBLIC_KEY', default='')
 RECAPTCHA_PRIVATE_KEY = get_env_variable('RECAPTCHA_PRIVATE_KEY', default='')
