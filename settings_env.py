@@ -81,6 +81,9 @@ copy_env_vars = [
     "TWITTER_ACCESS_TOKEN", # for automated tweets and to update @GovTrack/Members-of-Congress twitter list
     "TWITTER_ACCESS_TOKEN_SECRET",
     "SPARKPOST_API_KEY",
+    "PAYPAL_CLIENT_MODE",
+    "PAYPAL_CLIENT_ID",
+    "PAYPAL_CLIENT_SECRET",
 ]
 for var in copy_env_vars:
     locals()[var] = get_env_variable(var, default='')
@@ -93,7 +96,8 @@ if SPARKPOST_API_KEY:
         'transactional': True,
     }
 
-# TODO. The ad-free payment requires something like this:
-#import paypalrestsdk
-#paypalrestsdk.configure(mode="sandbox", client_id="...", client_secret="...")
+# The hide-the-ads payment requires Paypal integration:
+if PAYPAL_CLIENT_ID:
+    import paypalrestsdk
+    paypalrestsdk.configure(mode=PAYPAL_CLIENT_MODE, client_id=PAYPAL_CLIENT_ID, client_secret=PAYPAL_CLIENT_SECRET)
 
