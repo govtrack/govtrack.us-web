@@ -34,7 +34,7 @@ except ImproperlyConfigured:
     pass
 
 import dj_database_url
-DEFAULT_DATABASE_URL = 'sqlite:///' + os.path.dirname(__file__) + '/database.sqlite'
+DEFAULT_DATABASE_URL = 'sqlite:///' + os.path.dirname(__file__) + '/local/database.sqlite'
 DATABASE_URL = get_env_variable('DATABASE_URL', DEFAULT_DATABASE_URL)
 DATABASES = {
 	'default': dj_database_url.parse(DATABASE_URL)
