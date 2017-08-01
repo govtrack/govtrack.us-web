@@ -1,4 +1,4 @@
-django==1.7
+django<1.9
 uwsgi
 python-dateutil
 django-cache-utils
