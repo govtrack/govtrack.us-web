@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'^registration/', include('registration.urls')),
     url(r'^accounts/login/?$', registration.views.loginform), # Django adds a slash when logging out?
     url(r'^accounts/logout$', django.contrib.auth.views.logout, { "redirect_field_name": "next" }),
-    url(r'^accounts/profile$', registration.views.profile),
+    url(r'^accounts/profile$', registration.views.profile, name='registration.views.profile'),
 
 	url(r'^dump_request', website.views.dumprequest),
 ]

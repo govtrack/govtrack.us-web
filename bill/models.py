@@ -245,7 +245,6 @@ class Bill(models.Model):
     def data_dir_path(self):
         return "data/congress/%d/bills/%s/%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, BillType.by_value(self.bill_type).slug, self.number)
 
-    #@models.permalink
     def get_absolute_url(self):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
 

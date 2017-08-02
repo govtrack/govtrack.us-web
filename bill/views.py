@@ -100,8 +100,8 @@ def bill_details_user_view(request, congress, type_slug, number):
             </div>
             """
 
-        from django.template import Template, Context, RequestContext, loader
-        ret["admin_panel"] = Template(admin_panel).render(RequestContext(request, {
+        from django.template import Template, Context
+        ret["admin_panel"] = Template(admin_panel).render(Context({
             'bill': bill,
             "feed": bill.get_feed(),
             }))
@@ -183,9 +183,8 @@ def bill_widget_loader(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
 
     # @render_to() doesn't support additional parameters, so we have to render manually.
-    from django.shortcuts import render_to_response
-    from django.template import RequestContext
-    return render_to_response("bill/bill_widget.js", { "bill": bill, "SITE_ROOT_URL": settings.SITE_ROOT_URL }, context_instance=RequestContext(request), content_type="text/javascript" )
+    from django.shortcuts import render
+    return render(request, "bill/bill_widget.js", { "bill": bill, "SITE_ROOT_URL": settings.SITE_ROOT_URL }, content_type="text/javascript" )
 
 @anonymous_view
 @render_to("bill/bill_widget_info.html")

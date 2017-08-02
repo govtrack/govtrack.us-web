@@ -86,35 +86,41 @@ def template_context_processor(request):
 
     # Add context variables for whether the user is in the
     # House or Senate netblocks.
-    
     try:
-        ip = request.META["REMOTE_ADDR"]
-        ip = ip.replace("::ffff:", "") # ipv6 wrapping ipv4
-        
-        if is_ip_in_any_range(ip, HOUSE_NET_RANGES):
-            context["remote_net_house"] = True
-            request._track_this_user = True
-        if is_ip_in_any_range(ip, SENATE_NET_RANGES):
-            context["remote_net_senate"] = True
-            request._track_this_user = True
-        if is_ip_in_any_range(ip, EOP_NET_RANGES):
-            context["remote_net_eop"] = True
-            request._track_this_user = True
+        context["remote_net_" + request._special_netblock] = True
     except:
         pass
     
     return context
   
 class GovTrackMiddleware:
-    def process_response(self, request, response):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Is the user in one of the special netblocks?
+        try:
+            ip = request.META["REMOTE_ADDR"]
+            ip = ip.replace("::ffff:", "") # ipv6 wrapping ipv4
+            if is_ip_in_any_range(ip, HOUSE_NET_RANGES):
+                request._special_netblock = "house"
+            if is_ip_in_any_range(ip, SENATE_NET_RANGES):
+                request._special_netblock = "senate"
+            if is_ip_in_any_range(ip, EOP_NET_RANGES):
+                request._special_netblock = "eop"
+        except:
+            pass
+
+        response = self.get_response(request)
+
 		# log some requets for processing later
-        if hasattr(request, "_track_this_user"):
+        if hasattr(request, "_special_netblock"):
             uid = request.COOKIES.get("uuid")
             if not uid:
                 import uuid
                 uid = base64.urlsafe_b64encode(uuid.uuid4().bytes).replace('=', '')
             response.set_cookie("uuid", uid, max_age=60*60*24*365*10)
-            print "TRACK", uid, datetime.datetime.now().isoformat(), base64.b64encode(repr(request))
+
             from website.models import Sousveillance
             Sousveillance.objects.create(
                 subject=uid,
@@ -131,21 +137,3 @@ class GovTrackMiddleware:
 
         return response
 
-
-class DebugMiddleware:
-    def process_request(self, request):
-        r = Req(request=repr(request))
-        r.save()
-        request._debug_req = r
-        return None
-    def process_response(self, request, response):
-        if getattr(request, "_debug_req", None) != None:
-            request._debug_req.delete()
-            request._debug_req = None
-        return response
-    def process_exception(self, request, exception):
-        if getattr(request, "_debug_req", None) != None:
-            request._debug_req.delete()
-            request._debug_req = None
-        return None
-        

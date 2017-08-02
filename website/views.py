@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect, get_object_or_404, render
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
@@ -51,7 +50,7 @@ def staticpage(request, pagename):
     
     ctx = { 'pagename': pagename }
     
-    return render_to_response('website/' + pagename + '.html', ctx, RequestContext(request))
+    return render(request, 'website/' + pagename + '.html', ctx)
 
 def get_blog_items():
     # c/o http://stackoverflow.com/questions/1208916/decoding-html-entities-with-python
@@ -501,7 +500,7 @@ def go_ad_free_finish(request):
 
 @anonymous_view
 def videos(request, video_id=None):
-    return render_to_response('website/videos.html', { "video_id": video_id }, RequestContext(request))
+    return render(request, 'website/videos.html', { "video_id": video_id })
 
 
 def set_district(request):

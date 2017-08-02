@@ -65,18 +65,17 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer' # ne
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_SUBJECT_PREFIX = '[GovTrack] '
 
-
-MIDDLEWARE_CLASSES = (
-    #'silk.middleware.SilkyMiddleware',
-    'django.middleware.common.CommonMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'twostream.middleware.CacheLogic',
     'website.middleware.GovTrackMiddleware',
-)
+]
 
 ROOT_URLCONF = 'urls'
 
