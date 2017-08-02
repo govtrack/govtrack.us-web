@@ -653,7 +653,7 @@
 					<tr class="status-item {% if not item.date or item.different_congress %}pending{% endif %} {% if item.bill %}related-bill{% endif %}">
 						<td class="date {% if forloop.last %}last{% endif %} {% if item.last_occurred or not item.date or item.different_congress %}ghosted{% endif %}">
 							<div class="wrapper">
-								{% if item.date %}<span class="nowrap">{{item.date|date:"DATE_FORMAT"}}</span>{% endif %}
+								{% if item.date %}<span class="nowrap">{{item.date|date:"DATE_FORMAT"}}</span>{% else %}Pending{% endif %}
 							</div>
 						</td>
 						<td>
