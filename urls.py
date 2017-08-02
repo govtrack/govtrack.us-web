@@ -1,10 +1,16 @@
-from django.conf.urls import *
+from django.conf.urls import url, include
 from django.conf import settings
 import django.views.static
 
 from django.contrib import admin
 
-urlpatterns = patterns('',
+import django.contrib.auth.views
+import registration.views
+import website.api
+import website.views
+
+
+urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 
 	# main URLs
@@ -15,19 +21,19 @@ urlpatterns = patterns('',
     url(r'^congress/', include('vote.urls')),
     url(r'^congress/bills/', include('bill.urls')),
     url(r'', include('events.urls')),
-    url(r'^api/v2/([^/]+)(?:/(\d+))?', 'website.api.apiv2'),
+    url(r'^api/v2/([^/]+)(?:/(\d+))?', website.api.apiv2),
 
     url(r'^_twostream/', include('twostream.urls')),
 
     # django-registration-pv
-    (r'^emailverif/', include('emailverification.urls')),
-    (r'^registration/', include('registration.urls')),
-    (r'^accounts/login/?$', 'registration.views.loginform'), # Django adds a slash when logging out?
-    (r'^accounts/logout$', 'django.contrib.auth.views.logout', { "redirect_field_name": "next" }),
-    (r'^accounts/profile$', 'registration.views.profile'),
+    url(r'^emailverif/', include('emailverification.urls')),
+    url(r'^registration/', include('registration.urls')),
+    url(r'^accounts/login/?$', registration.views.loginform), # Django adds a slash when logging out?
+    url(r'^accounts/logout$', django.contrib.auth.views.logout, { "redirect_field_name": "next" }),
+    url(r'^accounts/profile$', registration.views.profile),
 
-	(r'^dump_request', 'website.views.dumprequest'),
-)
+	url(r'^dump_request', website.views.dumprequest),
+]
 
 # sitemaps
 from collections import OrderedDict
@@ -45,10 +51,10 @@ sitemaps = OrderedDict([
         ("votes_current", vote.views.sitemap_current),
         #("votes_archive", vote.views.sitemap_archive), # takes too long to load
 	])
-urlpatterns += patterns('',
-    (r'^sitemap\.xml$', anonymous_view(sitemap_index_view), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemap_pages'}),
-   url(r'^sitemap-(?P<section>.+)\.xml$', anonymous_view(sitemap_map_view), {'sitemaps': sitemaps}, name='sitemap_pages'),
-)
+urlpatterns += [
+    url(r'^sitemap\.xml$', anonymous_view(sitemap_index_view), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemap_pages'}),
+    url(r'^sitemap-(?P<section>.+)\.xml$', anonymous_view(sitemap_map_view), {'sitemaps': sitemaps}, name='sitemap_pages'),
+]
 
 if settings.DEBUG:
     # serve /static during debugging
@@ -60,5 +66,5 @@ if settings.DEBUG:
     urlpatterns += static("/data", document_root="data")
 
 if "silk" in settings.INSTALLED_APPS:
-	urlpatterns += patterns('', url(r'^silk/', include('silk.urls', namespace='silk')))
+	urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
 

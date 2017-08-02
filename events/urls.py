@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import *
+from django.conf.urls import url
 
-urlpatterns = patterns('events.views',
-    url(r'^accounts/lists', 'edit_subscription_lists'),
-    url(r'^events/_edit', 'edit_subscription_list'),
-    url('^events/_load_events$', 'events_list_items', name='events_list_items'),
-    url('^events/events.rss$', 'events_rss'),
-    url('^events/embed_legacy$', 'events_embed_legacy'),
-    url('^events/([\w\-]+)$', 'events_show_feed'),
-)
+import events.views
 
+urlpatterns = [
+    url(r'^accounts/lists', events.views.edit_subscription_lists),
+    url(r'^events/_edit', events.views.edit_subscription_list),
+    url('^events/_load_events$', events.views.events_list_items, name='events_list_items'),
+    url('^events/events.rss$', events.views.events_rss),
+    url('^events/embed_legacy$', events.views.events_embed_legacy),
+    url('^events/([\w\-]+)$', events.views.events_show_feed),
+]
