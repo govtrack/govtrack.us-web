@@ -257,7 +257,7 @@ def your_docket(request):
     # Pre-load the user's subscription lists and for each list
     # pre-load the list of bills entered into the list.
     lists = []
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         lists = request.user.subscription_lists.all()
         for lst in lists:
             lst.bills = []
@@ -395,7 +395,7 @@ def go_ad_free_start(request):
     
     # does the user have an ad-free payment already?
     msi = { }
-    if not request.user.is_anonymous():
+    if not request.user.is_anonymous:
         msi = request.user.userprofile().get_membership_subscription_info()
 
     # or did the user make an anonymous payment?
@@ -422,7 +422,7 @@ def go_ad_free_redirect(request):
         sandbox = "-sandbox"
 
     # slightly different SKU if the user is/isn't logged in
-    if request.user.is_anonymous():
+    if request.user.is_anonymous:
         item = {
             "name": "Support GovTrack.us (%.02d)" % amount,
             "sku": "govtrack-tip" + sandbox,
@@ -467,7 +467,7 @@ def go_ad_free_redirect(request):
     from website.models import PayPalPayment
     rec = PayPalPayment(
         paypal_id=payment.id,
-        user=request.user if not request.user.is_anonymous() else None,
+        user=request.user if not request.user.is_anonymous else None,
         response_data=payment.to_dict(),
         notes=item["name"])
     rec.save()
@@ -523,7 +523,7 @@ def set_district(request):
         json.dumps({ "status": "ok", "mocs": mocs }),
         content_type="application/json")
 
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         # Save to database.
         prof = request.user.userprofile()
         prof.congressionaldistrict = "%s%02d" % (state, district)
@@ -562,8 +562,8 @@ def add_remove_reaction(request):
 
         r, isnew = Reaction.objects.get_or_create(
             subject=request.POST["subject"],
-            user=request.user if request.user.is_authenticated() else None,
-            anon_session_key=Reaction.get_session_key(request) if not request.user.is_authenticated() else None,
+            user=request.user if request.user.is_authenticated else None,
+            anon_session_key=Reaction.get_session_key(request) if not request.user.is_authenticated else None,
         )
 
         if isnew:

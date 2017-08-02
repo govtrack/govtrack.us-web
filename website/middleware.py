@@ -118,7 +118,7 @@ class GovTrackMiddleware:
             from website.models import Sousveillance
             Sousveillance.objects.create(
                 subject=uid,
-                user=request.user if request.user.is_authenticated() else None,
+                user=request.user if request.user.is_authenticated else None,
                 req={
                     "path": request.path,
                     "query": { k: request.GET[k] for k in request.GET if k in ("q",) }, # whitelist qsargs

@@ -311,7 +311,7 @@ class Reaction(models.Model):
 
     @staticmethod
     def get_for_user(request):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             return Reaction.objects.filter(user=request.user)
         elif "reactions-key" in request.session:
             return Reaction.objects.filter(anon_session_key=Reaction.get_session_key(request))

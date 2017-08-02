@@ -77,7 +77,7 @@ def edit_subscription_lists(request):
 @login_required
 @json_response
 def edit_subscription_list(request):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return { "error": "not logged in" }
         
     if "email_freq" in request.POST:

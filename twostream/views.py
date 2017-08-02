@@ -19,7 +19,7 @@ def user_head(request):
 	m = resolve(request.GET.get("path", request.GET.get("view", "")))
 	
 	user_data = None
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user_data = { "email": request.user.email }
 		if hasattr(request.user, 'twostream_data'):
 			user_data.update(request.user.twostream_data)
