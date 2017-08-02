@@ -55,7 +55,7 @@ At the end:
 
 ### Configuration
 
-Some features of the site require additional configuration. To set configuration variables, create a file named `settings.env` and optionally set any of the following variables (defaults are shown where applicable):
+Some features of the site require additional configuration. To set configuration variables, create a file named `local/settings.env` and set any of the following optional variables (defaults are shown where applicable):
 
     # Database server.
     # See https://github.com/kennethreitz/dj-database-url

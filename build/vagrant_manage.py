@@ -1,9 +1,9 @@
 #!/bin/bash
 cd /vagrant
 export DEBUG=1
-if [ -f settings.env ]; then
-	echo "using settings.env"
+if [ -f local/settings.env ]; then
+	echo "using local/settings.env"
 	set -o allexport
-	source settings.env; 
+	source local/settings.env; 
 fi
 ./manage.py "$@"
