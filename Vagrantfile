@@ -49,7 +49,7 @@ Vagrant.configure(2) do |config|
     # source .venv/bin/activate
 
     # Install Python packages.
-    pip install --upgrade -r build/pipreq.txt
+    pip install --upgrade -r requirements.txt
 
     # On OS X, install bcrypt:
     # http://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed
