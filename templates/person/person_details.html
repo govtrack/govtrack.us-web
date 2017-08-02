@@ -42,6 +42,7 @@
 
 {% block body_scripts %}
 <script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
 <script>
 $(function() {
 	$('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
@@ -79,7 +80,8 @@ $(function() {
 			zoomType: 'xy',
 			backgroundColor: 'none',
 			height: 350,
-			marginTop: 5
+			marginTop: 5,
+			description: "{{person.name_no_details}} has an ideology score of {{analysis_data.sponsorship.ideology|floatformat:2}} and a leadership score of {{analysis_data.sponsorship.leadership|floatformat:2}}"
 		},
 		title: {
 			text: ''
