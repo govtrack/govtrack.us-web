@@ -346,6 +346,7 @@ class Bill(models.Model):
         "noun": "noun",
         "related_bills": "get_related_bills_api",
         "current_chamber": "current_chamber",
+        "text_info": "get_text_info",
     }
     api_example_id = 76416
     api_example_list = { "sort": "-introduced_date" }
@@ -390,7 +391,7 @@ class Bill(models.Model):
     @property
     def current_chamber(self):
         status = BillStatus.by_value(self.current_status)
-        if status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
+        if status in (BillStatus.introduced, BillStatus.reported):
             return self.originating_chamber.lower()
         elif hasattr(status, 'next_action_in'):
             return status.next_action_in
@@ -496,7 +497,7 @@ class Bill(models.Model):
         bill. 'Done' means the bill is dead or out of Congress."""
         if not self.is_alive or self.current_status in (BillStatus.passed_bill,):
             return 'Done'
-        if self.current_status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
+        if self.current_status in (BillStatus.introduced, BillStatus.reported):
             return self.originating_chamber
         if self.current_status in (BillStatus.pass_over_house, BillStatus.pass_back_house, BillStatus.conference_passed_house, BillStatus.prov_kill_cloturefailed, BillStatus.override_pass_over_house):
             return "Senate"
@@ -538,6 +539,11 @@ class Bill(models.Model):
         except IOError:
             return False
 
+    def get_text_info(self, version=None, mods_only=True, with_citations=False):
+        try:
+            return load_bill_text(self, version, mods_only=mods_only, with_citations=with_citations)
+        except IOError:
+            return None
 
     def get_upcoming_meetings(self):
         return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=self)
@@ -631,8 +637,6 @@ class Bill(models.Model):
                 date = eval(datestr)
                 if state == BillStatus.introduced:
                     continue # already indexed
-                if state == BillStatus.referred and (date.date() - self.introduced_date).days == 0:
-                    continue # don't dup these events so close
                 E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_enacted_bill else []))
 
             # generate events for new cosponsors... group by join date, and
@@ -901,7 +905,6 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             explanation = BillStatus.by_value(st).explanation
             if callable(explanation): explanation = explanation(self)
 
-            if st == BillStatus.referred: continue # don't care about this
             if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres, BillStatus.enacted_veto_override) and srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference", "override"):
                 ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
                 # PASSED:BILL only occurs on the second chamber, so indicate both agreed to in text
@@ -996,6 +999,16 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         "text_version": m['version_code'],
                         "end_of_day": True,
                     })
+
+            # Bring in committee meetings.
+            for mtg in self.committeemeeting_set.all():
+                ret.append({
+                    "key": "reported",
+                    "label": "Considered by " + unicode(mtg.committee),
+                    "explanation": "A committee held a hearing or business meeting about the " + self.noun + ".",
+                    "date": mtg.when,
+                })
+
 
             # Bring in committee reports.
             for rpt in (self.committee_reports or []):
@@ -1135,7 +1148,6 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         # define a state diagram
         common_paths = {
             BillStatus.introduced: BillStatus.reported,
-            BillStatus.referred: BillStatus.reported,
         }
 
         type_specific_paths = {
@@ -1285,7 +1297,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
     def get_related_bills_newer(self):
         return [rb for rb in self.get_related_bills()
             if self.title_no_number == rb.related_bill.title_no_number
-            and rb.related_bill.current_status not in (BillStatus.introduced, BillStatus.referred)
+            and rb.related_bill.current_status != BillStatus.introduced
             and rb.related_bill.current_status_date > self.current_status_date]
 
     def find_reintroductions(self):

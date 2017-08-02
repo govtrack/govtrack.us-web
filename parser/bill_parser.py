@@ -126,8 +126,10 @@ class BillProcessor(XmlProcessor):
 
     def process_current_status(self, obj, node):
         elem = node.xpath('./state')[0]
+        status = elem.text
+        if status == "REFERRED": status = "INTRODUCED"
         obj.current_status_date = self.parse_datetime(elem.get('datetime'))
-        obj.current_status = BillStatus.by_xml_code(elem.text)
+        obj.current_status = BillStatus.by_xml_code(status)
 
     def process_titles(self, obj, node):
         titles = []
@@ -164,7 +166,7 @@ class BillProcessor(XmlProcessor):
                 
                 role = Cosponsor.get_role_for(person, obj, joined)
                 if not role:
-                    log.error('Cosponsor %s did not have a role on %s' % (unicode(person), subnode.get('joined')))
+                    log.error('Cosponsor %s did not have a role on %s' % (unicode(person).encode("utf8"), subnode.get('joined')))
                     continue
 
                 value = subnode.get('withdrawn')
@@ -187,7 +189,7 @@ class BillProcessor(XmlProcessor):
 
         obsolete_cosp = Cosponsor.objects.filter(bill=obj).exclude(id__in=cosp)
         if obsolete_cosp.count() > 0:
-            log.error('Deleting obsolete cosponsor records: %s' % (unicode(obsolete_cosp)))
+            log.error('Deleting obsolete cosponsor records: %s' % obsolete_cosp)
             obsolete_cosp.delete()
            
 
@@ -401,6 +403,7 @@ def main(options):
 
             actions = []
             for axn in tree.xpath("actions/*[@state]"):
+                if axn.xpath("string(@state)") == "REFERRED": continue # we don't track this state
                 actions.append( (
                 	repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))),
                 	BillStatus.by_xml_code(axn.xpath("string(@state)")),
@@ -467,9 +470,8 @@ def load_senate_floor_schedule_data():
     try:
         dom = etree.parse(urllib.urlopen("https://www.senate.gov/legislative/schedule/floor_schedule.xml")).getroot()
     except etree.XMLSyntaxError:
-        print "Invalid data in https://www.senate.gov/legislative/schedule/floor_schedule.xml"
+        print "Invalid XML received for https://www.senate.gov/legislative/schedule/floor_schedule.xml"
         return
-
     def get(node, key): return node.find(key).text
     year = int(get(dom, "year"))
     congress = int(get(dom, "congress"))

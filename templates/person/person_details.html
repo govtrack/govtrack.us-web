@@ -296,7 +296,7 @@ $(function() {
 
 				{% if r.is_territory %}
 					<p style="font-size: 90%; line-height: 125%">
-						Because {{r.state_name_article}} is a territory of the United States, and not a state, it has no senators or representatives in Congress. Instead it sends a delegate to the House of Representatives{% if r.state == "PR" %}, called the resident commissioner,{% endif %} with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.
+						Because {{r.state_name_article}} is a territory of the United States, and not a state, its representative in the House of Representatives is a delegate{% if r.state == "PR" %}, called the resident commissioner,{% endif %} with limited voting privileges &mdash; {{ person.lastname }} can vote in committee but not on the House floor, including not on the final passage of bills. Delegates have a marginalized role in Congress and their constituents are not represented in Congress in the same manner as most citizens.
 					</p>
 				{% elif r.is_historical_territory %}
 					<p>{{r.state_name}} was a territory of the United States sending a delegate, but not a representative and senators, to the Congress.</p>
@@ -571,6 +571,8 @@ $(function() {
 			{% endfor %}
 		</ul>
 		<p><a href="/congress/bills/browse?sponsor={{person.id}}">View All &raquo;</a></p>
+
+		{% if role and active_role and role.leadership_title %}<p>As {{role.leadership_title_full}}, {{person.lastname}} may be focused on {{person.his_her}} responsibilities other than introducing legislation, such as setting the chamber&rsquo;s agenda, uniting {{person.his_her}} party, and brokering deals.</p>{% endif %}
 	</section><!-- /sponsorship -->
 {% endif %}
 

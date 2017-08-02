@@ -1,3 +1,4 @@
+#;encoding=utf8
 """
 ``BillStatus`` - list of possible Bill statuses.
 """
@@ -11,30 +12,30 @@ class BillStatus(enum.Enum):
     introduced = enum.Item(1,
         'Introduced',
         xml_code='INTRODUCED',
-        search_help_text="Introduced but not yet referred to a committee.",
-        explanation="This is the first step in the legislative process.",
-        sort_order=(0,0))
-    referred = enum.Item(2,
-        'Referred to Committee',
-        xml_code='REFERRED',
-        search_help_text="Referred to a committee in the originating chamber.",
+        search_help_text="Introduced is the first step in the legislative process.",
         explanation="Bills and resolutions are referred to committees which debate the bill before possibly sending it on to the whole chamber.",
-        sort_order=(0,1))
+        sort_order=(0,0))
+    #referred = enum.Item(2,
+    #    'Referred to Committee',
+    #    xml_code='REFERRED',
+    #    search_help_text="Referred to a committee in the originating chamber.",
+    #    explanation="Bills and resolutions are referred to committees which debate the bill before possibly sending it on to the whole chamber.",
+    #    sort_order=(0,1))
     reported = enum.Item(3,
-        'Ordered Reported by Committee',
+        'Ordered Reported',
         xml_code='REPORTED',
-        search_help_text="Ordered reported by a committee in the originating chamber.",
+        search_help_text="Ordered reported by a committee to the originating chamber.",
         explanation="A committee has voted to issue a report to the full chamber recommending that the bill be considered further. Only about 1 in 4 bills are reported out of committee.",
         sort_order=(0,2))
     pass_over_house = enum.Item(4,
-        'Passed House',
+        'Passed House (Senate next)',
         xml_code='PASS_OVER:HOUSE',
         search_help_text="Passed the House, waiting for a Senate vote next.",
         explanation=lambda b : "The %s was passed in a vote in the House. It goes to the Senate next." % b.noun,
         next_action_in="senate",
         sort_order=(1,0))
     pass_over_senate = enum.Item(5,
-        'Passed Senate',
+        'Passed Senate (House next)',
         xml_code='PASS_OVER:SENATE',
         search_help_text="Passed the Senate, waiting for a House vote next.",
         explanation=lambda b : "The %s was passed in a vote in the Senate. It goes to the House next." % b.noun,
@@ -62,34 +63,34 @@ class BillStatus(enum.Enum):
         explanation="The concurrent resolution was passed by both chambers in identical form. A concurrent resolution is not signed by the president and does not carry the force of law.",
         sort_order=(3,1))
     passed_bill = enum.Item(9,
-        'Passed House & Senate',
+        'Passed House & Senate (President next)',
         xml_code='PASSED:BILL',
         search_help_text="The bill passed both chambers of Congress in identical form and goes on to the President for signing next.",
         explanation="The bill was passed by both chambers in identical form. It goes to the President next who may sign or veto the bill.",
         sort_order=(3,2))
     pass_back_house = enum.Item(10,
-        'Passed House with Changes',
+        'Passed House with Changes (back to Senate)',
         xml_code='PASS_BACK:HOUSE',
         search_help_text="The House passed the bill with changes and sent it back to the Senate.",
         explanation="The House passed the bill with changes not in the Senate version and sent it back to the Senate to approve the changes.",
         next_action_in="senate",
         sort_order=(2,0))
     pass_back_senate = enum.Item(11,
-        'Passed Senate with Changes',
+        'Passed Senate with Changes (back to House)',
         xml_code='PASS_BACK:SENATE',
         search_help_text="The Senate passed the bill with changes and sent it back to the House.",
         explanation="The Senate passed the bill with changes not in the House version and sent it back to the House to approve the changes.",
         next_action_in="house",
         sort_order=(2,1))
     conference_passed_house = enum.Item(30,
-        'Conference Report Agreed to by House',
+        'Conference Report Agreed to by House (Senate next)',
         xml_code='CONFERENCE:PASSED:HOUSE',
         search_help_text="The House approved a conference committee report to resolve differences. The Senate must also approve it.",
         explanation="A conference committee was formed, comprising members of both the House and Senate, to resolve the differences in how each chamber passed the bill. The House approved the committee's report proposing the final form of the bill for consideration in both chambers. The Senate must also approve the conference report.",
         next_action_in="senate",
         sort_order=(2,2))
     conference_passed_senate = enum.Item(31,
-        'Conference Report Agreed to by Senate',
+        'Conference Report Agreed to by Senate (House next)',
         xml_code='CONFERENCE:PASSED:SENATE',
         search_help_text="The Senate approved a conference committee report to resolve differences. The House must also approve it.",
         explanation="A conference committee was formed, comprising members of both the House and Senate, to resolve the differences in how each chamber passed the bill. The Senate approved the committee's report proposing the final form of the bill for consideration in both chambers. The House must also approve the conference report.",
@@ -238,9 +239,6 @@ class BillStatus(enum.Enum):
     # all final statuses
     final_status = tuple(list(final_status_enacted_bill) + list(final_status_passed_resolution) + list(final_status_failed))
 
-	# the statuses that are basically just introduction
-    introduced_statuses = (introduced, referred)
-
 def get_bill_status_string(is_current, status):
     # Returns a string with two %'s in it, one for the bill noun ("bill"/"resolution")
     # and one for the status date.
@@ -248,9 +246,7 @@ def get_bill_status_string(is_current, status):
     # Some status messages depend on whether the bill is current:
     if is_current:
         if status == "INTRODUCED":
-            status = "This %s is in the first stage of the legislative process. It was introduced into Congress on %s. It will typically be considered by committee next."
-        elif status == "REFERRED":
-            status = "This %s was assigned to a congressional committee on %s, which will consider it before possibly sending it on to the House or Senate as a whole."
+            status = "This %s is in the first stage of the legislative process. It was introduced into Congress on %s. It will typically be considered by committee next before it is possibly sent on to the House or Senate as a whole."
         elif status == "REPORTED":
             status = "The committees assigned to this %s sent it to the House or Senate as a whole for consideration on %s."
         elif status == "PASS_OVER:HOUSE":
@@ -281,7 +277,7 @@ def get_bill_status_string(is_current, status):
             status = "After a presidential veto of the %s, the Senate succeeded in an override on %s. It goes to the House next."
     
     else: # Bill is not current.
-        if status == "INTRODUCED" or status == "REFERRED" or status == "REPORTED":
+        if status == "INTRODUCED" or status == "REPORTED":
             status = "This %s was introduced on %s, in a previous session of Congress, but was not enacted."
         elif status == "PASS_OVER:HOUSE":
             status = "This %s was introduced in a previous session of Congress and was passed by the House on %s but was never passed by the Senate."
@@ -339,14 +335,12 @@ def get_bill_really_short_status_string(status):
     
     if status == "INTRODUCED":
         status = "%s was introduced %s."
-    elif status == "REFERRED":
-        status = "%s was referred to committee %s."
     elif status == "REPORTED":
-        status = "Committees approved %s %s."
+        status = u"Committees 🆗'd %s %s." # squared OK emoji
     elif status == "PASS_OVER:HOUSE":
-        status = "%s passed the House %s (Senate next)."
+        status = u"%s passed the House %s (→Senate)."
     elif status == "PASS_OVER:SENATE":
-        status = "%s passed the Senate %s (House next)."
+        status = u"%s passed the Senate %s (→House)."
     elif status == "PASSED:BILL":
         status = "%s passed the House and Senate %s."
     elif status == "PASS_BACK:HOUSE":

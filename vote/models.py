@@ -156,8 +156,9 @@ class Vote(models.Model):
 
         # Extract all voters.
         all_voters = self.get_voters()
+        all_options = list(self.options.all())
         voters_by_option = {}
-        for option in self.options.all():
+        for option in all_options:
             voters_by_option[option] = [x for x in all_voters if x.option == option]
         total_count = len(all_voters)
 
@@ -178,7 +179,7 @@ class Vote(models.Model):
         # For each option find party break down,
         # total vote count and percentage in total count
         details = []
-        for option in self.options.all():
+        for option in all_options:
             voters = voters_by_option.get(option, [])
             percent = round(len(voters) / float(total_count) * 100.0)
             party_stats = dict((x, 0) for x in all_parties)
@@ -348,6 +349,10 @@ class Vote(models.Model):
         except Http404:
             pass
         return False
+
+    def get_map_thumbnail_type_fast(self):
+        if self.chamber == CongressChamber.senate: return "thumbnail"
+        return "map"
 
 
 class VoteOption(models.Model):

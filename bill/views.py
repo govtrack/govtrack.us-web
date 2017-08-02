@@ -56,14 +56,6 @@ def get_related_bills(bill):
             related_bills.append({ "bill": rb.related_bill, "note": ("(%s)" % (rb.relation.title() if rb.relation != "unknown" else "Related")), "show_title": True })
     return related_bills
 
-def get_text_info(bill):
-    # bill text info and areas of law affected
-    from billtext import load_bill_text
-    try:
-        return load_bill_text(bill, None, mods_only=True, with_citations=True)
-    except IOError:
-        return None
-
 @anonymous_view
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
@@ -75,7 +67,7 @@ def bill_details(request, congress, type_slug, number):
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": bill.get_feed(),
-        "text_info": get_text_info(bill),
+        "text_info": bill.get_text_info(with_citations=True),
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
     }
 
@@ -152,7 +144,7 @@ def bill_summaries(request, congress, type_slug, number):
     return {
         "bill": bill,
         "congressdates": get_congress_dates(bill.congress),
-        "text_info": get_text_info(bill), # for the header tabs
+        "text_info": bill.get_text_info(with_citations=True), # for the header tabs
     }
 
 @anonymous_view
@@ -162,7 +154,7 @@ def bill_full_details(request, congress, type_slug, number):
     return {
         "bill": bill,
         "related": get_related_bills(bill),
-        "text_info": get_text_info(bill), # for the header tabs
+        "text_info": bill.get_text_info(with_citations=True), # for the header tabs
     }
 
 @anonymous_view
@@ -175,13 +167,6 @@ def bill_widget(request, congress, type_slug, number):
     sponsor_name = None if not bill.sponsor else \
         get_person_name(bill.sponsor, firstname_position='before', show_suffix=True)
 
-    def get_text_info():
-        from billtext import load_bill_text
-        try:
-            return load_bill_text(bill, None, mods_only=True)
-        except IOError:
-            return None
-
     return {
         "SITE_ROOT_URL": settings.SITE_ROOT_URL,
         "bill": bill,
@@ -190,7 +175,7 @@ def bill_widget(request, congress, type_slug, number):
         "sponsor_name": sponsor_name,
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
-        "text": get_text_info,
+        "text": bill.get_text_info(),
     }
 
 @anonymous_view
@@ -485,8 +470,8 @@ bill_status_groups = [
         "bills", " that were vetoed and the veto was not overridden by Congress", " that were vetoed and the veto was not overridden by Congress",
         (BillStatus.prov_kill_veto, BillStatus.override_pass_over_house, BillStatus.override_pass_over_senate, BillStatus.vetoed_pocket, BillStatus.vetoed_override_fail_originating_house, BillStatus.vetoed_override_fail_originating_senate, BillStatus.vetoed_override_fail_second_house, BillStatus.vetoed_override_fail_second_senate)), # 8
     ("Other Legislation",
-        "bills and resolutions", " that have been introduced, referred to committee, or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
-        (BillStatus.introduced, BillStatus.referred, BillStatus.reported)), # 3
+        "bills and resolutions", " that have been introduced or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
+        (BillStatus.introduced, BillStatus.reported)), # 3
 ]
 
 def load_bill_status_qs(statuses, congress=CURRENT_CONGRESS):
@@ -538,7 +523,7 @@ def bill_docket(request):
             "top_tracked_bills": top_bills,
 
             "subjects": subject_choices(),
-            "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.referred, BillStatus.reported),
+            "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.reported),
         }
 
     ret = cache.get("bill_docket_info")

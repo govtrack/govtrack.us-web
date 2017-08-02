@@ -15,7 +15,7 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" integrity="sha256-VBrFgheoreGl4pKmWgZh3J23pJrhNlSUOBek+8Z2Gv0=" crossorigin="anonymous">
-		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20170526" />
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20170713" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
@@ -85,6 +85,7 @@
 	            <li role="separator" class="divider"></li>
 				<li><a href="/how-a-bill-becomes-a-law">How does a bill become a law?</a></li>
 				<li><a href="/what-is-the-law">What is the law?</a></li>
+				<li><a href="/congressional-procedures">Congressional Procedures</a></li>
 				<li><a href="/reading-list">Books We Recommend</a></li>
 	          </ul>
 	        </li>
@@ -135,6 +136,16 @@
 					<div class="text"><input type="text" placeholder="Search" id="master_search_q" name="q"/></div>
 					<input class="btn-search" type="submit" value="Search" />
 				</form>
+	        </li>
+	        <li>
+	        	<a href="https://www.patreon.com/bePatron?c=350193" style="background-color: #F96854; margin-left: 20px;">
+	        		Support Us
+	        	</a>
+	        </li>
+	        <li>
+	        	<a href="#" onclick="$('#message_us_modal').modal(); return false;" class="nav-item-image" title="Messenger CallBot">
+	        		<img src="{{STATIC_URL}}images/facebook_messenger_code.png">
+	        	</a>
 	        </li>
 	      </ul>
 	    </div><!-- /.navbar-collapse -->
@@ -216,7 +227,7 @@
 						<li><a href="/">Home</a></li>
 						<li><a href="/start">Start Tracking</a></li>
 						<li><a href="/about">About GovTrack</a></li>
-						<li><a href="/developers">Data/API</a></li>
+						<li><a href="/about-our-data">About the Data</a></li>
 						<li><a href="/legal">Privacy &amp; Legal</a></li>
 						{% if not user.is_authenticated %}
 						<li><a href="/accounts/login">Log in</a></li>
@@ -234,6 +245,7 @@
 						<li><a href="https://www.facebook.com/govtrack/"><i class="fa fa-facebook fa-fw"></i><span>Facebook</span></a></li>
 						<li><a href="http://twitter.com/govtrack"><i class="fa fa-twitter fa-fw"></i><span>Twitter</span></a></li>
 						<li><a href="https://medium.com/govtrack-insider"><i class="fa fa-medium fa-fw"></i><span>Medium</span></a></li>
+						<li><a href="https://www.patreon.com/govtrack"><i class="fa fa-usd fa-fw"></i><span>Patreon</span></a></li>
 						<li><a href="/blog"><i class="fa fa-quote-right fa-fw"></i><span>Blog</span></a></li>
 						<li><a href="https://github.com/govtrack/govtrack.us-web/commits/master"><i class="fa fa-github fa-fw"></i><span>Code</span></a></li>
 					</ul>
@@ -244,7 +256,7 @@
 
 					<p><a href="/about">About the Site</a> | <a href="/contact">Contact Us</a></p>
 
-					<p>You are encouraged to reuse any material on this site. GovTrack supports other Congress-tracking websites through our <a href="/developers">open data</a>.</p>
+					<p>You are encouraged to reuse any material on this site. Developers/journalists/researchers: See our <a href="/about-our-data">open bulk data sources</a>.</p>
 					
 					{% block footer_extra %}{% endblock %}
 				</section>
@@ -315,6 +327,29 @@
 
 	{% block extra_js %}{% endblock %}
 	{% block body_scripts %}{% endblock %}
+
+<!-- Quantcast Tag -->
+<script type="text/javascript">
+var _qevents = _qevents || [];
+(function() {
+var elem = document.createElement('script');
+elem.src = (document.location.protocol == "https:" ? "https://secure" : "http://edge") + ".quantserve.com/quant.js";
+elem.async = true;
+elem.type = "text/javascript";
+var scpt = document.getElementsByTagName('script')[0];
+scpt.parentNode.insertBefore(elem, scpt);
+})();
+_qevents.push({
+qacct:"p-NscxJMTcyb6nu"
+});
+</script>
+<noscript>
+<div style="display:none;">
+<img src="//pixel.quantserve.com/pixel/p-NscxJMTcyb6nu.gif" border="0" height="1" width="1" alt="Quantcast"/>
+</div>
+</noscript>
+<!-- End Quantcast tag -->
+
 </body>
 </html>
 {% endwith %}

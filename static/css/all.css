@@ -213,6 +213,17 @@ blockquote {
 		#masthead input {
 			color: black;
 		}
+		.nav-item-image img {
+			padding-top: 1px;
+			width: 49px;
+			height: 49px;
+		}
+		@media screen and (min-width: 768px) {
+			#masthead .nav-item-image {
+				 padding-top: 0;
+				 padding-bottom: 0;
+			}
+		}
 
 #logo {
 	display: block;
@@ -544,7 +555,7 @@ aside .download-links { padding: 31px 0 0 }
 
 			.tracker_widget h3 {
 				font-size: 1em;
-				color: #40a4bd;
+				color: #37C;
 				text-align: center;
 				margin: 0 0 .5em 0;
 				text-transform: none;
