@@ -20,11 +20,11 @@
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:title" content="{{bill.title}}">
 	{% if subtitle %}<meta name="twitter:description" content="{{subtitle}}">{% endif %}
-	<meta name="twitter:label1" value="Current Status">
-	<meta name="twitter:data1" value="{{bill.get_current_status_display}}">
+	<meta name="twitter:label1" content="Current Status">
+	<meta name="twitter:data1" content="{{bill.get_current_status_display}}">
 	{% if bill.sponsor %}
-		<meta name="twitter:label2" value="Sponsor">
-		<meta name="twitter:data2" value="{{bill.sponsor.name}}">
+		<meta name="twitter:label2" content="Sponsor">
+		<meta name="twitter:data2" content="{{bill.sponsor.name}}">
 	{% endif %}
 {% endblock %}
 
@@ -629,7 +629,7 @@
 					<tr class="status-item {% if not item.date or item.different_congress %}pending{% endif %} {% if item.bill %}related-bill{% endif %}">
 						<td class="date {% if forloop.last %}last{% endif %} {% if item.last_occurred or not item.date or item.different_congress %}ghosted{% endif %}">
 							<div class="wrapper">
-								{% if item.date %}<nobr>{{item.date|date:"DATE_FORMAT"}}</nobr>{% endif %}
+								{% if item.date %}<span class="nowrap">{{item.date|date:"DATE_FORMAT"}}</span>{% else %}Pending{% endif %}
 							</div>
 						</td>
 						<td>
@@ -780,7 +780,7 @@
 {% with bill.get_prognosis as p %}
 {% if p %}
 <div id="prognosis-details" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="prognosis-details-title" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
         
@@ -56,6 +56,8 @@
     <!--[if gt IE 7]><!-->
 
 	<div id="bodybody">
+
+	<div id="skiptocontent"><a href="#maincontent">skip to main content</a></div>
 
 	<div id="masthead">
 	<nav class="navbar">
@@ -194,7 +196,7 @@
 	{% endblock %}
 
 	{% block body_with_container %}
-		<div class="container">
+		<div id="maincontent" class="container">
 			<div id="content">
 				{% block body %}
 				{% endblock %}
@@ -248,17 +250,16 @@
 				</section>
 
 			</div>
-			</p>
+			</div>
 		</footer>
 
-	</div><!-- /wrapper -->
 
     <div id="error_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="errorModalTitle" aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="errorModalTitle"> </h4>
+            <h4 class="modal-title" id="errorModalTitle">[error message]</h4>
           </div>
           <div class="modal-body">
           </div>
