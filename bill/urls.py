@@ -21,7 +21,3 @@ urlpatterns = patterns('bill.views',
     url(r'^(\d+)/([a-z]+)(\d+)/(thumbnail|_text_image)$', 'bill_text_image'),
 )
 
-urlpatterns += patterns('',
-    url(r'^real_or_not', 'bill.bill_or_not.bill_or_not'),
-    url(r'^_ajax/bill_or_not', 'bill.bill_or_not.load_game'),
-)
