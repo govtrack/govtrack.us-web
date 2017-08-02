@@ -55,7 +55,7 @@ Vagrant.configure(2) do |config|
     # http://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed
 
     # Initialize the database.
-    ./manage.py syncdb --noinput
+    ./manage.py migrate --noinput
 
     # Load some legislative data
     ############################
