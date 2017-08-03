@@ -97,7 +97,6 @@ INSTALLED_APPS = (
 
     'haystack',
     'django_wysiwyg',
-    'django_twilio',
     'django_extensions',
     'htmlemailer',
     
