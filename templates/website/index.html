@@ -25,7 +25,6 @@
 	font-weight: bold;
 }
 #sitenewscontainer.navbar-default, #sitenewscontainer.navbar-default a {
-	background-color: rgba(0,0,0,.33);
 	border: none;
 }
 
@@ -119,7 +118,7 @@ article {
 	<div class="action-panel">
 
 	<form action="#" onsubmit="return do_address_form();" class="form-inline">
-      <label for="address" style="display: block;">Enter your address to find your representative, and senators and then get alerts:</label>
+      <label for="address" style="display: block;">Enter your address to find your representative and senators, and then get alerts.</label>
 	  <div class="form-group">
 	    <input type="text" class="form-control" id="address" placeholder="415 N. Main St., Hannibal, Missouri">
 	  </div>
@@ -135,7 +134,7 @@ article {
 	</form>
 
 	<form action="#" onsubmit="return do_subject_form();" class="form-inline">
-      <label for="bill-subject-area" style="display: block;">Find legislation that affects you:</label>
+      <label for="bill-subject-area" style="display: block;">Find legislation that affects you by selecting a subject area.</label>
 	  <div class="form-group">
 	    <select id="bill-subject-area" class="form-control" onchange="$(this).parents('form').submit();">
 	    	<option value="">Select Issue Area</option>
