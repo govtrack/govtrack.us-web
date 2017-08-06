@@ -17,13 +17,16 @@ def run_analysis_for_president(president, date_range):
 	start_date = datetime.strptime(date_range[0], "%Y-%m-%d").date()
 	end_date = datetime.strptime(date_range[1], "%Y-%m-%d").date()
 
-	# limit to first year
-	end_date = min(start_date+timedelta(days=365), end_date)
+	# limit to now, for the current president
+	end_date = min(end_date, datetime.now().date())
+
+	# limit to a shorter period than a whole presidency so this computes faster
+	end_date = min(start_date+timedelta(days=200), end_date)
 
 	# if we're measuring presidential activity, the date of signing could be outside of the Congress
 	enacted_bills = Bill.objects.filter(
 		current_status__in=BillStatus.final_status_enacted_bill,
-		sliplawpubpriv="PUB", # questionable
+		#sliplawpubpriv="PUB", # questionable
 		current_status_date__gte=start_date,
 		current_status_date__lte=end_date
 		)\
@@ -50,12 +53,16 @@ def run_analysis_for_president(president, date_range):
 			# the Statutes at Large. We can't do this on modern bills
 			# where the text came from GPO plain text format.
 			if b.congress < 103:
-				pages = len(text.split("\n=============================================\n"))
+				pages = len([pgtext for pgtext in text.split("\n=============================================\n") if pgtext.strip() != ""])
 			else:
 				print b.id, b, e
 				raise ValueError("page date missing")
 
 		words = len(re.split(r"\s+", text))
+
+		################ EEK
+		#if pages == 1: continue
+		################ EEK
 
 		rel_date = (b.current_status_date - start_date).days
 		rec = by_day.setdefault(rel_date, { "bills": 0, "pages": 0, "words": 0 } )
@@ -69,7 +76,7 @@ def run_analysis_for_president(president, date_range):
 	bills = 0
 	pages = 0
 	words = 0
-	for rel_date in range(max(by_day)+1):
+	for rel_date in range((end_date-start_date).days+1):
 		if rel_date in by_day:
 			bills += by_day[rel_date]["bills"]
 			pages += by_day[rel_date]["pages"]
@@ -81,14 +88,15 @@ def run_analysis_for_president(president, date_range):
 stats = { }
 columns = []
 
+# Only presidents whose first term began at the start of a Congress.
 run_analysis_for_president("Eisenhower", ("1953-01-20","1961-01-19"))
 run_analysis_for_president("Kennedy", ("1961-01-20","1963-11-22"))
 run_analysis_for_president("Nixon", ("1969-01-20","1974-08-09"))
 run_analysis_for_president("Carter", ("1977-01-20","1981-01-19"))
 run_analysis_for_president("Reagan", ("1981-01-20","1989-01-19"))
-run_analysis_for_president("Bush1", ("1989-01-20","1993-01-19"))
+run_analysis_for_president("Bush 41", ("1989-01-20","1993-01-19"))
 run_analysis_for_president("Clinton", ("1993-01-20","2001-01-19"))
-run_analysis_for_president("Bush2", ("2001-01-20","2009-01-19"))
+run_analysis_for_president("Bush 43", ("2001-01-20","2009-01-19"))
 run_analysis_for_president("Obama", ("2009-01-20","2017-01-19"))
 run_analysis_for_president("Trump", ("2017-01-20","2018-01-19"))
 
