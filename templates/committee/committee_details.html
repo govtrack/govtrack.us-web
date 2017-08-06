@@ -70,6 +70,7 @@
 			{% if party_counts|length > 0 and committee.code != "HSSO" %}
 			The majority party ensures it has a majority on every committee.
 			{% endif %}
+			</small></p>
 			
 			{% if members|length == 0 %}
 			<p>The membership of this committee is not yet available.</p>
@@ -93,6 +94,9 @@
 		<li role="presentation" class="active"><a href="#members" aria-controls="members" role="tab" data-toggle="tab">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
 		{% endif %}
 		<li role="presentation" {% if members|length == 0 %}class="active"{% endif %}><a href="#activity" aria-controls="activity" role="tab" data-toggle="tab">Bills</a></li>
+        {% if recent_reports|length > 0 %}
+			<li role="presentation"><a href="#reports" aria-controls="reports" role="tab" data-toggle="tab">Reports</a></li>
+        {% endif %}
 		{% if subcommittees %}<li role="presentation"><a href="#subcommittees" aria-controls="subcommittees" role="tab" data-toggle="tab">Subcommittees</a></li>{% endif %}
 	</ul>
 
@@ -170,9 +174,20 @@
 					<p>No bills have been assigned to this {% if parent %}sub{% endif %}committee.</p>
 				{% endif %}
 		</div>
+
+		<div id="reports" class="tab-pane">
+			<table class="table">
+			<thead><tr><th style="min-width: 9em">Date</th> <th>PDF</th> <th>Bill</th></tr></thead>
+			<tbody>
+				{% for item in recent_reports %}
+					<tr><td>{{item.docdate|date}}</td> <td><a href="{{item.gpo_pdf_url}}">PDF</a></td> <td><a href="{{item.bill.get_absolute_url}}">{{item.bill.title}}</a></td></tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		</div>
 		
 		{% if subcommittees %}
-		<div id="subcommittees" class="tab-pane active">
+		<div id="subcommittees" class="tab-pane">
 				<ul class="bullets">
 					{% for item in subcommittees %}
 					<li><a href="{{ item.get_absolute_url }}">{{ item.name_no_article }}</a></li>

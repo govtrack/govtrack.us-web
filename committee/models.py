@@ -142,6 +142,15 @@ class Committee(models.Model):
                 }
             }
 
+    def get_recent_reports(self):
+        reports = []
+        for bill in self.bills.exclude(committee_reports=None):
+            for rpt in bill.get_committee_reports():
+                if rpt["committee_code"].upper().replace("00", "") != self.code: continue
+                rpt["bill"] = bill
+                reports.append(rpt)
+        reports.sort(key = lambda rpt : rpt["docdate"], reverse=True)
+        return reports
 
 class CommitteeMemberRole(enum.Enum):
     exofficio = enum.Item(1, 'Ex Officio')

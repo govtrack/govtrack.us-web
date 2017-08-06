@@ -1011,50 +1011,26 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
 
             # Bring in committee reports.
-            for rpt in (self.committee_reports or []):
-                # Parse the report citation.
-                m = re.match(r"(S|H|Ex). Rept. (\d+)-(\d+)$", rpt)
-                if not m:
-                    continue
-                report_type, report_congress, report_number = m.groups()
-                report_type = report_type.lower() + "rpt"
-                rpt_mods = "../scripts/congress-pdf-config/data/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
-
-                # Load the report's MODS metadata, if we have it.
-                try:
-                    import lxml.etree
-                    rpt_mods = lxml.etree.parse(rpt_mods)
-                    ns = { "mods": "http://www.loc.gov/mods/v3" }
-                    docdate = rpt_mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
-                    docdate = datetime.date(*(int(d) for d in docdate.split("-")))
-                    committee_name = \
-                        { "H": "House", "S": "Senate" }[ rpt_mods.xpath("string(mods:extension/mods:congCommittee/@chamber)", namespaces=ns) ] \
-                      + " " + rpt_mods.xpath("string(mods:extension/mods:congCommittee/mods:name[@type='authority-standard'])", namespaces=ns) # authority-short gives short committee name like Appropriations
-                    gpo_pdf_url = rpt_mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
-                    numpages = rpt_mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
-                    if numpages: numpages = re.sub(r" p\.$", " pages", numpages)
-                except:
-                    continue
-
+            for rpt in self.get_committee_reports():
                 # Attach to an existing Reported event on the same date.
                 # TODO: But this could be the wrong chamber if multiple reports on the same date? Probably
                 # should check that the chamber matches the bill's originating chamber.
                 for i, event in enumerate(ret):
                     if event["key"] == "reported" \
-                       and docdate == as_date(event["date"]) \
+                       and rpt["docdate"] == as_date(event["date"]) \
                        and "committee_report_link" not in event:
-                        event["explanation"] += " The %s issued the report which may provide insight into the purpose of the legislation." % committee_name
-                        event["committee_report_link"] = gpo_pdf_url
+                        event["explanation"] += " The %s issued the report which may provide insight into the purpose of the legislation." % rpt["committee_name"]
+                        event["committee_report_link"] = rpt["gpo_pdf_url"]
                         break
                 else:
                     # Add a new event.
                     ret.append({
                         "key": "committee_report",
-                        "label": "Reported by " + committee_name,
+                        "label": "Reported by " + rpt["committee_name"],
                         "explanation": "A committee issued a report on the bill, which often provides helpful explanatory background on the issue addressed by the bill and the bill's intentions.",
-                        "date": docdate,
+                        "date": rpt["docdate"],
                         "end_of_day": True,
-                        "committee_report_link": gpo_pdf_url,
+                        "committee_report_link": rpt["gpo_pdf_url"],
                     })
 
             # Bring in major events from bills with textual similarity.
@@ -1389,6 +1365,45 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 for outcome in positions:
                     m.user_positions[outcome.owner_key] = positions[outcome]
         return m
+
+    def get_committee_reports(self):
+        import re, lxml.etree
+        for rpt in (self.committee_reports or []):
+            # Parse the report citation.
+            m = re.match(r"(S|H|Ex). Rept. (\d+)-(\d+)$", rpt)
+            if not m:
+                continue
+            report_type, report_congress, report_number = m.groups()
+            report_type = report_type.lower() + "rpt"
+            rpt_mods = "../scripts/congress-pdf-config/data/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
+
+            # Load the report's MODS metadata, if we have it.
+            try:
+                rpt_mods = lxml.etree.parse(rpt_mods)
+            except:
+                continue
+
+            ns = { "mods": "http://www.loc.gov/mods/v3" }
+            docdate = rpt_mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
+            docdate = datetime.date(*(int(d) for d in docdate.split("-")))
+            try:
+                committee_name = \
+                    { "H": "House", "S": "Senate" }[ rpt_mods.xpath("string(mods:extension/mods:congCommittee/@chamber)", namespaces=ns) ] \
+                    + " " + rpt_mods.xpath("string(mods:extension/mods:congCommittee/mods:name[@type='authority-standard'])", namespaces=ns) # authority-short gives short committee name like Appropriations
+            except KeyError:
+                continue
+            committee_code = rpt_mods.xpath("string(mods:extension/mods:congCommittee/@authorityId)", namespaces=ns)
+            gpo_pdf_url = rpt_mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
+            numpages = rpt_mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
+            if numpages: numpages = re.sub(r" p\.$", " pages", numpages)
+
+            yield {
+                "docdate": docdate,
+                "committee_code": committee_code,
+                "committee_name": committee_name,
+                "gpo_pdf_url": gpo_pdf_url,
+                "numpages": numpages,
+            }
 
     def get_gop_summary(self):
         import urllib, StringIO
