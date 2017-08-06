@@ -1,4 +1,4 @@
-rsync -avz --delete --delete-excluded govtrack.us::govtrackdata data \
+rsync -avz --delete --delete-excluded govtrack.us::govtrack_bootstrap_data data \
 	--include "us" \
 	--include "us/liv.xml" \
 	--include "us/liv111.xml" \
