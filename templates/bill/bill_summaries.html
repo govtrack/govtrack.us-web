@@ -146,5 +146,6 @@ function add_summary(name, href, first_summary) {
 for (var i = 0; i < summaries.length; i++) {
 	add_summary(summaries[i][0], summaries[i][1], i==0);
 }
+show_position(the_page.position); // Might be able to DRY up a bit moving this from specific bill subpages to bill_header
 </script>
 {% endblock %}

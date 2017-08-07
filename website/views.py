@@ -552,6 +552,69 @@ def medium_post_redirector(request, id):
     post = get_object_or_404(MediumPost, id=id)
     return HttpResponseRedirect(post.url)
 
+#Helper function for getting starter position information. 
+def __get_position(request):
+     from website.models import Position
+     p, isnew = Position.objects.get_or_create(
+         #Double-check requested: Does subject need additional cleaning? Doesn't have it with emoji.
+         subject=request.POST["subject"],
+         user=request.user if request.user.is_authenticated() else None,
+         anon_session_key=Position.get_session_key(request) if not request.user.is_authenticated() else None,
+     )
+     if isnew:
+         p.extra = {
+             "ip": request.META['REMOTE_ADDR'],
+         }
+     return p
+
+#Helper function for saving updated position information.
+def __update_position(p, updatedField):
+     from website.models import Position
+     if ((not p.position) and (not p.reasons)):
+         # no data, delete record.
+         # Could use return values (num_deleted, types_deleted) for confirmation.
+         p.delete()
+         res = { "status":"success", "position_cleared":true, "stored_info":"" }
+     else:
+         p.save()
+         id_after_storage = p.id
+         res = { "status":"success", "id":id_after_storage , "stored_info":getattr(p, updatedField)}
+     return res
+
+def change_position(request):
+    from website.models import Position
+    res = { "status": "error" }
+    if request.method == "POST" \
+        and request.POST.get("subject") \
+        and request.POST.get("position", "") in ("-3", "-2", "-1", "0", "1", "2", "3", "r"):
+
+        p = __get_position(request)
+
+        if( request.POST.get("position") == "r"):
+            p.position = None
+        else:
+            p.position = request.POST.get("position");
+
+        res = __update_position(p, "position");
+
+    return HttpResponse(json.dumps(res), content_type="application/json")
+
+def change_reasons(request):
+    from website.models import Position
+    res = { "status": "error" }
+    if request.method == "POST" \
+        and request.POST.get("subject") \
+        and "reasons" in request.POST:
+
+        p = __get_position(request)
+
+        #Double-check requested: Does this string need additional cleaning?
+        p.reasons = request.POST.get("reasons")
+
+        res = __update_position(p, "reasons");
+
+    return HttpResponse(json.dumps(res), content_type="application/json")
+
 def add_remove_reaction(request):
     from website.models import Reaction
     res = { "status": "error" }

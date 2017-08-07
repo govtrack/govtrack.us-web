@@ -176,7 +176,25 @@ def bill_details_user_view(request, congress, type_slug, number):
     # stable sort by count so that zeroes are in our preferred order
     ret["reactions"] = sorted(ret["reactions"], key = lambda x : -x["count"])
 
+    ret["position"] = get_user_bill_position_info(request, bill)
+
     return ret
+
+def get_user_bill_position_info(request, bill):
+    # user registered positions - needs to come out of the details-only view.
+    # import json #imported with emoji above
+    from website.models import Position
+    position_subject = "bill:" + bill.congressproject_id
+    pos = [ ]
+    p = Position.get_for_user(request).filter(subject=position_subject).first()
+    if p:
+        positionVal = p.position
+        reasons = p.reasons #Double-check requested: Does this need additional cleaning?
+    else:
+        positionVal = ""
+        reasons = ""
+    pos.append({"positionVal": positionVal, "reasons":reasons})
+    return pos
 
 @anonymous_view
 @render_to("bill/bill_summaries.html")
@@ -188,6 +206,14 @@ def bill_summaries(request, congress, type_slug, number):
         "text_info": get_text_info(bill), # for the header tabs
     }
 
+#Might be able DRY these user views up by moving this to header, but not for all pages.
+@user_view_for(bill_summaries)
+def bill_summaries_user_view(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    ret = { }
+    ret["position"] = get_user_bill_position_info(request, bill)
+    return ret
+
 @anonymous_view
 @render_to("bill/bill_full_details.html")
 def bill_full_details(request, congress, type_slug, number):
@@ -197,6 +223,13 @@ def bill_full_details(request, congress, type_slug, number):
         "related": get_related_bills(bill),
         "text_info": get_text_info(bill), # for the header tabs
     }
+
+@user_view_for(bill_full_details)
+def bill_full_details_user_view(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    ret = { }
+    ret["position"] = get_user_bill_position_info(request, bill)
+    return ret
 
 @anonymous_view
 @render_to("bill/bill_widget.html")
@@ -328,6 +361,13 @@ def bill_text(request, congress, type_slug, number, version=None):
         "days_old": (datetime.datetime.now().date() - bill.current_status_date).days,
         "is_on_bill_text_page": True, # for the header tabs
     }
+
+@user_view_for(bill_text)
+def bill_text_user_view(request, congress, type_slug, number, version=None):
+    bill = load_bill_from_url(congress, type_slug, number)
+    ret = { }
+    ret["position"] = get_user_bill_position_info(request, bill)
+    return ret
 
 @anonymous_view
 @json_response

@@ -21,6 +21,340 @@
 	<span class="other" style="display: none"> </span>
 </div>
 
+<div class="LikertHost">
+    <table class="LabeledLikertFrame"><tr>
+	<td>
+		<span class="outsideLabel rightAlign">Oppose</span>
+	</td>
+	<td>
+		<div class="LikertFrame">
+			<div class="negSide"><span class="LikertItemSideBarLabel">JavaScript</span></div>
+			<div class="posSide"><span class="LikertItemSideBarLabel">required</span></div>
+			<div class="valueHovers">
+			        <div class="val" data-value="-3" title="Strongly oppose"><div class="marker"></div>
+			        </div><div class="val" data-value="-2" title="Moderately oppose"><div class="marker"></div>
+			        </div><div class="val" data-value="-1" title="Slightly oppose"><div class="marker"></div>
+			        </div><div class="val" data-value="0"  title="Neither support nor oppose"><div class="marker"></div>
+			        </div><div class="val" data-value="1"  title="Slightly support"><div class="marker"></div>
+			        </div><div class="val" data-value="2"  title="Moderately support"><div class="marker"></div>
+			        </div><div class="val" data-value="3"  title="Strongly support"><div class="marker"></div>
+			        </div>
+			</div>
+		</div>
+	</td>
+	<td>
+		<span class="outsideLabel">Support</span>
+	</td>
+    </tr></table>
+    <textarea class="whybox" placeholder="Notes on why I oppose or support this bill." title="Notes on why I oppose or support this bill."></textarea>
+</div>
+<script>
+//After any needed changes, this JS should be separated out.
+window.onload = doOnLoad();
+function doOnLoad() {
+    hideJSReqdNotice();
+    addListeners();
+}
+function hideJSReqdNotice() {
+  var sideBarLabels = document.querySelectorAll("span.LikertItemSideBarLabel");
+  if (sideBarLabels.length>=1) {
+     for(var i = 0; i<sideBarLabels.length; i++) {
+         sideBarLabels[i].innerHTML = "";
+     }
+  }
+  return;
+}
+function addListeners() {
+  var valBoxes = document.querySelectorAll("div.valueHovers div.val");
+  for (var i = 0; i<valBoxes.length; i++) {
+      valBoxes[i].addEventListener("click",valClick);
+  }
+  var reasonBox = document.querySelector("textarea.whybox");
+  if (reasonBox != null) {
+	reasonBox.addEventListener("input",changeReasons);
+  } else {
+	console.log("Could not find box for entry of reasons.");
+  }
+}
+
+function valClick(event) {
+    //IE compatibility
+    event = event || window.event;
+    var target = event.target || event.srcElement;
+
+    //up-iteration to get parent div inspired by http://stackoverflow.com/a/29223563/798371
+    while (target) {
+      if (target instanceof HTMLDivElement) {
+        break;
+      }
+      target = target.parentNode;
+    }
+   storeVal(target);
+}
+function storeVal(clickedElement) {
+    //up-iteration to get parent div
+    var parentDiv = clickedElement;
+    while (parentDiv) {
+        if (parentDiv instanceof HTMLDivElement && parentDiv.classList.contains("val")) {
+          break;
+        }
+        parentDiv = parentDiv.parentNode;
+    }
+    if (parentDiv.classList.contains("valActive")) {
+        parentDiv.classList.remove("valActive");
+        ajaxPositionVal("r");
+    } else {
+        var setDiv = parentDiv.parentNode;
+        while (setDiv) {
+          if (setDiv instanceof HTMLDivElement && setDiv.classList.contains("valueHovers")) {
+            break;
+          }
+          setDiv = setDiv.parentNode;
+        }
+        setClassToOneVal(setDiv, "valActive", parentDiv); //Set b/c "saving" might get cleared later if there's an error
+        setClassToOneVal(setDiv, "saving", parentDiv);
+        ajaxPositionVal(setDiv, parentDiv);
+    }
+}
+function setClassToOneVal(setDiv, classToSet, elementToSet) {
+   //First, clear out any that have this class
+       var valsWithClass = setDiv.querySelectorAll("div."+classToSet);
+       for (var i = 0; i<valsWithClass.length; i++) {
+           if(classToSet=="saving") {
+		removeSavingMessages(valsWithClass[i]);
+	    } else if (classToSet=="saved") {
+              removeSavedMessages(valsWithClass[i]);
+	    } else {
+              valsWithClass[i].classList.remove(classToSet);
+	    }
+       }
+
+   //Then, set the class on this one element, if any
+       if(elementToSet != null) {
+           if(classToSet=="saving") {
+		addSavingMessages(elementToSet);
+	    } else if (classToSet=="saved") {
+              addSavedMessages(elementToSet);
+	    } else {
+              elementToSet.classList.add(classToSet);
+	    }
+       }
+}
+
+function changeReasons(event) {
+    //IE compatibility:
+    event = event || window.event;
+    var target = event.target || event.srcElement;
+    storeReasons(target);
+}
+function storeReasons(changedElement) {
+    addSavingMessages(changedElement);
+    ajaxPositionReasons(changedElement);
+}
+
+function ajaxPositionReasons(changedElement) {
+     $.ajax({
+		url: "{% url 'reasons' %}",
+		method: "POST",
+		data: {
+		   subject: "bill:{{bill.congressproject_id|escapejs}}",
+		   reasons: changedElement.value
+		},
+		success: function(dataFromServer) {
+		   if(dataFromServer["stored_info"]==changedElement.value) {
+                      removeSavingMessages(changedElement);
+                      addSavedMessages(changedElement);
+                 }
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+		   logAjaxError(jqXHR, textStatus, errorThrown);
+		   removeSavingMessages(changedElement);
+              }
+	})
+	return false;
+}
+function ajaxPositionVal(setDiv, valDiv) {
+     var positionVal = parseInt(valDiv.getAttribute("data-value"));
+     $.ajax({
+		url: "{% url 'position' %}",
+		method: "POST",
+		data: {
+		   subject: "bill:{{bill.congressproject_id|escapejs}}",
+		   position: positionVal
+		},
+		success: function() {
+		   setClassToOneVal(setDiv, "saving", null);
+		   setClassToOneVal(setDiv, "saved", valDiv);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+		   logAjaxError(jqXHR, textStatus, errorThrown);
+		   setClassToOneVal(setDiv, "saving", null);
+              }
+	})
+	return false;
+}
+function logAjaxError(jqXHR, textStatus, errorThrown) {
+	console.log("AJAX failed with status "+textStatus+". Error thrown: "+errorThrown+
+                   ". Server status: "+jqXHR.status+"; response text: "+jqXHR.responseText);
+}
+
+var SAVING_STRING = " (saving)";
+var SAVED_STRING = " (saved)";
+function addSavingMessages(elementToChange) {
+   elementToChange.classList.add("saving");
+   addToTitle(elementToChange, SAVING_STRING);
+}
+function removeSavingMessages(elementToChange) {
+   elementToChange.classList.remove("saving");
+   stripFromTitle(elementToChange, SAVING_STRING);
+}
+function addSavedMessages(elementToChange) {
+   elementToChange.classList.add("saved");
+   addToTitle(elementToChange, SAVED_STRING);
+}
+function removeSavedMessages(elementToChange) {
+   elementToChange.classList.remove("saved");
+   stripFromTitle(elementToChange, SAVED_STRING);
+}
+function stringEndsWith(long, short) {//returns boolean
+   return ((long.substring(long.length-short.length))===short);
+}
+function titleEndsWith(elementToTest, possibleSuffix) {
+   return stringEndsWith(elementToTest.title, possibleSuffix);
+}
+function stripFromTitle(elementToChange, stringToStrip) {//Removes string from end of title, if present.
+   if(titleEndsWith(elementToChange, stringToStrip)) {
+        elementToChange.title = elementToChange.title.substring(0,elementToChange.title.length-stringToStrip.length);
+   }
+}
+function addToTitle(elementToChange, stringToAdd) { //Adds string to end of title, if not present.
+   if(!titleEndsWith(elementToChange, stringToAdd)) {
+        elementToChange.title = elementToChange.title + stringToAdd;
+   }
+}
+
+//Used for loading in stored position data.
+function show_position(position) {
+   if((position[0]["positionVal"] != null) && (position[0]["positionVal"] != "")) {
+        var selectionString = "div.valueHovers div.val[data-value='"+position[0]["positionVal"]+"']";
+	 valueDiv = document.querySelector(selectionString);
+	 valueDiv.classList.add("valActive");
+	 addSavedMessages(valueDiv)
+    }
+
+    reasonsBox = document.querySelector("textarea.whybox");
+    if(position[0]["reasons"]) {
+       reasonsBox.value = (position[0]["reasons"]);
+       addSavedMessages(reasonsBox);
+    }
+}
+
+</script>
+<style>
+/*After any needed changes, this should be merged with site main CSS*/
+:root { /*sets vars used below*/
+    --main-height: 4ex;
+    --main-width: 28ex;
+}
+.rightAlign {
+    text-align: right;
+}
+table.LabeledLikertFrame {
+    margin: 0 auto;
+}
+table.LabeledLikertFrame td {
+    border:0;
+    padding:0;
+    margin:0;
+    vertical-align: middle;
+}
+div.LikertFrame {
+    min-height: 20px;
+    min-width: 140px;
+    height: var(--main-height);
+    width: var(--main-width);
+    position: relative;
+    display:inline-block;
+}
+div.negSide {
+    width: 45%;
+    height: 80%;
+    background-color: #ad343e;
+    position: absolute;
+    left: 5%;
+    top: 10%;
+    border-radius: 9999px 0 0 9999px;
+    z-index: 5;
+}
+div.posSide {
+    width: 45%;
+    height: 80%;
+    background-color: #149911;
+    position: absolute;
+    right: 5%;
+    top: 10%;
+    border-radius: 0 9999px 9999px 0;
+    z-index: 5;
+}
+span.LikertItemSideBarLabel {
+    height: calc(var(--main-height)*.8);
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    vertical-align:middle;
+    white-space: nowrap;
+    color: white;
+    font-style: italic;
+}
+span.outsideLabel {
+    font-style: italic;
+}
+div.valueHovers {
+    height: 100%;
+    z-index: 100;
+}
+div.val {
+    height: 100%;
+    width: calc(100% / 7);
+    display:inline-block;
+    position:relative;
+    margin:0;
+    z-index: 200;
+    opacity: 0;
+}
+div.marker {
+    height: 50%;
+    width: 50%;
+    border-radius: 9999px;
+    margin: auto;
+    position:absolute;
+    top: 25%;
+    left: 25%;
+    background-color: #cce5ff;
+}
+div.val:hover, div.valActive {
+    opacity: 1;
+}
+div.val.saving div.marker, div.val:active div.marker {
+   background-color: #99b2ff;
+}
+textarea.whybox {
+    width: 100%;
+    height: 5em;
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    background-size: 1.5em 1.5em;
+}
+textarea.whybox.saved {
+    background-image: url(/static/images/check32.png);
+}
+
+textarea.whybox.saving {
+    background-image: url(/static/images/cloud64.png);
+}
+</style>
+
 <style>
 .h1-multiline, h1 { padding: 0; margin: 0; }
 #bill-subpages { margin: 30px 0; font-size: 13px; }
