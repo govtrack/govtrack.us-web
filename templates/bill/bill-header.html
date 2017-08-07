@@ -45,6 +45,8 @@
 	<td>
 		<span class="outsideLabel">Support</span>
 	</td>
+	<!--Can make this a save button in future versions that work without javascript-->
+       <td class="notesToggle" title="Hide notes field"> <img src="/static/images/notes64.png"/></td>
     </tr></table>
     <textarea class="whybox" placeholder="Notes on why I oppose or support this bill." title="Notes on why I oppose or support this bill."></textarea>
 </div>
@@ -65,16 +67,29 @@ function hideJSReqdNotice() {
   return;
 }
 function addListeners() {
-  var valBoxes = document.querySelectorAll("div.valueHovers div.val");
-  for (var i = 0; i<valBoxes.length; i++) {
-      valBoxes[i].addEventListener("click",valClick);
-  }
-  var reasonBox = document.querySelector("textarea.whybox");
-  if (reasonBox != null) {
-	reasonBox.addEventListener("input",changeReasons);
-  } else {
-	console.log("Could not find box for entry of reasons.");
-  }
+    var likertHost = document.querySelector("div.LikertHost");
+    if (likertHost == null) {
+	console.log("Could not find div containing position registration; not adding event listeners.");
+    } else {
+        var valBoxes = likertHost.querySelectorAll("div.valueHovers div.val");
+        for (var i = 0; i<valBoxes.length; i++) {
+            valBoxes[i].addEventListener("click",valClick);
+        }
+
+        var reasonBox = likertHost.querySelector("textarea.whybox");
+        if (reasonBox != null) {
+            reasonBox.addEventListener("input",changeReasons);
+        } else {
+            console.log("Could not find box for entry of reasons.");
+        }
+
+        var notesToggler = likertHost.querySelector("td.notesToggle");
+        if (notesToggler != null) {
+            notesToggler.addEventListener("click",toggleWhybox);
+        } else {
+            console.log("Could not find element for toggling notes.");
+        }
+    }
 }
 
 function valClick(event) {
@@ -200,21 +215,29 @@ function logAjaxError(jqXHR, textStatus, errorThrown) {
 
 var SAVING_STRING = " (saving)";
 var SAVED_STRING = " (saved)";
+var SHOW_STRING = "Show ";
+var HIDE_STRING = "Hide ";
 function addSavingMessages(elementToChange) {
    elementToChange.classList.add("saving");
-   addToTitle(elementToChange, SAVING_STRING);
+   addToTitleEnd(elementToChange, SAVING_STRING);
 }
 function removeSavingMessages(elementToChange) {
    elementToChange.classList.remove("saving");
-   stripFromTitle(elementToChange, SAVING_STRING);
+   stripFromTitleEnd(elementToChange, SAVING_STRING);
 }
 function addSavedMessages(elementToChange) {
    elementToChange.classList.add("saved");
-   addToTitle(elementToChange, SAVED_STRING);
+   addToTitleEnd(elementToChange, SAVED_STRING);
 }
 function removeSavedMessages(elementToChange) {
    elementToChange.classList.remove("saved");
-   stripFromTitle(elementToChange, SAVED_STRING);
+   stripFromTitleEnd(elementToChange, SAVED_STRING);
+}
+function stringStartsWith(long, short) {//returns boolean
+   return ((long.substring(0,short.length))===short);
+}
+function titleStartsWith(elementToTest, possibleSuffix) {
+   return stringStartsWith(elementToTest.title, possibleSuffix);
 }
 function stringEndsWith(long, short) {//returns boolean
    return ((long.substring(long.length-short.length))===short);
@@ -222,31 +245,90 @@ function stringEndsWith(long, short) {//returns boolean
 function titleEndsWith(elementToTest, possibleSuffix) {
    return stringEndsWith(elementToTest.title, possibleSuffix);
 }
-function stripFromTitle(elementToChange, stringToStrip) {//Removes string from end of title, if present.
+function stripFromTitleStart(elementToChange, stringToStrip) {//Removes string from start of title, if present.
+   if(titleStartsWith(elementToChange, stringToStrip)) {
+        elementToChange.title = elementToChange.title.substring(stringToStrip.length);
+   }
+}
+function stripFromTitleEnd(elementToChange, stringToStrip) {//Removes string from end of title, if present.
    if(titleEndsWith(elementToChange, stringToStrip)) {
         elementToChange.title = elementToChange.title.substring(0,elementToChange.title.length-stringToStrip.length);
    }
 }
-function addToTitle(elementToChange, stringToAdd) { //Adds string to end of title, if not present.
+function addToTitleStart(elementToChange, stringToAdd) { //Adds string to start of title, if not present.
+   if(!titleStartsWith(elementToChange, stringToAdd)) {
+        elementToChange.title = stringToAdd + elementToChange.title;
+   }
+}
+function addToTitleEnd(elementToChange, stringToAdd) { //Adds string to end of title, if not present.
    if(!titleEndsWith(elementToChange, stringToAdd)) {
         elementToChange.title = elementToChange.title + stringToAdd;
    }
 }
 
+function toggleVisibility(toToggle, toUpdateMessage) {
+    //Not simply using $(toToggle).toggle("fast"); to allow updating message
+    if(toToggle.style.display == "none") {
+       showElement(toToggle, toUpdateMessage);
+    } else {
+       hideElement(toToggle, toUpdateMessage);
+    }
+}
+function hideElement(toHide, toUpdateMessage) {
+    $(toHide).hide("fast");
+    stripFromTitleStart(toUpdateMessage, HIDE_STRING);
+    addToTitleStart(toUpdateMessage, SHOW_STRING);
+}
+function showElement(toShow, toUpdateMessage) {
+    $(toShow).show("fast");
+    stripFromTitleStart(toUpdateMessage, SHOW_STRING);
+    addToTitleStart(toUpdateMessage, HIDE_STRING);
+}
+function toggleWhybox(event) {
+    //IE compatibility
+    event = event || window.event;
+    var tdToUpdateMsg = event.target || event.srcElement;
+
+    //up-iteration to get parent
+    while (tdToUpdateMsg) {
+      if (tdToUpdateMsg instanceof HTMLTableCellElement && tdToUpdateMsg.classList.contains("notesToggle")) {
+        break;
+      }
+      tdToUpdateMsg = tdToUpdateMsg.parentNode;
+    }
+    var target = tdToUpdateMsg;
+    while (target) {
+      if (target instanceof HTMLDivElement && target.classList.contains("LikertHost")) {
+        break;
+      }
+      target = target.parentNode;
+    }
+   toggleVisibility(target.querySelector("textarea.whybox"), tdToUpdateMsg);
+}
+
 //Used for loading in stored position data.
 function show_position(position) {
-   if((position[0]["positionVal"] != null) && (position[0]["positionVal"] != "")) {
-        var selectionString = "div.valueHovers div.val[data-value='"+position[0]["positionVal"]+"']";
-	 valueDiv = document.querySelector(selectionString);
-	 valueDiv.classList.add("valActive");
-	 addSavedMessages(valueDiv)
-    }
+  var likertHost = document.querySelector("div.LikertHost");
+  if (likertHost == null) {
+       console.log("Could not find div containing position registration; not displaying stored position data.");
+  } else {
+       if((position[0]["positionVal"] != null) && (position[0]["positionVal"] != "")) {
+           var selectionString = "div.valueHovers div.val[data-value='"+position[0]["positionVal"]+"']";
+	    valueDiv = likertHost.querySelector(selectionString);
+	    valueDiv.classList.add("valActive");
+	    addSavedMessages(valueDiv);
+       }
 
-    reasonsBox = document.querySelector("textarea.whybox");
-    if(position[0]["reasons"]) {
-       reasonsBox.value = (position[0]["reasons"]);
-       addSavedMessages(reasonsBox);
-    }
+	var notesToggler = likertHost.querySelector("td.notesToggle");
+       var reasonsBox = likertHost.querySelector("textarea.whybox");
+       if(position[0]["reasons"]) {
+           reasonsBox.value = (position[0]["reasons"]);
+           addSavedMessages(reasonsBox);
+           showElement(reasonsBox, notesToggler);
+       } else {
+           hideElement(reasonsBox, notesToggler);
+	}
+  }
 }
 
 </script>
@@ -309,6 +391,12 @@ span.LikertItemSideBarLabel {
 }
 span.outsideLabel {
     font-style: italic;
+}
+td.notesToggle img{
+   margin-top: -5px;
+   margin-bottom: auto;
+   margin-left: 1em;
+   height: 25px;
 }
 div.valueHovers {
     height: 100%;
