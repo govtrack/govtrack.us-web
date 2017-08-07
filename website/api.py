@@ -51,8 +51,7 @@ def apiv2(request, model, id):
 	model, qs = get_apiv2_model_qs(model)
 	return do_api_call(request, model, qs, id)
 	
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 
 def api_overview(request):
 	baseurl = "https://%s/api/v2/" % request.META["HTTP_HOST"]
@@ -61,10 +60,9 @@ def api_overview(request):
 	
 	api = [ (model, build_api_documentation(*get_apiv2_model_qs(model))) for model in endpoints ]
 	
-	return render_to_response('website/developers/api.html', {
+	return render(request, 'website/developers/api.html', {
 		"baseurl": baseurl,
 		"api": api,
-		},
-		RequestContext(request))
+		})
 
 

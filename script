@@ -1,5 +1,5 @@
 #!/bin/sh
-DJANGO_SETTINGS_MODULE=settings PYTHONPATH=. .env/bin/python -u -W ignore /dev/stdin "$@" << EOF;
+DJANGO_SETTINGS_MODULE=settings PYTHONPATH=. python -u -W ignore /dev/stdin "$@" << EOF;
 import django
 django.setup()
 

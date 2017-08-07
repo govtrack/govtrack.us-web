@@ -54,7 +54,7 @@ class Vote(models.Model):
     source = models.IntegerField(choices=VoteSource, help_text="The source of the vote information.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.")
     vote_type = models.CharField(max_length=255, help_text="Descriptive text for the type of the vote.")
-    category = models.IntegerField(max_length=255, choices=VoteCategory, help_text="The type of the vote.")
+    category = models.IntegerField(choices=VoteCategory, help_text="The type of the vote.")
     question = models.TextField(help_text="Descriptive text for what the vote was about.")
     required = models.CharField(max_length=10, help_text="A code indicating what number of votes was required for success. Often '1/2' or '3/5'. This field should be interpreted with care. It comes directly from the upstream source and may need some 'unpacking.' For instance, while 1/2 always mean 1/2 of those voting (i.e. excluding absent and abstain), 3/5 in some cases means to include absent/abstain and in other cases to exclude.")
     result = models.TextField(help_text="Descriptive text for the result of the vote.")

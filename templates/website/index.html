@@ -140,7 +140,6 @@ article {
 	    	<option value="">Select Issue Area</option>
 			{% for top_term, subterms in bill_subject_areas %}
 				<option value="{{top_term.get_absolute_url}}">{{top_term.name}}</option>
-				{% if not forloop.last %}&middot;{% endif %}
 			{% endfor %}
 	    </select>
 	  </div>
@@ -168,16 +167,17 @@ article {
 <div>
 
 <div id="blog-posts">
-	<h2>
+	<header>
 		<div style="float: right;">
 			<a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">subscribe</a>
 		</div>
-		<span>
-		<a href="https://govtrackinsider.com" title="More Posts on Medium" style="text-decoration: none; font-weight: bold;">
-			GovTrack Insider
-		</a>
-		</span>
-	</h2>
+		<h2>
+			<span><a href="https://govtrackinsider.com" title="More Posts on Medium" style="text-decoration: none">
+				GovTrack Insider
+			</a></span>
+		</h2>
+	</header>
+
 	<div class="row">
 	{% for post in medium_posts|slice:"0:3" %}
 	<div class="col-sm-6">

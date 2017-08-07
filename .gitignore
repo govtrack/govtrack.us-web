@@ -3,14 +3,14 @@
 *.pyo
 *.orig
 *~
+.vagrant
 
 # Project specific
-.env
-db
-log
-settings_local.py
+.env*
+.venv*
+env/
+local/
 pip-log.txt
-database.sqlite*
 static/css/all-min.css
 static/images/dynamic
 uwsgi.conf

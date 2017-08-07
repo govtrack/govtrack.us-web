@@ -2,7 +2,7 @@
 from django.db import models, DatabaseError
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+import django.contrib.contenttypes.fields as generic_fields
 from django.contrib.auth.models import User
 
 import re
@@ -362,7 +362,7 @@ class Event(models.Model):
 
     source_content_type = models.ForeignKey(ContentType)
     source_object_id = models.PositiveIntegerField()
-    source = generic.GenericForeignKey('source_content_type', 'source_object_id')
+    source = generic_fields.GenericForeignKey('source_content_type', 'source_object_id')
     eventid = models.CharField(max_length=32) # unique w.r.t. the source object 
 
     when = models.DateTimeField(db_index=True)

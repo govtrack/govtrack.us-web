@@ -1,4 +1,4 @@
-#!.env/bin/python -R
+#!python_rand_hash
 import os, sys
 
 if "runserver" in sys.argv:

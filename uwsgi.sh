@@ -32,7 +32,7 @@ if [[ "$1" = "stop" && -e $pidfile ]]; then
 	echo "Stopping..."
 	pid=$(cat $pidfile)
     kill -QUIT $pid
-	
+
 	# Wait till it actually exists.
 	while kill -0 $pid 2> /dev/null;
 	do
@@ -67,4 +67,4 @@ if [ -z "$DEBUG" ]; then
 	daemonize="--daemonize /dev/null --pidfile $pidfile --processes $PROCESSES --cheaper 2"
 fi
 
-.env/bin/uwsgi $daemonize --socket /tmp/uwsgi_govtrack_$NAME.sock --chmod-socket=666 --wsgi-file wsgi.py
+uwsgi $daemonize --socket /tmp/uwsgi_govtrack_$NAME.sock --chmod-socket=666 --wsgi-file wsgi.py

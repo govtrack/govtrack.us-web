@@ -606,7 +606,7 @@ $(function() {
                 voter_sort_3="{% if voter.voter_type_is_member %}{{ voter.person_role.state_name }} {{ voter.person_role.district|rjust:3 }}{% elif voter.voter_type == 2 %}00{% endif %}"
                 class="{% if voter.is_outlier %}voter_outlier{% endif %}"
             	>
-                <td class="vote_{{ voter.option.alpha_key }}"><nobr>{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</nobr></td>
+                <td class="vote_{{ voter.option.alpha_key }}"><span class="nowrap">{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</span></td>
                 <td>
                     {% if voter.voter_type != 1 %}
                         {% if voter.party|slice:"0:1" in "DIR" %}

@@ -245,7 +245,6 @@ class Bill(models.Model):
     def data_dir_path(self):
         return "data/congress/%d/bills/%s/%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, BillType.by_value(self.bill_type).slug, self.number)
 
-    #@models.permalink
     def get_absolute_url(self):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
 
@@ -1341,30 +1340,6 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                      return [e]
                
         return None
-
-    def get_open_market(self, user):
-        from django.contrib.contenttypes.models import ContentType
-        bill_ct = ContentType.objects.get_for_model(Bill)
-
-        import predictionmarket.models
-        try:
-            m = predictionmarket.models.Market.objects.get(owner_content_type=bill_ct, owner_object_id=self.id, isopen=True)
-        except predictionmarket.models.Market.DoesNotExist:
-            return None
-
-        for outcome in m.outcomes.all():
-            if outcome.owner_key == "1": # "yes"
-                m.yes = outcome
-                m.yes_price = int(round(outcome.price() * 100.0))
-        if user and user.is_authenticated():
-            account = predictionmarket.models.TradingAccount.get(user, if_exists=True)
-            if account:
-                positions, profit = account.position_in_market(m)
-                m.user_profit = round(profit, 1)
-                m.user_positions = { }
-                for outcome in positions:
-                    m.user_positions[outcome.owner_key] = positions[outcome]
-        return m
 
     def get_committee_reports(self):
         import re, lxml.etree

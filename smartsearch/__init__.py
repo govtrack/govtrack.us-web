@@ -13,7 +13,7 @@ def build_haystack_index(model):
 	I.__name__ = model.__name__
 	I.prefetch_related_list = []
 			
-	fieldmap = dict( (f.name, f) for f in model._meta.fields+model._meta.many_to_many )
+	fieldmap = dict( (f.name, f) for f in model._meta.get_fields() )
 	
 	def build_field(fieldname):
 		if not fieldname in fieldmap:

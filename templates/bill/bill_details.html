@@ -20,11 +20,11 @@
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:title" content="{{bill.title}}">
 	{% if subtitle %}<meta name="twitter:description" content="{{subtitle}}">{% endif %}
-	<meta name="twitter:label1" value="Current Status">
-	<meta name="twitter:data1" value="{{bill.get_current_status_display}}">
+	<meta name="twitter:label1" content="Current Status">
+	<meta name="twitter:data1" content="{{bill.get_current_status_display}}">
 	{% if bill.sponsor %}
-		<meta name="twitter:label2" value="Sponsor">
-		<meta name="twitter:data2" value="{{bill.sponsor.name}}">
+		<meta name="twitter:label2" content="Sponsor">
+		<meta name="twitter:data2" content="{{bill.sponsor.name}}">
 	{% endif %}
 {% endblock %}
 
@@ -54,14 +54,6 @@
 	// dynamic DOM elements
     $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
     if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);
-	if (the_page.poll_and_call_position) {
-		var p = the_page.poll_and_call_position;
-		$('#call_congress_positions').hide();
-		$('#call_congress_position_chosen').show();
-		$('#call_congress_position_chosen span').text(p.text);
-		$('#change_position').toggle(p.can_change);
-		$('#make_call').toggle(p.can_call.length > 0);
-	}
 
 	// UI fixups
     $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
@@ -132,22 +124,6 @@
 .dl-horizontal dd a {
 	font-weight: bold;
 }
-
-#call_congress_positions button {
-	display: inline-block;
-	margin-top: .75em;
-	margin-left: 2em;
-	padding: 8px;
-	font: 18px/24px Ubuntu, Verdana, Tahoma, Arial, sans-serif;
-	text-align: center;
-}
-	#call_congress_positions button span {
-		display: block;
-		font-size: 42px;
-		margin-top: 10px;
-	}
-		#call_congress_positions button.support span { color: green; }
-		#call_congress_positions button.oppose span { color: red; }
 
 #status-row-grid {
 }
@@ -653,7 +629,7 @@
 					<tr class="status-item {% if not item.date or item.different_congress %}pending{% endif %} {% if item.bill %}related-bill{% endif %}">
 						<td class="date {% if forloop.last %}last{% endif %} {% if item.last_occurred or not item.date or item.different_congress %}ghosted{% endif %}">
 							<div class="wrapper">
-								{% if item.date %}<nobr>{{item.date|date:"DATE_FORMAT"}}</nobr>{% endif %}
+								{% if item.date %}<span class="nowrap">{{item.date|date:"DATE_FORMAT"}}</span>{% else %}Pending{% endif %}
 							</div>
 						</td>
 						<td>
@@ -804,7 +780,7 @@
 {% with bill.get_prognosis as p %}
 {% if p %}
 <div id="prognosis-details" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="prognosis-details-title" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

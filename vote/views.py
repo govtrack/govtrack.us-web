@@ -4,8 +4,7 @@ from StringIO import StringIO
 from datetime import datetime
 
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404, render
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import cache_page
 
@@ -138,8 +137,8 @@ def vote_details_userview(request, congress, session, chamber_code, number):
             </div>
             """
 
-        from django.template import Template, Context, RequestContext, loader
-        ret["admin_panel"] = Template(admin_panel).render(RequestContext(request, {
+        from django.template import Template, Context
+        ret["admin_panel"] = Template(admin_panel).render(Context({
             'vote': vote,
             }))
 

@@ -1,11 +1,14 @@
 from django.conf import settings
 
 class CacheLogic:
-	def __init__(self):
+	def __init__(self, get_response):
 		if settings.SESSION_SAVE_EVERY_REQUEST:
 			raise Exception("You must set SESSION_SAVE_EVERY_REQUEST to False in order to use twostream.middleware.CacheLogic.")
+		self.get_response = get_response
 		
-	def process_response(self, request, response):
+	def __call__(self, request):
+		response = self.get_response(request)
+
 		if not getattr(request, "anonymous", False)\
 			or request.method not in ("GET", "HEAD")\
 			or settings.DEBUG:

@@ -91,8 +91,7 @@ h2 {
 	}
 	#content h2 {
 		border-bottom: 1px solid #1D4E70;
-		font-size: 14px;
-		margin: 1.85em 0 1.25em 0;
+		margin: 1em 0;
 	}
 		#content h2 span {
 			display: inline-block;
@@ -192,7 +191,7 @@ blockquote {
 		#masthead .nav a {
 			color: inherit;
 		}
-		#masthead .nav a:hover, #masthead .nav a:focus {
+		#masthead .nav a:hover, #masthead .nav a:focus, #masthead .nav .open>a {
 			background-color: #258;
 			color: white;
 		}
@@ -202,7 +201,7 @@ blockquote {
 		#masthead .dropdown-menu {
 			margin-top: -2px;
 		}
-		#masthead .dropdown-menu a:hover {
+		#masthead .dropdown-menu a:hover, #masthead .dropdown-menu a:focus {
 			color: black;
 		}
 		#masthead .navbar-toggle {
@@ -1118,3 +1117,35 @@ ul.singlesignon {
 		.sidebar-events h2:first-child {
 			margin-top: -10px;
 		}
+
+/* A11y Changes, merge? */
+
+/* skiptocontent from http://webaim.org/techniques/skipnav/ */
+#skiptocontent a {
+	padding:6px;
+	position: absolute;
+	top:-40px;
+	left:0px;
+	color:white;
+	border-right:1px solid white;
+	border-bottom:1px solid white;
+	border-bottom-right-radius:8px;
+	background:transparent;
+	-webkit-transition: top 1s ease-out, background 1s linear;
+    transition: top 1s ease-out, background 1s linear;
+    z-index: 100;
+}
+
+#skiptocontent a:focus {
+	position:absolute;
+	left:0px;
+	top:0px;
+	background:#BF1722;
+	outline:0;	
+	-webkit-transition: top .1s ease-in, background .5s linear;
+    transition: top .1s ease-in, background .5s linear;
+}
+
+.nowrap {
+	white-space: nowrap;
+}

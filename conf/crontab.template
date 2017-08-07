@@ -1,0 +1,21 @@
+MAILTO=tauberer@govtrack.us
+
+LANGUAGE=en_US.UTF-8
+LC_ALL=en_US.UTF-8
+LANG=en_US.UTF-8
+LC_TYPE=en_US.UTF-8
+
+45 2 * * 1-6 { cd {{ ROOT_DIR }}; honcho run ./run_scrapers.py text committees; }
+45 4 * * * { cd {{ ROOT_DIR }}; honcho run ./run_scrapers.py text bills votes stats; honcho run ./manage.py govtrack_insider_sync; ../scripts/predictgov/pull.sh > /dev/null; }
+15 6 * * * { cd {{ ROOT_DIR }}; honcho run ./run_scrapers.py bills; }
+15 9-18 * * 1-5 { cd {{ ROOT_DIR }}; honcho run ./run_scrapers.py votes; }
+45 9-21/3 * * * { cd {{ ROOT_DIR }}; honcho run ./run_scrapers.py text bills votes; honcho run ./manage.py govtrack_insider_sync; }
+
+0 7 * * 1-5 { cd {{ ROOT_DIR }}; date; honcho run ./manage.py sparkpost_bounces; honcho run ./manage.py send_email_updates daily; }
+0 13 * * 6 { cd {{ ROOT_DIR }}; date; honcho run ./manage.py sparkpost_bounces; honcho run ./manage.py send_email_updates weekly; }
+
+25 2 * * * { cd {{ ROOT_DIR }}; honcho run ./manage.py clear_expired_email_verifications; honcho run ./manage.py clearsessions; }
+
+0 7-20 * * * { cd {{ ROOT_DIR }}; honcho run ./manage.py tweet_something; }
+
+0 0,12 * * * { certbot-auto renew --quiet --no-self-upgrade }

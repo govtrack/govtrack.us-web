@@ -105,7 +105,7 @@ $(function() {
 			<tr>
 				<td style="padding: 0 1em 1em 0">
 					<b>{{cong.congress|ordinalhtml}}</b>
-					<div style="font-size: 90%; color: #777"><nobr>{{cong.dates.0|date}}</nobr><br/> <nobr>-{% if forloop.first %}present{% else %}{{cong.dates.1|date}}{% endif %}</nobr></div>
+					<div style="font-size: 90%; color: #777"></span>{{cong.dates.0|date}}</span><br/> <span class="nowrap">-{% if forloop.first %}present{% else %}{{cong.dates.1|date}}{% endif %}</span></div>
 				</td>
 				{% for c in cong.counts %}
 					<td style="padding-right: 1em; text-align: center;">

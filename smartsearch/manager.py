@@ -1,8 +1,8 @@
 """
 """
 from django import forms
-from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.template import Template, Context, RequestContext
+from django.shortcuts import redirect, get_object_or_404, render
+from django.template import Template, Context
 from django.template.loader import get_template
 from django.db.models import Count
 from django.http import HttpResponse
@@ -68,7 +68,7 @@ class SearchManager(object):
                 'noun_plural': noun[1],
                 }
             c.update(context)
-            return render_to_response(template, c, RequestContext(request))
+            return render(request, template, c)
             
         # Get the dict of params. We use .urlencode() on the dict which is available for .GET and .POST
         # but not .REQUEST. We can switch completely to request.GET later, after a transition time

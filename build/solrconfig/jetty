@@ -1,0 +1,8 @@
+NO_START=0 # Start on boot
+JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr/solr $JAVA_OPTIONS"
+JAVA_HOME=/usr
+JETTY_HOME=/opt/solr
+JETTY_USER=solr
+JETTY_LOGS=/var/log/solr
+JETTY_PORT=8983
+START_JAR="$JETTY_HOME/start.jar"

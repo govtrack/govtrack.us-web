@@ -87,7 +87,7 @@ function do_keyword_tracker_submit() {
 			{% for bill in coming_up %}
 				<tr>
 				<td>
-                  <nobr>{{bill.scheduled_consideration_date|date}}</nobr>
+                  <span style="nowrap">{{bill.scheduled_consideration_date|date}}</span>
                   {% if bill.docs_house_gov_postdate and not bill.senate_floor_schedule_postdate %}<div><small>(week of)</small></div>{% endif %}
                 </td>
 				<td>
@@ -109,10 +109,11 @@ function do_keyword_tracker_submit() {
 	{% endif %}
 
 	<div id="find" class="tab-pane {% if coming_up|length == 0 %}active{% endif %}">
+		<h2>Find a Bill</h2>
 		<div class="row">
 			<div class="col-sm-7">
 			<div style="padding-right: 30px">
-				<p style="margin-top: 30px">
+				<p>
 					{% if 5000 > total %}
 					Each year the United States Congress considers about 5,000 bills and resolutions,
 					{% else %}
@@ -126,14 +127,14 @@ function do_keyword_tracker_submit() {
 				<p>Because there are so many bills and resolutions, it can be difficult to find the one you are looking for. Please consider your options:</p>
 
 
-				<h2><span>Suggested ways to find a bill</span></h2>
+				<h3><span>Suggested ways to find a bill</span></h3>
 
 				<p>Start by using the <b>subject areas</b> listed on this page.</p>
 
 				<p>Or use our <a href="/congress/bills/browse">advanced search</a> to find bills by status, subject area, sponsor, or other fields.</p>
 
 
-				<h2><span>Search for bills whose text contains a keyword</span></h2>
+				<h3><span>Search for bills whose text contains a keyword</span></h3>
 
 				<form method="get" action="/congress/bills/browse" class="clearfix" style="margin-bottom: 1em">
 					<input type="text" placeholder="search query" style="max-width: 75%; height: 25px; float: left;" name="text"/>
@@ -141,12 +142,11 @@ function do_keyword_tracker_submit() {
 				</form>
 
 				<p>Since bills often contain legal terminology in place of everyday words, it is often easier to find a bill using one of the other methods above.</p>
-
 			</div>
 			</div>
 
 			<div class="col-sm-5">
-				<h2><span>Subject areas</span></h2>
+				<h3><span>Subject areas</span></h3>
 	
 		<div id="subject_list">
 		{% for topterm, subterms in subjects %}
@@ -168,10 +168,11 @@ function do_keyword_tracker_submit() {
 	</div>
 
 	<div id="get-alerts" class="tab-pane">
+		<h2>Get Alerts</h2>
 		<div class="row">
 			<div class="col-sm-6">
 			<div style="padding-right: 30px">
-				<h2><span>Basic alerts</span></h2>
+				<h3><span>Basic alerts</span></h3>
 				<ul id="basic_trackers" style="padding: 0">
 					{% for feed in feeds %}
 					<li onclick="window.location='{{feed.link}}'">
@@ -183,7 +184,7 @@ function do_keyword_tracker_submit() {
 			</div>
 			</div>
 			<div class="col-sm-6">
-				<h2><span>Other ways to get alerts</span></h2>
+				<h3><span>Other ways to get alerts</span></h3>
 
 				<p>There are many ways to get email alerts about bills in Congress from GovTrack.</p>
 
@@ -207,6 +208,7 @@ function do_keyword_tracker_submit() {
 	</div>
 	
 	<div id="bystatus" class="tab-pane">	
+		<h2>All Bills</h2>
 		<p style="margin-top: 15px">Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
 		{% for name, descr1, descr2, href, count, queryset in groups %}
@@ -239,7 +241,7 @@ function do_keyword_tracker_submit() {
 	
 	<div id="hot" class="tab-pane">
 		{% if trending_bill_feeds|length > 0 %}
-		<h3>Trending now:</h3>
+		<h2>Trending now:</h2>
 		<div style="margin-bottom: 1.5em">
 		{% for f in trending_bill_feeds %}
 			<div style="margin-bottom: .5em;">
@@ -249,7 +251,7 @@ function do_keyword_tracker_submit() {
 		</div>
 		{% endif %}
 
-		<h3>Top bills tracked by GovTrack users:</h3>
+		<h2>Top bills tracked by GovTrack users:</h2>
 		<div id="top_tracked_bills">
 		{% for bill, count in top_tracked_bills %}
 			<div style="margin-bottom: .5em;">

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect, get_object_or_404, render
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
@@ -51,7 +50,7 @@ def staticpage(request, pagename):
     
     ctx = { 'pagename': pagename }
     
-    return render_to_response('website/' + pagename + '.html', ctx, RequestContext(request))
+    return render(request, 'website/' + pagename + '.html', ctx)
 
 def get_blog_items():
     # c/o http://stackoverflow.com/questions/1208916/decoding-html-entities-with-python
@@ -100,7 +99,11 @@ def do_site_search(q, allow_redirect=False, request=None):
     
     from haystack.query import SearchQuerySet
     from events.models import Feed
-    
+
+    sqs = SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q)
+    if 'XapianEngine' not in settings.HAYSTACK_CONNECTIONS['person']['ENGINE']:
+        # Xapian doesn't provide a 'score' so we can't do this when debugging.
+        sqs = sqs.order_by('-is_currently_serving', '-score')
     results.append({
         "title": "Members of Congress, Presidents, and Vice Presidents",
         "href": "/congress/members/all",
@@ -112,7 +115,7 @@ def do_site_search(q, allow_redirect=False, request=None):
              "obj": p.object,
              "feed": p.object.get_feed(),
              "secondary": p.object.get_current_role() == None }
-            for p in SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q).order_by('-is_currently_serving', '-score')[0:9]]
+            for p in sqs[0:9]]
         })
        
     import us
@@ -253,7 +256,7 @@ def your_docket(request):
     # Pre-load the user's subscription lists and for each list
     # pre-load the list of bills entered into the list.
     lists = []
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         lists = request.user.subscription_lists.all()
         for lst in lists:
             lst.bills = []
@@ -391,7 +394,7 @@ def go_ad_free_start(request):
     
     # does the user have an ad-free payment already?
     msi = { }
-    if not request.user.is_anonymous():
+    if not request.user.is_anonymous:
         msi = request.user.userprofile().get_membership_subscription_info()
 
     # or did the user make an anonymous payment?
@@ -418,7 +421,7 @@ def go_ad_free_redirect(request):
         sandbox = "-sandbox"
 
     # slightly different SKU if the user is/isn't logged in
-    if request.user.is_anonymous():
+    if request.user.is_anonymous:
         item = {
             "name": "Support GovTrack.us (%.02d)" % amount,
             "sku": "govtrack-tip" + sandbox,
@@ -463,7 +466,7 @@ def go_ad_free_redirect(request):
     from website.models import PayPalPayment
     rec = PayPalPayment(
         paypal_id=payment.id,
-        user=request.user if not request.user.is_anonymous() else None,
+        user=request.user if not request.user.is_anonymous else None,
         response_data=payment.to_dict(),
         notes=item["name"])
     rec.save()
@@ -497,7 +500,7 @@ def go_ad_free_finish(request):
 
 @anonymous_view
 def videos(request, video_id=None):
-    return render_to_response('website/videos.html', { "video_id": video_id }, RequestContext(request))
+    return render(request, 'website/videos.html', { "video_id": video_id })
 
 
 def set_district(request):
@@ -519,7 +522,7 @@ def set_district(request):
         json.dumps({ "status": "ok", "mocs": mocs }),
         content_type="application/json")
 
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         # Save to database.
         prof = request.user.userprofile()
         prof.congressionaldistrict = "%s%02d" % (state, district)
@@ -558,8 +561,8 @@ def add_remove_reaction(request):
 
         r, isnew = Reaction.objects.get_or_create(
             subject=request.POST["subject"],
-            user=request.user if request.user.is_authenticated() else None,
-            anon_session_key=Reaction.get_session_key(request) if not request.user.is_authenticated() else None,
+            user=request.user if request.user.is_authenticated else None,
+            anon_session_key=Reaction.get_session_key(request) if not request.user.is_authenticated else None,
         )
 
         if isnew:

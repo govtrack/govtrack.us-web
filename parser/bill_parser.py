@@ -452,7 +452,11 @@ def load_senate_floor_schedule(options, bill_index):
     now = datetime.now()
     for entry in load_senate_floor_schedule_data():
         if entry["date"] >= now.date():
-            bill = Bill.objects.get(congress=entry["bill_congress"], bill_type=entry["bill_type"], number=entry["bill_number"])
+            try:
+                bill = Bill.objects.get(congress=entry["bill_congress"], bill_type=entry["bill_type"], number=entry["bill_number"])
+            except Bill.DoesNotExist:
+                print "Bill not in our database", entry
+                continue
             if bill.senate_floor_schedule_postdate == None or now - bill.senate_floor_schedule_postdate > timedelta(days=7):
                 bill.senate_floor_schedule_postdate = now
                 if bill.docs_house_gov_postdate is None or bill.senate_floor_schedule_postdate > bill.docs_house_gov_postdate: bill.scheduled_consideration_date = entry["date"]
@@ -498,6 +502,9 @@ def load_senate_floor_schedule_data():
 def load_docs_house_gov(options, bill_index):
     # Look at the three most recent JSON files by looking at the lexicographically last ones,
     # which possibly cover the current week, the next week, and the week after that.
+    if not os.path.exists("data/congress/upcoming_house_floor"):
+        print "No upcoming_house_floor data."
+        return
     for fn in sorted(os.listdir("data/congress/upcoming_house_floor"))[-3:]:
         data = json.load(open("data/congress/upcoming_house_floor/" + fn))
         for billinfo in data.get("upcoming", []):

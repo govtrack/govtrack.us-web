@@ -63,18 +63,19 @@
 				{% endfor %}
 			</dl>
 
-			<p style="line-height: 110%"><small>
+			
 			{% if member_highlights|length > 0 %}
-			The chair is always selected from the majority party and the ranking member is the most senior member of the minority party.
+			<p style="line-height: 110%"><small>The chair is always selected from the majority party and the ranking member is the most senior member of the minority party.</small></p>
 			{% endif %}
 			{% if party_counts|length > 0 and committee.code != "HSSO" %}
-			The majority party ensures it has a majority on every committee.
+			<p style="line-height: 110%"><small>The majority party ensures it has a majority on every committee.</small></p>
 			{% endif %}
 			</small></p>
 			
 			{% if members|length == 0 %}
 			<p>The membership of this committee is not yet available.</p>
 			{% endif %}
+
 	</div>
 	
 	
@@ -103,6 +104,7 @@
 	<div class="tab-content">
 		{% if members|length > 0 %}
 		<div id="members" class="tab-pane active members-grid">
+			<h2>Members</h2>
 		    <div class="row">
 	        {% for member in members %}
 		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
@@ -111,7 +113,7 @@
 		        <div class="member col-xs-6 col-sm-3 col-md-2">
 	            	
 		            <div class="photo">
-	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" width="100" height="120"/></a>
+	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" width="100" height="120" alt="Portrait of {{ member.person.name_no_details }}"/></a>
 	            	</div>
 	            	
 		            {% with member.person.get_current_role as role %}
@@ -153,6 +155,7 @@
 		{% endif %}
 		
 		<div id="activity" class="tab-pane {% if members|length == 0 %}active{% endif %}">
+				<h2>Bills</h2>
 				{% if committee.has_current_bills %}
 					{% with committee.current_bills_sorted as current_bills_sorted %}
 					<p>There are <a href="/congress/bills/browse#committees={{committee.id}}">{{current_bills_sorted.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>{% if current_bills_sorted.count > 100 %}. Below find the top 100{% endif %}:</p>
@@ -188,11 +191,12 @@
 		
 		{% if subcommittees %}
 		<div id="subcommittees" class="tab-pane">
-				<ul class="bullets">
-					{% for item in subcommittees %}
-					<li><a href="{{ item.get_absolute_url }}">{{ item.name_no_article }}</a></li>
-					{% endfor %}
-				</ul>
+			<h2>Subcommittees</h2>
+			<ul class="bullets">
+				{% for item in subcommittees %}
+				<li><a href="{{ item.get_absolute_url }}">{{ item.name_no_article }}</a></li>
+				{% endfor %}
+			</ul>
 		</div>
 		{% endif %}
 	</div><!-- /panes -->

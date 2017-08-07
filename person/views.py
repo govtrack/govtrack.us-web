@@ -199,13 +199,14 @@ def person_details_user_view(request, pk):
 def render_subscribe_inline(request, feed):
     # render the event subscribe button, but fake the return path
     # by overwriting our current URL
-    from django.template import Template, Context, RequestContext, loader
+    from django.template import Template, loader
     request.path = request.GET["path"]
     request.META["QUERY_STRING"] = ""
     events_button = loader.get_template("events/subscribe_inline.html")\
-        .render(RequestContext(request, {
+        .render({
 				'feed': feed,
-				}))
+                'request': request,
+				})
     return { 'events_subscribe_button': events_button }
                 
 @anonymous_view

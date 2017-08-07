@@ -70,7 +70,7 @@ function sousupdate() {
 		url: "/sousveillance.json",
 		success: function(res) {
 			function make_node(item, recursive) {
-				var node = $("<tr valign=top><td><nobr><span class=date></span></nobr></td> <td><a class=path></a> <div class='meta'>from <span class=netblock></span> (<span class=ua></span>)</div> <div class='recent'></div></td></tr>");
+				var node = $("<tr valign=top><td><span class='nowrap date'></span></td> <td><a class=path></a> <div class='meta'>from <span class=netblock></span> (<span class=ua></span>)</div> <div class='recent'></div></td></tr>");
 				node.find(".ua").text(item.ua ? item.ua : "bot")
 				node.find(".netblock").text(item.netblock)
 				node.find(".path").attr("href", item.path).text(item.path)
