@@ -239,6 +239,9 @@ class BillStatus(enum.Enum):
     # all final statuses
     final_status = tuple(list(final_status_enacted_bill) + list(final_status_passed_resolution) + list(final_status_failed))
 
+    # indicates a bill that was vetoed and an override was not attempted or failed
+    final_status_failed_vetoed = (prov_kill_veto, vetoed_pocket, vetoed_override_fail_originating_house, vetoed_override_fail_originating_senate, vetoed_override_fail_second_house, vetoed_override_fail_second_senate)
+
 def get_bill_status_string(is_current, status):
     # Returns a string with two %'s in it, one for the bill noun ("bill"/"resolution")
     # and one for the status date.

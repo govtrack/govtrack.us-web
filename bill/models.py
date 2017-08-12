@@ -461,7 +461,7 @@ class Bill(models.Model):
         status = self.get_long_text_for_status(self.current_status, self.current_status_date)
         if not self.is_final_status:
             if self.was_enacted_ex() is not None:
-                status += (" But provisions of this %s were incorporated into other %ss which were enacted" % (self.noun, self.noun)) \
+                status = ("Provisions of this %s were incorporated into other %ss which were enacted" % (self.noun, self.noun)) \
                              + ((", so there will not likely be further activity on this %s" % self.noun) if self.is_current else "") + "."
             elif self.text_incorporation: # not null, empty string, empty list
                 status += " Provisions of this %s were incorporated into other %ss." % (self.noun, self.noun)
@@ -1337,7 +1337,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             for rb in RelatedBill.objects.filter(bill=self, relation="identical").select_related("related_bill"):
                 e = rb.related_bill.was_enacted_ex(recurse=False, restrict_to_activity_in_date_range=restrict_to_activity_in_date_range)
                 if e is not None:
-                     return [e]
+                     return e
                
         return None
 
