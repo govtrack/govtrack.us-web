@@ -21,7 +21,7 @@ def run_analysis_for_president(president, date_range):
 	end_date = min(end_date, datetime.now().date())
 
 	# limit to a shorter period than a whole presidency so this computes faster
-	end_date = min(start_date+timedelta(days=200), end_date)
+	end_date = min(start_date+timedelta(days=235), end_date)
 
 	# if we're measuring presidential activity, the date of signing could be outside of the Congress
 	enacted_bills = Bill.objects.filter(
@@ -102,12 +102,15 @@ run_analysis_for_president("Trump", ("2017-01-20","2018-01-19"))
 
 # Write out.
 
+import re
+def fmt_day(d): return re.sub(r"^0", "", d.strftime("%m/%d"))
+
 W = csv.writer(sys.stdout)
 W.writerow(["reldate", "date"] + sum(([president, "pages", "words"] for president in columns), []))
 day_zero = datetime.strptime("2017-01-20", "%Y-%m-%d").date()
 for rel_date in range(max(stats)+1):
 	W.writerow(
-		[ rel_date, (day_zero+timedelta(days=rel_date)).strftime("%m-%d") ]
+		[ (rel_date+1), fmt_day(day_zero+timedelta(days=rel_date)) ]
 		+ sum(
 			(
 				list(stats[rel_date][president])
