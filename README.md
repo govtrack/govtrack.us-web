@@ -47,6 +47,9 @@ At the end:
     # Activate your local Python virtualenv environment
     source .venv/bin/activate
 
+    # *If* you've stored any customs settings, load them and start a sub-shell for the remaining commands.
+    honcho -e local/settings.env run bash
+
     # Create your initial user.
     ./manage.py createsuperuser
 

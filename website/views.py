@@ -215,7 +215,7 @@ def do_site_search(q, allow_redirect=False, request=None):
 
 @render_to('website/search.html')
 def search(request):
-    r = do_site_search(request.REQUEST.get("q", ""), allow_redirect=True, request=request)
+    r = do_site_search(request.GET.get("q", request.POST.get("q", "")), allow_redirect=True, request=request)
     if not isinstance(r, list): return r
     return { "results": r }
 

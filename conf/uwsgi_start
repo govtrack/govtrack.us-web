@@ -1,0 +1,9 @@
+#!/bin/bash
+source .venv/bin/activate
+yuicompressor static/css/all.css > static/css/all-min.css
+honcho -e local/settings.env run \
+	/home/govtrack/web/.venv/bin/uwsgi \
+	--wsgi-file wsgi.py \
+	--socket /tmp/uwsgi_govtrack_www.sock --chmod-socket=666 \
+	--pidfile /tmp/uwsgi_govtrack_www.pid \
+	--processes 12 --cheaper 2
