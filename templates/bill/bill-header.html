@@ -28,8 +28,10 @@
 	</td>
 	<td>
 		<div class="LikertFrame">
-			<div class="negSide"><span class="LikertItemSideBarLabel">JavaScript</span></div>
-			<div class="posSide"><span class="LikertItemSideBarLabel">required</span></div>
+			<div class="sides">
+			        <div class="negSide"><span class="LikertItemSideBarLabel">JavaScript</span></div>
+			        <div class="posSide"><span class="LikertItemSideBarLabel">required</span></div>
+			</div>
 			<div class="valueHovers">
 			        <div class="val" data-value="-3" title="Strongly oppose"><div class="marker"></div>
 			        </div><div class="val" data-value="-2" title="Moderately oppose"><div class="marker"></div>
@@ -48,7 +50,8 @@
 	<!--Can make this a save button in future versions that work without javascript-->
        <td class="notesToggle" title="Hide notes field"> <img src="/static/images/notes64.png"/></td>
     </tr></table>
-    <textarea class="whybox" placeholder="Notes on why I oppose or support this bill." title="Notes on why I oppose or support this bill."></textarea>
+    <textarea class="whybox" placeholder="My personal notes on why I oppose or support this bill."
+                                   title="My personal notes on why I oppose or support this bill."></textarea>
 </div>
 <script>
 //After any needed changes, this JS should be separated out.
@@ -358,23 +361,37 @@ div.LikertFrame {
     position: relative;
     display:inline-block;
 }
-div.negSide {
-    width: 45%;
+div.sides {
+    position:absolute;
+    width: 90%;
     height: 80%;
-    background-color: #ad343e;
-    position: absolute;
     left: 5%;
     top: 10%;
+    border-radius: 9999px;
+    /*Gradient backward-compatibility lines from https://www.w3schools.com/css/css3_gradients.asp */
+    background-color: LightSkyBlue; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left, red , lime); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(right, red, lime); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(right, red, lime); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to right, red, lime); /* Standard syntax */
+}
+div.negSide {
+    width: 50%;
+    height: 100%;
+    /*background-color: #ce7da5;*/
+    position: absolute;
+    left: 0;
+    top: 0;
     border-radius: 9999px 0 0 9999px;
     z-index: 5;
 }
 div.posSide {
-    width: 45%;
-    height: 80%;
-    background-color: #149911;
+    width: 50%;
+    height: 100%;
+    /*background-color: #499f68;*/
     position: absolute;
-    right: 5%;
-    top: 10%;
+    right: 0;
+    top: 0;
     border-radius: 0 9999px 9999px 0;
     z-index: 5;
 }
