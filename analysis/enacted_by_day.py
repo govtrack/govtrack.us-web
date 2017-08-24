@@ -21,7 +21,7 @@ def run_analysis_for_president(president, date_range):
 	end_date = min(end_date, datetime.now().date())
 
 	# limit to a shorter period than a whole presidency so this computes faster
-	end_date = min(start_date+timedelta(days=235), end_date)
+	#end_date = min(start_date+timedelta(days=365), end_date)
 
 	# if we're measuring presidential activity, the date of signing could be outside of the Congress
 	enacted_bills = Bill.objects.filter(
@@ -58,30 +58,30 @@ def run_analysis_for_president(president, date_range):
 				print b.id, b, e
 				raise ValueError("page date missing")
 
-		words = len(re.split(r"\s+", text))
+		#words = len(re.split(r"\s+", text)) # not very good for pre-GPO bills because Statutes at Large pages may have multiple statutes on them
 
 		################ EEK
 		#if pages == 1: continue
 		################ EEK
 
 		rel_date = (b.current_status_date - start_date).days
-		rec = by_day.setdefault(rel_date, { "bills": 0, "pages": 0, "words": 0 } )
+		rec = by_day.setdefault(rel_date, { "bills": 0, "pages": 0 } )
 		rec["bills"] += 1
 		rec["pages"] += pages
-		rec["words"] += words
+		#rec["words"] += words
 
 	# Compute cumulative counts starting on day 0 and for every day till the
 	# last day a bill was signed.
 	columns.append(president)
 	bills = 0
 	pages = 0
-	words = 0
+	#words = 0
 	for rel_date in range((end_date-start_date).days+1):
 		if rel_date in by_day:
 			bills += by_day[rel_date]["bills"]
 			pages += by_day[rel_date]["pages"]
-			words += by_day[rel_date]["words"]
-		stats.setdefault(rel_date, {})[president] = (bills, pages, words)
+			#words += by_day[rel_date]["words"]
+		stats.setdefault(rel_date, {})[president] = (bills, pages)
 
 # Collect data
 
@@ -106,7 +106,7 @@ import re
 def fmt_day(d): return re.sub(r"^0", "", d.strftime("%m/%d"))
 
 W = csv.writer(sys.stdout)
-W.writerow(["reldate", "date"] + sum(([president, "pages", "words"] for president in columns), []))
+W.writerow(["reldate", "date"] + sum(([president, "pages"] for president in columns), []))
 day_zero = datetime.strptime("2017-01-20", "%Y-%m-%d").date()
 for rel_date in range(max(stats)+1):
 	W.writerow(
