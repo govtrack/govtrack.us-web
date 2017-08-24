@@ -435,7 +435,7 @@ class Bill(models.Model):
         # Override the default Django behavior.
         s = self.get_current_status_and_date()
         ret = s[0]
-        if s[1]: ret += " (" + s[1] + ")"
+        if s[1]: ret = s[1]
         return ret
 
     def get_current_status_display_simple(self):
