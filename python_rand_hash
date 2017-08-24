@@ -2,15 +2,15 @@
 
 # Load the local Python environment.
 if [ -d .venv ]; then
-  echo "Activating .venv virtual environment."
+  #echo "Activating .venv virtual environment."
   source .venv/bin/activate
 fi
 
 # Load settings.
 if [ -f local/settings.env ]; then
-    echo "Loading settings from local/settings.env."
-    set -o allexport
-    source local/settings.env;
+  #echo "Loading settings from local/settings.env."
+  set -o allexport
+  source local/settings.env;
 fi
 
 # Run a python interpreter that uses a pseudo-random salt to make hash() values
