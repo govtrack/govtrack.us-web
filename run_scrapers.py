@@ -70,15 +70,6 @@ if "people" in sys.argv:
 	os.system("cd %s/congress-legislators; git fetch -pq" % SCRAPER_PATH)
 	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
-	# Convert people YAML into alternative formats.
-	os.system("cd %s/congress-legislators/scripts; . .env/bin/activate; python alternate_bulk_formats.py" % SCRAPER_PATH)
-
-	# Copy into our public directory.
-	for f in glob.glob("%s/congress-legislators/*.yaml" % SCRAPER_PATH):
-		make_link(f, "data/congress-legislators/%s" % os.path.basename(f))
-	for f in glob.glob("%s/congress-legislators/alternate_formats/*.csv" % SCRAPER_PATH):
-		make_link(f, "data/congress-legislators/%s" % os.path.basename(f))
-
 	# Load YAML (directly) into db.
 	os.system("./parse.py person") #  -l ERROR
 	os.system("./manage.py update_index -v 0 -u person person")
