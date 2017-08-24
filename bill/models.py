@@ -999,14 +999,18 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         "end_of_day": True,
                     })
 
-            # Bring in committee meetings.
+            # Bring in committee meetings. Skip if we have a REPORTED status on the same date.
             for mtg in self.committeemeeting_set.all():
-                ret.append({
-                    "key": "reported",
-                    "label": "Considered by " + unicode(mtg.committee),
-                    "explanation": "A committee held a hearing or business meeting about the " + self.noun + ".",
-                    "date": mtg.when,
-                })
+                for rec in ret:
+                    if rec["key"] == "reported" and rec["date"].isoformat()[0:10] == mtg.when.isoformat()[0:10]:
+                        break
+                else:
+                    ret.append({
+                        "key": "reported",
+                        "label": "Considered by " + unicode(mtg.committee),
+                        "explanation": "A committee held a hearing or business meeting about the " + self.noun + ".",
+                        "date": mtg.when,
+                    })
 
 
             # Bring in committee reports.
