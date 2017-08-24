@@ -644,20 +644,23 @@ def dump_sousveillance(request):
       if "?" in path: path = path[:path.index("?")] # ensure no qsargs
       if r.req.get("query"): path += "?" + urllib.urlencode({ k.encode("utf8"): v.encode("utf8") for k,v in r.req["query"].items() })
 
-      ua = str(user_agents.parse(r.req['agent']))
-      if ua == "Other / Other / Other": ua = "bot"
-      ua = re.sub(r"(\d+)(\.[\d\.]+)", r"\1", ua) # remove minor version numbers
+      if r.req['agent']:
+          ua = str(user_agents.parse(r.req['agent']))
+          if ua == "Other / Other / Other": ua = "bot"
+          ua = re.sub(r"(\d+)(\.[\d\.]+)", r"\1", ua) # remove minor version numbers
+      else:
+          ua = "unknown"
 
       ret = {
         "reqid": r.id,
         "when": r.when.strftime("%b %-d, %Y %-I:%M:%S %p"),
-        "netblock": get_netblock_label(r.req['ip']),
+        "netblock": get_netblock_label(r.req['ip']) if r.req['ip'] else None,
         "path": path,
         "query": r.req.get('query', {}),
         "ua": ua,
       }
       if recursive:
-          ret["netblock"] = ", ".join(sorted(set( get_netblock_label(rr.req["ip"]) for rr in Sousveillance.objects.filter(subject=r.subject) )))
+          ret["netblock"] = ", ".join(sorted(set( get_netblock_label(rr.req["ip"]) for rr in Sousveillance.objects.filter(subject=r.subject) if rr.req["ip"] )))
           ret["recent"] = [format_record(rr, False) for rr in Sousveillance.objects.filter(subject=r.subject, id__lt=r.id).order_by('-when')[0:15]]
       return ret
     records = [
