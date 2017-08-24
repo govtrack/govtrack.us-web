@@ -1,9 +1,12 @@
 from haystack import indexes
+from datetime import datetime
 
 # Some of the dates in Solr (Bill.current_status_date) are coming back as a DateTime, which Haystack rejects.
 class MyDateField(indexes.DateField):
 	def convert(self, value):
-		return indexes.DateTimeField().convert(value).date()
+		d = indexes.DateTimeField().convert(value)
+		if isinstance(d, datetime): d = d.date()
+		return d
 indexes.DateField = MyDateField
 
 def build_haystack_index(model):
