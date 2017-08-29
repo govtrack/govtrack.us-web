@@ -2,6 +2,22 @@
 #;encoding=utf-8
 
 # See if the text of one bill occurs within the text of another.
+# This works in two stages. In the "analysis" stage, all enacted
+# bills are compared to likely candidates for incorporated bills
+# and comparison output is saved to a CSV file. Only comparisons
+# not yet performed are run, and the CSV file is incremented with
+# new data. In the "load" step, the CSV data is loaded into the
+# database and old data in the database is cleared, with some
+# filtering - only pairs of bills that actually represent textual
+# incorporation are put into the database.
+#
+# To re-run, run in bash:
+#
+# for congress in {109..115}; do
+#  echo $congress;
+#  analysis/text_incorporation.py analyze $congress;
+#  analysis/text_incorporation.py load $congress;
+# done
 
 import sys
 import re
@@ -260,10 +276,16 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
         .filter(congress=b1.congress).more_like_this(b1)
       how_many = min(50, max(10, len(text1)/1000))
       similar_bills = set(r.object for r in qs[0:how_many])
+
+      # Add in any related bills identified by CRS. Related bills aren't
+      # exhaustive, which is why we also look at textually similar bills,
+      # but on very large bills (like big approps bills) textual similarity
+      # doesn't exhaustively include everythig either in the top ~50 results.
+      similar_bills |= set(rb.related_bill for rb in RelatedBill.objects.filter(bill=b1))
       
       # Iterate over each similar bill.
 
-      for b2 in similar_bills:
+      for b2 in sorted(similar_bills, key = lambda x : (x.congress, x.bill_type, x.number)):
         # Don't compare to other enacted bills.
         if b2.current_status in BillStatus.final_status_enacted_bill:
           continue

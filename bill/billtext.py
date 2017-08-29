@@ -49,8 +49,8 @@ bill_gpo_status_codes = {
     "pcs": ("Placed on Calendar in the Senate", None),
     "pp": ("Public Print", None),
     "pap": ("Printed as Passed", None),
-    "rah": ("Referred to House Committee (w/ Amendments)", { BillStatus.referred }),
-    "ras": ("Referred to Senate Committee (w/ Amendments)", { BillStatus.referred }),
+    "rah": ("Referred to House Committee (w/ Amendments)", { BillStatus.introduced }),
+    "ras": ("Referred to Senate Committee (w/ Amendments)", { BillStatus.introduced }),
     "rch": ("Reference Change", None),
     "rcs": ("Reference Change", None),
     "rdh": ("Received by the House", None),
@@ -72,8 +72,8 @@ bill_gpo_status_codes = {
     "rs_s": ("Reported by Senate Committee/Star Print", None),
     "rih": ("Referral Instructions in the House", None),
     "ris": ("Referral Instructions in the Senate", None),
-    "rth": ("Referred to House Committee", { BillStatus.referred }), # originating chamber
-    "rts": ("Referred to Senate Committee", { BillStatus.referred }), # originating chamber
+    "rth": ("Referred to House Committee", { BillStatus.introduced }), # originating chamber
+    "rts": ("Referred to Senate Committee", { BillStatus.introduced }), # originating chamber
     "s_p": ("Star Print of an Amendment", None),
     "fph": ("Failed Passage in the House", None),
     "fps": ("Failed Passage in the Senate", None),

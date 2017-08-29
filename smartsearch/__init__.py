@@ -1,4 +1,13 @@
 from haystack import indexes
+from datetime import datetime
+
+# Some of the dates in Solr (Bill.current_status_date) are coming back as a DateTime, which Haystack rejects.
+class MyDateField(indexes.DateField):
+	def convert(self, value):
+		d = indexes.DateTimeField().convert(value)
+		if isinstance(d, datetime): d = d.date()
+		return d
+indexes.DateField = MyDateField
 
 def build_haystack_index(model):
 	class I(indexes.SearchIndex, indexes.Indexable):
@@ -13,7 +22,7 @@ def build_haystack_index(model):
 	I.__name__ = model.__name__
 	I.prefetch_related_list = []
 			
-	fieldmap = dict( (f.name, f) for f in model._meta.fields+model._meta.many_to_many )
+	fieldmap = dict( (f.name, f) for f in model._meta.get_fields() )
 	
 	def build_field(fieldname):
 		if not fieldname in fieldmap:
@@ -35,6 +44,7 @@ def build_haystack_index(model):
 			raise ValueError("Model %s field %s in haystack_index is of a type I don't know how to index: %s." % (model.__name__, fieldname, clz))
 		
 		I.fields[fieldname] = index_class(model_attr=model_value, faceted=True, index_fieldname=fieldname, null=True, indexed=True) # xapian requires indexed=True, elasticsearch requires indexed=False to turn off language analysis, and Solr seems to ignore
+		I.fields[fieldname].set_instance_name(fieldname)
 			
 	for index_field in getattr(model, "haystack_index", []):
 		build_field(index_field)

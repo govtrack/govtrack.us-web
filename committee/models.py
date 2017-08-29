@@ -136,12 +136,21 @@ class Committee(models.Model):
             "title": self.fullname + " Meeting",
             "url": self.get_absolute_url(),
             "body_text_template": """{{subject|safe}}""",
-            "body_html_template": """<p>{{subject}}</p> <p><small>Check out our new <a href="https://www.govtrack.us/congress/committees/calendar">committee meeting calendar</a>.</small></p>""",
+            "body_html_template": """<p>{{subject}}</p>""",
             "context": {
                 "subject": mtg.subject + (" (Location: " + mtg.room + ")" if mtg.room else ""),
                 }
             }
 
+    def get_recent_reports(self):
+        reports = []
+        for bill in self.bills.exclude(committee_reports=None):
+            for rpt in bill.get_committee_reports():
+                if rpt["committee_code"].upper().replace("00", "") != self.code: continue
+                rpt["bill"] = bill
+                reports.append(rpt)
+        reports.sort(key = lambda rpt : rpt["docdate"], reverse=True)
+        return reports
 
 class CommitteeMemberRole(enum.Enum):
     exofficio = enum.Item(1, 'Ex Officio')

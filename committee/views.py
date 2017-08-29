@@ -45,6 +45,7 @@ def committee_details(request, parent_code, child_code=None):
             'feed': obj.get_feed(),
             "member_highlights": [m for m in members if m.role in (CommitteeMemberRole.chair, CommitteeMemberRole.vice_chair, CommitteeMemberRole.ranking_member)],
             "party_counts": party_counts,
+            "recent_reports": obj.get_recent_reports(),
             }
 
 

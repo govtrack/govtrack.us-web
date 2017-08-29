@@ -74,7 +74,7 @@
 	
 		<form method="post" class="form-horizontal login">{% csrf_token %}
 			<div class="form-group">
-				<label for="email" class="col-sm-2 col-md-3 control-label">Email Address</label>
+				<label for="email" class="col-sm-2 col-md-3 control-label">New Email Address</label>
 				<div class="col-sm-4 col-md-6">
 					<input type="email" size="20" id="email" name="email" value="{{user.email}}" class="form-control"/>
 				</div>
@@ -87,7 +87,7 @@
 		
 		<form method="post" class="form-horizontal login">{% csrf_token %}
 			<div class="form-group">
-				<label for="password" class="col-sm-2 col-md-3 control-label">Password</label>
+				<label for="password" class="col-sm-2 col-md-3 control-label">New Password</label>
 				<div class="col-sm-4 col-md-6">
 					<input type="password" size="20" id="password" name="password" value="" class="form-control"/>
 				</div>

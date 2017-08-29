@@ -63,17 +63,19 @@
 				{% endfor %}
 			</dl>
 
-			<p style="line-height: 110%"><small>
+			
 			{% if member_highlights|length > 0 %}
-			The chair is always selected from the majority party and the ranking member is the most senior member of the minority party.
+			<p style="line-height: 110%"><small>The chair is always selected from the majority party and the ranking member is the most senior member of the minority party.</small></p>
 			{% endif %}
 			{% if party_counts|length > 0 and committee.code != "HSSO" %}
-			The majority party ensures it has a majority on every committee.
+			<p style="line-height: 110%"><small>The majority party ensures it has a majority on every committee.</small></p>
 			{% endif %}
+			</small></p>
 			
 			{% if members|length == 0 %}
 			<p>The membership of this committee is not yet available.</p>
 			{% endif %}
+
 	</div>
 	
 	
@@ -93,12 +95,16 @@
 		<li role="presentation" class="active"><a href="#members" aria-controls="members" role="tab" data-toggle="tab">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
 		{% endif %}
 		<li role="presentation" {% if members|length == 0 %}class="active"{% endif %}><a href="#activity" aria-controls="activity" role="tab" data-toggle="tab">Bills</a></li>
+        {% if recent_reports|length > 0 %}
+			<li role="presentation"><a href="#reports" aria-controls="reports" role="tab" data-toggle="tab">Reports</a></li>
+        {% endif %}
 		{% if subcommittees %}<li role="presentation"><a href="#subcommittees" aria-controls="subcommittees" role="tab" data-toggle="tab">Subcommittees</a></li>{% endif %}
 	</ul>
 
 	<div class="tab-content">
 		{% if members|length > 0 %}
 		<div id="members" class="tab-pane active members-grid">
+			<h2>Members</h2>
 		    <div class="row">
 	        {% for member in members %}
 		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
@@ -107,7 +113,7 @@
 		        <div class="member col-xs-6 col-sm-3 col-md-2">
 	            	
 		            <div class="photo">
-	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" width="100" height="120"/></a>
+	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" width="100" height="120" alt="Portrait of {{ member.person.name_no_details }}"/></a>
 	            	</div>
 	            	
 		            {% with member.person.get_current_role as role %}
@@ -149,6 +155,7 @@
 		{% endif %}
 		
 		<div id="activity" class="tab-pane {% if members|length == 0 %}active{% endif %}">
+				<h2>Bills</h2>
 				{% if committee.has_current_bills %}
 					{% with committee.current_bills_sorted as current_bills_sorted %}
 					<p>There are <a href="/congress/bills/browse#committees={{committee.id}}">{{current_bills_sorted.count|intcomma}} bills referred to this {% if parent %}sub{% endif %}committee</a>{% if current_bills_sorted.count > 100 %}. Below find the top 100{% endif %}:</p>
@@ -170,14 +177,26 @@
 					<p>No bills have been assigned to this {% if parent %}sub{% endif %}committee.</p>
 				{% endif %}
 		</div>
+
+		<div id="reports" class="tab-pane">
+			<table class="table">
+			<thead><tr><th style="min-width: 9em">Date</th> <th>PDF</th> <th>Bill</th></tr></thead>
+			<tbody>
+				{% for item in recent_reports %}
+					<tr><td>{{item.docdate|date}}</td> <td><a href="{{item.gpo_pdf_url}}">PDF</a></td> <td><a href="{{item.bill.get_absolute_url}}">{{item.bill.title}}</a></td></tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		</div>
 		
 		{% if subcommittees %}
-		<div id="subcommittees" class="tab-pane active">
-				<ul class="bullets">
-					{% for item in subcommittees %}
-					<li><a href="{{ item.get_absolute_url }}">{{ item.name_no_article }}</a></li>
-					{% endfor %}
-				</ul>
+		<div id="subcommittees" class="tab-pane">
+			<h2>Subcommittees</h2>
+			<ul class="bullets">
+				{% for item in subcommittees %}
+				<li><a href="{{ item.get_absolute_url }}">{{ item.name_no_article }}</a></li>
+				{% endfor %}
+			</ul>
 		</div>
 		{% endif %}
 	</div><!-- /panes -->
@@ -187,7 +206,6 @@
 
 {% block body_scripts %}
 <script>
-$("ul.tabs li a").tabs("div.panes > div");
 $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
 </script>
 {% endblock %}

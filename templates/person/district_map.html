@@ -53,7 +53,7 @@
       		alert("That location does not seem to be in a United States Congressional District.");
       		return;
       	}
-      	if (district.number != "00" || 1) {
+      	if (district.number != "00") {
           // URLs don't use zero-padding
           var path = "/congress/members/" + district.state + "/" + parseInt(district.number);
           var fragment = "#q=" + encodeURIComponent(q) + "&marker_lng=" + pt[0] + "&marker_lat=" + pt[1];
@@ -64,8 +64,10 @@
           }
 	        window.location = path + fragment;
         }
-      	else
+      	else {
+            // There is no district page for at-large districts. Redirect to the state page.
 	        window.location = "/congress/members/" + district.state;
+        }
       });
   }
 
@@ -171,13 +173,11 @@
 					{% if stateapp != "T" %}
 						<p>The United States is divided into 435 congressional districts, each with a population of about 710,000 individuals. Each district elects a representative to the U.S. House of Representatives for a two-year term. Representatives are also called congressmen/congresswomen.</p>
 					{% elif state == "DC" %}
-						<p>The District of Columbia (DC) is the nation&rsquo;s capital. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators or representatives in Congress.</p>
-
-						<p>Instead, the District of Columbia sends a <b>delegate</b> to the House of Representatives with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
+						<p>The District of Columbia (DC) is the nation&rsquo;s capital. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators and its representative in the House of Representatives is a <b>delegate</b> with limited voting privileges.</p>
+						<p>Delegates have a marginalized role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
 					{% else %}
-						<p>{% if state == "VI" or state == "MP" %}The {% endif %}{{statename}} is a territory of the United States. Because it is not a state, it has no senators or representatives in Congress.</p>
-
-						<p>Instead, it sends a <b>delegate</b> to the House of Representatives{% if state == "PR" %}, called the <b>Resident Commissioner</b>,{% endif %} with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
+						<p>{% if state == "VI" or state == "MP" %}The {% endif %}{{statename}} is a territory of the United States. Because it is not a state, it has no senators and its representative in the House of Representatives is a <b>delegate</b>{% if state == "PR" %}, called the <b>Resident Commissioner</b>,{% endif %} with limited voting privileges.</p>
+						<p>Delegates have a marginalized role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
 					{% endif %}
 
 				{% endif %}
@@ -192,7 +192,7 @@
 				</div>
 				<div class="col-sm-9">
 					{% if rep %}
-						<div style="margin-bottom: .5em">
+						<div style="margin-bottom: 2px">
 						  <a href="{{rep.get_absolute_url}}" style="font-weight: bold; font-size: 110%; text-decoration: none; color: inherit;">
 							{{rep.name_no_details}}
 						  </a>
@@ -201,12 +201,12 @@
 						{% with rep.current_role as role %}
 						<div>{{role.get_description}}</div>
 	            		<div>Since {{role.logical_dates.0|date}} (Next Election in {{role.next_election_year}})</div>
-						<div style="margin-bottom: .5em;">{{role.party}}</div>
+						<div style="margin-bottom: .45em;">{{role.party}}</div>
 
 						<div class="spanbullets" style="margin-bottom: .75em;">
 						{% if rep.twitterid %}<span><a href="https://twitter.com/@{{rep.twitterid}}">@{{rep.twitterid}}</a></span>{% endif %}
 						{% if role.website %}<span><a href="{{role.website}}">Official Website <i class="fa  fa-external-link"></i></a></span>{% endif %}
-						{% if role.phone %}<span><nobr><a href="tel:+1-{{role.phone}}">{{role.phone}}</a></nobr></span>{% endif %}
+						{% if role.phone %}<span><span class="nowrap"><a href="tel:+1-{{role.phone}}">{{role.phone}}</a></span></span>{% endif %}
 						</div>
 
 						<div style="margin-bottom: .5em;"><a href="{{rep.get_absolute_url}}" class="btn btn-success">View Legislative Profile &amp; Get Alerts &raquo;</a></div>
@@ -217,7 +217,7 @@
 						{% endwith %}
 
 					{% else %}
-						<em>Vacant</em>
+						<em>This seat is currently vacant.</em>
 					{% endif %}
 				</div>
 				</div>

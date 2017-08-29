@@ -434,8 +434,8 @@ window.post_jquery_load_scripts.push(function() {
                 <label for="searchform_field_{{field.field_name}}" style="margin: 0;">{% if field.label %}{{field.label}}{% else %}{{field.field_name}}{% endif %}</label>
 				{% endif %}
                 {% if field.type == "text" %}
-                    <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text with_search_button" onchange="$('#show_more').hide()" style="width: 65%; margin-right: 5px;"> </input>
-                    <input id="searchform_field_{{field.field_name}}_button" class="btn-search-small" type="submit" value="Search" value="Go" onclick="update_search()"> </input>
+                    <input id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" type="text" class="text with_search_button" onchange="$('#show_more').hide()" style="width: 65%; margin-right: 5px;">
+                    <input id="searchform_field_{{field.field_name}}_button" class="btn-search-small" type="submit" value="Search" onclick="update_search()">
                     	{% comment %}when the text value changes, hide Show More so that we don't try to access a later page on a different search query than what we've loaded so far{% endcomment %}
                 {% elif field.type == "select" %}
                     <select id="searchform_field_{{field.field_name}}" name="{{field.field_name}}" size="1" onchange="update_search()" style="width: 100%"> </select>

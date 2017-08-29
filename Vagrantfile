@@ -10,6 +10,7 @@ Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/xenial64"
   config.vm.network "forwarded_port", guest: 8000, host: 8000
   config.vm.provision "shell", inline: <<-SHELL
+    # Create a fake manage.py file in ~ so 'vagrant ssh' can find it easily.
     ln -s /vagrant/build/vagrant_manage.py manage.py
     cd /vagrant
 
@@ -39,14 +40,16 @@ Vagrant.configure(2) do |config|
     # Install Python packages
     #########################
 
-    # Create a 'virtualenv' where Python packages are installed to.
-    virtualenv --system-site-packages .env
-
-    # Activate the Python virtual environment.
-    source .env/bin/activate
+    # If you're following these instructions manually, you should create
+    # a "virtualenv" for Python that will hold additional Python packages.
+    # With Vagrant, it's not necessary, so it's commented out. But you
+    # should run these two commands:
+    #
+    # virtualenv --system-site-packages .venv
+    # source .venv/bin/activate
 
     # Install Python packages.
-    pip install --upgrade -r build/pipreq.txt
+    pip install --upgrade -r requirements.txt
 
     # On OS X, install bcrypt:
     # http://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed

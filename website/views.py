@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect, get_object_or_404, render
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
@@ -51,7 +50,7 @@ def staticpage(request, pagename):
     
     ctx = { 'pagename': pagename }
     
-    return render_to_response('website/' + pagename + '.html', ctx, RequestContext(request))
+    return render(request, 'website/' + pagename + '.html', ctx)
 
 def get_blog_items():
     # c/o http://stackoverflow.com/questions/1208916/decoding-html-entities-with-python
@@ -216,7 +215,7 @@ def do_site_search(q, allow_redirect=False, request=None):
 
 @render_to('website/search.html')
 def search(request):
-    r = do_site_search(request.REQUEST.get("q", ""), allow_redirect=True, request=request)
+    r = do_site_search(request.GET.get("q", request.POST.get("q", "")), allow_redirect=True, request=request)
     if not isinstance(r, list): return r
     return { "results": r }
 
@@ -257,7 +256,7 @@ def your_docket(request):
     # Pre-load the user's subscription lists and for each list
     # pre-load the list of bills entered into the list.
     lists = []
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         lists = request.user.subscription_lists.all()
         for lst in lists:
             lst.bills = []
@@ -395,7 +394,7 @@ def go_ad_free_start(request):
     
     # does the user have an ad-free payment already?
     msi = { }
-    if not request.user.is_anonymous():
+    if not request.user.is_anonymous:
         msi = request.user.userprofile().get_membership_subscription_info()
 
     # or did the user make an anonymous payment?
@@ -422,7 +421,7 @@ def go_ad_free_redirect(request):
         sandbox = "-sandbox"
 
     # slightly different SKU if the user is/isn't logged in
-    if request.user.is_anonymous():
+    if request.user.is_anonymous:
         item = {
             "name": "Support GovTrack.us (%.02d)" % amount,
             "sku": "govtrack-tip" + sandbox,
@@ -467,7 +466,7 @@ def go_ad_free_redirect(request):
     from website.models import PayPalPayment
     rec = PayPalPayment(
         paypal_id=payment.id,
-        user=request.user if not request.user.is_anonymous() else None,
+        user=request.user if not request.user.is_anonymous else None,
         response_data=payment.to_dict(),
         notes=item["name"])
     rec.save()
@@ -501,7 +500,7 @@ def go_ad_free_finish(request):
 
 @anonymous_view
 def videos(request, video_id=None):
-    return render_to_response('website/videos.html', { "video_id": video_id }, RequestContext(request))
+    return render(request, 'website/videos.html', { "video_id": video_id })
 
 
 def set_district(request):
@@ -523,7 +522,7 @@ def set_district(request):
         json.dumps({ "status": "ok", "mocs": mocs }),
         content_type="application/json")
 
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         # Save to database.
         prof = request.user.userprofile()
         prof.congressionaldistrict = "%s%02d" % (state, district)
@@ -625,8 +624,8 @@ def add_remove_reaction(request):
 
         r, isnew = Reaction.objects.get_or_create(
             subject=request.POST["subject"],
-            user=request.user if request.user.is_authenticated() else None,
-            anon_session_key=Reaction.get_session_key(request) if not request.user.is_authenticated() else None,
+            user=request.user if request.user.is_authenticated else None,
+            anon_session_key=Reaction.get_session_key(request) if not request.user.is_authenticated else None,
         )
 
         if isnew:
@@ -706,22 +705,25 @@ def dump_sousveillance(request):
         except:
             pass
       if "?" in path: path = path[:path.index("?")] # ensure no qsargs
-      if r.req.get("query"): path += "?" + urllib.urlencode(r.req["query"])
+      if r.req.get("query"): path += "?" + urllib.urlencode({ k.encode("utf8"): v.encode("utf8") for k,v in r.req["query"].items() })
 
-      ua = str(user_agents.parse(r.req['agent']))
-      if ua == "Other / Other / Other": ua = "bot"
-      ua = re.sub(r"(\d+)(\.[\d\.]+)", r"\1", ua) # remove minor version numbers
+      if r.req['agent']:
+          ua = str(user_agents.parse(r.req['agent']))
+          if ua == "Other / Other / Other": ua = "bot"
+          ua = re.sub(r"(\d+)(\.[\d\.]+)", r"\1", ua) # remove minor version numbers
+      else:
+          ua = "unknown"
 
       ret = {
         "reqid": r.id,
         "when": r.when.strftime("%b %-d, %Y %-I:%M:%S %p"),
-        "netblock": get_netblock_label(r.req['ip']),
+        "netblock": get_netblock_label(r.req['ip']) if r.req['ip'] else None,
         "path": path,
         "query": r.req.get('query', {}),
         "ua": ua,
       }
       if recursive:
-          ret["netblock"] = ", ".join(sorted(set( get_netblock_label(rr.req["ip"]) for rr in Sousveillance.objects.filter(subject=r.subject) )))
+          ret["netblock"] = ", ".join(sorted(set( get_netblock_label(rr.req["ip"]) for rr in Sousveillance.objects.filter(subject=r.subject) if rr.req["ip"] )))
           ret["recent"] = [format_record(rr, False) for rr in Sousveillance.objects.filter(subject=r.subject, id__lt=r.id).order_by('-when')[0:15]]
       return ret
     records = [

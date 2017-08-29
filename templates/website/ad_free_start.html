@@ -33,7 +33,7 @@
 		{% endif %}
 
 		<div style="border: 1px solid #CCC; padding: 15px; margin: 2em -10px; background-color: #FFD; border-radius: 10px;">
-			<form id="go_ad_free" method="post" action="{% url "website.views.go_ad_free_redirect" %}">
+			<form id="go_ad_free" method="post" action="/accounts/membership/start">
 				{% csrf_token %}
 
 				<p><b>I support GovTrack in the amount of:</b></p>
@@ -63,7 +63,7 @@
 					<div id="adfreelogin" style="display: none; padding-bottom: 15px; border-bottom: 1px solid #DD9; margin-bottom: 15px;">
 						<p>Please create a GovTrack account to begin:</p>
 				
-						{% url "website.views.go_ad_free_redirect" as redirect_url %}
+						{% with redirect_url="accounts/membership/start" %}
 						<div style="width: 50%;">
 						<div class="signin_social" style="margin-left: 2em;">
 							{% with redirect_url as singlesignon_next %}
@@ -76,6 +76,7 @@
 						<a class="btn btn-success" href="/registration/signup?next={{redirect_url}}">Register a New Account</a>
 						<a class="btn btn-success" href="/accounts/login?next={{redirect_url}}">Existing User Log In</a>
 						</div>
+						{% endwith %}
 					</div>
 
 					<p>Or you can make a contribution without creating an account:</p>

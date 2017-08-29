@@ -355,7 +355,7 @@ function smooth_scroll(elem) {
 							<img style="float: left; margin-left: {{cohort.percentile}}px; margin-top: 1px;" src="/static/images/img-guy-taking-oath.png" width="16" height="16" title="{{person}}">
 						</div>
 					</td>
-					{% if stat.show_values %}<td class="max"><nobr>
+					{% if stat.show_values %}<td class="max"><span class="nowrap">
 						{{cohort.max|floatformat:"0"|intcomma}}{% if stat.key == "missed-votes" %}% missed votes
 						{% elif stat.key == "bills-introduced" %}
 							bills
@@ -380,7 +380,7 @@ function smooth_scroll(elem) {
 						{% elif stat.key == "transparency-bills" %}
 							points
 						{% endif %}
-					</nobr></td>{% endif %}
+					</span></td>{% endif %}
 
 					<td class="more">
 						<a href="/congress/members/report-cards/{{session}}/{{cohort.key}}/{{stat.key}}">View All</a>

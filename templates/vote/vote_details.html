@@ -228,7 +228,7 @@ $(function() {
 
 {% block body %}
 
-<h1 class="long">{{ vote.question }}</h1>
+<h1 class="long" data-vote-id="{{vote.id}}">{{ vote.question }}</h1>
 
 <div id="vote_explainer">
 	{% if vote.oursummary %}
@@ -337,11 +337,11 @@ $(function() {
         </p>
 
 	{% elif vote.question == "On Approving the Journal" %}
-    <p>This was a procedural vote. The House is required to approve its previous day&rsquo;s journal of activities each day.
-	But a roll call vote on approving the journal is often used by the majority party to get representatives to the floor
+    <p>This was a procedural vote. The House is required to approve its previous day&rsquo;s journal of activities each day, but the journal is never the true subject of these votes.
+    Because the journal is routinely approved, representatives use these votes to appear to be voting for or against their party, whichever is more politically useful, in aggregate vote statistics, knowing that their vote here does not truly matter.
+	These votes may also be used by the majority party to get representatives to the floor
 	or to conduct an informal tally about their position on another matter. That other matter is not made known to the general
 	public.</p>
-
     {% endif %}
 
 </div>
@@ -606,7 +606,7 @@ $(function() {
                 voter_sort_3="{% if voter.voter_type_is_member %}{{ voter.person_role.state_name }} {{ voter.person_role.district|rjust:3 }}{% elif voter.voter_type == 2 %}00{% endif %}"
                 class="{% if voter.is_outlier %}voter_outlier{% endif %}"
             	>
-                <td class="vote_{{ voter.option.alpha_key }}"><nobr>{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</nobr></td>
+                <td class="vote_{{ voter.option.alpha_key }}"><span class="nowrap">{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</span></td>
                 <td>
                     {% if voter.voter_type != 1 %}
                         {% if voter.party|slice:"0:1" in "DIR" %}
