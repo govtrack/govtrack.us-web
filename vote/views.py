@@ -4,8 +4,7 @@ from StringIO import StringIO
 from datetime import datetime
 
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404, render
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import cache_page
 
@@ -138,8 +137,8 @@ def vote_details_userview(request, congress, session, chamber_code, number):
             </div>
             """
 
-        from django.template import Template, Context, RequestContext, loader
-        ret["admin_panel"] = Template(admin_panel).render(RequestContext(request, {
+        from django.template import Template, Context
+        ret["admin_panel"] = Template(admin_panel).render(Context({
             'vote': vote,
             }))
 
@@ -339,6 +338,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		vote_result_2 = re.sub("^(Bill|Amendment|Resolution of Ratification|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion) ", "", vote.result)
 	if vote_result_2 == "unknown": vote_result_2 = ""
 	if len(vote_result_2) > 15: vote_result_2 = vote_result_2[-15:]
+	if vote_result_2 == "Confirmed": vote_title = re.sub(r"^On the Nomination ", "", vote_title)
 	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
 	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
 	
@@ -397,28 +397,28 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	chart_top = 0
 	if is_thumbnail:
 		# Title
-		ctx.set_font_size(20)
+		ctx.set_font_size(16)
 		ctx.set_source_rgb(.2,.2,.2)
 		ctx.move_to(150,10)
 		show_text_centered(ctx, vote_title, max_width=.95*image_width)
 		chart_top = 50
 	
 	# Vote Tally
-	font_size = 26 if len(vote_result_2) < 10 else 22
+	font_size = 24 if len(vote_result_2) < 10 else 20
 	ctx.set_font_size(font_size)
 	ctx.set_source_rgb(.1, .1, .1)
 	ctx.move_to(150,chart_top)
 	show_text_centered(ctx, vote_result_1)
 	
 	# Vote Result
-	ctx.move_to(150,chart_top+12+font_size)
+	ctx.move_to(150,chart_top+8+font_size)
 	show_text_centered(ctx, vote_result_2) 
 	w = max(ctx.text_extents(vote_result_1)[2], ctx.text_extents(vote_result_2)[2])
 	
 	# Line
 	ctx.set_line_width(1)
 	ctx.new_path()
-	ctx.line_to(150-w/2, chart_top+5+font_size)
+	ctx.line_to(150-w/2, chart_top+3+font_size)
 	ctx.rel_line_to(w, 0)
 	ctx.stroke()
 	
@@ -444,7 +444,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		
 	# Determine the seating chart dimensions: the radius of the inside row of
 	# seats and the radius of the outside row of seats.
-	inner_r = w/2 * 1.25 + 5 # wrap closely around the text in the middle
+	inner_r = w/2 * 1.25 + .4 * font_size # wrap closely around the text in the middle
 	if seating_rows <= 4: inner_r = max(inner_r, 75) # don't make the inner radius too small
 	outer_r = image_width * .45 # end close to the image width
 	
@@ -567,7 +567,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		ctx.translate(image_width/2, chart_top+25)
 		ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))
 		ctx.translate(r, 0)
-		ctx.rectangle(-seat_size/2, -seat_size/2, seat_size, seat_size)
+		ctx.rectangle(-seat_size/2, -seat_size/2, .8*seat_size, seat_size)
 		ctx.fill()
 
 	# Convert the image buffer to raw PNG bytes.

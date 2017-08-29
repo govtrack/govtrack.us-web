@@ -118,7 +118,7 @@ def pull_or_clone_repo(repo_url, folder, branch='master'):
 
 def install_deps():
     with cd('govtrack.us-web'):
-        sudo('pip install --upgrade -r ./build/pipreq.txt')
+        sudo('pip install --upgrade -r ./requirements.txt')
 
         # We don't need psycopg2 in the normal requirements. If postgres isn't
         # installed, the library installation will fail. Leave it out of the
@@ -137,10 +137,8 @@ def install_deps():
         # For backing up the data directory...
         sudo('pip install aws')
 
-        # TODO: Create a pipreq.server.txt, and move
-        # pipreq.txt to pipreq.app.txt. Then, install
-        # pipreq.server.txt here instead of having the
-        # requirements piece-meal.
+        # TODO: Create a requirements.server.txt with all of the requirements
+        # so we don't have to install them all piecemeal.
 
 
 def configure_solr():

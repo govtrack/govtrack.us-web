@@ -25,15 +25,17 @@ from website.models import MediumPost
 medium_posts = MediumPost.objects.order_by('-published')[0:6]
 
 class Command(BaseCommand):
-	args = 'daily|weekly|testadmin|testcount'
 	help = 'Sends out email updates of events to subscribing users.'
+
+	def add_arguments(self, parser):
+		parser.add_argument('mode', nargs=1, type=str)
 	
 	def handle(self, *args, **options):
-		if len(args) != 1 or args[0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
+		if options["mode"][0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
 			print "Specify daily or weekly or testadmin or testcount."
 			return
 
-		if args[0] == "testadmin":
+		if options["mode"][0] == "testadmin":
 			# Test an email to the site administrator only. There's no need to be complicated
 			# about finding users --- just use a hard-coded list.
 			users = User.objects.filter(email="jt@occams.info")
@@ -49,13 +51,13 @@ class Command(BaseCommand):
 			send_mail = True
 			mark_lists = True
 			send_old_events = False
-			if args[0] == "daily":
+			if options["mode"][0] == "daily":
 				list_email_freq = (1,)
 				back_days = BACKFILL_DAYS_DAILY
-			elif args[0] == "weekly":
+			elif options["mode"][0] == "weekly":
 				list_email_freq = (1,2)
 				back_days = BACKFILL_DAYS_WEEKLY
-			elif args[0] == "testcount":
+			elif options["mode"][0] == "testcount":
 				# count up how many daily emails we would send, but don't send any
 				list_email_freq = (1,)
 				send_mail = False
@@ -242,7 +244,15 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			fail_silently=False
 		)
 	except Exception as e:
-		print user, e
+		if "recipient address was suppressed due to" in str(e):
+			be, is_new = BouncedEmail.objects.get_or_create(user=user)
+			if not is_new:
+				be.bounces += 1
+				be.save()
+			print user, "user is on suppression list already"
+		else:
+			print user, e
+
 		return None # skip updating what events were sent, False = did not sent
 	
 	if not mark_lists:
@@ -260,13 +270,11 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 def load_markdown_content(template_path, utm=""):
 	# Load the Markdown template for the current blast.
 	templ = get_template(template_path)
-	ctx = Context({ })
 
 	# Get the text-only body content, which also includes some email metadata.
 	# Replace Markdown-style [text][href] links with the text plus bracketed href.
-	ctx.update({ "format": "text", "utm": "" })
+	ctx = { "format": "text", "utm": "" }
 	body_text = templ.render(ctx).strip()
-	ctx.pop()
 	body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 at \2", body_text)
 
 	# The top of the text content contains metadata in YAML format,
@@ -276,13 +284,12 @@ def load_markdown_content(template_path, utm=""):
 	body_text = body_text.strip()
 
 	# Get the HTML body content.
-	ctx.update({
+	ctx = {
 		"format": "html",
 		"utm": utm,
-	})
+	}
 	body_html = templ.render(ctx).strip()
 	body_html = markdown2.markdown(body_html)
-	ctx.pop()
 
 	# Store everything in meta_info.
 	

@@ -77,7 +77,7 @@ def edit_subscription_lists(request):
 @login_required
 @json_response
 def edit_subscription_list(request):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return { "error": "not logged in" }
         
     if "email_freq" in request.POST:
@@ -283,9 +283,9 @@ def events_embed_legacy(request):
         "link": feedlist[0].link if len(feedlist) == 1 else None }
         
     # render the HTML
-    from django.template import Template, Context, RequestContext, loader
+    from django.template import Template, Context, loader
     html = loader.get_template("events/events_embed_legacy.html")\
-        .render(RequestContext(request, context))
+        .render(context)
     
     # convert to Javascript document.write statements.
     from django.utils.html import strip_spaces_between_tags

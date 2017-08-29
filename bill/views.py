@@ -56,14 +56,6 @@ def get_related_bills(bill):
             related_bills.append({ "bill": rb.related_bill, "note": ("(%s)" % (rb.relation.title() if rb.relation != "unknown" else "Related")), "show_title": True })
     return related_bills
 
-def get_text_info(bill):
-    # bill text info and areas of law affected
-    from billtext import load_bill_text
-    try:
-        return load_bill_text(bill, None, mods_only=True, with_citations=True)
-    except IOError:
-        return None
-
 @anonymous_view
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
@@ -75,7 +67,7 @@ def bill_details(request, congress, type_slug, number):
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": bill.get_feed(),
-        "text_info": get_text_info(bill),
+        "text_info": bill.get_text_info(with_citations=True),
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
     }
 
@@ -105,50 +97,17 @@ def bill_details_user_view(request, congress, type_slug, number):
                  | <a href="/admin/bill/bill/{{bill.id}}">Edit</a>
                 <br/>Tracked by {{feed.tracked_in_lists.count|intcomma}} users
                 ({{feed.tracked_in_lists_with_email.count|intcomma}} w/ email).
-                <br/>{{num_issuepos}} poll responses, {{num_calls}} phone calls to Congress.
             </div>
             """
 
-        from poll_and_call.models import RelatedBill as IssueByBill
-        try:
-            from poll_and_call.models import *
-            ix = RelatedBill.objects.get(bill=bill).issue
-            num_issuepos = UserPosition.objects.filter(position__issue=ix).count()
-            num_calls = len([c for c in CallLog.objects.filter(position__position__issue=ix) if c.is_complete()])
-        except IssueByBill.DoesNotExist:
-            num_issuepos = 0
-            num_calls = 0
-
-        from django.template import Template, Context, RequestContext, loader
-        ret["admin_panel"] = Template(admin_panel).render(RequestContext(request, {
+        from django.template import Template, Context
+        ret["admin_panel"] = Template(admin_panel).render(Context({
             'bill': bill,
             "feed": bill.get_feed(),
-            "num_issuepos": num_issuepos,
-            "num_calls": num_calls,
             }))
 
     from person.views import render_subscribe_inline
     ret.update(render_subscribe_inline(request, bill.get_feed()))
-
-    # poll_and_call
-    if request.user.is_authenticated():
-        from poll_and_call.models import RelatedBill as IssueByBill, UserPosition
-        try:
-            issue = IssueByBill.objects.get(bill=bill).issue
-            try:
-                up = UserPosition.objects.get(user=request.user, position__issue=issue)
-                targets = up.get_current_targets()
-                ret["poll_and_call_position"] =  {
-                    "id": up.position.id,
-                    "text": up.position.text,
-                    "can_change": up.can_change_position(),
-                    "can_call": [(t.id, t.person.name) for t in targets] if isinstance(targets, list) else [],
-                    "call_url": issue.get_absolute_url() + "/make_call",
-                }
-            except UserPosition.DoesNotExist:
-                pass
-        except IssueByBill.DoesNotExist:
-            pass
 
     # emoji reactions
     import json
@@ -203,7 +162,7 @@ def bill_summaries(request, congress, type_slug, number):
     return {
         "bill": bill,
         "congressdates": get_congress_dates(bill.congress),
-        "text_info": get_text_info(bill), # for the header tabs
+        "text_info": bill.get_text_info(with_citations=True), # for the header tabs
     }
 
 #Might be able DRY these user views up by moving this to header, but not for all pages.
@@ -221,7 +180,7 @@ def bill_full_details(request, congress, type_slug, number):
     return {
         "bill": bill,
         "related": get_related_bills(bill),
-        "text_info": get_text_info(bill), # for the header tabs
+        "text_info": bill.get_text_info(with_citations=True), # for the header tabs
     }
 
 @user_view_for(bill_full_details)
@@ -241,13 +200,6 @@ def bill_widget(request, congress, type_slug, number):
     sponsor_name = None if not bill.sponsor else \
         get_person_name(bill.sponsor, firstname_position='before', show_suffix=True)
 
-    def get_text_info():
-        from billtext import load_bill_text
-        try:
-            return load_bill_text(bill, None, mods_only=True)
-        except IOError:
-            return None
-
     return {
         "SITE_ROOT_URL": settings.SITE_ROOT_URL,
         "bill": bill,
@@ -256,7 +208,7 @@ def bill_widget(request, congress, type_slug, number):
         "sponsor_name": sponsor_name,
         "current": bill.congress == CURRENT_CONGRESS,
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
-        "text": get_text_info,
+        "text": bill.get_text_info(),
     }
 
 @anonymous_view
@@ -264,9 +216,8 @@ def bill_widget_loader(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
 
     # @render_to() doesn't support additional parameters, so we have to render manually.
-    from django.shortcuts import render_to_response
-    from django.template import RequestContext
-    return render_to_response("bill/bill_widget.js", { "bill": bill, "SITE_ROOT_URL": settings.SITE_ROOT_URL }, context_instance=RequestContext(request), content_type="text/javascript" )
+    from django.shortcuts import render
+    return render(request, "bill/bill_widget.js", { "bill": bill, "SITE_ROOT_URL": settings.SITE_ROOT_URL }, content_type="text/javascript" )
 
 @anonymous_view
 @render_to("bill/bill_widget_info.html")
@@ -277,30 +228,6 @@ def bill_widget_info(request, congress, type_slug, number):
         "SITE_ROOT_URL": settings.SITE_ROOT_URL,
     }
 
-@json_response
-@login_required
-def market_test_vote(request):
-    bill = get_object_or_404(Bill, id = request.POST.get("bill", "0"))
-    prediction = int(request.POST.get("prediction", "0"))
-    market = bill.get_open_market(request.user)
-    if not market: return { }
-
-    from predictionmarket.models import Trade, TradingAccount
-    account = TradingAccount.get(request.user)
-    if prediction != 0:
-        # Buy shares in one of the outcomes.
-        try:
-            t = Trade.place(account, market.outcomes.get(owner_key = 1 if prediction == 1 else 0), 10)
-        except ValueError as e:
-            return { "error": str(e) }
-
-    else:
-        # Sell shares.
-        positions, pl = account.position_in_market(market)
-        for outcome in positions:
-            Trade.place(account, outcome, -positions[outcome]["shares"])
-
-    return { "vote": prediction }
 
 @anonymous_view
 @render_to('bill/bill_text.html')
@@ -582,8 +509,8 @@ bill_status_groups = [
         "bills", " that were vetoed and the veto was not overridden by Congress", " that were vetoed and the veto was not overridden by Congress",
         (BillStatus.prov_kill_veto, BillStatus.override_pass_over_house, BillStatus.override_pass_over_senate, BillStatus.vetoed_pocket, BillStatus.vetoed_override_fail_originating_house, BillStatus.vetoed_override_fail_originating_senate, BillStatus.vetoed_override_fail_second_house, BillStatus.vetoed_override_fail_second_senate)), # 8
     ("Other Legislation",
-        "bills and resolutions", " that have been introduced, referred to committee, or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
-        (BillStatus.introduced, BillStatus.referred, BillStatus.reported)), # 3
+        "bills and resolutions", " that have been introduced or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
+        (BillStatus.introduced, BillStatus.reported)), # 3
 ]
 
 def load_bill_status_qs(statuses, congress=CURRENT_CONGRESS):
@@ -635,7 +562,7 @@ def bill_docket(request):
             "top_tracked_bills": top_bills,
 
             "subjects": subject_choices(),
-            "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.referred, BillStatus.reported),
+            "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.reported),
         }
 
     ret = cache.get("bill_docket_info")
@@ -792,62 +719,6 @@ def uscodeindex(request, secid):
         "base_template": 'master_c.html' if parent else "master_b.html",
         "feed": (Feed.objects.get_or_create(feedname="usc:" + str(parent.id))[0]) if parent else None,
     }
-
-@anonymous_view
-def start_poll(request):
-    from poll_and_call.models import Issue, IssuePosition, RelatedBill as IssueByBill
-
-    # get the bill & valence
-    bill = get_object_or_404(Bill, id=request.GET.get("bill"))
-    valence = (request.GET.get("position") == "support")
-
-    # get the Issue
-    try:
-        ix = IssueByBill.objects.get(bill=bill).issue
-    except IssueByBill.DoesNotExist:
-        # no Issue yet, so create
-        ix = Issue.objects.create(
-            slug = "%d-%s-%d" % (bill.congress, bill.bill_type_slug, bill.number),
-            title = "PLACEHOLDER",
-            question = "PLACEHOLDER",
-            introtext = "Weigh in on %s." % bill.display_number_with_congress_number,
-            isopen = True,
-            )
-        IssueByBill.objects.create(issue=ix, bill=bill, valence=True)
-
-    # update the Issue since the bill title may have changed
-    ix.title = bill.title
-    ix.question = "What is your position on %s?" % bill.title
-    ix.save()
-
-    # how to refer to the bill in the call script
-    from django.template.defaultfilters import truncatewords
-    title = bill.title_no_number
-    if re.match(".* Act( of \d{4})?", title):
-        title = "The " + title
-    title = bill.display_number + ": " + title
-    bt = truncatewords(title, 11)
-    if "..." in bt:
-        bt = truncatewords(title, 15)
-        bt = u"%s (\u201C%s\u201D)" % (bill.display_number, bt.replace(bill.display_number + ": ", ""))
-
-    # create and update the options
-    for opt_valence, opt_verb in ((True, "support"), (False, "oppose")):
-        try:
-            p = ix.positions.get(valence=opt_valence)
-        except:
-            p = IssuePosition.objects.create(
-                    text="PLACEHOLDER",
-                    valence=opt_valence,
-                    call_script="PLACEHOLDER",
-                    )
-            ix.positions.add(p)
-
-        p.text = opt_verb.title()
-        p.call_script = "I %s %s." % (opt_verb, bt)
-        p.save()
-
-    return HttpResponseRedirect(ix.get_absolute_url() + "/join/" + str(ix.positions.get(valence=valence).id))
 
 @anonymous_view
 def bill_text_image(request, congress, type_slug, number, image_type):

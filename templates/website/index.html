@@ -14,16 +14,40 @@
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-position: 50% 50%;
-	min-height: 100vh;
 	font-size: 16px;
 }
 #masthead, #footer {
 	border-top: none;
-	background-color: rgba(0,0,0,.33);
+	background: none;
+}
+#masthead .nav > li > a {
+	color: black;
+	font-weight: bold;
 }
 #sitenewscontainer.navbar-default, #sitenewscontainer.navbar-default a {
-	background: white;
 	border: none;
+}
+
+h1 {
+	 margin: 2em 0;
+	 font-size: 6vh;
+	 line-height: 125%;
+	 border: none;
+	 color: #222;
+	 text-shadow: 1px 1px 3px #cba;
+}
+
+.action-panel, #blog-posts {
+	border-radius: 15px;
+	background-color: rgba(255, 255, 255, .75);
+	padding: 25px;
+
+	font-weight: bold;
+	font-size: 17px;
+}
+
+.action-panel form:first-child {
+	margin-bottom: 25px;
 }
 
 .form-group {
@@ -35,16 +59,14 @@
 	}
 }
 .btn { font-weight: bold; }
-.underlinks { margin-top: .5em; margin-left: 2px; }
-.underlinks a { display: inline-block; text-decoration: none; background-color: rgba(255,255,255,.5); padding: 2px 3px; border-radius: 3px; margin: 2px 0; }
+.underlinks { margin-top: .75em; margin-left: 2px; color: #AAA; }
+.underlinks a { text-decoration: none; margin: 2px 4px; }
 
-#blog-posts {
-	background-color: rgba(250,250,255, .9);
-	border-radius: 20px;
-	padding: 15px;
-	margin: 0 -15px 0 -15px;
+#blog-posts-wrapper {
+	background-color: #1D4E70;
+	padding: 15px 0;
 }
-	#blog-posts h2 { margin-top: 0; }
+#blog-posts h2 { color: black; margin-top: 0; }
 
 article {
 
@@ -89,65 +111,73 @@ article {
 
 {% block body %}
 
-	<h1 style="font-size: 3.75vh; line-height: 125%; border: none; color: #222; text-shadow: 1px 1px 2px rgb(237, 244, 255);">
-		GovTrack is here to help you track legislation being debated in the United States Congress.
+	<h1>
+		Track the United States Congress!
 	</h1>
 
-	<div style="font-family: 'Roboto Slab'; font-weight: bold;">
+	<div class="action-panel">
 
-	<form action="#" onsubmit="return do_address_form();" class="form-inline" style="margin: 40px 0">
-      <label for="address" style="display: block;">Enter your address to find your representative and senators and then get alerts:</label>
+	<form action="#" onsubmit="return do_address_form();" class="form-inline">
+      <label for="address" style="display: block;">Enter your address to find your representative and senators, and then get alerts.</label>
 	  <div class="form-group">
 	    <input type="text" class="form-control" id="address" placeholder="415 N. Main St., Hannibal, Missouri">
 	  </div>
 	  <div class="form-group">
 		  <button type="submit" class="btn btn-success">Find My Reps &raquo;</button>
 	  </div>
-	  <p class="underlinks">
+	  <div class="underlinks">
 		<a href="#" onclick="do_by_current_location(); return false;"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a> &middot;
 		<a href="/congress/members/map"><i class="fa fa-globe" aria-hidden="true"></i> View a Map</a> &middot;
 		<a href="/congress/members/current"><i class="fa fa-list" aria-hidden="true"></i> See All Members of Congress</a> &middot;
 		<a href="/congress/members">More</a>
-	  </p>
+	  </div>
 	</form>
 
-	<form action="#" onsubmit="return do_subject_form();" class="form-inline" style="margin: 40px 0">
-      <label for="bill-subject-area" style="display: block;">Find legislation that affects you:</label>
+	<form action="#" onsubmit="return do_subject_form();" class="form-inline">
+      <label for="bill-subject-area" style="display: block;">Find legislation that affects you by selecting a subject area.</label>
 	  <div class="form-group">
 	    <select id="bill-subject-area" class="form-control" onchange="$(this).parents('form').submit();">
 	    	<option value="">Select Issue Area</option>
 			{% for top_term, subterms in bill_subject_areas %}
 				<option value="{{top_term.get_absolute_url}}">{{top_term.name}}</option>
-				{% if not forloop.last %}&middot;{% endif %}
 			{% endfor %}
 	    </select>
 	  </div>
 	  <div class="form-group">
 	  	<button type="submit" class="btn btn-success">Find Legislation &raquo;</button>
 	  </div>
-	  <p class="underlinks">
+	  <div class="underlinks">
 		<a href="/congress/bills/#bystatus"><i class="fa fa-file-text-o" aria-hidden="true"></i> All Bills</a> &middot;
 		<a href="/congress/bills/#get-alerts"><i class="fa fa-bell" aria-hidden="true"></i> Get Alerts</a> &middot;
 		<a href="/congress/bills/browse"><i class="fa fa-list" aria-hidden="true"></i> Search</a> &middot;
 		<a href="/congress/votes"><i class="fa fa-check-square-o" aria-hidden="true"></i> Votes</a> &middot;
 		<a href="/congress/committees/"><i class="fa fa-users" aria-hidden="true"></i> Committees</a> &middot;
 		<a href="/congress/bills/">More</a>
-	  </p>
+	  </div>
 	</form>
 
 	</div>
 
+</div> <!-- /#content, defined in master.html -->
+</div> <!-- /.container, defined in master.html -->
+</div> <!-- /#bodybody, defined in master.html -->
+
+<div id="blog-posts-wrapper">
+<div class="container">
+<div>
+
 <div id="blog-posts">
-	<h2>
+	<header>
 		<div style="float: right;">
 			<a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">subscribe</a>
 		</div>
-		<span>
-		<a href="https://govtrackinsider.com" title="More Posts on Medium" style="color: white; text-decoration: none">
-			GovTrack Insider
-		</a>
-		</span>
-	</h2>
+		<h2>
+			<span><a href="https://govtrackinsider.com" title="More Posts on Medium" style="text-decoration: none">
+				GovTrack Insider
+			</a></span>
+		</h2>
+	</header>
+
 	<div class="row">
 	{% for post in medium_posts|slice:"0:3" %}
 	<div class="col-sm-6">

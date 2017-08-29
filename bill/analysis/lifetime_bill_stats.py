@@ -50,7 +50,7 @@ for r in cur_roles:
 	row.append(str(len(bills)))
 
 	# bills reported
-	bills_reported = [b for b in bills if b.current_status not in (BillStatus.introduced, BillStatus.referred)]
+	bills_reported = [b for b in bills if b.current_status != BillStatus.introduced]
 	row.append(str(len(bills_reported)))
 
 	# bills enacted

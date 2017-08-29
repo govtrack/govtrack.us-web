@@ -57,7 +57,7 @@ table.history {
 		<tr><th>Date</th> <th>Market Outcome</th> <th>Shares Bought/Sold</th> <th>Price</th> <th>Gain/Loss</th></tr>
 		{% for trade in trades %}
 			<tr>
-				<td><nobr>{{trade.created}}</nobr></td>
+				<td><span class="nowrap">{{trade.created}}</span></td>
 				<td>{{trade.outcome.market.name}} -- {{trade.outcome.name}}</td>
 				<td>{{trade.shares}}</td>
 				<td>{{trade.purchase_price|floatformat:3}}{% if trade.liquidation %}*{% endif %}</td>

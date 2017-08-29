@@ -199,13 +199,14 @@ def person_details_user_view(request, pk):
 def render_subscribe_inline(request, feed):
     # render the event subscribe button, but fake the return path
     # by overwriting our current URL
-    from django.template import Template, Context, RequestContext, loader
+    from django.template import Template, loader
     request.path = request.GET["path"]
     request.META["QUERY_STRING"] = ""
     events_button = loader.get_template("events/subscribe_inline.html")\
-        .render(RequestContext(request, {
+        .render({
 				'feed': feed,
-				}))
+                'request': request,
+				})
     return { 'events_subscribe_button': events_button }
                 
 @anonymous_view
@@ -492,13 +493,17 @@ def person_session_stats(request, pk, session):
 @anonymous_view
 @render_to('person/person_session_stats_overview.html')
 def person_session_stats_overview(request, session, cohort, specific_stat):
+    from person.views_sessionstats import get_cohort_name, stat_titles
+
     try:
         stats = Person.load_session_stats(session)
     except ValueError:
         # no stats
         raise Http404()
 
-    from person.views_sessionstats import get_cohort_name, stat_titles
+    if specific_stat is not None and specific_stat not in stat_titles:
+        # no stats
+        raise Http404()
 
     try:
         cohort_title = get_cohort_name(cohort, True) if cohort else None
@@ -568,10 +573,6 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
         for c in m["contexts"]:
             c["people"][0].sort()
             c["people"][1].sort()
-
-    #from person.views_sessionstats import clean_person_stats
-    #for pid, personstats in stats["people"].items():
-    #    clean_person_stats(personstats)
 
     import dateutil.parser
     return {

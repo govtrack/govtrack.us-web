@@ -34,7 +34,7 @@ except ImproperlyConfigured:
     pass
 
 import dj_database_url
-DEFAULT_DATABASE_URL = 'sqlite:///' + os.path.dirname(__file__) + '/database.sqlite'
+DEFAULT_DATABASE_URL = 'sqlite:///' + os.path.dirname(__file__) + '/local/database.sqlite'
 DATABASE_URL = get_env_variable('DATABASE_URL', DEFAULT_DATABASE_URL)
 DATABASES = {
 	'default': dj_database_url.parse(DATABASE_URL)
@@ -56,29 +56,48 @@ HAYSTACK_CONNECTIONS = {
 }
 
 CONGRESS_LEGISLATORS_PATH = get_env_variable('CONGRESS_LEGISLATORS_PATH', default='data/congress-legislators')
-GEOIP_DB_PATH = None
 RSS_CAMPAIGN_QUERYSTRING = get_env_variable('RSS_CAMPAIGN_QUERYSTRING', default="?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss")
 
 from django.utils.crypto import get_random_string
 default_secret_key = get_random_string(50, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
 SECRET_KEY = get_env_variable('SECRET_KEY', default=default_secret_key)
 
-GOOGLE_ANALYTICS_KEY = get_env_variable('GOOGLE_ANALYTICS_KEY', default='')
+# Copy some environment variables into the Django settings object.
+copy_env_vars = [
+    # For accounts logic.
+    "RECAPTCHA_PUBLIC_KEY",
+    "RECAPTCHA_PRIVATE_KEY",
+    "TWITTER_OAUTH_TOKEN", # also for automated tweets and used to update @GovTrack/Members-of-Congress twitter list
+    "TWITTER_OAUTH_TOKEN_SECRET",
+    "FACEBOOK_APP_ID", # also used for Facebook widgets
+    "FACEBOOK_APP_SECRET",
+    "FACEBOOK_AUTH_SCOPE",
+    "GOOGLE_APP_ID",
+    "GOOGLE_APP_SECRET",
+    "GOOGLE_AUTH_SCOPE",
 
-YOUTUBE_API_KEY = get_env_variable('YOUTUBE_API_KEY', default='')
+    # For us...
+    "GOOGLE_ANALYTICS_KEY",
+    "TWITTER_ACCESS_TOKEN", # for automated tweets and to update @GovTrack/Members-of-Congress twitter list
+    "TWITTER_ACCESS_TOKEN_SECRET",
+    "SPARKPOST_API_KEY",
+    "PAYPAL_CLIENT_MODE",
+    "PAYPAL_CLIENT_ID",
+    "PAYPAL_CLIENT_SECRET",
+]
+for var in copy_env_vars:
+    locals()[var] = get_env_variable(var, default='')
 
-# for registration
-RECAPTCHA_PUBLIC_KEY = get_env_variable('RECAPTCHA_PUBLIC_KEY', default='')
-RECAPTCHA_PRIVATE_KEY = get_env_variable('RECAPTCHA_PRIVATE_KEY', default='')
-TWITTER_OAUTH_TOKEN = get_env_variable('TWITTER_OAUTH_TOKEN', default='')
-TWITTER_OAUTH_TOKEN_SECRET = get_env_variable('TWITTER_OAUTH_TOKEN_SECRET', default='')
-FACEBOOK_APP_ID = get_env_variable('FACEBOOK_APP_ID', default='')
-FACEBOOK_APP_SECRET = get_env_variable('FACEBOOK_APP_SECRET', default='')
-FACEBOOK_AUTH_SCOPE = get_env_variable('FACEBOOK_AUTH_SCOPE', default='')  # can be an empty string
-TWILIO_ACCOUNT_SID = get_env_variable('TWILIO_ACCOUNT_SID', default='')
-TWILIO_AUTH_TOKEN = get_env_variable('TWILIO_AUTH_TOKEN', default='')
+if SPARKPOST_API_KEY:
+    EMAIL_BACKEND = 'sparkpost.django.email_backend.SparkPostEmailBackend'
+    SPARKPOST_OPTIONS = {
+        'track_opens': False,
+        'track_clicks': False,
+        'transactional': True,
+    }
 
-# TODO. The ad-free payment requires something like this:
-#import paypalrestsdk
-#paypalrestsdk.configure(mode="sandbox", client_id="...", client_secret="...")
+# The hide-the-ads payment requires Paypal integration:
+if PAYPAL_CLIENT_ID:
+    import paypalrestsdk
+    paypalrestsdk.configure(mode=PAYPAL_CLIENT_MODE, client_id=PAYPAL_CLIENT_ID, client_secret=PAYPAL_CLIENT_SECRET)
 

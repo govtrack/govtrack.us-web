@@ -6,7 +6,7 @@ from jsonfield import JSONField
 from events.models import Feed, SubscriptionList
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, unique=True, db_index=True)
+    user = models.OneToOneField(User, db_index=True)
     massemail = models.BooleanField(default=True) # may we send you mail?
     old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
     last_mass_email = models.IntegerField(default=0)
@@ -311,7 +311,7 @@ class Reaction(models.Model):
 
     @staticmethod
     def get_for_user(request):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             return Reaction.objects.filter(user=request.user)
         elif "reactions-key" in request.session:
             return Reaction.objects.filter(anon_session_key=Reaction.get_session_key(request))

@@ -8,7 +8,6 @@ ROOT = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.join(ROOT, 'lib'))
 
 DEBUG = ("DEBUG" in os.environ)
-TEMPLATE_DEBUG = DEBUG
 INTERNAL_IPS = ('127.0.0.1',)
 
 ADMINS = []
@@ -63,41 +62,22 @@ SESSION_COOKIE_SECURE = not DEBUG # send session cookies over SSL only
 CSRF_COOKIE_SECURE = not DEBUG # similarly
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer' # needed by openid login
 
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 587
-#EMAIL_HOST_USER = ''
-#EMAIL_HOST_PASSWORD = ''
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_SUBJECT_PREFIX = '[GovTrack] '
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-if not DEBUG:
-    TEMPLATE_LOADERS = (
-      ('django.template.loaders.cached.Loader', TEMPLATE_LOADERS),
-      )
-
-MIDDLEWARE_CLASSES = (
-    #'silk.middleware.SilkyMiddleware',
-    'django.middleware.common.CommonMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'twostream.middleware.CacheLogic',
     'website.middleware.GovTrackMiddleware',
-)
+]
 
 ROOT_URLCONF = 'urls'
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(ROOT, 'templates'),
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -117,9 +97,9 @@ INSTALLED_APPS = (
 
     'haystack',
     'django_wysiwyg',
-    'django_twilio',
+    'django_extensions',
     'htmlemailer',
-
+    
     # project modules
     'twostream',
     'simplegetapi',
@@ -131,25 +111,32 @@ INSTALLED_APPS = (
     'events',
     'smartsearch',
     'bill',
-    'poll_and_call',
-    'predictionmarket',
-    'whipturk',
 
     # for django-registration-pv
     'emailverification',
     'registration',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.request',
-    'django.core.context_processors.static',
-    'events.middleware.template_context_processor',
-    'website.middleware.template_context_processor',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(ROOT, 'templates')],
+        'OPTIONS': {
+            'debug': DEBUG,
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'events.middleware.template_context_processor',
+                'website.middleware.template_context_processor',
+            ],
+            'loaders': [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ],
+        },
+    },
+]
 
 TEST_DATABASE_CHARSET = 'utf8'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
@@ -172,12 +159,6 @@ CURRENT_CONGRESS = 115
 EMAIL_UPDATES_FROMADDR = "GovTrack.us Email Updates <noreply@mail.GovTrack.us>"
 EMAIL_UPDATES_RETURN_PATH = "GovTrack.us Email Updates <bounces+uid=%d@mail.GovTrack.us>"
 BOUNCES_UID_REGEX = re.compile(r"<?bounces\+uid=(\d+)@GovTrack\.us>?", re.I)
-
-PREDICTIONMARKET_SEED_MONEY = 1000
-PREDICTIONMARKET_BANK_UID = 136196
-
-#if DEBUG: # sometimes we debug in a live environment
-#	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Load settings from the environment
 from settings_env import *

@@ -70,15 +70,6 @@ if "people" in sys.argv:
 	os.system("cd %s/congress-legislators; git fetch -pq" % SCRAPER_PATH)
 	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
 	
-	# Convert people YAML into alternative formats.
-	os.system("cd %s/congress-legislators/scripts; . .env/bin/activate; python alternate_bulk_formats.py" % SCRAPER_PATH)
-
-	# Copy into our public directory.
-	for f in glob.glob("%s/congress-legislators/*.yaml" % SCRAPER_PATH):
-		make_link(f, "data/congress-legislators/%s" % os.path.basename(f))
-	for f in glob.glob("%s/congress-legislators/alternate_formats/*.csv" % SCRAPER_PATH):
-		make_link(f, "data/congress-legislators/%s" % os.path.basename(f))
-
 	# Load YAML (directly) into db.
 	os.system("./parse.py person") #  -l ERROR
 	os.system("./manage.py update_index -v 0 -u person person")
@@ -105,6 +96,9 @@ if "committees" in sys.argv:
 	# Generate historical XML, used by prognosis & session stats.
 	os.system("cd ../scripts/legacy-conversion; . ../%s/congress-legislators/scripts/.env/bin/activate; python convert_committees.py ../%s/congress-legislators/ ../data/historical-committee-membership/%s.xml"
 		% (SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
+
+	# Save a fixture.
+	os.system("./manage.py dumpdata --format json committee.Committee committee.CommitteeMember > data/db/django-fixture-committees.json")
 
 do_bill_parse = False
 

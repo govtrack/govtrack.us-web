@@ -45,20 +45,18 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-	<h1>{{statename}}</h2>
+	<h1>{{statename}}</h1>
 
 	{% if stateapp != "T" %}
 		<p>{{statename}} is a U.S. state with <b>two</b> senators in the United States Senate and <b>{{stateapp|apnumber}}</b> representatives in the United States House of Representatives.</p>
 
 	{% elif state == "DC" %}
-		<p>The District of Columbia (DC) is the nation&rsquo;s capital. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators or representatives in Congress.</p>
-
-		<p>Instead, the District of Columbia sends a <b>delegate</b> to the House of Representatives with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
+		<p>The District of Columbia (DC) is the nation&rsquo;s capital district. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators and its representative in the House of Representatives is a <b>delegate</b> with limited voting privileges.
+		Delegates have a marginalized role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
 
 	{% else %}
-		<p>{% if state == "VI" or state == "MP" %}The {% endif %}{{statename}} is a territory of the United States. Because it is not a state, it has no senators or representatives in Congress.</p>
-
-		<p>Instead, it sends a <b>delegate</b> to the House of Representatives{% if state == "PR" %}, called the <b>Resident Commissioner</b>,{% endif %} with essentially no voting privileges. Delegates have a marginal role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
+		<p>{% if state == "VI" or state == "MP" %}The {% endif %}{{statename}} is a territory of the United States. Because it is not a state, it has no senators and its representative in the House of Representatives is a <b>delegate</b>{% if state == "PR" %}, called the <b>Resident Commissioner</b>,{% endif %} with limited voting privileges.
+		Delegates have a marginalized role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
 	{% endif %}
 
 	{% if stateapp != "T" %}
@@ -72,7 +70,8 @@ $(function() {
 		<div class="tab-content" style="margin-top: 1em">
 
 	    	<div role="tabpanel" class="tab-pane active" id="senators">
-
+			
+			<h2>Senators</h2>
 			<p>Each state elects two senators for staggered 6-year terms. Senators represent the entire state. {{statename}}&rsquo;s senators are:</p>
 
 		    <div class="row members-grid">
@@ -83,7 +82,7 @@ $(function() {
 			            <p style="margin-top: 1em">The senate seat is currently vacant.</p>
 		        	{% else %}
 			            <div class="photo">
-			        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+			        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120" alt="{{ person.name_no_details }}"/></a>
 			        	</div>
 			        	
 			            {% with person.get_current_role as role %}
@@ -106,7 +105,7 @@ $(function() {
 	    	</div>
 
 	    	<div role="tabpanel" class="tab-pane" id="representatives">
-
+			<h2>Representatives</h2>
 	<p>The United States is divided into 435 congressional districts, each with a population of about 710,000 individuals. Each district elects a representative to the House for a two-year term. Representatives are also called congressmen/congresswomen.</p>
 
     {% if stateapp != 1 %}
@@ -142,7 +141,7 @@ $(function() {
 	            </div>
         	{% else %}
 	            <div class="photo">
-	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
+	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120" alt="{{ person.name_no_details }}"/></a>
 	        	</div>
 	        	
 	            {% with person.get_current_role as role %}
@@ -172,6 +171,7 @@ $(function() {
 
     		</div>
 	    	<div role="tabpanel" class="tab-pane" id="map">
+				<h2>Map of Congressional Districts</h2>
 				{% if state == "FL" or state == "VA" or state == "NC" %}
 		    		{% include "person/redistricting-notes.html" %}
 				{% endif %}

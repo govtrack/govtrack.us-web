@@ -54,13 +54,17 @@ for vote in votes:
 	for p1 in people:
 		for p2 in people:
 			if p1.id >= p2.id: continue # skip same (==), do pairs once (>)
-			if pvotes[p1][vote.id] == pvotes[p2][vote.id]:
-				counts[(p1,p2)] = counts.get((p1,p2), 0) + 1
+			if options[pvotes[p1][vote.id]].key in ("+", "-") and options[pvotes[p2][vote.id]].key in ("+", "-"):
+				counts[(p1,p2,"TOTAL")] = counts.get((p1,p2,"TOTAL"), 0) + 1
+				if pvotes[p1][vote.id] == pvotes[p2][vote.id]:
+					counts[(p1,p2,"SAME")] = counts.get((p1,p2,"SAME"), 0) + 1
 
 # Output totals (to stderr so it doesn't conflict with csv output).
 sys.stderr.write(str(len(votes)) + " votes\n")
 sys.stderr.write("voted the same way:\n")
-for p1, p2 in sorted(counts):
-	c1 = counts[(p1,p2)]
-	c2 = round(c1/float(len(votes)) * 100 * 10) / 10
-	sys.stderr.write(p1.name.encode("utf8") + "\t" + p2.name.encode("utf8") + "\t" + str(c1) + "\t" + str(c2) + "%\n")
+for p1, p2, count_type in sorted(counts):
+	if count_type == "TOTAL": continue # don't dup
+	numerator = counts[(p1,p2,"SAME")]
+	denominator = counts[(p1,p2,"TOTAL")]
+	pct = round(numerator/float(denominator) * 100 * 10) / 10
+	sys.stderr.write(p1.name.encode("utf8") + "\t" + p2.name.encode("utf8") + "\t" + str(numerator) + "\t" + str(denominator) + "\t" + str(pct) + "%\n")

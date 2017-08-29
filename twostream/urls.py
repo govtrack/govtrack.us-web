@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import *
+from django.conf.urls import url
 
-urlpatterns = patterns('twostream.views',
-    url(r'^/user-head$', 'user_head', name='twostream-views-user-head'),
-)
+import twostream.views
 
+urlpatterns = [
+    url(r'^user-head$', twostream.views.user_head, name='twostream-views-user-head'),
+]

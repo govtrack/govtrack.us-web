@@ -189,7 +189,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 			return re.sub(r"of \d\d\d\d$", "", title)
 		for reintro in Bill.objects.filter(congress=bill.congress-1, sponsor=bill.sponsor):
 			if normalize_title(bill.title_no_number) == normalize_title(reintro.title_no_number):
-				if reintro.current_status not in (BillStatus.introduced, BillStatus.referred):
+				if reintro.current_status != BillStatus.introduced:
 					factors.append(("reintroduced_of_reported", "This %s was reported by committee as %s in the previous session of Congress." % (bill.noun, reintro.display_number), "Got past committee in a previous Congress."))
 				else:
 					factors.append(("reintroduced", "This %s was a re-introduction of %s from the previous session of Congress." % (bill.noun, reintro.display_number), "Is a bill reintroduced from a previous Congress."))
@@ -251,7 +251,7 @@ def get_bill_factors(bill, pop_title_prefixes, committee_membership, majority_pa
 def is_success(bill, model_type, indexed_paragraphs):
 	# ok I think I got lucky that numpy.array turns True/False into 1.0/0.0
 	if model_type == 0:
-		return bill.current_status not in BillStatus.introduced_statuses
+		return bill.current_status != BillStatus.introduced
 	else:
 		if bill.current_status in BillStatus.final_status_passed:
 			return 1.0
@@ -305,7 +305,7 @@ def build_model(congress):
 		
 	# We create separate models for bills by the bill type (bill, joint resolution,
 	# concurrent resolution, simple resolution) and by whether the bill's status is
-	# introduced/referred or has been reported or more.
+	# introduced or has been reported or more.
 	#
 	# Once a bill has been reported by committee it's chances of success are
 	# of course much higher, since the bills that have not been reported by committee
@@ -320,12 +320,12 @@ def build_model(congress):
 		bills = BILLS.filter(bill_type__in=bill_type_map[bill_type])
 		if model_type == 1:
 			# In model 0, we scan across all bills, because all bills were
-			# in the introduced/referred status at one point. If we filter it to bills whose
-			# current status is introduced/referred, obviously they will all have been
+			# in the introduced status at one point. If we filter it to bills whose
+			# current status is introduced, obviously they will all have been
 			# failed bills, which defeats the purpose. In model 1, we
 			# only look at bills that have at least gotten reported so that we can see
 			# of reported bills which make it to success.
-			bills = bills.exclude(current_status__in=BillStatus.introduced_statuses)
+			bills = bills.exclude(current_status=BillStatus.introduced)
 
 		print bill_type, model_type
 		
@@ -333,7 +333,7 @@ def build_model(congress):
 		
 		if model_type == 0:
 			# for the introduced model, success is getting out of committee
-			total_success = bills.exclude(current_status__in=BillStatus.introduced_statuses).count()
+			total_success = bills.exclude(current_status=BillStatus.introduced).count()
 		else:
 			# for the reported model, success is being enacted (or whatever final status as appropriate for the bill type)
 			total_success = bills.filter(current_status__in=BillStatus.final_status_passed).count()
@@ -525,7 +525,7 @@ def compute_prognosis_2(prognosis_model, bill, committee_membership, majority_pa
 	prediction_1 = eval_model(model_1)
 	prediction_2 = eval_model(model_2)
 	
-	is_introduced = bill.current_status in BillStatus.introduced_statuses
+	is_introduced = bill.current_status == BillStatus.introduced
 	
 	def helps(factor, state1, state2):
 		a = model_1["factors"][factor]["regression_beta"] >= 0 if factor in model_1["factors"] else model_2["factors"][factor]["regression_beta"] >= 0
@@ -593,7 +593,7 @@ def test_prognosis(congress):
 			# Pull in the data as tuples of (prediction, success), each of which is a
 			# float in the range of [0,1].
 			bills = Bill.objects.filter(congress=congress, bill_type__in=bill_type_map[bt])
-			if model_type == 1: bills = bills.exclude(current_status__in=BillStatus.introduced_statuses)
+			if model_type == 1: bills = bills.exclude(current_status=BillStatus.introduced)
 			#bills = bills[0:100] # REMOVEME
 			model_result["count"] = bills.count()
 			data = []

@@ -161,7 +161,7 @@ h3 {
 
 <h2><span>Subject Areas</span></h2>
 
-{% if bill.get_terms_sorted|length = 0 %}
+{% if bill.get_terms_sorted|length == 0 %}
 	<p>None known at this time.</p>
 {% else %}
 <div>

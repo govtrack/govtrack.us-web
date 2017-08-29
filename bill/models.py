@@ -245,7 +245,6 @@ class Bill(models.Model):
     def data_dir_path(self):
         return "data/congress/%d/bills/%s/%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, BillType.by_value(self.bill_type).slug, self.number)
 
-    #@models.permalink
     def get_absolute_url(self):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
 
@@ -346,6 +345,7 @@ class Bill(models.Model):
         "noun": "noun",
         "related_bills": "get_related_bills_api",
         "current_chamber": "current_chamber",
+        "text_info": "get_text_info",
     }
     api_example_id = 76416
     api_example_list = { "sort": "-introduced_date" }
@@ -390,7 +390,7 @@ class Bill(models.Model):
     @property
     def current_chamber(self):
         status = BillStatus.by_value(self.current_status)
-        if status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
+        if status in (BillStatus.introduced, BillStatus.reported):
             return self.originating_chamber.lower()
         elif hasattr(status, 'next_action_in'):
             return status.next_action_in
@@ -435,7 +435,7 @@ class Bill(models.Model):
         # Override the default Django behavior.
         s = self.get_current_status_and_date()
         ret = s[0]
-        if s[1]: ret += " (" + s[1] + ")"
+        if s[1]: ret = s[1]
         return ret
 
     def get_current_status_display_simple(self):
@@ -461,7 +461,7 @@ class Bill(models.Model):
         status = self.get_long_text_for_status(self.current_status, self.current_status_date)
         if not self.is_final_status:
             if self.was_enacted_ex() is not None:
-                status += (" But provisions of this %s were incorporated into other %ss which were enacted" % (self.noun, self.noun)) \
+                status = ("Provisions of this %s were incorporated into other %ss which were enacted" % (self.noun, self.noun)) \
                              + ((", so there will not likely be further activity on this %s" % self.noun) if self.is_current else "") + "."
             elif self.text_incorporation: # not null, empty string, empty list
                 status += " Provisions of this %s were incorporated into other %ss." % (self.noun, self.noun)
@@ -496,7 +496,7 @@ class Bill(models.Model):
         bill. 'Done' means the bill is dead or out of Congress."""
         if not self.is_alive or self.current_status in (BillStatus.passed_bill,):
             return 'Done'
-        if self.current_status in (BillStatus.introduced, BillStatus.referred, BillStatus.reported):
+        if self.current_status in (BillStatus.introduced, BillStatus.reported):
             return self.originating_chamber
         if self.current_status in (BillStatus.pass_over_house, BillStatus.pass_back_house, BillStatus.conference_passed_house, BillStatus.prov_kill_cloturefailed, BillStatus.override_pass_over_house):
             return "Senate"
@@ -538,6 +538,11 @@ class Bill(models.Model):
         except IOError:
             return False
 
+    def get_text_info(self, version=None, mods_only=True, with_citations=False):
+        try:
+            return load_bill_text(self, version, mods_only=mods_only, with_citations=with_citations)
+        except IOError:
+            return None
 
     def get_upcoming_meetings(self):
         return CommitteeMeeting.objects.filter(when__gt=datetime.datetime.now(), bills=self)
@@ -631,8 +636,6 @@ class Bill(models.Model):
                 date = eval(datestr)
                 if state == BillStatus.introduced:
                     continue # already indexed
-                if state == BillStatus.referred and (date.date() - self.introduced_date).days == 0:
-                    continue # don't dup these events so close
                 E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_enacted_bill else []))
 
             # generate events for new cosponsors... group by join date, and
@@ -901,7 +904,6 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             explanation = BillStatus.by_value(st).explanation
             if callable(explanation): explanation = explanation(self)
 
-            if st == BillStatus.referred: continue # don't care about this
             if st in (BillStatus.passed_bill, BillStatus.passed_concurrentres, BillStatus.enacted_veto_override) and srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote2", "pingpong", "conference", "override"):
                 ch = {"h":"House","s":"Senate"}[srcnode.get("where")]
                 # PASSED:BILL only occurs on the second chamber, so indicate both agreed to in text
@@ -997,51 +999,41 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         "end_of_day": True,
                     })
 
+            # Bring in committee meetings. Skip if we have a REPORTED status on the same date.
+            for mtg in self.committeemeeting_set.all():
+                for rec in ret:
+                    if rec["key"] == "reported" and rec["date"].isoformat()[0:10] == mtg.when.isoformat()[0:10]:
+                        break
+                else:
+                    ret.append({
+                        "key": "reported",
+                        "label": "Considered by " + unicode(mtg.committee),
+                        "explanation": "A committee held a hearing or business meeting about the " + self.noun + ".",
+                        "date": mtg.when,
+                    })
+
+
             # Bring in committee reports.
-            for rpt in (self.committee_reports or []):
-                # Parse the report citation.
-                m = re.match(r"(S|H|Ex). Rept. (\d+)-(\d+)$", rpt)
-                if not m:
-                    continue
-                report_type, report_congress, report_number = m.groups()
-                report_type = report_type.lower() + "rpt"
-                rpt_mods = "../scripts/congress-pdf-config/data/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
-
-                # Load the report's MODS metadata, if we have it.
-                try:
-                    import lxml.etree
-                    rpt_mods = lxml.etree.parse(rpt_mods)
-                    ns = { "mods": "http://www.loc.gov/mods/v3" }
-                    docdate = rpt_mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
-                    docdate = datetime.date(*(int(d) for d in docdate.split("-")))
-                    committee_name = \
-                        { "H": "House", "S": "Senate" }[ rpt_mods.xpath("string(mods:extension/mods:congCommittee/@chamber)", namespaces=ns) ] \
-                      + " " + rpt_mods.xpath("string(mods:extension/mods:congCommittee/mods:name[@type='authority-standard'])", namespaces=ns) # authority-short gives short committee name like Appropriations
-                    gpo_pdf_url = rpt_mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
-                    numpages = rpt_mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
-                    if numpages: numpages = re.sub(r" p\.$", " pages", numpages)
-                except:
-                    continue
-
+            for rpt in self.get_committee_reports():
                 # Attach to an existing Reported event on the same date.
                 # TODO: But this could be the wrong chamber if multiple reports on the same date? Probably
                 # should check that the chamber matches the bill's originating chamber.
                 for i, event in enumerate(ret):
                     if event["key"] == "reported" \
-                       and docdate == as_date(event["date"]) \
+                       and rpt["docdate"] == as_date(event["date"]) \
                        and "committee_report_link" not in event:
-                        event["explanation"] += " The %s issued the report which may provide insight into the purpose of the legislation." % committee_name
-                        event["committee_report_link"] = gpo_pdf_url
+                        event["explanation"] += " The %s issued the report which may provide insight into the purpose of the legislation." % rpt["committee_name"]
+                        event["committee_report_link"] = rpt["gpo_pdf_url"]
                         break
                 else:
                     # Add a new event.
                     ret.append({
                         "key": "committee_report",
-                        "label": "Reported by " + committee_name,
+                        "label": "Reported by " + rpt["committee_name"],
                         "explanation": "A committee issued a report on the bill, which often provides helpful explanatory background on the issue addressed by the bill and the bill's intentions.",
-                        "date": docdate,
+                        "date": rpt["docdate"],
                         "end_of_day": True,
-                        "committee_report_link": gpo_pdf_url,
+                        "committee_report_link": rpt["gpo_pdf_url"],
                     })
 
             # Bring in major events from bills with textual similarity.
@@ -1135,7 +1127,6 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         # define a state diagram
         common_paths = {
             BillStatus.introduced: BillStatus.reported,
-            BillStatus.referred: BillStatus.reported,
         }
 
         type_specific_paths = {
@@ -1285,7 +1276,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
     def get_related_bills_newer(self):
         return [rb for rb in self.get_related_bills()
             if self.title_no_number == rb.related_bill.title_no_number
-            and rb.related_bill.current_status not in (BillStatus.introduced, BillStatus.referred)
+            and rb.related_bill.current_status != BillStatus.introduced
             and rb.related_bill.current_status_date > self.current_status_date]
 
     def find_reintroductions(self):
@@ -1350,33 +1341,48 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             for rb in RelatedBill.objects.filter(bill=self, relation="identical").select_related("related_bill"):
                 e = rb.related_bill.was_enacted_ex(recurse=False, restrict_to_activity_in_date_range=restrict_to_activity_in_date_range)
                 if e is not None:
-                     return [e]
+                     return e
                
         return None
 
-    def get_open_market(self, user):
-        from django.contrib.contenttypes.models import ContentType
-        bill_ct = ContentType.objects.get_for_model(Bill)
+    def get_committee_reports(self):
+        import re, lxml.etree
+        for rpt in (self.committee_reports or []):
+            # Parse the report citation.
+            m = re.match(r"(S|H|Ex). Rept. (\d+)-(\d+)$", rpt)
+            if not m:
+                continue
+            report_type, report_congress, report_number = m.groups()
+            report_type = report_type.lower() + "rpt"
+            rpt_mods = "../scripts/congress-pdf-config/data/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
 
-        import predictionmarket.models
-        try:
-            m = predictionmarket.models.Market.objects.get(owner_content_type=bill_ct, owner_object_id=self.id, isopen=True)
-        except predictionmarket.models.Market.DoesNotExist:
-            return None
+            # Load the report's MODS metadata, if we have it.
+            try:
+                rpt_mods = lxml.etree.parse(rpt_mods)
+            except:
+                continue
 
-        for outcome in m.outcomes.all():
-            if outcome.owner_key == "1": # "yes"
-                m.yes = outcome
-                m.yes_price = int(round(outcome.price() * 100.0))
-        if user and user.is_authenticated():
-            account = predictionmarket.models.TradingAccount.get(user, if_exists=True)
-            if account:
-                positions, profit = account.position_in_market(m)
-                m.user_profit = round(profit, 1)
-                m.user_positions = { }
-                for outcome in positions:
-                    m.user_positions[outcome.owner_key] = positions[outcome]
-        return m
+            ns = { "mods": "http://www.loc.gov/mods/v3" }
+            docdate = rpt_mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
+            docdate = datetime.date(*(int(d) for d in docdate.split("-")))
+            try:
+                committee_name = \
+                    { "H": "House", "S": "Senate" }[ rpt_mods.xpath("string(mods:extension/mods:congCommittee/@chamber)", namespaces=ns) ] \
+                    + " " + rpt_mods.xpath("string(mods:extension/mods:congCommittee/mods:name[@type='authority-standard'])", namespaces=ns) # authority-short gives short committee name like Appropriations
+            except KeyError:
+                continue
+            committee_code = rpt_mods.xpath("string(mods:extension/mods:congCommittee/@authorityId)", namespaces=ns)
+            gpo_pdf_url = rpt_mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
+            numpages = rpt_mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
+            if numpages: numpages = re.sub(r" p\.$", " pages", numpages)
+
+            yield {
+                "docdate": docdate,
+                "committee_code": committee_code,
+                "committee_name": committee_name,
+                "gpo_pdf_url": gpo_pdf_url,
+                "numpages": numpages,
+            }
 
     def get_gop_summary(self):
         import urllib, StringIO
