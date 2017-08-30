@@ -3,7 +3,7 @@ from django.http import HttpResponse, Http404
 from django.core.urlresolvers import resolve
 from django.template import Template, Context
 from django.views.decorators.cache import cache_control
-from django.views.decorators.csrf import requires_csrf_token
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 import json
 
@@ -16,7 +16,7 @@ var the_page = {{page_data|safe}};
 """)
 
 @cache_control(private=True, must_revalidate=True)
-@requires_csrf_token
+@ensure_csrf_cookie
 def user_head(request):
 	m = resolve(request.GET.get("path", request.GET.get("view", "")))
 	
