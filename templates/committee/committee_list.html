@@ -4,6 +4,13 @@
 {% block title %}U.S. Congress List of Commitees - GovTrack.us{% endblock %}
 {% block cat-icon-filename %}img-committees.png{% endblock %}
 
+{% block head %}
+<style>
+	h3 { margin-bottom: 8px; }
+	h3 a:link { font-weight: bold; text-decoration: none; border-bottom: 1px solid #9D2146; }
+</style>
+{% endblock %}
+
 {% block crumbs %}
 <ol class="breadcrumb">
     <li><a href="{% url "congress_home" %}">Congress</a></li>
@@ -26,7 +33,10 @@
         <h2>Senate Committees</h2>
         <ul style="list-style: none; padding: 0;">
             {% for item in senate_committees %}
-            <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
+            <li>
+				<h3><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></h3>
+				{% if item.jurisdiction %}<div>{{item.jurisdiction|truncatewords:28}}</div>{% endif %}
+			<//li>
             {% endfor %}
         </ul>
 	</div>
@@ -35,7 +45,10 @@
         <h2>House Committees</h2>
         <ul style="list-style: none; padding: 0;">
             {% for item in house_committees %}
-            <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
+            <li>
+				<h3><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></h3>
+				{% if item.jurisdiction %}<div>{{item.jurisdiction|truncatewords:28}}</div>{% endif %}
+			<//li>
             {% endfor %}
         </ul>
     </div>
@@ -46,7 +59,9 @@
         <p>The joint committees are made up of both senators and representatives. They typically have an oversight or policy role but no legislative duties.</p>
         <ul style="list-style: none; padding: 0;">
             {% for item in joint_committees %}
-            <li><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></li>
+            <li>
+				<p><a href="{{ item.get_absolute_url }}">{{ item.display_name }}</a></p>
+			<//li>
             {% endfor %}
         </ul>
         <p>While the Joint Committees on Printing and the Library have nominal responsibility for oversight of the Government Publishing Office and the Library of Congress, respectively,
