@@ -1,0 +1,31 @@
+{% extends "master.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Change {{panel.title}} - GovTrack.us{% endblock %}
+
+{% block body_class %}about{% endblock %}
+
+{% block extra_css %}
+<style>
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+<li><a href="/panels">Panel Management</a></li>
+<li><a href="/panels/{{panel.id}}">{{panel.title|truncatewords:5}}</a></li>
+<li class="active">Edit Panel</li>
+</ol>
+{% endblock %}
+
+{% block body %}
+<h1>Edit Panel Information</h1>
+
+<form method="post">
+{% csrf_token %}
+{{form|crispy}}
+<input type="submit" value="Save" class="btn btn-primary">
+</form>
+
+{% endblock %}
+

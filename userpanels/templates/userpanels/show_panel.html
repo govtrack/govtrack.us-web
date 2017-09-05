@@ -1,0 +1,118 @@
+{% extends "master.html" %}
+
+{% load govtrack_utils %}
+
+{% block title %}{{panel.title}} - GovTrack.us{% endblock %}
+
+{% block body_class %}about{% endblock %}
+
+{% block extra_css %}
+<style>
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+<li><a href="/panels">Panel Management</a></li>
+<li class="active">{{panel.title|truncatewords:5}}</li>
+</ol>
+{% endblock %}
+
+{% block body %}
+<h1>{{panel.title}}</h1>
+
+<div style="float: right"><a href="/panels/{{panel.id}}/edit" class="btn btn-primary">Edit Panel Info</a></div>
+
+<p>Created on {{panel.created|date}}.</p>
+
+{{panel.private_notes|markdown}}
+
+<table>
+<tr valign="top"><td style="padding: 0 1em 1em 0;"><b>Consent text:</b></td>
+<td><p>{{panel.consent_text}}</p></td></tr>
+
+<tr valign="top"><td style="padding: 0 1em 1em 0;"><b>Help text:</b></td>
+<td><p>{{panel.contact_info}}</p></td></tr>
+</table>
+
+<hr>
+
+<h3>Invite Members</h3>
+
+<div style="float: right"><a href="#" onclick="reset_panel_invitation_code(); return false;" class="btn btn-primary">Reset Link</a></div>
+
+<p>Add users to this panel by sending them the following link:</p>
+
+<p style="margin: 1em 2em"><code>{{invitation.url}}</code></p>
+
+<p>They&rsquo;ll be prompted to log in or create an account on GovTrack and then to accept the invitation. When they accept the invitation, they will be added into this panel. You can try the link yourself to see what it looks like.</p>
+
+<hr>
+
+<h3>Panel Members</h3>
+
+{% if memberships|length > 0 %}
+	<table class="table">
+	<thead>
+		<tr>
+			<th style="width: 3em;">Action</th>
+			<th>User&rsquo;s Email</th>
+			<th>Private Notes</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for membership in memberships %}
+		<tr valign="top">
+			<td>
+				<a href="#" title="Remove User From Panel" onclick="remove_user_from_panel({{membership.user.id}}, '{{membership.user.email|escapejs}}'); return false;"><span class="glyphicon glyphicon-remove"></span></a>
+				<a href="#" title="Edit Private Notes" onclick="edit_panel_member_notes({{membership.user.id}}, '{{membership.user.email|escapejs}}', '{{membership.extra.notes|escapejs}}'); return false;"><span class="glyphicon glyphicon-pencil"></span></a>
+			</td>
+			<td>
+				{{membership.user.email}}
+			</td>
+			<td>
+				<div>{{membership.extra.notes}}</div>
+				<div style="font-size: 80%;">used invitation <tt>{{membership.invitation_code}}</tt></div>
+			</td>
+		</tr>
+	{% endfor %}
+	</tbody>
+	</table>
+{% else %}
+	<p>There are no users in this panel yet.</p>
+{% endif %}
+
+<form id="admin-action" method="post">
+{% csrf_token %}
+<input type=hidden name=action value=none>
+<input type=hidden name=user value=>
+<input type=hidden name=value value=>
+</form>
+
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+function reset_panel_invitation_code() {
+	if (!confirm("Are you sure you want to reset the invitation link? The current link will become invalid."))
+		return;
+	$('#admin-action').find("input[name=action]").val("reset-link");
+	$('#admin-action').submit();
+}
+function remove_user_from_panel(userid, email) {
+	if (!confirm("Are you sure you want to remove " + email + " from this panel?"))
+		return;
+	$('#admin-action').find("input[name=action]").val("remove-user");
+	$('#admin-action').find("input[name=user]").val(userid);
+	$('#admin-action').submit();
+}
+function edit_panel_member_notes(userid, email, notes) {
+	var newnotes = prompt("Private notes for " + email + ":");
+	if (newnotes == null) return; // cancel
+	$('#admin-action').find("input[name=action]").val("set-user-notes");
+	$('#admin-action').find("input[name=user]").val(userid);
+	$('#admin-action').find("input[name=value]").val(newnotes);
+	$('#admin-action').submit();
+}
+</script>
+{% endblock %}

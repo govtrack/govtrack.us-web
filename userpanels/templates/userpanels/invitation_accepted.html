@@ -1,0 +1,24 @@
+{% extends "master.html" %}
+
+{% load govtrack_utils %}
+
+{% block title %}You Joined {{panel.title}} - GovTrack.us{% endblock %}
+
+{% block body_class %}about{% endblock %}
+
+{% block extra_css %}
+<style>
+</style>
+{% endblock %}
+
+{% block body %}
+<div style="max-width: 45em; margin: 3em 0;">
+	<h1>{{panel.title}}</h1>
+
+	<p><b>Thank you for joining the panel.</b></p>
+
+	<p>{{panel.contact_info}}</p>
+</div>
+
+{% endblock %}
+

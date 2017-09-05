@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     #'south',
     #'debug_toolbar',
     #'silk',
+    'crispy_forms',
 
     'haystack',
     'django_wysiwyg',
@@ -110,6 +111,7 @@ INSTALLED_APPS = (
     'events',
     'smartsearch',
     'bill',
+    'userpanels',
 
     # for django-registration-pv
     'emailverification',
@@ -136,6 +138,8 @@ TEMPLATES = [
         },
     },
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 TEST_DATABASE_CHARSET = 'utf8'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'

@@ -9,7 +9,6 @@ import registration.views
 import website.api
 import website.views
 
-
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 
@@ -22,6 +21,7 @@ urlpatterns = [
     url(r'^congress/bills/', include('bill.urls')),
     url(r'', include('events.urls')),
     url(r'^api/v2/([^/]+)(?:/(\d+))?', website.api.apiv2),
+    url(r'^panels/', include('userpanels.urls')),
 
     url(r'^_twostream/', include('twostream.urls')),
 

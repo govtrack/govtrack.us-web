@@ -1,0 +1,35 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Panel Management{% endblock %}
+
+{% block body_class %}about{% endblock %}
+
+{% block extra_css %}
+<style>
+section ul { padding-left: 1.5em; }
+</style>
+{% endblock %}
+
+{% block body %}
+<h1>Panel Management</h1>
+
+{% for panel in panels %}
+	<div style="margin: 2em 0;">
+		<div style="font-size: 110%; font-weight: bold;">
+			<a href="/panels/{{panel.id}}">{{panel.title}}</a>
+		</div>
+		<div>Created on {{panel.created|date}}.</div>
+		<div>{{panel.notes}}</div>
+	</div>
+{% empty %}
+	<p>You do not have any panels to manage yet.</p>
+{% endfor %}
+
+<hr>
+
+<form method="post">
+{% csrf_token %}
+<input type="submit" value="Create a New Panel" class="btn btn-primary">
+</form>
+
+{% endblock %}
+

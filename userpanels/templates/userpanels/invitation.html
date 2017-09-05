@@ -1,0 +1,30 @@
+{% extends "master.html" %}
+
+{% load govtrack_utils %}
+
+{% block title %}Join {{panel.title}} - GovTrack.us{% endblock %}
+
+{% block body_class %}about{% endblock %}
+
+{% block extra_css %}
+<style>
+</style>
+{% endblock %}
+
+{% block body %}
+<div style="max-width: 45em; margin: 3em 0;">
+	<h1>{{panel.title}}</h1>
+
+	<div style="font-size: 17px;">
+	{{panel.welcome_message|markdown}}
+	<p><i>{{panel.consent_text}}</i></p>
+	</div>
+
+	<form method="post">
+	{% csrf_token %}
+	<input type="submit" value="Join This Panel" class="btn btn-primary">
+	</form>
+</div>
+
+{% endblock %}
+
