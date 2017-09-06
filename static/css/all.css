@@ -234,7 +234,7 @@ blockquote {
 	text-indent: -9999px;
 	overflow: hidden;
 }
-	
+
 .breadcrumb {
 	margin-top: 15px;
 	margin-bottom: 0;
@@ -1048,14 +1048,14 @@ ul.singlesignon {
 	padding: 3px 3px 1px 5px;
 	position:relative;
 	line-height: 128%;
-    min-height: 20px;
+  min-height: 20px;
 	top: -4px;
 	left:-10px;
 	margin: 0 auto;
 	font-weight: bold;
 }
 	@media screen and (min-width: 768px) {
-		.photo_flag {
+		.photo_flag.committee {
 			left: -6px;
 		}
 	}
@@ -1140,7 +1140,7 @@ ul.singlesignon {
 	left:0px;
 	top:0px;
 	background:#BF1722;
-	outline:0;	
+	outline:0;
 	-webkit-transition: top .1s ease-in, background .5s linear;
     transition: top .1s ease-in, background .5s linear;
 }
