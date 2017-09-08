@@ -63,7 +63,7 @@
 				{% endfor %}
 			</dl>
 
-			
+
 			{% if member_highlights|length > 0 %}
 			<p style="line-height: 110%"><small>The chair is always selected from the majority party and the ranking member is the most senior member of the minority party.</small></p>
 			{% endif %}
@@ -71,14 +71,14 @@
 			<p style="line-height: 110%"><small>The majority party ensures it has a majority on every committee.</small></p>
 			{% endif %}
 			</small></p>
-			
+
 			{% if members|length == 0 %}
 			<p>The membership of this committee is not yet available.</p>
 			{% endif %}
 
 	</div>
-	
-	
+
+
 
 	<div class="aside col-sm-4">
 		<a href="#" class="track-btn" onclick="return show_track_panel();">Track Committee</a>
@@ -111,20 +111,20 @@
 		        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm"></div>{% endif %}
 		        {% if forloop.counter0|divisibleby:2 %}<div class="clearfix visible-xs"></div>{% endif %}
 		        <div class="member col-xs-6 col-sm-3 col-md-2">
-	            	
+
 		            <div class="photo">
 	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" width="100" height="120" alt="Portrait of {{ member.person.name_no_details }}"/></a>
 	            	</div>
-	            	
+
 		            {% with member.person.get_current_role as role %}
-		            
+
 					{% if member.role != SIMPLE_MEMBER %}
-		            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
+		            <div class="photo_flag flag_{{role.party|slice:":1"|lower}} committee">
 		            	{{ member.get_role_display }}
 		            </div>
 		            {% else %}
 	            	{% if member.subcommittee_role %}
-	                <div class="photo_flag flag_{{role.party|slice:":1"|lower}} sub_chair" title="Subcommittee {{member.subcommittee_role.role_name}}: {{member.subcommittee_role.committee.name}}">
+	                <div class="photo_flag flag_{{role.party|slice:":1"|lower committee}} sub_chair" title="Subcommittee {{member.subcommittee_role.role_name}}: {{member.subcommittee_role.committee.name}}">
 	                	{{member.subcommittee_role.committee.name|cut:"The "|truncatewords:1}}
 	                </div>
 	            	{% endif %}
@@ -142,7 +142,7 @@
 		            	<div>{{role.state}}-{{role.district}}</div>
 		            	{% endif %}
 		            	<div>{{role.party}}</div>
-		            	
+
 						{% if member.subcommittee_role %}
 							<div style="font-size: 95%; line-height: 120%; border-top: 1px solid #AAA; margin-top: 3px; padding-top: 3px;">{{member.subcommittee_role.role_name}}, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}" class="plain">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
 						{% endif %}
@@ -153,7 +153,7 @@
 		    </div>
 		</div>
 		{% endif %}
-		
+
 		<div id="activity" class="tab-pane {% if members|length == 0 %}active{% endif %}">
 				<h2>Bills</h2>
 				{% if committee.has_current_bills %}
@@ -188,7 +188,7 @@
 			</tbody>
 			</table>
 		</div>
-		
+
 		{% if subcommittees %}
 		<div id="subcommittees" class="tab-pane">
 			<h2>Subcommittees</h2>
