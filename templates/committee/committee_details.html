@@ -124,7 +124,7 @@
 		            </div>
 		            {% else %}
 	            	{% if member.subcommittee_role %}
-	                <div class="photo_flag flag_{{role.party|slice:":1"|lower committee}} sub_chair" title="Subcommittee {{member.subcommittee_role.role_name}}: {{member.subcommittee_role.committee.name}}">
+	                <div class="photo_flag flag_{{role.party|slice:":1"|lower}} committee sub_chair" title="Subcommittee {{member.subcommittee_role.role_name}}: {{member.subcommittee_role.committee.name}}">
 	                	{{member.subcommittee_role.committee.name|cut:"The "|truncatewords:1}}
 	                </div>
 	            	{% endif %}
