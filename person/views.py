@@ -285,6 +285,7 @@ def get_representatives(state):
 @render_to('person/state.html')
 def browse_state(request, state):
     state = normalize_state_arg(state)
+    if state not in stateapportionment: raise Http404()
     center_lat, center_long, center_zoom = get_district_bounds(state, None)
             
     return {
@@ -302,6 +303,7 @@ def browse_state(request, state):
 @render_to('person/district_map.html')
 def browse_district(request, state, district):
     state = normalize_state_arg(state)
+    if state not in stateapportionment: raise Http404()
 
     # make district an integer
     try:
