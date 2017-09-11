@@ -27,7 +27,7 @@ def run_analysis_for_president(president, date_range):
 	enacted_bills = Bill.objects.filter(
 		current_status__in=BillStatus.final_status_enacted_bill,
 		#sliplawpubpriv="PUB", # questionable
-		current_status_date__gte=start_date,
+		current_status_date__gte=start_date, # only use this if looking at a final status
 		current_status_date__lte=end_date
 		)\
 		.order_by('current_status_date')
@@ -104,19 +104,29 @@ run_analysis_for_president("Trump", ("2017-01-20","2018-01-19"))
 
 import re
 def fmt_day(d): return re.sub(r"^0", "", d.strftime("%m/%d"))
+day_zero = datetime.strptime("2017-01-20", "%Y-%m-%d").date()
 
 W = csv.writer(sys.stdout)
-W.writerow(["reldate", "date"] + sum(([president, "pages"] for president in columns), []))
-day_zero = datetime.strptime("2017-01-20", "%Y-%m-%d").date()
-for rel_date in range(max(stats)+1):
-	W.writerow(
-		[ (rel_date+1), fmt_day(day_zero+timedelta(days=rel_date)) ]
-		+ sum(
-			(
-				list(stats[rel_date][president])
-				if president in stats[rel_date]
-				else ["", "", ""]
-				for president in columns
-			), [])
-	)
 
+if len(sys.argv) == 1:
+	# show all days
+	W.writerow(["reldate", "date"] + sum(([president, "pages"] for president in columns), []))
+	for rel_date in range(max(stats)+1):
+		W.writerow(
+			[ (rel_date+1), fmt_day(day_zero+timedelta(days=rel_date)) ]
+			+ sum(
+				(
+					list(stats[rel_date][president])
+					if president in stats[rel_date]
+					else ["", ""]
+					for president in columns
+				), [])
+		)
+else:
+	# show only requested date
+	rel_date = int(sys.argv[1])-1
+	print(rel_date+1, fmt_day(day_zero+timedelta(days=rel_date)))
+	W.writerow(["president", "bills", "pages"])
+	for president in columns:
+		if president in stats[rel_date]:
+			W.writerow([president] + list(stats[rel_date][president]))
