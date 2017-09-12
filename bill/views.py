@@ -110,6 +110,7 @@ def bill_details_user_view(request, congress, type_slug, number):
     ret.update(render_subscribe_inline(request, bill.get_feed()))
 
     ret["reactions"] = get_user_bill_reactions(request, bill)
+    ret["position"] = get_user_bill_position_info(request, bill)
 
     return ret
 
@@ -146,6 +147,15 @@ def get_user_bill_reactions(request, bill):
 
     return ret
 
+def get_user_bill_position_info(request, bill):
+    if not request.user.is_authenticated: return None
+    # user registered positions
+    from website.models import UserPosition
+    p = UserPosition.objects.filter(user=request.user, subject=bill.get_feed().feedname).first()
+    if p:
+        return { "likert": p.likert, "reason": p.reason }
+    return None
+
 @anonymous_view
 @render_to("bill/bill_summaries.html")
 def bill_summaries(request, congress, type_slug, number):
@@ -162,6 +172,7 @@ def bill_summaries_user_view(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     ret = { }
     ret["reactions"] = get_user_bill_reactions(request, bill)
+    ret["position"] = get_user_bill_position_info(request, bill)
     return ret
 
 @anonymous_view
@@ -180,6 +191,7 @@ def bill_full_details_user_view(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     ret = { }
     ret["reactions"] = get_user_bill_reactions(request, bill)
+    ret["position"] = get_user_bill_position_info(request, bill)
     return ret
 
 @anonymous_view
@@ -287,6 +299,7 @@ def bill_text_user_view(request, congress, type_slug, number, version=None):
     bill = load_bill_from_url(congress, type_slug, number)
     ret = { }
     ret["reactions"] = get_user_bill_reactions(request, bill)
+    ret["position"] = get_user_bill_position_info(request, bill)
     return ret
 
 @anonymous_view

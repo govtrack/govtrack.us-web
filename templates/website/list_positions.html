@@ -1,0 +1,38 @@
+{% extends 'master.html' %}
+{% load govtrack_utils %}
+{% block title %}What You Have a Position On -- GovTrack.us{% endblock %}
+{% block head %}
+{% endblock %}
+
+{% block body_scripts %}
+{% endblock %}
+
+{% block body %}
+<h1>What You Have a Position On</h1>
+
+<p>Here you can see a list of the bills on which you have added notes and/or indicated your level of support/opposition, with the most recent indications first.</p>
+
+<p><a href="/congress/bills">You can search bills here</a>, and note your views under the title at the top of a specific bill page.</p>
+
+{% for position in positions %}
+    {# <p>Subject: {{ position.subject }} Created: {{position.created}} </p> #}
+    <div class="tracked_event">
+        <h4 class="event_title simple">
+            <a href="{{position.get_subject_link}}">{{position.get_subject_title}}</a>
+        </h4>
+        <div class="event_body">
+            {% if position.likert is not None %}
+                <p style="font-style: italic;">{{position.likert|likerttext}}</p>
+            {% endif %}
+            <p class="position_notes" style="margin: 0;">{{position.reason|markdown}}</p> 
+        </div>
+    </div>
+{% empty %}
+    <p>
+        You have not noted any positions yet! <br>
+        <a href="/congress/bills">You can explore bills here</a> 
+         and note your positions near the top of the page.
+    </p>
+{% endfor %}
+
+{% endblock %}
