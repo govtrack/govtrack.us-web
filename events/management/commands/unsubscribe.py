@@ -14,19 +14,19 @@ from website.models import UserProfile
 from datetime import datetime
 
 class Command(BaseCommand):
-	args = 'user@email.com or user ID'
 	help = 'Unsubscribes a user from receiving email updates.'
+
+	def add_arguments(self, parser):
+		parser.add_argument('email_address_or_id', nargs=1, type=str)
 	
 	def handle(self, *args, **options):
-		if len(args) != 1:
-			print "Specify a user's email address."
-			return
+		user = options["email_address_or_id"][0]
 		
 		try:
-			if "@" in args[0]:
-				p = UserProfile.objects.get(user__email=args[0])
+			if "@" in user:
+				p = UserProfile.objects.get(user__email=user)
 			else:
-				p = UserProfile.objects.get(user__id=args[0])
+				p = UserProfile.objects.get(user__id=user)
 		except UserProfile.DoesNotExist:
 			print "No such user."
 			return
