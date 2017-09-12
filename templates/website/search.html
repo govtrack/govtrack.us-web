@@ -9,16 +9,22 @@
 </style>
 {% endblock %}
 {% block body %}
-	<h1>Search</h1>
+	<h1>Search GovTrack</h1>
 
-	<form method="get" class="advanced-search">
-		<input name="q" type="text" class="text" value="{{request.GET.q}}" style="font-size: 15px; width: 350px" />
-		<input id="submit" class="btn-search-small" type="submit" value="Search"/>
+	{% if not request.GET.q %}
+	<p>Search GovTrack for <a href="/congress/members">senators and representatives</a>, states and territories, <a href="/congress/bills">bills and resolutions</a>, and <a href="/congress/committees">committees</a> using this form.</p>
+	{% endif %}
+
+	<form method="get">
+	  <div class="form-group">
+	    <label for="q">Search for...</label>
+	    <input type="text" class="form-control" id="q" name="q" value="{{request.GET.q}}">
+	  </div>
+	  <button type="submit" class="btn btn-default">Search</button>
 	</form>
-	
 
 	<div class="small" style="margin-top: 1em">
-		<p>When searching for bills, enter keywords to search the full text of bills,
+		<p>When searching for bills, enter keywords to search titles and full text,
 		or enter a bill number (e.g. HR 123 or HR 123/110) or slip law number (e.g. P.L. 110-64).
 		You can also put phrases in quotes (e.g. "nuclear fuel"). You can also search for Members of Congress by name, Congressional committees by name, and legislative subject areas.</p>
 	</div>
@@ -47,3 +53,10 @@
 	</div><!-- /search-results -->
 {% endblock %}
 
+{% block body_scripts %}
+<script>
+$(function() {
+	$('#q').focus();
+});
+</script>
+{% endblock %}

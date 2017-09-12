@@ -77,6 +77,10 @@
 	        <span class="icon-bar"></span>
 	        <span class="icon-bar"></span>
 	      </button>
+	      <a class="navbar-toggle" style="padding: 7px 8px 4px 8px; color: #557D9A;" href="/search" title="Search Site">
+	        <span class="sr-only">Search GovTrack</span>
+	        <span class="glyphicon glyphicon-search" style="font-size: 17px;"></span>
+	      </a>
 	      <a id="logo" href="/" class="navbar-brand {% block logo_class %}{% endblock %}">govtrack.us</a>
 	    </div>
 
@@ -139,12 +143,16 @@
 			{% endif %}
 			{% endblock %}
 			<li>
-				<form name="header_search" action="/search" method="GET" class="search-form" role="search">
+				<form name="header_search" action="/search" method="GET" class="search-form hidden-xs hidden-sm" role="search">
 					<label for="master_search_q" class="sr-only">Search GovTrack for</label>
 					<div class="text"><input type="text" placeholder="Search" id="master_search_q" name="q"/></div>
 					<input class="btn-search" type="submit" value="Search" />
 				</form>
-	        </li>
+		      <a class="navbar-toggle visible-sm" style="padding: 6px 8px 2px 8px; color: #557D9A;" href="/search" title="Search Site">
+		        <span class="sr-only">Search GovTrack</span>
+		        <span class="glyphicon glyphicon-search" style="font-size: 14px;"></span>
+		      </a>
+		    </li>
 			<li style="padding: 10px;">
     <div id="google_translate_element"></div><script type="text/javascript">
     function googleTranslateElementInit() {
