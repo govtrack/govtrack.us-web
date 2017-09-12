@@ -194,26 +194,26 @@ function ajaxPositionReasons(changedElement) {
 }
 function ajaxPositionVal(positionVal, setDiv = null, valDiv = null) {
      $.ajax({
-		url: "{% url 'position' %}",
-		method: "POST",
-		data: {
-		   subject: "bill:{{bill.congressproject_id|escapejs}}",
-		   position: positionVal
-		},
-		success: function() {
-                 if(positionVal != "r") {
-		   setClassToOneVal(setDiv, "saving", null);
-		   setClassToOneVal(setDiv, "saved", valDiv);
-                 }
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-		   logAjaxError(jqXHR, textStatus, errorThrown);
-                   if (positionVal != "r") {
-		   setClassToOneVal(setDiv, "saving", null);
-                   }
+	  url: "{% url 'position' %}",
+	  method: "POST",
+	  data: {
+	     subject: "bill:{{bill.congressproject_id|escapejs}}",
+	     position: positionVal
+	  },
+	  success: function() {
+              if(positionVal != "r") {
+	          setClassToOneVal(setDiv, "saving", null);
+	          setClassToOneVal(setDiv, "saved", valDiv);
               }
-	})
-	return false;
+	  },
+	  error: function(jqXHR, textStatus, errorThrown) {
+	      logAjaxError(jqXHR, textStatus, errorThrown);
+              if (positionVal != "r") {
+	          setClassToOneVal(setDiv, "saving", null);
+              }
+          }
+    })
+    return false;
 }
 function logAjaxError(jqXHR, textStatus, errorThrown) {
 	console.log("AJAX failed with status "+textStatus+". Error thrown: "+errorThrown+
@@ -414,10 +414,10 @@ span.outsideLabel {
     font-style: italic;
 }
 td.notesToggle img{
-   margin-top: -5px;
-   margin-bottom: auto;
-   margin-left: 1em;
-   height: 25px;
+    margin-top: -5px;
+    margin-bottom: auto;
+    margin-left: 1em;
+    height: 25px;
 }
 div.valueHovers {
     height: 100%;
@@ -446,7 +446,7 @@ div.val:hover, div.valActive {
     opacity: 1;
 }
 div.val.saving div.marker, div.val:active div.marker {
-   background-color: #99b2ff;
+    background-color: #99b2ff;
 }
 textarea.whybox {
     width: 100%;
