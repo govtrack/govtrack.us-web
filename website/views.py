@@ -562,7 +562,7 @@ def load_positions(request):
     positionlist = Position.objects.filter(
           user=request.user if request.user.is_authenticated() else None,
           anon_session_key=Position.get_session_key(request) if not request.user.is_authenticated() else None,
-    ).order_by('-created') #TODO: should be by modified date rather than created.
+    ).order_by('-modified')
     page = paginate(positionlist, request, per_page=50)
 
     return {

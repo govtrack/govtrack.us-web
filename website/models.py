@@ -328,6 +328,7 @@ class Position(models.Model):
     extra = JSONField()
 
     created = models.DateTimeField(auto_now_add=True, db_index=True)
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ( ('subject', 'user'), ('subject', 'anon_session_key') )
