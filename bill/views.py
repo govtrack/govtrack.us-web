@@ -140,7 +140,7 @@ def bill_details_user_view(request, congress, type_slug, number):
     return ret
 
 def get_user_bill_position_info(request, bill):
-    # user registered positions - needs to come out of the details-only view.
+    # user registered positions
     # import json #imported with emoji above
     from website.models import Position
     position_subject = "bill:" + bill.congressproject_id
