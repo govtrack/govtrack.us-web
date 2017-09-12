@@ -620,7 +620,7 @@ def __update_position(p, updatedField):
          # no data, delete record.
          # Could use return values (num_deleted, types_deleted) for confirmation.
          p.delete()
-         res = { "status":"success", "position_cleared":true, "stored_info":"" }
+         res = { "status":"success", "position_cleared":True, "stored_info":"" }
      else:
          p.save()
          id_after_storage = p.id

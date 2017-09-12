@@ -110,7 +110,7 @@ function valClick(event) {
    storeVal(target);
 }
 function storeVal(clickedElement) {
-    //up-iteration to get parent div
+    //up-iteration to get parent div with class "val"
     var parentDiv = clickedElement;
     while (parentDiv) {
         if (parentDiv instanceof HTMLDivElement && parentDiv.classList.contains("val")) {
@@ -131,7 +131,8 @@ function storeVal(clickedElement) {
         }
         setClassToOneVal(setDiv, "valActive", parentDiv); //Set b/c "saving" might get cleared later if there's an error
         setClassToOneVal(setDiv, "saving", parentDiv);
-        ajaxPositionVal(setDiv, parentDiv);
+        var positionVal = parseInt(parentDiv.getAttribute("data-value"));
+        ajaxPositionVal(positionVal, setDiv, parentDiv);
     }
 }
 function setClassToOneVal(setDiv, classToSet, elementToSet) {
@@ -191,8 +192,7 @@ function ajaxPositionReasons(changedElement) {
 	})
 	return false;
 }
-function ajaxPositionVal(setDiv, valDiv) {
-     var positionVal = parseInt(valDiv.getAttribute("data-value"));
+function ajaxPositionVal(positionVal, setDiv = null, valDiv = null) {
      $.ajax({
 		url: "{% url 'position' %}",
 		method: "POST",
@@ -201,12 +201,16 @@ function ajaxPositionVal(setDiv, valDiv) {
 		   position: positionVal
 		},
 		success: function() {
+                 if(positionVal != "r") {
 		   setClassToOneVal(setDiv, "saving", null);
 		   setClassToOneVal(setDiv, "saved", valDiv);
+                 }
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 		   logAjaxError(jqXHR, textStatus, errorThrown);
+                   if (positionVal != "r") {
 		   setClassToOneVal(setDiv, "saving", null);
+                   }
               }
 	})
 	return false;
