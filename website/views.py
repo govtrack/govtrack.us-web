@@ -551,12 +551,59 @@ def medium_post_redirector(request, id):
     post = get_object_or_404(MediumPost, id=id)
     return HttpResponseRedirect(post.url)
 
-#Helper function for getting starter position information. 
+@render_to('website/list_positions.html')
+def get_user_position_list(request):
+    return {}
+
+@render_to('website/list_position_elements.html')
+def load_positions(request):
+    from website.models import Position
+
+    positionlist = Position.objects.filter(
+          user=request.user if request.user.is_authenticated() else None,
+          anon_session_key=Position.get_session_key(request) if not request.user.is_authenticated() else None,
+    ).order_by('-created') #TODO: should be by modified date rather than created.
+    page = paginate(positionlist, request, per_page=50)
+
+    return {
+        'page': page,
+        'position_list': positionlist,
+         }
+
+#Helper function for getting bill from subject information.
+def __get_bill(subject):
+     from bill.models import Bill, BillType
+     hyphen = subject.rfind('-')
+     congressNum = int(subject[hyphen+1:])
+     billNumStart = re.search("\d",subject).start()
+     billNum = int(subject[billNumStart:hyphen])
+     billTypeSlug = subject[:billNumStart].lower()
+     if hyphen <= 0 or billNumStart <=0:
+        #String parsing error- this covers some but not all errors.
+        return None
+     try:
+         billObj = Bill.objects.get(congress=congressNum, bill_type=BillType.by_slug(billTypeSlug), number=billNum)
+         return billObj
+     except Bill.DoesNotExist:
+         return None
+#There may be a faster way to to do this in GovTrack, but it didn't quite work in tests:
+def __get_bill_autoparse(subject):
+     from bill.search import parse_bill_number
+     return parse_bill_number(subject)
+
+#Helper function for getting starter position information.
 def __get_position(request):
      from website.models import Position
+     #Double-check requested: Does subject need additional cleaning? Doesn't have it with emoji.
+     subjectStr = request.POST["subject"]
+     if subjectStr.startswith("bill:"):
+         billObj = __get_bill(subjectStr[5:])
+     else:
+         billObj = None
+
      p, isnew = Position.objects.get_or_create(
-         #Double-check requested: Does subject need additional cleaning? Doesn't have it with emoji.
-         subject=request.POST["subject"],
+         subject=subjectStr,
+         bill= billObj,
          user=request.user if request.user.is_authenticated() else None,
          anon_session_key=Position.get_session_key(request) if not request.user.is_authenticated() else None,
      )

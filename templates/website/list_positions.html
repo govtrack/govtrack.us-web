@@ -1,0 +1,72 @@
+{% extends 'master.html' %}
+{% block title %}What You Have a Position On -- GovTrack.us{% endblock %}
+{% block head %}
+<!--After changes are completed, could DRY up code common with templates/events/edit_lists.html
+and/or remove some code not actually used here.-->
+<style>
+p.if_has_no_positions {
+   font-weight: bold;
+}
+p.position_val {
+   font-weight: bold;
+}
+p.position_notes {
+   font-style: italic;
+}
+
+</style>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+$(function() {
+    $('#positions').html("Loading...");
+    $.ajax({
+        url: "/website/_load_positions",
+        type: "POST",
+        data: {
+            {% if request.GET.page %}page: "{{request.GET.page|escapejs}}",{% endif %}
+        },
+        dataType: "html",
+        success: function(data) {
+            $('#positions').html(data);
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block body %}
+<h1>What You Have a Position On</h1>
+
+{% if message %}
+<p class="text-info">{{message}}</p>
+{% endif %}
+
+<p>Here you can see a list of the bills on which you have added notes and/or indicated your level of support/opposition, with the most recent indications first.</p>
+
+<p>This content is only visible to you.</p>{# Change if user is on any panels! List panels. #}
+
+{# Add stronger warning message if user is not logged in? #}
+<p> Only positions/notes entered while logged in will be saved between sessions. </p>
+
+<p><a href="/congress/bills">You can search bills here</a>, and note your views under the title at the top of a specific bill page.</p>
+
+<section id="position_list">
+    <h2><span>Your Positions</span></h2>
+
+    <a href="/congress/bills">Click here to explore bills.</a></p>
+
+    <div class="row if_has_positions"><!-- style="display: none"-->
+    <div class="col-sm-7">
+
+        <div id="positions">
+            <ul id="list_positions">
+            </ul>
+        </div><!-- /positions -->
+
+    </div> <!-- /col -->
+    </div> <!-- /row -->
+
+</section>
+{% endblock %}

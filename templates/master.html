@@ -103,10 +103,12 @@
 					{% if request.anonymous %}
 						<li id="nav_track_start"><a href="/start">Start Tracking</a></li>
 						<li id="nav_track_lists" style="display: none"><a href="/accounts/lists">What You Are Tracking</a></li>
+                                                <li id="nav_track_positions" style="display: none"><a href="/accounts/positions">What You Have a Position On</a></li>
 					{% else %}
 						{% if user.is_authenticated %}
 						<li><a href="/start">Add a Tracker</a></li>
 						<li><a href="/accounts/lists">What You Are Tracking</a></li>
+                                                <li><a href="/accounts/positions">What You Have a Position On</a></li>
 						{% else %}
 						<li><a href="/start">Start Tracking</a></li>
 						{% endif %}
@@ -330,6 +332,7 @@
 		if (the_user) {
 			$('#nav_track_start').find('a').text("Add a Tracker");
 			$('#nav_track_lists').show();
+                        $('#nav_track_positions').show();
 			$('#nav_login').find('a').text('Your Account').attr('title', the_user.email).attr('href', '/accounts/profile');
 			$('#nav_logout').show();
 		}
