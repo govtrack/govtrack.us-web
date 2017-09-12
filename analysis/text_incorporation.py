@@ -422,6 +422,7 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
     #      in common is quite large.
     if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 300) \
       or (b1_ratio*b2_ratio > .66 and cmp_text_len > 800) \
+      or ((b1_ratio>.81 or b2_ratio>.81) and cmp_text_len > 800) \
       or ((b1_ratio>.33 or b2_ratio>.33) and cmp_text_len > 4000) \
       or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 8000):
 
