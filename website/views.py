@@ -551,6 +551,36 @@ def medium_post_redirector(request, id):
     post = get_object_or_404(MediumPost, id=id)
     return HttpResponseRedirect(post.url)
 
+@login_required
+@render_to('website/list_positions.html')
+def get_user_position_list(request):
+    from website.models import UserPosition
+    return {
+        "positions": UserPosition.objects.filter(user=request.user).order_by('-created')
+    }
+
+@login_required
+def update_userposition(request):
+    from website.models import UserPosition
+    if request.method != "POST": raise HttpResponseBadRequest()
+
+    # just validate
+    f = Feed.from_name(request.POST.get("subject", ""))
+    f.title
+
+    qs = UserPosition.objects.filter(user=request.user, subject=request.POST["subject"])
+    if not request.POST.get("likert") and not request.POST.get("reason"):
+        # Nothing to save - delete any existing.
+        qs.delete()
+    else:
+        # Update.
+        upos, _ = qs.get_or_create(user=request.user, subject=request.POST["subject"])
+        upos.likert = int(request.POST["likert"]) if request.POST.get("likert") else None
+        upos.reason = request.POST["reason"]
+        upos.save()
+
+    return HttpResponse(json.dumps({ "status": "ok" }), content_type="application/json")
+
 def add_remove_reaction(request):
     from website.models import Reaction
     res = { "status": "error" }

@@ -13,6 +13,17 @@ def randint(a, b):
 	return random.randint(int(a), int(b))
 
 @register.filter
+def likerttext(value):
+    likertdict = { -3: "Strongly oppose",
+                   -2: "Moderately oppose",
+                   -1: "Slightly oppose",
+                    0: "Neither support nor oppose",
+                    1: "Slightly support",
+                    2: "Moderately support",
+                    3: "Strongly support"}
+    return likertdict.get(value)
+
+@register.filter
 def ordinalhtml(value):
     """
     Converts an integer to its ordinal as HTML. 1 is '1<sup>st</sup>',
