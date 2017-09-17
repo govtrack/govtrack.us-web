@@ -15,454 +15,162 @@
 			</script>
 </div>
 
+<div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+<div class="col-md-5">
+
 <div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" style="display: none;">
 	<span class="main"> </span>
 	<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">···</a>
 	<span class="other" style="display: none"> </span>
 </div>
 
-<div class="LikertHost">
-    <table class="LabeledLikertFrame"><tr>
-	<td>
-		<span class="outsideLabel rightAlign">Oppose</span>
-	</td>
-	<td>
-		<div class="LikertFrame">
-			<div class="sides">
-			        <div class="negSide"><span class="LikertItemSideBarLabel">JavaScript</span></div>
-			        <div class="posSide"><span class="LikertItemSideBarLabel">required</span></div>
-			</div>
-			<div class="valueHovers">
-                                      <div class="val" data-value="-3" title="{{-3|likerttext}}"><div class="marker"></div>
-			        </div><div class="val" data-value="-2" title="{{-2|likerttext}}"><div class="marker"></div>
-			        </div><div class="val" data-value="-1" title="{{-1|likerttext}}"><div class="marker"></div>
-			        </div><div class="val" data-value="0"  title="{{0|likerttext}}"><div class="marker"></div>
-			        </div><div class="val" data-value="1"  title="{{1|likerttext}}"><div class="marker"></div>
-			        </div><div class="val" data-value="2"  title="{{2|likerttext}}"><div class="marker"></div>
-			        </div><div class="val" data-value="3"  title="{{3|likerttext}}"><div class="marker"></div>
-			        </div>
-			</div>
-		</div>
-	</td>
-	<td>
-		<span class="outsideLabel">Support</span>
-	</td>
-	<!--Can make this a save button in future versions that work without javascript-->
-       <td class="notesToggle" title="Hide notes field"> <img src="/static/images/notes64.png"/></td>
-    </tr></table>
-    <textarea class="whybox" placeholder="My personal notes on why I oppose or support this bill."
-                                   title="My personal notes on why I oppose or support this bill."></textarea>
 </div>
+<div class="col-md-7">
+
+<div id="UserPositionContainer">
+	<div class="LikertFrame">
+		<div class="LikertContainer"> {# to get rid of whitespace between elems, close tags are on next line #}
+    <span class="glyphicon glyphicon-thumbs-down" title="Oppose"></span>
+      <span class="val" data-value="-3" title="{{-3|likerttext}}"><span class="glyphicon glyphicon-star-empty"></span><span class="glyphicon glyphicon-star"></span>
+      </span><span class="val" data-value="-2" title="{{-2|likerttext}}"><span class="glyphicon glyphicon-star-empty"></span><span class="glyphicon glyphicon-star"></span>
+      </span><span class="val" data-value="-1" title="{{-1|likerttext}}"><span class="glyphicon glyphicon-star-empty"></span><span class="glyphicon glyphicon-star"></span>
+      </span><span class="val" data-value="0"  title="{{0|likerttext}}"><span class="glyphicon glyphicon-star-empty"></span><span class="glyphicon glyphicon-star"></span>
+      </span><span class="val" data-value="1"  title="{{1|likerttext}}"><span class="glyphicon glyphicon-star-empty"></span><span class="glyphicon glyphicon-star"></span>
+      </span><span class="val" data-value="2"  title="{{2|likerttext}}"><span class="glyphicon glyphicon-star-empty"></span><span class="glyphicon glyphicon-star"></span>
+      </span><span class="val" data-value="3"  title="{{3|likerttext}}"><span class="glyphicon glyphicon-star-empty"></span><span class="glyphicon glyphicon-star"></span></span>
+      <span class="glyphicon glyphicon-thumbs-up" title="Support"></span>
+		</div>
+    <span class="sidelabel">
+      <a href="#" class="notesToggle" onclick="return false;" title="Show or hide your notes" style="display: none">
+        <span class="glyphicon glyphicon-pencil"></span>
+        Add Note
+      </a>
+    </span>
+	</div>
+  <div class="whybox" style="display: none">
+    <textarea style="display: block;" 
+      placeholder="My personal notes on why I oppose or support this {{bill.noun}}."
+      title="My personal notes on why I oppose or support this {{bill.noun}}."></textarea>
+    <button class="btn btn-primary">Save Note</button>
+  </div>
+</div>
+
+</div>
+</div>
+
 <script>
-//After any needed changes, this JS should be separated out.
-window.onload = doOnLoad();
-function doOnLoad() {
-    hideJSReqdNotice();
-    addListeners();
-}
-function hideJSReqdNotice() {
-  var sideBarLabels = document.querySelectorAll("span.LikertItemSideBarLabel");
-  if (sideBarLabels.length>=1) {
-     for(var i = 0; i<sideBarLabels.length; i++) {
-         sideBarLabels[i].innerHTML = "";
-     }
+window.post_jquery_load_scripts.push(function() {
+  if (the_user)
+    $("#UserPositionContainer .notesToggle").show();
+
+  // load existing user position
+  if (the_page && the_page.position) {
+    $("#UserPositionContainer .LikertContainer .val").each(function(item) {
+      if ($(this).attr("data-value") == the_page.position.likert)
+        $(this).addClass('active');
+    });
+    $("#UserPositionContainer textarea").val(the_page.position.reason);
+    if (the_page.position.reason) {
+      $("#UserPositionContainer .whybox").show();
+      $("#UserPositionContainer .notesToggle").hide();
+    }
   }
-  return;
-}
-function addListeners() {
-    var likertHost = document.querySelector("div.LikertHost");
-    if (likertHost == null) {
-	console.log("Could not find div containing position registration; not adding event listeners.");
-    } else {
-        var valBoxes = likertHost.querySelectorAll("div.valueHovers div.val");
-        for (var i = 0; i<valBoxes.length; i++) {
-            valBoxes[i].addEventListener("click",valClick);
-        }
 
-        var reasonBox = likertHost.querySelector("textarea.whybox");
-        if (reasonBox != null) {
-            reasonBox.addEventListener("input",changeReasons);
-        } else {
-            console.log("Could not find box for entry of reasons.");
-        }
-
-        var notesToggler = likertHost.querySelector("td.notesToggle");
-        if (notesToggler != null) {
-            notesToggler.addEventListener("click",toggleWhybox);
-        } else {
-            console.log("Could not find element for toggling notes.");
-        }
+  // event handlers
+  $("#UserPositionContainer .notesToggle").click(function() {
+    $('#UserPositionContainer .whybox').toggle();
+    $('#UserPositionContainer .whybox textarea').focus();
+  });
+  $("#UserPositionContainer .LikertContainer .val").click(function() {
+    // Update and save this likert score.
+    if (!the_user) {
+      alert("You must be logged in to use this feature.");
+      return;
     }
-}
-
-function valClick(event) {
-    //IE compatibility
-    event = event || window.event;
-    var target = event.target || event.srcElement;
-
-    //up-iteration to get parent div inspired by http://stackoverflow.com/a/29223563/798371
-    while (target) {
-      if (target instanceof HTMLDivElement) {
-        break;
-      }
-      target = target.parentNode;
-    }
-   storeVal(target);
-}
-function storeVal(clickedElement) {
-    //up-iteration to get parent div with class "val"
-    var parentDiv = clickedElement;
-    while (parentDiv) {
-        if (parentDiv instanceof HTMLDivElement && parentDiv.classList.contains("val")) {
-          break;
-        }
-        parentDiv = parentDiv.parentNode;
-    }
-    if (parentDiv.classList.contains("valActive")) {
-        parentDiv.classList.remove("valActive");
-        ajaxPositionVal("r");
-    } else {
-        var setDiv = parentDiv.parentNode;
-        while (setDiv) {
-          if (setDiv instanceof HTMLDivElement && setDiv.classList.contains("valueHovers")) {
-            break;
-          }
-          setDiv = setDiv.parentNode;
-        }
-        setClassToOneVal(setDiv, "valActive", parentDiv); //Set b/c "saving" might get cleared later if there's an error
-        setClassToOneVal(setDiv, "saving", parentDiv);
-        var positionVal = parseInt(parentDiv.getAttribute("data-value"));
-        ajaxPositionVal(positionVal, setDiv, parentDiv);
-    }
-}
-function setClassToOneVal(setDiv, classToSet, elementToSet) {
-   //First, clear out any that have this class
-       var valsWithClass = setDiv.querySelectorAll("div."+classToSet);
-       for (var i = 0; i<valsWithClass.length; i++) {
-           if(classToSet=="saving") {
-		removeSavingMessages(valsWithClass[i]);
-	    } else if (classToSet=="saved") {
-              removeSavedMessages(valsWithClass[i]);
-	    } else {
-              valsWithClass[i].classList.remove(classToSet);
-	    }
-       }
-
-   //Then, set the class on this one element, if any
-       if(elementToSet != null) {
-           if(classToSet=="saving") {
-		addSavingMessages(elementToSet);
-	    } else if (classToSet=="saved") {
-              addSavedMessages(elementToSet);
-	    } else {
-              elementToSet.classList.add(classToSet);
-	    }
-       }
-}
-
-function changeReasons(event) {
-    //IE compatibility:
-    event = event || window.event;
-    var target = event.target || event.srcElement;
-    storeReasons(target);
-}
-function storeReasons(changedElement) {
-    addSavingMessages(changedElement);
-    ajaxPositionReasons(changedElement);
-}
-
-function ajaxPositionReasons(changedElement) {
-     $.ajax({
-		url: "{% url 'reasons' %}",
+    var wasme = $(this).hasClass("active");
+    $("#UserPositionContainer .LikertContainer .val").removeClass("active");
+    if (!wasme)
+      $(this).addClass("active");
+    saveUserPosition();
+  });
+  $("#UserPositionContainer button").click(function() {
+    saveUserPosition(true);
+  })
+});
+function saveUserPosition(show_status) {
+  $.ajax({
+		url: "{% url 'update-userposition' %}",
 		method: "POST",
 		data: {
-		   subject: "bill:{{bill.congressproject_id|escapejs}}",
-		   reasons: changedElement.value
+		   subject: "{{bill.get_feed.feedname|escapejs}}",
+       likert: $("#UserPositionContainer .val.active").attr("data-value"),
+		   reason: $("#UserPositionContainer textarea").val()
 		},
-		success: function(dataFromServer) {
-		   if(dataFromServer["stored_info"]==changedElement.value) {
-                      removeSavingMessages(changedElement);
-                      addSavedMessages(changedElement);
-                 }
+		success: function() {
+      if (show_status)
+        alert("Your note about this {{bill.noun}} has been saved.")
 		},
-		error: function(jqXHR, textStatus, errorThrown) {
-		   logAjaxError(jqXHR, textStatus, errorThrown);
-		   removeSavingMessages(changedElement);
-              }
+		error: function() {
+      alert("There was an error saving your position.")
+    }
 	})
 	return false;
 }
-function ajaxPositionVal(positionVal, setDiv = null, valDiv = null) {
-     $.ajax({
-	  url: "{% url 'position' %}",
-	  method: "POST",
-	  data: {
-	     subject: "bill:{{bill.congressproject_id|escapejs}}",
-	     position: positionVal
-	  },
-	  success: function() {
-              if(positionVal != "r") {
-	          setClassToOneVal(setDiv, "saving", null);
-	          setClassToOneVal(setDiv, "saved", valDiv);
-              }
-	  },
-	  error: function(jqXHR, textStatus, errorThrown) {
-	      logAjaxError(jqXHR, textStatus, errorThrown);
-              if (positionVal != "r") {
-	          setClassToOneVal(setDiv, "saving", null);
-              }
-          }
-    })
-    return false;
-}
-function logAjaxError(jqXHR, textStatus, errorThrown) {
-	console.log("AJAX failed with status "+textStatus+". Error thrown: "+errorThrown+
-                   ". Server status: "+jqXHR.status+"; response text: "+jqXHR.responseText);
-}
-
-var SAVING_STRING = " (saving)";
-var SAVED_STRING = " (saved)";
-var SHOW_STRING = "Show ";
-var HIDE_STRING = "Hide ";
-function addSavingMessages(elementToChange) {
-   elementToChange.classList.add("saving");
-   addToTitleEnd(elementToChange, SAVING_STRING);
-}
-function removeSavingMessages(elementToChange) {
-   elementToChange.classList.remove("saving");
-   stripFromTitleEnd(elementToChange, SAVING_STRING);
-}
-function addSavedMessages(elementToChange) {
-   elementToChange.classList.add("saved");
-   addToTitleEnd(elementToChange, SAVED_STRING);
-}
-function removeSavedMessages(elementToChange) {
-   elementToChange.classList.remove("saved");
-   stripFromTitleEnd(elementToChange, SAVED_STRING);
-}
-function stringStartsWith(long, short) {//returns boolean
-   return ((long.substring(0,short.length))===short);
-}
-function titleStartsWith(elementToTest, possibleSuffix) {
-   return stringStartsWith(elementToTest.title, possibleSuffix);
-}
-function stringEndsWith(long, short) {//returns boolean
-   return ((long.substring(long.length-short.length))===short);
-}
-function titleEndsWith(elementToTest, possibleSuffix) {
-   return stringEndsWith(elementToTest.title, possibleSuffix);
-}
-function stripFromTitleStart(elementToChange, stringToStrip) {//Removes string from start of title, if present.
-   if(titleStartsWith(elementToChange, stringToStrip)) {
-        elementToChange.title = elementToChange.title.substring(stringToStrip.length);
-   }
-}
-function stripFromTitleEnd(elementToChange, stringToStrip) {//Removes string from end of title, if present.
-   if(titleEndsWith(elementToChange, stringToStrip)) {
-        elementToChange.title = elementToChange.title.substring(0,elementToChange.title.length-stringToStrip.length);
-   }
-}
-function addToTitleStart(elementToChange, stringToAdd) { //Adds string to start of title, if not present.
-   if(!titleStartsWith(elementToChange, stringToAdd)) {
-        elementToChange.title = stringToAdd + elementToChange.title;
-   }
-}
-function addToTitleEnd(elementToChange, stringToAdd) { //Adds string to end of title, if not present.
-   if(!titleEndsWith(elementToChange, stringToAdd)) {
-        elementToChange.title = elementToChange.title + stringToAdd;
-   }
-}
-
-function toggleVisibility(toToggle, toUpdateMessage) {
-    //Not simply using $(toToggle).toggle("fast"); to allow updating message
-    if(toToggle.style.display == "none") {
-       showElement(toToggle, toUpdateMessage);
-    } else {
-       hideElement(toToggle, toUpdateMessage);
-    }
-}
-function hideElement(toHide, toUpdateMessage) {
-    $(toHide).hide("fast");
-    stripFromTitleStart(toUpdateMessage, HIDE_STRING);
-    addToTitleStart(toUpdateMessage, SHOW_STRING);
-}
-function showElement(toShow, toUpdateMessage) {
-    $(toShow).show("fast");
-    stripFromTitleStart(toUpdateMessage, SHOW_STRING);
-    addToTitleStart(toUpdateMessage, HIDE_STRING);
-}
-function toggleWhybox(event) {
-    //IE compatibility
-    event = event || window.event;
-    var tdToUpdateMsg = event.target || event.srcElement;
-
-    //up-iteration to get parent
-    while (tdToUpdateMsg) {
-      if (tdToUpdateMsg instanceof HTMLTableCellElement && tdToUpdateMsg.classList.contains("notesToggle")) {
-        break;
-      }
-      tdToUpdateMsg = tdToUpdateMsg.parentNode;
-    }
-    var target = tdToUpdateMsg;
-    while (target) {
-      if (target instanceof HTMLDivElement && target.classList.contains("LikertHost")) {
-        break;
-      }
-      target = target.parentNode;
-    }
-   toggleVisibility(target.querySelector("textarea.whybox"), tdToUpdateMsg);
-}
-
-//Used for loading in stored position data.
-function show_position(position) {
-  var likertHost = document.querySelector("div.LikertHost");
-  if (likertHost == null) {
-       console.log("Could not find div containing position registration; not displaying stored position data.");
-  } else {
-       if((position[0]["positionVal"] != null) && (position[0]["positionVal"] != "")) {
-           var selectionString = "div.valueHovers div.val[data-value='"+position[0]["positionVal"]+"']";
-	    valueDiv = likertHost.querySelector(selectionString);
-	    valueDiv.classList.add("valActive");
-	    addSavedMessages(valueDiv);
-       }
-
-	var notesToggler = likertHost.querySelector("td.notesToggle");
-       var reasonsBox = likertHost.querySelector("textarea.whybox");
-       if(position[0]["reasons"]) {
-           reasonsBox.value = (position[0]["reasons"]);
-           addSavedMessages(reasonsBox);
-           showElement(reasonsBox, notesToggler);
-       } else {
-           hideElement(reasonsBox, notesToggler);
-	}
-  }
-}
-
 </script>
 <style>
-/*After any needed changes, this should be merged with site main CSS*/
-:root { /*sets vars used below*/
-    --main-height: 4ex;
-    --main-width: 28ex;
+#UserPositionContainer {
+    cursor: default;
 }
-.rightAlign {
-    text-align: right;
-}
-table.LabeledLikertFrame {
-    margin: 0 auto;
-}
-table.LabeledLikertFrame td {
-    border:0;
-    padding:0;
-    margin:0;
-    vertical-align: middle;
-}
-div.LikertFrame {
-    min-height: 20px;
-    min-width: 140px;
-    height: var(--main-height);
-    width: var(--main-width);
-    position: relative;
-    display:inline-block;
-}
-div.sides {
-    position:absolute;
-    width: 90%;
-    height: 80%;
-    left: 5%;
-    top: 10%;
-    border-radius: 9999px;
-    /*Gradient backward-compatibility lines from https://www.w3schools.com/css/css3_gradients.asp */
-    background-color: LightSkyBlue; /* For browsers that do not support gradients */
-    background: -webkit-linear-gradient(left, red , lime); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(right, red, lime); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(right, red, lime); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(to right, red, lime); /* Standard syntax */
-}
-div.negSide {
-    width: 50%;
-    height: 100%;
-    /*background-color: #ce7da5;*/
-    position: absolute;
-    left: 0;
-    top: 0;
-    border-radius: 9999px 0 0 9999px;
-    z-index: 5;
-}
-div.posSide {
-    width: 50%;
-    height: 100%;
-    /*background-color: #499f68;*/
-    position: absolute;
-    right: 0;
-    top: 0;
-    border-radius: 0 9999px 9999px 0;
-    z-index: 5;
-}
-span.LikertItemSideBarLabel {
-    height: calc(var(--main-height)*.8);
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-    vertical-align:middle;
+#UserPositionContainer .LikertContainer {
+    display: inline-block;
+    white-space-collapse: discard;
+    padding: 0 .5em;
+    border-radius: 1em;
     white-space: nowrap;
+
+background: -moz-linear-gradient(45deg, #ED1322 0%, #B8BA8C 47%, #B8BA8C 53%, #07DA70 100%); /* ff3.6+ */
+background: -webkit-gradient(linear, left bottom, right top, color-stop(0%, #ED1322), color-stop(45%, #B8BA8C), color-stop(55%, #B8BA8C), color-stop(100%, #07DA70)); /* safari4+,chrome */
+background: -webkit-linear-gradient(45deg, #ED1322 0%, #B8BA8C 47%, #B8BA8C 53%, #07DA70 100%); /* safari5.1+,chrome10+ */
+background: -o-linear-gradient(45deg, #ED1322 0%, #B8BA8C 47%, #B8BA8C 53%, #07DA70 100%); /* opera 11.10+ */
+background: -ms-linear-gradient(45deg, #ED1322 0%, #B8BA8C 47%, #B8BA8C 53%, #07DA70 100%); /* ie10+ */
+background: linear-gradient(45deg, #ED1322 0%, #B8BA8C 47%, #B8BA8C 53%, #07DA70 100%); /* w3c */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#07DA70', endColorstr='#ED1322',GradientType=1 ); /* ie6-9 */
+}
+#UserPositionContainer .LikertContainer {
+  color: white;
+}
+#UserPositionContainer .LikertContainer .val {
+  display: inline-block;
+  padding: 3px .25em 1px .25em;
+  text-align: center;
+  cursor: pointer;
+  color: #DDD;
+}
+  #UserPositionContainer .LikertContainer .val:hover {
+    color: #FFF;
+  }
+  #UserPositionContainer .LikertContainer .val .glyphicon-star {
+    display: none;
+  }
+  #UserPositionContainer .LikertContainer .val.active .glyphicon-star-empty {
+    display: none;
+  }
+  #UserPositionContainer .LikertContainer .val.active .glyphicon-star {
+    display: inline;
     color: white;
+  }
+#UserPositionContainer .sidelabel {
+    color: #444;
     font-style: italic;
+    font-size: 83%;
 }
-span.outsideLabel {
-    font-style: italic;
-}
-td.notesToggle img{
-    margin-top: -5px;
-    margin-bottom: auto;
-    margin-left: 1em;
-    height: 25px;
-}
-div.valueHovers {
-    height: 100%;
-    z-index: 100;
-}
-div.val {
-    height: 100%;
-    width: calc(100% / 7);
-    display:inline-block;
-    position:relative;
-    margin:0;
-    z-index: 200;
-    opacity: 0;
-}
-div.marker {
-    height: 50%;
-    width: 50%;
-    border-radius: 9999px;
-    margin: auto;
-    position:absolute;
-    top: 25%;
-    left: 25%;
-    background-color: #cce5ff;
-}
-div.val:hover, div.valActive {
-    opacity: 1;
-}
-div.val.saving div.marker, div.val:active div.marker {
-    background-color: #99b2ff;
-}
-textarea.whybox {
+.whybox textarea {
+    margin: .5em 0;
     width: 100%;
     height: 5em;
-    background-repeat: no-repeat;
-    background-position: right bottom;
-    background-size: 1.5em 1.5em;
-}
-textarea.whybox.saved {
-    background-image: url(/static/images/check32.png);
-}
-
-textarea.whybox.saving {
-    background-image: url(/static/images/cloud64.png);
 }
 </style>
+
 
 <style>
 .h1-multiline, h1 { padding: 0; margin: 0; }

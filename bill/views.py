@@ -140,20 +140,13 @@ def bill_details_user_view(request, congress, type_slug, number):
     return ret
 
 def get_user_bill_position_info(request, bill):
+    if not request.user.is_authenticated: return None
     # user registered positions
-    # import json #imported with emoji above
-    from website.models import Position
-    position_subject = "bill:" + bill.congressproject_id
-    pos = [ ]
-    p = Position.get_for_user(request).filter(subject=position_subject).first()
+    from website.models import UserPosition
+    p = UserPosition.objects.filter(user=request.user, subject=bill.get_feed().feedname).first()
     if p:
-        positionVal = p.position
-        reasons = p.reasons #Double-check requested: Does this need additional cleaning?
-    else:
-        positionVal = ""
-        reasons = ""
-    pos.append({"positionVal": positionVal, "reasons":reasons})
-    return pos
+        return { "likert": p.likert, "reason": p.reason }
+    return None
 
 @anonymous_view
 @render_to("bill/bill_summaries.html")
@@ -165,7 +158,6 @@ def bill_summaries(request, congress, type_slug, number):
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
     }
 
-#Might be able DRY these user views up by moving this to header, but not for all pages.
 @user_view_for(bill_summaries)
 def bill_summaries_user_view(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)

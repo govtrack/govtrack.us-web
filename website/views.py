@@ -551,115 +551,35 @@ def medium_post_redirector(request, id):
     post = get_object_or_404(MediumPost, id=id)
     return HttpResponseRedirect(post.url)
 
+@login_required
 @render_to('website/list_positions.html')
 def get_user_position_list(request):
-    return {}
-
-@render_to('website/list_position_elements.html')
-def load_positions(request):
-    from website.models import Position
-
-    positionlist = Position.objects.filter(
-          user=request.user if request.user.is_authenticated() else None,
-          anon_session_key=Position.get_session_key(request) if not request.user.is_authenticated() else None,
-    ).order_by('-modified')
-    page = paginate(positionlist, request, per_page=50)
-
+    from website.models import UserPosition
     return {
-        'page': page,
-        'position_list': positionlist,
-         }
+        "positions": UserPosition.objects.filter(user=request.user).order_by('-created')
+    }
 
-#Helper function for getting bill from subject information.
-def __get_bill(subject):
-     from bill.models import Bill, BillType
-     hyphen = subject.rfind('-')
-     congressNum = int(subject[hyphen+1:])
-     billNumStart = re.search("\d",subject).start()
-     billNum = int(subject[billNumStart:hyphen])
-     billTypeSlug = subject[:billNumStart].lower()
-     if hyphen <= 0 or billNumStart <=0:
-        #String parsing error- this covers some but not all errors.
-        return None
-     try:
-         billObj = Bill.objects.get(congress=congressNum, bill_type=BillType.by_slug(billTypeSlug), number=billNum)
-         return billObj
-     except Bill.DoesNotExist:
-         return None
-#There may be a faster way to to do this in GovTrack, but it didn't quite work in tests:
-def __get_bill_autoparse(subject):
-     from bill.search import parse_bill_number
-     return parse_bill_number(subject)
+@login_required
+def update_userposition(request):
+    from website.models import UserPosition
+    if request.method != "POST": raise HttpResponseBadRequest()
 
-#Helper function for getting starter position information.
-def __get_position(request):
-     from website.models import Position
-     #Double-check requested: Does subject need additional cleaning? Doesn't have it with emoji.
-     subjectStr = request.POST["subject"]
-     if subjectStr.startswith("bill:"):
-         billObj = __get_bill(subjectStr[5:])
-     else:
-         billObj = None
+    # just validate
+    f = Feed.from_name(request.POST.get("subject", ""))
+    f.title
 
-     p, isnew = Position.objects.get_or_create(
-         subject=subjectStr,
-         bill= billObj,
-         user=request.user if request.user.is_authenticated() else None,
-         anon_session_key=Position.get_session_key(request) if not request.user.is_authenticated() else None,
-     )
-     if isnew:
-         p.extra = {
-             "ip": request.META['REMOTE_ADDR'],
-         }
-     return p
+    qs = UserPosition.objects.filter(user=request.user, subject=request.POST["subject"])
+    if not request.POST.get("likert") and not request.POST.get("reason"):
+        # Nothing to save - delete any existing.
+        qs.delete()
+    else:
+        # Update.
+        upos, _ = qs.get_or_create(user=request.user, subject=request.POST["subject"])
+        upos.likert = int(request.POST["likert"]) if request.POST.get("likert") else None
+        upos.reason = request.POST["reason"]
+        upos.save()
 
-#Helper function for saving updated position information.
-def __update_position(p, updatedField):
-     from website.models import Position
-     if ((not p.position) and (not p.reasons)):
-         # no data, delete record.
-         # Could use return values (num_deleted, types_deleted) for confirmation.
-         p.delete()
-         res = { "status":"success", "position_cleared":True, "stored_info":"" }
-     else:
-         p.save()
-         id_after_storage = p.id
-         res = { "status":"success", "id":id_after_storage , "stored_info":getattr(p, updatedField)}
-     return res
-
-def change_position(request):
-    from website.models import Position
-    res = { "status": "error" }
-    if request.method == "POST" \
-        and request.POST.get("subject") \
-        and request.POST.get("position", "") in ("-3", "-2", "-1", "0", "1", "2", "3", "r"):
-
-        p = __get_position(request)
-
-        if( request.POST.get("position") == "r"):
-            p.position = None
-        else:
-            p.position = request.POST.get("position");
-
-        res = __update_position(p, "position");
-
-    return HttpResponse(json.dumps(res), content_type="application/json")
-
-def change_reasons(request):
-    from website.models import Position
-    res = { "status": "error" }
-    if request.method == "POST" \
-        and request.POST.get("subject") \
-        and "reasons" in request.POST:
-
-        p = __get_position(request)
-
-        #Double-check requested: Does this string need additional cleaning?
-        p.reasons = request.POST.get("reasons")
-
-        res = __update_position(p, "reasons");
-
-    return HttpResponse(json.dumps(res), content_type="application/json")
+    return HttpResponse(json.dumps({ "status": "ok" }), content_type="application/json")
 
 def add_remove_reaction(request):
     from website.models import Reaction
