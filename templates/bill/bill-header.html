@@ -1,5 +1,96 @@
 {% load govtrack_utils %}
 
+<style>
+.h1-multiline, h1 { padding: 0; margin: 0; }
+#bill-subpages { margin: 15px 0; font-size: 13px; }
+#bill-subpages a { padding: 6.6px 10px; color: #9D2146; text-decoration: none; }
+#bill-subpages .active a { background-color: #9D2146; color: white; font-weight: bold; }
+</style>
+
+{# EMOJI REACTIONS STYLES AND SCRIPTS #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/emojione/2.1.4/assets/css/emojione.min.css"/>
+<style>
+#emoji-reactions {
+  display: block !important;
+}
+  #emoji-reactions a {
+     display: inline-block;
+     text-decoration: none;
+     padding: .25em 0 .25em .15em;
+     margin: 0 .25em .25em 0;
+     border: 1px solid rgba(255,255,255,0);
+     opacity: .5;
+  }
+    #emoji-reactions a.has-count {
+      opacity: 1;
+    }
+    #emoji-reactions a.active {
+      background-color: #FAFAFA;
+      border: 1px solid #DD9;
+      color: black;
+      opacity: 1;
+    }
+    #emoji-reactions a span {
+       display: inline-block;
+       font-style: normal;
+       color: #777;
+       font-size: 90%;
+       line-height: 90%;
+       padding: 0 1px;
+       min-width: .75em;
+    }
+    #emoji-reactions img.emojione {
+      height: 1ex;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/emojione/2.1.4/lib/js/emojione.min.js"></script>
+<script>
+  // show emojis
+  function add_emoji_reaction(emoji) {
+    var n = $("<a href='#'/>");
+    n.attr("data-count", emoji.count);
+    n.append(emojione.toImage(":" + emoji.name + ":"))
+    n.attr("title", "React to this {{bill.noun|escapejs}} with the " + emoji.name + " emoji.");
+    if (emoji.me)
+      n.addClass("active");
+    var c = $('<span></span>');
+    n.append(c);
+    function update_count() {
+      var count = parseInt(n.attr("data-count"));
+      c.text(count > 0 ? count : "");
+      n.toggleClass('has-count', count > 0);
+    }
+    update_count(emoji.count);
+    $('#emoji-reactions')
+      .find(($('#emoji-reactions .main > *').length < 3) ? '.main' : '.other')
+      .append(n);
+
+    n.click(function() {
+      var delta = n.hasClass("active") ? -1 : 1;
+      n.toggleClass("active");
+      n.attr("data-count", parseInt(n.attr("data-count")) + delta);
+      update_count();
+      $.ajax({
+        url: "{% url 'reaction' %}",
+        method: "POST",
+        data: {
+          subject: "bill:{{bill.congressproject_id|escapejs}}",
+          emoji: emoji.name,
+          mode: delta
+        },
+        success: function() {
+        }
+      })
+      return false;
+    })
+  }
+  window.post_jquery_load_scripts.push(function() {
+    for (var i = 0; i < the_page.reactions.length; i++)
+      add_emoji_reaction(the_page.reactions[i]);
+  });
+</script>
+
+{# BILL TITLE #}
 <div class="h1-multiline" style="border: none;">
 	<h1 style="margin-top: 10px; max-height: 3em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 			<p id="h1_overflow" style="display: none"></p>
@@ -20,13 +111,6 @@
 	<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">···</a>
 	<span class="other" style="display: none"> </span>
 </div>
-
-<style>
-.h1-multiline, h1 { padding: 0; margin: 0; }
-#bill-subpages { margin: 30px 0; font-size: 13px; }
-#bill-subpages a { padding: 6.6px 10px; color: #9D2146; text-decoration: none; }
-#bill-subpages .active a { background-color: #9D2146; color: white; font-weight: bold; }
-</style>
 
 {% with page=request.path|cut:bill.get_absolute_url %}
  <ul id="bill-subpages" class="nav nav-pills" role="tablist">

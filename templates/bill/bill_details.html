@@ -33,8 +33,6 @@
 	<meta property="og:description" content="{% if subtitle %}{{subtitle}}{% else %}A {{bill.noun}} in the U.S. Congress.{% endif %}" />
 	<meta property="og:url" content="https://www.govtrack.us{{bill.get_absolute_url}}" />
 	<meta property="og:type" content="og_govtrack:bill">
-
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/emojione/2.1.4/assets/css/emojione.min.css"/>
 {% endblock %}
 
 {% block body_scripts %}
@@ -48,8 +46,6 @@
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 
-<script src="https://cdn.jsdelivr.net/emojione/2.1.4/lib/js/emojione.min.js"></script>
-
 <script>
 	// dynamic DOM elements
     $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
@@ -57,51 +53,8 @@
 
 	// UI fixups
     $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
-    
-    // show emojis
-	function add_emoji_reaction(emoji) {
-		var n = $("<a href='#'/>");
-		n.attr("data-count", emoji.count);
-		n.append(emojione.toImage(":" + emoji.name + ":"))
-		n.attr("title", "React to this {{bill.noun|escapejs}} with the " + emoji.name + " emoji.");
-		if (emoji.me)
-			n.addClass("active");
-		var c = $('<span></span>');
-		n.append(c);
-		function update_count() {
-			var count = parseInt(n.attr("data-count"));
-			c.text(count > 0 ? count : "");
-		}
-		update_count(emoji.count);
-		$('#emoji-reactions')
-			.find(($('#emoji-reactions .main > *').length < 3) ? '.main' : '.other')
-			.append(n);
-
-		n.click(function() {
-			delta = n.hasClass("active") ? -1 : 1;
-			n.toggleClass("active");
-			n.attr("data-count", parseInt(n.attr("data-count")) + delta);
-			update_count();
-			$.ajax({
-				url: "{% url 'reaction' %}",
-				method: "POST",
-				data: {
-					subject: "bill:{{bill.congressproject_id|escapejs}}",
-					emoji: emoji.name,
-					mode: delta
-				},
-				success: function() {
-				}
-			})
-			return false;
-		})
-	}
-
 
 	$('[data-toggle="tooltip"]').tooltip()
-
-	for (var i = 0; i < the_page.reactions.length; i++)
-	  	add_emoji_reaction(the_page.reactions[i]);
 </script>
 {% endblock %}
 
@@ -240,35 +193,6 @@
 	#bill-actions > button {
 		width: 135px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
 	}
-
-#emoji-reactions {
-	display: block !important;
-}
-	#emoji-reactions a {
-		 display: inline-block;
-		 text-decoration: none;
-		 padding: .25em 0 .25em .15em;
-		 margin: 0 .25em .25em 0;
-		 border: 1px solid rgba(255,255,255,0);
-	}
-		#emoji-reactions a.active {
-			background-color: #FAFAFA;
-			border: 1px solid #DD9;
-			color: black;
-		}
-		#emoji-reactions a span {
-			 display: inline-block;
-			 font-style: normal;
-			 color: #777;
-			 font-size: 90%;
-			 line-height: 90%;
-			 padding: 0 1px;
-			 min-width: .75em;
-		}
-		#emoji-reactions img.emojione {
-			height: 1ex;
-		}
-
 </style>
 {% endblock %}
 

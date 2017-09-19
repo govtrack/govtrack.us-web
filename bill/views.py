@@ -109,9 +109,14 @@ def bill_details_user_view(request, congress, type_slug, number):
     from person.views import render_subscribe_inline
     ret.update(render_subscribe_inline(request, bill.get_feed()))
 
-    # emoji reactions
+    ret["reactions"] = get_user_bill_reactions(request, bill)
+
+    return ret
+
+def get_user_bill_reactions(request, bill):
     import json
     from website.models import Reaction
+
     # get aggregate counts
     reaction_subject = "bill:" + bill.congressproject_id
     emoji_counts = { }
@@ -120,20 +125,24 @@ def bill_details_user_view(request, congress, type_slug, number):
         if isinstance(v, dict):
             for emoji in v.get("emojis", []):
                 emoji_counts[emoji] = emoji_counts.get(emoji, 0) + r["count"]
+
     # get user's reactions
     r = Reaction.get_for_user(request).filter(subject=reaction_subject).first()
     my_emojis = set()
     if r and isinstance(r.reaction, dict):
         my_emojis = set(r.reaction.get("emojis", []))
-    ret["reactions"] = [ ]
+
+    # get all possible emojis
+    ret = [ ]
     for emoji in Reaction.EMOJI_CHOICES:
-        ret["reactions"].append({
+        ret.append({
             "name": emoji,
             "count": emoji_counts.get(emoji, 0),
             "me": emoji in my_emojis,
         })
+
     # stable sort by count so that zeroes are in our preferred order
-    ret["reactions"] = sorted(ret["reactions"], key = lambda x : -x["count"])
+    ret = sorted(ret, key = lambda x : -x["count"])
 
     return ret
 
@@ -147,6 +156,13 @@ def bill_summaries(request, congress, type_slug, number):
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
     }
 
+@user_view_for(bill_summaries)
+def bill_summaries_user_view(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    ret = { }
+    ret["reactions"] = get_user_bill_reactions(request, bill)
+    return ret
+
 @anonymous_view
 @render_to("bill/bill_full_details.html")
 def bill_full_details(request, congress, type_slug, number):
@@ -156,6 +172,13 @@ def bill_full_details(request, congress, type_slug, number):
         "related": get_related_bills(bill),
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
     }
+
+@user_view_for(bill_full_details)
+def bill_full_details_user_view(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    ret = { }
+    ret["reactions"] = get_user_bill_reactions(request, bill)
+    return ret
 
 @anonymous_view
 @render_to("bill/bill_widget.html")
@@ -255,6 +278,13 @@ def bill_text(request, congress, type_slug, number, version=None):
         "days_old": (datetime.datetime.now().date() - bill.current_status_date).days,
         "is_on_bill_text_page": True, # for the header tabs
     }
+
+@user_view_for(bill_text)
+def bill_text_user_view(request, congress, type_slug, number, version=None):
+    bill = load_bill_from_url(congress, type_slug, number)
+    ret = { }
+    ret["reactions"] = get_user_bill_reactions(request, bill)
+    return ret
 
 @anonymous_view
 @json_response
