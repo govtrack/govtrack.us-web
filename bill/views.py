@@ -109,9 +109,15 @@ def bill_details_user_view(request, congress, type_slug, number):
     from person.views import render_subscribe_inline
     ret.update(render_subscribe_inline(request, bill.get_feed()))
 
-    # emoji reactions
+    ret["reactions"] = get_user_bill_reactions(request, bill)
+    ret["position"] = get_user_bill_position_info(request, bill)
+
+    return ret
+
+def get_user_bill_reactions(request, bill):
     import json
     from website.models import Reaction
+
     # get aggregate counts
     reaction_subject = "bill:" + bill.congressproject_id
     emoji_counts = { }
@@ -120,22 +126,24 @@ def bill_details_user_view(request, congress, type_slug, number):
         if isinstance(v, dict):
             for emoji in v.get("emojis", []):
                 emoji_counts[emoji] = emoji_counts.get(emoji, 0) + r["count"]
+
     # get user's reactions
     r = Reaction.get_for_user(request).filter(subject=reaction_subject).first()
     my_emojis = set()
     if r and isinstance(r.reaction, dict):
         my_emojis = set(r.reaction.get("emojis", []))
-    ret["reactions"] = [ ]
+
+    # get all possible emojis
+    ret = [ ]
     for emoji in Reaction.EMOJI_CHOICES:
-        ret["reactions"].append({
+        ret.append({
             "name": emoji,
             "count": emoji_counts.get(emoji, 0),
             "me": emoji in my_emojis,
         })
-    # stable sort by count so that zeroes are in our preferred order
-    ret["reactions"] = sorted(ret["reactions"], key = lambda x : -x["count"])
 
-    ret["position"] = get_user_bill_position_info(request, bill)
+    # stable sort by count so that zeroes are in our preferred order
+    ret = sorted(ret, key = lambda x : -x["count"])
 
     return ret
 
@@ -153,6 +161,7 @@ def get_user_bill_position_info(request, bill):
 def bill_summaries(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     return {
+        "bill_subpage": "Summary",
         "bill": bill,
         "congressdates": get_congress_dates(bill.congress),
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
@@ -162,6 +171,7 @@ def bill_summaries(request, congress, type_slug, number):
 def bill_summaries_user_view(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     ret = { }
+    ret["reactions"] = get_user_bill_reactions(request, bill)
     ret["position"] = get_user_bill_position_info(request, bill)
     return ret
 
@@ -170,6 +180,7 @@ def bill_summaries_user_view(request, congress, type_slug, number):
 def bill_full_details(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     return {
+        "bill_subpage": "Details",
         "bill": bill,
         "related": get_related_bills(bill),
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
@@ -179,6 +190,7 @@ def bill_full_details(request, congress, type_slug, number):
 def bill_full_details_user_view(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     ret = { }
+    ret["reactions"] = get_user_bill_reactions(request, bill)
     ret["position"] = get_user_bill_position_info(request, bill)
     return ret
 
@@ -270,6 +282,7 @@ def bill_text(request, congress, type_slug, number, version=None):
         if not (btc.bill1, btc.ver1) in related_bills: related_bills.append((btc.bill1, btc.ver1))
 
     return {
+        "bill_subpage": "Text",
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "textdata": textdata,
@@ -285,6 +298,7 @@ def bill_text(request, congress, type_slug, number, version=None):
 def bill_text_user_view(request, congress, type_slug, number, version=None):
     bill = load_bill_from_url(congress, type_slug, number)
     ret = { }
+    ret["reactions"] = get_user_bill_reactions(request, bill)
     ret["position"] = get_user_bill_position_info(request, bill)
     return ret
 

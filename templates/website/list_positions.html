@@ -24,7 +24,7 @@
             {% if position.likert is not None %}
                 <p style="font-style: italic;">{{position.likert|likerttext}}</p>
             {% endif %}
-            <p class="position_notes" style="margin: 0;">{{position.reason}}</p> 
+            <p class="position_notes" style="margin: 0;">{{position.reason|markdown}}</p> 
         </div>
     </div>
 {% empty %}
