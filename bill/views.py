@@ -151,6 +151,7 @@ def get_user_bill_reactions(request, bill):
 def bill_summaries(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     return {
+        "bill_subpage": "Summary",
         "bill": bill,
         "congressdates": get_congress_dates(bill.congress),
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
@@ -168,6 +169,7 @@ def bill_summaries_user_view(request, congress, type_slug, number):
 def bill_full_details(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     return {
+        "bill_subpage": "Details",
         "bill": bill,
         "related": get_related_bills(bill),
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
@@ -268,6 +270,7 @@ def bill_text(request, congress, type_slug, number, version=None):
         if not (btc.bill1, btc.ver1) in related_bills: related_bills.append((btc.bill1, btc.ver1))
 
     return {
+        "bill_subpage": "Text",
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "textdata": textdata,

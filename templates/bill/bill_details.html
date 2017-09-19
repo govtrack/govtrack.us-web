@@ -196,14 +196,6 @@
 </style>
 {% endblock %}
 
-{% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="{% url "congress_home" %}">Congress</a></li>
-	<li><a href="/congress/bills">Bills</a></li>
-	<li class="active">{{bill.display_number_with_congress_number}}</li>
-</ol>
-{% endblock %}
-
 {% block body_class %}bill{% endblock %}
 
 {% block body %}

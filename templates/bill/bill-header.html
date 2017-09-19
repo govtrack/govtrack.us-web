@@ -90,9 +90,21 @@
   });
 </script>
 
+{# BREADCRUMBS #}
+<ol class="breadcrumb" style="margin: 0 0 5px 0;">
+  <li><a href="{% url "congress_home" %}">Congress</a></li>
+  <li><a href="/congress/bills">Bills</a></li>
+  {% if not bill_subpage %}
+  <li class="active">{{bill.display_number_with_congress_number}}</li>
+  {% else %}
+  <li><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a>
+  <li class="active">{{bill_subpage}}</li>
+  {% endif %}
+</ol>
+
 {# BILL TITLE #}
 <div class="h1-multiline" style="border: none;">
-	<h1 style="margin-top: 10px; max-height: 3em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+	<h1 style="max-height: 3em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 			<p id="h1_overflow" style="display: none"></p>
 			<script>
 			window.post_jquery_load_scripts.push(function() {
