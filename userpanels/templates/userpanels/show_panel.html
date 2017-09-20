@@ -35,6 +35,21 @@
 <td><p>{{panel.contact_info}}</p></td></tr>
 </table>
 
+{% if memberships|length > 0 %}
+<hr>
+
+<h3>Download Panel Data</h3>
+
+<p>Click the download buttons to download this panel&rsquo;s data:</p>
+
+<div>
+	<a href="{{panel.get_absolute_url}}/export/members" class="btn btn-primary">Download Members CSV</a>
+	<a href="{{panel.get_absolute_url}}/export/positions" class="btn btn-primary">Download Positions CSV</a>
+</div>
+
+
+{% endif %}
+
 <hr>
 
 <h3>Invite Members</h3>

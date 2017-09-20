@@ -159,6 +159,14 @@
 </style>
 <script>
 window.post_jquery_load_scripts.push(function() {
+  // alter form depending on whether user is a member of a userpanel
+  if (the_user) {
+    $('#UserPositionModal .not-on-a-user-panel-toggle').toggle(the_user.is_on_userpanel == 0);
+    $('.on-a-user-panel-toggle').toggle(the_user.is_on_userpanel > 0);
+    $('.on-a-user-panel-toggle .count').text(the_user.is_on_userpanel);
+    $('.on-a-user-panel-toggle .s').text(the_user.is_on_userpanel != 1 ? "s" : "");
+  }
+
   // load existing user position
   if (the_page && the_page.position) {
     $("#UserPositionContainer .LikertContainer .val").each(function(item) {
@@ -249,6 +257,9 @@ function saveUserPosition() {
         <span class="text">Add Note</span>
       </a>
       <a href="/accounts/positions" style="margin-left: .75em;">All Your Positions &raquo;</a>
+      <p class="on-a-user-panel-toggle" style="display: none;">
+        (Shared on <span class="count"></span> panel<span class="s"></span>.)
+      </p>
   </div>
   </div> <!-- /UserPositionContainer -->
 </div> <!-- /col -->
@@ -263,11 +274,16 @@ function saveUserPosition() {
       <div class="modal-body">
         <p>
           Add a note about this {{bill.noun}}.
-          Your note is for you and will not be shared with anyone.
+          <span class="not-on-a-user-panel-toggle">
+              Your note is for you and will not be shared with anyone.
+          </span>
+        </p>
+        <p class="on-a-user-panel-toggle" style="font-weight: bold;">
+          Because you are a member of <span class="count"></span> panel<span class="s"></span>, your positions on legislation and notes below will be shared with the panel administrators. (<a href="/accounts/positions">More Info</a>)
         </p>
         <textarea style="display: block;" 
-          placeholder="My personal notes on why I oppose or support this {{bill.noun}}."
-          title="My personal notes on why I oppose or support this {{bill.noun}}."></textarea>
+          placeholder="My notes on why I oppose or support this {{bill.noun}}."
+          title="My notes on why I oppose or support this {{bill.noun}}."></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-dismiss="modal">Save Note</button>

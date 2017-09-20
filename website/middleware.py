@@ -98,6 +98,13 @@ class GovTrackMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Some features require knowing if a user is a member of any panels.
+        from userpanels.models import PanelMembership
+        request.user.twostream_data = {
+            "is_on_userpanel": PanelMembership.objects.filter(user=request.user).count()
+              if request.user.is_authenticated else 0
+        }
+
         # Is the user in one of the special netblocks?
         try:
             ip = request.META["REMOTE_ADDR"]

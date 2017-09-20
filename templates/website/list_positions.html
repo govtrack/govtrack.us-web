@@ -14,6 +14,19 @@
 
 <p><a href="/congress/bills">You can search bills here</a>, and note your views under the title at the top of a specific bill page.</p>
 
+{% with panels=request.user.panelmembership_set.all %}
+    {% if panels|length > 0 %}
+        <div style="margin: 1em; border: 1px solid #C55; background-color: #FAF6F6; padding: 1em;">
+            <p style="margin-bottom: .5em;">Because you are a member of {{panels|length}} panel{{panels|pluralize}}, your positions on legislation and private notes will be shared with panel administrators:</p>
+            <ul style="margin: 0">
+                {% for panelmbr in panels %}
+                    <li>{{panelmbr.panel.title}}:<br>{{panelmbr.panel.consent_text}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endwith %}
+
 {% for position in positions %}
     {# <p>Subject: {{ position.subject }} Created: {{position.created}} </p> #}
     <div class="tracked_event">

@@ -556,7 +556,7 @@ def medium_post_redirector(request, id):
 def get_user_position_list(request):
     from website.models import UserPosition
     return {
-        "positions": UserPosition.objects.filter(user=request.user).order_by('-created')
+        "positions": UserPosition.objects.filter(user=request.user).order_by('-created'),
     }
 
 @login_required
