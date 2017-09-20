@@ -23,6 +23,9 @@ class Panel(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     updated = models.DateTimeField(auto_now=True, db_index=True)
 
+    def __str__(self):
+        return "<Panel %d %s>" % (self.id, self.title)
+
     def get_absolute_url(self):
         return "/panels/" + str(self.id)
 
