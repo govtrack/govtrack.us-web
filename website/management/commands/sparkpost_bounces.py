@@ -47,7 +47,7 @@ class Command(BaseCommand):
 		
 		for u in User.objects.filter(email=email):
 			found = True
-			print u, reason
+			print u, reason.encode("utf8")
 			be, is_new = BouncedEmail.objects.get_or_create(user=u)
 			if not is_new:
 				be.bounces += 1
