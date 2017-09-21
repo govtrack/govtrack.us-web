@@ -237,6 +237,13 @@ class MediumPost(models.Model):
         obj.post_slug = post['uniqueSlug']
         obj.data = post
         obj.published = datetime.fromtimestamp(post['firstPublishedAt']/1000)
+
+        # MySQL can't hold four-byte UTF8 characters. Supposedly a different
+        # charset will work (alter table website_mediumpost modify title varchar(128) character set utf8mb4 not null;)
+        # but even with this we still get an Incorrect string value error
+        # trying to save a four-byte emoji. So just kill those characters.
+        obj.title = "".join(c for c in unicode(obj.title) if len(c.encode("utf8")) < 4)
+
         obj.save()
 
         obj.create_events()

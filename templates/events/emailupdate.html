@@ -7,19 +7,21 @@
 		background-color: #F2F2F2;
 	}
 
+	li { font-size: 11pt; }
+
 	a {
 		color: #0000EE;
 	}
 	h1 {
 		font-family: Arial, sans-serif;
 		font-weight: bold;
-		font-size: 22pt;
+		font-size: 21pt;
 		text-align: left;
 	}
 	h2 {
 		font-family: Arial, sans-serif;
 		font-size: 18pt;
-		line-height: 20pt; 
+		line-height: 18pt; 
 		margin-top: 10px;
 		margin-bottom: 0px;
 		text-align: left;
@@ -96,6 +98,16 @@
             line-height:125% !important;
         }
     }
+
+#announcement-holder {
+	margin-bottom: 2em;
+	padding: .25em 1em .25em 1em;
+	border: 1px solid #DDD;
+	background-color: #F3F3FF;
+}
+#announcement-holder p, #announcement-holder li {
+	margin-bottom: .25em;
+}
 </style>
 {% endblock %}
 {% block body %}
@@ -106,13 +118,6 @@
 	<div><a href="https://www.govtrack.us/?{{utm}}" target="blank" style="color: white"><img src="https://www.govtrack.us/static/images/logo.png" alt="GovTrack.us" border="0"></a></div>
 	<div style="color: white; font-weight: bold; margin-top: 4px;">Email Update</div>
 </div>
-
-<!-- ANNOUNCEMENT -->
-{% if announcement.active %}
-<div style="margin: 0 1em 2em 1em; padding: .25em 1em .25em 1em; border: 1px solid #DDD; background-color: #F3F3FF">
-	{{announcement.body_html|safe}}
-</div>
-{% endif %}
 
 <!-- CONTENT AREA -->
 
@@ -129,6 +134,15 @@
         	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
 			    <tr>
 			        <td valign="top" class="leftColumnContent" align="left">
+
+						<!-- ANNOUNCEMENT -->
+						{% if announcement.active %}
+						<div id="announcement-holder">
+				            {% if announcement.subject %}<h2>{{announcement.subject}}</h2>{% endif %}
+							{{announcement.body_html|safe}}
+						</div>
+						{% endif %}
+
 
 						{% for list, events in eventslists %}
 				            <h2 style="text-align:left;">{{list.name}}</h2>
