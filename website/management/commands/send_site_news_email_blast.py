@@ -10,25 +10,27 @@ from htmlemailer import send_mail
 
 from datetime import datetime, timedelta
 
-blast_id = 6
+blast_id = 7
 
 class Command(BaseCommand):
-	args = 'test|go'
 	help = 'Sends out an email blast to users with a site announcement.'
-	
-	def handle(self, *args, **options):
-		# Definitions for the four groups of users.
 
-		if args[0] not in ("go", "count"):
+	def add_arguments(self, parser):
+		parser.add_argument('go', nargs=1, type=str)
+
+	def handle(self, *args, **options):
+		cmd = options["go"][0]
+		if cmd not in ("go", "count"):
 			# test email
 			users = UserProfile.objects.filter(user__id__in=(5,)) # me
-			test_addrs = args[1:]
+			test_addrs = [cmd]
 		else:
 			# some subset of users
 			users = UserProfile.objects.all()\
 				.filter(
-					Q(user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*6))
-				  | Q(user__last_login__gt=datetime.now()-timedelta(days=31*6))
+				    Q(user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*1))
+				  | Q(user__last_login__gt=datetime.now()-timedelta(days=31*4))
+				  | Q(user__date_joined__gt=datetime.now()-timedelta(days=31*4))
                 ).distinct()
 
 			# also require:
@@ -43,9 +45,8 @@ class Command(BaseCommand):
 
 		print users.count(), test_addrs
 			
-		if args[0] == "count":
+		if cmd == "count":
 			return
-		if args[0] not in ("go", "test"): raise Exception("sanity check fail")
 
 		# Get the list of user IDs.
 			
@@ -95,7 +96,7 @@ class Command(BaseCommand):
 			#	total_emails_sent += 1
 			ar = pool.apply_async(
 				send_blast,
-				[userid, args[0] == "test", test_addrs, i, len(users)])
+				[userid, cmd != "go", test_addrs, i, len(users)])
 			State.workers.append(ar)
 				
 			if wait_workers(15):

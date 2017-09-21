@@ -1,45 +1,166 @@
 {% extends "htmlemailer/boilerplate.html" %}
+{% load events_utils %}
 {% block head %}
 <style>
-#backgroundTable { min-width: 40em; max-width: 50em; }
-#content-area { padding-left: 1em; }
-p { line-height: 133%; }
+  #backgroundTable {
+    font-family: Arial, sans-serif;
+    background-color: #F2F2F2;
+  }
+
+  a {
+    color: #0000EE;
+  }
+  h1 {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 22pt;
+    text-align: left;
+  }
+  h2 {
+    font-family: Arial, sans-serif;
+    font-size: 17pt;
+    line-height: 20pt; 
+    margin-top: 17px;
+    margin-bottom: 0px;
+    text-align: left;
+  }
+  h3 {
+    font-family: Arial, sans-serif;
+    font-size: 12pt; 
+    margin-top: 10px;
+    margin-bottom: 20px;
+    line-height: 16pt;
+    text-align: left;
+  }
+  h4 {
+    font-family: Arial, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    text-align: left;
+  }
+  h5 {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 10pt;
+    color: #969698;
+    margin-bottom: 20px;
+    margin-top:20px;
+    text-align: left;
+  }
+  p {
+    font-family: Arial, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    line-height: 13pt;
+    margin-top: 10px;
+    text-align: left;
+  }
+
+        .templateColumnContainer{
+            text-align: left;
+        }
+
 </style>
 {% endblock %}
 {% block body %}
-    <table border="0" cellpadding="5" cellspacing="2" width="100%">
-      <tbody>
-        <tr>
-          <td valign="top">
-              <p><font size="+2"><b>Congress is about to wake up.</b></font></p>
-              <p>When President-elect Trump takes office on January 20, the House, Senate, and White House will be controlled by the same party. Congress is expected to move quickly on Trump&rsquo;s agenda <a href="http://www.forbes.com/sites/stancollender/2016/11/11/gop-to-do-previously-unimaginable-things-to-slam-dunk-its-agenda/#648c6b5a67b5">using the same tactics</a> immune to the filibuster that Democrats used to enact the Affordable Care Act in 2010.</p>
-              <p>Now more than ever we need transparency in Congress.</p>
-              <p>We&rsquo;re getting ready to continue our mission into 2017. Over the last year we&rsquo;ve helped 10 million Americans track Congress using bill alerts, we launched <a href="https://medium.com/govtrack-insider">GovTrack Insider</a>, where we put the most important legislation into plain English, and we worked <i>with</i> Congress on improving transparency at the source.</p>
-              <p>But we need your help.</p>
-              <p>First, we&rsquo;re simply out of money because no one funds our work. Important pieces of GovTrack including our plain-language summaries will end on December 31 if we can&rsquo;t pay for it. If every GovTrack user donated just 10 cents we could double our staff, but not everyone can. If <i>you</i> can, please help us continue GovTrack Insider and improve our bill tracking tools:</p>
-              <p
-                style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;text-align:
-                center;"><a href="https://www.patreon.com/govtrack"
-                  style="text-decoration:none;"><span style="font-size: 14.6667px; color: rgb(17, 85, 204); background-color: transparent; font-weight: 700; font-style: normal; font-variant: normal; text-decoration: underline; vertical-align: baseline; white-space: pre-wrap;">Donate to Support Our Work</span></a></p>
-              <p>Second, we want to know how we can better help you track Congress. And we need you to tell us if you can help in other ways. We are asking all of you to take a minute to</p>
-              <p
-                style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;text-align:
-                center;"><a
-                  href="https://goo.gl/forms/4lck8TGnEYLtkTcW2"
-                  style="text-decoration:none;"><span style="font-size: 14.6667px; color: rgb(17, 85, 204); background-color: transparent; font-weight: 700; font-style: normal; font-variant: normal; text-decoration: underline; vertical-align: baseline; white-space: pre-wrap;">Complete This Survey</span></a></p>
-              <p>to help us shape our efforts going forward.</p>
-              <p>Thanks very much for being a part of GovTrack.</p>
-              <p>Joshua Tauberer<br>founder, GovTrack.us</p>
-          </td>
-          <td valign="top"><a href="https://www.govtrack.us/"><img
-                alt="GovTrack.us Logo"
-                src="https://www.govtrack.us/static/images/media_icon.png"
-                moz-do-not-send="true" border="0" height="200"
-                width="200"></a><br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
-	<p style="line-height: 125%"><small>You received this email because you have registered an account on <a href="https://www.govtrack.us">GovTrack.us</a>. To change your email settings, visit your <a href="https://www.govtrack.us/accounts/profile">account settings</a>. GovTrack.us is a project of Civic Impulse LLC. <a href="{{unsub_url}}">Unsubscribe</a></small></p>
+
+<!-- HEADER -->
+<div style="background-color: #1D4E70; color: white; margin-bottom: 30px; padding: 30px; text-align: center;">
+  <div><a href="https://www.govtrack.us/?{{utm}}" target="blank" style="color: white"><img src="https://www.govtrack.us/static/images/logo.png" alt="GovTrack.us" border="0"></a></div>
+  <div style="color: white; font-weight: bold; margin-top: 4px;">GovTrack.us Update</div>
+</div>
+
+<!-- CONTENT AREA -->
+
+<table id="wideWrapper" border="0" cellpadding="0" cellspacing="0" style="max-width: 850px; margin: 0 auto;">
+<tr>
+<td>
+
+  <table border="0" cellpadding="6" cellspacing="0" style="text-align:left !important;">
+    <tr>
+
+        <td align="center" valign="top" width="70%" class="templateColumnContainer">
+          <table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
+          <tr>
+              <td valign="top" class="leftColumnContent" align="left">
+
+                <!-- BODY -->
+
+      <p>Happy Constitution Day!</p>
+      <p>Today 230 years ago the Constitution of the United States was signed in Philadelphia. GovTrack.us hasn&rsquo;t been around quite as long, but we&rsquo;ve seen a lot in our now 13 years of tracking the United States Congress.</p>
+      <p>We have some news to share with you about GovTrack. Read on to learn more about our CallBot and our 2017 Backer Update, and then please consider supporting our work!</p>
+      <br>
+      <table style="border:none;border-collapse:collapse">
+          <tr>
+            <td style="padding-right: 1.5em">
+              <a href="https://www.govtrack.us/files/govtrack_2017_backer_update.pdf" style="text-decoration:none;">
+                <img src="https://www.govtrack.us/files/govtrack_2017_backer_update_thumbnail.png" alt="GovTrack 2017 Backer Update" width="175" height="229" style="border: 1px solid black;">
+              </a>
+            </td>
+            <td><h2 style="margin-top: 0">2017 Backer Update</h2>
+              <p>We would like to share with you <a href="https://www.govtrack.us/files/govtrack_2017_backer_update.pdf"><b>our 2017 Backer Update that we sent sent to our supporters</b></a>, in which we highlight some of GovTrack&rsquo;s recent accomplishments and plans for the future, including recent GovTrack Insider articles and a new data analysis.</p>
+              <p>To see the 2017 Backer Update, just follow this link:</p>
+              <p><a href="https://www.govtrack.us/files/govtrack_2017_backer_update.pdf">https://www.govtrack.us/files/govtrack_2017_backer_update.pdf</a></p>
+            </td>
+          </tr>
+      </table>
+      <br>
+      <br>
+      <h2>We have a new way for you to reach Congress</h2>
+      <p>Our new CallBot help users like you stay on top of key votes via Facebook Messenger. We&rsquo;ll let you know about upcoming issues where your voice matters, then walk you through how to call your members of Congress. Our CallBot users have already made hundreds of phone calls to Congress about healthcare and immigration.</p>
+      <p>Signing up for our CallBot alerts is easy. Just follow <a href="https://www.messenger.com/t/govtrack">this link and say “Hi” to us on Messenger</a> and we&rsquo;ll get you set up.</p>
+      <h2>Reaching every American</h2>
+      <p>Our mission has changed from a technology-first pursuit to one about making information about Congress accessible for every American (read more about that in our <a href="https://www.govtrack.us/files/govtrack_2017_backer_update.pdf">backer update</a>).</p>
+      <p>* We are improving the site for those with visual disabilities and who use accessibility tools.</p>
+      <p>* Hola hispanohablantes! We added a Translate button at the top of every page so Spanish speakers can use GovTrack too!</p>
+      <center><img src="https://www.govtrack.us/files/translatebutton.png"></center>
+      <h2>Did you know we post summaries of bills on GovTrackInsider.com?</h2>
+      <p>Be sure to <a
+          href="https://www.govtrack.us/events/govtrack-insider">add our bill summaries to your email alerts</a> or visit <a
+          href="https://govtrackinsider.com/">https://govtrackinsider.com/</a> for our latest articles about legislation in Congress. We also post links on <a
+          href="https://twitter.com/govtrack">@govtrack on Twitter</a> and on our <a
+          href="https://www.facebook.com/govtrack/">Facebook</a> social media pages.</p>
+      <h2>Your support is crucial for our ability to bring greater transparency to Congress</h2>
+      <p>Our entire budget is less than most nonprofits pay their CEOs, and yet we&rsquo;re the front line for keeping 10 million Americans each year informed about the daily activities of the United States Congress.</p>
+      <p style="color: #990000; font-weight: bold; font-size: 125%; line-height: 130%;">Please keep GovTrack sustainable by becoming a monthly patron at <a href="https://www.patreon.com/govtrack">https://www.patreon.com/govtrack</a>. Your support will ensure we can continue to provide free access to information about Congress.</p>
+      <p>You can also <a href="https://www.govtrack.us/accounts/membership">make a one-time contribution</a>.</p>
+      <p>Thanks for tracking Congress,</p>
+      <p>The GovTrack Team</p>
+      <p>ps. Are you following us on <a
+          href="https://twitter.com/govtrack">Twitter</a>, <a
+          href="https://www.facebook.com/govtrack/">Facebook</a>, <a
+          href="https://govtrackinsider.com/">Medium</a>, and <a
+href="https://www.goodreads.com/group/show/220668-govtrack-reads.html">GoodReads</a>?</p>
+    </b>
+                <!-- /BODY -->
+
+              </td>
+          </tr>
+          </table>
+    </td>
+    </tr>
+  </table>
+
+  <!-- FOOTER -->
+
+  <table border="0" cellpadding="0" cellspacing="0" style="text-align:center !important;">
+  <tr>
+        <td align="center" valign="top" width="100%" class="templateColumnContainer">
+          <table border="0" cellpadding="10" cellspacing="0" width="100%">
+            <tr>
+              <td valign="top">
+                <p style="line-height: 125%"><small>You received this email because you have registered an account on <a href="https://www.govtrack.us">GovTrack.us</a>. To change your email settings, visit your <a href="https://www.govtrack.us/accounts/profile">account settings</a>. GovTrack.us is a project of Civic Impulse LLC. <a href="{{unsub_url}}">Unsubscribe</a></small></p>
+            </td>
+          </tr>
+      </table>
+    </td>
+  </tr>
+  </table>
+
+</td>
+</tr>
+</table>
+
 {% endblock %}
+
+
