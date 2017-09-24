@@ -20,8 +20,9 @@
 
 =====================================================================
 
-To unsubscribe or change your email updates settings, go to {{SITE_ROOT_URL}}/accounts/profile.
+To change your email updates settings go to {{SITE_ROOT_URL}}/accounts/profile or you can unsubscribe from all future mail from us at {unsubscribe}.
 
-This email was sent by Civic Impulse, LLC <http://www.civicimpulse.com>. You may contact us at hello+u{{user.id}}@govtrack.us. The email address this message was sent from is not monitored for replies.
+GovTrack.us is a project of {accountcompany} (https://civicimpulse.com), {accountaddress1}, {accountcity} {accountstate} {accountzip} {accountcountry}.
+You may contact us at hello+u{{user.id}}@govtrack.us. The email address this message was sent from is not monitored for replies.
 
 {% endautoescape %}

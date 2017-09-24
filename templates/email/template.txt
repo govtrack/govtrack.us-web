@@ -1,0 +1,13 @@
+{% autoescape off %}{% block content %}
+{% endblock %}
+GovTrack.us
+
+----
+
+{% block below_signature_content %}
+{% endblock %}
+
+GovTrack.us is a project of {accountcompany} (https://civicimpulse.com), {accountaddress1}, {accountcity} {accountstate} 
+{accountzip} {accountcountry}.  You can reach us at hello@govtrack.us. To stop all future emails from us, click
+{unsubscribe}.
+{% endautoescape %}

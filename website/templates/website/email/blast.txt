@@ -50,6 +50,10 @@ ps. Are you following us on Twitter, Facebook, Medium, and GoodReads?
 
 ----
 
-You received this email because you have registered an account on www.GovTrack.us. To change your email settings, visit your account settings page at https://www.govtrack.us/accounts/profile. GovTrack.us is a project of Civic Impulse, LLC. 
+You received this email because you have registered an account on www.GovTrack.us. To change your email settings, visit your account settings page at https://www.govtrack.us/accounts/profile.
 
-Unsubscribe: {{unsub_url}}
+GovTrack.us is a project of {accountcompany} (https://civicimpulse.com?{{utm}}), {accountaddress1}, {accountcity} {accountstate} 
+{accountzip} {accountcountry}. You may contact us at hello+u{{user.id}}@govtrack.us. The email address this message was sent from
+is not monitored for replies.
+
+Unsubscribe: {unsubscribe:{{unsub_url}}}

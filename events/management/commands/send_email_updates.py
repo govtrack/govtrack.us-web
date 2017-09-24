@@ -236,11 +236,11 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				"announcement": announce,
 				"medium_posts": medium_posts,
 			},
-			#headers={
-			#	'Reply-To': emailfromaddr,
-			#	'Auto-Submitted': 'auto-generated',
-			#	'X-Auto-Response-Suppress': 'OOF',
-			#},
+			headers={
+				'Reply-To': emailfromaddr,
+				'Auto-Submitted': 'auto-generated',
+				'X-Auto-Response-Suppress': 'OOF',
+			},
 			fail_silently=False
 		)
 	except Exception as e:

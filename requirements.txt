@@ -23,7 +23,8 @@ tqdm
 pyyaml
 pynliner
 git+https://github.com/govtrack/django-lorien-common
-git+https://github.com/if-then-fund/django-html-emailer@v0.0.2
+git+https://github.com/JoshData/commonmark-py-plaintext
+git+https://github.com/if-then-fund/django-html-emailer@v0.0.3
 xml_diff
 diff_match_patch_python
 python-twitter

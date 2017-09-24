@@ -1,0 +1,40 @@
+{% extends "htmlemailer/boilerplate.html" %}
+
+{% block head %}
+<style>
+#backgroundTable {
+	background-color: #FEFEFE;
+	color: #222;
+	max-width: 50em;
+}
+#content-area {
+	padding: 1em;
+}
+a {
+	color: #262;
+}
+</style>
+{% block extra_head %}
+{% endblock %}
+{% endblock %}
+
+{% block body %}
+
+{% block content %}
+{% endblock %}
+
+GovTrack.us
+
+<div style="margin-top: 1.5em; font-size: 85%; line-height: 128%;">
+<hr>
+{% block below_signature_content %}
+{% endblock %}
+
+<p>
+GovTrack.us is a project of <a href="https://civicimpulse.com">{accountcompany}</a>, {accountaddress1}, {accountcity} {accountstate} {accountzip} {accountcountry}.
+You can contact us at <a href="mailto:hello@govtrack.us">hello@govtrack.us</a>.
+<a href="{unsubscribe}">Unsubcribe from all future email from us</a>.
+</p>
+</div>
+
+{% endblock %}

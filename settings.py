@@ -53,7 +53,7 @@ STATICFILES_DIRS = [os.path.join(ROOT, 'static')]
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
 SITE_ROOT_URL = "https://www.govtrack.us"
 LOGIN_REDIRECT_URL = "/accounts/profile"
-SERVER_EMAIL = "GovTrack.us <noreply@mail.GovTrack.us>" # From: address on verification emails
+SERVER_EMAIL = "GovTrack.us <noreply@alerts.GovTrack.us>" # From: address on verification emails
 REGISTRATION_ASK_USERNAME = False
 SECURE_PROXY_SSL_HEADER = ("HTTPS", "on")
 
@@ -87,6 +87,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
+    'django.contrib.messages',
 
     # 3rd party libraries
     'common',
@@ -128,6 +129,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
                 'events.middleware.template_context_processor',
                 'website.middleware.template_context_processor',
             ],
@@ -159,9 +161,8 @@ IGNORABLE_404_URLS = (
 
 CURRENT_CONGRESS = 115
 
-EMAIL_UPDATES_FROMADDR = "GovTrack.us Email Updates <noreply@mail.GovTrack.us>"
-EMAIL_UPDATES_RETURN_PATH = "GovTrack.us Email Updates <bounces+uid=%d@mail.GovTrack.us>"
-BOUNCES_UID_REGEX = re.compile(r"<?bounces\+uid=(\d+)@GovTrack\.us>?", re.I)
+EMAIL_UPDATES_FROMADDR = "GovTrack.us Email Updates <noreply@alerts.GovTrack.us>"
+EMAIL_UPDATES_RETURN_PATH = "GovTrack.us Email Updates <bounces+uid=%d@alerts.GovTrack.us>"
 
 # Load settings from the environment
 from settings_env import *

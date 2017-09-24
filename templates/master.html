@@ -233,6 +233,19 @@
 	{% block body_with_container %}
 		<div id="maincontent" class="container">
 			<div id="content">
+				{# TODO: only works on non-anonymous pages #}
+			   	{% if messages %}
+				    <div class="container" style="margin-top: 1em;">
+				    {% for message in messages %}
+			        {# Django levels are: debug (map to Boostrap 'info'), info, success, warning, error (map to Boostrap 'danger') #}
+			        <div class="alert fade in alert-{% if message.level_tag == "error" %}danger{% elif message.level_tag == "debug" %}info{% else %}{{message.level_tag}}{% endif %}">
+			            <button type="button" class="close" data-dismiss="alert">&times;</button>
+			            {{ message }}
+			        </div>
+			        {% endfor %}
+			    </div>
+			    {% endif %}
+
 				{% block body %}
 				{% endblock %}
 			</div><!-- /content -->

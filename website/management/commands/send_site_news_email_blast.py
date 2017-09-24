@@ -138,7 +138,7 @@ def send_blast(user_id, is_test, test_addrs, counter, counter_max):
 				"unsub_url": settings.SITE_ROOT_URL + "/accounts/unsubscribe/" + prof.get_one_click_unsub_key()
 			},
 			headers = {
-				'From': "GovTrack.us <noreply@mail.govtrack.us>",
+				'From': "GovTrack.us <noreply@alerts.govtrack.us>",
 				'Reply-To': "GovTrack.us <hello@govtrack.us>",
 				'X-Auto-Response-Suppress': 'OOF',
 			},

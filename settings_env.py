@@ -76,25 +76,28 @@ copy_env_vars = [
     "GOOGLE_APP_SECRET",
     "GOOGLE_AUTH_SCOPE",
 
+    # For email...
+    "EMAIL_HOST",
+    "EMAIL_PORT",
+    "EMAIL_HOST_USER",
+    "EMAIL_HOST_PASSWORD",
+    "EMAIL_USE_TLS",
+    "EMAIL_BACKEND",
+
     # For us...
     "GOOGLE_ANALYTICS_KEY",
     "TWITTER_ACCESS_TOKEN", # for automated tweets and to update @GovTrack/Members-of-Congress twitter list
     "TWITTER_ACCESS_TOKEN_SECRET",
-    "SPARKPOST_API_KEY",
     "PAYPAL_CLIENT_MODE",
     "PAYPAL_CLIENT_ID",
     "PAYPAL_CLIENT_SECRET",
 ]
 for var in copy_env_vars:
-    locals()[var] = get_env_variable(var, default='')
-
-if SPARKPOST_API_KEY:
-    EMAIL_BACKEND = 'sparkpost.django.email_backend.SparkPostEmailBackend'
-    SPARKPOST_OPTIONS = {
-        'track_opens': False,
-        'track_clicks': False,
-        'transactional': True,
-    }
+    val = get_env_variable(var, default='')
+    if val != "":
+        if var == "EMAIL_PORT": val = int(val)
+        if var == "EMAIL_USE_TLS": val = (val.lower()=="true")
+    locals()[var] = val
 
 # The hide-the-ads payment requires Paypal integration:
 if PAYPAL_CLIENT_ID:
