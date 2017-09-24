@@ -18,15 +18,6 @@ h3 {
 </style>
 {% endblock %}
 
-{% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="{% url "congress_home" %}">Congress</a></li>
-	<li><a href="/congress/bills">Bills</a></li>
-	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a></li>
-	<li class="active">Summaries</li>
-</ol>
-{% endblock %}
-
 {% block summary %}
 
 {% include "bill/bill-header.html" %}
@@ -146,6 +137,5 @@ function add_summary(name, href, first_summary) {
 for (var i = 0; i < summaries.length; i++) {
 	add_summary(summaries[i][0], summaries[i][1], i==0);
 }
-show_position(the_page.position); // Might be able to DRY up a bit moving this from specific bill subpages to bill_header
 </script>
 {% endblock %}

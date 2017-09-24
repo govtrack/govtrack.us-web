@@ -318,36 +318,25 @@ class Reaction(models.Model):
         else:
             return Reaction.objects.none()
 
-class Position(models.Model):
+
+class UserPosition(models.Model):
     subject = models.CharField(max_length=20, db_index=True)
-    bill = models.ForeignKey('bill.Bill', db_index=True, blank=True, null=True, on_delete=models.CASCADE)
     user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
-    anon_session_key = models.CharField(max_length=64, blank=True, null=True, db_index=True)
-    position = models.IntegerField(blank=True, null=True)
-    reasons = models.TextField(blank=True)
+    likert = models.IntegerField(blank=True, null=True)
+    reason = models.TextField(blank=True)
     extra = JSONField()
 
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     modified = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ( ('subject', 'user'), ('subject', 'anon_session_key') )
+        unique_together = ( ('subject', 'user'), )
 
-    @staticmethod
-    def get_session_key(request):
-        import random, string
-        return request.session.setdefault("positions-key",
-            ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(20))
-            )
+    def get_subject_link(self):
+        return Feed.from_name(self.subject).link
+    def get_subject_title(self):
+        return Feed.from_name(self.subject).title
 
-    @staticmethod
-    def get_for_user(request):
-        if request.user.is_authenticated():
-            return Position.objects.filter(user=request.user)
-        elif "positions-key" in request.session:
-            return Position.objects.filter(anon_session_key=Position.get_session_key(request))
-        else:
-            return Position.objects.none()
 
 class Sousveillance(models.Model):
     subject = models.CharField(max_length=24, db_index=True)

@@ -350,22 +350,12 @@ window.document.addEventListener("DOMContentLoaded", function() {
     }
     );
 });
-show_position(the_page.position);
 </script>
 <script src="/static/js/linkify.min.js"></script>
 
 <div id="permalink_widget">
 	<a class="btn btn-success" href="about:blank">Permalink</a>
 </div>
-{% endblock %}
-
-{% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="{% url "congress_home" %}">Congress</a></li>
-	<li><a href="/congress/bills">Bills</a></li>
-	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a></li>
-	<li class="active">Text</li>
-</ol>
 {% endblock %}
 
 {% block body %}

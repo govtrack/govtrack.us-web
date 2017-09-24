@@ -18,7 +18,7 @@ def likerttext(value):
                    -2: "Moderately oppose",
                    -1: "Slightly oppose",
                     0: "Neither support nor oppose",
-                    1: "Slightliy support",
+                    1: "Slightly support",
                     2: "Moderately support",
                     3: "Strongly support"}
     return likertdict.get(value)
