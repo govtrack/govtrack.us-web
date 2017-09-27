@@ -15,7 +15,7 @@ import os, sys
 from datetime import datetime, timedelta
 import yaml, markdown2
 
-now = datetime.now()
+launch_time = datetime.now()
 
 import multiprocessing
 django.setup() # StackOverflow user says call setup when using multiprocessing
@@ -69,7 +69,7 @@ class Command(BaseCommand):
 			# re-starting this process and some new events crept in.
 			sublists = SubscriptionList.objects\
 					.filter(email__in=list_email_freq)\
-					.exclude(last_email_sent__gt=datetime.now()-timedelta(hours=20))
+					.exclude(last_email_sent__gt=launch_time-timedelta(hours=20))
 
 			# And get a list of those users.
 			users = User.objects.filter(subscription_lists__in=sublists).distinct()
@@ -129,8 +129,8 @@ class Command(BaseCommand):
 				# they might stop getting email updates.
 				counts["total_users_skipped_stale"] += 1
 				continue
-			elif user["last_login"] < datetime.now() - timedelta(days=3) \
-				and (not p or not p.pingtime or p.pingtime < datetime.now() - timedelta(days=20)) \
+			elif user["last_login"] < launch_time - timedelta(days=3) \
+				and (not p or not p.pingtime or p.pingtime < launch_time - timedelta(days=20)) \
 				and BouncedEmail.objects.filter(user_id=user["id"]).exists():
 				counts["total_users_skipped_bounced"] += 1
 				continue
@@ -169,7 +169,7 @@ def pool_worker(conn):
 		print "Uncaught exception", e
 
 def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events):
-	global now
+	global launch_time
 
 	user = User.objects.get(id=user_id)
 	
@@ -216,8 +216,8 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 	# email addresses are still valid, for folks that have not logged in recently
 	# and did not successfully recently ping back.
 	emailpingurl = None
-	if user.last_login < datetime.now() - timedelta(days=60) \
-		and not Ping.objects.filter(user=user, pingtime__gt=datetime.now() - timedelta(days=60)).exists():
+	if user.last_login < launch_time - timedelta(days=60) \
+		and not Ping.objects.filter(user=user, pingtime__gt=launch_time - timedelta(days=60)).exists():
 		emailpingurl = Ping.get_ping_url(user)
 		
 	# send
@@ -262,7 +262,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 	# events table so that we know not to email those events in a future update.
 	for sublist, events in eventslists:
 		sublist.last_event_mailed = max(sublist.last_event_mailed, most_recent_event)
-		sublist.last_email_sent = now
+		sublist.last_email_sent = launch_time
 		sublist.save()
 		
 	return eventcount # did sent email
