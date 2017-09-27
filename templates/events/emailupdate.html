@@ -26,6 +26,11 @@
 		margin-bottom: 0px;
 		text-align: left;
 	}
+		.rightColumnContent h2 {
+			font-size: 15pt;
+			line-height: 15pt; 
+			margin-top: 8px;
+		}
 	h3 {
 		font-family: Arial, sans-serif;
 		font-size: 12pt; 
@@ -45,7 +50,7 @@
 		font-weight: bold;
 		font-size: 10pt;
 		color: #969698;
-		margin-bottom: 20px;
+		margin-bottom: 10px;
 		margin-top:20px;
 		text-align: left;
 	}
@@ -136,7 +141,7 @@
 			        <td valign="top" class="leftColumnContent" align="left">
 
 						<!-- ANNOUNCEMENT -->
-						{% if announcement.active %}
+						{% if announcement %}
 						<div id="announcement-holder">
 				            {% if announcement.subject %}<h2>{{announcement.subject}}</h2>{% endif %}
 							{{announcement.body_html|safe}}
@@ -170,6 +175,8 @@
 							{% endfor %}
 
 							<br />
+						{% empty %}
+							<p>There were no new events in Congress that match your trackers since your last email update from GovTrack.</p>
 						{% endfor %}
 
 			        </td>
@@ -184,11 +191,11 @@
         	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
 			    <tr>
 			        <td valign="top" class="rightColumnContent" align="left">
-			            <h2 style="text-align:left;">Contribute</h2>
+			            <h2 style="text-align:left;">Learned something?</h2>
 			            <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			            	<tr>
 				            	<td style="text-align:left !important;">
-			                        <p style="text-align:left !important;">Is this email useful? Please <a href="https://www.patreon.com/govtrack">support GovTrack with a recurring tip</a> so that we can continue to improve this free service.</p>
+			                        <p style="text-align:left !important;">GovTrack is a free service but we have bills to pay. Support our work with a <a href="https://www.patreon.com/govtrack">recurring tip</a> or <a href="https://www.govtrack.us/accounts/membership">one-time tip</a>.</p>
 				            	</td>
 			            	</tr>
 			            </table>
@@ -213,7 +220,7 @@
 			            	<tr valign="top">
 				            	<td style="text-align:left !important;">
 									{% if post.image %}
-									<div style="float: right; margin: 0 0 1em 1em">
+									<div style="float: right; margin: 10px 0 1em 1em">
 										<a href="{{post.url}}?{{utm}}">
 											<img src="https://cdn-images-1.medium.com/max/100/{{post.image}}" style="border: 1px solid #888; width: 65px;"/>
 										</a>

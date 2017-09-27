@@ -185,6 +185,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 	eventslists = []
 	most_recent_event = None
 	eventcount = 0
+	can_send_if_no_events = False
 	for sublist in user.subscription_lists.all():
 		# Get a list of all of the trackers this user has in all lists. We use the
 		# complete list, even in non-email-update-lists, for rendering events.
@@ -203,9 +204,16 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			eventslists.append( (sublist, events) )
 			eventcount += len(events)
 			most_recent_event = max(most_recent_event, max_id)
+
+		# Check if we want to send an email even if there are no events:
+		# * We have announcement text.
+		# * It hasn't been incredibly long since their last update for any of their lists
+		#   with the right email frequency.
+		can_send_if_no_events |= (announce is not None) and (sublist.last_email_sent is not None) \
+			and (sublist.last_email_sent > launch_time-timedelta(days=60))
 	
-	# Don't send an empty email.... less we're testing and we want to send some old events.
-	if len(eventslists) == 0 and not send_old_events:
+	# Don't send an empty email.... unless we're testing and we want to send some old events.
+	if len(eventslists) == 0 and not send_old_events and not can_send_if_no_events:
 		return None
 		
 	if not send_mail:
@@ -278,9 +286,10 @@ def load_markdown_content(template_path, utm=""):
 	body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 at \2", body_text)
 
 	# The top of the text content contains metadata in YAML format,
-	# with "id" and "subject" required.
+	# with "id" and "subject" required and active: true or rundate set to today's date in ISO format.
 	meta_info, body_text = body_text.split("----------", 1)
 	meta_info = yaml.load(meta_info)
+	if not meta_info.get("active") and meta_info.get("rundate") != launch_time.date().isoformat(): return None
 	body_text = body_text.strip()
 
 	# Get the HTML body content.

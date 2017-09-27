@@ -1,1 +1,1 @@
-GovTrack Update for {{date}}{% if announcement.active and announcement.subject %} | {{announcement.subject}}{% endif %}
+GovTrack Update for {{date}}{% if announcement.subject %} | {{announcement.subject}}{% endif %}
