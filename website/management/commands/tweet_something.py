@@ -169,7 +169,7 @@ class Command(BaseCommand):
 		coming_up = list(dhg_bills | sfs_bills)
 		coming_up.sort(key = lambda b : b.docs_house_gov_postdate if (b.docs_house_gov_postdate and (not b.senate_floor_schedule_postdate or b.senate_floor_schedule_postdate < b.docs_house_gov_postdate)) else b.senate_floor_schedule_postdate)
 		for bill in coming_up:
-			text = "Coming up: " + bill.display_number
+			text = "\xf0\x9f\x94\x9c ".decode("utf8") + bill.display_number # SOON-> emoji
 			if bill.sponsor and bill.sponsor.twitterid: text += " by @" + bill.sponsor.twitterid
 			text += ": " + bill.title_no_number
 			self.post_tweet(
