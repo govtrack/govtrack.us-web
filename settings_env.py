@@ -97,7 +97,7 @@ for var in copy_env_vars:
     if val != "":
         if var == "EMAIL_PORT": val = int(val)
         if var == "EMAIL_USE_TLS": val = (val.lower()=="true")
-    locals()[var] = val
+        locals()[var] = val
 
 # The hide-the-ads payment requires Paypal integration:
 if PAYPAL_CLIENT_ID:
