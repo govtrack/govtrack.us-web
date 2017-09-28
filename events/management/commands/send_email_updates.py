@@ -87,6 +87,9 @@ class Command(BaseCommand):
 			"total_events_sent": 0,
 			"total_users_skipped_stale": 0,
 			"total_users_skipped_bounced": 0,
+			"total_time_querying": timedelta(seconds=0),
+			"total_time_rendering": timedelta(seconds=0),
+			"total_time_sending": timedelta(seconds=0),
 		}
 
  		# get the list of user IDs to iterate through; clone up front to avoid holding the cursor (?)
@@ -111,11 +114,10 @@ class Command(BaseCommand):
 
 		def dequeue(worker, limit):
 			while worker[2] > limit:
-				events_sent = worker[1].recv()
+				wcounts = worker[1].recv()
 				worker[2] -= 1
-				if events_sent != None:
-					counts["total_emails_sent"] += 1
-					counts["total_events_sent"] += events_sent
+				for k, v in wcounts.items():
+					counts[k] += v
 
 		for i, user in enumerate(user_iterator()):
 			# Check pingback status.
@@ -135,6 +137,11 @@ class Command(BaseCommand):
 				counts["total_users_skipped_bounced"] += 1
 				continue
 
+			# if debugging, can run it in the main process and ignore the pool
+			#wcounts = send_email_update(user["id"], list_email_freq, send_mail, mark_lists, send_old_events)
+			#for k, v in wcounts.items(): counts[k] += v
+			#continue
+
 			# Enque task.
 			worker = pool[i % len(pool)]
 			worker[1].send([user["id"], list_email_freq, send_mail, mark_lists, send_old_events])
@@ -150,9 +157,17 @@ class Command(BaseCommand):
 		for worker in pool: dequeue(worker, 0)
 		for worker in pool: worker[0].join(1)
 
+		# show stats
 		print "Sent" if send_mail else "Would send", counts["total_emails_sent"], "emails and", counts["total_events_sent"], "events"
-		print counts["total_users_skipped_stale"], "users skipped because they are stale"
-		print counts["total_users_skipped_bounced"], "users skipped because of a bounced email"
+		for k, v in counts.items():
+			print k, v
+
+		# show queries (requires DEBUG to be true)
+		if settings.DEBUG:
+			from django.db import connection
+			for q in connection.queries:
+				if float(q["time"]) > 0:
+					print q["time"], q["sql"]
 
 def pool_worker(conn):
 	try:
@@ -170,6 +185,8 @@ def pool_worker(conn):
 
 def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events):
 	global launch_time
+
+	user_start_time = datetime.now()
 
 	user = User.objects.get(id=user_id)
 	
@@ -211,14 +228,23 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		#   with the right email frequency.
 		can_send_if_no_events |= (announce is not None) and (sublist.last_email_sent is not None) \
 			and (sublist.last_email_sent > launch_time-timedelta(days=60))
+
+	user_querying_end_time = datetime.now()
 	
 	# Don't send an empty email.... unless we're testing and we want to send some old events.
 	if len(eventslists) == 0 and not send_old_events and not can_send_if_no_events:
-		return None
-		
+		return {
+			"total_time_querying": user_querying_end_time-user_start_time,
+		}
+
+
+	# When counting what we want to send, we supress emails.
 	if not send_mail:
 		# don't email, don't update lists with the last emailed id
-		return eventcount
+		return {
+			"total_events_sent": eventcount,
+			"total_time_querying": user_querying_end_time-user_start_time,
+		}
 	
 	# Add a pingback image into the email to know (with some low accuracy) which
 	# email addresses are still valid, for folks that have not logged in recently
@@ -230,6 +256,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		
 	# send
 	try:
+		timings = { }
 		send_html_mail(
 			"events/emailupdate",
 			emailreturnpath,
@@ -249,7 +276,8 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				'Auto-Submitted': 'auto-generated',
 				'X-Auto-Response-Suppress': 'OOF',
 			},
-			fail_silently=False
+			fail_silently=False,
+			timings=timings
 		)
 	except Exception as e:
 		if "recipient address was suppressed due to" in str(e):
@@ -260,20 +288,29 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			print user, "user is on suppression list already"
 		else:
 			print user, e
+		# raise - debugging - must also disable process pool to see what happened
 
-		return None # skip updating what events were sent, False = did not sent
+		# don't update this user's lists with what events were sent because it failed
+		return {
+			"total_time_querying": user_querying_end_time-user_start_time,
+			"total_time_sending": datetime.now()-user_querying_end_time,
+		}
 	
-	if not mark_lists:
-		return eventcount
-	
-	# mark each list as having mailed events up to the max id found from the
-	# events table so that we know not to email those events in a future update.
-	for sublist, events in eventslists:
-		sublist.last_event_mailed = max(sublist.last_event_mailed, most_recent_event)
-		sublist.last_email_sent = launch_time
-		sublist.save()
-		
-	return eventcount # did sent email
+	if mark_lists: # skipped when debugging
+		# mark each list as having mailed events up to the max id found from the
+		# events table so that we know not to email those events in a future update.
+		for sublist, events in eventslists:
+			sublist.last_event_mailed = max(sublist.last_event_mailed, most_recent_event)
+			sublist.last_email_sent = launch_time
+			sublist.save()
+
+	return {
+		"total_emails_sent": 1,
+		"total_events_sent": eventcount,
+		"total_time_querying": user_querying_end_time-user_start_time,
+		"total_time_rendering": timings["render"],
+		"total_time_sending": timings["send"],
+	}
 
 def load_markdown_content(template_path, utm=""):
 	# Load the Markdown template for the current blast.
