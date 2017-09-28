@@ -82,6 +82,9 @@ class Command(BaseCommand):
 				.values("id", "email", "last_login")\
 				.order_by('id')
 
+		# enable caching during event generation
+		enable_event_source_caching()
+
 		counts = {
 			"total_emails_sent": 0,
 			"total_events_sent": 0,

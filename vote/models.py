@@ -268,15 +268,19 @@ class Vote(models.Model):
         else:
             my_reps = []
 
-        oursummary = self.get_summary()
-
-        # fetch the whole vote (don't restrict by my_reps in the hope of
-        # making use of the db query cache)
-        all_votes = {
-            vv.person: vv.option
-            for vv in
-            self.voters.select_related('person', 'option')
-        }
+        # fetch the whole vote and our summary, and keep it cached with this object
+        # because in email updates this object is held in memory for the duration of
+        # sending out all email updates
+        if not hasattr(self, "_cached_event_data"):
+            oursummary = self.get_summary()
+            all_votes = {
+                vv.person: vv.option
+                for vv in
+                self.voters.select_related('person', 'option')
+            }
+            self._cached_event_data = [oursummary, all_votes]
+        else:
+            oursummary, all_votes = self._cached_event_data
         
         return {
             "type": "Vote",

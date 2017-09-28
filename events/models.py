@@ -13,6 +13,13 @@ from datetime import datetime, timedelta
 BACKFILL_DAYS_DAILY = 4
 BACKFILL_DAYS_WEEKLY = 14
 
+# When sending email updates, cache event source objects in memory so they can
+# retain state.
+EVENT_SOURCE_CACHE = None
+def enable_event_source_caching():
+    global EVENT_SOURCE_CACHE
+    EVENT_SOURCE_CACHE = dict()
+
 class Feed(models.Model):
     """Each Feed has a code name that can be used to reconstruct information about the feed."""
     feedname = models.CharField(max_length=64, unique=True, db_index=True)
@@ -387,7 +394,17 @@ class Event(models.Model):
         return unicode(self.source) + " " + unicode(self.eventid) + " / " + unicode(self.feed)
         
     def render(self, feeds=None):
-        return self.source.render_event(self.eventid, feeds)
+        if EVENT_SOURCE_CACHE is None or (self.source_content_type, self.source_object_id) not in EVENT_SOURCE_CACHE:
+            source = self.source
+        else:
+            source = EVENT_SOURCE_CACHE[(self.source_content_type, self.source_object_id)]
+
+        ret = source.render_event(self.eventid, feeds)
+
+        if EVENT_SOURCE_CACHE is not None:
+            EVENT_SOURCE_CACHE[(self.source_content_type, self.source_object_id)] = source
+
+        return ret
     
     # This is used to update the events for an object and delete any events that are not updated.
     class update:
