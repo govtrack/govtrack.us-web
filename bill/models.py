@@ -193,8 +193,8 @@ class Bill(models.Model):
     sponsor = models.ForeignKey('person.Person', blank=True, null=True,
                                 related_name='sponsored_bills', help_text="The primary sponsor of the bill.", on_delete=models.PROTECT)
     sponsor_role = models.ForeignKey('person.PersonRole', blank=True, null=True, help_text="The role of the primary sponsor of the bill at the time the bill was introduced.", on_delete=models.PROTECT)
-    committees = models.ManyToManyField(Committee, related_name='bills', help_text="Committees to which the bill has been referred.")
-    terms = models.ManyToManyField(BillTerm, related_name='bills', help_text="Subject areas associated with the bill.")
+    committees = models.ManyToManyField(Committee, blank=True, related_name='bills', help_text="Committees to which the bill has been referred.")
+    terms = models.ManyToManyField(BillTerm, blank=True, related_name='bills', help_text="Subject areas associated with the bill.")
     current_status = models.IntegerField(choices=BillStatus, help_text="The current status of the bill.")
     current_status_date = models.DateField(help_text="The date of the last major action on the bill corresponding to the current_status.")
     introduced_date = models.DateField(help_text="The date the bill was introduced.")
