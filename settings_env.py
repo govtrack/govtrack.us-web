@@ -100,7 +100,7 @@ for var in copy_env_vars:
         locals()[var] = val
 
 # The hide-the-ads payment requires Paypal integration:
-if PAYPAL_CLIENT_ID:
+if locals().get("PAYPAL_CLIENT_ID"):
     import paypalrestsdk
     paypalrestsdk.configure(mode=PAYPAL_CLIENT_MODE, client_id=PAYPAL_CLIENT_ID, client_secret=PAYPAL_CLIENT_SECRET)
 
