@@ -1,6 +1,6 @@
 [submodule "ext/django-registration-pv"]
 	path = ext/django-registration-pv
-	url = git://github.com/JoshData/django-registration-pv.git
+	url = https://github.com/govtrack/django-registration-pv
 [submodule "ext/diff_match_patch-python"]
 	path = ext/diff_match_patch-python
 	url = git://github.com/JoshData/diff_match_patch-python.git
