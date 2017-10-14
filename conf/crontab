@@ -11,8 +11,8 @@ LC_TYPE=en_US.UTF-8
 15 9-18 * * 1-5 { cd /home/govtrack/web; ./run_scrapers.py votes; }
 45 9-21/3 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes; ./manage.py govtrack_insider_sync; }
 
-0 7 * * 1-5 { cd /home/govtrack/web; date; ./manage.py sparkpost_bounces; ./manage.py send_email_updates daily; }
-0 13 * * 6 { cd /home/govtrack/web; date; ./manage.py sparkpost_bounces; ./manage.py send_email_updates weekly; }
+0 7 * * 1-5 { cd /home/govtrack/web; date; ./manage.py send_email_updates daily; }
+0 13 * * 6 { cd /home/govtrack/web; date; ./manage.py send_email_updates weekly; }
 
 25 2 * * * { cd /home/govtrack/web; ./manage.py clear_expired_email_verifications; ./manage.py clearsessions; }
 
