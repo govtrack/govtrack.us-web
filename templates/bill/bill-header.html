@@ -1,7 +1,314 @@
 {% load govtrack_utils %}
 
+<style>
+.h1-multiline, h1 { padding: 0; margin: 0; }
+#bill-subpages { margin: 15px 0; font-size: 13px; }
+#bill-subpages a { padding: 6.6px 10px; color: #9D2146; text-decoration: none; }
+#bill-subpages .active a { background-color: #9D2146; color: white; font-weight: bold; }
+</style>
+
+{# EMOJI REACTIONS STYLES AND SCRIPTS #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/emojione/2.1.4/assets/css/emojione.min.css"/>
+<style>
+#emoji-reactions {
+  display: block !important;
+}
+  #emoji-reactions a {
+     display: inline-block;
+     text-decoration: none;
+     padding: .25em 0 .25em .15em;
+     margin: 0 .25em .25em 0;
+     border: 1px solid rgba(255,255,255,0);
+     opacity: .5;
+  }
+    #emoji-reactions a.has-count {
+      opacity: 1;
+    }
+    #emoji-reactions a.active {
+      background-color: #FAFAFA;
+      border: 1px solid #DD9;
+      color: black;
+      opacity: 1;
+    }
+    #emoji-reactions a span {
+       display: inline-block;
+       font-style: normal;
+       color: #777;
+       font-size: 90%;
+       line-height: 90%;
+       padding: 0 1px;
+       min-width: .75em;
+    }
+    #emoji-reactions img.emojione {
+      height: 1ex;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/emojione/2.1.4/lib/js/emojione.min.js"></script>
+<script>
+  // show emojis
+  function add_emoji_reaction(emoji) {
+    var n = $("<a href='#'/>");
+    n.attr("data-count", emoji.count);
+    n.append(emojione.toImage(":" + emoji.name + ":"))
+    n.attr("title", "React to this {{bill.noun|escapejs}} with the " + emoji.name + " emoji.");
+    if (emoji.me)
+      n.addClass("active");
+    var c = $('<span></span>');
+    n.append(c);
+    function update_count() {
+      var count = parseInt(n.attr("data-count"));
+      c.text(count > 0 ? count : "");
+      n.toggleClass('has-count', count > 0);
+    }
+    update_count(emoji.count);
+    $('#emoji-reactions')
+      .find(($('#emoji-reactions .main > *').length < 3) ? '.main' : '.other')
+      .append(n);
+
+    n.click(function() {
+      var delta = n.hasClass("active") ? -1 : 1;
+      n.toggleClass("active");
+      n.attr("data-count", parseInt(n.attr("data-count")) + delta);
+      update_count();
+      $.ajax({
+        url: "{% url 'reaction' %}",
+        method: "POST",
+        data: {
+          subject: "bill:{{bill.congressproject_id|escapejs}}",
+          emoji: emoji.name,
+          mode: delta
+        },
+        success: function() {
+        }
+      })
+      return false;
+    })
+  }
+  window.post_jquery_load_scripts.push(function() {
+    for (var i = 0; i < the_page.reactions.length; i++)
+      add_emoji_reaction(the_page.reactions[i]);
+  });
+</script>
+
+{# LIKERT/TEXT SYLES AND SCRIPTS #}
+<style>
+#UserPositionContainer {
+    float: right;
+    cursor: default;
+}
+#UserPositionContainer .explanation {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-top: 5px;
+}
+  #UserPositionContainer .explanation a {
+    text-decoration: none;
+  }
+#UserPositionContainer .LikertContainer {
+    display: inline-block;
+    white-space-collapse: discard;
+    padding: 0 .2em;
+    border-radius: 1em;
+    white-space: nowrap;
+
+    background: -moz-linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* ff3.6+ */
+    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%, #f94e5e), color-stop(45%, #eae596), color-stop(55%, #eae596), color-stop(100%, #4cf2aa)); /* safari4+,chrome */
+    background: -webkit-linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* safari5.1+,chrome10+ */
+    background: -o-linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* opera 11.10+ */
+    background: -ms-linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* ie10+ */
+    background: linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* w3c */
+    filter: progid:DXImageTransform.Microsoft.gradient( ok-circletColorstr='#4cf2aa', endColorstr='#f94e5e',GradientType=1 ); /* ie6-9 */
+}
+#UserPositionContainer .LikertContainer {
+  color: white;
+}
+#UserPositionContainer .LikertContainer .val {
+  display: inline-block;
+  padding: .125em .25em;
+  text-align: center;
+  cursor: pointer;
+  color: #FFF;
+}
+  #UserPositionContainer .LikertContainer .val:hover .fa-circle {
+    color: #FFF;
+    opacity: 1;
+  }
+  #UserPositionContainer .LikertContainer .val .fa-circle {
+    color: #FFD;
+    opacity: .75;
+  }
+  #UserPositionContainer .LikertContainer .val .fa-check-circle {
+    display: none;
+  }
+  #UserPositionContainer .LikertContainer .val.active .fa-circle {
+    display: none;
+  }
+  #UserPositionContainer .LikertContainer .val.active .fa-check-circle {
+    display: inline;
+  }
+#UserPositionContainer .sidelabel {
+    margin: 0 3px;
+    color: #666;
+    font-size: 14px;
+}
+#UserPositionModal textarea {
+    width: 100%;
+    height: 5em;
+}
+</style>
+<script>
+window.post_jquery_load_scripts.push(function() {
+  // alter form depending on whether user is a member of a userpanel
+  if (the_user) {
+    $('#UserPositionModal .not-on-a-user-panel-toggle').toggle(the_user.is_on_userpanel == 0);
+    $('.on-a-user-panel-toggle').toggle(the_user.is_on_userpanel > 0);
+    $('.on-a-user-panel-toggle .count').text(the_user.is_on_userpanel);
+    $('.on-a-user-panel-toggle .s').text(the_user.is_on_userpanel != 1 ? "s" : "");
+  }
+
+  // load existing user position
+  if (the_page && the_page.position) {
+    $("#UserPositionContainer .LikertContainer .val").each(function(item) {
+      if ($(this).attr("data-value") == the_page.position.likert)
+        $(this).addClass('active');
+    });
+    $("#UserPositionModal textarea").val(the_page.position.reason);
+    if (the_page.position.reason)
+      $("#UserPositionContainer .notesToggle .text").text("See Note");
+  }
+
+  // event handlers
+  $("#UserPositionContainer .notesToggle").click(function() {
+    if (!the_user) {
+      alert("You must be logged in to use this feature.");
+      return;
+    }
+    $('#UserPositionModal').modal('show');
+  });
+  $('#UserPositionModal').on('shown.bs.modal', function() {
+    $('#UserPositionModal textarea').focus();
+  })
+  $("#UserPositionContainer .LikertContainer .val").click(function() {
+    // Update and save this likert score.
+    if (!the_user) {
+      alert("You must be logged in to use this feature.");
+      return;
+    }
+    var wasme = $(this).hasClass("active");
+    $("#UserPositionContainer .LikertContainer .val").removeClass("active");
+    if (!wasme)
+      $(this).addClass("active");
+    saveUserPosition();
+  });
+  $('#UserPositionModal').on('hide.bs.modal', function() {
+    saveUserPosition();
+  })
+});
+function saveUserPosition() {
+  $.ajax({
+    url: "{% url 'update-userposition' %}",
+    method: "POST",
+    data: {
+       subject: "{{bill.get_feed.feedname|escapejs}}",
+       likert: $("#UserPositionContainer .val.active").attr("data-value"),
+       reason: $("#UserPositionModal textarea").val()
+    },
+    success: function() {
+    },
+    error: function() {
+      alert("There was an error saving your position.")
+    }
+  })
+  return false;
+}
+</script>
+
+{# REACTIONS #}
+<div class="row">
+<div class="col-md-5" style="margin-bottom: 5px;">
+  <div class="sr-only">React to this {{bill.noun}} with an emoji:</div>
+  <div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" style="display: none;">
+    <span class="main"> </span>
+    <a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">···</a>
+    <span class="other" style="display: none"> </span>
+  </div>
+</div>
+
+<div class="col-md-7" style="margin-bottom: 5px;">
+  <div id="UserPositionContainer">
+    <div class="sr-only">Save your position on this bill {{bill.noun}} on a six-point scale from strongly oppose to strongly support:</div>
+    <div class="LikertFrame">
+      <span class="sidelabel glyphicon glyphicon-thumbs-down"></span>
+      <div class="LikertContainer"> {# to get rid of whitespace between elems, close tags are on next line #}
+        <span class="val" data-value="-3" title="{{-3|likerttext}}"><span class="fa fa-circle"></span><span class="fa fa-check-circle"></span>
+        </span><span class="val" data-value="-2" title="{{-2|likerttext}}"><span class="fa fa-circle"></span><span class="fa fa-check-circle"></span>
+        </span><span class="val" data-value="-1" title="{{-1|likerttext}}"><span class="fa fa-circle"></span><span class="fa fa-check-circle"></span>
+        </span><span class="val" data-value="0"  title="{{0|likerttext}}"><span class="fa fa-circle"></span><span class="fa fa-check-circle"></span>
+        </span><span class="val" data-value="1"  title="{{1|likerttext}}"><span class="fa fa-circle"></span><span class="fa fa-check-circle"></span>
+        </span><span class="val" data-value="2"  title="{{2|likerttext}}"><span class="fa fa-circle"></span><span class="fa fa-check-circle"></span>
+        </span><span class="val" data-value="3"  title="{{3|likerttext}}"><span class="fa fa-circle"></span><span class="fa fa-check-circle"></span></span>
+      </div>
+      <span class="sidelabel glyphicon glyphicon-thumbs-up"></span>
+    </div>
+    <div class="explanation">
+      <a href="#" class="notesToggle" onclick="return false;" title="Show or hide your notes">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <span class="text">Add Note</span>
+      </a>
+      <a href="/accounts/positions" style="margin-left: .75em;">All Your Positions &raquo;</a>
+      <p class="on-a-user-panel-toggle" style="display: none;">
+        (Shared on <span class="count"></span> panel<span class="s"></span>.)
+      </p>
+  </div>
+  </div> <!-- /UserPositionContainer -->
+</div> <!-- /col -->
+</div> <!-- /row -->
+<div id="UserPositionModal" class="modal modal-lg" tabindex="-1" role="dialog" aria-labelledby="UserPositionModalTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="UserPositionModalTitle">Add a Note</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+          Add a note about this {{bill.noun}}.
+          <span class="not-on-a-user-panel-toggle">
+              Your note is for you and will not be shared with anyone.
+          </span>
+        </p>
+        <p class="on-a-user-panel-toggle" style="font-weight: bold;">
+          Because you are a member of <span class="count"></span> panel<span class="s"></span>, your positions on legislation and notes below will be shared with the panel administrators. (<a href="/accounts/positions">More Info</a>)
+        </p>
+        <textarea style="display: block;" 
+          placeholder="My notes on why I oppose or support this {{bill.noun}}."
+          title="My notes on why I oppose or support this {{bill.noun}}."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Save Note</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# <hr style="border: 1px solid #f7fcff; margin: 5px 0;"> #}
+
+{# BREADCRUMBS #}
+<ol class="breadcrumb" style="margin: 0 0 5px 0;">
+  <li><a href="{% url "congress_home" %}">Congress</a></li>
+  <li><a href="/congress/bills">Bills</a></li>
+  {% if not bill_subpage %}
+  <li class="active">{{bill.display_number_with_congress_number}}</li>
+  {% else %}
+  <li><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a>
+  <li class="active">{{bill_subpage}}</li>
+  {% endif %}
+</ol>
+
+{# BILL TITLE #}
 <div class="h1-multiline" style="border: none;">
-	<h1 style="margin-top: 10px; max-height: 3em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
+	<h1 style="max-height: 3em; overflow: hidden;">{{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}</h1>
 			<p id="h1_overflow" style="display: none"></p>
 			<script>
 			window.post_jquery_load_scripts.push(function() {
@@ -14,19 +321,6 @@
 			});
 			</script>
 </div>
-
-<div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" style="display: none;">
-	<span class="main"> </span>
-	<a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">···</a>
-	<span class="other" style="display: none"> </span>
-</div>
-
-<style>
-.h1-multiline, h1 { padding: 0; margin: 0; }
-#bill-subpages { margin: 30px 0; font-size: 13px; }
-#bill-subpages a { padding: 6.6px 10px; color: #9D2146; text-decoration: none; }
-#bill-subpages .active a { background-color: #9D2146; color: white; font-weight: bold; }
-</style>
 
 {% with page=request.path|cut:bill.get_absolute_url %}
  <ul id="bill-subpages" class="nav nav-pills" role="tablist">

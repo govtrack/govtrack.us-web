@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.forms import ModelForm
@@ -81,8 +81,56 @@ def change_panel(request, panel_id):
             return HttpResponseRedirect("/panels/" + panel_id)
 
 @permission_required('userpanels.add_panel')
-def export_panel_users(requet, panel_id):
-    pass
+def export_panel_user_data(request, panel_id, download):
+    import csv, io
+    from django.utils.text import slugify
+    from website.models import UserPosition
+
+    panel = get_object_or_404(Panel, id=panel_id, admins=request.user)
+
+    buf = io.BytesIO()
+    w = csv.writer(buf)
+
+    if download == "members":
+        # Download the panel's membership, with one row per member.
+        w.writerow(["id", "email", "joined", "invitation_code", "notes"])
+        for mbr in PanelMembership.objects.filter(panel=panel).order_by('created').select_related("user"):
+            w.writerow([
+                mbr.id,
+                mbr.user.email,
+                mbr.created,
+                mbr.invitation_code,
+                mbr.extra["notes"],
+            ])
+    elif download == "positions":
+        # Download the positions panel members have taken on legislation,
+        # with one row per member-position.
+        members = dict(PanelMembership.objects.filter(panel=panel).values_list("user_id", "id"))
+        w.writerow(["position_id", "member_id", "member_email", "position_created", "likert_score", "reason_text"])
+        for upos in UserPosition.objects.filter(user__in=members)\
+            .order_by('created')\
+            .select_related("user"):
+            w.writerow([
+                upos.id,
+                members[upos.user.id],
+                upos.user.email,
+                upos.created,
+                upos.likert,
+                upos.reason.encode("utf8"),
+            ])
+    else:
+        return HttpResponse("invalid")
+    
+    ret = HttpResponse(buf.getvalue())
+    if True: # disable to make debugging easier
+        ret["Content-Type"] = "text/csv"
+        ret["Content-Disposition"] = "attachment;filename=%s_%s.csv" % (
+            slugify(panel.title),
+            download
+        )
+    else:
+        ret["Content-Type"] = "text/plain"
+    return ret
 
 @login_required
 def accept_invitation(request, invitation_id):

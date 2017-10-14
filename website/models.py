@@ -325,6 +325,26 @@ class Reaction(models.Model):
         else:
             return Reaction.objects.none()
 
+
+class UserPosition(models.Model):
+    subject = models.CharField(max_length=20, db_index=True)
+    user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
+    likert = models.IntegerField(blank=True, null=True)
+    reason = models.TextField(blank=True)
+    extra = JSONField()
+
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ( ('subject', 'user'), )
+
+    def get_subject_link(self):
+        return Feed.from_name(self.subject).link
+    def get_subject_title(self):
+        return Feed.from_name(self.subject).title
+
+
 class Sousveillance(models.Model):
     subject = models.CharField(max_length=24, db_index=True)
     user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
