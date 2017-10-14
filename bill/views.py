@@ -682,8 +682,22 @@ def uscodeindex(request, secid):
 
 @anonymous_view
 def bill_text_image(request, congress, type_slug, number, image_type):
+    # Get bill.
     bill = load_bill_from_url(congress, type_slug, number)
     from billtext import load_bill_text
+
+    # What size image are we asked to generate?
+    try:
+        width = int(request.GET["width"])
+    except:
+	    width = 0 # don't resize
+
+    # We're going to display this next to photos of members of congress,
+    # so use that aspect ratio by default.
+    try:
+        aspect = float(request.GET["aspect"])
+    except:
+	    aspect = 240.0/200.0
 
     # Rasterizes a page of a PDF to a greyscale PIL.Image.
     # Crop out the GPO seal & the vertical margins.
@@ -718,7 +732,17 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         # and just 404 it
         raise Http404()
 
+    cache_fn = None
+
     if metadata.get("pdf_file"):
+        # Check if we have a cached file. We want to cache longer than our HTTP cache
+        # because these thumbnails basically never change and calling pdftoppm is expensive.
+        import os.path
+        cache_fn = metadata["pdf_file"].replace(".pdf", "-" + image_type + "_" + str(width) + "_" + str(round(aspect,3)) + ".png")
+        if os.path.exists(cache_fn):
+            with open(cache_fn) as f:
+                return HttpResponse(f.read(), content_type="image/png")
+
         # Use the PDF files on disk.
         pg1 = pdftopng(metadata.get("pdf_file"), 1)
         try:
@@ -759,17 +783,11 @@ def bill_text_image(request, congress, type_slug, number, image_type):
     img = img.crop( (max(0, bbox[0]-hpad), 0, min(img.size[0], bbox[2]+hpad), img.size[1]) )
 
     # Now take a window from the top matching a particular aspect ratio.
-    # We're going to display this next to photos of members of congress,
-    # so use that aspect ratio.
-    try:
-        aspect = float(request.GET["aspect"])
-    except:
-	    aspect = 240.0/200.0
     img = img.crop((0,0, img.size[0], int(aspect*img.size[0])))
 
     # Resize to requested width.
-    if "width" in request.GET:
-        img.thumbnail((int(request.GET["width"]), int(aspect*float(request.GET["width"]))), Image.ANTIALIAS)
+    if width:
+        img.thumbnail((width, int(aspect*width)), Image.ANTIALIAS)
 
     # Add symbology.
     if image_type == "thumbnail":
@@ -796,12 +814,19 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         draw.rectangle(((0, 0), (img.size[0]-1, img.size[1]-1)), outline=(100,100,100,255), fill=None)
         del draw
 
-    # Serialize & return.
+    # Serialize.
     import StringIO
     imgbytesbuf = StringIO.StringIO()
     img.save(imgbytesbuf, "PNG")
     imgbytes = imgbytesbuf.getvalue()
     imgbytesbuf.close()
+
+    # Save to cache.
+    if cache_fn:
+        with open(cache_fn, "w") as f:
+            f.write(imgbytes)
+
+    # Return.
     return HttpResponse(imgbytes, content_type="image/png")
 
 @anonymous_view
