@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.template import Context, Template
 from django.template.loader import get_template
 from django.conf import settings
+import django.core.mail
 
 from optparse import make_option
 
@@ -174,19 +175,25 @@ class Command(BaseCommand):
 
 def pool_worker(conn):
 	try:
-		# close db connections in forked children
+		# close db connections in forked children on start
+		# in case there was any shared state with parent process
 		for db in django.db.connections.all(): db.close()
+
+		# open a new email connection
+		with django.core.mail.get_connection() as mail_connection:
 		
-		# Process incoming tasks.
-		while True:
-			args = conn.recv()
-			if args is None: break
-			conn.send(send_email_update(*args))
-		conn.close()
+			# Process incoming tasks.
+			while True:
+				args = conn.recv()
+				if args is None: break # stop when we get a None
+				conn.send(send_email_update(*args, mail_connection=mail_connection))
+
+			# Close the connection.
+			conn.close()
 	except Exception as e:
 		print "Uncaught exception", e
 
-def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events):
+def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events, mail_connection=None):
 	global launch_time
 
 	user_start_time = datetime.now()
@@ -256,6 +263,10 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 	if user.last_login < launch_time - timedelta(days=60) \
 		and not Ping.objects.filter(user=user, pingtime__gt=launch_time - timedelta(days=60)).exists():
 		emailpingurl = Ping.get_ping_url(user)
+
+	# ensure smtp connection is open in case it got shut (hmm)
+	if mail_connection.connection and not mail_connection.connection.sock: mail_connection.connection = None
+	mail_connection.open()
 		
 	# send
 	try:
@@ -280,6 +291,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				'X-Auto-Response-Suppress': 'OOF',
 			},
 			fail_silently=False,
+			connection=mail_connection,
 			timings=timings
 		)
 	except Exception as e:
