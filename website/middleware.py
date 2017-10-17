@@ -44,8 +44,8 @@ trending_feeds = None
 
 base_context = {
     "SITE_ROOT_URL": settings.SITE_ROOT_URL,
-    "GOOGLE_ANALYTICS_KEY": settings.GOOGLE_ANALYTICS_KEY,
-    "FACEBOOK_APP_ID": settings.FACEBOOK_APP_ID,
+    "GOOGLE_ANALYTICS_KEY": getattr(settings, 'GOOGLE_ANALYTICS_KEY', ''),
+    "FACEBOOK_APP_ID": getattr(settings, 'FACEBOOK_APP_ID', ''),
 }
 
 def template_context_processor(request):
