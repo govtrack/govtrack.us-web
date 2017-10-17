@@ -62,7 +62,7 @@ Vagrant.configure(2) do |config|
 
     # Get our latest database dump of legislators, committees, and subject areas.
     echo Downloading a partial database dump from GovTrack...
-    wget -P /tmp -q http://www.govtrack.us/data/db/django-fixture-{people,committees,billterms}.json
+    wget -nc -P /tmp -q http://www.govtrack.us/data/db/django-fixture-{people,committees,billterms}.json
 
     # And load them.
     echo Loading data...
