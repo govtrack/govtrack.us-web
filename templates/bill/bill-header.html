@@ -95,6 +95,7 @@
 #UserPositionContainer {
     float: right;
     cursor: default;
+    white-space: nowrap;
 }
 #UserPositionContainer .explanation {
   font-size: 12px;
@@ -112,13 +113,13 @@
     border-radius: 1em;
     white-space: nowrap;
 
-    background: -moz-linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* ff3.6+ */
-    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%, #f94e5e), color-stop(45%, #eae596), color-stop(55%, #eae596), color-stop(100%, #4cf2aa)); /* safari4+,chrome */
-    background: -webkit-linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* safari5.1+,chrome10+ */
-    background: -o-linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* opera 11.10+ */
-    background: -ms-linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* ie10+ */
-    background: linear-gradient(90deg, #f94e5e 0%, #eae596 48%, #eae596 52%, #4cf2aa 100%); /* w3c */
-    filter: progid:DXImageTransform.Microsoft.gradient( ok-circletColorstr='#4cf2aa', endColorstr='#f94e5e',GradientType=1 ); /* ie6-9 */
+    background: -moz-linear-gradient(90deg, #f94e5e 0%, #c0a66a 45%, #c0ba6a 55%, #00a45c 100%); /* ff3.6+ */
+    background: -webkit-gradient(linear, left bottom, right top, color-stop(0%, #f94e5e), color-stop(45%, #c0a66a), color-stop(55%, #c0ba6a), color-stop(100%, #00a45c)); /* safari4+,chrome */
+    background: -webkit-linear-gradient(90deg, #f94e5e 0%, #c0a66a 45%, #c0ba6a 55%, #00a45c 100%); /* safari5.1+,chrome10+ */
+    background: -o-linear-gradient(90deg, #f94e5e 0%, #c0a66a 45%, #c0ba6a 55%, #00a45c 100%); /* opera 11.10+ */
+    background: -ms-linear-gradient(90deg, #f94e5e 0%, #c0a66a 45%, #c0ba6a 55%, #00a45c 100%); /* ie10+ */
+    background: linear-gradient(90deg, #f94e5e 0%, #c0a66a 45%, #c0ba6a 55%, #00a45c 100%); /* w3c */
+    filter: progid:DXImageTransform.Microsoft.gradient( ok-circletColorstr='#00a45c', endColorstr='#f94e5e',GradientType=1 ); /* ie6-9 */
 }
 #UserPositionContainer .LikertContainer {
   color: white;
@@ -226,7 +227,7 @@ function saveUserPosition() {
 
 {# REACTIONS #}
 <div class="row">
-<div class="col-md-5" style="margin-bottom: 5px;">
+<div class="col-xs-5" style="margin-bottom: 5px;">
   <div class="sr-only">React to this {{bill.noun}} with an emoji:</div>
   <div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" style="display: none;">
     <span class="main"> </span>
@@ -235,7 +236,7 @@ function saveUserPosition() {
   </div>
 </div>
 
-<div class="col-md-7" style="margin-bottom: 5px;">
+<div class="col-xs-7" style="margin-bottom: 5px;">
   <div id="UserPositionContainer">
     <div class="sr-only">Save your position on this bill {{bill.noun}} on a six-point scale from strongly oppose to strongly support:</div>
     <div class="LikertFrame">
