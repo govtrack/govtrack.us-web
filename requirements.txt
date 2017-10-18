@@ -35,4 +35,4 @@ django-cache-url
 dj-haystack-url
 paypalrestsdk
 django-crispy-forms
-
+rtyaml
