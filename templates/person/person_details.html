@@ -468,7 +468,7 @@ $(function() {
 {% block body %}
 <div id="member-details">
 
-	{% if analysis_data.sponsorship or has_session_stats %}
+	{% if analysis_data.sponsorship or analysis_data.scorecards or has_session_stats %}
 	<section id="sponsorship_analysis">
 		<h2><span>Analysis</span></h2>
 
@@ -476,32 +476,46 @@ $(function() {
 			{% if analysis_data.sponsorship %}<h3>Legislative Metrics</h3>{% endif %}
 
 			<p>Read our <a href="{{person.get_absolute_url}}/report-card/{{has_session_stats.meta.pub_year}}">{{has_session_stats.meta.pub_year}} Report Card for {{person.lastname}}</a>.</p>
-
-			{% if analysis_data.sponsorship %}<h3>Sponsorship Analysis</h3>{% endif %}
 		{% endif %}
 
 		{% if analysis_data.sponsorship %}
+		<h3>Sponsorship Analysis</h3>
 		<p>Our unique analysis of the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored provides insight into {{ person.his_her }}
 		position in the {{analysis_data.sponsorship.chamber}}.</p>
-
 		<p>Each dot in the chart below {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a member of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %}
 		in {{analysis_data.sponsorship.end_date.year}}{% endif %}.
 		 The dots are positioned horizontally according
 		to our progressive&mdash;conservative ideology score and vertically according to our leadership score (leaders toward the top).
 		{{ person.lastname }} is shown as a purple triangle. <small>(<a href="/about/analysis">analysis methodology</a>)</small></p>
-
 		<div id="sponsorship_analysis_chart"> </div>
+		{% endif %}
 
-		<div style="margin-left: 25px; line-height: 110%; font-size: 13px;">
-		{% if analysis_data.influence %}
-		{% if analysis_data.influence.influencers|length > 0 %}
-			<p>Influenced by: {% for p in analysis_data.influence.influencers.values %}<a href="{{p.get_absolute_url}}">{{p.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-		{% endif %}
-		{% if analysis_data.influence.influencees|length > 0 %}
-			<p>Influences: {% for p in analysis_data.influence.influencees.values %}<a href="{{p.get_absolute_url}}">{{p.name}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-		{% endif %}
-		{% endif %}
-		</div>
+		{% if analysis_data.scorecards %}
+			<h3>Ratings from Advocacy Organizations</h3>
+			<div id="scorecards">
+				<style scoped>
+					#scorecards a {
+						display: inline-block;
+						border: 1px solid #9D2146;
+						border-radius: 4px;
+						text-decoration: none;
+						padding: 1px 3px;
+						margin: 0 .5em .5em 0;
+						color: inherit;
+					}
+						#scorecards a:hover {
+							background-color: #B46;
+							color: white;
+						}
+				</style>
+				{% for metadata, score in analysis_data.scorecards %}
+					<a
+					   href="{{metadata.link}}"
+					   title="Rating is {{metadata.based_on}} as of {{metadata.updated}}.">
+						{{metadata.name}}: <b>{{score.display}}</b>
+					</a>
+				{% endfor %}
+			</div>
 		{% endif %}
 	</section><!-- /analysis -->
     {% endif %}

@@ -1,5 +1,5 @@
-import os
-import csv, json
+import os, glob, StringIO
+import csv, json, rtyaml
 from us import parse_govtrack_date
 from types import RoleType
 from models import Person
@@ -11,6 +11,7 @@ def load_data(person):
         "sponsorship": load_sponsorship_analysis(person),
         "missedvotes": load_votes_analysis(person),
         #"influence": load_influence_analysis(person),
+        "scorecards": load_scorecards_for(person),
     }
     
 def load_sponsorship_analysis(person):
@@ -143,4 +144,58 @@ def load_influence_analysis(person):
         if person.id == influencee: influencers.append(influencer)
     
     return { "influencers": Person.objects.in_bulk(influencers), "influencees": Person.objects.in_bulk(influencees) }
-    
+
+_scorecards = None
+def load_scorecards():
+    global _scorecards
+    if _scorecards is None:
+        _scorecards = []
+        for fn in sorted(glob.glob("data/scorecards/*.yaml")):
+            with open(fn) as f:
+                # Split on "...", read the top as YAML and the
+                # bottom as CSV.
+                metadata, scores = f.read().split("\n...\n")
+                metadata = rtyaml.load(metadata)
+                scores = list(csv.reader(StringIO.StringIO(scores)))
+
+                # Store scores as a mapping from person IDs to score info.
+                letter_grades = ("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+")
+                def format_score(score, info):
+                    try:
+                        if metadata.get("type") == "percent":
+                            return {
+                                "display": str(int(score)) + "%",
+                                "sort": int(score),
+                            }
+                        if metadata.get("type") == "grade":
+                            # for sorting, turn the grade into a number from 0 to 100
+                            score = score.strip()
+                            return {
+                                "display": score,
+                                "sort": letter_grades.index(score)/float(len(letter_grades)-1)*100,
+                            }
+                        raise ValueError()
+                    except:
+                        raise ValueError("Invalid scorecard entry for %s: %s %s." % (info, repr(metadata.get("type")), repr(score)))
+                metadata["scores"] = {
+                    int(row[0]): format_score(row[1].strip(), [fn, row[0]] + row[2:])
+                    for row in scores
+                    if row[0].strip() != ""
+                }
+                metadata["based_on"] = metadata["based-on"]
+                _scorecards.append(metadata)
+        _scorecards.sort(key = lambda scorecard : scorecard["abbrev"])
+    return _scorecards
+
+def load_scorecards_for(person):
+    # Get the scorecards that apply to this person.
+    ret = []
+    for scorecard in load_scorecards():
+        if person.id in scorecard["scores"]:
+            ret.append( (scorecard, scorecard["scores"][person.id]) )
+
+    # Sort from highest to lowest score. Put percentages before letter grades.
+    ret.sort(key=lambda mr : mr[1]["sort"], reverse=True) # sort on score, best to worst
+
+    # Return.
+    return ret
