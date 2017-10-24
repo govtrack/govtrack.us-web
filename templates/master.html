@@ -35,26 +35,18 @@
 
 		<script type="text/javascript">
 		window.post_jquery_load_scripts = [];
-		</script>
 
 		{% if not debug %}
 		<!-- Google Analytics -->
-		<script type="text/javascript">
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-		</script>
 		<!-- End Google Analytics -->
-
-		<!-- Google AdSense tip code -->
-		<script>window.astip_client = "ca-tipjar-pub-3418906291605762"</script>
-		<script async src="https://www.gstatic.com/astip/astip.js"></script>
 		{% else %}
-			<script type="text/javascript">
 			window.ga = function() { };
-			</script>
 		{% endif %}
+		</script>
 
 		{% block head %}{% endblock %}
 	</head>
@@ -364,7 +356,6 @@
 	{% include "run_of_site_popups.html" %}
 
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-	<script>(adsbygoogle = window.adsbygoogle || []).push({ google_ad_client: "ca-pub-3418906291605762", enable_page_level_ads: true });</script> <!-- page-level ads -->
 
 	{% block extra_js %}{% endblock %}
 	{% block body_scripts %}{% endblock %}
