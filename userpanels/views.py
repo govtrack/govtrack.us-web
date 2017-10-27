@@ -100,7 +100,7 @@ def export_panel_user_data(request, panel_id, download):
                 mbr.user.email,
                 mbr.created,
                 mbr.invitation_code,
-                mbr.extra["notes"],
+                mbr.extra.get("notes", ""),
             ])
     elif download == "positions":
         # Download the positions panel members have taken on legislation,
