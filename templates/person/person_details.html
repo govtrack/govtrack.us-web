@@ -242,13 +242,18 @@ $(function() {
 {% block summary %}
 <div class="h1-multiline">
 	<h1>
+		{% if role.party %}
+		<div style="position: relative;">
+		  <div class="party_{{role.party.0}}" style="position: absolute; top: 9px; left: -21px; width: 14px; height: 14px;" title="{{role.party}}">&nbsp;</div>
+		</div>
+		{% endif %}
 		{{person.name_and_title}}
 	</h1>
 	{% if role and active_role and role.leadership_title %}<p>{{role.leadership_title_full}}</p>{% endif %}
 	<p>
 		{% if not active_role %}Former {% endif %}
-		{{ role.get_title }}{% if role.state %} from
-			{{ role.state_name_article }}{% if role.district == 0 %}&rsquo;s At-Large District{% elif role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District{% endif %}{% endif %}{% if role.party %}, <span class="partycolor_{{role.party.0}}">{{role.party}}</span>{% endif %}
+		{{ role.get_title }}{% if role.state %} for
+			{{ role.state_name_article }}{% if role.district == 0 %}&rsquo;s At-Large District{% elif role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District{% endif %}{% endif %}
 	</p>
 </div>
 {% endblock %}
@@ -263,7 +268,7 @@ $(function() {
 			<button class="btn btn-sm" onclick="return show_track_panel();">
 				<i class="glyphicon glyphicon-envelope"> </i>
 				<span style="margin-left: 3px;">
-					Get alerts
+					Get email alerts
 				</span>
 			</button>
 
@@ -296,14 +301,16 @@ $(function() {
 {% block body %}
 <div class="row group">
 	<div id="track_panel_base" class="col-sm-8">
-		<div style="margin: .5em 0 2em 0">
+		<div style="margin: .5em 0 1em 0">
         {% for r in person.roles_condensed %}
         	{% if forloop.first %}
         		{# r has mangled dates, so for the next election year we use "role" #}
-        		<p>{{ person.lastname }}, {% if r.party %}a{% if r.party.0 == "I" %}n{% endif %} {{r.party}},{% endif %}
+        		<p>{{ person.lastname }}{% if r.party %}, a{% if r.party.0 == "I" %}n{% endif %} {{r.party}},{% endif %}
         		{% if r.current %}is{% else %}was{% endif %} {# because of senator junior/senior status which can change mid-term, we cannot say "has been...since termstart" #}
         		{{r.get_description_natural|safe}}
-        		{% if r.current %}and has served since {{ r.startdate|date }} (next election in {{role.next_election_year}}){% else %}from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}{% if r.current and r.district > 0 %} (<a href="/congress/members/{{r.state}}/{{r.district}}">map</a>){% endif %}.
+        		{% if r.current and r.district > 0 %}(<a href="/congress/members/{{r.state}}/{{r.district}}">view map</a>){% endif %}
+        		{% if r.current %}and has served since {{ r.startdate|date }} (next election in {{role.next_election_year}}){% else %}
+        		from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}.
         		</p>
 
 				{% if r.is_territory %}
@@ -461,15 +468,19 @@ $(function() {
 		{% endif %}
 
 		{% if analysis_data.sponsorship %}
-		<h3>Sponsorship Analysis</h3>
-		<p>Our unique analysis of the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored provides insight into {{ person.his_her }}
-		position in the {{analysis_data.sponsorship.chamber}}.</p>
-		<p>Each dot in the chart below {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a member of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %}
-		in {{analysis_data.sponsorship.end_date.year}}{% endif %}.
-		 The dots are positioned horizontally according
-		to our progressive&mdash;conservative ideology score and vertically according to our leadership score (leaders toward the top).
-		{{ person.lastname }} is shown as a purple triangle. <small>(<a href="/about/analysis">analysis methodology</a>)</small></p>
+		<h3>Ideology&ndash;Leadership Chart</h3>
+
+		<p>
+		{{ person.lastname }} is shown as a purple triangle <span style="color: #df53df">▲</span> in our ideology-leadership chart below.
+		Each dot {% if analysis_data.sponsorship.current %}is{% else %}was{% endif %} a member of the {{analysis_data.sponsorship.chamber}}{% if not analysis_data.sponsorship.current %}
+		in {{analysis_data.sponsorship.end_date.year}}{% endif %}
+		positioned according to our liberal&ndash;conservative ideology score (left to right) and our leadership score (leaders are toward the top).</p>
+		
 		<div id="sponsorship_analysis_chart"> </div>
+
+		<p style="margin-top: -7px; color: #555;"><small>The chart is based on the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored.
+		See full <a href="/about/analysis">analysis methodology</a>.</small></p>
+
 		{% endif %}
 
 		{% if analysis_data.scorecards %}

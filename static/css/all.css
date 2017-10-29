@@ -83,22 +83,20 @@ h1 {
 		}
 
 h2 {
-	font-size: 1.4em;
-	line-height: 1.5em;
+	font-size: 19px;
 }
 	h2:first-child {
 		margin-top: 0;
 	}
 	#content h2 {
-		border-bottom: 1px solid #1D4E70;
 		margin: 1em 0;
 	}
 		#content h2 span {
 			display: inline-block;
-			padding: 2px 8px 1px 6px;
+			padding: 3px 8px 3px 6px;
 			background-color: #1D4E70;
 			color: white;
-			font-family: sans-serif;
+			font-weight: bold;
 		}
 
 h3 {
@@ -556,7 +554,7 @@ aside .download-links { padding: 31px 0 0 }
 
 			.tracker_widget h3 {
 				font-size: 1em;
-				color: #37C;
+				color: #36A;
 				text-align: center;
 				margin: 0 0 .5em 0;
 				text-transform: none;

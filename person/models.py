@@ -451,7 +451,7 @@ class PersonRole(models.Model):
         if self.role_type == RoleType.senator:
             js = ""
             if self.current and self.senator_rank: js = self.get_senator_rank_display() + " "
-            return js + self.get_title_name(False) + " from " + statenames[self.state]
+            return js + self.get_title_name(False) + " for " + statenames[self.state]
         if self.role_type == RoleType.representative:
             if self.district == -1 or stateapportionment.get(self.state) in ("T", None): # unknown district / current territories and former state-things, all of which send/sent delegates
                 return self.get_title_name(False) + " for " + self.state_name_article()
