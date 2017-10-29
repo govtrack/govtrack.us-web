@@ -1,4 +1,4 @@
-{% extends 'master_a.html' %}
+{% extends 'bill/bill-pages-layout.html' %}
 {% load humanize govtrack_utils %}
 
 {% block body_class %}bills{% endblock %}
@@ -7,20 +7,9 @@
 
 {% block meta_description %}Summary of {{bill|truncatewords:24}}{% endblock %}
 
-{% block extra_css %}
-<style>
-h1 {
-	border: none;
-}
-h3 {
-	margin-top: 0;
-}
-</style>
-{% endblock %}
+{% block body %}
 
-{% block summary %}
-
-{% include "bill/bill-header.html" %}
+{{block.super}}
 
 <div style="margin-top: 2em">
 	<div role="tabpanel">

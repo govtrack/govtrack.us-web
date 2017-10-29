@@ -1,4 +1,4 @@
-{% extends 'master.html' %}
+{% extends 'bill/bill-pages-layout.html' %}
 {% load humanize govtrack_utils %}
 
 {% block body_class %}bills{% endblock %}
@@ -7,7 +7,8 @@
 
 {% block meta_description %}Text of {{bill|truncatewords:8}} as of {{textdata.docdate}} ({{textdata.doc_version_name}} version). {{bill|truncatewords:24}}{% endblock %}
 
-{% block extra_css %}
+{% block head %}
+{{block.super}}
 <style>
 @import url(https://fonts.googleapis.com/css?family=Gentium+Basic:400,700,400italic);
 
@@ -49,30 +50,17 @@
 	text-align: center;
 }
 
-#show-sidebar {
-	display: none;
-}
-
 @media (min-width: 992px) {
 	.pad-left-sm {
 		padding-left: 20px;
 	}
 	#sourcecredit {
-		 margin-top: 1em;
 	}
 }
 @media (max-width: 991px) {
 	#sidebar {
 		display: none;
 		padding-bottom: 30px;
-	}
-	#show-sidebar[data-show='1'] {
-		display: block;
-	}
-	#sourcecredit {
-		font-size: 80%;
-		text-align: right;
-		margin: 0 0 .5em .5em;
 	}
 }
 
@@ -359,7 +347,7 @@ window.document.addEventListener("DOMContentLoaded", function() {
 {% endblock %}
 
 {% block body %}
-	{% include "bill/bill-header.html" %}
+	{{block.super}}
 
 	<div class="row" style="margin-top: 2.25em">
 		<div class="col-sm-8">
@@ -388,16 +376,11 @@ window.document.addEventListener("DOMContentLoaded", function() {
 		<div class="pad-left-sm">
 		<div style="margin-bottom: 15px;"><a href="{{textdata.gpo_pdf_url}}" class="btn btn-primary" style="text-transform: none">Download PDF</a></div>
 
-		<p id="show-sidebar" 
-			{% if alternates and alternates|length > 1 %}data-show="1"
-			{% elif textdata.text_html and related_bills %}data-show="1"
-			{% endif %}
-			>
-				<a href="#" onclick="$('#sidebar').slideDown(); $(this).remove(); return false;">View Options</a>
-		</p>
 		</div>
 		</div>
 	</div>
+
+	<hr>
 
 <div id="bill_comparison_content" style="display: none;">
 	<center style="padding: 1em">
@@ -419,65 +402,6 @@ window.document.addEventListener("DOMContentLoaded", function() {
 	<div style="clear: both"> </div>
 </div>
 
-<div class="row">
-<div class="col-md-4 col-md-push-8">
-
-	<div id="sidebar" class="pad-left-sm">
-
-		{% if alternates and alternates|length > 1 %}
-		<p style="margin-bottom: .25em">This {{bill.noun}} has {{alternates|length}} version{{alternates|pluralize}}. Select a version to view:</p>
-		<select size="1" onchange="window.location = '{{bill.get_absolute_url|escapejs}}/text/' + $(this).val();" class="form-control">
-			{% for alt in alternates %}
-				<option
-					value="{{alt.doc_version}}"
-					{% if textdata.doc_version == alt.doc_version %}selected="1"{% endif %}
-					>{{alt.docdate|date}}: {{alt.doc_version_name}}</option>
-			{% endfor %}
-		</select>
-
-		{% if textdata.text_html %}
-		<p style="margin-top: 1em; margin-bottom: .25em">Compare to a {% if is_latest %}previous{% else %}different{% endif %} version to see how the {{bill.noun}} has changed:</p>
-		<select size="1" onchange="if ($(this).val() == '') hide_comparison(); else load_comparison(null, $(this).val());" class="form-control compare-to">
-			<option value="">(Select Other Version)</option>
-			{% for alt in alternates %}
-				{% if textdata.doc_version != alt.doc_version %}
-					<option value="{{alt.doc_version}}">{{alt.docdate|date}}: {{alt.doc_version_name}}</option>
-				{% endif %}
-			{% endfor %}
-		</select>
-		{% endif %}
-		{% endif %}
-
-		{% if textdata.text_html and related_bills %}
-		<p style="margin-top: 1em; margin-bottom: .25em">Compare this {{bill.noun}} to another bill:</p>
-		<select size="1" onchange="if ($(this).val() == '') hide_comparison(); else load_comparison($(this).val().split(/ /)[0], $(this).val().split(/ /)[1]);" class="form-control compare-to">
-			<option value="">(Select Bill)</option>
-			{% for rb, bv in related_bills %}
-				<option value="{{rb.id}} {{bv}}">
-				 	{% if rb.congress == bill.congress %}{{rb.display_number_no_congress_number}}{% else %}{{rb.display_number_with_congress_number}}{% endif %} {{rb.title_no_number|truncatewords:15}}
-					({{bv|upper}})
-				</option>
-			{% endfor %}
-		</select>
-		{% endif %}
-	</div>
-
-	<div id="sourcecredit" class="pad-left-sm">
-		Source:
-			<a href="{{textdata.gpo_url}}">GPO</a>
-			{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
-			{% if textdata.source == "statutes" %}&mdash; <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">Statutes at Large</a>{% endif %}
-	</div>
-
-	<div class="pad-left-sm">
-		<div id="bill-text-ad-container" class="ads" style="margin-top: 2em; text-align: center; display: none;">
-			<div class="ad-container"> </div>
-			<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
-		</div>
-	</div>
-</div>
-
-<div class="col-md-8 col-md-pull-4">
 	<div id="main_text_content" class="bill_text_content">
 	{% if not textdata.text_html %}
 		<p>The text of this bill is not yet available. Please check back soon.</p>
@@ -489,8 +413,61 @@ window.document.addEventListener("DOMContentLoaded", function() {
 	<div id="content_loading" class="bill_text_content" style="display: none;">
 		<p>Loading...</p>
 	</div>
-</div>
 
-</div>
 {% endblock %}
 
+{% block sidebar_top %}
+	{% if alternates and alternates|length > 1 %}
+	<div>
+		<h2>This {{bill.noun}} has {{alternates|length}} version{{alternates|pluralize}}. Select a version to view:</p>
+		<select size="1" onchange="window.location = '{{bill.get_absolute_url|escapejs}}/text/' + $(this).val();" class="form-control">
+			{% for alt in alternates %}
+				<option
+					value="{{alt.doc_version}}"
+					{% if textdata.doc_version == alt.doc_version %}selected="1"{% endif %}
+					>{{alt.docdate|date}}: {{alt.doc_version_name}}</option>
+			{% endfor %}
+		</select>
+	</div>
+
+	{% if textdata.text_html %}
+	<div>
+		<h2>Compare to a {% if is_latest %}previous{% else %}different{% endif %} version to see how the {{bill.noun}} has changed:</h2>
+		<select size="1" onchange="if ($(this).val() == '') hide_comparison(); else load_comparison(null, $(this).val());" class="form-control compare-to">
+			<option value="">(Select Other Version)</option>
+			{% for alt in alternates %}
+				{% if textdata.doc_version != alt.doc_version %}
+					<option value="{{alt.doc_version}}">{{alt.docdate|date}}: {{alt.doc_version_name}}</option>
+				{% endif %}
+			{% endfor %}
+		</select>
+	</div>
+	{% endif %}
+	{% endif %}
+
+	{% if textdata.text_html and related_bills %}
+	<div>
+		<h2>Compare this {{bill.noun}} to another bill:</h2>
+		<select size="1" onchange="if ($(this).val() == '') hide_comparison(); else load_comparison($(this).val().split(/ /)[0], $(this).val().split(/ /)[1]);" class="form-control compare-to">
+			<option value="">(Select Bill)</option>
+			{% for rb, bv in related_bills %}
+				<option value="{{rb.id}} {{bv}}">
+				 	{% if rb.congress == bill.congress %}{{rb.display_number_no_congress_number}}{% else %}{{rb.display_number_with_congress_number}}{% endif %} {{rb.title_no_number|truncatewords:15}}
+					({{bv|upper}})
+				</option>
+			{% endfor %}
+		</select>
+	</div>
+	{% endif %}
+
+	{{block.super}}
+
+	<div>
+		<h2>Primary Source</h2>
+		<p id="sourcecredit">
+				<a href="{{textdata.gpo_url}}">Government Publishing Office</a>
+				{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
+				{% if textdata.source == "statutes" %}&mdash; <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">Statutes at Large</a>{% endif %}
+		</p>
+	</div>
+{% endblock %}

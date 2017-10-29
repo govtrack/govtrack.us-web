@@ -6,6 +6,7 @@
 {% block meta_description %}{{ committee }}{% endblock %}
 
 {% block head %}
+{{block.super}}
 <style>
 .tab-pane { margin-top: 1em; }
 #members h5 { margin: 6px 0 0 0; }
@@ -34,21 +35,33 @@
 <h1{% if parent %} class="long"{% endif %}>{% if parent %}{{ parent }}:<br>Subcommittee on {% endif %}{{ committee }}</h1>
 
 {% if committee.jurisdiction %}
-	<p>{{committee.jurisdiction}} {% if committee.jurisdiction_link %}(<a href="{{committee.jurisdiction_link}}">source</a>){% endif %}</p>
+	<p style="margin-bottom: 30px">{{committee.jurisdiction}} {% if committee.jurisdiction_link %}(<a href="{{committee.jurisdiction_link}}">source</a>){% endif %}</p>
 {% endif %}
 
-{% if committee.committee_type == TYPE_JOINT %}
-	<p>This is a &ldquo;joint&rdquo; committee, which means it has members from both the House and Senate.
-	We do not currently have information on the House members of joint committees.</p>
-{% endif %}
+{% endblock %}
 
-<div class="row group">
-	<div id="track_panel_base" class="col-sm-8">
-		    {% if committee.url %}
-				<p>
-					<a href="{{committee.url}}" target="_blank" class="plain">{{committee.url}}</a>
-				</p>
-		    {% endif %}
+{% block sidebar_top %}
+	<div>
+	<h2>What you can do</h2>
+	<div id="action-buttons">
+		<button class="btn btn-sm" onclick="return show_track_panel();">Track Committee</button>
+	</div>
+	<div class="clearfix"></div>
+	</div>
+
+    {% if committee.url %}
+	<div>
+    <h2>Links</h2>
+    <div id="seealso-links">
+        <a href="{{committee.url}}" target="_blank"><i class="fa fa-external-link""></i>{{committee.url}}</a>
+        <div class="clearfix"></div>
+    </div>
+	</div>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+	<div id="event_subscribe_inline_container"> </div>
 
 			<dl class="dl-horizontal wide" style="margin-bottom: .5em">
 				{% for mem in member_highlights %}
@@ -63,32 +76,22 @@
 				{% endfor %}
 			</dl>
 
-
-			{% if member_highlights|length > 0 %}
-			<p style="line-height: 110%"><small>The chair is always selected from the majority party and the ranking member is the most senior member of the minority party.</small></p>
-			{% endif %}
-			{% if party_counts|length > 0 and committee.code != "HSSO" %}
-			<p style="line-height: 110%"><small>The majority party ensures it has a majority on every committee.</small></p>
-			{% endif %}
-			</small></p>
-
 			{% if members|length == 0 %}
 			<p>The membership of this committee is not yet available.</p>
 			{% endif %}
 
-	</div>
+			<p style="line-height: 110%"><small>
+			{% if committee.committee_type == TYPE_JOINT %}
+				This is a &ldquo;joint&rdquo; committee, which means it has members from both the House and Senate.
+			{% elif member_highlights|length > 0 %}
+				The chair is always selected from the majority party and the ranking member is the most senior member of the minority party.
+			{% endif %}
+			{% if party_counts|length > 0 and committee.code != "HSSO" and committee.code.0 != "J" %}
+				The majority party ensures it has a majority on every committee.
+			{% endif %}
+			</small></p>
 
 
-
-	<div class="aside col-sm-4">
-		<a href="#" class="track-btn" onclick="return show_track_panel();">Track Committee</a>
-		<div id="event_subscribe_inline_container"> </div>
-	</div><!-- /aside -->
-
-</div><!-- /container -->
-{% endblock %}
-
-{% block body %}
 <div>
 	<ul class="nav nav-tabs" role="tablist">
 		{% if members|length > 0 %}
@@ -179,6 +182,7 @@
 		</div>
 
 		<div id="reports" class="tab-pane">
+			<h2>Reports</h2>
 			<table class="table">
 			<thead><tr><th style="min-width: 9em">Date</th> <th>PDF</th> <th>Bill</th></tr></thead>
 			<tbody>

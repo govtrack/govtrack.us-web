@@ -1,4 +1,4 @@
-{% extends 'master_a.html' %}
+{% extends 'bill/bill-pages-layout.html' %}
 {% load humanize govtrack_utils %}
 
 {% block body_class %}bills{% endblock %}
@@ -7,20 +7,9 @@
 
 {% block meta_description %}Details for {{bill|truncatewords:24}}{% endblock %}
 
-{% block extra_css %}
-<style>
-h1 {
-	border: none;
-}
-h3 {
-	margin-top: 0;
-}
-</style>
-{% endblock %}
-
 {% block body %}
 
-{% include "bill/bill-header.html" %}
+{{block.super}}
 
 {% if bill.congress >= 93 %}
 <h2><span>Cosponsors</span></h2>
@@ -171,9 +160,6 @@ h3 {
 {% endfor %}
 </div>
 {% endif %}
-
-<h2><span>Widget for your Website</span></h2>
-<p><a href="{{bill.get_absolute_url}}/widget">Get a bill status widget for your website &raquo;</a></p>
 
 {% endblock %}
 

@@ -44,9 +44,8 @@ h1, h2, h3, h4, h5 {
 	margin-bottom: 1em;
 	}
 h1 {
-	margin-bottom: .85em;
-	margin-top: 20px;
-	font-size: 27px;
+	margin: 15px 0;
+	font-size: 30px;
 	font-weight: bold;
 	line-height: 1.275em;
 	color: #222;
@@ -66,13 +65,14 @@ h1 {
 		color: #666;
 	}
 	.h1-multiline {
+		margin: 15px 0;
 		font-size: 27px;
 		font-weight: normal;
 		padding-bottom: .25em;
 		border-bottom: 1px solid #CCA;
 	}
 		.h1-multiline h1 {
-			margin-bottom: 0;
+			margin: 0;
 			padding-bottom: 0;
 			border: none;
 		}
@@ -134,6 +134,9 @@ header ul, footer ul {
 #content p {
 	margin-bottom: 1em;
 }
+	#content p.list-group-item-text {
+		margin: 0;
+	}
 
 #content hr {
 	border-color: #557D9A;
@@ -159,8 +162,7 @@ blockquote {
 /* ADS */
 
 .ads.square {
-	text-align: center;
-	margin-bottom: 20px;
+	margin: 60px 0;
 	}
 .ads.footer.leaderboard {
 	display: none;

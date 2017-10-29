@@ -1,34 +1,95 @@
 {% extends "master.html" %}
 {% load humanize %}
+
+{% block head %}
+<style>
+.sidebar, .sidebar p {
+	line-height: 122%;
+	color: #555;
+	font-size: 12px;
+}
+@media screen and (min-width: 768px) {
+	.sidebar > div {
+		padding: 15px;
+		background-color: #F7F4EB;
+		border-radius: 15px;
+	}
+}
+.sidebar > div > div {
+	margin-bottom: 15px;
+}
+.sidebar h2 {
+	font-size: 14px;
+	margin: 0 0 .75em 0;
+	color: black;
+	font-weight: bold;
+}
+	.sidebar h2:first-child {
+		margin-top: 0;
+	}
+.sidebar a:link, .sidebar a:visited {
+    color: #9d4660;
+}
+.sidebar button {
+	display: block;
+	margin-bottom: 1em;
+	width: 135px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
+}
+	.sidebar button:last-child {
+		margin-bottom: 0;
+	}
+
+@media screen and (max-width: 768px) {
+	.sidebar button {
+		float: left;
+		margin-right: 1.5em;
+	}
+}
+   #seealso-links {
+        font-size: 95%;
+    }
+        #seealso-links a {
+            display: inline-block;
+            text-decoration: none;
+            margin-right: 1.25em;
+            margin-bottom: .33em;
+        }
+            #seealso-links a:hover {
+                text-decoration: underline;
+            }
+        #seealso-links a i {
+            margin-right: .4em;
+        }
+</style>
+{% endblock %}
+
 {% block body_with_container %}
 <div class="container">
+	<div id="maincontent" >
+		{% block summary %}
+		{% endblock %}
+	</div><!-- /summary-box -->
+
 	<div class="row">
 
-
-		<div id="maincontent" class="col-sm-8">
-			{% block summary %}
+		<div class="col-sm-4 col-sm-push-8 sidebar">
+		  <div>
+			{% block sidebar_top %}
 			{% endblock %}
-
-			<div id="content">
-				{% block body %}
-				{% endblock %}
-			</div>
-		</div><!-- /summary-box -->
-
-		<div id="master-a-sidebar" class="col-sm-4" style="font-size: 90%; color: #555;">
-			{# ADVERTISEMENT #}
 
 			<div class="ads square">
 				<div id="master_a_ad"> </div>
 				<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
 			</div> <!-- /ads square -->
 
+			<div class="hidden-xs">
+
+			{% block sidebar_bottom %}
+			{% endblock %}
+
 			{# LINKS #}
 
-			<div class="hidden-xs sidebar-events" style="margin-top: -1em">
-
-			<h2 class="sr-only">Follow GovTrack on social media for more updates:</h2>
-			<p class="hide-sr">Follow GovTrack on social media for more updates:</p>
+			<h2>Follow GovTrack on social media for more updates:</h2>
 			<p>
 			<a href="https://www.facebook.com/govtrack/" title="Facebook Page"><i class="fa fa-facebook fa-fw"></i><span class="sr-only">Visit us on Facebook</span></a>
 			<a href="http://twitter.com/govtrack" title="Twitter Page"><i class="fa fa-twitter fa-fw"></i><span class="sr-only">Visit us on Twitter</span></a>
@@ -38,29 +99,28 @@
 
 			{# MEDIUM POSTS #}
 			{% if medium_posts %}
-		     	<p>On GovTrack Insider:</p>
-				<table>
+		     	<h2>On GovTrack Insider:</h2>
 				{% for post in medium_posts %}
 				{% if forloop.counter <= 3 %}
-					<tr valign="top">
-						<td style="padding-bottom: .33em">
+					<div class="row">
 						{% if post.image %}
+						<div class="col-xs-3" style="margin-top: 3px; padding-right: 0; margin-right: -5px;">
 							<a href="{{post.url}}">
-								<img src="https://d262ilb51hltx0.cloudfront.net/fit/c/60/60/{{post.image}}" style="float: left; margin: 3px .7em 0 0; border: 1px solid #BBB;"/>
+								<img src="https://d262ilb51hltx0.cloudfront.net/fit/c/60/60/{{post.image}}" style="border: 1px solid #BBB;"/ class="img-responsive">
 							</a>
+						</div>
+						<div class="col-xs-9">
+						{% else %}
+						<div class="col-xs-12">
 						{% endif %}
-						</td>
-						<td style="padding-bottom: .33em">
-						<a href="{{post.url}}">{{post.title}}</a> <span class="text-muted">&ndash; {{post.published|date}}</span>
-						<br>{{post.snippet}}
-						</td>
-					</tr>
+							<div><a href="{{post.url}}">{{post.title}}</a></div>
+							<p>{{post.snippet}} <span class="text-muted" style="font-size: 90%;"> {{post.published|date}}</span></p>
+							</p>
+						</div>
+					</div>
 				{% endif %}
 				{% endfor %}
-				</table>
 		    {% endif %}
-
-		    </div>
 
 			{# SIDEBAR #}
 			{% comment %}
@@ -68,7 +128,19 @@
 				{% include "events/trackedeventspanel.html" %}
 			</div>
 			{% endcomment %}
-		</div>
+
+			</div> <!-- /hidden-xs -->
+
+		  </div> <!-- /sidebar div-->
+		</div> <!-- /col -->
+
+		<div class="col-sm-8 col-sm-pull-4">
+			<div id="content">
+				{% block body %}
+				{% endblock %}
+			</div>
+		</div><!-- /col -->
+
 	</div> <!-- /row -->
 </div> <!-- /container -->
 

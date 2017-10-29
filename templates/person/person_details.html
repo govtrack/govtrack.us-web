@@ -7,30 +7,8 @@
 {% block meta_keywords %}{{person.name_no_district}},legislation,bills,district,sponsor,cosponsor,votes,missed votes,absences,committees{% endblock %}
 
 {% block head %}
+{{block.super}}
 <style>
-	#seealso-links {
-		padding: .4em .4em .3em .3em;
-		border-bottom: 1px solid #CCA;
-		margin-bottom: 14px;
-		font-size: 88%;
-	}
-		#seealso-links a {
-			display: inline-block;
-			text-decoration: none;
-			margin-right: 1.25em;
-		}
-			#seealso-links a:hover {
-				text-decoration: underline;
-			}
-		#seealso-links a i {
-			margin-right: .4em;
-		}
-
-	#action-buttons > * {
-		display: inline-block;
-		margin-right: 6px;
-	}
-
 	#title-info {
 		margin-bottom: 1em;
 	}
@@ -273,15 +251,49 @@ $(function() {
 			{{ role.state_name_article }}{% if role.district == 0 %}&rsquo;s At-Large District{% elif role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District{% endif %}{% endif %}{% if role.party %}, <span class="partycolor_{{role.party.0}}">{{role.party}}</span>{% endif %}
 	</p>
 </div>
+{% endblock %}
 
-{% if links %}
-<div id="seealso-links">
-	{% for label, link, css_class in links %}
-		<a href="{{link}}" target="_blank"><i class="{{css_class}}"></i>{{label}}</a>
-	{% endfor %}
-</div>
-{% endif %}
+{% block sidebar_top %}
+	{% if active_role %}
+	<div>
+		<h2>What you can do</h2>
 
+		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
+		<div id="action-buttons">
+			<button class="btn btn-sm" onclick="return show_track_panel();">
+				<i class="glyphicon glyphicon-envelope"> </i>
+				<span style="margin-left: 3px;">
+					Get alerts
+				</span>
+			</button>
+
+			{% if role.website %}
+			<button class="btn btn-sm" onclick="$('#contact_modal').modal();">
+				<i class="glyphicon glyphicon-comment"> </i>
+				<span style="margin-left: 3px;">
+					Contact {{person.him_her }}
+				</span>
+			</button>
+			{% endif %}
+		</div>
+		<div class="clearfix"></div>
+	</div>
+	{% endif %}
+
+	{% if links %}
+	<div>
+	<h2>Links</h2>
+	<div id="seealso-links">
+		{% for label, link, css_class in links %}
+			<a href="{{link}}" target="_blank"><i class="{{css_class}}"></i>{{label}}</a>
+		{% endfor %}
+		<div class="clearfix"></div>
+	</div>
+	</div>
+	{% endif %}
+{% endblock %}
+
+{% block body %}
 <div class="row group">
 	<div id="track_panel_base" class="col-sm-8">
 		<div style="margin: .5em 0 2em 0">
@@ -315,35 +327,6 @@ $(function() {
         {% endfor %}
         </div>
 
-		{% if active_role %}
-		<div class="panel panel-success" style="margin: 50px 0; padding-bottom: 0;">
-		  <div class="panel-body">
-			<h3 style="margin-top: 5px; font-weight: bold;">
-				What you can do
-			</h3>
-
-			<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-			<div id="action-buttons">
-				<button class="btn btn-sm" onclick="return show_track_panel();">
-					<i class="glyphicon glyphicon-envelope"> </i>
-					<span style="margin-left: 3px;">
-						Get alerts
-					</span>
-				</button>
-
-				{% if role.website %}
-				<button class="btn btn-sm" onclick="$('#contact_modal').modal();">
-					<i class="glyphicon glyphicon-comment"> </i>
-					<span style="margin-left: 3px;">
-						Contact {{person.him_her }}
-					</span>
-				</button>
-				{% endif %}
-			</div>
-
-		  </div>
-		</div>
-		{% endif %}
 		
 	</div><!-- /container -->
 
@@ -463,9 +446,8 @@ $(function() {
 		{% endif %}
 	</div><!-- /aside -->
 </div>
-{% endblock %}
 
-{% block body %}
+
 <div id="member-details">
 
 	{% if analysis_data.sponsorship or analysis_data.scorecards or has_session_stats %}

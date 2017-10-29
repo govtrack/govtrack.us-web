@@ -4,6 +4,7 @@
 {% block meta_description %}Find your U.S. Congress senators and representative in {{statename}} using a map.{% endblock %}
 {% block meta_keywords %}{{statename}},United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block head %}
+{{block.super}}
 	<style>
 	#content p.moc { font-weight: bold; margin: 0; }
 	.members-grid .info { margin-top: 8px; font-size: 85%; }
@@ -44,7 +45,7 @@ $(function() {
 </ol>
 {% endblock %}
 
-{% block body %}
+{% block summary %}
 	<h1>{{statename}}</h1>
 
 	{% if stateapp != "T" %}
@@ -58,7 +59,9 @@ $(function() {
 		<p>{% if state == "VI" or state == "MP" %}The {% endif %}{{statename}} is a territory of the United States. Because it is not a state, it has no senators and its representative in the House of Representatives is a <b>delegate</b>{% if state == "PR" %}, called the <b>Resident Commissioner</b>,{% endif %} with limited voting privileges.
 		Delegates have a marginalized role in Congress and their constituents are not represented in Congress in the same manner as most citizens.</p>
 	{% endif %}
+{% endblock %}
 
+{% block body %}
 	{% if stateapp != "T" %}
 		<ul class="nav nav-tabs" role="tablist" id="tabs">
 			<li role="presentation" class="active"><a href="#senators" aria-controls="senators" role="tab" data-toggle="tab">Senators</a></li>

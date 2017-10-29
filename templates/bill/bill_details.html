@@ -1,4 +1,4 @@
-{% extends "master_a.html" %}
+{% extends "bill/bill-pages-layout.html" %}
 {% load humanize %}
 {% load govtrack_utils %}
 
@@ -29,6 +29,7 @@
 {% endblock %}
 
 {% block head %}
+	{{block.super}}
 	<meta property="og:title" content="{{bill.title_no_number}} ({% if not bill.is_current %}{{bill.current_status_date|date:"Y"}} - {% endif %}{{bill.display_number_no_congress_number}})" />
 	<meta property="og:description" content="{% if subtitle %}{{subtitle}}{% else %}A {{bill.noun}} in the U.S. Congress.{% endif %}" />
 	<meta property="og:url" content="https://www.govtrack.us{{bill.get_absolute_url}}" />
@@ -183,68 +184,17 @@
 }
 
 
-#bill-actions {
-}
-	#bill-actions > * {
-		float: left;
-		margin-right: 1.5em;
-		margin-bottom: 1em;
-	}
-	#bill-actions > button {
-		width: 135px; /* at least as large as the largest so that when the buttons break to two lines they have the same width */
-	}
 </style>
 {% endblock %}
 
 {% block body_class %}bill{% endblock %}
 
-{% block body %}
-	<!-- title & pill nav -->
-
-	{% include "bill/bill-header.html" %}
-
-	<!-- summary snippet or bill full title -->
-
-	{% with bill.oursummary as summary1 %}
-	{% if summary1 %}
-		<div class="panel panel-info">
-		<div class="panel-body">
-		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
-		<p style="font-family: PT Serif; font-size: 16px; margin: 0;">
-			{{summary1.as_html|striptags|truncatewords:60}}
-			<a href="{{bill.get_absolute_url}}/summary">Continue reading &raquo;</a>
-			{% if summary1.source_text %}<br><span style="font-size: 85%">(Source: {{summary1.source_text}})</span>{% endif %}
-		</p>
-		</div>
-		</div>
-	{% elif subtitle %}
-		<p style="margin-bottom: 0">{{subtitle}}</p>
-		{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s titles are written by its sponsor.</em></small></p>{% endif %}
-		{# we should have the title disclaimer even if no long title, but I'm not sure where best to put it #}
-	{% endif %}
-
-	<!-- explanation -->	
-
-	{% if bill.explanatory_text %}
-	<div class="panel panel-info" style="margin: 30px 0;">
-	  <div class="panel-body">
-		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
-			{{bill.explanatory_text}}
-	  </div>
-	</div>
-	{% endif %}
-
-	{% endwith %}
-
-	<!-- actions -->
+{% block sidebar_top %}
+	{{block.super}}
 
 	{% if bill.is_alive %}
-	<div class="panel panel-success" style="margin: 30px 0; padding-bottom: 0;">
-	  <div class="panel-body">
-		<h3 style="margin-top: 5px; font-weight: bold;">
-			What you can do
-		</h3>
-
+	<div>
+	<h2>Take action</h2>
 	<div id="bill-actions" class="clearfix">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<button class="btn btn-sm" onclick="return show_track_panel();">
@@ -281,14 +231,49 @@
 
 	</div><!-- /bill-actions -->
 	<div id="event_subscribe_inline_container"> </div>
+	</div>
+	{% endif %}
+{% endblock %}
 
 
+{% block body %}
+	{{block.super}}
+
+	<!-- summary snippet or bill full title -->
+
+	{% with bill.oursummary as summary1 %}
+	{% if summary1 %}
+		<div class="panel panel-info">
+		<div class="panel-body">
+		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
+		<p style="font-family: PT Serif; font-size: 16px; margin: 0;">
+			{{summary1.as_html|striptags|truncatewords:60}}
+			<a href="{{bill.get_absolute_url}}/summary">Continue reading &raquo;</a>
+			{% if summary1.source_text %}<br><span style="font-size: 85%">(Source: {{summary1.source_text}})</span>{% endif %}
+		</p>
+		</div>
+		</div>
+	{% elif subtitle %}
+		<p style="margin-bottom: 0">{{subtitle}}</p>
+		{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s titles are written by its sponsor.</em></small></p>{% endif %}
+		{# we should have the title disclaimer even if no long title, but I'm not sure where best to put it #}
+	{% endif %}
+
+	<!-- explanation -->	
+
+	{% if bill.explanatory_text %}
+	<div class="panel panel-info" style="margin: 30px 0;">
+	  <div class="panel-body">
+		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
+			{{bill.explanatory_text}}
 	  </div>
 	</div>
+	{% endif %}
 
-	{% endif %}	
+	{% endwith %}
 
-<div id="bill-overview-panel" style="margin: 30px 0;">
+
+<div id="bill-overview-panel">
 	<h2><span>Overview</span></h2>
 
 		<div class="info" style="width: auto; background: none;">
@@ -454,7 +439,7 @@
 						{% if p.prediction|floatformat:0 == "0" %}data-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
 						>
 						{{p.prediction|floatformat:0}}% chance</span> of being {{p.success_name}}
-                        according to <a href="https://www.skoposlabs.com/">Skopos Labs</a>
+                        according to <a href="https://www.skoposlabs.com/" style="font-weight: normal">Skopos Labs</a>
 						(<a href="#" onclick="$('#prognosis-details').modal(); return false;" style="font-weight: normal;">details</a>)
 					</p>
 				</dd>

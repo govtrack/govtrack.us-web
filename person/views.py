@@ -75,7 +75,7 @@ def person_details(request, pk):
         
         links = []
         if role.current:
-            if role.website: links.append(("%s's Official Website" % person.lastname, role.website, "fa  fa-external-link"))
+            if role.website: links.append(("%s's Official Website" % person.lastname, role.website, "fa fa-external-link"))
             if person.twitterid: links.append(("@" + person.twitterid, "http://twitter.com/" + person.twitterid, "fa fa-twitter"))
         if person.osid: links.append(("OpenSecrets", "http://www.opensecrets.org/politicians/summary.php?cid=" + person.osid, "fa fa-money"))
         if person.pvsid: links.append(("VoteSmart", "http://votesmart.org/candidate/" + person.pvsid, "fa fa-th-list"))
