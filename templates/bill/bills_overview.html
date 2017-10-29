@@ -71,17 +71,19 @@ function do_keyword_tracker_submit() {
 </div>
 
 <ul class="nav nav-tabs" role="tablist">
-	{% if coming_up|length > 0 %}<li role="presentation" class="active"><a href="#docket" aria-controls="docker" role="tab" data-toggle="tab">Coming Up</a></li>{% endif %}
-	<li role="presentation" {% if coming_up|length == 0 %}class="active"{% endif %}><a href="#find" aria-controls="find" role="tab" data-toggle="tab">Find a Bill</a></li>
+	<li role="presentation" class="active"><a href="#docket" aria-controls="docker" role="tab" data-toggle="tab">Coming Up &amp; Trending</a></li>
+	<li role="presentation"><a href="#find" aria-controls="find" role="tab" data-toggle="tab">Find a Bill</a></li>
 	<li role="presentation"><a href="#get-alerts" aria-controls="get-alerts" role="tab" data-toggle="tab">Get Alerts</a></li>
 	<li role="presentation"><a href="#bystatus" aria-controls="bystatus" role="tab" data-toggle="tab">All Bills</a></li>
-	<li role="presentation"><a href="#hot" aria-controls="hot" role="tab" data-toggle="tab">Hot Bills</a></li>
 </ul>
 
 <div class="tab-content">
-	{% if coming_up|length > 0 %}
 	<div id="docket" class="tab-pane active">
-			<p style="margin-top: 15px">{{coming_up|length}} {% if coming_up|length == 1 %}bill or resolution is{% else %}bills and resolutions are{% endif %} on the House and Senate calendars for the coming days.</p>
+		<h2><span>Coming Up</span></h2>
+		{% if coming_up|length == 0 %}
+			<p>No bills have been posted as coming up by the House or Senate. Bills are put on the calendar of business often just days ahead of major activity. The majority party controls the calendar of business in each chamber.</p>
+		{% else %}
+			<p>{{coming_up|length}} {% if coming_up|length == 1 %}bill or resolution is{% else %}bills and resolutions are{% endif %} on the House and Senate calendars for the coming days.</p>
 
 			<table class="table">
 			{% for bill in coming_up %}
@@ -105,11 +107,32 @@ function do_keyword_tracker_submit() {
 			</table>
 
 			<p>Once bills are scheduled for floor action they typically have enough support to pass!</p>
-	</div>
-	{% endif %}
+		{% endif %}
 
-	<div id="find" class="tab-pane {% if coming_up|length == 0 %}active{% endif %}">
-		<h2>Find a Bill</h2>
+		{% if trending_bill_feeds|length > 0 %}
+		<h2><span>Trending now</span></h2>
+		<div style="margin-bottom: 1.5em">
+		{% for f in trending_bill_feeds %}
+			<div style="margin-bottom: .5em;">
+				<a href="{{f.link}}">{{f.title|truncatewords:30}}</a>
+			</div>
+		{% endfor %}
+		</div>
+		{% endif %}
+
+		<h2><span>Top bills tracked by GovTrack users</span></h2>
+		<div id="top_tracked_bills">
+		{% for bill, count in top_tracked_bills %}
+			<div style="margin-bottom: .5em;">
+				<a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a>
+				<br><small>tracked by {{count}} user{{count|pluralize}}</small>
+			</div>
+		{% endfor %}
+		</div>
+	</div>
+
+	<div id="find" class="tab-pane">
+		<h2><span>Find a Bill</span></h2>
 		<div class="row">
 			<div class="col-sm-7">
 			<div style="padding-right: 30px">
@@ -168,11 +191,11 @@ function do_keyword_tracker_submit() {
 	</div>
 
 	<div id="get-alerts" class="tab-pane">
-		<h2>Get Alerts</h2>
+		<h2><span>Get Alerts</span></h2>
 		<div class="row">
 			<div class="col-sm-6">
 			<div style="padding-right: 30px">
-				<h3><span>Basic alerts</span></h3>
+				<h3 style="margin-top: 0"><span>Basic alerts</span></h3>
 				<ul id="basic_trackers" style="padding: 0">
 					{% for feed in feeds %}
 					<li onclick="window.location='{{feed.link}}'">
@@ -184,7 +207,7 @@ function do_keyword_tracker_submit() {
 			</div>
 			</div>
 			<div class="col-sm-6">
-				<h3><span>Other ways to get alerts</span></h3>
+				<h3 style="margin-top: 0"><span>Other ways to get alerts</span></h3>
 
 				<p>There are many ways to get email alerts about bills in Congress from GovTrack.</p>
 
@@ -194,7 +217,7 @@ function do_keyword_tracker_submit() {
 
 				<p>If you are interested in the legislative activity of your representative and senators, start by <a href="/congress/members">finding who represents you</a>.</p>
 
-				<h2><span>Advanced alerts</span></h2>
+				<h3><span>Advanced alerts</span></h3>
 				<form onsubmit="return do_keyword_tracker_submit()" class="clearfix" style="margin-bottom: 1em">
 					<div>Enter a keyword or phrase to get alerts for:</div>
 					<input id="track-by-keyword-input" type="text" placeholder="your alert keyword or phrase" style="width: 220px; height: 26px; float: left; margin: 0 0 5px 0;"/>
@@ -208,7 +231,7 @@ function do_keyword_tracker_submit() {
 	</div>
 	
 	<div id="bystatus" class="tab-pane">	
-		<h2>All Bills</h2>
+		<h2><span>All Bills</span></h2>
 		<p style="margin-top: 15px">Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
 		{% for name, descr1, descr2, href, count, queryset in groups %}
@@ -239,27 +262,5 @@ function do_keyword_tracker_submit() {
 		are enacted and when during the legislative session activity tends to occur.</p>
 	</div>
 	
-	<div id="hot" class="tab-pane">
-		{% if trending_bill_feeds|length > 0 %}
-		<h2>Trending now:</h2>
-		<div style="margin-bottom: 1.5em">
-		{% for f in trending_bill_feeds %}
-			<div style="margin-bottom: .5em;">
-				<a href="{{f.link}}">{{f.title|truncatewords:30}}</a>
-			</div>
-		{% endfor %}
-		</div>
-		{% endif %}
-
-		<h2>Top bills tracked by GovTrack users:</h2>
-		<div id="top_tracked_bills">
-		{% for bill, count in top_tracked_bills %}
-			<div style="margin-bottom: .5em;">
-				<a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a>
-				<br><small>tracked by {{count}} user{{count|pluralize}}</small>
-			</div>
-		{% endfor %}
-		</div>
-	</div>
 </div>
 {% endblock %}

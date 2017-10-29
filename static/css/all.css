@@ -98,6 +98,9 @@ h2 {
 			color: white;
 			font-weight: bold;
 		}
+	.tab-content h2 {
+		font-size: 17px;
+	}
 
 h3 {
 	font-size: 1.15em;

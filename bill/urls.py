@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^(\d+)/([a-z]+)(\d+)/widget\.js$', bill.views.bill_widget_loader),
     url(r'^(\d+)/([a-z]+)(\d+).json$', bill.views.bill_get_json, name='bill_get_json'),
     url(r'^subjects/([^/]+)/(\d+)', bill.views.subject),
-    url(r'^$', bill.views.bill_docket, name='bill_docket'),
+    url(r'^$', bill.views.bills_overview, name='bills_overview'),
     url(r'^statistics$', bill.views.bill_statistics, name='bill_stats'),
     url(r'^uscode(?:/(\d+|.*))?$', bill.views.uscodeindex),
     url(r'^_ajax/load_text', bill.views.bill_text_ajax),

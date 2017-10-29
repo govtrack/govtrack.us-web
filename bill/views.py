@@ -497,7 +497,7 @@ def subject_choices():
         subject_choices_data = sorted(subject_choices_data.items(), key = lambda x : x[0].name)
     return subject_choices_data
 
-# used by bill_docket and bill_statistics
+# used by bills_overview and bill_statistics
 bill_status_groups = [
     ("Enacted Laws",
         "enacted bills and joint resolutions", " so far in this session of Congress", " (both bills and joint resolutions can be enacted as law)",
@@ -523,8 +523,8 @@ def load_bill_status_qs(statuses, congress=CURRENT_CONGRESS):
     return Bill.objects.filter(congress=congress, current_status__in=statuses)
 
 @anonymous_view
-@render_to('bill/bill_docket.html')
-def bill_docket(request):
+@render_to('bill/bills_overview.html')
+def bills_overview(request):
     def build_info():
         # feeds about all legislation that we offer the user to subscribe to
         feeds = [f for f in Feed.get_simple_feeds() if f.category == "federal-bills"]
@@ -571,10 +571,10 @@ def bill_docket(request):
             "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.reported),
         }
 
-    ret = cache.get("bill_docket_info")
+    ret = cache.get("bills_overview_info")
     if not ret:
         ret = build_info()
-        cache.set("bill_docket_info", ret, 60*60)
+        cache.set("bills_overview_info", ret, 60*60)
 
     return ret
 
