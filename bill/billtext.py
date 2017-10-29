@@ -5,6 +5,7 @@ if __name__ == "__main__":
 
 import datetime, lxml, os.path, re
 from bill.status import BillStatus
+from django.conf import settings
 
 bill_gpo_status_codes = {
     "ah": ("Amendment", None),
@@ -256,6 +257,9 @@ def get_bill_text_metadata(bill, version):
     elif os.path.exists(basename + "/document.xml"):
         dat["xml_file"] = basename + "/document.xml"
         dat["has_displayable_text"] = True
+
+    if settings.DEBUG:
+        dat["has_thumbnail"] = True
 
     return dat
         
