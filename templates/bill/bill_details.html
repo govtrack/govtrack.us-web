@@ -72,6 +72,28 @@
 #action-panel h1 { font-size: 20px; }
 #action-panel h2 { font-size: 16px; }
 
+#summary h1, #summary h2, #summary h3, #summary h4, #summary h5 {
+   margin: .75em 0 .25em 0;
+}
+#summary p {
+   text-align: justify;
+   line-height: 127%;
+   margin-bottom: .5em;
+}   
+#summary-read-more {
+    position: relative;
+    float: right;
+    top: -50px;
+    padding: 12px;
+    background-color: rgba(255,255,255,.5);
+}
+  #summary-read-more a {
+    background-color: #9D2146;
+  }
+  #summary-read-more a:hover {
+    background-color: #AA4433;
+  }
+
 .dl-horizontal dd {
 	padding-bottom: .5em;
 }
@@ -243,33 +265,33 @@
 
 	{% with bill.oursummary as summary1 %}
 	{% if summary1 %}
-		<div class="panel panel-info">
-		<div class="panel-body">
-		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
-		<p style="font-family: PT Serif; font-size: 16px; margin: 0;">
-			{{summary1.as_html|striptags|truncatewords:60}}
-			<a href="{{bill.get_absolute_url}}/summary">Continue reading &raquo;</a>
-			{% if summary1.source_text %}<br><span style="font-size: 85%">(Source: {{summary1.source_text}})</span>{% endif %}
-		</p>
-		</div>
-		</div>
+        <div style="margin: 30px 0;">
+          <h2><span>About the {{bill.noun}}</span></h2>
+          {% if summary1.source_text %}
+             <div style="float: right; margin: 0 0 1.5em 1.5em; font-size: 85%">(Source: {{summary1.source_text}})</div>
+          {% endif %}
+          <div id="summary">
+            {{summary1.as_html|truncatewords_html:90|safe}}
+          </div>
+          <p id="summary-read-more"><a href="{{bill.get_absolute_url}}/summary" class="btn btn-sm">Continue reading &raquo;</a></p>
+       </div>
+       <h2><span>Sponsor and status</span></h2>
+
 	{% elif subtitle %}
 		<p style="margin-bottom: 0">{{subtitle}}</p>
 		{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s titles are written by its sponsor.</em></small></p>{% endif %}
 		{# we should have the title disclaimer even if no long title, but I'm not sure where best to put it #}
-	{% endif %}
 
-	<!-- explanation -->	
-
-	{% if bill.explanatory_text %}
-	<div class="panel panel-info" style="margin: 30px 0;">
-	  <div class="panel-body">
+	    <!-- automatic explanation -->	
+	    {% if bill.explanatory_text %}
+	    <div class="panel panel-info" style="margin: 30px 0;">
+	    <div class="panel-body">
 		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
 			{{bill.explanatory_text}}
-	  </div>
-	</div>
+	    </div>
+	    </div>
+	    {% endif %}
 	{% endif %}
-
 	{% endwith %}
 
 <div class="row" style="margin-top: 30px; margin-bottom: 15px;">
