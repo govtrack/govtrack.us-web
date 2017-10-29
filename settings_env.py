@@ -55,7 +55,7 @@ HAYSTACK_CONNECTIONS = {
     'bill': dj_haystack_url.parse(get_env_variable('HAYSTACK_BILL_CONNECTION', default='xapian:local/xapian_index_bill')),
 }
 
-CONGRESS_LEGISLATORS_PATH = get_env_variable('CONGRESS_LEGISLATORS_PATH', default='data/congress-legislators')
+CONGRESS_LEGISLATORS_PATH = get_env_variable('CONGRESS_LEGISLATORS_PATH', default='data/congress-legislators/')
 RSS_CAMPAIGN_QUERYSTRING = get_env_variable('RSS_CAMPAIGN_QUERYSTRING', default="?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss")
 
 from django.utils.crypto import get_random_string
