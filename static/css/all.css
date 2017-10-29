@@ -301,10 +301,12 @@ blockquote {
 		padding: 0 0 12px;
 		margin: 0 0 9px;
 		}
+	dl.dl-horizontal dt {
+		font-weight: normal;
+	}
 	@media (min-width: 768px) {
 		dl.dl-horizontal dt {
 			width: 90px;
-			font-weight: normal;
 			}
 		dl.dl-horizontal dd {
 			margin-left: 100px;
