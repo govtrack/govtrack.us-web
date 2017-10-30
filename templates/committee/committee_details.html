@@ -66,13 +66,13 @@
 			<dl class="dl-horizontal wide" style="margin-bottom: .5em">
 				{% for mem in member_highlights %}
 					<dt>{{mem.get_role_display}}:</dt>
-					<dd><a href="{{mem.person.get_absolute_url}}">{{mem.person}}</a></dd>
+					<dd style="margin-bottom: .25em"><a href="{{mem.person.get_absolute_url}}">{{mem.person}}</a></dd>
 				{% endfor %}
 			</dl>
 			<dl class="dl-horizontal wide" style="margin-bottom: .5em">
 				{% for party, count in party_counts %}
 					<dt>{{party}}s:</dt>
-					<dd>{{count}}</dd>
+					<dd style="margin-bottom: .25em">{{count}}</dd>
 				{% endfor %}
 			</dl>
 
@@ -110,10 +110,11 @@
 			<h2>Members</h2>
 		    <div class="row">
 	        {% for member in members %}
-		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-md"></div><div class="clearfix visible-lg"></div>{% endif %}
-		        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-sm"></div>{% endif %}
+		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-lg"></div>{% endif %}
+		        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-md"></div>{% endif %}
+		        {% if forloop.counter0|divisibleby:3 %}<div class="clearfix visible-sm"></div>{% endif %}
 		        {% if forloop.counter0|divisibleby:2 %}<div class="clearfix visible-xs"></div>{% endif %}
-		        <div class="member col-xs-6 col-sm-3 col-md-2">
+		        <div class="member col-xs-6 col-sm-4 col-md-3 col-lg-2">
 
 		            <div class="photo">
 	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" width="100" height="120" alt="Portrait of {{ member.person.name_no_details }}"/></a>

@@ -1053,13 +1053,13 @@ ul.singlesignon {
 	padding: 3px 3px 1px 5px;
 	position:relative;
 	line-height: 128%;
-  min-height: 20px;
+	min-height: 20px;
 	top: -4px;
 	left:-10px;
 	margin: 0 auto;
 	font-weight: bold;
 }
-	@media screen and (min-width: 768px) {
+	@media screen and (min-width: 1200px) {
 		.photo_flag.committee {
 			left: -6px;
 		}
