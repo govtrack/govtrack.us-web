@@ -9,7 +9,7 @@
 {{block.super}}
 <style>
 .tab-pane { margin-top: 1em; }
-#members h5 { margin: 6px 0 0 0; }
+#members .info { margin-top: 5px; font-size: 92%; line-height: 120%; color: #555; }
 #committee_bill_list {
 	padding: 0;
 }
@@ -129,28 +129,22 @@
 		            {% else %}
 	            	{% if member.subcommittee_role %}
 	                <div class="photo_flag flag_{{role.party|slice:":1"|lower}} committee sub_chair" title="Subcommittee {{member.subcommittee_role.role_name}}: {{member.subcommittee_role.committee.name}}">
-	                	{{member.subcommittee_role.committee.name|cut:"The "|truncatewords:1}}
+						Subcommittee {{member.subcommittee_role.role_name}}
 	                </div>
 	            	{% endif %}
 		            {% endif %}
 
-		            <h5><a href="{{ member.person.get_absolute_url }}" class="plain">{{ member.person.name_no_details }}</a></h5>
+		            <div style="font-weight: bold; line-height: 126%;"><a href="{{ member.person.get_absolute_url }}" class="plain">{{ member.person.name_no_details }}</a></div>
 
 		            <div class="info">
 		            	{% if committee.committee_type == TYPE_JOINT %}
-		            		{{role.get_title}}
+		            		{{role.get_title}}<br>
 		            	{% endif %}
-		            	{% if not role.district %}
-		            	<div>{{role.state_name}}</div>
-		            	{% else %}
-		            	<div>{{role.state}}-{{role.district}}</div>
-		            	{% endif %}
-		            	<div>{{role.party}}</div>
-
-						{% if member.subcommittee_role %}
-							<div style="font-size: 95%; line-height: 120%; border-top: 1px solid #AAA; margin-top: 3px; padding-top: 3px;">{{member.subcommittee_role.role_name}}, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}" class="plain">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
-						{% endif %}
-		            </div>
+		            	{{role.party}}
+					</div>
+					{% if member.subcommittee_role %}
+						<div class="info">{{member.subcommittee_role.role_name.lower}}, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}" class="plain">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
+					{% endif %}
 		            {% endwith %}
 		        </div>
 		        {% endfor %}
