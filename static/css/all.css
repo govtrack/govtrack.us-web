@@ -564,7 +564,7 @@ aside .download-links { padding: 31px 0 0 }
 				margin: 0 0 .5em 0;
 				text-transform: none;
 			}
-			.list_select ul { padding: 0; list-style: none; }
+			.list_select ul, .events_to_track ol { padding: 0; list-style: none; }
 			.events_to_track li a,
 			.list_select li a {
 				display: block;
