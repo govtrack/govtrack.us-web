@@ -36,6 +36,7 @@ def user_head(request):
 
 	return HttpResponse(head_template.render(Context({
 				"csrf_token": request.META.get("CSRF_COOKIE") or "",
+				"user": request.user,
 				"user_data": json.dumps(user_data),
 				"page_data": json.dumps(page_data),
 				})), content_type=head_template_mime_type)
