@@ -72,6 +72,17 @@
 #action-panel h1 { font-size: 20px; }
 #action-panel h2 { font-size: 16px; }
 
+#summary-source-credit {
+	margin-bottom: .5em;
+    font-size: 85%;
+    color: #555;
+}
+	@media screen and (min-width: 768px) {
+		#summary-source-credit {
+		    float: right;
+		    margin: -1.6em 0 0 0;
+		}
+	}
 #summary h1, #summary h2, #summary h3, #summary h4, #summary h5 {
    margin: .75em 0 .25em 0;
 }
@@ -79,13 +90,14 @@
    text-align: justify;
    line-height: 127%;
    margin-bottom: .5em;
-}   
+}
 #summary-read-more {
-    position: relative;
-    float: right;
-    top: -50px;
-    padding: 12px;
-    background-color: rgba(255,255,255,.5);
+	position: absolute;
+	width: 100%;
+    margin-top: -50px;
+    padding-top: 25px;
+    background: linear-gradient(0deg, white 10%, transparent);
+    text-align: center;
 }
   #summary-read-more a {
     background-color: #9D2146;
@@ -268,12 +280,12 @@
         <div style="margin: 30px 0;">
           <h2><span>About the {{bill.noun}}</span></h2>
           {% if summary1.source_text %}
-             <div style="float: right; margin: 0 0 1.5em 1.5em; font-size: 85%">(Source: {{summary1.source_text}})</div>
+             <div id="summary-source-credit">Source: {{summary1.source_text}}</div>
           {% endif %}
           <div id="summary">
             {{summary1.as_html|truncatewords_html:90|safe}}
           </div>
-          <p id="summary-read-more"><a href="{{bill.get_absolute_url}}/summary" class="btn btn-sm">Continue reading &raquo;</a></p>
+          <div id="summary-read-more"><a href="{{bill.get_absolute_url}}/summary" class="btn btn-sm">Continue reading &raquo;</a></div>
        </div>
        <h2><span>Sponsor and status</span></h2>
 
