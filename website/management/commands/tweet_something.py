@@ -65,7 +65,13 @@ class Command(BaseCommand):
 		if key in self.previous_tweets:
 			return
 
-		text = truncatechars(text, 140-1-23-3) + " " + url
+		text = truncatechars(text,
+			280 # max tweet length
+			-1 # space
+			-23 # link after being automatically shortened
+			-3 # emoji
+		)
+		text += " " + url
 		text += u" 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is two characters (plus a space before it) as Twitter sees it
 
 		if "TEST" in os.environ:
@@ -198,7 +204,7 @@ class Command(BaseCommand):
 			if text == "": continue
 			bill_number = bill.display_number
 			if bill.sponsor and bill.sponsor.twitterid: bill_number += " by @" + bill.sponsor.twitterid
-			text = text % (bill_number, u"y’day")
+			text = text % (bill_number, u"yesterday")
 			text += " " + bill.title_no_number
 			self.post_tweet(
 				bill.current_status_date.isoformat() + ":bill:%s:status:%s" % (bill.congressproject_id, status),
