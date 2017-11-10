@@ -85,6 +85,8 @@ def export_panel_user_data(request, panel_id, download):
     import csv, io
     from django.utils.text import slugify
     from website.models import UserPosition
+    from bill.models import Bill
+    from events.models import Feed
 
     panel = get_object_or_404(Panel, id=panel_id, admins=request.user)
 
@@ -106,7 +108,7 @@ def export_panel_user_data(request, panel_id, download):
         # Download the positions panel members have taken on legislation,
         # with one row per member-position.
         members = dict(PanelMembership.objects.filter(panel=panel).values_list("user_id", "id"))
-        w.writerow(["position_id", "member_id", "member_email", "position_created", "likert_score", "reason_text"])
+        w.writerow(["position_id", "member_id", "member_email", "position_created", "bill_id", "bill_title", "bill_link", "likert_score", "reason_text"])
         for upos in UserPosition.objects.filter(user__in=members)\
             .order_by('created')\
             .select_related("user"):
@@ -115,6 +117,9 @@ def export_panel_user_data(request, panel_id, download):
                 members[upos.user.id],
                 upos.user.email,
                 upos.created,
+                Bill.from_feed(Feed.from_name(upos.subject)).congressproject_id,
+                upos.get_subject_title(),
+                "https://www.govtrack.us" + upos.get_subject_link(),
                 upos.likert,
                 upos.reason.encode("utf8"),
             ])
