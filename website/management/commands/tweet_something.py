@@ -23,6 +23,9 @@ class Command(BaseCommand):
 		self.twitter = twitter.Api(consumer_key=settings.TWITTER_OAUTH_TOKEN, consumer_secret=settings.TWITTER_OAUTH_TOKEN_SECRET,
 		                  access_token_key=settings.TWITTER_ACCESS_TOKEN, access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET)
 
+		# Determine maximum length of a shortened link.
+		self.short_url_length_https = self.twitter.GetHelpConfiguration()['short_url_length_https']
+
 		# What have we tweeted about before? Let's not tweet
 		# it again.
 		self.load_previous_tweets()
@@ -65,18 +68,39 @@ class Command(BaseCommand):
 		if key in self.previous_tweets:
 			return
 
+		# For good measure, ensure Unicode is normalized. Twitter
+		# counts characters on normalized strings.
+		if not isinstance(text, unicode): text = text.decode("utf8")
+		import unicodedata
+		text = unicodedata.normalize('NFC', text)
+
+		# They don't count codepoints as one character, contrary to the dev docs.
+		# Only certain ranges count as 1, the rest count as two. See
+		# https://twitter.com/FakeUnicode/status/928741001186783232. Since truncatechars
+		# sees actual codepoints, it will not trim to the right length, so we'll
+		# compute the difference between what Python and Twitter see, and we'll
+		# reduce the target length accordingly.
+		text_len_diff = sum([1 for c in text if not( (0 <= ord(c) <= 0x10FF) or (0x2000 <= ord(c) <= 0x200D) or (0x2010 <= ord(c) <= 0x201F) or (0x2032 <= ord(c) <= 0x2037) )])
+
+		# Truncate to hit the right total length.
 		text = truncatechars(text,
 			280 # max tweet length
 			-1 # space
-			-23 # link after being automatically shortened
-			-3 # emoji
+			-self.short_url_length_https # link after being automatically shortened
+			-1 # space
+			-4 # emoji
+			-text_len_diff # number of characters we have to reduce by so Twitter doesn't see more than 280, even tho we might see 280
 		)
-		text += " " + url
-		text += u" 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is two characters (plus a space before it) as Twitter sees it
+		text += " "
+		text += url
+		text += u" 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is four(?) characters as Twitter sees it (plus the preceding space)
 
 		if "TEST" in os.environ:
 			# Don't tweet. Just print and exit.
-			print key, text
+			print self.short_url_length_https
+			print key
+			print len(text)-len(url)+self.short_url_length_https, text_len_diff
+			print repr(text)
 			sys.exit(1)
 
 		tweet = self.twitter.PostUpdate(text, verify_status_length=False) # it does not do link shortening test correctly
