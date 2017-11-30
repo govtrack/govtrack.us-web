@@ -309,8 +309,8 @@ $(function() {
         		{% if r.current %}is{% else %}was{% endif %} {# because of senator junior/senior status which can change mid-term, we cannot say "has been...since termstart" #}
         		{{r.get_description_natural|safe}}
         		{% if r.current and r.district > 0 %}(<a href="/congress/members/{{r.state}}/{{r.district}}">view map</a>){% endif %}
-        		{% if r.current %}and has served since {{ r.startdate|date }} (next election in {{role.next_election_year}}){% else %}
-        		from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}.
+        		{% if r.current %}and has served since {{ r.startdate|date }}. {{ person.lastname }} is next up for reelection in {{role.next_election_year}}.{% else %}
+        		from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}.{% endif %}
         		</p>
 
 				{% if r.is_territory %}
