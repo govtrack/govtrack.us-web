@@ -96,9 +96,6 @@ class Command(BaseCommand):
 			"total_time_sending": timedelta(seconds=0),
 		}
 
- 		# get the list of user IDs to iterate through; clone up front to avoid holding the cursor (?)
-		if sys.stdout.isatty(): print "Looking for subscribed users..."
-
 		# when debugging, show a progress meter
 		def user_iterator(): return users
 		if sys.stdout.isatty(): 

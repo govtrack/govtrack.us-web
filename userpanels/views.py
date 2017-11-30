@@ -118,7 +118,7 @@ def export_panel_user_data(request, panel_id, download):
                 upos.user.email,
                 upos.created,
                 Bill.from_feed(Feed.from_name(upos.subject)).congressproject_id,
-                upos.get_subject_title(),
+                upos.get_subject_title().encode("utf8"),
                 "https://www.govtrack.us" + upos.get_subject_link(),
                 upos.likert,
                 upos.reason.encode("utf8"),
