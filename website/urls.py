@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^_ajax/reaction', website.views.add_remove_reaction, name='reaction'),
     url(r'^reactions.json', website.views.dump_reactions, name='dump_reactions'),
     url(r'^sousveillance.json', website.views.dump_sousveillance),
+    url(r'^misconduct', website.views.misconduct),
 ]

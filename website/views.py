@@ -700,3 +700,23 @@ def dump_sousveillance(request):
     return HttpResponse(json.dumps(records, indent=2), content_type="application/json")
 dump_sousveillance.max_age = 30
 dump_sousveillance = anonymous_view(dump_sousveillance)
+
+misconduct_data = None
+@anonymous_view
+@render_to('website/misconduct.html')
+def misconduct(request):
+    global misconduct_data
+    if not misconduct_data:
+        # Load data.
+        import csv
+        misconduct_data = list(csv.DictReader(open("data/us/misconduct.csv")))
+
+        # Pre-fetch all members then add references to Person instances from numeric IDs.
+        from person.models import Person
+        people_map = Person.objects.in_bulk(set(entry["person_id"] for entry in misconduct_data))
+        for entry in misconduct_data:
+            entry["person"] = people_map[int(entry["person_id"])]
+
+    return {
+        "entries": misconduct_data,
+    }

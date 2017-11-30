@@ -1,0 +1,35 @@
+{% extends "master.html" %}
+{% load govtrack_utils %}
+
+{% block title %}GovTrack.us - Privacy Policy and Terms of Service{% endblock %}
+
+{% block body %}
+<h1>Congressional Misconduct Database</h1>
+
+<div class="row">
+  <div class="col-sm-9">
+    <p>This page tracks Congress members’ misconduct, ranging from ethics investigations to criminal convictions, that we’ve been able to locate for the last 10 years. Our sources include the <a href="https://oce.house.gov/">House’s Office of Congressional Ethics</a>, the <a href="https://ethics.house.gov/">House Committee on Ethics</a>, the <a href="https://www.ethics.senate.gov/public/">Senate Select Committee on Ethics</a>, <a href="https://en.wikipedia.org/wiki/List_of_American_federal_politicians_convicted_of_crimes">Wikipedia’s list of convictions</a>, and <a href="https://www.washingtonpost.com/news/the-fix/wp/2015/07/29/more-than-two-dozen-members-of-congress-have-been-indicted-since-1980/?utm_term=.76f0f90890d2">The Washington Post’s list of indictments</a>.</p>
+
+    <p>We’ll add to this page as instance of misconduct occur. Are we missing anything? <a href="/contact">Let us know</a>.</p>
+
+    <p class="visible-xs"><i>More information about this list is at the bottom of the page.</i></p>
+
+    {% for entry in entries %}
+      <h3 style="margin-bottom: .5em; font-size: 110%; font-weight: bold;"><a href="{{entry.person.get_absolute_url}}">{{entry.person.name}}</a></h3>
+     	{{entry.text|markdown}}
+    {% endfor %}
+  </div>
+  <div class="col-sm-3">
+    <hr class="visible-xs">
+
+    <p>We plan to add instances of expulsion, censure, and other cases going back to the beginning of the nation &mdash; stay tuned.</p>
+
+    <p>Other relevant sources:</p>
+    <ul style="padding-left:1.1em">
+      <li><a href="https://www.everycrsreport.com/reports/93-875.html">Expulsion and Censure Actions Taken by the Full Senate Against Members (CRS report)</a></li>
+      <li><a href="https://www.everycrsreport.com/reports/RL30764.html">Enforcement of Congressional Rules of Conduct: A Historical Overview (CRS report)</a></li>
+    </ul>
+  </div>
+</div>
+
+{% endblock %}
