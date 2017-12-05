@@ -219,10 +219,10 @@
 			            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #F2F2F2;margin-bottom:5px;margin-top:20px;padding-top:10px;width:100%;">
 			            	<tr valign="top">
 				            	<td style="text-align:left !important;">
-									{% if post.image %}
+									{% if post.image_100px %}
 									<div style="float: right; margin: 10px 0 1em 1em">
 										<a href="{{post.url}}?{{utm}}">
-											<img src="https://cdn-images-1.medium.com/max/100/{{post.image}}" style="border: 1px solid #888; width: 65px;"/>
+											<img src="{{post.image_100px}}" style="border: 1px solid #888; width: 65px;"/>
 										</a>
 									</div>
 									{% endif %}

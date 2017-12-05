@@ -700,6 +700,7 @@ class Bill(models.Model):
         date = self.introduced_date
         action = None
         action_type = None
+        xmlinfo = None
         reps_on_committees = []
         reps_tracked = Bill.get_tracked_people(feeds)
 
@@ -710,6 +711,7 @@ class Bill(models.Model):
                 if st == status:
                     date = eval(datestr)
                     action = text
+                    srcnode = etree.fromstring(srcxml) if srcxml else None
                     break
             else:
                 raise Exception("Invalid %s event in %s." % (status, str(self)))
@@ -759,6 +761,12 @@ class Bill(models.Model):
         else:
             explanation = self.get_long_text_for_status(status, date)
 
+        v = Bill.get_status_related_vote(srcnode)
+        if v:
+            thumbnail_url = v.get_absolute_url() + "/image"
+        else:
+            thumbnail_url = self.get_absolute_url() + "/thumbnail"
+
         return {
             "type": status.label,
             "date": date,
@@ -783,8 +791,17 @@ class Bill(models.Model):
                 "show_sponsor": action_type == 'introduced' or self.sponsor in reps_tracked,
                 "summary": explanation,
                 "reps_on_committees": reps_on_committees,
-                }
+                },
+            "thumbnail_url": thumbnail_url,
             }
+
+    @staticmethod
+    def get_status_related_vote(srcnode):
+        if srcnode.get("how") == "roll":
+            #print(ValueError(etree.tostring(srcnode)))
+            #raise ValueError(srcnode)
+            pass
+        return None
 
     def render_event_cosp(self, ev_code, feeds):
         cosp = Cosponsor.objects.filter(bill=self, withdrawn=None, joined=ev_code)
@@ -828,7 +845,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 "noun": self.noun,
                 "cumulative_cosp_count": cumulative_cosp_count,
 				"cumulative_cosp_by_party": cumulative_cosp_by_party,
-                }
+                },
+            "thumbnail_url": self.get_absolute_url() + "/thumbnail",
             }
 
     def render_event_dhg(self, feeds):
@@ -841,6 +859,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             "body_text_template": """This {{noun}} has been added to the House's schedule for the coming week, according to the House Majority Leader. More information can be found at http://docs.house.gov/floor.\n\nLast Action: {{current_status}}""",
             "body_html_template": """<p>This {{noun}} has been added to the House&rsquo;s schedule for the coming week, according to the House Majority Leader. See <a href="http://docs.house.gov/floor/">the week ahead</a>.</p><p>Last Action: {{current_status}}</p>""",
             "context": { "noun": self.noun, "current_status": self.current_status_description },
+            "thumbnail_url": self.get_absolute_url() + "/thumbnail",
             }
     def render_event_sfs(self, feeds):
         return {
@@ -852,6 +871,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             "body_text_template": """This {{noun}} has been added to the Senate's floor schedule for the next legislative day.\n\nnLast Action: {{current_status}}""",
             "body_html_template": """<p>This {{noun}} has been added to the Senate&rsquo;s floor schedule for the next legislative day.</p><p>Last Action: {{current_status}}</p>""",
             "context": { "noun": self.noun, "current_status": self.current_status_description },
+            "thumbnail_url": self.get_absolute_url() + "/thumbnail",
             }
 
     def render_event_text(self, ev_code, feeds):
@@ -877,6 +897,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 "sponsor": self.sponsor,
                 "show_sponsor": self.sponsor in Bill.get_tracked_people(feeds),
 				},
+            "thumbnail_url": self.get_absolute_url() + "/thumbnail",
             }
 
     def render_event_summary(self, feeds):
@@ -890,6 +911,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             "body_text_template": """{{summary.plain_text|truncatewords:80}}""",
             "body_html_template": """{{summary.as_html|truncatewords_html:80|safe}}""",
             "context": { "summary": bs },
+            "thumbnail_url": self.get_absolute_url() + "/thumbnail",
             }
 
     def get_major_events(self, top=True):

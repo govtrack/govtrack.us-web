@@ -103,10 +103,10 @@
 				{% for post in medium_posts %}
 				{% if forloop.counter <= 3 %}
 					<div class="row">
-						{% if post.image %}
+						{% if post.image_100px %}
 						<div class="col-xs-3" style="margin-top: 3px; padding-right: 0; margin-right: -5px;">
 							<a href="{{post.url}}">
-								<img src="https://d262ilb51hltx0.cloudfront.net/fit/c/60/60/{{post.image}}" style="border: 1px solid #BBB;"/ class="img-responsive">
+								<img src="{{post.image_100px}}" style="border: 1px solid #BBB;"/ class="img-responsive">
 							</a>
 						</div>
 						<div class="col-xs-9">

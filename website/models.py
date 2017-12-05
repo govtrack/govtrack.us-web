@@ -257,9 +257,20 @@ class MediumPost(models.Model):
         return self.data['virtuals'].get('subtitle')
 
     @property
-    def image(self):
-        if self.data['virtuals'].get('previewImage'):
-            return self.data['virtuals']['previewImage']['imageId']
+    def image_url(self):
+        return self.image_400px
+
+    @property
+    def image_100px(self):
+        return self.get_image_url(100)
+
+    @property
+    def image_400px(self):
+        return self.get_image_url(400)
+
+    def get_image_url(self, size): # 100, 400
+        if self.data['virtuals'].get('previewImage', {}).get("imageId"):
+            return "https://cdn-images-1.medium.com/max/" + str(size) + "/" + self.data['virtuals']['previewImage']['imageId']
         return None
 
     def create_events(self):

@@ -9,210 +9,168 @@
   <meta property="og:url" content="{{SITE_ROOT_URL}}" />
 
 <style>
-#bodybody {
-	background-image: url(/static/images/capitol_splash.jpeg);
-	background-repeat: no-repeat;
-	background-size: cover;
-	background-position: 50% 50%;
-	font-size: 16px;
+.top-actions > * {
+  margin: 1em 0;
+  font-size: 90%;
 }
-#masthead, #footer {
-	border-top: none;
-	background: none;
+.top-actions label {
+  font-weight: normal;
 }
-#masthead .nav > li > a {
-	color: black;
-	font-weight: bold;
-}
-#sitenewscontainer.navbar-default, #sitenewscontainer.navbar-default a {
-	border: none;
-}
-
-h1 {
-	 margin: 2em 0;
-	 font-size: 6vh;
-	 line-height: 125%;
-	 border: none;
-	 color: #222;
-	 text-shadow: 1px 1px 3px #cba;
-}
-
-.action-panel, #blog-posts {
-	border-radius: 15px;
-	background-color: rgba(255, 255, 255, .75);
-	padding: 25px;
-
-	font-weight: bold;
-	font-size: 17px;
-}
-
-.action-panel form:first-child {
-	margin-bottom: 25px;
-}
-
-.form-group {
-	margin-bottom: 5px;
-}
-@media (min-width: 768px) {
-	.form-inline .form-control {
-		min-width: 30em;
-	}
-}
-.btn { font-weight: bold; }
+  #content .top-actions label h2 {
+    font-size: 105%;
+    margin: 0 0 .5em 0;
+  }
+  .top-actions label div {
+    font-size: 90%;
+    color: #555;
+  }
+  .top-actions button {
+    background-color: #9D2146;
+    color: white;
+    margin-left: .5em;
+  }
+    .top-actions button:hover {
+      background-color: #c4496f;
+      color: white;
+      margin-left: .5em;
+    }
 .underlinks { margin-top: .75em; margin-left: 2px; color: #AAA; }
-.underlinks a { text-decoration: none; margin: 2px 4px; }
-
-#blog-posts-wrapper {
-	background-color: #1D4E70;
-	padding: 15px 0;
-}
-#blog-posts h2 { color: black; margin-top: 0; }
+.underlinks a { display: inline-block; text-decoration: none; margin: 2px 4px; }
 
 article {
-
 }
-
-	article h3 {
-		margin: 0 0 .2em 0;
-		line-height: 125%;
-	}
-
-	article h3 a:link {
-		text-decoration: none;
-		font-weight: bold;
-	}
-
-	#content article p {
-		margin-bottom: .25em;
-	}
+  article h3 {
+    margin: 0 0 .2em 0;
+    line-height: 115%;
+  }
+  article h3 a:link {
+    text-decoration: none;
+    font-weight: bold;
+  }
+  #content article p {
+    margin-bottom: .25em;
+    line-height: 122%;
+  }
 </style>
 {% endblock %}
 
-{% block body_class %}homepage{% endblock %}
-
 {% block body_scripts %}
 <script type="text/javascript">
-	function do_address_form() {
-		window.location = "/congress/members/map#address=" + encodeURIComponent($('#address').val());
-		return false;
-	}
-	function do_by_current_location() {
-		window.location = "/congress/members/map#my_location=1";
-		return false;
-	}
-	function do_subject_form() {
-		var url = $('#bill-subject-area').val();
-		if (url)
-			window.location = url;
-		return false;
-	}
+  function do_address_form() {
+    window.location = "/congress/members/map#address=" + encodeURIComponent($('#address').val());
+    return false;
+  }
+  function do_by_current_location() {
+    window.location = "/congress/members/map#my_location=1";
+    return false;
+  }
+  function do_subject_form() {
+    var url = $('#bill-subject-area').val();
+    if (url)
+      window.location = url;
+    return false;
+  }
 </script>
 {% endblock %}
 
 {% block body %}
 
-	<h1>
-		Track the United States Congress!
-	</h1>
+{# Quick action forms at top #}
 
-	<div class="action-panel">
+<div class="row top-actions">
+  <div class="col-sm-6">
+    <form action="#" onsubmit="return do_address_form();">
+      <label for="address">
+        <h2>Find your representative and senators in the U.S. Congress.</h2>
+        <div>Enter your home address:</div>
+      </label>
+      <table width="100%">
+        <tr>
+          <td>
+            <input type="text" class="form-control" id="address" placeholder="415 N. Main St., Hannibal, Missouri" style="width: 100%;">
+          </td>
+          <td>
+            <button type="submit" class="btn">Go &raquo;</button>
+          </td>
+      </tr>
+      </table>
+      <div class="underlinks">
+        <a href="#" onclick="do_by_current_location(); return false;"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a> &middot;
+        <a href="/congress/members/map"><i class="fa fa-globe" aria-hidden="true"></i> View a Map</a> &middot;
+        <a href="/congress/members/current"><i class="fa fa-list" aria-hidden="true"></i> See All Members of Congress</a> &middot;
+        <a href="/congress/members">More</a>
+      </div>
+    </form>
 
-	<form action="#" onsubmit="return do_address_form();" class="form-inline">
-      <label for="address" style="display: block;">Enter your address to find your representative and senators, and then get alerts.</label>
-	  <div class="form-group">
-	    <input type="text" class="form-control" id="address" placeholder="415 N. Main St., Hannibal, Missouri">
-	  </div>
-	  <div class="form-group">
-		  <button type="submit" class="btn btn-success">Find My Reps &raquo;</button>
-	  </div>
-	  <div class="underlinks">
-		<a href="#" onclick="do_by_current_location(); return false;"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a> &middot;
-		<a href="/congress/members/map"><i class="fa fa-globe" aria-hidden="true"></i> View a Map</a> &middot;
-		<a href="/congress/members/current"><i class="fa fa-list" aria-hidden="true"></i> See All Members of Congress</a> &middot;
-		<a href="/congress/members">More</a>
-	  </div>
-	</form>
+  </div>
+  <div class="col-sm-6">
 
-	<form action="#" onsubmit="return do_subject_form();" class="form-inline">
-      <label for="bill-subject-area" style="display: block;">Find legislation that affects you by selecting a subject area.</label>
-	  <div class="form-group">
-	    <select id="bill-subject-area" class="form-control" onchange="$(this).parents('form').submit();">
-	    	<option value="">Select Issue Area</option>
-			{% for top_term, subterms in bill_subject_areas %}
-				<option value="{{top_term.get_absolute_url}}">{{top_term.name}}</option>
-			{% endfor %}
-	    </select>
-	  </div>
-	  <div class="form-group">
-	  	<button type="submit" class="btn btn-success">Find Legislation &raquo;</button>
-	  </div>
-	  <div class="underlinks">
-		<a href="/congress/bills/#bystatus"><i class="fa fa-file-text-o" aria-hidden="true"></i> All Bills</a> &middot;
-		<a href="/congress/bills/#get-alerts"><i class="fa fa-bell" aria-hidden="true"></i> Get Alerts</a> &middot;
-		<a href="/congress/bills/browse"><i class="fa fa-list" aria-hidden="true"></i> Search</a> &middot;
-		<a href="/congress/votes"><i class="fa fa-check-square-o" aria-hidden="true"></i> Votes</a> &middot;
-		<a href="/congress/committees/"><i class="fa fa-users" aria-hidden="true"></i> Committees</a> &middot;
-		<a href="/congress/bills/">More</a>
-	  </div>
-	</form>
+    <form action="#" onsubmit="return do_subject_form();">
+      <label for="bill-subject-area">
+        <h2>Find legislation in the U.S. Congress that affects you.</h2>
+        <div>Select a subject area to search and get alerts:</div>
+      </label>
+      <table width="100%">
+        <tr>
+          <td>
+            <select id="bill-subject-area" class="form-control" onchange="$(this).parents('form').submit();">
+              <option value="">Select Issue Area</option>
+              {% for top_term, subterms in bill_subject_areas %}
+                <option value="{{top_term.get_absolute_url}}">{{top_term.name}}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>
+            <button type="submit" class="btn">Go &raquo;</button>
+          </td>
+        </tr>
+      </table>
+      <div class="underlinks">
+        <a href="/congress/bills/#bystatus"><i class="fa fa-file-text-o" aria-hidden="true"></i> All Bills</a> &middot;
+        <a href="/congress/bills/#get-alerts"><i class="fa fa-bell" aria-hidden="true"></i> Get Alerts</a> &middot;
+        <a href="/congress/bills/browse"><i class="fa fa-list" aria-hidden="true"></i> Search</a> &middot;
+        <a href="/congress/votes"><i class="fa fa-check-square-o" aria-hidden="true"></i> Votes</a> &middot;
+        <a href="/congress/committees/"><i class="fa fa-users" aria-hidden="true"></i> Committees</a> &middot;
+        <a href="/congress/bills/">More</a>
+      </div>
+    </form>
 
-	</div>
-
-</div> <!-- /#content, defined in master.html -->
-</div> <!-- /.container, defined in master.html -->
-</div> <!-- /#bodybody, defined in master.html -->
-
-<div id="blog-posts-wrapper">
-<div class="container">
-<div>
-
-<div id="blog-posts">
-	<header>
-		<div style="float: right;">
-			<a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">subscribe</a>
-		</div>
-		<h2>
-			<span><a href="https://govtrackinsider.com" title="More Posts on Medium" style="text-decoration: none">
-				GovTrack Insider
-			</a></span>
-		</h2>
-	</header>
-
-	<div class="row">
-	{% for post in medium_posts|slice:"0:3" %}
-	<div class="col-sm-6">
-		<article class="row" style="margin-bottom: 1.5em">
-		{% if not post.image %}
-			<div class="col-xs-12">
-		{% else %}
-			<div class="col-xs-4 col-sm-3 col-lg-2" style="padding-right: 0">
-			<a href="{{post.url}}">
-				<img src="https://cdn-images-1.medium.com/max/400/{{post.image}}" class="img-responsive" style="border: 1px solid #888;"/>
-			</a>
-			</div>
-			<div class="col-xs-8 col-sm-9 col-lg-10">
-		{% endif %}
-		<h3 style="line-height: 120%;"><a href="{{post.url}}">{{post.title}}</a></h3>
-		<p style="line-height: 125%;">{{post.snippet}} <span style="font-size: 90%">{{post.published}}</span></p>
-		</div>
-		</article>
-	</div>
-	{% if forloop.counter|divisibleby:2 %}<div class="clearfix"> </div>{% endif %}
-	{% endfor %}
-	
-	<div class="col-sm-6">
-		<p><strong>Site News</strong></p>
-		<div style="font-size: 80%">
-		{% for item in blog|slice:"0:1" %}
-			<article style="margin-bottom: 1.5em">
-			<h3><a href="{{item.link}}">{{item.title}}</a></h3>
-			<p>{{item.content|striptags|truncatewords:25}} <span style="font-size: 90%">{{item.date}}</span></p>
-			</article>
-		{% endfor %}
-		</div>
-	</div> <!-- /col -->
-	</div> <!-- /row -->
+  </div>
 </div>
+
+<hr style="margin: 2em 0; border-color: #EEEEF3">
+
+<h2>Recently in Congress...</h2>
+
+<div class="row">
+  {% for post in posts %}
+  <div class="col-sm-6">
+    <article class="row" style="margin-bottom: 1.5em">
+      {% if not post.image_url %}
+        <div class="col-xs-12">
+      {% else %}
+        <div class="col-xs-4 col-sm-3" style="padding-right: 0">
+        <a href="{{post.url}}">
+          <img src="{{post.image_url}}" class="img-responsive" style="border: 1px solid #888;"/>
+        </a>
+        </div>
+        <div class="col-xs-8 col-sm-9">
+      {% endif %}
+      <div style="font-size: 88%; color: #555;">{{post.type}}</div>
+      <h3><a href="{{post.url}}">{{post.title}}</a></h3>
+      <p><span style="font-size: 90%">{{post.published}}</span></p>
+      <p>{{post.snippet}}</p>
+      </div>
+    </article>
+  </div>
+  {% if forloop.counter|divisibleby:2 %}<div class="clearfix"> </div>{% endif %}
+  {% endfor %}
+</div> <!-- /row -->
+
+<div style="float: right;">
+  <a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">Subscribe to all GovTrack Insider articles.</a>
+</div>
+
 {% endblock %}
 
 

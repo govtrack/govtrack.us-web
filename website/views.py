@@ -25,23 +25,47 @@ from datetime import datetime, timedelta, time
 @anonymous_view
 @render_to('website/index.html')
 def index(request):
-    blog_feed = cache.get("our_blog_feed")
-    if not blog_feed:
-        blog_feed = get_blog_items()[0:4]
-        cache.set("our_blog_feed", blog_feed, 60*30) # 30 min
-    
-    events_feed = cache.get("frontpage_events_feed")
-    if not events_feed:
-        events_feed = Feed.get_events_for([fn for fn in ("misc:activebills2", "misc:billsummaries", "misc:allvotes") if Feed.objects.filter(feedname=fn).exists()], 6)
-        cache.set("frontpage_events_feed", events_feed, 60*15) # 15 minutes
-
+    # Fetch subject areas for drop-down.
     from bill.views import subject_choices
     bill_subject_areas = subject_choices()
 
+    posts = []
+
+    # Fetch our Medium posts for summaries and features.
+    from website.models import MediumPost
+    medium_posts = MediumPost.objects.order_by('-published')[0:6]
+    for m in medium_posts: m.type = "GovTrack Insider"
+    posts.extend(medium_posts)
+
+    # Fetch our blog posts for site news. This is an expensive
+    # call but the page is cached in whole.
+    blog_feed = list(get_blog_items())
+    for p in blog_feed: p["type"] = "Site News"
+    posts.extend(blog_feed)
+
+    # Get some legislative events, mixing across mutually exclusive feeds.
+    from events.templatetags.events_utils import render_event
+    for feed, count in (("misc:activebills2", 6),):
+        events_feed = Feed.get_events_for([feed], count)
+        for evt in events_feed:
+            r = render_event(evt, [])
+            r["published"] = r["date"]
+            r["snippet"] = r["body_text"]
+            r["image_url"] = r.get("thumbnail_url")
+            posts.append(r)
+
+    # Sort.
+    posts.sort(key = lambda p : p["published"] if isinstance(p, dict) else p.published, reverse=True)
+
+    # Fix events that have time-less dates --- turn into a date instance
+    # so rendering is correct (otherwise we get "midnight").
+    for p in posts:
+        if isinstance(p, dict) and p.get("date_has_no_time"):
+            p["published"] = p["published"].date()
+
     return {
-        'events': events_feed,
-        'blog': blog_feed,
         'bill_subject_areas': bill_subject_areas,
+        'posts': posts,
         }
       
 @anonymous_view
@@ -64,10 +88,21 @@ def get_blog_items():
     def decode_unicode_references(data):
         return re.sub("&#(\d+)(;|(?=\s))", _callback, data)
 
+    # Fetch from Atom feed.
     import feedparser
-    feed = feedparser.parse(settings.SITE_ROOT_URL + "/blog/atom")
+    feed = feedparser.parse("https://govtracknews.wordpress.com/feed/atom/")
 
-    return [{"link":entry.link, "title":decode_unicode_references(entry.title), "date":datetime(*entry.updated_parsed[0:6]), "content":decode_unicode_references(entry.content[0].value)} for entry in feed["entries"][0:4]]
+    from django.template.defaultfilters import truncatewords, striptags
+
+    # Yield dicts.
+    for i, entry in enumerate(feed["entries"]):
+        if i >= 2: return
+        yield {
+            "url": entry.link,
+            "title": decode_unicode_references(entry.title),
+            "published": datetime(*entry.updated_parsed[0:6]),
+            "snippet": truncatewords(striptags(decode_unicode_references(entry.content[0].value)), 30)
+        }
 
 def congress_home(request):
     return HttpResponseRedirect("/start")
