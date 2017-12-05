@@ -37,6 +37,12 @@ a.plain:hover, a.plain:focus, a.plain:active {
 	text-decoration: none;
 }
 
+/* we use some unstyled buttons that render differently on Chrome and FF */
+button.btn {
+    background-color: #CDCDCD;
+    color: black;
+}
+
 h1, h2, h3, h4, h5 {
 	font: normal normal normal 2.5em/1.5em 'Roboto Slab';
 	line-height: 130%;
