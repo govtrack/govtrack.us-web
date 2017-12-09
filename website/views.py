@@ -43,16 +43,47 @@ def index(request):
     for p in blog_feed: p["type"] = "Site News"
     posts.extend(blog_feed)
 
-    # Get some legislative events, mixing across mutually exclusive feeds.
-    from events.templatetags.events_utils import render_event
-    for feed, count in (("misc:activebills2", 6),):
-        events_feed = Feed.get_events_for([feed], count)
-        for evt in events_feed:
-            r = render_event(evt, [])
-            r["published"] = r["date"]
-            r["snippet"] = r["body_text"]
-            r["image_url"] = r.get("thumbnail_url")
-            posts.append(r)
+    # Get some bills whose status recently changed, focusing on important bills
+    # using the proscore. Draw from different time periods to get a mix of
+    # bills that are both important and recent.
+    from datetime import datetime, timedelta
+    from settings import CURRENT_CONGRESS
+    from haystack.query import SearchQuerySet
+    bills = set()
+    for days in (1, 2, 3, 7, 14):
+        sqs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], congress=CURRENT_CONGRESS, current_status_date__gt=datetime.now()-timedelta(days=days)).order_by('-proscore')
+        n1 = len(bills)
+        for sb in sqs:
+            if sb.object in bills: continue
+            bills.add(sb.object)
+            if len(bills) - n1 > 1: break
+        if len(bills) == 60: break
+    from bill.models import Bill;  bills.add(Bill.objects.get(id=355371))
+    for b in bills:
+      snippet = b.current_status_description
+      try:
+          snippet = b.oursummary.plain_text
+      except: pass # no summary
+      posts.append({
+        "title": b.title,
+        "published": datetime(b.current_status_date.year, b.current_status_date.month, b.current_status_date.day),
+        "date_has_no_time": True,
+        "type": b.get_current_status_display(),
+        "snippet": snippet,
+        "url": b.get_absolute_url(),
+        "image_url": b.get_thumbnail_url_ex(),
+      })
+
+    ## Get some legislative events, mixing across mutually exclusive feeds.
+    #from events.templatetags.events_utils import render_event
+    #for feed, count in (("misc:comingup", 2),):
+    #    events_feed = Feed.get_events_for([feed], count)
+    #    for evt in events_feed:
+    #        r = render_event(evt, [])
+    #        r["published"] = r["date"]
+    #        r["snippet"] = r["body_text"]
+    #        r["image_url"] = r.get("thumbnail_url")
+    #        posts.append(r)
 
     # Sort.
     posts.sort(key = lambda p : p["published"] if isinstance(p, dict) else p.published, reverse=True)

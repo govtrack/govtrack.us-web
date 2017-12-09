@@ -607,11 +607,11 @@
 								</p>
 								{% if item.vote_obj.oursummary %}{{item.vote_obj.oursummary.as_html|truncatewords_html:30|safe}}{% endif %}
 								<p class="links">
-									{% with vit=item.vote_obj.get_map_thumbnail_type %}
+									{% with vit=item.vote_obj.get_thumbnail_url %}
 									{% if vit %}
 										<a href="{{item.vote_obj.get_absolute_url}}">
 											<img
-												src="{{item.vote_obj.get_absolute_url}}/{{vit}}"
+												src="{{vit}}"
 												alt="thumbnail image of vote"
 												style="max-width: 75px; float: left; margin: 2px 1em 1em 0;"
 												>
