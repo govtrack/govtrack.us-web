@@ -308,7 +308,8 @@ class Vote(models.Model):
                                 for p in my_reps if p in all_votes
                             ]
                         if feeds != None else []
-                }
+                },
+			"thumbnail_url": self.get_thumbnail_url(),
             }
             
     def possible_reconsideration_votes(self, voters=None):
@@ -340,6 +341,11 @@ class Vote(models.Model):
         return candidates
 
     def get_thumbnail_url(self):
+        if not hasattr(self, "_cached_thumbnail_url"):
+           self._cached_thumbnail_url = self._get_thumbnail_url()
+        return self._cached_thumbnail_url
+
+    def _get_thumbnail_url(self):
         from vote.views import vote_thumbnail_image_map, vote_thumbnail_image_seating_diagram
         from django.http import Http404
         try:

@@ -290,7 +290,8 @@ class MediumPost(models.Model):
             "body_html_template": """<p>{{snippet}}</p>""",
             "context": {
                 "snippet": self.snippet,
-                }
+                },
+            "thumbnail_url": self.get_image_url(100),
             }
 
 Feed.register_feed(

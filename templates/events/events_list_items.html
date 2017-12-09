@@ -8,7 +8,17 @@
 
 {% for event in page.object_list %}
 {% with event|render_event:feeds as meta %}
-	<div class="tracked_event">
+<div class="tracked_event">
+<table>
+<tr valign="top">
+<td width="100" style="padding-right: 1em">
+	{% if meta.thumbnail_url %}
+		<a href="{{meta.url}}" {% if request.POST.newtab == '1' %}target="_blank"{% endif %}>
+			<img src="{{meta.thumbnail_url}}" class="img-responsive">
+		</a>
+	{% endif %}
+</td>
+<td>
 		{% if simple_mode %}
 			<h4 class="event_title simple"><a href="{{meta.url}}" {% if request.POST.newtab == '1' %}target="_blank"{% endif %}>{{meta.title}}</a></h4>
 			<div class="event_type">Type: <span>{{meta.type}}</span></div>
@@ -44,7 +54,10 @@
 			
 			{{meta.body_html|safe}}
 		</div>
-	</div>
+</td>
+</tr>
+</table>
+</div>
 {% endwith %}
 {% empty %}
 <p>There are no recent events tracked by the selected {% if list %}list{% else %}tracker{% endif %}.</p>
