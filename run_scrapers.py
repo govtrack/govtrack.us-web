@@ -117,9 +117,6 @@ if "text" in sys.argv:
 	# only use this for 114th forward).
 	os.system("(cd ~/scripts/congress-pdf-config/; . .env/bin/activate; ./run fdsys --collections=CRPT --store=mods --congress=%s --log=%s)" % (CONGRESS, log_level))
 
-	# Update the mirror of Cato's deepbills.
-	os.system("cd %s; . .env/bin/activate; ./run deepbills --log=%s" % (SCRAPER_PATH, log_level))
-
 	# Update text incorporation analysis for any new text versions.
 	os.system("analysis/text_incorporation.py analyze %d" % CONGRESS)
 	os.system("analysis/text_incorporation.py load %d" % CONGRESS)
