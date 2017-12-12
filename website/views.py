@@ -768,21 +768,24 @@ dump_sousveillance.max_age = 30
 dump_sousveillance = anonymous_view(dump_sousveillance)
 
 misconduct_data = None
-@anonymous_view
-@render_to('website/misconduct.html')
-def misconduct(request):
+def load_misconduct_data():
     global misconduct_data
     if not misconduct_data:
         # Load data.
-        import csv
-        misconduct_data = list(csv.DictReader(open("data/us/misconduct.csv")))
+        import rtyaml
+        misconduct_data = rtyaml.load(open("data/us/misconduct.yaml"))
 
         # Pre-fetch all members then add references to Person instances from numeric IDs.
         from person.models import Person
-        people_map = Person.objects.in_bulk(set(entry["person_id"] for entry in misconduct_data))
+        people_map = Person.objects.in_bulk(set(entry["person"] for entry in misconduct_data))
         for entry in misconduct_data:
-            entry["person"] = people_map[int(entry["person_id"])]
+            entry["person"] = people_map[int(entry["person"])]
 
+    return misconduct_data
+
+@anonymous_view
+@render_to('website/misconduct.html')
+def misconduct(request):
     return {
-        "entries": misconduct_data,
+        "entries": load_misconduct_data(),
     }

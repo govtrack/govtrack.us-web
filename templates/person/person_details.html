@@ -1,4 +1,5 @@
 {% extends "master_a.html" %}
+{% load govtrack_utils %}
 {% load humanize persontags govtrack_utils %}
 
 {% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}{{ role.get_title }}{% if role.state %} for {{ role.state_name_article }}{% if role.district > 0 %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
@@ -334,6 +335,16 @@ $(function() {
         {% endfor %}
         </div>
 
+		{% if misconduct %}
+		<p style="margin: .5em 0 1em 0; font-weight: bold;">
+			<a href="/misconduct">Congressional misconduct:</a>
+		</p>
+        {% for entry in misconduct %}
+			<p style="margin: .5em 0 1em 0">
+				{{entry.text|markdown}}
+			</p>
+		{% endfor %}
+		{% endif %}
 		
 	</div><!-- /container -->
 

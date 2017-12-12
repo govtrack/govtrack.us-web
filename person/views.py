@@ -109,6 +109,10 @@ def person_details(request, pk):
             # squash all errors
             vote_explanations = { }
 
+        # Misconduct - load and filter this person's entries, keeping original order.
+        from website.views import load_misconduct_data
+        misconduct = [m for m in load_misconduct_data() if m["person"] == person ]
+
         return {'person': person,
                 'role': role,
                 'active_role': active_role,
@@ -125,6 +129,7 @@ def person_details(request, pk):
                 'bill_subject_areas': bills_by_subject_counts,
                 'vote_explanations': vote_explanations,
                 'key_votes': load_key_votes(person),
+                'misconduct': misconduct,
                 }
 
     #ck = "person_details_%s" % pk
