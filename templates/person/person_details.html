@@ -227,6 +227,10 @@ $(function() {
 	});
 	{% endif %}
 })
+
+function show_pronunciation_guide() {
+	$("#pronunciation_modal").modal();
+}
 </script>
 {% endblock %}
 
@@ -256,6 +260,13 @@ $(function() {
 		{{ role.get_title }}{% if role.state %} for
 			{{ role.state_name_article }}{% if role.district == 0 %}&rsquo;s At-Large District{% elif role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District{% endif %}{% endif %}
 	</p>
+	{% if pronunciation %}
+		<p style="font-size: 12px; color: #555; margin-top: 2px; cursor: pointer" onclick="show_pronunciation_guide()">
+			pronounced
+			{{pronunciation.respell}}
+			<span class="glyphicon glyphicon-info-sign"></span>
+		</p>
+	{% endif %}
 </div>
 {% endblock %}
 
@@ -690,5 +701,34 @@ $(function() {
 	
 </div><!-- /member-details -->
 
+<div id="pronunciation_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="pronunciationModalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="pronunciationModalTitle">Pronunciation Guide</h4>
+          </div>
+          <div class="modal-body" style="font-size: 115%">
+			<center>
+			<p>{{person.name_no_details}} is pronounced:</p>
+			<p style="font-size: 130%; font-weight: bold; font-family: monospace;">{{pronunciation.respell}}</p>
+			</center>
+			<p>The letters stand for sounds according to the following table:</p>
+			<table class="table table-striped pronunciation_guide_table" style="margin: 1em 0">
+			<thead><tr><th style="text-align: center">Letter</th> <th>Sounds As In</th></thead>
+			<tbody>
+				{% for letter, sound in pronunciation.key %}
+					<tr><td style="font-family: monospace; font-weight: bold; text-align: center;">{{letter}}</td> <td>{{sound}}</td> </tr>
+				{% endfor %}
+			</tobdy>
+			</table>
+			<p>Capital letters indicate a stressed syllable.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+          </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 

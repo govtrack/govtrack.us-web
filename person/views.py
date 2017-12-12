@@ -32,10 +32,42 @@ from twostream.decorators import anonymous_view, user_view_for
 
 from settings import CURRENT_CONGRESS
 
+pronunciation_guide = None
+pronunciation_guide_key = {
+"a": "cat", "b": "bat",
+"ah": "calm", "ch": "chin",
+"air": "hair", "d": "day",
+"ar": "bar", "f": "fat",
+"aw": "law", "g": "get",
+"ay": "say", "h": "hat",
+"e": "bed", "j": "jam",
+"ee": "meet", "k": "king",
+"eer": "beer", "l": "leg",
+"er": "her", "m": "man",
+"ew": "few", "n": "not",
+"i": "pin", "ng": "sing",
+u"ī": "eye", "nk": "thank",
+"o": "top", "p": "pen",
+"oh": "most", "r": "rag",
+"oo": "soon", "s": "sit",
+"oor": "poor", "t": "top",
+"or": "corn", "th": "thin",
+"ow": "cow", u"t͡h": "this",
+"oy": "boy", "v": "van",
+"u": "cup", "w": "will",
+"uh": "'a' in along", "y": "yes",
+"uu": "book", "z": "zebra",
+"y": "cry", "zh": "vision",
+"yoo": "unit",  "yr": "fire",
+" ": None, "-": None,
+}
+
 @anonymous_view
 @render_to('person/person_details.html')
 def person_details(request, pk):
     def build_info():
+        global pronunciation_guide
+
         if re.match(r"\d", pk):
             person = get_object_or_404(Person, pk=pk)
         else:
@@ -113,10 +145,36 @@ def person_details(request, pk):
         from website.views import load_misconduct_data
         misconduct = [m for m in load_misconduct_data() if m["person"] == person ]
 
+        # Load pronunciation from guide. Turn into a mapping from GovTrack IDs to data.
+        if pronunciation_guide is None:
+            import rtyaml
+            pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open("data/us/pronunciation.yaml")) }
+        pronunciation = pronunciation_guide.get(person.id)
+        # TODO: Validate that the 'name' in the guide matches the name we're actually displaying.
+        if pronunciation:
+          # Show just the parts of the respelling key that are relevant to this name.
+          pronunciation["key"] = []
+          for namepart in pronunciation["respell"].split(" // "):
+            # Parse out the letters actually used in the guide. Sweep from left to right chopping
+            # off valid respelling letter combinations, chopping off the longest one where possible.
+            i = 0
+            while i < len(namepart):
+              for s in sorted(pronunciation_guide_key, key = lambda s : -len(s)):
+                if namepart[i:i+len(s)] in (s, s.upper()):
+                  if s not in pronunciation["key"]:
+                    pronunciation["key"].append(s)
+                  i += len(s)
+                  break
+              else:
+                # respelling did not match any valid symbol
+                break
+          pronunciation["key"] = sorted([ (letter, pronunciation_guide_key[letter]) for letter in pronunciation["key"] if pronunciation_guide_key[letter] ])
+
         return {'person': person,
                 'role': role,
                 'active_role': active_role,
                 'active_congressional_role': active_role and role.role_type in (RoleType.senator, RoleType.representative),
+                'pronunciation': pronunciation,
                 'photo': photo_url,
                 'photo_credit': photo_credit,
                 'links': links,
