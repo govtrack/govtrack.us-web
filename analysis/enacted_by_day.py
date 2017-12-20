@@ -1,7 +1,7 @@
 #!script
 
 from datetime import datetime, timedelta
-import csv, sys, re
+import csv, sys, os, re
 
 from us import get_congress_dates
 
@@ -60,9 +60,10 @@ def run_analysis_for_president(president, date_range):
 
 		#words = len(re.split(r"\s+", text)) # not very good for pre-GPO bills because Statutes at Large pages may have multiple statutes on them
 
-		################ EEK
-		#if pages == 1: continue
-		################ EEK
+		if os.environ.get("PAGES") == "1" and pages > 1: continue
+		if os.environ.get("PAGES") == ">1" and pages <= 1: continue
+
+		#if b.congress == 115: print pages, b
 
 		rel_date = (b.current_status_date - start_date).days
 		rec = by_day.setdefault(rel_date, { "bills": 0, "pages": 0 } )
@@ -110,17 +111,26 @@ W = csv.writer(sys.stdout)
 
 if len(sys.argv) == 1:
 	# show all days
-	W.writerow(["reldate", "date"] + sum(([president, "pages"] for president in columns), []))
+
+	# what to show in each president column
+	if os.environ.get("PAGES"):
+		stat_val = lambda day, president : day[president][1] # pages
+	elif os.environ.get("RANK"):
+		idx = 0 if os.environ.get("RANK") == "count" else 1
+		stat_val = lambda day, president : sorted((day[p][idx] for p in columns if p in day), reverse=True).index(day[president][idx]) + 1
+	else:
+		stat_val = lambda day, president : day[president][0] # count
+
+	W.writerow(["reldate", "date"] + [president for president in columns])
 	for rel_date in range(max(stats)+1):
 		W.writerow(
 			[ (rel_date+1), fmt_day(day_zero+timedelta(days=rel_date)) ]
-			+ sum(
-				(
-					list(stats[rel_date][president])
+			+ [
+					stat_val(stats[rel_date], president)
 					if president in stats[rel_date]
-					else ["", ""]
+					else ""
 					for president in columns
-				), [])
+			]
 		)
 else:
 	# show only requested date
