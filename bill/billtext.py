@@ -9,9 +9,7 @@ from django.conf import settings
 
 bill_gpo_status_codes = {
     "ah": ("Amendment", None),
-    "ah2": ("Amendment", None),
     "as": ("Amendment", None),
-    "as2": ("Amendment", None),
     "ash": ("Additional Sponsors", None),
     "sas": ("Additional Sponsors", None),
     "sc": ("Sponsor Change", None),
@@ -80,20 +78,22 @@ bill_gpo_status_codes = {
     "fps": ("Failed Passage in the Senate", None),
     }
 
-def get_gpo_status_code_name(doc_version):
+def split_gpo_status_code(doc_version):
     # handle e.g. "eas2"
     digit_suffix = ""
     while len(doc_version) > 0 and doc_version[-1].isdigit():
         digit_suffix = doc_version[-1] + digit_suffix
         doc_version = doc_version[:-1]
-    
+    return (doc_version, digit_suffix)
+
+def get_gpo_status_code_name(doc_version):
+    (doc_version, digit_suffix) = split_gpo_status_code(doc_version)
     doc_version_name = bill_gpo_status_codes.get(doc_version, ("Unknown Status (%s)" % doc_version, None))[0]
-
     if digit_suffix: doc_version_name += " " + digit_suffix
-
     return doc_version_name
 
 def get_gpo_status_code_corresponding_status(doc_version):
+    (doc_version, digit_suffix) = split_gpo_status_code(doc_version)
     ret = bill_gpo_status_codes.get(doc_version, (None, None))[1]
     if ret is None: ret = set()
     return ret
