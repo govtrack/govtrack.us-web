@@ -15,6 +15,10 @@
 		text-align: left;
 	}
 
+    #vote-summary-wrapper > div > h2:first-child {
+        margin-top: 0;
+    }
+
     p#yourreps {
         margin: 1em 0 0 0;
         font-style: italic;
@@ -416,7 +420,7 @@ $(function() {
 
 {% if has_diagram.diagram %}
     <div class="col-sm-6 col-lg-3">
-        <div style="margin-top: 1em">
+        <div style="margin: 1em 0">
             <img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" style="margin: auto;" />
             <div style="margin: .5em 0;" class="diagram-legend">
                 Key:
@@ -453,7 +457,7 @@ $(function() {
     </div>
 {% endif %}
 
-<div class="col-sm-12 col-lg-6">
+<div class="col-sm-12 {% if has_diagram.map and vote.chamber_name != "Senate" %}col-lg-6{% else %}col-lg-7{% endif %}">
     <table class="stats" style="margin-bottom: 1em">
         <thead>
             <tr>
@@ -471,30 +475,21 @@ $(function() {
         <tbody>
             {% for item in totals.options %}
             <tr>
-                <th scope="row">
+                <th scope="row" style="white-space: nowrap;">
                 	{% if item.option.key == "+" or item.option.key == "-" %}
                 		<span class="vote_{{ item.option.alpha_key }}" style="padding-left: 4px; border: 1px solid #AAA;">&nbsp;</span>
                 	{% endif %}
                 	{{ item.option }}
                 </th>
                 <td style="font-weight: bold; padding: 0 6px 0 6px;">{{ item.count }}</td>
-                <td>
-                    <!--
-                    <div style="width: {{item.chart_width}}px; background-color: black; color: white; padding: 1px; text-align: right; float: left; padding-right: 5px;"> 
-                        {{ item.count }}
-                    </div>
-                    -->
-                    {% for count in item.party_counts %}
-                        <div style="width: {{count.chart_width}}px; float: left;" class="color_{{count.party|slice:"0:1"}}"> 
-                            &nbsp;
-                        </div>
-                    {% endfor %}
-                    <div style="float: left; padding-left: 5px">
+                <td style="white-space: nowrap; text-align: left;">
+                    {% for count in item.party_counts %}<div style="width: {{count.chart_width}}px; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 
+                    &nbsp;</div>{% endfor %}<div style="display: inline-block; padding-left: 5px;">
                         {{ item.percent }}%
                     </div>
 
                     {% if item.option.key == "0" and propublica_count > 0 %}
-                        <div style="clear: both; font-size: 83%; text-align: left; padding: 0 5px 4px 5px;"><a href="{{propublica_url}}">{{propublica_count}} explanation{{propublica_count|pluralize}} via ProPublica</a></div>
+                        <div style="font-size: 83%; text-align: left; padding: 0 5px 4px 5px;"><a href="{{propublica_url}}">{{propublica_count}} explanation{{propublica_count|pluralize}} via ProPublica</a></div>
                     {% endif %}
                 </td>
                 {% for count in item.party_counts %}
