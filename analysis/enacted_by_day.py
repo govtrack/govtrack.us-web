@@ -113,9 +113,9 @@ if len(sys.argv) == 1:
 	# show all days
 
 	# what to show in each president column
-	if os.environ.get("PAGES"):
+	if os.environ.get("COUNT") == "pages":
 		stat_val = lambda day, president : day[president][1] # pages
-	elif os.environ.get("RANK"):
+	elif os.environ.get("RANK"): # "pages" = "count"
 		idx = 0 if os.environ.get("RANK") == "count" else 1
 		stat_val = lambda day, president : sorted((day[p][idx] for p in columns if p in day), reverse=True).index(day[president][idx]) + 1
 	else:
