@@ -457,17 +457,15 @@ $(function() {
     </div>
 {% endif %}
 
-<div class="col-sm-12 {% if has_diagram.map and vote.chamber_name != "Senate" %}col-lg-6{% else %}col-lg-7{% endif %}">
-    <table class="stats" style="margin-bottom: 1em">
+<div class="col-sm-12 {% if has_diagram.map and vote.chamber_name != "Senate" %}col-lg-6{% else %}col-lg-7{% endif %}" style="margin-bottom: 1em">
+    <table class="stats">
         <thead>
             <tr>
                 <th></th>
-                <th colspan="2">Totals</th>
+                <th colspan="2" style="font-weight: bold">Totals</th>
                 {% for party in totals.parties %}
-                    <th>
-						<span class="party_{{party.0}}" style="padding-left: 3px">&nbsp;</span>
-						&nbsp;
-                    	{{ party }}
+                    <th style="padding-left: 6px; padding-right: 6px;">
+                    	{{ party }}s
                     </th>
                 {% endfor %}
             </tr>
@@ -475,17 +473,19 @@ $(function() {
         <tbody>
             {% for item in totals.options %}
             <tr>
-                <th scope="row" style="white-space: nowrap;">
+                <th scope="row" style="white-space: nowrap; border: none;">
+					{% comment %}
                 	{% if item.option.key == "+" or item.option.key == "-" %}
                 		<span class="vote_{{ item.option.alpha_key }}" style="padding-left: 4px; border: 1px solid #AAA;">&nbsp;</span>
                 	{% endif %}
+					{% endcomment %}
                 	{{ item.option }}
                 </th>
                 <td style="font-weight: bold; padding: 0 6px 0 6px;">{{ item.count }}</td>
-                <td style="white-space: nowrap; text-align: left;">
-                    {% for count in item.party_counts %}<div style="width: {{count.chart_width}}px; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 
+                <td style="white-space: nowrap; text-align: left; padding: 5px;">
+                    {% for count in item.party_counts %}<div style="width: {{190|mult:count.count|div:totals.total_count|floatformat:0}}px; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 
                     &nbsp;</div>{% endfor %}<div style="display: inline-block; padding-left: 5px;">
-                        {{ item.percent }}%
+                        {{ item.percent }}<span style="margin-left: 2px; font-size: 80%; color: #555;">%</span>
                     </div>
 
                     {% if item.option.key == "0" and propublica_count > 0 %}
@@ -493,30 +493,25 @@ $(function() {
                     {% endif %}
                 </td>
                 {% for count in item.party_counts %}
-                <td>{{ count.count }}</td>
+	                <td style="padding: 6px">
+						<div>{{ count.count }}</div>
+						<div style="height: .25em;"><div style="height: .25em; width: {{5|mult:count.count|div:totals.total_count|floatformat:3}}em; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
+					</td>
                 {% endfor %}
             </tr>
             {% endfor %}
-            <tr>
-                <th scope="row">Required:</th>
-                <td colspan="2" style="text-align: left; padding-left: 12px;">
-                	{% if vote.required == "1/2" %}
-                		Simple Majority
-                	{% else %}
-                		{{ vote.required }}
-                	{% endif %}
-                </td>
-				<td colspan="{{totals.parties|length}}" style="font-size: 90%">
-					source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>
+			<tr>
+				<td style="border: none;"></td>
+				<td colspan="{{totals.parties|length}}" style="font-size: 85%; color: #666; border: none;">
+					{% if vote.required == "1/2" %}
+			     		Simple Majority
+			      	{% else %}
+			         		{{ vote.required }}
+			      	{% endif %}
+					required.
+					Source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
 				</td>
-            </tr>
-            {% comment %}
-            <tr class="gradient">
-                <td class="empty" colspan="3"></td>
-                {% for count in totals.party_counts %}
-                {% endfor %}
-            </tr>
-            {% endcomment %}
+			</tr>
         </tbody>
     </table>
 </div>

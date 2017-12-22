@@ -194,11 +194,11 @@ class Vote(models.Model):
                 else:
                     total_party_stats[party]['other'] += 1
             party_counts = [party_stats.get(x, 0) for x in all_parties]
-            party_counts = [{"party": all_parties[i], "count": c, 'chart_width': 190 * c / total_count} for i, c in enumerate(party_counts)]
+            party_counts = [{"party": all_parties[i], "count": c} for i, c in enumerate(party_counts)]
                 
             detail = {'option': option, 'count': len(voters),
                 'percent': int(percent), 'party_counts': party_counts,
-                'chart_width': 190 * int(percent) / 100}
+                }
             if option.key == '+':
                 detail['yes'] = True
             if option.key == '-':

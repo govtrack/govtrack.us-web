@@ -53,3 +53,11 @@ def stripfinalperiod(value):
     if value.endswith("."):
         value = value[:-1]
     return value
+
+@register.filter
+def mult(value, operand):
+    return float(value) * float(operand)
+
+@register.filter
+def div(value, operand):
+    return float(value) / float(operand)

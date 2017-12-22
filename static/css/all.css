@@ -372,14 +372,13 @@ blockquote {
 	}
 	.stats tbody td, .stats tbody th {
 		padding: 0;
-		border: 1px solid #d7ddd7;
+		border: 1px solid #e9ede9;
 		height: 29px;
 		vertical-align: middle;
 		}
 	.stats tbody th {
-		font: 10px/20px serif;
-		font-weight: bold;
-		text-transform: uppercase;
+		font: 12px/20px serif;
+		font-weight: normal;
 		text-align: right;
 		line-height: 100%;
 		padding: 0 10px 0 0;
@@ -395,18 +394,6 @@ blockquote {
 			text-align: center;
 			font-weight: normal;
 			}
-	.stats .pink td { background: #f2f2f2 }
-	.stats .gradient .empty {
-		background: none;
-		border: 0;
-		}
-	.stats .gradient td {
-		background: #ededed url(../images/bg-stats-table.gif) repeat-x;
-		height: 44px;
-		line-height: 44px;
-		vertical-align: middle;
-		}
-		.stats .gradient td img { vertical-align: middle }
 .download-links li {
 	padding: 0 0 6px;
 	overflow: hidden;
