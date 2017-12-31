@@ -116,8 +116,7 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 		if (enddate-startdate).days > 365*1.5:
 			return b.was_enacted_ex()
 		else:
-			raise ValueError()
-			return b.was_enacted_ex(restrict_to_activity_in_date_range=(startdate.isoformat(), enddate.isoformat()))
+			return b.was_enacted_ex(restrict_to_activity_in_date_range=(startdate, enddate))
 	bills_enacted = [b for b in bills if was_bill_enacted(b, startdate, enddate)]
 	stats["bills-enacted-ti"] = {
 		"value": len(bills_enacted),

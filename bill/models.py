@@ -1332,7 +1332,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         # Checking if a bill was "enacted" in a popular sense is a little tricky.
         # A bill is enacted if it was signed by the president, etc.
         # And if a bill's provisions were substantially incorporated into a bill
-        # that was enacted, then we can also say yes the original bill was enacted to.
+        # that was enacted, then we can also say yes the original bill was enacted too.
         # The sponsor "gets credit", in some sense, for enacting a law.
         #
         # Although CRS identifies "identicial" bills, and if this bill is identical
@@ -1340,27 +1340,27 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         # text_incorporation data is probably more correct because it looks at the
         # *most recent* text for a bill, while a CRS "identical bill" relation is
         # set if two bills were identical at either point in either's history.
+        # But we don't have text incoproration data for bills without XML text, which
+        # began gradually around the 109th/110th Congress, so we also look at CRS
+        # relations to fill in historical bills.
         #
         # A bill may have provisions incorporated into multiple enacted bills.
         # We'll say that this bill was enacted if at least one third of its text
         # is found within enacted bills, across all of the text relations.
         #
-        # We don't have text incoproration data for bills without XML text, which
-        # began gradually around the 109th/110th Congress, so we also look at CRS
-        # relations to fill in historical bills.
-        #
         # Returns a list of bills that this bill was enacted via, including this
         # bill itself, or None if the bill was not "enacted".
         #
-        # Some of our statistics wants to know if a bill was enacted within a certain
-        # time frame, so there is that restriction too.
+        # Our session statistics wants to know if a bill was enacted within a certain
+        # time frame, so there is that restriction too. restrict_to_activity_in_date_range
+        # is a tuple of datetime.Date instances in that case.
 
         def date_filter(d):
             if restrict_to_activity_in_date_range is None: return True
             return restrict_to_activity_in_date_range[0] <= d <= restrict_to_activity_in_date_range[1]
 
         # If we know the bill to have been enacted itself...
-        if self.current_status in BillStatus.final_status_enacted_bill and date_filter(self.current_status_date.isoformat()):
+        if self.current_status in BillStatus.final_status_enacted_bill and date_filter(self.current_status_date):
             return [self]
 
         # Check related bills identified by text incorporation...
