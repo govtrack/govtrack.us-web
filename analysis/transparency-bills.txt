@@ -80,3 +80,32 @@ s2639-114	Equal Access to Congressional Research Service Reports Act of 2016
 s2852-114	OPEN Government Data Act
 s2969-114	Presidential Tax Transparency Act
 hconres169-114	Establishing a Joint Committee on the Organization of Congress.
+hr70-115	Federal Advisory Committee Act Amendments of 2017
+hr732-115	Stop Settlement Slush Funds Act of 2017
+hr73-115	Presidential Library Donation Reform Act of 2017
+hres630-115	Requiring each Member, officer, and employee of the House of Representatives to complete a program of training in workplace rights and responsibilities each session of each Congress, and for other purposes.
+hres604-115	CEASE Resolution
+hr522-115	Stop Settlement Slush Funds Act of 2017
+s2236-115	Congressional Harassment Reform Act
+hr745-115	Federal Records Modernization Act of 2017
+s2159-115	ME TOO Congress Act
+hr4494-115	Congressional Accountability and Hush Fund Elimination Act
+hr4396-115	ME TOO Congress Act
+s1189-115	Close the Revolving Door Act of 2017
+hr3462-115	Office of Government Ethics Independence Act of 2017
+hr4674-115	Stop Taxpayers Obligations to Perpetrators of Sexual Harassment Act
+hr4522-115	Stop Taxpayers Obligations to Perpetrators of Sexual Harassment Act
+hr4481-115	To amend the Congressional Accountability Act of 1995 to prohibit the use of public funds to make payments of awards and settlements in connection with violations of such Act which are committed by employing offices of the House of Representat
+hr4497-115	To amend the Congressional Accountability Act of 1995 to prohibit the use of public funds to pay settlements and awards for workplace harassment and discrimination claims under the Congressional Accountability Act of 1995 which arise from acts
+sres323-115	STOP Sexual Harassment Resolution
+hr4458-115	To amend the Congressional Accountability Act of 1995 to prohibit the use of public funds for the payment of a settlement or award under such Act in connection with a claim arising from sexual harassment committed by a Member of Congress, and 
+hr1934-115	To establish a 5-year ban on individuals appointed to Executive Schedule positions and Members of Congress engaging in lobbying activities at the Federal level.
+s953-115	White House Visitor Logs Transparency Act of 2017
+s522-115	A bill to establish a 5-year ban on individuals appointed to Executive Schedule positions and Members of Congress engaging in lobbying activities at the Federal level.
+hr346-115	Congressional Integrity Act
+s2195-115	Judicial Transparency and Ethics Enhancement Act of 2017
+hr2678-115	ETHICS Act of 2017
+hr4504-115	Transparency in Government Act of 2017
+s333-115	Stop Settlement Slush Funds Act of 2017
+hr384-115	End the Congressional Revolving Door Act
+hr383-115	Stop the Revolving Door in Washington Act

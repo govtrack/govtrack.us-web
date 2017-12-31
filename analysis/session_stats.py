@@ -135,12 +135,23 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 	has_companion = []
 	for bill in bills:
 		# Check if the bill was reported during this time period.
+        # We'll consider a bill reported if it had any major status change,
+		# since a report per se doesn't always occur. Find the first
+		# major status change and see if that occurred in the time
+		# window of these stats.
+		first_major_status_change = None
 		for datestr, st, text, srcxml in bill.major_actions:
-			date = eval(datestr)
-			if isinstance(date, datetime.datetime): date = date.date()
-			if date >= startdate and date <= enddate and st == BillStatus.reported:
-				was_reported.append(bill)
-				break # make sure not to double-count any bills in case of data errors
+			if st != BillStatus.introduced:
+				d = eval(datestr)
+				if isinstance(d, datetime.datetime): d = d.date()
+				first_major_status_change = d
+				break
+		if first_major_status_change and (startdate <= first_major_status_change <= enddate):
+			was_reported.append(bill)
+		elif bill in bills_enacted:
+			# Also give credit if the bill's provisions were enacted via
+			# other legislation during this time period.
+			was_reported.append(bill)
 
 		# Check whether any cosponsors are on relevant committees.
 		# Warning: Committee membership data is volatile, so re-running the stats may come out different.
@@ -439,10 +450,10 @@ if __name__ == "__main__":
 			"as-of": datetime.datetime.now().isoformat(),
 			"notes": notes,
 			"congress": congress,
-			"session": "2016",
 			"is_full_congress_stats": is_full_congress_stats,
 		},
 		"people": stats,
 	}
+	if not is_full_congress_stats: stats["meta"]["session"] = congress_or_session
 	json.dump(stats, sys.stdout, indent=2, sort_keys=True)
 
