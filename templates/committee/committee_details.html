@@ -140,7 +140,12 @@
 		            	{% if committee.committee_type == TYPE_JOINT %}
 		            		{{role.get_title}}<br>
 		            	{% endif %}
-		            	{{role.party}}
+		            	{{role.party}}<br>
+                        {% if not role.district %}
+                          {{role.state_name}}
+                        {% else %}
+                          {{role.state}}-{{role.district}}
+                        {% endif %}
 					</div>
 					{% if member.subcommittee_role %}
 						<div class="info">{{member.subcommittee_role.role_name.lower}}, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}" class="plain">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
