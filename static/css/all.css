@@ -166,18 +166,20 @@ blockquote {
 		0 1px 2px 5px rgba(106,106,106,.4);
 }
 
-/* ADS */
+/* ADVERTISEMENTS */
 
+.ads {
+	display: none;
+}
 .ads.square {
 	margin: 60px 0;
 	}
 .ads.footer.leaderboard {
-	display: none;
 	margin: 20px 0 20px 0;
 	text-align: center;
 	}
 	.ads .explainer {
-		margin-bottom: 10px;
+		margin: 10px 0;
 		text-align: center;
 		font-size: 12px;
 		}
