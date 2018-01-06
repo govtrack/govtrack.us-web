@@ -111,12 +111,19 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 
 	# How many bills were "enacted" within this time window? Follow the was_enacted_ex logic
 	# which includes text incorporation. Only use the date range on single-year stats because
-	# a bill might be enacted after the end of a Congress.
+	# a bill might be enacted after the end of a Congress. Don't count the bill itself if it became
+    # the vehicle for passage of an unrelated matter, because the original sponsor has nothing to
+    # do with that and shouldn't get credit. But do count it if it was incorporated into a bill
+    # that was a vehicle for passage.
 	def was_bill_enacted(b, startdate, enddate):
 		if (enddate-startdate).days > 365*1.5:
-			return b.was_enacted_ex()
+			bs = b.was_enacted_ex()
 		else:
-			return b.was_enacted_ex(restrict_to_activity_in_date_range=(startdate, enddate))
+			bs = b.was_enacted_ex(restrict_to_activity_in_date_range=(startdate, enddate))
+		for b1 in (bs or []):
+			if b1 == b and b1.original_intent_replaced: continue
+			return True # i.e. was enacted via any bill that isn't itself and itself was a vehicle
+		return False
 	bills_enacted = [b for b in bills if was_bill_enacted(b, startdate, enddate)]
 	stats["bills-enacted-ti"] = {
 		"value": len(bills_enacted),
@@ -134,6 +141,11 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 	has_cosponsors_both_parties = []
 	has_companion = []
 	for bill in bills:
+		# Skip any bills that were the vehicle for passage of an unrelated matter
+		# (and the original matter is gone).
+		if bill.original_intent_replaced:
+			continue
+
 		# Check if the bill was reported during this time period.
         # We'll consider a bill reported if it had any major status change,
 		# since a report per se doesn't always occur. Find the first
