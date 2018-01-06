@@ -6,25 +6,25 @@ from PIL import Image
 from person.models import Person
 
 class Command(BaseCommand):
+	def add_arguments(self, parser):
+		parser.add_argument('person_id')
+		parser.add_argument('photo_url')
+		parser.add_argument('credit_url')
+		parser.add_argument('credit_text')
+
 	def handle(self, *args, **options):
-		if len(args) != 4:
-			print "Usage: import_photo id url credit_url credit_text"
-			return
-
-		id, url, credit_url, credit_text = args
-
 		try:
-			p = Person.objects.get(id=id)
+			p = Person.objects.get(id=options['person_id'])
 		except:
 			try:
-				p = Person.objects.get(bioguideid=id)
+				p = Person.objects.get(bioguideid=options['person_id'])
 			except:
 				print "Invalid id."
 				return
 
 		# load photo from url
 		import StringIO
-		im = Image.open(StringIO.StringIO(urlopen(url).read()))
+		im = Image.open(StringIO.StringIO(urlopen(options['photo_url']).read()))
 
 		ar = 1.2
 
@@ -56,5 +56,5 @@ class Command(BaseCommand):
 
 		# write metadata
 		with open("../data/photos/%d-credit.txt" % p.id, "w") as f:
-			f.write(credit_url + " " + credit_text + "\n")
+			f.write(options['credit_url'] + " " + options['credit_text'] + "\n")
 
