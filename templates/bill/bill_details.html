@@ -307,7 +307,7 @@
 	{% endwith %}
 
 <div class="row" style="margin-top: 30px; margin-bottom: 15px;">
-	{% if bill.sponsor.has_photo %}
+	{% if not bill.original_intent_replaced and bill.sponsor.has_photo %}
 	<div class="col-xs-3 col-sm-2" style="padding-right: 0; padding-bottom: 1em;">
 		<a href="{{bill.sponsor.get_absolute_url}}">
 			<img src="/data/photos/{{bill.sponsor.id}}-200px.jpeg" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
@@ -457,6 +457,13 @@
 						<p class="small" style="line-height: 125%;">{{bill.sponsor_role.party}}</p>
 					</div>
 					<div style="clear: both"></div>
+				</dd>
+				{% elif bill.sponsor and bill.original_intent_replaced %}
+				<dt>Sponsor:</dt>
+				<dd>
+					<p><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
+					was the sponsor of this bill when it was introduced, but the bill&rsquo;s text was subsequently replaced
+					with unrelated provisions.</p>
 				</dd>
 				{% endif %}
 

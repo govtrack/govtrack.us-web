@@ -91,6 +91,7 @@ class BillProcessor(XmlProcessor):
             # pull forward other fields set on the Bill object that don't
             # come from the bill status XML
             obj.text_incorporation = existing_bill_obj.text_incorporation
+            obj.original_intent_replaced = existing_bill_obj.original_intent_replaced
         except Bill.DoesNotExist:
             pass
 

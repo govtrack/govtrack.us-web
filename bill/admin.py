@@ -15,6 +15,7 @@ class CosponsorInline(admin.TabularInline):
 class BillAdmin(admin.ModelAdmin):
     list_display = ['title', 'congress', 'number', 'introduced_date']
     raw_id_fields = ['sponsor', 'cosponsors', 'sponsor_role', 'committees', 'terms']
+    fields = ('congress', 'bill_type', 'number', 'title', 'lock_title', 'sponsor', 'introduced_date', 'source', 'source_link', 'original_intent_replaced') # some field is causing problems
     #inlines = (CosponsorInline,)
 
 class BillLinkAdmin(admin.ModelAdmin):
