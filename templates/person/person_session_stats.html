@@ -254,7 +254,7 @@ function smooth_scroll(elem) {
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-reported" %}
-			<p>Most bills and resolutions languish in committee without any action. {{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} in {{period}} that got a committee vote sending it to the floor for further consideration.</p>
+			<p>Most bills and resolutions languish in committee without any action. {{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} in {{period}} that got past committee and to the floor for consideration.</p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-with-committee-leaders" %}
@@ -400,7 +400,7 @@ function smooth_scroll(elem) {
 			<p class="notes">A bill or joint resolution is considered enacted if it or an exactly identical bill to it is enacted as law. We only consider bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
 			{% endif %}
 		{% elif stat.key == "bills-enacted-ti" %}
-			<p class="notes">The legislator must be the primary sponsor of the bill or joint resolution that was enacted or the primary sponsor of a bill or joint resolution for which at least about one third of its text was incorporated into another bill or joint resolution that was enacted as law, as determined by an automated analysis. While a legislator may lay claim to authoring other bills that became law, these cases are difficult for us to track quantitatively.</p>
+			<p class="notes">The legislator must be the primary sponsor of the bill or joint resolution that was enacted or the primary sponsor of a bill or joint resolution for which at least about one third of its text was incorporated into another bill or joint resolution that was enacted as law, as determined by an automated analysis. While a legislator may lay claim to authoring other bills that became law, these cases are difficult for us to track quantitatively. We also exclude bills where the sponsor&rsquo;s original intent is not in the final bill.</p>
 		{% elif stat.key == "bills-with-companion" %}
 			<p class="notes">Companion bills are those that are identified as &ldquo;identical&rdquo; by Congress&rsquo;s Congressional Research Service.</p>
 		{% elif stat.key == "bills-with-cosponsors-both-parties" %}

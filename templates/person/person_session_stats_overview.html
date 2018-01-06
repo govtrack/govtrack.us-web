@@ -115,7 +115,7 @@
 					<p>The number of bills each legislator introduced that became law in {{period}}, including via incorporation into other bills. Keep in mind that it takes a law to repeal a law. Very few bills ever become law.</p>
 
 				{% elif stat.key == "bills-reported" %}
-					<p>The number of bills that each legislator introduced in {{period}} that got a committee vote sending it to the floor for further consideration. Most bills and resolutions languish in committee without any action.</p>
+					<p>The number of bills that each legislator introduced in {{period}} that got past committee and to the floor for consideration. Most bills and resolutions languish in committee without any action.</p>
 
 				{% elif stat.key == "bills-with-committee-leaders" %}
 					<p>The number of bills that each legislator introduced in {{period}} that had a cosponsor who was a chair or ranking member of a committee that the bill was referred to. Getting support from committee leaders on relevant committees is a crucial step in moving legislation forward.</p>
@@ -213,7 +213,7 @@
 					<p class="notes">A bill or joint resolution is considered enacted if it or an exactly identical bill to it is enacted as law. We only consider bills that the legislator was the primary sponsor of. While a legislator may lay claim to authoring other bills that became law, such as through incorporation into larger bills, these cases are difficult for us to track quantitatively.</p>
 					{% endif %}
 				{% elif stat.key == "bills-enacted-ti" %}
-					<p class="notes">The legislator must be the primary sponsor of the bill or joint resolution that was enacted or the primary sponsor of a bill or joint resolution for which at least about one third of its text was incorporated into another bill or joint resolution that was enacted as law, as determined by an automated analysis. While a legislator may lay claim to authoring other bills that became law, these cases are difficult for us to track quantitatively.</p>
+					<p class="notes">The legislator must be the primary sponsor of the bill or joint resolution that was enacted or the primary sponsor of a bill or joint resolution for which at least about one third of its text was incorporated into another bill or joint resolution that was enacted as law, as determined by an automated analysis. While a legislator may lay claim to authoring other bills that became law, these cases are difficult for us to track quantitatively. We also exclude bills where the sponsor&rsquo;s original intent is not in the final bill.</p>
 				{% elif stat.key == "bills-with-companion" %}
 					<p class="notes">Companion bills are those that are identified as &ldquo;identical&rdquo; by Congress&rsquo;s Congressional Research Service.</p>
 				{% elif stat.key == "bills-with-cosponsors-both-parties" %}
