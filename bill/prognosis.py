@@ -48,7 +48,6 @@ def load_majority_party(congress):
 
 def load_committee_membership(congress):
 	# load archival committee data for a given congress
-	if congress >= 115: return { }
 	from parser.committee_parser import ROLE_MAPPING
 	committee_membership = { }
 	for cnode in lxml.etree.parse("data/historical-committee-membership/%d.xml" % congress).xpath("committee|committee/subcommittee"):
