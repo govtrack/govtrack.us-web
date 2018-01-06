@@ -1,22 +1,22 @@
 from us import statenames
 
 stat_titles = {
-    "missed-votes":  { "title": "Missed Votes", "icon": "voting-records", "superlatives": ("most absent", "most voting") },
-    "bills-introduced":  { "title": "Bills Introduced", "icon": "bills-resolutions", "superlatives": ("most bills", "fewest bills") },
-    "bills-enacted":  { "title": "Laws Enacted", "icon": "bills-resolutions", "superlatives": ("most bills", "fewest bills") },
-    "bills-enacted-ti":  { "title": "Laws Enacted", "icon": "bills-resolutions", "superlatives": ("most bills", "fewest bills") },
-    "bills-reported":  { "title": "Bills Out of Committee", "icon": "committees", "superlatives": ("most bills", "fewest bills") },
-    "bills-with-committee-leaders":  { "title": "Powerful Cosponsors", "icon": "committees", "superlatives": ("most bills", "fewest bills") },
-    "bills-with-cosponsors-both-parties":  { "title": "Writing Bipartisan Bills", "icon": "handshake", "superlatives": ("highest % of bills", "lowest % of bills") },
-    "bills-with-cosponsors-both-parties-count":  { "title": "Writing Bipartisan Bills", "icon": "handshake", "superlatives": ("most bills", "fewest bills") },
-    "bills-with-companion":  { "title": "Working with the {{other_chamber}}", "icon": "handshake", "superlatives": ("most bills", "fewest bills") },
-    "cosponsors":  { "title": "Cosponsors", "icon": "congress-members", "superlatives": ("most cosponsors", "fewest cosponsors") },
-    "cosponsored":  { "title": "Bills Cosponsored", "icon": "bills-resolutions", "superlatives": ("most bills", "fewest bills") },
-    "cosponsored-other-party":  { "title": "Joining Bipartisan Bills", "icon": "handshake", "superlatives": ("most bipartisan", "least bipartisan") },
-    "ideology": { "title": "Ideology Score", "icon": "congress-members", "superlatives": ("most conservative", "most liberal") },
-    "leadership":  { "title": "Leadership Score", "icon": "congress-members", "superlatives": ("best score", "worst score") },
-    "committee-positions":  { "title": "Committee Positions", "icon": "committees", "superlatives": ("highest score", "lowest score") },
-    "transparency-bills":  { "title": "Government Transparency", "icon": "open-government", "superlatives": ("most supportive", "least supportive") },
+    "missed-votes":  { "title": "Missed Votes", "icon": "voting-records", "verb": ("Was", "", "in votes"), "superlatives": ("most absent", "most present") },
+    "bills-introduced":  { "title": "Bills Introduced", "icon": "bills-resolutions", "verb": ("Introduced", "the", ""), "superlatives": ("most bills", "fewest bills") },
+    "bills-enacted":  { "title": "Laws Enacted", "icon": "bills-resolutions", "verb": ("Wrote", "the", ""), "superlatives": ("most laws", "fewest laws") },
+    "bills-enacted-ti":  { "title": "Laws Enacted", "icon": "bills-resolutions", "verb": ("Wrote", "the", ""), "superlatives": ("most laws", "fewest laws") },
+    "bills-reported":  { "title": "Bills Out of Committee", "icon": "committees", "verb": ("Got their bills out of committee", "the", ""), "superlatives": ("most often", "least often") },
+    "bills-with-committee-leaders":  { "title": "Powerful Cosponsors", "icon": "committees", "verb": ("Got influential cosponsors", "the", ""), "superlatives": ("most often", "least often") },
+    "bills-with-cosponsors-both-parties":  { "title": "Writing Bipartisan Bills", "icon": "handshake", "verb": ("Got bipartisan cosponsors", "on the", ""), "superlatives": ("highest % of bills", "lowest % of bills") },
+    "bills-with-cosponsors-both-parties-count":  { "title": "Writing Bipartisan Bills", "icon": "handshake", "verb": ("Got bipartisan cosponsors", "on the", ""), "superlatives": ("most bills", "fewest bills") },
+    "bills-with-companion":  { "title": "Working with the {{other_chamber}}", "icon": "handshake", "verb": ("Got bicameral support", "on the", ""), "superlatives": ("most bills", "fewest bills") },
+    "cosponsors":  { "title": "Cosponsors", "icon": "congress-members", "verb": ("", "Got the", "on their bills"), "superlatives": ("most cosponsors", "fewest cosponsors") },
+    "cosponsored":  { "title": "Bills Cosponsored", "icon": "bills-resolutions", "verb": ("Cosponsored", "the", ""), "superlatives": ("most bills", "fewest bills") },
+    "cosponsored-other-party":  { "title": "Joining Bipartisan Bills", "icon": "handshake", "verb": ("Joined bipartisan bills", "the", ""), "superlatives": ("most often", "least often") },
+    "ideology": { "title": "Ideology Score", "icon": "congress-members", "verb": ("Ranked", "", ""), "superlatives": ("most conservative", "most liberal") },
+    "leadership":  { "title": "Leadership Score", "icon": "congress-members", "verb": ("Ranked", "the", ""), "superlatives": ("top leader", "bottom follower") },
+    "committee-positions":  { "title": "Committee Positions", "icon": "committees", "verb": ("Held", "the", ""), "superlatives": ("most committee positions", "fewest committee positions") },
+    "transparency-bills":  { "title": "Government Transparency", "icon": "open-government", "verb": ("Supported government transparency", "the", ""), "superlatives": ("most often", "least oftenn") },
 }
 
 def get_cohort_name(key, longform=False):
@@ -89,6 +89,10 @@ def clean_person_stats(stats):
 
             # These are never interesting.
             if cohort == "house-safe-seat":
+                context["use_in_headline"] = False
+
+            # Don't highlight people in the middle of the pack.
+            if context["percentile"] > 25 and context["percentile"] < 75:
                 context["use_in_headline"] = False
 
             # The percentile we computed off-line is the normal percentile, but it's not good for

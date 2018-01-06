@@ -91,7 +91,8 @@ def person_details(request, pk):
         # analysis
         analysis_data = analysis.load_data(person)
         try:
-            has_session_stats = person.get_session_stats('2016')
+            # Get session stats for the previous year.
+            has_session_stats = person.get_session_stats(str(datetime.now().year-1))
         except:
             # Not everyone has current stats, obviously. They may have stats
             # corresponding to their most recent role. Since stats are a

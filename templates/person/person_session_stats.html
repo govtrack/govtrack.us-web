@@ -13,103 +13,43 @@
 	}
 
 	#content h2 {
-		margin-top: 0;
-		margin-left: 0;
-	}
-
-	section.stat {
-		padding: 1.5em 0 2em 0;
-		border-bottom: 1px solid #DDD;
-	}
-		section.stat.last {
-			border: none;
-		}
-	#content section.stat h2 {
-		font-size: 1.8em;
-		margin-bottom: 18px;
-	}
-	section.stat h3.rank {
-		font-size: 1.2em;
-		text-transform: inherit;
-		margin: 0 0 22px 0;
-	}
-	section .rank em {
-		background-color: #285900;
-		color: white;
-		padding: 2px 4px;
-		font-style: normal;
-	}
-	section p.details {
-		font-size: 90%;
-		color: #444;
-		margin: 1em 2em;
-	}
-	section table.context thead td {
-		font-size: 85%;
-		color: #777;
-		padding: 0 0 .25em 1em;
-		font-style: italic;
-	}
-	section table.context th {
-		text-align: right;
+		margin: 0 0 1em 0;
 		font-weight: normal;
 	}
-	section table.context th, section table.context td.percentile {
-		padding: 2px .75em;
-	}
-	section table.context td.percentile {
-		min-width: 225px;
-	}
-	section table.context td.min, section table.context td.max {
-		font-size: 80%;
-		color: #777;
-		padding: 0 4px 2px 4px;
-		vertical-align: middle;
-	}
-	section table.context td.bar {
-		vertical-align: middle;
-		padding: 2px 0;
-	}
-	section table.context td.bar div.bar {
-		width: 116px;
-		height: 18px; 
-		background-color: #1D4E70;
-	}
-	section table.context td.more a {
-		padding: 0 1em;
-		font-size: 75%;
-		color: #F77;
-	}
-	section table.context tr.odd {
-		background-color: #EEE;
-	}
-	section p.notes {
-		font-size: 88%;
-		color: #777;
-		margin: 1.5em 0 1em 0;
+		#content h2 em {
+			font-weight: bold;
+			font-style: normal;
+		}
+		#content h2 small {
+			color: inherit;
+		}
+
+	p.details, p.notes {
+		font-size: 90%;
+		color: #444;
+		margin: .25em 0;
 	}
 
-	section .icon {
-		margin: 0 auto;
-		width: 150px;
-		height: 120px;
+	.icon {
+		width: 100%;
+		height: 5vw;
 	}
-	section.icon-congress-members .icon {
-		background: url(/static/images/img-congress-members.png) center 5px / contain no-repeat;
+	.icon-congress-members .icon {
+		background: url(/static/images/img-congress-members.png) center center / contain no-repeat;
 	}
-	section.icon-committees .icon {
-		background: url(/static/images/img-committees.png) center 15px / contain no-repeat;
+	.icon-committees .icon {
+		background: url(/static/images/img-committees.png) center center / contain no-repeat;
 	}
-	section.icon-bills-resolutions .icon {
-		background: url(/static/images/img-bills-resolutions.png) center 5px / contain no-repeat;
+	.icon-bills-resolutions .icon {
+		background: url(/static/images/img-bills-resolutions.png) center center / contain no-repeat;
 	}
-	section.icon-voting-records .icon {
+	.icon-voting-records .icon {
 		background: url(/static/images/img-voting-records.png) center top / contain no-repeat;
 	}
-	section.icon-open-government .icon {
+	.icon-open-government .icon {
 		background: url(/static/images/img-open-government.png) center top / contain no-repeat;
 	}
-	section.icon-handshake .icon{
+	.icon-handshake .icon {
 		background: url(/static/images/img-handshake.png) center top / contain no-repeat;
 	}
 </style>
@@ -209,35 +149,43 @@ function smooth_scroll(elem) {
 </div> <!-- inner col -->
 </div> <!-- outer row -->
 
-<div class="row">
-
+<table>
+<tbody>
 {% for stat in stats %}
-<section id="{{stat.key}}" class="row stat {{stat.key}} icon-{{stat.icon}} {% if forloop.last %}last{% endif %}">
-	<div class="col-sm-2">
+  <tr valign="top">
+	<td id="{{stat.key}}" class="icon-{{stat.icon}}" width="10%">
 		<div class="icon">&nbsp;</div>
-	</div>
-
-	<div class="col-sm-10">
-		<h2>{{stat.title}}</h2>
-
+	</td>
+	<td>
+		<h2>
 		{% with stat.context_for_headline as h %}
 		{% if h %}
-			<h3 class="rank">
+				<em>{{stat.verb.0}}</em>
+				
+				{{stat.verb.1}}
+
+				<em>
 				{% if h.rank_descending == 1 %}
-					<em>the {{stat.superlatives.0}}</em>
+					{{stat.superlatives.0}}
 				{% elif h.rank_ascending == 1 %}
-					<em>the {{stat.superlatives.1}}</em>
+					{{stat.superlatives.1}}
 				{% elif h.rank_descending < h.rank_ascending %}
-					<em>{{h.rank_descending|ordinalhtml}}</em> {{stat.superlatives.0}}
+					{{h.rank_descending|ordinalhtml}} {{stat.superlatives.0}}
 				{% else %}
-					<em>{{h.rank_ascending|ordinalhtml}}</em> {{stat.superlatives.1}}
+					{{h.rank_ascending|ordinalhtml}} {{stat.superlatives.1}}
 				{% endif %}
+				</em>
 
-				among
+				{{stat.verb.2}}
 
-				<em>{{h.name}}</em>{% if h.rank_ties > 0 %}; tied with {{h.rank_ties}} other{{h.rank_ties|pluralize}}{% endif %}
-			</h3>
+				compared to
+
+				<em>{{h.name}}</em>
+				{% if h.rank_ties > 0 %}<small>(tied with {{h.rank_ties}} other{{h.rank_ties|pluralize}})</small>{% endif %}
+		{% else %}
+			<em>{{stat.title}}</em>
 		{% endif %}
+		</h2>
 
 		{% if stat.key == "missed-votes" %}
 			<p>{{person.lastname}} missed <strong>{{stat.value|floatformat:1}}%</strong> of votes ({{stat.missed|intcomma}} of {{stat.elligible|intcomma}} votes) in {{period}}. <a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
@@ -246,11 +194,11 @@ function smooth_scroll(elem) {
 			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} in {{period}}. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}">View Bills &raquo;</a></p>
 
 		{% elif stat.key == "bills-enacted" %}
-			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a></p>
+			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. {% if stat.value > 0 %}<a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a>{% endif %}</p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-enacted-ti" %}
-			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law, including via incorporation into other measures, in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a></p>
+			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law, including via incorporation into other measures, in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. {% if stat.value > 0 %}<a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a>{% endif %}</p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-reported" %}
@@ -301,8 +249,8 @@ function smooth_scroll(elem) {
 
 		{% elif stat.key == "transparency-bills" %}
 			<p>GovTrack looked at whether {{person.lastname}} supported any of {{stat.num_bills}} <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">government transparency bills</a> in the {{stat.chamber}} that we identified in this session. We gave {{person.lastname}} <strong>{{stat.value}}</strong> point{{stat.value|pluralize}}, based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
-			{% if stat.sponsored|length > 0 %}<p class="details">Sponsored: {% for title, link in stat.sponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
-			{% if stat.cosponsored|length > 0 %}<p class="details">Cosponsored: {% for title, link in stat.cosponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.sponsored|length > 0 %}<p class="details">{{person.lastname}} sponsored {% for title, link in stat.sponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.cosponsored|length > 0 %}<p class="details">{{person.lastname}} cosponsored {% for title, link in stat.cosponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% else %}
 			<p>{{stat.value}}</p>
@@ -310,23 +258,11 @@ function smooth_scroll(elem) {
 		{% endif %}
 
 		{% if stat.context_for_display|length %}
-		<table class="context" style="width: 100%;">
-			<thead>
-				<tr>
-					<td>compared to...</td>
-					<td>rank</td>
-					<td {% if stat.show_values %}colspan=3{% endif %} style="padding: 0; text-align: center;">
-						{{stat.superlatives.1}}
-						⇢
-						{{stat.superlatives.0}}
-					</td>
-				</tr>
-			</thead>
+		<p class="details">
+			Compare to all
 			{% for cohort in stat.context_for_display %}
-				<tr class="{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
-					<th scope="row">{{cohort.name}}</th>
-
-					<td class="percentile" width="40%">
+				<a href="/congress/members/report-cards/{{session}}/{{cohort.key}}/{{stat.key}}"
+					title="
 						{% if cohort.rank_ascending == 1 and cohort.large_tie %}
 							{{stat.superlatives.1}}
 							along with {{cohort.rank_ties}} others
@@ -335,9 +271,9 @@ function smooth_scroll(elem) {
 							along with {{cohort.rank_ties}} others
 						{% else %}
 							{% if cohort.rank_ascending == 1 %}
-								the {{stat.superlatives.1}}
+								{{stat.superlatives.1}}
 							{% elif cohort.rank_descending == 1 %}
-								the {{stat.superlatives.0}}
+								{{stat.superlatives.0}}
 							{% elif cohort.rank_descending < cohort.rank_ascending %}
 								{{cohort.rank_descending|ordinalhtml}} {{stat.superlatives.0}}
 							{% else %}
@@ -345,49 +281,12 @@ function smooth_scroll(elem) {
 							{% endif %}
 							{% if cohort.rank_ties %}<small>(tied w/ {{cohort.rank_ties}})</small>{% endif %}
 						{% endif %}
-						<small>out of {{cohort.N}}</small>
-					</td>
-
-					{% if stat.show_values %}<td class="min" style="text-align: right">{{cohort.min|floatformat:"0"}}</td>{% endif %}
-
-					<td class="bar">
-						<div class="bar">
-							<img style="float: left; margin-left: {{cohort.percentile}}px; margin-top: 1px;" src="/static/images/img-guy-taking-oath.png" width="16" height="16" title="{{person}}">
-						</div>
-					</td>
-					{% if stat.show_values %}<td class="max"><span class="nowrap">
-						{{cohort.max|floatformat:"0"|intcomma}}{% if stat.key == "missed-votes" %}% missed votes
-						{% elif stat.key == "bills-introduced" %}
-							bills
-						{% elif stat.key == "bills-enacted" %}
-							laws
-						{% elif stat.key == "bills-reported" %}
-							bills
-						{% elif stat.key == "bills-with-committee-leaders" %}
-							bills
-						{% elif stat.key == "bills-with-cosponsors-both-parties" %}% of bills
-						{% elif stat.key == "bills-with-cosponsors-both-parties-count" %}
-							bills
-						{% elif stat.key == "bills-with-companion" %}
-							bills
-						{% elif stat.key == "cosponsors" %}
-							cosponsors
-						{% elif stat.key == "cosponsored" %}
-							bills
-						{% elif stat.key == "cosponsored-other-party" %}% of bills
-						{% elif stat.key == "committee-positions" %}
-							points
-						{% elif stat.key == "transparency-bills" %}
-							points
-						{% endif %}
-					</span></td>{% endif %}
-
-					<td class="more">
-						<a href="/congress/members/report-cards/{{session}}/{{cohort.key}}/{{stat.key}}">View All</a>
-					</td>
-				</tr>
+					">
+					{{cohort.name}}</a>
+					({{cohort.percentile|ordinalhtml}} percentile){% if not forloop.last %};{% else %}.{% endif %}
 			{% endfor %}
-		</table>
+		</p>
+
 
 		{% if stat.key == "missed-votes" %}
 			{% if role.role_type == 2 %}
@@ -411,9 +310,12 @@ function smooth_scroll(elem) {
 
 		{% endif %}
 		{% endwith %}
-	</div>
-</section>
+  </td>
+</tr>
+<tr><td colspan="2"><hr></td></tr>
 {% endfor %}
+</tbody>
+</table>
 
 	<section>
 		{% include "person/session_stats_notes.html" %}
