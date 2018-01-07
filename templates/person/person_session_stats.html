@@ -1,11 +1,29 @@
 {% extends "master.html" %}
 {% load humanize persontags cache govtrack_utils %}
 
-{% block title %}{{person.name_no_details}} Report Card {{session}} - GovTrack.us{% endblock %}
+{% block title %}{{person.name_no_details}}&rsquo;s {{session}} Report Card from GovTrack.us{% endblock %}
 
 {% block meta_description %}Year-end {{session}} legislative statistics for {{person}}, the {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
 
+{% block og_image %}
+    <meta name="twitter:card" content="summary">
+    <meta property="og:image" content="https://www.govtrack.us{{person.get_photo.0}}"/>
+    <meta name="twitter:image" content="https://www.govtrack.us{{person.get_photo.0}}"/>
+{% endblock %}
+
 {% block head %}
+<meta property="og:title" content="{{person.name_no_details}}&rsquo;s {{session}} legislative statistics.">
+{% with stats.0.context_for_headline as h %}
+{% if h %}
+<meta property="og:description" content="{{stats.0.verb.0}} {{stats.0.verb.1}}
+{% if h.rank_descending == 1 %}{{stats.0.superlatives.0}}
+{% elif h.rank_ascending == 1 %}{{stats.0.superlatives.1}}
+{% elif h.rank_descending < h.rank_ascending %}{{h.rank_descending|ordinal}} {{stats.0.superlatives.0}}
+{% else %}{{h.rank_ascending|ordinal}} {{stats.0.superlatives.1}}{% endif %}
+{{stats.0.verb.2}} compared to {{h.name}}, and other {{session}} legislative statistics">
+{% endif %}
+{% endwith %}
+
 <style>
 	.row.nav {
 		font-size: 90%;
@@ -245,10 +263,12 @@ function smooth_scroll(elem) {
 		{% elif stat.key == "committee-positions" %}
 			<p>{{person.lastname}} held a leadership position on <strong>{{stat.committees|length}}</strong>
 			committee{{stat.committees|length|pluralize}} and <strong>{{stat.subcommittees|length}}</strong>
-			subcommittee{{stat.subcommittees|length|pluralize}}, as either a chair (majority party) or ranking member (minority party), at the end of the session. For comparison to other Members of Congress, we assigned a score giving five points for each full committee leadership position and one point for each subcommittee leadership position. <a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
+			subcommittee{{stat.subcommittees|length|pluralize}}, as either a chair (majority party) or ranking member (minority party), at the end of the session.
+			{% if stat.context_for_headline %}For comparison to other Members of Congress, we assigned a score giving five points for each full committee leadership position and one point for each subcommittee leadership position.{% endif %}
+			<a href="{{person.get_absolute_url}}">View {{person.lastname}}&rsquo;s Profile &raquo;</a></p>
 
 		{% elif stat.key == "transparency-bills" %}
-			<p>GovTrack looked at whether {{person.lastname}} supported any of {{stat.num_bills}} <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">government transparency bills</a> in the {{stat.chamber}} that we identified in this session. We gave {{person.lastname}} <strong>{{stat.value}}</strong> point{{stat.value|pluralize}}, based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
+			<p>GovTrack looked at whether {{person.lastname}} supported any of {{stat.num_bills}} <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">government transparency, accountability, and effectiveness bills</a> in the {{stat.chamber}} that we identified in this session. We gave {{person.lastname}} <strong>{{stat.value}}</strong> point{{stat.value|pluralize}}, based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
 			{% if stat.sponsored|length > 0 %}<p class="details">{{person.lastname}} sponsored {% for title, link in stat.sponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 			{% if stat.cosponsored|length > 0 %}<p class="details">{{person.lastname}} cosponsored {% for title, link in stat.cosponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
@@ -261,29 +281,9 @@ function smooth_scroll(elem) {
 		<p class="details">
 			Compare to all
 			{% for cohort in stat.context_for_display %}
-				<a href="/congress/members/report-cards/{{session}}/{{cohort.key}}/{{stat.key}}"
-					title="
-						{% if cohort.rank_ascending == 1 and cohort.large_tie %}
-							{{stat.superlatives.1}}
-							along with {{cohort.rank_ties}} others
-						{% elif cohort.rank_descending == 1 and cohort.large_tie %}
-							{{stat.superlatives.0}}
-							along with {{cohort.rank_ties}} others
-						{% else %}
-							{% if cohort.rank_ascending == 1 %}
-								{{stat.superlatives.1}}
-							{% elif cohort.rank_descending == 1 %}
-								{{stat.superlatives.0}}
-							{% elif cohort.rank_descending < cohort.rank_ascending %}
-								{{cohort.rank_descending|ordinalhtml}} {{stat.superlatives.0}}
-							{% else %}
-								{{cohort.rank_ascending|ordinalhtml}} {{stat.superlatives.1}}
-							{% endif %}
-							{% if cohort.rank_ties %}<small>(tied w/ {{cohort.rank_ties}})</small>{% endif %}
-						{% endif %}
-					">
+				<a href="/congress/members/report-cards/{{session}}/{{cohort.key}}/{{stat.key}}">
 					{{cohort.name}}</a>
-					({{cohort.percentile|ordinalhtml}} percentile){% if not forloop.last %};{% else %}.{% endif %}
+				({{cohort.percentile|ordinalhtml}} percentile){% if not forloop.last %};{% else %}.{% endif %}
 			{% endfor %}
 		</p>
 
