@@ -581,6 +581,11 @@ class PersonRole(models.Model):
     def next_election_year(self):
         # For current terms, roles end at the end of a Congress on Jan 3.
         # The election occurs in the year before.
+        #
+        # EXCEPT: Senators appointed to fill a term may be up for re-election
+        # by special election sooner than the term end date stored in our
+        # data.
+        if self.id == 44287: return 2018 # Tina Smith
         if not self.current: raise ValueError()
         return self.enddate.year-1
 
