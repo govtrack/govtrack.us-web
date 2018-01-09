@@ -461,29 +461,33 @@ class PersonRole(models.Model):
                 return self.get_title_name(False) + " for " + statenames[self.state] + "'s " + ordinal(self.district) + " congressional district"
 
     def get_description_natural(self):
-        """A description of this role in sentence form, e.g. the delegate for the District of Columbia's at-large district."""
+        """A description in HTML of this role in sentence form, e.g. the delegate for the District of Columbia's at-large district."""
         
         from website.templatetags.govtrack_utils import ordinalhtml
+
+        (statename, statename_article) = (self.state_name_article(), "")
+        if statename.startswith("the "): (statename, statename_article) = (statename[4:], "the ")
+        statename = '%s<a href="/congress/members/%s">%s</a>' % (statename_article, self.state, statename)
         
         if self.role_type in (RoleType.president, RoleType.vicepresident):
             return self.get_title_name(False)
         if self.role_type == RoleType.senator:
             js = "a "
             if self.current and self.senator_rank: js = "the " + self.get_senator_rank_display().lower() + " "
-            return js + "senator from " + statenames[self.state]
+            return js + "senator from " + statename
         if self.role_type == RoleType.representative:
             if stateapportionment.get(self.state) in ("T", None): # current territories and former state-things, all of which send/sent delegates
                 return "the %s from %s" % (
                     self.get_title_name(False).lower(),
-                    self.state_name_article()
+                    statename
                 )
             else:
                 if self.district == -1:
-                    return "the representative for " + statenames[self.state]
+                    return "the representative for " + statename
                 elif self.district == 0:
-                    return "the representative for " + statenames[self.state] + "'s at-large district"
+                    return "the representative for " + statename + u"\u2019s at-large district"
                 else:
-                    return "the representative for " + statenames[self.state] + "'s " + ordinalhtml(self.district) + " congressional district"
+                    return "the representative for " + statename + u"\u2019s " + ordinalhtml(self.district) + " congressional district"
 
     def congress_numbers(self):
         """The Congressional sessions (Congress numbers) that this role spans, as a list from the starting Congress number through consecutive numbers to the ending Congress number."""
