@@ -709,3 +709,54 @@ def person_session_stats_export(request, session, cohort, statistic):
     else:
         r = HttpResponse(output, content_type='text/plain')
     return r
+
+@anonymous_view
+@render_to('person/person_cosponsors.html')
+def person_cosponsors(request, pk):
+    # Load the cosponsors.
+    from bill.models import Cosponsor
+    person = get_object_or_404(Person, pk=pk)
+    cosponsors = Cosponsor.objects.filter(bill__sponsor=person, withdrawn=None)\
+       .prefetch_related("bill", "bill__terms", "person", "person__roles")
+
+    # Pre-fetch all of the top-terms.
+    from bill.models import BillTerm
+    top_terms = set(BillTerm.get_top_term_ids())
+
+    # Aggregate.
+    total = 0
+    from collections import defaultdict
+    ret = defaultdict(lambda : {
+        "total": 0,
+        "by_issue": defaultdict(lambda : 0),
+    })
+    for cosp in cosponsors:
+        total += 1
+        ret[cosp.person]["total"] += 1
+        for t in cosp.bill.terms.all():
+           if t.id in top_terms:
+               ret[cosp.person]["by_issue"][t] += 1
+        if "first_date" not in ret[cosp.person] or cosp.joined < ret[cosp.person]["first_date"]: ret[cosp.person]["first_date"] = cosp.joined
+        if "last_date" not in ret[cosp.person] or cosp.joined > ret[cosp.person]["last_date"]: ret[cosp.person]["last_date"] = cosp.joined
+
+    # Sort.
+    for info in ret.values():
+        info['by_issue'] = sorted(info['by_issue'].items(), key = lambda kv : kv[1], reverse=True)
+    ret = sorted(ret.items(), key = lambda kv : (kv[1]['total'], kv[1]['last_date'], kv[0].sortname), reverse=True)
+
+    # Total bills, date range.
+    from bill.models import Bill
+    total_bills = Bill.objects.filter(sponsor=person).count()
+    date_range = (None, None)
+    if len(ret) > 0:
+        date_range = (min(r["first_date"] for p, r in ret), max(r["last_date"] for p, r in ret))
+
+    return {
+        "person": person,
+        "cosponsors": ret,
+        "total": total,
+        "total_bills": total_bills,
+        "date_range": date_range,
+    }
+
+

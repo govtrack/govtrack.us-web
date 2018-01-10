@@ -599,7 +599,10 @@ function show_pronunciation_guide() {
 			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
 			{% endfor %}
 		</ul>
-		<p><a href="/congress/bills/browse?sponsor={{person.id}}">View All &raquo;</a></p>
+		<p>
+            <a href="/congress/bills/browse?sponsor={{person.id}}">View All &raquo;</a>
+            | <a href="{{person.get_absolute_url}}/cosponsors">View Cosponsors &raquo;</a>
+        </p>
 
 		{% if role and active_role and role.leadership_title %}<p>As {{role.leadership_title_full}}, {{person.lastname}} may be focused on {{person.his_her}} responsibilities other than introducing legislation, such as setting the chamber&rsquo;s agenda, uniting {{person.his_her}} party, and brokering deals.</p>{% endif %}
 	</section><!-- /sponsorship -->

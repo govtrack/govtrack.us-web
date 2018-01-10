@@ -1,0 +1,72 @@
+{% extends "master.html" %}
+{% load humanize persontags cache govtrack_utils %}
+
+{% block title %}{{person.name_no_details}}&rsquo;s Cosponsors - GovTrack.us{% endblock %}
+
+{% block meta_description %}Who&rsquo;s cosponsored {{person.name_no_details}}&rsquo;s bills?{% endblock %}
+
+{% block og_image %}
+    <meta name="twitter:card" content="summary">
+    <meta property="og:image" content="https://www.govtrack.us{{person.get_photo.0}}"/>
+    <meta name="twitter:image" content="https://www.govtrack.us{{person.get_photo.0}}"/>
+{% endblock %}
+
+{% block head %}
+<style>
+</style>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+</script>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+	<li><a href="{% url "congress_home" %}">Congress</a></li>
+	<li><a href="/congress/members">Members of Congress</a></li>
+	<li><a href="{{person.get_absolute_url}}">{{person.name_no_details}}</a></li>
+	<li>Cosponsors</li>
+</ol>
+{% endblock %}
+
+{% block body %}
+<h1>
+	{{person.name_and_title}}&rsquo;s Cosponsors
+</h1>
+
+<p>
+   {{person.lastname}}
+   {% if person.is_currently_serving %}has gotten
+   {% else %}got{% endif %}
+   <b>{{total|intcomma}}</b>
+   cosponsor{{total|pluralize}}
+   {% if cosponsors|length > 0 %}
+   (by {{cosponsors|length}} unique Member{{cosponsors|pluralize}} of Congress)
+   {% endif %}
+   on {{person.his_her}}
+   {{total_bills|intcomma}}
+   bill{{total_bills|pluralize}}{% if cosponsors|length > 0 %}
+     from {{date_range.0|date}} to {{date_range.1|date}}{% endif %}.
+   {% if cosponsors|length > 0 %}
+     Here they are in order from most cosponsored bills to fewest.
+   {% endif %}
+</p>
+
+{% for cosponsor, info in cosponsors %}
+<div style="margin-bottom: 1em">
+  <div style="font-size: 110%; margin-bottom: 3px;"><a href="{{cosponsor.get_absolute_url}}">{{cosponsor}}</a></div>
+  <div>
+    <a href="/congress/bills/browse#sponsor={{person.id}}&cosponsors={{cosponsor.id}}&congress=__ALL__">{{info.total}} bill{{info.total|pluralize}}</a>
+    from {{info.first_date|date}} to {{info.last_date|date}}
+  </div>
+  <div>
+    {% for term, count in info.by_issue %}
+      {{term}} (<a href="/congress/bills/browse#sponsor={{person.id}}&cosponsors={{cosponsor.id}}&congress=__ALL__&terms={{term.id}}">{{count|intcomma}}</a>){% if not forloop.last %}; {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+

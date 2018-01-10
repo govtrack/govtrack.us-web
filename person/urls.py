@@ -18,6 +18,7 @@ urlpatterns = [
 	url(r'^[^/]+/(\d+)$', person.views.person_details, name='person_details'), # name slug (but it's ignored) "/" ID
     url(r'^([A-Z]?\d+)$', person.views.person_details, name='person_details'), # allow bioguide ID here
 	url(r'^[^/]+/(\d+)/report-card/(\d{4})', person.views.person_session_stats, name='person_session_stats'), # name slug "/" ID "/year-end/" session name (year)
+	url(r'^[^/]+/(\d+)/cosponsors', person.views.person_cosponsors),
 	
 	url(r'^embed/mapframe(?:\.xpd)?$', person.views.districtmapembed, name='districtmapembed'),
 ]
