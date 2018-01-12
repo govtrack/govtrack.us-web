@@ -55,7 +55,7 @@
 	}
 
     .diagram-legend {
-        text-align: center;
+		margin-top: .5em;
         color: #666;
         line-height: 130%;
         font-size: 12px;
@@ -225,7 +225,7 @@ $(function() {
 <ol class="breadcrumb">
     <li><a href="{% url "congress_home" %}">Congress</a></li>
     <li><a href="/congress/votes">Votes</a></li>
-    <li class="active">{{vote.name}} in {{vote.created.year}}</li>
+    <li class="active">{{vote.name}} in {{vote.created.year}} ({{ vote.congress|ordinalhtml }} Congress)</li>
 </ol>
 {% endblock %}
 
@@ -349,115 +349,11 @@ $(function() {
 
 </div>
 
-<div>
-	<div class="row" style="margin-bottom: 1em">
-		<div class="col-xs-3">
-			<div class="hdr">Congress</div>
-			<div>{{ vote.congress|ordinalhtml }} Congress</div>
-		</div>
-		<div class="col-xs-3">
-			<div class="hdr">Date</div>
-			<div>{{ vote.created|date:"DATE_FORMAT" }}</div>
-		</div>
-		<div class="col-xs-3">
-			<div class="hdr">Chamber</div>
-			<div>{{ vote.chamber_name }}</div>
-		</div>
-		<div class="col-xs-3">
-			<div class="hdr">Number</div>
-			<div>#{{ vote.number }}</div>
-		</div>
-	</div>
-
-	<dl class="dl-horizontal">
-	{% if vote.question_details %}
-	<dt>Question:</dt>
-	<dd>{{ vote.question_details }}</dd>
-	{% endif %}
-
-	<dt>Result:</dt>
-	<dd>{{ vote.result }}</dd>
-	</dl>
-</div>
-
-{% if has_vp_vote %}<p>The Vice President cast a tie-breaking vote.</p>{% endif %}
-
-<div id="admin_panel"> </div>
-
-<div class="panel panel-success" style="margin: 30px 0; padding-bottom: 0;">
-  <div class="panel-body">
-    <h3 style="margin: 5px 0 0 0; font-weight: bold;">
-        What you can do
-    </h3>
-
-    <div id="what-you-can-do-actions" class="clearfix">
-        <button class="btn btn-sm" onclick="window.location='/events/track-something?feed=misc:allvotes';">
-            <i class="glyphicon glyphicon-envelope"> </i>
-            <span style="margin-left: 3px;">
-                Get Email Alerts
-            </span>
-        </button>
-
-        {% with SITE_ROOT_URL|add:vote.get_absolute_url as share_url %}
-        <div>
-            <a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{vote.result}} - {{vote.question|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
-            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-        </div>
-
-        {% if FACEBOOK_APP_ID %}
-            <div style="margin-bottom: 5px;">
-                <div class="fb-share-button" data-href="{{share_url}}" data-layout="box_count"></div>
-            </div>
-        {% endif %}
-        {% endwith %}
-    </div><!-- /what-you-can-do-actions -->
-  </div>
-</div>
-
 {% with vote.totals as totals %}
+<div style="margin: 30px 0">
 <div class="row">
-
-{% if has_diagram.diagram %}
-    <div class="col-sm-6 col-lg-3">
-        <div style="margin: 1em 0">
-            <img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" style="margin: auto;" />
-            <div style="margin: .5em 0;" class="diagram-legend">
-                Key:
-                {% for item in totals.options %}
-                  {% if item.option.key == "+" or item.option.key == "-" %}
-                    {% for count in item.party_counts %}
-                        {% if count.party.0 == "D" or count.party.0 == "R" %}
-                            {% for k, v in diagram_key_colors %}
-                                {% if count.count > 0 and k.0 == count.party.0 and k.1 == item.option.key %}
-                                    <span style="padding: 2px 4px; background-color: {{v}}; margin-right: .25em; cursor: default; {% if item.option.key == "+" %}color: white;{% else %}color: #222;{% endif %}" title="{{count.party}} {{item.option.value}}">
-                                        {{count.party.0}}
-                                        {{item.option.value}}</span>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                  {% endif %}
-                {% endfor %}
-            </div>
-            {% if has_ideology_scores %}
-            <div class="diagram-legend" style="margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
-            {% endif %}
-        </div>
-    </div>
-{% endif %}
-{% if has_diagram.map and vote.chamber_name != "Senate" %}
-    <div class="col-sm-6 col-lg-3">
-        <div style="margin-top: 1em">
-            <img src="{{ vote.get_absolute_url }}/map" class="img-responsive" style="margin: auto;" />
-            <div style="margin: .5em 0;" class="diagram-legend">
-                This is a cartogram. Each hexagon represents one congressional district.
-            </div>
-        </div>
-    </div>
-{% endif %}
-
-<div class="col-sm-12 {% if has_diagram.map and vote.chamber_name != "Senate" %}col-lg-6{% else %}col-lg-7{% endif %}" style="margin-bottom: 1em">
-    <table class="stats">
+<div class="col-md-7">
+    <table class="stats" style="margin-right: 30px">
         <thead>
             <tr>
                 <th></th>
@@ -502,21 +398,105 @@ $(function() {
 			<tr>
 				<td style="border: none;"></td>
 				<td colspan="{{totals.parties|length}}" style="font-size: 85%; color: #666; border: none;">
-					{% if vote.required == "1/2" %}
-			     		Simple Majority
-			      	{% else %}
-			         		{{ vote.required }}
-			      	{% endif %}
-					required.
-					Source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
+					{% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
 				</td>
 			</tr>
         </tbody>
     </table>
 </div>
+<div class="col-md-5">
+	<dl class="dl-horizontal" style="font-size: 90%; margin-top: 1em;">
+		<dt>Date:</dt>
+		<dd>{{ vote.created|date:"DATE_FORMAT" }}</dd>
+		{% if vote.question_details %}
+		<dt>Question:</dt>
+		<dd>{{ vote.question_details }}</dd>
+		{% endif %}
+		<dt>Required:</dt>
+		<dd>{% if vote.required == "1/2" %}Simple Majority{% else %}{{ vote.required }}{% endif %}</dd>
+		<dt>Result:</dt>
+		<dd>{{ vote.result }}</dd>
+		<dt>Source:</dt>
+		<dd><a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a></dd>
+	</dl>
+</div>
+</div>
+
+<div class="row">
+{% if has_diagram.diagram %}
+    <div class="col-sm-6 col-md-5">
+        <div style="margin: 1em 0">
+			<h3>Ideology Vote Chart</h3>
+            <img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" />
+            <div style="margin: .5em 0;" class="diagram-legend">
+                Key:
+                {% for item in totals.options %}
+                  {% if item.option.key == "+" or item.option.key == "-" %}
+                    {% for count in item.party_counts %}
+                        {% if count.party.0 == "D" or count.party.0 == "R" %}
+                            {% for k, v in diagram_key_colors %}
+                                {% if count.count > 0 and k.0 == count.party.0 and k.1 == item.option.key %}
+                                    <span style="padding: 2px 4px; background-color: {{v}}; margin-right: .25em; cursor: default; {% if item.option.key == "+" %}color: white;{% else %}color: #222;{% endif %}" title="{{count.party}} {{item.option.value}}">
+                                        {{count.party.0}}
+                                        {{item.option.value}}</span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+            </div>
+            {% if has_ideology_scores %}
+            <div class="diagram-legend" style="margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% if has_diagram.map and vote.chamber_name != "Senate" %}
+    <div class="col-sm-5 col-lg-4">
+        <div style="margin-top: 1em">
+			<h3>Cartogram Map</h3>
+            <img src="{{ vote.get_absolute_url }}/map" class="img-responsive" style="margin: auto;" />
+            <div style="margin: .5em 0;" class="diagram-legend">
+                Each hexagon represents one congressional district.
+            </div>
+        </div>
+    </div>
+{% endif %}
 </div> <!-- /row -->
 
-<div class="clear"> </div>
+<div id="admin_panel"> </div>
+
+<div class="panel panel-success" style="margin: 30px 0; padding-bottom: 0;">
+  <div class="panel-body">
+    <h3 style="margin: 5px 0 0 0; font-weight: bold;">
+        What you can do
+    </h3>
+
+    <div id="what-you-can-do-actions" class="clearfix">
+        <button class="btn btn-sm" onclick="window.location='/events/track-something?feed=misc:allvotes';">
+            <i class="glyphicon glyphicon-envelope"> </i>
+            <span style="margin-left: 3px;">
+                Get Email Alerts
+            </span>
+        </button>
+
+        {% with SITE_ROOT_URL|add:vote.get_absolute_url as share_url %}
+        <div>
+            <a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{vote.result}} - {{vote.question|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
+            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        </div>
+
+        {% if FACEBOOK_APP_ID %}
+            <div style="margin-bottom: 5px;">
+                <div class="fb-share-button" data-href="{{share_url}}" data-layout="box_count"></div>
+            </div>
+        {% endif %}
+        {% endwith %}
+    </div><!-- /what-you-can-do-actions -->
+  </div>
+</div>
+
 
 <div id="vote-details" class="section">
 
