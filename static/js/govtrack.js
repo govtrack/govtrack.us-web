@@ -68,12 +68,19 @@ function init_ad_zone(ad_container) {
         */
 
     } else if (ad_container.attr('data-zone') == "master_a") {
-        // Master A Responsive
+        // Master A Google AdSense Responsive unit
         write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
 
+    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 768) {
+        // Footer leaderboard Media.net unit, when the viewport is large enough to display it.
+        write_ad_code('<div id="536175723"></div>');
+        try { window._mNHandle.queue.push(function () {
+            window._mNDetails.loadTag("536175723", "728x90", "536175723");
+        }); } catch (error) { }
+
     } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 800) {
-        // Footer, except on small screens.
+        // Footer leaderboard Google AdSense unit, when the viewport is large enough to display it.
         write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="5620102176"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
     }
