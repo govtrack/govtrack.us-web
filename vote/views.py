@@ -567,7 +567,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		ctx.translate(image_width/2, chart_top+25)
 		ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))
 		ctx.translate(r, 0)
-		ctx.rectangle(-seat_size/2, -seat_size/2, .8*seat_size, seat_size)
+		ctx.rectangle(-seat_size/2, -seat_size/2, seat_size, seat_size)
 		ctx.fill()
 
 	# Convert the image buffer to raw PNG bytes.
