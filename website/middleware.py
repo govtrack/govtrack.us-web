@@ -69,13 +69,6 @@ def template_context_processor(request):
     context["trending_feeds"] = trending_feeds[1]
     context["trending_bill_feeds"] = [f for f in trending_feeds[1] if f.feedname.startswith("bill:")]
 
-    # Add site-wide tracked events.
-    all_tracked_events = cache.get("all_tracked_events")
-    if not all_tracked_events:
-        all_tracked_events = Feed.get_events_for([fn for fn in ("misc:activebills2", "misc:billsummaries", "misc:allvotes") if Feed.objects.filter(feedname=fn).exists()], 6)
-        cache.set("all_tracked_events", all_tracked_events, 60*15) # 15 minutes
-    context["all_tracked_events"] = all_tracked_events
-
     # Get our latest Medium posts.
     medium_posts = cache.get("medium_posts")
     if not medium_posts:
