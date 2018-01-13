@@ -556,6 +556,11 @@ def bills_overview(request):
             [0:25]
         top_bills = [(Bill.from_feed(Feed.from_name(bf["feedname"])), bf["count"]) for bf in top_bills]
 
+        # trending bills
+        trf = Feed.get_trending_feeds()
+        trf = [Feed.objects.get(id=f) for f in trf]
+        trending_bill_feeds = [f for f in trf if f.feedname.startswith("bill:")]
+
         return {
             "feeds": feeds,
 
@@ -566,6 +571,7 @@ def bills_overview(request):
             "groups": groups,
             "coming_up": coming_up,
             "top_tracked_bills": top_bills,
+            "trending_bill_feeds": trending_bill_feeds,
 
             "subjects": subject_choices(),
             "BILL_STATUS_INTRO": (BillStatus.introduced, BillStatus.reported),

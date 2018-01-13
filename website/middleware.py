@@ -55,20 +55,6 @@ def template_context_processor(request):
     
     context = dict(base_context) # clone
     
-    # Add top-tracked feeds.
-    from events.models import Feed
-    global trending_feeds
-    if settings.DEBUG and False:
-        trending_feeds = [None, []]
-    elif not trending_feeds or trending_feeds[0] < datetime.datetime.now()-datetime.timedelta(hours=2):
-        trf = cache.get("trending_feeds")
-        if not trf:
-            trf = Feed.get_trending_feeds()
-            cache.set("trending_feeds", trf, 60*60*2)
-        trending_feeds = (datetime.datetime.now(), [Feed.objects.get(id=f) for f in trf])
-    context["trending_feeds"] = trending_feeds[1]
-    context["trending_bill_feeds"] = [f for f in trending_feeds[1] if f.feedname.startswith("bill:")]
-
     # Get our latest Medium posts.
     medium_posts = cache.get("medium_posts")
     if not medium_posts:
