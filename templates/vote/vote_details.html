@@ -279,8 +279,10 @@ $(function() {
 		{% endif %}
 
 		{% if vote.related_bill and vote.related_bill.oursummary %}
+		<div class="row">
+		<div class="col-sm-8">
 			<div class="well" style="position: relative">
-                <div id="vote-summary-wrapper" style="max-height: 7em; overflow: hidden;">
+                <div id="vote-summary-wrapper" style="max-height: 270px; overflow: hidden;">
                     <div>
         				{{vote.related_bill.oursummary.as_html|safe}}
         				{% if vote.related_bill.oursummary.source_text %}
@@ -307,9 +309,13 @@ $(function() {
                   </a>
                 </div>
 			</div>
-
-			{% include "ad_footer_leaderboard.html" %}
-			<hr>
+		</div> <!-- /col -->
+        <div class="col-sm-4">
+			<div class="ads" data-zone="master_a">
+				<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
+			</div> <!-- /ads square -->
+		</div>
+		</div> <!-- /row -->
 		{% endif %}
 
     {% elif vote.category == VoteCategory.amendment %}
