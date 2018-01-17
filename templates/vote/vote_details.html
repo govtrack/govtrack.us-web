@@ -7,14 +7,6 @@
 {% block head %}
 	<meta property="og:title" content="{{ vote.question|truncatewords:10 }} -- {{ vote.get_chamber_display }} Vote #{{ vote.number }} -- {{ vote.created|date:"DATE_FORMAT" }}" />
 	<style>
-	.hdr {
-		font-style: italic;
-		color: #666;
-	}
-	.dl-horizontal dt {
-		text-align: left;
-	}
-
     #vote-summary-wrapper > div > h2:first-child {
         margin-top: 0;
     }
@@ -23,6 +15,15 @@
         margin: 1em 0 0 0;
         font-style: italic;
     }
+
+	.vote-meta-info {
+	  font-size: 90%;
+	  margin-top: 1em;
+	}
+	#content .vote-meta-info p {
+	  margin-bottom: .25em;
+	  line-height: 128%;
+	}
 
     #what-you-can-do-actions {
     }
@@ -353,14 +354,15 @@ $(function() {
 <div style="margin: 30px 0">
 <div class="row">
 <div class="col-md-7">
+    <h3 style="margin: 0">Totals</h3>
     <table class="stats" style="margin-right: 30px">
         <thead>
             <tr>
                 <th></th>
-                <th colspan="2" style="font-weight: bold">Totals</th>
+                <th colspan="2">All Votes</th>
                 {% for party in totals.parties %}
                     <th style="padding-left: 6px; padding-right: 6px;">
-                    	{{ party }}s
+                    	{{party|slice:"0:1"}}<span class="hidden-xs">{{party|slice:"1:"}}s</span>
                     </th>
                 {% endfor %}
             </tr>
@@ -376,11 +378,13 @@ $(function() {
 					{% endcomment %}
                 	{{ item.option }}
                 </th>
-                <td style="font-weight: bold; padding: 0 6px 0 6px;">{{ item.count }}</td>
-                <td style="white-space: nowrap; text-align: left; padding: 5px;">
-                    {% for count in item.party_counts %}<div style="width: {{190|mult:count.count|div:totals.total_count|floatformat:0}}px; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 
+                <td style="padding: 0 6px 0 6px;">
+                  {{ item.percent }}<span style="margin-left: 2px; font-size: 80%; color: #555;">%</span>
+                </td>
+                <td style="white-space: nowrap; text-align: left; padding: 5px 1em 5px 5px;">
+                    {% for count in item.party_counts %}<div style="width: {{100|mult:count.count|div:totals.max_option_count|floatformat:0}}px; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 
                     &nbsp;</div>{% endfor %}<div style="display: inline-block; padding-left: 5px;">
-                        {{ item.percent }}<span style="margin-left: 2px; font-size: 80%; color: #555;">%</span>
+                      {{ item.count }}
                     </div>
 
                     {% if item.option.key == "0" and propublica_count > 0 %}
@@ -388,9 +392,9 @@ $(function() {
                     {% endif %}
                 </td>
                 {% for count in item.party_counts %}
-	                <td style="padding: 6px">
+	                <td style="padding: 6px 8px">
 						<div>{{ count.count }}</div>
-						<div style="height: .25em;"><div style="height: .25em; width: {{5|mult:count.count|div:totals.total_count|floatformat:3}}em; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
+						<div style="height: .25em;"><div style="height: .25em; width: {{2|mult:count.count|div:totals.max_option_count|floatformat:3}}em; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
 					</td>
                 {% endfor %}
             </tr>
@@ -405,20 +409,20 @@ $(function() {
     </table>
 </div>
 <div class="col-md-5">
-	<dl class="dl-horizontal" style="font-size: 90%; margin-top: 1em;">
-		<dt>Date:</dt>
-		<dd>{{ vote.created|date:"DATE_FORMAT" }}</dd>
+	<div class="vote-meta-info">
+		<p>Date:
+		{{ vote.created|date:"DATE_FORMAT" }}</p>
 		{% if vote.question_details %}
-		<dt>Question:</dt>
-		<dd>{{ vote.question_details }}</dd>
+		<p>Question:
+		{{ vote.question_details }}</p>
 		{% endif %}
-		<dt>Required:</dt>
-		<dd>{% if vote.required == "1/2" %}Simple Majority{% else %}{{ vote.required }}{% endif %}</dd>
-		<dt>Result:</dt>
-		<dd>{{ vote.result }}</dd>
-		<dt>Source:</dt>
-		<dd><a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a></dd>
-	</dl>
+		<p>Required:
+		{% if vote.required == "1/2" %}Simple Majority{% else %}{{ vote.required }}{% endif %}</p>
+		<p>Result:
+		{{ vote.result }}</p>
+		<p>Source:
+		<a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a></p>
+	</div>
 </div>
 </div>
 

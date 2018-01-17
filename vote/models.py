@@ -216,7 +216,7 @@ class Vote(models.Model):
         # hide Present/Not Voting if no one voted that way
         details = [d for d in details if d["count"] > 0 or "hide_if_empty" not in d]
 
-        totals = {'options': details, 'total_count': total_count,
+        totals = {'options': details, 'max_option_count': max(detail['count'] for detail in details),
                 'party_counts': party_counts, 'parties': all_parties,
                 }
         self._cached_totals = totals
