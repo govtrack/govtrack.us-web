@@ -410,18 +410,16 @@ aside .download-links { padding: 31px 0 0 }
 .stats thead.sortable th { cursor: pointer; }
 .stats tbody tr.group td { font-size: 105%; font-weight: bold; text-transform: none; }
 
-.partycolor_D { color: #0041a1; }
-.partycolor_R { color: #e60e13; }
+.partycolor_D { color: #008ed1; }
+.partycolor_R { color: #f83631; }
 .partycolor_I {  }
 .party_D, .party_I, .party_R {
 	cursor: default;
 	color: white;
 }
-.color_D { background-color: #0041a1; }
-.color_R { background-color: #e60e13; }
+.color_D, .party_D { background-color: #008ed1; }
+.color_R, .party_R { background-color: #f83631; }
 .color_I { background-color: #921b85; }
-.party_D { background-color: #0041a1; }
-.party_R { background-color: #e60e13; }
 .party_I { border: 1px solid black; color: black; }
 
 /* historical parties... the other letters of the alphabet */

@@ -266,12 +266,12 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 		return vote_thumbnail_image_seating_diagram(vote, image_type == "thumbnail")
 
 vote_diagram_colors = {
-	("D", "+"): (0.15, 0.34, 0.63),
-	("D", "-"): (0.85, 0.85, 1.0),
+	("D", "+"): (0/255.0, 142/255.0, 209/255.0), # same as CSS color
+	("D", "-"): (213/255.0, 244/255.0, 255/255.0), # reduced saturation and then matched lightness with R at 95
 	("I", "+"): (0.07, 0.05, 0.07),
 	("I", "-"): (0.85, 0.85, 0.85),
-	("R", "+"): (0.90, 0.25, 0.27),
-	("R", "-"): (1.0, 0.85, 0.85),
+	("R", "+"): (248/255.0, 54/255.0, 49/255.0), # same as CSS color
+	("R", "-"): (255/255.0, 227/255.0, 223/255.0), # reduced saturation and then matched lightness with D at 95
 }
 
 def vote_thumbnail_image_map(vote):
