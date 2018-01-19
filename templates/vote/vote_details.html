@@ -236,6 +236,9 @@ $(function() {
 
 <div id="vote_explainer">
 	{% if vote.oursummary %}
+		<div class="row">
+		<div class="col-sm-8">
+
 		<div>{{vote.oursummary.as_html|safe}}</div>
 
 		<small>
@@ -252,12 +255,13 @@ $(function() {
         {% endif %}
 		</small>
 
-		<hr>
-
-		{% include "ad_footer_leaderboard.html" %}
-
-		<hr>
-
+		</div> <!-- /col -->
+	    <div class="col-sm-4">
+			<div class="ads" data-zone="master_a">
+				<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
+			</div> <!-- /ads square -->
+		</div> <!-- /col -->
+		</div> <!-- /row -->
 
     {% elif vote.is_on_passage %}
 		<p>
