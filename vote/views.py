@@ -305,6 +305,10 @@ def vote_thumbnail_image_map(vote):
 		elif node.tag.endswith("polygon"):
 			# No voter for this district.
 			node.set("style", "fill:white")
+		elif node.get("id") == "non-voting-delegates":
+			# The non-voting-delegates group holds the districts
+			# we should hide because they don't have a vote.
+			tree.getroot().remove(node)
 
 	# Send response.
 	v = ET.tostring(tree.getroot())

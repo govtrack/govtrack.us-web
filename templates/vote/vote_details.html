@@ -361,7 +361,7 @@ $(function() {
 <div class="row">
 <div class="col-md-7">
     <h3 style="margin: 0">Totals</h3>
-    <table class="stats" style="margin-right: 30px">
+    <table class="stats" style="margin: 0 30px 0 0">
         <thead>
             <tr>
                 <th></th>
@@ -400,7 +400,7 @@ $(function() {
                 {% for count in item.party_counts %}
 	                <td style="padding: 6px 8px">
 						<div>{{ count.count }}</div>
-						<div style="height: .25em;"><div style="height: .25em; width: {{2|mult:count.count|div:totals.max_option_count|floatformat:3}}em; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
+						<div style="height: .25em;"><div style="height: .25em; width: {{3.5|mult:count.count|div:totals.max_option_count|floatformat:3}}em; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
 					</td>
                 {% endfor %}
             </tr>
