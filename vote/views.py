@@ -613,43 +613,78 @@ def presidential_candidates(request):
 
 @anonymous_view
 @render_to('vote/comparison.html')
-def vote_comparison_table(request, table_id, table_slug):
+def vote_comparison_table_named(request, table_id, table_slug):
 	# Validate URL.
-	if int(table_id) != 1:
+	if int(table_id) == 1:
+		if table_slug != "trump-nominations":
+			return HttpResponseRedirect("/congress/votes/compare/1/trump-nominations")
+		title = "Key Trump Nominations"
+		description = "Senate votes on key Trump nominations."
+		votes = [
+			("115-2017/s29", { "title": "Mattis—Defense", "longtitle":  "James Mattis to be Secretary of Defense" }),
+			("115-2017/s30", { "title": "Kelly—Homeland Security", "longtitle": "John Kelly to be Secretary of Homeland Security" }),
+			("115-2017/s32", { "title": "Pompeo—CIA", "longtitle": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
+			("115-2017/s33", { "title": "Haley—UN Ambassador", "longtitle": "Nikki Haley to be the Ambassador to the United Nations" }),
+			("115-2017/s35", { "title": "Chao—Transportation", "longtitle": "Elaine Chao to be Secretary of Transportation" }),
+			("115-2017/s36", { "title": "Tillerson—State", "longtitle": "Rex Tillerson to be Secretary of State" }),
+			("115-2017/s54", { "title": "DeVos—Education", "longtitle": "Elisabeth DeVos to be Secretary of Education" }),
+			("115-2017/s59", { "title": "Sessions—Attorney General", "longtitle": "Jeff Sessions to be Attorney General" }),
+			("115-2017/s61", { "title": "Price—HHS", "longtitle": "Thomas Price to be Secretary of Health and Human Services" }),
+			("115-2017/s63", { "title": "Mnuchin—Treasury", "longtitle": "Steven Mnuchin to be Secretary of the Treasury" }),
+			("115-2017/s64", { "title": "Shulkin—VA", "longtitle": "David Shulkin to be Secretary of Veterans Affairs" }),
+			("115-2017/s65", { "title": "McMahon—SBA", "longtitle": "Linda McMahon to be Administrator of the Small Business Administration" }),
+			("115-2017/s68", { "title": "Mulvaney—OMB", "longtitle": "Mick Mulvaney to be Director of the Office of Management and Budget" }),
+			("115-2017/s71", { "title": "Pruitt—EPA", "longtitle": "Scott Pruitt to be Administrator of the Environmental Protection Agency" }),
+		]
+	elif int(table_id) == 2:
+		if table_slug != "trump-impeachment":
+			return HttpResponseRedirect("/congress/votes/compare/2/trump-impeachment")
+		title = "Comparing Votes Impeaching President Trump"
+		description = "House votes on resolutions of impeachment of the President."
+		votes = [
+			("115-2017/h658", { "title": "On Motion to Table Resolution of Impeachment H.Res. 646" }),
+			("115-2018/h35", { "title": "On Motion to Table Resolution of Impeachment H.Res. 705" }),
+		]
+	else:
 		raise Http404()
-	if table_slug != "trump-nominations":
-		return HttpResponseRedirect("/congress/votes/compare/1/trump-nominations")
-
-	# Get votes to show.
-	votes = [
-		("115-2017/s29", { "title": "Mattis—Defense", "longtitle":  "James Mattis to be Secretary of Defense" }),
-		("115-2017/s30", { "title": "Kelly—Homeland Security", "longtitle": "John Kelly to be Secretary of Homeland Security" }),
-		("115-2017/s32", { "title": "Pompeo—CIA", "longtitle": "Mike Pompeo to be Director of the Central Intelligence Agency" }),
-		("115-2017/s33", { "title": "Haley—UN Ambassador", "longtitle": "Nikki Haley to be the Ambassador to the United Nations" }),
-		("115-2017/s35", { "title": "Chao—Transportation", "longtitle": "Elaine Chao to be Secretary of Transportation" }),
-		("115-2017/s36", { "title": "Tillerson—State", "longtitle": "Rex Tillerson to be Secretary of State" }),
-		("115-2017/s54", { "title": "DeVos—Education", "longtitle": "Elisabeth DeVos to be Secretary of Education" }),
-		("115-2017/s59", { "title": "Sessions—Attorney General", "longtitle": "Jeff Sessions to be Attorney General" }),
-		("115-2017/s61", { "title": "Price—HHS", "longtitle": "Thomas Price to be Secretary of Health and Human Services" }),
-		("115-2017/s63", { "title": "Mnuchin—Treasury", "longtitle": "Steven Mnuchin to be Secretary of the Treasury" }),
-		("115-2017/s64", { "title": "Shulkin—VA", "longtitle": "David Shulkin to be Secretary of Veterans Affairs" }),
-		("115-2017/s65", { "title": "McMahon—SBA", "longtitle": "Linda McMahon to be Administrator of the Small Business Administration" }),
-		("115-2017/s68", { "title": "Mulvaney—OMB", "longtitle": "Mick Mulvaney to be Director of the Office of Management and Budget" }),
-		("115-2017/s71", { "title": "Pruitt—EPA", "longtitle": "Scott Pruitt to be Administrator of the Environmental Protection Agency" }),
-	]
 
 	# Compute matrix.
 	votes, party_totals, voters = get_vote_matrix(votes)
 
 	# Return.
 	return {
-		"title": "Key Trump Nominations",
-		"description": "Senate votes on key Trump nominations.",
+		"title": title,
+		"description": description,
 		"votes": votes,
 		"party_totals": party_totals,
 		"voters": voters,
 		"col_width_pct": int(round(100/(len(votes)+1))),
 	}
+
+@anonymous_view
+@render_to('vote/comparison.html')
+def vote_comparison_table_arbitrary(request, vote_ids):
+    # Get votes to show.
+    votes = []
+    for vote_id in vote_ids.split(","):
+        try:
+            vote = get_object_or_404(Vote, id=vote_id)
+        except ValueError:
+            raise Http404()
+        votes.append(vote)
+
+    # Compute matrix.
+    votes, party_totals, voters = get_vote_matrix(votes)
+
+    # Return.
+    return {
+        "title": "Vote Comparison",
+        "description": "",
+        "votes": votes,
+        "party_totals": party_totals,
+        "voters": voters,
+        "col_width_pct": int(round(100/(len(votes)+1))),
+    }
 
 def get_vote_matrix(votes):
 	# Convert votes array to Vote instances with extra fields attached as instance fields.
