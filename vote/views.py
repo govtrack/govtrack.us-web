@@ -133,7 +133,9 @@ def vote_details_userview(request, congress, session, chamber_code, number):
         admin_panel = """
             <div class="clear"> </div>
             <div style="margin-top: 1.5em; padding: .5em; background-color: #EEE; ">
-                <b>ADMIN</b> - <a href="{% url "vote_go_to_summary_admin" %}?vote={{vote.id}}">Edit Summary</a>
+                <b>ADMIN</b>
+                - <a href="/admin/vote/vote/{{vote.id}}/change/">Edit Vote</a>
+                - <a href="{% url "vote_go_to_summary_admin" %}?vote={{vote.id}}">Edit Summary</a>
             </div>
             """
 
