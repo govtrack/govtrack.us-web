@@ -967,7 +967,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
             vote_text = None
             vote_obj = None
-            if srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "pingpong", "conference", "override"):
+            if srcnode is not None and srcnode.get("where") in ("h", "s") and srcnode.get("type") in ("vote", "vote2", "cloture", "pingpong", "conference", "override"):
                 if srcnode.get("how") == "roll":
                     try:
                         from vote.models import Vote, CongressChamber, VoteSource
@@ -1043,6 +1043,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
             # Bring in committee meetings. Skip if we have a REPORTED status on the same date.
             for mtg in self.committeemeeting_set.all():
+                if unicode(mtg.committee) == "House Committee on Rules": continue # not interesting
                 for rec in ret:
                     if rec["key"] == "reported" and rec["date"].isoformat()[0:10] == mtg.when.isoformat()[0:10]:
                         break
@@ -1057,9 +1058,11 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
             # Bring in committee reports.
             for rpt in self.get_committee_reports():
-                # Attach to an existing Reported event on the same date.
+                # Attach to an existing Reported event on the same date. Replace an existing bill text
+                # for reported status on the same date.
                 # TODO: But this could be the wrong chamber if multiple reports on the same date? Probably
                 # should check that the chamber matches the bill's originating chamber.
+                bill_text_event = None
                 for i, event in enumerate(ret):
                     if event["key"] == "reported" \
                        and rpt["docdate"] == as_date(event["date"]) \
@@ -1067,6 +1070,10 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         event["explanation"] += " The %s issued the report which may provide insight into the purpose of the legislation." % rpt["committee_name"]
                         event["committee_report_link"] = rpt["gpo_pdf_url"]
                         break
+                    if event["key"] == "text_version" and event["text_version"] in ("rs", "rh") \
+                       and rpt["docdate"] == as_date(event["date"]) \
+                       and "committee_report_link" not in event:
+                        bill_text_event = event
                 else:
                     # Add a new event.
                     ret.append({
@@ -1077,6 +1084,9 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                         "end_of_day": True,
                         "committee_report_link": rpt["gpo_pdf_url"],
                     })
+                    if bill_text_event:
+                        ret.remove(bill_text_event)
+                        ret[-1]["text_version"] = bill_text_event["text_version"]
 
             # Bring in major events from bills with textual similarity.
             got_rb = set()
