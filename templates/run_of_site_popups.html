@@ -8,7 +8,7 @@ $(function() {
 		if (win_loc_hash == "#track") return;
 
 		// Read the persistent cookie for flags.
-		var flags = $.cookie("flags");
+		var flags = $.cookie("flags1");
 		flags = !flags ? {} : parse_qs(flags);
 
 		// Increment a counter.
@@ -23,47 +23,88 @@ $(function() {
 		//	ga('send', 'event', 'popup', 'survey');
 
 		!function() {
-			//if (show_messenger(flags)) return;
-			//if (show_followus(flags)) return;
+			if (show_followus(flags)) return;
 		}();
 
 		// Save flags.
-		$.cookie("flags", form_qs(flags), { expires: 21, path: '/' });
+		$.cookie("flags1", form_qs(flags), { expires: 28, path: '/' });
 	}, 750)
 });
 
 function show_followus(flags) {
-	if (Math.random() < .66) return false; // shown 1/3rd of times
-	if (flags.foll_tw) return false; // only show once
-	
-	flags.foll_tw = true;
+	// only show this modal once
+	if (flags.follow_us) return false;
+	flags.follow_us = true;
 
 	$('#followus_modal').modal();
+
+	// add twitter async script
 	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
 
-	return true;
-}
-
-function show_messenger(flags) {
-	if (flags.fbm) return false; // only show once
-	flags.fbm = true;
-
-	$('#message_us_modal').modal();
 	return true;
 }
 </script>
 
 
 <div id="followus_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="followusModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-sm" role="document">
+  <style scoped>
+    #followus_modal p { line-height: 132%; margin-bottom: 1em; }
+    #followus_modal .modal-body .row > div > div { margin-bottom: 1.75em; }
+    #followus_modal .dropnum {
+      color: #903;
+      float: left;
+      font-family: Georgia, Times New Roman, serif;
+      font-weight: bold;
+      font-size: 3em;
+      line-height: .85em;
+      padding-right: 12px;
+      padding-left: 3px;
+      padding-bottom: 5px;
+    }
+  </style>
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="followusModalTitle">Follow us?</h4>
+        <h4 class="modal-title" id="followusModalTitle">Getting Started with GovTrack</h4>
       </div>
       <div class="modal-body">
-        <p style="margin-bottom: 20px">We tweet when bills are enacted and when we publish original research.</p>
-        <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/govtrack" data-widget-id="508366437044330496" data-height="250" data-tweet-limit="2" data-chrome="nofooter noborders">Tweets by @govtrack</a>
+        <div class="row">
+          <div class="col-sm-6">
+            <p><span class="dropnum">1.</span> Follow us on Twitter and Facebook for updates about legislation in Congress.</p>
+
+            <div>
+              <a href="https://twitter.com/govtrack?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="true">Follow @govtrack</a>
+              <span style="width: 2em">&nbsp;</span>
+              <iframe src="https://www.facebook.com/plugins/follow.php?href=https%3A%2F%2Fwww.facebook.com%2Fgovtrack&width=120&height=21&layout=button_count&size=small&show_faces=true&appId" width="120" height="21" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+            </div>
+
+            <p><span class="dropnum">2.</span> Say &ldquo;Hi&rdquo; to us on Facebook Messenger and we&rsquo;ll walk you
+            through how to call your representative and senators.</p>
+
+            <div><a class="btn btn-default btn-sm" href="https://www.messenger.com/t/govtrack" target="_blank" style="color: black">
+              <img src="{% static "images/facebook_messenger.png" %}" style="height: 1.5em;">
+              Say &ldquo;Hi&rdquo; on Messenger
+            </a></div>
+
+            <p><span class="dropnum">3.</span> Sign up for our articles by email and then get legislative alerts for your reps or issues you care about.</p>
+
+            <div>
+              <a class="btn btn-primary btm-sm" href="/events/govtrack-insider" target="_blank"><i class="glyphicon glyphicon-envelope"></i> Sign Up</a>
+              <a class="btn btn-primary btm-sm" href="/start" target="_blank"><i class="glyphicon glyphicon-flash"></i> Get Alerts</a>
+            </div>
+            
+            <p><span class="dropnum">4.</span> Support our work so we can bring you more information about what Congress is doing each day.</p>
+
+            <div>
+              <a class="btn btn-primary btm-sm" href="/accounts/membership" target="_blank"><i class="glyphicon glyphicon-usd"></i> One Time</a>
+              <a class="btn btn-primary btm-sm" href="https://www.patreon.com/govtrack" target="_blank"><i class="glyphicon glyphicon-credit-card"></i> Monthly</a>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/govtrack" data-widget-id="508366437044330496" data-chrome="noheader nofooter noborders transparent" data-tweet-limit="1">Tweets by @govtrack</a>
+          </div>
+        </div>
       </div>
       <!--<div class="modal-footer">
       	<button type="button" class="btn btn-default" data-dismiss="modal">Not Now</button>
@@ -71,62 +112,8 @@ function show_messenger(flags) {
     </div>
   </div>
 </div>
-
-<div id="message_us_modal" class="modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="message_us_modal_title">
-  <div class="modal-dialog">
-  <style>
-  	#message_us_modal .modal-content {
-  		background-color: #9D2146;
-  		color: white;
-  	}
-  	#message_us_modal .modal-body .close { color: #EEE; opacity: .75; }
-  	#message_us_modal .modal-body h4 {
-  		margin-bottom: .5em;
-  	}
-  	#message_us_modal .modal-body p {
-  		line-height: 130%;
-  	}
-  	#message_us_modal .modal-body a.btn {
-  		font-size: 20px;
-  		margin-bottom: 1.5em;
-  		background-color: white;
-  		color: #337ab7;
-  		border-color: #AABBAA;
-  	}
-  	#message_us_modal .modal-body a.btn:hover {
-  		background-color: #FFE;
-  		border-color: white;
-  	}
-  </style>
-    <div class="modal-content" style="font-size: 17px;">
-      <div class="modal-body">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-   		<h4 class="modal-title" id="message_us_modal_title" style="font-size: 22px; font-weight: bold; line-height: 140%;">
-   			Say &ldquo;Hi&rdquo; to GovTrack&rsquo;s new CallBot!
-   		</h4>
-
-   		<p style="margin: 1.5em 0">Say &ldquo;Hi&rdquo; to @GovTrack on Facebook Messenger and we&rsquo;ll walk you through <b>how to call your representative and senators</b> about important issues as they arise.</p>
-
-   		<div class="row">
-   			<div class="col-sm-7">
-   				<a class="btn"
-   					href="https://www.messenger.com/t/govtrack">
-   					<img src="{% static "images/facebook_messenger.png" %}" style="height: 1.5em;">
-   					Say &ldquo;Hi&rdquo; on Messenger
-   				</a>
-
-   				<p>In the future we&rsquo;ll also let you know about other issues in Congress where your voice matters, and after you call we&rsquo;ll tell you what happened.</p>
-
-   				<p>Like the rest of GovTrack, our CallBot is nonpartisan. We want to help everyone reach Congress.</p>
-   			</div>
-   			<div class="col-sm-5 hidden-xs">
-   				<p style="line-height: 122%;">Not on your phone? Scan this code with Messenger to find us:</p>
+{% comment %}
    				<a href="https://www.messenger.com/t/govtrack">
    					<img src="{% static "images/facebook_messenger_code.png" %}" class="img-responsive" style="border: 2px solid black;">
    				</a>
-   			</div>
-   		</div>
-      </div>
-    </div>
-  </div>
-</div>
+{% endcomment %}
