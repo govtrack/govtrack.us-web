@@ -49,7 +49,7 @@ class Committee(models.Model):
 
     @property
     def fullname(self):
-        if self.committee == None:
+        if self.committee_id == None:
             return self.name
         else:
             return self.committee.name + ": Subcommittee on " + self.name
