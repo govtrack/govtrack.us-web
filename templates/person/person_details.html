@@ -317,7 +317,7 @@ function show_pronunciation_guide() {
         {% for r in person.roles_condensed %}
         	{% if forloop.first %}
         		{# r has mangled dates, so for the next election year we use "role" #}
-        		<p>{{ person.lastname }}{% if r.party %}, a{% if r.party.0 == "I" %}n{% endif %} {{r.party}},{% endif %}
+        		<p>{{ person.lastname }}{% if r.party %}, a{% if r.party.0 == "I" %}n{% endif %} {{r.party}}{% if r.caucus %}{% if r.current %} caucusing{% else %}who caucused{% endif %} with the {{r.caucus}}s{% endif %},{% endif %}
         		{% if r.current %}is{% else %}was{% endif %} {# because of senator junior/senior status which can change mid-term, we cannot say "has been...since termstart" #}
         		{{r.get_description_natural|safe}}
         		{% if r.current and r.district > 0 %}(<a href="/congress/members/{{r.state}}/{{r.district}}">view map</a>){% endif %}

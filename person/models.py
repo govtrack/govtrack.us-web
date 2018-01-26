@@ -227,6 +227,7 @@ class Person(models.Model):
                 ret[-1].enddate = role.enddate
                 ret[-1].current |= role.current
                 ret[-1].party = role.party # show most recent party
+                ret[-1].caucus = role.caucus # show most recent cancus
                 ret[-1].seniority = None # probably changes
             else:
                 ret.append(role)
