@@ -89,11 +89,14 @@ class BillTerm(models.Model):
 
     @staticmethod
     def get_top_term_ids():
+        # Get the IDs of all of the (contemporary "new") BillTerm instances
+        # that are top terms, i.e. that are not the child term of any other term.
+        # Cache the answer.
         from django.core.cache import cache
         key = "BillTerm.get_top_terms"
         ret = cache.get(key)
         if ret is not None: return ret
-        ret = set([t.id for t in BillTerm.objects.filter(term_type=TermType.new) if t.is_top_term()])
+        ret = set(BillTerm.objects.filter(term_type=TermType.new, parents=None).values_list('id', flat=True))
         cache.set(key, ret, 60*60*24*7) # one week, cause this never changes
         return ret
 
