@@ -72,6 +72,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'twostream.middleware.CacheLogic',
     'website.middleware.GovTrackMiddleware',
 ]
@@ -92,7 +93,7 @@ INSTALLED_APPS = (
     # 3rd party libraries
     'common',
     #'south',
-    #'debug_toolbar',
+    'debug_toolbar',
     #'silk',
     'crispy_forms',
 
@@ -186,3 +187,5 @@ SILKY_MAX_RESPONSE_BODY_SIZE = 0
 SILKY_META = True
 SILKY_INTERCEPT_PERCENT = 1
 SILKY_PYTHON_PROFILER = True
+
+SHOW_TOOLBAR_CALLBACK = lambda : True

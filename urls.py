@@ -65,6 +65,12 @@ if settings.DEBUG:
     from django.conf.urls.static import static
     urlpatterns += static("/data", document_root="data")
 
+    # serve the debug toolbar
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
+
 if "silk" in settings.INSTALLED_APPS:
 	urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
 
