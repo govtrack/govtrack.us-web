@@ -1339,7 +1339,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             if normalize_title(self.title_no_number) != normalize_title(reintro.title_no_number): continue
             yield reintro
 
-    def was_enacted_ex(self, recurse=True, restrict_to_activity_in_date_range=None):
+    def was_enacted_ex(self, recurse=True, restrict_to_activity_in_date_range=None, cache_related_bills_qs=None):
         # Checking if a bill was "enacted" in a popular sense is a little tricky.
         # A bill is enacted if it was signed by the president, etc.
         # And if a bill's provisions were substantially incorporated into a bill
@@ -1366,6 +1366,14 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         # time frame, so there is that restriction too. restrict_to_activity_in_date_range
         # is a tuple of datetime.Date instances in that case.
 
+        # Pre-fetch related bills.
+        identical_bills = lambda : self.relatedbills.filter(relation="identical").select_related("related_bill")
+        if cache_related_bills_qs is not None and not hasattr(cache_related_bills_qs, '_cache_related_bills'):
+            cache_related_bills_qs._cache_related_bills = list(RelatedBill.objects.filter(bill__in=cache_related_bills_qs, relation="identical").select_related("related_bill"))
+        if hasattr(cache_related_bills_qs, '_cache_related_bills'):
+            identical_bills = lambda : set(rb for rb in cache_related_bills_qs._cache_related_bills # lazy load
+              if rb.bill_id == self.id)
+
         def date_filter(d):
             if restrict_to_activity_in_date_range is None: return True
             return restrict_to_activity_in_date_range[0] <= d <= restrict_to_activity_in_date_range[1]
@@ -1390,7 +1398,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
         # Check identical bills identified by CRS, i.e. "companion" bills.
         if recurse:
-            for rb in RelatedBill.objects.filter(bill=self, relation="identical").select_related("related_bill"):
+            for rb in identical_bills():
                 e = rb.related_bill.was_enacted_ex(recurse=False, restrict_to_activity_in_date_range=restrict_to_activity_in_date_range)
                 if e is not None:
                      return e

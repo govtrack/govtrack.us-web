@@ -171,6 +171,8 @@ def person_details(request, pk):
                 break
           pronunciation["key"] = sorted([ (letter, pronunciation_guide_key[letter]) for letter in pronunciation["key"] if pronunciation_guide_key[letter] ])
 
+        enacted_bills_src_qs = person.sponsored_bills.exclude(original_intent_replaced=True).order_by('-current_status_date')
+
         return {'person': person,
                 'role': role,
                 'active_role': active_role,
@@ -180,7 +182,7 @@ def person_details(request, pk):
                 'photo_credit': photo_credit,
                 'links': links,
                 'analysis_data': analysis_data,
-                'enacted_bills': [b for b in person.sponsored_bills.exclude(original_intent_replaced=True).order_by('-current_status_date') if b.was_enacted_ex()],
+                'enacted_bills': [b for b in enacted_bills_src_qs if b.was_enacted_ex(cache_related_bills_qs=enacted_bills_src_qs)],
                 'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
                 'committeeassignments': get_committee_assignments(person),
                 'feed': person.get_feed(),
