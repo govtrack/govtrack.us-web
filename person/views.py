@@ -209,7 +209,7 @@ def person_details(request, pk):
 def load_key_votes(person):
     # Get this person's key votes.
 
-    from vote.models import Vote
+    from vote.models import Vote, Voter
 
     # First get all of the major votes that this person has participated in.
     all_votes = person.votes.filter(vote__category__in=Vote.MAJOR_CATEGORIES)
@@ -250,8 +250,9 @@ def load_key_votes(person):
     ret = sorted(ret, key = lambda v : v.created, reverse=True)
 
     # Replace with a tuple of the vote and the Voter object for this person.
+    voters = { v.vote_id: v for v in Voter.objects.filter(vote__in=ret, person=person).select_related("option") }
     ret = [
-        (vote, vote.voters.get(person=person))
+        (vote, voters[vote.id])
         for vote in ret
     ]
 
