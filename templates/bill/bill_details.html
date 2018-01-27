@@ -478,21 +478,19 @@
 				{% endif %}
 				{% endif %}
 
-				{% with bill.get_prognosis as p %}
-				{% if p and bill.is_alive %}
+				{% if prognosis and bill.is_alive %}
 				<dt>Prognosis:</dt>
 				<dd>
 					<p>
 						<span
-						{% if p.prediction|floatformat:0 == "0" %}data-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
+						{% if prognosis.prediction|floatformat:0 == "0" %}data-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
 						>
-						{{p.prediction|floatformat:0}}% chance</span> of being {{p.success_name}}
+						{{prognosis.prediction|floatformat:0}}% chance</span> of being {{prognosis.success_name}}
                         according to <a href="https://www.skoposlabs.com/" style="font-weight: normal">Skopos Labs</a>
 						(<a href="#" onclick="$('#prognosis-details').modal(); return false;" style="font-weight: normal;">details</a>)
 					</p>
 				</dd>
 				{% endif %}
-				{% endwith %}
 				
 				{% with reintro_as=reintros.1 related_newer=bill.get_related_bills_newer %}
 					
@@ -726,8 +724,7 @@
 	
 
 {# Prognosis Details #}
-{% with bill.get_prognosis as p %}
-{% if p %}
+{% if prognosis %}
 <div id="prognosis-details" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="prognosis-details-title" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -736,10 +733,10 @@
         <h4 class="modal-title" id="prognosis-details-title">Prognosis Details</h4>
       </div>
       <div class="modal-body">
-      	<p style="margin-bottom: .25em">This {{bill.noun}} has a <b>{{p.prediction|floatformat:0}}%</b> chance of being {{p.success_name}}.</p>
-        {% if p.notes %}
+      	<p style="margin-bottom: .25em">This {{bill.noun}} has a <b>{{prognosis.prediction|floatformat:0}}%</b> chance of being {{prognosis.success_name}}.</p>
+        {% if prognosis.notes %}
           <p>Factors considered:</p>
-          <p style="margin: 1em">{{p.notes}}</p>
+          <p style="margin: 1em">{{prognosis.notes}}</p>
           <p>(Factors are based on correlations which may not indicate causation.)</p>
         {% endif %}
         <p>Predictions are by <a href="https://www.skoposlabs.com/">Skopos Labs</a>.</p>
@@ -748,7 +745,6 @@
   </div>
 </div>
 {% endif %}
-{% endwith %}
 
 		
 {% if bill.congress >= 113 and 0 %}

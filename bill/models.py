@@ -526,25 +526,50 @@ class Bill(models.Model):
         return self.links.filter(approved=True)
 
     def get_prognosis(self):
+        # Gets the prognosis, returning a dict with fields "prediction" (a percent) and
+        # "success_name" (a string either "enacted" or "agreed to", depending on the
+        # type of bill).
+
+        # There are no prognoses for dead bills.
         if self.congress != settings.CURRENT_CONGRESS: return None
-        # Load the predictgov prognosis data.
+
+        # Load and cache the Skopos Labs prognosis data.
         from django.core.cache import cache
-        key = "Bill.predictgov"
+        key = "Bill.prognosis.skopos"
         ret = cache.get(key)
         if ret is None:
+            # Cache miss.
             try:
                 import csv
-                ret = { row["bill_id"].lower(): { "prediction": float(row["Prediction"])*100, "notes": row["descs"] }
-                    for row in csv.DictReader(open("../scripts/predictgov/predictions.csv")) }
+                with open("../scripts/predictgov/predictions.csv") as f:
+                    ret = { row["bill_id"].lower(): { "prediction": float(row["Prediction"])*100 } # , "notes": row["descs"] }
+                            for row in csv.DictReader(f) }
             except:
                 # On any sort of error, just ignore.
                 return None
             cache.set(key, ret, 60*60*4.5) # 4.5 hours, since the file is updated daily
+
+        # Extract the info for this bill.
         ret = ret.get(self.congressproject_id)
         if ret:
             ret["success_name"] = "enacted" if self.bill_type in (BillType.senate_bill, BillType.house_bill, BillType.senate_joint_resolution, BillType.house_joint_resolution) \
                 else "agreed to"
         return ret
+
+    def get_prognosis_with_details(self):
+        # The notes --- the explanation for the prognosis --- is too much to cache in memcached
+        # in a single entry. Just go to disk for each bill. This only happens on bill pages.
+        # Same return value as get_prognosis, but adds a "notes" key.
+        try:
+            import csv
+            with open("../scripts/predictgov/predictions.csv") as f:
+                for row in csv.DictReader(f):
+                    if row["bill_id"].lower() == self.congressproject_id:
+                        return { "prediction": float(row["Prediction"])*100, "notes": row["descs"] }
+        except:
+            # On any sort of error, just ignore.
+            pass
+        return None
 
     def get_formatted_summary(self):
         return get_formatted_bill_summary(self)
