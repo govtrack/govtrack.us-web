@@ -308,7 +308,7 @@ class SearchManager(object):
                 def count(self):
                     return len(self.qs)
                 def order_by(self, field):
-                    return SR(self.qs.order_by(field))
+                    return SR(self.qs.order_by(field), self.manager)
                 def __len__(self):
                     return len(self.qs)
                 def __getitem__(self, index): # slices too, yields a list?
