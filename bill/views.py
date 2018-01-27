@@ -489,7 +489,7 @@ def subject_choices():
     global subject_choices_data
     if subject_choices_data == None:
         subject_choices_data = { }
-        for t in BillTerm.objects.filter(term_type=TermType.new).exclude(parents__id__gt=0):
+        for t in BillTerm.objects.filter(term_type=TermType.new).exclude(parents__id__gt=0).prefetch_related("subterms"):
             x = []
             subject_choices_data[t] = x
             for tt in t.subterms.all():

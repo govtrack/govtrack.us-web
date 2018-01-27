@@ -259,7 +259,7 @@ class Bill(models.Model):
         for datestr, st, text, srcxml in reversed(self.major_actions):
             if srcxml:
                 srcnode = etree.fromstring(srcxml)
-                v = Bill.get_status_related_vote(srcnode)
+                v = self.get_status_related_vote(srcnode)
                 if v:
                     vurl = v.get_thumbnail_url()
                     if vurl:
@@ -740,7 +740,7 @@ class Bill(models.Model):
                 raise Exception("Invalid %s event in %s." % (status, str(self)))
 
             # get a URL to a thumbnail (if this status is for a roll call vote, use its thumbnail)
-            v = Bill.get_status_related_vote(srcnode)
+            v = self.get_status_related_vote(srcnode)
             if v:
                 thumbnail_url = v.get_absolute_url() + "/image"
             else:
@@ -819,11 +819,10 @@ class Bill(models.Model):
             "thumbnail_url": thumbnail_url,
             }
 
-    @staticmethod
-    def get_status_related_vote(srcnode):
+    def get_status_related_vote(self, srcnode):
         if srcnode is not None and srcnode.get("how") == "roll":
             from vote.models import Vote, CongressChamber
-            return Vote.objects.filter(session=srcnode.get("datetime")[0:4], chamber=CongressChamber.senate if srcnode.get("where") == "s" else CongressChamber.house, number=srcnode.get("roll")).first()
+            return Vote.objects.filter(congress=self.congress, session=srcnode.get("datetime")[0:4], chamber=CongressChamber.senate if srcnode.get("where") == "s" else CongressChamber.house, number=srcnode.get("roll")).first()
         return None
 
     def render_event_cosp(self, ev_code, feeds):

@@ -46,16 +46,19 @@ def index(request):
     # Get some bills whose status recently changed, focusing on important bills
     # using the proscore. Draw from different time periods to get a mix of
     # bills that are both important and recent.
+    from bill.models import Bill
     from datetime import datetime, timedelta
     from settings import CURRENT_CONGRESS
     from haystack.query import SearchQuerySet
     bills = set()
     for days in (1, 2, 3, 7, 14):
-        sqs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], congress=CURRENT_CONGRESS, current_status_date__gt=datetime.now()-timedelta(days=days)).order_by('-proscore')
+        sqs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], congress=CURRENT_CONGRESS, current_status_date__gt=datetime.now()-timedelta(days=days)).order_by('-proscore')[0:60]
         n1 = len(bills)
+        sqs_bills = Bill.objects.select_related('oursummary').in_bulk({ sb.pk for sb in sqs  })
         for sb in sqs:
-            if sb.object in bills: continue
-            bills.add(sb.object)
+            bill = sqs_bills[int(sb.pk)]
+            if bill in bills: continue
+            bills.add(bill)
             if len(bills) - n1 > 1: break
         if len(bills) == 60: break
     from bill.models import Bill;  bills.add(Bill.objects.get(id=355371))
