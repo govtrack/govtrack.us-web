@@ -3,7 +3,7 @@ from django.contrib.humanize.templatetags.humanize import ordinal
 
 from smartsearch.manager import SearchManager
 
-from bill.models import Bill, BillTerm, TermType, BillType, BillStatus, USCSection
+from bill.models import Bill, BillTerm, TermType, BillType, BillStatus, USCSection, RelatedBill
 from person.models import Person
 from us import get_congress_dates
 from settings import CURRENT_CONGRESS
@@ -108,8 +108,17 @@ def usc_cite(qs, form):
 		return qs.filter(usc_citations_uptree=v)
 	return None
 
+def bill_bulk_loader(bill_ids):
+    bills = Bill.objects\
+        .select_related("sponsor")\
+        .in_bulk(bill_ids)
+    for b in bills.values(): b._cached_identical_bills = set()
+    for rb in RelatedBill.objects.filter(bill__in=list(bills), relation="identical").select_related("related_bill"):
+        bills[rb.bill.id]._cached_identical_bills.add(rb)
+    return bills
+
 def bill_search_manager():
-    sm = SearchManager(Bill, connection="bill")
+    sm = SearchManager(Bill, connection="bill", bulk_loader=bill_bulk_loader)
     
     sm.add_option('similar_to', type="text", label="similar to (enter bill number)", visible_if=lambda form : False, filter=similar_to)
     sm.add_option('usc_cite', type="text", label="cites", visible_if=lambda form : False, orm_field_name='usc_citations_uptree', filter=usc_cite)

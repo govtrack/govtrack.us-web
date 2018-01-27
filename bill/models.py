@@ -1370,6 +1370,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
         # Pre-fetch related bills.
         identical_bills = lambda : self.relatedbills.filter(relation="identical").select_related("related_bill")
+        if hasattr(self, '_cached_identical_bills'):
+            identical_bills = lambda : self._cached_identical_bills
         if cache_related_bills_qs is not None and not hasattr(cache_related_bills_qs, '_cache_related_bills'):
             cache_related_bills_qs._cache_related_bills = list(RelatedBill.objects.filter(bill__in=set(cache_related_bills_qs.only("sponsor_id")), relation="identical").select_related("related_bill"))
         if hasattr(cache_related_bills_qs, '_cache_related_bills'):

@@ -17,9 +17,10 @@ FACET_CACHE_TIME = 60*60
 FACET_OPTIONS = { "limit": -1, "mincount": 1, "sort": "count" } # limits cause problems because the selected option can dissapear!
 
 class SearchManager(object):
-    def __init__(self, model, qs=None, connection=None):
+    def __init__(self, model, qs=None, connection=None, bulk_loader=None):
         self.model = model
         self.qs = qs
+        self.bulk_loader = (bulk_loader or model.objects.in_bulk)
         self.options = []
         self._form = None
         self.col_left = None
@@ -210,10 +211,11 @@ class SearchManager(object):
         """
         Build the `self.model` queryset limited to selected filters.
         """
+
+        from haystack.query import SearchQuerySet
         
         if self.qs is None:
             #qs = self.model.objects.all().select_related()
-            from haystack.query import SearchQuerySet
             qs = SearchQuerySet()
             if self.connection: qs = qs.using(self.connection)
             qs = qs.filter(indexed_model_name__in=[self.model.__name__], **self.global_filters)
@@ -294,12 +296,13 @@ class SearchManager(object):
             return qs.distinct()
             
         # Haystack but not Django ORM
-        else:
+        elif isinstance(qs, SearchQuerySet):
             # Revise the SearchQuerySet to iterate over model objects
             # rather than SearchResult objects.
             class SR:
-                def __init__(self, qs):
+                def __init__(self, qs, manager):
                     self.qs = qs
+                    self.manager = manager
                 def facet(self, field, **kwargs):
                     return self.qs.facet(field, **kwargs)
                 def count(self):
@@ -308,12 +311,17 @@ class SearchManager(object):
                     return SR(self.qs.order_by(field))
                 def __len__(self):
                     return len(self.qs)
-                def __getitem__(self, index): # slices too
-                    return SR(self.qs[index])
+                def __getitem__(self, index): # slices too, yields a list?
+                    return SR(self.qs[index], self.manager)
                 def __iter__(self):
+                    # Pre-load all objects in bulk. Then yield in the right order.
+                    objects = self.manager.bulk_loader(item.pk for item in self.qs)
                     for item in self.qs:
-                        yield item.object
-            return SR(qs)
+                        yield objects[int(item.pk)]
+            return SR(qs, self)
+
+        else:
+            raise ValueError(qs)
             
     def build_cache_key(self, prefix, qsparams, omit=None):
         import hashlib
