@@ -1,34 +1,80 @@
 {% extends "master.html" %}
 {% load govtrack_utils %}
+{% load humanize %}
 
 {% block title %}GovTrack.us - Congressional Misconduct Database{% endblock %}
+
+{% block head %}
+<style>
+.panel h2 { margin: 0; font-weight: bold; font-size: 115%; }
+.panel ul { margin: 0; padding: 0 0 0 1.1em; line-height: 126%; }
+.panel ul li { margin: .5em 0; }
+.panel p { margin: 1em 0; }
+</style>
+{% endblock %}
 
 {% block body %}
 <h1>Congressional Misconduct Database</h1>
 
+<div class="row" style="margin-top: 30px; margin-bottom: 30px">
+   <div class="col-sm-8">
+     <p>
+       This page lists {{entries|length|intcomma}} instances of misconduct and alleged misconduct by Members of the United States Congress from 1789 to the present
+       and is updated as new information becomes available.
+     </p>
+     <p>
+       The investigations, settlements, and resignations listed on this page <strong>do not imply guilt</strong> in the absense
+       of a conviction, guilty plea, etc. We include investigations even if the Member of Congress is exonerated because the investigation and exoneration are themselves important events.
+       Conversely, investigations that end without a guilty determination <strong>do not imply innocence</strong>.
+     </p>
+  </div>
+</div>
+
 <div class="row">
-  <div class="col-sm-9">
-    <p>This page tracks Congress members’ misconduct, ranging from ethics investigations to criminal convictions, that we’ve been able to locate for the last 10 years. Our sources include the <a href="https://oce.house.gov/">House’s Office of Congressional Ethics</a>, the <a href="https://ethics.house.gov/">House Committee on Ethics</a>, the <a href="https://www.ethics.senate.gov/public/">Senate Select Committee on Ethics</a>, <a href="https://en.wikipedia.org/wiki/List_of_American_federal_politicians_convicted_of_crimes">Wikipedia’s list of convictions</a>, and <a href="https://www.washingtonpost.com/news/the-fix/wp/2015/07/29/more-than-two-dozen-members-of-congress-have-been-indicted-since-1980/?utm_term=.76f0f90890d2">The Washington Post’s list of indictments</a>.</p>
+  <div class="col-sm-4 col-sm-push-8">
+    <div class="panel panel-info">
+     <div class="panel-body">
+        <span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
+        <h2>What&rsquo;s Included On This Page</h2>
+        <p>We have included:</p>
+        <ul>
+          <li>All letters of reproval, censures, and expulsions from Congress from 1789 to the present.</li>
+          <li>All investigations by the <a href="https://oce.house.gov/">House Office of Congressional Ethics (OCE)</a>, the <a href="https://ethics.house.gov/">House Committee on Ethics (HCE)</a>, and the <a href="https://www.ethics.senate.gov/public/">Senate Select Committee on Ethics (SSCE)</a>, and other investigations by a body of Congress that involved alleged personal misconduct from 1789 to the present, including all investigations by the Senate on whether to allow a senator-elect to be seated when it stemmed from allegations of personal misconduct.</li>
+          <li>As many monetary settlements that we are aware of, e.g. those administered by Congress&rsquo;s <a href="https://www.compliance.gov/">Office of Compliance</a> regarding sexual harassment claims, but many settlements are not known to the public.</li>
+          <li>Resignations that we believe to be likely relevant to an allegation of misconduct, because Members of Congress often resign to head-off a Congressional investigation.</li>
+          <li>Law enforcement investigations, convictions, and pleas that we are aware of, except in cases where all of the following three conditions hold: the investigation resulted in exoneration, it was not conducted by Congress, and was not related to the Member of Congress&rsquo;s official duties.</li>
+         </ul>
 
-    <p>We’ll add to this page as instance of misconduct occur. Are we missing anything? <a href="/contact">Let us know</a>.</p>
+         <h2>Are They Guilty</h2>
+         <p>Investigations, settlements, and resignations <strong>do not imply guilt</strong>. Some investigations are motivated by politics or a personal grudge, settlements are often used when it would be less costly than defending a law suit, and Members of Congress often resign when they are likely to lose re-election (regardless of why). We include investigations even if the Member of Congress is exonerated because the investigation and exoneration are themselves important events that it is a part of our mission to chronicle.</p>
+         <p>Conversely, an investigation that ends without a guilty determination <strong>does not imply innocence</strong> --- Congress polices itself in many cases and Members of Congress are reluctant to punish their peers.</p>
+         <p>Not all misconduct is treated equally, and the types of misconduct that have consequences have changed drastically over time. You won&rsquo;t see sexual harassment before the 1980s, but you will see overt racism, reference to sodomy law, and murder.</p>
 
-    <p class="visible-xs"><i>More information about this list is at the bottom of the page.</i></p>
+         <h2>Further Reading</h2>
+         <p>For more background on how disciplinary actions work in Congress, see these reports by the Congressional Research Service:</p>
+         <ul>
+           <li><a href="https://www.everycrsreport.com/reports/93-875.html">Expulsion and Censure Actions Taken by the Full Senate Against Members</a></li>
+           <li><a href="https://www.everycrsreport.com/reports/RL31382.html">Expulsion, Censure, Reprimand, and Fine: Legislative Discipline in the House of Representatives</a></li>
+           <li><a href="https://www.everycrsreport.com/reports/RL30764.html">Enforcement of Congressional Rules of Conduct: A Historical Overview</a></li>
+         </ul>
 
+         <h2>Sources</h2>
+         <p>This database is sourced from a variety of materials, including contemporary news reports, as well as:</p>
+         <ul>
+           <li><a href="https://babel.hathitrust.org/cgi/pt?id=umn.31951p00933065r;view=1up;seq=7">United States Senate Election, Expulsion, and Censure Cases, U.S. Senate Historical Office</a></li>
+           <li><a href="https://ethics.house.gov/sites/ethics.house.gov/files/Historical_Chart_Final_Version%20in%20Word_0.pdf">Historical Summary of Conduct Cases in the House of Representatives, Committee on Standards of Official Conduct, 1798-2004</a></li>
+           <li><a href="https://www.washingtonpost.com/news/the-fix/wp/2015/07/29/more-than-two-dozen-members-of-congress-have-been-indicted-since-1980/">The Washington Post’s list of congressional indictments</a></li>
+           <li><a href="https://en.wikipedia.org/wiki/List_of_American_federal_politicians_convicted_of_crimes">Wikipedia’s list of convictions of American politicians</a>, as of Jan 23, 2018</li>
+         </ul>
+         <p>Our raw data for this page is <a href="https://github.com/govtrack/misconduct">available for reuse on GitHub</a>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-8 col-sm-pull-4">
     {% for entry in entries %}
       <h3 style="margin-bottom: .5em; font-size: 110%; font-weight: bold;"><a href="{{entry.person.get_absolute_url}}">{{entry.person.name}}</a></h3>
      	{{entry.text|markdown}}
     {% endfor %}
-  </div>
-  <div class="col-sm-3">
-    <hr class="visible-xs">
-
-    <p>We plan to add instances of expulsion, censure, and other cases going back to the beginning of the nation &mdash; stay tuned.</p>
-
-    <p>Other relevant sources:</p>
-    <ul style="padding-left:1.1em">
-      <li><a href="https://www.everycrsreport.com/reports/93-875.html">Expulsion and Censure Actions Taken by the Full Senate Against Members (CRS report)</a></li>
-      <li><a href="https://www.everycrsreport.com/reports/RL30764.html">Enforcement of Congressional Rules of Conduct: A Historical Overview (CRS report)</a></li>
-    </ul>
   </div>
 </div>
 
