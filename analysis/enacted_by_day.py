@@ -21,7 +21,7 @@ def run_analysis_for_president(president, date_range):
 	end_date = min(end_date, datetime.now().date())
 
 	# limit to a shorter period than a whole presidency so this computes faster
-	end_date = min(start_date+timedelta(days=365), end_date)
+	end_date = min(start_date+timedelta(days=365*1.5), end_date)
 
 	# if we're measuring presidential activity, the date of signing could be outside of the Congress
 	enacted_bills = Bill.objects.filter(
@@ -99,7 +99,7 @@ run_analysis_for_president("Bush 41", ("1989-01-20","1993-01-19"))
 run_analysis_for_president("Clinton", ("1993-01-20","2001-01-19"))
 run_analysis_for_president("Bush 43", ("2001-01-20","2009-01-19"))
 run_analysis_for_president("Obama", ("2009-01-20","2017-01-19"))
-run_analysis_for_president("Trump", ("2017-01-20","2018-01-19"))
+run_analysis_for_president("Trump", ("2017-01-20","2021-01-19"))
 
 # Write out.
 
