@@ -10,13 +10,38 @@
 .panel ul { margin: 0; padding: 0 0 0 1.1em; line-height: 126%; }
 .panel ul li { margin: .5em 0; }
 .panel p { margin: 1em 0; }
+
+#filters { border: 1px solid #666; padding: 5px; }
+#filters .filter-tag { display: inline-block; margin: 0 .5em; cursor: pointer; }
+#filters .filter-tag.active { font-weight: bold; }
+
+.misconduct-entry {
+  margin: 1.5em 0;
+}
+
+.misconduct-entry h3 {
+ margin: 0;
+ font-size: 110%;
+ font-weight: bold;
+}
+
+.tag-list {
+  margin: 2px 0;
+  font-size: 90%;
+  color: #555;
+  letter-spacing: -.25px;
+}
+  .tag-list span {
+    display: inline-block;
+    margin-right: .5em;
+  }
 </style>
 {% endblock %}
 
 {% block body %}
 <h1>Congressional Misconduct Database</h1>
 
-<div class="row" style="margin-top: 30px; margin-bottom: 30px">
+<div class="row" style="margin-top: 30px; margin-bottom: 15px">
    <div class="col-sm-8">
      <p>
        This page lists {{entries|length|intcomma}} instances of misconduct and alleged misconduct by Members of the United States Congress from 1789 to the present
@@ -71,11 +96,60 @@
     </div>
   </div>
   <div class="col-sm-8 col-sm-pull-4">
+    <div id="filters">
+        <b>filter:</b>
+        {% for key, label in tags %}
+        <span class="filter-tag" data-tag="{{key}}">{{label}}</span>
+        {% endfor %}
+    </div>
+
     {% for entry in entries %}
-      <h3 style="margin-bottom: .5em; font-size: 110%; font-weight: bold;"><a href="{{entry.person.get_absolute_url}}">{{entry.person.name}}</a></h3>
+      <div class="misconduct-entry {% for tag in entry.tags %}tag-{{tag}} {% endfor %}">
+        <h3><a href="{{entry.person.get_absolute_url}}">{{entry.person.name}}</a></h3>
+        <div class="tag-list">{% for key, label in tags %}
+          {% if key in entry.tags %}
+            <span>{{label}}</span>
+          {% endif %}
+        {% endfor %}</div>
      	{{entry.text|markdown}}
+      </div>
     {% endfor %}
   </div>
 </div>
 
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+$(function() {
+  $('#filters .filter-tag').click(function() {
+    // toggle
+    var elem = $(this);
+    elem.toggleClass("active");
+
+    // apply
+    var filters = [];
+    $('#filters .filter-tag.active').each(function() {
+      filters.push(this.getAttribute("data-tag"));
+    });
+    if (filters.length == 0) {
+      // no filters active -> all shown
+      $('.misconduct-entry').fadeIn();
+    } else {
+      // only matching entries are shown
+      $('.misconduct-entry').each(function() {
+          var node = $(this);
+          var toggle = false;
+          filters.forEach(function(filter) {
+            if (node.hasClass("tag-" + filter))
+              toggle = true;
+          });
+          node.toggleClass("active", toggle);
+      });
+      $('.misconduct-entry.active').fadeIn();
+      $('.misconduct-entry:not(.active)').slideUp();
+    }
+  });
+});
+</script>
 {% endblock %}

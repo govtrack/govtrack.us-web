@@ -784,11 +784,38 @@ def load_misconduct_data():
         for entry in misconduct_data:
             entry["person"] = people_map[int(entry["person"])]
 
+        # Split all tags and percolate consequence tags to the top level.
+        for entry in misconduct_data:
+            if "tags" in entry:
+                entry["tags"] = set(entry["tags"].split(" "))
+            else:
+                entry["tags"] = set()
+            for cons in entry["consequences"]:
+                if "tags" in cons:
+                    entry["tags"] |= set(cons["tags"].split(" "))
+
     return misconduct_data
+
+misconduct_tags = (
+  ("corruption", "bribery & corruption"),
+  ("crime", "other crimes"),
+  ("ethics", "ethics violation"),
+  ("sexual-harassment", "sexual harassment"),
+  ("campaign", "elections-related"),
+  ("expulsion", "expulsion"),
+  ("censure", "censure"),
+  ("reprimand", "reprimand"),
+  ("resignation", "resignation"),
+  ("exclusion", "exclusion"),
+  ("settlement", "settlement"),
+  ("conviction", "conviction in court"),
+  ("plea", "pleaded in court"),
+)
 
 @anonymous_view
 @render_to('website/misconduct.html')
 def misconduct(request):
     return {
         "entries": load_misconduct_data(),
+        "tags": misconduct_tags,
     }
