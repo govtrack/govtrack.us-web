@@ -34,12 +34,12 @@ except ImproperlyConfigured:
     pass
 
 import dj_database_url
+if not os.path.exists("local"): os.makedirs('local') # ensure directory for default sqlite db exists
 DEFAULT_DATABASE_URL = 'sqlite:///' + os.path.dirname(__file__) + '/local/database.sqlite'
 DATABASE_URL = get_env_variable('DATABASE_URL', DEFAULT_DATABASE_URL)
 DATABASES = {
 	'default': dj_database_url.parse(DATABASE_URL)
 }
-
 import django_cache_url
 CACHE_URL = get_env_variable('CACHE_URL', default="locmem://opendataiscool")
 CACHES = {
