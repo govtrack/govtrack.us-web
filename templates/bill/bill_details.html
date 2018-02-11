@@ -295,6 +295,7 @@
 	{% endwith %}
 
 <div class="row" style="margin-top: 30px; margin-bottom: 15px;">
+{% if show_media_bar %}
 	{% if not bill.original_intent_replaced and bill.sponsor.has_photo %}
 	<div class="col-xs-3 col-sm-2" style="padding-right: 0; padding-bottom: 1em;">
 		<a href="{{bill.sponsor.get_absolute_url}}">
@@ -325,6 +326,7 @@
 		</small>
 	</div>
 	{% endif %}
+{% endif %}
 </div> <!-- /row -->
 
 <div id="bill-overview-panel">
@@ -436,32 +438,43 @@
 				{% endif %}
 				{% endwith %}
 
-				{% if bill.sponsor and not bill.sponsor.has_photo %}
+				{% if not show_media_bar and bill.sponsor %}
 				<dt>Sponsor:</dt>
 				<dd>
+				{% if not bill.original_intent_replaced %}
+					{% if bill.sponsor.has_photo %}
+						<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
+							<a href="{{bill.sponsor.get_absolute_url}}">
+							<img src="/data/photos/{{bill.sponsor.id}}-100px.jpeg" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
+							</a>
+						</div>
+					{% endif %}
 					<div>
 						<p ><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a></p>
 						<p class="small" style="line-height: 125%; margin: 0;">{{bill.sponsor_role.get_description}}</p>
 						<p class="small" style="line-height: 125%;">{{bill.sponsor_role.party}}</p>
 					</div>
 					<div style="clear: both"></div>
-				</dd>
-				{% elif bill.sponsor and bill.original_intent_replaced %}
-				<dt>Sponsor:</dt>
-				<dd>
+				{% elif bill.original_intent_replaced %}
 					<p><a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
 					was the sponsor of this bill when it was introduced, but the bill&rsquo;s text was subsequently replaced
 					with unrelated provisions.</p>
-				</dd>
 				{% endif %}
+				</dd>
 
 				{% if text_info or bill.is_current %}
-				{% if not text_info.has_thumbnail %}
 				<dt>Text:</dt>
 				<dd>
 					{% if not text_info %}
 						<p>Not available yet.</p>
 					{% elif text_info.has_displayable_text %}
+						{% if text_info.has_thumbnail %}
+							<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
+								<a href="{{bill.get_absolute_url}}/text">
+									<img src="{{bill.get_absolute_url}}/_text_image" class="img-responsive" alt="Thumbnail of {{bill.noun}} text" style="border: 1px solid #999;"/>
+								</a>
+							</div>
+						{% endif %}
 						<p style="line-height: 125%;">
 							<a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a>
 							<small><br>Last Updated: {{text_info.docdate}}
@@ -476,7 +489,8 @@
 					{% endif %}
 				</dd>
 				{% endif %}
-				{% endif %}
+
+				{% endif %} {# / not show media bar #}
 
 				{% if prognosis and bill.is_alive %}
 				<dt>Prognosis:</dt>

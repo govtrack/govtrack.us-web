@@ -60,6 +60,7 @@ def get_related_bills(bill):
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
+    text_info = bill.get_text_info(with_citations=True)
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
@@ -68,8 +69,9 @@ def bill_details(request, congress, type_slug, number):
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
         "feed": bill.get_feed(),
         "prognosis": bill.get_prognosis_with_details(),
-        "text_info": bill.get_text_info(with_citations=True),
+        "text_info": text_info,
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
+        "show_media_bar": not bill.original_intent_replaced and bill.sponsor.has_photo() and text_info and text_info["has_thumbnail"],
     }
 
 def fixup_text_incorporation(text_incorporation):
