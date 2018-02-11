@@ -1,0 +1,74 @@
+{% extends "master.html" %}
+
+{% load static %}
+{% load govtrack_utils %}
+
+{% block title %}Register a New Stakeholder - GovTrack.us{% endblock %}
+
+{% block extra_css %}
+<style>
+  #content { max-width: 50em; }
+  .links > span {
+  }
+    .links > span:before {
+        margin: .5em;
+        content: "-";
+    }
+    .links > span:first-child:before {
+        display: none;
+    }
+    .links a {
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+{# <li><a href="/stakeholders">Stakeholders</a></li> #}
+{# <li class="active">Register a New Stakeholder</li> #}
+</ol>
+{% endblock %}
+
+{% block body %}
+<h1>{{stakeholder.name}}</h1>
+
+{% if stakeholder.description %}
+<p>{{stakeholder.description}}</p>
+{% endif %}
+
+<p class="links">
+{% if stakeholder.website %}
+    <span><a href="{{stakeholder.website}}">{{stakeholder.website}}</a></span>
+{% endif %}
+{% if stakeholder.twitter_handle %}
+    <span><a href="https://twitter.com/{{stakeholder.twitter_handle}}"><i class="fa fa-twitter fa-fw"></i> @{{stakeholder.twitter_handle}}</a></span>
+{% endif %}
+</p>
+
+{% if stakeholder.verified is False %}
+    <p class="text-danger">GovTrack staff rejected your request to register this stakeholder. For more information, please contact us.</p>
+{% elif stakeholder.verified is None %}
+    <div class="panel panel-info">
+        <div class="panel-body">
+            <p>This organization is in the queue to be confirmed by GovTrack staff. You&rsquo;ll hear from us in a few days with more information.</p>
+            {% if stakeholder.twitter_handle %}
+                <hr>
+                <p>If @{{stakeholder.twitter_handle}} is a verified Twitter account, you can get confirmed <b>instantly</b> if you can log into it! Start by clicking the button below:</p>
+                <p><a href="/registration/ext/verify/start/twitter?next={{stakeholder.get_absolute_url}}?instant-verify"><img src="{% static 'icons/sm/twitter_button.png' %}"></a></p>
+                {% if instant_verification_status %}
+                    <p class="text-danger">{{instant_verification_status}}</p>
+                {% endif %}
+                <p>(If you are already logged into your personal Twitter account, you may need to <a href="https://twitter.com">log out of Twitter</a> first.)</p>
+            {% endif %}
+        </div>
+    </div>
+{% elif is_admin %}
+    <p class="text-success">Congrats, this stakeholder is confirmed. We&rsquo;ll be in touch soon with more information.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block body_scripts %}
+
+{% endblock %}

@@ -275,7 +275,6 @@
           </div>
           <div id="summary-read-more"><a href="{{bill.get_absolute_url}}/summary" class="btn btn-sm">Continue reading &raquo;</a></div>
        </div>
-       <h2><span>Sponsor and status</span></h2>
 
 	{% elif subtitle %}
 		<p style="margin-bottom: 0">{{subtitle}}</p>
@@ -294,8 +293,19 @@
 	{% endif %}
 	{% endwith %}
 
-<div class="row" style="margin-top: 30px; margin-bottom: 15px;">
+<div style="font-size: 88%; margin: 1em 1em 2em 1em; padding: .5em; border: 1px solid #DDC; background: #FFE; font-style: italic; ">
+	<style scoped>
+		a:not(:hover) { color: #333; text-decoration: none; }
+	</style>
+	<a href="/stakeholders/new">
+		Your organization&rsquo;s position statement could be here! Register your organization as a stakeholder...
+	</a>
+</div>
+
+<h2><span>Sponsor and status</span></h2>
+
 {% if show_media_bar %}
+<div class="row" style="margin-top: 30px; margin-bottom: 15px;">
 	{% if not bill.original_intent_replaced and bill.sponsor.has_photo %}
 	<div class="col-xs-3 col-sm-2" style="padding-right: 0; padding-bottom: 1em;">
 		<a href="{{bill.sponsor.get_absolute_url}}">
@@ -326,8 +336,8 @@
 		</small>
 	</div>
 	{% endif %}
-{% endif %}
 </div> <!-- /row -->
+{% endif %}
 
 <div id="bill-overview-panel">
 

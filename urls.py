@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'', include('events.urls')),
     url(r'^api/v2/([^/]+)(?:/(\d+))?', website.api.apiv2),
     url(r'^panels/', include('userpanels.urls')),
+    url(r'^stakeholders/', include('stakeholder.urls')),
 
     url(r'^_twostream/', include('twostream.urls')),
 

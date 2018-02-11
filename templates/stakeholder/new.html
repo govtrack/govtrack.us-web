@@ -1,0 +1,38 @@
+{% extends "master.html" %}
+
+{% load crispy_forms_tags %}
+{% load govtrack_utils %}
+
+{% block title %}Register a New Stakeholder - GovTrack.us{% endblock %}
+
+{% block extra_css %}
+<style>
+  #content { max-width: 50em; }
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+{# <li><a href="/stakeholders">Stakeholders</a></li> #}
+{# <li class="active">Register a New Stakeholder</li> #}
+</ol>
+{% endblock %}
+
+{% block body %}
+<h1>Register a New Stakeholder</h1>
+
+<p>GovTrack is planning to roll out new tools for stakeholders of federal legislation.
+Register your organization using the form below. We&rsquo;ll be in touch about how
+you can have your advocacy position statements appear next to legislation on GovTrack.</p>
+
+<form method="post">
+{% csrf_token %}
+{{form|crispy}}
+<input type="submit" value="Submit" class="btn btn-primary">
+</form>
+
+{% endblock %}
+
+{% block body_scripts %}
+
+{% endblock %}

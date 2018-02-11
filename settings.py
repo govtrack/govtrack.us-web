@@ -114,6 +114,7 @@ INSTALLED_APPS = (
     'smartsearch',
     'bill',
     'userpanels',
+    'stakeholder',
 
     # for django-registration-pv
     'emailverification',
