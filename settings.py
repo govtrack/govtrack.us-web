@@ -72,7 +72,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'twostream.middleware.CacheLogic',
     'website.middleware.GovTrackMiddleware',
 ]
@@ -93,7 +93,7 @@ INSTALLED_APPS = (
     # 3rd party libraries
     'common',
     #'south',
-    'debug_toolbar',
+    #'debug_toolbar',
     #'silk',
     'crispy_forms',
 
