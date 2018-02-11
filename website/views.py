@@ -61,7 +61,7 @@ def index(request):
             bills.add(bill)
             if len(bills) - n1 > 1: break
         if len(bills) == 60: break
-    from bill.models import Bill;  bills.add(Bill.objects.get(id=355371))
+    from bill.models import Bill
     for b in bills:
       snippet = b.current_status_description
       try:
