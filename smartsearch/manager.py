@@ -197,7 +197,7 @@ class SearchManager(object):
 
             # Cache the final response for 5 minutes.
             ret = json.dumps(ret)
-            cache.set(cachekey, ret, 60*5)
+            #cache.set(cachekey, ret, 60*5) # TOO BIG TO CACHE
             return HttpResponse(ret, content_type='text/json')
         except Exception as e:
             import traceback
