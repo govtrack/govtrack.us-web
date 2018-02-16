@@ -71,7 +71,7 @@ def bill_details(request, congress, type_slug, number):
         "prognosis": bill.get_prognosis_with_details(),
         "text_info": text_info,
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
-        "show_media_bar": not bill.original_intent_replaced and bill.sponsor.has_photo() and text_info and text_info["has_thumbnail"],
+        "show_media_bar": not bill.original_intent_replaced and bill.sponsor and bill.sponsor.has_photo() and text_info and text_info.get("has_thumbnail"),
     }
 
 def fixup_text_incorporation(text_incorporation):
