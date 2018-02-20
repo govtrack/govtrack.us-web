@@ -26,13 +26,30 @@ class StakeholderAdminsInline(admin.TabularInline):
     raw_id_fields = ('stakeholder', 'user')
     verbose_name = "Administrator"
     verbose_name_plural = "Administrators"
-    extra = 0
+    extra = 1
     form = AdminForm
 
 class StakeholderAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'name', 'verified')
+    list_display = ('slug', 'name', 'verified', 'created')
     list_filter = ('verified',)
     inlines = [StakeholderAdminsInline]
     exclude = ('admins', 'extra')
+    ordering = ('slug', '-verified')
+
+class BillPositionAdminInline(admin.TabularInline):
+    model = BillPosition
+    raw_id_fields = ('post', 'bill')
+
+class VotePositionAdminInline(admin.TabularInline):
+    model = VotePosition
+    raw_id_fields = ('post', 'vote')
+
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'stakeholder_', 'positions', 'created')
+    raw_id_fields = ('stakeholder',)
+    inlines = [BillPositionAdminInline, VotePositionAdminInline]
+    exclude = ('extra',)
+    def stakeholder_(self, obj): return obj.stakeholder.name
 
 admin.site.register(Stakeholder, StakeholderAdmin)
+admin.site.register(Post, PostAdmin)

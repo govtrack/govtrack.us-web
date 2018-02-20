@@ -13,11 +13,13 @@ class CosponsorInline(admin.TabularInline):
 
 
 class BillAdmin(admin.ModelAdmin):
-    list_display = ['title', 'congress', 'number', 'introduced_date']
+    list_display = ['title', 'congress', 'introduced_date']
     raw_id_fields = ['sponsor', 'cosponsors', 'sponsor_role', 'committees', 'terms']
     fields = ('congress', 'bill_type', 'number', 'title', 'lock_title', 'sponsor', 'introduced_date', 'source', 'source_link', 'original_intent_replaced', # some field is causing problems
        'sliplawpubpriv', 'sliplawnum' )
-    #inlines = (CosponsorInline,)
+    search_fields = ('title', 'congress')
+    list_filter = ('congress', 'bill_type', 'current_status')
+    ordering = ('-introduced_date', '-congress', '-bill_type', '-number')
 
 class BillLinkAdmin(admin.ModelAdmin):
     list_display = ['created', 'url', 'title', 'approved']

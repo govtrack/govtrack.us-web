@@ -44,6 +44,10 @@
     $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
 
 	$('[data-toggle="tooltip"]').tooltip()
+
+	function show_stakeholder_position(postid) {
+		$("#stakeholder-position-" + postid).modal();
+	}
 </script>
 {% endblock %}
 
@@ -205,7 +209,7 @@
 	margin-bottom: .22em;
 }
 
-
+.modal-body h1:first-child { margin-top: 0; }
 </style>
 {% endblock %}
 
@@ -293,14 +297,6 @@
 	{% endif %}
 	{% endwith %}
 
-<div style="font-size: 88%; margin: 1em 1em 2em 1em; padding: .5em; border: 1px solid #DDC; background: #FFE; font-style: italic; ">
-	<style scoped>
-		a:not(:hover) { color: #333; text-decoration: none; }
-	</style>
-	<a href="/stakeholders/new">
-		Your organization&rsquo;s position statement could be here! Register your organization as a stakeholder...
-	</a>
-</div>
 
 <h2><span>Sponsor and status</span></h2>
 
@@ -558,8 +554,35 @@
 
 	<div id="admin_panel"> </div>
 
+
+<div style="margin: 30px 0;">
+  <h2><span>What stakeholders are saying</span></h2>
+  
+  {% for sp in stakeholder_posts %}
+  	<p style="line-height: 128%;">
+		{% if sp.position == 1 %}
+			<span class="glyphicon glyphicon-thumbs-up"></span>
+		{% endif %}
+		{% if sp.position == -1 %}
+			<span class="glyphicon glyphicon-thumbs-down"></span>
+		{% endif %}
+  		<a href="#" onclick="show_stakeholder_position({{sp.id}}); return false;">{{sp.stakeholder.name}}</a>:
+  		&ldquo;{{sp.title|truncatewords:50}}&rdquo;
+  	</p>
+  {% endfor %}
+
+  <div id="stakeholders-register" style="font-size: 88%; padding: .5em; border: 1px solid #DDC; background: #FFE; font-style: italic; ">
+	<style scoped>
+		#stakeholders-register a:not(:hover) { color: #333; text-decoration: none; }
+	</style>
+	<a href="/stakeholders/new">
+		Your organization&rsquo;s position statement could be here! Register your organization as a stakeholder...
+	</a>
+  </div>
+</div>	
+
 	{% if text_incorporation and bill.is_success %}
-		<h2><span>Incorporated Legislation</span></h2>
+		<h2><span>Incorporated legislation</span></h2>
 
 		<p>This {{bill.noun}} incorporates provisions from:</p>
 
@@ -786,5 +809,28 @@ var DISQUSWIDGETS = {
 </script>
 <script src="//govtrack.disqus.com/count-data.js?1={{feed.feedname|urlencode}}"> </script>
 {% endif %}
+
+{% for sp in stakeholder_posts %}
+<div id="stakeholder-position-{{sp.id}}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="stakeholder-position-{{sp.id}}-title" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="stakeholder-position-{{sp.id}}-title">
+        	{{sp.stakeholder.name}}
+      		{% if sp.position == 1 %}supports this {{bill.noun}}{% endif %}
+      		{% if sp.position == -1 %}opposes this {{bill.noun}}{% endif %}
+       </h4>
+      </div>
+      <div class="modal-body">
+      	{% if sp.link or sp.stakeholder.website %}
+      		<p style="font-size: 90%; color: #555; margin-bottom: 1em;">This position statement was submitted by <a href="{% firstof sp.link sp.stakeholder.website %}">{{sp.stakeholder.name}}</a> on {{sp.created|date}}.</p>
+      	{% endif %}
+      	{{sp.content|markdown}}
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
 
 {% endblock %}

@@ -59,8 +59,20 @@ def get_related_bills(bill):
 @anonymous_view
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
+    # pre-load info
+    
     bill = load_bill_from_url(congress, type_slug, number)
     text_info = bill.get_text_info(with_citations=True)
+
+    from stakeholder.models import BillPosition
+    stakeholder_posts = bill.stakeholder_positions\
+        .filter(post__stakeholder__verified=True)\
+        .select_related("post", "post__stakeholder")\
+        .order_by('-created')
+    def add_position_return_post(bp): bp.post.position = bp.position; return bp.post
+    stakeholder_posts = [add_position_return_post(bp) for bp in stakeholder_posts]
+
+    # context
     return {
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
@@ -72,6 +84,7 @@ def bill_details(request, congress, type_slug, number):
         "text_info": text_info,
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
         "show_media_bar": not bill.original_intent_replaced and bill.sponsor and bill.sponsor.has_photo() and text_info and text_info.get("has_thumbnail"),
+        "stakeholder_posts": stakeholder_posts,
     }
 
 def fixup_text_incorporation(text_incorporation):
