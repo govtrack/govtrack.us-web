@@ -556,22 +556,49 @@
 
 
 <div style="margin: 30px 0;">
-  <h2><span>What stakeholders are saying</span></h2>
-  
+  <h2 style="margin-bottom: 15px;"><span>What stakeholders are saying</span></h2>
+  <style>
+    .stakeholder-post {
+    	margin-bottom: 5px;
+    	padding: 5px 10px;
+    	line-height: 128%;
+    }
+    .stakeholder-post:hover { cursor: pointer; background-color: #F5F5F5; border-radius: 8px;}
+    .stakeholder-position-1 { border-left: 3px solid #0A0; }
+    	.stakeholder-position-1 .stakeholder-position { color: #070; }
+    .stakeholder-position--1 { border-left: 3px solid #F00; }
+    	.stakeholder-position--1 .stakeholder-position { color: #F00; }
+    .stakeholder-position {
+    	display: block;
+    	float: right;
+    	margin: -2px 0 2px 2px;
+    }
+    .stakeholder-name {
+    	display: block;
+    	float: left;
+    	max-width: 15em;
+    	overflow: hidden;
+    	white-space: nowrap;
+    	text-overflow: ellipsis;
+    	font-weight: bold;
+    	text-decoration: underline;
+    }
+  </style>
   {% for sp in stakeholder_posts %}
-  	<p style="line-height: 128%;">
+  	<div class="stakeholder-post stakeholder-position-{{sp.position}}" onclick="show_stakeholder_position({{sp.id}}); return false;">
 		{% if sp.position == 1 %}
-			<span class="glyphicon glyphicon-thumbs-up"></span>
+			<span class="stakeholder-position glyphicon glyphicon-thumbs-up"></span>
 		{% endif %}
 		{% if sp.position == -1 %}
-			<span class="glyphicon glyphicon-thumbs-down"></span>
+			<span class="stakeholder-position glyphicon glyphicon-thumbs-down"></span>
 		{% endif %}
-  		<a href="#" onclick="show_stakeholder_position({{sp.id}}); return false;">{{sp.stakeholder.name}}</a>:
-  		&ldquo;{{sp.title|truncatewords:50}}&rdquo;
-  	</p>
+  		<span class="stakeholder-name">{{sp.stakeholder.name}}</span>{% if sp.content %}:
+  			{{sp.title|truncatewords:41}}
+  		{% endif %}
+  	</div>
   {% endfor %}
 
-  <div id="stakeholders-register" style="font-size: 88%; padding: .5em; border: 1px solid #DDC; background: #FFE; font-style: italic; ">
+  <div id="stakeholders-register" style="margin-top: 15px; font-size: 88%; padding: .5em; border: 1px solid #DDC; background: #FFE; font-style: italic; ">
 	<style scoped>
 		#stakeholders-register a:not(:hover) { color: #333; text-decoration: none; }
 	</style>

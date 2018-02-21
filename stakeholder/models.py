@@ -89,12 +89,12 @@ class Post(models.Model):
 
     def title(self):
         if self.content is None: raise ValueError()
-        m = re.match(".*\n\n", self.content.lstrip())
-        if m:
+        self.content = self.content.replace("\r\n", "\n").replace("\r", "\n")
+        title = self.content
+        m = re.match(r"#*.*?(\n\n|$)", self.content.lstrip(), re.S)
+        if m: # take first Markdown paragraph
             title = m.group(0).strip()
-        else:
-            title = self.content
-        title = title.lstrip("#").strip() # Markdown heading
+        title = title.lstrip("#").strip() # remove Markdown heading
         return title
 
     def positions(self):
