@@ -565,7 +565,12 @@ class Bill(models.Model):
             with open("../scripts/predictgov/predictions.csv") as f:
                 for row in csv.DictReader(f):
                     if row["bill_id"].lower() == self.congressproject_id:
-                        return { "prediction": float(row["Prediction"])*100, "notes": row["descs"] }
+                        return {
+                          "prediction": float(row["Prediction"])*100,
+                          "notes": row["descs"],
+                          "success_name": ("enacted" if self.bill_type in (BillType.senate_bill, BillType.house_bill, BillType.senate_joint_resolution, BillType.house_joint_resolution)
+                                               else "agreed to"),
+                        }
         except:
             # On any sort of error, just ignore.
             pass
