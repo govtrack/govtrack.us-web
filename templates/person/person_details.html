@@ -317,12 +317,18 @@ function show_pronunciation_guide() {
         {% for r in person.roles_condensed %}
         	{% if forloop.first %}
         		{# r has mangled dates, so for the next election year we use "role" #}
-        		<p>{{ person.lastname }}{% if r.party %}, a{% if r.party.0 == "I" %}n{% endif %} {{r.party}}{% if r.caucus %}{% if r.current %} caucusing{% else %}who caucused{% endif %} with the {{r.caucus}}s{% endif %},{% endif %}
+        		<p>
+       			{{ person.lastname }}
         		{% if r.current %}is{% else %}was{% endif %} {# because of senator junior/senior status which can change mid-term, we cannot say "has been...since termstart" #}
         		{{r.get_description_natural|safe}}
         		{% if r.current and r.district > 0 %}(<a href="/congress/members/{{r.state}}/{{r.district}}">view map</a>){% endif %}
-        		{% if r.current %}and has served since {{ r.startdate|date }}. {{ person.lastname }} is next up for reelection in {{role.next_election_year}}.{% else %}
-        		from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}.{% endif %}
+    			{% if r.current %}and is {{r.get_party}}{% else %}
+    			and was {{r.get_party}}{% endif %}.
+    			{{person.he_she_cap}}
+        		{% if r.current %}has served since {{ r.startdate }}{% else %}
+        		served from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}.
+        		   {# note that r has mangled dates so must show year only #}
+        		{% if r.current %}{{ person.lastname }} is next up for reelection in {{role.next_election_year}}.{% endif %}
         		</p>
 
 				{% if r.is_territory %}
@@ -341,7 +347,8 @@ function show_pronunciation_guide() {
         		{% endif %}
 
         		{{r.get_description_natural|safe}}
-        		({{ r.startdate|date:"Y" }}-{{ r.enddate|date:"Y" }}{% if r.party and r.party != role.party %}; {{r.party}}{% endif %}){% if forloop.last %}.</p>{% else %};{% endif %}
+        		as {{r.get_party}}
+        		from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% if forloop.last %}.</p>{% else %};{% endif %}
 	        {% endif %}
         {% endfor %}
         </div>

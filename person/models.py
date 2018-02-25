@@ -222,10 +222,32 @@ class Person(models.Model):
         ret = []
         for role in self.roles.order_by('startdate'):
             role.id = None # prevent corruption
-            role.enddate = role.logical_enddate(round_end=round_end)
+            role.enddate = PersonRole.round_down_enddate(role.enddate, do_rounding=round_end)
             if len(ret) > 0 and role.continues_from(ret[-1]):
+                # condense party_affiliations
+                import copy
+                prev_parties = copy.deepcopy((ret[-1].extra or {}).get("party_affiliations", [])) # clone
+                next_parties = list((role.extra or {}).get("party_affiliations", [])) # clone
+                if len(prev_parties) == 0 and len(next_parties) == 0 and ret[-1].party == role.party and ret[-1].caucus == role.caucus:
+                    # Neither have party_affiliations set *and* the party is the same
+                    # for the two roles, so merge without anything complicated.
+                    pass
+                else:
+                    # One or both has party_affiliations, so merge. If either has
+                    # none, fill it in with a dummy entry and merge the last entry
+                    # of the previous with the first one of the next.
+                    if len(prev_parties) == 0: prev_parties = [{ "start": ret[-1].startdate.isoformat(), "end": ret[-1].enddate.isoformat(), "party": ret[-1].party, "caucus": ret[-1].caucus }]
+                    if len(next_parties) == 0: next_parties = [{ "start": role.startdate.isoformat(), "end": role.enddate.isoformat(), "party": role.party, "caucus": role.caucus }]
+                    if prev_parties[-1]["party"] == next_parties[0]["party"] and prev_parties[-1].get("caucus") == next_parties[0].get("caucus"):
+                        prev_parties[-1]["end"] = next_parties[0]["end"]
+                        next_parties.pop(0)
+                    ret[-1].extra = copy.deepcopy(ret[-1].extra or {}) # initialize
+                    ret[-1].extra["party_affiliations"] = prev_parties + next_parties
+
+                # extend the end date
                 ret[-1].enddate = role.enddate
                 ret[-1].current |= role.current
+
                 # the following are for the most recent value although they may change during a term
                 ret[-1].party = role.party
                 ret[-1].caucus = role.caucus
@@ -512,6 +534,35 @@ class PersonRole(models.Model):
         if self.leadership_title == "Speaker": return "Speaker of the House"
         return RoleType.by_value(self.role_type).congress_chamber + " " + self.leadership_title
 
+    def get_party(self):
+        # If the person didn't change parties, just return the party.
+        # Otherwise return "most recently a PARTY1 (year1-year2) and before that (year3-4), and ..."
+        from parser.processor import Processor
+        parties = (self.extra or {}).get("party_affiliations", [])
+        def a_an(word): return "a" if word[0].lower() not in "aeiou" else "an"
+        if len(parties) <= 1:
+            return a_an(self.party) + " " + self.party + ("" if not self.caucus else " caucusing with the " + self.caucus + "s")
+        parties = [
+            "%s %s%s (%d-%s)" % (
+                a_an(entry["party"]),
+                entry["party"],
+                "" if not entry.get("caucus") else " caucusing with the " + entry["caucus"] + "s",
+                Processor.parse_datetime(entry["start"]).year,
+                "" if self.current and i == len(parties)-1
+                else PersonRole.round_down_enddate(Processor.parse_datetime(entry["end"])).year,
+            )
+            for i, entry in enumerate(parties)
+            ]
+        if self.current:
+            most_recent_descr1 = ""
+            most_recent_descr2 = ", "
+        else:
+            most_recent_descr1 = "most recently "
+            most_recent_descr2 = " and "
+        most_recent = parties.pop(-1)
+        if len(parties) > 1: parties[-1] = "and " + parties[-1]
+        return most_recent_descr1 + most_recent + most_recent_descr2 + "previously " + (", " if len(parties) > 2 else " ").join(parties)
+
     def get_party_on_date(self, when):
         if self.extra and "party_affiliations" in self.extra:
             for pa in self.extra["party_affiliations"]:
@@ -568,17 +619,24 @@ class PersonRole(models.Model):
                 break
             if prev_role == None or not role.continues_from(prev_role):
                 startdate = role.startdate
-            enddate = role.logical_enddate(round_end=round_end)
+            enddate = PersonRole.round_down_enddate(role.enddate, do_rounding=round_end)
             prev_role = role
             if role.id == self.id:
                 found_me = True
         if not found_me: raise Exception("Didn't find myself?!")
         return (startdate, enddate)
 
-    def logical_enddate(self, round_end=False):
-        if round_end and self.enddate.month == 1 and self.enddate.day < 10:
-            return datetime.date(self.enddate.year-1, 12, 31)
-        return self.enddate
+    @staticmethod
+    def round_down_enddate(d, do_rounding=True):
+        # If a date ends in the first three days of January, round it down to
+        # December 31 of the previou year, so that we can show a nice year for
+        # term end dates (2011-2012 rather than 2011-2013 which misleadingly
+        # implies it was more than a few days in 2013 that probably weren't
+        # in session anyway).
+        if do_rounding:
+            if d.month == 1 and d.day <= 3:
+                return datetime.date(d.year-1, 12, 31)
+        return d
 
     def next_election_year(self):
         # For current terms, roles end at the end of a Congress on Jan 3.
