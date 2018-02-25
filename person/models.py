@@ -226,9 +226,10 @@ class Person(models.Model):
             if len(ret) > 0 and role.continues_from(ret[-1]):
                 ret[-1].enddate = role.enddate
                 ret[-1].current |= role.current
-                ret[-1].party = role.party # show most recent party
-                ret[-1].caucus = role.caucus # show most recent cancus
-                ret[-1].seniority = None # probably changes
+                # the following are for the most recent value although they may change during a term
+                ret[-1].party = role.party
+                ret[-1].caucus = role.caucus
+                ret[-1].senator_rank = role.senator_rank
             else:
                 ret.append(role)
         ret.reverse()
