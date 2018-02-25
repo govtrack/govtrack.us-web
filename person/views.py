@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os
+import os, os.path
 from datetime import datetime, timedelta
 from math import log, sqrt
 
@@ -149,7 +149,11 @@ def person_details(request, pk):
         # Load pronunciation from guide. Turn into a mapping from GovTrack IDs to data.
         if pronunciation_guide is None:
             import rtyaml
-            pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open("data/us/pronunciation.yaml")) }
+            if not os.path.exists("data/us/pronunciation.yaml"):
+                # debugging
+                pronunciation_guide = { }
+            else:
+                pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open("data/us/pronunciation.yaml")) }
         pronunciation = pronunciation_guide.get(person.id)
         # TODO: Validate that the 'name' in the guide matches the name we're actually displaying.
         if pronunciation:
@@ -226,7 +230,7 @@ def load_key_votes(person):
     for congresses_set in [congresses[0:2], congresses[2:]]:
         # Scan the cached votes for the votes with the most number of outliers
         # and the votes that this person was an outlier in.
-        import csv, os.path
+        import csv
         top_votes = { }
         outlier_votes = set()
         for congress in congresses_set:

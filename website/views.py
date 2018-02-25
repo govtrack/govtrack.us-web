@@ -775,8 +775,12 @@ def load_misconduct_data():
     global misconduct_data
     if not misconduct_data:
         # Load data.
-        import rtyaml
-        misconduct_data = rtyaml.load(open("data/us/misconduct.yaml"))
+        import os.path, rtyaml
+        if not os.path.exists("data/us/misconduct.yaml"):
+            # debugging
+            misconduct_data = []
+        else:
+            misconduct_data = rtyaml.load(open("data/us/misconduct.yaml"))
 
         # Pre-fetch all members then add references to Person instances from numeric IDs.
         from person.models import Person
