@@ -85,7 +85,7 @@ class Post(models.Model):
     updated = models.DateTimeField(auto_now=True, db_index=True)
 
     def __unicode__(self):
-        return "<StakeholderPost %d %s>" % (self.id, str(self.stakeholder))
+        return "<StakeholderPost %d %s>" % (self.id, unicode(self.stakeholder))
 
     def title(self):
         if self.content is None: raise ValueError()
@@ -98,7 +98,7 @@ class Post(models.Model):
         return title
 
     def positions(self):
-        return ",".join(sorted(str(x) for x in list(self.bill_positions.all()) + list(self.vote_positions.all())))
+        return ",".join(sorted(unicode(x) for x in list(self.bill_positions.all()) + list(self.vote_positions.all())))
 
 
 class BillPosition(models.Model):
