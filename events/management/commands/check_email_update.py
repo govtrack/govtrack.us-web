@@ -16,19 +16,21 @@ from datetime import datetime, timedelta
 now = datetime.now()
 
 class Command(BaseCommand):
-	args = 'emailaddress'
-	help = 'Checks the status of an email update (e.g. for when a user says they are not getting updates.'
+	help = 'Checks the status of an email update (e.g. for when a user says they are not getting updates).'
 	
+	def add_arguments(self, parser):
+		parser.add_argument('email_address', type=str, help="The email address or user ID.")
+
 	def handle(self, *args, **options):
-		if len(args) != 1:
+		if not options['email_address']:
 			print "Specify an email address."
 			return
 			
 		try:
-			if "@" in args[0]:
-				user = User.objects.get(email=args[0])
+			if "@" in options['email_address']:
+				user = User.objects.get(email=options['email_address'])
 			else:
-				user = User.objects.get(id=args[0])
+				user = User.objects.get(id=options['email_address'])
 		except User.DoesNotExist:
 			print "Not a user."
 			return
