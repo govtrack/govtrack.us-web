@@ -537,6 +537,7 @@ class PersonRole(models.Model):
     def get_party(self):
         # If the person didn't change parties, just return the party.
         # Otherwise return "most recently a PARTY1 (year1-year2) and before that (year3-4), and ..."
+        if self.party is None: return "(unknown party)"
         from parser.processor import Processor
         parties = (self.extra or {}).get("party_affiliations", [])
         def a_an(word): return "a" if word[0].lower() not in "aeiou" else "an"
