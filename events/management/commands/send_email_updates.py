@@ -21,9 +21,9 @@ launch_time = datetime.now()
 import multiprocessing
 django.setup() # StackOverflow user says call setup when using multiprocessing
 
-# get GovTrack Insider posts		
-from website.models import MediumPost
-medium_posts = MediumPost.objects.order_by('-published')[0:6]
+# globals that are loaded by the parent process before forking children
+announce = None
+medium_posts = None
 
 class Command(BaseCommand):
 	help = 'Sends out email updates of events to subscribing users.'
@@ -32,6 +32,9 @@ class Command(BaseCommand):
 		parser.add_argument('mode', nargs=1, type=str)
 	
 	def handle(self, *args, **options):
+		global announce
+		global medium_posts
+
 		if options["mode"][0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
 			print "Specify daily or weekly or testadmin or testcount."
 			return
@@ -86,6 +89,14 @@ class Command(BaseCommand):
 		# enable caching during event generation
 		enable_event_source_caching()
 
+		# load general announcement
+		announce = load_announcement("website/email/email_update_announcement.md", options["mode"][0] == "testadmin")
+
+		# get GovTrack Insider posts
+		from website.models import MediumPost
+		medium_posts = MediumPost.objects.order_by('-published')[0:6]
+
+		# counters for analytics on what we sent
 		counts = {
 			"total_emails_sent": 0,
 			"total_events_sent": 0,
@@ -324,7 +335,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		"total_time_sending": timings["send"],
 	}
 
-def load_markdown_content(template_path, utm=""):
+def load_announcement(template_path, testing):
 	# Load the Markdown template for the current blast.
 	templ = get_template(template_path)
 
@@ -337,14 +348,24 @@ def load_markdown_content(template_path, utm=""):
 	# The top of the text content contains metadata in YAML format,
 	# with "id" and "subject" required and active: true or rundate set to today's date in ISO format.
 	meta_info, body_text = body_text.split("----------", 1)
-	meta_info = yaml.load(meta_info)
-	if not meta_info.get("active") and meta_info.get("rundate") != launch_time.date().isoformat(): return None
 	body_text = body_text.strip()
+	meta_info = yaml.load(meta_info)
+
+	# Under what cases do we use this announcement?
+	if meta_info.get("active"):
+		pass # active is set to something truthy
+	elif meta_info.get("rundate") == launch_time.date().isoformat():
+		pass # rundate matches date this job was started
+	elif "rundate" in meta_info and testing:
+		pass # when testing ignore the actual date set
+	else:
+		# the announcement file is inactive/stale
+		return None
 
 	# Get the HTML body content.
 	ctx = {
 		"format": "html",
-		"utm": utm,
+		"utm": "",
 	}
 	body_html = templ.render(ctx).strip()
 	body_html = markdown2.markdown(body_html)
@@ -356,6 +377,4 @@ def load_markdown_content(template_path, utm=""):
 	
 	return meta_info
 
-# get announcement content
-announce = load_markdown_content("website/email/email_update_announcement.md")
 
