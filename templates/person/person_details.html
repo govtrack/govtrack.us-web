@@ -354,13 +354,11 @@ function show_pronunciation_guide() {
         </div>
 
 		{% if misconduct %}
-		<p style="margin: .5em 0 1em 0; font-weight: bold;">
-			<a href="/misconduct">Congressional misconduct:</a>
-		</p>
+		<h2><span>Misconduct/alleged misconduct</span></h2>
         {% for entry in misconduct %}
-			<p style="margin: .5em 0 1em 0">
-				{{entry.text|markdown}}
-			</p>
+        	<div style="margin-bottom: 1em">
+        		{% include "website/misconduct-entry.html" %}
+        	</div>
 		{% endfor %}
 		{% endif %}
 		

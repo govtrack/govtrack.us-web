@@ -61,3 +61,4 @@ def mult(value, operand):
 @register.filter
 def div(value, operand):
     return float(value) / float(operand)
+

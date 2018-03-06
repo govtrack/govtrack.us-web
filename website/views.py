@@ -20,7 +20,7 @@ from events.models import Feed
 import us
 
 import re, json
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
 
 @anonymous_view
 @render_to('website/index.html')
@@ -788,8 +788,29 @@ def load_misconduct_data():
         for entry in misconduct_data:
             entry["person"] = people_map[int(entry["person"])]
 
-        # Split all tags and percolate consequence tags to the top level.
         for entry in misconduct_data:
+            for consequence in entry.get("consequences", []):
+                # Pre-render consequence dates.
+                if isinstance(consequence.get("date"), (int, str)):
+                    if len(str(consequence["date"])) == 4: # year
+                        consequence["date_rendered"] = str(consequence["date"])
+                    elif len(consequence["date"]) == 7: # YYYY-MM, but it's historical so we can't use strftime directly
+                        consequence["date_rendered"] = date(2000, int(consequence["date"][5:7]), 1).strftime("%B") + " " + str(int(consequence["date"][0:4]))
+                    else:
+                        raise ValueError(consequence["date"])
+                elif isinstance(consequence.get("date"), date):
+                    consequence["date_rendered"] = date(2000, consequence["date"].month, consequence["date"].day).strftime("%b. %d").replace(" 0", " ") + ", " + str(consequence["date"].year)
+                else:
+                    raise ValueError(consequence["date"])
+
+                # Normalize links to list.
+                if isinstance(consequence.get("link"), str):
+                    consequence["links"] = [consequence["link"]]
+                else:
+                    consequence["links"] = consequence.get("link", [])
+                consequence["wrap_link"] = (len(consequence["links"]) == 1) and (len(consequence.get("action", "") + consequence.get("text", "")) < 100)
+
+            # Split all tags and percolate consequence tags to the top level.
             if "tags" in entry:
                 entry["tags"] = set(entry["tags"].split(" "))
             else:

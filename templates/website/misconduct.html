@@ -1,5 +1,4 @@
 {% extends "master.html" %}
-{% load govtrack_utils %}
 {% load humanize %}
 
 {% block title %}GovTrack.us - Congressional Misconduct Database{% endblock %}
@@ -111,7 +110,7 @@
             <span>{{label}}</span>
           {% endif %}
         {% endfor %}</div>
-     	{{entry.text|markdown}}
+        {% include "website/misconduct-entry.html" %}
       </div>
     {% endfor %}
   </div>

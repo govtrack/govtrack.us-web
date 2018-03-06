@@ -1,0 +1,34 @@
+{% load govtrack_utils %}
+
+{{entry.text|markdown}}
+
+{% if entry.consequences %}
+<table style="font-size: 90%; line-height: 120%; margin-top: -.5em; margin-left: 4px;">
+  {% for consequence in entry.consequences %}
+    <tr valign="top">
+      <td style="width: 8em; padding: .25em">
+        {{consequence.date_rendered}}
+      </td>
+      <td style="padding: .25em">
+      {% if consequence.body %}
+        {{consequence.body}}
+
+        {% if consequence.wrap_link %}<a href="{{consequence.links.0}}">{% endif %}
+        {{consequence.action}}
+        {% if consequence.wrap_link %}</a>{% endif %}
+      {% else %}
+        {% if consequence.wrap_link %}<a href="{{consequence.links.0}}">{% endif %}
+        {{consequence.text}}
+        {% if consequence.wrap_link %}</a>{% endif %}
+      {% endif %}
+
+      {% if not consequence.wrap_link and consequence.links %}
+        {% for link in consequence.links %}
+          <a href="{{link}}"><span class="glyphicon glyphicon-new-window"></span></a>
+        {% endfor %}
+      {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% endif %}
