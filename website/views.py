@@ -814,6 +814,8 @@ misconduct_tags = (
   ("settlement", "settlement"),
   ("conviction", "conviction in court"),
   ("plea", "pleaded in court"),
+  ("resolved", "resolved"),
+  ("unresolved", "unresolved"),
 )
 
 @anonymous_view
