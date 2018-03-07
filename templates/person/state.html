@@ -177,9 +177,7 @@ $(function() {
     		</div>
 	    	<div role="tabpanel" class="tab-pane" id="map">
 				<h2>Map of Congressional Districts</h2>
-				{% if state == "FL" or state == "VA" or state == "NC" %}
-		    		{% include "person/redistricting-notes.html" %}
-				{% endif %}
+	    		{% include "person/redistricting-notes.html" %}
 
 				<iframe id="map-iframe" style="width: 100%; height: 80vh; border: 1px solid #999;"> </iframe>
 

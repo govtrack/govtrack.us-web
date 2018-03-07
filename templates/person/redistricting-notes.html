@@ -1,3 +1,9 @@
+{% if not state or state == "FL" or state == "VA" or state == "NC" or state == "PA" %}
 <div class="alert alert-success" role="alert" style="padding: 8px; font-size: 12px;">
-	Our maps for Florida, North Carolina, and Virginia have been updated to reflect 2016 court-ordered redistricting, as of Jan 3, 2017.
+   Congressional district maps are changing in some states for the 2018 elections.
+   If you want to look up who represents you now, our maps based on the 2016 elections are for you.
+   If you are looking for information on who you will be on your ballot this year,
+   please consult your local elections authority.
 </div>
+{% endif %}
+
