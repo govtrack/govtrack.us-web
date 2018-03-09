@@ -25,8 +25,8 @@
 
 {% block crumbs %}
 <ol class="breadcrumb">
-{# <li><a href="/stakeholders">Stakeholders</a></li> #}
-{# <li class="active">Register a New Stakeholder</li> #}
+<li><a href="/stakeholders">Stakeholders</a></li>
+<li class="active">{{stakeholder.name}}</li>
 </ol>
 {% endblock %}
 
@@ -51,7 +51,7 @@
 {% elif stakeholder.verified is None %}
     <div class="panel panel-info">
         <div class="panel-body">
-            <p>This organization is in the queue to be confirmed by GovTrack staff. You&rsquo;ll hear from us in a few days with more information.</p>
+            <div>This organization is in the queue to be confirmed by GovTrack staff. You&rsquo;ll hear from us in a few days with more information.</div>
             {% if stakeholder.twitter_handle %}
                 <hr>
                 <p>If @{{stakeholder.twitter_handle}} is a verified Twitter account, you can get confirmed <b>instantly</b> if you can log into it! Start by clicking the button below:</p>
@@ -65,6 +65,30 @@
     </div>
 {% elif is_admin %}
     <p class="text-success">Congrats, this stakeholder is confirmed. We&rsquo;ll be in touch soon with more information.</p>
+{% endif %}
+
+{% if posts %}
+    <h2>Posts</h2>
+
+    {% for post in posts %}
+    <div style="margin: 1.5em 0;">
+        <p>
+        {% for bp in post.bill_positions.all %}
+            {% if bp.position is not None %}
+            {{bp.get_position_display}}:
+            {% endif %}
+            <a href="{{bp.bill.get_absolute_url}}">{{bp.bill}}</a>
+            {% if not forloop.last %}; {% endif %}
+        {% endfor %}
+        </p>
+        {% if post.content %}
+            <p>{{post.content|markdown|truncatewords_html:350}}</p>
+        {% endif %}
+        {% if post.link %}
+            <p><a href="{{post.link}}">{{post.link}}</a></p>
+        {% endif %}
+    </div>
+    {% endfor %}
 {% endif %}
 
 {% endblock %}

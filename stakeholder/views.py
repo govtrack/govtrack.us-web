@@ -3,41 +3,77 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.forms import Form, CharField, URLField
+from django.forms import Form, CharField, URLField, ChoiceField, Textarea
 from django.http import Http404, HttpResponseRedirect
 
-from .models import Stakeholder
+from .models import Stakeholder, Post, BillPosition
+
+@login_required
+def list_my_stakeholders(request):
+    return render(request, "stakeholder/index.html", {
+      "stakeholders": Stakeholder.objects.filter(admins=request.user).order_by('name', 'created'),
+    })
 
 @login_required
 def new_stakeholder(request):
+    from bill.models import Bill
+    related_bill = None
+    if request.GET.get('bill'):
+      related_bill = Bill.from_congressproject_id(request.GET['bill'])
+
     class NewStakehoderForm(Form):
       organization_name = CharField()
-      website = URLField(initial="http://")
-      twitter_name = CharField(initial="@", required=False)
+      organization_website = URLField(initial="http://")
+      twitter_account = CharField(initial="@", required=False)
+      if related_bill:
+        position = ChoiceField(choices=[(None, '(choose)'), (1, "Support"), (0, "Neutral"), (-1, "Oppose")], required=False,
+          label="Your organization's position on " + related_bill.display_number)
+        position_statement_link = URLField(required=False,
+          label="Link to webpage or PDF containing a position statement about " + related_bill.display_number + " (optional)")
+        position_statement_content = CharField(required=False, widget=Textarea,
+          label="Paste the text of your position statement about " + related_bill.display_number + " (optional)")
 
     if request.method == "GET":
-      return render(request, "stakeholder/new.html", {
-        "form": NewStakehoderForm()
-      })
-    else:
+        form = NewStakehoderForm()
+    else: # POST
         form = NewStakehoderForm(request.POST)
         if form.is_valid():
             # Create a new un-verified Stakeholder object.
             stk = Stakeholder()
             stk.name = form.cleaned_data['organization_name']
-            stk.website = form.cleaned_data['website'] or None
-            stk.twitter_handle = form.cleaned_data['twitter_name'].lstrip("@") or None
+            stk.website = form.cleaned_data['organization_website'] or None
+            stk.twitter_handle = form.cleaned_data['twitter_account'].lstrip("@") or None
             stk.save()
+
+            # Create a new post.
+            if related_bill and (form.cleaned_data['position'] != '' or form.cleaned_data['position_statement_link'] or form.cleaned_data['position_statement_content']):
+              post = Post()
+              post.stakeholder = stk
+              if form.cleaned_data['position_statement_link'] or form.cleaned_data['position_statement_content']:
+                post.post_type = 1 # summary
+                post.link = (form.cleaned_data['position_statement_link'] or None)
+                post.content = (form.cleaned_data['position_statement_content'] or None)
+              else:
+                post.post_type = 0 # positions only
+              post.save()
+
+              bp = BillPosition()
+              bp.post = post
+              bp.bill = related_bill
+              if form.cleaned_data['position'] != '':
+                bp.position = int(form.cleaned_data['position'])
+              bp.save()
 
             # Make this user an admin.
             stk.admins.add(request.user)
 
             # Go view it.
             return HttpResponseRedirect(stk.get_absolute_url())
-        return render(request,
-            "stakeholder/new.html", {
-            "form": form,
-        })
+
+    return render(request, "stakeholder/new.html", {
+      "form": form,
+      "related_bill": related_bill,
+    })
 
 
 def view_stakeholder(request, id):
@@ -82,10 +118,24 @@ def view_stakeholder(request, id):
         instant_verification_status = "It looks like you logged into a different account. You may need to go to Twitter.com and log out manually first so you can log into a different account. You must log in as @" + stakeholder.twitter_handle + "."
       del request.session["registration_external_verify"]
 
+    # Get the Posts. Return one Post for non-positions-only posts,
+    # and explode positions-only posts into a cloned Post per position.
+    posts = []
+    posts.extend(Post.objects.filter(stakeholder=stakeholder).exclude(post_type=0))
+    for p in Post.objects.filter(stakeholder=stakeholder, post_type=0):
+      for bp in p.bill_positions.all():
+        p = Post(
+          id=p.id,
+          created=bp.created,
+        )
+        posts.append(p)
+    posts.sort(key = lambda p : p.created)
+
     # Render.
     return render(request,
         "stakeholder/view.html", {
         "stakeholder": stakeholder,
         "is_admin": is_admin,
         "instant_verification_status": instant_verification_status,
+        "posts": posts,
     })

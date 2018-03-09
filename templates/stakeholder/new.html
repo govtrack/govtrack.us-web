@@ -19,17 +19,25 @@
 {% endblock %}
 
 {% block body %}
+
+{% if related_bill %}
+<h1>Register Your Organization&rsquo;s Position on {{related_bill}}</h1>
+{% else %}
 <h1>Register a New Stakeholder</h1>
+{% endif %}
 
-<p>GovTrack is planning to roll out new tools for stakeholders of federal legislation.
-Register your organization using the form below. We&rsquo;ll be in touch about how
-you can have your advocacy position statements appear next to legislation on GovTrack.</p>
+<div style="margin: 2em 0;">
+<p>GovTrack is rolling out new tools for stakeholders of federal legislation.
+Register your organization using the form below.</p>
+</div>
 
-<form method="post">
+<form method="post" style="margin: 2em 0;">
 {% csrf_token %}
 {{form|crispy}}
 <input type="submit" value="Submit" class="btn btn-primary">
 </form>
+
+<p>Our team will be in touch after you register to confirm your information.</p>
 
 {% endblock %}
 

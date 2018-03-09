@@ -88,7 +88,10 @@ class Post(models.Model):
         return "<StakeholderPost %d %s>" % (self.id, unicode(self.stakeholder))
 
     def title(self):
-        if self.content is None: raise ValueError()
+        if self.content is None:
+            ret = self.positions()
+            if ret == "": ret = "<no content or positions>"
+            return ret
         self.content = self.content.replace("\r\n", "\n").replace("\r", "\n")
         title = self.content
         m = re.match(r"#*.*?(\n\n|$)", self.content.lstrip(), re.S)
