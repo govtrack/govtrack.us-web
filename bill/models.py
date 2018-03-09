@@ -1683,7 +1683,7 @@ class BillSummary(models.Model):
         if self.id < 75 or self.source_text == "Wikipedia":
             return self.content
         else:
-            return markdown2.markdown(self.content)
+            return markdown(self.content)
 
     def plain_text(self):
         import re

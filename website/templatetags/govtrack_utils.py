@@ -3,7 +3,7 @@ from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 from django.utils import safestring
 from django.template.defaultfilters import stringfilter
-import random, markdown2
+import random
 import json as jsonlib
 
 register = template.Library()
