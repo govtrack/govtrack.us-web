@@ -32,9 +32,8 @@ class BillLinkAdmin(admin.ModelAdmin):
 class BillSummaryAdmin(admin.ModelAdmin):
     list_display = ['created', 'bill']
     raw_id_fields = ['bill']
-    change_form_template = 'admin/wysiwyg_billsummary_change_form.html' # for django_wysiwyg
+
     def save_model(self, request, obj, form, change):
-        obj.content = BillSummaryAdmin.sanitize_html(obj.content)
         obj.save()
         obj.bill.create_events()
 
@@ -47,20 +46,6 @@ class BillSummaryAdmin(admin.ModelAdmin):
     	obj.delete()
         bill.create_events()
         
-    @staticmethod
-    def sanitize_html(value):
-        # based on http://djangosnippets.org/snippets/205/
-        from BeautifulSoup import BeautifulSoup
-        valid_tags = 'p i strong b u a h1 h2 h3 pre br img ul ol li span'.split()
-        valid_attrs = 'href src'.split()
-        soup = BeautifulSoup(value)
-        for tag in soup.findAll(True):
-            if tag.name not in valid_tags:
-                tag.hidden = True
-            tag.attrs = [(attr, val) for attr, val in tag.attrs
-                         if attr in valid_attrs]
-        return soup.renderContents().decode('utf8')
-
 admin.site.register(BillTerm, BillTermAdmin)
 admin.site.register(Bill, BillAdmin)
 admin.site.register(BillLink, BillLinkAdmin)

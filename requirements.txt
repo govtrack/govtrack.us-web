@@ -9,7 +9,6 @@ django-picklefield
 mimeparse
 defusedxml
 jsonfield
-beautifulsoup
 feedparser
 numpy
 django-haystack
