@@ -11,7 +11,7 @@ from common import enum
 from us import get_session_ordinal
 from bill.models import BillSummary
 
-import markdown2
+from website.templatetags.govtrack_utils import markdown
 
 class CongressChamber(enum.Enum):
     senate = enum.Item(1, 'Senate')
@@ -479,7 +479,7 @@ class VoteSummary(models.Model):
     def get_absolute_url(self): return self.vote.get_absolute_url()
 
     def as_html(self):
-        return markdown2.markdown(self.content)
+        return markdown(self.content)
 
     def plain_text(self):
         # Kill links.

@@ -14,7 +14,8 @@ from htmlemailer import send_mail as send_html_mail
 
 import os, sys
 from datetime import datetime, timedelta
-import yaml, markdown2
+import yaml
+from website.templatetags.govtrack_utils import markdown
 
 launch_time = datetime.now()
 
@@ -368,7 +369,7 @@ def load_announcement(template_path, testing):
 		"utm": "",
 	}
 	body_html = templ.render(ctx).strip()
-	body_html = markdown2.markdown(body_html)
+	body_html = markdown(body_html)
 
 	# Store everything in meta_info.
 	

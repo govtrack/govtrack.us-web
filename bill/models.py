@@ -14,8 +14,11 @@ from us import get_congress_dates, get_session_from_date
 
 from django.conf import settings
 
-import datetime, os.path, re, urlparse, markdown2
+import datetime, os.path, re, urlparse
 from lxml import etree
+
+from website.templatetags.govtrack_utils import markdown
+
 
 "Enums"
 

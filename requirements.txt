@@ -17,7 +17,8 @@ xapian-haystack
 recaptcha-client
 django-wysiwyg
 rcssmin
-markdown2
+commonmark
+html5lib
 tqdm
 pyyaml
 pynliner

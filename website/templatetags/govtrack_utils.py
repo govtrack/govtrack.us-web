@@ -41,7 +41,44 @@ def ordinalhtml(value):
 @register.filter(is_safe=True)
 @stringfilter
 def markdown(value):
-    return safestring.mark_safe(markdown2.markdown(force_unicode(value), safe_mode=True))
+    # Renders the string using CommonMark in safe mode, which blocks
+    # raw HTML in the input and also some links using a blacklist,
+    # plus a second pass filtering using a whitelist for allowed
+    # tags and URL schemes.
+
+    import CommonMark
+    ast = CommonMark.Parser().parse(force_unicode(value))
+    html = CommonMark.HtmlRenderer({ 'safe': True }).render(ast)
+
+    import html5lib, urlparse
+    def filter_url(url):
+        try:
+            urlp = urlparse.urlparse(url)
+        except Exception as e:
+            # invalid URL
+            return None
+        if urlp.scheme not in ("http", "https"):
+            return None
+        return url
+    valid_tags = set('strong em a code p h1 h2 h3 h4 h5 h6 pre br hr img ul ol li span blockquote'.split())
+    valid_tags = set('{http://www.w3.org/1999/xhtml}' + tag for tag in valid_tags)
+    dom = html5lib.HTMLParser().parseFragment(html)
+    for node in dom.iter():
+        if node.tag not in valid_tags and node.tag != 'DOCUMENT_FRAGMENT':
+            node.tag = '{http://www.w3.org/1999/xhtml}span'
+        for name, val in node.attrib.items():
+            if name.lower() in ("href", "src"):
+                val = filter_url(val)
+                if val is None:
+                    node.attrib.pop(name)
+                else:
+                    node.set(name, val)
+            else:
+                # No other attributes are permitted.
+                node.attrib.pop(name)
+    html = html5lib.serialize(dom, quote_attr_values="always", omit_optional_tags=False, alphabetical_attributes=True)
+
+    return safestring.mark_safe(html)
 
 @register.filter(is_safe=True)
 def json(value):
