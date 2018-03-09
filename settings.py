@@ -98,7 +98,6 @@ INSTALLED_APPS = (
     'crispy_forms',
 
     'haystack',
-    'django_wysiwyg',
     'htmlemailer',
     
     # project modules

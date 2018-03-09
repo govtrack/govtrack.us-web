@@ -14,7 +14,6 @@ django-haystack
 pysolr==2.1.0
 xapian-haystack
 recaptcha-client
-django-wysiwyg
 rcssmin
 commonmark
 html5lib
