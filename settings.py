@@ -99,7 +99,6 @@ INSTALLED_APPS = (
 
     'haystack',
     'django_wysiwyg',
-    'django_extensions',
     'htmlemailer',
     
     # project modules
