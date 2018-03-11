@@ -1,21 +1,23 @@
 {% if format == "text" %}
-rundate: "2018-03-03"
-subject: "Tip: The Congressional Misconduct Database"
+rundate: "2018-03-10"
+subject: "Tip: Advocacy Scorecards"
 ----------
 {% endif %}
 
 Are you getting the most out of GovTrack? GovTrack has a variety of tools for tracking Congress, new and old. But with so much information 
-readily available it can be hard to know what’s out there. That’s why starting today we’ll be providing weekly tips on how to get the most
-out of GovTrack in your regular email update. Today, we’d like to share our Congressional Misconduct Database.
+readily available it can be hard to know what’s out there. That’s why we’re providing weekly tips on how to get the most out of GovTrack in your 
+regular email update. Today, we’d like to show where to find advocates’ ratings of your representatives.
 
-## About the Misconduct Database
+## About Advocacy Scorecards
 
-In our new [Congressional Misconduct Database](https://www.govtrack.us/misconduct) we have chronicled 372 allegations of misconduct by 
-representatives and senators from 1789 to today, including corruption, sexual harassment and abuse, expulsion from Congress, and more. You can 
-sort the data by tags on the type of misconduct or the resolution of the case.
+Legislative advocates often put out congressional scorecards to rate their approval of each member of Congress. These scores are typically based 
+on how members vote on a given issue or set of issues the advocate cares about, so they can give a good idea of where your representatives stand. 
+GovTrack currently displays scores from eleven organizations in the analysis section of members’ pages.
 
-![Congressional Misconduct Database Screenshot](https://www.govtrack.us/static/images/misconduct_screenshot.png)
+![Advocacy Scorecards Screenshot](https://www.govtrack.us/static/images/scorecards_screenshot.png)
 
-We will be writing about trends and interesting cases we have noticed in a series of articles, starting with our [introductory article](https://govtrackinsider.com/introducing-govtracks-congressional-misconduct-database-7d49f677fbce) on sexual 
-harassment. We invite you to use our data to learn more about the history of misconduct and how it was handled, as well as to stay up-to-date 
-with the latest cases. We’ll be working regularly to keep the database as comprehensive as possible.
+Check out a live example on the page for [Rep. Devin Nunes](https://www.govtrack.us/congress/members/devin_nunes/400297).
+
+Scores from the National Organization for the Reform of Marijuana Laws (NORML) and NumbersUSA are the most recent additions to our scorecard 
+collection. We’ll be updating these scores occasionally to ensure accuracy.
+
