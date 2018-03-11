@@ -61,8 +61,9 @@ def rescale(u, log=False):
 	if log:
 		m = numpy.median(u)
 		s = -m**2/(2*m - 1)
-		u = numpy.log(u + s)
-		u = (u - min(u)) / (max(u) - min(u))
+		if s > 0:
+			u = numpy.log(u + s)
+			u = (u - min(u)) / (max(u) - min(u))
 	return [float(v) for v in u]
 
 # BEGIN
