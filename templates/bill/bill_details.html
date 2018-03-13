@@ -298,6 +298,16 @@
 	{% endwith %}
 
 
+  <div id="stakeholders-register" style="margin: 18px 0 25px 0; font-size: 85%; padding: .4em; border: 1px solid #DDC; background: #FFE; font-style: italic; ">
+	<style scoped>
+		#stakeholders-register a:not(:hover) { color: #333; text-decoration: none; }
+	</style>
+	<a href="/stakeholders/new?bill={{bill.congressproject_id}}">
+		Your organization&rsquo;s position statement could be on this page! Register your organization&rsquo;s position on this bill &raquo;
+	</a>
+  </div>
+
+
 <h2><span>Sponsor and status</span></h2>
 
 {% if show_media_bar %}
@@ -554,7 +564,7 @@
 
 	<div id="admin_panel"> </div>
 
-
+{% if stakeholder_posts %}
 <div style="margin: 30px 0;">
   <h2 style="margin-bottom: 15px;"><span>What stakeholders are saying</span></h2>
   <style>
@@ -597,16 +607,8 @@
   		{% endif %}
   	</div>
   {% endfor %}
-
-  <div id="stakeholders-register" style="margin-top: 15px; font-size: 88%; padding: .5em; border: 1px solid #DDC; background: #FFE; font-style: italic; ">
-	<style scoped>
-		#stakeholders-register a:not(:hover) { color: #333; text-decoration: none; }
-	</style>
-	<a href="/stakeholders/new?bill={{bill.congressproject_id}}">
-		Your organization&rsquo;s position statement could be here! Register your organization&rsquo;s position on this bill...
-	</a>
-  </div>
-</div>	
+</div>
+{% endif %}
 
 	{% if text_incorporation and bill.is_success %}
 		<h2><span>Incorporated legislation</span></h2>
