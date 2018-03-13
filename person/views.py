@@ -34,31 +34,31 @@ from settings import CURRENT_CONGRESS
 
 pronunciation_guide = None
 pronunciation_guide_key = {
-"a": "cat", "b": "bat",
-"ah": "calm", "ch": "chin",
-"air": "hair", "d": "day",
-"ar": "bar", "f": "fat",
-"aw": "law", "g": "get",
-"ay": "say", "h": "hat",
-"e": "bed", "j": "jam",
-"ee": "meet", "k": "king",
-"eer": "beer", "l": "leg",
-"er": "her", "m": "man",
-"ew": "few", "n": "not",
-"i": "pin", "ng": "sing",
-u"ī": "eye", "nk": "thank",
-"o": "top", "p": "pen",
-"oh": "most", "r": "rag",
-"oo": "soon", "s": "sit",
-"oor": "poor", "t": "top",
-"or": "corn", "th": "thin",
-"ow": "cow", u"t͡h": "this",
-"oy": "boy", "v": "van",
-"u": "cup", "w": "will",
-"uh": "cup", "y": "yes",
-"uu": "book", "z": "zebra",
-"y": "cry", "zh": "vision",
-"yoo": "unit",  "yr": "fire",
+u"a": "cat", u"b": "bat",
+u"ah": "calm", u"ch": "chin",
+u"air": "hair", u"d": "day",
+u"ar": "bar", u"f": "fat",
+u"aw": "law", u"g": "get",
+u"ay": "say", u"h": "hat",
+u"e": "bed", u"j": "jam",
+u"ee": "meet", u"k": "king",
+u"eer": "beer", u"l": "leg",
+u"er": "her", u"m": "man",
+u"ew": "few", u"n": "not",
+u"i": "pin", u"ng": "sing",
+u"ī": "eye", u"nk": "thank",
+u"o": "top", u"p": "pen",
+u"oh": "most", u"r": "rag",
+u"oo": "soon", u"s": "sit",
+u"oor": "poor", u"t": "top",
+u"or": "corn", u"th": "thin",
+u"ow": "cow", u"t͡h": "this",
+u"oy": "boy", u"v": "van",
+u"u": "cup", u"w": "will",
+u"uh": "cup", u"y": "yes",
+u"uu": "book", u"z": "zebra",
+u"y": "cry", u"zh": "vision",
+u"yoo": "unit",  u"yr": "fire",
 " ": None, "-": None,
 }
 
@@ -154,11 +154,14 @@ def person_details(request, pk):
                 pronunciation_guide = { }
             else:
                 pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open("data/us/pronunciation.yaml")) }
+
+        # Get this person's entry.
         pronunciation = pronunciation_guide.get(person.id)
         # TODO: Validate that the 'name' in the guide matches the name we're actually displaying.
         if pronunciation:
-          # Show just the parts of the respelling key that are relevant to this name.
-          pronunciation["key"] = []
+          # Show a letter-pronunciation key including only the letters in the pronunciation respelling,
+          # and excluding punctuation glyphs (which are used for syllabification and word boundaries).
+          pronunciation["key"] = set()
           for namepart in pronunciation["respell"].split(" // "):
             # Parse out the letters actually used in the guide. Sweep from left to right chopping
             # off valid respelling letter combinations, chopping off the longest one where possible.
@@ -166,14 +169,20 @@ def person_details(request, pk):
             while i < len(namepart):
               for s in sorted(pronunciation_guide_key, key = lambda s : -len(s)):
                 if namepart[i:i+len(s)] in (s, s.upper()):
-                  if s not in pronunciation["key"]:
-                    pronunciation["key"].append(s)
+                  if pronunciation_guide_key[s]:
+                    pronunciation["key"].add(s)
                   i += len(s)
                   break
               else:
                 # respelling did not match any valid symbol
                 break
-          pronunciation["key"] = sorted([ (letter, pronunciation_guide_key[letter]) for letter in pronunciation["key"] if pronunciation_guide_key[letter] ])
+
+          # Sort the letters. Because of the barred i, a standard lexicographic sort fails. Use NFKD to sort barred i after regular i.
+          import unicodedata
+          pronunciation["key"] = sorted(pronunciation["key"], key = lambda letter : unicodedata.normalize('NFKD', letter))
+
+          # Turn letters into letter-guide pairs.
+          pronunciation["key"] = [(letter, pronunciation_guide_key[letter]) for letter in pronunciation["key"]]
 
         enacted_bills_src_qs = person.sponsored_bills.exclude(original_intent_replaced=True).order_by('-current_status_date')
 

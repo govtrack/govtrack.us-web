@@ -726,7 +726,7 @@ function show_pronunciation_guide() {
 			<thead><tr><th style="text-align: center">Letter</th> <th>Sounds As In</th></thead>
 			<tbody>
 				{% for letter, sound in pronunciation.key %}
-					<tr><td style="font-family: monospace; font-weight: bold; text-align: center;">{{letter}}</td> <td>{{sound}}</td> </tr>
+					<tr><td style="font-family: monospace; font-weight: bold; text-align: center;">{{letter.upper}} {{letter}}</td> <td>{{sound}}</td> </tr>
 				{% endfor %}
 			</tobdy>
 			</table>
