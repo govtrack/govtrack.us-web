@@ -34,7 +34,7 @@ class StakeholderAdmin(admin.ModelAdmin):
     list_filter = ('verified',)
     inlines = [StakeholderAdminsInline]
     exclude = ('admins', 'extra')
-    ordering = ('slug', '-verified')
+    ordering = ('-created',)
 
 class BillPositionAdminInline(admin.TabularInline):
     model = BillPosition

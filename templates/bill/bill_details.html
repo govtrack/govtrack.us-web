@@ -573,20 +573,20 @@
     	padding: 5px 10px;
     	line-height: 128%;
     }
-    .stakeholder-post:hover { cursor: pointer; background-color: #F5F5F5; border-radius: 8px;}
+    .stakeholder-post.has-content:hover { cursor: pointer; background-color: #F5F5F5; border-radius: 8px;}
     .stakeholder-position-1 { border-left: 3px solid #0A0; }
     	.stakeholder-position-1 .stakeholder-position { color: #070; }
     .stakeholder-position--1 { border-left: 3px solid #F00; }
     	.stakeholder-position--1 .stakeholder-position { color: #F00; }
     .stakeholder-position {
     	display: block;
-    	float: right;
-    	margin: -2px 0 2px 2px;
+    	float: left;
+    	margin-right: .3em;
     }
     .stakeholder-name {
     	display: block;
     	float: left;
-    	max-width: 15em;
+    	max-width: 20em;
     	overflow: hidden;
     	white-space: nowrap;
     	text-overflow: ellipsis;
@@ -595,7 +595,7 @@
     }
   </style>
   {% for sp in stakeholder_posts %}
-  	<div class="stakeholder-post stakeholder-position-{{sp.position}}" onclick="show_stakeholder_position({{sp.id}}); return false;">
+  	<div class="stakeholder-post stakeholder-position-{{sp.position}} {% if sp.content %}has-content{% endif %}" {% if sp.content %}onclick="show_stakeholder_position({{sp.id}}); return false;"{% endif %}>
 		{% if sp.position == 1 %}
 			<span class="stakeholder-position glyphicon glyphicon-thumbs-up"></span>
 		{% endif %}
@@ -605,6 +605,7 @@
   		<span class="stakeholder-name">{{sp.stakeholder.name}}</span>{% if sp.content %}:
   			{{sp.title|truncatewords:41}}
   		{% endif %}
+        <div class="clearfix"></div>
   	</div>
   {% endfor %}
 </div>
