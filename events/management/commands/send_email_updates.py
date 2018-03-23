@@ -221,7 +221,6 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 	eventslists = []
 	most_recent_event = None
 	eventcount = 0
-	can_send_if_no_events = False
 	for sublist in user.subscription_lists.all():
 		# Get a list of all of the trackers this user has in all lists. We use the
 		# complete list, even in non-email-update-lists, for rendering events.
@@ -241,17 +240,10 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			eventcount += len(events)
 			most_recent_event = max(most_recent_event, max_id)
 
-		# Check if we want to send an email even if there are no events:
-		# * We have announcement text.
-		# * It hasn't been incredibly long since their last update for any of their lists
-		#   with the right email frequency.
-		can_send_if_no_events |= (announce is not None) and (sublist.last_email_sent is not None) \
-			and (sublist.last_email_sent > launch_time-timedelta(days=60))
-
 	user_querying_end_time = datetime.now()
 	
 	# Don't send an empty email.... unless we're testing and we want to send some old events.
-	if len(eventslists) == 0 and not send_old_events and not can_send_if_no_events:
+	if len(eventslists) == 0 and not send_old_events and announce is None:
 		return {
 			"total_time_querying": user_querying_end_time-user_start_time,
 		}
@@ -301,7 +293,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			},
 			fail_silently=False,
 			connection=mail_connection,
-			timings=timings
+			#timings=timings
 		)
 	except Exception as e:
 		if "recipient address was suppressed due to" in str(e):
@@ -332,8 +324,8 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		"total_emails_sent": 1,
 		"total_events_sent": eventcount,
 		"total_time_querying": user_querying_end_time-user_start_time,
-		"total_time_rendering": timings["render"],
-		"total_time_sending": timings["send"],
+		#"total_time_rendering": timings["render"],
+		#"total_time_sending": timings["send"],
 	}
 
 def load_announcement(template_path, testing):
