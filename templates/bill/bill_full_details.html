@@ -58,6 +58,7 @@
 {% endif %}
 
 <h2><span>Votes</span></h2>
+<style>.minor_vote { display: none; }</style>
 {% if bill.votes.exists %}
 	{% for v in bill.votes.all %}
 	<div class="{% if v.is_major %}major_{% else %}minor_{% endif %}vote" style="margin-bottom: 1em">
