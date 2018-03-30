@@ -43,6 +43,14 @@ function init_ad_zone(ad_container) {
     // save cookie
     $.cookie("ad_exp", form_qs(ad_cookie), { expires: 21, path: '/' });
 
+    // Activate page-level auto-placement ads.
+    if (!is_ad_free) {
+        (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-3418906291605762",
+          enable_page_level_ads: true
+        });
+    }
+
     // Show ad.
 
     function write_ad_code(html, text) {
@@ -66,6 +74,16 @@ function init_ad_zone(ad_container) {
         write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="7881093146"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
         */
+
+    } else if (ad_container.attr('data-zone') == "master_a" && $(window).width() >= 1170) {
+		// Master A Google AdSense 336x280 unit.
+        write_ad_code('<ins class="adsbygoogle" style="margin:0 -4px;display:inline-block;width:336px;height:280px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="4342089141"></ins>');
+        (adsbygoogle = window.adsbygoogle || []).push({});
+
+    } else if (ad_container.attr('data-zone') == "master_a" && $(window).width() >= 970) {
+		// Master A Google AdSense 200x200 unit.
+        write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:200px;height:200px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8659683806"></ins>');
+        (adsbygoogle = window.adsbygoogle || []).push({});
 
     } else if (ad_container.attr('data-zone') == "master_a") {
         // Master A Google AdSense Responsive unit
