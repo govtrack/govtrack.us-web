@@ -1,28 +1,28 @@
 {% if format == "text" %}
-rundate: "2018-03-31"
-subject: "Tip: What is Congress browsing?"
+rundate: "2018-04-07"
+subject: "Tip: ¿Hablas español?"
 ----------
 {% endif %}
 
-Are you getting the most out of GovTrack? GovTrack has a variety of 
-tools for tracking Congress, new and old. But with so much information 
+Are you getting the most out of GovTrack? With so much information 
 readily available it can be hard to know what’s out there. That’s why 
 we’re providing weekly tips on how to get the most out of GovTrack in 
-your regular email update. Today, we’d like to show you how 
-Congressional and White House staff are using GovTrack.
+your regular email update. **Today, we’d like to show you how to translate 
+the site into Spanish.**
 
-**What is Congress browsing?**
+![Screenshot](https://www.govtrack.us/static/images/googletranslate_screenshot.png)
 
-At the bottom of the “About Us” menu is a link to a live record of any 
-time someone visits GovTrack.us from within the United States Capitol, 
-the White House, and their associated office buildings. We created this 
-page last year because in March 2017 the U.S. Congress passed a bill 
-that rolled back regulations prohibiting Internet service providers from 
-selling subscribers’ browsing habits to advertisers. So it’s only fair 
-that we publish their browsing history on our site.
+You can do this by going to the language select at the top right next to 
+the search bar. Easy!
 
-![Screenshot](https://www.govtrack.us/static/images/sousveillance_screenshot.png)
+Try it now [on our home page](https://www.govtrack.us). Happy tracking!
 
-You can learn more about [how Congress uses GovTrack 
-here](https://www.govtrack.us/sousveillance).
+---
 
+¿Estás ganando el máximo de GovTrack? Con tanta información disponible, puede ser difícil 
+hallar lo que hay. Por eso, vamos a ofrecer sugerencias y trucos cada semana para 
+conseguir más de GovTrack, en tu email regular. **Hoy, te enseñamos cómo traducir el sitio 
+a Español.**
+
+Halla "Select language" (eligir idioma) [a la encima y derecho de la página](https://www.govtrack.us),
+al lado de la barra de búsqueda. ¡Tan fácil!
