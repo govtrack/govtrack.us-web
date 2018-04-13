@@ -387,7 +387,7 @@ class Bill(models.Model):
     def title_no_number(self):
         """The title of the bill without the number."""
         if self.lock_title:
-            return re.sub("^" + re.escape(self.display_number_no_congress_number+": "), "", self.title)
+            return re.sub("^" + re.escape(self.display_number+": "), "", self.title)
         return get_primary_bill_title(self, self.titles, with_number=False)
 
     @property
