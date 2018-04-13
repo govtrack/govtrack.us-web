@@ -647,15 +647,15 @@ def vote_comparison_table_named(request, table_id, table_slug):
 			("115-2017/h658", { "title": "On Motion to Table Resolution of Impeachment H.Res. 646" }),
 			("115-2018/h35", { "title": "On Motion to Table Resolution of Impeachment H.Res. 705" }),
 		]
-	elif int(table_id) == 3:
-		if table_slug != "immigration-feb-2018":
-			return HttpResponseRedirect("/congress/votes/compare/3/immigration-feb-2018")
-		title = "Comparing Votes on Immigration, DACA, and Border Security"
-		description = "Senate votes on Feb. 16, 2018 on immigration, Deferred Action for Childhood Arrivals (DACA), and border security. All three plans included a path to citizenship for DACA recipients. The plans differed in funding for border security or a wall on the southern border and in restrictions on legal immigration."
+	elif int(table_id) == 4:
+		if table_slug != "balanced-budget-amendment-2018":
+			return HttpResponseRedirect("/congress/votes/compare/4/balanced-budget-amendment-2018")
+		title = "Comparing Votes on Tax Cuts, the Omnibus Spending Bill, and the Balanced Budget Amendment"
+		description = "The House recently voted to cut taxes (Tax Cuts and Jobs Act, Dec. 20, 2017), increase spending (Consolidated Appropriations Act, Mar. 22, 2018), and --- quixotically --- require that the federal budget be balanced without a three-fifths vote in both chambers (Balanced Budget Amendment, Apr. 12, 2018)."
 		votes = [
-			("115-2018/s33", { "title": "McCain-Coons: DACA fix and border security measures, no funding for a wall" }),
-			("115-2018/s35", { "title": "Common Sense Coalition: DACA fix, some immigration limits, $25B for border security" }),
-			("115-2018/s36", { "title": "Trump plan: DACA fix, most immigration limits, heavier enforcement, $25B for border wall" }),
+			("115-2017/h699", { "title": "Tax Cuts and Jobs Act" }),
+			("115-2018/h127", { "title": "Consolidated Appropriations Act" }),
+			("115-2018/h138", { "title": "Balanced Budget Amendment" }),
 		]
 	else:
 		raise Http404()
