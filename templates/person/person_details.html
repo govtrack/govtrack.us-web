@@ -354,7 +354,15 @@ function show_pronunciation_guide() {
         </div>
 
 		{% if misconduct %}
-		<h2><span>Misconduct/alleged misconduct</span></h2>
+		<h2><span>
+          {% if misconduct_any_alleged and misconduct_any_not_alleged %}
+            Misconduct/alleged misconduct
+          {% elif misconduct_any_alleged %}
+            Alleged misconduct &amp; resolution
+          {% else %}
+            Misconudct
+          {% endif %}
+        </span></h2>
         {% for entry in misconduct %}
         	<div style="margin-bottom: 1em">
         		{% include "website/misconduct-entry.html" %}

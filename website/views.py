@@ -819,6 +819,9 @@ def load_misconduct_data():
                 if "tags" in cons:
                     entry["tags"] |= set(cons["tags"].split(" "))
 
+            # Mark the entry as 'alleged' if no guilty consequence tag (which we've percolated to the top) is present.
+            entry["alleged"] = (len(entry["tags"] & misconduct_tags_guilty) == 0)
+
     return misconduct_data
 
 misconduct_tags = (
@@ -838,6 +841,8 @@ misconduct_tags = (
   ("resolved", "resolved"),
   ("unresolved", "unresolved"),
 )
+
+misconduct_tags_guilty = set(["expulsion", "censure", "reprimand", "exclusion", "conviction", "plea"])
 
 @anonymous_view
 @render_to('website/misconduct.html')

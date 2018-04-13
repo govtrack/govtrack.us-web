@@ -143,8 +143,11 @@ def person_details(request, pk):
             vote_explanations = { }
 
         # Misconduct - load and filter this person's entries, keeping original order.
+        # Choose 'Alleged misconduct', 'Misconduct', 'Misconduct/alleged misconduct' as appropriate.
         from website.views import load_misconduct_data
         misconduct = [m for m in load_misconduct_data() if m["person"] == person ]
+        misconduct_any_alleged = (len([ m for m in misconduct if m["alleged"]  ]) > 0)
+        misconduct_any_not_alleged = (len([ m for m in misconduct if not m["alleged"]  ]) > 0)
 
         # Load pronunciation from guide. Turn into a mapping from GovTrack IDs to data.
         if pronunciation_guide is None:
@@ -204,6 +207,8 @@ def person_details(request, pk):
                 'vote_explanations': vote_explanations,
                 'key_votes': load_key_votes(person),
                 'misconduct': misconduct,
+                'misconduct_any_alleged': misconduct_any_alleged,
+                'misconduct_any_not_alleged': misconduct_any_not_alleged,
                 }
 
     #ck = "person_details_%s" % pk
