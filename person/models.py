@@ -645,8 +645,9 @@ class PersonRole(models.Model):
         #
         # EXCEPT: Senators appointed to fill a term may be up for re-election
         # by special election sooner than the term end date stored in our
-        # data.
-        if self.id == 44287: return 2018 # Tina Smith
+        # data. The end date is thus not known because it will be when the
+        # special election winner is certified.
+        if self.id in (44287, 44288): return 2018 # Tina Smith, Cindy Hyde-Smith
         if not self.current: raise ValueError()
         return self.enddate.year-1
 
