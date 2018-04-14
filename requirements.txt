@@ -13,7 +13,6 @@ numpy
 django-haystack
 pysolr==2.1.0
 xapian-haystack
-recaptcha-client
 rcssmin
 commonmark
 html5lib

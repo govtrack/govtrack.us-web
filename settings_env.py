@@ -65,8 +65,8 @@ SECRET_KEY = get_env_variable('SECRET_KEY', default=default_secret_key)
 # Copy some environment variables into the Django settings object.
 copy_env_vars = [
     # For accounts logic.
-    "RECAPTCHA_PUBLIC_KEY",
-    "RECAPTCHA_PRIVATE_KEY",
+    "RECAPTCHA_SITE_KEY",
+    "RECAPTCHA_SECRET_KEY",
     "TWITTER_OAUTH_TOKEN", # also for automated tweets and used to update @GovTrack/Members-of-Congress twitter list
     "TWITTER_OAUTH_TOKEN_SECRET",
     "FACEBOOK_APP_ID", # also used for Facebook widgets
