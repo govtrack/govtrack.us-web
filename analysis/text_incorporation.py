@@ -402,28 +402,24 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
     if  b1.title_no_number.startswith("A bill to designate ") \
      or b1.title_no_number.startswith("To designate ") \
      or b1.title_no_number.startswith("To name ") \
+     or b1.title_no_number.startswith("A bill for the relief of ") \
      or "Commemorative Coin Act" in b1.title_no_number:
       if b1_ratio*b2_ratio < .85:
         continue
 
     # For other bills...
-    #   a) The bills are nearly identical, i.e. the ratios indicating how
-    #      must text of each bill is in the other are both high, and
-    #      there is some minimum amount of text in the bills so that we're
-    #      sure there is substantative text at all.
-    #   b) The bills are substantially similar to each other and the text
+    #   a) The bills are substantially similar to each other and the text
     #      in common is large enough to exclude cases where all of the
-    #      substance in the bills are in the dis-similar parts.
-    #   c) One bill is substantially (>33%) incorporated within the other
+    #      substance in the bills are in the dis-similar parts. The smaller
+    #      the absolute amount in common, the higher the relative threshold.
+    #   b) One bill is substantially (>33%) incorporated within the other
     #      and the text in common is significantly large to ensure that
     #      there are substantive provisions in that part.
     #   d) One bill has provisions incorporated within the other, and though
     #      it's a small part of the bill, it's a large bill and the text
     #      in common is quite large.
-    if   (b1_ratio*b2_ratio > .95 and cmp_text_len > 300) \
-      or (b1_ratio*b2_ratio > .66 and cmp_text_len > 800) \
-      or ((b1_ratio>.81 or b2_ratio>.81) and cmp_text_len > 800) \
-      or ((b1_ratio>.33 or b2_ratio>.33) and cmp_text_len > 4000) \
+    if   (b1_ratio*b2_ratio > max(.95-0.0006*(cmp_text_len-300), .66) and cmp_text_len > 300) \
+      or (max(b1_ratio, b2_ratio) > max(.81-0.00015*(cmp_text_len-800), .33) and cmp_text_len > 800) \
       or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 8000):
 
       # Index this information with both bills.
