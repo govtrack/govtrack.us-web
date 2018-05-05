@@ -436,7 +436,9 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
         "other": b1_id,
         "other_version": b1_versioncode,
         "other_ratio": b1_ratio,
-        "text": cmp_text,
+        #"text": cmp_text, # Unicode isnt being saved into the db properly which causes
+                           # equality comparisons to fail when checking if records need
+                           # updating, and we're not using this anyway, so don't include it.
       }
 
       # For b1, which was enacted, we're saying that the bill's
@@ -447,13 +449,14 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
         "other": b2_id,
         "other_version": b2_versioncode,
         "other_ratio": b2_ratio,
-        "text": cmp_text,
+        #"text": cmp_text, # see above
       }
 
-  # Reformat so each bill has a list of other bills rather than
-  # a mapping.
+  # Reformat so each bill has a stable-ordered list of other bills rather than
+  # an unordered mapping.
   for b in text_incorporation:
-    text_incorporation[b] = sorted(text_incorporation[b].values(), key=lambda item : -item['my_ratio'])
+    text_incorporation[b] = sorted(text_incorporation[b].values(), key=lambda item : (
+      -item['my_ratio'], item['other_ratio'], item['my_version'], item['other'], item['other_version']))
 
   # Get the haystack index.
   from bill.search_indexes import BillIndex
