@@ -1430,7 +1430,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                     if other_bill.was_enacted_ex(recurse=False, restrict_to_activity_in_date_range=restrict_to_activity_in_date_range):
                         ret.append(other_bill)
                         total_incorporated_ratio += rec["my_ratio"]
-            if total_incorporated_ratio >= .33:
+            if total_incorporated_ratio >= .5:
                 return ret
 
         # Check identical bills identified by CRS, i.e. "companion" bills.
