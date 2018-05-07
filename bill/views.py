@@ -127,6 +127,8 @@ def bill_details_user_view(request, congress, type_slug, number):
 
     ret["reactions"] = get_user_bill_reactions(request, bill)
     ret["position"] = get_user_bill_position_info(request, bill)
+    if request.user.is_authenticated:
+        ret["stakeholders"] = [ { "id": s.id, "title": s.name } for s in request.user.stakeholder_set.all() ]
 
     return ret
 
