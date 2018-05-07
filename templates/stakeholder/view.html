@@ -88,6 +88,7 @@
             <p><a href="{{post.link}}">{{post.link}}</a></p>
         {% endif %}
     </div>
+    {% if not forloop.last %}<hr>{% endif %}
     {% endfor %}
 {% endif %}
 

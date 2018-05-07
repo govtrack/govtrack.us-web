@@ -15,16 +15,22 @@ def list_my_stakeholders(request):
     })
 
 @login_required
-def new_stakeholder(request):
+def new_stakeholder_post(request):
     from bill.models import Bill
     related_bill = None
     if request.GET.get('bill'):
       related_bill = Bill.from_congressproject_id(request.GET['bill'])
 
+    user_admin_of_stakeholders = request.user.stakeholder_set.all()
+
     class NewStakehoderForm(Form):
-      organization_name = CharField()
-      organization_website = URLField(initial="http://")
-      twitter_account = CharField(initial="@", required=False)
+      if not user_admin_of_stakeholders:
+        organization_name = CharField()
+        organization_website = URLField(initial="http://")
+        twitter_account = CharField(initial="@", required=False)
+      else:
+        organization = ChoiceField(choices=[(s.id, s.name) for s in user_admin_of_stakeholders],
+          label="Your organization")
       if related_bill:
         position = ChoiceField(choices=[(None, '(choose)'), (1, "Support"), (0, "Neutral"), (-1, "Oppose")], required=False,
           label="Your organization's position on " + related_bill.display_number)
@@ -38,15 +44,27 @@ def new_stakeholder(request):
     else: # POST
         form = NewStakehoderForm(request.POST)
         if form.is_valid():
-            # Create a new un-verified Stakeholder object.
-            stk = Stakeholder()
-            stk.name = form.cleaned_data['organization_name']
-            stk.website = form.cleaned_data['organization_website'] or None
-            stk.twitter_handle = form.cleaned_data['twitter_account'].lstrip("@") or None
-            stk.save()
+            if not user_admin_of_stakeholders:
+              # Create a new un-verified Stakeholder object.
+              stk = Stakeholder()
+              stk.name = form.cleaned_data['organization_name']
+              stk.website = form.cleaned_data['organization_website'] or None
+              stk.twitter_handle = form.cleaned_data['twitter_account'].lstrip("@") or None
+              stk.save()
 
-            # Create a new post.
+              # Make this user an admin.
+              stk.admins.add(request.user)
+            else:
+              # Get an existing Stakeholder that they are the admin of.
+              stk = get_object_or_404(Stakeholder, id=form.cleaned_data['organization'])
+              if request.user not in stk.admins.all():
+                # Invalid. Get out of here.
+                return HttpResponseRedirect(stk.get_absolute_url())
+
+            # Create a new post if this page is for a related bill and a position,
+            # link, or statement are provided.
             if related_bill and (form.cleaned_data['position'] != '' or form.cleaned_data['position_statement_link'] or form.cleaned_data['position_statement_content']):
+              # Create a new Post object.
               post = Post()
               post.stakeholder = stk
               if form.cleaned_data['position_statement_link'] or form.cleaned_data['position_statement_content']:
@@ -57,15 +75,13 @@ def new_stakeholder(request):
                 post.post_type = 0 # positions only
               post.save()
 
+              # Attach a BillPosition to the Post.
               bp = BillPosition()
               bp.post = post
               bp.bill = related_bill
               if form.cleaned_data['position'] != '':
                 bp.position = int(form.cleaned_data['position'])
               bp.save()
-
-            # Make this user an admin.
-            stk.admins.add(request.user)
 
             # Go view it.
             return HttpResponseRedirect(stk.get_absolute_url())
