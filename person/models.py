@@ -679,7 +679,7 @@ from events.models import Feed
 Feed.register_feed(
     "p:",
     title = lambda feed : Person.from_feed(feed).name,
-    noun = "person",
+    noun = "legislator",
     includes = lambda feed : [Person.from_feed(feed).get_feed("pv"), Person.from_feed(feed).get_feed("ps")],
     link = lambda feed: Person.from_feed(feed).get_absolute_url(),
     scoped_title = lambda feed : "All Events for " + Person.from_feed(feed).lastname,
@@ -691,7 +691,7 @@ Feed.register_feed(
 Feed.register_feed(
     "ps:",
     title = lambda feed : Person.from_feed(feed).name + " - Bills Sponsored",
-    noun = "person",
+    noun = "legislator",
     link = lambda feed: Person.from_feed(feed).get_absolute_url(),
     scoped_title = lambda feed : Person.from_feed(feed).lastname + "'s Sponsored Bills",
     category = "federal-bills",
@@ -700,7 +700,7 @@ Feed.register_feed(
 Feed.register_feed(
     "pv:",
     title = lambda feed : Person.from_feed(feed).name + " - Voting Record",
-    noun = "person",
+    noun = "legislator",
     link = lambda feed: Person.from_feed(feed).get_absolute_url(),
     scoped_title = lambda feed : Person.from_feed(feed).lastname + "'s Voting Record",
     single_event_type = True,

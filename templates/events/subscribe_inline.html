@@ -165,10 +165,15 @@ $(function() {
 
 		{% if request.user.is_authenticated and feed.includes_feeds|length != 0 %}
 			<div class="events_to_track" style="display: none">
-				<h3 style="margin-top: 1em">What would you like to track?</h3>
-				<ol id="track_panel_selected_feed" style="padding: 0;">
+				<h4>Choose detailed tracker:</h4>
+				<ol id="track_panel_selected_feed">
 					{% for f in feed.includes_feeds_and_self %}
-						<li {% if forloop.first %}class="selected"{% endif %}><a href="#" feed="{{f.feedname}}" onclick="return selected_feed_changed(this);"><span class="icon"></span> {{f.scoped_title}}</a></li>
+						<li {% if forloop.first %}class="selected"{% endif %}>
+							<a href="#" feed="{{f.feedname}}" onclick="return selected_feed_changed(this);">
+								<span class="icon"></span> {{f.scoped_title}}
+							</a>
+							<div>{{f.description}}</div>
+						</li>
 					{% endfor %}
 				</ol>
 			</div>

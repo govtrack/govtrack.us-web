@@ -541,40 +541,32 @@ aside .download-links { padding: 31px 0 0 }
 			text-transform: none;
 		}
 
-	.tracker_widget {
-		line-height: 130%;
-		text-align: left;
-	}
-			.tracker_widget.modal-body {
-				padding-bottom: 0;
+			.list_select ul, .events_to_track ol {
+				list-style: none;
+				font-size: .9em;
+				margin: 2px 0;
+				padding: 0;
 			}
-
-			.tracker_widget h3 {
-				font-size: 1em;
-				color: #36A;
-				text-align: center;
-				margin: 0 0 .5em 0;
-				text-transform: none;
-			}
-			.list_select ul, .events_to_track ol { padding: 0; list-style: none; }
 			.events_to_track li a,
 			.list_select li a {
 				display: block;
 				padding: 0 10px;
-				height: 25px;
-				line-height: 28px;
-				margin: 2px 0;
-				background: #fff;
 				moz-border-radius: 5px;
 				border-radius: 5px;
 				overflow: hidden;
-				font-size: .9em;
+				line-height: 23px;
 				text-decoration: none;
 			}
 			.events_to_track li a {
 				background: transparent;
 				border: 0;
 				margin-bottom: 0;
+			}
+			.events_to_track li div {
+				margin-top: -2px;
+				margin-left: 30px;
+				margin-bottom: 2px;
+				line-height: 125%;
 			}
 			.list_select li.new a,
 			.list_select li.all a {	 /* Styles the "Add New List" link */
