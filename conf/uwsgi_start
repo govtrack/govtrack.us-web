@@ -6,4 +6,4 @@ honcho -e local/settings.env run \
 	--wsgi-file wsgi.py \
 	--socket /tmp/uwsgi_govtrack_www.sock --chmod-socket=666 \
 	--pidfile /tmp/uwsgi_govtrack_www.pid \
-	--processes 21 --cheaper 10 --cheaper-algo busyness --cheaper-step 3
+	--processes 10
