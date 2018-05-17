@@ -45,11 +45,13 @@ class VotePositionAdminInline(admin.TabularInline):
     raw_id_fields = ('post', 'vote')
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'stakeholder_', 'positions', 'created')
+    list_display = ('title', 'stakeholder_', 'positions', 'created', 'stakeholder_verified')
     raw_id_fields = ('stakeholder',)
     inlines = [BillPositionAdminInline, VotePositionAdminInline]
     exclude = ('extra',)
     def stakeholder_(self, obj): return obj.stakeholder.name
+    def stakeholder_verified(self, obj): return obj.stakeholder.verified
+    list_filter = ('stakeholder__verified',)
 
 admin.site.register(Stakeholder, StakeholderAdmin)
 admin.site.register(Post, PostAdmin)
