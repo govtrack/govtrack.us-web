@@ -34,6 +34,15 @@
 {% block summary %}
 <h1{% if parent %} class="long"{% endif %}>{% if parent %}{{ parent }}:<br>Subcommittee on {% endif %}{{ committee }}</h1>
 
+<div class="action-row clearfix">
+	<button class="btn btn-sm btn-success" onclick="return show_track_panel();">
+		<i class="glyphicon glyphicon-envelope"> </i>
+		<span style="margin-left: 3px;">
+			Track Committee
+		</span>
+	</button>
+</div>
+
 {% if committee.jurisdiction %}
 	<p style="margin-bottom: 30px">{{committee.jurisdiction}} {% if committee.jurisdiction_link %}(<a href="{{committee.jurisdiction_link}}">source</a>){% endif %}</p>
 {% endif %}
@@ -41,14 +50,6 @@
 {% endblock %}
 
 {% block sidebar_top %}
-	<div>
-	<h2>What you can do</h2>
-	<div id="action-buttons">
-		<button class="btn btn-sm btn-default" onclick="return show_track_panel();">Track Committee</button>
-	</div>
-	<div class="clearfix"></div>
-	</div>
-
     {% if committee.url %}
 	<div>
     <h2>Links</h2>

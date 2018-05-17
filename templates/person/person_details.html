@@ -268,35 +268,30 @@ function show_pronunciation_guide() {
 		</p>
 	{% endif %}
 </div>
-{% endblock %}
 
-{% block sidebar_top %}
-	{% if active_role %}
-	<div>
-		<h2>What you can do</h2>
-
+<div class="action-row clearfix">
+{% if active_role %}
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-		<div id="action-buttons">
-			<button class="btn btn-sm btn-default" onclick="return show_track_panel();">
+			<button class="btn btn-sm btn-success" onclick="return show_track_panel();">
 				<i class="glyphicon glyphicon-envelope"> </i>
 				<span style="margin-left: 3px;">
-					Get email alerts
+					Track {{person.him_her|capfirst}}
 				</span>
 			</button>
 
 			{% if role.website %}
-			<button class="btn btn-sm btn-default" onclick="$('#contact_modal').modal();">
+			<button class="btn btn-sm btn-default" onclick="$('#contact_modal').modal();" style="background: white;">
 				<i class="glyphicon glyphicon-comment"> </i>
 				<span style="margin-left: 3px;">
-					Contact {{person.him_her }}
+					Contact {{person.him_her|capfirst}}
 				</span>
 			</button>
 			{% endif %}
-		</div>
-		<div class="clearfix"></div>
-	</div>
 	{% endif %}
+</div>
+{% endblock %}
 
+{% block sidebar_top %}
 	{% if links %}
 	<div>
 	<h2>Links</h2>

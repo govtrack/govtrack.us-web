@@ -217,28 +217,17 @@
 
 {% block body_class %}bill{% endblock %}
 
-{% block sidebar_top %}
-	{{block.super}}
-
+{% block header_top %}
 	{% if bill.is_alive %}
-	<div>
-	<h2>Take action</h2>
-	<div id="bill-actions" class="clearfix">
+	<div class="action-row clearfix">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-		<button class="btn btn-sm btn-default" onclick="return show_track_panel();">
+		<button class="btn btn-sm btn-success" onclick="return show_track_panel();">
 			<i class="glyphicon glyphicon-envelope"> </i>
 			<span style="margin-left: 3px;">
-				Get Email Alerts
+				Track {{bill.display_number_no_congress_number}}
 			</span>
 		</button>
 		
-		{% if bill.cosponsors.all|length >= 3 and 0 %}
-		<button class="btn btn-sm btn-default" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
-			<span style="color: #080; margin: 0 2px"><i class="fa fa-money" aria-hidden="true"></i></span>
-			if.then.fund
-		</button>
-		{% endif %}
-
 		<!--
 		<button class="btn btn-sm btn-default" onclick="window.location = 'https://phonecongress.com/topic/congress/bills/{{bill.congressproject_id}}/{{bill.id}}'">
 			<span class="glyphicon glyphicon-phone" style="color: #444"></span>
@@ -247,19 +236,16 @@
 		-->
 
 		{% with SITE_ROOT_URL|add:bill.get_absolute_url as share_url %}
-		<div style="margin-bottom: 8px">
+		<div style="margin-top: 1px;">
 			<a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{bill.title|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
 			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 		</div>
 
 		{% if FACEBOOK_APP_ID %}
-			<div style="margin-bottom: 5px;">
 				<div class="fb-share-button" data-href="{{share_url}}" data-layout="button_count"></div>
-			</div>
 		{% endif %}
 		{% endwith %}
 
-	</div><!-- /bill-actions -->
 	</div>
 	{% endif %}
 {% endblock %}

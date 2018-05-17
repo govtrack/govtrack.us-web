@@ -960,6 +960,10 @@ dl.schema > div {
 	font-size: 85%;
 }
 
+.action-row > * {
+	float: left;
+	margin: 0 15px 15px 0;
+}
 
 /******************************
  JT added things below here
