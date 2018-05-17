@@ -93,10 +93,11 @@ h2 {
 	}
 		#content h2 span {
 			display: inline-block;
-			padding: 3px 8px 3px 6px;
+			padding: 3px 8px 4px 6px;
 			background-color: #1D4E70;
 			color: white;
 			font-weight: bold;
+			border-radius: 3px;
 		}
 	.tab-content h2 {
 		font-size: 17px;
