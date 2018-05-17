@@ -37,12 +37,6 @@ a.plain:hover, a.plain:focus, a.plain:active {
 	text-decoration: none;
 }
 
-/* we use some unstyled buttons that render differently on Chrome and FF */
-button.btn {
-    background-color: #CDCDCD;
-    color: black;
-}
-
 h1, h2, h3, h4, h5 {
 	font: normal normal normal 2.5em/1.5em 'Roboto Slab';
 	line-height: 130%;
@@ -255,6 +249,34 @@ blockquote {
 	font-size: 88%;
 }
 	.breadcrumb a {
+	}
+
+/* bootstrap modals */
+.modal-header {
+	background-color: #9D2146;
+	color: white;
+	padding: 12px 15px;
+}
+	.modal-header .close {
+		opacity: .75;
+		color: white;
+	}
+	h2.modal-title {
+	  margin: 0 !important;
+	  font-weight: bold;
+	  font-size: 22px;
+	}
+.modal-body {
+	background-color: #FAFAFF;
+}
+	.modal-body h3 {
+		margin: .75em 0 .5em 0;
+		font-size: 18px;
+		color: #1D4E70;
+		font-weight: bold;
+	}
+	.modal-body .btn-primary {
+		color: white;
 	}
 
 .panel-info {
@@ -1136,4 +1158,19 @@ ul.singlesignon {
 
 .nowrap {
 	white-space: nowrap;
+}
+
+#followus_modal p { line-height: 132%; margin-bottom: 1em; }
+#followus_modal .col-sm-6 p + div { margin-left: 50px; }
+#followus_modal .modal-body .row > div > div { margin-bottom: 1.75em; }
+#followus_modal .dropnum {
+  color: #903;
+  float: left;
+  font-family: Georgia, Times New Roman, serif;
+  font-weight: bold;
+  font-size: 3em;
+  line-height: .85em;
+  padding-right: 12px;
+  padding-left: 3px;
+  padding-bottom: 5px;
 }

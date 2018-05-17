@@ -47,28 +47,16 @@ function show_followus(flags) {
 
 
 <div id="followus_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="followusModalTitle" aria-hidden="true">
-  <style scoped>
-    #followus_modal p { line-height: 132%; margin-bottom: 1em; }
-    #followus_modal .modal-body .row > div > div { margin-bottom: 1.75em; }
-    #followus_modal .dropnum {
-      color: #903;
-      float: left;
-      font-family: Georgia, Times New Roman, serif;
-      font-weight: bold;
-      font-size: 3em;
-      line-height: .85em;
-      padding-right: 12px;
-      padding-left: 3px;
-      padding-bottom: 5px;
-    }
-  </style>
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="followusModalTitle">Getting Started with GovTrack</h4>
+        <h2 class="modal-title" id="followusModalTitle">Getting Started with GovTrack.us</h2>
       </div>
       <div class="modal-body">
+        <p>GovTrack.us is an independent website tracking the status of legislation in the United States Congress and helping you participate in your national legislature. Here are some tips to get started.</p>
+        <hr>
+
         <div class="row">
           <div class="col-sm-6">
             <p><span class="dropnum">1.</span> Follow us on Twitter and Facebook for updates about legislation in Congress.</p>
@@ -94,15 +82,17 @@ function show_followus(flags) {
               <a class="btn btn-primary btm-sm" href="/start" target="_blank"><i class="glyphicon glyphicon-flash"></i> Get Alerts</a>
             </div>
             
+            <!--
             <p><span class="dropnum">4.</span> Support our work so we can bring you more information about what Congress is doing each day.</p>
 
             <div>
               <a class="btn btn-primary btm-sm" href="/accounts/membership" target="_blank"><i class="glyphicon glyphicon-usd"></i> One Time</a>
               <a class="btn btn-primary btm-sm" href="https://www.patreon.com/govtrack" target="_blank"><i class="glyphicon glyphicon-credit-card"></i> Monthly</a>
             </div>
+            -->
           </div>
-          <div class="col-sm-6">
-            <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/govtrack" data-widget-id="508366437044330496" data-chrome="noheader nofooter noborders transparent" data-tweet-limit="1">Tweets by @govtrack</a>
+          <div class="col-sm-6" style="max-height: 325px; overflow: auto;">
+            <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/govtrack" data-widget-id="508366437044330496" data-chrome="noheader nofooter noborders transparent" data-tweet-limit="3">Tweets by @govtrack</a>
           </div>
         </div>
       </div>

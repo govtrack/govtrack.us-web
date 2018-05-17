@@ -277,7 +277,7 @@ function show_pronunciation_guide() {
 
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<div id="action-buttons">
-			<button class="btn btn-sm" onclick="return show_track_panel();">
+			<button class="btn btn-sm btn-default" onclick="return show_track_panel();">
 				<i class="glyphicon glyphicon-envelope"> </i>
 				<span style="margin-left: 3px;">
 					Get email alerts
@@ -285,7 +285,7 @@ function show_pronunciation_guide() {
 			</button>
 
 			{% if role.website %}
-			<button class="btn btn-sm" onclick="$('#contact_modal').modal();">
+			<button class="btn btn-sm btn-default" onclick="$('#contact_modal').modal();">
 				<i class="glyphicon glyphicon-comment"> </i>
 				<span style="margin-left: 3px;">
 					Contact {{person.him_her }}
@@ -406,7 +406,7 @@ function show_pronunciation_guide() {
 	    <div class="modal-content">
 	      <div class="modal-header">
 	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	        <h4 class="modal-title" id="contact_modalTitle">Contact {{person.name_and_title}}</h4>
+	        <h2 class="modal-title" id="contact_modalTitle">Contact {{person.name_and_title}}</h2>
 	      </div>
 	      <div class="modal-body">
 			<div class="list-group">
@@ -722,7 +722,7 @@ function show_pronunciation_guide() {
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="pronunciationModalTitle">Pronunciation Guide</h4>
+            <h2 class="modal-title" id="pronunciationModalTitle">Pronunciation Guide</h2>
           </div>
           <div class="modal-body" style="font-size: 115%">
 			<center>

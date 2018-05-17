@@ -225,7 +225,7 @@
 	<h2>Take action</h2>
 	<div id="bill-actions" class="clearfix">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-		<button class="btn btn-sm" onclick="return show_track_panel();">
+		<button class="btn btn-sm btn-default" onclick="return show_track_panel();">
 			<i class="glyphicon glyphicon-envelope"> </i>
 			<span style="margin-left: 3px;">
 				Get Email Alerts
@@ -233,16 +233,18 @@
 		</button>
 		
 		{% if bill.cosponsors.all|length >= 3 and 0 %}
-		<button class="btn btn-sm" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
+		<button class="btn btn-sm btn-default" onclick="window.location = 'https://if.then.fund/find-campaign/bill-sponsors/{{bill.congressproject_id}}';">
 			<span style="color: #080; margin: 0 2px"><i class="fa fa-money" aria-hidden="true"></i></span>
 			if.then.fund
 		</button>
 		{% endif %}
 
-		<button class="btn btn-sm" onclick="window.location = 'https://phonecongress.com/topic/congress/bills/{{bill.congressproject_id}}/{{bill.id}}'">
+		<!--
+		<button class="btn btn-sm btn-default" onclick="window.location = 'https://phonecongress.com/topic/congress/bills/{{bill.congressproject_id}}/{{bill.id}}'">
 			<span class="glyphicon glyphicon-phone" style="color: #444"></span>
 			<span style="margin-left: 3px;">Call Congress</span>
 		</button>
+		-->
 
 		{% with SITE_ROOT_URL|add:bill.get_absolute_url as share_url %}
 		<div style="margin-bottom: 8px">
@@ -258,7 +260,6 @@
 		{% endwith %}
 
 	</div><!-- /bill-actions -->
-	<div id="event_subscribe_inline_container"> </div>
 	</div>
 	{% endif %}
 {% endblock %}
@@ -809,7 +810,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="prognosis-details-title">Prognosis Details</h4>
+        <h2 class="modal-title" id="prognosis-details-title">Prognosis Details</h2>
       </div>
       <div class="modal-body">
       	<p style="margin-bottom: .25em">This {{bill.noun}} has a <b>{{prognosis.prediction|floatformat:0}}%</b> chance of being {{prognosis.success_name}}.</p>
@@ -848,11 +849,11 @@ var DISQUSWIDGETS = {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="stakeholder-position-{{sp.id}}-title">
+        <h2 class="modal-title" id="stakeholder-position-{{sp.id}}-title">
         	{{sp.stakeholder.name}}
       		{% if sp.position == 1 %}supports this {{bill.noun}}{% endif %}
       		{% if sp.position == -1 %}opposes this {{bill.noun}}{% endif %}
-       </h4>
+       </h2>
       </div>
       <div class="modal-body">
       	{% if sp.link or sp.stakeholder.website %}
@@ -864,6 +865,8 @@ var DISQUSWIDGETS = {
   </div>
 </div>
 {% endfor %}
+
+<div id="event_subscribe_inline_container"> </div>
 
 {% endblock %}
 

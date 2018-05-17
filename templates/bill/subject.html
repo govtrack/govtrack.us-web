@@ -51,17 +51,16 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="subterms_modal_title">Drill Down</h4>
+        <h2 class="modal-title" id="subterms_modal_title">Sub-categories of {{term}}</h2>
       </div>
       <div class="modal-body">
+      	<p>{{term}} has {{subs|length}} sub-categories that you can use to track a more targeted set of legislation:</p>
 		<ul>
 		{% for sub in subs %}
 			<li><a href="{{sub.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{sub.name}}</a></li>
 		{% endfor %}
 		</ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+		<p>Subject areas of legislation are provided by the Library of Congress.</p>
       </div>
     </div>
   </div>
