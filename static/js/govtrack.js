@@ -20,7 +20,7 @@ $(function() {
 });
 
 function show_modal(title, message) {
-    $('#error_modal h4').text(title);
+    $('#error_modal h2').text(title);
     if (message.charAt(0) != '<') {
         $('#error_modal .modal-dialog').toggleClass('modal-sm', true);
         $('#error_modal .modal-body').html($("<p/>").text(message).html());
