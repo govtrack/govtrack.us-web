@@ -97,9 +97,14 @@ def index(request):
         if isinstance(p, dict) and p.get("date_has_no_time"):
             p["published"] = p["published"].date()
 
+    from person.models import Person
+    from vote.models import Vote
     return {
         'bill_subject_areas': bill_subject_areas,
         'posts': posts,
+        'number_of_bills': Bill.objects.filter(congress=settings.CURRENT_CONGRESS).count(),
+        'number_of_legislators': Person.objects.filter(roles__current=True).count(),
+        'number_of_votes': Vote.objects.filter(created__year=datetime.now().year).count(),
         }
       
 @anonymous_view

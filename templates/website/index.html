@@ -1,5 +1,6 @@
 {% extends "master.html" %}
 {% load events_utils %}
+{% load humanize %}
 {% block title %}GovTrack.us: Tracking the U.S. Congress{% endblock %}
 {% block meta_description %}Tracking legislation and votes in the United States Congress.{% endblock %}
 
@@ -9,6 +10,95 @@
   <meta property="og:url" content="{{SITE_ROOT_URL}}" />
 
 <style>
+#bodybody {
+	background-image: url(/static/images/capitol_splash_1200.jpeg);
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: 30% 40%;
+	min-height: 80vh;
+}
+	@media screen and (max-width: 1024px) {
+		#bodybody {
+			background-image: url(/static/images/capitol_splash_1024.jpeg);
+		}
+	}
+	@media screen and (max-width: 768px) and (max-height: 768px) {
+		#bodybody {
+			background-image: url(/static/images/capitol_splash_640.jpeg);
+		}
+	}
+
+#masthead {
+	border-top: none;
+	background-color: rgba(0,0,0,.4);
+}
+#masthead .navbar-toggle { color: #CCC !important; border-color: #CCC; } /* search, hamburger */
+#masthead .navbar-toggle .icon-bar { background-color: #CCC; } /* hamburger */
+
+#sitenewscontainer.navbar-default {
+	border: none;
+	background: none;
+	color: white;
+}
+	#sitenewscontainer.navbar-default a {
+		color: #fccc99;
+		border-bottom: 1px solid #fccc84;
+	}
+
+#jumbotron {
+	font-size: 4vw;
+	padding-left: .5em;
+}
+	#social-media-icons {
+		font-size: 14px;
+	}
+	@media screen and (max-width: 1200px) {
+		#jumbotron {
+			font-size: 3.5vw;
+		}
+	}
+	@media screen and (max-width: 992px) {
+		#jumbotron {
+			font-size: 30px;
+		}
+		#deck {
+			background: rgba(255,255,255,.75);
+			padding: .25em;
+		}
+	}
+
+	h1 {
+		font-size: inherit;
+		border: none;
+		color: #713;
+		line-height: 1.2em;
+		margin: 22px 0 12px 0;
+		max-width: 12em;
+		text-shadow: 2px 2px rgba(200,200,200,.5);
+	}
+		h1 span {
+			padding: .1em .2em;
+			background: rgba(255,255,255,.2);
+		}
+
+	#deck {
+		font-size: 55%;
+		color: #337;
+		font-family: 'Titillium Web';
+		text-shadow: 1px 1px rgba(200,200,200,.5);
+		padding-left: .25em;
+		max-width: 22em;
+	}
+	#deck2 {
+		color: #226;
+		margin: .5em 0;
+		font-size: 75%;
+	}
+
+#maincontent {
+	background: white;
+}
+
 .top-actions > * {
   margin: 1em 0;
   font-size: 90%;
@@ -17,7 +107,8 @@
   font-weight: normal;
 }
   #content .top-actions label h2 {
-    font-size: 105%;
+  	font-weight: bold;
+	color: #824;
     margin: 0 0 .5em 0;
   }
   .top-actions label div {
@@ -72,7 +163,32 @@ article {
 </script>
 {% endblock %}
 
-{% block body %}
+{% block body_with_container %}
+<div id="jumbotron" class="container">
+	<div id="social-media-icons" class="pull-right">
+		<a href="https://www.facebook.com/govtrack/" title="Facebook"><i class="fa fa-facebook fa-fw"></i></a>
+		<a href="http://twitter.com/govtrack" title="Twitter"><i class="fa fa-twitter fa-fw"></i></a>
+		<a href="https://medium.com/govtrack-insider" title="Medium"><i class="fa fa-medium fa-fw"></i></a>
+		<a href="https://www.patreon.com/govtrack" title="Patreon"><i class="fa fa-usd fa-fw"></i></a>
+	</div>
+
+	<h1>
+		<span>Tracking</span><wbr><span>the</span><br><span>United</span><wbr><span>States</span><wbr><span>Congress</span>
+	</h1>
+	<div id="deck">
+		Find your representative and senators and legislation that affects you.
+		<div id="deck2">
+			{{number_of_bills|intcomma}} bills <span>&middot;</span>
+			{{number_of_legislators|intcomma}} legislators <span>&middot;</span>
+			{{number_of_votes|intcomma}} votes this year
+		</div>
+	</div>
+</div>
+
+</div> <!-- /#bodybody -->
+<div id="maincontent" style="padding-top: 25px">
+	<div class="container">
+		<div id="content">
 
 {# Quick action forms at top #}
 
@@ -170,6 +286,9 @@ article {
 <div style="float: right;">
   <a href="/events/govtrack-insider" style="text-transform: none; font-size: 80%; text-decoration: none;">Subscribe to all GovTrack Insider articles.</a>
 </div>
+
+	</div><!-- /content -->
+</div> <!-- /container -->
 
 {% endblock %}
 
