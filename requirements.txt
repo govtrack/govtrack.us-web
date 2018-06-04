@@ -32,3 +32,4 @@ dj-haystack-url
 paypalrestsdk
 django-crispy-forms
 rtyaml
+plotly

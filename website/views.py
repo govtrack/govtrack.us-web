@@ -797,14 +797,17 @@ def load_misconduct_data():
             for consequence in entry.get("consequences", []):
                 # Pre-render consequence dates.
                 if isinstance(consequence.get("date"), (int, str)):
-                    if len(str(consequence["date"])) == 4: # year
+                    if len(str(consequence["date"])) == 4: # year alone
                         consequence["date_rendered"] = str(consequence["date"])
+                        consequence["date_year"] = int(consequence["date"])
                     elif len(consequence["date"]) == 7: # YYYY-MM, but it's historical so we can't use strftime directly
                         consequence["date_rendered"] = date(2000, int(consequence["date"][5:7]), 1).strftime("%B") + " " + str(int(consequence["date"][0:4]))
+                        consequence["date_year"] = int(consequence["date"][0:4])
                     else:
                         raise ValueError(consequence["date"])
                 elif isinstance(consequence.get("date"), date):
                     consequence["date_rendered"] = date(2000, consequence["date"].month, consequence["date"].day).strftime("%b. %d").replace(" 0", " ") + ", " + str(consequence["date"].year)
+                    consequence["date_year"] = consequence["date"].year
                 else:
                     raise ValueError(consequence["date"])
 
@@ -815,26 +818,38 @@ def load_misconduct_data():
                     consequence["links"] = consequence.get("link", [])
                 consequence["wrap_link"] = (len(consequence["links"]) == 1) and (len(consequence.get("action", "") + consequence.get("text", "")) < 100)
 
+                # Parse tags.
+                if "tags" in consequence:
+                    consequence["tags"] = set(consequence["tags"].split(" "))
+                else:
+                    consequence["tags"] = set()
+
+                # Map consequence back to main entry. When plotting by consequence,
+                # we may want to know what entry it was for.
+                consequence["entry"] = entry
+
+
             # Split all tags and percolate consequence tags to the top level.
             if "tags" in entry:
                 entry["tags"] = set(entry["tags"].split(" "))
             else:
                 entry["tags"] = set()
             for cons in entry["consequences"]:
-                if "tags" in cons:
-                    entry["tags"] |= set(cons["tags"].split(" "))
+                entry["tags"] |= cons["tags"]
 
             # Mark the entry as 'alleged' if no guilty consequence tag (which we've percolated to the top) is present.
             entry["alleged"] = (len(entry["tags"] & misconduct_tags_guilty) == 0)
 
     return misconduct_data
 
-misconduct_tags = (
+misconduct_type_tags = [
   ("corruption", "bribery & corruption"),
   ("crime", "other crimes"),
   ("ethics", "ethics violation"),
   ("sexual-harassment-abuse", "sexual harassment & abuse"),
   ("elections", "campaign & elections"),
+]
+misconduct_consequence_tags = [
   ("expulsion", "expulsion"),
   ("censure", "censure"),
   ("reprimand", "reprimand"),
@@ -843,16 +858,78 @@ misconduct_tags = (
   ("settlement", "settlement"),
   ("conviction", "conviction in court"),
   ("plea", "pleaded in court"),
+]
+misconduct_status_tags = [
   ("resolved", "resolved"),
   ("unresolved", "unresolved"),
-)
+]
+misconduct_tag_filters = misconduct_type_tags + misconduct_consequence_tags + misconduct_status_tags
 
 misconduct_tags_guilty = set(["expulsion", "censure", "reprimand", "exclusion", "conviction", "plea"])
 
 @anonymous_view
 @render_to('website/misconduct.html')
 def misconduct(request):
+    entries = load_misconduct_data()
+
+    import plotly.graph_objs as go
+    from plotly.offline import plot
+
+    # Break out consequences into their own list.
+    consequences = sum((entry['consequences'] for entry in entries), [])
+    last_consequence_year = max(cons['date_year'] for cons in consequences)
+
+    # Make a common x-axis of decades starting with the first full year of the Congress,
+    # which happens to be an even decade.
+    x = [(1790 + 10*x) for x in range(0, (last_consequence_year-1790)//10+1)]
+    xlab = [str(year)+'s' for year in x]
+
+    bar_chart_layout = go.Layout(
+        barmode='stack',
+        margin=go.Margin(l=25,r=20,b=10,t=0,pad=0),
+        legend={ "orientation": "h" })
+
+    def make_chart(title, universe, bars, year_of):
+        stacks = []
+        def decade_of(entry): return year_of(entry) - (year_of(entry) % 10)
+        for tag, label in bars:
+            y = [
+                sum(1
+                    for entry in universe
+                    if  decade_of(entry) == decade
+                    and tag in entry['tags'])
+                for decade in x
+            ]
+            stacks.append(go.Bar(x=xlab, y=y, name=label))
+        return {
+            "title": title,
+            "figure": plot(
+                go.Figure(
+                    data=stacks,
+                    layout=bar_chart_layout),
+                output_type="div",
+                include_plotlyjs=False,
+                show_link=False)
+            }
+
+    charts = [
+        make_chart(
+            title="Types of misconduct and alleged misconduct over time",
+            universe=entries,
+            bars=misconduct_type_tags,
+            year_of=lambda entry : entry['consequences'][0]['date_year'],
+        ),
+        make_chart(
+            title="Consequences of misconduct and alleged misconduct over time",
+            universe=consequences,
+            bars=misconduct_consequence_tags,
+            year_of=lambda entry : entry['date_year'],
+        ),
+    ]
+
+
     return {
-        "entries": load_misconduct_data(),
-        "tags": misconduct_tags,
+        "entries": entries,
+        "tags": misconduct_tag_filters,
+        "charts": charts,
     }

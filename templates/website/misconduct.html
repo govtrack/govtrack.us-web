@@ -35,6 +35,8 @@
     margin-right: .5em;
   }
 </style>
+
+ <script src="https://cdn.plot.ly/plotly-1.38.1.min.js" integrity="sha256-AJ4JjfIWwD1frDMDIYugrscahA0HtKUvyw4l/kQXdRI=" crossorigin="anonymous"></script>
 {% endblock %}
 
 {% block body %}
@@ -95,6 +97,15 @@
     </div>
   </div>
   <div class="col-sm-8 col-sm-pull-4">
+    <h2><span>Overview</span></h2>
+
+    {% for chart in charts %}
+      <h3>{{chart.title}}</h3>
+      {{chart.figure|safe}}
+    {% endfor %}
+
+    <h2><span>Misconduct and alleged misconduct</span></h2>
+
     <div id="filters">
         <b>filter:</b>
         {% for key, label in tags %}
