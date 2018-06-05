@@ -37,7 +37,7 @@ class Command(BaseCommand):
 		global medium_posts
 
 		if options["mode"][0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
-			print "Specify daily or weekly or testadmin or testcount."
+			print("Specify daily or weekly or testadmin or testcount.")
 			return
 
 		if options["mode"][0] == "testadmin":
@@ -171,16 +171,16 @@ class Command(BaseCommand):
 		for worker in pool: worker[0].join(1)
 
 		# show stats
-		print "Sent" if send_mail else "Would send", counts["total_emails_sent"], "emails and", counts["total_events_sent"], "events"
-		for k, v in counts.items():
-			print k, v
+		print("Sent" if send_mail else "Would send", counts["total_emails_sent"], "emails and", counts["total_events_sent"], "events")
+		for k, v in list(counts.items()):
+			print(k, v)
 
 		# show queries (requires DEBUG to be true)
 		if settings.DEBUG:
 			from django.db import connection
 			for q in connection.queries:
 				if float(q["time"]) > 0:
-					print q["time"], q["sql"]
+					print(q["time"], q["sql"])
 
 def pool_worker(conn):
 	try:
@@ -200,7 +200,7 @@ def pool_worker(conn):
 			# Close the connection.
 			conn.close()
 	except Exception as e:
-		print "Uncaught exception", e
+		print("Uncaught exception", e)
 
 def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events, mail_connection=None):
 	global launch_time
@@ -301,9 +301,9 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			if not is_new:
 				be.bounces += 1
 				be.save()
-			print user, "user is on suppression list already"
+			print(user, "user is on suppression list already")
 		else:
-			print user, e
+			print(user, e)
 		# raise - debugging - must also disable process pool to see what happened
 
 		# don't update this user's lists with what events were sent because it failed

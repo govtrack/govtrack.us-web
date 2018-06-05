@@ -78,7 +78,7 @@ def main(options):
             try:
                 cobj = Committee.objects.get(code=committee["thomas_id"])
             except Committee.DoesNotExist:
-                print "New committee:", committee["thomas_id"]
+                print("New committee:", committee["thomas_id"])
                 cobj = Committee(code=committee["thomas_id"])
                
             cobj.committee_type = TYPE_MAPPING[committee["type"]]
@@ -96,7 +96,7 @@ def main(options):
                 try:
                     sobj = Committee.objects.get(code=code)
                 except Committee.DoesNotExist:
-                    print "New subcommittee:", code
+                    print("New subcommittee:", code)
                     sobj = Committee(code=code)
                 
                 sobj.name = subcom["name"]
@@ -113,7 +113,7 @@ def main(options):
         # file.
         other_committees = Committee.objects.filter(obsolete=False).exclude(id__in=seen_committees)
         if len(other_committees) > 0:
-            print "Marking obsolete:", ", ".join(c.code for c in other_committees)
+            print("Marking obsolete:", ", ".join(c.code for c in other_committees))
             other_committees.update(obsolete=True)
 
         File.objects.save_file(COMMITTEES_FILE)
@@ -146,7 +146,7 @@ def main(options):
             try:
                 cobj = Committee.objects.get(code=committee)
             except Committee.DoesNotExist:
-                print "Committee not found:", committee
+                print("Committee not found:", committee)
                 continue
 
             # Process members of current committee node

@@ -134,7 +134,7 @@ def get_blog_items():
     def _callback(matches):
         id = matches.group(1)
         try:
-           return unichr(int(id))
+           return chr(int(id))
         except:
            return id
     def decode_unicode_references(data):
@@ -739,7 +739,7 @@ def dump_sousveillance(request):
     from website.models import Sousveillance
     from website.middleware import is_ip_in_any_range, HOUSE_NET_RANGES, SENATE_NET_RANGES, EOP_NET_RANGES
     import re
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     import user_agents
 
     def get_netblock_label(ip):
@@ -759,7 +759,7 @@ def dump_sousveillance(request):
         except:
             pass
       if "?" in path: path = path[:path.index("?")] # ensure no qsargs
-      if r.req.get("query"): path += "?" + urllib.urlencode({ k.encode("utf8"): v.encode("utf8") for k,v in r.req["query"].items() })
+      if r.req.get("query"): path += "?" + urllib.parse.urlencode({ k.encode("utf8"): v.encode("utf8") for k,v in list(r.req["query"].items()) })
 
       if r.req['agent']:
           ua = str(user_agents.parse(r.req['agent']))

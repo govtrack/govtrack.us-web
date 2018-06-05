@@ -47,4 +47,4 @@ for vote in votes:
 				voter.person.sortname,
 				voter.option.value,
 			] if with_voters else [])
-		w.writerow([unicode(v).encode("utf8") for v in row])
+		w.writerow([str(v).encode("utf8") for v in row])

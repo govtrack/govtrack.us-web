@@ -6,8 +6,8 @@ from django.contrib import admin
 
 import django.contrib.auth.views
 import registration.views
-import website.api
-import website.views
+from . import website.api
+from . import website.views
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -38,10 +38,10 @@ urlpatterns = [
 
 # sitemaps
 from collections import OrderedDict
-import person.views, bill.views, committee.views, vote.views
+from . import person.views, bill.views, committee.views, vote.views
 from django.contrib.sitemaps.views import index as sitemap_index_view
 from django.contrib.sitemaps.views import sitemap as sitemap_map_view
-from twostream.decorators import anonymous_view
+from .twostream.decorators import anonymous_view
 sitemaps = OrderedDict([
         ("bills_current", bill.views.sitemap_current),
         #("bills_archive", bill.views.sitemap_archive), # takes too long to load

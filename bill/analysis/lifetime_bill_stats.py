@@ -58,7 +58,7 @@ for r in cur_roles:
 	row.append(str(len(bills_enacted)))
 
 	row.extend([
-		unicode(r.person).encode("utf8"),
+		str(r.person).encode("utf8"),
 		r.party,
 		"http://www.govtrack.us" + r.person.get_absolute_url(),
 	])

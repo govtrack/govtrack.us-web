@@ -13,7 +13,7 @@ from datetime import datetime, time
 
 from registration.helpers import json_response
 
-from models import *
+from .models import *
 from website.models import *
 from events.templatetags.events_utils import render_event
 
@@ -170,7 +170,7 @@ def events_list_items(request):
     if len(qs) > 15:
         # Get the time between consecutive events, in days.
         seps = []
-        for i in xrange(1, len(qs)):
+        for i in range(1, len(qs)):
             s = (qs[i-1]["when"]-qs[i]["when"]).total_seconds()
             if s == 0: continue # skip things that happen at exactly the same time,
                                 # since they probably don't help us understand frequency
@@ -216,12 +216,12 @@ def events_list_items(request):
             
 def events_rss(request):
     import django.contrib.syndication.views
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
 
     try:
         feedlist, feedtitle = get_feed_list(request)
     except Exception as e:
-        raise Http404(unicode(e))
+        raise Http404(str(e))
     feedtitle += " - Tracked Events from GovTrack.us"
     
     class DjangoFeed(django.contrib.syndication.views.Feed):
@@ -240,7 +240,7 @@ def events_rss(request):
         def item_link(self, item):
             return settings.SITE_ROOT_URL + item["url"] + settings.RSS_CAMPAIGN_QUERYSTRING
         def item_guid(self, item):
-            return self.item_link(item) + "#eventid=" + urllib.quote_plus(item["guid"]) 
+            return self.item_link(item) + "#eventid=" + urllib.parse.quote_plus(item["guid"]) 
         def item_pubdate(self, item):
             return item["date"] if (not item["date"] or isinstance(item["date"], datetime)) else datetime.combine(item["date"], time.min)
             

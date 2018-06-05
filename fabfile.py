@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from __future__ import print_function
+
 
 from boto import ec2
 from fabric.api import cd, env, put, run, settings, sudo

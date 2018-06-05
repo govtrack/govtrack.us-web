@@ -9,7 +9,7 @@ from django.db.utils import IntegrityError
 import glob
 import re
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import os.path
 from datetime import datetime, timedelta
 
@@ -57,7 +57,7 @@ class AmendmentProcessor(XmlProcessor):
              + " to " + obj.bill.display_number
              
         for elem in node.xpath('description|purpose'):
-            text = unicode(elem.text) if elem.text else ""
+            text = str(elem.text) if elem.text else ""
             if text.strip() != "":
                 # Clean titles.
                 text = re.sub(r"(?i)^(?:An )?(?:substitute )?amendment (?:in the nature of a substitute )?(numbered|No\.) (\d+) printed in (part .* of )?(House Report \d+-\d+|the Congressional Record) to ", "To ", text)
@@ -125,7 +125,7 @@ def main(options):
         if not File.objects.is_changed(fname) and not options.force:
             m = re.match(r"data/us/(\d+)/bills.amdt/([sh])(\d+).xml", fname)
             if not m:
-                print "Invalid file name", fname
+                print("Invalid file name", fname)
             else:
                 amdt = Amendment.objects.get(congress=m.group(1), amendment_type=AmendmentType.by_slug(m.group(2)), number=m.group(3))
                 seen_amdt_ids.append(amdt.id) # don't delete me later
@@ -137,7 +137,7 @@ def main(options):
         try:
             amdt = amendment_processor.process(Amendment(), node)
         except:
-            print fname
+            print(fname)
             raise
 
         if not amdt:
@@ -155,7 +155,7 @@ def main(options):
         try:
             amdt.save()
         except:
-            print amdt
+            print(amdt)
             raise
             
         # For House votes on amendments, the only way to associate the vote with the
@@ -173,7 +173,7 @@ def main(options):
                     vote.related_amendment = amdt
                     vote.save()
                 except Vote.DoesNotExist:
-                    print "Missing vote data in", fname
+                    print("Missing vote data in", fname)
             
         # If this amendment is related to a vote, mark the vote as missing data because
         # we may need to update the vote title if the amendment title has changed.
@@ -185,7 +185,7 @@ def main(options):
     if options.congress and not options.filter:
         missing = Amendment.objects.filter(congress=options.congress).exclude(id__in = seen_amdt_ids)
         if missing.exists():
-            print "Amendments should be deleted: ", missing
+            print("Amendments should be deleted: ", missing)
 
 
 if __name__ == '__main__':

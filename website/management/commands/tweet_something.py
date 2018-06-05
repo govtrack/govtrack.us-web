@@ -70,7 +70,7 @@ class Command(BaseCommand):
 
 		# For good measure, ensure Unicode is normalized. Twitter
 		# counts characters on normalized strings.
-		if not isinstance(text, unicode): text = text.decode("utf8")
+		if not isinstance(text, str): text = text.decode("utf8")
 		import unicodedata
 		text = unicodedata.normalize('NFC', text)
 
@@ -93,14 +93,14 @@ class Command(BaseCommand):
 		)
 		text += " "
 		text += url
-		text += u" 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is four(?) characters as Twitter sees it (plus the preceding space)
+		text += " 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is four(?) characters as Twitter sees it (plus the preceding space)
 
 		if "TEST" in os.environ:
 			# Don't tweet. Just print and exit.
-			print self.short_url_length_https
-			print key
-			print len(text)-len(url)+self.short_url_length_https, text_len_diff
-			print repr(text)
+			print(self.short_url_length_https)
+			print(key)
+			print(len(text)-len(url)+self.short_url_length_https, text_len_diff)
+			print(repr(text))
 			sys.exit(1)
 
 		tweet = self.twitter.PostUpdate(text, verify_status_length=False) # it does not do link shortening test correctly
@@ -228,7 +228,7 @@ class Command(BaseCommand):
 			if text == "": continue
 			bill_number = bill.display_number
 			if bill.sponsor and bill.sponsor.twitterid: bill_number += " by @" + bill.sponsor.twitterid
-			text = text % (bill_number, u"yesterday")
+			text = text % (bill_number, "yesterday")
 			text += " " + bill.title_no_number
 			self.post_tweet(
 				bill.current_status_date.isoformat() + ":bill:%s:status:%s" % (bill.congressproject_id, status),

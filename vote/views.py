@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
-from StringIO import StringIO
+from io import StringIO
 from datetime import datetime
 
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -321,7 +321,7 @@ def vote_thumbnail_image_map(vote):
 def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	
 	import cairo, re, math
-	from StringIO import StringIO
+	from io import StringIO
 	
 	# general image properties
 	font_face = "DejaVu Serif Condensed"
@@ -358,7 +358,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	party_index = { "Democrat": 0, "Republican": 2 }
 	for opt in totals["options"]:
 		total_counts[opt["option"].key] = opt["count"]
-		for i in xrange(len(totals["parties"])):
+		for i in range(len(totals["parties"])):
 			j = party_index.get(totals["parties"][i], 1)
 			if opt["option"].key not in ("+", "-"):
 				# most votes are by proportion of those voting (not some cloture etc.),
@@ -469,7 +469,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	# Determine how many seats on each row.
 	seats_so_far = 0
 	rowcounts = []
-	for row in xrange(seating_rows):
+	for row in range(seating_rows):
 		# What's the radius of this row?
 		if seating_rows > 1:
 			r = inner_r + (outer_r-inner_r) * row / float(seating_rows-1)
@@ -495,7 +495,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	# left side.
 	seats = []
 	for row, count in enumerate(rowcounts):
-		for i in xrange(count):
+		for i in range(count):
 			seats.append( (row, i) )
 			
 	# Sort the seats in the order we will fill them from left to right,
@@ -549,13 +549,13 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 			# how many votes in this group?
 			n_voters = (yea_counts_by_party if vote == 0 else nay_counts_by_party)[party]
 			# for each voter...
-			for i in xrange(n_voters):
+			for i in range(n_voters):
 				seats[seat_idx] = (seats[seat_idx], (party, vote)) 
 				seat_idx += 1
 	
 	else:
 		# Assign voters to seats in order.
-		for i in xrange(len(voter_details)):
+		for i in range(len(voter_details)):
 			seats[i] = (seats[i], voter_details[i][1])
 
 	# Draw the seats.

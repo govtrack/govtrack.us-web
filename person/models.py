@@ -10,11 +10,12 @@ from jsonfield import JSONField
 
 from common import enum
 from person.types import Gender, RoleType, SenatorClass, SenatorRank
-from name import get_person_name
+from .name import get_person_name
 
 from us import stateapportionment, get_congress_dates, statenames, get_congress_from_date, get_all_sessions
 
 import functools
+import collections
 def cache_result(f):
     @functools.wraps(f)
     def g(self):
@@ -61,9 +62,9 @@ class Person(models.Model):
         # hard-to-type characters.
         def str2(s): return s if s != None else ""
         import unicodedata
-        n = self.name_no_details().replace(u"\u201c", " ").replace(u"\u201d", " ")
+        n = self.name_no_details().replace("\u201c", " ").replace("\u201d", " ")
         r = n + "\n" + \
-            u"".join(c for c in unicodedata.normalize('NFKD', n) if not unicodedata.combining(c)) + "\n"
+            "".join(c for c in unicodedata.normalize('NFKD', n) if not unicodedata.combining(c)) + "\n"
         most_recent_role = self.get_most_recent_role()
         if most_recent_role:
             r += str2(most_recent_role.state) + " " + str2(statenames.get(most_recent_role.state))
@@ -148,7 +149,7 @@ class Person(models.Model):
 
     @property
     def fullname(self):
-        return u'%s %s' % (self.firstname, self.lastname)
+        return '%s %s' % (self.firstname, self.lastname)
 
     @cache_result
     def name_no_district(self):
@@ -509,9 +510,9 @@ class PersonRole(models.Model):
                 if self.district == -1:
                     return "the representative for " + statename
                 elif self.district == 0:
-                    return "the representative for " + statename + u"\u2019s at-large district"
+                    return "the representative for " + statename + "\u2019s at-large district"
                 else:
-                    return "the representative for " + statename + u"\u2019s " + ordinalhtml(self.district) + " congressional district"
+                    return "the representative for " + statename + "\u2019s " + ordinalhtml(self.district) + " congressional district"
 
     def congress_numbers(self):
         """The Congressional sessions (Congress numbers) that this role spans, as a list from the starting Congress number through consecutive numbers to the ending Congress number."""
@@ -519,7 +520,7 @@ class PersonRole(models.Model):
         c1 = get_congress_from_date(self.startdate, range_type="start")
         c2 = get_congress_from_date(self.enddate, range_type="end")
         if not c1 or not c2: return None
-        return range(c1, c2+1) # congress number only, not session
+        return list(range(c1, c2+1)) # congress number only, not session
 
     def most_recent_congress_number(self):
         n = self.congress_numbers()
@@ -661,7 +662,7 @@ class PersonRole(models.Model):
                 try:
                     return self.person.get_session_stats(session)
                 except ValueError as e:
-                    errs.append(unicode(e))
+                    errs.append(str(e))
         raise ValueError("No statistics are available for this role: %s" % "; ".join(errs))
 
     def opposing_party(self):

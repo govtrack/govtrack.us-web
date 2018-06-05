@@ -6,4 +6,4 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		for p in Person.objects.filter(roles__current=True):
 			if not p.has_photo():
-				print p.id, p
+				print(p.id, p)

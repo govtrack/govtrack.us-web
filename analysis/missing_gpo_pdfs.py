@@ -13,6 +13,6 @@ for congress in range(103, 112+1):
 		fn2 = "data/congress/%d/bills/%s/%s%s/text-versions/%s/mods.xml" % (
 			congress, bill_type, bill_type, bill_number, print_code)
 		if not os.path.exists(fn2):
-			print fn2
+			print(fn2)
 		
 

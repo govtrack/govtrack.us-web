@@ -28,15 +28,15 @@ class Command(BaseCommand):
 			else:
 				p = UserProfile.objects.get(user__id=user)
 		except UserProfile.DoesNotExist:
-			print "No such user."
+			print("No such user.")
 			return
-		print "Turning off mass email option."
+		print("Turning off mass email option.")
 		p.massemail = False
 		p.save()
 		
-		print "Turning off email updates on the following subscription lists..."
+		print("Turning off email updates on the following subscription lists...")
 		for sublist in SubscriptionList.objects.filter(user=p.user):
-			print sublist.user.email, sublist.name, "was", sublist.email
+			print(sublist.user.email, sublist.name, "was", sublist.email)
 			
 			sublist.email = 0
 			sublist.save()

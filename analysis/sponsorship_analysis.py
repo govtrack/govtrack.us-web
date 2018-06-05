@@ -124,7 +124,7 @@ def build_matrix(congressnumber, starting_congress, house_or_senate, people, peo
 	# but include only those Members of Congress that served in the indicated
 	# Congress.
 	cells = []
-	for cn in xrange(starting_congress, congressnumber+1):
+	for cn in range(starting_congress, congressnumber+1):
 		for billfilename in glob.glob(datadir + "/us/" + str(cn) + "/bills/" + house_or_senate + "*.xml"):
 			xml = lxml.parse(billfilename)
 			
@@ -182,12 +182,12 @@ def build_matrix(congressnumber, starting_congress, house_or_senate, people, peo
 def smooth_matrix(nreps, P):
 	# Take the square root of each cell to flatten out outliers where one person
 	# cosponsors a lot of other people's bills.
-	for i in xrange(nreps):
-		for j in xrange(nreps):
+	for i in range(nreps):
+		for j in range(nreps):
 			P[i,j] = math.sqrt(P[i,j])
 
 def build_party_list(rep_to_row, people, nreps):
-	parties = [None for i in xrange(nreps)]
+	parties = [None for i in range(nreps)]
 	for k, v in rep_to_row.items():
 		parties[v] = people[k].party
 	return parties
@@ -207,7 +207,7 @@ def ideology_analysis(nreps, parties, P):
 	# To make the spectrum left-right, we'll multiply the scores by the sign of
 	# the mean score of the Republicans to put them on the right.
 	# Actually, since scale doesn't matter, just multiply it by the mean.
-	R_scores = [spectrum[i] for i in xrange(nreps) if parties[i] == "Republican"]
+	R_scores = [spectrum[i] for i in range(nreps) if parties[i] == "Republican"]
 	R_score_mean = sum(R_scores)/len(R_scores)
 	spectrum = spectrum * R_score_mean
 
@@ -225,7 +225,7 @@ def leadership_analysis(nreps, P):
 	# have some data. But if they have so little data, we should fudge
 	# it because if they only 'cosponsor' their own bills they will get
 	# leadership scores of 0.5.
-	for col in xrange(nreps):
+	for col in range(nreps):
 		s = sum(P[:,col])
 		if s == 0: raise ValueError()
 		if s < 10: # min number of cosponsorship data per person
@@ -300,23 +300,23 @@ def draw_figure(congressnumber, house_or_senate, start_date, end_date, nreps, pa
 		plt.yticks([])	
 		
 		for party, color in (("Republican", "r"), ("Democrat", "b"), ("Independent", "k")):
-			for i in xrange(nreps):
+			for i in range(nreps):
 				if parties[i] == party:
 					plt.text(spectrum[i], pagerank[i], names[i], color=color, ha="left", weight="light", size=(8 if house_or_senate == "s" else 6)/figsize)
 					#print spectrum[i], pagerank[i], names[i].encode("utf8")
 			
-			ss = [spectrum[i] for i in xrange(nreps) if parties[i] == party]
-			pp = [pagerank[i] for i in xrange(nreps) if parties[i] == party]
+			ss = [spectrum[i] for i in range(nreps) if parties[i] == party]
+			pp = [pagerank[i] for i in range(nreps) if parties[i] == party]
 			plt.plot(ss, pp, "." + color, markersize=3/figsize)
 	
 		plt.savefig(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + figsizedescr + ".png", dpi=120*figsize, bbox_inches="tight", pad_inches=.02)
 
 def describe_members(nreps, parties, spectrum, pagerank):
 	# Describe what kind of person each is....
-	descr = [None for x in xrange(nreps)] # allocate some space
+	descr = [None for x in range(nreps)] # allocate some space
 	for party in ("Republican", "Democrat", "Independent"):
-		ss = [spectrum[i] for i in xrange(nreps) if parties[i] == party]
-		pp = [pagerank[i] for i in xrange(nreps) if parties[i] == party]
+		ss = [spectrum[i] for i in range(nreps) if parties[i] == party]
+		pp = [pagerank[i] for i in range(nreps) if parties[i] == party]
 		
 		if party != "Independent": # not enough to actually perform the computation, even if we don't want to use it anyway
 			ss_20 = scipy.stats.scoreatpercentile(ss, 20)
@@ -352,7 +352,7 @@ def describe_members(nreps, parties, spectrum, pagerank):
 				["lonely left-leaning Independent", "lonely centrist Independent", "lonely right-leaning Independent"],
 				]
 				
-		for i in xrange(nreps):
+		for i in range(nreps):
 			if parties[i] == party:
 				descr[i] = descr_table[2 if pagerank[i] < pp_20 else 1 if pagerank[i] < pp_80 else 0][0 if spectrum[i] < ss_20 else 1 if spectrum[i] < ss_80 else 2]
 
@@ -361,8 +361,8 @@ def describe_members(nreps, parties, spectrum, pagerank):
 def write_stats_to_disk(congressnumber, house_or_senate, nreps, ids, parties, names, spectrum, pagerank, descr, other_cols):
 	w = open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + ".txt", "w")
 	w.write("ID, ideology, leadership, name, party, description, introduced_bills_%d, cosponsored_bills_%d, unique_cosponsors_%d, total_cosponsors_%d\n" % tuple([congressnumber]*4))
-	for i in xrange(nreps):
-		w.write(", ".join( [unicode(d).encode("utf8") for d in
+	for i in range(nreps):
+		w.write(", ".join( [str(d).encode("utf8") for d in
 			[ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i]] + other_cols[i]
 			]) + "\n" )
 	w.close()
@@ -380,15 +380,15 @@ def create_member_images():
 		# archivally and is no longer used.
 
 		# Create an image for each person.
-		for j in xrange(nreps):
+		for j in range(nreps):
 			fig = plt.figure()
 			plt.xlabel("Ideology", size="x-large") # size not working, ugh
 			plt.ylabel("Leadership", size="x-large")
 			plt.xticks([])
 			plt.yticks([])	
 			for party, color in (("Republican", "r"), ("Democrat", "b"), ("Independent", "k")):
-				ss = [spectrum[i] for i in xrange(nreps) if parties[i] == party]
-				pp = [pagerank[i] for i in xrange(nreps) if parties[i] == party]
+				ss = [spectrum[i] for i in range(nreps) if parties[i] == party]
+				pp = [pagerank[i] for i in range(nreps) if parties[i] == party]
 				plt.plot(ss, pp, "." + color, markersize=7)
 			plt.plot(spectrum[j], pagerank[j], "ok", markersize=20)
 			plt.savefig(datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis/" + str(ids[j]) + ".png", dpi=25, bbox_inches="tight", pad_inches=.05)
@@ -423,7 +423,7 @@ def influence_matrix(congressnumber, starting_congress, house_or_senate, people,
 			initial_score = score
 			initial_pctile = pctile
 			continue
-		print sponsor, cosponsor, score - initial_score, pctile - initial_pctile
+		print(sponsor, cosponsor, score - initial_score, pctile - initial_pctile)
 			
 if __name__ == "__main__":
 	congressnumber = int(sys.argv[1])

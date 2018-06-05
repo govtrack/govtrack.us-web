@@ -11,7 +11,7 @@ def batch(iterable, n = 1):
 	   yield iterable[ndx:min(ndx+n, l)]
 
 for idset in batch(all_bill_ids, n=2000):
-	print "..."
+	print("...")
 	for bill in Bill.objects.only('congress', 'bill_type', 'number').in_bulk(idset).values():
 		fn = "data/congress/%s/bills/%s/%s%d/data.json" % (
 			bill.congress,
@@ -20,6 +20,6 @@ for idset in batch(all_bill_ids, n=2000):
 			bill.number)
 
 		if not os.path.exists(fn):
-			print bill.id, bill
+			print(bill.id, bill)
 
 

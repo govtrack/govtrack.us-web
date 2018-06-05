@@ -78,7 +78,7 @@ def main():
     try:
         main2()
     except SingleRun.InstanceRunningException as e:
-        print "Another %s parser is running with pid %s." % (lf, str(e))
+        print("Another %s parser is running with pid %s." % (lf, str(e)))
         
 
 # adapted from http://krosinski.blogspot.com/2012/04/preventing-python-script-from-running.html

@@ -68,5 +68,5 @@ for person, role, statname, cohortname, groupinfo in collected_stats:
 	tweet += ".\n"
 	tweet += "https://www.govtrack.us" + person.get_absolute_url() + "/report-card/" + str(allstats["meta"]["session"])
 
-	print tweet.encode("utf8")
-	print
+	print(tweet.encode("utf8"))
+	print()

@@ -2,7 +2,7 @@ from django import forms
 
 from vote.models import Vote, CongressChamber, VoteCategory
 
-YEARS = [('', 'Any')] + [(x, str(x)) for x in xrange(2011, 1788, -1)]
+YEARS = [('', 'Any')] + [(x, str(x)) for x in range(2011, 1788, -1)]
 CHAMBERS = [('', 'Any')] + CongressChamber.choices()
 CATEGORIES = [('', 'Any')] + VoteCategory.choices()
 

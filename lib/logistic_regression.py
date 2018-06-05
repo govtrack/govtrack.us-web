@@ -57,12 +57,12 @@ def simple_logistic_regression(x,y,beta_start=None,verbose=False,
  chi-squared value for -2l is the model chi-squared test.
     """
     if len(x) != len(y):
-        raise ValueError, "x and y should be the same length!"
+        raise ValueError("x and y should be the same length!")
     if beta_start is None:
         beta_start = np.zeros(2,x.dtype)
     iter = 0; diff = 1.; beta = beta_start  # initial values
     if verbose:
-        print 'iteration  beta log-likliehood |beta-beta_old|' 
+        print('iteration  beta log-likliehood |beta-beta_old|') 
     while iter < MAXIT:
         beta_old = beta 
         p = np.exp(beta[0]+beta[1]*x)/(1.+np.exp(beta[0]+beta[1]*x))
@@ -76,7 +76,7 @@ def simple_logistic_regression(x,y,beta_start=None,verbose=False,
         # sum of absolute differences
         diff = np.sum(np.fabs(beta-beta_old))
         if verbose:
-            print iter+1, beta, l, diff
+            print(iter+1, beta, l, diff)
         if diff <= CONV_THRESH: break
         iter = iter + 1
     return beta, J_bar, l
@@ -109,7 +109,7 @@ def logistic_regression(x,y,beta_start=None,verbose=False,CONV_THRESH=1.e-3,
  chi-squared value for -2l is the model chi-squared test.
     """
     if x.shape[-1] != len(y):
-        raise ValueError, "x.shape[-1] and y should be the same length!"
+        raise ValueError("x.shape[-1] and y should be the same length!")
     try:
         N, npreds = x.shape[1], x.shape[0]
     except: # single predictor, use simple logistic regression routine.
@@ -122,7 +122,7 @@ def logistic_regression(x,y,beta_start=None,verbose=False,CONV_THRESH=1.e-3,
     Xt = np.transpose(X)
     iter = 0; diff = 1.; beta = beta_start  # initial values
     if verbose:
-        print 'iteration  beta log-likliehood |beta-beta_old|' 
+        print('iteration  beta log-likliehood |beta-beta_old|') 
     while iter < MAXIT:
         beta_old = beta 
         ebx = np.exp(np.dot(beta, X))
@@ -134,7 +134,7 @@ def logistic_regression(x,y,beta_start=None,verbose=False,CONV_THRESH=1.e-3,
         beta = beta_old + np.linalg.lstsq(J_bar, s)[0] # new value of beta
         diff = np.sum(np.fabs(beta-beta_old)) # sum of absolute differences
         if verbose:
-            print iter+1, beta, l, diff
+            print(iter+1, beta, l, diff)
         if diff <= CONV_THRESH: break
         iter = iter + 1
     if iter == MAXIT and diff > CONV_THRESH: 
@@ -149,9 +149,9 @@ def calcprob(beta, x):
         N, npreds = x.shape[1], x.shape[0]
     except: # single predictor, x is a vector, len(beta)=2.
         N, npreds = len(x), 1
-	print len(beta), npreds
+	print(len(beta), npreds)
     if len(beta) != npreds+1:
-        raise ValueError,'sizes of beta and x do not match!'
+        raise ValueError('sizes of beta and x do not match!')
     if npreds==1: # simple logistic regression
         return 100.*np.exp(beta[0]+beta[1]*x)/(1.+np.exp(beta[0]+beta[1]*x))
     X = np.ones((npreds+1,N), x.dtype)
@@ -170,9 +170,9 @@ if __name__ == '__main__':
     # random draws from trivariate normal distribution
     x = multivariate_normal(np.array([0,0,0]),np.array([[1,r12,r13],[r12,1,r23],[r13,r23,1]]), nsamps)
     x2 = multivariate_normal(np.array([0,0,0]),np.array([[1,r12,r13],[r12,1,r23],[r13,r23,1]]), nsamps)
-    print
-    print 'correlations (r12,r13,r23) = ',r12,r13,r23
-    print 'number of realizations = ',nsamps
+    print()
+    print('correlations (r12,r13,r23) = ',r12,r13,r23)
+    print('number of realizations = ',nsamps)
     # training data.
     truth = x[:,0]
     thresh = 0. # forecast threshold (0 is climatology)
@@ -187,9 +187,9 @@ if __name__ == '__main__':
     beta,Jbar,llik = logistic_regression(fcst[0,:],obs_binary,verbose=True)
     covmat = np.linalg.inv(Jbar)
     stderr = np.sqrt(np.diag(covmat))
-    print 'using only first predictor:'
-    print 'beta =' ,beta
-    print 'standard error =',stderr
+    print('using only first predictor:')
+    print('beta =' ,beta)
+    print('standard error =',stderr)
     # forecasts from independent data.
     prob = calcprob(beta, fcst2[0,:])
     # compute Brier Skill Score
@@ -197,14 +197,14 @@ if __name__ == '__main__':
     bs = np.mean((0.01*prob - verif)**2)
     bsclim = np.mean((climprob - verif)**2)
     bss = 1.-(bs/bsclim)
-    print 'Brier Skill Score = ',bss
+    print('Brier Skill Score = ',bss)
     # using only 2nd predictor.
     beta,Jbar,llik = logistic_regression(fcst[1,:],obs_binary,verbose=True)
     covmat = np.linalg.inv(Jbar)
     stderr = np.sqrt(np.diag(covmat))
-    print 'using only second predictor:'
-    print 'beta =' ,beta
-    print 'standard error =',stderr
+    print('using only second predictor:')
+    print('beta =' ,beta)
+    print('standard error =',stderr)
     # forecasts from independent data.
     prob = calcprob(beta, fcst2[1,:])
     # compute Brier Skill Score
@@ -212,14 +212,14 @@ if __name__ == '__main__':
     bs = np.mean((0.01*prob - verif)**2)
     bsclim = np.mean((climprob - verif)**2)
     bss = 1.-(bs/bsclim)
-    print 'Brier Skill Score = ',bss
+    print('Brier Skill Score = ',bss)
     # using both predictors.
     beta,Jbar,llik = logistic_regression(fcst,obs_binary,verbose=True)
     covmat = np.linalg.inv(Jbar)
     stderr = np.sqrt(np.diag(covmat))
-    print 'using both predictors:'
-    print 'beta =' ,beta
-    print 'standard error =',stderr
+    print('using both predictors:')
+    print('beta =' ,beta)
+    print('standard error =',stderr)
     # forecasts from independent data.
     prob = calcprob(beta, fcst2)
     # compute Brier Skill Score
@@ -227,11 +227,11 @@ if __name__ == '__main__':
     bs = np.mean((0.01*prob - verif)**2)
     bsclim = np.mean((climprob - verif)**2)
     bss = 1.-(bs/bsclim)
-    print 'Brier Skill Score = ',bss
-    print """\n
-If Brier Skill Scores within +/- 0.01 of 0.16, 0.04 and 0.18 everything OK\n"""
+    print('Brier Skill Score = ',bss)
+    print("""\n
+If Brier Skill Scores within +/- 0.01 of 0.16, 0.04 and 0.18 everything OK\n""")
 # calculate reliability.
-    print 'reliability:'
+    print('reliability:')
     totfreq = np.zeros(10,'f')
     obfreq = np.zeros(10,'f')
     for icat in range(10):
@@ -247,16 +247,16 @@ If Brier Skill Scores within +/- 0.01 of 0.16, 0.04 and 0.18 everything OK\n"""
     reliability = np.zeros(10,'f')
     frequse = np.zeros(10,'f')
     totsum = nsamps
-    print 'fcst prob, obs frequency, frequency of use'
+    print('fcst prob, obs frequency, frequency of use')
     for icat in range(10):
         prob1 = icat*10.
         prob2 = (icat+1)*10.
         fcstprob[icat] = 0.5*(prob1+prob2)
         reliability[icat] = 100.*obfreq[icat]/totfreq[icat]
         frequse[icat] = 100.*totfreq[icat]/totsum
-        print fcstprob[icat],reliability[icat],frequse[icat]
+        print(fcstprob[icat],reliability[icat],frequse[icat])
     # make a reliability diagram
-    print 'plotting reliability diagram...'
+    print('plotting reliability diagram...')
     import matplotlib.pyplot as plt
     fig=plt.figure(figsize=(8,7))
     ax = fig.add_axes([0.1,0.1,0.8,0.8])

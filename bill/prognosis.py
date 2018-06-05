@@ -81,7 +81,7 @@ def load_lobbying_data(congress):
 		if bill_number.replace(".", "").startswith("SAMDT"): continue
 		m = bill_number_re.match(bill_number.strip().lower().replace(".", ""))
 		if m == None:
-			print "bad bill in lobbying data %s %s" % (bill_congress, bill_number)
+			print("bad bill in lobbying data %s %s" % (bill_congress, bill_number))
 		else:
 			bt, bn = m.group(1), m.group(2)
 			bt = bill_type_special.get(bt, bt)
@@ -284,7 +284,7 @@ def build_model(congress):
 	for bill in BILLS:
 		title = bill.title_no_number
 		if title.startswith("Providing for consideration of"): continue # hack, add later
-		for nwords in xrange(4, 10):
+		for nwords in range(4, 10):
 			prefix = " ".join(title.split(" ")[0:nwords])
 			title_counts[prefix] = title_counts.get(prefix, 0) + 1
 	title_counts = sorted(title_counts.items(), key = lambda kv : kv[1], reverse=True)
@@ -326,7 +326,7 @@ def build_model(congress):
 			# of reported bills which make it to success.
 			bills = bills.exclude(current_status=BillStatus.introduced)
 
-		print bill_type, model_type
+		print(bill_type, model_type)
 		
 		total = bills.count()
 		
@@ -337,7 +337,7 @@ def build_model(congress):
 			# for the reported model, success is being enacted (or whatever final status as appropriate for the bill type)
 			total_success = bills.filter(current_status__in=BillStatus.final_status_passed).count()
 			
-		print "\toverall", int(round(100.0*total_success/total)), "%; N=", total
+		print("\toverall", int(round(100.0*total_success/total)), "%; N=", total)
 		
 		# GET REGRESSION MATRIX INFORMATION
 		
@@ -401,7 +401,7 @@ def build_model(congress):
 				
 		# LOGISTIC REGRESSION
 		
-		for trial in xrange(2):
+		for trial in range(2):
 			regression_predictors_map = None
 			regression_beta = None
 			if len(factor_binomial_sig) > 0:
@@ -429,7 +429,7 @@ def build_model(congress):
 					try:
 						stderrs = sqrt(diag(inv(J_bar))) # [intercept, beta1, beta2, ...]
 					except numpy.linalg.linalg.LinAlgError as e:
-						print "\t", e
+						print("\t", e)
 						break
 					
 					# The standard errors are coming back wacky large for
@@ -466,11 +466,11 @@ def build_model(congress):
 		model["factors"] = model_factors
 		for key, bill_counts in factor_success_rate.items():
 			if key not in factor_binomial_sig: continue
-			print "\t" + key, \
+			print("\t" + key, \
 				int(round(100.0*bill_counts[1]/bill_counts[0])), "%;", \
 				"N=", bill_counts[0], \
 				"p<", int(round(100*factor_binomial_sig[key])), \
-				"B=", regression_beta[regression_predictors_map[key]+1]
+				"B=", regression_beta[regression_predictors_map[key]+1])
 			model_factors[key] = dict()
 			model_factors[key]["count"] = bill_counts[0]
 			model_factors[key]["success_rate"] = 100.0*bill_counts[1]/bill_counts[0]
@@ -516,8 +516,8 @@ def compute_prognosis_2(prognosis_model, bill, committee_membership, majority_pa
 			return model["success_rate"]
 		else:
 			factor_keys = set(f[0] for f in factors)
-			predictors = [0.0 for f in xrange(len(model["regression_beta"])-1)] # remove the intercept
 			for key, index in model["regression_predictors_map"].items():
+			predictors = [0.0 for f in range(len(model["regression_beta"])-1)] # remove the intercept
 				predictors[index] = 1.0 if key in factor_keys else 0.0
 			return float(calcprob(model["regression_beta"], numpy.transpose(numpy.array([predictors]))))
 			
@@ -553,7 +553,7 @@ def compute_prognosis_2(prognosis_model, bill, committee_membership, majority_pa
 	}
 
 def compute_prognosis(bill, proscore=False):
-	import prognosis_model
+	from . import prognosis_model
 	majority_party = load_majority_party(bill.congress)
 	committee_membership = load_committee_membership(bill.congress)
 	prog = compute_prognosis_2(prognosis_model, bill, committee_membership, majority_party, None, proscore=proscore)
@@ -574,7 +574,7 @@ def test_prognosis(congress):
 	
 	for model_type in (0, 1):
 		for bt in bill_type_map:
-			print "Testing", model_type, bt, "..."
+			print("Testing", model_type, bt, "...")
 			
 			# What was the success rate in the training data?
 			model = prognosis_model.factors[(bt, model_type==0)]
@@ -610,13 +610,13 @@ def test_prognosis(congress):
 			# prognosis increases, the %-success increases.
 			model_result["bins"] = []
 			bins = []
-			for p in xrange(0, 100+10, 10):
+			for p in range(0, 100+10, 10):
 				b = percentile(xdata, p)
 				if len(bins) == 0 or b > bins[-1]:
 					bins.append(b)
 			bindices = digitize(xdata, bins)
-			for b in xrange(len(bins)-1):
-				bindata = [data[i] for i in xrange(len(data)) if bindices[i] == b]
+			for b in range(len(bins)-1):
+				bindata = [data[i] for i in range(len(data)) if bindices[i] == b]
 				if len(bindata) == 0: continue
 				median_prog = median([x for x,y in bindata])
 				pct_success = mean([y for x,y in bindata])
@@ -662,7 +662,7 @@ def top_prognosis(congress, bill_type):
 		if not max_p or p["prediction"] > max_p:
 			max_p = p["prediction"]
 			max_b = bill
-	print max_p, max_b
+	print(max_p, max_b)
 
 def get_bill_paragraphs(bill):
 	import lxml.html
@@ -672,10 +672,10 @@ def get_bill_paragraphs(bill):
 	try:
 		dom = lxml.html.fromstring(load_bill_text(bill, None)["text_html"])
 	except IOError:
-		print("no bill text", bill.id, bill)
+		print(("no bill text", bill.id, bill))
 		return None
 	except Exception as e:
-		print("error in bill text", bill.id, bill, e)
+		print(("error in bill text", bill.id, bill, e))
 		return None
 		
 	hashes = { }

@@ -7,7 +7,7 @@ from smartsearch.manager import SearchManager
 
 from person.models import Person, PersonRole
 from person.types import RoleType
-from name import get_person_name
+from .name import get_person_name
 from us import statenames
 
 def template_get_context(obj, form):

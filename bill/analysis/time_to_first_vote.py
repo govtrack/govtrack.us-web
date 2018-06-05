@@ -11,4 +11,4 @@ for bill in Bill.objects.filter(congress=111, bill_type=BillType.senate_bill):
 			delay_times.append( eval(d).date() - bill.introduced_date )
 			break
 	
-print "\n".join([str(d.total_seconds()/60/60/24) for d in delay_times])
+print("\n".join([str(d.total_seconds()/60/60/24) for d in delay_times]))

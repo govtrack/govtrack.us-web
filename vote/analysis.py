@@ -27,7 +27,7 @@ def logisticRegression(y, x, alpha=.1):
 		 * B[k] \
 		 - np.sum([
 			y[i] * x[i, k] * sigmoid(-y[i] * np.dot(B, x[i,:]))
-			for i in xrange(n)])
+			for i in range(n)])
 
 	# The full gradient is just an array of componentwise derivatives
 	def dB(B):
@@ -41,10 +41,10 @@ def logisticRegression(y, x, alpha=.1):
 		""" Negative likelihood of the data under the current settings of parameters. """
 		# Data likelihood
 		l = 0
-		for i in xrange(n):
+		for i in range(n):
 			l += np.log(sigmoid(y[i] * np.dot(betas, x[i,:])))
 		# Prior likelihood
-		for k in xrange(1, x.shape[1]):
+		for k in range(1, x.shape[1]):
 			l -= (alpha / 2.0) * betas[k]**2
 		return -1.0 * l
 	betas = fmin_bfgs(neg_lik, betas, fprime=dB)
@@ -52,7 +52,7 @@ def logisticRegression(y, x, alpha=.1):
 	# predict the y's again; not sure why sigmoid needs a
 	# transformation...
 	py = np.zeros(n)
-	for i in xrange(n):
+	for i in range(n):
 		py[i] = (sigmoid(np.dot(betas, x[i,:])) - .5) * 2
 
 	# f-score

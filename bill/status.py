@@ -200,19 +200,19 @@ class BillStatus(enum.Enum):
         explanation="A vote to override the President's veto failed in the Senate. The bill is now dead.",
         sort_order=(5,9))
     enacted_signed = enum.Item(28,
-        u'Enacted \u2014 Signed by the President',
+        'Enacted \u2014 Signed by the President',
         xml_code='ENACTED:SIGNED',
         search_help_text="Enacted by a signature of the President.",
         explanation="The President signed the bill and it became law.",
         sort_order=(3,3))
     enacted_veto_override = enum.Item(29,
-        u'Enacted \u2014 Veto Overridden',
+        'Enacted \u2014 Veto Overridden',
         xml_code='ENACTED:VETO_OVERRIDE',
         search_help_text="Enacted by a veto override.",
         explanation="Congress overrode the veto of the President. The bill became law.",
         sort_order=(3,5))
     enacted_tendayrule = enum.Item(32,
-        u'Enacted \u2014 By 10 Day Rule',
+        'Enacted \u2014 By 10 Day Rule',
         xml_code='ENACTED:TENDAYRULE',
         search_help_text="Enacted by failing to be returned by the President within ten days (Sundays excepted).",
         explanation="The bill was enacted by failing to be signed or vetoed by the President within ten days of receiving the bill from Congress (Sundays excepted).",
@@ -339,11 +339,11 @@ def get_bill_really_short_status_string(status):
     if status == "INTRODUCED":
         status = "%s was introduced %s."
     elif status == "REPORTED":
-        status = u"Committees 🆗'd %s %s." # squared OK emoji
+        status = "Committees 🆗'd %s %s." # squared OK emoji
     elif status == "PASS_OVER:HOUSE":
-        status = u"%s passed the House %s (→Senate)."
+        status = "%s passed the House %s (→Senate)."
     elif status == "PASS_OVER:SENATE":
-        status = u"%s passed the Senate %s (→House)."
+        status = "%s passed the Senate %s (→House)."
     elif status == "PASSED:BILL":
         status = "%s passed the House and Senate %s."
     elif status == "PASS_BACK:HOUSE":

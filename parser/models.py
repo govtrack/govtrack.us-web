@@ -3,7 +3,7 @@ Internal info about statuses
 of previus parsings.
 """
 import binascii
-from StringIO import StringIO
+from io import StringIO
 
 from django.db import models
 

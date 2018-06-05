@@ -1,8 +1,8 @@
-from models import Req
+from .models import Req
 from django.core.cache import cache
 from django.conf import settings
  
-import json, datetime, base64, urllib2
+import json, datetime, base64, urllib.request, urllib.error, urllib.parse
 
 from emailverification.models import BouncedEmail
 

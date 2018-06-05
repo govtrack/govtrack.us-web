@@ -14,10 +14,11 @@ from us import get_congress_dates, get_session_from_date
 
 from django.conf import settings
 
-import datetime, os.path, re, urlparse
+import datetime, os.path, re, urllib.parse
 from lxml import etree
 
 from website.templatetags.govtrack_utils import markdown
+import collections
 
 
 "Enums"
@@ -117,7 +118,7 @@ class Cosponsor(models.Model):
     api_example_parameters = { "sort": "-joined" }
 
     def __unicode__(self):
-        return self.person_name + u" " + self.details() + u": " + unicode(self.bill)
+        return self.person_name + " " + self.details() + ": " + str(self.bill)
 
     @property
     def person_name(self):
@@ -175,15 +176,15 @@ class Cosponsor(models.Model):
                 new_role = Cosponsor.get_role_for(c.person, c.bill, c.joined)
                 if new_role != c.role:
                     if new_role:
-                        print c.person, c.joined, c.bill
-                        print c.role, "=>", new_role
-                        print
+                        print(c.person, c.joined, c.bill)
+                        print(c.role, "=>", new_role)
+                        print()
                         c.role = new_role
                         c.save()
                     else:
-                        print c.person, c.joined, c.bill
-                        print "can't update because no new role", c.role, "=> ?"
-                        print
+                        print(c.person, c.joined, c.bill)
+                        print("can't update because no new role", c.role, "=> ?")
+                        print()
 
 class Bill(models.Model):
     """A bill represents a bill or resolution introduced in the United States Congress."""
@@ -272,7 +273,7 @@ class Bill(models.Model):
     # indexing
     def get_index_text(self):
         bill_text = load_bill_text(self, None, plain_text=True)
-        if ((82 <= self.congress <= 92) or (103 <= self.congress)) and not bill_text: print "NO BILL TEXT", self
+        if ((82 <= self.congress <= 92) or (103 <= self.congress)) and not bill_text: print("NO BILL TEXT", self)
         summary_text = ""
         bs = BillSummary.objects.filter(bill=self).first()
         if bs: summary_text = bs.plain_text()
@@ -309,7 +310,7 @@ class Bill(models.Model):
         if hasattr(csd, 'date'): csd = csd.date()
         r = (csd - cstart).days / 365.0 # ranges from 0.0 to about 2.0.
         if self.is_current:
-            from prognosis import compute_prognosis
+            from .prognosis import compute_prognosis
             r += compute_prognosis(self, proscore=True)["prediction"]
         r *= type_boost[self.bill_type]
         return r
@@ -317,7 +318,7 @@ class Bill(models.Model):
         if not self.sponsor_role: return None
         mp = getattr(Bill, "_majority_party", { })
         if self.congress not in mp:
-            from prognosis import load_majority_party
+            from .prognosis import load_majority_party
             mp[self.congress] = load_majority_party(self.congress)
             Bill._majority_party = mp
         p = self.sponsor_role.party
@@ -769,7 +770,7 @@ class Bill(models.Model):
         return reps_tracked
 
     def render_event_state(self, ev_code, feeds):
-        from status import BillStatus
+        from .status import BillStatus
         status = BillStatus.by_value(int(ev_code))
         date = self.introduced_date
         action = None
@@ -1101,14 +1102,14 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
             # Bring in committee meetings. Skip if we have a REPORTED status on the same date.
             for mtg in self.committeemeeting_set.all():
-                if unicode(mtg.committee) == "House Committee on Rules": continue # not interesting
+                if str(mtg.committee) == "House Committee on Rules": continue # not interesting
                 for rec in ret:
                     if rec["key"] == "reported" and rec["date"].isoformat()[0:10] == mtg.when.isoformat()[0:10]:
                         break
                 else:
                     ret.append({
                         "key": "reported",
-                        "label": "Considered by " + unicode(mtg.committee),
+                        "label": "Considered by " + str(mtg.committee),
                         "explanation": "A committee held a hearing or business meeting about the " + self.noun + ".",
                         "date": mtg.when,
                     })
@@ -1505,21 +1506,21 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             }
 
     def get_gop_summary(self):
-        import urllib, StringIO
+        import urllib.request, urllib.parse, urllib.error, io
         try:
             from django.utils.safestring import mark_safe
-            dom = etree.parse(urllib.urlopen("http://www.gop.gov/api/bills.get?congress=%d&number=%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, self.number)))
+            dom = etree.parse(urllib.request.urlopen("http://www.gop.gov/api/bills.get?congress=%d&number=%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, self.number)))
         except:
             return None
         if dom.getroot().tag == '{http://www.w3.org/1999/xhtml}html': return None
         def sanitize(s, as_text=False):
             if s.strip() == "": return None
             return mark_safe("".join(
-                etree.tostring(n, method="html" if not as_text else "text", encoding=unicode)
+                etree.tostring(n, method="html" if not as_text else "text", encoding=str)
                 for n
-                in etree.parse(StringIO.StringIO(s), etree.HTMLParser(remove_comments=True, remove_pis=True)).xpath("body")[0]))
+                in etree.parse(io.StringIO(s), etree.HTMLParser(remove_comments=True, remove_pis=True)).xpath("body")[0]))
         ret = {
-            "link": unicode(dom.xpath("string(bill/permalink)")),
+            "link": str(dom.xpath("string(bill/permalink)")),
             "summary": sanitize(dom.xpath("string(bill/analysis/bill-summary)")),
             "background": sanitize(dom.xpath("string(bill/analysis/background)")),
             "cost": sanitize(dom.xpath("string(bill/analysis/cost)")),
@@ -1576,7 +1577,7 @@ class BillLink(models.Model):
         ordering = ('-created',)
     @property
     def hostname(self):
-        return urlparse.urlparse(self.url).hostname
+        return urllib.parse.urlparse(self.url).hostname
 
 class BillTextComparison(models.Model):
     bill1 = models.ForeignKey(Bill, related_name="comparisons1")
@@ -1669,10 +1670,10 @@ Feed.register_feed(
 
 # Bill search tracker.
 def bill_search_feed_title(q):
-    from search import bill_search_manager
+    from .search import bill_search_manager
     return "Bill Search - " + bill_search_manager().describe_qs(q)
 def bill_search_feed_execute(q):
-    from search import bill_search_manager
+    from .search import bill_search_manager
     from settings import CURRENT_CONGRESS
 
     bills = bill_search_manager().execute_qs(q, overrides={'congress': CURRENT_CONGRESS}).order_by("-current_status_date")[0:100] # we have to limit to make this reasonably fast
@@ -1700,7 +1701,7 @@ class BillSummary(models.Model):
     source_text = models.CharField(max_length=64, blank=True, null=True, db_index=True)
 
     def __unicode__(self):
-        return unicode(self.bill)[0:30] + " - " + self.plain_text()[0:60]
+        return str(self.bill)[0:30] + " - " + self.plain_text()[0:60]
 
     def as_html(self):
         if self.id < 75 or self.source_text == "Wikipedia":
@@ -1735,7 +1736,7 @@ class USCSection(models.Model):
     update_flag = models.IntegerField(default=0)
 
     def __unicode__(self):
-        return ((unicode(self.parent_section) + " > ") if self.parent_section else "") + self.get_level_type_display() + " "  + (self.number if self.number else "[No Number]")
+        return ((str(self.parent_section) + " > ") if self.parent_section else "") + self.get_level_type_display() + " "  + (self.number if self.number else "[No Number]")
 
     @property
     def name_recased(self):
@@ -1795,7 +1796,7 @@ class USCSection(models.Model):
           D.append(t)
         D.sort(key = lambda title : (int(title["number"].replace("a", "")), title["number"]))
         USCSection.load_data(D)
-        print USCSection.objects.filter(update_flag=0).count(), "deleted sections" # .delete() ?
+        print(USCSection.objects.filter(update_flag=0).count(), "deleted sections") # .delete() ?
     @staticmethod
     def load_data(structure_data):
         if isinstance(structure_data, str):
@@ -1840,12 +1841,12 @@ class USCSection(models.Model):
                     setattr(obj, k, v)
                 obj.save()
             else:
-                print "created", obj
+                print("created", obj)
             USCSection.load_data2(obj, sec.get("subparts", []))
 
 Feed.register_feed(
     "usc:",
-    title = lambda feed : unicode(USCSection.objects.get(id=feed.feedname.split(":", 1)[1])),
+    title = lambda feed : str(USCSection.objects.get(id=feed.feedname.split(":", 1)[1])),
     link = lambda feed : USCSection.objects.get(id=feed.feedname.split(":", 1)[1]).get_absolute_url(),
     category = "federal-bills",
     description = "Get updates for bills citing this part of the U.S. Code, including major activity and when the bill is scheduled for debate.",

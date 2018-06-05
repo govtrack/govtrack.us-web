@@ -31,7 +31,7 @@ import pygraphviz as pgv
 G = pgv.AGraph(directed=True, dpi=120, overlap=False, splines=True, bgcolor="transparent")
 for (s0, s1), n in sorted(T.items(), key=lambda x : (x[0][0].sort_order, x[0][1].sort_order)):
 	nn = sum([v[1] for v in T.items() if v[0][0] == s0])
-	print s0.label, s1.label, float(n)/float(nn)
+	print(s0.label, s1.label, float(n)/float(nn))
 	if s1 == Died: continue # don't draw it
 	G.add_node(s0.key, fontsize=8)
 	G.add_node(s1.key, fontsize=8)

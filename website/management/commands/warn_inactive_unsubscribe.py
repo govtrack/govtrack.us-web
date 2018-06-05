@@ -21,15 +21,15 @@ class Command(BaseCommand):
 			.exclude(user__ping__pingtime__isnull=False)\
 			.values_list("user", "user__email", "user__last_login").distinct()
 		
-		print "Cutoff:", cutoff.isoformat()
-		print "Lists:", users.count()
-		print "Emailed since 2.0:", users.exclude(last_event_mailed=None).count()
+		print("Cutoff:", cutoff.isoformat())
+		print("Lists:", users.count())
+		print("Emailed since 2.0:", users.exclude(last_event_mailed=None).count())
 
 		if len(args) > 0 and args[0] == "send":
 			for user in users:
 				axn = UserAction()
 				axn.uid = user[0]
-				print user
+				print(user)
 				send_email_verification(user[1], None, axn)
 
 class UserAction:

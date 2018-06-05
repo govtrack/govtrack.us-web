@@ -6,8 +6,9 @@ import django.contrib.contenttypes.fields as generic_fields
 from django.contrib.auth.models import User
 
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from datetime import datetime, timedelta
+import collections
 
 # In a worst-case scenario, at most how many days back should we send events?
 BACKFILL_DAYS_DAILY = 4
@@ -141,7 +142,7 @@ class Feed(models.Model):
             except DatabaseError as e:
                 # The database table hasn't been configured with the date_added column,
                 # which is hidden from the Django ORM at the moment.
-                print "Database isn't configured with date_added column in events_subscriptionlist_trackers."
+                print("Database isn't configured with date_added column in events_subscriptionlist_trackers.")
                 return None
                 
         trending = []
@@ -245,7 +246,7 @@ class Feed(models.Model):
     @property
     def title(self):
         m = self.type_metadata()
-        if "title" not in m: return unicode(self)
+        if "title" not in m: return str(self)
         if callable(m["title"]):
             return m["title"](self)
         return m["title"]
@@ -268,11 +269,11 @@ class Feed(models.Model):
         
     @property
     def view_url(self):
-        return "/events?feeds=" + urllib.quote(self.feedname)
+        return "/events?feeds=" + urllib.parse.quote(self.feedname)
     
     @property
     def rss_url(self):
-        return "/events/events.rss?feeds=" + urllib.quote(self.feedname)
+        return "/events/events.rss?feeds=" + urllib.parse.quote(self.feedname)
 
     def includes_feeds(self):
         m = self.type_metadata()
@@ -391,7 +392,7 @@ class Event(models.Model):
              ('when', 'source_content_type', 'source_object_id', 'seq', 'feed'))
     
     def __unicode__(self):
-        return unicode(self.source) + " " + unicode(self.eventid) + " / " + unicode(self.feed)
+        return str(self.source) + " " + str(self.eventid) + " / " + str(self.feed)
         
     def render(self, feeds=None):
         if EVENT_SOURCE_CACHE is None or (self.source_content_type, self.source_object_id) not in EVENT_SOURCE_CACHE:

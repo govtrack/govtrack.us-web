@@ -21,7 +21,7 @@ def main(options):
         for event, elem in etree.iterparse(fname, events=('end',), tag='state'):
             vars.add(elem.text)
     for item in vars:
-        print item
+        print(item)
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ class Command(BaseCommand):
 	
 	def handle(self, *args, **options):
 		if len(args) < 1:
-			print "Specify a feed name."
+			print("Specify a feed name.")
 			return
 			
 		# Get the feeds, and expand to include any contained feeds.
@@ -33,4 +33,4 @@ class Command(BaseCommand):
 		# Prints
 		users.sort()
 		for user in users:
-			print user
+			print(user)

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from urllib import urlopen
+from urllib.request import urlopen
 from PIL import Image
 
 from person.models import Person
@@ -19,12 +19,12 @@ class Command(BaseCommand):
 			try:
 				p = Person.objects.get(bioguideid=options['person_id'])
 			except:
-				print "Invalid id."
+				print("Invalid id.")
 				return
 
 		# load photo from url
-		import StringIO
-		im = Image.open(StringIO.StringIO(urlopen(options['photo_url']).read()))
+		import io
+		im = Image.open(io.StringIO(urlopen(options['photo_url']).read()))
 
 		ar = 1.2
 
@@ -45,7 +45,7 @@ class Command(BaseCommand):
 				"" if not sz else ("-%dpx" % sz))
 			if sz is not None:
 				im = im.resize((sz, int(sz*ar)), resample=Image.BILINEAR)
-			print fn
+			print(fn)
 			im.save(fn)
 
 		# save original and thumbnails

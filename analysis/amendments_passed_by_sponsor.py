@@ -18,7 +18,7 @@ people_map = {
 }
 
 people_map['01631'] = Person.objects.get(id=300022) # Hillary Clinton
-print people_map['01631']
+print(people_map['01631'])
 
 # Count up by scanning files. Our in-database data is missing actions and
 # isn't well-linked to votes, at least in historical data.

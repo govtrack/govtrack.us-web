@@ -165,11 +165,11 @@ def parse_usc_citation(cite):
         # Skip this if there is a paragraph in the citation --- that can't be appended
         # to a range.
         sec_dash_parts = sec_cite.split("-") if not para_cite else []
-        for i in xrange(1, len(sec_dash_parts)):
+        for i in range(1, len(sec_dash_parts)):
             # Split the citation around the dash to check each half.
             sec_parts = ["-".join(sec_dash_parts[:i]),
                          "-".join(sec_dash_parts[i:])]
-            from models import USCSection
+            from .models import USCSection
             matched_secs = list(USCSection.objects.filter(citation__in = 
                 [("usc/" + title_cite + "/" + sec_part) for sec_part in sec_parts]))
             if len(matched_secs) != 2: continue # one or the other was not a valid section number
@@ -346,12 +346,12 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
         # Caller just wants the plain text?
         if plain_text:
             # replace form feeds (OCR'd layers only) with an indication of the page break
-            return bill_text_content.replace(u"\u000C", "\n=============================================\n")
+            return bill_text_content.replace("\u000C", "\n=============================================\n")
             
         # Return the text wrapped in <pre>, and replace form feeds with an <hr>.
         import cgi
         bill_text_content = "<pre>" + cgi.escape(bill_text_content) + "</pre>"
-        bill_text_content = bill_text_content.replace(u"\u000C", "<hr>") # (OCR'd layers only)
+        bill_text_content = bill_text_content.replace("\u000C", "<hr>") # (OCR'd layers only)
 
         ret.update({
             "text_html": bill_text_content,
@@ -363,8 +363,8 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
 def load_citation_info(metadata):
     if "citations" not in metadata: return
 
-    from models import USCSection
-    from search import parse_slip_law_number
+    from .models import USCSection
+    from .search import parse_slip_law_number
     import re
 
     # gather the citations listed in the MODS file

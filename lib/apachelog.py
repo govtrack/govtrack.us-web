@@ -167,7 +167,7 @@ class parser:
         self._pattern = '^' + ' '.join(subpatterns) + '$'
         try:
             self._regex = re.compile(self._pattern)
-        except Exception, e:
+        except Exception as e:
             raise ApacheLogParserError(e)
         
     def parse(self, line):

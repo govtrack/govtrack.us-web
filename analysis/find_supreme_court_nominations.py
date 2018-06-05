@@ -35,7 +35,7 @@ for v in Vote.objects\
 		v.total_other,
 
 		# the president
-		unicode(r.person).encode("utf8"),
+		str(r.person).encode("utf8"),
 	
 		# days until the end of the current presidential term
 		(next_prez - v.created.date()).days,

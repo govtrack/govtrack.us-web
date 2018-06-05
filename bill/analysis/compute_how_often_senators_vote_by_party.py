@@ -11,5 +11,5 @@ for y in (2009, 2010, 2011):
    r = vv.person.get_role_at_date(v.created)
    if vv.option.key in ("+", "-") and r and r.party != "Independent":
     counts[(r.party == p) ^ (vv.option.key == "-")] += 1
-print votecount, "votes"
-print float(counts[True])/sum(counts.values())
+print(votecount, "votes")
+print(float(counts[True])/sum(counts.values()))

@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		if not options['email_address']:
-			print "Specify an email address."
+			print("Specify an email address.")
 			return
 			
 		try:
@@ -32,34 +32,34 @@ class Command(BaseCommand):
 			else:
 				user = User.objects.get(id=options['email_address'])
 		except User.DoesNotExist:
-			print "Not a user."
+			print("Not a user.")
 			return
 		
-		print "Joined:", user.date_joined
-		print "Last Login:", user.last_login
+		print("Joined:", user.date_joined)
+		print("Last Login:", user.last_login)
 		
 		try:
 			p = Ping.objects.get(user=user)
-			print "Last Ping:", p.pingtime
+			print("Last Ping:", p.pingtime)
 		except Ping.DoesNotExist:
-			print "No Ping"
+			print("No Ping")
 			
 		try:
 			b = BouncedEmail.objects.get(user=user)
-			print "Bounce:", b.firstbouncetime, "x" + str(b.bounces)
+			print("Bounce:", b.firstbouncetime, "x" + str(b.bounces))
 		except BouncedEmail.DoesNotExist:
-			print "No Bounces"
+			print("No Bounces")
 			
 		for sublist in user.subscription_lists.all():
-			print sublist.name,
+			print(sublist.name, end=' ')
 			if sublist.email == 0:
-				print "- Emails Off"
+				print("- Emails Off")
 			else:
-				print "-", sublist.get_email_display(),
-				print "Last Email:", sublist.last_email_sent,
+				print("-", sublist.get_email_display(), end=' ')
+				print("Last Email:", sublist.last_email_sent, end=' ')
 			
 				max_id, events = sublist.get_new_events()
-				print len(events), "events pending"
+				print(len(events), "events pending")
 			
 			for feed in sublist.trackers.all():
-				print "\t", feed.title.encode("utf8")
+				print("\t", feed.title.encode("utf8"))

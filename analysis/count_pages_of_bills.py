@@ -34,7 +34,7 @@ def doit(congress):
 			enacted["words"] += wds
 
 
-	print congress, all["count"], all["pages"], all["words"], enacted["count"], enacted["pages"], enacted["words"]
-	print "\t", missing_text, "missing text"
+	print(congress, all["count"], all["pages"], all["words"], enacted["count"], enacted["pages"], enacted["words"])
+	print("\t", missing_text, "missing text")
 
 doit(114)

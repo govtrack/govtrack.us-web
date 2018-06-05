@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
 			test_addrs = None
 
-		print users.count(), test_addrs
+		print(users.count(), test_addrs)
 			
 		if cmd == "count":
 			return
@@ -64,7 +64,7 @@ class Command(BaseCommand):
 		from django.db import connection 
 		connection.close()
 		
-		print "Sending..."
+		print("Sending...")
 			
 		# When we send a lot, each one goes slowly. Use a Pool
 		# to submit the mail jobs in parallel. Only submit a
@@ -106,7 +106,7 @@ class Command(BaseCommand):
 
 		wait_workers(0)
 			
-		print "sent", State.total_emails_sent, "emails"
+		print("sent", State.total_emails_sent, "emails")
 
 def send_blast(user_id, is_test, test_addrs, counter, counter_max):
 	user = User.objects.get(id=user_id)
@@ -129,7 +129,7 @@ def send_blast(user_id, is_test, test_addrs, counter, counter_max):
 	
 	# send!
 	try:
-		print "%d/%d" % (counter+1, counter_max), user.id, ", ".join(send_to_addr)
+		print("%d/%d" % (counter+1, counter_max), user.id, ", ".join(send_to_addr))
 		send_mail(
 			"website/email/blast",
 			emailreturnpath,
@@ -145,7 +145,7 @@ def send_blast(user_id, is_test, test_addrs, counter, counter_max):
 			fail_silently=False
 		)
 	except Exception as e:
-		print user, e
+		print(user, e)
 		return False
 	
 	if not is_test:

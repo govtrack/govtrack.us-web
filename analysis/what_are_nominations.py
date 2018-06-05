@@ -33,17 +33,17 @@ for v in all_votes:
 	elif "to be a Member of the" in v.question:
 		boards_commissions += 1
 	else:
-		print v.question
+		print(v.question)
 		other += 1
 
-print "district judges", district_judges
-print "circuit judges", circuit_judges
-print "supreme court", sup_ct
-print "senior agency positions", secretaries_ags
-print "federal reserve board of govs", fed_govs
-print "ambassadors", ambassadors
-print "boards and commissions", boards_commissions
-print "other (printed above)", other
+print("district judges", district_judges)
+print("circuit judges", circuit_judges)
+print("supreme court", sup_ct)
+print("senior agency positions", secretaries_ags)
+print("federal reserve board of govs", fed_govs)
+print("ambassadors", ambassadors)
+print("boards and commissions", boards_commissions)
+print("other (printed above)", other)
 
 # Ordered by most no votes.
 w = csv.writer(sys.stdout)

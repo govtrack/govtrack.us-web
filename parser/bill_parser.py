@@ -12,7 +12,7 @@ from django.db.utils import IntegrityError
 import glob
 import re
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import os.path
 import json
 from datetime import datetime, timedelta, date
@@ -135,12 +135,12 @@ class BillProcessor(XmlProcessor):
     def process_titles(self, obj, node):
         titles = []
         for elem in node.xpath('./titles/title'):
-            text = unicode(elem.text) if elem.text else None
+            text = str(elem.text) if elem.text else None
             titles.append((elem.get('type') + ("-partial" if elem.get("partial") == "1" else ""), elem.get('as'), text))
         obj.titles = titles
         
         # let the XML override the displayed bill number (American Memory bills)
-        n = unicode(node.xpath('string(bill-number)'))
+        n = str(node.xpath('string(bill-number)'))
         if not n: n = None
         
         if not obj.lock_title:
@@ -167,7 +167,7 @@ class BillProcessor(XmlProcessor):
                 
                 role = Cosponsor.get_role_for(person, obj, joined)
                 if not role:
-                    log.error('Cosponsor %s did not have a role on %s' % (unicode(person).encode("utf8"), subnode.get('joined')))
+                    log.error('Cosponsor %s did not have a role on %s' % (str(person).encode("utf8"), subnode.get('joined')))
                     continue
 
                 value = subnode.get('withdrawn')
@@ -370,7 +370,7 @@ def main(options):
                 textfile = get_bill_text_metadata(b, None)
                 if not textfile:
                     if b.congress >= 103 and b.introduced_date < (datetime.now()-timedelta(days=14)).date():
-                        print "No bill text?", fname, b.introduced_date
+                        print("No bill text?", fname, b.introduced_date)
                     continue
                 textfile = textfile["text_file"]
                 if os.path.exists(textfile) and File.objects.is_changed(textfile):
@@ -380,7 +380,7 @@ def main(options):
                     
                 continue
             except Bill.DoesNotExist:
-                print "Unchanged metadata file but bill doesn't exist:", fname
+                print("Unchanged metadata file but bill doesn't exist:", fname)
                 pass # just parse as normal
             
         if options.slow:
@@ -391,14 +391,14 @@ def main(options):
             try:
                 bill = bill_processor.process(Bill(), node)
             except:
-                print fname
+                print(fname)
                 raise
            
             seen_bill_ids.append(bill.id) # don't delete me later
             
             # So far this is just for American Memory bills.
             if node.xpath("string(source/@url)"):
-                bill.source_link = unicode(node.xpath("string(source/@url)"))
+                bill.source_link = str(node.xpath("string(source/@url)"))
             else:
                 bill.source_link = None
 
@@ -422,7 +422,7 @@ def main(options):
             try:
                 bill.save()
             except:
-                print bill
+                print(bill)
                 raise
 
             if bill_index:
@@ -437,7 +437,7 @@ def main(options):
     if options.congress and not options.filter:
         # this doesn't work because seen_bill_ids is too big for sqlite!
         for b in Bill.objects.filter(congress=options.congress).exclude(id__in = seen_bill_ids):
-            print "Bill is no longer on disk: ", b.id, b
+            print("Bill is no longer on disk: ", b.id, b)
         
     # The rest is for current only...
     
@@ -456,7 +456,7 @@ def load_senate_floor_schedule(options, bill_index):
             try:
                 bill = Bill.objects.get(congress=entry["bill_congress"], bill_type=entry["bill_type"], number=entry["bill_number"])
             except Bill.DoesNotExist:
-                print "Bill not in our database", entry
+                print("Bill not in our database", entry)
                 continue
             if bill.senate_floor_schedule_postdate == None or now - bill.senate_floor_schedule_postdate > timedelta(days=7):
                 bill.senate_floor_schedule_postdate = now
@@ -469,9 +469,9 @@ def load_senate_floor_schedule(options, bill_index):
 
 def load_senate_floor_schedule_data():
     try:
-        dom = etree.parse(urllib.urlopen("https://www.senate.gov/legislative/schedule/floor_schedule.xml")).getroot()
+        dom = etree.parse(urllib.request.urlopen("https://www.senate.gov/legislative/schedule/floor_schedule.xml")).getroot()
     except etree.XMLSyntaxError:
-        print "Invalid XML received for https://www.senate.gov/legislative/schedule/floor_schedule.xml"
+        print("Invalid XML received for https://www.senate.gov/legislative/schedule/floor_schedule.xml")
         return
     def get(node, key): return node.find(key).text
     year = int(get(dom, "year"))
@@ -504,7 +504,7 @@ def load_docs_house_gov(options, bill_index):
     # Look at the three most recent JSON files by looking at the lexicographically last ones,
     # which possibly cover the current week, the next week, and the week after that.
     if not os.path.exists("data/congress/upcoming_house_floor"):
-        print "No upcoming_house_floor data."
+        print("No upcoming_house_floor data.")
         return
     for fn in sorted(os.listdir("data/congress/upcoming_house_floor"))[-3:]:
         data = json.load(open("data/congress/upcoming_house_floor/" + fn))

@@ -84,14 +84,14 @@ for fn in glob.glob(datadir + "rolls/*.xml"):
 # Get a complete list of Members via the GovTrack API. We need to know who so we bring forward
 # any historical data.
 if len(voters_by_chamber['h']) == 0 or len(voters_by_chamber['s']) == 0:
-	import json, urllib
+	import json, urllib.request, urllib.parse, urllib.error
 	voters_by_chamber = { "h": set(), "s": set() }
-	for m in json.load(urllib.urlopen("http://www.govtrack.us/api/v1/person/?roles__current=true&limit=600"))["objects"]:
+	for m in json.load(urllib.request.urlopen("http://www.govtrack.us/api/v1/person/?roles__current=true&limit=600"))["objects"]:
 		c = "s" if (m["current_role"]["role_type"] == "senator") else "h"
 		voters_by_chamber[c].add( int(m["id"]) ) 
 	
 if len(voters_by_chamber['h']) == 0 or len(voters_by_chamber['s']) == 0:
-	print "missed_votes: There are no voters in one of the chambers. Which means we don't know who is currently serving...."
+	print("missed_votes: There are no voters in one of the chambers. Which means we don't know who is currently serving....")
 	sys.exit(0)
 
 # For each Member of Congress, search for the most recent Congress that has their
@@ -173,7 +173,7 @@ for bin in [("lifetime", "s"), ("lifetime", "h")] + sorted(session_bin_dates):
 	# really happens at the start of a Congress. One chamber may
 	# not have voted yet.
 	if len(values) == 0:
-		print "No data for", bin
+		print("No data for", bin)
 		continue
 		
 	# For each of them, store the percentile and the (bin-wide) median.

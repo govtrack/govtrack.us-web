@@ -22,7 +22,7 @@
 import sys
 import re
 import unicodedata
-from StringIO import StringIO
+from io import StringIO
 import lxml.etree
 from numpy import percentile
 
@@ -73,7 +73,7 @@ def extract_text(fn):
     # Up-cast everything to unicode, so there's no mixed typing
     # of strings.
     if node.text:
-      buf.write(unicode(node.text))
+      buf.write(str(node.text))
 
     # ... and then the children ...
     for child in node:
@@ -83,7 +83,7 @@ def extract_text(fn):
     # that the text does not run together with subsequent block-level
     # content...
     if node.tag in ("text",):
-      buf.write(u" ")
+      buf.write(" ")
 
   # Serializes a node into plain text.
   def serialize_node(node, buf):
@@ -95,7 +95,7 @@ def extract_text(fn):
     # Up-cast everything to unicode, so there's no mixed typing
     # of strings.
     if node.tail:
-      buf.write(unicode(node.tail))
+      buf.write(str(node.tail))
 
   # Serialize the bill text XML document. Serialie each legis-body
   # or resolution-body. There may be more than one such node if the
@@ -111,28 +111,28 @@ def extract_text(fn):
   text = text.lower()
 
   # Normalize whitespace, dashes, and punctuation.
-  text = re.sub(u"\\s+", u" ", text) # collapse whitespace into single spaces
-  text = re.sub(u"[−–—~‐]+", u"-", text) # lots of dash types
-  text = re.sub(u"\\W+ ", u" ", text) # remove punctuation preceding whitespace
+  text = re.sub("\\s+", " ", text) # collapse whitespace into single spaces
+  text = re.sub("[−–—~‐]+", "-", text) # lots of dash types
+  text = re.sub("\\W+ ", " ", text) # remove punctuation preceding whitespace
 
   # Replace common phrases with single, atomic words so that they count
   # for less in the analysis phase of this script.
-  text = re.sub(u"is amended by striking", u"/IABS/", text)
-  text = re.sub(u"is amended by adding at the end the following", u"/IABAATETF/", text)
-  text = re.sub(u"after the date of enactment of this act", u"/ATDOEOTA/", text)
+  text = re.sub("is amended by striking", "/IABS/", text)
+  text = re.sub("is amended by adding at the end the following", "/IABAATETF/", text)
+  text = re.sub("after the date of enactment of this act", "/ATDOEOTA/", text)
 
   # Make comparison insensitive to Unicode details that can be removed,
   # like accent marks. I have no reason to believe this matters, but
   # the more unicode that can be removed, the better, I guess. This
   # decomposes Unicode characters and then removes combining characters.
-  text = u"".join(c for c in unicodedata.normalize('NFKD', text)
+  text = "".join(c for c in unicodedata.normalize('NFKD', text)
     if not unicodedata.combining(c))
 
   return text
 
 def to_words(text, word_map):
   # Splice on whitespace and convert the words to a unicode string where code points map to words in the original.
-  return u"".join([word_map.setdefault(w, unichr(len(word_map)+32)) for w in text.split(" ")])
+  return "".join([word_map.setdefault(w, chr(len(word_map)+32)) for w in text.split(" ")])
 
 def from_words(wordlist, word_map):
   # Turn the Unicode string where code points map to words back to the original string.
@@ -202,12 +202,12 @@ def compare_bills(b1, b2):
   fn2 = get_bill_text_metadata(b2, None)['xml_file']
   text1 = extract_text(fn1)
   state = prepare_text1(text1)
-  print b1.id, unicode(b1).encode("utf8")
-  print b2.id, unicode(b2).encode("utf8")
+  print(b1.id, str(b1).encode("utf8"))
+  print(b2.id, str(b2).encode("utf8"))
   ratio1, ratio2, text = compare_text(extract_text(fn2), *state)
-  print ratio1, ratio2, ratio1*ratio2
-  print(text[:1000].encode("utf8"))
-  print
+  print(ratio1, ratio2, ratio1*ratio2)
+  print((text[:1000].encode("utf8")))
+  print()
 
 
 if __name__ == "__main__" and sys.argv[1] == "analyze":
@@ -509,10 +509,10 @@ elif __name__ == "__main__" and sys.argv[-1] == "test":
       b2 = Bill.from_congressproject_id(b2_id)
       r = RelatedBill.objects.filter(bill=b1, related_bill=b2, relation="identical")
       #if r.count() == 0:
-      print b1_id, b2_id, r
-      print b1
-      print b2
-      print
+      print(b1_id, b2_id, r)
+      print(b1)
+      print(b2)
+      print()
 
 elif __name__ == "__main__" and sys.argv[1] == "graph":
   # Make a graph of text incorporation relationships.
@@ -603,7 +603,7 @@ elif __name__ == "__main__" and sys.argv[1] == "graph":
   print(svg)
 
 elif __name__ == "__main__" and sys.argv[1] == "extract-text":
-  print extract_text(sys.argv[2]).encode("utf8")
+  print(extract_text(sys.argv[2]).encode("utf8"))
 
 
 elif __name__ == "__main__" and len(sys.argv) == 3:
@@ -623,7 +623,7 @@ elif __name__ == "__main__":
     .filter(relation="identical", related_bill__id__gt=F('bill__id'))\
     .filter(bill__congress=114, bill__current_status=BillStatus.enacted_signed):
     if len(sys.argv) > 1:
-      if sys.argv[1] not in unicode(br.bill):
+      if sys.argv[1] not in str(br.bill):
         continue
 
     compare_bills(br.bill, br.related_bill)

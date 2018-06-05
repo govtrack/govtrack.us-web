@@ -383,7 +383,7 @@ class VoteOption(models.Model):
     def norm_text(self):
         if self.key == "+": return "Yes"
         if self.key == "-": return "No"
-        return unicode(self)
+        return str(self)
 
 class Voter(models.Model):
     """How people voted on roll call votes in the U.S. Congress since 1789. See the Vote API. Filter on the vote field to get the results of a particular vote."""
@@ -401,7 +401,7 @@ class Voter(models.Model):
     api_filter_if = { "option__key": ["person"] }
     
     def __unicode__(self):
-        return u'%s /%s/ %s' % (unicode(self.person), self.option.key, unicode(self.vote))
+        return '%s /%s/ %s' % (str(self.person), self.option.key, str(self.vote))
         
     def voter_type_is_member(self):
         return self.voter_type == VoterType.member
@@ -463,9 +463,9 @@ class Voter(models.Model):
             if not v.person_role or not v.is_valid():
                 new_role = Voter.get_role_for(v.person, v.vote, v.created)
                 if new_role != v.person_role:
-                    print v.person, v.created, v.vote
-                    print v.person_role, "=>", new_role
-                    print
+                    print(v.person, v.created, v.vote)
+                    print(v.person_role, "=>", new_role)
+                    print()
                     v.person_role = new_role
                     v.save()
 
