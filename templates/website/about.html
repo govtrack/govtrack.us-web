@@ -1,11 +1,16 @@
 {% extends "master.html" %}
+{% load static %}
 {% block title %}GovTrack.us - About{% endblock %}
 
 {% block body_class %}about{% endblock %}
 
 {% block extra_css %}
 <style>
-section ul { padding-left: 1.5em; }
+@media screen and (min-width: 768px) {
+	section ul { padding-left: 1.5em; }
+}
+#content p.staffer-name { margin-bottom: .5em; font-weight: bold; }
+img.staffer-photo { width: 178px; height: 200px; border: 1px solid black; margin-right: 1em; }
 </style>
 {% endblock %}
 
@@ -13,7 +18,7 @@ section ul { padding-left: 1.5em; }
 <h1>About GovTrack.us</h1>
 
 <div class="row">
-<section class="col-sm-6">
+<section class="col-sm-7 col-md-6">
 	<p style="font-size: 120%; font-weight: bold; font-family: Roboto Slab;">GovTrack.us tracks the United States Congress and helps Americans participate in their national legislature.</p>
 
 	<p>We publish the status of federal legislation, information about your representative and senators in Congress including voting records, and original research on bills and votes.</p>
@@ -39,10 +44,47 @@ section ul { padding-left: 1.5em; }
 
     <p>We pay our operating costs through our advertising revenue (<a href="/advertising">read our ad policy</a>) and crowdfunding (<a href="https://www.patreon.com/govtrack">support us on Patreon</a>; <a href="https://www.kickstarter.com/projects/1872382405/govtrack-insider/posts/1475289">see our 2015 project on Kickstarter</a>).</p>
 
-	<p>We&rsquo;re a small organization with four part-time staff members. <a href="http://razor.occams.info">Joshua Tauberer</a>, who started GovTrack as a hobby in 2004, is the organization&rsquo;s founder and president.</p>
+	<p>We&rsquo;re a small organization with four part-time staff members, who are:</p>
 
-	<p>See our <a href="/press">press clippings</a> to read what people think of the site.</p>
-	
+	<table>
+		<tr valign="top">
+			<td>
+				<img class="staffer-photo" src="{% static "images/staff/josh.jpeg" %}">
+			</td>
+			<td>
+				<p class="staffer-name"><a href="https://razor.occams.info">Joshua Tauberer</a>, president</p>
+				<p>Joshua is the founder of GovTrack.us. He created GovTrack initially as a hobby in 2004. He is a software developer and entrepreneur that has also been a contractor to the United States Congress and the District of Columbia municipal government on improving the publication process of the law, and he is a member of the Open Government Advisory Group to the DC mayor. He holds a Ph.D. from the University of Pennsylvania.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>
+				<img class="staffer-photo" src="{% static "images/staff/jesse.jpeg" %}">
+			</td>
+			<td>
+				<p class="staffer-name">Jesse Rifkin, staff writer</p>
+				<p>Jesse has been a staff writer for <a href="https://govtrackinsider.com/">GovTrack Insider</a> since 2016, focusing primarily on bill summaries. His writings on politics and other subjects have been published in The Washington Post, Politico Magazine, Los Angeles Times, USA Today, Daily Beast, HuffPost Politics, Hartford Courant, and Billboard. Jesse's favorite pieces he's written for GovTrack Insider are: <a href="https://govtrackinsider.com/almost-unanimous-2017-edition-we-asked-why-these-lone-dissenters-withheld-their-votes-on-bills-974b8e22686d">Almost Unanimous</a>, where we asked why these lone dissenters    withheld their votes on bills, <a href="https://govtrackinsider.com/will-the-constitution-ever-be-amended-again-we-asked-the-man-behind-the-twenty-seventh-amendment-60ebe7375a3e">Will the Constitution ever be amended again?</a>, where we asked the man behind the Twenty-Seventh Amendment, and <a href="https://govtrackinsider.com/what-the-first-congress-of-1789-can-teach-the-congress-of-2017-f136a2baee92">What the first Congress of 1789 can teach the Congress of 2017</a>.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>
+				<img class="staffer-photo" src="{% static "images/staff/ben.jpeg" %}">
+			</td>
+			<td>
+				<p class="staffer-name">Ben Hammer, external relations associate</p>
+				<p>Ben is our external relations associate. He has assisted managing site content and fundraising for three years, working to find new partnerships, projects, and data. Some of his latest work includes adding congressional scorecards to Member pages and statements from legislative stakeholders to bill pages. He has a B.A. in philosophy from Carnegie Mellon University. Outside of work Ben is working on a short graphic novel about sentient candles.</p>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>
+				<img class="staffer-photo" src="{% static "images/staff/amy.jpeg" %}">
+			</td>
+			<td>
+				<p class="staffer-name">Amy West, Research & Communications Manager </p>
+				<p>Amy has been the GovTrack research and communications manager since February 2017 when she realized she didn't want to retire quite so early after all. She edits GovTrack Insider articles, posts to GovTrack social media and developed the <a href="/misconduct">Congressional Misconduct Database</a>. From 1999-2015, she was a librarian at the University of Minnesota Libraries specializing in government publications and government data. "</p>
+			</td>
+		</tr>
+	</table>
+
 	{# <p>Ben Hammer is our research staffer. Our past staff and contributors have included Thomas Schoenfelder, Aviad Eilam, Gordon P. Hemsley, <a href="http://www.villagecreative.com">Village Creative</a>, Ben Rellick, Daniel Gabriele, <a href="http://lorien.name/">Grigoriy Petukhov</a>, Patrick Tutwiler, and Kevin Henry.</p> #}
 	
 	<h2><span>Help us open government</span></h2>
@@ -63,7 +105,7 @@ section ul { padding-left: 1.5em; }
 	</ul>
 </section>
 
-<section class="col-sm-offset-1 col-sm-5" style="font-size: 14px; font-family: Roboto Slab;">
+<section class="col-md-offset-1 col-sm-5" style="font-size: 14px; font-family: Roboto Slab;">
 <div class="panel panel-info">
 <div class="panel-body">
 <h3 style="text-align: center; font-weight: bold; margin: 1em;">Our Charter</h3>
