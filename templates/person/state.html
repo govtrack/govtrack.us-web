@@ -19,6 +19,8 @@ var map_loaded = false;
 $(function() {
    {% if stateapp != "T" %}
     $('a[data-toggle="tab"][href="#map"]').on('shown.bs.tab', load_map_iframe);
+    if (window.location.hash == "#map")
+    	load_map_iframe(); // already open
    {% else %}
    	setTimeout(load_map_iframe, 50);
    {% endif %}
