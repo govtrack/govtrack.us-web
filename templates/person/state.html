@@ -17,11 +17,16 @@
 // before it is visible, so don't load the iframe until the map tab is clicked
 var map_loaded = false;
 $(function() {
-   $('a[data-toggle="tab"][href="#map"]').on('shown.bs.tab', function (e) {
+   {% if stateapp != "T" %}
+    $('a[data-toggle="tab"][href="#map"]').on('shown.bs.tab', load_map_iframe);
+   {% else %}
+   	setTimeout(load_map_iframe, 50);
+   {% endif %}
+   function load_map_iframe() {
    	if (map_loaded) return;
    	map_loaded = true;
      $("#map-iframe").attr('src', "/congress/members/embed/mapframe?state={{state}}&footer=0");
-   })
+   }
 
    $('a[data-toggle="tab"][href="#representatives"]').on('shown.bs.tab', function (e) {
     if ($(window).width() > 768) {
@@ -212,6 +217,9 @@ $(function() {
 	        {% endif %}
         </div>
         {% endfor %}
+
+		<iframe id="map-iframe" style="width: 100%; height: 80vh; border: 1px solid #999;"> </iframe>
+
     </div>
 
 	{% endif %}

@@ -371,7 +371,6 @@ def get_representatives(state):
 def browse_state(request, state):
     state = normalize_state_arg(state)
     if state not in stateapportionment: raise Http404()
-    center_lat, center_long, center_zoom = get_district_bounds(state, None)
             
     return {
         "state": state,
@@ -379,9 +378,6 @@ def browse_state(request, state):
         "statename": statenames[state],
         "senators": get_senators(state),
         "representatives": get_representatives(state),
-        "center_lat": center_lat,
-        "center_long": center_long,
-        "center_zoom": center_zoom,
     }
 
 @anonymous_view
@@ -437,7 +433,7 @@ def get_district_bounds(state, district):
     zoom_info_cache_key = "map_zoom_%s-%s" % (state, "" if not district else district)
 
     if state == "MP":
-        return (145.7, 15.1, 11.0)
+        return (15.1, 145.7, 11.0)
     elif state == "AS":
         center_long, center_lat, center_zoom = (-170.255127, -14.514462, 8.0)
     elif state == "HI":
