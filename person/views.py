@@ -9,6 +9,7 @@ from django.db import connection
 from django.db.models import Count
 from django.http import Http404, HttpResponse
 from django.core.cache import cache
+from django.conf import settings
 
 from common.decorators import render_to
 from common.pagination import paginate
@@ -427,6 +428,9 @@ def browse_district(request, state, district):
         "district_zero": ("%02d" % int(district)),
         "statelist": statelist,
         "legislators": sens+reps,
+        "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
+    	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
+    	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
     }
     
 def get_district_bounds(state, district):
@@ -484,6 +488,9 @@ def districtmapembed(request):
         "state": request.GET.get("state", ""),
         "district": request.GET.get("district", ""),
         "bounds": request.GET.get("bounds", None),
+        "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
+    	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
+    	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
     }
     
 import django.contrib.sitemaps

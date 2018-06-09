@@ -4,9 +4,9 @@
 
 <script>
 // Mapbox configuration
-var accessToken = 'pk.eyJ1IjoiZ292dHJhY2siLCJhIjoiY2lua2J1cmwzMHhyNnVrbHl3bmx4ZnZneiJ9.Wld_AdbKwOgmF2ZXn2SPmw';
-var styleURL = 'mapbox://styles/govtrack/ciwuoqjiv00aq2qo75yducni3';
-var mapId = 'govtrack.cd-115-2016';
+var accessToken = '{{MAPBOX_ACCESS_TOKEN|escapejs}}';
+var styleURL = 'mapbox://styles/{{MAPBOX_MAP_STYLE|escapejs}}';
+var mapId = '{{MAPBOX_MAP_ID|escapejs}}';
 
 var state = {% if state %}"{{state|upper|escapejs}}"{% else %}null{% endif %};
 var district = {% if district %}parseInt("{{district|upper|escapejs}}"){% else %}null{% endif %};

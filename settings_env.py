@@ -91,6 +91,9 @@ copy_env_vars = [
     "PAYPAL_CLIENT_MODE",
     "PAYPAL_CLIENT_ID",
     "PAYPAL_CLIENT_SECRET",
+    "MAPBOX_ACCESS_TOKEN",
+    "MAPBOX_MAP_STYLE",
+    "MAPBOX_MAP_ID",
 ]
 for var in copy_env_vars:
     val = get_env_variable(var, default='')
