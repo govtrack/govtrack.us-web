@@ -440,8 +440,8 @@ def get_district_bounds(state, district):
         return (15.1, 145.7, 11.0)
     elif state == "AS":
         center_long, center_lat, center_zoom = (-170.255127, -14.514462, 8.0)
-    elif state == "HI":
-        center_long, center_lat, center_zoom = (-155.5, 20, 7.0)
+    elif state == "HI" and district in (None, 0):
+        center_long, center_lat, center_zoom = (-157, 20, 7.0)
     elif state == "AK":
         # Alaska has a longitude wrap-around problem so it's easier to just specify
         # the coordinates manually than to figure out generically how to do the math
@@ -450,9 +450,14 @@ def get_district_bounds(state, district):
     elif cache.get(zoom_info_cache_key):
         center_lat, center_long, center_zoom = cache.get(zoom_info_cache_key)
     else:
-        data = json.load(open("person/district_bounds.json"))
-        key = state + ((":" + str(district)) if district else "")
-        center_lat, center_long, center_zoom = [float(v) for v in data[key].split("|")]
+    	with open("static/js/congressional-districts-bboxes-115-2016.js") as f:
+	    	data_json = f.read().replace("var bboxes = ", "")
+        	data = json.loads(data_json)
+        key = state + (("%02d" % district) if district else "")
+        left, bottom, right, top = data[key]
+        center_lat = (top+bottom)/2
+        center_long = (left+right)/2
+        center_zoom = min( log(180/(top-bottom))/log(2), log(360/(right-left))/log(2) ) + 1
         cache.set(zoom_info_cache_key, (center_lat, center_long, center_zoom) )
     return (center_lat, center_long, center_zoom)
 
