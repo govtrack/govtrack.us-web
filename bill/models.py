@@ -447,8 +447,17 @@ class Bill(models.Model):
         counts = { }
         for p in self.cosponsor_records.filter(withdrawn=None).select_related("role").values_list("role__party", flat=True):
             counts[p] = counts.get(p, 0) + 1
-        counts = sorted(list(counts.items()), key=lambda kv : -kv[1])
+        counts = sorted(list(counts.items()), key=lambda kv : (-kv[1], (kv[0] != self.sponsor_role.party) if self.sponsor_role else 0)) # party with highest count first, break ties with sponsor's party first
         return counts
+    @property
+    def cosponsor_counts_summary(self):
+        counts = self.cosponsor_counts_by_party
+        if len(counts) == 0:
+            return "0"
+        return "%d (%s)" % (
+            sum(count for (party, count) in counts),
+            ",".join(("%d%s" % (count, party[0])) for (party, count) in counts),
+        )
 
     # STATUS STRINGS
 
