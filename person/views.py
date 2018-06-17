@@ -322,6 +322,9 @@ def browse_map(request):
         "center_long": -96,
         "center_zoom": 4,
         "statelist": statelist,
+        "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
+    	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
+    	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
     }
     
 def normalize_state_arg(state):
