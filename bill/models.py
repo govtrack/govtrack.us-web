@@ -286,7 +286,7 @@ class Bill(models.Model):
     def get_index_text_boosted(self):
         return self.title
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
-    haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'), ('usc_citations_uptree', 'MultiValue'), ('enacted_ex', 'Boolean'))
+    haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'), ('usc_citations_uptree', 'MultiValue'), ('enacted_ex', 'Boolean'), ('cosponsor_count', 'Integer'))
     def get_terms_index_list(self):
         return set([t.id for t in self.terms.all()])
     def get_committees_index_list(self):
@@ -348,9 +348,17 @@ class Bill(models.Model):
                 ret.add(sec_obj.id)
                 sec_obj = sec_obj.parent_section
         return ret
+
     def update_index(self, bill_index):
         # Update this bill in the search database.
         bill_index.update_object(self, using="bill")
+    @staticmethod
+    def UpdateIndex():
+        from bill.search_indexes import BillIndex
+        from tqdm import tqdm
+        index = BillIndex()
+        for billid in tqdm(Bill.objects.all().values_list('id', flat=True)):
+            Bill.objects.get(id=billid).update_index(index)
 
     # api
     api_recurse_on = ("sponsor", "sponsor_role")

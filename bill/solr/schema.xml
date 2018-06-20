@@ -45,6 +45,7 @@
     <field name="proscore" type="float" indexed="true" stored="true" multiValued="false" />
     <field name="usc_citations_uptree" type="long" indexed="true" stored="true" multiValued="true" />
    
+    <field name="cosponsor_count" type="long" indexed="true" stored="true" multiValued="false" />
  </fields>
 
 

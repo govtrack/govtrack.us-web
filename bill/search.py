@@ -141,6 +141,8 @@ def bill_search_manager():
     sm.add_sort("Introduced Date (Newest First)", "-introduced_date")
     sm.add_sort("Introduced Date (Oldest First)", "introduced_date")
     sm.add_sort("Last Major Action (Recent First)", "-current_status_date")
+    sm.add_sort("Cosponsors (Most First)", "-cosponsor_count")
+    sm.add_sort("Cosponsors (Fewest First)", "cosponsor_count")
 
     #def safe_strftime(date, format):
     #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")
