@@ -933,3 +933,18 @@ def misconduct(request):
         "tags": misconduct_tag_filters,
         "charts": charts,
     }
+
+def user_group_signup(request):
+    if request.method != "POST":
+        return HttpResponseBadRequest()
+
+    from website.models import UserGroupSignup
+    UserGroupSignup.objects.create(
+        user=request.user if request.user.is_authenticated() else None,
+        email=request.POST.get("email", ""),
+        groups=request.POST.get("groups", "")
+        )
+
+    return HttpResponse(
+        json.dumps({ "status": "ok" }),
+        content_type="application/json")

@@ -363,3 +363,10 @@ class Sousveillance(models.Model):
     req = JSONField()
     when = models.DateTimeField(auto_now_add=True, db_index=True)
 
+
+class UserGroupSignup(models.Model):
+    user = models.ForeignKey(User, blank=True, null=True, db_index=True, on_delete=models.CASCADE)
+    email = models.CharField(max_length=256, blank=True, null=True)
+    groups = models.CharField(max_length=256, blank=True, null=True)
+    when = models.DateTimeField(auto_now_add=True, db_index=True)
+

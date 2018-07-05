@@ -14,15 +14,8 @@ $(function() {
 		// Increment a counter.
 		flags.hits = (parseInt(flags.hits) || 0) + 1;
 
-		//} else if (flags.hits > 1 && flags.hits < 10 && (flags.hits % 3) == 0) {
-		//	$('#supportus_modal').modal();
-		//	ga('send', 'event', 'popup', 'support_us');
-
-		//} else if (flags.hits == 5) {
-		//	$('#survey_modal').modal();
-		//	ga('send', 'event', 'popup', 'survey');
-
 		!function() {
+			if (show_usergroup(flags)) return;
 			if (show_followus(flags)) return;
 		}();
 
@@ -41,6 +34,14 @@ function show_followus(flags) {
 	// add twitter async script
 	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
 
+	return true;
+}
+
+function show_usergroup(flags) {
+	// only show this modal once
+	if (flags.usergroup) return false;
+	flags.usergroup = true;
+	$('#usergroup_modal').modal();
 	return true;
 }
 </script>
@@ -102,8 +103,122 @@ function show_followus(flags) {
     </div>
   </div>
 </div>
-{% comment %}
-   				<a href="https://www.messenger.com/t/govtrack">
-   					<img src="{% static "images/facebook_messenger_code.png" %}" class="img-responsive" style="border: 2px solid black;">
-   				</a>
-{% endcomment %}
+
+<style>
+#usergroup_modal label {
+	display: block;
+}
+</style>
+<script>
+$(function() {
+	function update_next_enabled() {
+		// Update disabled/enabled state of Next button.
+		$('#usergroup_modal .btn-primary').prop('disabled',
+			$('#usergroup_modal input:checked').length == 0
+			||
+			($('#usergroup_modal .step-two').is(":visible")
+			 && !/\w/.test($('#usergroup_modal .step-two input').val()))
+		)
+
+		// Show hide corresponding next paragraph.
+		var first_checked_group = $('#usergroup_modal input:checked').first().attr('id');
+		$('#usergroup_modal .step-two p[data-for]').each(function() {
+			$(this).toggle($(this).attr('data-for') == first_checked_group);
+		});
+	}
+	$('#usergroup_modal input').click(update_next_enabled);
+	$('#usergroup_modal input').keyup(update_next_enabled);
+	$('#usergroup_modal input').change(update_next_enabled);
+	update_next_enabled();
+	$('#usergroup_modal .btn-primary').click(function() {
+		if (!$('#usergroup_modal .step-two').is(":visible")) {
+			$('#usergroup_modal .step-two').slideDown();
+			$('#usergroup_modal .step-two input').focus();
+			update_next_enabled();
+		} else if (!$('#usergroup_modal .step-three').is(":visible")) {
+			// submit!
+			$('#usergroup_modal .step-three').slideDown();
+			$('#usergroup_modal .btn-default').fadeOut();
+			$('#usergroup_modal .btn-primary').text("Close");
+
+
+			var groups = [];
+			$('#usergroup_modal input:checked').each(function() {
+				groups.push($(this).attr('id').substring("usergroup_modal_".length));
+			});
+
+			$.ajax({
+				method: "POST",
+				url: "/user-group-signup",
+				data: {
+					groups: groups.join(","),
+					email: $('#usergroup_modal .step-two input').val()
+				}
+			});
+		} else {
+			// close
+			$('#usergroup_modal').modal('hide');
+		}
+	});
+})
+</script>
+<div id="usergroup_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="usergroup_modal_title" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h2 class="modal-title" id="usergroup_modal_title">Join GovTrack&rsquo;s Advisory Community</h2>
+      </div>
+      <div class="modal-body">
+      	<p>We’re looking to learn more about who uses GovTrack and what features you find helpful or think could be improved. If you can, please take a few minutes to help us improve GovTrack for users like you.</p>
+      	<p>Start by telling us more about yourself:</p>
+      	<label for="usergroup_modal_professionals">
+      		<input type="checkbox" id="usergroup_modal_professionals">
+      		I&rsquo;m a lobbyist, advocate, or other professional.
+      	</label>
+      	<label for="usergroup_modal_youth">
+      		<input type="checkbox" id="usergroup_modal_youth">
+      		I&rsquo;m a young person (younger than 26 years old).
+      	</label>
+      	<label for="usergroup_modal_womenminority">
+      		<input type="checkbox" id="usergroup_modal_womenminority">
+      		I&rsquo;m a member of a minority or disadvantaged group.
+      	</label>
+      	<label for="usergroup_modal_educator">
+      		<input type="checkbox" id="usergroup_modal_educator">
+      		I&rsquo;m a teacher, librarian, or other educator.
+      	</label>
+      	<label for="usergroup_modal_other">
+      		<input type="checkbox" id="usergroup_modal_other">
+      		Other
+      	</label>
+      	<div class="step-two" style="display: none; padding: 1em 0;">
+	      	<p data-for="usergroup_modal_professionals">
+	      		We hope to make GovTrack more useful to policy professionals like you. Please sign up for our advisory group to be a part of making GovTrack a better tool for what you do.
+	      	</p>
+	      	<p data-for="usergroup_modal_youth">
+	      		Young Americans have historically been the least involved in politics, despite the huge consequences policies can have on them. By joining our advisory group, you can help us make GovTrack more useful and engaging to young voters like you.
+	      	</p>
+	      	<p data-for="usergroup_modal_womenminority">
+				Our mission is to empower every American with the tools to understand and impact Congress. We hope that with your input we can make GovTrack more accessible to minority and disadvantaged communities who we may currently struggle to reach. Please join our advisory group to let us know what more we can do.
+	      	</p>
+	      	<p data-for="usergroup_modal_educator">
+				We love educating Americans about how their government works too! Please help us make GovTrack better address the needs of educators by joining our advisory group.
+	      	</p>
+	      	<p data-for="usergroup_modal_other">
+	      		Would you like to join our advisory group to work with us on the future of GovTrack?
+	      	</p>
+	      	<p style="margin-bottom: 5px;">Email address where we can reach you:</p>
+	      	<p><input type="text" class="form-control" placeholder="your email address" value="{{request.user.email}}"></p>
+      	</div>
+      	<div class="step-three" style="display: none;">
+      		<p>Thank you for joining the GovTrack Advisory Community! We&rsquo;ll be in touch.</p>
+      	</div>
+      	<div style="padding-top: .5em;">
+	      	<!--<button type="button" class="btn btn-default pull-right" data-dismiss="modal">No Thanks</button>-->
+	      	<button type="button" class="btn btn-primary">Next &raquo;</button>
+	    </div>
+      </div>
+    </div>
+  </div>
+</div>
