@@ -39,9 +39,11 @@ function show_followus(flags) {
 
 function show_usergroup(flags) {
 	// only show this modal once
+	if (flags.hits <= 10) return false;
 	if (flags.usergroup) return false;
 	flags.usergroup = true;
 	$('#usergroup_modal').modal();
+	ga('send', 'event', "user group signup", "modal shown");
 	return true;
 }
 </script>
@@ -129,6 +131,9 @@ $(function() {
 	$('#usergroup_modal input').click(update_next_enabled);
 	$('#usergroup_modal input').keyup(update_next_enabled);
 	$('#usergroup_modal input').change(update_next_enabled);
+	$('#usergroup_modal input').click(function() {
+		ga('send', 'event', "user group signup", $(this).attr('id').substring("usergroup_modal_".length));
+	});
 	update_next_enabled();
 	$('#usergroup_modal .btn-primary').click(function() {
 		if (!$('#usergroup_modal .step-two').is(":visible")) {
@@ -155,6 +160,7 @@ $(function() {
 					email: $('#usergroup_modal .step-two input').val()
 				}
 			});
+			ga('send', 'event', "user group signup", "submit");
 		} else {
 			// close
 			$('#usergroup_modal').modal('hide');
