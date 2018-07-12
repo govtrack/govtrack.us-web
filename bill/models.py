@@ -445,6 +445,12 @@ class Bill(models.Model):
         return ("Pub" if self.sliplawpubpriv == "PUB" else "Pvt") + (".L. %d-%d" % (self.congress, self.sliplawnum))
 
     @property
+    def sponsor_name(self):
+        from person.name import get_person_name
+        self.sponsor.role = self.sponsor_role
+        return get_person_name(self.sponsor, firstname_position='before')
+
+    @property
     def cosponsor_count(self):
         return self.cosponsor_records.filter(withdrawn=None).count()
     @property

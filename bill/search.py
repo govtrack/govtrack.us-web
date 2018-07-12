@@ -155,7 +155,7 @@ def bill_search_manager():
 		<div class="col-xs-10 col-md-11">
     	<div style="margin-bottom: 3px"><a href="{{object.get_absolute_url}}" style="font-size: 15px; line-height: 125%;">{{object|truncatewords_html:50}}</a></div>
 		<div style="font-size: 90%">
-    	{% if object.sponsor %}<div style="margin-bottom: 3px">Sponsor: {{object.sponsor}}</div>{% endif %}
+    	{% if object.sponsor %}<div style="margin-bottom: 3px">Sponsor: {{object.sponsor_name}}</div>{% endif %}
 		<table width="100%"><tr valign="top">
     	{% if object.source != "statutesatlarge" %}<td width="25%" style="padding-right: 1.5em">Introduced<br>{{object.introduced_date}}</td>{% else %}<td/>{% endif %}
     	{% if object.source != "americanmemory" and object.get_current_status_display_simple != "Introduced" %}<td width="25%" style="padding-right: 1.5em">{% if object.source != "statutesatlarge" %}{{object.get_current_status_display_simple}}{% else %}Enacted/Agreed to{% endif %}<br>{{object.current_status_date}}</td>{% else %}<td/>{% endif %}
