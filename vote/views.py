@@ -698,7 +698,7 @@ def vote_comparison_table_arbitrary(request, vote_ids):
         "col_width_pct": int(round(100/(len(votes)+1))),
     }
 
-def get_vote_matrix(votes):
+def get_vote_matrix(votes, filter_people=None, tqdm=lambda _ : _):
 	# Convert votes array to Vote instances with extra fields attached as instance fields.
 	# votes is an array of tuples of the form
 	# (Vote instance | Vote id, Vote slug, { extra dict info })
@@ -736,23 +736,24 @@ def get_vote_matrix(votes):
 
 	votes = [fetch_vote(item) for item in votes]
 
-	# Compute totals by party, which yields a matrix like hte matrix for voters
+	# Compute totals by party, which yields a matrix like the matrix for voters
 	# where the rows are parties and in each row the 'votes' key provides columns
 	# for the votes.
 
-	party_totals = { }
-	for i, vote in enumerate(votes):
-		totals = vote.totals()
-		for party, party_total in zip(totals['parties'], totals['party_counts']):
-			pt = party_totals.setdefault(party, {
-				"party": party,
-				"total_votes": 0,
-				"votes": [None] * len(votes), # if this party didn't occur in prev votes, make sure we have an empty record
-			})
-			pt["total_votes"] += party_total["total"]
-			pt["votes"][i] = party_total
-	party_totals = sorted(party_totals.values(), key = lambda value : -value['total_votes'])
-	party_sort_order = [party_total["party"] for party_total in party_totals]
+	if not filter_people:
+		party_totals = { }
+		for i, vote in enumerate(votes):
+			totals = vote.totals()
+			for party, party_total in zip(totals['parties'], totals['party_counts']):
+				pt = party_totals.setdefault(party, {
+					"party": party,
+					"total_votes": 0,
+					"votes": [None] * len(votes), # if this party didn't occur in prev votes, make sure we have an empty record
+				})
+				pt["total_votes"] += party_total["total"]
+				pt["votes"][i] = party_total
+		party_totals = sorted(party_totals.values(), key = lambda value : -value['total_votes'])
+		party_sort_order = [party_total["party"] for party_total in party_totals]
 
 	# Is more than one chamber involved here?
 	more_than_one_chamber = (len(set(v.chamber for v in votes)) > 1)
@@ -760,8 +761,9 @@ def get_vote_matrix(votes):
 	# Compute the rows of the matrix.
 
 	voters = { }
-	for i, vote in enumerate(votes):
-		for voter in vote.get_voters():
+	for i, vote in enumerate(tqdm(votes)):
+		for voter in vote.get_voters(filter_people=filter_people):
+			if filter_people and voter.person not in filter_people: continue
 			v = voters.setdefault(voter.person_id, {
 				"person": voter.person,
 				"total_plus": 0,
@@ -801,4 +803,4 @@ def get_vote_matrix(votes):
 	# Default sort order.
 	voters = sorted(voters.values(), key = lambda value : value['person_name'])
 
-	return votes, party_totals, voters
+	return votes, party_totals if not filter_people else None, voters

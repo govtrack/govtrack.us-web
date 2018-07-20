@@ -1,16 +1,26 @@
 #!script
-import csv, sys, re, datetime
+import csv, sys, re, datetime, tqdm
 
+from person.models import *
 from vote.models import Vote, VoteCategory
 from vote.views import get_vote_matrix
 
-# Select votes.
-#votes = Vote.objects.filter(session=sys.argv[1], category=VoteCategory.nomination,
-#   created__gte=datetime.datetime(int(sys.argv[1]), 1, 20, 12, 0, 0))
-votes = Vote.objects.filter(id__in=sys.argv[1:])
+if True:
+	filter_people = set(Person.objects.filter(roles__current=True, roles__state="TX"))
+	votes = Vote.objects.filter(voters__person__in=filter_people).distinct()
+
+else:
+	# Select votes.
+	#votes = Vote.objects.filter(session=sys.argv[1], category=VoteCategory.nomination,
+	#   created__gte=datetime.datetime(int(sys.argv[1]), 1, 20, 12, 0, 0))
+	votes = Vote.objects.filter(id__in=sys.argv[1:])
+	filter_people = set()
 
 # Compute matrix.
-votes, party_totals, voters = get_vote_matrix(votes.order_by('created'))
+votes, party_totals, voters = get_vote_matrix(
+	votes.order_by('created'),
+	filter_people=filter_people,
+	tqdm=tqdm.tqdm)
 
 # Write out.
 w = csv.writer(sys.stdout)

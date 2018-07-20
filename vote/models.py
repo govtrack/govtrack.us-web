@@ -131,9 +131,11 @@ class Vote(models.Model):
     def is_on_passage(self):
         return self.category in (VoteCategory.passage_suspension, VoteCategory.passage, VoteCategory.veto_override)
  
-    def get_voters(self):
+    def get_voters(self, filter_people=None):
         # Fetch from database.
-        ret = list(self.voters.all().select_related('person', 'person_role', 'option'))
+        voters = self.voters.all()
+        if filter_people: voters = voters.filter(person__in=filter_people)
+        ret = list(voters.select_related('person', 'person_role', 'option'))
 
         # Add the exact party of the person at this time.
         for voter in ret:
