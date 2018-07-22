@@ -2,7 +2,6 @@ honcho
 django<1.12
 uwsgi
 python-dateutil
-django-cache-utils
 django-debug-toolbar
 django-picklefield
 mimeparse

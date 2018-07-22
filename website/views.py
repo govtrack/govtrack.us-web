@@ -9,8 +9,6 @@ from django.conf import settings
 
 from common.decorators import render_to
 
-from cache_utils.decorators import cached
-
 from twostream.decorators import anonymous_view
 from registration.helpers import json_response
 
