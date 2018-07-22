@@ -19,7 +19,6 @@ html5lib
 tqdm
 pyyaml
 pynliner
-git+https://github.com/govtrack/django-lorien-common
 django-html-emailer
 xml_diff
 diff_match_patch_python
