@@ -79,7 +79,7 @@ class SearchManager(object):
 
         # Although we cache some facet queries, also cache the final response.
         m = hashlib.md5()
-        m.update(self.model.__name__ + "|" + qsparams.urlencode())
+        m.update((self.model.__name__ + "|" + qsparams.urlencode()).encode("utf8"))
         cachekey = "smartsearch__response__" + m.hexdigest()
         resp = cache.get(cachekey)
         if resp and False:
@@ -334,12 +334,12 @@ class SearchManager(object):
         return "smartsearch_%s_%s__%s" % (
             self.model.__name__,
             prefix,
-            hasher(
+            hasher((
                 "&".join( str(k) + "=" + str(v) for k, v in list(self.global_filters.items()) )
                 + "&&" +
-                "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in qsparams or o.field_name + "[]" in qsparams) and (o != omit) ),
-            ).hexdigest()
-            )        
+                "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in qsparams or o.field_name + "[]" in qsparams) and (o != omit) )
+            ).encode("utf8")).hexdigest()
+            )
                         
     def get_model_field(self, option):
         include_counts = True

@@ -55,7 +55,7 @@ class BillTerm(models.Model):
     name = models.CharField(max_length=255)
     subterms = models.ManyToManyField('self', related_name="parents", symmetrical=False, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     def __repr__(self):
         return "<BillTerm: %s:%s>" % (TermType.by_value(self.term_type).label, self.name.encode("utf8"))
@@ -117,7 +117,7 @@ class Cosponsor(models.Model):
 
     api_example_parameters = { "sort": "-joined" }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.person_name + " " + self.details() + ": " + str(self.bill)
 
     @property
@@ -236,7 +236,7 @@ class Bill(models.Model):
         unique_together = [('congress', 'bill_type', 'number'),
         ('congress', 'sliplawpubpriv', 'sliplawnum')]
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     @staticmethod
@@ -1200,11 +1200,33 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             return datetime.datetime.combine(x, datetime.time.min if not end_of_day else datetime.time.max)
         def event_cmp(a, b):
             if a.get("sort") and b.get("sort") and a["sort"][0] == b["sort"][0]:
-                return cmp(a["sort"], b["sort"])
+                da, db = a["sort"], b["sort"]
+                return (da>db)-(da<db)
             da = as_dt(a["date"], a.get("end_of_day", False))
             db = as_dt(b["date"], b.get("end_of_day", False))
-            return cmp(da, db)
-        ret.sort(cmp=event_cmp)
+            return (da>db)-(da<db)
+
+        # https://docs.python.org/3/howto/sorting.html
+        def cmp_to_key(mycmp):
+            'Convert a cmp= function into a key= function'
+            class K:
+                def __init__(self, obj, *args):
+                    self.obj = obj
+                def __lt__(self, other):
+                    return mycmp(self.obj, other.obj) < 0
+                def __gt__(self, other):
+                    return mycmp(self.obj, other.obj) > 0
+                def __eq__(self, other):
+                    return mycmp(self.obj, other.obj) == 0
+                def __le__(self, other):
+                    return mycmp(self.obj, other.obj) <= 0
+                def __ge__(self, other):
+                    return mycmp(self.obj, other.obj) >= 0
+                def __ne__(self, other):
+                    return mycmp(self.obj, other.obj) != 0
+            return K
+
+        ret.sort(key=cmp_to_key(event_cmp))
 
         if top:
             # Mark the last entry that occurs prior to all events on this bill.
@@ -1589,14 +1611,14 @@ class BillTextComparison(models.Model):
         unique_together = ( ('bill1', 'ver1', 'bill2', 'ver2'), )
     def compress(self):
         import bz2, base64
-        self.data["left_text_bz2"] = base64.b64encode(bz2.compress(self.data["left_text"]))
-        self.data["right_text_bz2"] = base64.b64encode(bz2.compress(self.data["right_text"]))
+        self.data["left_text_bz2"] = base64.b64encode(bz2.compress(self.data["left_text"].encode("utf8"))).decode("ascii")
+        self.data["right_text_bz2"] = base64.b64encode(bz2.compress(self.data["right_text"].encode("utf8"))).decode("ascii")
         del self.data["left_text"]
         del self.data["right_text"]
     def decompress(self):
         import bz2, base64
-        self.data["left_text"] = bz2.decompress(base64.b64decode(self.data["left_text_bz2"]))
-        self.data["right_text"] = bz2.decompress(base64.b64decode(self.data["right_text_bz2"]))
+        self.data["left_text"] = bz2.decompress(base64.b64decode(self.data["left_text_bz2"].encode("ascii"))).decode("utf8")
+        self.data["right_text"] = bz2.decompress(base64.b64decode(self.data["right_text_bz2"].encode("ascii"))).decode("utf8")
 
 # Feeds
 from events.models import Feed, truncate_words
@@ -1700,7 +1722,7 @@ class BillSummary(models.Model):
     source_url = models.TextField(blank=True, null=True)
     source_text = models.CharField(max_length=64, blank=True, null=True, db_index=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.bill)[0:30] + " - " + self.plain_text()[0:60]
 
     def as_html(self):
@@ -1735,7 +1757,7 @@ class USCSection(models.Model):
     ordering = models.IntegerField()
     update_flag = models.IntegerField(default=0)
 
-    def __unicode__(self):
+    def __str__(self):
         return ((str(self.parent_section) + " > ") if self.parent_section else "") + self.get_level_type_display() + " "  + (self.number if self.number else "[No Number]")
 
     @property
@@ -1887,7 +1909,7 @@ class Amendment(models.Model):
             ('bill', 'sequence')]
             # bill+sequence is not unique, see the github thread on amendment numbering --- currently this is manually fixed up in the db as a non-unique index
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def display_number(self):

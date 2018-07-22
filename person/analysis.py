@@ -184,7 +184,7 @@ def load_scorecards():
                 }
                 metadata["based_on"] = metadata["based-on"]
                 _scorecards.append(metadata)
-        _scorecards.sort(key = lambda scorecard : scorecard["abbrev"])
+        _scorecards.sort(key = lambda scorecard : scorecard.get("abbrev") or scorecard["name"])
     return _scorecards
 
 def load_scorecards_for(person):

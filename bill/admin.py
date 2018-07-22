@@ -42,8 +42,8 @@ class BillSummaryAdmin(admin.ModelAdmin):
         bill_index.update_object(obj.bill, using="bill")
         
     def delete_model(self, request, obj):
-    	bill = obj.bill
-    	obj.delete()
+        bill = obj.bill
+        obj.delete()
         bill.create_events()
         
 admin.site.register(BillTerm, BillTermAdmin)

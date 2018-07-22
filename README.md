@@ -9,7 +9,7 @@ Local Development
 
 ### Development using Vagrant
 
-GovTrack.us runs on Ubuntu 16.04 or OS X. To simplify local development, we have a `Vagrantfile` in this directory. You can get started quickly simply by installing [Vagrant](https://www.vagrantup.com/) and running:
+GovTrack.us is based on Python 3 and Django 1.x and runs on Ubuntu 16.04 or OS X. To simplify local development, we have a `Vagrantfile` in this directory. You can get started quickly simply by installing [Vagrant](https://www.vagrantup.com/) and running:
 
     # Get this repo (you must clone with `--recursive`)
     git clone --recursive https://github.com/govtrack/govtrack.us-web.git
@@ -87,3 +87,18 @@ See `settings.env.template` for details, especially for values used in productio
 # Credits
 
 Emoji icons by http://emojione.com/developers/.
+
+# Production Deployment Notes
+
+On my Ubuntu 14.04 box I had to:
+
+    pip install --upgrade pip setuptools six
+
+To set up a MySQL database you'll need the OS MySQL package and the Python package:
+
+    apt-get install libmysqlclient-dev
+    pip install mysqlclient
+
+To use memcached:
+
+    pip install pylibmc

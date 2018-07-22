@@ -83,7 +83,7 @@ class Vote(models.Model):
     api_recurse_on = ('related_bill', 'options')
     api_example_parameters = { "sort": "-created" }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.question
 
     def calculate_totals(self):
@@ -368,7 +368,7 @@ class VoteOption(models.Model):
     key = models.CharField(max_length=20)
     value = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.value
         
     @property
@@ -400,7 +400,7 @@ class Voter(models.Model):
     api_example_parameters = { "sort": "-created" }
     api_filter_if = { "option__key": ["person"] }
     
-    def __unicode__(self):
+    def __str__(self):
         return '%s /%s/ %s' % (str(self.person), self.option.key, str(self.vote))
         
     def voter_type_is_member(self):

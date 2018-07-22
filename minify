@@ -1,2 +1,2 @@
 #!/bin/bash
-python -m rcssmin < static/css/all.css > static/css/all-min.css
+.venv/bin/python3 -m rcssmin < static/css/all.css > static/css/all-min.css
