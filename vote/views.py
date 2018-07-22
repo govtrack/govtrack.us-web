@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
-from io import StringIO
+from io import StringIO, BytesIO
 from datetime import datetime
 
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -83,7 +83,7 @@ def vote_details(request, congress, session, chamber_code, number):
     has_ideology_scores = attach_ideology_scores(voters, vote.congress)
         
     # perform an initial sort for display
-    voters.sort(key = lambda x : (x.option.key, x.person_role.party if x.person and x.person_role else "", x.person.name_no_details_lastfirst if x.person else x.get_voter_type_display()))
+    voters.sort(key = lambda x : (x.option.key, x.person_role.party if x.person and x.person_role else "", x.person.name_no_details_lastfirst() if x.person else x.get_voter_type_display()))
 
     # did any Senate leaders switch their vote for a motion to reconsider?
     reconsiderers = vote.possible_reconsideration_votes(voters)
@@ -164,7 +164,7 @@ def load_ideology_scores(congress):
                 if float(ideolog[2]) <  .1: continue # very low leadership score, ideology is not reliable
                 ideology_scores[congress][int(ideolog[0])] = float(ideolog[1])
                 scores_by_party.setdefault(ideolog[4].strip(), []).append(float(ideolog[1]))
-            ideology_scores[congress]["MEDIAN"] = median(ideology_scores[congress].values())
+            ideology_scores[congress]["MEDIAN"] = median(list(ideology_scores[congress].values()))
             for party in scores_by_party:
                 ideology_scores[congress]["MEDIAN:"+party] = median(scores_by_party[party])
         except IOError:
@@ -321,7 +321,6 @@ def vote_thumbnail_image_map(vote):
 def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	
 	import cairo, re, math
-	from io import StringIO
 	
 	# general image properties
 	font_face = "DejaVu Serif Condensed"
@@ -577,7 +576,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		ctx.fill()
 
 	# Convert the image buffer to raw PNG bytes.
-	buf = StringIO()
+	buf = BytesIO()
 	im.write_to_png(buf)
 	v = buf.getvalue()
 	

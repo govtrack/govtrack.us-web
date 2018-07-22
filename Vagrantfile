@@ -28,14 +28,14 @@ Vagrant.configure(2) do |config|
     echo Installing system packages...
     sudo apt-get update
     sudo apt install -y -q \
-        git python-virtualenv python-lxml python-openid \
-        python-oauth2client python-iso8601 python-numpy python-scipy \
-        python-prctl python-pip python-xapian
+        git python-virtualenv python3-lxml \
+        python3-iso8601 python3-numpy python3-scipy \
+        python3-pip libcap-dev
 
     # On OS X...
     # ----------
     # export CFLAGS=-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/usr/include/libxml2
-    # pip install virtualenv lxml python-openid python-oauth2 iso-8601 numpy scipy
+    # pip3 install virtualenv lxml python-openid python-oauth2 iso-8601 numpy scipy
 
     # Install Python packages
     #########################
@@ -45,7 +45,7 @@ Vagrant.configure(2) do |config|
     # With Vagrant, it's not necessary, so it's commented out. But you
     # should run these two commands:
     #
-    # virtualenv --system-site-packages .venv
+    # virtualenv --system-site-packages -ppython3 .venv
     # source .venv/bin/activate
 
     # Install Python packages.

@@ -29,7 +29,7 @@ class Committee(models.Model):
     jurisdiction = models.TextField(blank=True, null=True, help_text="The committee's jurisdiction, if known.")
     jurisdiction_link = models.TextField(blank=True, null=True, help_text="A link to where the jurisdiction text was sourced from.")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -171,7 +171,7 @@ class CommitteeMember(models.Model):
     committee = models.ForeignKey('committee.Committee', related_name='members', help_text="The committee or subcommittee being served on.")
     role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member, help_text="The role of the member on the committee.")
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s @ %s as %s' % (self.person, self.committee, self.get_role_display())
 
     # api
@@ -213,7 +213,7 @@ class CommitteeMeeting(models.Model):
     class Meta:
         ordering = [ "-created" ]
 
-    def __unicode__(self):
+    def __str__(self):
         return self.guid
 
     @property

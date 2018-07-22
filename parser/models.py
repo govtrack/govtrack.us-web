@@ -64,7 +64,7 @@ class File(models.Model):
     checksum = models.CharField(max_length=8)
     processed = models.DateTimeField(auto_now=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.path
 
     objects = FileManager()

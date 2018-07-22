@@ -25,7 +25,7 @@ class Feed(models.Model):
     """Each Feed has a code name that can be used to reconstruct information about the feed."""
     feedname = models.CharField(max_length=64, unique=True, db_index=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.feedname
         
     def tracked_in_lists_with_email(self):
@@ -391,7 +391,7 @@ class Event(models.Model):
              ('feed', 'when', 'source_content_type', 'source_object_id', 'eventid'),
              ('when', 'source_content_type', 'source_object_id', 'seq', 'feed'))
     
-    def __unicode__(self):
+    def __str__(self):
         return str(self.source) + " " + str(self.eventid) + " / " + str(self.feed)
         
     def render(self, feeds=None):

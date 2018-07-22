@@ -131,7 +131,7 @@ class Person(models.Model):
     api_example_id = 400326
     #######
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @staticmethod
@@ -419,7 +419,7 @@ class PersonRole(models.Model):
     class Meta:
         pass # ordering = ['startdate'] # causes prefetch_related to be slow
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s / %s to %s / %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display(), repr(self.congress_numbers()))
        
     def continues_from(self, prev):

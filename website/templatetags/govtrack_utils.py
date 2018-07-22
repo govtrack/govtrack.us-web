@@ -1,6 +1,5 @@
 from django import template
 from django.utils.translation import ugettext as _
-from django.utils.encoding import force_unicode
 from django.utils import safestring
 from django.template.defaultfilters import stringfilter
 import random
@@ -47,7 +46,7 @@ def markdown(value):
     # tags and URL schemes.
 
     import CommonMark
-    ast = CommonMark.Parser().parse(force_unicode(value))
+    ast = CommonMark.Parser().parse(value)
     html = CommonMark.HtmlRenderer({ 'safe': True }).render(ast)
 
     import html5lib, urllib.parse

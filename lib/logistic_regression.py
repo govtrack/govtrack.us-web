@@ -149,7 +149,6 @@ def calcprob(beta, x):
         N, npreds = x.shape[1], x.shape[0]
     except: # single predictor, x is a vector, len(beta)=2.
         N, npreds = len(x), 1
-	print(len(beta), npreds)
     if len(beta) != npreds+1:
         raise ValueError('sizes of beta and x do not match!')
     if npreds==1: # simple logistic regression

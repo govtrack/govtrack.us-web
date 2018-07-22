@@ -452,9 +452,9 @@ def get_district_bounds(state, district):
     elif cache.get(zoom_info_cache_key):
         center_lat, center_long, center_zoom = cache.get(zoom_info_cache_key)
     else:
-    	with open("static/js/congressional-districts-bboxes-115-2016.js") as f:
-	    	data_json = f.read().replace("var bboxes = ", "")
-        	data = json.loads(data_json)
+        with open("static/js/congressional-districts-bboxes-115-2016.js") as f:
+            data_json = f.read().replace("var bboxes = ", "")
+            data = json.loads(data_json)
         key = state + (("%02d" % district) if district else "")
         left, bottom, right, top = data[key]
         center_lat = (top+bottom)/2

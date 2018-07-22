@@ -182,7 +182,7 @@ def events_list_items(request):
             days_between_events = 1000
         else:
             seps.sort()
-            days_between_events = seps[len(seps)/2]
+            days_between_events = seps[len(seps)//2]
         
         if not sublist or sublist.email == 0:
             if days_between_events < 1:

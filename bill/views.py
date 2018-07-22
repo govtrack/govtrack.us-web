@@ -399,7 +399,7 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     def differ(text1, text2):
         # ensure we use the C++ Google DMP and can specify the time limit
         import diff_match_patch
-        for x in diff_match_patch.diff_unicode(text1, text2, timelimit=timelimit):
+        for x in diff_match_patch.diff(text1, text2, timelimit=timelimit):
             yield x
     compare(doc1.getroot(), doc2.getroot(), make_tag_func=make_tag_func, differ=differ)
 
@@ -410,8 +410,8 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     ret = {
         "left_meta": left,
         "right_meta": right,
-        "left_text": lxml.etree.tostring(doc1),
-        "right_text": lxml.etree.tostring(doc2),
+        "left_text": lxml.etree.tostring(doc1, encoding=str),
+        "right_text": lxml.etree.tostring(doc2, encoding=str),
     }
 
     if use_cache or force_update:
@@ -774,7 +774,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         from PIL import Image
         import subprocess, io
         pngbytes = subprocess.check_output(["/usr/bin/pdftoppm", "-f", str(pagenumber), "-l", str(pagenumber), "-scale-to", str(width), "-png", pdffile])
-        im = Image.open(io.StringIO(pngbytes))
+        im = Image.open(io.BytesIO(pngbytes))
         im = im.convert("L")
 
         # crop out the GPO seal:
@@ -809,7 +809,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         import os.path
         cache_fn = metadata["pdf_file"].replace(".pdf", "-" + image_type + "_" + str(width) + "_" + str(round(aspect,3)) + ".png")
         if os.path.exists(cache_fn):
-            with open(cache_fn) as f:
+            with open(cache_fn, "rb") as f:
                 return HttpResponse(f.read(), content_type="image/png")
 
         # Use the PDF files on disk.
@@ -885,7 +885,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
 
     # Serialize.
     import io
-    imgbytesbuf = io.StringIO()
+    imgbytesbuf = io.BytesIO()
     img.save(imgbytesbuf, "PNG")
     imgbytes = imgbytesbuf.getvalue()
     imgbytesbuf.close()

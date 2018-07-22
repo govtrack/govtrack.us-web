@@ -70,10 +70,8 @@ def extract_text(fn):
       return
 
     # Write the text that occurs before the first child.
-    # Up-cast everything to unicode, so there's no mixed typing
-    # of strings.
     if node.text:
-      buf.write(str(node.text))
+      buf.write(node.text)
 
     # ... and then the children ...
     for child in node:
@@ -92,10 +90,8 @@ def extract_text(fn):
 
     # And then the text that occurs after the closing tag
     # of the element and before the next element.
-    # Up-cast everything to unicode, so there's no mixed typing
-    # of strings.
     if node.tail:
-      buf.write(str(node.tail))
+      buf.write(node.tail)
 
   # Serialize the bill text XML document. Serialie each legis-body
   # or resolution-body. There may be more than one such node if the
