@@ -9,7 +9,6 @@ from django.db.models import Count, F
 from django.core.cache import cache
 
 from common.decorators import render_to
-from common.pagination import paginate
 
 from bill.models import Bill, BillType, BillStatus, BillTerm, TermType, BillTextComparison, BillSummary
 from bill.search import bill_search_manager, parse_bill_citation

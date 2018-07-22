@@ -12,7 +12,6 @@ from django.core.cache import cache
 from django.conf import settings
 
 from common.decorators import render_to
-from common.pagination import paginate
 
 import json, pickle, base64, re
 

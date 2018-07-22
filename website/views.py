@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
 from common.decorators import render_to
-from common.pagination import paginate
 
 from cache_utils.decorators import cached
 

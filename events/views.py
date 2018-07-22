@@ -5,9 +5,9 @@ from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.core.paginator import Paginator
 
 from common.decorators import render_to
-from common.pagination import paginate
 
 from datetime import datetime, time
 
@@ -160,7 +160,7 @@ def events_list_items(request):
         qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, int(request.POST.get('count', '100'))) # get all events
     else:
         qs = []
-    page = paginate(qs, request, per_page=50)
+    page = Paginator(qs, 50)
     
     # Based on the last 100 events, how often do we expect to get email updates?
     # Compute this using the median time between events, which should give us an
