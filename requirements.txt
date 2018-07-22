@@ -11,7 +11,6 @@ feedparser
 numpy
 django-haystack
 pysolr==2.1.0
-xapian-haystack
 rcssmin
 commonmark
 html5lib

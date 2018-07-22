@@ -50,6 +50,7 @@ Vagrant.configure(2) do |config|
 
     # Install Python packages.
     pip install --upgrade -r requirements.txt
+    pip install --upgrade xapian-haystack
 
     # On OS X, install bcrypt:
     # http://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed

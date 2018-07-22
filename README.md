@@ -67,6 +67,8 @@ Some features of the site require additional configuration. To set configuration
     #
     # For local development you may want to use the (default) Xapian search engine, e.g.:
     # xapian:/home/username/govtrack.us-web/xapian_index_person
+    # You'll need to `apt-get install python-xapian` and `pip install xapian-haystack`
+    # or see https://github.com/notanumber/xapian-haystack.
     #
     # For a production deployment you may want to use Solr instead, e.g.:
     # solr:http://localhost:8983/solr/person
@@ -74,7 +76,7 @@ Some features of the site require additional configuration. To set configuration
     # You can also specify 'simple' to have a dummy search backend that
     # does not actually index or search anything.
     HAYSTACK_PERSON_CONNECTION=xapian:local/xapian_index_person
-    HAYSTACK_BILL_CONNECTION=xapian:local/bill
+    HAYSTACK_BILL_CONNECTION=xapian:local/xapian_index_bill
 
     # Django uses a secret key to provide cryptographic signing. It should be random
     # and kept secure. You can generate a key with `./manage.py generate_secret_key`
