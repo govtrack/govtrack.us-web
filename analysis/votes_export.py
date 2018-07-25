@@ -3,7 +3,8 @@ import csv, sys
 
 from django.conf import settings
 
-from vote.models import *
+from person.models import Person
+from vote.models import Vote
 
 with_voters = False
 
@@ -13,15 +14,21 @@ w.writerow(
 	+ (["person", "vote"] if with_voters else [])
 )
 
-votes = Vote.objects.filter(
-	#congress=113,
-	session__in=(2015, 2017),
-	chamber=CongressChamber.senate
-	).order_by('created')
+#votes = Vote.objects.filter(
+#	#congress=113,
+#	session__in=(2015, 2017),
+#	chamber=CongressChamber.senate
+#	).order_by('created')
+
+with_voters = True
+people = set(Person.objects.filter(roles__current=True, roles__state="TX"))
+votes = Vote.objects.filter(voters__person__in=people).distinct()
 
 for vote in votes:
 	if with_voters:
-		voters = list(vote.voters.all().select_related('person', 'option'))
+		voters = vote.voters.all()
+		if people: voters = voters.filter(person__in=people)
+		voters = list(voters.select_related('person', 'option'))
 		voters = sorted(voters, key = lambda v : v.person.sortname)
 	else:
 		voters = [None]
