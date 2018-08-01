@@ -707,7 +707,7 @@
 				</h3>
 				<p>We recommend the following <span id="active-citation-format">MLA</span>-formatted citation when using the information you see here in academic work:</p>
 				<div style="margin: 1em; word-wrap: break-word;">
-					<p id="cite_apa" style="display: none">Civic Impulse. ({% now "Y" %}). {{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15|stripfinalperiod}}. Retrieved from {{request.build_absolute_uri}}</p>
+					<p id="cite_apa" style="display: none">GovTrack.us. ({% now "Y" %}). {{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15|stripfinalperiod}}. Retrieved from {{request.build_absolute_uri}}</p>
 					<p id="cite_mla">&ldquo;{{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15|stripfinalperiod}}.&rdquo; www.GovTrack.us. {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
 					<p id="cite_wikipedia" style="display: none">{{cite web<br/>
 					|url={{request.build_absolute_uri}}<br/>
