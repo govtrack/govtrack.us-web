@@ -1,0 +1,30 @@
+{% extends "master.html" %}
+
+{% load static %}
+{% load govtrack_utils %}
+
+{% block title %}Your Stakeholders - GovTrack.us{% endblock %}
+
+{% block extra_css %}
+<style>
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+<li class="active">Stakeholders</li>
+</ol>
+{% endblock %}
+
+{% block body %}
+<h1>Your Stakeholders</h1>
+
+{% for s in stakeholders %}
+	<p><a href="{{s.get_absolute_url}}">{{s}}</a></p>
+{% endfor %}
+
+{% endblock %}
+
+{% block body_scripts %}
+
+{% endblock %}
