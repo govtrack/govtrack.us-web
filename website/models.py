@@ -20,6 +20,10 @@ class UserProfile(models.Model):
     one_click_unsub_gendate = models.DateTimeField(blank=True, null=True)
     one_click_unsub_hit = models.DateTimeField(blank=True, null=True)
 
+    # we ask people after a long term period of inactivity if they still want to hear from us,
+    # and this records the date we sent the warning
+    inactivity_warning_sent = models.DateTimeField(blank=True, null=True)
+
     # for the constituent calls research project
     research_anon_key = models.IntegerField(blank=True, null=True, unique=True)
 
@@ -98,6 +102,9 @@ class UserProfile(models.Model):
         SubscriptionList.objects.filter(user=p.user).update(email=0)
 
         return True
+
+    def is_inactive(self):
+        return self.inactivity_warning_sent and (not self.user.last_login or self.user.last_login < self.inactivity_warning_sent)
 
 def get_user_profile(user):
     if hasattr(user, "_profile"): return user._profile

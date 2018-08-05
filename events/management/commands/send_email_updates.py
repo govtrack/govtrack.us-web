@@ -8,6 +8,7 @@ import django.core.mail
 
 from optparse import make_option
 
+from website.models import UserProfile
 from events.models import *
 from emailverification.models import Ping, BouncedEmail
 from htmlemailer import send_mail as send_html_mail
@@ -133,20 +134,14 @@ class Command(BaseCommand):
 					counts[k] += v
 
 		for i, user in enumerate(user_iterator()):
-			# Check pingback status.
-			try:
-				p = Ping.objects.get(user_id=user["id"])
-			except Ping.DoesNotExist:
-				p = None
-				
-			if user["last_login"] < datetime(2009, 4, 1) and p == None:
-				# We warned these people on 2012-04-17 that if they didn't log in
-				# they might stop getting email updates.
-				counts["total_users_skipped_stale"] += 1
-				continue
-			elif user["last_login"] < launch_time - timedelta(days=3) \
-				and (not p or not p.pingtime or p.pingtime < launch_time - timedelta(days=20)) \
-				and BouncedEmail.objects.filter(user_id=user["id"]).exists():
+            # Skip users who have been given an inactivity warning and have not
+            # logged in afterwards.
+			if UserProfile.objects.get(user_id=user["id"]).is_inactive():
+                counts["total_users_skipped_stale"] += 1
+                continue
+
+            # Skip users that emails to whom have bounced.
+			if BouncedEmail.objects.filter(user_id=user["id"]).exists():
 				counts["total_users_skipped_bounced"] += 1
 				continue
 
