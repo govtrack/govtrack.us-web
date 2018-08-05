@@ -88,6 +88,19 @@ def index(request):
     #        r["image_url"] = r.get("thumbnail_url")
     #        posts.append(r)
 
+    # Add new stakeholder posts to the news feet.
+    from stakeholder.models import Post
+    for p in Post.objects.filter(stakeholder__verified=True).exclude(content=None).order_by('-created')[0:10]:
+      posts.append({
+        "title": p.stakeholder.name + " " + p.positions_vp(),
+        "published": p.created,
+        "date_has_no_time": False,
+        "type": "Stakeholder Statement",
+        "snippet": p.title(),
+        "url": p.get_a_target_link(),
+        "image_url": p.get_thumbnail_url_ex(),
+      })
+
     # Sort.
     posts.sort(key = lambda p : p["published"] if isinstance(p, dict) else p.published, reverse=True)
 

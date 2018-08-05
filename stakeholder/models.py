@@ -101,8 +101,22 @@ class Post(models.Model):
         return title
 
     def positions(self):
-        return ",".join(sorted(unicode(x) for x in list(self.bill_positions.all()) + list(self.vote_positions.all())))
+        return ", ".join(sorted(unicode(x) for x in list(self.bill_positions.all()) + list(self.vote_positions.all())))
+    def positions_vp(self):
+        return ", ".join(sorted(
+            ((x.get_position_display().lower() + "s ") if x.position != 0 else "statement on ")
+             + unicode(x.get_target())
+            for x in list(self.bill_positions.all()) + list(self.vote_positions.all())
+            ))
 
+    def get_a_target_link(self):
+        for x in list(self.bill_positions.all()) + list(self.vote_positions.all()):
+            return x.get_target().get_absolute_url()
+        return None
+    def get_thumbnail_url_ex(self):
+        for x in self.bill_positions.all():
+            return x.bill.get_thumbnail_url_ex()
+        return None
 
 class BillPosition(models.Model):
     post = models.ForeignKey(Post, related_name="bill_positions", on_delete=models.CASCADE, help_text="The post that this position is related to.")
@@ -114,6 +128,8 @@ class BillPosition(models.Model):
         unique_together = [('post', 'bill', 'position')]
     def __unicode__(self): # for admin and Post.positions
         return ((self.get_position_display()+u": ") if self.position is not None else u"") + unicode(self.bill)
+    def get_target(self):
+        return self.bill
 
 class VotePosition(models.Model):
     post = models.ForeignKey(Post, related_name="vote_positions", on_delete=models.CASCADE, help_text="The post that this position is related to.")
@@ -125,3 +141,5 @@ class VotePosition(models.Model):
         unique_together = [('post', 'vote', 'position')]
     def __unicode__(self): # for admin and Post.positions
         return ((self.get_position_display()+u": ") if self.position is not None else u"") + unicode(self.vote)
+    def get_target(self):
+        return self.vote
