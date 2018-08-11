@@ -395,7 +395,7 @@ class SearchManager(object):
                 if field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
                     # values+annotate makes the db return an integer rather than an object,
                     # and Haystack always returns integers rather than objects
-                    return field.rel.to.objects.in_bulk(ids)
+                    return field.related_model.objects.in_bulk(ids)
                 return None
 
             def nice_name(value, objs):
@@ -409,7 +409,7 @@ class SearchManager(object):
                     # values+annotate makes the db return an integer rather than an object
                     if objs and value in objs:
                         return str(objs[value])
-                    value = field.rel.to.objects.get(id=value)
+                    value = field.related_model.objects.get(id=value)
                 return str(value)
             
             def fix_value_type(value):
@@ -529,7 +529,7 @@ class SearchManager(object):
                 def formatter(value):
                     # If the ORM field is for objects, map ID to an object value, then apply option formatter. 
                     if field and field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
-                        value = field.rel.to.objects.get(id=v)
+                        value = field.related_model.objects.get(id=v)
                     if option.formatter: return option.formatter(value)
                     return str(value)
                 

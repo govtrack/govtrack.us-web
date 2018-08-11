@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponse, Http404
-from django.core.urlresolvers import resolve
+from django.urls import resolve
 from django.template import Template, Context
 from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import ensure_csrf_cookie

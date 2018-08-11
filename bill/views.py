@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import redirect, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal

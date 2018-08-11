@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models, DatabaseError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
 import django.contrib.contenttypes.fields as generic_fields
 from django.contrib.auth.models import User
@@ -366,9 +366,9 @@ class Event(models.Model):
     feed(s) the event is in.
     """
     
-    feed = models.ForeignKey(Feed)
+    feed = models.ForeignKey(Feed, on_delete=models.PROTECT)
 
-    source_content_type = models.ForeignKey(ContentType)
+    source_content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     source_object_id = models.PositiveIntegerField()
     source = generic_fields.GenericForeignKey('source_content_type', 'source_object_id')
     eventid = models.CharField(max_length=32) # unique w.r.t. the source object 
@@ -455,7 +455,7 @@ class SubscriptionList(models.Model):
     # see send_email_updates.py
     EMAIL_CHOICES = [(0, 'No Email Updates'), (1, 'Daily'), (2, 'Weekly')]
     
-    user = models.ForeignKey(User, db_index=True, related_name="subscription_lists")
+    user = models.ForeignKey(User, db_index=True, related_name="subscription_lists", on_delete=models.CASCADE)
     name = models.CharField(max_length=64)
     trackers = models.ManyToManyField(Feed, related_name="tracked_in_lists")
     is_default = models.BooleanField(default=False)

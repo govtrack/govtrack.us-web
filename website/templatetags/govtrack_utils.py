@@ -7,10 +7,6 @@ import json as jsonlib
 
 register = template.Library()
 
-@register.assignment_tag
-def randint(a, b):
-	return random.randint(int(a), int(b))
-
 @register.filter
 def likerttext(value):
     likertdict = { -3: "Strongly oppose",

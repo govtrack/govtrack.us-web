@@ -1,5 +1,5 @@
 honcho
-django<1.12
+django
 uwsgi
 python-prctl
 python-dateutil

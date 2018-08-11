@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import redirect, get_object_or_404, render
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
