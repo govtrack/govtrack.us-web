@@ -10,7 +10,7 @@ import website.api
 import website.views
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 
 	# main URLs
     url(r'', include('redirect.urls')),

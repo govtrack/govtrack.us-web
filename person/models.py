@@ -388,7 +388,7 @@ class Person(models.Model):
 class PersonRole(models.Model):
     """Terms held in office by Members of Congress, Presidents, and Vice Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President/Vice President four years, and in the Senate six years (three 'Congresses')."""
 	
-    person = models.ForeignKey('person.Person', related_name='roles')
+    person = models.ForeignKey('person.Person', related_name='roles', on_delete=models.CASCADE)
     role_type = models.IntegerField(choices=RoleType, db_index=True, help_text="The type of this role: a U.S. senator, a U.S. congressperson, a U.S. president, or a U.S. vice president.")
     current = models.BooleanField(default=False, choices=[(False, "No"), (True, "Yes")], db_index=True, help_text="Whether the role is currently held, or if this is archival information.")
     startdate = models.DateField(db_index=True, help_text="The date the role began (when the person took office).")

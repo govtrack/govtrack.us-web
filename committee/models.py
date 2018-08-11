@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from datetime import datetime, timedelta
 import re
@@ -167,8 +167,8 @@ class CommitteeMember(models.Model):
     # committee membership, so we should not create any
     # foreign keys to this model.
 
-    person = models.ForeignKey('person.Person', related_name='committeeassignments', help_text="The Member of Congress serving on a committee.")
-    committee = models.ForeignKey('committee.Committee', related_name='members', help_text="The committee or subcommittee being served on.")
+    person = models.ForeignKey('person.Person', related_name='committeeassignments', on_delete=models.CASCADE, help_text="The Member of Congress serving on a committee.")
+    committee = models.ForeignKey('committee.Committee', related_name='members', on_delete=models.PROTECT, help_text="The committee or subcommittee being served on.")
     role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member, help_text="The role of the member on the committee.")
 
     def __str__(self):
@@ -203,7 +203,7 @@ MEMBER_ROLE_WEIGHTS = {
 
 class CommitteeMeeting(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    committee = models.ForeignKey(Committee, related_name="meetings", db_index=True)
+    committee = models.ForeignKey(Committee, related_name="meetings", db_index=True, on_delete=models.PROTECT)
     when = models.DateTimeField()
     subject = models.TextField()
     bills = models.ManyToManyField("bill.Bill", blank=True)

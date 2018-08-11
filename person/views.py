@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from math import log, sqrt
 
 from django.shortcuts import redirect, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import connection
 from django.db.models import Count
 from django.http import Http404, HttpResponse

@@ -30,8 +30,8 @@ class Panel(models.Model):
         return "/panels/" + str(self.id)
 
 class PanelMembership(models.Model):
-    panel = models.ForeignKey(Panel, help_text="The panel that the user is a member of.")
-    user = models.ForeignKey('auth.User', help_text="The user who is a member of the panel.")
+    panel = models.ForeignKey(Panel, on_delete=models.CASCADE, help_text="The panel that the user is a member of.")
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, help_text="The user who is a member of the panel.")
 
     invitation_code = models.UUIDField(editable=False, help_text="The invitation code used to accept the invitation.")
     extra = JSONField(blank=True, default={}, help_text="Additional information stored with this object.")
@@ -43,7 +43,7 @@ class PanelMembership(models.Model):
         unique_together = [ ('panel', 'user') ]
 
 class PanelInvitation(models.Model):
-    panel = models.ForeignKey(Panel, help_text="The panel that the user is being invited to.")
+    panel = models.ForeignKey(Panel, on_delete=models.CASCADE, help_text="The panel that the user is being invited to.")
     code = models.UUIDField(default=uuid.uuid4, editable=False, help_text="The invitation code used in the return URL.")
 
     extra = JSONField(blank=True, default={}, help_text="Additional information stored with this object.")

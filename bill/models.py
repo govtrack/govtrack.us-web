@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.template.defaultfilters import slugify, date as date_to_str
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from common import enum
 from jsonfield import JSONField
@@ -109,7 +109,7 @@ class Cosponsor(models.Model):
 
     person = models.ForeignKey('person.Person', db_index=True, on_delete=models.PROTECT, help_text="The cosponsoring person.")
     role = models.ForeignKey('person.PersonRole', db_index=True, on_delete=models.PROTECT, help_text="The role of the cosponsor at the time of cosponsorship.")
-    bill = models.ForeignKey('bill.Bill', db_index=True, help_text="The bill being cosponsored.")
+    bill = models.ForeignKey('bill.Bill', db_index=True, on_delete=models.CASCADE, help_text="The bill being cosponsored.")
     joined = models.DateField(db_index=True, help_text="The date the cosponsor was added. It is always greater than or equal to the bill's introduced_date.")
     withdrawn = models.DateField(blank=True, null=True, help_text="If the cosponsor withdrew his/her support, the date of withdrawl. Otherwise empty.")
     class Meta:
@@ -1556,8 +1556,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         return ret
 
 class RelatedBill(models.Model):
-    bill = models.ForeignKey(Bill, related_name="relatedbills")
-    related_bill = models.ForeignKey(Bill, related_name="relatedtobills")
+    bill = models.ForeignKey(Bill, related_name="relatedbills", on_delete=models.CASCADE)
+    related_bill = models.ForeignKey(Bill, related_name="relatedtobills", on_delete=models.CASCADE)
     relation = models.CharField(max_length=16)
 
     relation_sort_order = { "identical": 0 }
@@ -1602,9 +1602,9 @@ class BillLink(models.Model):
         return urllib.parse.urlparse(self.url).hostname
 
 class BillTextComparison(models.Model):
-    bill1 = models.ForeignKey(Bill, related_name="comparisons1")
+    bill1 = models.ForeignKey(Bill, related_name="comparisons1", on_delete=models.CASCADE)
     ver1 = models.CharField(max_length=6)
-    bill2 = models.ForeignKey(Bill, related_name="comparisons2")
+    bill2 = models.ForeignKey(Bill, related_name="comparisons2", on_delete=models.CASCADE)
     ver2 = models.CharField(max_length=6)
     data = JSONField()
     class Meta:
@@ -1748,7 +1748,7 @@ class BillSummary(models.Model):
 
 # USC Citations
 class USCSection(models.Model):
-    parent_section = models.ForeignKey('self', blank=True, null=True, db_index=True)
+    parent_section = models.ForeignKey('self', blank=True, null=True, db_index=True, on_delete=models.CASCADE)
     citation = models.CharField(max_length=32, blank=True, null=True, db_index=True)
     level_type = models.CharField(max_length=10, choices=[('title', 'Title'), ('subtitle', 'Subtitle'), ('chapter', 'Chapter'), ('subchapter', 'Subchapter'), ('part', 'Part'), ('subpart', 'Subpart'), ('division', 'Division'), ('heading', 'Heading'), ('section', 'Section')])
     number = models.CharField(max_length=24, blank=True, null=True)
@@ -1895,7 +1895,7 @@ class Amendment(models.Model):
     congress = models.IntegerField(help_text="The number of the Congress in which the amendment was offered. The current Congress is %d." % settings.CURRENT_CONGRESS)
     amendment_type = models.IntegerField(choices=AmendmentType, help_text="The amendment's type, indicating the chmaber in which the amendment was offered.")
     number = models.IntegerField(help_text="The amendment's number according to the Library of Congress's H.Amdt and S.Amdt numbering (just the integer part).")
-    bill = models.ForeignKey(Bill, help_text="The bill the amendment amends.")
+    bill = models.ForeignKey(Bill, help_text="The bill the amendment amends.", on_delete=models.PROTECT)
     sequence = models.IntegerField(blank=True, null=True, help_text="For House amendments, the sequence number of the amendment (unique within a bill).")
 
     title = models.CharField(max_length=255, help_text="A title for the amendment.")

@@ -5,7 +5,7 @@ from datetime import datetime
 
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.views.decorators.cache import cache_page
 
 from common.decorators import render_to

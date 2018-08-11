@@ -3,7 +3,7 @@ import math
 
 from django.db import models
 from django.db.models import Q, F
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 
 from common import enum
@@ -364,7 +364,7 @@ class Vote(models.Model):
 
 
 class VoteOption(models.Model):
-    vote = models.ForeignKey('vote.Vote', related_name='options')
+    vote = models.ForeignKey('vote.Vote', related_name='options', on_delete=models.CASCADE)
     key = models.CharField(max_length=20)
     value = models.CharField(max_length=255)
 
@@ -388,11 +388,11 @@ class VoteOption(models.Model):
 class Voter(models.Model):
     """How people voted on roll call votes in the U.S. Congress since 1789. See the Vote API. Filter on the vote field to get the results of a particular vote."""
 	
-    vote = models.ForeignKey('vote.Vote', related_name='voters', help_text="The vote that this record is a part of.")
+    vote = models.ForeignKey('vote.Vote', related_name='voters', on_delete=models.PROTECT, help_text="The vote that this record is a part of.")
     person = models.ForeignKey('person.Person', blank=True, null=True, on_delete=models.PROTECT, related_name='votes', help_text="The person who cast this vote. May be null if the information could not be determined.")
     person_role = models.ForeignKey('person.PersonRole', blank=True, null=True, on_delete=models.PROTECT, related_name='votes', help_text="The role of the person who cast this vote at the time of the vote. May be null if the information could not be determined.")
     voter_type = models.IntegerField(choices=VoterType, help_text="Whether the voter was a Member of Congress or the Vice President.")
-    option = models.ForeignKey('vote.VoteOption', help_text="How the person voted.")
+    option = models.ForeignKey('vote.VoteOption', on_delete=models.CASCADE, help_text="How the person voted.")
     voteview_extra_code = models.CharField(max_length=20, help_text="Extra information provided in the voteview data.")
     created = models.DateTimeField(db_index=True, help_text="The date (and in recent history also time) on which the vote was held.") # equal to vote.created
     

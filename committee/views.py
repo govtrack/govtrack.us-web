@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import redirect, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from common.decorators import render_to
 
