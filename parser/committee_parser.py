@@ -166,53 +166,53 @@ def main(options):
     loaded_meetings = set()
     processed_all_meetings = True
     for chamber in ("house", "senate"):
-		meetings_file = 'data/congress/committee_meetings_%s.json' % chamber
-		file_changed = File.objects.is_changed(meetings_file)
-	
-		if not file_changed and not options.force:
-			log.info('File %s was not changed' % meetings_file)
-			processed_all_meetings = False
-		else:
-			meetings = json.load(open(meetings_file))
-			
-			# Process committee event nodes
-			for meeting in meetings:
-				try:
-					# Associate it with an existing meeting object if GUID is already known.
-					# Must get it like this, vs just assigning the ID as we do in other parsers,
-					# because of the auto_now_add created field, which otherwise misbehaves.
-					try:
-						mobj = CommitteeMeeting.objects.get(guid=meeting['guid'])
-					except CommitteeMeeting.DoesNotExist:
-						mobj = CommitteeMeeting()
-					
-					# Parse.
-					mobj = meeting_processor.process(mobj, meeting)
-					
-					# Attach the meeting to the subcommittee if set.
-					if mobj.subcommittee:
-						mobj.committee = Committee.objects.get(code=mobj.committee.code + mobj.subcommittee)
-					
-					mobj.save()
-					loaded_meetings.add(mobj.id)
-					
-					mobj.bills.clear()
-					for bill in meeting["bill_ids"]:
-					    try:
-					        bill_type, bill_num, bill_cong = re.match(r"([a-z]+)(\d+)-(\d+)$", bill).groups()
-					        bill = Bill.objects.get(congress=bill_cong, bill_type=BillType.by_slug(bill_type), number=int(bill_num))
-					        mobj.bills.add(bill)
-					    except AttributeError:
-					        pass # regex failed
-					    except common.enum.NotFound:
-					        pass # invalid bill type code in source data
-					    except Bill.DoesNotExist:
-					        pass # we don't know about bill yet
-				except Committee.DoesNotExist:
-					log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
-	
-			File.objects.save_file(meetings_file)
-		
+    	meetings_file = 'data/congress/committee_meetings_%s.json' % chamber
+    	file_changed = File.objects.is_changed(meetings_file)
+    
+    	if not file_changed and not options.force:
+    		log.info('File %s was not changed' % meetings_file)
+    		processed_all_meetings = False
+    	else:
+    		meetings = json.load(open(meetings_file))
+    		
+    		# Process committee event nodes
+    		for meeting in meetings:
+    			try:
+    				# Associate it with an existing meeting object if GUID is already known.
+    				# Must get it like this, vs just assigning the ID as we do in other parsers,
+    				# because of the auto_now_add created field, which otherwise misbehaves.
+    				try:
+    					mobj = CommitteeMeeting.objects.get(guid=meeting['guid'])
+    				except CommitteeMeeting.DoesNotExist:
+    					mobj = CommitteeMeeting()
+    				
+    				# Parse.
+    				mobj = meeting_processor.process(mobj, meeting)
+    				
+    				# Attach the meeting to the subcommittee if set.
+    				if mobj.subcommittee:
+    					mobj.committee = Committee.objects.get(code=mobj.committee.code + mobj.subcommittee)
+    				
+    				mobj.save()
+    				loaded_meetings.add(mobj.id)
+    				
+    				mobj.bills.clear()
+    				for bill in meeting["bill_ids"]:
+    				    try:
+    				        bill_type, bill_num, bill_cong = re.match(r"([a-z]+)(\d+)-(\d+)$", bill).groups()
+    				        bill = Bill.objects.get(congress=bill_cong, bill_type=BillType.by_slug(bill_type), number=int(bill_num))
+    				        mobj.bills.add(bill)
+    				    except AttributeError:
+    				        pass # regex failed
+    				    except common.enum.NotFound:
+    				        pass # invalid bill type code in source data
+    				    except Bill.DoesNotExist:
+    				        pass # we don't know about bill yet
+    			except Committee.DoesNotExist:
+    				log.error('Could not load Committee object for meeting %s' % meeting_processor.display_node(meeting))
+    
+    		File.objects.save_file(meetings_file)
+    	
     if processed_all_meetings:
         # Drop any future meetings that are no longer in the source data.
         obsolete_mtgs = CommitteeMeeting.objects.exclude(id__in=loaded_meetings).filter(when__gt=datetime.now())
@@ -224,7 +224,7 @@ def main(options):
         for committee in Committee.objects.filter(obsolete=False):
             log.info('Generating events for %s.' % committee)
             committee.create_events()
-				
+    			
 
 
 if __name__ == '__main__':

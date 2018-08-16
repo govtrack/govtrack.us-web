@@ -320,7 +320,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
         # convert XML on the fly to HTML
         import lxml.html, congressxml
         ret.update({
-            "text_html": lxml.html.tostring(congressxml.convert_xml(dat["xml_file"])),
+            "text_html": lxml.html.tostring(congressxml.convert_xml(dat["xml_file"]), encoding=str),
             "source": dat.get("xml_file_source"),
         })
 
@@ -328,13 +328,13 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
         # This will be for bills around the 103rd-108th Congresses when
         # bill text is available from GPO but not in XML.
         ret.update({
-            "text_html": open(dat["html_file"]).read().decode("utf8"),
+            "text_html": open(dat["html_file"]).read(),
         })
 
     elif "text_file" in dat:
         # bill text from the Statutes at Large, or when plain_text is True then from GPO
 
-        bill_text_content = open(dat["text_file"]).read().decode("utf8")
+        bill_text_content = open(dat["text_file"]).read()
 
         # In the GPO BILLS collection, there's gunk at the top and bottom that we'd
         # rather just remove: metadata in brackets at the top, and <all> at the end.
@@ -428,7 +428,7 @@ def load_citation_info(metadata):
     def rebuild_usc_sec(seclist, indent=0):
         ret = []
         seclist = [kv for kv in seclist.items() if kv[0] != "_count"]
-        seclist = sorted(seclist, key=lambda x : x[0].ordering)
+        seclist = sorted(seclist, key=lambda x : x[0].ordering or -1)
         for sec, subparts in seclist:
             ret.append({
                 "text": (ucfirst(sec.level_type + ((" " + sec.number) if sec.number else "") + (": " if sec.name else "")) if sec.level_type else "") + (sec.name_recased if sec.name else ""),

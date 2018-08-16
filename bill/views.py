@@ -892,7 +892,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
 
     # Save to cache.
     if cache_fn:
-        with open(cache_fn, "w") as f:
+        with open(cache_fn, "wb") as f:
             f.write(imgbytes)
 
     # Return.

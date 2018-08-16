@@ -234,12 +234,11 @@ def vote_export_csv(request, congress, session, chamber_code, number):
             voter.person_role.state if voter.person and voter.person_role else "--",
             voter.person_role.district if voter.person and voter.person_role else "--",
             voter.option.value,
-            voter.person.name_no_district().encode('utf-8') if voter.person else voter.get_voter_type_display(),
+            voter.person.name_no_district() if voter.person else voter.get_voter_type_display(),
             voter.person_role.party if voter.person and voter.person_role else "--",])
     output = outfile.getvalue()
     firstline = '%s Vote #%d %s - %s\n' % (vote.get_chamber_display(), vote.number,
                                          vote.created.isoformat(), vote.question) # strftime doesn't work on dates before 1900
-    firstline = firstline.encode('utf-8')
     r = HttpResponse(firstline + output, content_type='text/csv')
     r['Content-Disposition'] = 'attachment; filename=' + vote.get_absolute_url()[1:].replace("/", "_") + ".csv"
     return r

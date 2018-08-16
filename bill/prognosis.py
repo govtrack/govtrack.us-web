@@ -516,8 +516,8 @@ def compute_prognosis_2(prognosis_model, bill, committee_membership, majority_pa
 			return model["success_rate"]
 		else:
 			factor_keys = set(f[0] for f in factors)
-			for key, index in model["regression_predictors_map"].items():
 			predictors = [0.0 for f in range(len(model["regression_beta"])-1)] # remove the intercept
+			for key, index in model["regression_predictors_map"].items():
 				predictors[index] = 1.0 if key in factor_keys else 0.0
 			return float(calcprob(model["regression_beta"], numpy.transpose(numpy.array([predictors]))))
 			

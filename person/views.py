@@ -668,8 +668,8 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
     for m in metrics:
         m["contexts"] = sorted(m["contexts"].values(), key = lambda c : -c["N"])
         for c in m["contexts"]:
-            c["people"][0].sort()
-            c["people"][1].sort()
+            c["people"][0].sort(key = lambda v : str(v))
+            c["people"][1].sort(key = lambda v : str(v))
 
     import dateutil.parser
     return {
