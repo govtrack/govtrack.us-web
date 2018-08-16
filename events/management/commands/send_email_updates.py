@@ -137,8 +137,8 @@ class Command(BaseCommand):
             # Skip users who have been given an inactivity warning and have not
             # logged in afterwards.
 			if UserProfile.objects.get(user_id=user["id"]).is_inactive():
-                counts["total_users_skipped_stale"] += 1
-                continue
+				counts["total_users_skipped_stale"] += 1
+				continue
 
             # Skip users that emails to whom have bounced.
 			if BouncedEmail.objects.filter(user_id=user["id"]).exists():
