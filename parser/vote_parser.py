@@ -139,7 +139,7 @@ def main(options):
 
     def log_delete_qs(qs):
         if qs.count() == 0: return
-        print "Deleting obsoleted records: ", qs
+        print("Deleting obsoleted records: ", qs)
         #if qs.count() > 3:
         #    print "Delete skipped..."
         #    return
@@ -208,7 +208,7 @@ def main(options):
                             vote.related_amendment = Amendment.objects.get(congress=vote.related_bill.congress, amendment_type=AmendmentType.by_slug(amdt_node.get("number")[0]), number=amdt_node.get("number")[1:])
                         except Amendment.DoesNotExist:
                             if vote.congress >= 93:
-                                print "Missing amendment", fname
+                                print("Missing amendment", fname)
                                 vote.missing_data = True
                     elif amdt_node.get("ref") == "bill-serial":
                         # It is impossible to associate House votes with amendments just from the House
@@ -337,7 +337,7 @@ def main(options):
                     
             File.objects.save_file(fname)
 
-        except Exception, ex:
+        except Exception as ex:
             log.error('Error in processing %s' % fname, exc_info=ex)
             had_error = True
         

@@ -57,9 +57,9 @@ def make_stat(descr, pop, stat):
 	vals = [stat(p) for p in pop]
 	vals = [v for v in vals if v != None]
 	v = stat(todd_akin)
-	print descr
-	print "value", round(v, 2), "N=", len(vals), "mean", round(mean(vals), 2), "median", round(median(vals), 2), "percentile", round(percentileofscore(vals, v))
-	print
+	print(descr)
+	print("value", round(v, 2), "N=", len(vals), "mean", round(mean(vals), 2), "median", round(median(vals), 2), "percentile", round(percentileofscore(vals, v)))
+	print()
 
 make_stat("#enacted; congressmen", all_congressmen, bills_enacted)
 make_stat("#enacted; republicans tenure as long", republican_congresspeeps_serving_as_long, bills_enacted)
@@ -73,13 +73,13 @@ make_stat("leadership; republican freshmen", republican_new_congresspeeps, leade
 make_stat("chair; republican", republican_congresspeeps, is_chair)
 make_stat("chair; republican tenure as long", republican_congresspeeps_serving_as_long, is_chair)
 
-print "cosponsored", Cosponsor.objects.filter(person=todd_akin).count()
+print("cosponsored", Cosponsor.objects.filter(person=todd_akin).count())
 make_stat("% dem bills; republican", republican_congresspeeps, pct_dem_bills)
 make_stat("% dem bills; republican tenure as long", republican_congresspeeps_serving_as_long, pct_dem_bills)
 make_stat("% dem bills; republican non-freshmen", republican_non_new_congresspeeps, pct_dem_bills)
 make_stat("% dem bills; republican freshmen", republican_new_congresspeeps, pct_dem_bills)
 
-print "sponsored", Bill.objects.filter(sponsor=todd_akin).count()
+print("sponsored", Bill.objects.filter(sponsor=todd_akin).count())
 make_stat("% cosponsors dem; republican", republican_congresspeeps, pct_dem_cosponsors)
 make_stat("% cosponsors dem; republican tenure as long", republican_congresspeeps_serving_as_long, pct_dem_cosponsors)
 make_stat("% cosponsors dem; republican non-freshmen", republican_non_new_congresspeeps, pct_dem_cosponsors)

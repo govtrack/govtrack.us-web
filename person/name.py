@@ -14,7 +14,7 @@ def get_person_name(person,
         
     if person.nickname:
         if firstname_style == None:
-            firstname += u" \u201c%s\u201d" % person.nickname
+            firstname += " \u201c%s\u201d" % person.nickname
         elif firstname_style == "nickname" and len(person.nickname) < len(firstname):
             firstname = person.nickname
  

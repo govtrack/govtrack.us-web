@@ -1,4 +1,4 @@
-from models import SubscriptionList
+from .models import SubscriptionList
 
 def template_context_processor(request):
 	context = { "subscription_feeds": None }

@@ -11,12 +11,12 @@ from vote.models import Vote, CongressChamber, VoteCategory
 from us import get_all_sessions
 
 def session_filter(qs, form):
-	session_index = form["session"]
-	if session_index != None:
-		s = get_all_sessions()[int(session_index)]
-		qs = qs.filter(congress=s[0], session=s[1])
-	return qs
-	
+    session_index = form["session"]
+    if session_index != None:
+        s = get_all_sessions()[int(session_index)]
+        qs = qs.filter(congress=s[0], session=s[1])
+    return qs
+    
 def vote_search_manager():
     sm = SearchManager(Vote, qs=Vote.objects.select_related('oursummary'))
     
@@ -24,21 +24,21 @@ def vote_search_manager():
     # and then just the session number (the year) for year-based
     # sessions.
     def format_session(s):
-    	if s[0] >= 77:
-    		 # year and congress number in parens
-    		return s[1] + " (" + ordinal(s[0]) + " Congress)"
-    	else:
-    		# date range and congress number in parens
-    		if s[2].year == s[3].year:
-				# strftime requires year>=1900, so fool it for generating
-				# month names by replacing old years with 1900
-				if s[2].month == s[3].month:
-					return str(s[2].year) + " " + s[2].replace(1900).strftime("%b") + " (" + ordinal(s[0]) + " Congress)"
-				else:
-					return str(s[2].year) + " " + s[2].replace(1900).strftime("%b-") + s[3].replace(1900).strftime("%b") + " (" + ordinal(s[0]) + " Congress)"
-    		else:
-    			return str(s[2].year) + "-" + str(s[3].year) + " (" + ordinal(s[0]) + " Congress)"
-    	
+        if s[0] >= 77:
+             # year and congress number in parens
+            return s[1] + " (" + ordinal(s[0]) + " Congress)"
+        else:
+            # date range and congress number in parens
+            if s[2].year == s[3].year:
+                # strftime requires year>=1900, so fool it for generating
+                # month names by replacing old years with 1900
+                if s[2].month == s[3].month:
+                    return str(s[2].year) + " " + s[2].replace(1900).strftime("%b") + " (" + ordinal(s[0]) + " Congress)"
+                else:
+                    return str(s[2].year) + " " + s[2].replace(1900).strftime("%b-") + s[3].replace(1900).strftime("%b") + " (" + ordinal(s[0]) + " Congress)"
+            else:
+                return str(s[2].year) + "-" + str(s[3].year) + " (" + ordinal(s[0]) + " Congress)"
+        
     session_choices = reversed([(i, format_session(cs)) for (i,cs) in enumerate(get_all_sessions()) if cs[2] <= datetime.now().date()])
     
     sm.add_option('session', type="select", choices=session_choices, filter=session_filter, help="Note: Even-year sessions extend a few days into the next year.")
@@ -70,7 +70,7 @@ def vote_search_manager():
             <div><span class="fa fa-calendar fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-8">
-        	<div><span class="fa fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
+            <div><span class="fa fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
         </div>
         <div class="col-xs-12">
           <div style="margin-left: 5px">
@@ -83,6 +83,6 @@ def vote_search_manager():
 
     </div>
     </div>
-	""")
+    """)
 
     return sm

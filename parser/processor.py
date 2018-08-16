@@ -98,13 +98,13 @@ class Processor(object):
                 v1 = getattr(old_value, k)
                 v2 = getattr(new_value, k)
                 if v1 != v2:
-                    print "Change in", k, "value of", unicode(old_value).encode("utf8"), ":", unicode(v1).encode("utf8"), "=>", unicode(v2).encode("utf8")
+                    print("Change in", k, "value of", str(old_value).encode("utf8"), ":", str(v1).encode("utf8"), "=>", str(v2).encode("utf8"))
                     return True
         return False
 
 class XmlProcessor(Processor):
     def display_node(self, node):
-        return '<%s>: ' % node.tag + ', '.join('%s: %s' % x for x in node.attrib.iteritems())
+        return '<%s>: ' % node.tag + ', '.join('%s: %s' % x for x in node.attrib.items())
     def get_node_attribute_keys(self, node):
         return node.attrib
     def get_node_attribute_value(self, node, attr):
@@ -112,7 +112,7 @@ class XmlProcessor(Processor):
     def get_node_child_value(self, node, name):
         # raise IndexError on failure
         subnode = node.xpath('./%s' % name)[0]
-        return unicode(subnode.text)
+        return str(subnode.text)
 
 class YamlProcessor(Processor):
     def display_node(self, node):
@@ -139,7 +139,7 @@ def yaml_load(path):
     # faster. The format of the pickle file is incompatible with
 	# what the congress project utils.py does, so use a different filename.
 
-    import cPickle as pickle, os.path, hashlib
+    import pickle as pickle, os.path, hashlib
     import yaml
     try:
         from yaml import CSafeLoader as Loader, CDumper as Dumper

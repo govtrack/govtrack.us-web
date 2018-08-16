@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import models
 from django.conf import settings
@@ -29,11 +29,11 @@ class Stakeholder(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     updated = models.DateTimeField(auto_now=True, db_index=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.verified:
             return self.slug
         else:
-            return u"[unverified] " + self.slug
+            return "[unverified] " + self.slug
 
     def __repr__(self):
         return "<Stakeholder %d %s>" % (self.id, self.slug)
@@ -58,9 +58,9 @@ class Stakeholder(models.Model):
         # Reset to something generated, first from the website's hostname,
         # minus an initial "www." if present and chopping off .com or .org.
         if self.website:
-            import urlparse
+            import urllib.parse
             try:
-                p = urlparse.urlparse(self.website)
+                p = urllib.parse.urlparse(self.website)
                 m = re.match(r"(www\.)?(.*)(\.com|\.org)$", p.hostname)
                 self.slug = m.group(2)
                 return
@@ -84,8 +84,8 @@ class Post(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     updated = models.DateTimeField(auto_now=True, db_index=True)
 
-    def __unicode__(self):
-        return "<StakeholderPost %d %s>" % (self.id, unicode(self.stakeholder))
+    def __str__(self):
+        return "<StakeholderPost %d %s>" % (self.id, str(self.stakeholder))
 
     def title(self):
         if self.content is None:
@@ -101,11 +101,11 @@ class Post(models.Model):
         return title
 
     def positions(self):
-        return ", ".join(sorted(unicode(x) for x in list(self.bill_positions.all()) + list(self.vote_positions.all())))
+        return ", ".join(sorted(str(x) for x in list(self.bill_positions.all()) + list(self.vote_positions.all())))
     def positions_vp(self):
         return ", ".join(sorted(
             ((x.get_position_display().lower() + "s ") if x.position != 0 else "statement on ")
-             + unicode(x.get_target())
+             + str(x.get_target())
             for x in list(self.bill_positions.all()) + list(self.vote_positions.all())
             ))
 
@@ -126,8 +126,8 @@ class BillPosition(models.Model):
     updated = models.DateTimeField(auto_now=True, db_index=True)
     class Meta:
         unique_together = [('post', 'bill', 'position')]
-    def __unicode__(self): # for admin and Post.positions
-        return ((self.get_position_display()+u": ") if self.position is not None else u"") + unicode(self.bill)
+    def __str__(self): # for admin and Post.positions
+        return ((self.get_position_display()+": ") if self.position is not None else "") + str(self.bill)
     def get_target(self):
         return self.bill
 
@@ -139,7 +139,7 @@ class VotePosition(models.Model):
     updated = models.DateTimeField(auto_now=True, db_index=True)
     class Meta:
         unique_together = [('post', 'vote', 'position')]
-    def __unicode__(self): # for admin and Post.positions
-        return ((self.get_position_display()+u": ") if self.position is not None else u"") + unicode(self.vote)
+    def __str__(self): # for admin and Post.positions
+        return ((self.get_position_display()+": ") if self.position is not None else "") + str(self.vote)
     def get_target(self):
         return self.vote

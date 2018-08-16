@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from django.db import models, DatabaseError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
 import django.contrib.contenttypes.fields as generic_fields
 from django.contrib.auth.models import User
 
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from datetime import datetime, timedelta
+import collections
 
 # In a worst-case scenario, at most how many days back should we send events?
 BACKFILL_DAYS_DAILY = 4
@@ -24,7 +25,7 @@ class Feed(models.Model):
     """Each Feed has a code name that can be used to reconstruct information about the feed."""
     feedname = models.CharField(max_length=64, unique=True, db_index=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.feedname
         
     def tracked_in_lists_with_email(self):
@@ -141,7 +142,7 @@ class Feed(models.Model):
             except DatabaseError as e:
                 # The database table hasn't been configured with the date_added column,
                 # which is hidden from the Django ORM at the moment.
-                print "Database isn't configured with date_added column in events_subscriptionlist_trackers."
+                print("Database isn't configured with date_added column in events_subscriptionlist_trackers.")
                 return None
                 
         trending = []
@@ -245,7 +246,7 @@ class Feed(models.Model):
     @property
     def title(self):
         m = self.type_metadata()
-        if "title" not in m: return unicode(self)
+        if "title" not in m: return str(self)
         if callable(m["title"]):
             return m["title"](self)
         return m["title"]
@@ -268,11 +269,11 @@ class Feed(models.Model):
         
     @property
     def view_url(self):
-        return "/events?feeds=" + urllib.quote(self.feedname)
+        return "/events?feeds=" + urllib.parse.quote(self.feedname)
     
     @property
     def rss_url(self):
-        return "/events/events.rss?feeds=" + urllib.quote(self.feedname)
+        return "/events/events.rss?feeds=" + urllib.parse.quote(self.feedname)
 
     def includes_feeds(self):
         m = self.type_metadata()
@@ -365,9 +366,9 @@ class Event(models.Model):
     feed(s) the event is in.
     """
     
-    feed = models.ForeignKey(Feed)
+    feed = models.ForeignKey(Feed, on_delete=models.PROTECT)
 
-    source_content_type = models.ForeignKey(ContentType)
+    source_content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     source_object_id = models.PositiveIntegerField()
     source = generic_fields.GenericForeignKey('source_content_type', 'source_object_id')
     eventid = models.CharField(max_length=32) # unique w.r.t. the source object 
@@ -390,8 +391,8 @@ class Event(models.Model):
              ('feed', 'when', 'source_content_type', 'source_object_id', 'eventid'),
              ('when', 'source_content_type', 'source_object_id', 'seq', 'feed'))
     
-    def __unicode__(self):
-        return unicode(self.source) + " " + unicode(self.eventid) + " / " + unicode(self.feed)
+    def __str__(self):
+        return str(self.source) + " " + str(self.eventid) + " / " + str(self.feed)
         
     def render(self, feeds=None):
         if EVENT_SOURCE_CACHE is None or (self.source_content_type, self.source_object_id) not in EVENT_SOURCE_CACHE:
@@ -454,7 +455,7 @@ class SubscriptionList(models.Model):
     # see send_email_updates.py
     EMAIL_CHOICES = [(0, 'No Email Updates'), (1, 'Daily'), (2, 'Weekly')]
     
-    user = models.ForeignKey(User, db_index=True, related_name="subscription_lists")
+    user = models.ForeignKey(User, db_index=True, related_name="subscription_lists", on_delete=models.CASCADE)
     name = models.CharField(max_length=64)
     trackers = models.ManyToManyField(Feed, related_name="tracked_in_lists")
     is_default = models.BooleanField(default=False)

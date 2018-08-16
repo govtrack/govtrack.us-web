@@ -6,7 +6,7 @@ from jsonfield import JSONField
 from events.models import Feed, SubscriptionList
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, db_index=True)
+    user = models.OneToOneField(User, db_index=True, on_delete=models.CASCADE)
     massemail = models.BooleanField(default=True) # may we send you mail?
     old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
     last_mass_email = models.IntegerField(default=0)
@@ -134,8 +134,8 @@ class Req(models.Model):
 
 from bill.models import Bill
 class CommunityInterest(models.Model):
-    user = models.ForeignKey(User)
-    bill = models.ForeignKey(Bill)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
     methods = models.CharField(max_length=32)
     created = models.DateTimeField(auto_now_add=True)
     class Meta:
@@ -208,11 +208,11 @@ class MediumPost(models.Model):
 
     @staticmethod
     def get_medium_posts():
-        import urllib2, json
+        import urllib.request, urllib.error, urllib.parse, json
         # Fetch posts.
-        medium_posts = urllib2.Request("https://medium.com/govtrack-insider?format=json")
+        medium_posts = urllib.request.Request("https://medium.com/govtrack-insider?format=json")
         medium_posts.add_header("User-Agent", "Python +https://www.govtrack.us") # default header has been blocked
-        medium_posts = urllib2.urlopen(medium_posts).read()
+        medium_posts = urllib.request.urlopen(medium_posts).read()
         # there's some crap before the JSON object starts
         medium_posts = medium_posts[medium_posts.index("{"):]
         medium_posts = json.loads(medium_posts)
@@ -249,7 +249,7 @@ class MediumPost(models.Model):
         # charset will work (alter table website_mediumpost modify title varchar(128) character set utf8mb4 not null;)
         # but even with this we still get an Incorrect string value error
         # trying to save a four-byte emoji. So just kill those characters.
-        obj.title = "".join(c for c in unicode(obj.title) if len(c.encode("utf8")) < 4)
+        obj.title = "".join(c for c in str(obj.title) if len(c.encode("utf8")) < 4)
 
         obj.save()
 

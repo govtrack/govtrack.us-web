@@ -26,7 +26,7 @@ for vote in Vote.objects.filter(question__icontains="Speaker", related_bill=None
 	parties = vote.voters.filter(option__value=winner).values("person_role__party").annotate(count=Count('id')).order_by('-count')
 	cross_party_votes = sum(party['count'] for party in parties[1:])
 
-	print """
+	print("""
 <!-- %s -->
 <tr><td><a href="%s">%s</a></td> <td>%s</td> <td>%s</td> <td><a href="%s">%s</a></td></tr>
 """ % (
@@ -37,4 +37,4 @@ for vote in Vote.objects.filter(question__icontains="Speaker", related_bill=None
 	cross_party_votes,
 	vote.get_source_link(),
 	vote.get_source_display(),
-	)
+	))

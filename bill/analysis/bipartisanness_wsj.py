@@ -49,5 +49,5 @@ for congress in [112]: # range(96, 113):
 							if bill.sponsor.role.party != r.party:
 								total_companion_bipartisan += 1
 		
-	print congress, bipartisan_cosp, has_initial_cosponsors, total_companion_bipartisan, total_has_companion, total
+	print(congress, bipartisan_cosp, has_initial_cosponsors, total_companion_bipartisan, total_has_companion, total)
 	

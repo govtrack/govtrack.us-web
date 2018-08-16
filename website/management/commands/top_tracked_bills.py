@@ -12,11 +12,11 @@ class Command(BaseCommand):
 	help = 'Reports top-tracked bills.'
 	
 	def handle(self, *args, **options):
-		print "tracked by users registered in the last two weeks"
+		print("tracked by users registered in the last two weeks")
 		self.show_stats(True)
 
-		print
-		print "tracked by all users"
+		print()
+		print("tracked by all users")
 		self.show_stats(False)
 	
 	def show_stats(self, recent_users_only):
@@ -32,9 +32,9 @@ class Command(BaseCommand):
 			.values('feedname', 'count')\
 			[0:25]
 
-		print "new users \t all users \t sponsor \t url \t bill title"
+		print("new users \t all users \t sponsor \t url \t bill title")
 		for bf in top_bills:
 			f = Feed.from_name(bf["feedname"])
 			b = Bill.from_feed(f)
-			print bf["count"], "\t", f.tracked_in_lists.all().count(), "\t", b.sponsor.lastname.encode("utf8"), b.get_absolute_url(), "\t", b
+			print(bf["count"], "\t", f.tracked_in_lists.all().count(), "\t", b.sponsor.lastname.encode("utf8"), b.get_absolute_url(), "\t", b)
 			

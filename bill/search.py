@@ -80,7 +80,7 @@ def parse_bill_number(q, congress=None):
         return None
 
 def parse_slip_law_number(q):
-    m = slip_law_number_re.match(q.replace(" ", "").replace(".", "").replace(u"\u2013", "-"))
+    m = slip_law_number_re.match(q.replace(" ", "").replace(".", "").replace("\u2013", "-"))
     if m == None: return None
     pub_priv, cn, ln = m.groups()
     try:
@@ -127,7 +127,7 @@ def bill_search_manager():
     sm.add_option('congress', type="select", formatter=format_congress_number, sort="KEY-REVERSE")
     sm.add_option('sponsor', type="select", sort="LABEL", formatter=lambda p : p.sortname)
     sm.add_option('current_status', label="current status", sort=lambda s : BillStatus.by_value(s).sort_order)
-    sm.add_option('enacted_ex', type="boolean", label=u"Enacted \u2014 Including by Incorporation into Other Bills")
+    sm.add_option('enacted_ex', type="boolean", label="Enacted \u2014 Including by Incorporation into Other Bills")
     sm.add_option('cosponsors', label="cosponsor", type="select", sort="LABEL", formatter=lambda p : p.sortname)
     sm.add_option('committees', label="committee", type="select", sort="LABEL", formatter=lambda c : c.shortname)
     sm.add_option('terms', type="select", label="subject", choices=get_terms(BillTerm.objects.exclude(parents__id__gt=0)))

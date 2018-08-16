@@ -9,7 +9,7 @@ Local Development
 
 ### Development using Vagrant
 
-GovTrack.us runs on Ubuntu 16.04 or OS X. To simplify local development, we have a `Vagrantfile` in this directory. You can get started quickly simply by installing [Vagrant](https://www.vagrantup.com/) and running:
+GovTrack.us is based on Python 3 and Django 1.x and runs on Ubuntu 16.04 or OS X. To simplify local development, we have a `Vagrantfile` in this directory. You can get started quickly simply by installing [Vagrant](https://www.vagrantup.com/) and running:
 
     # Get this repo (you must clone with `--recursive`)
     git clone --recursive https://github.com/govtrack/govtrack.us-web.git
@@ -67,6 +67,8 @@ Some features of the site require additional configuration. To set configuration
     #
     # For local development you may want to use the (default) Xapian search engine, e.g.:
     # xapian:/home/username/govtrack.us-web/xapian_index_person
+    # You'll need to `apt-get install python-xapian` and `pip install xapian-haystack`
+    # or see https://github.com/notanumber/xapian-haystack.
     #
     # For a production deployment you may want to use Solr instead, e.g.:
     # solr:http://localhost:8983/solr/person
@@ -74,7 +76,7 @@ Some features of the site require additional configuration. To set configuration
     # You can also specify 'simple' to have a dummy search backend that
     # does not actually index or search anything.
     HAYSTACK_PERSON_CONNECTION=xapian:local/xapian_index_person
-    HAYSTACK_BILL_CONNECTION=xapian:local/bill
+    HAYSTACK_BILL_CONNECTION=xapian:local/xapian_index_bill
 
     # Django uses a secret key to provide cryptographic signing. It should be random
     # and kept secure. You can generate a key with `./manage.py generate_secret_key`
@@ -85,3 +87,18 @@ See `settings.env.template` for details, especially for values used in productio
 # Credits
 
 Emoji icons by http://emojione.com/developers/.
+
+# Production Deployment Notes
+
+On my Ubuntu 14.04 box I had to:
+
+    pip install --upgrade pip setuptools six
+
+To set up a MySQL database you'll need the OS MySQL package and the Python package:
+
+    apt-get install libmysqlclient-dev
+    pip install mysqlclient
+
+To use memcached:
+
+    pip install pylibmc

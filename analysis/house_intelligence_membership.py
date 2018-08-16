@@ -33,9 +33,8 @@ for congress in range(109,114):
 		for cmte in memberships.get(mbr.get("id"), set()):
 			cross_seated.setdefault(cmte, set()).add((mbr.get("id"), mbr.get("role")))
 
-	print congress, file_save_date
+	print(congress, file_save_date)
 	for cmte in sorted(cross_seated):
-		print \
-			Committee.objects.get(code=cmte).abbrev, "\t", \
-			", ".join( person_name(id, file_save_date) + ((" (" + role + ")") if role else "") for (id, role) in sorted(cross_seated[cmte], key = lambda x : not x[1] ) )
-	print
+		print(Committee.objects.get(code=cmte).abbrev, "\t", \
+			", ".join( person_name(id, file_save_date) + ((" (" + role + ")") if role else "") for (id, role) in sorted(cross_seated[cmte], key = lambda x : not x[1] ) ))
+	print()

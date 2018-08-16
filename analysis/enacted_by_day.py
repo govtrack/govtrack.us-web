@@ -55,7 +55,7 @@ def run_analysis_for_president(president, date_range):
 			if b.congress < 103:
 				pages = len([pgtext for pgtext in text.split("\n=============================================\n") if pgtext.strip() != ""])
 			else:
-				print b.id, b, e
+				print(b.id, b, e)
 				raise ValueError("page date missing")
 
 		#words = len(re.split(r"\s+", text)) # not very good for pre-GPO bills because Statutes at Large pages may have multiple statutes on them

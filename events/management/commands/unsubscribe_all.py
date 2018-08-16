@@ -29,11 +29,11 @@ class Command(BaseCommand):
 			else:
 				p = UserProfile.objects.get(user__id=user)
 		except UserProfile.DoesNotExist:
-			print user, "no such user"
+			print(user, "no such user")
 			return
 
 		p.one_click_unsub_hit = datetime.now()
 		p.massemail = False
 		p.save()
 		SubscriptionList.objects.filter(user=p.user).update(email=0)
-		print user
+		print(user)

@@ -59,10 +59,10 @@ def get_secondary_bill_title(bill, titles):
 def normalize_title(title):
     "replace apostrophes/quotes with curly ones"
 
-    title = re.sub(r"(\S)(''|\")", r"\1" + u"\N{RIGHT DOUBLE QUOTATION MARK}", title)
-    title = re.sub(r"(\S)'", r"\1" + u"\N{RIGHT SINGLE QUOTATION MARK}", title)
-    title = re.sub(r"(''|\")", u"\N{LEFT DOUBLE QUOTATION MARK}", title)
-    title = re.sub(r"'", u"\N{LEFT SINGLE QUOTATION MARK}", title)
+    title = re.sub(r"(\S)(''|\")", r"\1" + "\N{RIGHT DOUBLE QUOTATION MARK}", title)
+    title = re.sub(r"(\S)'", r"\1" + "\N{RIGHT SINGLE QUOTATION MARK}", title)
+    title = re.sub(r"(''|\")", "\N{LEFT DOUBLE QUOTATION MARK}", title)
+    title = re.sub(r"'", "\N{LEFT SINGLE QUOTATION MARK}", title)
     return title
 
 

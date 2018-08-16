@@ -1,16 +1,11 @@
 from django import template
 from django.utils.translation import ugettext as _
-from django.utils.encoding import force_unicode
 from django.utils import safestring
 from django.template.defaultfilters import stringfilter
 import random
 import json as jsonlib
 
 register = template.Library()
-
-@register.assignment_tag
-def randint(a, b):
-	return random.randint(int(a), int(b))
 
 @register.filter
 def likerttext(value):
@@ -35,8 +30,8 @@ def ordinalhtml(value):
         return value
     t = (_('th'), _('st'), _('nd'), _('rd'), _('th'), _('th'), _('th'), _('th'), _('th'), _('th'))
     if value % 100 in (11, 12, 13): # special case
-        return safestring.mark_safe(u"%d<sup>%s</sup>" % (value, t[0]))
-    return safestring.mark_safe(u'%d<sup>%s</sup>' % (value, t[value % 10]))
+        return safestring.mark_safe("%d<sup>%s</sup>" % (value, t[0]))
+    return safestring.mark_safe('%d<sup>%s</sup>' % (value, t[value % 10]))
 
 @register.filter(is_safe=True)
 @stringfilter
@@ -47,13 +42,13 @@ def markdown(value):
     # tags and URL schemes.
 
     import CommonMark
-    ast = CommonMark.Parser().parse(force_unicode(value))
+    ast = CommonMark.Parser().parse(value)
     html = CommonMark.HtmlRenderer({ 'safe': True }).render(ast)
 
-    import html5lib, urlparse
+    import html5lib, urllib.parse
     def filter_url(url):
         try:
-            urlp = urlparse.urlparse(url)
+            urlp = urllib.parse.urlparse(url)
         except Exception as e:
             # invalid URL
             return None

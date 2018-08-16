@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import redirect, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.core.paginator import Paginator
 
 from common.decorators import render_to
-from common.pagination import paginate
 
 from datetime import datetime, time
 
 from registration.helpers import json_response
 
-from models import *
+from .models import *
 from website.models import *
 from events.templatetags.events_utils import render_event
 
@@ -160,7 +160,7 @@ def events_list_items(request):
         qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, int(request.POST.get('count', '100'))) # get all events
     else:
         qs = []
-    page = paginate(qs, request, per_page=50)
+    page = Paginator(qs, 50)
     
     # Based on the last 100 events, how often do we expect to get email updates?
     # Compute this using the median time between events, which should give us an
@@ -170,7 +170,7 @@ def events_list_items(request):
     if len(qs) > 15:
         # Get the time between consecutive events, in days.
         seps = []
-        for i in xrange(1, len(qs)):
+        for i in range(1, len(qs)):
             s = (qs[i-1]["when"]-qs[i]["when"]).total_seconds()
             if s == 0: continue # skip things that happen at exactly the same time,
                                 # since they probably don't help us understand frequency
@@ -182,7 +182,7 @@ def events_list_items(request):
             days_between_events = 1000
         else:
             seps.sort()
-            days_between_events = seps[len(seps)/2]
+            days_between_events = seps[len(seps)//2]
         
         if not sublist or sublist.email == 0:
             if days_between_events < 1:
@@ -216,12 +216,12 @@ def events_list_items(request):
             
 def events_rss(request):
     import django.contrib.syndication.views
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
 
     try:
         feedlist, feedtitle = get_feed_list(request)
     except Exception as e:
-        raise Http404(unicode(e))
+        raise Http404(str(e))
     feedtitle += " - Tracked Events from GovTrack.us"
     
     class DjangoFeed(django.contrib.syndication.views.Feed):
@@ -240,7 +240,7 @@ def events_rss(request):
         def item_link(self, item):
             return settings.SITE_ROOT_URL + item["url"] + settings.RSS_CAMPAIGN_QUERYSTRING
         def item_guid(self, item):
-            return self.item_link(item) + "#eventid=" + urllib.quote_plus(item["guid"]) 
+            return self.item_link(item) + "#eventid=" + urllib.parse.quote_plus(item["guid"]) 
         def item_pubdate(self, item):
             return item["date"] if (not item["date"] or isinstance(item["date"], datetime)) else datetime.combine(item["date"], time.min)
             

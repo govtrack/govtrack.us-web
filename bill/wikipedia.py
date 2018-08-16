@@ -4,7 +4,7 @@
 # template (https://en.wikipedia.org/wiki/Template:Infobox_U.S._legislation).
 # There are less than 1,000 such pages.
 
-import urllib, json, re
+import urllib.request, urllib.parse, urllib.error, json, re
 import mwparserfromhell
 
 from bill.models import Bill, BillSummary, BillType
@@ -13,7 +13,7 @@ from bill.models import Bill, BillSummary, BillType
 
 def query(url):
 	url = "https://en.wikipedia.org/w/api.php?format=json&" + url
-	response = urllib.urlopen(url)
+	response = urllib.request.urlopen(url)
 	return json.loads(response.read())
 
 def get_pages_that_embed(template_name):
@@ -21,7 +21,7 @@ def get_pages_that_embed(template_name):
 	while True:
 		# Construct next page for query results.
 		url = "action=query&list=embeddedin&einamespace=0&eifilterredir=nonredirects&eilimit=500"
-		url += "&eititle="  + urllib.quote(template_name)
+		url += "&eititle="  + urllib.parse.quote(template_name)
 		if continue_arg:
 			# every iteration but the first
 			url += "&eicontinue=" + continue_arg
@@ -87,7 +87,7 @@ def has_param(template, param):
 def get_bill_from_infobox(template):
 	if has_param(template, "cite public law"):
 		value = template.get("cite public law").value.strip()
-		m = re.match(u"(?:p(?:ub(?:lic)?)?\.?\s*?l(?:aw)?.?\s*(?:no.?)?)?\s*(\d+)\s*[-\u2013\.]\s*(\d+)$", value, re.I)
+		m = re.match("(?:p(?:ub(?:lic)?)?\.?\s*?l(?:aw)?.?\s*(?:no.?)?)?\s*(\d+)\s*[-\u2013\.]\s*(\d+)$", value, re.I)
 		if m:
 			return ("PL", int(m.group(1)), int(m.group(2)))
 		m = re.match("\{\{USPL\|(\d+)\|(\d+)\}\}$", value, re.I)
@@ -165,15 +165,15 @@ for bill_id, pages in bill_summaries.items():
 	page = pages[0]
 	update_fields = {
 		"source_text": "Wikipedia",
-		"source_url": "https://en.wikipedia.org/wiki/" + urllib.quote(page["title"].replace(" ", "_").encode("utf8")),
+		"source_url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(page["title"].replace(" ", "_").encode("utf8")),
 		"content": page["extract"] + "\n\n<p>This summary is from <a href=\"%s\">Wikipedia</a>.</p>" % bs.source_url,
 	}
 	updated = False
-	for k, v in update_fields.items():
+	for k, v in list(update_fields.items()):
 		if getattr(bs, k, None) != v:
 			setattr(bs, k, v)
 			updated = True
 	if updated:
-		print "Saving:", unicode(bs).encode("utf8")
+		print("Saving:", str(bs).encode("utf8"))
 		bs.save()
 			

@@ -9,7 +9,7 @@ from django.conf import settings
 
 from optparse import make_option
 
-import sys, re, urlparse, urllib, lxml, apachelog
+import sys, re, urllib.parse, urllib.request, urllib.parse, urllib.error, lxml, apachelog
 
 from bill.models import Bill, BillType, BillLink
 
@@ -17,9 +17,9 @@ re_bill = re.compile(r"^/congress/bills/(\d\d\d)/([a-z]+)([0-9]+)")
 
 logformat = r'%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"'
 
-class AppURLopener(urllib.FancyURLopener):
+class AppURLopener(urllib.request.FancyURLopener):
 	version = "GovTrack.us scraper" # else Wikipedia gives 403s
-urllib._urlopener = AppURLopener()
+urllib.request._urlopener = AppURLopener()
 
 
 class Command(BaseCommand):
@@ -28,7 +28,7 @@ class Command(BaseCommand):
 	
 	def handle(self, *args, **options):
 		if len(args) != 1:
-			print "Missing argument."
+			print("Missing argument.")
 			return
 
 		min_count = int(args[0])
@@ -54,9 +54,9 @@ class Command(BaseCommand):
 			if ref in ("", "-") or "govtrack.us" in ref:
 				continue
 			
-			url = urlparse.urlparse(ref)
+			url = urllib.parse.urlparse(ref)
 			hostname = url.hostname
-			qs = urlparse.parse_qs(url.query)
+			qs = urllib.parse.parse_qs(url.query)
 			
 			if not hostname: continue
 			
@@ -105,7 +105,7 @@ class Command(BaseCommand):
 			if not is_new: continue
 			
 			try:
-				stream = urllib.urlopen(referral_url.geturl())
+				stream = urllib.request.urlopen(referral_url.geturl())
 				if stream.getcode() != 200: continue
 				dom = lxml.etree.parse(stream, lxml.etree.HTMLParser())
 			except:
@@ -123,13 +123,13 @@ class Command(BaseCommand):
 				lnk.approved = True
 			else:
 				if first_print:
-					print "Links pending approval:"
-					print
+					print("Links pending approval:")
+					print()
 					first_print = False
-				print referral_url.geturl()
-				print title.encode("utf8")
-				print unicode(bill).encode("utf8")
-				print
+				print(referral_url.geturl())
+				print(title.encode("utf8"))
+				print(str(bill).encode("utf8"))
+				print()
 			
 			lnk.save()
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import redirect, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
@@ -9,7 +9,6 @@ from django.db.models import Count, F
 from django.core.cache import cache
 
 from common.decorators import render_to
-from common.pagination import paginate
 
 from bill.models import Bill, BillType, BillStatus, BillTerm, TermType, BillTextComparison, BillSummary
 from bill.search import bill_search_manager, parse_bill_citation
@@ -22,7 +21,7 @@ from settings import CURRENT_CONGRESS
 
 from us import get_congress_dates
 
-import urllib, urllib2, json, datetime, re
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, json, datetime, re
 from registration.helpers import json_response
 from twostream.decorators import anonymous_view, user_view_for
 
@@ -97,7 +96,7 @@ def fixup_text_incorporation(text_incorporation):
         item["other"] = Bill.from_congressproject_id(item["other"])
         item["other_ratio"] *= 100
         return item
-    return map(fixup_item, text_incorporation)
+    return list(map(fixup_item, text_incorporation))
 
 @user_view_for(bill_details)
 def bill_details_user_view(request, congress, type_slug, number):
@@ -263,7 +262,7 @@ def bill_text(request, congress, type_slug, number, version=None):
         raise Http404("Invalid bill type: " + type_slug)
     bill = get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
 
-    from billtext import load_bill_text, get_bill_text_versions
+    from .billtext import load_bill_text, get_bill_text_versions
     try:
         textdata = load_bill_text(bill, version)
     except IOError:
@@ -286,7 +285,7 @@ def bill_text(request, congress, type_slug, number, version=None):
                 is_latest = True
 
     # Get a list of related bills.
-    from billtext import get_current_version
+    from .billtext import get_current_version
     related_bills = []
     for rb in list(bill.find_reintroductions()) + [r.related_bill for r in bill.get_related_bills()]:
         try:
@@ -333,7 +332,7 @@ def bill_text_ajax(request):
         return { "error": str(e) }
 
 def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10, use_cache=True, force_update=False):
-    from billtext import load_bill_text, get_current_version
+    from .billtext import load_bill_text, get_current_version
     from xml_diff import compare
     import lxml
 
@@ -400,7 +399,7 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     def differ(text1, text2):
         # ensure we use the C++ Google DMP and can specify the time limit
         import diff_match_patch
-        for x in diff_match_patch.diff_unicode(text1, text2, timelimit=timelimit):
+        for x in diff_match_patch.diff(text1, text2, timelimit=timelimit):
             yield x
     compare(doc1.getroot(), doc2.getroot(), make_tag_func=make_tag_func, differ=differ)
 
@@ -411,8 +410,8 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
     ret = {
         "left_meta": left,
         "right_meta": right,
-        "left_text": lxml.etree.tostring(doc1),
-        "right_text": lxml.etree.tostring(doc2),
+        "left_text": lxml.etree.tostring(doc1, encoding=str),
+        "right_text": lxml.etree.tostring(doc2, encoding=str),
     }
 
     if use_cache or force_update:
@@ -491,10 +490,10 @@ def query_popvox(method, args):
     if args != None: _args.update(args)
     _args["api_key"] = settings.POPVOX_API_KEY
 
-    url = "https://www.popvox.com/api/" + method + "?" + urllib.urlencode(_args).encode("utf8")
+    url = "https://www.popvox.com/api/" + method + "?" + urllib.parse.urlencode(_args).encode("utf8")
 
-    req = urllib2.Request(url)
-    resp = urllib2.urlopen(req)
+    req = urllib.request.Request(url)
+    resp = urllib.request.urlopen(req)
     if resp.getcode() != 200:
         raise Exception("Failed to load page: " + url)
     ret = resp.read()
@@ -607,7 +606,7 @@ def bills_overview(request):
 def bill_statistics(request):
     # Get the count of bills by status and by Congress.
     counts_by_congress = []
-    for c in xrange(93, CURRENT_CONGRESS+1):
+    for c in range(93, CURRENT_CONGRESS+1):
         total = Bill.objects.filter(congress=c).count()
         if total == 0: continue # during transitions between Congresses
         counts_by_congress.append({
@@ -754,7 +753,7 @@ def uscodeindex(request, secid):
 def bill_text_image(request, congress, type_slug, number, image_type):
     # Get bill.
     bill = load_bill_from_url(congress, type_slug, number)
-    from billtext import load_bill_text
+    from .billtext import load_bill_text
 
     # What size image are we asked to generate?
     try:
@@ -773,9 +772,9 @@ def bill_text_image(request, congress, type_slug, number, image_type):
     # Crop out the GPO seal & the vertical margins.
     def pdftopng(pdffile, pagenumber, width=900):
         from PIL import Image
-        import subprocess, StringIO
+        import subprocess, io
         pngbytes = subprocess.check_output(["/usr/bin/pdftoppm", "-f", str(pagenumber), "-l", str(pagenumber), "-scale-to", str(width), "-png", pdffile])
-        im = Image.open(StringIO.StringIO(pngbytes))
+        im = Image.open(io.BytesIO(pngbytes))
         im = im.convert("L")
 
         # crop out the GPO seal:
@@ -810,7 +809,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         import os.path
         cache_fn = metadata["pdf_file"].replace(".pdf", "-" + image_type + "_" + str(width) + "_" + str(round(aspect,3)) + ".png")
         if os.path.exists(cache_fn):
-            with open(cache_fn) as f:
+            with open(cache_fn, "rb") as f:
                 return HttpResponse(f.read(), content_type="image/png")
 
         # Use the PDF files on disk.
@@ -885,8 +884,8 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         del draw
 
     # Serialize.
-    import StringIO
-    imgbytesbuf = StringIO.StringIO()
+    import io
+    imgbytesbuf = io.BytesIO()
     img.save(imgbytesbuf, "PNG")
     imgbytes = imgbytesbuf.getvalue()
     imgbytesbuf.close()

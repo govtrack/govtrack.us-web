@@ -48,9 +48,9 @@ def make_link(src, dest):
 		pass # files are the same (hardlinked)
 	else:
 		if md5(src) != md5(dest):
-			print "replacing", src, dest
+			print("replacing", src, dest)
 		else:
-			print "squashing existing file", src, dest
+			print("squashing existing file", src, dest)
 		os.unlink(dest)
 		os.link(src, dest)
 
@@ -210,8 +210,8 @@ if "stat_bills" in sys.argv:
 	
 	# Copy bill metadata into our legacy location.
 	# (No need to copy text-versions anywhere: we read it from the congress data directory.)
-	for congress in xrange(82, 92+1):
-		print congress, "..."
+	for congress in range(82, 92+1):
+		print(congress, "...")
 		
 		# Copy files into legacy location.
 		mkdir("data/us/%d/bills" % congress)
@@ -247,7 +247,7 @@ if "photos" in sys.argv:
 		# source JPEG & sanity check that it exists
 		fn1 = src + bioguide_id + ".jpg"
 		if not os.path.exists(fn1):
-			print "Missing: " + fn1
+			print("Missing: " + fn1)
 			continue
 
 		# destination file name
@@ -257,17 +257,17 @@ if "photos" in sys.argv:
 		if not (os.path.exists(fn2) and md5(fn1) == md5(fn2)):
 			p = person.models.Person.objects.get(id=govtrack_id)
 			r = p.roles.get(current=True)
-			print ("change" if os.path.exists(fn2) else "new"), p
-			print "<hr><p>%s</p>" % p.name.encode("utf8")
+			print(("change" if os.path.exists(fn2) else "new"), p)
+			print("<hr><p>%s</p>" % p.name.encode("utf8"))
 			print("<table cols=2><tr>")
 			if os.path.exists(fn2):
-				print "<td><img src='https://www.govtrack.us/data/photos/%d.jpeg'></td>" % p.id
+				print("<td><img src='https://www.govtrack.us/data/photos/%d.jpeg'></td>" % p.id)
 			else:
-				print "<iframe src='%s' width=100%% height=500> </iframe>" % ("https://twitter.com/"+p.twitterid if p.twitterid else r.website)
-			print "<td><img src='https://raw.githubusercontent.com/unitedstates/images/newscraper/congress/original/%s.jpg'></td>" % bioguide_id
-			print "</tr></table>"
+				print("<iframe src='%s' width=100%% height=500> </iframe>" % ("https://twitter.com/"+p.twitterid if p.twitterid else r.website))
+			print("<td><img src='https://raw.githubusercontent.com/unitedstates/images/newscraper/congress/original/%s.jpg'></td>" % bioguide_id)
+			print("</tr></table>")
 			metadata = yaml.load(open(fn1.replace("/original/", "/metadata/").replace(".jpg", ".yaml")))
-			print "<p>%s</p><p>%s</p>" % (metadata['link'], metadata['name'])
+			print("<p>%s</p><p>%s</p>" % (metadata['link'], metadata['name']))
 			continue
 
 		# check if the destination JPEG already exists and it has different content
@@ -285,12 +285,12 @@ if "photos" in sys.argv:
 
 			# Okay now actually do the backup.
 			for fn in files_to_archive:
-				print fn, "=>", get_archive_fn(fn)
+				print(fn, "=>", get_archive_fn(fn))
 				shutil.move(fn, get_archive_fn(fn))
 
 		# Copy in the file if it's new.
 		if copy(fn1, fn2, None):
-			print fn1, "=>", fn2
+			print(fn1, "=>", fn2)
 
 			# get required metadata
 			metadata = yaml.load(open(fn1.replace("/original/", "/metadata/").replace(".jpg", ".yaml")))

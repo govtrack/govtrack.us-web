@@ -3,5 +3,5 @@ def printexception(f):
         try:
             return f(*args, **kwargs)
         except Exception as e:
-            print e
+            print(e)
     return g

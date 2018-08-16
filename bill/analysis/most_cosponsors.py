@@ -18,7 +18,7 @@ for bill_and_count in bills_most_cosponsored:
 	bill = Bill.objects.get(id=bill_and_count["bill"])
 	w.writerow([
 		bill_and_count["count"],
-		unicode(bill).encode("utf8"),
+		str(bill).encode("utf8"),
 		BillStatus.by_value(bill.current_status).label.encode("utf8"),
 		"https://www.govtrack.us" + bill.get_absolute_url(),
 	])

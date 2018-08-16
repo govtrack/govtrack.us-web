@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.template.defaultfilters import slugify, date as date_to_str
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from common import enum
 from jsonfield import JSONField
@@ -14,10 +14,11 @@ from us import get_congress_dates, get_session_from_date
 
 from django.conf import settings
 
-import datetime, os.path, re, urlparse
+import datetime, os.path, re, urllib.parse
 from lxml import etree
 
 from website.templatetags.govtrack_utils import markdown
+import collections
 
 
 "Enums"
@@ -54,7 +55,7 @@ class BillTerm(models.Model):
     name = models.CharField(max_length=255)
     subterms = models.ManyToManyField('self', related_name="parents", symmetrical=False, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     def __repr__(self):
         return "<BillTerm: %s:%s>" % (TermType.by_value(self.term_type).label, self.name.encode("utf8"))
@@ -108,7 +109,7 @@ class Cosponsor(models.Model):
 
     person = models.ForeignKey('person.Person', db_index=True, on_delete=models.PROTECT, help_text="The cosponsoring person.")
     role = models.ForeignKey('person.PersonRole', db_index=True, on_delete=models.PROTECT, help_text="The role of the cosponsor at the time of cosponsorship.")
-    bill = models.ForeignKey('bill.Bill', db_index=True, help_text="The bill being cosponsored.")
+    bill = models.ForeignKey('bill.Bill', db_index=True, on_delete=models.CASCADE, help_text="The bill being cosponsored.")
     joined = models.DateField(db_index=True, help_text="The date the cosponsor was added. It is always greater than or equal to the bill's introduced_date.")
     withdrawn = models.DateField(blank=True, null=True, help_text="If the cosponsor withdrew his/her support, the date of withdrawl. Otherwise empty.")
     class Meta:
@@ -116,8 +117,8 @@ class Cosponsor(models.Model):
 
     api_example_parameters = { "sort": "-joined" }
 
-    def __unicode__(self):
-        return self.person_name + u" " + self.details() + u": " + unicode(self.bill)
+    def __str__(self):
+        return self.person_name + " " + self.details() + ": " + str(self.bill)
 
     @property
     def person_name(self):
@@ -175,15 +176,15 @@ class Cosponsor(models.Model):
                 new_role = Cosponsor.get_role_for(c.person, c.bill, c.joined)
                 if new_role != c.role:
                     if new_role:
-                        print c.person, c.joined, c.bill
-                        print c.role, "=>", new_role
-                        print
+                        print(c.person, c.joined, c.bill)
+                        print(c.role, "=>", new_role)
+                        print()
                         c.role = new_role
                         c.save()
                     else:
-                        print c.person, c.joined, c.bill
-                        print "can't update because no new role", c.role, "=> ?"
-                        print
+                        print(c.person, c.joined, c.bill)
+                        print("can't update because no new role", c.role, "=> ?")
+                        print()
 
 class Bill(models.Model):
     """A bill represents a bill or resolution introduced in the United States Congress."""
@@ -235,7 +236,7 @@ class Bill(models.Model):
         unique_together = [('congress', 'bill_type', 'number'),
         ('congress', 'sliplawpubpriv', 'sliplawnum')]
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     @staticmethod
@@ -272,7 +273,7 @@ class Bill(models.Model):
     # indexing
     def get_index_text(self):
         bill_text = load_bill_text(self, None, plain_text=True)
-        if ((82 <= self.congress <= 92) or (103 <= self.congress)) and not bill_text: print "NO BILL TEXT", self
+        if ((82 <= self.congress <= 92) or (103 <= self.congress)) and not bill_text: print("NO BILL TEXT", self)
         summary_text = ""
         bs = BillSummary.objects.filter(bill=self).first()
         if bs: summary_text = bs.plain_text()
@@ -309,7 +310,7 @@ class Bill(models.Model):
         if hasattr(csd, 'date'): csd = csd.date()
         r = (csd - cstart).days / 365.0 # ranges from 0.0 to about 2.0.
         if self.is_current:
-            from prognosis import compute_prognosis
+            from .prognosis import compute_prognosis
             r += compute_prognosis(self, proscore=True)["prediction"]
         r *= type_boost[self.bill_type]
         return r
@@ -317,7 +318,7 @@ class Bill(models.Model):
         if not self.sponsor_role: return None
         mp = getattr(Bill, "_majority_party", { })
         if self.congress not in mp:
-            from prognosis import load_majority_party
+            from .prognosis import load_majority_party
             mp[self.congress] = load_majority_party(self.congress)
             Bill._majority_party = mp
         p = self.sponsor_role.party
@@ -769,7 +770,7 @@ class Bill(models.Model):
         return reps_tracked
 
     def render_event_state(self, ev_code, feeds):
-        from status import BillStatus
+        from .status import BillStatus
         status = BillStatus.by_value(int(ev_code))
         date = self.introduced_date
         action = None
@@ -1101,14 +1102,14 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
             # Bring in committee meetings. Skip if we have a REPORTED status on the same date.
             for mtg in self.committeemeeting_set.all():
-                if unicode(mtg.committee) == "House Committee on Rules": continue # not interesting
+                if str(mtg.committee) == "House Committee on Rules": continue # not interesting
                 for rec in ret:
                     if rec["key"] == "reported" and rec["date"].isoformat()[0:10] == mtg.when.isoformat()[0:10]:
                         break
                 else:
                     ret.append({
                         "key": "reported",
-                        "label": "Considered by " + unicode(mtg.committee),
+                        "label": "Considered by " + str(mtg.committee),
                         "explanation": "A committee held a hearing or business meeting about the " + self.noun + ".",
                         "date": mtg.when,
                     })
@@ -1199,11 +1200,33 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             return datetime.datetime.combine(x, datetime.time.min if not end_of_day else datetime.time.max)
         def event_cmp(a, b):
             if a.get("sort") and b.get("sort") and a["sort"][0] == b["sort"][0]:
-                return cmp(a["sort"], b["sort"])
+                da, db = a["sort"], b["sort"]
+                return (da>db)-(da<db)
             da = as_dt(a["date"], a.get("end_of_day", False))
             db = as_dt(b["date"], b.get("end_of_day", False))
-            return cmp(da, db)
-        ret.sort(cmp=event_cmp)
+            return (da>db)-(da<db)
+
+        # https://docs.python.org/3/howto/sorting.html
+        def cmp_to_key(mycmp):
+            'Convert a cmp= function into a key= function'
+            class K:
+                def __init__(self, obj, *args):
+                    self.obj = obj
+                def __lt__(self, other):
+                    return mycmp(self.obj, other.obj) < 0
+                def __gt__(self, other):
+                    return mycmp(self.obj, other.obj) > 0
+                def __eq__(self, other):
+                    return mycmp(self.obj, other.obj) == 0
+                def __le__(self, other):
+                    return mycmp(self.obj, other.obj) <= 0
+                def __ge__(self, other):
+                    return mycmp(self.obj, other.obj) >= 0
+                def __ne__(self, other):
+                    return mycmp(self.obj, other.obj) != 0
+            return K
+
+        ret.sort(key=cmp_to_key(event_cmp))
 
         if top:
             # Mark the last entry that occurs prior to all events on this bill.
@@ -1505,21 +1528,21 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             }
 
     def get_gop_summary(self):
-        import urllib, StringIO
+        import urllib.request, urllib.parse, urllib.error, io
         try:
             from django.utils.safestring import mark_safe
-            dom = etree.parse(urllib.urlopen("http://www.gop.gov/api/bills.get?congress=%d&number=%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, self.number)))
+            dom = etree.parse(urllib.request.urlopen("http://www.gop.gov/api/bills.get?congress=%d&number=%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, self.number)))
         except:
             return None
         if dom.getroot().tag == '{http://www.w3.org/1999/xhtml}html': return None
         def sanitize(s, as_text=False):
             if s.strip() == "": return None
             return mark_safe("".join(
-                etree.tostring(n, method="html" if not as_text else "text", encoding=unicode)
+                etree.tostring(n, method="html" if not as_text else "text", encoding=str)
                 for n
-                in etree.parse(StringIO.StringIO(s), etree.HTMLParser(remove_comments=True, remove_pis=True)).xpath("body")[0]))
+                in etree.parse(io.StringIO(s), etree.HTMLParser(remove_comments=True, remove_pis=True)).xpath("body")[0]))
         ret = {
-            "link": unicode(dom.xpath("string(bill/permalink)")),
+            "link": str(dom.xpath("string(bill/permalink)")),
             "summary": sanitize(dom.xpath("string(bill/analysis/bill-summary)")),
             "background": sanitize(dom.xpath("string(bill/analysis/background)")),
             "cost": sanitize(dom.xpath("string(bill/analysis/cost)")),
@@ -1533,8 +1556,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         return ret
 
 class RelatedBill(models.Model):
-    bill = models.ForeignKey(Bill, related_name="relatedbills")
-    related_bill = models.ForeignKey(Bill, related_name="relatedtobills")
+    bill = models.ForeignKey(Bill, related_name="relatedbills", on_delete=models.CASCADE)
+    related_bill = models.ForeignKey(Bill, related_name="relatedtobills", on_delete=models.CASCADE)
     relation = models.CharField(max_length=16)
 
     relation_sort_order = { "identical": 0 }
@@ -1576,26 +1599,26 @@ class BillLink(models.Model):
         ordering = ('-created',)
     @property
     def hostname(self):
-        return urlparse.urlparse(self.url).hostname
+        return urllib.parse.urlparse(self.url).hostname
 
 class BillTextComparison(models.Model):
-    bill1 = models.ForeignKey(Bill, related_name="comparisons1")
+    bill1 = models.ForeignKey(Bill, related_name="comparisons1", on_delete=models.CASCADE)
     ver1 = models.CharField(max_length=6)
-    bill2 = models.ForeignKey(Bill, related_name="comparisons2")
+    bill2 = models.ForeignKey(Bill, related_name="comparisons2", on_delete=models.CASCADE)
     ver2 = models.CharField(max_length=6)
     data = JSONField()
     class Meta:
         unique_together = ( ('bill1', 'ver1', 'bill2', 'ver2'), )
     def compress(self):
         import bz2, base64
-        self.data["left_text_bz2"] = base64.b64encode(bz2.compress(self.data["left_text"]))
-        self.data["right_text_bz2"] = base64.b64encode(bz2.compress(self.data["right_text"]))
+        self.data["left_text_bz2"] = base64.b64encode(bz2.compress(self.data["left_text"].encode("utf8"))).decode("ascii")
+        self.data["right_text_bz2"] = base64.b64encode(bz2.compress(self.data["right_text"].encode("utf8"))).decode("ascii")
         del self.data["left_text"]
         del self.data["right_text"]
     def decompress(self):
         import bz2, base64
-        self.data["left_text"] = bz2.decompress(base64.b64decode(self.data["left_text_bz2"]))
-        self.data["right_text"] = bz2.decompress(base64.b64decode(self.data["right_text_bz2"]))
+        self.data["left_text"] = bz2.decompress(base64.b64decode(self.data["left_text_bz2"].encode("ascii"))).decode("utf8")
+        self.data["right_text"] = bz2.decompress(base64.b64decode(self.data["right_text_bz2"].encode("ascii"))).decode("utf8")
 
 # Feeds
 from events.models import Feed, truncate_words
@@ -1669,10 +1692,10 @@ Feed.register_feed(
 
 # Bill search tracker.
 def bill_search_feed_title(q):
-    from search import bill_search_manager
+    from .search import bill_search_manager
     return "Bill Search - " + bill_search_manager().describe_qs(q)
 def bill_search_feed_execute(q):
-    from search import bill_search_manager
+    from .search import bill_search_manager
     from settings import CURRENT_CONGRESS
 
     bills = bill_search_manager().execute_qs(q, overrides={'congress': CURRENT_CONGRESS}).order_by("-current_status_date")[0:100] # we have to limit to make this reasonably fast
@@ -1699,8 +1722,8 @@ class BillSummary(models.Model):
     source_url = models.TextField(blank=True, null=True)
     source_text = models.CharField(max_length=64, blank=True, null=True, db_index=True)
 
-    def __unicode__(self):
-        return unicode(self.bill)[0:30] + " - " + self.plain_text()[0:60]
+    def __str__(self):
+        return str(self.bill)[0:30] + " - " + self.plain_text()[0:60]
 
     def as_html(self):
         if self.id < 75 or self.source_text == "Wikipedia":
@@ -1725,7 +1748,7 @@ class BillSummary(models.Model):
 
 # USC Citations
 class USCSection(models.Model):
-    parent_section = models.ForeignKey('self', blank=True, null=True, db_index=True)
+    parent_section = models.ForeignKey('self', blank=True, null=True, db_index=True, on_delete=models.CASCADE)
     citation = models.CharField(max_length=32, blank=True, null=True, db_index=True)
     level_type = models.CharField(max_length=10, choices=[('title', 'Title'), ('subtitle', 'Subtitle'), ('chapter', 'Chapter'), ('subchapter', 'Subchapter'), ('part', 'Part'), ('subpart', 'Subpart'), ('division', 'Division'), ('heading', 'Heading'), ('section', 'Section')])
     number = models.CharField(max_length=24, blank=True, null=True)
@@ -1734,8 +1757,8 @@ class USCSection(models.Model):
     ordering = models.IntegerField()
     update_flag = models.IntegerField(default=0)
 
-    def __unicode__(self):
-        return ((unicode(self.parent_section) + " > ") if self.parent_section else "") + self.get_level_type_display() + " "  + (self.number if self.number else "[No Number]")
+    def __str__(self):
+        return ((str(self.parent_section) + " > ") if self.parent_section else "") + self.get_level_type_display() + " "  + (self.number if self.number else "[No Number]")
 
     @property
     def name_recased(self):
@@ -1795,7 +1818,7 @@ class USCSection(models.Model):
           D.append(t)
         D.sort(key = lambda title : (int(title["number"].replace("a", "")), title["number"]))
         USCSection.load_data(D)
-        print USCSection.objects.filter(update_flag=0).count(), "deleted sections" # .delete() ?
+        print(USCSection.objects.filter(update_flag=0).count(), "deleted sections") # .delete() ?
     @staticmethod
     def load_data(structure_data):
         if isinstance(structure_data, str):
@@ -1840,12 +1863,12 @@ class USCSection(models.Model):
                     setattr(obj, k, v)
                 obj.save()
             else:
-                print "created", obj
+                print("created", obj)
             USCSection.load_data2(obj, sec.get("subparts", []))
 
 Feed.register_feed(
     "usc:",
-    title = lambda feed : unicode(USCSection.objects.get(id=feed.feedname.split(":", 1)[1])),
+    title = lambda feed : str(USCSection.objects.get(id=feed.feedname.split(":", 1)[1])),
     link = lambda feed : USCSection.objects.get(id=feed.feedname.split(":", 1)[1]).get_absolute_url(),
     category = "federal-bills",
     description = "Get updates for bills citing this part of the U.S. Code, including major activity and when the bill is scheduled for debate.",
@@ -1872,7 +1895,7 @@ class Amendment(models.Model):
     congress = models.IntegerField(help_text="The number of the Congress in which the amendment was offered. The current Congress is %d." % settings.CURRENT_CONGRESS)
     amendment_type = models.IntegerField(choices=AmendmentType, help_text="The amendment's type, indicating the chmaber in which the amendment was offered.")
     number = models.IntegerField(help_text="The amendment's number according to the Library of Congress's H.Amdt and S.Amdt numbering (just the integer part).")
-    bill = models.ForeignKey(Bill, help_text="The bill the amendment amends.")
+    bill = models.ForeignKey(Bill, help_text="The bill the amendment amends.", on_delete=models.PROTECT)
     sequence = models.IntegerField(blank=True, null=True, help_text="For House amendments, the sequence number of the amendment (unique within a bill).")
 
     title = models.CharField(max_length=255, help_text="A title for the amendment.")
@@ -1886,7 +1909,7 @@ class Amendment(models.Model):
             ('bill', 'sequence')]
             # bill+sequence is not unique, see the github thread on amendment numbering --- currently this is manually fixed up in the db as a non-unique index
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def display_number(self):

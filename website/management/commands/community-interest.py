@@ -38,15 +38,15 @@ class Command(BaseCommand):
 		
 
 		
-		print "Top Bills"
+		print("Top Bills")
 		interests.sort(key = lambda ix : ix["count"], reverse=True)
-		for i in xrange(20):
+		for i in range(20):
 			for b in interests[i]["bills"]:
-				print b
-			print "\t", len(set(CommunityInterest.objects.filter(bill__in=interests[i]["bills"]).values_list("user", flat=True))), "distinct users"
+				print(b)
+			print("\t", len(set(CommunityInterest.objects.filter(bill__in=interests[i]["bills"]).values_list("user", flat=True))), "distinct users")
 			methods = { }
 			for ci in CommunityInterest.objects.filter(bill__in=interests[i]["bills"]):
 				for m in ci.methods.split(","):
 					methods[m] = methods.get(m, 0) + 1
-			print "\t", methods
-			print
+			print("\t", methods)
+			print()

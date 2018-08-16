@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from datetime import datetime, timedelta
 import re
@@ -29,7 +29,7 @@ class Committee(models.Model):
     jurisdiction = models.TextField(blank=True, null=True, help_text="The committee's jurisdiction, if known.")
     jurisdiction_link = models.TextField(blank=True, null=True, help_text="A link to where the jurisdiction text was sourced from.")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -167,11 +167,11 @@ class CommitteeMember(models.Model):
     # committee membership, so we should not create any
     # foreign keys to this model.
 
-    person = models.ForeignKey('person.Person', related_name='committeeassignments', help_text="The Member of Congress serving on a committee.")
-    committee = models.ForeignKey('committee.Committee', related_name='members', help_text="The committee or subcommittee being served on.")
+    person = models.ForeignKey('person.Person', related_name='committeeassignments', on_delete=models.CASCADE, help_text="The Member of Congress serving on a committee.")
+    committee = models.ForeignKey('committee.Committee', related_name='members', on_delete=models.PROTECT, help_text="The committee or subcommittee being served on.")
     role = models.IntegerField(choices=CommitteeMemberRole, default=CommitteeMemberRole.member, help_text="The role of the member on the committee.")
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s @ %s as %s' % (self.person, self.committee, self.get_role_display())
 
     # api
@@ -203,7 +203,7 @@ MEMBER_ROLE_WEIGHTS = {
 
 class CommitteeMeeting(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    committee = models.ForeignKey(Committee, related_name="meetings", db_index=True)
+    committee = models.ForeignKey(Committee, related_name="meetings", db_index=True, on_delete=models.PROTECT)
     when = models.DateTimeField()
     subject = models.TextField()
     bills = models.ManyToManyField("bill.Bill", blank=True)
@@ -213,7 +213,7 @@ class CommitteeMeeting(models.Model):
     class Meta:
         ordering = [ "-created" ]
 
-    def __unicode__(self):
+    def __str__(self):
         return self.guid
 
     @property

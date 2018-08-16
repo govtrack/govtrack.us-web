@@ -6,7 +6,7 @@ from optparse import make_option
 
 from emailverification.models import BouncedEmail, Record as EVRecord
 
-import json, urllib, urllib2
+import json, urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 
 class Command(BaseCommand):
 	help = 'Creates BouncedMail records for Sparkmail bounces.'
@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
 	def process_page(self, pagenum, since):
 		# Request
-		url = "https://api.sparkpost.com/api/v1/message-events?" + urllib.urlencode({
+		url = "https://api.sparkpost.com/api/v1/message-events?" + urllib.parse.urlencode({
 			"events": "bounce",
 			"bounce_classes": "10,30,90,22,23,25,50,51,52,53,54",
 			"per_page": 10000, # is the max
@@ -28,10 +28,10 @@ class Command(BaseCommand):
 			"page": pagenum,
 		})
 		print(url)
-		req = urllib2.Request(url)
+		req = urllib.request.Request(url)
 		req.add_header("Authorization", settings.SPARKPOST_API_KEY)
 		req.add_header('Content-Type', 'application/json')
-		r = urllib2.urlopen(req)
+		r = urllib.request.urlopen(req)
 
 		# Response
 		r = json.loads(r.read())["results"]
@@ -47,7 +47,7 @@ class Command(BaseCommand):
 		
 		for u in User.objects.filter(email=email):
 			found = True
-			print u, reason.encode("utf8")
+			print(u, reason.encode("utf8"))
 			be, is_new = BouncedEmail.objects.get_or_create(user=u)
 			if not is_new:
 				be.bounces += 1
@@ -55,9 +55,9 @@ class Command(BaseCommand):
 	
 		for r in EVRecord.objects.filter(email=email):
 			found = True
-			print r, reason
+			print(r, reason)
 			r.killed = True
 			r.save()
 			
 		if not found:
-			print email, "not found"
+			print(email, "not found")

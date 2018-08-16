@@ -1,8 +1,8 @@
-import os, glob, StringIO
+import os, glob, io
 import csv, json, rtyaml
 from us import parse_govtrack_date
-from types import RoleType
-from models import Person
+from .types import RoleType
+from .models import Person
 
 from settings import CURRENT_CONGRESS
 
@@ -156,7 +156,7 @@ def load_scorecards():
                 # bottom as CSV.
                 metadata, scores = f.read().split("\n...\n")
                 metadata = rtyaml.load(metadata)
-                scores = list(csv.reader(StringIO.StringIO(scores)))
+                scores = list(csv.reader(io.StringIO(scores)))
 
                 # Store scores as a mapping from person IDs to score info.
                 letter_grades = ("F", "D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+")
@@ -184,7 +184,7 @@ def load_scorecards():
                 }
                 metadata["based_on"] = metadata["based-on"]
                 _scorecards.append(metadata)
-        _scorecards.sort(key = lambda scorecard : scorecard["abbrev"])
+        _scorecards.sort(key = lambda scorecard : scorecard.get("abbrev") or scorecard["name"])
     return _scorecards
 
 def load_scorecards_for(person):

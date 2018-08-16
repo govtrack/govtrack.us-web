@@ -47,6 +47,6 @@ def append_qsarg(value, arg):
         value += "&"
     else:
         value += "?"
-    return value + unicode(arg)
+    return value + str(arg)
 
 

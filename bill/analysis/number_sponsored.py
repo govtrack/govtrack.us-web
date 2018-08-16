@@ -46,7 +46,7 @@ for role_type in (RoleType.representative, RoleType.senator):
 		if congress < 109: continue # make a smaller table
 
 		if build(role_type, congress, session, startdate, enddate, people_sort_order, data_matrix):
-			print role_type.congress_chamber, congress, session
+			print(role_type.congress_chamber, congress, session)
 			sessions.append((congress, session))
 
 	writer = csv.writer(open("sponsorship_counts_%s.csv" % role_type.congress_chamber.lower()[0], "w"))

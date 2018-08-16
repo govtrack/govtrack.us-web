@@ -166,7 +166,7 @@ def main(options):
                         break
             
             if not govtrack_id:
-                print "No GovTrack ID:"
+                print("No GovTrack ID:")
                 pprint.pprint(m)
                 had_error = True
                 continue
@@ -300,7 +300,7 @@ def main(options):
             
             # And likewise for any existing roles that are left over.
             for pr in existing_roles:
-                print pr.person.id, pr
+                print(pr.person.id, pr)
                 raise ValueError("Deleted role??")
                 log.warn("Deleted %s" % pr)
                 pr.delete()
@@ -311,7 +311,7 @@ def main(options):
                 # starts of terms that are adjacent. Refresh the list to get
                 # the roles in order.
                 role_list = list(PersonRole.objects.filter(person=person).order_by('startdate'))
-                for i in xrange(len(role_list)):
+                for i in range(len(role_list)):
                     role_list[i].create_events(
                         role_list[i-1] if i > 0 else None,
                         role_list[i+1] if i < len(role_list)-1 else None
@@ -328,7 +328,7 @@ def main(options):
                 log.warn("%s is now %s." % (nn[0], person.name))
                 person.save()
             
-        except Exception, ex:
+        except Exception as ex:
             # Catch unexpected exceptions and log them
             pprint.pprint(node)
             log.error('', exc_info=ex)

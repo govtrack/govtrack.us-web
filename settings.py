@@ -18,7 +18,7 @@ if DEBUG and "SSH_CONNECTION" in os.environ:
 	# the list of INTERNAL_IPSs so that he can see the SQL.
 	# debugging output.
 	INTERNAL_IPS = ('127.0.0.1', os.environ["SSH_CONNECTION"].split(" ")[0])
-	if sys.argv == ['./manage.py', 'runserver']: print "Internal IPs:", repr(INTERNAL_IPS)
+	if sys.argv == ['./manage.py', 'runserver']: print("Internal IPs:", repr(INTERNAL_IPS))
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

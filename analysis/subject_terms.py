@@ -53,7 +53,7 @@ for t in BillTerm.objects.all().order_by('name'):
 
 	w1, w2, w3 = files[k]
 
-	print t, t.term_type, t.is_top_term()
+	print(t, t.term_type, t.is_top_term())
 
 	for bill in Bill.objects.filter(congress__gte=108, terms=t).only("id", "congress", "bill_type", "number", "title", "titles", "introduced_date", "sponsor_role__party").prefetch_related("sponsor_role"):
 		w1.writerow([

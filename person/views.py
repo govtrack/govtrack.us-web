@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from math import log, sqrt
 
 from django.shortcuts import redirect, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import connection
 from django.db.models import Count
 from django.http import Http404, HttpResponse
@@ -12,9 +12,8 @@ from django.core.cache import cache
 from django.conf import settings
 
 from common.decorators import render_to
-from common.pagination import paginate
 
-import json, cPickle, base64, re
+import json, pickle, base64, re
 
 from us import statelist, statenames, stateapportionment, state_abbr_from_name, stateabbrs, get_congress_dates
 
@@ -26,7 +25,7 @@ from person.util import get_committee_assignments
 from events.models import Feed
 
 from smartsearch.manager import SearchManager
-from search import person_search_manager
+from .search import person_search_manager
 
 from registration.helpers import json_response
 from twostream.decorators import anonymous_view, user_view_for
@@ -35,31 +34,31 @@ from settings import CURRENT_CONGRESS
 
 pronunciation_guide = None
 pronunciation_guide_key = {
-u"a": "cat", u"b": "bat",
-u"ah": "calm", u"ch": "chin",
-u"air": "hair", u"d": "day",
-u"ar": "bar", u"f": "fat",
-u"aw": "law", u"g": "get",
-u"ay": "say", u"h": "hat",
-u"e": "bed", u"j": "jam",
-u"ee": "meet", u"k": "king",
-u"eer": "beer", u"l": "leg",
-u"er": "her", u"m": "man",
-u"ew": "few", u"n": "not",
-u"i": "pin", u"ng": "sing",
-u"ī": "eye", u"nk": "thank",
-u"o": "top", u"p": "pen",
-u"oh": "most", u"r": "rag",
-u"oo": "soon", u"s": "sit",
-u"oor": "poor", u"t": "top",
-u"or": "corn", u"th": "thin",
-u"ow": "cow", u"t͡h": "this",
-u"oy": "boy", u"v": "van",
-u"u": "cup", u"w": "will",
-u"uh": "cup", u"y": "yes",
-u"uu": "book", u"z": "zebra",
-u"y": "cry", u"zh": "vision",
-u"yoo": "unit",  u"yr": "fire",
+"a": "cat", "b": "bat",
+"ah": "calm", "ch": "chin",
+"air": "hair", "d": "day",
+"ar": "bar", "f": "fat",
+"aw": "law", "g": "get",
+"ay": "say", "h": "hat",
+"e": "bed", "j": "jam",
+"ee": "meet", "k": "king",
+"eer": "beer", "l": "leg",
+"er": "her", "m": "man",
+"ew": "few", "n": "not",
+"i": "pin", "ng": "sing",
+"ī": "eye", "nk": "thank",
+"o": "top", "p": "pen",
+"oh": "most", "r": "rag",
+"oo": "soon", "s": "sit",
+"oor": "poor", "t": "top",
+"or": "corn", "th": "thin",
+"ow": "cow", "t͡h": "this",
+"oy": "boy", "v": "van",
+"u": "cup", "w": "will",
+"uh": "cup", "y": "yes",
+"uu": "book", "z": "zebra",
+"y": "cry", "zh": "vision",
+"yoo": "unit",  "yr": "fire",
 " ": None, "-": None,
 }
 
@@ -307,11 +306,11 @@ def searchmembers(request, mode=None):
         } )
 
 def http_rest_json(url, args=None, method="GET"):
-    import urllib, urllib2, json
+    import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, json
     if method == "GET" and args != None:
-        url += "?" + urllib.urlencode(args).encode("utf8")
-    req = urllib2.Request(url)
-    r = urllib2.urlopen(req, timeout=10)
+        url += "?" + urllib.parse.urlencode(args).encode("utf8")
+    req = urllib.request.Request(url)
+    r = urllib.request.urlopen(req, timeout=10)
     return json.load(r, "utf8")
     
 @anonymous_view
@@ -347,7 +346,7 @@ def get_senators(state):
     sens = list(sens)
 
     # Make sure we list at least two slots, filling with Vacant if needed.
-    for i in xrange(2-len(sens)):
+    for i in range(2-len(sens)):
         sens.append(None)
 
     return sens
@@ -359,7 +358,7 @@ def get_representatives(state):
             
     # Load representatives for non-at-large states.
     else:
-        dists = xrange(1, stateapportionment[state]+1)
+        dists = range(1, stateapportionment[state]+1)
     
     reps = []
     for i in dists:
@@ -453,9 +452,9 @@ def get_district_bounds(state, district):
     elif cache.get(zoom_info_cache_key):
         center_lat, center_long, center_zoom = cache.get(zoom_info_cache_key)
     else:
-    	with open("static/js/congressional-districts-bboxes-115-2016.js") as f:
-	    	data_json = f.read().replace("var bboxes = ", "")
-        	data = json.loads(data_json)
+        with open("static/js/congressional-districts-bboxes-115-2016.js") as f:
+            data_json = f.read().replace("var bboxes = ", "")
+            data = json.loads(data_json)
         key = state + (("%02d" % district) if district else "")
         left, bottom, right, top = data[key]
         center_lat = (top+bottom)/2
@@ -521,7 +520,7 @@ class sitemap_districts(django.contrib.sitemaps.Sitemap):
             if state not in stateapportionment: continue
             ret.append( (state, 0) )
             if stateapportionment[state] not in (1, "T"):
-                for district in xrange(1, stateapportionment[state]+1):
+                for district in range(1, stateapportionment[state]+1):
                     ret.append( (state, district) )
         return ret
     def location(self, item):
@@ -727,8 +726,8 @@ def person_session_stats_export(request, session, cohort, statistic):
     rows.sort(key = lambda r : (r[0], r[8]))
 
     # format CSV
-    import csv, StringIO
-    outfile = StringIO.StringIO()
+    import csv, io
+    outfile = io.StringIO()
     writer = csv.writer(outfile)
     writer.writerow(["rank_from_low", "rank_from_high", "percentile", statistic, "id", "bioguide_id", "state", "district", "name"])
     for row in rows: writer.writerow(row)

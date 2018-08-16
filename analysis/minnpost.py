@@ -10,7 +10,7 @@ P = list(r.person for r in PersonRole.objects.filter(current=True, state="MN").o
 P2 = P + list(r.person for r in PersonRole.objects.filter(current=True).exclude(state="MN").order_by('role_type', 'state', 'district'))
 
 def u(obj):
-	return unicode(obj).encode("utf8")
+	return str(obj).encode("utf8")
 def write_col_headers(cols, rows):
 	W.writerow(["", "<---", cols, "--->"])
 	W.writerow([rows] + [u(p) for p in P])

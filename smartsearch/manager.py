@@ -9,9 +9,10 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from django.core.cache import cache
 
-import json, urllib, hashlib
+import json, urllib.request, urllib.parse, urllib.error, hashlib
 
 from common.enum import MetaEnum
+import collections
 
 FACET_CACHE_TIME = 60*60
 FACET_OPTIONS = { "limit": -1, "mincount": 1, "sort": "count" } # limits cause problems because the selected option can dissapear!
@@ -78,7 +79,7 @@ class SearchManager(object):
 
         # Although we cache some facet queries, also cache the final response.
         m = hashlib.md5()
-        m.update(self.model.__name__ + "|" + qsparams.urlencode())
+        m.update((self.model.__name__ + "|" + qsparams.urlencode()).encode("utf8"))
         cachekey = "smartsearch__response__" + m.hexdigest()
         resp = cache.get(cachekey)
         if resp and False:
@@ -262,7 +263,7 @@ class SearchManager(object):
                     else:
                        filters[option.orm_field_name] = values
                     
-                elif not u'__ALL__' in values:
+                elif not '__ALL__' in values:
                     # if __ALL__ value presents in filter values
                     # then do not limit queryset
 
@@ -327,18 +328,18 @@ class SearchManager(object):
         import hashlib
         hasher = hashlib.sha1
         def get_value(f):
-            if f in qsparams: return urllib.quote(qsparams[f])
-            if f + "[]" in qsparams: return "&".join(urllib.quote(v) for v in sorted(qsparams.getlist(f + "[]")))
+            if f in qsparams: return urllib.parse.quote(qsparams[f])
+            if f + "[]" in qsparams: return "&".join(urllib.parse.quote(v) for v in sorted(qsparams.getlist(f + "[]")))
             return ""
         return "smartsearch_%s_%s__%s" % (
             self.model.__name__,
             prefix,
-            hasher(
-                "&".join( unicode(k) + "=" + unicode(v) for k, v in self.global_filters.items() )
+            hasher((
+                "&".join( str(k) + "=" + str(v) for k, v in list(self.global_filters.items()) )
                 + "&&" +
-                "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in qsparams or o.field_name + "[]" in qsparams) and (o != omit) ),
-            ).hexdigest()
-            )        
+                "&".join( o.field_name + "=" + get_value(o.field_name) for o in self.options if (o.field_name in qsparams or o.field_name + "[]" in qsparams) and (o != omit) )
+            ).encode("utf8")).hexdigest()
+            )
                         
     def get_model_field(self, option):
         include_counts = True
@@ -394,7 +395,7 @@ class SearchManager(object):
                 if field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
                     # values+annotate makes the db return an integer rather than an object,
                     # and Haystack always returns integers rather than objects
-                    return field.rel.to.objects.in_bulk(ids)
+                    return field.related_model.objects.in_bulk(ids)
                 return None
 
             def nice_name(value, objs):
@@ -407,13 +408,13 @@ class SearchManager(object):
                 if field and field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
                     # values+annotate makes the db return an integer rather than an object
                     if objs and value in objs:
-                        return unicode(objs[value])
-                    value = field.rel.to.objects.get(id=value)
-                return unicode(value)
+                        return str(objs[value])
+                    value = field.related_model.objects.get(id=value)
+                return str(value)
             
             def fix_value_type(value):
                 # Solr and ElasticSearch return strings on integer data types.
-                if isinstance(value, (str, unicode)) and field.__class__.__name__ in ('IntegerField', 'ForeignKey', 'ManyToManyField'):
+                if isinstance(value, str) and field.__class__.__name__ in ('IntegerField', 'ForeignKey', 'ManyToManyField'):
                     return int(value)
                 return value
 
@@ -491,7 +492,7 @@ class SearchManager(object):
             if fieldname + "__in" in self.global_filters:
                 return key in list(self.global_filters[fieldname+ "__in"]) + list(str(s) for s in self.global_filters[fieldname+ "__in"])
             return True
-        return filter(lambda kv : should_show_count(kv[0], kv[1]), counts)
+        return [kv for kv in counts if should_show_count(kv[0], kv[1])]
 
     def execute_qs(self, qs, defaults=None, overrides=None):
         from django.http import QueryDict
@@ -505,8 +506,8 @@ class SearchManager(object):
         return self.queryset(qd)
 
     def describe_qs(self, qs):
-        import urlparse
-        return self.describe(urlparse.parse_qs(qs))
+        import urllib.parse
+        return self.describe(urllib.parse.parse_qs(qs))
         
     def describe(self, qs): # qs is a dict from field names to a list of values, like request.POST
         descr = []
@@ -528,9 +529,9 @@ class SearchManager(object):
                 def formatter(value):
                     # If the ORM field is for objects, map ID to an object value, then apply option formatter. 
                     if field and field.__class__.__name__ in ('ForeignKey', 'ManyToManyField'):
-                        value = field.rel.to.objects.get(id=v)
+                        value = field.related_model.objects.get(id=v)
                     if option.formatter: return option.formatter(value)
-                    return unicode(value)
+                    return str(value)
                 
             vals = []
             for v in qs[option.field_name]:

@@ -35,11 +35,11 @@ for c in Cosponsor.objects\
 		c.bill.title.encode("utf8"),
 		"https://www.govtrack.us" + c.bill.get_absolute_url(),
 		c.person.id,
-		unicode(c.person).encode("utf8"),
+		str(c.person).encode("utf8"),
 		"https://www.govtrack.us" + c.person.get_absolute_url(),
 		c.role.party,
 		c.bill.sponsor.id if c.bill.sponsor else "",
-		unicode(c.bill.sponsor).encode("utf8") if c.bill.sponsor else "",
+		str(c.bill.sponsor).encode("utf8") if c.bill.sponsor else "",
 		("https://www.govtrack.us" + c.bill.sponsor.get_absolute_url()) if c.bill.sponsor else "",
 		c.bill.sponsor_role.party if c.bill.sponsor else "",
 	])

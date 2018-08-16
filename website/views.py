@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import redirect, get_object_or_404, render
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
 from common.decorators import render_to
-from common.pagination import paginate
-
-from cache_utils.decorators import cached
 
 from twostream.decorators import anonymous_view
 from registration.helpers import json_response
@@ -134,7 +131,7 @@ def get_blog_items():
     def _callback(matches):
         id = matches.group(1)
         try:
-           return unichr(int(id))
+           return chr(int(id))
         except:
            return id
     def decode_unicode_references(data):
@@ -739,7 +736,7 @@ def dump_sousveillance(request):
     from website.models import Sousveillance
     from website.middleware import is_ip_in_any_range, HOUSE_NET_RANGES, SENATE_NET_RANGES, EOP_NET_RANGES
     import re
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     import user_agents
 
     def get_netblock_label(ip):
@@ -759,7 +756,7 @@ def dump_sousveillance(request):
         except:
             pass
       if "?" in path: path = path[:path.index("?")] # ensure no qsargs
-      if r.req.get("query"): path += "?" + urllib.urlencode({ k.encode("utf8"): v.encode("utf8") for k,v in r.req["query"].items() })
+      if r.req.get("query"): path += "?" + urllib.parse.urlencode({ k.encode("utf8"): v.encode("utf8") for k,v in list(r.req["query"].items()) })
 
       if r.req['agent']:
           ua = str(user_agents.parse(r.req['agent']))
@@ -886,6 +883,7 @@ def misconduct(request):
     entries = load_misconduct_data()
 
     import plotly.graph_objs as go
+    import plotly.graph_objs.layout as go_layout
     from plotly.offline import plot
 
     # Break out consequences into their own list.
@@ -899,7 +897,7 @@ def misconduct(request):
 
     bar_chart_layout = go.Layout(
         barmode='stack',
-        margin=go.Margin(l=25,r=20,b=10,t=0,pad=0),
+        margin=go_layout.Margin(l=25,r=20,b=10,t=0,pad=0),
         legend={ "orientation": "h" })
 
     def make_chart(title, universe, bars, year_of):
