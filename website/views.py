@@ -883,6 +883,7 @@ def misconduct(request):
     entries = load_misconduct_data()
 
     import plotly.graph_objs as go
+    import plotly.graph_objs.layout as go_layout
     from plotly.offline import plot
 
     # Break out consequences into their own list.
@@ -896,7 +897,7 @@ def misconduct(request):
 
     bar_chart_layout = go.Layout(
         barmode='stack',
-        margin=go.Margin(l=25,r=20,b=10,t=0,pad=0),
+        margin=go_layout.Margin(l=25,r=20,b=10,t=0,pad=0),
         legend={ "orientation": "h" })
 
     def make_chart(title, universe, bars, year_of):
