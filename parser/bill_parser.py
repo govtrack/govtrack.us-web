@@ -213,7 +213,7 @@ class BillProcessor(XmlProcessor):
                 log.error('Could not find committee %s' % subnode.get('code'))
             else:
                 comlist.append(com)
-        obj.committees = comlist
+        obj.committees.set(comlist)
 
     def process_terms(self, obj, node, congress):
         termlist = []
@@ -223,7 +223,7 @@ class BillProcessor(XmlProcessor):
                 termlist.append(get_term(name, congress))
             except KeyError:
                 log.error('Could not find term [name: %s]' % name)
-        obj.terms = termlist
+        obj.terms.set(termlist)
 
     def process_relatedbills(self, obj, node):
         RelatedBill.objects.filter(bill=obj).delete()
@@ -359,7 +359,7 @@ def main(options):
         # With indexing or events enabled, if the bill metadata file hasn't changed check
         # the bill's latest text file for changes so we can create a text-is-available
         # event and so we can index the bill's text.
-        if (not options.congress or options.congress>42) and (bill_index and not options.disable_events) and not File.objects.is_changed(fname) and not options.force:
+        if (not options.congress or int(options.congress)>42) and (bill_index and not options.disable_events) and not File.objects.is_changed(fname) and not options.force:
             m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
 
             try:
@@ -409,7 +409,7 @@ def main(options):
                 	repr(bill_processor.parse_datetime(axn.xpath("string(@datetime)"))),
                 	BillStatus.by_xml_code(axn.xpath("string(@state)")),
                 	axn.xpath("string(text)"),
-                    etree.tostring(axn),
+                    etree.tostring(axn, encoding=str),
                 	) )
                 
             bill.sliplawpubpriv = None

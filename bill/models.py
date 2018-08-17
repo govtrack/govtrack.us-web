@@ -289,7 +289,7 @@ class Bill(models.Model):
     haystack_index = ('bill_type', 'congress', 'number', 'sponsor', 'current_status', 'terms', 'introduced_date', 'current_status_date', 'committees', 'cosponsors')
     haystack_index_extra = (('proscore', 'Float'), ('sponsor_party', 'MultiValue'), ('usc_citations_uptree', 'MultiValue'), ('enacted_ex', 'Boolean'), ('cosponsor_count', 'Integer'))
     def get_terms_index_list(self):
-        return set([t.id for t in self.terms.all()])
+        return sorted(set([t.id for t in self.terms.all()]))
     def get_committees_index_list(self):
         return [c.id for c in self.committees.all()]
     def get_cosponsors_index_list(self):
@@ -348,7 +348,7 @@ class Bill(models.Model):
             while sec_obj:
                 ret.add(sec_obj.id)
                 sec_obj = sec_obj.parent_section
-        return ret
+        return sorted(ret)
 
     def update_index(self, bill_index):
         # Update this bill in the search database.

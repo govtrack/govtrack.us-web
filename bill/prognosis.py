@@ -63,7 +63,7 @@ cached_leadership_scores = { }
 def get_leadership_score(person):
 	if person.id in cached_leadership_scores: return cached_leadership_scores[person.id]
 	sp_ana = load_sponsorship_analysis(person)
-	score = float(sp_ana["leadership"]) if sp_ana else None
+	score = float(sp_ana["leadership"]) if sp_ana else 0.0
 	cached_leadership_scores[person.id] = score
 	return score
 

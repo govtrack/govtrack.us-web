@@ -23,5 +23,8 @@ django.setup()
 
 import sys
 sys.argv.pop(0) # /dev/stdin
-execfile(sys.argv[0])
+fn = sys.argv[0]
+with open(fn) as f:
+    code = compile(f.read(), fn, 'exec')
+    exec(code)
 EOF

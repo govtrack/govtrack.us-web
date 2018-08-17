@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
 		# load photo from url
 		import io
-		im = Image.open(io.StringIO(urlopen(options['photo_url']).read()))
+		im = Image.open(io.BytesIO(urlopen(options['photo_url']).read()))
 
 		ar = 1.2
 

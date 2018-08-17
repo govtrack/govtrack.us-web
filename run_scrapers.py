@@ -20,9 +20,9 @@ def md5(fn, modulo=None):
 	# to remove content we don't want to check for
 	# differences.
 	
-	with open(fn) as fobj:
+	with open(fn, "rb") as fobj:
 		data = fobj.read()
-	if modulo != None: data = re.sub(modulo, "--", data)
+	if modulo != None: data = re.sub(modulo, b"--", data)
 	
 	md5 = hashlib.md5()
 	md5.update(data)
@@ -138,14 +138,14 @@ if "bills" in sys.argv:
 		if int(congress) != CONGRESS: raise ValueError()
 		if bill_type not in bill_type_map: raise ValueError()
 		fn2 = "data/us/%d/bills/%s%d.xml" % (CONGRESS, bill_type_map[bill_type], int(number))
-		do_bill_parse |= copy(fn, fn2, r'updated="[^"]+"')
+		do_bill_parse |= copy(fn, fn2, b'updated="[^"]+"')
 
 	mkdir("data/us/%d/bills.amdt" % CONGRESS)
 	for fn in sorted(glob.glob("%s/data/%d/amendments/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
 		congress, amdt_type, number = re.match(r".*congress/data/(\d+)/amendments/([hsup]+)amdt/(?:[hsup]+)amdt(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
 		fn2 = "data/us/%d/bills.amdt/%s%d.xml" % (CONGRESS, amdt_type, int(number))
-		copy(fn, fn2, r'updated="[^"]+"')
+		copy(fn, fn2, b'updated="[^"]+"')
 	
 	# Scrape upcoming House bills.
 
@@ -177,7 +177,7 @@ if "votes" in sys.argv:
 		congress, session, chamber, number = re.match(r".*congress/data/(\d+)/votes/(\d+|[A-C])/([hs])(\d+)/data.xml$", fn).groups()
 		if int(congress) != CONGRESS: raise ValueError()
 		fn2 = "data/us/%d/rolls/%s%s-%d.xml" % (CONGRESS, chamber, session, int(number))
-		did_any_file_change |= copy(fn, fn2, r'updated="[^"]+"')
+		did_any_file_change |= copy(fn, fn2, b'updated="[^"]+"')
 		
 	# Load into db.
 	if did_any_file_change or True: # amendments can mark votes as missing data
@@ -219,7 +219,7 @@ if "stat_bills" in sys.argv:
 			bill_type, number = re.match(r".*congress/data/\d+/bills/([a-z]+)/(?:[a-z]+)(\d+)/data.xml$", fn).groups()
 			if bill_type not in bill_type_map: raise ValueError()
 			fn2 = "data/us/%d/bills/%s%d.xml" % (congress, bill_type_map[bill_type], int(number))
-			copy(fn, fn2, r'updated="[^"]+"')
+			copy(fn, fn2, b'updated="[^"]+"')
 			
 		# Load into db.
 		os.system("./parse.py --congress=%d bill" % congress) #  -l ERROR

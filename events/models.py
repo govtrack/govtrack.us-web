@@ -528,7 +528,7 @@ class SubscriptionList(models.Model):
         if not self.public_id:
             from random import choice
             import string
-            self.public_id = ''.join([choice(string.letters + string.digits) for i in range(16)])
+            self.public_id = ''.join([choice(string.ascii_letters + string.digits) for i in range(16)])
             self.save()
         return self.public_id
 

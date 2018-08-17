@@ -3,7 +3,7 @@ Internal info about statuses
 of previus parsings.
 """
 import binascii
-from io import StringIO
+from io import BytesIO
 
 from django.db import models
 
@@ -13,9 +13,9 @@ def crc(fname, content=None):
     """
 
     if content is not None:
-        fobj = StringIO(content)
+        fobj = BytesIO(content)
     else:
-        fobj = open(fname, 'r')
+        fobj = open(fname, 'rb')
     value = 0
     for line in fobj:
         value = binascii.crc32(line, value)

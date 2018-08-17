@@ -83,7 +83,7 @@ def vote_details(request, congress, session, chamber_code, number):
     has_ideology_scores = attach_ideology_scores(voters, vote.congress)
         
     # perform an initial sort for display
-    voters.sort(key = lambda x : (x.option.key, x.person_role.party if x.person and x.person_role else "", x.person.name_no_details_lastfirst() if x.person else x.get_voter_type_display()))
+    voters.sort(key = lambda x : (x.option.key, x.person_role.party if x.person and x.person_role and x.person_role.party else "", x.person.name_no_details_lastfirst() if x.person else x.get_voter_type_display()))
 
     # did any Senate leaders switch their vote for a motion to reconsider?
     reconsiderers = vote.possible_reconsideration_votes(voters)
@@ -444,7 +444,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		# about 8 for the House
 		
 	# Long ago Congress had very few people.
-	seating_rows = min(total_count, total_count / 8 + 1, seating_rows)
+	seating_rows = min(total_count, total_count // 8 + 1, seating_rows)
 		
 	# Determine the seating chart dimensions: the radius of the inside row of
 	# seats and the radius of the outside row of seats.

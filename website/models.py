@@ -212,7 +212,7 @@ class MediumPost(models.Model):
         # Fetch posts.
         medium_posts = urllib.request.Request("https://medium.com/govtrack-insider?format=json")
         medium_posts.add_header("User-Agent", "Python +https://www.govtrack.us") # default header has been blocked
-        medium_posts = urllib.request.urlopen(medium_posts).read()
+        medium_posts = urllib.request.urlopen(medium_posts).read().decode("utf8")
         # there's some crap before the JSON object starts
         medium_posts = medium_posts[medium_posts.index("{"):]
         medium_posts = json.loads(medium_posts)

@@ -213,7 +213,7 @@ class Vote(models.Model):
         
         # sort options by well-known keys, then by total number of votes
         option_sort_order = {"+":0, "-":1, "P":2, "0":3}
-        details.sort(key = lambda d : (option_sort_order.get(d['option'].key, None), -d['count']))
+        details.sort(key = lambda d : (option_sort_order.get(d['option'].key, 0), -d['count']))
         
         # hide Present/Not Voting if no one voted that way
         details = [d for d in details if d["count"] > 0 or "hide_if_empty" not in d]
