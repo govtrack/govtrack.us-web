@@ -13,6 +13,8 @@ class Command(BaseCommand):
 		parser.add_argument('credit_text')
 
 	def handle(self, *args, **options):
+		ar = 1.2
+	
 		try:
 			p = Person.objects.get(id=options['person_id'])
 		except:
@@ -21,23 +23,6 @@ class Command(BaseCommand):
 			except:
 				print("Invalid id.")
 				return
-
-		# load photo from url
-		import io
-		im = Image.open(io.BytesIO(urlopen(options['photo_url']).read()))
-
-		ar = 1.2
-
-		if im.size[0] < 200 or im.size[1] < 200*ar:
-			raise Exception("image is too small")
-
-		# crop
-		if im.size[0]*ar > im.size[1]:
-			# too wide
-			im = im.crop(box=(int(im.size[0]/2-im.size[1]/ar/2), 0, int(im.size[0]/2+im.size[1]/ar/2), im.size[1]))
-		else:
-			# too tall
-			im = im.crop(box=(0, 0, im.size[0], int(im.size[0]*ar) ))
 
 		def save(im, sz=None):
 			fn = "../data/photos/%d%s.jpeg" % (
@@ -48,8 +33,30 @@ class Command(BaseCommand):
 			print(fn)
 			im.save(fn)
 
-		# save original and thumbnails
-		save(im)
+		if options['photo_url']:
+			# load photo from url
+			import io
+			im = Image.open(io.BytesIO(urlopen(options['photo_url']).read()))
+	
+			if im.size[0] < 200 or im.size[1] < 200*ar:
+				raise Exception("image is too small")
+	
+			# crop
+			if im.size[0]*ar > im.size[1]:
+				# too wide
+				im = im.crop(box=(int(im.size[0]/2-im.size[1]/ar/2), 0, int(im.size[0]/2+im.size[1]/ar/2), im.size[1]))
+			else:
+				# too tall
+				im = im.crop(box=(0, 0, im.size[0], int(im.size[0]*ar) ))
+
+			# save original
+			save(im)
+
+		else:
+			# just create thumbnails from existing photo
+			im = Image.open("../data/photos/%d.jpeg" % p.id)
+
+		# save thumbnails
 		save(im, 50)
 		save(im, 100)
 		save(im, 200)
