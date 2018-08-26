@@ -128,7 +128,7 @@ for p in voters_by_chamber['h'] | voters_by_chamber['s']:
 					else:
 						person_lifetime_vote_dates[(rec["chamber"], p)] = (min(person_lifetime_vote_dates[(rec["chamber"], p)][0], parse_datetime(rec["period_start"])), max(person_lifetime_vote_dates[(rec["chamber"], p)][1], parse_datetime(rec["period_end"])))
 				else:
-					bin = (int(rec["congress"]), rec["session"], rec["chamber"], rec["period"])
+					bin = (int(rec["congress"]), rec["session"], rec["chamber"], int(rec["period"]))
 					session_bin_dates[bin] = (parse_datetime(rec["period_start"]), parse_datetime(rec["period_end"]))
 					vote_counts[p][bin] = { "total": int(rec["total_votes"]), "missed": int(rec["missed_votes"]) }
 			break # don't look at previous congresses, we have their house and senate records both here
@@ -202,11 +202,18 @@ for bin in [("lifetime", "s"), ("lifetime", "h")] + sorted(session_bin_dates):
 		
 # Write out statistics by Member of Congress. Although we're only writing out currently serving MoCs,
 # include their lifetime records for both the house and senate.
+def bin_key(bin):
+	# Bins are in the format of either (congress, session, chamber, quarter)
+	# or ("lifetime", chamber). Since int (congress) and str ("lifetime") are
+	# not comparabiel (thanks Python 3!), we need a custom sort function to
+	# make the tuples comparable.
+	if bin[0] == "lifetime": return (1, bin)
+	return (0, bin)
 for p in vote_counts:
 	w = csv.writer(open(datadir + "stats/person/missedvotes/%d.csv" % p, "w"))
 	# columns are tied to how we load in historical data above
 	w.writerow(["congress", "session", "chamber", "period", "total_votes", "missed_votes", "percent", "percentile", "period_start", "period_end", "pctile25", "pctile50", "pctile75", "pctile90"])
-	for bin in sorted(vote_counts[p]):
+	for bin in sorted(vote_counts[p], key=bin_key):
 		v = vote_counts[p][bin]
 		if bin[0] == "lifetime":
 			dates = person_lifetime_vote_dates[(bin[1], p)]

@@ -233,6 +233,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		if len(events) > 0:
 			eventslists.append( (sublist, events) )
 			eventcount += len(events)
+			if most_recent_event is None: most_recent_event = max_id
 			most_recent_event = max(most_recent_event, max_id)
 
 	user_querying_end_time = datetime.now()
@@ -311,7 +312,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		# mark each list as having mailed events up to the max id found from the
 		# events table so that we know not to email those events in a future update.
 		for sublist, events in eventslists:
-			sublist.last_event_mailed = max(sublist.last_event_mailed, most_recent_event)
+			sublist.last_event_mailed = max(sublist.last_event_mailed, most_recent_event) if sublist.last_event_mailed is not None else most_recent_event
 			sublist.last_email_sent = launch_time
 			sublist.save()
 

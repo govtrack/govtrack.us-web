@@ -92,11 +92,11 @@ class Person(models.Model):
     def current_role_title(self):
         return self.get_current_role_field('get_title')
     def all_role_types(self):
-        return set(self.roles.values_list("role_type", flat=True))
+        return sorted(set(self.roles.values_list("role_type", flat=True)))
     def current_role_state(self):
         return self.get_current_role_field('state')
     def all_role_states(self):
-        return set(self.roles.values_list("state", flat=True))
+        return sorted(set(self.roles.values_list("state", flat=True)))
     def current_role_district(self):
         return self.get_current_role_field('district')
     def all_role_districts(self):
@@ -105,12 +105,12 @@ class Person(models.Model):
         # [(state=A, district=Y), (state=B, district=X)].
         # Exclude districts that are empty (None, i.e. for senators
         # presidents, etc.) or unknown (-1).
-        return set("%s-%02d" % sd for sd in self.roles.values_list("state", "district")
-            if sd[1] not in (None, -1))
+        return sorted(set("%s-%02d" % sd for sd in self.roles.values_list("state", "district")
+            if sd[1] not in (None, -1)))
     def current_role_party(self):
         return self.get_current_role_field('party')
     def all_role_parties(self):
-        return set(self.roles.values_list("party", flat=True))
+        return sorted(set(self.roles.values_list("party", flat=True)), key=lambda x : (str(type(x)), x)) # allow None's to be sorted with strings
     def first_took_office(self):
         # first took office for the most recent role
         role = self.get_most_recent_role()

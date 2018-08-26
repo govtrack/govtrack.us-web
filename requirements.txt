@@ -32,3 +32,4 @@ paypalrestsdk
 django-crispy-forms
 rtyaml
 plotly
+matplotlib

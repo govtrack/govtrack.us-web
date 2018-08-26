@@ -17,6 +17,8 @@
 # for c in {93..113}; do echo $c; analysis/sponsorship_analysis.py $c; done
 
 import sys
+import csv
+import json
 import os
 import glob
 import math
@@ -160,7 +162,7 @@ def build_matrix(congressnumber, starting_congress, house_or_senate, people, peo
 			if has_entry:
 				date = xml.xpath("introduced/@datetime")[0]
 				start_date = min(start_date, date) if start_date else date
-				end_date = max(end_date, date)
+				end_date = max(end_date, date) if end_date else date
 	
 	# In the event a member of congress neither sponsored nor cosponsored
 	# a bill, just give them an empty slot.
@@ -359,21 +361,15 @@ def describe_members(nreps, parties, spectrum, pagerank):
 	return descr
 		
 def write_stats_to_disk(congressnumber, house_or_senate, nreps, ids, parties, names, spectrum, pagerank, descr, other_cols):
-	w = open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + ".txt", "w")
-	w.write("ID, ideology, leadership, name, party, description, introduced_bills_%d, cosponsored_bills_%d, unique_cosponsors_%d, total_cosponsors_%d\n" % tuple([congressnumber]*4))
-	for i in range(nreps):
-		w.write(", ".join( [str(d).encode("utf8") for d in
-			[ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i]] + other_cols[i]
-			]) + "\n" )
-	w.close()
+	with open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + ".txt", "w") as f:
+		w = csv.writer(f)
+		w.writerow(["ID", "ideology", "leadership", "name", "party", "description", "introduced_bills_%d" % congressnumber, "cosponsored_bills_%d" % congressnumber, "unique_cosponsors_%d" % congressnumber, "total_cosponsors_%d" % congressnumber])
+		for i in range(nreps):
+			w.writerow([ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i]] + other_cols[i])
 	
 def write_metadata_to_disk(congressnumber, house_or_senate, start_date, end_date):
-	w = open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + "_meta.txt", "w")
-	w.write('{\n')
-	w.write(' "start_date": "' + start_date + '",\n')
-	w.write(' "end_date": "' + end_date + '"\n')
-	w.write('}\n')
-	w.close()
+	with open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + "_meta.txt", "w") as w:
+		w.write(json.dumps({ "start_date": start_date, "end_date": end_date }, indent=2))
 
 def create_member_images():
 		# We no longer need this as the site displays Javascript-based graphs. So this is here

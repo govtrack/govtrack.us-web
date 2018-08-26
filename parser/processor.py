@@ -148,9 +148,9 @@ def yaml_load(path):
 
     # Check if the .pickle file exists and a hash stored inside it
     # matches the hash of the YAML file, and if so unpickle it.
-    h = hashlib.sha1(open(path).read()).hexdigest()
+    h = hashlib.sha1(open(path, 'rb').read()).hexdigest()
     if os.path.exists(path + ".pickle2"):
-        store = pickle.load(open(path + ".pickle2"))
+        store = pickle.load(open(path + ".pickle2", 'rb'))
         if store["hash"] == h:
             return store["data"]
 
@@ -158,7 +158,7 @@ def yaml_load(path):
     data = yaml.load(open(path), Loader=Loader)
 
     # Store in a pickled file for fast access later.
-    pickle.dump({ "hash": h, "data": data }, open(path+".pickle2", "w"))
+    pickle.dump({ "hash": h, "data": data }, open(path+".pickle2", "wb"))
 
     return data
 

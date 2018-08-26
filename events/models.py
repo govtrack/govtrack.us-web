@@ -564,6 +564,7 @@ class SubscriptionList(models.Model):
         feedmap = dict((f.id, source_feed_map.get(f, f)) for f in feeds)
         for b in batch:
             key = b[1:3] # get the part that uniquely identifies the event, across feeds
+            if max_id is None: max_id = b[0]
             max_id = max(max_id, b[0]) # since we return one event record randomly out of
                                        # all of the dups for the feeds for all records,
                                        # make sure we return the max of the ids, or else
