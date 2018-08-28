@@ -444,6 +444,30 @@ class Bill(models.Model):
     def slip_law_number(self):
         if not self.sliplawnum: return None
         return ("Pub" if self.sliplawpubpriv == "PUB" else "Pvt") + (".L. %d-%d" % (self.congress, self.sliplawnum))
+    def bluebook_citation(self):
+        title = re.sub(r"^The ", "", self.title_no_number).rstrip(".")
+        ret = title + ", "
+        if self.sliplawnum:
+            ret += ("Pub" if self.sliplawpubpriv == "PUB" else "Pvt") + (". L. No. %d-%d" % (self.congress, self.sliplawnum))
+            ret += ", "
+            year = self.current_status_date.year
+            # should omit bill number if bill is enacted, but it is used when citing legislative history, so we always add it
+        else:
+            year = self.introduced_date.year
+        from django.contrib.humanize.templatetags.humanize import ordinal
+        billnum = self.display_number_no_congress_number
+        billnum = re.sub("^H.Res. ", "H.R. Res. ", billnum) # stupid bluebook format
+        billnum = re.sub("^S.Res. ", "S. Res. ", billnum) # stupid bluebook format
+        billnum = re.sub("^H.J.Res. ", "H.R.J. Res. ", billnum) # stupid bluebook format
+        billnum = re.sub("^S.J.Res. ", "S.J. Res. ", billnum) # stupid bluebook format
+        billnum = re.sub("^H.Con.Res. ", "H.R. Con. Res. ", billnum) # stupid bluebook format
+        billnum = re.sub("^S.Con.Res. ", "S. Con. Res. ", billnum) # stupid bluebook format
+        ret += billnum
+        ret += ", " + ordinal(self.congress) + " Cong."
+        if not title.endswith(" of {}".format(year)):
+            ret += " ({})".format(year)
+        ret += "."
+        return ret
 
     @property
     def sponsor_name(self):

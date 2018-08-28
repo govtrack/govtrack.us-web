@@ -439,7 +439,7 @@
 				{% with bill.slip_law_number as sln %}
 				{% if sln %}
 					<dt>Law:</dt>
-					<dd><p>{{bill.slip_law_number}}</p></dd>
+					<dd><p>{{sln}}</p></dd>
 				{% endif %}
 				{% endwith %}
 
@@ -709,6 +709,7 @@
 				<div style="margin: 1em; word-wrap: break-word;">
 					<p id="cite_apa" style="display: none">GovTrack.us. ({% now "Y" %}). {{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15|stripfinalperiod}}. Retrieved from {{request.build_absolute_uri}}</p>
 					<p id="cite_mla">&ldquo;{{bill.display_number_no_congress_number}} &mdash; {{bill.congress|ordinal}} Congress: {{bill.title_no_number|truncatewords:15|stripfinalperiod}}.&rdquo; www.GovTrack.us. {{bill.introduced_date|date:"Y"}}. {% now "F j, Y" %} &lt;{{request.build_absolute_uri}}&gt;</p>
+					<p id="cite_bluebook" style="display: none">{{bill.bluebook_citation}}</p>
 					<p id="cite_wikipedia" style="display: none">{{cite web<br/>
 					|url={{request.build_absolute_uri}}<br/>
 					|title={{bill.display_number_with_congress_number}}<br/>
@@ -722,7 +723,7 @@
 					<script>function show_cite(elem) {
 						var fmt = $(elem).attr("data-cite");
 						var v = $("#cite_" + fmt).is(":visible");
-						$('#cite_apa, #cite_mla, #cite_wikipedia').slideUp();
+						$('#cite_apa, #cite_mla, #cite_bluebook, #cite_wikipedia').slideUp();
 						if (!v) $("#cite_" + fmt).slideDown();
 						$(elem).parent().parents().find("li").show();
 						$(elem).parent().hide();
@@ -733,6 +734,7 @@
 						<li>show another citation format:</li>
 						<li style="display: none"><a href="#" onclick="return show_cite(this)" data-cite="mla">MLA</a></li>
 						<li><a href="#" onclick="return show_cite(this)" data-cite="apa">APA</a></li>
+						<li><a href="#" onclick="return show_cite(this)" data-cite="bluebook">Blue Book</a></li>
 						<li><a href="#" onclick="return show_cite(this)" data-cite="wikipedia">Wikipedia Template</a></li>
 					</ul>
 				</div>
