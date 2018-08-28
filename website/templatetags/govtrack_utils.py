@@ -61,7 +61,7 @@ def markdown(value):
     for node in dom.iter():
         if node.tag not in valid_tags and node.tag != 'DOCUMENT_FRAGMENT':
             node.tag = '{http://www.w3.org/1999/xhtml}span'
-        for name, val in node.attrib.items():
+        for name, val in list(node.attrib.items()):
             if name.lower() in ("href", "src"):
                 val = filter_url(val)
                 if val is None:
