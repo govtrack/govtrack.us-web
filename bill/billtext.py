@@ -106,8 +106,7 @@ def load_bill_mods_metadata(fn):
     ns = { "mods": "http://www.loc.gov/mods/v3" }
     
     docdate = mods.xpath("string(mods:originInfo/mods:dateIssued)", namespaces=ns)
-    gpo_url = "http://www.gpo.gov/fdsys/search/pagedetails.action?packageId=" + mods.xpath("string(mods:recordInfo/mods:recordIdentifier[@source='DGPO'])", namespaces=ns)
-    #gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
+    gpo_url = mods.xpath("string(mods:identifier[@type='uri'])", namespaces=ns)
     gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
     doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
     numpages = mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
@@ -243,7 +242,7 @@ def get_bill_text_metadata(bill, version):
         dat["has_displayable_text"] = True
 
     # get a PDF file if one exists
-    pdf_fn = "../scripts/congress-pdf-config/" + basename.replace("data/congress", "data") + "/document.pdf"
+    pdf_fn = basename + "/document.pdf"
     if os.path.exists(pdf_fn):
         dat["pdf_file"] = pdf_fn
         dat["has_thumbnail"] = True
@@ -265,9 +264,6 @@ def get_bill_text_metadata(bill, version):
         
 def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citations=False):
     # Load bill text info from the Congress project data directory.
-    # We have JSON files for metadata and plain text files mirrored from GPO
-    # containing bill text (either from the Statutes at Large OCR'ed text
-    # layers, or from GPO FDSys's BILLS collection).
     
     dat = get_bill_text_metadata(bill, version)
     if not dat:

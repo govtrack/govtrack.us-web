@@ -1521,7 +1521,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 continue
             report_type, report_congress, report_number = m.groups()
             report_type = report_type.lower() + "rpt"
-            rpt_mods = "../scripts/congress-pdf-config/data/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
+            rpt_mods = "data/congress/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
 
             # Load the report's MODS metadata, if we have it.
             try:

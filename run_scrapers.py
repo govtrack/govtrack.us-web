@@ -106,16 +106,11 @@ if "text" in sys.argv:
 	# Do this before bills because the process of loading into the db checks for new
 	# bill text and generates feed events for text availability.
 
-	# Update the mirror of bill text on GPO FDSys, except PDFs.
-	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=BILLS --bulkdata=False --store=mods,text,xml --log=%s" % (SCRAPER_PATH, log_level))
+	# Update the mirror of bill text from GPO's GovInfo.gov.
+	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=BILLS --extract=mods,text,xml,pdf --log=%s" % (SCRAPER_PATH, log_level))
 
-	# Fetch PDFs. We do this separately because we only use them for thumbnails and
-	# don't want to expose in data.
-	os.system("(cd ~/scripts/congress-pdf-config/; . .env/bin/activate; ./run fdsys --collections=BILLS --bulkdata=False --store=pdf --log=%s)" % log_level)
-
-	# Also metadata for committee reports, for the current Congress (because we
-	# only use this for 114th forward).
-	os.system("(cd ~/scripts/congress-pdf-config/; . .env/bin/activate; ./run fdsys --collections=CRPT --store=mods --congress=%s --log=%s)" % (CONGRESS, log_level))
+	# Also metadata for committee reports.
+	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=CRPT --extract=mods --log=%s" % (SCRAPER_PATH, log_level))
 
 	# Update text incorporation analysis for any new text versions.
 	os.system("analysis/text_incorporation.py analyze %d" % CONGRESS)
@@ -127,7 +122,7 @@ if "text" in sys.argv:
 if "bills" in sys.argv:
 	# Scrape.
 	if CONGRESS >= 114:
-		os.system("cd %s; . .env/bin/activate; ./run fdsys --bulkdata=True --collections=BILLSTATUS --log=%s; ./run bills --govtrack --congress=%d --log=%s" % (SCRAPER_PATH, log_level, CONGRESS, log_level))
+		os.system("cd %s; . .env/bin/activate; ./run govinfo --bulkdata=BILLSTATUS --log=%s; ./run bills --govtrack --congress=%d --log=%s" % (SCRAPER_PATH, log_level, CONGRESS, log_level))
 	
 	# Copy files into legacy location.
 
@@ -204,7 +199,7 @@ if "stat_bills" in sys.argv:
 	# Pull in statutes from the 85th-92nd Congress
 	# via the GPO's Statutes at Large.
 	
-	os.system("cd %s; . .env/bin/activate; ./run fdsys --collections=STATUTE --store=mods --log=%s" % (SCRAPER_PATH, "warn")) # log_level
+	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=STATUTE --extract=mods --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=65-86 --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=87-106 --textversions --log=%s" % (SCRAPER_PATH, "warn")) # log_level
 	

@@ -537,7 +537,7 @@
 				{% if bill.source == "statutesatlarge" %}
 				<dt>Source:</dt>
 				<dd>
-					<p><a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a></p>
+					<p><a href="{{text_info.gpo_url}}">GPO GovInfo &ndash; United States Statutes at Large</a></p>
 				</dd>
 				{% elif bill.source == "americanmemory" %}
 				<dt>Source:</dt>
@@ -748,7 +748,7 @@
 						Congress.gov is generally updated one day after events occur, and so legislative activity shown here may be one day behind. Data via the <a href="https://github.com/unitedstates/congress">congress project</a>.
 					{% elif bill.source == "statutesatlarge" %}
 						<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
-						<a href="{{text_info.gpo_url}}">GPO FDSys &ndash; United States Statutes at Large</a>, the official digital repository for historical records of enacted laws.
+						<a href="{{text_info.gpo_url}}">GPO GovInfo.gov &ndash; United States Statutes at Large</a>, the official digital repository for historical records of enacted laws.
 						Limited information is available for bills and resolutions introduced before 1973 (the 93<sup>rd</sup> Congress).
 						Data via the <a href="https://github.com/unitedstates/congress">congress project</a>.
 					{% elif bill.source == "americanmemory" %}
