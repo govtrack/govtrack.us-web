@@ -1,9 +1,11 @@
 #!/bin/bash
+NAME=$1
+PROCESSES=$2
 source .venv/bin/activate
 ./minify
 honcho -e local/settings.env run \
-	/home/govtrack/web/.venv/bin/uwsgi \
+	.venv/bin/uwsgi \
 	--wsgi-file wsgi.py \
-	--socket /tmp/uwsgi_govtrack_www.sock --chmod-socket=666 \
-	--pidfile /tmp/uwsgi_govtrack_www.pid \
-	--processes 10
+	--socket /tmp/uwsgi_govtrack_${NAME}.sock --chmod-socket=666 \
+	--pidfile /tmp/uwsgi_govtrack_${NAME}.pid \
+	--processes $PROCESSES
