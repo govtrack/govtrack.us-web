@@ -223,7 +223,13 @@ class Person(models.Model):
         ret = []
         for role in self.roles.order_by('startdate'):
             role.id = None # prevent corruption
+
+            # since we'll end up only showing years, round Jan 3 back to the previous year
             role.enddate = PersonRole.round_down_enddate(role.enddate, do_rounding=round_end)
+
+            # is the end a special election?
+            role.ends_with_special_election = ((role.extra or {}).get("end-type") == "special-election")
+
             if len(ret) > 0 and role.continues_from(ret[-1]):
                 # condense party_affiliations
                 import copy
@@ -253,6 +259,7 @@ class Person(models.Model):
                 ret[-1].party = role.party
                 ret[-1].caucus = role.caucus
                 ret[-1].senator_rank = role.senator_rank
+                ret[-1].ends_with_special_election = role.ends_with_special_election
             else:
                 ret.append(role)
         ret.reverse()
@@ -648,8 +655,9 @@ class PersonRole(models.Model):
         # by special election sooner than the term end date stored in our
         # data. The end date is thus not known because it will be when the
         # special election winner is certified.
-        if self.id in (44287, 44288): return 2018 # Tina Smith, Cindy Hyde-Smith
         if not self.current: raise ValueError()
+        if (self.extra or {}).get("end-type") == "special-election":
+            return self.enddate.year
         return self.enddate.year-1
 
     def get_most_recent_session_stats(self):

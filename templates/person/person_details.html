@@ -323,7 +323,14 @@ function show_pronunciation_guide() {
         		{% if r.current %}has served since {{ r.startdate }}{% else %}
         		served from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}.
         		   {# note that r has mangled dates so must show year only #}
-        		{% if r.current %}{{ person.lastname }} is next up for reelection in {{role.next_election_year}}.{% endif %}
+        		{% if r.current %}
+                    {{ person.lastname }}
+                    {% if r.ends_with_special_election %}
+                        was appointed to the Senate to fill a vacancy and is up for reelection in a special election in {{role.next_election_year}}.
+                    {% else %}
+                        is next up for reelection in {{role.next_election_year}}.
+                    {% endif %}
+                {% endif %}
         		</p>
 
 				{% if r.is_territory %}
