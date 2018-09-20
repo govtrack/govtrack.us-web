@@ -138,7 +138,7 @@
 		font-weight: bold;
 	}
 		#status-row-grid .status-item.pending .status-label {
-			font-weight: normal;
+			padding-top: .25em;
 		}
 	#status-row-grid .status-item .status-description {
 		padding-bottom: 1.25em;
@@ -197,7 +197,7 @@
 	#status-row-grid .img.status_enacted_tendayrule
 	 { background-position: -370px 0; }
 #status-row-grid .pending {
-	color: #BBB;
+	color: #AAA;
 }
 	#status-row-grid .pending .img {
 		opacity: .3;
@@ -639,10 +639,26 @@
 			{% if current or bill.get_major_events|length > 0 %}
 				<table id="status-row-grid">
 				{% for item in bill.get_major_events %}
+					{% if item.first_future_event %}
+						<tr class="status-item pending">
+							<td class="date ghosted">
+								<div class="wrapper">
+								</div>
+							</td>
+							<td></td>
+							<td style="padding: .25em 0 1em 0; font-size: 90%;">
+								If this {{bill.noun}} has further action, the following steps may occur next:
+							</td>
+						</tr>
+					{% endif %}
 					<tr class="status-item {% if not item.date or item.different_congress %}pending{% endif %} {% if item.bill %}related-bill{% endif %}">
 						<td class="date {% if forloop.last %}last{% endif %} {% if item.last_occurred or not item.date or item.different_congress %}ghosted{% endif %}">
 							<div class="wrapper">
-								{% if item.date %}<span class="nowrap">{{item.date|date:"DATE_FORMAT"}}</span>{% else %}Pending{% endif %}
+								{% if item.date %}
+								<span class="nowrap">{{item.date|date:"DATE_FORMAT"}}</span>
+								{% else %}
+								&mdash;
+								{% endif %}
 							</div>
 						</td>
 						<td>
