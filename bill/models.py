@@ -1279,8 +1279,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
         if self.is_alive and top and not self.enacted_ex():
             if len(ret) > 0: # mark the last one differently for display purposes
                 ret[-1]["last_occurred"] = True
-            for key, label in self.get_future_events():
-                ret.append({ "key": key, "label": label })
+            for i, (key, label) in enumerate(self.get_future_events()):
+                ret.append({ "key": key, "label": label, "first_future_event": (i==0) })
 
         return ret
 
@@ -1290,12 +1290,12 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
         # define a state diagram
         common_paths = {
-            BillStatus.introduced: BillStatus.reported,
+            BillStatus.introduced: (BillStatus.reported, "Passed Committee"),
         }
 
         type_specific_paths = {
             BillType.house_bill: {
-                BillStatus.reported: BillStatus.pass_over_house,
+                BillStatus.reported: (BillStatus.pass_over_house, "Passed House"),
                 BillStatus.pass_over_house: (BillStatus.passed_bill, "Passed Senate"),
                 BillStatus.pass_back_house: (BillStatus.passed_bill, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
@@ -1309,7 +1309,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 BillStatus.override_pass_over_house: BillStatus.enacted_veto_override,
             },
             BillType.senate_bill: {
-                BillStatus.reported: BillStatus.pass_over_senate,
+                BillStatus.reported: (BillStatus.pass_over_senate, "Passed Senate"),
                 BillStatus.pass_over_senate: (BillStatus.passed_bill, "Passed House"),
                 BillStatus.pass_back_house: (BillStatus.passed_bill, "Senate Approves House Changes"),
                 BillStatus.pass_back_senate: (BillStatus.passed_bill, "House Approves Senate Changes"),
