@@ -104,3 +104,7 @@ function init_ad_zone(ad_container) {
     }
 }
 
+function smooth_scroll_to(elem) {
+    $("html, body").animate({ scrollTop: elem.offset().top - $(window).height()/10 });
+    return false;
+}

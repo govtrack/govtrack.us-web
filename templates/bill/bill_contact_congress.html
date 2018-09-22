@@ -1,0 +1,530 @@
+{% extends 'master.html' %}
+{% load humanize govtrack_utils %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}Call or Write Congress About {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
+
+{% block head %}
+  {% include "person/mapbox-head.html" %}
+  <style>
+    #map {
+      width: 100%;
+      height: 70vh;
+      border: 1px solid #999;
+    }
+
+    .panel-red {
+      background-color: #9D2146;
+      border-radius: 20px;
+      padding: 5px;
+      color: white;
+      font-weight: bold;
+    }
+      .panel-red a {
+        color: inherit;
+        font-weight: normal;
+      }
+
+    .panel-blue {
+      background-color: #1D4E70;
+      border-radius: 20px;
+      padding: 5px;
+      color: white;
+      font-weight: bold;
+    }
+      .panel-blue a {
+        color: inherit;
+        font-weight: normal;
+      }
+
+    #content * > p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+  <li><a href="{% url "congress_home" %}">Congress</a></li>
+  <li><a href="/congress/bills">Bills</a></li>
+  <li><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a>
+  <li class="active">Call/Write Congress</li>
+</ol>
+{% endblock %}
+
+{% block body %}
+
+<div class="h1-multiline" style="margin: .5em 0">
+  <h1 style="max-height: 3em; overflow: hidden;">
+  {{bill.display_number_no_congress_number}}{% if not bill.is_current%} ({{bill.congress|ordinalhtml}}){% endif %}: {{bill.title_no_number}}
+  </h1>
+  <p id="h1_overflow" style="display: none"></p>
+  <script>
+  window.post_jquery_load_scripts.push(function() {
+  $('h1').truncate_text(function (remaining, chopped) {
+      if (chopped) {
+        $('h1').css({ marginBottom: '2px' });
+        $('#h1_overflow').text("..." + chopped).show();
+      }
+  }, function() { $('h1').addClass('long'); });
+  });
+  </script>
+</div>
+
+<div class="row">
+  <div class="col-md-7">
+    <h2 style="margin: .5em 0 1em 0">Here&rsquo;s how to call or write Congress about this {{bill.noun}}</h2>
+
+    <p>We&rsquo;ll walk you through the process of writing or calling your representative and senators in Congress about {{bill.display_number}}. But before we can help, we need to know where you call home so we can figure out who represents you.</p>
+
+    <form onsubmit="enter_address(); return false;" style="margin: 1.5em 0;" class="panel panel-red">
+    <div class="panel-body">
+      <h2 style="margin: 0">I live at...</h2>
+      <div class="row">
+        <div class="col-xs-8 col-md-8">
+          <input id="address" class="form-control" type="text"
+            name="address"
+            placeholder="415 N. Main St., Hannibal, Missouri"
+            style="margin: 6px 0;">
+        </div>
+        <div class="col-xs-4" style="padding: 5px 0 0 0">
+          <button id="find-my-reps" class="btn btn-info">
+            <span class="fa fa-search"></span>
+            Find My Reps
+          </button>
+        </div>
+      </div>
+      <a id="use-my-address" href="#" onclick="use_my_location(); return false;">
+        <span class="fa fa-location-arrow"></span>
+        I&rsquo;m at home now, use my location
+      </a>
+    </div>
+    </form>
+
+    <div id="check-the-map-anchor"></div>
+
+    <div id="check-the-map" style="display: none;">
+      <h2 style="margin: 1.5em 0 .5em 0;">Is this your home?</h2>
+      <div class="row">
+        <!-- provide space in margin so user can scroll past -->
+        <div class="col-xs-11 col-md-12">
+          <p>Check that we&rsquo;ve placed the marker on the map where your home is. If we got it right, scroll down to <a href="#" onclick="smooth_scroll_to($('#statename')); return false">continue below the map</a>. If we got it wrong, scroll up and try entering another address in your congressional district.</p>
+          <div id='map'></div>
+        </div>
+      </div>
+
+      <h2 style="margin: 1.5em 0 1em 0;">
+        You live in <span id="statename"></span>&rsquo;s <span id="districtordinal"></span> congressional district.
+      </h2>
+
+      <p style="margin: 0 0 1em 0">You are represented by:</p>
+
+      <div id="you-are-represented-by-template" style="display: none;">
+        <table>
+          <tr valign="top">
+            <td>
+              <img style="display: none; width: 50px; height: 60px; border: 1px solid #333; margin: 0 1em .75em 0;">
+            </td>
+            <td style="padding-bottom: .75em;">
+              <div class="name" style="font-weight: bold"><a style="color: inherit; border: none;"></a></div>
+              <div class="description" style="color: #555;"></div>
+              <div class="party" style="color: #555;"></div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div id="you-are-represented-by" style="margin-bottom: .5em">
+        <table>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="who-to-contact-overview" class="panel panel-blue">
+        <div class="panel-body">
+          <p>
+            {# The logic here should match the javascript of how we populate the "ask" text. #}
+
+            {{bill.display_number}} is currently pending before the
+            {% if bill.current_chamber == "senate" %}Senate, so we will help you connect with your <i>senators</i>.
+            {% else %}House of Representatives, so we will help you connect with your <i>representative</i>.{% endif %}
+            
+            {% if bill.current_chamber == bill.originating_chamber|lower %}
+              {% if bill.current_status == 1 %} {# introduced #}
+                You will ask them to either cosponsor or oppose the {{bill.noun}}.
+              {% else %}
+                You will ask them to vote for or against the {{bill.noun}}.
+              {% endif %}
+            {% else %}
+                You will ask them to vote for or against the {{bill.noun}}.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <div id="who-to-contact-no-targets" class="panel panel-blue">
+        <div class="panel-body">
+          <p>
+            {{bill.display_number}} is currently pending before the
+            {% if bill.current_chamber == "senate" %}Senate, but you do not have any senators.
+            {% else %}House of Representatives, but your district does not have a representative at this time.{% endif %}
+            Unfortunately there isn&rsquo;t anyone in Congress for you to call about this {{bill.noun}}. Try looking up other legislation on this topic.
+          </p>
+        </div>
+      </div>
+    </div>  
+
+  </div>
+  <div class="col-md-5">
+    <div class="panel panel-info" style="font-size: 90%">
+    <div class="panel-body">
+      <h2 style="margin: 0 0 1em 0; font-size: 105%; font-weight: bold;">
+        General tips
+      </h2>
+      <p>Your representative and senators were elected by you and upwards of a million to tens of millions of your fellow Americans, but <b>by law they each only have a small team of correspondents on staff</b> to read and respond to all of their mail.</p>
+      <p>Be <b>patient and respectful</b> to the staff member you reach &mdash; you want them on your side, don&rsquo;t you?</p>
+      <p>The way to stand out is to provide a <b>brief but specific personal story</b> about how this {{bill.noun}} would affect your life. If you don&rsquo;t have a personal story, you may want to write or call about a different topic.</p>
+      <p>Do they want to hear from you? <b>Yes!</b> They need your support next election. But that doesn&rsquo;t mean you&rsquo;ll change their mind. On hot issues, their vote is often already made up. But on other issues, you could be their first constituent to weigh in.</p>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div id="script-template" style="display: none;">
+  <div class="col-md-6">
+  <div style="margin: 1em 0; border: 1px solid #9D2146; padding: 1em;">
+    
+    <h2 style="margin: 0 0 15px 0;">How to call or write <span class="name"></span></h2>
+    
+    <p>Calling and writing your <span class="role-type"></span> are equally effective ways to make your voice heard. Choose the method that you are most comfortable with. {# Either way, think first about a brief but specific personal story about how this {{bill.noun}} would affect your life. And remember to be patient and respectful as you&rsquo;ll be communicating with a staff member who receives hundreds of calls and letters each day from your fellow constituents. #}</p>
+
+    <p class="is-a-cosponsor text-info"><span class="name"></span> is a cosponsor of {{bill.display_number}}, so you can thank <span class="him-her"></span> for <span class="his-her"></span> support if you support this {{bill.noun}}.</p>
+
+    {% if bill.current_chamber == bill.originating_chamber|lower and bill.current_status == 1 %}
+    <p class="is-a-committee-member text-info"><span class="name"></span> is on a committee that {{bill.display_number}} has been referred to, and <span class="his-her"></span> vote will be needed to advance the {{bill.noun}} (<span class="he-she"></span> is <span class="committee-list"></span>).</p>
+    {% endif %}
+
+    <h3 style="margin-top: 0">How to write <span class="name" style="font-style: normal;"></span></h3>
+
+    <ol>
+      <li>Visit the <span class="role-type"></span>&rsquo;s website at <a class="website" target="_blank"></a>. (This link will open a new browser tab.)</li>
+      <li>Look for the contact form for submitting your opinion on legislation.</li>
+      <li>Enter your name and address.</li>
+      <li>Copy and paste one of the messages below and <b>modify it to include a personal story about how this issue would affect your life</b>:</li>
+    </ol>
+
+    <h4 style="margin: 0 0 5px 40px; font-size: 90%; font-weight: bold; font-variant: small-caps; color: black;">if you support the {{bill.noun}}</h4>
+    <div style="margin: 0 0 0 40px; border: 1px solid #AAA; padding: .5em; background-color: #F5F5F5; font-family: Roboto Slab;">
+      <p>Dear <span class="name"></span>,</p>
+      <p>I am writing to <span class="ask-support"></span>.</p>
+      <p>Thank you for your time.</p>
+    </div>
+    <h4 style="margin: 15px 0 5px 40px; font-size: 90%; font-weight: bold; font-variant: small-caps; color: black;">if you oppose the {{bill.noun}}</h4>
+    <div style="margin: 0 0 15px 40px; border: 1px solid #AAA; padding: .5em; background-color: #F5F5F5; font-family: Roboto Slab;">
+      <p>Dear <span class="name"></span>,</p>
+      <p>I am writing to <span class="ask-oppose"></span>.</p>
+      <p>Thank you for your time.</p>
+    </div>
+
+    <p>You can expect to get a form response, but know that <b>your <span class="role-type"></span> is typically tallying the messages they receive on each side of each issue</b>.</p>
+
+    <h3>How to call <span class="name" style="font-style: normal;"></span></h3>
+
+    <p>You can reach <span class="name"></span>&rsquo;s office by calling <a class="tel"></a>.
+    A staff member in the <span class="role-type"></span>&rsquo;s office will probably pick
+    up the phone. Your conversation will go something like this:</p>
+    <p><i><span class="name"></span>&rsquo;s office. How can I help you?</i></p>
+
+    <h4 style="margin: 0 0 8px 0; font-size: 90%; font-weight: bold; font-variant: small-caps; color: black;">if you support the {{bill.noun}}</h4>
+    <blockquote style="font-family: Roboto Slab; margin-left: 2px; padding: 0 8px; line-height: 150%;">
+      <p>Hi, I&rsquo;m a constituent and I am calling to <span class="ask-support"></span></span>.</p>
+    </blockquote>
+    <h4 style="margin: 0 0 8px 0; font-size: 90%; font-weight: bold; font-variant: small-caps; color: black;">if you oppose the {{bill.noun}}</h4>
+    <blockquote style="font-family: Roboto Slab; margin-left: 2px; padding: 0 8px; line-height: 150%;">
+      <p>Hi, I&rsquo;m a constituent and I am calling to <span class="ask-oppose"></span></span>.</p>
+    </blockquote>
+
+    <p>Then say just <b>one sentence about how this issue affects your life</b> to show the staffer that the issue means something to you. When the staffer asks</p>
+    <p><i>Can I get your name and address?</i></p>
+    <p>provide your name and address so your call is counted, and then say <i>Thank you for your time.</i> and you&rsquo;ll be done!</p>
+    <p>Your goal is to be counted, so a quick and courteous call like this is
+    all it takes. If you get voicemail, leave your name and address in your message.</p>
+  </div>
+  </div>
+</div>
+
+<div id="scripts" class="row">
+</div>
+
+{% endblock %}
+
+
+{% block body_scripts %}
+
+{% include "person/mapbox-scripts.html" %}
+
+<script>
+  $(function() {
+    // Restore state.
+    var state = $.cookie("homeaddr");
+    if (state) {
+      state = parse_qs(state);
+      if (state.addr) {
+        $('#address').val(state.addr);
+        enter_address();
+        return; // don't put focus in the field
+      } else if (state.coords) {
+        modal_operation(function(operation_finished) {
+          show_map_step({ longitude: state.coords.split(/,/)[0], latitude: state.coords.split(/,/)[1] }, operation_finished);
+        });
+        return; // don't put focus in the field
+      }
+    }
+
+    // UI.
+    $('#address').focus();
+
+  });
+
+  function modal_operation(op) {
+    var controls = $('#find-my-reps, #use-my-address');
+    controls.attr('disabled', '1');
+    function end_modal_operation() {
+      controls.removeAttr('disabled');
+    };
+    try {
+      op(end_modal_operation);
+    } catch (e) {
+      end_modal_operation();
+    }
+  }
+
+  function enter_address() {
+    var addr = $('#address').val();
+    if (!/\S/.test(addr)) {
+      // For debugging it's helpful to be able to clear
+      // the cookie.
+      $.cookie("homeaddr", '', { expires: -1, path: '/' });
+      return;
+    }
+    modal_operation(function(operation_finished) {
+      // Query MapBox API to geocode the street address. Then pass
+      // the coordinate on to the next step.
+      address_to_latlng(addr, function (pt) {
+        // Save state.
+        $.cookie("homeaddr", form_qs({ "addr": addr }), { expires: 30.5*6, path: '/' });
+
+        // Show UI.
+        show_map_step({ longitude: pt[0], latitude: pt[1] }, operation_finished);
+      });
+    });
+  }
+
+  function use_my_location() {
+    if (!("geolocation" in navigator)) {
+      alert("Location is not available.");
+      return;
+    }
+    modal_operation(function(operation_finished) {
+      // Use the browser's location feature to get the coordinate.
+      navigator.geolocation.getCurrentPosition(function(position) {
+        // Sometimes it comes back with the MaxMind center of the U.S.
+        // at 38, -97. Don't allow that. See http://fusion.net/story/287592/internet-mapping-glitch-kansas-farm/.
+        // We also see 37.09024, -95.71289 in the wild. So use a large
+        // enough tolerance.
+        var dist_from_us_center = Math.pow(Math.pow(position.coords.latitude - 38, 2) + Math.pow(position.coords.longitude - -97, 2), .5);
+        if (dist_from_us_center < 2.5) {
+          operation_finished();
+          alert("Your location is not available.");
+          return;
+        }
+
+        // Save state.
+        $.cookie("homeaddr", form_qs({ "coords": position.coords.longitude + "," + position.coords.latitude }), { expires: 30.5*6, path: '/' });
+
+        // Show UI.
+        show_map_step(position.coords, operation_finished);
+      }, function(err) {
+        operation_finished();
+        alert("Your location is not available.");
+      }, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 15000
+      });
+      });
+    }
+
+    function show_map_step(coord, operation_finished) {
+      // Query Mapbox API to get what district is at this location.
+      latlng_to_district({
+        lat: coord.latitude,
+        lng: coord.longitude
+        }, function(district) {
+          if (!district) {
+            alert("That location does not seem to be in a United States Congressional District.");
+            operation_finished();
+            return;
+          }
+
+          // Okay we have the state and district.
+
+          // Show the map.
+          smooth_scroll_to($('#check-the-map-anchor'));
+          $('#check-the-map').show();
+          map.resize();
+
+          // Add a marker for the user's home.
+          if (window.current_marker_id)
+            map.removeLayer(window.current_marker_id);
+          window.current_marker_id = addMapMarker([coord.longitude, coord.latitude]);
+
+          // Get reps & district bounds.
+          $.ajax({
+            url: "/congress/members/lookup.json",
+            method: "GET",
+            data: {
+              state: district.state,
+              district: district.number,
+              bill: "{{bill.congressproject_id|escapejs}}"
+            },
+            success: function(res) {
+              // Show only the outline of the district. Since the map might still
+              // be loading, especially if this is happening on page load because
+              // the user's address was saved, delay until the map is loaded and
+              // the function is available.
+              function delay_until_map_loaded(f) {
+                if (!map.showCongressionalDistrict) // not loaded
+                  map.on('load', f);
+                else
+                  f();
+              }
+              delay_until_map_loaded(function() {
+                // Zoom map to the district.
+                map.flyTo({
+                  center: [res.district.bounds.center.longitude, res.district.bounds.center.latitude], // the user's home is at [coord.longitude, coord.latitude]
+                  zoom: res.district.bounds.zoom-1});
+
+                map.showCongressionalDistrict(district.state, district.number);
+              });
+
+              // Fill in the text.
+              $('#statename').text(res.state.name);
+              $('#districtordinal').text(res.district.ordinal);
+
+              // Show all reps.
+              var members_to_contact = [];
+              var t = $("#you-are-represented-by table tbody");
+              t.text('');
+              res.members.forEach(function(p) {
+                var n = $("#you-are-represented-by-template tr").clone();
+                t.append(n);
+                if (p.photo_url)
+                  n.find("img").attr('src', p.photo_url).show();
+                n.find(".name a").attr('href', p.url);
+                n.find(".name a").text(p.name);
+                n.find(".description").text(p.description);
+                n.find(".party").text(p.party);
+
+                // Filter out reps that the user may contact at this point
+                // in the legislative process.
+                if (("{{bill.current_chamber}}" == "senate" && p.type == "Senator")
+                  || ("{{bill.current_chamber}}" == "house" && p.type == "Representative")) {
+                  members_to_contact.push(p);
+                } else {
+                  // Dim.
+                  n.find(".name a").css({ fontWeight: "normal" });
+                }
+              });
+
+              // Tell the user which members they are going to now contact.
+              $('#who-to-contact-overview').toggle(members_to_contact.length > 0);
+              $('#who-to-contact-no-targets').toggle(members_to_contact.length == 0);
+
+              // Populate scripts.
+              $('#scripts').text('');
+              members_to_contact.forEach(function(p) {
+                // Create a script for legislator p.
+                var n = $('#script-template>div').clone();
+                $('#scripts').append(n);
+                n.find(".name").text(p.name_formal);
+                n.find('.role-type').text(p.type.toLowerCase());
+                n.find('.website').attr("href", p.contact_url);
+                n.find('.website').text(p.website);
+                n.find('.tel').attr("href", "tel:+1" + p.phone);
+                n.find('.tel').text(p.phone);
+                n.find(".he-she").text(p.pronouns.he_she);
+                n.find(".him-her").text(p.pronouns.him_her);
+                n.find(".his-her").text(p.pronouns.his_her);
+                n.find(".is-a-cosponsor").toggle(p['bill-status'].cosponsor);
+                n.find(".is-a-committee-member").toggle(p['bill-status']["committee-assignments"].length > 0);
+                n.find(".committee-list").text(
+                  p['bill-status']["committee-assignments"].map(function(ca) {
+                    return (ca.role ? ca.role : "a member") + " of the " + ca.committee;
+                  }).join(", ")
+                );
+
+                // Customize the support / oppose asks.
+                
+                var ask_support;
+                var ask_oppose;
+
+                {# The logic here should match the template logic explaining the "ask" text above. #}
+                {% if bill.current_chamber == bill.originating_chamber|lower and bill.current_status == 1 %}
+                // The bill is in committee. The ask is for the legislator to cosponsor
+                // the bill. If the legislator is on the right committee, we note that
+                // as a part of the ask. If the legislator is already a cosponsor, we
+                // simply thank them for their support.
+                //
+                // The ask continues the sentence "I'm writing/calling to....". We use
+                // name_formal which is good for calls and letters, whereas "you" is
+                // only good for letters and not calls because the user is talking to
+                // a staffer.
+                if (p['bill-status'].cosponsor) {
+                  ask_support = "thank " + p.name_formal + " for cosponsoring {{bill.title_comma_the|escapejs}}";
+                  if (p['bill-status']["committee-assignments"].length > 0)
+                    ask_support += " and ask " + p.pronouns.him_her + " to support it in the " + p['bill-status']["committee-assignments"][0].committee + " where the bill is waiting for a vote";
+
+                  ask_oppose = "ask " + p.name_formal + " to stop supporting {{bill.title_comma_the|escapejs}}";
+                  if (p['bill-status']["committee-assignments"].length > 0)
+                    ask_oppose += " and oppose it in the " + p['bill-status']["committee-assignments"][0].committee + " where the bill is waiting for a vote";
+                } else {
+                  ask_support = "ask " + p.name_formal + " to cosponsor {{bill.title_comma_the|escapejs}}";
+                  if (p['bill-status']["committee-assignments"].length > 0)
+                    ask_support += " and support it in the " + p['bill-status']["committee-assignments"][0].committee + " where the bill is waiting for a vote";
+
+                  ask_oppose = "ask " + p.name_formal + " to oppose {{bill.title_comma_the|escapejs}}";
+                  if (p['bill-status']["committee-assignments"].length > 0)
+                    ask_oppose += " and oppose it in the " + p['bill-status']["committee-assignments"][0].committee + " where the bill is waiting for a vote";
+                }
+
+                {% else %}
+                // The bill is past committee so is facing a vote in either the originating
+                // or other chamber. If in the originating chamber, we again have a different
+                // ask for cosponsors. Committee membership is no longer relevant, though.
+                if (p['bill-status'].cosponsor) {
+                  ask_support = "thank " + p.name_formal + " for cosponsoring {{bill.title_comma_the|escapejs}}";
+                  ask_oppose = "ask " + p.name_formal + " to stop supporting {{bill.title_comma_the|escapejs}}";
+                } else {
+                  ask_support = "ask " + p.name_formal + " to vote for {{bill.title_comma_the|escapejs}}";
+                  ask_oppose = "ask " + p.name_formal + " to vote against {{bill.title_comma_the|escapejs}}";
+                }
+
+                {% endif %}
+
+                n.find('.ask-support').text(ask_support);
+                n.find('.ask-oppose').text(ask_oppose);
+              });
+
+              operation_finished();
+            },
+            error: function() {
+              operation_finished();
+            }
+          })
+      });
+    }
+</script>
+{% endblock %}

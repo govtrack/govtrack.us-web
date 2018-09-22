@@ -398,6 +398,13 @@ class Bill(models.Model):
         if self.lock_title:
             return re.sub("^" + re.escape(self.display_number+": "), "", self.title)
         return get_primary_bill_title(self, self.titles, with_number=False)
+    @property
+    def title_comma_the(self):
+        # Instead of H.R. 1: Help America Act, return "H.R. 1, the Help America Act".
+        # This works for titles that end with Act or Act of 2000.
+        if re.search(r" Act( of \d\d\d\d)?$", self.title):
+            return re.sub("^(" + re.escape(self.display_number) + "): ", r"\1, the ", self.title)
+        return self.title
 
     @property
     def bill_type_slug(self):
