@@ -76,7 +76,7 @@
 {% block body_scripts %}
 <script>
 function smooth_scroll(elem) {
-	$("html, body").animate({ scrollTop: $('#' + elem.href.split("#")[1]).offset().top - $(window).height()/10 });
+	smooth_scroll_to($('#' + elem.href.split("#")[1]));
 	return false;
 }
 </script>

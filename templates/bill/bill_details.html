@@ -221,13 +221,20 @@
 	{% if bill.is_alive %}
 	<div class="action-row clearfix">
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
-		<button class="btn btn-sm btn-success" onclick="return show_track_panel();">
+		<button class="btn btn-success" onclick="return show_track_panel();">
 			<i class="glyphicon glyphicon-envelope"> </i>
 			<span style="margin-left: 3px;">
 				Track {{bill.display_number_no_congress_number}}
 			</span>
 		</button>
-		
+
+		<a class="btn btn-info" href="{{bill.get_absolute_url}}/comment">
+			<i class="fa fa-phone-square"> </i>
+			<span style="margin-left: 3px;">
+				Call or Write Congress
+			</span>
+		</a>
+
 		<!--
 		<button class="btn btn-sm btn-default" onclick="window.location = 'https://phonecongress.com/topic/congress/bills/{{bill.congressproject_id}}/{{bill.id}}'">
 			<span class="glyphicon glyphicon-phone" style="color: #444"></span>
@@ -236,7 +243,7 @@
 		-->
 
 		{% with SITE_ROOT_URL|add:bill.get_absolute_url as share_url %}
-		<div style="margin-top: 1px;">
+		<div style="margin-top: 3px;">
 			<a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{bill.title|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>
 			<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 		</div>

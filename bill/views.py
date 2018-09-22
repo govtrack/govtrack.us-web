@@ -902,5 +902,15 @@ def bill_text_image(request, congress, type_slug, number, image_type):
 def bill_get_json(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     return HttpResponseRedirect("/api/v2/bill/%d" % bill.id)
-     
+
+@anonymous_view
+@render_to('bill/bill_contact_congress.html')
+def bill_contact_congress(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    return {
+        "bill": bill,
+        "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
+        "MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
+        "MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
+    }
 

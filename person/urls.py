@@ -21,4 +21,6 @@ urlpatterns = [
 	url(r'^[^/]+/(\d+)/cosponsors', person.views.person_cosponsors),
 	
 	url(r'^embed/mapframe(?:\.xpd)?$', person.views.districtmapembed, name='districtmapembed'),
+
+	url(r'^lookup\.json$', person.views.lookup_reps),
 ]

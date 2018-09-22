@@ -499,7 +499,102 @@ def districtmapembed(request):
     	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
     	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
     }
-    
+
+
+@anonymous_view
+@json_response
+def lookup_reps(request):
+    from django.contrib.humanize.templatetags.humanize import ordinal
+    from person.name import get_person_name
+
+    # Get the state and district from the query string.
+    try:
+        state = request.GET['state']
+        district = int(request.GET['district'])
+        if state not in stateapportionment: raise Exception()
+    except:
+        return {
+        }
+
+    # Get the bill (optional) from the query string
+    from bill.models import Bill
+    try:
+        bill = Bill.from_congressproject_id(request.GET["bill"])
+    except:
+        bill = None
+
+    # Helper to get relevant committee assignments.
+    from committee.models import CommitteeMember, CommitteeMemberRole
+    from committee.util import sort_members
+    def mention_committees_once(committeeassignments):
+        # The committee assignments have been sorted first by role (i.e.
+        # committees that the person is the chair of come first) and then
+        # by committee name (which also puts subcommittees after committees).
+        # In order to be less verbose, only mention each full committee
+        # once --- take the first in each mention.
+        seen = set()
+        for c in committeeassignments:
+            if (c.committee in seen) or (c.committee.committee in seen):
+                continue
+            yield c
+            if c.committee.committee is not None:
+                seen.add(c.committee.committee) # add main committee
+            else:
+                seen.add(c.committee) # add this committee
+
+    bounds = get_district_bounds(state, district)
+    return {
+        "state": {
+            "name": statenames[state],
+            "isTerritory": stateapportionment[state] == "T",
+        },
+        "district": {
+            "ordinal": ordinal(district) if district > 0 else "At Large",
+            "bounds": {
+                "center": { "latitude": bounds[0], "longitude": bounds[1] },
+                "zoom": bounds[2]
+            }
+        },
+        "members": [
+            {
+                "id": p.id,
+                "name": get_person_name(p, role_recent=True, firstname_position="before", show_title=True, show_party=False, show_district=False),
+                "name_formal": p.current_role.get_title() + " " + p.lastname,
+                "url": p.get_absolute_url(),
+                "type": p.current_role.get_role_type_display(),
+                "description": p.current_role.get_description(),
+                "party": p.current_role.party,
+                "photo_url": p.get_photo_url_50() if p.has_photo() else None,
+                "contact_url": (p.current_role.extra or {}).get("contact_form") or p.current_role.website,
+                "phone": p.current_role.phone,
+                "website": p.current_role.website,
+                "pronouns": {
+                    "him_her": p.him_her,
+                    "his_her": p.his_her,
+                    "he_she": p.he_she,
+                },
+                "bill-status": {
+                    "cosponsor": p in bill.cosponsors.all(),
+                    "committee-assignments": [
+                        {
+                            "committee": c.committee.fullname,
+                            "role": c.get_role_display() if c.role in (CommitteeMemberRole.chair, CommitteeMemberRole.ranking_member, CommitteeMemberRole.vice_chair) else None,
+                        }
+                        for c in
+                            mention_committees_once(
+                             sort_members(
+                                CommitteeMember.objects.filter(person=p, committee__in=bill.committees.all())))
+                    ]
+                } if bill else None,
+            }
+            for p in
+            list(Person.objects.filter(roles__current=True, roles__state=state, roles__role_type=RoleType.senator)
+              .order_by('roles__senator_rank'))
+            +
+            list(Person.objects.filter(roles__current=True, roles__state=state, roles__district=district, roles__role_type=RoleType.representative))
+        ]
+    }
+
 import django.contrib.sitemaps
 class sitemap_current(django.contrib.sitemaps.Sitemap):
     changefreq = "weekly"

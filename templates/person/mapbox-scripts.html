@@ -68,20 +68,25 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
     // Create a filter to show only the selected state and district. For
     // layers that have a color filter already applied, we have to put it
     // back.
-    var filter = ['all'];
-    if (state) filter.push(['==', 'state', state]);
-    if (district) filter.push(['==', 'number', district]);
-    for (var i = 1; i <= 5; i++) {
-      for (var j = 0; j < 3; j++) {
-        var layer = layer_base_names[j] + i;
-        map.setFilter(layer, filter.concat([layer_base_filters[layer]]));
+    map.showCongressionalDistrict = function(state, district) {
+      var filter = ['all'];
+      if (state) filter.push(['==', 'state', state]);
+      if (district) filter.push(['==', 'number', district]);
+      for (var i = 1; i <= 5; i++) {
+        for (var j = 0; j < 3; j++) {
+          var layer = layer_base_names[j] + i;
+          map.setFilter(layer, filter.concat([layer_base_filters[layer]]));
+        }
       }
     }
+    map.showCongressionalDistrict(state, district);
 
     // Add markers.
     window.addMapMarker = function(lnglat) {
       window._map_marker_count++;
-      map.addSource("symbols"+_map_marker_count, {
+      var markerid = "symbols"+_map_marker_count;
+
+      map.addSource(markerid, {
         "type": "geojson",
         "data": {
           "type": "FeatureCollection",
@@ -100,14 +105,16 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
 
       // add source as a layer and apply some styles
       map.addLayer({
-          "id": "symbols"+_map_marker_count,
+          "id": markerid,
           "type": "circle",
-          "source": "symbols"+_map_marker_count,
+          "source": markerid,
           "paint": {
              "circle-radius": 10,
              "circle-color": "#007cbf"
           }
       });
+
+      return markerid;
     };
 
     window._map_markers.forEach(addMapMarker);
