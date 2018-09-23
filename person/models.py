@@ -438,7 +438,7 @@ class PersonRole(models.Model):
         return True
 
     def get_title(self):
-        """The long form of the title used to prefix the names of people with this role: Representative, Senator, President, Delegate, or Resident Commissioner."""
+        """The long form of the title used to prefix the names of people with this role: Representative, Senator, President, or Resident Commissioner."""
         return self.get_title_name(short=False)
 
     def get_title_abbreviated(self):
@@ -455,11 +455,13 @@ class PersonRole(models.Model):
         if self.role_type == RoleType.representative:
             if self.state not in stateapportionment:
                 # All of the former 'states' were territories that sent delegates.
-                return 'Rep.' if short else 'Delegate'
+                return 'Rep.' if short else 'Representative'
             if self.state == 'PR':
                 return 'Commish.' if short else 'Resident Commissioner'
             if stateapportionment[self.state] == 'T':
-                return 'Rep.' if short else 'Delegate'
+                # These folks are also commonly called delegates, but out of respect
+                # for their disenfranchised constituents we refer to them as representatives.
+                return 'Rep.' if short else 'Representative'
             return 'Rep.' if short else 'Representative'
             
     def state_name(self):
