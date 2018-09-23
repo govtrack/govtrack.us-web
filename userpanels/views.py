@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
@@ -90,7 +87,7 @@ def export_panel_user_data(request, panel_id, download):
 
     panel = get_object_or_404(Panel, id=panel_id, admins=request.user)
 
-    buf = io.BytesIO()
+    buf = io.StringIO()
     w = csv.writer(buf)
 
     if download == "members":
@@ -98,9 +95,9 @@ def export_panel_user_data(request, panel_id, download):
         w.writerow(["id", "email", "joined", "invitation_code", "notes"])
         for mbr in PanelMembership.objects.filter(panel=panel).order_by('created').select_related("user"):
             w.writerow([
-                mbr.id,
+                str(mbr.id),
                 mbr.user.email,
-                mbr.created,
+                mbr.created.isoformat(),
                 mbr.invitation_code,
                 mbr.extra.get("notes", ""),
             ])
@@ -113,15 +110,15 @@ def export_panel_user_data(request, panel_id, download):
             .order_by('created')\
             .select_related("user"):
             w.writerow([
-                upos.id,
+                str(upos.id),
                 members[upos.user.id],
                 upos.user.email,
-                upos.created,
+                upos.created.isoformat(),
                 Bill.from_feed(Feed.from_name(upos.subject)).congressproject_id,
-                upos.get_subject_title().encode("utf8"),
+                upos.get_subject_title(),
                 "https://www.govtrack.us" + upos.get_subject_link(),
-                upos.likert,
-                upos.reason.encode("utf8"),
+                str(upos.likert),
+                upos.reason,
             ])
     else:
         return HttpResponse("invalid")
