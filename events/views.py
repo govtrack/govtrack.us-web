@@ -12,6 +12,7 @@ from common.decorators import render_to
 from datetime import datetime, time
 
 from registration.helpers import json_response
+from twostream.decorators import anonymous_view
 
 from .models import *
 from website.models import *
@@ -213,7 +214,8 @@ def events_list_items(request):
         'expected_frequency': expected_frequency,
         'simple_mode': len(feedlist) == 1 and feedlist[0].single_event_type,
             }
-            
+
+@anonymous_view            
 def events_rss(request):
     import django.contrib.syndication.views
     import urllib.request, urllib.parse, urllib.error
@@ -266,6 +268,7 @@ def events_show_feed(request, feedslug):
         "feed": feed,
     }
 
+@anonymous_view            
 def events_embed_legacy(request):
     # prepare template context
     try:
