@@ -1,19 +1,70 @@
+# Google
+
+User-agent: Googlebot
+Disallow: /data
+Disallow: /registration/ext
+Disallow: /accounts
+Disallow: /api
+Disallow: */xml
+Disallow: */details
+Disallow: */widget
+Disallow: */_text_image
+Disallow: *?*
+Crawl-delay: 3
+
 User-agent: Mediapartners-Google
-Disallow:
+Disallow: /data
+Disallow: /registration/ext
+Disallow: /accounts
+Disallow: /api
+Disallow: */xml
+Disallow: */details
+Disallow: */widget
+Disallow: */_text_image
+Disallow: *?*
+Crawl-delay: 3
+
+# Yahoo
+
+User-agent: Slurp
+Disallow: /data
+Disallow: /registration/ext
+Disallow: /accounts
+Disallow: /api
+Disallow: */xml
+Disallow: */details
+Disallow: */widget
+Disallow: */_text_image
+Disallow: *?*
+Crawl-delay: 5
+
+# Bing
+
+User-Agent: bingbot
+Disallow: /data
+Disallow: /registration/ext
+Disallow: /accounts
+Disallow: /api
+Disallow: */xml
+Disallow: */details
+Disallow: */widget
+Disallow: */_text_image
+Disallow: *?*
+Crawl-delay: 7
+
+# Everyone Else
 
 User-agent: *
 Disallow: /data
 Disallow: /registration/ext
-Disallow: /congress/bills/browse?
-Disallow: /congress/billsearch.xpd
-Disallow: /events/embed_legacy
-Disallow: /blog/wp-includes
 Disallow: /accounts
 Disallow: /api
 Disallow: */xml
-
-User-agent: BecomeBot
-Disallow: /
+Disallow: */details
+Disallow: */widget
+Disallow: */_text_image
+Disallow: *?*
+Crawl-delay: 30
 
 Sitemap: https://www.govtrack.us/sitemap.xml
 
