@@ -221,8 +221,7 @@ def get_bill_text_metadata(bill, version):
         
     basename += "/" + dat["version_code"]
 
-    bt2 = BillType.by_value(bill.bill_type).xml_code
-    html_fn = "data/congress-bill-text-legacy/%s/%s/%s%d%s.html" % (bill.congress, bt2, bt2, bill.number, dat["version_code"])
+    html_fn = "data/congress-bill-text-legacy/%d/%s/%s%d/%s.html" % (bill.congress, bt, bt, bill.number, dat["version_code"])
 
     if os.path.exists(basename + "/mods.xml"):
         dat["mods_file"] = basename + "/mods.xml"
