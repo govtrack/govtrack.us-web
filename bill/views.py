@@ -445,7 +445,10 @@ def bill_list(request):
     ix1 = None
     ix2 = None
     if "subject" in request.GET:
-        ix = BillTerm.objects.get(id=request.GET["subject"])
+        try:
+            ix = BillTerm.objects.get(id=request.GET["subject"])
+        except ValueError:
+            raise Http404()
         if ix.parents.all().count() == 0:
             ix1 = ix
         else:
