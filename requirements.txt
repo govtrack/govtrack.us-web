@@ -33,3 +33,5 @@ django-crispy-forms
 rtyaml
 plotly
 matplotlib
+pycairo
+

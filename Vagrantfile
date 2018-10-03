@@ -30,7 +30,7 @@ Vagrant.configure(2) do |config|
     sudo apt install -y -q \
         git python-virtualenv python3-lxml \
         python3-iso8601 python3-numpy python3-scipy \
-        python3-pip libcap-dev
+        python3-pip libcap-dev libcairo-dev
 
     # On OS X...
     # ----------
