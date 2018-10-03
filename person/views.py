@@ -263,8 +263,14 @@ def load_key_votes(person):
         ret += [v for v in top_votes if v in outlier_votes][0:3] \
              + [v for v in top_votes if v not in outlier_votes][0:2]
 
+    # Temporarily add the House and Senate votes on H.J.Res. 43/115 in support of our partnership with CMU
+    # if this person voted on it.
+    for vote in [119031, 119172]:
+        if Voter.objects.filter(vote__id=vote, person=person).exists():
+            ret.append(vote)
+
     # Convert to Vote objects, make unique, and order by vote date.
-    ret = Vote.objects.filter(id__in=ret).order_by('-created')
+    ret = Vote.objects.filter(id__in=ret)
     ret = sorted(ret, key = lambda v : v.created, reverse=True)
 
     # Replace with a tuple of the vote and the Voter object for this person.
