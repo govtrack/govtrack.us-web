@@ -223,6 +223,18 @@ $(function() {
 
 <h1 class="long" data-vote-id="{{vote.id}}">{{ vote.question }}</h1>
 
+{% if vote.question_details %}
+<p>{{ vote.question_details }}</p>
+{% endif %}
+<p>
+    {{ vote.result }}
+    &middot;
+    {{ vote.created|date }}
+    {% if vote.has_time %}at {{ vote.created|time }} ET{% endif %}
+    &middot;
+    Source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>
+</p>
+
 <div id="vote_explainer">
 	{% if vote.oursummary %}
 		<div class="row">
@@ -351,8 +363,6 @@ $(function() {
 
 {% with vote.totals as totals %}
 <div style="margin: 30px 0">
-<div class="row">
-<div class="col-md-7">
     <h3 style="margin: 0">Totals</h3>
     <table class="stats" style="margin: 0 30px 0 0">
         <thead>
@@ -380,8 +390,8 @@ $(function() {
                 <td style="padding: 0 6px 0 6px;">
                   {{ item.percent }}<span style="margin-left: 2px; font-size: 80%; color: #555;">%</span>
                 </td>
-                <td style="white-space: nowrap; text-align: left; padding: 5px 1em 5px 5px;">
-                    {% for count in item.party_counts %}<div style="width: {{100|mult:count.count|div:totals.max_option_count|floatformat:0}}px; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 
+                <td style="white-space: nowrap; text-align: left; padding: 5px 1vw 5px 5px;">
+                    {% for count in item.party_counts %}<div style="width: {{10|mult:count.count|div:totals.max_option_count|floatformat:0}}vw; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 
                     &nbsp;</div>{% endfor %}<div style="display: inline-block; padding-left: 5px;">
                       {{ item.count }}
                     </div>
@@ -393,36 +403,28 @@ $(function() {
                 {% for count in item.party_counts %}
 	                <td style="padding: 6px 8px">
 						<div>{{ count.count }}</div>
-						<div style="height: .25em;"><div style="height: .25em; width: {{3.5|mult:count.count|div:totals.max_option_count|floatformat:3}}em; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
+						<div style="height: .25em;"><div style="height: .25em; width: {{7|mult:count.count|div:totals.max_option_count|floatformat:3}}vw; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
 					</td>
                 {% endfor %}
             </tr>
             {% endfor %}
+            {% if has_vp_vote %}
 			<tr>
 				<td style="border: none;"></td>
-				<td colspan="{{totals.parties|length}}" style="font-size: 85%; color: #666; border: none;">
-					{% if has_vp_vote %}The Vice President cast a tie-breaking vote.{% endif %}
+				<td colspan="{{totals.parties|length}}" style="font-size: 85%; color: #666; border: none; font: 12px/20px serif;">
+					The Vice President cast a tie-breaking vote.
 				</td>
 			</tr>
+            {% endif %}
+            <tr>
+                <td style="border: none;"/>
+                <td colspan="2" style="border: none; text-align: left; font: 12px/20px serif;">
+                    {% if vote.required == "1/2" %}Simple Majority{% else %}{{ vote.required }}{% endif %}
+                    Required
+                </td>
+            </tr>
         </tbody>
     </table>
-</div>
-<div class="col-md-5">
-	<div class="vote-meta-info">
-		<p>Date:
-		{{ vote.created|date:"DATE_FORMAT" }}</p>
-		{% if vote.question_details %}
-		<p>Question:
-		{{ vote.question_details }}</p>
-		{% endif %}
-		<p>Required:
-		{% if vote.required == "1/2" %}Simple Majority{% else %}{{ vote.required }}{% endif %}</p>
-		<p>Result:
-		{{ vote.result }}</p>
-		<p>Source:
-		<a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a></p>
-	</div>
-</div>
 </div>
 
 <div class="row">
