@@ -55,9 +55,9 @@ $(function() {
 {% block summary %}
 	<h1>{{statename}}</h1>
 
-	<p style="margin: 15px 0">
+	<p style="margin: 30px 0">
 	{% if stateapp != "T" %}
-		{{statename}} is a U.S. state with <b>two</b> senators in the United States Senate and <b>{{stateapp|apnumber}}</b> representatives in the United States House of Representatives.
+		The state of {{statename}} has <b>two</b> senators in the United States Senate and <b>{{stateapp|apnumber}}</b> representatives in the United States House of Representatives.
 
 	{% elif state == "DC" %}
 		The District of Columbia (DC) is the nation&rsquo;s capital district. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators and its representative in the House of Representatives is a <b>delegate</b> with limited voting privileges.
@@ -84,7 +84,8 @@ $(function() {
 	    	<div role="tabpanel" class="tab-pane active" id="senators">
 			
 			<h2>Senators</h2>
-			<p>Each state elects two senators for staggered 6-year terms. Senators represent the entire state. {{statename}}&rsquo;s senators are:</p>
+			<p>Each state in the United States elects two senators, regardless of the state&rsquo;s population. Senators serve six-year terms with staggered elections. Americans in the United States&rsquo;s six territories do not have senators.</p>
+			<p>{{statename}}&rsquo;s senators are:</p>
 
 		    <div class="row members-grid">
 		    {% for person in senators %}
@@ -118,7 +119,8 @@ $(function() {
 
 	    	<div role="tabpanel" class="tab-pane" id="representatives">
 			<h2>Representatives</h2>
-	<p>The United States is divided into 435 congressional districts, each with a population of about 710,000 individuals. Each district elects a representative to the House for a two-year term. Representatives are also called congressmen/congresswomen.</p>
+	<p>The United States is divided into 435 congressional districts, each with a population of about 710,000 individuals. Each district elects a representative to the House of Representatives for a two-year term. Representatives are also called congressmen/congresswomen.
+	Americans in the United States&rsquo;s six territories are represented in the House of Representatives by an additional six non-voting delegates.</p>
 
     {% if stateapp != 1 %}
 	<div style="margin: 1.75em 0;">
@@ -132,9 +134,14 @@ $(function() {
 	</form>
 	<div style="margin: .5em"><a href="#" onclick="window.location = '/congress/members/map#address=my+location'; return false;" style="text-decoration: none"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
 	</div>
-    {% endif %}
 
-	<p>{{statename}}&rsquo;s representative{% if stateapp > 1 %}s are{% else %} is{% endif %}:</p>
+	<p>{{statename}}&rsquo;s {{stateapp|apnumber}} representatives are:</p>
+
+	{% else %}
+
+	<p>{{statename}}&rsquo;s one representative, called an &ldquo;at-large&rdquo; representative because they represent the entire state, is:</p>
+
+    {% endif %}
 
     <div class="row members-grid">
     {% for district, person in representatives %}
