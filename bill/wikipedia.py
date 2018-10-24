@@ -14,7 +14,7 @@ from bill.models import Bill, BillSummary, BillType
 def query(url):
 	url = "https://en.wikipedia.org/w/api.php?format=json&" + url
 	response = urllib.request.urlopen(url)
-	return json.loads(response.read())
+	return json.loads(response.read().decode("utf8"))
 
 def get_pages_that_embed(template_name):
 	continue_arg = None
@@ -29,7 +29,7 @@ def get_pages_that_embed(template_name):
 		# Fetch.
 		results = query(url)
 		for page in results["query"]["embeddedin"]:
-			yield(page)
+			yield page
 			#return # DEUBGGING, just get one
 
 		# Iterate by getting the next 'eicontinue' parameter
@@ -66,7 +66,11 @@ def get_bill_for_page(page):
 	for template in mwparserfromhell.parse(page["text"]).filter_templates():
 		if template.name.strip() == "Infobox U.S. legislation":
 			#print page["title"].encode("utf8")
-			billref = get_bill_from_infobox(template)
+			try:
+				billref = get_bill_from_infobox(template)
+			except Exception as e:
+				print(page["pageid"], e)
+				billref = None
 			if billref:
 				try:
 					if billref[0] == "PL":
@@ -94,7 +98,7 @@ def get_bill_from_infobox(template):
 		if m:
 			return ("PL", int(m.group(1)), int(m.group(2)))
 	if has_param(template, "leghisturl"):
-		value = template.get("leghisturl").value.strip().encode("utf8")
+		value = template.get("leghisturl").value.strip()
 		m = re.match("http://(?:thomas.loc|www.congress).gov/cgi-bin/bdquery/z\?d(\d+):([a-z\.]+)(\d+):", value, re.I)
 		if m:
 			thomas_bill_types = { "H": "hr", "HR": "hr", "SN": "s", "S": "s" }
@@ -110,7 +114,7 @@ def get_bill_from_infobox(template):
 		value = template.get("introducedbill").value.strip()
 		m = re.match(r"\{\{USBill\|(\d+)\|([\w\.]+)\|(\d+)\}\}$", value)
 		if m:
-			wikipedia_bill_type = { "S": "s", "HR": "hr", "SJ": "sjres" }
+			wikipedia_bill_type = { "S": "s", "HR": "hr", "H": "hr", "SJ": "sjres" }
 			return ("BILL", int(m.group(1)), wikipedia_bill_type[m.group(2).replace(".", "").upper()], int(m.group(3)))
 		if has_param(template, "enacted by"):
 			congress = template.get("enacted by").value.strip()
@@ -165,7 +169,7 @@ for bill_id, pages in bill_summaries.items():
 	page = pages[0]
 	update_fields = {
 		"source_text": "Wikipedia",
-		"source_url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(page["title"].replace(" ", "_").encode("utf8")),
+		"source_url": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(page["title"].replace(" ", "_")),
 		"content": page["extract"] + "\n\n<p>This summary is from <a href=\"%s\">Wikipedia</a>.</p>" % bs.source_url,
 	}
 	updated = False
@@ -174,6 +178,6 @@ for bill_id, pages in bill_summaries.items():
 			setattr(bs, k, v)
 			updated = True
 	if updated:
-		print("Saving:", str(bs).encode("utf8"))
 		bs.save()
+		print(bs)
 			
