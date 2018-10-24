@@ -5,6 +5,7 @@ python-prctl
 python-dateutil
 django-debug-toolbar
 django-picklefield
+oauth2
 mimeparse
 pillow
 defusedxml
