@@ -142,6 +142,11 @@
 		<h1>{{statename}}&rsquo;s {{district|ordinalhtml}} Congressional District</h1>
 	{% endif %}
 
+
+<div style="margin: 2em 0">
+{% include "person/redistricting-notes.html" %}
+</div>
+
 <div style="margin: 2em 0">
 <form class="form-inline" onsubmit="do_address(); return false;">
   <div class="form-group">
@@ -228,8 +233,6 @@
 	{% else %}
 		<div class="col-xs-12">
 	{% endif %}
-
-	{% include "person/redistricting-notes.html" %}
 
 	<div id='map'></div>
 	

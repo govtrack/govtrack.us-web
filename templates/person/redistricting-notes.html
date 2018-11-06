@@ -1,9 +1,8 @@
-{% if not state or state == "FL" or state == "VA" or state == "NC" or state == "PA" %}
-<div class="alert alert-success" role="alert" style="padding: 8px; font-size: 12px;">
-   Congressional district maps are changing in some states for the 2018 elections.
-   If you want to look up who represents you now, our maps based on the 2016 elections are for you.
-   If you are looking for information on who you will be on your ballot this year,
-   please consult your local elections authority.
+{% if not state or state == "PA" %}
+<div class="alert alert-success" role="alert" style="padding: 8px; font-size: 14px;">
+   <span style="font-size: 120%;"><strong>Pennsylvania residents STOP</strong>. Congressional district maps are changing in your state for the 2018 elections.</span>
+   Head to <a href="https://www.dos.pa.gov/VotingElections/CandidatesCommittees/RunningforOffice/Pages/2018-Remedial-Congressional-Districts.aspx">this site run by the Pennsylvania government</a> to see which congressional district you are voting in this election. Our map below has NOT been updated for the 2018 elections.
+   If you want to look up who represents you in Congress now, you may use our map below, which will compare your location to the congressional districts as of the 2016 election.
 </div>
 {% endif %}
 
