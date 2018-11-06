@@ -231,7 +231,7 @@ function smooth_scroll(elem) {
 			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% else %}{{person.lastname}} tends to gather cosponsors only on one side of the aisle.{% endif %} <strong>{{stat.value|floatformat:"0"}}%</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
 
 		{% elif stat.key == "bills-with-cosponsors-both-parties-count" %}
-			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% else %}{{person.lastname}} tends to gather cosponsors only on one side of the aisle.{% endif %} <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
+			<p>In this era of partisanship, it is important to see Members of Congress working across the aisle. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
 
 		{% elif stat.key == "bills-with-companion" %}
 			<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions had a companion bill in the {{stat.other_chamber}}. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>
