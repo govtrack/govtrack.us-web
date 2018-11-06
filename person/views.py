@@ -532,6 +532,48 @@ def membersoverview(request):
         }
         for role_type, buckets in longevity_by_bucket.items()
     }
+
+    # Compute an age/sex breakdown. For each chamber, compute the median age. Then bucket
+    # by chamber, above/below the median age, and sex.
+    from numpy import median
+    from person.types import Gender
+    ages = PersonRole.objects.filter(current=True, role_type__in=(RoleType.senator, RoleType.representative)).values('role_type', 'person__gender', 'person__birthday')
+    ages = [(v['role_type'], v['person__gender'], int(round((now-v['person__birthday']).days/365.25))) for v in ages]
+    def minmaxmedian(data): return { "min": min(data), "max": max(data), "median": int(round(median(data))) }
+    minmaxmedian_age_by_chamber = { role_type: minmaxmedian([v[2] for v in ages if v[0] == role_type]) for role_type in (RoleType.senator, RoleType.representative) }
+    agesex = {
+        role_type: {
+            "summary": {
+                "age": minmaxmedian_age_by_chamber[role_type]["median"],
+                "percent_older_men": int(round(100 *
+                      len([v for v in ages if v[0] == role_type and v[1] == Gender.male and v[2] > minmaxmedian_age_by_chamber[role_type]["median"]])
+                    / len([v for v in ages if v[0] == role_type])
+                )),
+                "percent_younger_women": int(round(100 *
+                      len([v for v in ages if v[0] == role_type and v[1] == Gender.female and v[2] <= minmaxmedian_age_by_chamber[role_type]["median"]])
+                    / len([v for v in ages if v[0] == role_type])
+                ))
+            },
+            "buckets": [
+                "{}-{} years old".format(minmaxmedian_age_by_chamber[role_type]["median"]+1, minmaxmedian_age_by_chamber[role_type]["max"]),
+                "{}-{} years old".format(minmaxmedian_age_by_chamber[role_type]["min"], minmaxmedian_age_by_chamber[role_type]["median"]),
+            ],
+            "series": [
+                {
+                    "name": gender_label,
+                    "data": [
+                        len([v for v in ages if v[0] == role_type and v[1] == gender_value and v[2] > minmaxmedian_age_by_chamber[role_type]["median"]]),
+                        len([v for v in ages if v[0] == role_type and v[1] == gender_value and v[2] <= minmaxmedian_age_by_chamber[role_type]["median"]]),
+                    ]
+                }
+                for (gender_label, gender_value) in [
+                    ("Men", Gender.male),
+                    ("Women", Gender.female),
+                ]
+            ]
+        }
+        for role_type in (RoleType.senator, RoleType.representative)
+    }
     
     return {
         "statelist": statelist,
@@ -541,6 +583,7 @@ def membersoverview(request):
         "house_vacancies": 435-get_current_members(RoleType.representative, False, False),
         "house_delegate_vacancies": 6-get_current_members(RoleType.representative, True, False),
         "longevity": longevity,
+        "agesex": agesex,
     }
 
 @anonymous_view
