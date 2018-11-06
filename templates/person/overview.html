@@ -16,44 +16,57 @@
 
 {% block summary %}
 	<h1>Members of Congress</h1>
-
-	<p>Use GovTrack to find out who represents you in Congress and what bills they have sponsored.</p>
 {% endblock %}
 	
 {% block body %}
-	<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
-		<label for="address" style="margin-bottom: .25em">Enter your address below. We will find your congressional district.</label>
-		<input id="address" class="form-control" type="text" value="" style="width: 75%; height: 26px; float: left;" placeholder="415 N. Main St., Hannibal, Missouri" />
-		<input class="btn-search-small2" type="submit" value="Search"  />
-		<div style="clear: both"> </div>
-	</form>
 
-	<div class="row" style="margin-top: 1.5em">
-		<div class="col-xs-6">
-			<label for="state" style="margin-bottom: .5em">Or select a state to list all senators and representatives from that state:</label>
+	<h2>Find Your Representative and Senators</h2>
+
+	<p>Use GovTrack to find out who represents you in Congress and what bills they have sponsored.</p>
+
+	<div class="row">
+	<div class="col-sm-7 col-lg-8">
+	<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
+		<label for="address" style="display: block; margin-bottom: .25em;">Enter your address:</label>
+		<table style="width: 100%;"><tr>
+		<td><input id="address" class="form-control" type="text" value="" placeholder="415 N. Main St., Hannibal, Missouri" /></td>
+		<td><button type="submit" class="btn btn-default" style="margin-left: .5em;"><span class="glyphicon glyphicon-search"></span> <span class="sr-only">Search</span></button></td>
+		</tr></table>
+		<div style="margin: 6px 0 1em 0">
+			<a href="/congress/members/map#my_location=1"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a>
+			&middot;
+			<a href="/congress/members/map">View a Map of All Congressional Districts</a>
+		</div>
+	</form>
+	</div>
+	<div class="col-sm-5 col-lg-4">
+			<label for="state" style="margin-bottom: .5em;">Or select a state:</label>
 			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" class="form-control">
 				<option value="">(Select State)</option>
 				{% for abbr, name in statelist %}
 				<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
 				{% endfor %}								
 			</select>
-		</div>
-		<div class="col-xs-6" style="padding-top: 1em; font-size: 90%">
-			<p><a href="/congress/members/map">View a Map of Congressional Districts</a></p>
-			<p><a href="/congress/members/current">List all Members of Congress</a></p>
-			<p><a href="/congress/members/all">Search Former Members of Congress</a></p>
-		</div>
+	</div>
 	</div>
 
-	<img src="/static/images/capitol-diagram.jpg" class="img-responsive" style="margin-bottom: 20px" alt="Photo of U.S. Capitol Building">
+	<h2>All Representatives and Senators in Congress</h2>
 
-<p>The United States Congress has an upper chamber called the Senate and a lower chamber called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process to create federal statutory law.</p>
-	
+	<p>The United States Congress has two chambers, one called the Senate and the other called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process to create federal statutory law. They occupy opposite ends of the Capitol Building.</p>
+
+	<p>
+		<a href="/congress/members/current">List all Members of Congress</a>
+		&middot;
+		<a href="/congress/members/all">Search Former Members of Congress</a>
+	</p>
+
+	<img src="/static/images/capitol-diagram.jpg" class="img-responsive" style="margin-bottom: 30px" alt="Photo of U.S. Capitol Building">
+
 <div class="row">
 <div class="col-sm-6">
 	<h2>The Senate</h2>
 	
-	<p>The 50 states elect 2 senators each for staggered 6-year terms. A senator represents between 1 and 37 million people, depending on their state&rsquo;s population.</p>
+	<p>The United States&rsquo;s 50 states each elect two senators for staggered six-year terms. A senator represents between 1 and 37 million people, depending on their state&rsquo;s population.</p>
 	
 	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of senators by party:</p>
 	
@@ -62,8 +75,8 @@
 	{% for p in senate_by_party %}
 	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}
-	{% if senate_vacancies > 0 %}<tr><th>Vacancies</th> <td>{{senate_vacancies}}</td></tr>{% endif %}
-	<tr><th>Total</th> <td>100</td></tr>
+	{% if senate_vacancies > 0 %}<tr><td>Vacancies</td> <td>{{senate_vacancies}}</td></tr>{% endif %}
+	<tr><td>Total</td> <td>100</td></tr>
 	</table>
 </div>
 <div class="col-sm-6">	
@@ -78,8 +91,8 @@
 	{% for p in house_by_party %}
 	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}
-	{% if house_vacancies > 0 %}<tr><th>Vacancies</th> <td>{{house_vacancies}}</td></tr>{% endif %}
-	<tr><th>Total</th> <td>435</td></tr>
+	{% if house_vacancies > 0 %}<tr><td>Vacancies</td> <td>{{house_vacancies}}</td></tr>{% endif %}
+	<tr><td>Total</td> <td>435</td></tr>
 	</table>
 	
 	<p style="margin-top: .5em">The District of Columbia, Puerto Rico, and the U.S.&rsquo;s four other island territories &mdash; American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands &mdash; each send a non-voting delegate to the House. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
