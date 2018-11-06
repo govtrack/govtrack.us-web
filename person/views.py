@@ -472,6 +472,8 @@ def get_district_bounds(state, district):
 @anonymous_view
 @render_to('person/overview.html')
 def membersoverview(request):
+    # Get list of current members by role type --- including or excluding delegates and
+    # possibly grouping by party.
     def get_current_members(role_type, delegates, by_party):
         qs = PersonRole.objects.filter(
             role_type=role_type,
@@ -482,6 +484,54 @@ def membersoverview(request):
             return qs.values('party').annotate(count=Count('party')).order_by('-count')
         else:
             return qs.count()
+
+    # Get a breakdown of members by chamber and party by longevity. Sum the total number
+    # of days in office in Congress by all current members. It's easier to sum without
+    # trying to restrict the longevity computation to days in the same chamber.
+    from collections import defaultdict
+    from datetime import timedelta
+    from datetime import datetime
+
+    # Collect the longevity of each member currently serving in Congress.
+    now = datetime.now().date()
+    longevity_by_member = defaultdict(lambda : timedelta(0))
+    for role in PersonRole.objects.filter(person__roles__current=True, role_type__in=(RoleType.senator, RoleType.representative)): # any congressional role for any member who has a current role
+        longevity_by_member[role.person] += (min(now, role.enddate) - role.startdate)
+    
+    # Put each currently serving member into a bucket by chamber, quantized longevity, and party.
+    longevity_by_bucket = defaultdict(lambda : defaultdict(lambda : defaultdict(lambda : 0)))
+    for role in PersonRole.objects.filter(current=True, role_type__in=(RoleType.senator, RoleType.representative)): # current member roles
+        bucket = longevity_by_member[role.person].days // 365.25
+        if role.role_type == RoleType.senator:
+            bucket_size = 6
+        elif role.role_type == RoleType.representative:
+            bucket_size = 4
+        else:
+            raise ValueError()
+        bucket = int(bucket // bucket_size)
+        bucket = (-bucket, "{}-{} years".format(bucket*bucket_size, (bucket+1)*bucket_size-1))
+        longevity_by_bucket[role.role_type][bucket][role.party] += 1
+
+    # Get the parties in sorted order by number of members by chamber so we can put the series in order.
+    party_order = list(PersonRole.objects.filter(current=True, role_type__in=(RoleType.senator, RoleType.representative)).values('role_type', 'party').annotate(count=Count('party')).order_by('-count'))
+
+    # Reform the data into chamber -> party -> bucket array since each party will be a series with
+    # buckets (in correspondence between parties).
+    longevity = {
+        role_type: {
+            "buckets": [bucket_name for (bucket_index, bucket_name), counts in sorted(buckets.items())],
+            "series": [
+                {
+                    "name": rec["party"]+'s',
+                    "data": [counts[rec["party"]] for (bucket_index, bucket_name), counts in sorted(buckets.items())],
+                    "color": { "Democrat": "#008ed1", "Republican": "#f83631", "Independent": "#921b85" }.get(rec["party"]),
+                         # see colors also defined in vote.views.vote_diagram_colors
+                }
+                for rec in reversed(party_order) if rec["role_type"] == role_type
+            ]
+        }
+        for role_type, buckets in longevity_by_bucket.items()
+    }
     
     return {
         "statelist": statelist,
@@ -490,6 +540,7 @@ def membersoverview(request):
         "house_by_party": get_current_members(RoleType.representative, False, True),
         "house_vacancies": 435-get_current_members(RoleType.representative, False, False),
         "house_delegate_vacancies": 6-get_current_members(RoleType.representative, True, False),
+        "longevity": longevity,
     }
 
 @anonymous_view

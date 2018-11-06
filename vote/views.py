@@ -266,7 +266,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 		# Seating diagram.
 		return vote_thumbnail_image_seating_diagram(vote, image_type == "thumbnail")
 
-vote_diagram_colors = {
+vote_diagram_colors = { # see also person.views.membersoverview
 	("D", "+"): (0/255.0, 142/255.0, 209/255.0), # same as CSS color
 	("D", "-"): (213/255.0, 244/255.0, 255/255.0), # reduced saturation and then matched lightness with R at 95
 	("I", "+"): (0.07, 0.05, 0.07),

@@ -1,17 +1,57 @@
 {% extends "master_b.html" %}
-{% load humanize %}
+{% load humanize govtrack_utils %}
 {% block title %}Members of the United States Congress - GovTrack.us{% endblock %}
 {% block meta_description %}The United States Congress is made up of 100 senators, 435 representatives, and 6 delegates to the House of Representatives.{% endblock %}
 {% block meta_keywords %}United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
 
 {% block body_scripts %}
-	<script type="text/javascript">
-		function doform() {
-			window.location = "/congress/members/map#address=" + encodeURIComponent($('#address').val());
-			return false;
-		}
-	</script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+
+<script type="text/javascript">
+function doform() {
+	window.location = "/congress/members/map#address=" + encodeURIComponent($('#address').val());
+	return false;
+}
+
+
+function make_longevity_chart(elemid, data, xaxis) {
+	Highcharts.chart(elemid, {
+	    chart: {
+	        type: 'bar',
+	        animation: false
+	    },
+	    title: null,
+	    xAxis: {
+	        categories: data.buckets,
+	        title: {
+	        	text: 'Years Served in Congress'
+	        }
+	    },
+	    yAxis: {
+	        min: 0,
+	        title: {
+	            text: 'Number of ' + xaxis
+	        }
+	    },
+	    legend: {
+	        reversed: true
+	    },
+		credits: { enabled: false },
+	    plotOptions: {
+	        series: {
+	            stacking: 'normal'
+	        }
+	    },
+	    series: data.series
+	});
+}
+
+$(function() {
+	make_longevity_chart("senate_longevity_chart", {{longevity.1|json}}, 'Senators');
+	make_longevity_chart("house_longevity_chart", {{longevity.2|json}}, 'Representatives');
+});
+</script>
 {% endblock %}
 
 {% block summary %}
@@ -70,14 +110,19 @@
 	
 	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of senators by party:</p>
 	
+	<h3>Senators by Party</h3>
 	<table style="width: 15em; margin-bottom: 1em;">
-	<caption>Senators by Party</caption>
 	{% for p in senate_by_party %}
 	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}
 	{% if senate_vacancies > 0 %}<tr><td>Vacancies</td> <td>{{senate_vacancies}}</td></tr>{% endif %}
 	<tr><td>Total</td> <td>100</td></tr>
 	</table>
+
+	<p>The District of Columbia, Puerto Rico, and the U.S.’s four other island territories — American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands — are not represented in the Senate.</p>
+
+	<h3>Tenure of Senators</h3>
+	<div id="senate_longevity_chart"></div>
 </div>
 <div class="col-sm-6">	
 	<h2>The House of Representatives</h2>
@@ -85,9 +130,10 @@
 	<p>The states are also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative to the House of Representatives for a 2-year term.</p>
 
 	<p>As in the Senate, the day-to-day activities of the House are controlled by the &ldquo;majority party.&ldquo; Here is a count of representatives by party:</p>
+
+	<h3>Representatives by Party</h3>
 	
 	<table style="width: 15em">
-	<caption>Representatives by Party</caption>
 	{% for p in house_by_party %}
 	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
 	{% endfor %}
@@ -96,6 +142,9 @@
 	</table>
 	
 	<p style="margin-top: .5em">The District of Columbia, Puerto Rico, and the U.S.&rsquo;s four other island territories &mdash; American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands &mdash; each send a non-voting delegate to the House. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
+
+	<h3>Tenure of Representatives</h3>
+	<div id="house_longevity_chart"></div>
 </div>
 </div>
 
