@@ -268,7 +268,7 @@ class Bill(models.Model):
                     vurl = v.get_thumbnail_url()
                     if vurl:
                         return vurl
-        return self.get_absolute_url() + "/thumbnail"
+        return self.get_absolute_url() + "/thumbnail?aspect=0.5625" # use a 16:9 aspect ratio which is similar to the vote cartogram aspect ratio and horizontal which is better for the homepage
 
     # indexing
     def get_index_text(self):

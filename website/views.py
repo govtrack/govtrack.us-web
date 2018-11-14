@@ -26,95 +26,62 @@ def index(request):
     from bill.views import subject_choices
     bill_subject_areas = subject_choices()
 
-    posts = []
+    post_groups = []
 
     # Fetch our Medium posts for summaries and features.
     from website.models import MediumPost
-    medium_posts = MediumPost.objects.order_by('-published')[0:6]
-    for m in medium_posts: m.type = "GovTrack Insider"
-    posts.extend(medium_posts)
+    post_groups.append({
+        "title": "What We're Watching",
+        "posts": MediumPost.objects.order_by('-published')[0:3],
+        "link": "/events/govtrack-insider",
+        "link_text": "Subscribe to all GovTrack Insider articles",
+    })
 
-    # Fetch our blog posts for site news. This is an expensive
-    # call but the page is cached in whole.
-    blog_feed = list(get_blog_items())
-    for p in blog_feed: p["type"] = "Site News"
-    posts.extend(blog_feed)
-
-    # Get some bills whose status recently changed, focusing on important bills
-    # using the proscore. Draw from different time periods to get a mix of
-    # bills that are both important and recent.
+    # legislation coming up
+    from django.db.models import F
+    from django.conf import settings
     from bill.models import Bill
-    from datetime import datetime, timedelta
-    from settings import CURRENT_CONGRESS
-    from haystack.query import SearchQuerySet
-    bills = set()
-    for days in (1, 2, 3, 7, 14):
-        sqs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], congress=CURRENT_CONGRESS, current_status_date__gt=datetime.now()-timedelta(days=days)).order_by('-proscore')[0:60]
-        n1 = len(bills)
-        sqs_bills = Bill.objects.select_related('oursummary').in_bulk({ sb.pk for sb in sqs  })
-        for sb in sqs:
-            bill = sqs_bills[int(sb.pk)]
-            if bill in bills: continue
-            bills.add(bill)
-            if len(bills) - n1 > 1: break
-        if len(bills) == 60: break
-    from bill.models import Bill
-    for b in bills:
-      snippet = b.current_status_description
-      try:
-          snippet = b.oursummary.plain_text
-      except: pass # no summary
-      posts.append({
-        "title": b.title,
-        "published": datetime(b.current_status_date.year, b.current_status_date.month, b.current_status_date.day),
-        "date_has_no_time": True,
-        "type": b.get_current_status_display(),
-        "snippet": snippet,
-        "url": b.get_absolute_url(),
-        "image_url": b.get_thumbnail_url_ex(),
-      })
+    dhg_bills = Bill.objects.filter(congress=settings.CURRENT_CONGRESS, docs_house_gov_postdate__gt=datetime.now() - timedelta(days=10)).filter(docs_house_gov_postdate__gt=F('current_status_date'))
+    sfs_bills = Bill.objects.filter(congress=settings.CURRENT_CONGRESS, senate_floor_schedule_postdate__gt=datetime.now() - timedelta(days=5)).filter(senate_floor_schedule_postdate__gt=F('current_status_date'))
+    coming_up = list((dhg_bills | sfs_bills))
+    coming_up.sort(key = lambda bill : -bill.proscore())
+    if len(coming_up) > 0:
+        post_groups.append({
+            "title": "Legislation Coming Up",
+            "posts": [{
+                "image_url": bill.get_thumbnail_url_ex(),
+                "title": bill.title,
+                "url": bill.get_absolute_url(),
+                "published": "week of " + bill.scheduled_consideration_date.strftime("%x"),
+            } for bill in coming_up[0:3]],
+            "link": "/congress/bills",
+            "link_text": "View All",
+        })
 
-    ## Get some legislative events, mixing across mutually exclusive feeds.
-    #from events.templatetags.events_utils import render_event
-    #for feed, count in (("misc:comingup", 2),):
-    #    events_feed = Feed.get_events_for([feed], count)
-    #    for evt in events_feed:
-    #        r = render_event(evt, [])
-    #        r["published"] = r["date"]
-    #        r["snippet"] = r["body_text"]
-    #        r["image_url"] = r.get("thumbnail_url")
-    #        posts.append(r)
+    trending_feeds = [Feed.objects.get(id=f) for f in Feed.get_trending_feeds()[0:6]]
+    if len(trending_feeds) > 0:
+        post_groups.append({
+            "title": "Trending",
+            "posts": [{
+                "title": feed.title,
+                "url": feed.link,
+            } for feed in trending_feeds
+        ]})
 
-    # Add new stakeholder posts to the news feet.
-    from stakeholder.models import Post
-    for p in Post.objects.filter(stakeholder__verified=True).exclude(content=None).order_by('-created')[0:10]:
-      posts.append({
-        "title": p.stakeholder.name + " " + p.positions_vp(),
-        "published": p.created,
-        "date_has_no_time": False,
-        "type": "Stakeholder Statement",
-        "snippet": p.title(),
-        "url": p.get_a_target_link(),
-        "image_url": p.get_thumbnail_url_ex(),
-      })
-
-    # Sort.
-    posts.sort(key = lambda p : p["published"] if isinstance(p, dict) else p.published, reverse=True)
-
-    # Fix events that have time-less dates --- turn into a date instance
-    # so rendering is correct (otherwise we get "midnight").
-    for p in posts:
-        if isinstance(p, dict) and p.get("date_has_no_time"):
-            p["published"] = p["published"].date()
 
     from person.models import Person
     from vote.models import Vote
     return {
-        'bill_subject_areas': bill_subject_areas,
-        'posts': posts,
+        # for the splash
         'number_of_bills': Bill.objects.filter(congress=settings.CURRENT_CONGRESS).count(),
         'number_of_legislators': Person.objects.filter(roles__current=True).count(),
         'number_of_votes': Vote.objects.filter(created__year=datetime.now().year).count(),
+
+        # for the action area below the splash
+        'bill_subject_areas': bill_subject_areas,
+
+        # for the highlights blocks
+        'post_groups': post_groups,
         }
       
 @anonymous_view

@@ -38,6 +38,8 @@ rsync -az --delete --delete-excluded govtrack.us::govtrack_bootstrap_data data \
 	--include "congress/115/bills/*/*10/text-versions/*/catoxml.xml" \
 	--include "congress/committee_meetings_house.json" \
 	--include "congress/committee_meetings_senate.json" \
+	--include "congress/upcoming_house_floor" \
+	--include "congress/upcoming_house_floor/*.json" \
 	--include "historical-committee-membership" \
 	--include "historical-committee-membership/*" \
 	--exclude "**"

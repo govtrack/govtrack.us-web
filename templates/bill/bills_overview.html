@@ -89,6 +89,11 @@ function do_keyword_tracker_submit() {
 			{% for bill in coming_up %}
 				<tr>
 				<td>
+                  <a href="{{bill.get_absolute_url}}">
+                    <img src="{{bill.get_absolute_url}}/thumbnail" width="75">
+                  </a>
+                </td>
+				<td>
                   <span class="nowrap">{{bill.scheduled_consideration_date|date}}</span>
                   {% if bill.docs_house_gov_postdate and not bill.senate_floor_schedule_postdate %}<div><small>(week of)</small></div>{% endif %}
                 </td>
