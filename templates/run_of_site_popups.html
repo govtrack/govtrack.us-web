@@ -15,6 +15,7 @@ $(function() {
 		flags.hits = (parseInt(flags.hits) || 0) + 1;
 
 		!function() {
+			if (show_fundraise(flags)) return;
 			//if (show_usergroup(flags)) return;
 			if (show_followus(flags)) return;
 		}();
@@ -44,6 +45,14 @@ function show_usergroup(flags) {
 	flags.usergroup = true;
 	$('#usergroup_modal').modal();
 	ga('send', 'event', "user group signup", "modal shown");
+	return true;
+}
+
+function show_fundraise(flags) {
+	// only show this modal once
+	if (flags.fundraise == 1) return false;
+	flags.fundraise = 1;
+	$('#fundraise_modal').modal();
 	return true;
 }
 </script>
@@ -214,6 +223,30 @@ $(function() {
 	      	<!--<button type="button" class="btn btn-default pull-right" data-dismiss="modal">No Thanks</button>-->
 	      	<button type="button" class="btn btn-primary">Next &raquo;</button>
 	    </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="fundraise_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="fundraise_modal_title" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h2 class="modal-title" id="fundraise_modal_title">
+    	    There’s never been a better time for civic engagement.
+    	</h2>
+      </div>
+      <div class="modal-body">
+		<p>You’ve cast your vote. Now what? Join 10 million other Americans using GovTrack to learn about and contact your representative and senators and track what Congress is doing each day.</p>
+		<p>And starting in 2019 we&rsquo;ll be tracking Congress&rsquo;s oversight investigations of the executive branch.</p>
+		<p>You’re more than a vote, so support GovTrack today with a tip of any amount:</p>
+		<div style="font-size: 115%; font-weight: bold;">
+			<p></p>
+			<p><a href="/accounts/membership">One-Time Tip</a> or <a href="https://patreon.com/govtrack">Monthly Support</a></p>
+		</div>
+		<p style="font-size: 95%; color: #555;">Or keep using GovTrack for free! Our public interest mission means we will never put our service behind a paywall.</p>
       </div>
     </div>
   </div>
