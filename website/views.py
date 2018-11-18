@@ -926,3 +926,44 @@ def user_group_signup(request):
     return HttpResponse(
         json.dumps({ "status": "ok" }),
         content_type="application/json")
+
+@login_required
+def discourse_sso(request):
+  # Identity provider for the Discourse.org SSO protocol
+  # for our forum at community.govtrack.us. @login_required
+  # takes care of redirecting users to the login path. Only
+  # after logging in do they end up at this view.
+  
+  # Validate the signature in the request.
+  import hmac
+  sig = hmac.new(getattr(settings, 'COMMUNITY_FORUM_SSO_KEY').encode("ascii"),
+                 msg=request.GET.get("sso", "").encode("ascii"),
+                 digestmod="SHA256")\
+                 .hexdigest()
+  if sig != request.GET.get("sig"):
+    return HttpResponseBadRequest()
+
+  # Decode the payload.
+  import base64
+  import urllib.parse
+  payload = urllib.parse.parse_qs(base64.b64decode(request.GET.get("sso", "").encode("ascii")).decode("ascii"))
+
+  # Add user attributes.
+  payload['external_id'] = request.user.id
+  payload['email'] = request.user.email
+
+  # Encode the payload to send a redirect back to the forum.
+  payload = base64.b64encode(urllib.parse.urlencode(payload, doseq=True).encode("ascii")).decode("ascii")
+
+  # Redirect back to the forum.  
+  return HttpResponseRedirect(
+    settings.COMMUNITY_FORUM_URL
+    + "/session/sso_login?"
+    + urllib.parse.urlencode({
+        "sso": payload,
+        "sig": hmac.new(getattr(settings, 'COMMUNITY_FORUM_SSO_KEY').encode("ascii"),
+                        msg=payload.encode("ascii"),
+                        digestmod="SHA256")\
+                       .hexdigest()
+      })
+  )

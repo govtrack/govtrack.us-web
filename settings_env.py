@@ -94,6 +94,8 @@ copy_env_vars = [
     "MAPBOX_ACCESS_TOKEN",
     "MAPBOX_MAP_STYLE",
     "MAPBOX_MAP_ID",
+    "COMMUNITY_FORUM_URL",
+    "COMMUNITY_FORUM_SSO_KEY",
 ]
 for var in copy_env_vars:
     val = get_env_variable(var, default='')
