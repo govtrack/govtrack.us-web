@@ -221,19 +221,14 @@ $(function() {
 
 {% block body %}
 
-<h1 class="long" data-vote-id="{{vote.id}}">{{ vote.question }}</h1>
-
-{% if vote.question_details %}
-<p>{{ vote.question_details }}</p>
-{% endif %}
-<p>
-    {{ vote.result }}
-    &middot;
-    {{ vote.created|date }}
-    {% if vote.has_time %}at {{ vote.created|time }} ET{% endif %}
-    &middot;
-    Source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>
-</p>
+<h1 class="long" data-vote-id="{{vote.id}}">
+  {{ vote.question }}
+  {% if vote.question_details %}
+    <div style="margin-top: 2px; font-size: 12px; font-weight: normal; color: black; line-height: 125%;">
+      {{ vote.question_details }}
+    </div>
+  {% endif %}
+</h1>
 
 <div id="vote_explainer">
 	{% if vote.oursummary %}
@@ -382,8 +377,8 @@ $(function() {
         </thead>
         <tbody>
             {% for item in totals.options %}
-            <tr>
-                <th scope="row" style="white-space: nowrap; border: none;">
+            <tr {% if item.option.winner %}style="font-weight: bold"{% endif %}>
+                <th scope="row" style="white-space: nowrap; border: none; font-weight: inherit;">
 					{% comment %}
                 	{% if item.option.key == "+" or item.option.key == "-" %}
                 		<span class="vote_{{ item.option.alpha_key }}" style="padding-left: 4px; border: 1px solid #AAA;">&nbsp;</span>
@@ -415,11 +410,17 @@ $(function() {
         </tbody>
     </table>
     <p style="margin: 1em 0 0 0; font: 12px/20px serif;">
-                    {% if vote.required == "1/2" %}Simple Majority{% else %}{{ vote.required }}{% endif %}
-                    Required.
-            {% if has_vp_vote %}
-					The Vice President cast a tie-breaking vote.
-            {% endif %}
+        {{ vote.result }}.
+
+        {% if vote.required == "1/2" %}Simple Majority{% else %}{{ vote.required }}{% endif %}
+        Required.
+
+        {% if has_vp_vote %}
+            The Vice President cast a tie-breaking vote.
+        {% endif %}
+
+        {{ vote.created|date }} {% if vote.has_time %}at {{ vote.created|time }} ET{% endif %}.
+        Source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
     </p>
 </div>
 

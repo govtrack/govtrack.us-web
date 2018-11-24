@@ -58,12 +58,14 @@ class Vote(models.Model):
     question = models.TextField(help_text="Descriptive text for what the vote was about.")
     required = models.CharField(max_length=10, help_text="A code indicating what number of votes was required for success. Often '1/2' or '3/5'. This field should be interpreted with care. It comes directly from the upstream source and may need some 'unpacking.' For instance, while 1/2 always mean 1/2 of those voting (i.e. excluding absent and abstain), 3/5 in some cases means to include absent/abstain and in other cases to exclude.")
     result = models.TextField(help_text="Descriptive text for the result of the vote.")
+    passed = models.NullBooleanField(help_text="Whether the vote passed or failed, for votes that have such an option. Otherwise None.")
 
     total_plus = models.IntegerField(blank=True, default=0, help_text="The count of positive votes (aye/yea).")
     total_minus = models.IntegerField(blank=True, default=0, help_text="The count of negative votes (nay/no).")
     total_other = models.IntegerField(blank=True, default=0, help_text="The count of abstain or absent voters.")
     percent_plus = models.FloatField(blank=True, null=True, help_text="The percent of positive votes. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
     margin = models.FloatField(blank=True, null=True, help_text="The absolute value of the difference in the percent of positive votes and negative votes. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
+    majority_party_percent_plus = models.FloatField(blank=True, null=True, help_text="The percent of positive votes among the majority party only. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
 
     related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.", on_delete=models.PROTECT)
     related_amendment = models.ForeignKey('bill.Amendment', related_name='votes', blank=True, null=True, help_text="A related amendment.", on_delete=models.PROTECT)
@@ -87,15 +89,72 @@ class Vote(models.Model):
         return self.question
 
     def calculate_totals(self):
+        # totals by yes/no/other
         self.total_plus = self.voters.filter(option__key='+').count()
         self.total_minus = self.voters.filter(option__key='-').count()
         self.total_other = self.voters.count() - (self.total_plus + self.total_minus)
+
+        # margin, percent of yes votes
         if self.total_plus + self.total_minus == 0:
             self.percent_plus = None
             self.margin = None
         else:
             self.percent_plus = self.total_plus/float(self.total_plus + self.total_minus + self.total_other)
             self.margin = abs(self.total_plus - self.total_minus) / float(self.total_plus + self.total_minus)
+
+        # how did the majority party vote?
+        if self.total_plus > 0:
+            majority_party_votes = self.totals()['party_counts'][0] # first party is the one with the most voters
+            self.majority_party_percent_plus = majority_party_votes['yes']/majority_party_votes['total']
+        else:
+            self.majority_party_percent_plus = None
+
+        # pass or failed?
+        import re
+        regexes = [
+            (True, re.compile(r"Not Sustained")), # the sustained/not sustained cases are awkward to assign to a binary outcome but this seems to make the most sense
+            (False, re.compile(r"Failed|Rejected|Defeated|Not Germane|Not Guilty|Sustained")),
+            (True, re.compile(r"Passed|Agreed to|Overridden|Confirmed|Ratified|Guilty|Germane|Adopted|Accepted|Not Well Taken")),
+            (None, re.compile('.')), # some votes like votes for Speaker or quorum calls do not have a binary outcome
+        ]
+        for value, regex in regexes:
+            if regex.search(self.result):
+                self.passed = value
+                break
+        else:
+            raise ValueError("No regex matched for result {}.".format(self.result))
+
+        # which option was the winner? some results match an option text exactly, like votes for Speaker
+        winning_option = self.options.filter(value=self.result).first()
+        if self.required == "QUORUM":
+            if self.result == "Passed":
+                winning_option = self.options.get(key="P")
+            elif self.result == "Failed":
+                winning_option = self.options.get(key="0")
+        elif winning_option is None and self.passed is not None and self.options.filter(key__in=("+", "-")).exists():
+            # If there's no match and the vote has +/- options and we determined
+            # the vote passed or failed, then a passed vote is + and a failed vote is -.
+            # Some failed votes don't have a '-' option because everyone voted present,
+            # and in that case we need to add an option. But then we have to set the
+            # right text value to Nay or No depending on the Yes text. There are also
+            # failed votes without '+' options, so we can't assume '+' exists, but only
+            # if there is no '-'.
+            if self.passed:
+                winning_option = self.options.get(key="+")
+            else:
+                try:
+                    winning_option = self.options.get(key="-")
+                except VoteOption.DoesNotExist:
+                    winning_option = self.options.create(key="-", value="No" if self.options.get(key="+").value == "Aye" else "Nay")
+        if winning_option is not None and not winning_option.winner:
+            # Winner is known. Set its winner field to true and the other options to false.
+            self.options.update(winner=False)
+            winning_option.winner = True
+            winning_option.save()
+        else:
+            # No winner known.
+            self.options.update(winner=None)
+
         self.save()
 
     def get_absolute_url(self):
@@ -370,7 +429,11 @@ class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='options', on_delete=models.CASCADE)
     key = models.CharField(max_length=20)
     value = models.CharField(max_length=255)
+    winner = models.NullBooleanField(help_text="If known, whether this Option is the one that was the vote's winner.")
 
+    def __repr__(self):
+        return "<{} {}>".format(self.key, self.value)
+        
     def __str__(self):
         return self.value
         
