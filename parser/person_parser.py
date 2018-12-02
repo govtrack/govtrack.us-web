@@ -357,7 +357,10 @@ def main(options):
             f = BASE_PATH + p + ".yaml"
             File.objects.save_file(f)
 
-    update_twitter_list()
+    try:
+        update_twitter_list()
+    except Exception as e:
+        print("Error updating twitter list.", e)
 
 def filter_yaml_term_structure(node):
     ret = { }
