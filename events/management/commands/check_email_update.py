@@ -62,4 +62,4 @@ class Command(BaseCommand):
 				print(len(events), "events pending")
 			
 			for feed in sublist.trackers.all():
-				print("\t", feed.title.encode("utf8"))
+				print("\t", feed.title)
