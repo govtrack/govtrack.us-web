@@ -495,6 +495,19 @@ function show_pronunciation_guide() {
 
 
 <div id="member-details">
+	{% if person.oversight_topics.all|length %}
+	<section>
+		<h2><span>Oversight &amp; Investigations</span></h2>
+		<ul>
+		{% for rec in person.oversight_topics.all %}
+			<li>
+				<a href="{{rec.topic.get_absolute_url}}">{{rec.topic.title}}</a>
+				<div>{{rec.topic.summary}} {{rec.description}}</div>
+			</li>
+		{% endfor %}
+		</ul>
+	</section>
+	{% endif %}
 
 	{% if analysis_data.sponsorship or analysis_data.scorecards or has_session_stats %}
 	<section id="sponsorship_analysis">

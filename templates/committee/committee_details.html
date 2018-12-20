@@ -92,6 +92,19 @@
 			{% endif %}
 			</small></p>
 
+	{% if committee.oversight_topics.all|length %}
+	<section style="margin: 30px 0;">
+		<p>Related oversight &amp; investigations:</p>
+		<ul>
+		{% for rec in committee.oversight_topics.all %}
+			<li>
+				<a href="{{rec.topic.get_absolute_url}}">{{rec.topic.title}}</a>
+				<div>{{rec.topic.summary}} {{rec.description}}</div>
+			</li>
+		{% endfor %}
+		</ul>
+	</section>
+	{% endif %}
 
 <div>
 	<ul class="nav nav-tabs" role="tablist">

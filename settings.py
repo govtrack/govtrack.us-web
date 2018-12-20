@@ -111,6 +111,7 @@ INSTALLED_APPS = (
     'events',
     'smartsearch',
     'bill',
+    'oversight',
     'userpanels',
     'stakeholder',
 

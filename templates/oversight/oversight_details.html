@@ -1,0 +1,168 @@
+{% extends "master_a.html" %}
+{% load humanize persontags %}
+
+{% block title %}{{ topic.title }} - GovTrack.us{% endblock %}
+
+{% block meta_description %}{{ topic.summary_as_plain_text|truncatewords:50 }}{% endblock %}
+
+{% block head %}
+  {{block.super}}
+  <style>
+    dt {
+      font-style: italic;
+    }
+
+    .media-row h3, .media-row h4 {
+      margin-top: 0;
+      line-height: 125%;
+      font-size: inherit;
+      font-weight: bold;
+    }
+
+    .topic-update {
+      margin: 2em 0;
+      padding: 2em 0;
+      border-top: 1px solid #EEE;
+    }
+      .topic-update:first-child {
+        margin-top: 0;
+        padding-top: 0;
+        border: none;
+      }
+      .topic-update h3 {
+        margin: 0;
+      }
+      .topic-update .metadata {
+        margin: .5em 0 12px 0;
+        font-size: 80%;
+        color: #555;
+      }
+  </style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+<li><a href="{% url "congress_home" %}">Congress</a></li>
+<li><a href="/congress/oversight">Oversight &amp; Investigations</a></li>
+<li class="active">{{topic.title|truncatewords:3}}</li>
+</ol>
+{% endblock %}
+
+{% block summary %}
+<h1>{{topic.title}}</h1>
+
+<div class="action-row clearfix">
+  <button class="btn btn-sm btn-success" onclick="return show_track_panel();">
+    <i class="glyphicon glyphicon-envelope"> </i>
+    <span style="margin-left: 3px;">
+      Track Oversight Topic
+    </span>
+  </button>
+</div>
+
+{% endblock %}
+
+{% block sidebar_top %}
+  {% if topic.relevant_committees.all|length %}
+    <h3>Related Committes</h3>
+    {% for rec in topic.relevant_committees.all %}
+      <p style="margin-bottom: .5em;"><a href="{{rec.committee.get_absolute_url}}">{{rec.committee}}</a></p>
+      <p>{{rec.description}}</p>
+    {% endfor %}
+  {% endif %}
+{% endblock %}
+
+{% block body %}
+  <div id="event_subscribe_inline_container"> </div>
+
+  <p style="margin: 15px 0 .55em 0;">
+    {{topic.summary}}
+  </p>
+
+  <dl class="dl-horizontal wide" style="margin: 0 0 35px 0;">
+    <dt>Current Status</dt>
+    <dd style="margin-bottom: .5em;">{{topic.current_status}}
+
+    <dt>Next Steps</dt>
+    <dd>{{topic.next_step}}
+  </dl>
+
+  {% if topic.relevant_people.all|length %}
+    <h2><span>Key legislators</span></h2>
+  {% endif %}
+
+  <div class="row media-row" style="margin-top: 30px; margin-bottom: 15px;">
+    {% for rec in topic.relevant_people.all %}
+    <div class="col-sm-6" style="margin-bottom: 1em;">
+      <div class="row">
+        <div class="col-xs-4" style="padding-right: 0; padding-bottom: 1em;">
+          <a href="{{rec.person.get_absolute_url}}">
+            <img src="/data/photos/{{rec.person.id}}-200px.jpeg" alt="Photo of {{rec.person.name_no_details}}" class="img-responsive" style="border: 1px solid #999;"/>
+          </a>
+        </div>
+        <div class="col-xs-8">
+          <h3 style="margin: 0 0 .5em 0; font-family: sans-serif;">
+            <a class="name" href="{{rec.person.get_absolute_url}}">{{rec.person.name}}</a>
+          </h3>
+          <p style="line-height: 125%; margin: 0; font-size: 90%;">
+            {{rec.description}}
+          </p>
+        </div>
+      </div>
+    </div>
+    {% if forloop.counter|divisibleby:2 %}<div class="clearfix"></div>{% endif %}
+    {% endfor %}
+  </div> <!-- /row -->
+
+  <h2><span>Summary</span></h2>
+
+  <div id="summary">
+    {{topic.narrative_as_html|safe}}
+    <p style="text-align: right; color: #555;">Updated {{topic.post_date|date}}</p>
+  </div>
+
+  {% if topic.relevant_bills.all|length %}
+    <h3>Key legislation</h3>
+
+    <div class="row media-row" style="margin-top: 15px; margin-bottom: 15px;  font-size: 90%;">
+      {% for rec in topic.relevant_bills.all %}
+      <div class="col-sm-4">
+        <div class="row">
+          <div class="col-xs-5 col-sm-12">
+            <a href="{{rec.bill.get_absolute_url}}">
+              <img src="{{rec.bill.get_thumbnail_url}}?aspect=.66" class="img-responsive" style="border: 1px solid #BBB; margin-bottom: .5em"/>
+            </a>
+          </div>
+          <div class="col-xs-7 col-sm-12">
+            <h4 style="margin: 0"><a href="{{rec.bill.get_absolute_url}}" style="font-weight: normal;">{{rec.bill.title|truncatewords:20}}</a></h4>
+            <p style="line-height: 125%; margin: 0 0 1em 0;">
+              {{rec.description}}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% if forloop.counter|divisibleby:3 %}<div class="clearfix"></div>{% endif %}
+      {% endfor %}
+    </div> <!-- /row -->
+  {% endif %}
+
+  {% if topic.updates.all|length %}
+  <h2><span>Updates</span></h2>
+  {% endif %}
+
+  <div>
+  {% for update in topic.updates.all %}
+    <div class="topic-update">
+      <h3>{{update.title}}</h3>
+      <div class="metadata">{{update.created|date}} {{update.created|time}}</div>
+      {{update.summary_as_html|safe}}
+    </div>
+  {% endfor %}
+  </div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+$('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
+</script>
+{% endblock %}

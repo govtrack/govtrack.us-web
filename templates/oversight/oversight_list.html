@@ -1,0 +1,83 @@
+{% extends "master_a.html" %}
+{% load humanize persontags %}
+
+{% block title %}Congressional Oversight &amp; Investigations - GovTrack.us{% endblock %}
+
+{% block meta_description %}{% endblock %}
+
+{% block head %}
+  {{block.super}}
+  <style>
+  </style>
+{% endblock %}
+
+{% block crumbs %}
+<ol class="breadcrumb">
+<li><a href="{% url "congress_home" %}">Congress</a></li>
+<li class="active">Oversight &amp; Investigations</li>
+</ol>
+{% endblock %}
+
+{% block summary %}
+<h1>Congressional Oversight &amp; Investigations</h1>
+
+<div class="action-row clearfix">
+  <button class="btn btn-sm btn-success" onclick="return show_track_panel();">
+    <i class="glyphicon glyphicon-envelope"> </i>
+    <span style="margin-left: 3px;">
+      Track All Oversight Topics
+    </span>
+  </button>
+</div>
+
+{% endblock %}
+
+{% block sidebar_top %}
+{% endblock %}
+
+{% block body %}
+  <div id="event_subscribe_inline_container"> </div>
+
+  <p style="margin: 10px 0 30px 0;">One of Congress’ key functions and a check-and-balance implicit in the Constitution is to supervise the activities of the executive branch, a.k.a. to perform oversight. Sometimes the oversight is as simple as an annual check-in during appropriations hearings, other times oversight includes subpoenas and investigations.</p>
+
+  <h2><span>What we&rsquo;re tracking</span></h2>
+
+  {% for topic in topics %}
+    <h3><a href="{{topic.get_absolute_url}}">{{topic.title}}</a></h3>
+    <p>{{topic.summary}}</p>
+    <div class="row">
+      {% for rec in topic.relevant_people.all %}
+      <div class="col-xs-3 col-sm-2 col-lg-1" style="margin-bottom: 1em;">
+        <a href="{{rec.person.get_absolute_url}}">
+          <img src="/data/photos/{{rec.person.id}}-200px.jpeg" alt="Photo of {{rec.person.name_no_details}}" class="img-responsive" style="border: 1px solid #999;"/>
+        </a>
+      </div>
+      {% if forloop.counter|divisibleby:4 %}<div class="clearfix"></div>{% endif %}
+      {% endfor %}
+      {% for rec in topic.relevant_bills.all %}
+      <div class="col-xs-3 col-sm-2 col-lg-1" style="margin-bottom: 1em;">
+        <a href="{{rec.bill.get_absolute_url}}">
+          <img src="{{rec.bill.get_thumbnail_url}}?aspect=1.25" class="img-responsive" style="border: 1px solid #BBB;"/>
+        </a>
+      </div>
+      {% if forloop.counter|divisibleby:4 %}<div class="clearfix"></div>{% endif %}
+      {% endfor %}
+    </div>
+
+  {% empty %}
+
+    <p>Stay tuned! We will be adding oversight topics this week!</p>
+
+  {% endfor %}
+
+  <hr style="margin: 2em">
+
+  <p>Something missing? <a href="https://community.govtrack.us/t/covering-congressional-oversight-on-govtrack/34">Suggest an oversight topic for inclusion on this page on our community forum</a>.</p>
+
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+$('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
+</script>
+{% endblock %}

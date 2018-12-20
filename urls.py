@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^congress/committees/', include('committee.urls')),
     url(r'^congress/', include('vote.urls')),
     url(r'^congress/bills/', include('bill.urls')),
+    url(r'^congress/oversight/', include('oversight.urls')),
     url(r'', include('events.urls')),
     url(r'^api/v2/([^/]+)(?:/(\d+))?', website.api.apiv2),
     url(r'^panels/', include('userpanels.urls')),
