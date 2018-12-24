@@ -1,0 +1,45 @@
+{% extends "master.html" %}
+
+{% block title %}Missing Data on GovTrack.us{% endblock %}
+
+{% block crumbs %}
+{% endblock %}
+
+{% block body_scripts %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block body %}
+	<h1>Missing Data</h1>
+	
+	<p>We&rsquo;re missing the following data about legislators:</p>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				<th>Photo</th>
+				<th>Birthday</th>
+				<th>Pronunciation</th>
+				<th>Scorecards</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for p in people %}
+				<tr>
+					<td>{{p.id}}</td>
+					<td><a href="{{p.link}}">{{p.name}}</a></td>
+					<td>{{p.photo}}</td>
+					<td>{{p.birthday}}</td>
+					<td>{{p.pronunciation}}</td>
+					<td>{{p.scorecards}}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+{% endblock %}
+

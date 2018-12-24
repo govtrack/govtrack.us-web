@@ -967,3 +967,47 @@ def discourse_sso(request):
                        .hexdigest()
       })
   )
+
+@anonymous_view
+@render_to('website/missing_data.html')
+def missing_data(request):
+    # What data are we missing?
+
+    # What data are we missing about current legislators?
+
+    # Load the pronunciation guide.
+    import os.path
+    if not os.path.exists("data/us/pronunciation.yaml"):
+        pronunciation_guide = None
+    else:
+        import rtyaml
+        pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open("data/us/pronunciation.yaml")) }
+
+    from person.models import Person
+    from person.analysis import load_scorecards_for
+    people = { }
+    def add_person(p):
+        return people.setdefault(p.id, {
+            "id": p.id,
+            "name": p.sortname,
+            "link": p.get_absolute_url(),
+        })
+    for p in Person.objects.filter(roles__current=True):
+        if not p.has_photo():
+            add_person(p).update({ "photo": "✘" })
+        if not p.birthday:
+            add_person(p).update({ "birthday": "✘" })
+        if pronunciation_guide:
+            if p.id not in pronunciation_guide:
+                add_person(p).update({ "pronunciation": "✘" })
+            # Check that the name in the guide matches the name we display.
+            elif pronunciation_guide[p.id]['name'] != p.firstname + " // " + p.lastname:
+                add_person(p).update({ "pronunciation": "mismatch" })
+        if not load_scorecards_for(p):
+            # new legislators won't have scorecards for a while
+            add_person(p).update({ "scorecards": "✘" })
+    people = sorted(people.values(), key=lambda p : p['name'])
+
+    return {
+        "people": people,
+    }

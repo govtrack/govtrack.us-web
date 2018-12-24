@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^sousveillance.json', website.views.dump_sousveillance),
     url(r'^misconduct', website.views.misconduct),
     url(r'^user-group-signup', website.views.user_group_signup),
+    url(r'^missing-data', website.views.missing_data),
 ]
