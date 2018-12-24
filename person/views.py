@@ -558,31 +558,32 @@ def get_members_age_sex_table():
         if p['person__birthday'] is None:
             return None
     ages = [(v['role_type'], v['person__gender'], int(round((now-v['person__birthday']).days/365.25))) for v in ages]
-    def minmaxmedian(data): return { "min": min(data), "max": max(data), "median": int(round(median(data))) }
-    minmaxmedian_age_by_chamber = { role_type: minmaxmedian([v[2] for v in ages if v[0] == role_type]) for role_type in (RoleType.senator, RoleType.representative) }
-    agesex = {
+    median_age = int(round(median([p[2] for p in ages]))) # get median age across chambers so the two charts are consistent
+    def minmax(data): return { "min": min(data), "max": max(data) }
+    minmax_age_by_chamber = { role_type: minmax([v[2] for v in ages if v[0] == role_type]) for role_type in (RoleType.senator, RoleType.representative) }
+    return {
         role_type: {
             "summary": {
-                "age": minmaxmedian_age_by_chamber[role_type]["median"],
+                "age": median_age,
                 "percent_older_men": int(round(100 *
-                      len([v for v in ages if v[0] == role_type and v[1] == Gender.male and v[2] > minmaxmedian_age_by_chamber[role_type]["median"]])
+                      len([v for v in ages if v[0] == role_type and v[1] == Gender.male and v[2] > median_age])
                     / len([v for v in ages if v[0] == role_type])
                 )),
                 "percent_younger_women": int(round(100 *
-                      len([v for v in ages if v[0] == role_type and v[1] == Gender.female and v[2] <= minmaxmedian_age_by_chamber[role_type]["median"]])
+                      len([v for v in ages if v[0] == role_type and v[1] == Gender.female and v[2] <= median_age])
                     / len([v for v in ages if v[0] == role_type])
                 ))
             },
             "buckets": [
-                "{}-{} years old".format(minmaxmedian_age_by_chamber[role_type]["median"]+1, minmaxmedian_age_by_chamber[role_type]["max"]),
-                "{}-{} years old".format(minmaxmedian_age_by_chamber[role_type]["min"], minmaxmedian_age_by_chamber[role_type]["median"]),
+                "{}-{} years old".format(median_age+1, minmax_age_by_chamber[role_type]["max"]),
+                "{}-{} years old".format(minmax_age_by_chamber[role_type]["min"], median_age),
             ],
             "series": [
                 {
                     "name": gender_label,
                     "data": [
-                        len([v for v in ages if v[0] == role_type and v[1] == gender_value and v[2] > minmaxmedian_age_by_chamber[role_type]["median"]]),
-                        len([v for v in ages if v[0] == role_type and v[1] == gender_value and v[2] <= minmaxmedian_age_by_chamber[role_type]["median"]]),
+                        len([v for v in ages if v[0] == role_type and v[1] == gender_value and v[2] > median_age]),
+                        len([v for v in ages if v[0] == role_type and v[1] == gender_value and v[2] <= median_age]),
                     ]
                 }
                 for (gender_label, gender_value) in [
