@@ -18,7 +18,7 @@ def session_filter(qs, form):
     return qs
     
 def vote_search_manager():
-    sm = SearchManager(Vote, qs=Vote.objects.select_related('oursummary'))
+    sm = SearchManager(Vote, qs=Vote.objects.select_related('oursummary', 'related_bill__oursummary'))
     
     # show sessions as year+session for non-year-based sessions,
     # and then just the session number (the year) for year-based
