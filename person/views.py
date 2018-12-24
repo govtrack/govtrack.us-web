@@ -484,7 +484,20 @@ def membersoverview(request):
             return qs.values('party').annotate(count=Count('party')).order_by('-count')
         else:
             return qs.count()
+    
+    return {
+        "statelist": statelist,
+        "senate_by_party": get_current_members(RoleType.senator, False, True),
+        "senate_vacancies": 100-get_current_members(RoleType.senator, False, False),
+        "house_by_party": get_current_members(RoleType.representative, False, True),
+        "house_vacancies": 435-get_current_members(RoleType.representative, False, False),
+        "house_delegate_vacancies": 6-get_current_members(RoleType.representative, True, False),
+        "longevity": get_members_longevity_table(),
+        "agesex": get_members_age_sex_table(),
+    }
 
+
+def get_members_longevity_table():
     # Get a breakdown of members by chamber and party by longevity. Sum the total number
     # of days in office in Congress by all current members. It's easier to sum without
     # trying to restrict the longevity computation to days in the same chamber.
@@ -517,7 +530,7 @@ def membersoverview(request):
 
     # Reform the data into chamber -> party -> bucket array since each party will be a series with
     # buckets (in correspondence between parties).
-    longevity = {
+    return {
         role_type: {
             "buckets": [bucket_name for (bucket_index, bucket_name), counts in sorted(buckets.items())],
             "series": [
@@ -533,11 +546,17 @@ def membersoverview(request):
         for role_type, buckets in longevity_by_bucket.items()
     }
 
+def get_members_age_sex_table():
     # Compute an age/sex breakdown. For each chamber, compute the median age. Then bucket
     # by chamber, above/below the median age, and sex.
+    from datetime import datetime
     from numpy import median
     from person.types import Gender
+    now = datetime.now().date()
     ages = PersonRole.objects.filter(current=True, role_type__in=(RoleType.senator, RoleType.representative)).values('role_type', 'person__gender', 'person__birthday')
+    for p in ages: # if any legislators are missing a birthday, we can't create the table
+        if p['person__birthday'] is None:
+            return None
     ages = [(v['role_type'], v['person__gender'], int(round((now-v['person__birthday']).days/365.25))) for v in ages]
     def minmaxmedian(data): return { "min": min(data), "max": max(data), "median": int(round(median(data))) }
     minmaxmedian_age_by_chamber = { role_type: minmaxmedian([v[2] for v in ages if v[0] == role_type]) for role_type in (RoleType.senator, RoleType.representative) }
@@ -573,17 +592,6 @@ def membersoverview(request):
             ]
         }
         for role_type in (RoleType.senator, RoleType.representative)
-    }
-    
-    return {
-        "statelist": statelist,
-        "senate_by_party": get_current_members(RoleType.senator, False, True),
-        "senate_vacancies": 100-get_current_members(RoleType.senator, False, False),
-        "house_by_party": get_current_members(RoleType.representative, False, True),
-        "house_vacancies": 435-get_current_members(RoleType.representative, False, False),
-        "house_delegate_vacancies": 6-get_current_members(RoleType.representative, True, False),
-        "longevity": longevity,
-        "agesex": agesex,
     }
 
 @anonymous_view

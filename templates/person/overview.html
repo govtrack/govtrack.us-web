@@ -85,8 +85,8 @@ function make_agesex_chart(elemid, data, xaxis) {
 $(function() {
 	make_longevity_chart("senate_longevity_chart", {{longevity.1|json}}, 'Senators');
 	make_longevity_chart("house_longevity_chart", {{longevity.2|json}}, 'Representatives');
-	make_agesex_chart("senate_agesex_chart", {{agesex.1|json}}, 'Senators');
-	make_agesex_chart("house_agesex_chart", {{agesex.2|json}}, 'Representatives');
+	{% if agesex.1 %}make_agesex_chart("senate_agesex_chart", {{agesex.1|json}}, 'Senators');{% endif %}
+	{% if agesex.2 %}make_agesex_chart("house_agesex_chart", {{agesex.2|json}}, 'Representatives');{% endif %}
 });
 </script>
 {% endblock %}
@@ -161,9 +161,11 @@ $(function() {
 	<h3>Tenure of Senators</h3>
 	<div id="senate_longevity_chart"></div>
 
+	{% if agesex.1 %}
 	<h3>Age and Sex of Senators</h3>
 	<div id="senate_agesex_chart"></div>
 	<p>{{agesex.1.summary.percent_older_men}}% of senators are men over the age of {{agesex.1.summary.age}}, while only {{agesex.1.summary.percent_younger_women}}% of senators are women {{agesex.1.summary.age}} years old or younger.</p>
+	{% endif %}
 </div>
 <div class="col-sm-6">	
 	<h2>The House of Representatives</h2>
@@ -187,9 +189,11 @@ $(function() {
 	<h3>Tenure of Representatives</h3>
 	<div id="house_longevity_chart"></div>
 
+	{% if agesex.2 %}
 	<h3>Age and Sex of Representatives</h3>
 	<div id="house_agesex_chart"></div>
 	<p>{{agesex.2.summary.percent_older_men}}% of representatives are men over the age of {{agesex.2.summary.age}}, while only {{agesex.2.summary.percent_younger_women}}% of representatives are women {{agesex.2.summary.age}} years old or younger.</p>
+	{% endif %}
 </div>
 </div>
 
