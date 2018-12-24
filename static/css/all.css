@@ -442,7 +442,7 @@ aside .download-links { padding: 31px 0 0 }
 .color_D, .party_D { background-color: #008ed1; }
 .color_R, .party_R { background-color: #f83631; }
 .color_I { background-color: #921b85; }
-.party_I { border: 1px solid black; color: black; }
+.party_I { border: 1px solid #555; color: black; }
 
 /* historical parties... the other letters of the alphabet */
 .color_A, .color_B, .color_C, .color_E, .color_F, .color_G, .color_H, .color_J, .color_K, .color_L, .color_M, .color_N, .color_O, .color_P, .color_Q, .color_S, .color_T, .color_U, .color_V, .color_W, .color_X, .color_Y, .color_Z { background-color: #EEE; }

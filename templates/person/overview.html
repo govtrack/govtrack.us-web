@@ -150,15 +150,19 @@ $(function() {
 	<h3>Senators by Party</h3>
 	<table style="width: 15em; margin-bottom: 1em;">
 	{% for p in senate_by_party %}
-	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
+	<tr>
+		<td><span class="party_{{p.party.0}}" style="display: inline-block; line-height: 100%; padding: 1px; margin-bottom: 1px; width: 1em; text-align: center;">{{p.party.0}}</span></td>
+		<th>{{p.party}}s</th> <td>{{p.count}}</td>
+	</tr>
 	{% endfor %}
-	{% if senate_vacancies > 0 %}<tr><td>Vacancies</td> <td>{{senate_vacancies}}</td></tr>{% endif %}
-	<tr><td>Total</td> <td>100</td></tr>
+	{% if senate_vacancies > 0 %}<tr><td/><td>Vacancies</td> <td>{{senate_vacancies}}</td></tr>{% endif %}
+	<tr style="border-top: 1px solid #555;"><td/><td>Total</td> <td>100</td></tr>
 	</table>
 
 	<p>The District of Columbia, Puerto Rico, and the U.S.’s four other island territories — American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands — are not represented in the Senate.</p>
 
 	<h3>Tenure of Senators</h3>
+	<p>The table below shows a breakdown of how many years the senators have been serving in office.</p>
 	<div id="senate_longevity_chart"></div>
 
 	{% if agesex.1 %}
@@ -178,15 +182,20 @@ $(function() {
 	
 	<table style="width: 15em">
 	{% for p in house_by_party %}
-	<tr><th>{{p.party}}s</th> <td>{{p.count}}</td></tr>
+	<tr>
+		<td><span class="party_{{p.party.0}}" style="display: inline-block; line-height: 100%; padding: 1px; margin-bottom: 1px; width: 1em; text-align: center;">{{p.party.0}}</span></td>
+		<th>{{p.party}}s</th>
+		<td>{{p.count}}</td>
+	</tr>
 	{% endfor %}
-	{% if house_vacancies > 0 %}<tr><td>Vacancies</td> <td>{{house_vacancies}}</td></tr>{% endif %}
-	<tr><td>Total</td> <td>435</td></tr>
+	{% if house_vacancies > 0 %}<tr><td/><td>Vacancies</td> <td>{{house_vacancies}}</td></tr>{% endif %}
+	<tr style="border-top: 1px solid #555;"><td/><td>Total</td> <td>435</td></tr>
 	</table>
 	
 	<p style="margin-top: .5em">The District of Columbia, Puerto Rico, and the U.S.&rsquo;s four other island territories &mdash; American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands &mdash; each send a non-voting delegate to the House. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
 
 	<h3>Tenure of Representatives</h3>
+	<p>The table below shows a breakdown of how many years the representatives have been serving in office.</p>
 	<div id="house_longevity_chart"></div>
 
 	{% if agesex.2 %}
