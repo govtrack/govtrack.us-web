@@ -428,6 +428,15 @@ class PersonRole(models.Model):
 
     def __str__(self):
         return '%s / %s to %s / %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display(), repr(self.congress_numbers()))
+
+    def get_office_id(self):
+        if self.role_type in (RoleType.president, RoleType.vicepresident):
+            return RoleType.by_value(self.role_type).key
+        if self.role_type == RoleType.senator:
+            return ("sen", self.state, self.senator_class)
+        if self.role_type == RoleType.representative:
+            return ("rep", self.state, self.district)
+        raise ValueError()
        
     def continues_from(self, prev):
         if self.startdate - prev.enddate > datetime.timedelta(days=120): return False
