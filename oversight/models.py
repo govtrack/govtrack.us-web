@@ -134,8 +134,8 @@ class OversightTopic(models.Model):
 
 class OversightRelevantPerson(models.Model):
     """A link between an OversightTopic and a Person."""
-    topic = models.ForeignKey(OversightTopic, related_name="relevant_people", help_text="The related topic.")
-    person = models.ForeignKey(Person, related_name="oversight_topics", help_text="The related person.")
+    topic = models.ForeignKey(OversightTopic, on_delete=models.CASCADE, related_name="relevant_people", help_text="The related topic.")
+    person = models.ForeignKey(Person, related_name="oversight_topics", on_delete=models.CASCADE, help_text="The related person.")
     description = models.CharField(max_length=256, blank=True, help_text="One-sentence explaining how the person relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the person's page.")
     order = models.IntegerField(default=0, help_text="If different order numbers are given to relevant bills, they will be listed in ascending numeric order by this field.")
     class Meta:
@@ -144,8 +144,8 @@ class OversightRelevantPerson(models.Model):
 
 class OversightRelevantBill(models.Model):
     """A link between an OversightTopic and a Bill."""
-    topic = models.ForeignKey(OversightTopic, related_name="relevant_bills", help_text="The related topic.")
-    bill = models.ForeignKey(Bill, related_name="oversight_topics", help_text="The related bill.")
+    topic = models.ForeignKey(OversightTopic, related_name="relevant_bills", on_delete=models.CASCADE, help_text="The related topic.")
+    bill = models.ForeignKey(Bill, related_name="oversight_topics", on_delete=models.CASCADE, help_text="The related bill.")
     description = models.CharField(max_length=256, blank=True, help_text="One-sentence explaining how the bill relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the bill's page.")
     order = models.IntegerField(default=0, help_text="If different order numbers are given to relevant bills, they will be listed in ascending numeric order by this field.")
     class Meta:
@@ -154,8 +154,8 @@ class OversightRelevantBill(models.Model):
 
 class OversightRelevantCommittee(models.Model):
     """A link between an OversightTopic and a Bill."""
-    topic = models.ForeignKey(OversightTopic, related_name="relevant_committees", help_text="The related topic.")
-    committee = models.ForeignKey(Committee, related_name="oversight_topics", help_text="The related committee.")
+    topic = models.ForeignKey(OversightTopic, related_name="relevant_committees", on_delete=models.CASCADE, help_text="The related topic.")
+    committee = models.ForeignKey(Committee, related_name="oversight_topics", on_delete=models.CASCADE, help_text="The related committee.")
     description = models.CharField(max_length=256, blank=True, help_text="One-sentence explaining how the committee relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the committee's page.")
     order = models.IntegerField(default=0, help_text="If different order numbers are given to relevant bills, they will be listed in ascending numeric order by this field.")
     class Meta:
@@ -164,7 +164,7 @@ class OversightRelevantCommittee(models.Model):
 
 class OversightUpdate(models.Model):
     """An update for the oversight topic for a timeline or that we might send out in an email update."""
-    topic = models.ForeignKey(OversightTopic, related_name="updates", help_text="The related topic.")
+    topic = models.ForeignKey(OversightTopic, related_name="updates", on_delete=models.CASCADE, help_text="The related topic.")
     title = models.CharField(max_length=256, help_text="The title oversight topic for display purposes.")
     summary = models.TextField(help_text="The summary text for the topic in CommonMark format.")
     created = models.DateTimeField(db_index=True, auto_now_add=True, help_text="The date the oversight topic was created.")
