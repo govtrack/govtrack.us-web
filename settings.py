@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
-import os.path
 import sys
 import re
 
-ROOT = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(ROOT, 'lib'))
+sys.path.insert(0, 'lib')
 
 DEBUG = ("DEBUG" in os.environ)
 INTERNAL_IPS = ('127.0.0.1',)
@@ -39,7 +37,7 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(ROOT, 'media')
+MEDIA_ROOT = 'media'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -47,7 +45,7 @@ MEDIA_ROOT = os.path.join(ROOT, 'media')
 MEDIA_URL = '/media/'
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(ROOT, 'static')]
+STATICFILES_DIRS = ['static']
 
 # django-regitration-pv
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
@@ -123,7 +121,7 @@ INSTALLED_APPS = (
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(ROOT, 'templates')],
+        'DIRS': ['templates'],
         'OPTIONS': {
             'debug': DEBUG,
             'context_processors': [
