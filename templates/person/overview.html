@@ -93,9 +93,6 @@ $(function() {
 
 {% block summary %}
 	<h1>Members of Congress</h1>
-{% endblock %}
-	
-{% block body %}
 
 	<h2>Find Your Representative and Senators</h2>
 
@@ -116,7 +113,7 @@ $(function() {
 		</div>
 	</form>
 	</div>
-	<div class="col-sm-5 col-lg-4">
+	<div class="col-sm-5 col-lg-4" style="margin-bottom: 1em">
 			<label for="state" style="margin-bottom: .5em;">Or select a state:</label>
 			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" class="form-control">
 				<option value="">(Select State)</option>
@@ -126,6 +123,10 @@ $(function() {
 			</select>
 	</div>
 	</div>
+
+{% endblock %}
+	
+{% block body %}
 
 	<h2>All Representatives and Senators in Congress</h2>
 
@@ -145,7 +146,7 @@ $(function() {
 	
 	<p>The United States&rsquo;s 50 states each elect two senators for staggered six-year terms. A senator represents between 1 and 37 million people, depending on their state&rsquo;s population.</p>
 	
-	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&ldquo;   Here is a count of senators by party:</p>
+	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&rdquo;   Here is a count of senators by party:</p>
 	
 	<h3>Senators by Party</h3>
 	<table style="width: 15em; margin-bottom: 1em;">
@@ -176,7 +177,7 @@ $(function() {
 	
 	<p>The states are also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative to the House of Representatives for a 2-year term.</p>
 
-	<p>As in the Senate, the day-to-day activities of the House are controlled by the &ldquo;majority party.&ldquo; Here is a count of representatives by party:</p>
+	<p>As in the Senate, the day-to-day activities of the House are controlled by the &ldquo;majority party.&rdquo; Here is a count of representatives by party:</p>
 
 	<h3>Representatives by Party</h3>
 	
