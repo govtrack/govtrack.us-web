@@ -37,7 +37,7 @@ pronunciation_guide_key = {
 "a": "cat", "b": "bat",
 "ah": "calm", "ch": "chin",
 "air": "hair", "d": "day",
-"ar": "bar", "f": "fat",
+               "f": "fat",
 "aw": "law", "g": "get",
 "ay": "say", "h": "hat",
 "e": "bed", "j": "jam",
