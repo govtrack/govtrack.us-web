@@ -98,7 +98,7 @@ class Processor(object):
                 v1 = getattr(old_value, k)
                 v2 = getattr(new_value, k)
                 if v1 != v2:
-                    print("Change in", k, "value of", str(old_value).encode("utf8"), ":", str(v1).encode("utf8"), "=>", str(v2).encode("utf8"))
+                    print("Change in", k, "value of", str(old_value), ":", str(v1), "=>", str(v2))
                     return True
         return False
 
