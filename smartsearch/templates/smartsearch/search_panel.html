@@ -474,7 +474,6 @@ window.post_jquery_load_scripts.push(function() {
           <div class="input-group">
             <label for="searchform_sort" class="input-group-addon" style="font-size: 12px">sort by</label>
             <select id="searchform_sort" name="sort" size="1" onchange="update_search()" class="form-control" style="font-size: 12px">
-                {% if has_relevance_sort %}<option value="relevance">Relevance</option>{% endif %}
                 {% for label, key, default in sort_options %}
                     <option value="{{key}}" {% if default %}selected{% endif %}>{{label}}</option>
                 {% endfor %}

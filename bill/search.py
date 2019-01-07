@@ -137,6 +137,7 @@ def bill_search_manager():
     
     #sm.add_sort("Popularity", "-total_bets", default=True)
     # default sort order is handled by the view
+    sm.add_sort("Relevance of Title/Text", "relevance", func=lambda x : x) # no-op to use Solr default
     sm.add_sort("Secret Sauce", "-proscore")
     sm.add_sort("Introduced Date (Newest First)", "-introduced_date")
     sm.add_sort("Introduced Date (Oldest First)", "introduced_date")

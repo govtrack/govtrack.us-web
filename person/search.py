@@ -56,7 +56,8 @@ def person_search_manager(mode):
 
     sm.add_option('gender')
 
-    sm.add_sort("Name", "sortname", default=True)
+    sm.add_sort("Name Match", "relevance", func=lambda x : x) # no-op to use Solr default
+    sm.add_sort("Alphabetical", "sortname", default=True)
     if mode == "current":
         sm.add_sort("Seniority (Oldest First)", "first_took_office")
         sm.add_sort("Seniority (Newest Members First)", "-first_took_office")
