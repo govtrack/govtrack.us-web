@@ -59,8 +59,7 @@ $(function() {
 			zoomType: 'xy',
 			backgroundColor: 'none',
 			height: 350,
-			marginTop: 5,
-			description: "{{person.name_no_details}} has an ideology score of {{analysis_data.sponsorship.ideology|floatformat:2}} and a leadership score of {{analysis_data.sponsorship.leadership|floatformat:2}}"
+			marginTop: 5
 		},
 		title: {
 			text: ''
@@ -530,8 +529,9 @@ function show_pronunciation_guide() {
 		
 		<div id="sponsorship_analysis_chart"> </div>
 
-		<p style="margin-top: -7px; color: #555;"><small>The chart is based on the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored.
-		See full <a href="/about/analysis">analysis methodology</a>.</small></p>
+		<p style="margin-top: -7px; color: #555; font-size: 90%; line-height: 120%;">The chart is based on the bills {{ person.lastname }} {% if analysis_data.sponsorship.current %}has{% endif %} sponsored and cosponsored
+		from {{analysis_data.sponsorship.start_date|date}} to {{analysis_data.sponsorship.end_date|date}}.
+		See full <a href="/about/analysis">analysis methodology</a>.</p>
 
 		{% endif %}
 

@@ -68,12 +68,14 @@ def load_sponsorship_analysis2(congressnumber, role_type, person):
             
     # sort, required by regroup tag
     all_points.sort(key = lambda item : item["party"])
-            
+
+    # if the person was not found, return None            
     if person and not "ideology" in data: return None
     
+    # add metadata
     data.update(json.load(open(fname.replace(".txt", "_meta.txt"))))
     from parser.processor import Processor
-    for field in ('start_date', 'end_date'):
+    for field in ('start_date', 'end_date'): # parse date fields to datetime's
         data[field] = Processor.parse_datetime(data[field])
     
     return data
