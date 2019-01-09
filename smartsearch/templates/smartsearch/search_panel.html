@@ -232,11 +232,16 @@ function update_search(pagenum, pageinc, elem, isinitial) {
     if (isinitial) {
         // The initial search combines the default faceting with the URL fragment.
         var fragment_params = parse_qs.fragment();
+
         for (var k in default_search) postdata[k] = default_search[k];
         for (var k in fragment_params) postdata[k] = fragment_params[k];
         for (var k in fragment_params)
             if (fragment_params[k] == "__ALL__")
                 delete postdata[k]; // null is not sufficient
+
+	// Make sure a text search behaves predictably
+	if ("text" in fragment_params)
+	    postdata["sort"]="relevance";
 
         // Update the sort control.
         if ("sort" in postdata)

@@ -461,8 +461,8 @@ def show_bill_browse(template, request, ix1, ix2, context):
         # pass through
         default_sort = request.GET["sort"]
     elif "text" in request.GET:
-        # when the user is doing a text search, sort by standard Solr relevance scoring, which includes boosting the bill title
-        default_sort = None
+        # when the user is doing a text search, sort by relevance to that text
+        default_sort = "relevance"
     elif "sponsor" in request.GET:
         # when searching by sponsor, the default order is to show bills in reverse chronological order
         default_sort = "-introduced_date"
