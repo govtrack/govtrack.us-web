@@ -251,7 +251,7 @@ def run_sponsorship_analysis(people, congress, startdate, enddate):
 	# stats we just want to look at activity during this year. This puts freshmen
 	# Members on a more equal footing.
 	global sponsorship_analysis_data
-	from analysis.sponsorship_analysis import *
+	from analysis.sponsorship_analysis import get_people, build_matrix, smooth_matrix, build_party_list, ideology_analysis, leadership_analysis
 	sponsorship_analysis_data = { }
 	peoplemap, people_list = get_people([role for (person,role) in people])
 	for chamber, role_type in (('h', RoleType.representative), ('s', RoleType.senator)):
