@@ -306,14 +306,14 @@ def vote_thumbnail_image_map(vote):
 	for node in tree.getroot():
 		color = colors.get(node.get("id"))
 		if color:
-			node.set("style", "fill:" + color)
+			node.set("style", "fill: {}; stroke: #AAA; stroke-width: 1px;".format(color))
 		elif node.tag.endswith("polygon"):
 			# No voter for this district.
-			node.set("style", "fill:white")
-		elif node.get("id") == "non-voting-delegates":
-			# The non-voting-delegates group holds the districts
-			# we should hide because they don't have a vote.
-			tree.getroot().remove(node)
+			node.set("style", "fill: white; stroke: #666; stroke-width: 1px;")
+		#elif node.get("id") == "non-voting-delegates":
+		#	# The non-voting-delegates group holds the districts
+		#	# we should hide because they don't have a vote.
+		#	tree.getroot().remove(node)
 
 	# Send response.
 	v = ET.tostring(tree.getroot())
