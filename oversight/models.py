@@ -14,15 +14,15 @@ from events.models import truncate_words
 class OversightTopic(models.Model):
     """An oversight/investigation topic."""
 
-    title = models.CharField(max_length=256, help_text="The title oversight topic for display purposes.")
+    title = models.CharField(max_length=256, help_text="The title of the oversight topic for display purposes.")
     slug = models.SlugField(help_text="The slug used in URLs for this topic.")
 
     congress_start = models.IntegerField(default=settings.CURRENT_CONGRESS, help_text="The first Congress this oversight topic pertained to.")
     congress_end = models.IntegerField(default=settings.CURRENT_CONGRESS, help_text="The last Congress this oversight topic pertained to, after which the topic is hidden from the main list.")
 
-    summary = models.CharField(max_length=256, help_text="One-sentence explaining what the topic is about.")
-    current_status = models.CharField(max_length=256, help_text="One-sentence explaining what the current status of this topic is.")
-    next_step = models.CharField(max_length=256, help_text="One-sentence explaining what the next procedural steps or expected actions for this topic are.")
+    summary = models.CharField(max_length=500, help_text="One-sentence explaining what the topic is about.")
+    current_status = models.CharField(max_length=500, help_text="One-sentence explaining what the current status of this topic is.")
+    next_step = models.CharField(max_length=500, help_text="One-sentence explaining what the next procedural steps or expected actions for this topic are.")
     narrative = models.TextField(blank=True, help_text="The long explanatory text for the topic in CommonMark format.")
     post_date = models.DateTimeField(help_text="The date this oversight topic's summary was last updated.")
 
@@ -136,7 +136,7 @@ class OversightRelevantPerson(models.Model):
     """A link between an OversightTopic and a Person."""
     topic = models.ForeignKey(OversightTopic, on_delete=models.CASCADE, related_name="relevant_people", help_text="The related topic.")
     person = models.ForeignKey(Person, related_name="oversight_topics", on_delete=models.CASCADE, help_text="The related person.")
-    description = models.CharField(max_length=256, blank=True, help_text="One-sentence explaining how the person relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the person's page.")
+    description = models.CharField(max_length=500, blank=True, help_text="One-sentence explaining how the person relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the person's page.")
     order = models.IntegerField(default=0, help_text="If different order numbers are given to relevant bills, they will be listed in ascending numeric order by this field.")
     class Meta:
         unique_together = [("topic", "person")]
@@ -146,7 +146,7 @@ class OversightRelevantBill(models.Model):
     """A link between an OversightTopic and a Bill."""
     topic = models.ForeignKey(OversightTopic, related_name="relevant_bills", on_delete=models.CASCADE, help_text="The related topic.")
     bill = models.ForeignKey(Bill, related_name="oversight_topics", on_delete=models.CASCADE, help_text="The related bill.")
-    description = models.CharField(max_length=256, blank=True, help_text="One-sentence explaining how the bill relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the bill's page.")
+    description = models.CharField(max_length=500, blank=True, help_text="One-sentence explaining how the bill relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the bill's page.")
     order = models.IntegerField(default=0, help_text="If different order numbers are given to relevant bills, they will be listed in ascending numeric order by this field.")
     class Meta:
         unique_together = [("topic", "bill")]
@@ -156,7 +156,7 @@ class OversightRelevantCommittee(models.Model):
     """A link between an OversightTopic and a Bill."""
     topic = models.ForeignKey(OversightTopic, related_name="relevant_committees", on_delete=models.CASCADE, help_text="The related topic.")
     committee = models.ForeignKey(Committee, related_name="oversight_topics", on_delete=models.CASCADE, help_text="The related committee.")
-    description = models.CharField(max_length=256, blank=True, help_text="One-sentence explaining how the committee relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the committee's page.")
+    description = models.CharField(max_length=500, blank=True, help_text="One-sentence explaining how the committee relates to the topic. The sentence must be able to stand on its own because it will appear on both the oversight topic page and the committee's page.")
     order = models.IntegerField(default=0, help_text="If different order numbers are given to relevant bills, they will be listed in ascending numeric order by this field.")
     class Meta:
         unique_together = [("topic", "committee")]
@@ -165,7 +165,7 @@ class OversightRelevantCommittee(models.Model):
 class OversightUpdate(models.Model):
     """An update for the oversight topic for a timeline or that we might send out in an email update."""
     topic = models.ForeignKey(OversightTopic, related_name="updates", on_delete=models.CASCADE, help_text="The related topic.")
-    title = models.CharField(max_length=256, help_text="The title oversight topic for display purposes.")
+    title = models.CharField(max_length=500, help_text="The title oversight topic for display purposes.")
     summary = models.TextField(help_text="The summary text for the topic in CommonMark format.")
     created = models.DateTimeField(db_index=True, auto_now_add=True, help_text="The date the oversight topic was created.")
     updated = models.DateTimeField(db_index=True, auto_now=True, help_text="The date the oversight topic's metadata/summary was last updated.")
