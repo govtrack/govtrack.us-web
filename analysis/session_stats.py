@@ -79,6 +79,15 @@ def get_cohorts(person, role, congress, session, committee_membership):
 		elif session in ("2019", "2020"):
 			assert prev_congresses_served == { 114, 115 }
 			prev_congresses_served = set([115])
+	if person.id in (412748, 412749, 412750, 412751):
+		# Similarly, Kevin Hern, Joseph D. Morelle, Mary Gay Scanlon, Susan Wild took office only after the 2018 election, so we'll
+		# keep them as a freshman again in 2019, 2020 and then sophomores in 2021, 2022.
+		if session in ("2019", "2020"):
+			assert prev_congresses_served == { 115 }
+			prev_congresses_served = set()
+		elif session in ("2021", "2022"):
+			assert prev_congresses_served == { 115, 116 }
+			prev_congresses_served = set([116])
 	if len(prev_congresses_served) == 0: cohorts.append({ "key": chamber + "-freshmen", "chamber": chamber })
 	if len(prev_congresses_served) == 1: cohorts.append({ "key": chamber + "-sophomores", "chamber": chamber })
 	if years_served >= 10: cohorts.append({ "key": chamber + "-tenyears", "chamber": chamber, "first_date": min_start_date.isoformat()  })
