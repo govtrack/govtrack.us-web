@@ -667,10 +667,18 @@ class Bill(models.Model):
             return "An \"original bill\" is one which is drafted and approved by a committee before it is formally introduced in the House or Senate."
         return None
 
-    def loc_hdl_link(self):
-        """Returns the Library of Congress Handle URL for the bill, e.g. http://hdl.loc.gov/loc.uscongress/legislation.114hr4330."""
-        return "http://hdl.loc.gov/loc.uscongress/legislation.%d%s%d" \
-            % (self.congress, self.bill_type_slug, self.number)
+    def congressdotgov_link(self):
+        congressdotgovbilltype = {
+           BillType.senate_bill: "senate-bill", BillType.house_bill: "house-bill",
+           BillType.senate_resolution: "senate resolution", BillType.house_resolution: "house-resolution",
+           BillType.senate_concurrent_resolution: "senate-concurrent-resolution", BillType.house_concurrent_resolution: "house-concurrent-resolution",
+           BillType.senate_joint_resolution: "senate-joint-resolution", BillType.house_joint_resolution: "house-joint-resolution",
+        }
+        return "https://congress.gov/bill/{congress_ordinal}-congress/{bill_type}/{number}".format(
+            congress_ordinal=self.congress, # Congress.gov accepts non-ordinal numbers and redirects to their canonical URL
+            bill_type=congressdotgovbilltype[self.bill_type],
+            number=self.number,
+        )
 
     def get_feed(self):
         from events.models import Feed

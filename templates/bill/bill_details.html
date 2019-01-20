@@ -781,7 +781,7 @@
 				</h3>
 				<p style="margin-bottom: 0">GovTrack automatically collects legislative information from a variety of governmental and non-governmental sources. This page is sourced primarily from
 					{% if bill.congress >= 93 %}
-						<a href="{{bill.loc_hdl_link}}">Congress.gov</a>, the official portal of the United States Congress.
+						<a href="{{bill.congressdotgov_link}}">Congress.gov</a>, the official portal of the United States Congress.
 						Congress.gov is generally updated one day after events occur, and so legislative activity shown here may be one day behind. Data via the <a href="https://github.com/unitedstates/congress">congress project</a>.
 					{% elif bill.source == "statutesatlarge" %}
 						<!-- http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE -->
