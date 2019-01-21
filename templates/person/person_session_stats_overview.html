@@ -70,6 +70,16 @@
 	{% else %}
 		<p>These statistics dissect the legislative records of Members of Congress during the {{meta.congress|ordinalhtml}} Congress ({{meta.startdate|date}}-{{meta.enddate|date}}), as of {{publishdate|date}}.</p>
 	{% endif %}
+
+    <div class="panel panel-info" style="margin: 1em 0 1em 0;">
+      <div class="panel-body">
+        <p>A higher or lower number below doesn&rsquo;t necessarily make a legislator any better or worse, or more or less effective, than other Members 
+        of Congress. We present these statistics for you to understand the quantitative aspects of legislating and make your own judgements based on what
+        legislative activities you think are important.</p>
+        <p style="margin-bottom: 0">Keep in mind that there are many important aspects of being a legislator besides what can be measured, such as 
+        constituent services and performing oversight of the executive branch, which aren&rsquo;t reflected here.</p>
+      </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -125,6 +135,9 @@
 				
 				{% elif stat.key == "bills-with-cosponsors-both-parties-count" %}
 					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the number of bills introduced by each legislator in {{period}} which had both a Democratic cosponsor and a Republican cosponsor.</p>
+
+				{% elif stat.key == "bills-with-cosponsor-other-party" %}
+					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the number of bills introduced by each legislator in {{period}} which had cosponsor from the other political party than the party the legislator caucuses with.</p>
 
 				{% elif stat.key == "bills-with-companion" %}
 					<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. This is the number of bills introduced by each legislator in {{period}} that had a companion bill in the other chamber. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>

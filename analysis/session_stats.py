@@ -147,7 +147,7 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 	bills = list(bills)
 	was_reported = []
 	has_cmte_leaders = []
-	has_cosponsors_both_parties = []
+	has_bipartisan_cosponsor = []
 	has_companion = []
 	for bill in bills:
 		# Skip any bills that were the vehicle for passage of an unrelated matter
@@ -184,15 +184,17 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 					x = True
 		if x: has_cmte_leaders.append(bill)
 
-		# Check whether there's a cosponsor from both parties.
+		# Check whether there's a cosponsor from the opposite party of the sponsor.
+		# For independents, use the party they caucus with.
 		# Warning: If someone switches parties, this will change.
-		co_d = False
-		co_r = False
+		sponsor_party = bill.sponsor_role.caucus or bill.sponsor_role.party
+		assert sponsor_party in ("Republican", "Democrat")
 		for cosponsor in cosponsors:
-			if cosponsor.role.party == "Democrat": co_d = True
-			if cosponsor.role.party == "Republican": co_r = True
-		if co_d and co_r:
-			has_cosponsors_both_parties.append(bill)
+			cosponsor_party = cosponsor.role.caucus or cosponsor.role.party
+			assert cosponsor_party in ("Republican", "Democrat")
+			if cosponsor_party != sponsor_party:
+				has_bipartisan_cosponsor.append(bill)
+				break
 
         # Check if a companion bill was introduced during the time period.
 		if RelatedBill.objects.filter(bill=bill, relation="identical", related_bill__introduced_date__gte=startdate, related_bill__introduced_date__lte=enddate).exists():
@@ -209,9 +211,9 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 		"bills": make_bill_entries(has_cmte_leaders),
 	}
 
-	stats["bills-with-cosponsors-both-parties-count"] = {
-		"value": len(has_cosponsors_both_parties),
-		"bills": make_bill_entries(has_cosponsors_both_parties),
+	stats["bills-with-cosponsor-other-party"] = {
+		"value": len(has_bipartisan_cosponsor),
+		"bills": make_bill_entries(has_bipartisan_cosponsor),
 		"num_bills": len(bills),
 	}
 

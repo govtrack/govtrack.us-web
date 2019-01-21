@@ -233,6 +233,9 @@ function smooth_scroll(elem) {
 		{% elif stat.key == "bills-with-cosponsors-both-parties-count" %}
 			<p>In this era of partisanship, it is important to see Members of Congress working across the aisle. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
 
+		{% elif stat.key == "bills-with-cosponsor-other-party" %}
+			<p>In this era of partisanship, it is important to see Members of Congress working across the aisle. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had a cosponsor from a different political party than the party {{person.lastname}} caucuses with in {{period}}.</p>
+
 		{% elif stat.key == "bills-with-companion" %}
 			<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions had a companion bill in the {{stat.other_chamber}}. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>
 			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}

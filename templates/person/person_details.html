@@ -513,8 +513,7 @@ function show_pronunciation_guide() {
 		<h2><span>Analysis</span></h2>
 
 		{% if has_session_stats %}
-			{% if analysis_data.sponsorship %}<h3>Legislative Metrics</h3>{% endif %}
-
+			<h3>Legislative Metrics</h3>
 			<p>Read our <a href="{{person.get_absolute_url}}/report-card/{{has_session_stats.meta.pub_year}}">{{has_session_stats.meta.pub_year}} Report Card for {{person.lastname}}</a>.</p>
 		{% endif %}
 
