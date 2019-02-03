@@ -160,6 +160,13 @@ if do_bill_parse:
 	# indexing each time is substantial, set the TIMEOUT and
 	# BATCH_SIZE options in the haystack connections appropriately.
 	# ./manage.py update_index -v 2 -u bill bill
+	# Or for a single Congress:
+	# import tqdm
+	# from bill.models import Bill
+	# from bill.search_indexes import BillIndex
+	# bill_index = BillIndex()
+	# for bill in tqdm.tqdm(Bill.objects.filter(congress=115)):
+	#  bill.update_index(bill_index)
 
 if "votes" in sys.argv:
 	# Scrape.
