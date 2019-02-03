@@ -63,7 +63,14 @@
 
 {% block summary %}
 <div>
-	<h1>{{session}} Report Cards{% if cohort %}: {{cohort_title}}{% endif %}</h1>
+	<h1>
+			{{session}} Report Cards
+			<div class="small">
+				{% if cohort %}{{cohort_title}}{% endif %}
+				{% if cohort and specific_stat %} / {% endif %}
+				{% if specific_stat %}{{specific_stat_title}}{% endif %}
+			</div>
+	</h1>
 
 	{% if not meta.is_full_congress_stats %}
 		<p>These special year-end statistics dissect the legislative records of Members of Congress during the {{session}} legislative year ({{meta.startdate|date}}-{{meta.enddate|date}}), looking at Members who served at the end of that period. This page was last updated on {{publishdate|date}}.</p>
@@ -137,7 +144,7 @@
 					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the number of bills introduced by each legislator in {{period}} which had both a Democratic cosponsor and a Republican cosponsor.</p>
 
 				{% elif stat.key == "bills-with-cosponsor-other-party" %}
-					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the number of bills introduced by each legislator in {{period}} which had cosponsor from the other political party than the party the legislator caucuses with.</p>
+					<p>In this era of partisanship, it is encouraging to see Members of Congress working across the aisle. This is the number of bills introduced by each legislator in {{period}} which had a cosponsor from the other political party than the party the legislator caucused with.</p>
 
 				{% elif stat.key == "bills-with-companion" %}
 					<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. This is the number of bills introduced by each legislator in {{period}} that had a companion bill in the other chamber. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>

@@ -121,13 +121,13 @@ function smooth_scroll(elem) {
 		<hr>
 
 		{% if not meta.is_full_congress_stats %}
-			<p>These special year-end statistics cover <b>{{person.lastname}}&rsquo;s record during the {{session}} legislative year</b> ({{meta.startdate|date}}-{{meta.enddate|date}}) and compare {{himher}} to other {{class}} serving at the end of that period. Last updated on {{publishdate|date}}. {{meta.notes}}</p>
+			<p>These year-end statistics cover <b>{{person.lastname}}&rsquo;s record during the {{session}} legislative year</b> ({{meta.startdate|date}}-{{meta.enddate|date}}) and compare {{himher}} to other {{class}} serving at the end of that period. Last updated on {{publishdate|date}}. {{meta.notes}}</p>
 		{% else %}
-			<p>These special statistics cover <b>{{person.lastname}}&rsquo;s record during the {{meta.congress|ordinalhtml}} Congress</b> ({{congress_dates.0|date}}-{{congress_dates.1|date}}) and compare {{himher}} to other {{class}} also serving at the end of the session. Last updated on {{publishdate|date}}. {{meta.notes}}</p>
+			<p>These statistics cover <b>{{person.lastname}}&rsquo;s record during the {{meta.congress|ordinalhtml}} Congress</b> ({{congress_dates.0|date}}-{{congress_dates.1|date}}) and compare {{himher}} to other {{class}} also serving at the end of the session. Last updated on {{publishdate|date}}. {{meta.notes}}</p>
 		{% endif %}
 
 		{% if role.leadership_title %}
-			<p style="color: red">Members of Congress with party leadership roles often do not participate in the legislative process in the same way as other Members of Congress. Since {{person.lastname}} {% if role.current %}is{% else %}was{% endif %} busy being {{role.leadership_title}}, the metrics of legislative activity listed below may not apply.</p>
+			<p style="color: red">Members of Congress with party leadership roles often do not participate in the legislative process in the same way as other Members of Congress. Since {{person.lastname}} was busy being {{role.leadership_title}}, the metrics of legislative activity listed below may not apply.</p>
 		{% endif %}
 
 	{% if photo %}
@@ -234,7 +234,7 @@ function smooth_scroll(elem) {
 			<p>In this era of partisanship, it is important to see Members of Congress working across the aisle. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
 
 		{% elif stat.key == "bills-with-cosponsor-other-party" %}
-			<p>In this era of partisanship, it is important to see Members of Congress working across the aisle. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had a cosponsor from a different political party than the party {{person.lastname}} caucuses with in {{period}}.</p>
+			<p>In this era of partisanship, it is important to see Members of Congress working across the aisle. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had a cosponsor from a different political party than the party {{person.lastname}} caucused with in {{period}}.</p>
 
 		{% elif stat.key == "bills-with-companion" %}
 			<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions had a companion bill in the {{stat.other_chamber}}. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>

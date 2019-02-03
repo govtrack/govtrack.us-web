@@ -1,12 +1,14 @@
 #!script
 
-import sys, json
+import sys, json, re
 
 from us import statenames
 from person.models import Person, PersonRole
 from person.views_sessionstats import stat_titles, get_cohort_name
 
+session = re.match(r".*-(\d\d\d\d)\.", sys.argv[1]).group(1)
 allstats = json.load(open(sys.argv[1]))
+
 collected_stats = []
 for id, stats in allstats["people"].items():
 	person = Person.objects.get(id=id)
@@ -65,8 +67,8 @@ for person, role, statname, cohortname, groupinfo in collected_stats:
 	if groupinfo["rank_ties"] > 0:
 		tweet += " (tied w/ %d)" % groupinfo["rank_ties"]
 
-	tweet += ".\n"
-	tweet += "https://www.govtrack.us" + person.get_absolute_url() + "/report-card/" + str(allstats["meta"]["session"])
+	tweet += ". "
+	tweet += "https://www.govtrack.us" + person.get_absolute_url() + "/report-card/" + session
 
-	print(tweet.encode("utf8"))
+	print(tweet)
 	print()
