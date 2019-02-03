@@ -332,6 +332,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	
 	# format text to print on the image
 	vote_title = re.sub(r"^On the Motion to ", "To ", vote.question)
+	vote_title = re.sub(r"^On the Motion ", "Motion ", vote.question)
 	if re.match(r"Cloture .*Rejected", vote.result):
 		vote_result_2 = "Filibustered"
 	elif re.match(r"Cloture .*Agreed to", vote.result):
@@ -343,7 +344,7 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	elif re.match(r".* Not Sustained$", vote.result):
 		vote_result_2 = "Not Sustained"
 	else:
-		vote_result_2 = re.sub("^(Bill|Amendment|Resolution of Ratification|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion) ", "", vote.result)
+		vote_result_2 = re.sub("^(Bill|Amendment|Resolution of Ratification|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion|Motion for Attendance) ", "", vote.result)
 	if vote_result_2 == "unknown": vote_result_2 = ""
 	if len(vote_result_2) > 15: vote_result_2 = vote_result_2[-15:]
 	if vote_result_2 == "Confirmed": vote_title = re.sub(r"^On the Nomination ", "", vote_title)
