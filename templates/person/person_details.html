@@ -745,34 +745,32 @@ function show_pronunciation_guide() {
 			<p>{{person.name_no_details}} is pronounced:</p>
 			<p style="font-size: 130%; font-weight: bold; font-family: monospace;">{{pronunciation.respell}}</p>
 			<p>The letters stand for sounds according to the following table:</p>
-			<table style="margin: 1em auto;" border="1">
-				<tr valign="top">
-					{% for word in pronunciation.key %}
-					<td>
-						<table class="table table-striped" style="margin: 0;">
-						<thead style="color: #555;"><tr><td>letter</td> <td>as in</td></thead>
-						<tbody>
-							{% for letter, sound in word %}
-								<tr>
-									<td style="font-family: monospace; font-weight: bold; text-align: center;">{{letter}}</td>
-									<td>
-									{% if sound %} {# else punctuation #}
-										{{sound}}
-									{% endif %}
-									</td>
-								</tr>
-							{% endfor %}
-						</tobdy>
-						</table>
+			{% for word in pronunciation.key %}
+			<table style="margin: 1.75em 0;">
+			<tbody>
+			<tr>
+				<td style="padding-right: 1em; color: #777; font-style: italic; text-align: right;"><div>letters</div><div>as in</div></td>
+				{% for letter, sound in word %}
+					<td style="padding: 0 .4em;">
+						<div style="font-family: monospace; font-weight: bold; text-align: center;">
+							{{letter}}
+						</div>
+						<div>
+						{% if sound %} {# else punctuation #}
+							{{sound}}
+						{% else %}
+							&nbsp;
+						{% endif %}
+						</div>
 					</td>
-					{% endfor %}
-				</tr>
+				{% endfor %}
+				<td style="padding-left: 1em; width: 65px;">{# get centering right #}</td>
+			</tr>
+			</tobdy>
 			</table>
+			{% endfor %}
 			<p>Capital letters indicate a stressed syllable.</p>
 			</center>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
           </div>
         </div>
     </div>
