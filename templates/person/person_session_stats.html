@@ -110,7 +110,7 @@ function smooth_scroll(elem) {
 	<div class="col-sm-9 col-md-10">
 	{% endif %}
 		<p><em>
-			{% if role.leadership_title %}{{role.leadership_title_full}}<br>{% endif %}
+			{% if role.leadership_title %}{{role.leadership_title}}<br>{% endif %}
 			{% if role.senator_rank %}{{role.get_senator_rank_display}}{% endif %}
 			{{ role.get_role_type_display }}
 			{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District{% endif %}{% endif %}

@@ -444,6 +444,7 @@ class PersonRole(models.Model):
         if self.senator_class != prev.senator_class: return False
         if self.state != prev.state: return False
         if self.district != prev.district: return False
+        if self.leadership_title != prev.leadership_title: return False
         return True
 
     def get_title(self):
@@ -546,12 +547,6 @@ class PersonRole(models.Model):
         n = n[-1]
         if n > settings.CURRENT_CONGRESS: n = settings.CURRENT_CONGRESS # we don't ever mean to ask for a future one (senators, PR res com)
         return n
-
-    @property
-    def leadership_title_full(self):
-        if not self.leadership_title: return None
-        if self.leadership_title == "Speaker": return "Speaker of the House"
-        return RoleType.by_value(self.role_type).congress_chamber + " " + self.leadership_title
 
     def get_party(self):
         # If the person didn't change parties, just return the party.
