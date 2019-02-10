@@ -757,7 +757,7 @@ function show_pronunciation_guide() {
 						</div>
 						<div>
 						{% if sound %} {# else punctuation #}
-							{{sound}}
+							{{sound|safe}}
 						{% else %}
 							&nbsp;
 						{% endif %}
