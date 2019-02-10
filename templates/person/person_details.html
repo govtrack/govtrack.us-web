@@ -740,21 +740,36 @@ function show_pronunciation_guide() {
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h2 class="modal-title" id="pronunciationModalTitle">Pronunciation Guide</h2>
           </div>
-          <div class="modal-body" style="font-size: 115%">
+          <div class="modal-body">
 			<center>
 			<p>{{person.name_no_details}} is pronounced:</p>
 			<p style="font-size: 130%; font-weight: bold; font-family: monospace;">{{pronunciation.respell}}</p>
-			</center>
 			<p>The letters stand for sounds according to the following table:</p>
-			<table class="table table-striped pronunciation_guide_table" style="margin: 1em 0">
-			<thead><tr><th style="text-align: center">Letter</th> <th>Sounds As In</th></thead>
-			<tbody>
-				{% for letter, sound in pronunciation.key %}
-					<tr><td style="font-family: monospace; font-weight: bold; text-align: center;">{{letter.upper}} {{letter}}</td> <td>{{sound}}</td> </tr>
-				{% endfor %}
-			</tobdy>
+			<table style="margin: 1em auto;" border="1">
+				<tr valign="top">
+					{% for word in pronunciation.key %}
+					<td>
+						<table class="table table-striped" style="margin: 0;">
+						<thead style="color: #555;"><tr><td>letter</td> <td>as in</td></thead>
+						<tbody>
+							{% for letter, sound in word %}
+								<tr>
+									<td style="font-family: monospace; font-weight: bold; text-align: center;">{{letter}}</td>
+									<td>
+									{% if sound %} {# else punctuation #}
+										{{sound}}
+									{% endif %}
+									</td>
+								</tr>
+							{% endfor %}
+						</tobdy>
+						</table>
+					</td>
+					{% endfor %}
+				</tr>
 			</table>
 			<p>Capital letters indicate a stressed syllable.</p>
+			</center>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>

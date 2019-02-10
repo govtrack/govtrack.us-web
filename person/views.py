@@ -161,32 +161,28 @@ def person_details(request, pk):
         # Get this person's entry.
         pronunciation = pronunciation_guide.get(person.id)
         # TODO: Validate that the 'name' in the guide matches the name we're actually displaying.
-        if pronunciation:
-          # Show a letter-pronunciation key including only the letters in the pronunciation respelling,
-          # and excluding punctuation glyphs (which are used for syllabification and word boundaries).
-          pronunciation["key"] = set()
+        if pronunciation and not pronunciation.get("key"):
+          # Show a key to the letters used in the pronunciation guide. Break apart the name
+          # into words which we'll show in columns.
+          pronunciation["key"] = []
           for namepart in pronunciation["respell"].split(" // "):
-            # Parse out the letters actually used in the guide. Sweep from left to right chopping
-            # off valid respelling letter combinations, chopping off the longest one where possible.
-            i = 0
-            while i < len(namepart):
-              for s in sorted(pronunciation_guide_key, key = lambda s : -len(s)):
-                if namepart[i:i+len(s)] in (s, s.upper()):
-                  if pronunciation_guide_key[s]:
-                    pronunciation["key"].add(s)
-                  i += len(s)
-                  break
-              else:
-                # respelling did not match any valid symbol
-                break
+            for nameword in namepart.split(" "):
+                # Parse out the symbols actually used in the guide. Sweep from left to right chopping
+                # off valid respelling letter combinations, chopping off the longest one where possible.
+                pronunciation["key"].append([])
+                i = 0
+                while i < len(nameword):
+                  for s in sorted(pronunciation_guide_key, key = lambda s : -len(s)):
+                    if nameword[i:i+len(s)] in (s, s.upper()):
+                      pronunciation["key"][-1].append( (nameword[i:i+len(s)], pronunciation_guide_key[s]) )
+                      i += len(s)
+                      break
+                  else:
+                    # respelling did not match any valid symbol, should be an error but we don't
+                    # want to issue an Oops! for this
+                    break
 
-          # Sort the letters. Because of the barred i, a standard lexicographic sort fails. Use NFKD to sort barred i after regular i.
-          import unicodedata
-          pronunciation["key"] = sorted(pronunciation["key"], key = lambda letter : unicodedata.normalize('NFKD', letter))
-
-          # Turn letters into letter-guide pairs.
-          pronunciation["key"] = [(letter, pronunciation_guide_key[letter]) for letter in pronunciation["key"]]
-
+        # Get their enacted bills.
         enacted_bills_src_qs = person.sponsored_bills.exclude(original_intent_replaced=True).order_by('-current_status_date')
 
         return {'person': person,
