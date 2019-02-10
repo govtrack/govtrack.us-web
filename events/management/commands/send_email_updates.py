@@ -44,7 +44,7 @@ class Command(BaseCommand):
 		if options["mode"][0] == "testadmin":
 			# Test an email to the site administrator only. There's no need to be complicated
 			# about finding users --- just use a hard-coded list.
-			users = User.objects.filter(email="jt@occams.info")
+			users = User.objects.filter(email="tauberer@govtrack.us")
 			send_mail = True
 			mark_lists = False
 			send_old_events = True
