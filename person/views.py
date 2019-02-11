@@ -118,7 +118,6 @@ def person_details(request, pk):
         # Get a break down of the top terms this person's sponsored bills fall into,
         # looking only at the most recent five years of bills.
         from bill.models import BillTerm
-        from datetime import datetime, timedelta
         most_recent_bill = person.sponsored_bills.order_by("-introduced_date").first()
         bills_by_subject_counts = list(person.sponsored_bills.filter(
             terms__id__in=BillTerm.get_top_term_ids(),
@@ -498,8 +497,7 @@ def get_members_longevity_table():
     # of days in office in Congress by all current members. It's easier to sum without
     # trying to restrict the longevity computation to days in the same chamber.
     from collections import defaultdict
-    from datetime import timedelta
-    from datetime import datetime
+    from datetime import datetime, timedelta
 
     # Collect the longevity of each member currently serving in Congress.
     now = datetime.now().date()
