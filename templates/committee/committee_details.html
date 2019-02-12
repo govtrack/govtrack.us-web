@@ -70,7 +70,7 @@
 					<dd style="margin-bottom: .25em"><a href="{{mem.person.get_absolute_url}}">{{mem.person}}</a></dd>
 				{% endfor %}
 			</dl>
-			<dl class="dl-horizontal wide" style="margin-bottom: .5em">
+			<dl class="dl-horizontal wide" style="margin-bottom: 1em">
 				{% for party, count in party_counts %}
 					<dt>{{party}}s:</dt>
 					<dd style="margin-bottom: .25em">{{count}}</dd>
@@ -81,7 +81,7 @@
 			<p>The membership of this committee is not yet available.</p>
 			{% endif %}
 
-			<p style="line-height: 110%"><small>
+			<p style="line-height: 110%; margin: 2em 0;"><small>
 			{% if committee.committee_type == TYPE_JOINT %}
 				This is a &ldquo;joint&rdquo; committee, which means it has members from both the House and Senate.
 			{% elif member_highlights|length > 0 %}
@@ -168,6 +168,7 @@
 		        </div>
 		        {% endfor %}
 		    </div>
+			<p><small>Committee membership information is from the <a href="https://github.com/unitedstates/congress-legislators">unitedstates project on github</a>.</small></p>
 		</div>
 		{% endif %}
 

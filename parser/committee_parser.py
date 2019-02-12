@@ -35,6 +35,7 @@ ROLE_MAPPING = {
     'Vice Chairman': CommitteeMemberRole.vice_chair,
     'Vice Chair': CommitteeMemberRole.vice_chair,
     'Vice Chairwoman': CommitteeMemberRole.vice_chair,
+    'Vice-Chair': CommitteeMemberRole.vice_chair,
     'Member': CommitteeMemberRole.member,
 }
 
