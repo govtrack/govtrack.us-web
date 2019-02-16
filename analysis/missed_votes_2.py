@@ -10,7 +10,7 @@ w.writerow(fields)
 
 
 for hs in ('h', 's'):
-	for rec in csv.DictReader(open("data/us/114/stats/missedvotes_%s.csv" % hs)):
+	for rec in csv.DictReader(open("data/analysis/by-congress/114/missedvotes_%s.csv" % hs)):
 		p = Person.objects.get(id=rec["id"])
 		if not p.current_role: continue
 		rec["chamber"] = "Senate" if hs == "s" else "House"

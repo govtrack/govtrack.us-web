@@ -36,7 +36,7 @@ for vid in tqdm(votes_to_process):
 
 
 import csv
-writer = csv.writer(open("data/us/%d/stats/notable_votes.csv" % congress, "w"))
+writer = csv.writer(open("data/analysis/by-congress/%d/notable_votes.csv" % congress, "w"))
 writer.writerow(["vote_id", "vote_url", "outliers"])
 for row in rows:
     writer.writerow(row)

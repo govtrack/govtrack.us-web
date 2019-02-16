@@ -12,6 +12,7 @@ from scipy.stats import percentileofscore, scoreatpercentile
 
 congress = int(sys.argv[1])
 datadir = "data/us/%d/" % congress
+datadir_stats = "data/analysis/by-congress/%d/" % congress
 
 # UTILS
 
@@ -27,7 +28,7 @@ def parse_datetime(value):
 # BEGIN
 
 # prepare output data directories
-os.system("mkdir -p " + datadir + "stats/person/missedvotes")
+os.system("mkdir -p " + datadir_stats + "person/missedvotes")
 
 # load in the session dates so we know how to break them down into smaller time periods
 session_dates = { }
@@ -100,7 +101,7 @@ if len(voters_by_chamber['h']) == 0 or len(voters_by_chamber['s']) == 0:
 # that point. Also update the person's lifetime vote dates.
 for p in voters_by_chamber['h'] | voters_by_chamber['s']:
 	for cc in range(congress-1, 0, -1):
-		fn = "../data/us/%d/stats/person/missedvotes/%d.csv" % (cc, p)
+		fn = "data/analysis/by-congress/%d/person/missedvotes/%d.csv" % (cc, p)
 		if os.path.exists(fn):
 			for rec in csv.DictReader(open(fn)):
 				# currently serving but has not voted in this chamber in this Congress yet
@@ -192,7 +193,7 @@ for bin in [("lifetime", "s"), ("lifetime", "h")] + sorted(session_bin_dates):
 		plist = [p for p in plist if bin in vote_counts[p]]
 		
 		plist.sort(key = lambda p : -vote_counts[p][bin]['percentile'])
-		w = csv.writer(open(datadir + "stats/missedvotes_%s.csv" % bin[1], "w"))
+		w = csv.writer(open(datadir_stats + "missedvotes_%s.csv" % bin[1], "w"))
 		w.writerow(["id", "total_votes", "missed_votes", "percent", "percentile", "first_vote_date", "last_vote_date"])
 		for p in plist:
 			# when doing lifetime stats, is a member currently serving but has not voted, so omit from stats
@@ -210,7 +211,7 @@ def bin_key(bin):
 	if bin[0] == "lifetime": return (1, bin)
 	return (0, bin)
 for p in vote_counts:
-	w = csv.writer(open(datadir + "stats/person/missedvotes/%d.csv" % p, "w"))
+	w = csv.writer(open(datadir_stats + "person/missedvotes/%d.csv" % p, "w"))
 	# columns are tied to how we load in historical data above
 	w.writerow(["congress", "session", "chamber", "period", "total_votes", "missed_votes", "percent", "percentile", "period_start", "period_end", "pctile25", "pctile50", "pctile75", "pctile90"])
 	for bin in sorted(vote_counts[p], key=bin_key):

@@ -242,7 +242,7 @@ def load_key_votes(person):
         top_votes = { }
         outlier_votes = set()
         for congress in congresses_set:
-            fn = "data/us/%d/stats/notable_votes.csv" % congress
+            fn = "data/analysis/by-congress/%d/notable_votes.csv" % congress
             if not os.path.exists(fn): continue
             for vote in csv.DictReader(open(fn)):
                 if int(vote["vote_id"]) not in all_votes: continue

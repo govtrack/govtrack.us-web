@@ -159,7 +159,7 @@ def load_ideology_scores(congress):
     for ch in ('h', 's'):
         try:
             scores_by_party = { }
-            for ideolog in csv.reader(open("data/us/%d/stats/sponsorshipanalysis_%s.txt" % (congress, ch))):
+            for ideolog in csv.reader(open("data/analysis/by-congress/%d/sponsorshipanalysis_%s.txt" % (congress, ch))):
                 if ideolog[0] == "ID": continue # header row
                 if float(ideolog[2]) <  .1: continue # very low leadership score, ideology is not reliable
                 ideology_scores[congress][int(ideolog[0])] = float(ideolog[1])

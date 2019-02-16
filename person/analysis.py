@@ -26,7 +26,7 @@ def load_sponsorship_analysis(person):
 def load_sponsorship_analysis2(congressnumber, role_type, person):
     data = { "congress": congressnumber, "current": congressnumber == settings.CURRENT_CONGRESS }
     
-    fname = 'data/us/%d/stats/sponsorshipanalysis' % congressnumber
+    fname = 'data/analysis/by-congress/%d/sponsorshipanalysis' % congressnumber
     if role_type == RoleType.senator:
         fname += "_s.txt"
         data["chamber"] = "Senate"
@@ -87,7 +87,7 @@ def load_votes_analysis(person):
     congressnumber = role.most_recent_congress_number()
     if not congressnumber: return None
     
-    fn = 'data/us/%d/stats/person/missedvotes/%d.csv' % (congressnumber, person.pk)
+    fn = 'data/analysis/by-congress/%d/person/missedvotes/%d.csv' % (congressnumber, person.pk)
     if not os.path.exists(fn): return None
     
     lifetime_rec = None

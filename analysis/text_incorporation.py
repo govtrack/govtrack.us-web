@@ -233,7 +233,7 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
     # Load the current comparison data so we know what bill texts
     # we've already compared and copy those comparisons into the
     # output.
-    csv_fn = "data/us/%d/text_comparison.csv" % congress
+    csv_fn = "data/analysis/by-congress/%d/text_comparison.csv" % congress
     existing_comps = set()
     if os.path.exists(csv_fn):
       for row in csv.reader(open(csv_fn)):
@@ -352,7 +352,7 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
 
   congress = int(sys.argv[2])
 
-  csv_fn = "data/us/%d/text_comparison.csv" % congress
+  csv_fn = "data/analysis/by-congress/%d/text_comparison.csv" % congress
 
   # Identify the most recent bill version for each bill. Since the
   # CSV file is in chronological order by the date the text analysis
@@ -491,7 +491,7 @@ elif __name__ == "__main__" and sys.argv[-1] == "test":
   import csv
   from bill.models import Bill, RelatedBill
   congress = 114
-  csv_fn = "data/us/%d/text_comparison.csv" % congress
+  csv_fn = "data/analysis/by-congress/%d/text_comparison.csv" % congress
   for row in csv.reader(open(csv_fn)):
     timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text = row
     b1_ratio = float(b1_ratio)

@@ -353,7 +353,7 @@ class Person(models.Model):
         else:
             raise ValueError("Invalid session: %s" % session)
 
-        fn = "data/us/%d/stats/session-%s.json" % (congress, session)
+        fn = "data/analysis/by-congress/%d/session-%s.json" % (congress, session)
         try:
             datafile = json.load(open(fn))
             datafile["meta"]["pub_year"] = session

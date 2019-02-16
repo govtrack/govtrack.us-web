@@ -37,7 +37,6 @@ import matplotlib.pyplot as plt
 
 # CONFIGURATION
 
-datadir = "data"
 matplotlib.rcParams["font.size"] = 9.0
 matplotlib.rcParams["lines.markersize"] = 3
 
@@ -127,7 +126,7 @@ def build_matrix(congressnumber, starting_congress, house_or_senate, people, peo
 	# Congress.
 	cells = []
 	for cn in range(starting_congress, congressnumber+1):
-		for billfilename in glob.glob(datadir + "/us/" + str(cn) + "/bills/" + house_or_senate + "*.xml"):
+		for billfilename in glob.glob("data/us/" + str(cn) + "/bills/" + house_or_senate + "*.xml"):
 			xml = lxml.parse(billfilename)
 			
 			# get the sponsor
@@ -311,7 +310,7 @@ def draw_figure(congressnumber, house_or_senate, start_date, end_date, nreps, pa
 			pp = [pagerank[i] for i in range(nreps) if parties[i] == party]
 			plt.plot(ss, pp, "." + color, markersize=3/figsize)
 	
-		plt.savefig(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + figsizedescr + ".png", dpi=120*figsize, bbox_inches="tight", pad_inches=.02)
+		plt.savefig("data/analysis/by-congress/" + str(congressnumber) + "/sponsorshipanalysis_" + house_or_senate + figsizedescr + ".png", dpi=120*figsize, bbox_inches="tight", pad_inches=.02)
 
 def describe_members(nreps, parties, spectrum, pagerank):
 	# Describe what kind of person each is....
@@ -361,14 +360,14 @@ def describe_members(nreps, parties, spectrum, pagerank):
 	return descr
 		
 def write_stats_to_disk(congressnumber, house_or_senate, nreps, ids, parties, names, spectrum, pagerank, descr, other_cols):
-	with open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + ".txt", "w") as f:
+	with open("data/analysis/by-congress/" + str(congressnumber) + "/sponsorshipanalysis_" + house_or_senate + ".txt", "w") as f:
 		w = csv.writer(f)
 		w.writerow(["ID", "ideology", "leadership", "name", "party", "description", "introduced_bills_%d" % congressnumber, "cosponsored_bills_%d" % congressnumber, "unique_cosponsors_%d" % congressnumber, "total_cosponsors_%d" % congressnumber])
 		for i in range(nreps):
 			w.writerow([ids[i], spectrum[i], pagerank[i], names[i], parties[i], descr[i]] + other_cols[i])
 	
 def write_metadata_to_disk(congressnumber, house_or_senate, start_date, end_date):
-	with open(datadir + "/us/" + str(congressnumber) + "/stats/sponsorshipanalysis_" + house_or_senate + "_meta.txt", "w") as w:
+	with open("data/analysis/by-congress/" + str(congressnumber) + "/sponsorshipanalysis_" + house_or_senate + "_meta.txt", "w") as w:
 		w.write(json.dumps({ "start_date": start_date, "end_date": end_date }, indent=2))
 
 def create_member_images():
@@ -387,7 +386,7 @@ def create_member_images():
 				pp = [pagerank[i] for i in range(nreps) if parties[i] == party]
 				plt.plot(ss, pp, "." + color, markersize=7)
 			plt.plot(spectrum[j], pagerank[j], "ok", markersize=20)
-			plt.savefig(datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis/" + str(ids[j]) + ".png", dpi=25, bbox_inches="tight", pad_inches=.05)
+			plt.savefig("data/analysis/by-congress/" + str(congressnumber) + "/person/sponsorshipanalysis/" + str(ids[j]) + ".png", dpi=25, bbox_inches="tight", pad_inches=.05)
 
 def do_analysis(congressnumber, starting_congress, house_or_senate, people, people_list):
 	start_date, end_date, rep_to_row, nreps, P = build_matrix(congressnumber, starting_congress, house_or_senate, people, people_list)
@@ -436,7 +435,7 @@ if __name__ == "__main__":
 		attach_other_stats(congressnumber, person_role)
 
 	# Perform analysis totally separately for each chamber.
-	os.system("mkdir -p " + datadir + "/us/" + str(congressnumber) + "/stats/person/sponsorshipanalysis")
+	os.system("mkdir -p data/analysis/by-congress/" + str(congressnumber) + "/person/sponsorshipanalysis")
 	for house_or_senate in ('h', 's'):
 		do_analysis(congressnumber, congressnumber-2, house_or_senate, people, people_list)
 
