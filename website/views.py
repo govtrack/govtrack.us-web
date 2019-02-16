@@ -758,11 +758,11 @@ def load_misconduct_data():
     if not misconduct_data:
         # Load data.
         import os.path, rtyaml
-        if not os.path.exists("data/us/misconduct.yaml"):
+        if not hasattr(settings, 'MISCONDUCT_DATABASE_PATH'):
             # debugging
             misconduct_data = []
         else:
-            misconduct_data = rtyaml.load(open("data/us/misconduct.yaml"))
+            misconduct_data = rtyaml.load(open(settings.MISCONDUCT_DATABASE_PATH))
 
         # Pre-fetch all members then add references to Person instances from numeric IDs.
         from person.models import Person
@@ -977,11 +977,11 @@ def missing_data(request):
 
     # Load the pronunciation guide.
     import os.path
-    if not os.path.exists("data/us/pronunciation.yaml"):
+    if not hasattr(settings, 'PRONUNCIATION_DATABASE_PATH'):
         pronunciation_guide = None
     else:
         import rtyaml
-        pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open("data/us/pronunciation.yaml")) }
+        pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open(settings.PRONUNCIATION_DATABASE_PATH)) }
 
     from person.models import Person
     from person.analysis import load_scorecards_for

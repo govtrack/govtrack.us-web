@@ -25,7 +25,8 @@ from person.models import Person
 from bill.title import get_primary_bill_title
 from bill.billtext import get_bill_text_metadata
 from committee.models import Committee
-from settings import CURRENT_CONGRESS
+
+from django.conf import settings
 
 log = logging.getLogger('parser.bill_parser')
 PERSON_CACHE = {}
@@ -336,7 +337,7 @@ def main(options):
         bill_index = BillIndex()
 
     if options.congress and int(options.congress) <= 42:
-        files = glob.glob('data/congress/%s/bills/*/*/*.xml' % options.congress)
+        files = glob.glob(settings.CONGRESS_DATA_PATH + '/%s/bills/*/*/*.xml' % options.congress)
         log.info('Parsing unitedstates/congress bills of only congress#%s' % options.congress)
     elif options.congress:
         files = glob.glob('data/us/%s/bills/*.xml' % options.congress)
@@ -441,7 +442,7 @@ def main(options):
         
     # The rest is for current only...
     
-    if options.congress and int(options.congress) != CURRENT_CONGRESS:
+    if options.congress and int(options.congress) != settings.CURRENT_CONGRESS:
         return
         
     # Find what might be coming up this week.
@@ -503,11 +504,11 @@ def load_senate_floor_schedule_data():
 def load_docs_house_gov(options, bill_index):
     # Look at the three most recent JSON files by looking at the lexicographically last ones,
     # which possibly cover the current week, the next week, and the week after that.
-    if not os.path.exists("data/congress/upcoming_house_floor"):
+    if not os.path.exists(settings.CONGRESS_DATA_PATH + "/upcoming_house_floor"):
         print("No upcoming_house_floor data.")
         return
-    for fn in sorted(os.listdir("data/congress/upcoming_house_floor"))[-3:]:
-        data = json.load(open("data/congress/upcoming_house_floor/" + fn))
+    for fn in sorted(os.listdir(settings.CONGRESS_DATA_PATH + "/upcoming_house_floor"))[-3:]:
+        data = json.load(open(settings.CONGRESS_DATA_PATH + "/upcoming_house_floor/" + fn))
         for billinfo in data.get("upcoming", []):
             if "bill_id" not in billinfo: continue
     

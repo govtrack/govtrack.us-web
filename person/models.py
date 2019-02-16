@@ -310,11 +310,13 @@ class Person(models.Model):
 
     def get_photo_url(self, size=100):
         """Return URL of 100px photo, or other specified size."""
-        return '/data/photos/%d-%dpx.jpeg' % (self.pk, size)
+        return '/static/legislator-photos/%d-%dpx.jpeg' % (self.pk, size)
     def get_photo_url_50(self):
         return self.get_photo_url(size=50)
     def get_photo_url_100(self):
         return self.get_photo_url(size=100)
+    def get_photo_url_200(self):
+        return self.get_photo_url(size=200)
     def has_photo(self, size=100):
         import os.path
         return os.path.exists("." + self.get_photo_url(size=size))
@@ -334,7 +336,7 @@ class Person(models.Model):
 
     def get_photo(self):
         size = 200
-        photo_path = 'data/photos/%d-%dpx.jpeg' % (self.pk, size)
+        photo_path = 'static/legislator-photos/%d-%dpx.jpeg' % (self.pk, size)
         if os.path.exists(photo_path):
             photo_url = '/' + photo_path
             with open(photo_path.replace("-%dpx.jpeg" % size, "-credit.txt"), "r") as f:

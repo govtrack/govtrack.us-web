@@ -84,6 +84,13 @@ Some features of the site require additional configuration. To set configuration
 
 See `settings.env.template` for details, especially for values used in production.
 
+Additionally, some data files are stored in separate repositories and must be obtained and the path configured in settings.env:
+
+* congress project bill status data (etc.)
+* congress-legislators data
+* legislator photos (symlink photos directory to static/legislator-photos)
+* GovTrack's scorecards, miscondut, and name pronuciation repositories
+
 # Credits
 
 Emoji icons by http://emojione.com/developers/.

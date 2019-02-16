@@ -4,7 +4,7 @@ from us import parse_govtrack_date
 from .types import RoleType
 from .models import Person
 
-from settings import CURRENT_CONGRESS
+from django.conf import settings
 
 def load_data(person):
     return {
@@ -24,7 +24,7 @@ def load_sponsorship_analysis(person):
     return load_sponsorship_analysis2(congressnumber, role.role_type, person)
     
 def load_sponsorship_analysis2(congressnumber, role_type, person):
-    data = { "congress": congressnumber, "current": congressnumber == CURRENT_CONGRESS }
+    data = { "congress": congressnumber, "current": congressnumber == settings.CURRENT_CONGRESS }
     
     fname = 'data/us/%d/stats/sponsorshipanalysis' % congressnumber
     if role_type == RoleType.senator:
@@ -150,9 +150,9 @@ def load_influence_analysis(person):
 _scorecards = None
 def load_scorecards():
     global _scorecards
-    if _scorecards is None:
+    if _scorecards is None and hasattr(settings, 'SCORECARDS_DATABASE_PATH'):
         _scorecards = []
-        for fn in sorted(glob.glob("data/scorecards/*.yaml")):
+        for fn in sorted(glob.glob(settings.SCORECARDS_DATABASE_PATH + "/*.yaml")):
             with open(fn) as f:
                 # Split on "...", read the top as YAML and the
                 # bottom as CSV.

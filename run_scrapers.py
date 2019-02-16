@@ -235,7 +235,7 @@ if "photos" in sys.argv:
 	#os.system("cd ../scripts/congress-images; git pull --rebase")
 
 	src = '../scripts/congress-images/congress/original/'
-	dst = 'data/photos/'
+	dst = 'static/legislator-photos/'
 
 	# Get a list of GovTrack IDs and Bioguide IDs for which photos are provided
 	# in the unitedstates/images repo. Only import photos of current Members of
@@ -264,7 +264,7 @@ if "photos" in sys.argv:
 			print("<hr><p>%s</p>" % p.name.encode("utf8"))
 			print("<table cols=2><tr>")
 			if os.path.exists(fn2):
-				print("<td><img src='https://www.govtrack.us/data/photos/%d.jpeg'></td>" % p.id)
+				print("<td><img src='https://www.govtrack.us/static/legislator-photos/%d.jpeg'></td>" % p.id)
 			else:
 				print("<iframe src='%s' width=100%% height=500> </iframe>" % ("https://twitter.com/"+p.twitterid if p.twitterid else r.website))
 			print("<td><img src='https://raw.githubusercontent.com/unitedstates/images/newscraper/congress/original/%s.jpg'></td>" % bioguide_id)

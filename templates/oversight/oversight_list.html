@@ -49,7 +49,7 @@
       {% for rec in topic.relevant_people.all %}
       <div class="col-xs-3 col-sm-2 col-lg-1" style="margin-bottom: 1em;">
         <a href="{{rec.person.get_absolute_url}}">
-          <img src="/data/photos/{{rec.person.id}}-200px.jpeg" alt="Photo of {{rec.person.name_no_details}}" class="img-responsive" style="border: 1px solid #999;"/>
+          <img src="{{rec.person.get_photo_url_200}}" alt="Photo of {{rec.person.name_no_details}}" class="img-responsive" style="border: 1px solid #999;"/>
         </a>
       </div>
       {% if forloop.counter|divisibleby:4 %}<div class="clearfix"></div>{% endif %}

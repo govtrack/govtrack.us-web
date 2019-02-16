@@ -26,6 +26,7 @@ def get_env_boolvar(var_name, default=NOT_SET):
     strvalue = get_env_variable(var_name, default)
     return (strvalue.lower() == 'true')
 
+###############################################################################
 
 ALLOWED_HOSTS = get_env_listvar('ALLOWED_HOSTS', default="localhost,127.0.0.1")
 try:
@@ -55,12 +56,14 @@ HAYSTACK_CONNECTIONS = {
     'bill': dj_haystack_url.parse(get_env_variable('HAYSTACK_BILL_CONNECTION', default='xapian:local/xapian_index_bill')),
 }
 
-CONGRESS_LEGISLATORS_PATH = get_env_variable('CONGRESS_LEGISLATORS_PATH', default='data/congress-legislators/')
-RSS_CAMPAIGN_QUERYSTRING = get_env_variable('RSS_CAMPAIGN_QUERYSTRING', default="?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss")
-
 from django.utils.crypto import get_random_string
 default_secret_key = get_random_string(50, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
 SECRET_KEY = get_env_variable('SECRET_KEY', default=default_secret_key)
+
+CONGRESS_LEGISLATORS_PATH = get_env_variable('CONGRESS_LEGISLATORS_PATH', default='data/congress-legislators/')
+
+RSS_CAMPAIGN_QUERYSTRING = get_env_variable('RSS_CAMPAIGN_QUERYSTRING', default="?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss")
+
 
 # Copy some environment variables into the Django settings object.
 copy_env_vars = [
@@ -96,6 +99,11 @@ copy_env_vars = [
     "MAPBOX_MAP_ID",
     "COMMUNITY_FORUM_URL",
     "COMMUNITY_FORUM_SSO_KEY",
+
+    "CONGRESS_DATA_PATH",
+    "MISCONDUCT_DATABASE_PATH",
+    "PRONUNCIATION_DATABASE_PATH",
+    "SCORECARDS_DATABASE_PATH",
 ]
 for var in copy_env_vars:
     val = get_env_variable(var, default='')

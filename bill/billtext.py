@@ -194,8 +194,7 @@ def get_bill_text_metadata(bill, version):
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
     import glob, json
 
-    bt = BillType.by_value(bill.bill_type).slug
-    basename = "data/congress/%d/bills/%s/%s%d/text-versions" % (bill.congress, bt, bt, bill.number)
+    basename = bill.data_dir_path + "/text-versions"
     
     if version == None:
         # Cycle through files to find most recent version by date.
@@ -221,6 +220,7 @@ def get_bill_text_metadata(bill, version):
         
     basename += "/" + dat["version_code"]
 
+    bt = BillType.by_value(bill.bill_type).slug
     html_fn = "data/congress-bill-text-legacy/%d/%s/%s%d/%s.html" % (bill.congress, bt, bt, bill.number, dat["version_code"])
 
     if os.path.exists(basename + "/mods.xml"):

@@ -150,11 +150,11 @@ def person_details(request, pk):
         # Load pronunciation from guide. Turn into a mapping from GovTrack IDs to data.
         if pronunciation_guide is None:
             import rtyaml
-            if not os.path.exists("data/us/pronunciation.yaml"):
+            if not hasattr(settings, 'PRONUNCIATION_DATABASE_PATH'):
                 # debugging
                 pronunciation_guide = { }
             else:
-                pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open("data/us/pronunciation.yaml")) }
+                pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open(settings.PRONUNCIATION_DATABASE_PATH)) }
 
         # Get this person's entry.
         pronunciation = pronunciation_guide.get(person.id)

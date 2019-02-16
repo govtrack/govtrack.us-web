@@ -251,7 +251,7 @@ class Bill(models.Model):
 
     @property
     def data_dir_path(self):
-        return "data/congress/%d/bills/%s/%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, BillType.by_value(self.bill_type).slug, self.number)
+        return settings.CONGRESS_DATA_PATH + "/%d/bills/%s/%s%d" % (self.congress, BillType.by_value(self.bill_type).slug, BillType.by_value(self.bill_type).slug, self.number)
 
     def get_absolute_url(self):
         return reverse('bill_details', args=(self.congress, BillType.by_value(self.bill_type).slug, self.number))
@@ -1536,7 +1536,7 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 continue
             report_type, report_congress, report_number = m.groups()
             report_type = report_type.lower() + "rpt"
-            rpt_mods = "data/congress/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
+            rpt_mods = settings.CONGRESS_DATA_PATH + "/%s/crpt/%s/%s%s/mods.xml" % (report_congress, report_type, report_type, report_number)
 
             # Load the report's MODS metadata, if we have it.
             try:
@@ -1606,7 +1606,7 @@ def get_formatted_bill_summary(bill):
     # used regex to add XML structure, which we saved in a bills.summary directory.
     # Now we just read the original text scraped from THOMAS and split into paragraphs.
 
-    # The file location for American Memory bills is in data/congress, and those don't
+    # The file location for American Memory bills is in settings.CONGRESS_DATA_PATH, and those don't
     # have summaries anyway.
     if bill.congress <= 42: return None
 

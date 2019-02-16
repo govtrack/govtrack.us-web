@@ -25,7 +25,7 @@ class Command(BaseCommand):
 				return
 
 		def save(im, sz=None):
-			fn = "../data/photos/%d%s.jpeg" % (
+			fn = "static/legislator-photos/%d%s.jpeg" % (
 				p.id,
 				"" if not sz else ("-%dpx" % sz))
 			if sz is not None:
@@ -54,7 +54,7 @@ class Command(BaseCommand):
 
 		else:
 			# just create thumbnails from existing photo
-			im = Image.open("../data/photos/%d.jpeg" % p.id)
+			im = Image.open("static/legislator-photos/%d.jpeg" % p.id)
 
 		# save thumbnails
 		save(im, 50)
@@ -62,6 +62,6 @@ class Command(BaseCommand):
 		save(im, 200)
 
 		# write metadata
-		with open("../data/photos/%d-credit.txt" % p.id, "w") as f:
+		with open("static/legislator-photos/%d-credit.txt" % p.id, "w") as f:
 			f.write(options['credit_url'] + " " + options['credit_text'] + "\n")
 

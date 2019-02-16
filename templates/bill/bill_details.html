@@ -311,7 +311,7 @@
 	{% if not bill.original_intent_replaced and bill.sponsor.has_photo %}
 	<div class="col-xs-3 col-sm-2" style="padding-right: 0; padding-bottom: 1em;">
 		<a href="{{bill.sponsor.get_absolute_url}}">
-			<img src="/data/photos/{{bill.sponsor.id}}-200px.jpeg" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
+			<img src="{{bill.sponsor.get_photo_url_200}}" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
 		</a>
 	</div>
 	<div class="col-xs-7 col-sm-4">
@@ -457,7 +457,7 @@
 					{% if bill.sponsor.has_photo %}
 						<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
 							<a href="{{bill.sponsor.get_absolute_url}}">
-							<img src="/data/photos/{{bill.sponsor.id}}-100px.jpeg" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
+							<img src="{{bill.sponsor.get_photo_url_100}}" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
 							</a>
 						</div>
 					{% endif %}

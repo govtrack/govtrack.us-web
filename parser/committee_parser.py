@@ -171,7 +171,7 @@ def parse_committee_schedules(options):
     loaded_meetings = set()
     processed_all_meetings = True
     for chamber in ("house", "senate"):
-    	meetings_file = 'data/congress/committee_meetings_%s.json' % chamber
+    	meetings_file = settings.CONGRESS_DATA_PATH + '/committee_meetings_%s.json' % chamber
     	file_changed = File.objects.is_changed(meetings_file)
     
     	if not file_changed and not options.force:
