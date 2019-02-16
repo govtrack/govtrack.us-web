@@ -7,7 +7,6 @@ urlpatterns = [
     url('^votes$', vote.views.vote_list, name='vote_list'),
     url('^votes/(\d+)-(\w+)/(h|s)(\d+)$', vote.views.vote_details, name='vote_details'),
     url('^votes/(\d+)-(\w+)/(h|s)(\d+)/export/csv$', vote.views.vote_export_csv, name='vote_export_csv'),
-    url('^votes/(\d+)-(\w+)/(h|s)(\d+)/export/xml$', vote.views.vote_export_xml, name='vote_export_xml'),
     url('^votes/(\d+)-(\w+)/(h|s)(\d+).json$', vote.views.vote_get_json, name='vote_get_json'),
     url('^votes/(\d+)-(\w+)/(h|s)(\d+)/(diagram|thumbnail|map)$', vote.views.vote_thumbnail_image, name='vote_thumbnail_image'),
     url('^votes/check_thumbnails', vote.views.vote_check_thumbnails),

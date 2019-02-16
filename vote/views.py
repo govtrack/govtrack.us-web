@@ -249,12 +249,6 @@ def vote_export_csv(request, congress, session, chamber_code, number):
 
 
 @anonymous_view
-def vote_export_xml(request, congress, session, chamber_code, number):
-    vote = load_vote(congress, session, chamber_code, number)
-    fobj = open('data/us/%s/rolls/%s%s-%s.xml' % (congress, chamber_code, session, number))
-    return HttpResponse(fobj, content_type='text/xml')
-
-@anonymous_view
 def vote_get_json(request, congress, session, chamber_code, number):
     vote = load_vote(congress, session, chamber_code, number)
     return HttpResponseRedirect("/api/v2/vote/%d" % vote.id)
