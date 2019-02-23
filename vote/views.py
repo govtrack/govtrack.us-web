@@ -287,6 +287,7 @@ def vote_thumbnail_image_map(vote):
 	# Fetch color codes per district.
 	colors = { }
 	for voter in vote.get_voters():
+		if not voter.person_role: continue # some votes cannot map voters to roles such as when there are mismatches w/ the term start/end dates
 		district = voter.person_role.state.lower() + ("%02d" % voter.person_role.district)
 		clr = vote_diagram_colors.get((voter.person_role.party[0], voter.option.key))
 		if clr:
