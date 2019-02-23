@@ -32,7 +32,7 @@ os.system("mkdir -p " + datadir_stats + "person/missedvotes")
 
 # load in the session dates so we know how to break them down into smaller time periods
 session_dates = { }
-for rec in csv.DictReader(open("../data/us/sessions.tsv"), delimiter="\t"):
+for rec in csv.DictReader(open("sessions.tsv"), delimiter="\t"):
 	session_dates[(int(rec['congress']), rec['session'])] = (parse_datetime(rec['start']), parse_datetime(rec['end']))
 
 def date_to_month_index(date):

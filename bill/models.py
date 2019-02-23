@@ -46,10 +46,10 @@ class BillTerm(models.Model):
     Bill Term aka Issua Area
 
     Old terms:
-     * http://www.govtrack.us/data/us/liv.xml
+     * bill/liv.xml
     New terms:
-     * http://www.govtrack.us/data/us/liv111.xml
-     * http://www.govtrack.us/data/us/crsnet.xml
+     * bill/liv111.xml
+     * bill/crsnet.xml
     """
     term_type = models.IntegerField(choices=TermType)
     name = models.CharField(max_length=255)

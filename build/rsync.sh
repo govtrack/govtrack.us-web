@@ -1,9 +1,5 @@
 rsync -az --delete --delete-excluded govtrack.us::govtrack_bootstrap_data data \
 	--include "us" \
-	--include "us/liv.xml" \
-	--include "us/liv111.xml" \
-	--include "us/crsnet.xml" \
-	--include "us/sessions.tsv" \
 	--include "us/115" \
 	--include "us/115/bills" \
 	--include "us/115/bills/*01.xml" \

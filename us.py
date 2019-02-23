@@ -43,7 +43,7 @@ def get_congress_dates(congressnumber):
     global CONGRESS_DATES
     if CONGRESS_DATES == { }:
         cd = {}
-        for line in open('data/us/sessions.tsv'):
+        for line in open('sessions.tsv'):
             cn, sessionname, startdate, enddate = line.strip().split('\t')[0:4]
             if not '-' in startdate: # header
                 continue
@@ -58,7 +58,7 @@ def get_session_from_date(when, allow_start_date=True, allow_end_date=True, cong
     global SESSION_DATES
     if SESSION_DATES == [ ]:
         sd = []
-        for line in open('data/us/sessions.tsv'):
+        for line in open('sessions.tsv'):
             cn, sessionname, startdate, enddate = line.strip().split('\t')[0:4]
             if not '-' in startdate: # header
                 continue

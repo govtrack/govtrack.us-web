@@ -1,7 +1,7 @@
 #!script
 """
 Parser of:
- * bill terms located in data/us/[liv, liv111, crsnet].xml
+ * bill terms located in bill/{liv, liv111, crsnet].xml
  * bills located in data/congress/*/bills/...
  
 for x in {82..112}; do echo $x; ./parse.py bill --congress=$x -l ERROR --force --disable-events --disable-indexing; done
@@ -257,7 +257,7 @@ def main(options):
         existing_terms[(int(term.term_type), term.name)] = term
 
     log.info('Processing old bill terms')
-    TERMS_FILE = 'data/us/liv.xml'
+    TERMS_FILE = 'bill/liv.xml'
     tree = etree.parse(TERMS_FILE)
     for node in tree.xpath('/liv/top-term'):
         term = term_processor.process(BillTerm(), node)
@@ -291,7 +291,7 @@ def main(options):
                     log.error('Duplicated term %s' % term_processor.display_node(subnode))
 
     log.info('Processing new bill terms')
-    for FILE in ('data/us/liv111.xml', 'data/us/crsnet.xml'):
+    for FILE in ('bill/liv111.xml', 'bill/crsnet.xml'):
         tree = etree.parse(FILE)
         for node in tree.xpath('/liv/top-term'):
             term = term_processor.process(BillTerm(), node)
