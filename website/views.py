@@ -997,6 +997,8 @@ def missing_data(request):
             add_person(p).update({ "photo": "✘" })
         if not p.birthday:
             add_person(p).update({ "birthday": "✘" })
+        if not p.twitterid:
+            add_person(p).update({ "twitter": "✘" })
         if pronunciation_guide:
             if p.id not in pronunciation_guide:
                 add_person(p).update({ "pronunciation": "✘" })
