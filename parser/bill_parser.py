@@ -2,7 +2,7 @@
 """
 Parser of:
  * bill terms located in data/us/[liv, liv111, crsnet].xml
- * bills located in data/us/*/bills/*.xml
+ * bills located in data/congress/*/bills/...
  
 for x in {82..112}; do echo $x; ./parse.py bill --congress=$x -l ERROR --force --disable-events --disable-indexing; done
 """
@@ -336,14 +336,11 @@ def main(options):
         from bill.search_indexes import BillIndex
         bill_index = BillIndex()
 
-    if options.congress and int(options.congress) <= 42:
-        files = glob.glob(settings.CONGRESS_DATA_PATH + '/%s/bills/*/*/*.xml' % options.congress)
+    if options.congress:
+        files = glob.glob(settings.CONGRESS_DATA_PATH + '/%s/bills/*/*/data.xml' % options.congress)
         log.info('Parsing unitedstates/congress bills of only congress#%s' % options.congress)
-    elif options.congress:
-        files = glob.glob('data/us/%s/bills/*.xml' % options.congress)
-        log.info('Parsing bills of only congress#%s' % options.congress)
     else:
-        files = glob.glob('data/us/*/bills/*.xml')
+        files = glob.glob(settings.CONGRESS_DATA_PATH + '/*/bills/*/*/data.xml')
         
     if options.filter:
         files = [f for f in files if re.match(options.filter, f)]
@@ -361,10 +358,10 @@ def main(options):
         # the bill's latest text file for changes so we can create a text-is-available
         # event and so we can index the bill's text.
         if (not options.congress or int(options.congress)>42) and (bill_index and not options.disable_events) and not File.objects.is_changed(fname) and not options.force:
-            m = re.search(r"/(\d+)/bills/([a-z]+)(\d+)\.xml$", fname)
+            m = re.match(re.escape(settings.CONGRESS_DATA_PATH) + r'/(?P<congress>\d+)/bills/(?P<bill_type>[a-z]+)/(?P<bill_type_2>[a-z]+)(?P<number>\d+)/data.xml', fname)
 
             try:
-                b = Bill.objects.get(congress=m.group(1), bill_type=BillType.by_xml_code(m.group(2)), number=m.group(3))
+                b = Bill.objects.get(congress=int(m.group("congress")), bill_type=BillType.by_slug(m.group("bill_type")), number=m.group("number"))
                 seen_bill_ids.append(b.id)
                 
                 # Update the index/events for any bill with recently changed text

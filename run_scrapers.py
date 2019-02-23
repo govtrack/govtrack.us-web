@@ -10,12 +10,6 @@ SCRAPER_PATH = "../scripts/congress"
 
 # UTILS
 
-bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }
-
-def mkdir(path):
-	if not os.path.exists(path):
-		os.makedirs(path)
-
 def md5(fn, modulo=None):
 	# do an MD5 on the file but run a regex first
 	# to remove content we don't want to check for
@@ -41,19 +35,6 @@ def copy(fn1, fn2, modulo):
 	#print fn2
 	shutil.copy2(fn1, fn2)
 	return True
-
-def make_link(src, dest):
-	if not os.path.exists(dest):
-		os.link(src, dest)
-	elif os.stat(src).st_ino == os.stat(dest).st_ino:
-		pass # files are the same (hardlinked)
-	else:
-		if md5(src) != md5(dest):
-			print("replacing", src, dest)
-		else:
-			print("squashing existing file", src, dest)
-		os.unlink(dest)
-		os.link(src, dest)
 
 # MAIN
 
@@ -125,24 +106,6 @@ if "bills" in sys.argv:
 	if CONGRESS >= 114:
 		os.system("cd %s; . .env/bin/activate; ./run govinfo --bulkdata=BILLSTATUS --log=%s; ./run bills --govtrack --congress=%d --log=%s" % (SCRAPER_PATH, log_level, CONGRESS, log_level))
 	
-	# Copy files into legacy location.
-
-	mkdir("data/us/%d/bills" % CONGRESS)
-	bill_type_map = { 'hr': 'h', 's': 's', 'hres': 'hr', 'sres': 'sr', 'hjres': 'hj', 'sjres': 'sj', 'hconres': 'hc', 'sconres': 'sc' }
-	for fn in sorted(glob.glob("%s/data/%d/bills/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
-		congress, bill_type, number = re.match(r".*congress/data/(\d+)/bills/([a-z]+)/(?:[a-z]+)(\d+)/data.xml$", fn).groups()
-		if int(congress) != CONGRESS: raise ValueError()
-		if bill_type not in bill_type_map: raise ValueError()
-		fn2 = "data/us/%d/bills/%s%d.xml" % (CONGRESS, bill_type_map[bill_type], int(number))
-		do_bill_parse |= copy(fn, fn2, b'updated="[^"]+"')
-
-	mkdir("data/us/%d/bills.amdt" % CONGRESS)
-	for fn in sorted(glob.glob("%s/data/%d/amendments/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
-		congress, amdt_type, number = re.match(r".*congress/data/(\d+)/amendments/([hsup]+)amdt/(?:[hsup]+)amdt(\d+)/data.xml$", fn).groups()
-		if int(congress) != CONGRESS: raise ValueError()
-		fn2 = "data/us/%d/bills.amdt/%s%d.xml" % (CONGRESS, amdt_type, int(number))
-		copy(fn, fn2, b'updated="[^"]+"')
-	
 	# Scrape upcoming House bills.
 
 	os.system("cd %s; . .env/bin/activate; ./run upcoming_house_floor --log=%s" % (SCRAPER_PATH, log_level))
@@ -204,16 +167,7 @@ if "stat_bills" in sys.argv:
 	# Copy bill metadata into our legacy location.
 	# (No need to copy text-versions anywhere: we read it from the congress data directory.)
 	for congress in range(82, 92+1):
-		print(congress, "...")
-		
-		# Copy files into legacy location.
-		mkdir("data/us/%d/bills" % congress)
-		for fn in sorted(glob.glob("%s/data/%d/bills/*/*/data.xml" % (SCRAPER_PATH, congress))):
-			bill_type, number = re.match(r".*congress/data/\d+/bills/([a-z]+)/(?:[a-z]+)(\d+)/data.xml$", fn).groups()
-			if bill_type not in bill_type_map: raise ValueError()
-			fn2 = "data/us/%d/bills/%s%d.xml" % (congress, bill_type_map[bill_type], int(number))
-			copy(fn, fn2, b'updated="[^"]+"')
-			
+		print(congress, "...")			
 		# Load into db.
 		os.system("./parse.py --congress=%d bill" % congress) #  -l ERROR
 		

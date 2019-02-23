@@ -126,7 +126,7 @@ def build_matrix(congressnumber, starting_congress, house_or_senate, people, peo
 	# Congress.
 	cells = []
 	for cn in range(starting_congress, congressnumber+1):
-		for billfilename in glob.glob("data/us/" + str(cn) + "/bills/" + house_or_senate + "*.xml"):
+		for billfilename in glob.glob("data/congress/{congress}/bills/{chamber}*/*/data.xml".format(congress=cn, chamber=house_or_senate)):
 			xml = lxml.parse(billfilename)
 			
 			# get the sponsor

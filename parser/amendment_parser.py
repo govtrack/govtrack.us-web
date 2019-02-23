@@ -19,10 +19,10 @@ from parser.models import File
 from bill.models import Amendment, AmendmentType, Bill, BillType
 from vote.models import Vote, CongressChamber
 from person.models import Person
-from settings import CURRENT_CONGRESS
+from settings import CURRENT_CONGRESS, CONGRESS_DATA_PATH
 from us import get_session_from_date
 
-log = logging.getLogger('parser.bill_parser')
+log = logging.getLogger('parser.amendment_parser')
 PERSON_CACHE = {}
 
 def get_person(pk):
@@ -33,9 +33,9 @@ def get_person(pk):
     return PERSON_CACHE[pk]
 
 class AmendmentProcessor(XmlProcessor):
-    REQUIRED_ATTRIBUTES = ['session', 'chamber', 'number']
-    ATTRIBUTES = ['session', 'chamber', 'number']
-    FIELD_MAPPING = {'chamber': 'amendment_type', 'session': 'congress'}
+    REQUIRED_ATTRIBUTES = ['session', 'amendment_type', 'number']
+    ATTRIBUTES = ['session', 'amendment_type', 'number']
+    FIELD_MAPPING = {'session': 'congress'}
 
     def process(self, obj, node):
         obj = super(AmendmentProcessor, self).process(obj, node)
@@ -78,7 +78,7 @@ class AmendmentProcessor(XmlProcessor):
     def session_handler(self, value):
         return int(value)
 
-    def chamber_handler(self, value):
+    def amendment_type_handler(self, value):
         return AmendmentType.by_slug(value)
 
     def number_handler(self, value):
@@ -105,10 +105,10 @@ def main(options):
     """
 
     if options.congress:
-        files = glob.glob('data/us/%s/bills.amdt/*.xml' % options.congress)
+        files = glob.glob(CONGRESS_DATA_PATH + '/{congress}/amendments/*/*/data.xml'.format(congress=options.congress))
         log.info('Parsing amendments of only congress#%s' % options.congress)
     else:
-        files = glob.glob('data/us/*/bills.amdt/*.xml')
+        files = glob.glob(CONGRESS_DATA_PATH + '/*/amendments/*/*/data.xml')
         
     if options.filter:
         files = [f for f in files if re.match(options.filter, f)]
@@ -121,18 +121,20 @@ def main(options):
     seen_amdt_ids = []
     for fname in files:
         progress.tick()
+
+        m = re.match(re.escape(CONGRESS_DATA_PATH) + r'/(?P<congress>\d+)/amendments/(?P<amendment_type>[a-z]+)/(?P<amendment_type2>[a-z]+)(?P<number>[0-9]+)/data.xml', fname)
         
         if not File.objects.is_changed(fname) and not options.force:
-            m = re.match(r"data/us/(\d+)/bills.amdt/([sh])(\d+).xml", fname)
             if not m:
-                print("Invalid file name", fname)
+                raise ValueError("Invalid file name", fname)
             else:
-                amdt = Amendment.objects.get(congress=m.group(1), amendment_type=AmendmentType.by_slug(m.group(2)), number=m.group(3))
+                amdt = Amendment.objects.get(congress=int(m.group("congress")), amendment_type=AmendmentType.by_slug(m.group("amendment_type")), number=int(m.group("number")))
                 seen_amdt_ids.append(amdt.id) # don't delete me later
             continue
             
         tree = etree.parse(fname)
         node = tree.xpath('/amendment')[0]
+        node.set("amendment_type", m.group("amendment_type")) # move from the filename to a place where we can see it in the XML
         
         try:
             amdt = amendment_processor.process(Amendment(), node)

@@ -1606,13 +1606,8 @@ def get_formatted_bill_summary(bill):
     # used regex to add XML structure, which we saved in a bills.summary directory.
     # Now we just read the original text scraped from THOMAS and split into paragraphs.
 
-    # The file location for American Memory bills is in settings.CONGRESS_DATA_PATH, and those don't
-    # have summaries anyway.
-    if bill.congress <= 42: return None
-
     import cgi
-    sfn = "data/us/%d/bills/%s%d.xml" % (bill.congress, BillType.by_value(bill.bill_type).xml_code, bill.number)
-    with open(sfn) as f:
+    with open(bill.data_dir_path + "/data.xml") as f:
        dom = etree.parse(f)
 
     summary = dom.find("summary")
@@ -1924,9 +1919,9 @@ Feed.register_feed(
     )
 
 class AmendmentType(enum.Enum):
-    senate_amendment = enum.Item(1, 'S.Amdt.', slug='s', full_name="Senate Amendment", search_help_text="Senate amendments")
-    house_amendment = enum.Item(2, 'H.Amdt.', slug='h', full_name="House Amendment", search_help_text="House amendments")
-    senate_unprinted_amendment = enum.Item(3, 'S.Up.Amdt.', slug='sup', full_name="Senate Unprinted Amendment", search_help_text="Senate \"unprinted\" amendments")
+    senate_amendment = enum.Item(1, 'S.Amdt.', slug='samdt', full_name="Senate Amendment", search_help_text="Senate amendments")
+    house_amendment = enum.Item(2, 'H.Amdt.', slug='hamdt', full_name="House Amendment", search_help_text="House amendments")
+    senate_unprinted_amendment = enum.Item(3, 'S.Up.Amdt.', slug='supamdt', full_name="Senate Unprinted Amendment", search_help_text="Senate \"unprinted\" amendments")
 
 class Amendment(models.Model):
     """An amendment to a bill."""
