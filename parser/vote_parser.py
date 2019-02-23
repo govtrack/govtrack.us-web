@@ -17,6 +17,7 @@ from vote.models import (Vote, VoteOption, VoteSource, Voter,
                          CongressChamber, VoteCategory, VoterType)
 
 from django.template.defaultfilters import truncatewords
+from django.conf import settings
 
 log = logging.getLogger('parser.vote_parser')
 
@@ -117,11 +118,6 @@ def main(options):
     voter_processor = VoterProcessor()
     voter_processor.PERSON_CACHE = dict((x.pk, x) for x in Person.objects.all())
 
-    # The pattern which the roll file matches
-    # Filename contains info which should be placed to DB
-    # along with info extracted from the XML file
-    re_path = re.compile('data/us/(\d+)/rolls/([hs])(\w+)-(\d+)\.xml')
-
     chamber_mapping = {'s': CongressChamber.senate,
                        'h': CongressChamber.house}
 
@@ -129,10 +125,10 @@ def main(options):
         files = glob.glob(options.filter)
         log.info('Parsing rolls matching %s' % options.filter)
     elif options.congress:
-        files = glob.glob('data/us/%s/rolls/*.xml' % options.congress)
+        files = glob.glob(settings.CONGRESS_DATA_PATH + '/%s/votes/*/*/data.xml' % options.congress)
         log.info('Parsing rolls of only congress#%s' % options.congress)
     else:
-        files = glob.glob('data/us/*/rolls/*.xml')
+        files = glob.glob('data/congress/*/votes/*/*/data.xml')
     log.info('Processing votes: %d files' % len(files))
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
@@ -151,10 +147,10 @@ def main(options):
     for fname in files:
         progress.tick()
 
-        match = re_path.search(fname)
+        match = re.match(r"data/congress/(?P<congress>\d+)/votes/(?P<session>[ABC0-9]+)/(?P<chamber>[hs])(?P<number>\d+)/data.xml$", fname)
         
         try:
-            existing_vote = Vote.objects.get(congress=match.group(1), chamber=chamber_mapping[match.group(2)], session=match.group(3), number=match.group(4))
+            existing_vote = Vote.objects.get(congress=int(match.group("congress")), chamber=chamber_mapping[match.group("chamber")], session=match.group("session"), number=int(match.group("number")))
         except Vote.DoesNotExist:
             existing_vote = None
         
@@ -180,11 +176,10 @@ def main(options):
 
                 vote = vote_processor.process(Vote(), roll_node)
                 if existing_vote: vote.id = existing_vote.id
-                match = re_path.search(fname)
-                vote.congress = int(match.group(1))
-                vote.chamber = chamber_mapping[match.group(2)]
-                vote.session = match.group(3)
-                vote.number = int(match.group(4))
+                vote.congress = int(match.group("congress"))
+                vote.chamber = chamber_mapping[match.group("chamber")]
+                vote.session = match.group("session")
+                vote.number = int(match.group("number"))
                 
                 # Get related bill & amendment.
                 

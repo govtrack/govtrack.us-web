@@ -173,18 +173,8 @@ if "votes" in sys.argv:
 	if CONGRESS >= 101:
 		os.system("cd %s; . .env/bin/activate; ./run votes --govtrack --log=%s --force --fast" % (SCRAPER_PATH, log_level))
 	
-	# Copy files into legacy location.
-	did_any_file_change = False
-	mkdir("data/us/%d/rolls" % CONGRESS)
-	for fn in sorted(glob.glob("%s/data/%d/votes/*/*/data.xml" % (SCRAPER_PATH, CONGRESS))):
-		congress, session, chamber, number = re.match(r".*congress/data/(\d+)/votes/(\d+|[A-C])/([hs])(\d+)/data.xml$", fn).groups()
-		if int(congress) != CONGRESS: raise ValueError()
-		fn2 = "data/us/%d/rolls/%s%s-%d.xml" % (CONGRESS, chamber, session, int(number))
-		did_any_file_change |= copy(fn, fn2, b'updated="[^"]+"')
-		
 	# Load into db.
-	if did_any_file_change or True: # amendments can mark votes as missing data
-		os.system("./parse.py vote --congress=%d -l %s" % (CONGRESS, log_level))
+	os.system("./parse.py vote --congress=%d -l %s" % (CONGRESS, log_level))
 
 	# Update key votes analysis.
 	os.system("analysis/key_votes.py %d" % CONGRESS)

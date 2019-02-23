@@ -11,7 +11,7 @@ import lxml.etree as lxml
 from scipy.stats import percentileofscore, scoreatpercentile
 
 congress = int(sys.argv[1])
-datadir = "data/us/%d/" % congress
+vote_xml_glob = "data/congress/%d/votes/*/*/data.xml" % congress
 datadir_stats = "data/analysis/by-congress/%d/" % congress
 
 # UTILS
@@ -54,11 +54,11 @@ session_bin_dates = { }
 vote_counts = { }
 voters_by_chamber = { "h": set(), "s": set() }
 person_lifetime_vote_dates = { }
-for fn in glob.glob(datadir + "rolls/*.xml"):
-	m = re.search(r"/([hs])([^/]+)-\d+.xml$", fn)
-	where, session = m.groups()
-	
+for fn in glob.glob(vote_xml_glob):
+	m = re.match("data/congress/\d+/votes/(.*)/.*/", fn)
+	session = m.group(1)
 	dom = lxml.parse(fn).getroot()
+	where = dom.get("where")[0] # h, s
 	date = parse_datetime(dom.get("datetime"))
 	bin = (congress, session, where, get_date_bin(congress, session, date))
 	
