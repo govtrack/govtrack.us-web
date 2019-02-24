@@ -200,7 +200,7 @@ def main(options):
                 for amdt_node in roll_node.xpath("amendment"):
                     if amdt_node.get("ref") == "regular" and vote.related_bill is not None:
                         try:
-                            vote.related_amendment = Amendment.objects.get(congress=vote.related_bill.congress, amendment_type=AmendmentType.by_slug(amdt_node.get("number")[0]), number=amdt_node.get("number")[1:])
+                            vote.related_amendment = Amendment.objects.get(congress=vote.related_bill.congress, amendment_type=AmendmentType.by_slug(amdt_node.get("number")[0]+"amdt"), number=amdt_node.get("number")[1:])
                         except Amendment.DoesNotExist:
                             if vote.congress >= 93:
                                 print("Missing amendment", fname)
