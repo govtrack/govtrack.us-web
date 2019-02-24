@@ -118,6 +118,12 @@ INSTALLED_APPS = (
     'registration',
 )
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend', # only used for the admin?
+    'registration.views.EmailPasswordLoginBackend', # regular login
+    'registration.views.DirectLoginBackend', # social login
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
