@@ -41,9 +41,9 @@ def markdown(value):
     # plus a second pass filtering using a whitelist for allowed
     # tags and URL schemes.
 
-    import CommonMark
-    ast = CommonMark.Parser().parse(value)
-    html = CommonMark.HtmlRenderer({ 'safe': True }).render(ast)
+    import commonmark
+    ast = commonmark.Parser().parse(value)
+    html = commonmark.HtmlRenderer({ 'safe': True }).render(ast)
 
     import html5lib, urllib.parse
     def filter_url(url):
