@@ -1,6 +1,7 @@
 honcho
 django
 uwsgi
+lxml
 python-prctl
 python-dateutil
 django-debug-toolbar
@@ -11,6 +12,7 @@ pillow
 defusedxml
 jsonfield
 feedparser
+scipy
 numpy
 django-haystack
 pysolr

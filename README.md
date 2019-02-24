@@ -9,7 +9,7 @@ Local Development
 
 ### Development using Vagrant
 
-GovTrack.us is based on Python 3 and Django 1.x and runs on Ubuntu 16.04 or OS X. To simplify local development, we have a `Vagrantfile` in this directory. You can get started quickly simply by installing [Vagrant](https://www.vagrantup.com/) and running:
+GovTrack.us is based on Python 3 and Django 2.1 and runs on Ubuntu 18.04 or OS X. To simplify local development, we have a `Vagrantfile` in this directory. You can get started quickly simply by installing [Vagrant](https://www.vagrantup.com/) and running:
 
     # Get this repo (you must clone with `--recursive`)
     git clone --recursive https://github.com/govtrack/govtrack.us-web.git
@@ -97,15 +97,39 @@ Emoji icons by http://emojione.com/developers/.
 
 # Production Deployment Notes
 
-On my Ubuntu 14.04 box I had to:
+Additional package installation notes are in the Vagrantfile.
 
-    pip install --upgrade pip setuptools six
+You'll need a `data` directory that contains:
 
-To set up a MySQL database you'll need the OS MySQL package and the Python package:
+* analysis (the output of our data analyses)
+* congress (a symbolic link to the congress project's `data` directory, holding bill and legislator data, some of which can't be reproduced because the source data is gone; also set `CONGRESS_DATA_PATH=data/congress` in local/settings.env)
+* congress-bill-text-legacy (a final copy of HTML bill text scraped from the old THOMAS.gov, for bills before XML bill text started)
+* historical-committee-membership (past committee membership, )
+* legislator-photos (manually collected photos of legislators; create a symbolic link from `static/legislator-photos` to `legislator-photos/photos`)
 
-    apt-get install libmysqlclient-dev
-    pip install mysqlclient
+You'll need several other data repositories that you can put in the `data` directory if you don't expose the whole directory over HTTP, but they can also be placed anywhere because the paths are in settings:
 
-To use memcached:
+* Our [congressional misconduct database](https://github.com/govtrack/misconduct) YAML file: `MISCONDUCT_DATABASE_PATH=data/misconduct/misconduct.yaml`
+* Our [legislator name pronunciation database](https://github.com/govtrack/pronunciation/): `PRONUNCIATION_DATABASE_PATH=data/pronunciation/legislators.yaml`
+* Our [advocacy organization scorecards database](https://github.com/govtrack/advocacy-organization-scorecards): `SCORECARDS_DATABASE_PATH=data/advocacy-organization-scorecards/scorecards`
 
-    pip install pylibmc
+At this point you should be able to run `./manage.py runserver` and test that the site works.
+
+And `conf/uwsgi_start test 1` should start the uWSGI application daemon.
+
+Install nginx and supervisord (which keeps the uWSGI process running) and set up their configuration files:
+
+    apt install nginx supervisor
+    rm /etc/nginx/sites-enabled/default
+    ln -s /home/govtrack/web/conf/nginx.conf /etc/nginx/sites-enabled/www.govtrack.us.conf
+    ln -s /home/govtrack/web/conf/supervisor.conf /etc/supervisor/conf.d/govtrack.conf
+    # install a TLS certificate at /etc/ssl/local/ssl_certificate.{key,crt}
+    service nginx restart
+    service supervisor restart
+
+To scrape and load new data, you'll need the congress project:
+
+* Clone it anywhere and set that directory as `CONGRESS_PROJECT_PATH` in the settings.
+* Follow it's installation steps to create a virtualenv for it in its `.env` directory.
+* Clone the congress-legislators project as a subdirectory and follow its installation steps to create a virtualenv for its scripts in its `scripts/.env` directory.
+* Enable the crontab.

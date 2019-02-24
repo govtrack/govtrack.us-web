@@ -7,7 +7,7 @@
 
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/xenial64"
+  config.vm.box = "ubuntu/bionic64"
   config.vm.network "forwarded_port", guest: 8000, host: 8000
   config.vm.provision "shell", inline: <<-SHELL
     # Create a fake manage.py file in ~ so 'vagrant ssh' can find it easily.
@@ -18,7 +18,7 @@ Vagrant.configure(2) do |config|
     # Start here! #
     ###############
 
-    # These instructions are for Ubuntu 16.04. Where the instructions
+    # These instructions are for Ubuntu 18.04. Where the instructions
     # differ for OS X, we'll note those differences.
 
     # Install system packages
@@ -27,10 +27,14 @@ Vagrant.configure(2) do |config|
     # (Ubuntu only)
     echo Installing system packages...
     sudo apt-get update
+    # on a new system you might also want to run: sudo apt-get upgrade
     sudo apt install -y -q \
-        git python-virtualenv python3-lxml \
-        python3-iso8601 python3-numpy python3-scipy \
-        python3-pip python3-xapian libcap-dev libcairo-dev
+        git python3-pip virtualenv \
+        libcap-dev libcairo-dev python3-xapian
+    # on production we don't use python3-xapian
+
+    # on production I needed:
+    # sudo apt-get install memcached libmysqlclient-dev
 
     # On OS X...
     # ----------
@@ -45,12 +49,14 @@ Vagrant.configure(2) do |config|
     # With Vagrant, it's not necessary, so it's commented out. But you
     # should run these two commands:
     #
-    # virtualenv --system-site-packages -ppython3 .venv
+    # virtualenv -ppython3 .venv
     # source .venv/bin/activate
 
     # Install Python packages.
     pip install --upgrade -r requirements.txt
-    pip install --upgrade xapian-haystack
+    pip install --upgrade xapian-haystack # not needed in production
+
+    # on production I needed: pip install mysqlclient pylibmc
 
     # On OS X, install bcrypt:
     # http://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed
