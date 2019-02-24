@@ -17,7 +17,7 @@ from person.models import Person, PersonRole, Gender, RoleType, SenatorClass, Se
 from us import get_congress_dates
 
 from django.db import transaction
-from settings import CURRENT_CONGRESS, CONGRESS_LEGISLATORS_PATH
+from settings import CURRENT_CONGRESS, CONGRESS_PROJECT_PATH
 
 log = logging.getLogger('parser.person_parser')
 
@@ -116,7 +116,7 @@ def main(options):
     which have been changed.
     """
 
-    BASE_PATH = CONGRESS_LEGISLATORS_PATH
+    BASE_PATH = CONGRESS_PROJECT_PATH + "/congress-legislators/"
     SRC_FILES = ['legislators-current', 'legislators-historical', 'legislators-social-media', 'executive'] # order matters
 
     for p in SRC_FILES:

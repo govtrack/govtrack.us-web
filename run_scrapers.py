@@ -6,7 +6,6 @@ import os, os.path, glob, re, hashlib, shutil, sys, datetime
 from django.conf import settings
 
 CONGRESS = int(os.environ.get("CONGRESS", settings.CURRENT_CONGRESS))
-SCRAPER_PATH = "../scripts/congress"
 
 # UTILS
 
@@ -49,8 +48,8 @@ if "people" in sys.argv:
 	if CONGRESS != settings.CURRENT_CONGRESS: raise ValueErrror()
 	
 	# Pull latest poeple YAML.
-	os.system("cd %s/congress-legislators; git fetch -pq" % SCRAPER_PATH)
-	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
+	os.system("cd %s/congress-legislators; git fetch -pq" % settings.CONGRESS_PROJECT_PATH)
+	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % settings.CONGRESS_PROJECT_PATH)
 	
 	# Load YAML (directly) into db.
 	os.system("./parse.py person") #  -l ERROR
@@ -66,18 +65,18 @@ if "committees" in sys.argv:
 	# Committee metadata.
 	
 	# Pull latest YAML.
-	os.system("cd %s/congress-legislators; git fetch -pq" % SCRAPER_PATH)
-	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % SCRAPER_PATH)
+	os.system("cd %s/congress-legislators; git fetch -pq" % settings.CONGRESS_PROJECT_PATH)
+	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % settings.CONGRESS_PROJECT_PATH)
 	
 	# Committee events.
-	os.system("cd %s; . .env/bin/activate; ./run committee_meetings --docs=False --log=%s" % (SCRAPER_PATH, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run committee_meetings --docs=False --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
 	
 	# Load into db.
 	os.system("./parse.py -l ERROR committee")
 
 	# Generate historical XML, used by prognosis & session stats.
 	os.system(". %s/congress-legislators/scripts/.env/bin/activate; python committee/archive_committee_membership.py %s/congress-legislators/ data/historical-committee-membership/%s.xml"
-		% (SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
+		% (settings.CONGRESS_PROJECT_PATH, settings.CONGRESS_PROJECT_PATH, CONGRESS))
 
 	# Save a fixture.
 	os.system("./manage.py dumpdata --format json committee.Committee committee.CommitteeMember > data/db/django-fixture-committees.json")
@@ -89,10 +88,10 @@ if "text" in sys.argv:
 	# bill text and generates feed events for text availability.
 
 	# Update the mirror of bill text from GPO's GovInfo.gov.
-	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=BILLS --extract=mods,text,xml,pdf --log=%s" % (SCRAPER_PATH, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=BILLS --extract=mods,text,xml,pdf --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
 
 	# Also metadata for committee reports.
-	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=CRPT --extract=mods --log=%s" % (SCRAPER_PATH, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=CRPT --extract=mods --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
 
 	# Update text incorporation analysis for any new text versions.
 	os.system("analysis/text_incorporation.py analyze %d" % CONGRESS)
@@ -104,11 +103,11 @@ if "text" in sys.argv:
 if "bills" in sys.argv:
 	# Scrape.
 	if CONGRESS >= 114:
-		os.system("cd %s; . .env/bin/activate; ./run govinfo --bulkdata=BILLSTATUS --log=%s; ./run bills --govtrack --congress=%d --log=%s" % (SCRAPER_PATH, log_level, CONGRESS, log_level))
+		os.system("cd %s; . .env/bin/activate; ./run govinfo --bulkdata=BILLSTATUS --log=%s; ./run bills --govtrack --congress=%d --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level, CONGRESS, log_level))
 	
 	# Scrape upcoming House bills.
 
-	os.system("cd %s; . .env/bin/activate; ./run upcoming_house_floor --log=%s" % (SCRAPER_PATH, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run upcoming_house_floor --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
 	do_bill_parse = True
 	
 	# os.system("./manage.py dumpdata --format json bill.BillTerm > data/db/django-fixture-billterms.json")
@@ -134,7 +133,7 @@ if do_bill_parse:
 if "votes" in sys.argv:
 	# Scrape.
 	if CONGRESS >= 101:
-		os.system("cd %s; . .env/bin/activate; ./run votes --govtrack --log=%s --force --fast" % (SCRAPER_PATH, log_level))
+		os.system("cd %s; . .env/bin/activate; ./run votes --govtrack --log=%s --force --fast" % (settings.CONGRESS_PROJECT_PATH, log_level))
 	
 	# Load into db.
 	os.system("./parse.py vote --congress=%d -l %s" % (CONGRESS, log_level))
@@ -160,9 +159,9 @@ if "stat_bills" in sys.argv:
 	# Pull in statutes from the 85th-92nd Congress
 	# via the GPO's Statutes at Large.
 	
-	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=STATUTE --extract=mods --log=%s" % (SCRAPER_PATH, "warn")) # log_level
-	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=65-86 --log=%s" % (SCRAPER_PATH, "warn")) # log_level
-	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=87-106 --textversions --log=%s" % (SCRAPER_PATH, "warn")) # log_level
+	os.system("cd %s; . .env/bin/activate; ./run govinfo --collections=STATUTE --extract=mods --log=%s" % (settings.CONGRESS_PROJECT_PATH, "warn")) # log_level
+	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=65-86 --log=%s" % (settings.CONGRESS_PROJECT_PATH, "warn")) # log_level
+	os.system("cd %s; . .env/bin/activate; ./run statutes --volumes=87-106 --textversions --log=%s" % (settings.CONGRESS_PROJECT_PATH, "warn")) # log_level
 	
 	# Copy bill metadata into our legacy location.
 	# (No need to copy text-versions anywhere: we read it from the congress data directory.)

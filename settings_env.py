@@ -60,8 +60,6 @@ from django.utils.crypto import get_random_string
 default_secret_key = get_random_string(50, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
 SECRET_KEY = get_env_variable('SECRET_KEY', default=default_secret_key)
 
-CONGRESS_LEGISLATORS_PATH = get_env_variable('CONGRESS_LEGISLATORS_PATH', default='data/congress-legislators/')
-
 RSS_CAMPAIGN_QUERYSTRING = get_env_variable('RSS_CAMPAIGN_QUERYSTRING', default="?utm_campaign=govtrack_feed&utm_source=govtrack/feed&utm_medium=rss")
 
 
@@ -101,6 +99,7 @@ copy_env_vars = [
     "COMMUNITY_FORUM_SSO_KEY",
 
     "CONGRESS_DATA_PATH",
+    "CONGRESS_PROJECT_PATH",
     "MISCONDUCT_DATABASE_PATH",
     "PRONUNCIATION_DATABASE_PATH",
     "SCORECARDS_DATABASE_PATH",

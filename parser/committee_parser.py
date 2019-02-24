@@ -67,7 +67,7 @@ def main(options):
 
 def parse_committee_names(options):
     log.info('Processing committees')
-    COMMITTEES_FILE = settings.CONGRESS_LEGISLATORS_PATH + 'committees-current.yaml'
+    COMMITTEES_FILE = settings.CONGRESS_PROJECT_PATH + '/congress-legislators/committees-current.yaml'
 
     if not File.objects.is_changed(COMMITTEES_FILE) and not options.force:
         log.info('File %s was not changed' % COMMITTEES_FILE)
@@ -122,14 +122,14 @@ def parse_committee_names(options):
         
 def parse_committee_members(options):
     log.info('Processing committee members')
-    MEMBERS_FILE = settings.CONGRESS_LEGISLATORS_PATH + 'committee-membership-current.yaml'
+    MEMBERS_FILE = settings.CONGRESS_PROJECT_PATH + '/congress-legislators/committee-membership-current.yaml'
     file_changed = File.objects.is_changed(MEMBERS_FILE)
 
     if not file_changed and not options.force:
         log.info('File %s was not changed' % MEMBERS_FILE)
     else:
         # map Bioguide IDs to GovTrack IDs
-        y = yaml_load(settings.CONGRESS_LEGISLATORS_PATH + "legislators-current.yaml")
+        y = yaml_load(settings.CONGRESS_CONGRESS_PATH + "/congress-legislators/legislators-current.yaml")
         person_id_map = { }
         for m in y:
             if "id" in m and "govtrack" in m["id"] and "bioguide" in m["id"]:
