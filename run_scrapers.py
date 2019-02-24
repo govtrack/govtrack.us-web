@@ -76,7 +76,7 @@ if "committees" in sys.argv:
 	os.system("./parse.py -l ERROR committee")
 
 	# Generate historical XML, used by prognosis & session stats.
-	os.system("cd ../scripts/legacy-conversion; . ../%s/congress-legislators/scripts/.env/bin/activate; python convert_committees.py ../%s/congress-legislators/ ../data/historical-committee-membership/%s.xml"
+	os.system(". %s/congress-legislators/scripts/.env/bin/activate; python committee/archive_committee_membership.py %s/congress-legislators/ data/historical-committee-membership/%s.xml"
 		% (SCRAPER_PATH, SCRAPER_PATH, CONGRESS))
 
 	# Save a fixture.
