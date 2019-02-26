@@ -88,7 +88,7 @@ Additionally, some data files are stored in separate repositories and must be ob
 
 * congress project bill status data (etc.)
 * congress-legislators data
-* legislator photos (symlink photos directory to static/legislator-photos)
+* legislator photos (static/legislator-photos is symlinked to ../data/legislators-photos/photos, so this must go in `data` for now)
 * GovTrack's scorecards, miscondut, and name pronuciation repositories
 
 # Credits
@@ -105,7 +105,7 @@ You'll need a `data` directory that contains:
 * congress (a symbolic link to the congress project's `data` directory, holding bill and legislator data, some of which can't be reproduced because the source data is gone; also set `CONGRESS_DATA_PATH=data/congress` in local/settings.env)
 * congress-bill-text-legacy (a final copy of HTML bill text scraped from the old THOMAS.gov, for bills before XML bill text started)
 * historical-committee-membership (past committee membership, )
-* legislator-photos (manually collected photos of legislators; create a symbolic link from `static/legislator-photos` to `legislator-photos/photos`)
+* legislator-photos (manually collected photos of legislators; there's a symbolic link from `static/legislator-photos` to `legislator-photos/photos`)
 
 You'll need several other data repositories that you can put in the `data` directory if you don't expose the whole directory over HTTP, but they can also be placed anywhere because the paths are in settings:
 
