@@ -770,6 +770,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         aspect = float(request.GET["aspect"])
     except:
 	    aspect = 240.0/200.0
+    if image_type == "card": aspect = .5 # height/width
 
     # Rasterizes a page of a PDF to a greyscale PIL.Image.
     # Crop out the GPO seal & the vertical margins.
@@ -862,7 +863,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         img.thumbnail((width, int(aspect*width)), Image.ANTIALIAS)
 
     # Add symbology.
-    if image_type == "thumbnail":
+    if image_type in ("thumbnail", "card"):
         img = img.convert("RGBA")
 
         banner_color = None

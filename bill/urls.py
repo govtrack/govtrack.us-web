@@ -21,6 +21,6 @@ urlpatterns = [
     url(r'^_ajax/load_text', bill.views.bill_text_ajax),
     url(r'^_ajax/join_community', bill.views.join_community),
     url(r'^_admin/go_to_summary_admin', bill.views.go_to_summary_admin, name="bill_go_to_summary_admin"),
-    url(r'^(\d+)/([a-z]+)(\d+)/(thumbnail|_text_image)$', bill.views.bill_text_image),
+    url(r'^(\d+)/([a-z]+)(\d+)/(thumbnail|_text_image|card)$', bill.views.bill_text_image),
 ]
 

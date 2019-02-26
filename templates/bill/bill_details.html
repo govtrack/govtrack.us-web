@@ -9,8 +9,8 @@
 
 {% block og_image %}
 	{% if text_info.has_thumbnail %}
-		<meta property="og:image" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=1"/>
-		<meta name="twitter:image" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail?aspect=.75"/>
+		<meta property="og:image" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail"/>
+		<meta name="twitter:image" content="https://www.govtrack.us{{bill.get_absolute_url}}/card"/>
 	{% else %}
 		<meta property="og:image" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
 		<meta name="twitter:image" content="https://www.govtrack.us/static/images/media_icon.png?20130118" />
