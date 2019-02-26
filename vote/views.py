@@ -330,8 +330,9 @@ def vote_thumbnail_wide(vote):
     im, ctx = create_image(image_width, image_height)
 
     # Title
-    vote_title = re.sub(r"^On the Motion to ", "To ", vote.question)
-    vote_title = re.sub(r"^On the Motion ", "Motion ", vote_title)
+    vote_title = re.sub(r"^(On the )?Motion to Invoke ", "", vote.question)
+    vote_title = re.sub(r"^(On the )?Motion to ", "To ", vote.question)
+    vote_title = re.sub(r"^(On the )?Motion ", "Motion ", vote_title)
     vote_title = re.sub(r"^On the Nomination ", "", vote_title)
     ctx.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
     ctx.set_font_size(16)
@@ -383,7 +384,7 @@ def vote_thumbnail_wide(vote):
         photo = Image.open(open("." + v.person.get_photo_url(), "rb"))
         photo.thumbnail((photo_width, photo_height))
         x = int( image_width//2 + 20 + (i % 3) * photo_width*1.2 )
-        y = int( 45 + (i // 3) * (photo_height+caption_height*1.25) )
+        y = int( 40 + (i // 3) * (photo_height+caption_height*1.25) )
         im.paste(photo, (x, y))
 
         # Draw a rectange around the photo.
