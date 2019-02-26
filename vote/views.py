@@ -259,10 +259,20 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 	vote = load_vote(congress, session, chamber_code, number)
 	if image_type == "map":
 		# SVG map.
-		return vote_thumbnail_image_map(vote)
-	else:
+		body, mime_type = vote_thumbnail_image_map(vote)
+	elif image_type == "diagram":
 		# Seating diagram.
-		return vote_thumbnail_image_seating_diagram(vote, image_type == "thumbnail")
+		body, mime_type = vote_thumbnail_image_seating_diagram(vote)
+	elif image_type == "card":
+		# Twitter card thumbnail.
+		body, mime_type = vote_thumbnail_wide(vote)
+	else:
+		raise Http404()
+
+	# Return response.
+	r = HttpResponse(body, content_type=mime_type)
+	r["Content-Length"] = len(body)
+	return r
 
 vote_diagram_colors = { # see also person.views.membersoverview
 	("D", "+"): (0/255.0, 142/255.0, 209/255.0), # same as CSS color
@@ -310,24 +320,174 @@ def vote_thumbnail_image_map(vote):
 		#	# we should hide because they don't have a vote.
 		#	tree.getroot().remove(node)
 
-	# Send response.
-	v = ET.tostring(tree.getroot())
-	r = HttpResponse(v, content_type='image/svg+xml')
-	r["Content-Length"] = len(v)
-	return r
+	# Send raw SVG response.
+	return (ET.tostring(tree.getroot()), "image/svg+xml")
 
-def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
-	
+def vote_thumbnail_wide(vote):
+    import cairo, re
+
+    image_width, image_height = (600, 300) # 2:1
+    im, ctx = create_image(image_width, image_height)
+
+    # Title
+    vote_title = re.sub(r"^On the Motion to ", "To ", vote.question)
+    vote_title = re.sub(r"^On the Motion ", "Motion ", vote_title)
+    vote_title = re.sub(r"^On the Nomination ", "", vote_title)
+    ctx.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+    ctx.set_font_size(16)
+    ctx.set_source_rgb(.2,.2,.2)
+    ctx.move_to(image_width/2, 10)
+    show_text_centered(ctx, vote_title, max_width=.95*image_width)
+
+    # Vote Chamber/Date/Number
+    vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
+    vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
+    ctx.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+    ctx.set_font_size(14)
+    ctx.move_to(image_width/4, image_height-25)
+    show_text_centered(ctx, vote_citation, max_width=image_width/2*.95) 
+
+    # Convert the image buffer to raw PNG bytes.
+    buf = BytesIO()
+    im.write_to_png(buf)
+
+    # Load it into PIL and add the sub-images.
+    from PIL import Image
+    im = Image.open(buf)
+
+    # Make the seating diagram.
+    seating_diagram_width = 280
+    seating_diagram = Image.open(BytesIO(vote_thumbnail_image_seating_diagram(vote, 280, 175)[0]))
+    im.paste(seating_diagram, (image_width//4-seating_diagram_width//2,75))
+
+    # Show some legislators - outliers first. Select randomly.
+    legislator_count = 6
+    import random
+    voters = vote.get_voters()
+    get_vote_outliers(voters)
+    random.shuffle(voters) # first shuffle
+    voters.sort(key = lambda v : not v.is_outlier) # put outliers first, but otherwise keeping the shuffled order
+    selected_voters = []
+    while len(selected_voters) < legislator_count and len(voters) > 0:
+        v = voters.pop(0)
+        if not v.person_role: continue
+        if not v.person.has_photo(): continue
+        selected_voters.append(v)
+
+    # Paste a block for each legislator.
+    for i, v in enumerate(selected_voters):
+        # Paste photo.
+        photo_width = int(image_width/8)
+        photo_height = int(photo_width*1.2)
+        caption_height = 33
+        photo = Image.open(open("." + v.person.get_photo_url(), "rb"))
+        photo.thumbnail((photo_width, photo_height))
+        x = int( image_width//2 + 20 + (i % 3) * photo_width*1.2 )
+        y = int( 45 + (i // 3) * (photo_height+caption_height*1.25) )
+        im.paste(photo, (x, y))
+
+        # Draw a rectange around the photo.
+        try:
+            from PIL import ImageDraw
+            draw = ImageDraw.Draw(im)
+            color = vote_diagram_colors[(v.party[0], v.option.key)]
+            color = tuple(int(255*x) for x in color) # float to int
+            draw.rectangle(((x, y), (x+photo.size[0], y+photo.size[1])), outline=color, fill=None)
+        except:
+            # If the party or option key doesn't have a color, skip.
+            pass
+        finally:
+            del draw
+
+        # Make a temporary buffer for the text.
+        im2 = cairo.ImageSurface(cairo.FORMAT_ARGB32, photo_width, caption_height)
+        ctx2 = cairo.Context(im2)
+
+        bg_clr = (1,1,1)
+        fg_clr = (0,0,0)
+        try:
+            bg_clr = vote_diagram_colors[(v.party[0], v.option.key)]
+            if v.option.key == "+":
+                fg_clr = (1,1,1)
+        except:
+            # If the party or option key doesn't have a color, skip.
+            pass
+
+        # clear background
+        ctx2.set_source_rgba(*bg_clr)
+        ctx2.new_path()
+        ctx2.line_to(0, 0)
+        ctx2.line_to(image_width, 0)
+        ctx2.line_to(image_width, image_height)
+        ctx2.line_to(0, image_height)
+        ctx2.fill()
+
+        # write text
+        ctx2.set_source_rgb(*fg_clr)
+        ctx2.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+        ctx2.set_font_size(12)
+        ctx2.move_to(photo_width/2, 14)
+        show_text_centered(ctx2, v.person.lastname, max_width=photo_width-4, use_baseline=True)
+        ctx2.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        ctx2.move_to(photo_width/2, 27)
+        show_text_centered(ctx2, "· " + v.option.value + " ·", use_baseline=True)
+
+        # copy into main raster
+        buf = BytesIO()
+        im2.write_to_png(buf)
+        im2 = Image.open(buf)
+        im.paste(im2, (x, y+photo_height))
+
+    # Rasterize it again.
+    buf = BytesIO()
+    im.save(buf, "PNG")
+
+    # Return the image.
+    return (buf.getvalue(), "image/png")
+
+FONT_FACE = "DejaVu Serif Condensed"
+
+def create_image(image_width, image_height, bg_color=(1,1,1,1)):
+    import cairo
+
+    im = cairo.ImageSurface(cairo.FORMAT_ARGB32, image_width, image_height)
+    ctx = cairo.Context(im)
+
+    # clear background
+    ctx.set_source_rgba(*bg_color)
+    ctx.new_path()
+    ctx.line_to(0, 0)
+    ctx.line_to(image_width, 0)
+    ctx.line_to(image_width, image_height)
+    ctx.line_to(0, image_height)
+    ctx.fill()
+
+    return (im, ctx)
+
+def show_text_centered(ctx, text, max_width=None, use_baseline=False):
+    import re
+    while True:
+        (x_bearing, y_bearing, width, height, x_advance, y_advance) = ctx.text_extents(text)
+        if use_baseline:
+            height = 0
+        if max_width is not None and width > max_width:
+            # Chop off a word if possible and replace with ellisis.
+            text2 = re.sub(r" \S+[ \.…]*?$", "…", text)
+            if text2 == text:
+                # If there was no word to chop off, just chop off
+                # any letter.
+                text2 = re.sub(r".[ \.…]*?$", "…", text)
+            text = text2
+            continue
+        break
+        
+    ctx.rel_move_to(-width/2, height)
+    ctx.show_text(text)
+
+def vote_thumbnail_image_seating_diagram(vote, image_width=300, image_height=170):
 	import cairo, re, math
 	
-	# general image properties
-	font_face = "DejaVu Serif Condensed"
-	image_width = 300
-	image_height = 250 if is_thumbnail else 170
-	
 	# format text to print on the image
-	vote_title = re.sub(r"^On the Motion to ", "To ", vote.question)
-	vote_title = re.sub(r"^On the Motion ", "Motion ", vote.question)
 	if re.match(r"Cloture .*Rejected", vote.result):
 		vote_result_2 = "Filibustered"
 	elif re.match(r"Cloture .*Agreed to", vote.result):
@@ -342,9 +502,6 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		vote_result_2 = re.sub("^(Bill|Amendment|Resolution of Ratification|(Joint |Concurrent )?Resolution|Conference Report|Nomination|Motion to \S+|Motion|Motion for Attendance) ", "", vote.result)
 	if vote_result_2 == "unknown": vote_result_2 = ""
 	if len(vote_result_2) > 15: vote_result_2 = vote_result_2[-15:]
-	if vote_result_2 == "Confirmed": vote_title = re.sub(r"^On the Nomination ", "", vote_title)
-	vote_date = vote.created.strftime("%x") if vote.created.year > 1900 else vote.created.isoformat().split("T")[0]
-	vote_citation = vote.get_chamber_display() + " Vote #" + str(vote.number) + " -- " + vote_date
 	
 	# get vote totals by option and by party
 	totals = vote.totals()
@@ -371,67 +528,28 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 	if total_count == 0 or "+" not in total_counts or "-" not in total_counts: raise Http404() # no thumbnail for other sorts of votes
 	vote_result_1 = "%d-%d" % (total_counts["+"], total_counts["-"])
 	
-	def show_text_centered(ctx, text, max_width=None):
-		while True:
-			(x_bearing, y_bearing, width, height, x_advance, y_advance) = ctx.text_extents(text)
-			if max_width is not None and width > max_width:
-				text2 = re.sub(r" \S+(\.\.\.)?$", "...", text)
-				if text2 != text:
-					text = text2
-					continue
-			break
-			
-		ctx.rel_move_to(-width/2, height)
-		ctx.show_text(text)
+	im, ctx = create_image(image_width, image_height)
 	
-	im = cairo.ImageSurface(cairo.FORMAT_ARGB32, image_width, image_height)
-	ctx = cairo.Context(im)
-	
-	ctx.select_font_face(font_face, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-	
-	# clear background
-	ctx.set_source_rgb(1,1,1)
-	ctx.new_path()
-	ctx.line_to(0, 0)
-	ctx.line_to(image_width, 0)
-	ctx.line_to(image_width, image_height)
-	ctx.line_to(0, image_height)
-	ctx.fill()
-	
-	chart_top = 0
-	if is_thumbnail:
-		# Title
-		ctx.set_font_size(16)
-		ctx.set_source_rgb(.2,.2,.2)
-		ctx.move_to(150,10)
-		show_text_centered(ctx, vote_title, max_width=.95*image_width)
-		chart_top = 50
+	ctx.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
 	
 	# Vote Tally
-	font_size = 24 if len(vote_result_2) < 10 else 20
+	font_size = (24 if len(vote_result_2) < 10 else 20) * image_width / 300
 	ctx.set_font_size(font_size)
 	ctx.set_source_rgb(.1, .1, .1)
-	ctx.move_to(150,chart_top)
+	ctx.move_to(image_width/2, 0)
 	show_text_centered(ctx, vote_result_1)
 	
 	# Vote Result
-	ctx.move_to(150,chart_top+8+font_size)
+	ctx.move_to(image_width/2, 8+font_size)
 	show_text_centered(ctx, vote_result_2) 
 	w = max(ctx.text_extents(vote_result_1)[2], ctx.text_extents(vote_result_2)[2])
 	
 	# Line
 	ctx.set_line_width(1)
 	ctx.new_path()
-	ctx.line_to(150-w/2, chart_top+3+font_size)
+	ctx.line_to(image_width/2-w/2, 3+font_size)
 	ctx.rel_line_to(w, 0)
 	ctx.stroke()
-	
-	if is_thumbnail:
-		# Vote Chamber/Date/Number
-		ctx.select_font_face(font_face, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-		ctx.set_font_size(14)
-		ctx.move_to(150,image_height-25)
-		show_text_centered(ctx, vote_citation, max_width=.98*image_width) 
 	
 	# Seats
 	
@@ -568,21 +686,16 @@ def vote_thumbnail_image_seating_diagram(vote, is_thumbnail):
 		# draw
 		ctx.set_source_rgb(*vote_diagram_colors[(["D", "I", "R"][party], ["+", "-"][vote])])
 		ctx.identity_matrix()
-		ctx.translate(image_width/2, chart_top+25)
+		ctx.translate(image_width/2, 25)
 		ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))
 		ctx.translate(r, 0)
 		ctx.rectangle(-seat_size/2, -seat_size/2, seat_size, seat_size)
 		ctx.fill()
 
-	# Convert the image buffer to raw PNG bytes.
+	# Convert the image buffer to raw PNG bytes and return it.
 	buf = BytesIO()
 	im.write_to_png(buf)
-	v = buf.getvalue()
-	
-	# Form the response.
-	r = HttpResponse(v, content_type='image/png')
-	r["Content-Length"] = len(v)
-	return r
+	return (buf.getvalue(), "image/png")
 
 @anonymous_view
 def vote_check_thumbnails(request):
@@ -590,7 +703,7 @@ def vote_check_thumbnails(request):
         .order_by("congress", "session", "chamber", "number")
     ret = ""
     for v in votes:
-        ret += """<div><a href="%s"><img src="%s" style="border: 1px solid #777"/></a></div>\n""" % (v.get_absolute_url(), v.get_absolute_url() + "/thumbnail")
+        ret += """<div><a href="%s"><img src="%s" style="border: 1px solid #777"/></a></div>\n""" % (v.get_absolute_url(), v.get_absolute_url() + "/card")
     return HttpResponse(ret, content_type='text/html')
 	
 import django.contrib.sitemaps

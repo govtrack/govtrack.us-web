@@ -418,7 +418,7 @@ class Vote(models.Model):
         except Http404:
             pass
         try:
-            vote_thumbnail_image_seating_diagram(self, True)
+            vote_thumbnail_image_seating_diagram(self)
             return self.get_absolute_url() + "/diagram"
         except Http404:
             pass

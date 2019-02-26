@@ -8,7 +8,7 @@ urlpatterns = [
     url('^votes/(\d+)-(\w+)/(h|s)(\d+)$', vote.views.vote_details, name='vote_details'),
     url('^votes/(\d+)-(\w+)/(h|s)(\d+)/export/csv$', vote.views.vote_export_csv, name='vote_export_csv'),
     url('^votes/(\d+)-(\w+)/(h|s)(\d+).json$', vote.views.vote_get_json, name='vote_get_json'),
-    url('^votes/(\d+)-(\w+)/(h|s)(\d+)/(diagram|thumbnail|map)$', vote.views.vote_thumbnail_image, name='vote_thumbnail_image'),
+    url('^votes/(\d+)-(\w+)/(h|s)(\d+)/(diagram|map|card)$', vote.views.vote_thumbnail_image, name='vote_thumbnail_image'),
     url('^votes/check_thumbnails', vote.views.vote_check_thumbnails),
     url('^votes/presidential-candidates', vote.views.presidential_candidates),
     url('^votes/compare/(\d+)/([\w\-]+)$', vote.views.vote_comparison_table_named),
