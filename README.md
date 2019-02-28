@@ -128,11 +128,12 @@ Install nginx, supervisord (which keeps the uWSGI process running), and certbot 
     service supervisor restart
     certbot # and follow prompts, but without the HTTP redirect because we already have it
 
-To scrape and load new data, you'll need the congress project:
+To scrape and load new data, you'll need the congress project, etc.:
 
-* Clone it anywhere and set that directory as `CONGRESS_PROJECT_PATH` in GovTrack's `local/settings.env`.
-* Follow it's installation steps to create a Python 2 virtualenv for it in its `.env` directory.
+* Clone the congress project repo anywhere and set that directory as `CONGRESS_PROJECT_PATH` in GovTrack's `local/settings.env`.
+* Follow its installation steps to create a Python 2 virtualenv for it in its `.env` directory.
 * Symlink the `data/congress` _data_ directory as the `data` directory inside the congress project directory.
 * Clone the [congress-legislators](https://github.com/unitedstates/congress-legislators/) project as a subdirectory and follow its installation steps to create a separate Python 3 virtualenv for its scripts in its `scripts/.env` directory.
-* Try launching the scrapers from the GovTrack directory: `./run_scrapers.py people`, `./run_scrapers.py committees`.
+* Try launching the scrapers from the GovTrack directory: `./run_scrapers.py people`, `./run_scrapers.py committees`, etc.
+* Copy over our local/skoposlabs_s3cmd.ini file.
 * Enable the crontab.

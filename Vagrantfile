@@ -33,8 +33,8 @@ Vagrant.configure(2) do |config|
         libcap-dev libcairo-dev python3-xapian
     # on production we don't use python3-xapian
 
-    # on production I needed:
-    # sudo apt-get install memcached libmysqlclient-dev poppler-utils
+    # on production I also needed:
+    # sudo apt-get install memcached libmysqlclient-dev poppler-utils s3cmd
 
     # On OS X...
     # ----------

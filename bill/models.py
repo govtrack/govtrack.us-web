@@ -599,7 +599,7 @@ class Bill(models.Model):
             # Cache miss.
             try:
                 import csv
-                with open("../scripts/predictgov/predictions.csv") as f:
+                with open("data/skopos_labs_predictions.csv") as f:
                     ret = { row["bill_id"].lower(): { "prediction": float(row["Prediction"])*100 } # , "notes": row["descs"] }
                             for row in csv.DictReader(f) }
             except:
@@ -620,7 +620,7 @@ class Bill(models.Model):
         # Same return value as get_prognosis, but adds a "notes" key.
         try:
             import csv
-            with open("../scripts/predictgov/predictions.csv") as f:
+            with open("data/skopos_labs_predictions.csv") as f:
                 for row in csv.DictReader(f):
                     if row["bill_id"].lower() == self.congressproject_id:
                         return {

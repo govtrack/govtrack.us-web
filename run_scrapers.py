@@ -150,6 +150,7 @@ if "votes" in sys.argv:
 if "stats" in sys.argv:
 	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)
 	os.system("analysis/missed_votes.py %d" % CONGRESS)
+	os.system("s3cmd -c local/skoposlabs_s3cmd.ini --force get s3://predictfederal/preds.csv data/skopos_labs_predictions.csv > /dev/null")
 	
 if "am_mem_bills" in sys.argv:
 	# American Memory

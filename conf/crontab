@@ -6,7 +6,7 @@ LANG=en_US.UTF-8
 LC_TYPE=en_US.UTF-8
 
 45 2 * * 1-6 { cd /home/govtrack/web; ./run_scrapers.py text committees; }
-45 4 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes stats; ./manage.py govtrack_insider_sync; ../scripts/predictgov/pull.sh > /dev/null; }
+45 4 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes stats; ./manage.py govtrack_insider_sync; }
 15 6 * * * { cd /home/govtrack/web; ./run_scrapers.py bills; }
 15 9-18 * * 1-5 { cd /home/govtrack/web; ./run_scrapers.py votes; }
 45 9-21/3 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes; ./manage.py govtrack_insider_sync; }
