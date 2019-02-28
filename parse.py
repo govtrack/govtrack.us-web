@@ -66,45 +66,12 @@ def parse_args():
 
 def main():
     kwargs, args = parse_args()
-    
-    lf = args[0] + "." + kwargs.method
-    @SingleRun(lock_file_name="govtrack_parser_" + lf)
-    def main2():
-        setup_logging(kwargs.level)
-        parser = __import__('parser.%s_parser' % args[0], globals(), locals(), ['xxx'])
-        getattr(parser, kwargs.method)(kwargs)
-        logging.debug('Done')
 
-    try:
-        main2()
-    except SingleRun.InstanceRunningException as e:
-        print("Another %s parser is running with pid %s." % (lf, str(e)))
-        
+    setup_logging(kwargs.level)
+    parser = __import__('parser.%s_parser' % args[0], globals(), locals(), ['xxx'])
+    getattr(parser, kwargs.method)(kwargs)
+    logging.debug('Done')
 
-# adapted from http://krosinski.blogspot.com/2012/04/preventing-python-script-from-running.html
-import os
-class SingleRun():
-    class InstanceRunningException(Exception):
-        pass
-    def __init__(self, lock_file_name):
-        self.lock_file =  "/tmp/%s.pid" % lock_file_name
-    def __call__(self, func):
-        def f(*args, **kwargs):
-            if os.path.exists(self.lock_file):
-                with open(self.lock_file, "rt") as f:
-                    pid = f.read()
-                if os.path.exists("/proc/%s" % pid):
-                    raise self.InstanceRunningException(pid)
-                os.unlink(self.lock_file)
-            try:
-                with open(self.lock_file, "wt") as f:
-                    f.write(str(os.getpid()))
-                return func(*args,**kwargs)
-            finally:
-                if os.path.exists(self.lock_file):
-                    os.unlink(self.lock_file)
-        return f
-        
 if __name__ == '__main__':
     main()
 

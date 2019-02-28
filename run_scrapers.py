@@ -4,6 +4,11 @@
 
 import os, os.path, glob, re, hashlib, shutil, sys, datetime
 from django.conf import settings
+from exclusiveprocess import Lock
+
+# Ensure we don't run scrapers concurrently since they can
+# mess each other up.
+Lock(die=True).forever()
 
 CONGRESS = int(os.environ.get("CONGRESS", settings.CURRENT_CONGRESS))
 

@@ -37,4 +37,5 @@ rtyaml
 plotly
 matplotlib
 pycairo
+exclusiveprocess
 

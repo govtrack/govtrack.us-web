@@ -18,6 +18,13 @@ from datetime import datetime, timedelta
 import yaml
 from website.templatetags.govtrack_utils import markdown
 
+# If this command takes longer than it should, we could end up starting the next
+# day's process before this one finishes. There's nothing strictly wrong with
+# that, but we don't want to put so much load on the server, and it should be
+# an error condition for the process to run for so long.
+from exclusiveprocess import Lock
+Lock(die=True).forever()
+
 launch_time = datetime.now()
 
 import multiprocessing
