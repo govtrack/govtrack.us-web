@@ -137,3 +137,18 @@ To scrape and load new data, you'll need the congress project, etc.:
 * Try launching the scrapers from the GovTrack directory: `./run_scrapers.py people`, `./run_scrapers.py committees`, etc.
 * Copy over our local/skoposlabs_s3cmd.ini file.
 * Enable the crontab.
+
+The crontab sends the outputs of the commands to Josh, so the server needs a sendmail-like command. The easiest to set up is msmtp, like so:
+
+	apt install msmtp-mta
+	cat > /etc/msmtprc <<EOF;
+	account default
+	auth on
+	tls on
+	tls_trust_file /etc/ssl/certs/ca-certificates.crt
+	host *******
+	port 587
+	from #######@govtrack.us
+	user *******
+	password *******
+	EOF

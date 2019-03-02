@@ -8,4 +8,5 @@ honcho -e local/settings.env run \
 	--wsgi-file wsgi.py \
 	--socket /tmp/uwsgi_govtrack_${NAME}.sock --chmod-socket=666 \
 	--pidfile /tmp/uwsgi_govtrack_${NAME}.pid \
-	--processes $PROCESSES
+	--processes $PROCESSES --master \
+	--close-on-exec

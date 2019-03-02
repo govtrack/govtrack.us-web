@@ -2,7 +2,7 @@ import os, prctl
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 try:
-  prctl.set_name("govtrack-" + os.environ["NAME"])
+  prctl.set_name("django-" + os.environ["NAME"])
 except:
   pass
 

@@ -5,9 +5,10 @@ if "runserver" in sys.argv:
 	# Always do this in debug mode.
 	os.environ["DEBUG"] = "1"
 else:
+	# Put the managment command name into the process name.
 	try:
 		import prctl
-		prctl.set_name("django-govtrack")
+		prctl.set_name(sys.argv[1])
 	except:
 		pass
 
