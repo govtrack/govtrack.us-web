@@ -1,0 +1,15 @@
+{% autoescape off %}{% load events_utils %}{% for list, events in eventslists %}
+{{list.name}}
+----------------------------------{% for event in events %}
+{% with event|render_event:feed as meta %}
+{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} -- {{meta.type}}
+{{meta.title}}
+{{meta.body_text}}
+{{SITE_ROOT_URL}}{{meta.url}}
+{% if feeds and event.feeds|length > 0 %}[You are seeing this event because you subscribe to {% for feed in event.feeds %}{% if not forloop.first %}, {% endif %}{{feed.title}}{% endfor %}]{% endif %}
+
+/ / / /{% endwith %}{% endfor %}
+{% empty %}
+There were no new events in Congress that match your trackers since your last email update from GovTrack.{% endfor %}
+{% endautoescape %}
+

@@ -1,5 +1,4 @@
 {% extends "htmlemailer/boilerplate.html" %}
-{% load events_utils %}
 {% block head %}
 <style>
 	#backgroundTable {
@@ -116,7 +115,6 @@
 </style>
 {% endblock %}
 {% block body %}
-{% with "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email" as utm %}
 
 <!-- HEADER -->
 <div style="background-color: #1D4E70; color: white; margin-bottom: 30px; padding: 30px; text-align: center;">
@@ -148,45 +146,7 @@
 						</div>
 						{% endif %}
 
-
-						{% for list, events in eventslists %}
-				            <h2 style="text-align:left;">{{list.name}}</h2>
-
-							{% for event in events %}
-							{% with event|render_event:feed as meta %}
-
-				            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #F2F2F2;margin-bottom:10px;margin-top:20px;">
-				            	<tr valign="top">
-                                    <td width="100" style="padding-right: 1em; padding-top: 20px;">
-                                      {% if meta.thumbnail_url %}
-                                        <a href="{{SITE_ROOT_URL}}{{meta.url|append_qsarg:utm}}">
-                                          <img src="{% if ":" not in meta.thumbnail_url %}{{SITE_ROOT_URL}}{% endif %}{{meta.thumbnail_url}}" style="width: 100%;">
-                                        </a>
-                                      {% endif %}
-                                    </td>
-
-					            	<td style="text-align:left !important; padding-top: 20px;">
-							            <h5>{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} &mdash; {{meta.type}}</h5>
-										<h3><span style="text-align:left"><a href="{{SITE_ROOT_URL}}{{meta.url|append_qsarg:utm}}">{{meta.title}}</a></span></h3>
-										{{meta.body_html|safe}}
-
-										{% if event.feeds and event.feeds|length > 0 %}
-											<div style="font-size: 80%">Trackers:
-											{% for feed in event.feeds %}{% if not forloop.first %}, {% endif %}
-											<a href="{{SITE_ROOT_URL}}{{feed.link|append_qsarg:utm}}">{{feed.title}}</a>{% endfor %}.
-											</div>
-										{% endif %}
-					            	</td>
-				            	</tr>
-				            </table>
-							{% endwith %}
-							{% endfor %}
-
-							<br />
-						{% empty %}
-							<p>There were no new events in Congress that match your trackers since your last email update from GovTrack.</p>
-						{% endfor %}
-
+						{{body_html|safe}}
 			        </td>
 			    </tr>
         	</table>
@@ -291,8 +251,6 @@
 </td>
 </tr>
 </table>
-
-{% endwith %}
 
 {% if emailpingurl %}
 <!-- Sorry but we want to know if your email address is still valid. -->

@@ -31,6 +31,9 @@ import multiprocessing
 django.setup() # StackOverflow user says call setup when using multiprocessing
 
 # globals that are loaded by the parent process before forking children
+utm = "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email"
+template_body_text = None
+template_body_html = None
 announce = None
 medium_posts = None
 
@@ -41,6 +44,8 @@ class Command(BaseCommand):
 		parser.add_argument('mode', nargs=1, type=str)
 	
 	def handle(self, *args, **options):
+		global template_body_text
+		global template_body_html
 		global announce
 		global medium_posts
 
@@ -98,7 +103,9 @@ class Command(BaseCommand):
 		# enable caching during event generation
 		enable_event_source_caching()
 
-		# load general announcement
+		# load globals
+		template_body_text = get_template("events/emailupdate_body.txt")
+		template_body_html = get_template("events/emailupdate_body.html")
 		announce = load_announcement("website/email/email_update_announcement.md", options["mode"][0] == "testadmin")
 
 		# get GovTrack Insider posts
@@ -251,6 +258,16 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			"total_time_querying": user_querying_end_time-user_start_time,
 		}
 
+	# Render the body of the email.
+	body_context = {
+		"eventslists": eventslists,
+		"feed": all_trackers, # use all trackers in the user's account as context for displaying events
+		"SITE_ROOT_URL": settings.SITE_ROOT_URL,
+		"utm": utm,
+	}
+	body_text = template_body_text.render(context=body_context)
+	body_html = template_body_html.render(context=body_context)
+	user_rendering_end_time = datetime.now()
 
 	# When counting what we want to send, we supress emails.
 	if not send_mail:
@@ -258,6 +275,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		return {
 			"total_events_sent": eventcount,
 			"total_time_querying": user_querying_end_time-user_start_time,
+			"total_time_rendering": user_rendering_end_time-user_querying_end_time,
 		}
 	
 	# Add a pingback image into the email to know (with some low accuracy) which
@@ -282,10 +300,9 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			{
 				"user": user,
 				"date": datetime.now().strftime("%b. %d").replace(" 0", " "),
-				"eventslists": eventslists,
-				"feed": all_trackers, # use all trackers in the user's account as context for displaying events
 				"emailpingurl": emailpingurl,
-				"SITE_ROOT_URL": settings.SITE_ROOT_URL,
+				"body_text": body_text,
+				"body_html": body_html,
 				"announcement": announce,
 				"medium_posts": medium_posts,
 			},
@@ -327,7 +344,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		"total_emails_sent": 1,
 		"total_events_sent": eventcount,
 		"total_time_querying": user_querying_end_time-user_start_time,
-		#"total_time_rendering": timings["render"],
+		"total_time_rendering": user_rendering_end_time-user_querying_end_time,
 		#"total_time_sending": timings["send"],
 	}
 
