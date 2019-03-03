@@ -59,7 +59,7 @@ def vote_search_manager():
     sm.set_template("""
     <div class="row">
         <div class="col-xs-2 col-md-1" style="padding-right: 0">
-            <img src="{{object.get_absolute_url}}/diagram" class="img-responsive"/>
+            <img src="{{object.get_absolute_url}}/thumbnail" class="img-responsive"/>
         </div>
         <div class="col-xs-10 col-md-11">
 

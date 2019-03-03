@@ -263,8 +263,11 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 	elif image_type == "diagram":
 		# Seating diagram.
 		body, mime_type = vote_thumbnail_image_seating_diagram(vote)
+	elif image_type == "thumbnail":
+		# Small square thumbnail.
+		body, mime_type = vote_thumbnail_small(vote)
 	elif image_type == "card":
-		# Twitter card thumbnail.
+		# Twitter card wide thumbnail.
 		body, mime_type = vote_thumbnail_wide(vote)
 	else:
 		raise Http404()
@@ -282,6 +285,28 @@ vote_diagram_colors = { # see also person.views.membersoverview
 	("R", "+"): (248/255.0, 54/255.0, 49/255.0), # same as CSS color
 	("R", "-"): (255/255.0, 227/255.0, 223/255.0), # reduced saturation and then matched lightness with D at 95
 }
+
+def vote_thumbnail_small(vote):
+	# Try producing the map diagram, and if that's not available, then
+	# the seating diagram.
+	try:
+		body, mime_type = vote_thumbnail_image_map(vote)
+		# This is SVG so return it directly.
+		return body, mime_type
+	except Http404:
+		body, mime_type = vote_thumbnail_image_seating_diagram(vote)
+
+	# Scale down the image.
+	from PIL import Image
+	im = Image.open(BytesIO(body))
+	im.thumbnail((100,100))
+
+	# Rasterize it again.
+	buf = BytesIO()
+	im.save(buf, "PNG")
+
+	# Return the image.
+	return (buf.getvalue(), "image/png")
 
 def vote_thumbnail_image_map(vote):
 	# We only have an SVG for House votes for certain Congresses.

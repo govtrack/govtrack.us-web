@@ -405,24 +405,7 @@ class Vote(models.Model):
         return candidates
 
     def get_thumbnail_url(self):
-        if not hasattr(self, "_cached_thumbnail_url"):
-           self._cached_thumbnail_url = self._get_thumbnail_url()
-        return self._cached_thumbnail_url
-
-    def _get_thumbnail_url(self):
-        from vote.views import vote_thumbnail_image_map, vote_thumbnail_image_seating_diagram
-        from django.http import Http404
-        try:
-            vote_thumbnail_image_map(self)
-            return self.get_absolute_url() + "/map"
-        except Http404:
-            pass
-        try:
-            vote_thumbnail_image_seating_diagram(self)
-            return self.get_absolute_url() + "/diagram"
-        except Http404:
-            pass
-        return None
+        return self.get_absolute_url() + "/thumbnail"
 
 
 class VoteOption(models.Model):
