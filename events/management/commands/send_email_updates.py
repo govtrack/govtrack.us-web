@@ -30,6 +30,10 @@ launch_time = datetime.now()
 import multiprocessing
 django.setup() # StackOverflow user says call setup when using multiprocessing
 
+#if debugging single-threade
+#global_mail_connection = django.core.mail.get_connection()
+#global_mail_connection.open()
+
 # globals that are loaded by the parent process before forking children
 utm = "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email"
 template_body_text = None
@@ -62,8 +66,12 @@ class Command(BaseCommand):
 			send_old_events = True
 			list_email_freq = (1,2)
 		else:
-			# Now that the number of registered users is much larger than the number of event-generating
-			# feeds, it is faster to find users to update by starting with the most recent events.
+			# Find the subscription lists w/ daily emails turned on.
+			# Exclude lists we sent an email out to in the last 20 hours,
+			# in case we're re-starting this process and some new events crept in.
+			sublists = SubscriptionList.objects\
+				.filter(email=1)\
+				.exclude(last_email_sent__gt=launch_time-timedelta(hours=20))
 			
 			users = None
 			send_mail = True
@@ -71,23 +79,19 @@ class Command(BaseCommand):
 			send_old_events = False
 			if options["mode"][0] == "daily":
 				list_email_freq = (1,)
-				back_days = BACKFILL_DAYS_DAILY
 			elif options["mode"][0] == "weekly":
 				list_email_freq = (1,2)
-				back_days = BACKFILL_DAYS_WEEKLY
+				# Add in the subscription lists for weekly updates (we do both daily and weekly when
+				# we run the weekly batch) but in case we're re-starting the batch, don't send emails
+				# to users if they only have a weekly list and we emailed them during the week.
+				sublists |= SubscriptionList.objects\
+					.filter(email=2)\
+					.exclude(last_email_sent__gt=launch_time-timedelta(days=5))
 			elif options["mode"][0] == "testcount":
 				# count up how many daily emails we would send, but don't send any
 				list_email_freq = (1,)
 				send_mail = False
 				mark_lists = False
-				back_days = BACKFILL_DAYS_DAILY
-
-			# Find the subscription lists w/ emails turned on.
-			# Exclude lists we sent an email out to in the last 20 hours, in case we're
-			# re-starting this process and some new events crept in.
-			sublists = SubscriptionList.objects\
-					.filter(email__in=list_email_freq)\
-					.exclude(last_email_sent__gt=launch_time-timedelta(hours=20))
 
 			# And get a list of those users.
 			users = User.objects.filter(subscription_lists__in=sublists).distinct()
@@ -110,7 +114,7 @@ class Command(BaseCommand):
 
 		# get GovTrack Insider posts
 		from website.models import MediumPost
-		medium_posts = MediumPost.objects.order_by('-published')[0:6]
+		medium_posts = list(MediumPost.objects.order_by('-published')[0:6])
 
 		# counters for analytics on what we sent
 		counts = {
@@ -125,7 +129,7 @@ class Command(BaseCommand):
 
 		# when debugging, show a progress meter
 		def user_iterator(): return users
-		if sys.stdout.isatty(): 
+		if sys.stdout.isatty():
 			def user_iterator():
 				import tqdm
 				return tqdm.tqdm(list(users))
@@ -139,7 +143,7 @@ class Command(BaseCommand):
 			proc.start()
 			return [proc, parent_conn, 0]
 		pool = [create_worker() for i in range(5)]
-
+		
 		def dequeue(worker, limit):
 			while worker[2] > limit:
 				wcounts = worker[1].recv()
@@ -148,21 +152,20 @@ class Command(BaseCommand):
 					counts[k] += v
 
 		for i, user in enumerate(user_iterator()):
-            # Skip users who have been given an inactivity warning and have not
-            # logged in afterwards.
+			# Skip users who have been given an inactivity warning and have not
+			# logged in afterwards.
 			if UserProfile.objects.get(user_id=user["id"]).is_inactive():
 				counts["total_users_skipped_stale"] += 1
 				continue
 
-            # Skip users that emails to whom have bounced.
+			# Skip users that emails to whom have bounced.
 			if BouncedEmail.objects.filter(user_id=user["id"]).exists():
 				counts["total_users_skipped_bounced"] += 1
 				continue
 
-			# if debugging, can run it in the main process and ignore the pool
-			#wcounts = send_email_update(user["id"], list_email_freq, send_mail, mark_lists, send_old_events)
+			## if debugging, can run it in the main process and ignore the pool
+			#wcounts = send_email_update(user["id"], list_email_freq, send_mail, mark_lists, send_old_events, global_mail_connection)
 			#for k, v in wcounts.items(): counts[k] += v
-			#continue
 
 			# Enque task.
 			worker = pool[i % len(pool)]
@@ -172,10 +175,8 @@ class Command(BaseCommand):
 			# Deque results periodically so that the loop tracks overall progress and the pipe doesn't hit a limit.
 			dequeue(worker, 10)
 
-		# signal we're done so processes terminate
+		# signal we're done so processes terminate, then join to reclaim the workers
 		for worker in pool: worker[1].send(None)
-
-		# join
 		for worker in pool: dequeue(worker, 0)
 		for worker in pool: worker[0].join(1)
 
@@ -204,14 +205,14 @@ def pool_worker(conn):
 			while True:
 				args = conn.recv()
 				if args is None: break # stop when we get a None
-				conn.send(send_email_update(*args, mail_connection=mail_connection))
+				conn.send(send_email_update(*args, mail_connection))
 
 			# Close the connection.
 			conn.close()
 	except Exception as e:
 		print("Uncaught exception", e)
 
-def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events, mail_connection=None):
+def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events, mail_connection):
 	global launch_time
 
 	user_start_time = datetime.now()
@@ -287,8 +288,10 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		emailpingurl = Ping.get_ping_url(user)
 
 	# ensure smtp connection is open in case it got shut (hmm)
-	if mail_connection.connection and not mail_connection.connection.sock: mail_connection.connection = None
-	mail_connection.open()
+	if not mail_connection.connection: raise ValueError("the mail connection should be open already")
+	if not mail_connection.connection.sock: # socket seems to have been closed - reopen it
+		mail_connection.connection = None
+		mail_connection.open()
 		
 	# send
 	try:
@@ -313,7 +316,6 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			},
 			fail_silently=False,
 			connection=mail_connection,
-			#timings=timings
 		)
 	except Exception as e:
 		if "recipient address was suppressed due to" in str(e):
@@ -340,12 +342,14 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			sublist.last_email_sent = launch_time
 			sublist.save()
 
+	user_sending_end_time = datetime.now()
+
 	return {
 		"total_emails_sent": 1,
 		"total_events_sent": eventcount,
 		"total_time_querying": user_querying_end_time-user_start_time,
 		"total_time_rendering": user_rendering_end_time-user_querying_end_time,
-		#"total_time_sending": timings["send"],
+		"total_time_sending": user_sending_end_time-user_rendering_end_time,
 	}
 
 def load_announcement(template_path, testing):
