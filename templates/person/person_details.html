@@ -253,8 +253,8 @@ function show_pronunciation_guide() {
 		{% endif %}
 		{{person.name_and_title}}
 	</h1>
-	{% if role and active_role and role.leadership_title %}<p>{{role.leadership_title}}</p>{% endif %}
 	<p>
+		{% if role and active_role and role.leadership_title %}{{role.leadership_title}} and{% endif %}
 		{% if not active_role %}Former {% endif %}
 		{{ role.get_title }}{% if role.state %} for
 			{{ role.state_name_article }}{% if role.district == 0 %}&rsquo;s At-Large District{% elif role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District{% endif %}{% endif %}
@@ -722,7 +722,7 @@ function show_pronunciation_guide() {
 	<p>The information on this page is originally sourced from a variety of materials, including:</p>
 	<ul style="list-style: none; padding: 0;">
 	{% with person.vote_sources as person_vote_sources %}
-		<li><a href="https://github.com/unitedstates/congress-legislators">@unitedstates/congress-legislators</a>, a community project gathering congressional information</li>
+		<li><a href="https://github.com/unitedstates/congress-legislators">unitedstates/congress-legislators</a>, a community project gathering congressional information</li>
 		{% if committeeassignments or "congress" in person_vote_sources %}
 			<li>The <a href="http://www.house.gov">House</a> and <a href="http://www.senate.gov">Senate</a> websites, for committee membership and voting records</li>
 		{% endif %}
