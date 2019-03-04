@@ -5,6 +5,7 @@ from lxml import etree
 import glob
 import re
 import logging
+from datetime import timedelta
 
 from parser.progress import Progress
 from parser.processor import XmlProcessor
@@ -307,6 +308,11 @@ def main(options):
                         voter.person_role = voter.person.role
                     # If we couldn't match a role for this person on the date of the vote, and if the voter was Not Voting,
                     # and we're looking at historical data, then this is probably a data error --- the voter wasn't even in office.
+                    # At the start of each Congress, the House does a Call by States and Election of the Speaker, before swearing
+                    # in. In the 116th Congress, these votes had a Not Voting for Walter Jones who had not yet made it to DC, and
+                    # then omitted Jones in the votes after swearing in. In those cases, look for a role coming up.
+                    if voter.person_role is None and voter.option.key == "0" and vote.question in ("Call by States", "Election of the Speaker"):
+                        voter.person_role = voter.person.roles.filter(startdate__gt=vote.created, startdate__lt=vote.created+timedelta(days=30)).first()
                     if voter.person_role is None:
                         if vote.source == VoteSource.keithpoole and voter.option.key == "0":
                             # Drop this record.
