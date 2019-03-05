@@ -102,9 +102,9 @@ Additional package installation notes are in the Vagrantfile.
 You'll need a `data` directory that contains:
 
 * analysis (the output of our data analyses)
-* congress (a symbolic link to the congress project's `data` directory, holding bill and legislator data, some of which can't be reproduced because the source data is gone; also set `CONGRESS_DATA_PATH=data/congress` in local/settings.env)
+* congress (a symbolic link to the [congress project](https://github.com/unitedstates/congress)'s `data` directory, holding bill and legislator data, some of which can't be reproduced because the source data is gone; also set `CONGRESS_DATA_PATH=data/congress` in local/settings.env)
 * congress-bill-text-legacy (a final copy of HTML bill text scraped from the old THOMAS.gov, for bills before XML bill text started)
-* historical-committee-membership (past committee membership, )
+* historical-committee-membership (past committee membership, snapshots of earlier data)
 * legislator-photos (manually collected photos of legislators; there's a symbolic link from `static/legislator-photos` to `legislator-photos/photos`)
 
 You'll need several other data repositories that you can put in the `data` directory if you don't expose the whole directory over HTTP, but they can also be placed anywhere because the paths are in settings:
@@ -117,19 +117,22 @@ At this point you should be able to run `./manage.py runserver` and test that th
 
 And `conf/uwsgi_start test 1` should start the uWSGI application daemon.
 
-Install nginx and supervisord (which keeps the uWSGI process running) and set up their configuration files:
+Install nginx, supervisord (which keeps the uWSGI process running), and certbot and set up their configuration files:
 
-    apt install nginx supervisor
+    apt install nginx supervisor certbot python3-certbot-nginx
     rm /etc/nginx/sites-enabled/default
     ln -s /home/govtrack/web/conf/nginx.conf /etc/nginx/sites-enabled/www.govtrack.us.conf
     ln -s /home/govtrack/web/conf/supervisor.conf /etc/supervisor/conf.d/govtrack.conf
-    # install a TLS certificate at /etc/ssl/local/ssl_certificate.{key,crt}
+    # install a TLS certificate at /etc/ssl/local/ssl_certificate.{key,crt} (e.g. https://gist.github.com/JoshData/49eff618f84ce4890697d65bcb740137)
     service nginx restart
     service supervisor restart
+    certbot # and follow prompts, but without the HTTP redirect because we already have it
 
 To scrape and load new data, you'll need the congress project:
 
-* Clone it anywhere and set that directory as `CONGRESS_PROJECT_PATH` in the settings.
-* Follow it's installation steps to create a virtualenv for it in its `.env` directory.
-* Clone the congress-legislators project as a subdirectory and follow its installation steps to create a virtualenv for its scripts in its `scripts/.env` directory.
+* Clone it anywhere and set that directory as `CONGRESS_PROJECT_PATH` in GovTrack's `local/settings.env`.
+* Follow it's installation steps to create a Python 2 virtualenv for it in its `.env` directory.
+* Symlink the `data/congress` _data_ directory as the `data` directory inside the congress project directory.
+* Clone the [congress-legislators](https://github.com/unitedstates/congress-legislators/) project as a subdirectory and follow its installation steps to create a separate Python 3 virtualenv for its scripts in its `scripts/.env` directory.
+* Try launching the scrapers from the GovTrack directory: `./run_scrapers.py people`, `./run_scrapers.py committees`.
 * Enable the crontab.

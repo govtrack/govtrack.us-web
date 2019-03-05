@@ -34,7 +34,7 @@ Vagrant.configure(2) do |config|
     # on production we don't use python3-xapian
 
     # on production I needed:
-    # sudo apt-get install memcached libmysqlclient-dev
+    # sudo apt-get install memcached libmysqlclient-dev poppler-utils
 
     # On OS X...
     # ----------
