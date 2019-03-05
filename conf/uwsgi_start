@@ -1,12 +1,24 @@
 #!/bin/bash
+
 NAME=$1
 PROCESSES=$2
+
+if [ -z "$NAME" ]; then
+  # If launched without a NAME environment variable,
+  # start as a local HTTP server on port 8000.
+  BIND_ARGS="--http 127.0.0.1:8000 --static-map /static=static"
+else
+  # Use the NAME to form a Unix socket file and a PID file.
+  BIND_ARGS="--socket /tmp/uwsgi_govtrack_${NAME}.sock --chmod-socket=666 --pidfile /tmp/uwsgi_govtrack_${NAME}.pid"
+fi
+
+if [ -z "$PROCESSES"]; then PROCESSES=1; fi
+
 source .venv/bin/activate
 ./minify
 honcho -e local/settings.env run \
 	.venv/bin/uwsgi \
 	--wsgi-file wsgi.py \
-	--socket /tmp/uwsgi_govtrack_${NAME}.sock --chmod-socket=666 \
-	--pidfile /tmp/uwsgi_govtrack_${NAME}.pid \
+	$BIND_ARGS \
 	--processes $PROCESSES --master \
 	--close-on-exec
