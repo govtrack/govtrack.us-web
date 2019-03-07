@@ -762,14 +762,14 @@ def bill_text_image(request, congress, type_slug, number, image_type):
     try:
         width = int(request.GET["width"])
     except:
-	    width = 0 # don't resize
+        width = 0 # don't resize
 
     # We're going to display this next to photos of members of congress,
     # so use that aspect ratio by default.
     try:
         aspect = float(request.GET["aspect"])
     except:
-	    aspect = 240.0/200.0
+        aspect = 240.0/200.0
     if image_type == "card": aspect = .5 # height/width
 
     # Rasterizes a page of a PDF to a greyscale PIL.Image.
@@ -802,7 +802,9 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         metadata = load_bill_text(bill, None, mods_only=True)
     except IOError:
         # if bill text metadata isn't available, trap the error
-        # and just 404 it
+        # and just return the sponsor's photo, if possible.
+        if bill.sponsor and bill.sponsor.has_photo():
+            return HttpResponseRedirect(bill.sponsor.get_photo_url())
         raise Http404()
 
     cache_fn = None
