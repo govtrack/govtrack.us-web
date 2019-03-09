@@ -406,29 +406,14 @@ def vote_thumbnail_wide(vote):
         photo_width = int(image_width/8)
         photo_height = int(photo_width*1.2)
         caption_height = 33
-        photo = Image.open(open("." + v.person.get_photo_url(), "rb"))
-        photo.thumbnail((photo_width, photo_height))
         x = int( image_width//2 + 20 + (i % 3) * photo_width*1.2 )
         y = int( 40 + (i // 3) * (photo_height+caption_height*1.25) )
-        im.paste(photo, (x, y))
-
-        # Draw a rectange around the photo.
         try:
-            from PIL import ImageDraw
-            draw = ImageDraw.Draw(im)
-            color = vote_diagram_colors[(v.party[0], v.option.key)]
-            color = tuple(int(255*x) for x in color) # float to int
-            draw.rectangle(((x, y), (x+photo.size[0], y+photo.size[1])), outline=color, fill=None)
+            rect_color = vote_diagram_colors[(v.party[0], v.option.key)]
+            rect_color = tuple(int(255*x) for x in rect_color) # float to int
         except:
             # If the party or option key doesn't have a color, skip.
-            pass
-        finally:
-            del draw
-
-        # Make a temporary buffer for the text.
-        im2 = cairo.ImageSurface(cairo.FORMAT_ARGB32, photo_width, caption_height)
-        ctx2 = cairo.Context(im2)
-
+            rect_color = (0,0,0)
         bg_clr = (1,1,1)
         fg_clr = (0,0,0)
         try:
@@ -439,30 +424,7 @@ def vote_thumbnail_wide(vote):
             # If the party or option key doesn't have a color, skip.
             pass
 
-        # clear background
-        ctx2.set_source_rgba(*bg_clr)
-        ctx2.new_path()
-        ctx2.line_to(0, 0)
-        ctx2.line_to(image_width, 0)
-        ctx2.line_to(image_width, image_height)
-        ctx2.line_to(0, image_height)
-        ctx2.fill()
-
-        # write text
-        ctx2.set_source_rgb(*fg_clr)
-        ctx2.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        ctx2.set_font_size(12)
-        ctx2.move_to(photo_width/2, 14)
-        show_text_centered(ctx2, v.person.lastname, max_width=photo_width-4, use_baseline=True)
-        ctx2.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx2.move_to(photo_width/2, 27)
-        show_text_centered(ctx2, "· " + v.option.value + " ·", use_baseline=True)
-
-        # copy into main raster
-        buf = BytesIO()
-        im2.write_to_png(buf)
-        im2 = Image.open(buf)
-        im.paste(im2, (x, y+photo_height))
+        draw_legislator_image(im, x, y, photo_width, photo_height, v.person, rect_color, caption_height, bg_clr, fg_clr, "· " + v.option.value + " ·")
 
     # Rasterize it again.
     buf = BytesIO()
@@ -470,6 +432,52 @@ def vote_thumbnail_wide(vote):
 
     # Return the image.
     return (buf.getvalue(), "image/png")
+
+def draw_legislator_image(im, x, y, width, height, person, rect_color, caption_height, caption_bg_color, caption_fg_color, caption_extra_text):
+    # Open the legislator's photo.
+    import cairo
+    from PIL import Image, ImageDraw
+    photo = Image.open(open("." + person.get_photo_url(100 if width <= 100 else 200), "rb"))
+    photo.thumbnail((width, height))
+
+    # Paste it into the target image buffer.
+    im.paste(photo, (x, y))
+
+    # Draw a rectange around the photo.
+    draw = ImageDraw.Draw(im)
+    draw.rectangle(((x, y), (x+photo.size[0]-1, y+photo.size[1])), outline=rect_color, fill=None)
+
+    # Make a temporary buffer for the text.
+    im2 = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, caption_height)
+    ctx2 = cairo.Context(im2)
+
+    # clear background
+    ctx2.set_source_rgba(*caption_bg_color)
+    ctx2.new_path()
+    ctx2.line_to(0, 0)
+    ctx2.line_to(width, 0)
+    ctx2.line_to(width, caption_height)
+    ctx2.line_to(0, caption_height)
+    ctx2.fill()
+
+    # write text
+    font_size = caption_height * .6
+    if caption_extra_text: font_size /= 1.85
+    ctx2.set_source_rgb(*caption_fg_color)
+    ctx2.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+    ctx2.set_font_size(font_size)
+    ctx2.move_to(width/2, 2+font_size*1.05)
+    show_text_centered(ctx2, person.lastname, max_width=width-4, use_baseline=True)
+    ctx2.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+    ctx2.set_font_size(font_size*.9)
+    ctx2.move_to(width/2, 2+font_size*2.25)
+    show_text_centered(ctx2, caption_extra_text, use_baseline=True)
+
+    # copy into main raster
+    buf = BytesIO()
+    im2.write_to_png(buf)
+    im2 = Image.open(buf)
+    im.paste(im2, (x, y+height))
 
 FONT_FACE = "DejaVu Serif Condensed"
 
