@@ -15,6 +15,7 @@ static/css/all-min.css
 static/images/dynamic
 uwsgi.conf
 data
+files
 
 .idea
 django-fixture*
