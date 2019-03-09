@@ -321,6 +321,7 @@ def browse_map(request):
         "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
     	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
     	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
+        "DISTRICT_BBOXES_FILE": settings.DISTRICT_BBOXES_FILE,
     }
     
 def normalize_state_arg(state):
@@ -424,6 +425,7 @@ def browse_district(request, state, district):
         "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
     	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
     	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
+        "DISTRICT_BBOXES_FILE": settings.DISTRICT_BBOXES_FILE,
     }
     
 def get_district_bounds(state, district):
@@ -443,7 +445,7 @@ def get_district_bounds(state, district):
     elif cache.get(zoom_info_cache_key):
         center_lat, center_long, center_zoom = cache.get(zoom_info_cache_key)
     else:
-        with open("static/js/congressional-districts-bboxes-115-2016.js") as f:
+        with open(settings.DISTRICT_BBOXES_FILE) as f:
             data_json = f.read().replace("var bboxes = ", "")
             data = json.loads(data_json)
         key = state + (("%02d" % district) if district else "")
@@ -591,6 +593,7 @@ def districtmapembed(request):
         "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
     	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
     	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
+        "DISTRICT_BBOXES_FILE": settings.DISTRICT_BBOXES_FILE,
     }
 
 
