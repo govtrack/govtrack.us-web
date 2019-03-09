@@ -16,6 +16,7 @@ static/images/dynamic
 uwsgi.conf
 data
 files
+log
 
 .idea
 django-fixture*

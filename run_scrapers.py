@@ -146,9 +146,6 @@ if "votes" in sys.argv:
 	# Update key votes analysis.
 	os.system("analysis/key_votes.py %d" % CONGRESS)
 
-	# Update change tracker.
-	os.system("/home/govtrack/update-votes-servo")
-
 	# During election season.
 	#os.system("analysis/missed_votes_prezcandidates.py > /tmp/votes-$$.json && mv /tmp/votes-$$.json data/misc/presidential-candidates-missed-votes.json")
 
