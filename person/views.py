@@ -317,9 +317,6 @@ def http_rest_json(url, args=None, method="GET"):
 @render_to('person/district_map.html')
 def browse_map(request):
     return {
-        "center_lat": 38, # # center the map on the continental US
-        "center_long": -96,
-        "center_zoom": 4,
         "statelist": statelist,
         "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
     	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
@@ -416,13 +413,7 @@ def browse_district(request, state, district):
     if len(reps) > 0:
         reps[0][0]["first_representative"] = True
 
-    # map center
-    center_lat, center_long, center_zoom = get_district_bounds(state, district)
-            
     return {
-        "center_lat": center_lat,
-        "center_long": center_long,
-        "center_zoom": center_zoom,
         "state": state,
         "stateapp": stateapportionment[state],
         "statename": statenames[state],
