@@ -396,12 +396,11 @@ def load_comparison(left_bill, left_version, right_bill, right_version, timelimi
         import lxml.etree
         elem = lxml.etree.Element("comparison-change")
         return elem
-    def differ(text1, text2):
-        # ensure we use the C++ Google DMP and can specify the time limit
-        import diff_match_patch
-        for x in diff_match_patch.diff(text1, text2, timelimit=timelimit):
-            yield x
-    compare(doc1.getroot(), doc2.getroot(), make_tag_func=make_tag_func, differ=differ)
+    #def differ(text1, text2):
+    #    import diff_match_patch
+    #    for x in diff_match_patch.diff(text1, text2, timelimit=timelimit):
+    #        yield x
+    compare(doc1.getroot(), doc2.getroot(), make_tag_func=make_tag_func)#, differ=differ)
 
     # Prepare JSON response data.
         # dates aren't JSON serializable

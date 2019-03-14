@@ -24,7 +24,7 @@ pyyaml
 pynliner
 django-html-emailer
 xml_diff
-diff_match_patch_python
+diff-match-patch==20181111
 python-twitter
 sparkpost
 user-agents
