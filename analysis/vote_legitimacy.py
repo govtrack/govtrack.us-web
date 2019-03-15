@@ -15,7 +15,7 @@ def percent(value): return round(value*100, 1)
 
 # Load historical state populations.
 state_pop = { }
-for state, year, pop in csv.reader(open("../historical_state_population_by_year.csv")):
+for state, year, pop in csv.reader(open("analysis/historical_state_population_by_year.csv")):
 	year = int(year)
 	pop = int(pop)
 	state_pop[(state, year)] = pop
