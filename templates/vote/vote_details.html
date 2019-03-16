@@ -429,6 +429,17 @@ $(function() {
         {{ vote.created|date }} {% if vote.has_time %}at {{ vote.created|time }} ET{% endif %}.
         Source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
     </p>
+    {% with vote.get_equivalent_aye_voters_us_population_percent as pct %}
+    {% if pct %}
+        {% for item in totals.options %}
+            {% if item.option.key == pct.0 %}
+               <p style="margin: 0; font: 12px/20px serif;">
+                   The {{item.option.value}} votes represented {{pct.1|floatformat:0}}% of the country&rsquo;s population by apportioning each state&rsquo;s population to its voting senators.
+               </p>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
 </div>
 
 <div class="row">
