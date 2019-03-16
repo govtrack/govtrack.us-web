@@ -800,15 +800,19 @@ def bill_text_image(request, congress, type_slug, number, image_type):
     try:
         metadata = load_bill_text(bill, None, mods_only=True)
     except IOError:
-        # if bill text metadata isn't available, trap the error
-        # and just return the sponsor's photo, if possible.
-        if bill.sponsor and bill.sponsor.has_photo():
-            return HttpResponseRedirect(bill.sponsor.get_photo_url())
-        raise Http404()
+        # if bill text metadata isn't available, we won't show the bill text as a part of the thumbnail
+        metadata = None
 
     cache_fn = None
 
-    if metadata.get("pdf_file"):
+    from PIL import Image
+
+    if not metadata:
+        # Start with a blank page.
+        w = max(width, 100)
+        pg1 = Image.new("RGB", (w, int(aspect*w)), color=(255,255,255))
+        pg2 = pg1
+    elif metadata.get("pdf_file"):
         # Check if we have a cached file. We want to cache longer than our HTTP cache
         # because these thumbnails basically never change and calling pdftoppm is expensive.
         import os.path
@@ -843,7 +847,6 @@ def bill_text_image(request, congress, type_slug, number, image_type):
     # we'll combine the first two pages and then shift the window down
     # until the real start of the bill.
     
-    from PIL import Image
     img = Image.new(pg1.mode, (pg1.size[0], int(pg1.size[1]+pg2.size[1])))
     img.paste(pg1, (0,0))
     img.paste(pg2, (0,pg1.size[1]))
@@ -854,7 +857,8 @@ def bill_text_image(request, congress, type_slug, number, image_type):
     from PIL import ImageOps
     hpad = int(.02*img.size[0])
     bbox = ImageOps.invert(img).getbbox()
-    img = img.crop( (max(0, bbox[0]-hpad), 0, min(img.size[0], bbox[2]+hpad), img.size[1]) )
+    if bbox: # if image is empty, bbox is None
+        img = img.crop( (max(0, bbox[0]-hpad), 0, min(img.size[0], bbox[2]+hpad), img.size[1]) )
 
     # Now take a window from the top matching a particular aspect ratio.
     img = img.crop((0,0, img.size[0], int(aspect*img.size[0])))
