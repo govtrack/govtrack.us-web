@@ -228,14 +228,15 @@ $(function() {
 
 {% block body %}
 
-<h1 class="long" data-vote-id="{{vote.id}}">
+<h1 class="long" data-vote-id="{{vote.id}}" style="margin-bottom: 0; border: none;">
   {{ vote.question }}
-  {% if vote.question_details %}
-    <div style="margin-top: 2px; font-size: 12px; font-weight: normal; color: black; line-height: 125%;">
-      {{ vote.question_details }}
-    </div>
-  {% endif %}
 </h1>
+<div style="margin: 2px 0 16px 0; font-size: 12px; font-weight: normal; color: black; line-height: 125%; padding-bottom: 6px; border-bottom: 1px solid #CCA;">
+  {{ vote.created|date }} {% if vote.has_time %}at {{ vote.created|time }} ET{% endif %}.
+  {% if vote.question_details %}
+    {{ vote.question_details }}.
+  {% endif %}
+</div>
 
 <div id="vote_explainer">
 	{% if vote.oursummary %}
@@ -426,7 +427,6 @@ $(function() {
             The Vice President cast a tie-breaking vote.
         {% endif %}
 
-        {{ vote.created|date }} {% if vote.has_time %}at {{ vote.created|time }} ET{% endif %}.
         Source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
     </p>
     {% with vote.get_equivalent_aye_voters_us_population_percent as pct %}
