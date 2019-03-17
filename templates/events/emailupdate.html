@@ -9,7 +9,7 @@
 	li { font-size: 11pt; }
 
 	a {
-		color: #0000EE;
+		color: #9D2146;
 	}
 	h1 {
 		font-family: Arial, sans-serif;
@@ -25,22 +25,19 @@
 		margin-bottom: 0px;
 		text-align: left;
 	}
-		.rightColumnContent h2 {
-			font-size: 15pt;
-			line-height: 15pt; 
-			margin-top: 8px;
-		}
 	h3 {
 		font-family: Arial, sans-serif;
-		font-size: 12pt; 
-		margin-top: 10px;
-		margin-bottom: 20px;
-		line-height: 16pt;
+		font-size: 11pt; 
+		margin: 10px 0;
+		line-height: 13pt;
 		text-align: left;
 	}
+		h3 a {
+			color: #9D2146 !important;
+		}
 	h4 {
 		font-family: Arial, sans-serif;
-		font-size: 12pt;
+		font-size: 11pt;
 		font-weight: normal;
 		text-align: left;
 	}
@@ -53,6 +50,13 @@
 		margin-top: 0;
 		text-align: left;
 	}
+	.section {
+		margin: 1em 0;
+		border-radius: 15px;
+		background-color: #ffffff;
+		padding: 15px;
+		text-align:left !important;
+	}
 	p {
 		font-family: Arial, sans-serif;
 		font-size: 11pt;
@@ -62,46 +66,6 @@
 		text-align: left;
 	}
 
-        .templateColumnContainer{
-            text-align: left;
-        }
-
-        .leftColumnContent{
-            text-align: left;
-        }
-
-        .rightColumnContent{
-            text-align: left;
-        }
-
-        .rightColumnContent p {
-			font-size: 10pt;
-			line-height: 13pt;
-		}
-
-    @media only screen and (min-width: 751px){
-		#wideWrapper > tr > td { padding: 0 12px; }
-	}
-
-    @media only screen and (max-width: 750px){
-		#wideWrapper > tr > td { padding: 0; }
-
-        .templateColumnContainer{
-            display:block !important;
-            width:95% !important;
-            padding: 10px;
-        }
-
-        .leftColumnContent{
-            font-size:16pt !important;
-            line-height:125% !important;
-        }
-
-        .rightColumnContent{
-            font-size:16pt !important;
-            line-height:125% !important;
-        }
-    }
 
 #announcement-holder {
 	margin-bottom: 2em;
@@ -128,61 +92,28 @@
 <tr>
 <td>
 
-	<table border="0" cellpadding="6" cellspacing="0" style="text-align:left !important;">
-    <tr>
-
-		<!-- LEFT COLUMN -->
-
-        <td align="center" valign="top" width="70%" class="templateColumnContainer">
-        	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
-			    <tr>
-			        <td valign="top" class="leftColumnContent" align="left">
-
 						<!-- ANNOUNCEMENT -->
 						{% if announcement %}
+<div style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
 						<div id="announcement-holder">
 				            {% if announcement.subject %}<h2>{{announcement.subject}}</h2>{% endif %}
 							{{announcement.body_html|safe}}
 						</div>
+</div>
 						{% endif %}
 
-						{{body_html|safe}}
-			        </td>
-			    </tr>
-        	</table>
-		</td>
+<div class="section">
+Like these updates?
+A <a href="https://www.patreon.com/govtrack">recurring tip</a> or <a href="https://www.govtrack.us/accounts/membership">one-time tip</a> will help us keep this service free for everyone.
+Join us on
+<a href="https://www.facebook.com/govtrack/" title="Facebook Page">Facebook</a> and
+<a href="http://twitter.com/govtrack" title="Twitter Page">Twitter</a>
+for more updates.
+</div>
 
-		<!-- RIGHT COLUMN -->
-
-	    <td align="center" valign="top" width="30%" class="templateColumnContainer">
-
-        	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
-			    <tr>
-			        <td valign="top" class="rightColumnContent" align="left">
-			            <h2 style="text-align:left;">Like these updates?</h2>
-			            <table border="0" cellpadding="0" cellspacing="0" width="100%">
-			            	<tr>
-				            	<td style="text-align:left !important;">
-			                        <p style="text-align:left !important;">Supporting our work with a <a href="https://www.patreon.com/govtrack">recurring tip</a> or <a href="https://www.govtrack.us/accounts/membership">one-time tip</a> will help us keep this service free for everyone.</p>
-				            	</td>
-			            	</tr>
-			            </table>
-			        </td>
-			    </tr>
-        	</table>
-
-	       	<table border="0" cellpadding="0" cellspacing="0" width="100%" height="12px">
-        		<tr>
-        			<td>
-        			</td>
-        		</tr>
-        	</table>
-
-		    {% if medium_posts %}
-        	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
-			    <tr>
-			        <td valign="top" class="rightColumnContent" align="left">
-			            <h2 style="text-align:left;">On GovTrack Insider</h2>
+		{% if medium_posts %}
+		<div class="section">
+			            <h2>On GovTrack Insider</h2>
 						{% for post in medium_posts|slice:"0:3" %}
 			            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #F2F2F2;margin-bottom:5px;margin-top:20px;padding-top:10px;width:100%;">
 			            	<tr valign="top">
@@ -201,34 +132,14 @@
 			            	</tr>
 			            </table>
 						{% endfor %}
-						<p>Get all GovTrack Insider posts by <a href="https://www.govtrack.us/events/govtrack-insider?{{utm}}">adding them to your email updates</a>.</p>
-			        </td>
-			    </tr>
-        	</table>
-	       	<table border="0" cellpadding="0" cellspacing="0" width="100%" height="12px">
-        		<tr>
-        			<td>
-        			</td>
-        		</tr>
-        	</table>
+			</div>
 			{% endif %}
 
-        	<table border="0" cellpadding="12" cellspacing="0" width="100%" style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
-			    <tr>
-			        <td valign="top" class="rightColumnContent" align="left">
-			            <h2 style="text-align:left;">Follow Us on Social Media</h2>
-					    <p>
-					    <a href="https://www.facebook.com/govtrack/" title="Facebook Page">Facebook</a> |
-					    <a href="http://twitter.com/govtrack" title="Twitter Page">Twitter</a> |
-					    <a href="https://medium.com/govtrack-insider" title="Medium Page">Medium</a>
-					    </p>
-			        </td>
-			    </tr>
-        	</table>
+<div class="section">
+						{{body_html|safe}}
+</div>
 
-        </td>
-    </tr>
-	</table>
+
 
 	<!-- FOOTER -->
 
