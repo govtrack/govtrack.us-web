@@ -230,7 +230,7 @@ class Person(models.Model):
             # is the end a special election?
             role.ends_with_special_election = ((role.extra or {}).get("end-type") == "special-election")
 
-            if len(ret) > 0 and role.continues_from(ret[-1]):
+            if len(ret) > 0 and role.continues_from(ret[-1], sensitive_to_leadership_roles=True):
                 # condense party_affiliations
                 import copy
                 prev_parties = copy.deepcopy((ret[-1].extra or {}).get("party_affiliations", [])) # clone
@@ -440,13 +440,13 @@ class PersonRole(models.Model):
             return ("rep", self.state, self.district)
         raise ValueError()
        
-    def continues_from(self, prev):
+    def continues_from(self, prev, sensitive_to_leadership_roles=False):
         if self.startdate - prev.enddate > datetime.timedelta(days=120): return False
         if self.role_type != prev.role_type: return False
         if self.senator_class != prev.senator_class: return False
         if self.state != prev.state: return False
         if self.district != prev.district: return False
-        if self.leadership_title != prev.leadership_title: return False
+        if sensitive_to_leadership_roles and self.leadership_title != prev.leadership_title: return False
         return True
 
     def get_title(self):
