@@ -220,8 +220,8 @@
 {% block body_class %}bill{% endblock %}
 
 {% block header_top %}
-	{% if bill.is_alive %}
 	<div class="action-row clearfix">
+		{% if bill.is_alive %}
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<button class="btn btn-success" onclick="return show_track_panel();">
 			<i class="glyphicon glyphicon-envelope"> </i>
@@ -229,13 +229,16 @@
 				Track {{bill.display_number_no_congress_number}}
 			</span>
 		</button>
+		{% endif %}
 
+		{% if bill.current_chamber %}
 		<a class="btn btn-info" href="{{bill.get_absolute_url}}/comment">
 			<i class="fa fa-phone-square"> </i>
 			<span style="margin-left: 3px;">
 				Call or Write Congress
 			</span>
 		</a>
+		{% endif %}
 
 		<!--
 		<button class="btn btn-sm btn-default" onclick="window.location = 'https://phonecongress.com/topic/congress/bills/{{bill.congressproject_id}}/{{bill.id}}'">
@@ -256,7 +259,6 @@
 		{% endwith %}
 
 	</div>
-	{% endif %}
 {% endblock %}
 
 
