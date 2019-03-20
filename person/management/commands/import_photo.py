@@ -35,8 +35,11 @@ class Command(BaseCommand):
 
 		if options['photo_url']:
 			# load photo from url
-			import io
-			im = Image.open(io.BytesIO(urlopen(options['photo_url']).read()))
+			if options['photo_url'].startswith("."):
+				stream = open(options['photo_url'], 'rb')
+			else:
+				stream = urlopen(options['photo_url'])
+			im = Image.open(stream)
 	
 			if im.size[0] < 200 or im.size[1] < 200*ar:
 				raise Exception("image is too small")
