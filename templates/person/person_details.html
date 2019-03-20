@@ -313,16 +313,15 @@ function show_pronunciation_guide() {
         		{# r has mangled dates, so for the next election year we use "role" #}
         		<p>
        			{{ person.lastname }}
-        		{% if r.current %}is{% else %}was{% endif %} {# because of senator junior/senior status and leadership titles which can change mid-term, we cannot say "has been...since termstart" #}
+        		{% if r.current %}is{% else %}was{% endif %} {# because of senator junior/senior status which can change mid-term, we cannot say "has been...since termstart" #}
         		{{r.get_description_natural|safe}}
         		{% if r.current and r.district > 0 %}(<a href="/congress/members/{{r.state}}/{{r.district}}">view map</a>){% endif %}
-        		{% if r.leadership_title %}and {{r.leadership_title}}{% endif %}
-    			as {{r.get_party}}.
+    			and {% if r.current %}is{% else %}was{% endif %} {{r.get_party}}.
     			{{person.he_she_cap}}
-        		{% if r.current %}has served {% if r.leadership_title %}in that role{% endif %} since {{ r.startdate }}{% else %}
+        		{% if r.current %}has served since {{ r.startdate }}{% else %}
         		served from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}.
         		   {# note that r has mangled dates so must show year only #}
-        		{% if r.current %}
+                    {% if r.current %}
                     {% if role.next_election_year != ELECTION_JUST_HAPPENED_YEAR %}
                       {% if r.ends_with_special_election %}
                         {{ person.lastname }} was appointed to the Senate to fill a vacancy and is up for reelection in a special election in {{role.next_election_year}}.
@@ -332,8 +331,12 @@ function show_pronunciation_guide() {
                     {% else %}
                        {{ person.lastname }}&rsquo;s current term ends on {{role.enddate|date}}.
                     {% endif %}
-                {% endif %}
+                    {% endif %}
         		</p>
+
+				{% if r.leadership_title %}
+				<p>{{person.he_she|capfirst}} {% if r.current %}is{% else %}was{% endif %} also {{r.leadership_title }}, a party leadership role. Party leaders focus more on setting their party&rsquo;s legislative priorties than on introducing legislation.</p>
+				{% endif %}
 
 				{% if r.is_territory %}
 					<p style="font-size: 90%; line-height: 125%">
@@ -358,7 +361,6 @@ function show_pronunciation_guide() {
         		{% endif %}
 
         		{{r.get_description_natural|safe}}
-        		{% if r.leadership_title %}and {{r.leadership_title}}{% endif %}
         		as {{r.get_party}}
         		from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% if forloop.last %}.</p>{% else %};{% endif %}
 	        {% endif %}
