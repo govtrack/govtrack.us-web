@@ -802,6 +802,16 @@ def vote_comparison_table_named(request, table_id, table_slug):
 			("115-2018/h127", { "title": "Consolidated Appropriations Act" }),
 			("115-2018/h138", { "title": "Balanced Budget Amendment" }),
 		]
+	elif int(table_id) == 5:
+		if table_slug != "senate-nuclear-option":
+			return HttpResponseRedirect("/congress/votes/compare/5/senate-nuclear-option")
+		title = "The Nuclear Option"
+		description = "The so-called Nuclear Option in the Senate is a simple majority vote to change the rules regarding \"cloture\" votes with a 3/5ths threshold. In each vote below, a \"no\" vote was a vote to change the rules and eliminate some aspect of the filibuster. A \"yes\" vote was a vote to preserve the long-standing filibuster rules."
+		votes = [
+			("113-2013/s242", { "title": "Keeping Filibuster for Most Nominees" }),
+			("115-2017/s109", { "title": "Keeping Filibuster for Supreme Court Nominees" }),
+			("116-2019/s59",  { "title": "Keeping Filibuster 30-Hour Length for Most Nominees" }),
+		]
 	else:
 		raise Http404()
 
