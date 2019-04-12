@@ -77,6 +77,10 @@ def load_sponsorship_analysis2(congressnumber, role_type, person):
     from parser.processor import Processor
     for field in ('start_date', 'end_date'): # parse date fields to datetime's
         data[field] = Processor.parse_datetime(data[field])
+
+    # add links to each person
+    people = Person.objects.in_bulk({ pt["id"] for pt in all_points })
+    for pt in all_points: pt["link"] = people[pt["id"]].get_absolute_url() if pt["id"] in people else None
     
     return data
     

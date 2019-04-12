@@ -118,12 +118,15 @@ $(function() {
 			marker: { symbol: "circle", radius: 3 },
 			name: '{{party.grouper|escapejs}}s',
 			color: party_colors['{{party.grouper|escapejs}}'],
+			cursor: "pointer",
+			point: { events: { click: function () { location.href = this.link; } } },
 			data: [
 				{% for item in party.list %}
 					{
 						x: {{item.ideology}},
 						y: {{item.leadership}},
-						name: "{{item.name|escapejs}}\n<br>{{item.total_cosponsors}} cosponsors ({{analysis_data.sponsorship.congress|ordinal}} Congress)"
+						name: "{{item.name|escapejs}}\n<br>{{item.total_cosponsors}} cosponsors ({{analysis_data.sponsorship.congress|ordinal}} Congress)",
+						link: "{{item.link|escapejs}}"
 					}
 					{% if not forloop.last %},{% endif %}
 				{% endfor %}
