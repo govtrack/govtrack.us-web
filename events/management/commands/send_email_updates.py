@@ -145,11 +145,23 @@ class Command(BaseCommand):
 		pool = [create_worker() for i in range(5)]
 		
 		def dequeue(worker, limit):
-			while worker[2] > limit:
+			while worker[2] > limit: # the worker has more than limit emails in its queue
+				# Each worker sends back some data each time it finishes handling
+				# a user's email updates. Get that data and aggregate it.
+				# But our workers get stuck, so poll for a bit waiting for the
+				# email to send. If it doesn't finish, abort the worker.
+				if not worker[1].poll(60*10): # 10 minutes
+					# Worker seems to be stuck.
+					print("Worker got stuck. Making a new one.")
+					worker[1].close()
+					worker[0].terminate()
+					worker[0].close()
+					return create_worker()
 				wcounts = worker[1].recv()
 				worker[2] -= 1
 				for k, v in wcounts.items():
 					counts[k] += v
+			return worker
 
 		for i, user in enumerate(user_iterator()):
 			# Skip users who have been given an inactivity warning and have not
@@ -173,7 +185,8 @@ class Command(BaseCommand):
 			worker[2] += 1
 
 			# Deque results periodically so that the loop tracks overall progress and the pipe doesn't hit a limit.
-			dequeue(worker, 10)
+			# If a worker gets stuck, replace it with a new one.
+			pool[i % len(pool)] = dequeue(worker, 10)
 
 		# signal we're done so processes terminate, then join to reclaim the workers
 		for worker in pool: worker[1].send(None)
