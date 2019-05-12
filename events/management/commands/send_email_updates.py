@@ -155,7 +155,6 @@ class Command(BaseCommand):
 					print("Worker got stuck. Making a new one.")
 					worker[1].close()
 					worker[0].terminate()
-					worker[0].close()
 					return create_worker()
 				wcounts = worker[1].recv()
 				worker[2] -= 1
@@ -180,9 +179,20 @@ class Command(BaseCommand):
 			#for k, v in wcounts.items(): counts[k] += v
 
 			# Enque task.
-			worker = pool[i % len(pool)]
-			worker[1].send([user["id"], list_email_freq, send_mail, mark_lists, send_old_events])
-			worker[2] += 1
+			while True:
+				worker = pool[i % len(pool)]
+				try:
+					worker[1].send([user["id"], list_email_freq, send_mail, mark_lists, send_old_events])
+					worker[2] += 1
+					break
+				except BrokenPipeError:
+					# Something is wrong with the worker. Kill it and make
+					# a new worker, and then try again.
+					print("Worker pipe broken. Making a new one.")
+					worker[1].close()
+					worker[0].terminate()
+					pool[i % len(pool)] = create_worker()
+					continue
 
 			# Deque results periodically so that the loop tracks overall progress and the pipe doesn't hit a limit.
 			# If a worker gets stuck, replace it with a new one.
