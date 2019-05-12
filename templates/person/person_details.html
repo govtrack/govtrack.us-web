@@ -657,30 +657,29 @@ function show_pronunciation_guide() {
 
 		{% if key_votes|length > 0 %}
 			<h3>Key Votes</h3>
-			<table class="table" style="margin: 0 0 3em 0">
-				<thead>
-					<tr>
-						<th style="text-align: center;">{{person.lastname}}&rsquo;s Vote</th>
-						<th style="vertical-align: middle;">Vote Description</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for v, voter in key_votes %}
-						<tr>
-							<td class="vote_{{ voter.option.alpha_key }}" style="text-align: center; vertical-align: middle; font-variant: small-caps;">
-								{{voter.option.value}}
-							</td>
-							<td style="line-height: 125%;">
-								<a href="{{v.get_absolute_url}}" title="{{v.question}}" style="text-decoration: none">{{v.question|truncatewords:28}}</a>
-								<div style="font-size: 88%; line-height: 128%;">
-									{{v.created|date}}. {{v.summary}}.<br>
-									{{v.get_summary.plain_text|truncatewords:45}}
-								</div>
-							</td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
+			<div class="row">
+			{% for v, voter in key_votes %}
+				<div class="col-md-6" style="padding-right: 5px">
+				<div style="height: 11em;overflow: hidden; border: 1px solid #CCC; border-radius: 10px; font-size: 90%; margin-bottom: 20px;">
+					<h4 style="margin: 0; padding: 4px 9px; border-bottom: 1px solid #CCC;" class="vote_{{ voter.option.alpha_key }}">
+						{{person.lastname}} voted <b>{{voter.option.value}}</b>
+					</h4>
+					<div style="padding: 6px 9px; line-height: 110%;">
+						<div style="margin-bottom: 5px;">
+							<a href="{{v.get_absolute_url}}" title="{{v.question}}" style="text-decoration: none">{{v.question|truncatewords:20}}</a>
+						</div>
+						<div style="font-size: 95%">
+						<div>{{v.summary}} on {{v.created|date}}.</div>
+						{% if v.get_summary %}
+						<hr style="margin: 5px 0; border: 1px solid #CCC;">
+						<div>{{v.get_summary.plain_text|truncatewords:25}}</div>
+						{% endif %}
+						</div>
+					</div>
+				</div>
+				</div>
+			{% endfor %}
+			</div>
 		{% endif %}
 
 		{% if analysis_data.missedvotes %}

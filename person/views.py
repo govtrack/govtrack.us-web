@@ -221,60 +221,55 @@ def person_details(request, pk):
 def load_key_votes(person):
     # Get this person's key votes.
 
+    import csv
     from vote.models import Vote, Voter
 
     # First get all of the major votes that this person has participated in.
     all_votes = person.votes.filter(vote__category__in=Vote.MAJOR_CATEGORIES)
+
+    # Then get the unique set of Congress numbers that those votes were in.
     congresses = sorted(set(all_votes.values_list("vote__congress", flat=True).distinct()), reverse=True)
+
+    # And the vote IDs.
     all_votes = all_votes.values_list("vote__id", flat=True)
 
     # We'll pick top votes where the person was an outlier (so the vote was informative
-    # for this Member) and top where the person wasn't an outlier but had a lot of
-    # outliers (so the vote was interesting).
-    #
-    # But we'll disperse the votes across the time period the Member served in:
-    # 4 in the most recent two Congress, 4 after that.
-    ret = []
-    for congresses_set in [congresses[0:2], congresses[2:]]:
-        # Scan the cached votes for the votes with the most number of outliers
-        # and the votes that this person was an outlier in.
-        import csv
-        top_votes = { }
-        outlier_votes = set()
-        for congress in congresses_set:
-            fn = "data/analysis/by-congress/%d/notable_votes.csv" % congress
-            if not os.path.exists(fn): continue
-            for vote in csv.DictReader(open(fn)):
-                if int(vote["vote_id"]) not in all_votes: continue
-                outliers = set(int(v) for v in vote["outliers"].split(" ") if v != "")
-                top_votes[int(vote["vote_id"])] = len(outliers)
-                if person.id in outliers: outlier_votes.add(int(vote["vote_id"]))
+    # for this Member) and top where the person wasn't an outlier but it had a lot of
+    # outliers (so the vote was interesting). Load them all in.
+    nonoutlier_votes = { }
+    outlier_votes = set()
+    for congress in congresses:
+        fn = "data/analysis/by-congress/%d/notable_votes.csv" % congress
+        if not os.path.exists(fn): continue
+        for vote in csv.DictReader(open(fn)):
+            if int(vote["vote_id"]) not in all_votes: continue # only look at major votes
+            outliers = set(int(v) for v in vote["outliers"].split(" ") if v != "") # person IDs of outliers for this vote
+            nonoutlier_votes[int(vote["vote_id"])] = len(outliers) # vote with a lot of outliers
+            if person.id in outliers: outlier_votes.add(int(vote["vote_id"])) # vote where the person is an outlier
 
-        # Sort the votes by the number of outliers.
-        top_votes = sorted(top_votes.items(), key=lambda kv : -kv[1])
-        top_votes = [kv[0] for kv in top_votes]
+    votes = []
 
-        ret += [v for v in top_votes if v in outlier_votes][0:3] \
-             + [v for v in top_votes if v not in outlier_votes][0:2]
+    # For the non-outlier votes, take those with the most outliers.
+    nonoutlier_votes = sorted(nonoutlier_votes.items(), key=lambda kv : -kv[1])
+    votes += [kv[0] for kv in nonoutlier_votes[0:4]]
 
-    # Temporarily add the House and Senate votes on H.J.Res. 43/115 in support of our partnership with CMU
-    # if this person voted on it.
-    for vote in [119031, 119172]:
-        if Voter.objects.filter(vote__id=vote, person=person).exists():
-            ret.append(vote)
+    # For the outlier votes, take some with the most and fewest outliers (i.e. this legislator is most unique).
+    votes += [kv[0] for kv in [kv for kv in nonoutlier_votes if kv[0] in outlier_votes][0:4]]
+    nonoutlier_votes = sorted(nonoutlier_votes, key=lambda kv : kv[1])
+    votes += [kv[0] for kv in [kv for kv in nonoutlier_votes if kv[0] in outlier_votes][0:4]]
 
     # Convert to Vote objects, make unique, and order by vote date.
-    ret = Vote.objects.filter(id__in=ret)
-    ret = sorted(ret, key = lambda v : v.created, reverse=True)
+    votes = Vote.objects.filter(id__in=votes)
+    votes = sorted(votes, key = lambda v : v.created, reverse=True)
 
     # Replace with a tuple of the vote and the Voter object for this person.
-    voters = { v.vote_id: v for v in Voter.objects.filter(vote__in=ret, person=person).select_related("option") }
-    ret = [
+    voters = { v.vote_id: v for v in Voter.objects.filter(vote__in=votes, person=person).select_related("option") }
+    votes = [
         (vote, voters[vote.id])
-        for vote in ret
+        for vote in votes
     ]
 
-    return ret
+    return votes
 
 @user_view_for(person_details)
 def person_details_user_view(request, pk):
