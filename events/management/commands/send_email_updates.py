@@ -136,8 +136,8 @@ class Command(BaseCommand):
 
 		# Create a pool of workers. (multiprocessing.Pool behaves weirdly with Django.)
 		# Sparkpost says have up to 10 concurrent connections.
-		for db in django.db.connections.all(): db.close() # close before forking
 		def create_worker():
+			for db in django.db.connections.all(): db.close() # close before forking
 			parent_conn, child_conn = multiprocessing.Pipe()
 			proc = multiprocessing.Process(target=pool_worker, args=(child_conn,))
 			proc.start()
@@ -150,16 +150,19 @@ class Command(BaseCommand):
 				# a user's email updates. Get that data and aggregate it.
 				# But our workers get stuck, so poll for a bit waiting for the
 				# email to send. If it doesn't finish, abort the worker.
-				if not worker[1].poll(60*10): # 10 minutes
-					# Worker seems to be stuck.
-					print("Worker got stuck. Making a new one.")
+				try:
+					if not worker[1].poll(60*10): # 10 minutes
+						raise ConnectionResetError()
+					wcounts = worker[1].recv()
+					worker[2] -= 1
+					for k, v in wcounts.items():
+						counts[k] += v
+				except ConnectionResetError:
+					# Worker seems to be stuck or gone.
+					print("Worker got stuck/died. Making a new one.")
 					worker[1].close()
 					worker[0].terminate()
 					return create_worker()
-				wcounts = worker[1].recv()
-				worker[2] -= 1
-				for k, v in wcounts.items():
-					counts[k] += v
 			return worker
 
 		for i, user in enumerate(user_iterator()):
