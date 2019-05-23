@@ -61,6 +61,26 @@ pronunciation_guide_key = {
 " ": None, "-": None,
 }
 
+prez_2020_candidate_ids = (
+  300008, # Biden
+  412223, # Gillibrand
+  400357, # Sanders
+  412678, # Harris
+  412542, # Warren
+  412598, # Booker
+  412242, # Klobuchar
+  412514, # Swalwell
+  412532, # Gabbard
+  400352, # Ryan
+  412632, # Moulton
+  412575, # O'Rourke
+  412544, # Delaney
+  404738, # Gravel
+  400193, # Inslee
+  412330, # Bennet
+)
+
+
 @anonymous_view
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -203,6 +223,7 @@ def person_details(request, pk):
                 'misconduct': misconduct,
                 'misconduct_any_alleged': misconduct_any_alleged,
                 'misconduct_any_not_alleged': misconduct_any_not_alleged,
+                'is_2020_candidate': person.id in prez_2020_candidate_ids,
                 }
 
     #ck = "person_details_%s" % pk
