@@ -396,8 +396,9 @@ blockquote {
 		margin-left: 0;
 	}
 	.stats tbody td, .stats tbody th {
-		padding: 0;
-		border: 1px solid #e9ede9;
+		border-top: 1px solid #e3e0e3;
+		border-bottom: 1px solid #e3e0e3;
+		padding: 0 2px;
 		height: 29px;
 		vertical-align: middle;
 		}
@@ -413,7 +414,6 @@ blockquote {
 		}
 		.stats thead th {
 			height: 30px;
-			padding: 0 4px;
 			vertical-align: middle;
 			text-align: center;
 			font-weight: normal;
