@@ -11,6 +11,7 @@
 }
 #content p.staffer-name { margin-bottom: .5em; font-weight: bold; }
 img.staffer-photo { width: 178px; height: 200px; border: 1px solid black; margin-right: 1em; }
+#staff-table td { padding-bottom: 1em; }
 </style>
 {% endblock %}
 
@@ -19,7 +20,7 @@ img.staffer-photo { width: 178px; height: 200px; border: 1px solid black; margin
 
 <div class="row">
 <section class="col-sm-7 col-md-6">
-	<p style="font-size: 120%; font-weight: bold; font-family: Roboto Slab;">GovTrack.us tracks the United States Congress and helps Americans participate in their national legislature.</p>
+	<p style="font-size: 120%; line-height: 150%; font-weight: bold; font-family: Quicksand; margin: 1em 0 1.5em 0;">GovTrack.us tracks the United States Congress and helps Americans participate in their national legislature.</p>
 
 	<p>We publish the status of federal legislation, information about your representative and senators in Congress including voting records, and original research on legislation and congressional oversight &amp; investigations.</p>
 
@@ -46,7 +47,7 @@ img.staffer-photo { width: 178px; height: 200px; border: 1px solid black; margin
 
 	<p>We&rsquo;re a small organization with four part-time staff members, who are:</p>
 
-	<table>
+	<table id="staff-table">
 		<tr valign="top">
 			<td>
 				<img class="staffer-photo" src="{% static "images/staff/josh.jpeg" %}">
