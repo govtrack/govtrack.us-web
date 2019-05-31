@@ -63,6 +63,17 @@
 		cursor: pointer;
 	}
 
+    .vote-list {
+        border: 1px solid #DDD;
+    }
+        .vote-list thead {
+            background-color: #555;
+            color: white;
+        }
+        .vote-list .group td {
+            padding: 10px 0 2px 0;
+        }
+
     .diagram-legend {
 		margin-top: .5em;
         color: #666;
@@ -164,7 +175,7 @@ function get_sort_func(order_indexes) {
     function sort_key(n) {
         var key = [];
         for (var i = 0; i < order_indexes.length; i++) {
-            if (order_indexes[i] == 3)
+            if (order_indexes[i] == 1)
                 key.push($(n).attr('voter_sort_' + order_indexes[i]))
             else
                 key.push($($(n).find('td')[order_indexes[i]]).text())
@@ -195,10 +206,10 @@ $(function() {
         // multi-column sort order
         var sorting;
         switch (index) {
-            /* Vote  */  case 0: sorting = [index, 1, 2, 3]; break;
-            /* Party */  case 1: sorting = [index, 4, 2, 3, 1]; break;
-            /* Name  */  case 2: sorting = [index, 3, 1]; break;
-            /* State */  case 3: sorting = [index, 2, 0]; break;
+            /* Vote  */     case 0: sorting = [index, 2, 3, 1]; break;
+            /* District */  case 1: sorting = [index, 3, 0, 2]; break;
+            /* Party */     case 2: sorting = [index, 4, 3, 1]; break;
+            /* Name  */     case 3: sorting = [index, 1, 2, 3]; break;
         }
 
         $('#vote-list-template tbody tr').sortElements(get_sort_func(sorting));
@@ -207,8 +218,8 @@ $(function() {
     });
     
     // initial sort
-    current_sort_column = 3;
-    $('#vote-list-template tbody  tr').sortElements(get_sort_func([3,2,0]));
+    current_sort_column = 1;
+    $('#vote-list-template tbody  tr').sortElements(get_sort_func([1,3,0,2]));
     update_table();
     $(window).resize(update_table);
 
@@ -579,10 +590,10 @@ $(function() {
         <table id="vote-list-template" class="vote-list stats" style="display: none">
             <thead class="sortable">
                 <tr>
-                    <th>Vote</th>
-                    <th>Party</th>
-                    <th>Representative</th>
-                    <th>{% if vote.chamber == 1 %}State{% else %}District{% endif %}</th>
+                    <th width="13%">Vote</th>
+                    <th width="15%">{% if vote.chamber == 1 %}State{% else %}District{% endif %}</th>
+                    <th width="12%">Party</th>
+                    <th style="text-align: left; padding-left: 10px;">Representative</th>
                     <th style="display: none">Score</th> <!-- for sorting only -->
                 </tr>
             </thead>
@@ -590,12 +601,19 @@ $(function() {
             {% for voter in voters %}
             <tr vid="{{voter.id}}"
             	voter_group_0="{{ voter.option.value }}"
-            	voter_group_1="{% if voter.voter_type != 1 %}{{ voter.party }}{% endif %}"
-            	voter_group_3="{% if voter.voter_type_is_member %}{{ voter.person_role.state_name }}{% elif voter.voter_type == 2 %}The Vice President{% endif %}"
-                voter_sort_3="{% if voter.voter_type_is_member %}{{ voter.person_role.state_name }} {{ voter.person_role.district|rjust:3 }}{% elif voter.voter_type == 2 %}00{% endif %}"
+            	voter_group_1="{% if voter.voter_type_is_member %}{{ voter.person_role.state_name }}{% elif voter.voter_type == 2 %}The Vice President{% endif %}"
+                voter_sort_1="{% if voter.voter_type_is_member %}{{ voter.person_role.state_name }} {{ voter.person_role.district|rjust:3 }}{% elif voter.voter_type == 2 %}00{% endif %}"
+            	voter_group_2="{% if voter.voter_type != 1 %}{{ voter.party }}{% endif %}"
                 class="{% if voter.is_outlier %}voter_outlier{% endif %}"
             	>
                 <td class="vote_{{ voter.option.alpha_key }}"><span class="nowrap">{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</span></td>
+                <td>
+                	{% if voter.voter_type_is_member %}
+		                {{ voter.person_role.state }}{% if voter.person_role.district and voter.person_role.district != -1 %} {{ voter.person_role.district|ordinalhtml }}{% endif %}
+                    {% else %}
+                    	-- {% comment %} a single dash confuses the table sorter?? {% endcomment %}
+                    {% endif %}
+                </td>
                 <td>
                     {% if voter.voter_type != 1 %}
                         {% if voter.party|slice:"0:1" in "DIR" %}
@@ -609,7 +627,7 @@ $(function() {
                         {% endif %}
                     {% endif %}
                 </td>
-                <td style="padding: 5px 0 5px 0;">
+                <td style="text-align: left; padding-left: 10px;">
                     {% if voter.voter_type == 1 %}
                         [Information Missing]
                     {% elif voter.voter_type == 2 %}
@@ -622,13 +640,6 @@ $(function() {
                         {% elif voter.explanation %}
                             <a class="note" title="{{voter.explanation.reason}} -- Explanation from ProPublica" href="{{propublica_url}}"><sup>EXPL</sup></a>
                         {% endif %}
-                    {% endif %}
-                </td>
-                <td>
-                	{% if voter.voter_type_is_member %}
-		                {{ voter.person_role.state }}{% if voter.person_role.district and voter.person_role.district != -1 %} {{ voter.person_role.district|ordinalhtml }}{% endif %}
-                    {% else %}
-                    	-- {% comment %} a single dash confuses the table sorter?? {% endcomment %}
                     {% endif %}
                 </td>
                 <td style="display: none"> <!-- using for sorting only -->

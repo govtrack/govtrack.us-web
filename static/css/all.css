@@ -1,4 +1,4 @@
-@import 'https://fonts.googleapis.com/css?family=PT+Sans|Roboto+Slab:300,700|Titillium+Web:600';
+@import 'https://fonts.googleapis.com/css?family=Quicksand:300,Roboto+Slab:300,700|Titillium+Web:600';
 
 /* GLOBAL STYLES */
 
@@ -38,7 +38,7 @@ a.plain:hover, a.plain:focus, a.plain:active {
 }
 
 h1, h2, h3, h4, h5 {
-	font: normal normal normal 2.5em/1.5em 'Roboto Slab';
+	font: normal normal normal 2.5em/1.5em 'Quicksand';
 	line-height: 130%;
 	margin-top: 1.5em;
 	margin-bottom: 1em;
@@ -65,7 +65,7 @@ h1 {
 		color: #666;
 	}
 	.h1-multiline {
-		margin: 15px 0;
+		margin: 5px 0 15px 0;
 		font-size: 27px;
 		font-weight: normal;
 		padding-bottom: .25em;
@@ -93,11 +93,11 @@ h2 {
 	}
 		#content h2 span {
 			display: inline-block;
-			padding: 3px 8px 4px 6px;
+			padding: 3px 10px 4px 8px;
 			background-color: #1D4E70;
 			color: white;
 			font-weight: bold;
-			border-radius: 3px;
+			border-radius: 13px;
 		}
 	.tab-content h2 {
 		font-size: 17px;
@@ -115,7 +115,7 @@ h5 {
 	text-transform: uppercase;
 	}
 
-h2 span, h3 span, h4 span, span span, a em {
+h3 span, h4 span, span span, a em {
 	font-weight: normal;
 	font-style: italic;
 	text-transform: none;
@@ -183,10 +183,9 @@ blockquote {
 
 #masthead {
 	margin-bottom: 15px;
-	background-color: #1D4E70;
-	font-family: 'PT Sans', sans-serif;
+	font-family: Quicksand;
 	font-size: 13px;
-	color: #FAFAFA;
+	color: #1D4E70;
 }
 #masthead .navbar {
 	/* override bootstrap */
@@ -197,11 +196,12 @@ blockquote {
 			color: inherit;
 		}
 		#masthead .nav a:hover, #masthead .nav a:focus, #masthead .nav .open>a {
-			background-color: #258;
-			color: white;
+			background-color: inherit;
+			color: #9D2146;
 		}
 		#masthead .nav .dropdown-menu {
-			background: linear-gradient(#1D4E70, #022640);
+			background: linear-gradient(#9D2146, #A35);
+			color: white;
 		}
 		#masthead .dropdown-menu {
 			margin-top: -2px;
@@ -242,7 +242,7 @@ blockquote {
 }
 
 .breadcrumb {
-	margin-top: 15px;
+	margin-top: 0;
 	margin-bottom: 0;
 	padding-bottom: 0; /* override bootstrap, always followed by a h1 which has a margin */
 	padding-left: 0;
@@ -396,8 +396,9 @@ blockquote {
 		margin-left: 0;
 	}
 	.stats tbody td, .stats tbody th {
-		padding: 0;
-		border: 1px solid #e9ede9;
+		border-top: 1px solid #e3e0e3;
+		border-bottom: 1px solid #e3e0e3;
+		padding: 0 2px;
 		height: 29px;
 		vertical-align: middle;
 		}
@@ -413,7 +414,6 @@ blockquote {
 		}
 		.stats thead th {
 			height: 30px;
-			padding: 0 4px;
 			vertical-align: middle;
 			text-align: center;
 			font-weight: normal;
