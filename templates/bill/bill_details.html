@@ -208,10 +208,30 @@
 	color: #777;
 }
 
-#bill-overview-panel p { margin: .1em; }
-#content dt {
-	margin-bottom: .22em;
+
+.property-panel {
 }
+	@media screen and (min-width: 768px) {
+	.property-panel .col-sm-3 {
+		text-align: right;
+	}
+	.property-panel .col-sm-9 {
+		padding-left: 0;
+	}
+	}
+        .property-panel .row > * {
+		margin-bottom: .5em;
+	}
+		.property-panel .col-sm-3 span {
+			padding: 1px 5px 1px 5px;
+			background-color: #9D2146;
+			border-radius: 6px;
+			color: white;
+			font-size: 90%;
+			font-family: 'Titillium Web';
+			cursor: default;
+		}
+	#content .property-panel p { margin-bottom: 5px; }
 
 .modal-body h1:first-child { margin-top: 0; }
 </style>
@@ -345,24 +365,27 @@
 </div> <!-- /row -->
 {% endif %}
 
-<div id="bill-overview-panel">
-
-		<div class="info">
-		
-			<dl class="dl-horizontal" style="margin-bottom: 0">
+<div class="property-panel">
+	<div class="row">
+		<div class="col-sm-3 col-md-2">
+			<span>Introduced</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
 				{% if bill.source != "statutesatlarge" %}
-					<dt>Introduced:</dt>
-					<dd><p><strong>{{bill.introduced_date}}</strong>
-						{% if not bill.is_alive %}<br>{{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}{% endif %}</p></dd>
+					{{bill.introduced_date}}
+						{% if not bill.is_alive %}<br>{{bill.congress|ordinalhtml}} Congress, {{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}}{% endif %}
 				{% else %}
 					{# from the SaL, the introduced date is not known #}
-					<dt>Introduced:</dt>
-					<dd><p>{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})</p></dd>
+					{{bill.congress|ordinalhtml}} Congress ({{congressdates.0|date:"Y"}}&ndash;{{congressdates.1|date:"Y"}})
 				{% endif %}
+		</div>
+		<div class="clearfix"></div>
 
 				{% if bill.source != "americanmemory" %}
-				<dt>Status:</dt>
-				<dd style="margin-bottom: .5em;">
+		<div class="col-sm-3 col-md-2">
+			<span>Status</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
 					{% if bill.source == "statutesatlarge" and bill.noun == "bill" %}
 						<p>Enacted on {{bill.current_status_date}}</p>
 					{% elif bill.source == "statutesatlarge" and bill.noun == "resolution" %}
@@ -443,20 +466,28 @@
 					{% endfor %}
 					</div>
 					{% endif %}
-
-				</dd>
+		</div>
+		<div class="clearfix"></div>
 				{% endif %}
 
 				{% with bill.slip_law_number as sln %}
 				{% if sln %}
-					<dt>Law:</dt>
-					<dd><p>{{sln}}</p></dd>
+		<div class="col-sm-3 col-md-2">
+			<span>Law</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
+			{{sln}}
+		</div>
+		<div class="clearfix"></div>
 				{% endif %}
 				{% endwith %}
 
-				{% if not show_media_bar and bill.sponsor %}
-				<dt>Sponsor:</dt>
-				<dd>
+				{% if not show_media_bar %}
+				{% if bill.sponsor %}
+		<div class="col-sm-3 col-md-2">
+			<span>Sponsor</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
 				{% if not bill.original_intent_replaced %}
 					{% if bill.sponsor.has_photo %}
 						<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
@@ -476,11 +507,15 @@
 					was the sponsor of this bill when it was introduced, but the bill&rsquo;s text was subsequently replaced
 					with unrelated provisions.</p>
 				{% endif %}
-				</dd>
+		</div>
+		<div class="clearfix"></div>
+				{% endif %}
 
 				{% if text_info or bill.is_current %}
-				<dt>Text:</dt>
-				<dd>
+		<div class="col-sm-3 col-md-2">
+			<span>Text</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
 					{% if not text_info %}
 						<p>Not available yet.</p>
 					{% elif text_info.has_displayable_text %}
@@ -503,35 +538,44 @@
 					{% else %}
 						<p><a href="{{text_info.gpo_pdf_url}}">Read Text &raquo;</a> (PDF; {{text_info.docdate}})</p>
 					{% endif %}
-				</dd>
+		</div>
+		<div class="clearfix"></div>
 				{% endif %}
 
 				{% endif %} {# / not show media bar #}
 
 				{% if prognosis and bill.is_alive %}
-				<dt>Prognosis:</dt>
-				<dd>
-					<p>
+		<div class="col-sm-3 col-md-2">
+			<span>Prognosis</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
 						<span
 						{% if prognosis.prediction|floatformat:0 == "0" %}data-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
 						>
 						{{prognosis.prediction|floatformat:0}}% chance</span> of being {{prognosis.success_name}}
                         according to <a href="https://www.skoposlabs.com/" style="font-weight: normal">Skopos Labs</a>
 						(<a href="#" onclick="$('#prognosis-details').modal(); return false;" style="font-weight: normal;">details</a>)
-					</p>
-				</dd>
+		</div>
+		<div class="clearfix"></div>
 				{% endif %}
 				
 				{% with reintro_as=reintros.1 related_newer=bill.get_related_bills_newer %}
 					
 				{% if reintro_as %}
-					<dt>See Instead:</dt>
-					<dd><p>This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
-					{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}</p></dd>
+		<div class="col-sm-3 col-md-2">
+			<span>See Instead</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
+					This bill was re-introduced as <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> on {{reintro_as.introduced_date}}.
+					{% if reintro_as.is_alive %}See <a href="{{reintro_as.get_absolute_url}}">{{reintro_as.display_number}}</a> for current action on this subject.{% endif %}
+		</div>
+		<div class="clearfix"></div>
 					
 				{% elif related_newer and not text_incorporation %}
-					<dt>See Instead:</dt>
-					<dd>
+		<div class="col-sm-3 col-md-2">
+			<span>See Instead</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
 					{% for rb in related_newer %}
 						<p>
 							<a href="{{rb.related_bill.get_absolute_url}}">{{rb.related_bill.display_number_no_congress_number}}</a>
@@ -539,28 +583,30 @@
 							<br/>{{rb.related_bill.get_current_status_display}} &mdash; {{rb.related_bill.current_status_date|date}}
 						</p>
 					{% endfor %}
-					</dd>
+		</div>
+		<div class="clearfix"></div>
 					
 				{% endif %}
 				
 				{% endwith %}
 				
+		<div class="col-sm-3 col-md-2">
+			<span>Source</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
 				{% if bill.source == "statutesatlarge" %}
-				<dt>Source:</dt>
-				<dd>
-					<p><a href="{{text_info.gpo_url}}">GPO GovInfo &ndash; United States Statutes at Large</a></p>
-				</dd>
+					<a href="{{text_info.gpo_url}}">GPO GovInfo &ndash; United States Statutes at Large</a>
 				{% elif bill.source == "americanmemory" %}
-				<dt>Source:</dt>
-				<dd>
-					<p><a href="{{bill.source_link}}">American Memory Century of Lawmaking</a>
-					<br/>(Click for scanned images of the {{bill.noun}}&rsquo;s text.)</p>
-				</dd>
+					<a href="{{bill.source_link}}">American Memory Century of Lawmaking</a>
+					<br/>(Click for scanned images of the {{bill.noun}}&rsquo;s text.)
+				{% elif bill.source == "thomas-congproj" %}
+					<a href="{{bill.congressdotgov_link}}">Congress.gov</a>
 				{% endif %}
-			</dl>
+		</div>
+		<div class="clearfix"></div>
 
-		</div><!-- /info -->
-</div> <!-- /bill-overview-panel -->
+	</div><!-- /.row -->
+</div> <!-- /.property-panel -->
 
 	<div id="admin_panel"> </div>
 
