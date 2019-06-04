@@ -232,7 +232,7 @@ blockquote {
 
 #logo {
 	display: block;
-	background: url(../images/logo.png) 0 0 no-repeat;
+	background: url(../images/logo.png?201906) 0 0 no-repeat;
 	height: 30px;
 	width: 110px;
 	margin-top: 11px;
