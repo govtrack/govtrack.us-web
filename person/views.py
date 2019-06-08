@@ -321,14 +321,16 @@ def searchmembers(request, mode=None):
             "mode": mode, # "current" or "all"
         } )
 
-def http_rest_json(url, args=None, method="GET"):
-    import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, json
+def http_rest_json(url, args=None, method="GET", headers={}):
+    # Call a REST API that returns a JSON object/array and return it as a Python dict/list.
+    import urllib.request, urllib.parse, json
     if method == "GET" and args != None:
         url += "?" + urllib.parse.urlencode(args).encode("utf8")
-    req = urllib.request.Request(url)
+    req = urllib.request.Request(url, headers=headers)
     r = urllib.request.urlopen(req, timeout=10)
-    return json.load(r, "utf8")
-    
+    r = r.read().decode("utf8")
+    return json.loads(r)
+
 @anonymous_view
 @render_to('person/district_map.html')
 def browse_map(request):

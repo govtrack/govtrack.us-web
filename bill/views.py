@@ -58,11 +58,11 @@ def get_related_bills(bill):
 @anonymous_view
 @render_to('bill/bill_details.html')
 def bill_details(request, congress, type_slug, number):
-    # pre-load info
-    
+    # load bill and text
     bill = load_bill_from_url(congress, type_slug, number)
     text_info = bill.get_text_info(with_citations=True)
 
+    # load stakeholder positions
     from stakeholder.models import BillPosition
     stakeholder_posts = bill.stakeholder_positions\
         .filter(post__stakeholder__verified=True)\
@@ -84,6 +84,7 @@ def bill_details(request, congress, type_slug, number):
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
         "show_media_bar": not bill.original_intent_replaced and bill.sponsor and bill.sponsor.has_photo() and text_info and text_info.get("has_thumbnail"),
         "stakeholder_posts": stakeholder_posts,
+        "legislator_statements": fetch_statements(bill),
     }
 
 def fixup_text_incorporation(text_incorporation):
@@ -97,6 +98,107 @@ def fixup_text_incorporation(text_incorporation):
         item["other_ratio"] *= 100
         return item
     return list(map(fixup_item, text_incorporation))
+
+def fetch_statements(bill):
+    from person.models import Person
+    from person.views import http_rest_json
+    from parser.processor import Processor
+
+    # load statements from ProPublica API, ignoring any network errors
+    try:
+        statements = http_rest_json(
+          "https://api.propublica.org/congress/v1/{congress}/bills/{bill}/statements.json".format(
+            congress=bill.congress,
+            bill=bill.bill_type_slug + str(bill.number),
+          ),
+          headers={
+            'X-API-Key': settings.PROPUBLICA_CONGRESS_API_KEY,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          })
+        if statements["status"] != "OK": raise Exception()
+        statements = statements["results"]
+    except:
+        return []
+
+    # bulk-fetch all legislators mentioned and make a mapping from bioguide ID to Person object
+    legislators = { p.bioguideid: p for p in Person.objects.filter(bioguideid__in=[s['member_id'] for s in statements]) }
+
+    # make simplified statements records
+    statements = [{
+        "date": Processor.parse_datetime(s["date"]).date(),
+        "person": legislators.get(s["member_id"]),
+        "type": s["statement_type"],
+        "title": s["title"],
+        "url": s["url"],
+    } for s in statements]
+
+    # downcase all-caps titles
+    for s in statements:
+      if s["title"] != s["title"].upper(): continue
+      s["title"] = s["title"].lower()
+      if s["person"]: s["title"] = s["title"].replace(s["person"].lastname.lower(), s["person"].lastname) # common easy case fix
+
+    # sort by date because we want to give a diversity of viewpoints by showing only one
+    # statement per legislator
+    statements.sort(key = lambda s : s["date"], reverse=True)
+
+    # Put all of the statements that are the most recent for the legislator first, then all of the second-most-recent, and so on.
+    # Since sort is stable, it will remain in reverse-date order within each group.
+    seen = { }
+    for s in statements:
+      seen[s["person"]] = seen.get(s["person"], 0) + 1
+      s["legislator_ordinal"] = seen[s["person"]]
+    statements.sort(key = lambda s : s["legislator_ordinal"])
+
+    # bulk-fetch ideology & leadership scores
+    from person.models import RoleType
+    from person.analysis import load_sponsorship_analysis2
+    scores = load_sponsorship_analysis2(bill.congress, RoleType.representative, None)["all"] + load_sponsorship_analysis2(bill.congress, RoleType.senator, None)["all"]
+    leadership_scores = {
+      s["id"]: float(s["leadership"])
+      for s in scores
+    }
+    ideology_scores = {
+      s["id"]: float(s["ideology"])
+      for s in scores
+    }
+
+    # Tag relevance of the person making the press statement. (We'd love to prioritize relevant
+    # committee chairs but we only have current committee info so we couldn't do it for
+    # past bills.)
+    cosponsors = set(bill.cosponsors.all())
+    for s in statements:
+      if s["person"] == bill.sponsor:
+        s["relevance"] = "Sponsor"
+        s["priority"] = (0, -leadership_scores.get(s["person"].id, 0))
+      elif s["person"] in cosponsors:
+        s["relevance"] = "Co-sponsor"
+        s["priority"] = (1, -leadership_scores.get(s["person"].id if s["person"] else 0, 0))
+
+    # Get the prioritized statements to show.
+    ret = []
+
+    # For up to the first two, show the sponsor and the cosponsor with the highest leadership
+    # score (or if there is no sponsor statement, the two top cosponsors), but prioritizing
+    # the most recent statements for each legislator
+    statements.sort(key = lambda s : (s["legislator_ordinal"], s.get("priority", (2,))))
+    while statements and statements[0].get("priority") and statements[0]["legislator_ordinal"] == 1 and len(ret) < 2:
+      ret.append(statements.pop(0))
+
+    # For the third statement, take the legislator with the ideology score furthest from
+    # the sponsor's score, to hopefully get an opposing viewpoint.
+    if bill.sponsor.id in ideology_scores:
+      statements.sort(key = lambda s : (
+               s["legislator_ordinal"], # most recent statements by legislators first
+               not(s["person"] and s["person"].id in ideology_scores), # people with ideology scores first
+               "relevance" in s, # people who aren't a sponsor/cosponsor first
+               -abs(ideology_scores.get(s["person"].id if s["person"] else 0, 0) - ideology_scores[bill.sponsor.id]) ) )
+      while statements and len(ret) < 3:
+        ret.append(statements.pop(0))
+
+    return ret
+
 
 @user_view_for(bill_details)
 def bill_details_user_view(request, congress, type_slug, number):
