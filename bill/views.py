@@ -131,7 +131,8 @@ def fetch_statements(bill):
         "type": s["statement_type"],
         "title": s["title"],
         "url": s["url"],
-    } for s in statements]
+    } for s in statements
+      if s["date"]]
 
     # downcase all-caps titles
     for s in statements:
@@ -188,7 +189,7 @@ def fetch_statements(bill):
 
     # For the third statement, take the legislator with the ideology score furthest from
     # the sponsor's score, to hopefully get an opposing viewpoint.
-    if bill.sponsor.id in ideology_scores:
+    if bill.sponsor and bill.sponsor.id in ideology_scores:
       statements.sort(key = lambda s : (
                s["legislator_ordinal"], # most recent statements by legislators first
                not(s["person"] and s["person"].id in ideology_scores), # people with ideology scores first

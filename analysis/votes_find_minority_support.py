@@ -14,8 +14,8 @@ for vote in votes:
 	di = vote.totals["parties"].index("Democrat")
 	ri = vote.totals["parties"].index("Republican")
 	dpct = vote.totals["party_counts"][di]["yes"] / vote.totals["party_counts"][di]["total"]
-	rpct = vote.totals["party_counts"][ri]["yes"] / vote.totals["party_counts"][ri]["total"]
-	vote.dr = dpct / rpct
+	rpct = max(1, vote.totals["party_counts"][ri]["yes"]) / vote.totals["party_counts"][ri]["total"]
+	vote.dr = dpct / rpct # prevent division by zero by clamping on previous line
 
 # Filter out votes that don't have a higher proportion of Dems
 # voting in favor than the proportion of Republicans.
@@ -36,8 +36,8 @@ for vote in votes:
 
 # Show bills in a helpful order.
 bills = sorted(bills.values(), key = lambda b: (
-	b["bill"].was_enacted_ex() is not None, # put all enacted bills together
-	("senate" in b and "house" in b), # bills that have votes in both chambers
+	("senate" in b and "house" in b), # bills that have votes in both chambers (there were some vetos that we want to surface)
+	b["bill"].was_enacted_ex() is not None, # bills that were enacted
 	((b["senate"].dr if "senate" in b else 0) + (b["house"].dr if "house" in b else 0)), # order by the ratio
 ))
 for b in bills:
