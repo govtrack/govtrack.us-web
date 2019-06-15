@@ -78,7 +78,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'urls'
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -117,7 +117,14 @@ INSTALLED_APPS = (
     # for django-registration-pv
     'emailverification',
     'registration',
-)
+]
+
+# in production...
+try:
+    import django_mysql
+    INSTALLED_APPS.append("django_mysql")
+except ImportError:
+    pass
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend', # only used for the admin?

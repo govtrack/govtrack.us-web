@@ -34,7 +34,7 @@ Vagrant.configure(2) do |config|
     # on production we don't use python3-xapian
 
     # on production I also needed:
-    # sudo apt-get install memcached libmysqlclient-dev poppler-utils s3cmd
+    # sudo apt-get install memcached libmysqlclient-dev poppler-utils s3cmd mysql-client
 
     # On OS X...
     # ----------
@@ -56,7 +56,7 @@ Vagrant.configure(2) do |config|
     pip install --upgrade -r requirements.txt
     pip install --upgrade xapian-haystack # not needed in production
 
-    # on production I needed: pip install mysqlclient pylibmc
+    # on production I needed: pip install mysqlclient pylibmc django-mysql
 
     # On OS X, install bcrypt:
     # http://stackoverflow.com/questions/22875270/error-installing-bcrypt-with-pip-on-os-x-cant-find-ffi-h-libffi-is-installed
