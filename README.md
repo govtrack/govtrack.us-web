@@ -124,6 +124,7 @@ Install nginx, supervisord (which keeps the uWSGI process running), and certbot 
     ln -s /home/govtrack/web/conf/nginx.conf /etc/nginx/sites-enabled/www.govtrack.us.conf
     ln -s /home/govtrack/web/conf/supervisor.conf /etc/supervisor/conf.d/govtrack.conf
     # install a TLS certificate at /etc/ssl/local/ssl_certificate.{key,crt} (e.g. https://gist.github.com/JoshData/49eff618f84ce4890697d65bcb740137)
+    mkdir /var/cache/nginx/www.govtrack.us
     service nginx restart
     service supervisor restart
     certbot # and follow prompts, but without the HTTP redirect because we already have it
