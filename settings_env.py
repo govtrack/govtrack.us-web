@@ -77,7 +77,7 @@ copy_env_vars = [
     "GOOGLE_APP_SECRET",
     "GOOGLE_AUTH_SCOPE",
 
-    # For email...
+    # For email (if one SMTP backend)...
     "EMAIL_HOST",
     "EMAIL_PORT",
     "EMAIL_HOST_USER",
@@ -118,3 +118,25 @@ if locals().get("PAYPAL_CLIENT_ID"):
     import paypalrestsdk
     paypalrestsdk.configure(mode=PAYPAL_CLIENT_MODE, client_id=PAYPAL_CLIENT_ID, client_secret=PAYPAL_CLIENT_SECRET)
 
+# Multiple email backends?
+from django.core.mail.backends.smtp import EmailBackend as SMTPEmailBackend
+EMAIL_BACKENDS = { }
+i = 1
+while "EMAIL_{}_HOST".format(i) in os.environ:
+    backend_class = SMTPEmailBackend
+    backend_args = {
+        "host": get_env_variable("EMAIL_{}_HOST".format(i)),
+        "port": int(get_env_variable("EMAIL_{}_PORT".format(i))),
+        "username": get_env_variable("EMAIL_{}_HOST_USER".format(i)),
+        "password": get_env_variable("EMAIL_{}_HOST_PASSWORD".format(i)),
+        "use_tls": get_env_boolvar("EMAIL_{}_USE_TLS".format(i)),
+    }
+    def make_backend(i, backend_class, backend_args):
+      def create_backend(*args, **kwargs):
+        return backend_class(
+          *args,
+          **backend_args,
+          **kwargs)
+      return create_backend
+    EMAIL_BACKENDS[i] = make_backend(i, backend_class, backend_args)
+    i += 1

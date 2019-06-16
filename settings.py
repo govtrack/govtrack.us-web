@@ -51,7 +51,8 @@ STATICFILES_DIRS = ['static']
 APP_NICE_SHORT_NAME = "GovTrack" # a short name for your site
 SITE_ROOT_URL = "https://www.govtrack.us"
 LOGIN_REDIRECT_URL = "/accounts/profile"
-SERVER_EMAIL = "GovTrack.us <noreply@alerts.GovTrack.us>" # From: address on verification emails
+SERVER_EMAIL = "GovTrack.us <noreply@alerts.GovTrack.us>" # From: address on verification emails, error emails
+DEFAULT_FROM_EMAIL = SERVER_EMAIL # send_email management command
 REGISTRATION_ASK_USERNAME = False
 SECURE_PROXY_SSL_HEADER = ("HTTPS", "on")
 
