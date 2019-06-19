@@ -59,6 +59,13 @@ class EmailBackend(BaseEmailBackend):
                 backend.open()
                 self.open_backends[backend_key] = backend
 
+            # Pre-process the message.
+            preprocfuncname = "preprocess_message_for_" + backend_key
+            if hasattr(self, preprocfuncname):
+                f = getattr(self, preprocfuncname)
+                for m in email_messages:
+                    f(m)
+
             # Pass it the messages.
             backend.send_messages(email_messages)
 
@@ -72,12 +79,31 @@ class GovTrackEmailBackend(EmailBackend):
         # backend "1".
         for recip in message.to:
             if GovTrackEmailBackend.is_microsoft_address(recip):
-                return 2
-        return 1
+                return '2'
+        return '1'
 
     @staticmethod
     def is_microsoft_address(email):
         parts = email.split("@", 1)
         if len(parts) != 2:
             return False
-        return parts[1].lower() in ("live.com", "hotmail.com", "outlook.com", "msn.com")
+        return parts[1].lower() in ("live.com", "hotmail.com", "outlook.com", "msn.com", "govtrack.us")
+
+    def preprocess_message_for_2(self, msg):
+        msg.body = self.fixup_mailgun_content(msg.body, msg)
+        if hasattr(msg, 'alternatives'):
+            for i, (content, mimetype) in enumerate(msg.alternatives):
+                msg.alternatives[i] = (self.fixup_mailgun_content(content, msg), mimetype)
+
+    def fixup_mailgun_content(self, content, msg):
+        content = content.replace("{unsubscribe}", msg.extra_headers.get('X-Unsubscribe-Link'))
+        content = content.replace("%7Bunsubscribe%7D", msg.extra_headers.get('X-Unsubscribe-Link'))
+        # mailgun has "%unsubscribe_url%" but we might as well put in our own link so we track it immediately
+
+        content = content.replace("{accountcompany}", "Civic Impulse LLC")
+        content = content.replace("{accountaddress1}", "712 H Street NE Suite 1260")
+        content = content.replace("{accountcity}", "Washington")
+        content = content.replace("{accountstate}", "DC")
+        content = content.replace("{accountzip}", "20002")
+        content = content.replace("{accountcountry}", "USA")
+        return content

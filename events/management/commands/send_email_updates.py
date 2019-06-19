@@ -333,6 +333,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				'Reply-To': emailfromaddr,
 				'Auto-Submitted': 'auto-generated',
 				'X-Auto-Response-Suppress': 'OOF',
+				'X-Unsubscribe-Link': UserProfile.objects.get(user=user).get_one_click_unsub_url(),
 			},
 			fail_silently=False,
 			connection=mail_connection,

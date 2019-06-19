@@ -131,12 +131,12 @@ while "EMAIL_{}_HOST".format(i) in os.environ:
         "password": get_env_variable("EMAIL_{}_HOST_PASSWORD".format(i)),
         "use_tls": get_env_boolvar("EMAIL_{}_USE_TLS".format(i)),
     }
-    def make_backend(i, backend_class, backend_args):
+    def make_backend(backend_class, backend_args):
       def create_backend(*args, **kwargs):
         return backend_class(
           *args,
           **backend_args,
           **kwargs)
       return create_backend
-    EMAIL_BACKENDS[i] = make_backend(i, backend_class, backend_args)
+    EMAIL_BACKENDS[str(i)] = make_backend(backend_class, backend_args)
     i += 1

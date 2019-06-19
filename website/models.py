@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
 from jsonfield import JSONField
 
@@ -80,6 +81,8 @@ class UserProfile(models.Model):
             self.one_click_unsub_gendate = datetime.now()
             self.save(update_fields=['one_click_unsub_key', 'one_click_unsub_gendate'])
         return self.one_click_unsub_key
+    def get_one_click_unsub_url(self):
+        return settings.SITE_ROOT_URL + "/accounts/unsubscribe/" + self.get_one_click_unsub_key()
 
     @staticmethod
     def one_click_unsubscribe(key):
