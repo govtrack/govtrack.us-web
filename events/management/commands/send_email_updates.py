@@ -313,12 +313,6 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		and not Ping.objects.filter(user=user, pingtime__gt=launch_time - timedelta(days=60)).exists():
 		emailpingurl = Ping.get_ping_url(user)
 
-	# ensure smtp connection is open in case it got shut (hmm)
-	if not mail_connection.connection: raise ValueError("the mail connection should be open already")
-	if not mail_connection.connection.sock: # socket seems to have been closed - reopen it
-		mail_connection.connection = None
-		mail_connection.open()
-		
 	# send
 	try:
 		timings = { }

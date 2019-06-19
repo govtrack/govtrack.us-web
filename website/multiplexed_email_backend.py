@@ -44,6 +44,14 @@ class EmailBackend(BaseEmailBackend):
             if backend_key in self.open_backends:
                 backend = self.open_backends[backend_key]
 
+                # Ensure SMTP backends are still truly open. Sometimes the socket gets reset.
+                if hasattr(backend, 'connection'):
+                    if not backend.connection:
+                        raise ValueError("the mail connection should be open already")
+                    if not backend.connection.sock: # socket seems to have been closed - reopen it
+                        backend.connection = None
+                        backend.open()
+
             # Otherwise, construct the backend (the backends list contains
             # functions that lazy-load the actual backend).
             else:
