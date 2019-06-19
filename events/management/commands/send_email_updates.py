@@ -328,6 +328,8 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				"body_html": body_html,
 				"announcement": announce,
 				"medium_posts": medium_posts,
+				"SITE_ROOT_URL": settings.SITE_ROOT_URL,
+				"utm": utm,
 			},
 			headers={
 				'Reply-To': emailfromaddr,
