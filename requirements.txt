@@ -38,4 +38,4 @@ plotly
 matplotlib
 pycairo
 exclusiveprocess
-
+email_validator

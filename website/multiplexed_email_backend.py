@@ -3,6 +3,8 @@ from django.core.mail.backends.base import BaseEmailBackend
 
 import random
 
+from email_validator import validate_email, EmailNotValidError
+
 class EmailBackend(BaseEmailBackend):
     def __init__(self, fail_silently=False, **kwargs):
         self.fail_silently = fail_silently
@@ -84,10 +86,36 @@ class GovTrackEmailBackend(EmailBackend):
 
     @staticmethod
     def is_microsoft_address(email):
-        parts = email.split("@", 1)
-        if len(parts) != 2:
+        # Extract domain.
+        try:
+            domain = email.lower().split("@", 1)[1]
+        except IndexError:
+            # Input was invalid, no @-sign.
             return False
-        return parts[1].lower() in ("live.com", "hotmail.com", "outlook.com", "msn.com", "govtrack.us")
+
+        # Known MS addresses, plus our own address for testing.
+        if domain in ("live.com", "hotmail.com", "outlook.com", "msn.com", "govtrack.us"):
+            return True
+
+        # Of our top 25 domains, these are definitely not hosted by Microsoft.
+        if domain in ("gmail.com", "yahoo.com", "aol.com", "comcast.net", "sbcglobal.net", "verizon.net", "att.net", "cox.net", "bellsouth.net", "me.com", "earthlink.net", "mac.com", "charter.net", "icloud.com", "ymail.com", "optonline.net", "juno.com", "rocketmail.com"):
+            return False
+        if domain.endswith(".gov") or domain.endswith(".mil"):
+            return False
+
+        # For the rest, do a MX lookup. Domains handled by *.mail.protection.outlook.com are Microsoft addresses.
+        # Get the MX records, and take the first record's host component.
+        try:
+            mx = validate_email(email)['mx'][0][1]
+        except EmailNotValidError as e:
+            # Syntax or MX lookup failed?
+            return False
+        except (KeyError, IndexError) as e:
+            # No MX info?
+            return False
+        if mx.endswith(".outlook.com"):
+            return True
+        return False
 
     def preprocess_message_for_2(self, msg):
         msg.body = self.fixup_mailgun_content(msg.body, msg)
@@ -96,9 +124,14 @@ class GovTrackEmailBackend(EmailBackend):
                 msg.alternatives[i] = (self.fixup_mailgun_content(content, msg), mimetype)
 
     def fixup_mailgun_content(self, content, msg):
-        content = content.replace("{unsubscribe}", msg.extra_headers.get('X-Unsubscribe-Link'))
-        content = content.replace("%7Bunsubscribe%7D", msg.extra_headers.get('X-Unsubscribe-Link'))
-        # mailgun has "%unsubscribe_url%" but we might as well put in our own link so we track it immediately
+        if 'X-Unsubscribe-Link' in msg.extra_headers:
+            # Use a custom link we stash in the email headers.
+            content = content.replace("{unsubscribe}", msg.extra_headers.get('X-Unsubscribe-Link'))
+            content = content.replace("%7Bunsubscribe%7D", msg.extra_headers.get('X-Unsubscribe-Link'))
+        else:
+            # Fall back to Mailgun's variable.
+            content = content.replace("{unsubscribe}", "%unsubscribe_url%")
+            content = content.replace("%7Bunsubscribe%7D", "%unsubscribe_url%")
 
         content = content.replace("{accountcompany}", "Civic Impulse LLC")
         content = content.replace("{accountaddress1}", "712 H Street NE Suite 1260")
