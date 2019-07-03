@@ -27,7 +27,37 @@
 {% block body_scripts %}
   {% include "person/mapbox-scripts.html" %}
   
+  {% if not state %}
   <script>
+  // Highlight districts on hover. {# except on the district pages #}
+  var hover_popup = new mapboxgl.Popup({
+    closeButton: false,
+    closeOnClick: false
+  });
+  for (var i = 1; i <= 5; i++) {
+    map.on("mouseenter", "districts-fill-"+i, function(e) { hovering_over(e, e.features[0]); });
+    //map.on("mouseleave", "districts-fill-"+i, function(e) { end_hovering_over(e); });
+  }
+  function hovering_over(e, feature) {
+     //console.log(feature.geometry, feature.properties, feature.properties.state, parseInt(feature.properties.number), feature.properties.state_name);
+     // https://docs.mapbox.com/mapbox-gl-js/example/popup-on-hover/
+     map.getCanvas().style.cursor = 'pointer';
+     var description = feature.properties.state_name + (feature.properties.number == "00" ? " At Large" : "’s " + ordinal(parseInt(feature.properties.number)) + " Congressional District");
+     var url = "/congress/members/" + feature.properties.state + (feature.properties.number == "00" ? "" : "/" + parseInt(feature.properties.number));
+     //var coord = feature.geometry.coordinates[0][0]; // works for polygon but not multipolygon features
+     var coord = [feature.properties.label_pt_lon, feature.properties.label_pt_lat];
+     hover_popup
+       .setLngLat(coord)
+       .setHTML("<a href='" + url + "'>Go to " + description + "</a>")
+       .addTo(map);
+  }
+  function end_hovering_over(e) {
+    map.getCanvas().style.cursor = '';
+    hover_popup.remove();
+  }
+  {% endif %}
+
+  // Update the map embed iframe code to match the current viewport when the user moves the map
   map.on("moveend", update_embed_code_bounds);
   function update_embed_code_bounds() {
   	var b = map.getBounds();
@@ -35,6 +65,7 @@
   }
   update_embed_code_bounds(); // initialize
 
+  // Fix the form layout.
   if ($(window).width() > 768) {
     var input = $('#user-address');
     var w = $('#user-address').parents("form").innerWidth();
@@ -44,6 +75,7 @@
     input.width(w-50);
   }
 
+  // Handle geocoding result.
   function go_to_point(pt, q) {
     // Query Mapbox API to get what district is at this location.
     latlng_to_district({
@@ -149,7 +181,7 @@
 
 <div style="margin: 2em 0">
 <form class="form-inline" onsubmit="do_address(); return false;">
-  <p>Find your representative (a.k.a. congressman or congresswoman) by entering your address:</p>
+  <p>Find your representative (a.k.a. congressman or congresswoman) by entering your address or clicking a district in the map:</p>
   <div class="form-group">
     <label for="user-address" class="sr-only">Address</label>
     <input type="text" class="form-control" id="user-address" placeholder="Enter an address in the United States">

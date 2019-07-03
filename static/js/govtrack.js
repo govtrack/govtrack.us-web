@@ -108,3 +108,13 @@ function smooth_scroll_to(elem) {
     $("html, body").animate({ scrollTop: elem.offset().top - $(window).height()/10 });
     return false;
 }
+
+function ordinal(n) {
+    var t = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+    var m;
+    if (n % 100 >= 11 && n % 100 <= 13)
+        m = 0;
+    else
+        m = n % 10;
+    return n + "<sup>" + t[m] + "</sup>";
+}
