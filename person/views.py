@@ -309,7 +309,7 @@ def render_subscribe_inline(request, feed):
                 'request': request,
 				})
     return { 'events_subscribe_button': events_button }
-                
+
 @anonymous_view
 def searchmembers(request, mode=None):
     return person_search_manager(mode).view(request, "person/person_list.html",

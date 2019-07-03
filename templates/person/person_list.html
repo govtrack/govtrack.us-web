@@ -1,6 +1,6 @@
 {% extends 'master_b.html' %}
 
-{% block title %}Members of Congress - Search - GovTrack.us{% endblock %}
+{% block title %}List of Representatives and Senators - GovTrack.us{% endblock %}
 {% block meta_description %}Representatives and Senators in the United States Congress.{% endblock %}
 {% block meta_keywords %}United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
@@ -14,8 +14,10 @@
 
 {% block summary %}
 	{% if mode == "current" %}
-		<h1>Members of Congress</h1>
-		<p>This page lists the currently serving Members of Congress. You can also <a href="/congress/members/map">view congressional district maps</a> or <a href="/congress/members/all">search the historical list of Members of Congress</a>.</p>
+		<h1>List of Representatives and Senators</h1>
+		<p>This page lists the currently serving representatives in the House of Representatives and the senators in the U.S. Senate,
+		collectively called the Members of Congress.</p>
+		<p>You can also see a <a href="/congress/members/map">map and search by address</a> or the <a href="/congress/members/all">historical list of Members of Congress</a>.</p>
 	{% elif mode == "all" %}
 		<h1>Historial List of Members of Congress</h1>
 		<p>Search all current and past Members of Congress back to the founding of the nation in 1789. You can also <a href="/congress/members/current">search currently serving Members of Congress</a> or <a href="/congress/members/map">view current congressional district maps</a>.</p>
