@@ -29,31 +29,48 @@
   
   {% if not state %}
   <script>
-  // Highlight districts on hover. {# except on the district pages #}
+  var current_district_popup;
   var hover_popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false
   });
   for (var i = 1; i <= 5; i++) {
-    map.on("mouseenter", "districts-fill-"+i, function(e) { hovering_over(e, e.features[0]); });
-    //map.on("mouseleave", "districts-fill-"+i, function(e) { end_hovering_over(e); });
+    map.on("mouseenter", "districts-fill-"+i, function(e) { map.getCanvas().style.cursor = 'pointer'; });
+    //map.on("mouseleave", "districts-fill-"+i, function(e) { map.getCanvas().style.cursor = ''; }); // when going between districts a leave event for the previous district can fire after the enter event for the next district?
+    map.on("click", "districts-fill-"+i, function(e) { show_district_popup(e, e.features[0]); });
   }
-  function hovering_over(e, feature) {
-     //console.log(feature.geometry, feature.properties, feature.properties.state, parseInt(feature.properties.number), feature.properties.state_name);
+  var current_legislators_by_district = {
+    {% for m in current_members %}
+      "{{m.state}}{{m.district}}": {
+        "name": "{{m.person.name_no_district|escapejs}}"
+      }{% if not forloop.last %},{% endif %}{% endfor %}
+  };
+  function show_district_popup(e, feature) {
+     //console.log(e, feature.geometry, feature.properties, feature.properties.state, parseInt(feature.properties.number), feature.properties.state_name);
      // https://docs.mapbox.com/mapbox-gl-js/example/popup-on-hover/
-     map.getCanvas().style.cursor = 'pointer';
-     var description = feature.properties.state_name + (feature.properties.number == "00" ? " At Large" : "’s " + ordinal(parseInt(feature.properties.number)) + " Congressional District");
+     var district = feature.properties.state_name + (feature.properties.number == "00" ? " At Large" : "’s " + ordinal(parseInt(feature.properties.number)) + " Congressional District");
      var url = "/congress/members/" + feature.properties.state + (feature.properties.number == "00" ? "" : "/" + parseInt(feature.properties.number));
+     var n = $("<div><div style='text-align: center'><div class=district style='font-weight: bold;'></div><div class='repname'></div><div><a>More &raquo;</a></div></div>");
+     n.find('.district').html(district);
+     var key = feature.properties.state + parseInt(feature.properties.number);
+     if (key in current_legislators_by_district)
+       n.find('.repname').text(current_legislators_by_district[key].name);
+     else
+       n.find('.repname').text("Vacancy");
+     n.find('a').attr('href', url);
+     if (url == current_district_popup) {
+       // click to toggle visibility
+       hover_popup.remove();
+       current_district_popup = null;
+       return;
+     }
+     current_district_popup = url;
      //var coord = feature.geometry.coordinates[0][0]; // works for polygon but not multipolygon features
-     var coord = [feature.properties.label_pt_lon, feature.properties.label_pt_lat];
+     //var coord = [feature.properties.label_pt_lon, feature.properties.label_pt_lat]; // from census data but not the actual label points?
      hover_popup
-       .setLngLat(coord)
-       .setHTML("<a href='" + url + "'>Go to " + description + "</a>")
+       .setLngLat(e.lngLat)
+       .setHTML(n.html())
        .addTo(map);
-  }
-  function end_hovering_over(e) {
-    map.getCanvas().style.cursor = '';
-    hover_popup.remove();
   }
   {% endif %}
 

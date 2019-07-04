@@ -334,8 +334,11 @@ def http_rest_json(url, args=None, method="GET", headers={}):
 @anonymous_view
 @render_to('person/district_map.html')
 def browse_map(request):
+    # Get current members of Congress to show in the district popups.
+    current_members = PersonRole.objects.filter(current=True, role_type=RoleType.representative).select_related("person")
     return {
         "statelist": statelist,
+        "current_members": current_members,
         "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
     	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
     	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
