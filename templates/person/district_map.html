@@ -27,8 +27,8 @@
 {% block body_scripts %}
   {% include "person/mapbox-scripts.html" %}
   
-  {% if not state %}
   <script>
+  {% if not state %}
   var current_district_popup;
   var hover_popup = new mapboxgl.Popup({
     closeButton: false,
