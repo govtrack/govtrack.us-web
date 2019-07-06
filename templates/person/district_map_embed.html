@@ -39,7 +39,7 @@
 
 {% if request.GET.marker_lat %}
 <script>
-addMapMarker([parseFloat("{{request.GET.marker_lng|escapejs}}"), parseFloat("{{request.GET.marker_lat|escapejs}}")]);
+map.addMarker("Location", [parseFloat("{{request.GET.marker_lng|escapejs}}"), parseFloat("{{request.GET.marker_lat|escapejs}}")]);
 </script>
 {% endif %}
 

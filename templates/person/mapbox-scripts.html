@@ -28,13 +28,6 @@ else
 
 var viewport = geoViewport.viewport(bbox, [window.innerWidth/2, window.innerHeight/2])
 
-// hold markers until map is loaded
-window._map_markers = [];
-window._map_marker_count = 0;
-function addMapMarker(lnglat) {
-  _map_markers.push(lnglat);
-}
-
 // Checks for support of Mapbox GL. Works with most modern browsers.
 if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
 
@@ -80,45 +73,18 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
       }
     }
     map.showCongressionalDistrict(state, district);
-
-    // Add markers.
-    window.addMapMarker = function(lnglat) {
-      window._map_marker_count++;
-      var markerid = "symbols"+_map_marker_count;
-
-      map.addSource(markerid, {
-        "type": "geojson",
-        "data": {
-          "type": "FeatureCollection",
-          "features": [
-            {
-              "type": "Feature",
-              "properties": {},
-              "geometry": {
-                  "type": "Point",
-                  "coordinates": lnglat // array [lng, lat]
-              }
-            }
-          ]
-        }
-      });
-
-      // add source as a layer and apply some styles
-      map.addLayer({
-          "id": markerid,
-          "type": "circle",
-          "source": markerid,
-          "paint": {
-             "circle-radius": 10,
-             "circle-color": "#007cbf"
-          }
-      });
-
-      return markerid;
-    };
-
-    window._map_markers.forEach(addMapMarker);
   });
+
+  // Add markers.
+  map.addMarker = function(label, lnglat) {
+    var marker = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    }).setLngLat(lnglat)
+      .setText(label)
+      .addTo(map);
+    return marker;
+  };
 
 } else {
 

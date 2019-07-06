@@ -377,9 +377,9 @@
           map.resize();
 
           // Add a marker for the user's home.
-          if (window.current_marker_id)
-            map.removeLayer(window.current_marker_id);
-          window.current_marker_id = addMapMarker([coord.longitude, coord.latitude]);
+          if (window.current_marker)
+            window.current_marker.remove();
+          window.current_marker = map.addMarker("You", [coord.longitude, coord.latitude]);
 
           // Get reps & district bounds.
           $.ajax({

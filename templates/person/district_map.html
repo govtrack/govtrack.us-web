@@ -108,14 +108,14 @@
           var fragment = "#q=" + encodeURIComponent(q) + "&marker_lng=" + pt[0] + "&marker_lat=" + pt[1];
           if (path == window.location.pathname) {
             // The page won't reload. Just add a marker & alert.
-            addMapMarker(pt);
+            map.addMarker(q, pt);
             alert("That address is in the same congressional district.");
           }
-	        window.location = path + fragment;
+          window.location = path + fragment;
         }
       	else {
             // There is no district page for at-large districts. Redirect to the state page.
-	        window.location = "/congress/members/" + district.state;
+            window.location = "/congress/members/" + district.state;
         }
       });
   }
@@ -163,7 +163,7 @@
   if (q.q)
     $('#user-address').val(q.q);
   if (q.marker_lat)
-    addMapMarker([parseFloat(q.marker_lng), parseFloat(q.marker_lat)]);
+    map.addMarker(q.q ? q.q : "Location", [parseFloat(q.marker_lng), parseFloat(q.marker_lat)]);
 </script>
 {% endblock %}
 
