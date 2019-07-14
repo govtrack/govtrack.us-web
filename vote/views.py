@@ -262,7 +262,7 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 		body, mime_type = vote_thumbnail_image_map(vote)
 	elif image_type == "diagram":
 		# Seating diagram.
-		body, mime_type = vote_thumbnail_image_seating_diagram(vote)
+		body, mime_type = vote_thumbnail_image_seating_diagram(vote, include_result=False)
 	elif image_type == "thumbnail":
 		# Small square thumbnail.
 		body, mime_type = vote_thumbnail_small(vote)
@@ -319,24 +319,28 @@ def vote_thumbnail_image_map(vote):
 	import xml.etree.ElementTree as ET
 	tree = ET.parse('static/cd-2014.svg')
 
-	# Fetch color codes per district.
-	colors = { }
+	# Fetch color codes per district and make SVG CSS styles.
+	styles = { }
 	for voter in vote.get_voters():
 		if not voter.person_role: continue # some votes cannot map voters to roles such as when there are mismatches w/ the term start/end dates
+		if voter.option.key not in ("+", "-"): continue # don't know what color to assign here
 		district = voter.person_role.state.lower() + ("%02d" % voter.person_role.district)
-		clr = vote_diagram_colors.get((voter.person_role.party[0], voter.option.key))
+		clr = vote_diagram_colors.get((voter.person_role.party[0], "+"))
 		if clr:
 			clr = tuple([c*256 for c in clr])
-			colors[district] = "rgb(%d,%d,%d)" % clr
-	if len(colors) == 0:
+			if voter.option.key == "+":
+				styles[district] = "fill: rgb(%d,%d,%d); stroke: #AAA; strike-width: 1px;" % clr
+			else:
+				styles[district] = "fill: transparent; stroke: rgb(%d,%d,%d); strike-width: 1px;" % clr
+	if len(styles) == 0:
 		# Does not have any +/- votes.
 		raise Http404()
 
 	# Apply.
 	for node in tree.getroot():
-		color = colors.get(node.get("id"))
-		if color:
-			node.set("style", "fill: {}; stroke: #AAA; stroke-width: 1px;".format(color))
+		style = styles.get(node.get("id"))
+		if style:
+			node.set("style", style)
 		elif node.tag.endswith("polygon"):
 			# No voter for this district.
 			node.set("style", "fill: white; stroke: #666; stroke-width: 1px;")
@@ -518,7 +522,7 @@ def show_text_centered(ctx, text, max_width=None, use_baseline=False):
     ctx.rel_move_to(-width/2, height)
     ctx.show_text(text)
 
-def vote_thumbnail_image_seating_diagram(vote, image_width=300, image_height=170):
+def vote_thumbnail_image_seating_diagram(vote, image_width=330, image_height=190, include_result=True):
 	import cairo, re, math
 	
 	# format text to print on the image
@@ -562,6 +566,8 @@ def vote_thumbnail_image_seating_diagram(vote, image_width=300, image_height=170
 	if total_count == 0 or "+" not in total_counts or "-" not in total_counts: raise Http404() # no thumbnail for other sorts of votes
 	vote_result_1 = "%d-%d" % (total_counts["+"], total_counts["-"])
 	
+	if not include_result:
+		image_height -= 20
 	im, ctx = create_image(image_width, image_height)
 	
 	ctx.select_font_face(FONT_FACE, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
@@ -570,20 +576,27 @@ def vote_thumbnail_image_seating_diagram(vote, image_width=300, image_height=170
 	font_size = (24 if len(vote_result_2) < 10 else 20) * image_width / 300
 	ctx.set_font_size(font_size)
 	ctx.set_source_rgb(.1, .1, .1)
-	ctx.move_to(image_width/2, 0)
+	ctx.move_to(image_width/2, 0 if include_result else 8)
 	show_text_centered(ctx, vote_result_1)
+	w = ctx.text_extents(vote_result_1)[2]
+	seating_center_y = 10
 	
 	# Vote Result
-	ctx.move_to(image_width/2, 8+font_size)
-	show_text_centered(ctx, vote_result_2) 
-	w = max(ctx.text_extents(vote_result_1)[2], ctx.text_extents(vote_result_2)[2])
+	if include_result:
+		# Text
+		ctx.move_to(image_width/2, 8+font_size)
+		show_text_centered(ctx, vote_result_2)
+		w = max(w, ctx.text_extents(vote_result_2)[2])
 	
-	# Line
-	ctx.set_line_width(1)
-	ctx.new_path()
-	ctx.line_to(image_width/2-w/2, 3+font_size)
-	ctx.rel_line_to(w, 0)
-	ctx.stroke()
+		# Line
+		ctx.set_line_width(1)
+		ctx.new_path()
+		ctx.line_to(image_width/2-w/2, 3+font_size)
+		ctx.rel_line_to(w, 0)
+		ctx.stroke()
+
+		# Shift diagram down.
+		seating_center_y = 25
 	
 	# Seats
 	
@@ -601,7 +614,7 @@ def vote_thumbnail_image_seating_diagram(vote, image_width=300, image_height=170
 	# Determine the seating chart dimensions: the radius of the inside row of
 	# seats and the radius of the outside row of seats.
 	inner_r = w/2 * 1.25 + .4 * font_size # wrap closely around the text in the middle
-	if seating_rows <= 4: inner_r = max(inner_r, 75) # don't make the inner radius too small
+	inner_r = max(inner_r, 75 if seating_rows <= 4 else 50) # don't make the inner radius too small
 	outer_r = image_width * .45 # end close to the image width
 	
 	# If we assume the absolute spacing of seats is constant from row to row, then
@@ -718,13 +731,21 @@ def vote_thumbnail_image_seating_diagram(vote, image_width=300, image_height=170
 			r = inner_r
 		
 		# draw
-		ctx.set_source_rgb(*vote_diagram_colors[(["D", "I", "R"][party], ["+", "-"][vote])])
+		ctx.set_source_rgba(*( list(vote_diagram_colors[(["D", "I", "R"][party], "+")]) + [1 if vote == 0 else .3] ))
 		ctx.identity_matrix()
-		ctx.translate(image_width/2, 25)
-		ctx.rotate(3.14159 - 3.14159 * seat_pos/float(rowcounts[row]-1))
+		ctx.translate(image_width/2, seating_center_y)
+		p = seat_pos/float(rowcounts[row]-1)
+		ctx.rotate(3.14159 * (1 - p))
 		ctx.translate(r, 0)
+		def sigmoid(x): return 1 / (1 + math.exp(- (x*2-1)*2 )) # row is steepnesss
+		ctx.rotate(3.14159 * (sigmoid(p) - p))
+		if vote > 0:
+			ctx.scale(.9, .9) # stroke rects look bigger than filled rects otherwise
 		ctx.rectangle(-seat_size/2, -seat_size/2, seat_size, seat_size)
-		ctx.fill()
+		if vote == 0:
+			ctx.fill()
+		else:
+			ctx.stroke()
 
 	# Convert the image buffer to raw PNG bytes and return it.
 	buf = BytesIO()

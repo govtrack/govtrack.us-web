@@ -75,11 +75,15 @@
         }
 
     .diagram-legend {
-		margin-top: .5em;
+	margin-top: .5em;
         color: #666;
         line-height: 130%;
         font-size: 12px;
     }
+        .diagram-legend * {
+          display: inline-block;
+          margin: 0 .25em .25em 0;
+        }
 	</style>
 {% endblock %}
 {% block og_image %}
@@ -459,17 +463,16 @@ $(function() {
         <div style="margin: 1em 0">
 			<h3>Ideology Vote Chart</h3>
             <img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" />
-            <div style="margin: .5em 0;" class="diagram-legend">
-                Key:
+            <div style="margin: .5em 0; max-width: 300px;" class="diagram-legend">
+                <div style="float: left; margin: 0 .25em 1em 0">Key:</div>
                 {% for item in totals.options %}
                   {% if item.option.key == "+" or item.option.key == "-" %}
                     {% for count in item.party_counts %}
                         {% if count.party.0 == "D" or count.party.0 == "R" %}
                             {% for k, v in diagram_key_colors %}
-                                {% if count.count > 0 and k.0 == count.party.0 and k.1 == item.option.key %}
-                                    <span style="padding: 2px 4px; background-color: {{v}}; margin-right: .25em; cursor: default; {% if item.option.key == "+" %}color: white;{% else %}color: #222;{% endif %}" title="{{count.party}} {{item.option.value}}">
-                                        {{count.party.0}}
-                                        {{item.option.value}}</span>
+                                {% if count.count > 0 and k.0 == count.party.0 and k.1 == "+" %}
+                                    <span style="padding: 2px 4px; border: 1px solid transparent; {% if item.option.key == "+" %}background{% else %}border{% endif %}-color: {{v}}; cursor: default; {% if item.option.key == "+" %}color: white;{% else %}color: #222;{% endif %}" title="{{count.party}} {{item.option.value}}">
+                                        {{count.party}} - {{item.option.value}}</span>
                                 {% endif %}
                             {% endfor %}
                         {% endif %}
@@ -484,12 +487,17 @@ $(function() {
     </div>
 {% endif %}
 {% if has_diagram.map and vote.chamber_name != "Senate" %}
-    <div class="col-sm-5 col-lg-4">
+    <div class="col-sm-6">
         <div style="margin-top: 1em">
 			<h3>Cartogram Map</h3>
             <img src="{{ vote.get_absolute_url }}/map" class="img-responsive" style="margin: auto;" />
             <div style="margin: .5em 0;" class="diagram-legend">
                 Each hexagon represents one congressional district.
+                {% for item in totals.options %}
+                  {% if item.option.key == "+" %}
+                    Solid hexes are {{item.option.value}} votes.
+                  {% endif %}
+                {% endfor %}
             </div>
         </div>
     </div>
