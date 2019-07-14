@@ -92,7 +92,12 @@ def person_details(request, pk):
         else:
             # support bioguide IDs for me
             person = get_object_or_404(Person, bioguideid=pk)
-        
+
+        # There are some people in the database --- presidents and vice presidents --- who have never served in Congress.
+        # We don't have any inbound links to those pages, so don't serve them.
+        if not person.roles.filter(role_type__in=(RoleType.representative, RoleType.senator)).exists():
+            raise Http404()
+
         # current role
         role = person.get_current_role()
         if role:

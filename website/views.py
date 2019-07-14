@@ -167,12 +167,17 @@ def do_site_search(q, allow_redirect=False, request=None):
     from haystack.query import SearchQuerySet
     from events.models import Feed
 
-    sqs = SearchQuerySet().using("person").filter(indexed_model_name__in=["Person"], content=q)
+    from person.models import RoleType
+    sqs = SearchQuerySet().using("person")\
+        .filter(
+            indexed_model_name__in=["Person"],
+            all_role_types__in=(RoleType.representative, RoleType.senator),
+            content=q)
     if 'XapianEngine' not in settings.HAYSTACK_CONNECTIONS['person']['ENGINE']:
         # Xapian doesn't provide a 'score' so we can't do this when debugging.
         sqs = sqs.order_by('-is_currently_serving', '-score')
     results.append({
-        "title": "Members of Congress, Presidents, and Vice Presidents",
+        "title": "Members of Congress",
         "href": "/congress/members/all",
         "qsarg": "name",
         "noun": "Members of Congress, Presidents, or Vice Presidents",
@@ -254,7 +259,7 @@ def do_site_search(q, allow_redirect=False, request=None):
     # that is confusing to also see with committee results
     from bill.models import BillTerm, TermType
     results.append({
-        "title": "Subject Areas (Federal Legislation)",
+        "title": "Subject Areas",
         "href": "/congress/bills",
         "noun": "subject areas",
         "results": [
