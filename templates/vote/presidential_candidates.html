@@ -11,9 +11,16 @@
 
 <script>
 $(function() {
-    $.getJSON('/data/misc/presidential-candidates-missed-votes.json', function(res) {
+    $.getJSON('/data/analysis/presidential-candidates-missed-votes.json', function(res) {
     	$('#last-updated').text(res.updated)
     	$('.days-before-election').text(res.now);
+    	$('.window-size').text(res.window_size);
+	$('#election-year-current').text(res.elections[res.elections.length-1]);
+	var election_years_string = res.elections.slice(); // clone
+	election_years_string[election_years_string.length-1] = "and " + election_years_string[election_years_string.length-1];
+	$('#election-years-list').text(election_years_string.join(", "));
+    	$('#number-of-prev-elections').text(res.elections.length-1);
+	$('#days-before-election-minus-window-size').text(res.now + res.window_size);
 
         build_chart(res);
 
@@ -37,11 +44,20 @@ $(function() {
 	        	return -1;
 	        })
         	group.rows.forEach(function(row){
+			var url = row.shift();
 	        	var tr = $("<tr/>");
 	        	row.forEach(function(cell, i) {
 	        		var td = $("<td/>");
-	        		if (cell == "MEDIAN") cell = (group.chamber == "house" ? "House" : "Senate") + " Median";
 	        		if (cell == null) cell = "";
+				if (i == 0 && cell != "MEDIAN") {
+					var a = $("<a/>");
+					a.attr("href", url);
+					a.text(cell);
+					td.append(a);
+					tr.append(td);
+					return;
+				}
+	        		if (cell == "MEDIAN") cell = (group.chamber == "house" ? "House" : "Senate") + " Median";
 	        		if (i == 3) {
 	        			cell = Math.round(cell);
 	        			cell += "%";
@@ -67,8 +83,15 @@ function build_chart(data) {
             series[i].color = "#FF" + c1 + "0" + c2 + "0";
         else
             series[i].color = "#" + c1 + "0" + c2 + "0" + "FF";
-        series[i].dashStyle = (series[i].status ? "Solid" : "Dot");
-        series[i].lineWidth = (series[i].status && series[i].status!="nominee" ? 3 : 1);
+
+        if (series[i].election_year == data.elections[data.elections.length-1]) {
+            series[i].lineWidth = 2;
+        } else if (series[i].status != null) {
+            series[i].lineWidth = 1;
+        } else {
+            series[i].lineWidth = .5;
+            series[i].dashStyle = "Dash";
+        }
     }
 
     function x_axis_index_to_days(n) {
@@ -91,13 +114,14 @@ function build_chart(data) {
             //plotBands: [{ from: 0, to: series[0].data.length-Math.floor(data.now/data.report_every_ndays)-1,  color: 'rgba(200,200,200,.25)', label: { text: 'The Past' }, zIndex: 1 }],
             plotLines: [
                 { value: series[0].data.length-Math.floor(data.now/data.report_every_ndays)-1, width: 1, color: "#66AA66", label: { text: 'Today' } },
-                { value: series[0].data.length-Math.floor(data.super_tuesday_2008/data.report_every_ndays)-1, width: 1, color: '#66AA66', label: { text: 'Super Tuesday 2008' } }
+                { value: series[0].data.length-Math.floor(data.super_tuesday/data.report_every_ndays)-1, width: 1, color: '#66AA66', label: { text: 'Super Tuesday (Approx)' } },
+                { value: series[0].data.length-1, width: 1, color: '#66AA66', label: { text: 'Election Day' } }
             ]
         },
         yAxis: [{ min: 0, max: 100, title: { text: 'Missed Votes (%)' } }],
         tooltip: {
             formatter: function() {
-                return this.series.options.legislator_name + "<br/>" + this.y  + "%" + "<br/>" + x_axis_index_to_days(this.x) + " days before the " + this.series.options.election_year + " election";
+                return this.series.options.election_year + " Election<br>" + this.series.options.legislator_name + "<br/>Miseed " + this.y  + "% of Votes" + "<br/>" + x_axis_index_to_days(this.x) + " days before the " + this.series.options.election_year + " election";
             }
         },
         plotOptions: {
@@ -127,31 +151,31 @@ function build_chart(data) {
 		<li>Presidential Candidates</li>
 	</ol>
 
-	<h1>Presidential Candidates Miss Votes</h1>
-
 	<div style="float: right; margin: 0 2em 2em 2em">Updated: <span id="last-updated"> </span></div>
 
-	<h3>We compared the missed votes of the 2008 and 2012 presidential candidates who were also serving in Congress at the time.</h3>
+	<h1>Presidential Candidates Miss Votes</h1>
 
-	<h2><span>Over Time</span></h2>
+	<h2 style="margin: 1em 0;">
+	We compared the missed votes of the 2008 through 2020 presidential candidates who were also serving in Congress at the time.
+	</h2>
 
-	<p>As the party primaries and caucuses near, candidates tend to miss more and more votes as they are out fundraising and campaigning.</p>
+	<p>As primaries, caucuses, and the election near, candidates tend to miss more and more votes as they are out fundraising and campaigning.</p>
 
-	<p>We looked at the 640-day period before the 2008 and 2016 elections to see when candidates begin to miss votes and how that trend continues up to the election. The horizontal axis is the number of days ahead of the corresponding election. Each candidate&rsquo;s missed vote percent is plotted over time, until the candidate ended his or her campaign.</p>
-
-	<p>The plots for the 2008 and 2016 elections are overlayed. The lines for the 2016 candidates stop at the line marked &ldquo;Today.&rdquo;</p>
+	<p>We looked at corresponding time periods before the <span id="election-years-list"> </span> elections to see when presidential candidates begin to miss votes and how that trend continues up to the election.
+	The chart below is organized from left to right by the number of days ahead of the each election. Each candidate&rsquo;s missed vote percent is plotted over time, until the candidate ended his or her campaign.
+	The elections are overlayed. The lines for the current candidates in the <span id="election-year-current"> </span> election stop at the vertical bar marked &ldquo;Today.&rdquo;</p>
 
 	<div style="margin: 2em 0">
 		<div id="chart"> </div>
 	</div>
 
+<hr>
+{% include "ad_footer_leaderboard.html" %}
+<hr>
+
 	<h2><span>By The Numbers</span></h2>
 
-	<p>We also computed some totals using corresponding time periods in each election.</p>
-
-	<p>For the 2016 election, we looked at votes in the last year <em>and</em> votes in the year before that, so that you can see how the candidates voted before their run for president and during this last year of their campaigning. For the 2008 election, we looked at the corresponding one-year time period ending, like today, <span class="days-before-election"> </span> days ahead of the election, plus the one-year time period before that for comparison.</p>
-
-	<p><em>Because Clinton was only serving in Congress simultaneously during her 2008 campaign, she is listed among the 2008 candidates.</em></p>
+	<p>To see how candidates step away from Congress during campaigns, we compared the missed votes in the preceding <span class="window-size"> </span> days to the <span class="window-size"> </span> day period before that, and corresponding time periods for past elections (i.e. <span id="days-before-election-minus-window-size"> </span> to <span class="days-before-election"> </span> days ahead of the election and the <span class="window-size"> </span> days before that). You can see how the candidates voted before their run for president and during the most recent period of their campaigning.</p>
 
 	<table id="window-data" class="table" style="width: auto; margin-top: 1.5em">
 	<thead>
@@ -176,10 +200,6 @@ function build_chart(data) {
 
 </div><!-- margin -->
 </div><!-- /container-fluid -->
-
-<hr>
-
-{% include "ad_footer_leaderboard.html" %}
 
 {% endblock %}
 
