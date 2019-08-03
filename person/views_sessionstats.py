@@ -17,7 +17,7 @@ stat_titles = {
     "ideology": { "title": "Ideology Score", "icon": "congress-members", "verb": ("Ranked", "", ""), "superlatives": ("most conservative", "most liberal") },
     "leadership":  { "title": "Leadership Score", "icon": "congress-members", "verb": ("Ranked", "the", ""), "superlatives": ("top leader", "bottom/follower") },
     "committee-positions":  { "title": "Committee Positions", "icon": "committees", "verb": ("Held", "the", ""), "superlatives": ("most committee positions", "fewest committee positions") },
-    "transparency-bills":  { "title": "Government Transparency", "icon": "open-government", "verb": ("Supported government transparency", "the", ""), "superlatives": ("most often", "least oftenn") },
+    "transparency-bills":  { "title": "Government Transparency", "icon": "open-government", "verb": ("Supported government transparency", "the", ""), "superlatives": ("most often", "least often") },
 }
 
 def get_cohort_name(key, longform=False):

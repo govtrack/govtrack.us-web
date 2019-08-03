@@ -180,7 +180,7 @@ def do_site_search(q, allow_redirect=False, request=None):
         "title": "Members of Congress",
         "href": "/congress/members/all",
         "qsarg": "name",
-        "noun": "Members of Congress, Presidents, or Vice Presidents",
+        "noun": "Members of Congress",
         "results": [
             {"href": p.object.get_absolute_url(),
              "label": p.object.name,
