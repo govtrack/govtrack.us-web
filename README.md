@@ -50,6 +50,31 @@ At the end:
     # Start the debug server.
     ./manage.py runserver
 
+### Getting test data
+
+The Vagrantfile automatically loads current legislator information from the live site. The site draws on about a dozen different data sources.
+
+#### Bills & votes
+
+To get bill and vote data, you'll need to run the "congress" project scrapers.
+
+If you used Vagrant, use `vagrant ssh` to go into the virtual machine. Otherwise, perform these steps in this project's main directory:
+
+    sudo apt install python-dev libxml2-dev libxslt1-dev libz-dev python-pip # see congress project deps
+    git clone https://github.com/unitedstates/congress congress-project
+    cd congress-project/
+    pip2 install -r requirements.txt 
+    python2 run govinfo --bulkdata=BILLSTATUS --congress=116
+    python2 run bills --log=debug --govtrack
+    python2 run votes --log=debug --govtrack
+    cd ..
+    mkdir -p local
+    cho "CONGRESS_DATA_PATH=congress-project/data" >> local/settings.env
+    mkdir -p data/historical-committee-membership
+    echo "<stub/>" > data/historical-committee-membership/116.xml
+    ./parse.py bill
+    ./parse.py vote
+
 ### Configuration
 
 Some features of the site require additional configuration. To set configuration variables, create a file named `local/settings.env` and set any of the following optional variables (defaults are shown where applicable):

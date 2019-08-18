@@ -129,7 +129,7 @@ def main(options):
         files = glob.glob(settings.CONGRESS_DATA_PATH + '/%s/votes/*/*/data.xml' % options.congress)
         log.info('Parsing rolls of only congress#%s' % options.congress)
     else:
-        files = glob.glob('data/congress/*/votes/*/*/data.xml')
+        files = glob.glob(settings.CONGRESS_DATA_PATH + '/*/votes/*/*/data.xml')
     log.info('Processing votes: %d files' % len(files))
     total = len(files)
     progress = Progress(total=total, name='files', step=10)
@@ -148,7 +148,7 @@ def main(options):
     for fname in files:
         progress.tick()
 
-        match = re.match(r"data/congress/(?P<congress>\d+)/votes/(?P<session>[ABC0-9]+)/(?P<chamber>[hs])(?P<number>\d+)/data.xml$", fname)
+        match = re.search(r"(?P<congress>\d+)/votes/(?P<session>[ABC0-9]+)/(?P<chamber>[hs])(?P<number>\d+)/data.xml$", fname)
         
         try:
             existing_vote = Vote.objects.get(congress=int(match.group("congress")), chamber=chamber_mapping[match.group("chamber")], session=match.group("session"), number=int(match.group("number")))

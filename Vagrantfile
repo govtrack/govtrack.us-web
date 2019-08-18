@@ -77,12 +77,7 @@ Vagrant.configure(2) do |config|
     ./manage.py loaddata /tmp/django-fixture-committees.json
     ./manage.py loaddata /tmp/django-fixture-billterms.json
 
-    # Fetch some data about bills and votes.
-    echo Fetching a subset of data files about bills and votes...
-    build/rsync.sh
-    echo And now am loading it into the database...
-    ./parse.py bill --congress=115
-    ./parse.py vote --congress=115
+    # Bills and votes are harder to fetch. See the README.
 
     # Update search indexes.
     echo "Initializing search indexes (this part takes a long while)..."
