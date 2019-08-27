@@ -114,7 +114,7 @@ Additionally, some data files are stored in separate repositories and must be ob
 * congress project bill status data (etc.)
 * congress-legislators data
 * legislator photos (static/legislator-photos is symlinked to ../data/legislators-photos/photos, so this must go in `data` for now)
-* GovTrack's scorecards, miscondut, and name pronuciation repositories
+* GovTrack's scorecards, misconduct, and name pronuciation repositories
 
 # Credits
 
