@@ -178,6 +178,11 @@ blockquote {
 		text-align: center;
 		font-size: 12px;
 		}
+@media screen and (max-width: 768px) {
+	.ads {
+		border: 1px dashed #555;
+	}
+}
 
 /* MASTER LAYOUT */
 
