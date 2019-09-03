@@ -87,6 +87,35 @@ def bill_details(request, congress, type_slug, number):
         "legislator_statements": fetch_statements(bill),
     }
 
+@anonymous_view
+@render_to('bill/bill_key_questions.html')
+def bill_key_questions(request, congress, type_slug, number):
+    # load bill and text
+    bill = load_bill_from_url(congress, type_slug, number)
+    text_info = bill.get_text_info(with_citations=True)
+
+    # load stakeholder positions
+    from stakeholder.models import BillPosition
+    stakeholder_posts = bill.stakeholder_positions\
+        .filter(post__stakeholder__verified=True)\
+        .select_related("post", "post__stakeholder")\
+        .order_by('-created')
+    def add_position_return_post(bp): bp.post.position = bp.position; return bp.post
+    stakeholder_posts = [add_position_return_post(bp) for bp in stakeholder_posts]
+
+    # context
+    return {
+        'bill': bill,
+        "congressdates": get_congress_dates(bill.congress),
+        "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
+        "prognosis": bill.get_prognosis_with_details(),
+        "text_info": text_info,
+        "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
+        "stakeholder_posts": stakeholder_posts,
+        "legislator_statements": fetch_statements(bill),
+    }
+
+
 def fixup_text_incorporation(text_incorporation):
     if text_incorporation is None:
         return text_incorporation

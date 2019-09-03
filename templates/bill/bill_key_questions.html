@@ -1,0 +1,60 @@
+{% extends "bill/bill-pages-layout.html" %}
+{% load humanize %}
+{% load govtrack_utils %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}Questions for {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}Questions for {{bill|truncatewords:24}}{% endblock %}
+
+{% block body %}
+
+{{block.super}}
+
+<h2><span>Content</span></h2>
+
+In general, what would you say is the subject of this bill?
+<br>
+<br>
+What do you know about the bill sponsor and cosponsors? Does this help you understand the bill? 
+<br>
+<br>
+{% if legislator_statements %}
+Some Members of Congress have issued press releases about this bill. What do they tell you about the bill?
+<br>
+<br>
+{% endif %}
+{% if bill.find_reintroductions|length > 0  %}
+This bill has been introduced in another Congress. What has changed between versions?
+ (Hint: You can compare the bill’s text to its
+ previous versions on the right hand side of the text page.)
+<br>
+<br>
+{% endif %}
+
+<h2><span>Analysis</span></h2>
+
+{% if stakeholder_posts %}
+A third-party stakeholder has made a statement about this bill. What is their relationship to the bill?
+ Does their perspective help you understand the bill?
+<br>
+<br>
+{% endif %}
+What kind of expert would be able to tell you more about the policies this bill would impact?
+<br>
+<br>
+Who is this bill likely to affect?
+<br>
+<br>
+Is this bill important?
+<br>
+<br>
+
+<h2><span>Action</span></h2>
+What can your Member of Congress do to impact this bill? (Hint: Is your Member on a committee this bill was assigned to?)
+<br>
+<br>
+What organizations are working to impact the passage of this bill?
+
+{% endblock %}

@@ -336,6 +336,8 @@ function saveUserPosition() {
     <li role="presentation" {% if is_on_bill_text_page %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/text" role="tab">Text</a></li>
 	{% endif %}
 
+    <li role="presentation" {% if page == "/keyquestions" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/keyquestions" role="tab">Key Questions</a></li>
+
 </ul>
 
 {# can't be in the sidebar because sidebar styling messes up the modal title #}

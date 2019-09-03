@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^(\d+)/([a-z]+)(\d+)$', bill.views.bill_details, name='bill_details'),
     url(r'^(\d+)/([a-z]+)(\d+)/summary$', bill.views.bill_summaries, name='bill_summaries'),
     url(r'^(\d+)/([a-z]+)(\d+)/details$', bill.views.bill_full_details, name='bill_full_details'),
+    url(r'^(\d+)/([a-z]+)(\d+)/keyquestions$', bill.views.bill_key_questions, name='bill_key_questions'),
     url(r'^(\d+)/([a-z]+)(\d+)/text(?:/([a-z0-9]+))?$', bill.views.bill_text, name='bill_text'),
     url(r'^(\d+)/([a-z]+)(\d+)/widget$', bill.views.bill_widget_info),
     url(r'^(\d+)/([a-z]+)(\d+)/widget\.html$', bill.views.bill_widget),
