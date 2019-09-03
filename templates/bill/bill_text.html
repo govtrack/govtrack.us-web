@@ -351,7 +351,7 @@ window.document.addEventListener("DOMContentLoaded", function() {
 
 	<div class="row" style="margin-top: 2.25em">
 		<div class="col-sm-8">
-			<p style="margin-bottom: 1.5em">The text of the bill below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
+			<p style="margin-bottom: 1.5em">The text of the {{bill.noun}} below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
 
 			{% if not is_latest %}
 				<div class="alert alert-warning" role="alert">
@@ -404,7 +404,7 @@ window.document.addEventListener("DOMContentLoaded", function() {
 
 	<div id="main_text_content" class="bill_text_content">
 	{% if not textdata.text_html %}
-		<p>The text of this bill is not yet available. Please check back soon.</p>
+		<p>The text of this {{bill.noun}} is not yet available. Please check back soon.</p>
 	{% else %}
 			{{textdata.text_html|safe}}
 	{% endif %}
@@ -449,7 +449,7 @@ window.document.addEventListener("DOMContentLoaded", function() {
 	<div>
 		<h2>Compare this {{bill.noun}} to another bill:</h2>
 		<select size="1" onchange="if ($(this).val() == '') hide_comparison(); else load_comparison($(this).val().split(/ /)[0], $(this).val().split(/ /)[1]);" class="form-control compare-to">
-			<option value="">(Select Bill)</option>
+			<option value="">(Select)</option>
 			{% for rb, bv in related_bills %}
 				<option value="{{rb.id}} {{bv}}">
 				 	{% if rb.congress == bill.congress %}{{rb.display_number_no_congress_number}}{% else %}{{rb.display_number_with_congress_number}}{% endif %} {{rb.title_no_number|truncatewords:15}}
