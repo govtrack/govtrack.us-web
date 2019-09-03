@@ -1,0 +1,136 @@
+{% extends "bill/bill-pages-layout.html" %}
+{% load humanize %}
+{% load govtrack_utils %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}Questions for {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}Questions for {{bill|truncatewords:24}}{% endblock %}
+
+{% block head %}
+{{block.super}}
+<style>
+	#study-guide {
+		font-size: 16px;
+	}
+	#study-guide li {
+		margin: .25em 0 .75em 0;
+	}
+</style>
+{% endblock %}
+
+{% block body %}
+
+{{block.super}}
+
+<div class="panel panel-info">
+	<div class="panel-body">
+<p>How well do you know {{bill.display_number}}? Use this study guide to find out.</p>
+
+<p style="margin-bottom: 0">You can find answers to most of the questions below here on GovTrack.us, including on the overview,
+{% with bill.oursummary as summary1 %}
+{% with bill.get_formatted_summary as summary2 %}
+{% if summary1 or summary2 %} summary,{% endif %}{% endwith %}{% endwith %}
+ details, and text tabs for this {{bill.noun}} at the top of this page.</p>
+</div>
+</div>
+
+<div id="study-guide">
+
+<h2><span>What would this {{bill.noun}} do?</span></h2>
+
+<ol>
+
+<li>In a few words, what would you say is the subject of this {{bill.noun}}?</li>
+
+{% if text_info.numpages|length > 30 %}
+<li>The text of this {{bill.noun}} is {{text_info.numpages}} long.
+ What strategies could you use to learn about the {{bill.noun}} without having to
+ read it all?</li>
+{% endif %}
+
+{% if text_info.numpages|length < 10 and text_info.numpages|length > 0 %}
+<li>This {{bill.noun}} is only {{text_info.numpages}} long. Are you able to understand it?
+ Does being short make the {{bill.noun}} less significant?</li>
+{% endif %}
+
+{% if not text_info.numpages %}
+<li>The text of this {{bill.noun}} is not available yet. 
+How else might you learn about what the {{bill.noun}} would do?</li>
+{% endif %}
+
+{% with bill.oursummary as summary1 %}
+	{% with bill.get_formatted_summary as summary2 %}
+	{% if summary1 or summary2 %}
+		<li>There is a summary available for this {{bill.noun}}. 
+		Does it help you understand what the {{bill.noun}} would do?</li>
+	{% endif %}
+	{% endwith %}
+{% endwith %}
+
+<li>Who is this {{bill.noun}} likely to impact?</li>
+
+<li>Is this {{bill.noun}} important?</li>
+
+</ol>
+
+<h2><span>What else do you know about this {{bill.noun}}?</span></h2>
+
+<ol>
+
+<li>What do you know about the sponsor? 
+Is this the kind of {{bill.noun}} you would expect from them? Why or why not?</li>
+
+{% if legislator_statements %}
+<li>Some Members of Congress have made statements about this {{bill.noun}}.
+ What do those statements tell you about the {{bill.noun}}?
+ Do the statements agree about what the {{bill.noun}} would do?</li>
+{% endif %}
+
+{% if bill.find_reintroductions|length > 0  %}
+<li>This {{bill.noun}} has been introduced in another Congress. What has changed between versions?
+ (Hint: You can compare its text to
+ previous versions on the right hand side of the text page.)</li>
+{% endif %} 
+
+{# Add links later #}
+
+{% if stakeholder_posts %}
+<li>A stakeholder organization has made a statement about this {{bill.noun}}.
+ What is their relationship to the bill?
+ How does their perspective help you understand the {{bill.noun}}?
+ Is anyone talking about the {{bill.noun}} off of GovTrack?</li>
+{% endif %}
+
+{% if not stakeholder_posts %}
+<li>Step away from GovTrack for a moment.
+ Is anyone talking about this {{bill.noun}}?
+ How does their perspective help you understand the {{bill.noun}}?</li>
+{% endif %}
+
+<li>What kind of expert would be able to tell you more about the policies this {{bill.noun}} would impact?</li>
+
+</ol>
+
+<h2><span>What can you do about this {{bill.noun}}?</span></h2>
+
+<ol>
+
+<li>What can your Member of Congress do to impact this {{bill.noun}}?
+ (Hint: Are your representative or senators on a committee this {{bill.noun}}
+ was assigned to?)</li>
+
+<li>What organizations are working to impact the passage of this {{bill.noun}}?</li>
+
+</ol>
+
+<hr style="margin: 2em 0;">
+
+<p class="text-info">
+Each bill&rsquo;s study guide is a little different &mdash; we automatically choose which questions to include based on the information we have available about the bill.
+Bill study guides are a new feature to GovTrack. You can help us improve them by sending your feedback to <a href="mailto:hello@govtrack.us?subject=Bill study guide">hello@govtrack.us</a>.
+</p>
+
+</div>
+{% endblock %}
