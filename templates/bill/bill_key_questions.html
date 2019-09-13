@@ -44,13 +44,13 @@
 
 <li>In a few words, what would you say is the subject of this {{bill.noun}}?</li>
 
-{% if text_info.numpages|length > 30 %}
+{% if text_info.numpages >= 10 %}
 <li>The text of this {{bill.noun}} is {{text_info.numpages}} long.
  What strategies could you use to learn about the {{bill.noun}} without having to
  read it all?</li>
 {% endif %}
 
-{% if text_info.numpages|length < 10 and text_info.numpages|length > 0 %}
+{% if text_info.numpages < 10 and text_info.numpages > 0 %}
 <li>This {{bill.noun}} is only {{text_info.numpages}} long. Are you able to understand it?
  Does being short make the {{bill.noun}} less significant?</li>
 {% endif %}
