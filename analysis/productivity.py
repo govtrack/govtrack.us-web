@@ -52,7 +52,7 @@ def compute_productivity(congress, date_range, label=None):
 		# Bills since 1993 have GPO MODS XML metadata with page counts.
 		try:
 			mods = load_bill_text(b, None, mods_only=True)
-			enacted_bill_pages += int(mods.get("numpages").replace(" pages", ""))
+			enacted_bill_pages += mods.get("numpages")
 		except (IOError, AttributeError):
 			# For historical statutes we only have plain text from the
 			# Statutes at Large, extracted from PDFs. We can get page

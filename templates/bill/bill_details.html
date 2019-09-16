@@ -348,7 +348,7 @@
 		<a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a>
 		<small><br>Last Updated: {{text_info.docdate}}
 		{% if text_info.numpages %}
-		<br>Length: {{text_info.numpages}}
+		<br>Length: {{text_info.numpages_display}}
 		{% endif %}
 		</small>
 	</div>
@@ -521,7 +521,7 @@
 							<a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a>
 							<small><br>Last Updated: {{text_info.docdate}}
 							{% if text_info.numpages %}
-							<br>Length: {{text_info.numpages}}
+							<br>Length: {{text_info.numpages_display}}
 							{% endif %}
 							</small>
 						</p>

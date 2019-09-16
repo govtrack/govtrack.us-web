@@ -23,8 +23,6 @@ for congress, session, startdate, enddate in get_all_sessions():
 
 		try:
 			pp = load_bill_text(b, None, mods_only=True).get("numpages")
-			pp = int(pp.replace(" pages", ""))
-
 			t = load_bill_text(b, None, plain_text=True)
 			wds = len(t.split(" "))
 		except IOError:

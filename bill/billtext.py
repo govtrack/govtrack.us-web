@@ -110,7 +110,7 @@ def load_bill_mods_metadata(fn):
     gpo_pdf_url = mods.xpath("string(mods:location/mods:url[@displayLabel='PDF rendition'])", namespaces=ns)
     doc_version = mods.xpath("string(mods:extension/mods:billVersion)", namespaces=ns)
     numpages = mods.xpath("string(mods:physicalDescription/mods:extent)", namespaces=ns)
-    if numpages: numpages = re.sub(r" p\.$", " pages", numpages)
+    if numpages: numpages = int(re.sub(r" p\.$", "", numpages))
     
     docdate = datetime.date(*(int(d) for d in docdate.split("-")))
     doc_version_name = get_gpo_status_code_name(doc_version)
@@ -136,6 +136,7 @@ def load_bill_mods_metadata(fn):
         "doc_version": doc_version,
         "doc_version_name": doc_version_name,
         "numpages": numpages,
+        "numpages_display": (str(numpages) + " page" + ("s" if numpages != 1 else "")) if numpages is not None else None,
         "citations": citations,
     }
 

@@ -44,20 +44,18 @@
 
 <li>In a few words, what would you say is the subject of this {{bill.noun}}?</li>
 
-{% if text_info.numpages|length > 30 %}
-<li>The text of this {{bill.noun}} is {{text_info.numpages}} long.
- What strategies could you use to learn about the {{bill.noun}} without having to
- read it all?</li>
-{% endif %}
-
-{% if text_info.numpages|length < 10 and text_info.numpages|length > 0 %}
-<li>This {{bill.noun}} is only {{text_info.numpages}} long. Are you able to understand it?
- Does being short make the {{bill.noun}} less significant?</li>
-{% endif %}
-
 {% if not text_info.numpages %}
 <li>The text of this {{bill.noun}} is not available yet. 
 How else might you learn about what the {{bill.noun}} would do?</li>
+
+{% elif text_info.numpages > 10 %}
+<li>The text of this {{bill.noun}} is {{text_info.numpages_display}} long.
+ What strategies could you use to learn about the {{bill.noun}} without having to
+ read it all?</li>
+
+{% else %}
+<li>This {{bill.noun}} is only {{text_info.numpages_display}} long. Are you able to understand it?
+ Does being short make the {{bill.noun}} less significant?</li>
 {% endif %}
 
 {% with bill.oursummary as summary1 %}

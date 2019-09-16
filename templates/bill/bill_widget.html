@@ -132,7 +132,7 @@
 				{% if text_info and text_info.has_displayable_text %}
 				<dt>Text:</dt>
 				<dd>
-					<a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}/text" target="_blank">Read {{bill.noun|capfirst}} Text &raquo;</a> <span style="color: #777">({{text_info.numpages}})</span></dd>
+					<a href="{{SITE_ROOT_URL}}{{bill.get_absolute_url}}/text" target="_blank">Read {{bill.noun|capfirst}} Text &raquo;</a> <span style="color: #777">({{text_info.numpages_display}})</span></dd>
 				</dd>
 				{% endif %}
 				{% endwith %}

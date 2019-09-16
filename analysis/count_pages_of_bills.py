@@ -22,7 +22,6 @@ def doit(congress):
 		except IOError:
 			missing_text += 1
 			continue
-		pp = int(pp.replace(" pages", ""))
 		wds = len(load_bill_text(b, None, plain_text=True).split(" "))
 
 		all["count"] += 1

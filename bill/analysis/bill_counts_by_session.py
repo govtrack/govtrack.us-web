@@ -38,7 +38,7 @@ for congress, session, startdate, enddate in get_all_sessions():
 		status = mods["doc_version"]
 		if status is None or status.strip() == "": status = "UNKNOWN"
 		status_names[status] = mods["doc_version_name"]
-		pp = int(mods.get("numpages").replace(" pages", ""))
+		pp = mods.get("numpages")
 		page_counts[status] = page_counts.get(status, 0) + pp
 
 	for status, page_count in sorted(page_counts.items(), key = lambda kv : -kv[1]):

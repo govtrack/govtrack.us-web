@@ -43,7 +43,7 @@ def run_analysis(label, congress):
 		# Bills since 1993 have GPO MODS XML metadata with page counts.
 		try:
 			mods = load_bill_text(b, None, mods_only=True)
-			pages = int(mods.get("numpages").replace(" pages", ""))
+			pages = mods.get("numpages")
 		except (IOError, AttributeError) as e:
 			# For historical statutes we only have plain text from the
 			# Statutes at Large, extracted from PDFs. We can get page
