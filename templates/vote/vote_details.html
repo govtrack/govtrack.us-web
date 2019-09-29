@@ -410,7 +410,9 @@ $(function() {
                 	{{ item.option }}
                 </th>
                 <td style="padding: 0 6px 0 6px;">
+                  {% if item.percent is not None %}
                   {{ item.percent }}<span style="margin-left: 2px; font-size: 80%; color: #555;">%</span>
+                  {% endif %}
                 </td>
                 <td style="white-space: nowrap; text-align: left; padding: 5px 1vw 5px 5px;">
                     {% for count in item.party_counts %}<div style="width: {{10|mult:count.count|div:totals.max_option_count|floatformat:3}}vw; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 

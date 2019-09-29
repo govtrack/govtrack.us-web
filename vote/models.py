@@ -229,6 +229,17 @@ class Vote(models.Model):
             voters_by_option[option] = [x for x in all_voters if x.option == option]
         total_count = len(all_voters)
 
+        # How many legislators count toward or against passage? For most votes, only ayes
+        # and nays count toward a majority (i.e. present and not voting don't), or special
+        # votes like the name of a legislator in an election for speaker. However, Senate
+        # cloture votes require "3/5ths of senators duly sworn" or something, meaning,
+        # Senators who don't vote do count against the vote threshold. So use the total in
+        # that case and include present/not voting in the % breakdown.
+        if self.required == "3/5" and "Cloture" in self.question: # best way to detect but perhaps imperfect
+            total_count_voting = 0 # fall back to total body
+        else:
+            total_count_voting = len([x for x in all_voters if x.option.key not in ("0", "P")])
+
         # Find all parties which participated in vote
         # and sort them in order which they should be displayed
 
@@ -243,12 +254,24 @@ class Vote(models.Model):
         total_party_stats = dict((x, {'yes': 0, 'no': 0, 'other': 0, 'total': 0})\
                                  for x in all_parties)
 
-        # For each option find party break down,
-        # total vote count and percentage in total count
+        # For each option find the count, the percent of voting members, and the party break down.
         details = []
         for option in all_options:
             voters = voters_by_option.get(option, [])
-            percent = round(len(voters) / float(total_count) * 100.0)
+            if option.key in ("0", "P") and total_count_voting > 0:
+                # Present and not-voting are not counted toward passage so they
+                # are omitted from the percent, unless this is a quorum call and
+                # the only options are present or not voting, in which case we
+                # compute percentages across all legislators below.
+                percent = None
+            else:
+                # If this is a yes-no vote, then compute the percentage for this
+                # option using the yes/no voters only in the denominator. If there
+                # are none (it's a quorum call or Election of the Speaker vote),
+                # then compute across the whole body. This gives slightly the wrong
+                # idea for cloture votes, which require 3/5ths of senators sworn, i.e.
+                # not senators voting but all senators serving.
+                percent = int(round(len(voters) / float(total_count_voting or total_count) * 100.0))
             party_stats = dict((x, 0) for x in all_parties)
             for voter in voters:
                 party = voter.party
@@ -264,7 +287,7 @@ class Vote(models.Model):
             party_counts = [{"party": all_parties[i], "count": c} for i, c in enumerate(party_counts)]
                 
             detail = {'option': option, 'count': len(voters),
-                'percent': int(percent), 'party_counts': party_counts,
+                'percent': percent, 'party_counts': party_counts,
                 }
             if option.key == '+':
                 detail['yes'] = True
