@@ -1,9 +1,12 @@
 {% if format == "text" %}
-rundate: "2019-04-20"
-subject: "Subpoenas and Sorting the Democratic Contenders for President"
+rundate: "2019-10-05"
+subject: "New: Impeachment.guide"
 ----------
 {% endif %}
 
-Here come the subpoenas: Our [summary of recent House oversight activity](https://govtrackinsider.com/here-come-the-subpoenas-a-summary-of-recent-house-oversight-activity-6fd6003a191c) includes investigations of Russian election interference, security clearance subpoenas, subpoenas about the Census and border separation.
+Speaker of the House Nancy Pelosi has announced the start of a process to potentially impeach President Trump. But what is that process, and why start now?
 
-What can GovTrack data tell us about the nine most recent and current Members of Congress running for President? [Our analysis of the presidential field](https://govtrackinsider.com/what-can-govtrack-data-tell-us-about-the-nine-most-recent-and-current-members-of-congress-running-14bc37b1f4b8) looked at their ideology scores and legislation they sponsored in major policy areas.
+We’ve launched a new website, [impeachment.guide](https://impeachment.guide/), to answer these questions. You can find concise explanations of the events leading up to the impeachment inquiry, possible charges the President may face, and a timeline of the impeachment process as we know it.
+
+The information on [impeachment.guide](https://impeachment.guide/) is compiled from Congressional Research Services research reports, United States law, and key documents that initiated or contributed to the impeachment inquiry. We will be updating the website as new documents are released.
+

@@ -15,9 +15,10 @@ $(function() {
 		flags.hits = (parseInt(flags.hits) || 0) + 1;
 
 		!function() {
-			if (show_fundraise(flags)) return;
+			if (show_announcement(flags)) return;
+			//if (show_fundraise(flags)) return;
 			//if (show_usergroup(flags)) return;
-			if (show_followus(flags)) return;
+			//if (show_followus(flags)) return;
 		}();
 
 		// Save flags.
@@ -53,6 +54,14 @@ function show_fundraise(flags) {
 	if (flags.fundraise == 1) return false;
 	flags.fundraise = 1;
 	$('#fundraise_modal').modal();
+	return true;
+}
+
+function show_announcement(flags) {
+	// only show this modal once
+	if (flags.ancmt == 1) return false;
+	flags.ancmt = 1;
+	$('#run_of_site_announcement_modal').modal();
 	return true;
 }
 </script>
@@ -251,3 +260,25 @@ $(function() {
     </div>
   </div>
 </div>
+
+<div id="run_of_site_announcement_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="run_of_site_announcement_modal_title" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h2 class="modal-title" id="run_of_site_announcement_modal_title">
+    	    We&rsquo;re now tracking the impeachment inquiry
+    	</h2>
+      </div>
+      <div class="modal-body">
+	<p>An impeachment inquiry is the first step in a process that could result in the removal of President Trump from office.</p>
+	<p>Want to know how impeachment works? Need help keeping track of the inquiry&rsquo;s status and its findings? We have a new website for you. Check out:</p>
+	<div style="font-size: 115%; font-weight: bold;">
+		<p><a href="https://impeachment.guide">Impeachment.guide</a></p>
+	</div>
+	<p>The information on impeachment.guide is compiled from Congressional Research Services reseach reports, United States law, and key documents that initiated or contributed to the impeachment inquiry. We will be updating the website as new documents are released.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
