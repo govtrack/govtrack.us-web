@@ -490,7 +490,7 @@ def load_senate_floor_schedule_data():
               "hj": BillType.house_joint_resolution,
               "hc": BillType.house_concurrent_resolution,
             }
-            measure = bill_type + "|" + bill_number
+            if bill_type.endswith("TD"): continue # Treaty Document (measure = "116TD1")
             yield {
                 "date": d,
                 "bill_congress": congress,

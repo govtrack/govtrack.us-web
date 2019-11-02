@@ -44,6 +44,7 @@ def run_analysis_for_president(president, date_range):
 		try:
 			mods = load_bill_text(b, None, mods_only=True)
 			pages = mods.get("numpages")
+			if pages is None: raise IOError() # try another way
 		except (IOError, AttributeError) as e:
 			# For historical statutes we only have plain text from the
 			# Statutes at Large, extracted from PDFs. We can get page
