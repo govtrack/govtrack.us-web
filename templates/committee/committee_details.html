@@ -92,7 +92,8 @@
 			{% endif %}
 			</small></p>
 
-	{% if committee.oversight_topics.all|length %}
+
+  	{% if committee.oversight_topics.all|length %}
 	<section style="margin: 30px 0;">
 		<p>Related oversight &amp; investigations:</p>
 		<ul>
@@ -105,6 +106,7 @@
 		</ul>
 	</section>
 	{% endif %}
+	
 
 <div>
 	<ul class="nav nav-tabs" role="tablist">
@@ -116,6 +118,7 @@
 			<li role="presentation"><a href="#reports" aria-controls="reports" role="tab" data-toggle="tab">Reports</a></li>
         {% endif %}
 		{% if subcommittees %}<li role="presentation"><a href="#subcommittees" aria-controls="subcommittees" role="tab" data-toggle="tab">Subcommittees</a></li>{% endif %}
+		{% if press_statements %}<li role="presentation"><a href="#statements" aria-controls="statements" role="tab" data-toggle="tab">Press Statements</a></li>{% endif %}
 	</ul>
 
 	<div class="tab-content">
@@ -216,6 +219,20 @@
 				<li><a href="{{ item.get_absolute_url }}">{{ item.name_no_article }}</a></li>
 				{% endfor %}
 			</ul>
+		</div>
+		{% endif %}
+
+		{% if press_statements %}
+		<div id="statements" class="tab-pane">
+			<h2>Press Statements</h2>
+			  <p>Committee press statements from <a href="https://projects.propublica.org/represent/">ProPublica Represent</a>:</p>
+			  {% for sp in press_statements %}
+			    <p style="margin-bottom: .5em">
+			      &ldquo;<a href="{{sp.url}}" target="_blank">{{sp.title|truncatewords:50}}</a>&rdquo;
+			      <br><span style="font-size: 90%">&nbsp; &nbsp; &mdash;
+			      {{sp.date|date}}</span>
+			    </p>
+			  {% endfor %}
 		</div>
 		{% endif %}
 	</div><!-- /panes -->
