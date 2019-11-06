@@ -32,12 +32,12 @@ def new_stakeholder_post(request):
         organization = ChoiceField(choices=[(s.id, s.name) for s in user_admin_of_stakeholders],
           label="Your organization")
       if related_bill:
-        position = ChoiceField(choices=[(None, '(choose)'), (1, "Support"), (0, "Neutral"), (-1, "Oppose")], required=False,
+        position = ChoiceField(choices=[(None, '(choose)'), (1, "Support"), (0, "Neutral"), (-1, "Oppose")], required=True,
           label="Your organization's position on " + related_bill.display_number)
-        position_statement_link = URLField(required=False,
-          label="Link to webpage or PDF containing a position statement about " + related_bill.display_number + " (optional)")
-        position_statement_content = CharField(required=False, widget=Textarea,
-          label="Paste the text of your position statement about " + related_bill.display_number + " (optional)")
+        position_statement_link = URLField(required=True,
+          label="Link to webpage or PDF containing a position statement about " + related_bill.display_number)
+        position_statement_content = CharField(required=True, widget=Textarea,
+          label="Paste the text of your position statement about " + related_bill.display_number)
 
     if request.method == "GET":
         form = NewStakehoderForm()
