@@ -44,18 +44,51 @@
 
 <li>In a few words, what would you say is the subject of this {{bill.noun}}?</li>
 
+<div class="tips">
+	<p>This question is asking you to determine what areas of policy this bill is meant to impact. Doing so is an important first step in analyzing the intentions behind the policy and its possible effects. To start, look at the bill’s title and see if it helps.</p>
+	{% if bill.subtitle %}
+	<p>A bill’s short title isn’t always an indicator of its substance. However, many bills come with a longer title that can be more explanatory. Try looking at this bill’s long title, found above Sponsor and Status on the <a href="{{bill.get_absolute_url}}">overview tab</a>.</p>
+	{% endif %}
+	{% if bill.committees.exists %}
+	<p>At the top of the <a href="{{bill.get_absolute_url}}/details">details tab</a>, you can find the committee assignments of this bill. Those will likely give a clue about the substance of the policy in the bill, as committees usually only look at bills within a certain jurisdiction.</p>
+	{% endif %}
+	{% if bill.get_terms_sorted|length > 0 %}
+	<p>The Library of Congress provides bill subject areas listed at the bottom of the <a href="{{bill.get_absolute_url}}/details">details tab</a>. When in doubt, refer to these.</p>
+	{% endif %}
+</div>
+
 {% if not text_info.numpages %}
 <li>The text of this {{bill.noun}} is not available yet. 
 How else might you learn about what the {{bill.noun}} would do?</li>
+
+<div class="tips">
+	<p>It’s hard to learn about legislation when the text isn’t available. The best way to do it is to gather context by looking to see if anyone is talking about this {{bill.noun}}.</p>
+	<p>Try entering the name of the {{bill.noun}} into your favorite search engine. Do you find any articles about it? Have any Members of Congress given hints as to what the {{bill.noun}} would do? However, if the text isn’t available and no one has anything to say about this {{bill.noun}}, it may be better to look at other legislation.</p>
+</div>
 
 {% elif text_info.numpages > 10 %}
 <li>The text of this {{bill.noun}} is {{text_info.numpages_display}} long.
  What strategies could you use to learn about the {{bill.noun}} without having to
  read it all?</li>
 
+<div class="tips">
+	<p>Even if you’re a lawyer, this bill is probably too long to be worth reading. It might not even be possible. Here are a few suggestions for understanding the bill without reading the whole thing:</p>
+	{% if bill.text_incorporation|length > 1 %}
+	<p>You’ve been tricked! This isn’t one bill, it’s several bills in a conga line! Actually, it’s called an “omnibus” bill, and it’s when Congress decides to pass a bunch of legislation in a single package. You can browse through the incorporated bills in the related bills section under the <a href="{{bill.get_absolute_url}}/details">details tab</a>. It may be better to investigate a few of those rather than the whole omnibus.</p>
+	{% endif %}
+	{% if legislator_statements or stakeholder_posts %}
+	<p>Someone has made a statement about this bill, which you can find in the position statements section under the <a href="{{bill.get_absolute_url}}">overview tab</a>. Member statements can be useful for analyzing a bill. Just keep in mind they have a stake in the game.</p>
+	{% endif %}
+
 {% else %}
 <li>This {{bill.noun}} is only {{text_info.numpages_display}} long. Are you able to understand it?
  Does being short make the {{bill.noun}} less significant?</li>
+
+<div class="tips">
+	<p>If you can understand the bill from reading it, bravo! If not, don’t worry. Even a short bill can be challenging to understand.</p>
+	<p>Try your best to read the <a href="{{bill.get_absolute_url}}/text">text of the bill</a> to get a sense of how it is written, and take note of what is easier or harder to understand. Don’t feel bad if the actual policy is unclear; sometimes it’s better to rely on analysis from legal experts to know what a bill would do. It may also be helpful to revisit the text after reading a summary or a press release.</p>
+</div>
+
 {% endif %}
 
 {% with bill.oursummary as summary1 %}
@@ -63,13 +96,21 @@ How else might you learn about what the {{bill.noun}} would do?</li>
 	{% if summary1 or summary2 %}
 		<li>There is a summary available for this {{bill.noun}}. 
 		Does it help you understand what the {{bill.noun}} would do?</li>
+		<div class="tips">
+			<p>GovTrack Insider summaries provide some context on the history of the issue and the arguments for or against the bill, plus information about the bill’s status and its likelihood of passage. We also collect summaries from the Library of Congress’ nonpartisan Congressional Research Services and, after removing biased language, from House GOP.</p>
+			<p>The goal of this study guide is to help you understand the bill well enough that you could write your own summary. Try using the summaries available as reference. You can find them under the <a href="{{bill.get_absolute_url}}/summary">summary tab</a>.</p>
+		</div>
 	{% endif %}
 	{% endwith %}
 {% endwith %}
 
-<li>Who is this {{bill.noun}} likely to impact?</li>
+<li>Who is this {{bill.noun}} likely to impact? Is this {{bill.noun}} important?</li>
 
-<li>Is this {{bill.noun}} important?</li>
+<div class="tips">
+	<p>These questions are related. Be sure to answer the first question before you answer the second. Even if you think this bill looks boring, is there anyone who would say otherwise?</p>
+	<p>Participating in a democracy isn’t just about representing your own interests; it’s also about representing the interests of your peers. When you look at a {{bill.noun}} before Congress you should consider who it will impact and how. Then you can make a judgment about whether the {{bill.noun}} matters and whether you support it.</p>
+	<p>Try coming up with a list of who will be affected by this {{bill.noun}} and how. When you think you’re done with your list, ask yourself one more time: Is this {{bill.noun}} important?</p>
+</div>
 
 </ol>
 
@@ -80,16 +121,35 @@ How else might you learn about what the {{bill.noun}} would do?</li>
 <li>What do you know about the sponsor? 
 Is this the kind of {{bill.noun}} you would expect from them? Why or why not?</li>
 
+<div class="tips">
+	<p>The {{bill.noun}}’s primary sponsor is displayed at the top of the <a href="{{bill.get_absolute_url}}">overview tab</a>. The <a href="{{bill.sponsor.get_absolute_url}}">sponsor's GovTrack page</a> provides information about their history and recent actions in Congress.{% if bill.cosponsor_count > 0 %} Similarly, you’ll find a list of cosponsors at the top of the <a href="{{bill.get_absolute_url}}/details">details tab</a>.{% endif %}</p>
+	<p>The most immediate thing you might notice about the sponsor is their party. Here are some other factors to consider when thinking about the {{bill.noun}}’s sponsor, all of which can be found on the sponsor’s page:</p>
+	<p>Where do they represent? Is this {{bill.noun}} uniquely important to the sponsor’s constituents?</p>
+	<p>What committees are they on? If they are on a committee this {{bill.noun}} was assigned to, they will have greater influence over its passage.</p>
+	<p>Where do they fall on the GovTrack Ideology-Leadership Chart? We publish an analysis of members’ cosponsorships to give an idea of where each member falls on the political spectrum, and how much influence they have in Congress. This information could be helpful context for understanding the {{bill.noun}}.</p>
+	<p>These are only a few of the factors at play when a member chooses to sponsor legislation. What wasn’t on this list that should be?</p>
+</div>
+
 {% if legislator_statements %}
 <li>Some Members of Congress have made statements about this {{bill.noun}}.
  What do those statements tell you about the {{bill.noun}}?
  Do the statements agree about what the {{bill.noun}} would do?</li>
+
+<div class="tips">
+	<p>One way to learn more about a {{bill.noun}} is to look at what members of Congress say about it. You can find press releases about this {{bill.noun}} made by members of Congress in the position statements section of the <a href="{{bill.get_absolute_url}}">overview tab</a>, or at <a href="{{bill.propublica_represent_link}}/statements">ProPublica Represent</a>.</p>
+	<p>When a member makes a press release about a {{bill.noun}} they signal that the {{bill.noun}} is important, and often include their argument in support or opposition of it. Understanding those arguments is informative for understanding the {{bill.noun}} itself.</p>
+</div>
+
 {% endif %}
 
 {% if bill.find_reintroductions|length > 0  %}
-<li>This {{bill.noun}} has been introduced in another Congress. What has changed between versions?
- (Hint: You can compare its text to
- previous versions on the right hand side of the text page.)</li>
+<li>This {{bill.noun}} has been introduced in another Congress. What has changed between versions?</li>
+
+<div class="tips">
+	<p>You can view the previous versions of this {{bill.noun}} in the related bills section of the <a href="{{bill.get_absolute_url}}/details">details tab</a>. You can also compare this {{bill.noun}}’s text to previous versions or related legislation by using the comparison tool on the right hand side of the <a href="{{bill.get_absolute_url}}/text">text tab</a>.</p>\
+	<p>It’s not uncommon for legislation to be reintroduced across multiple sessions of Congress. Since this {{bill.noun}} failed to pass in a previous session of Congress, its supporters have given it another chance by reintroducing it. Did they make any changes to the {{bill.noun}} to improve its chances? Have the sponsor and cosponsors changed between iterations of the {{bill.noun}}?</p>
+</div>
+
 {% endif %} 
 
 {# Add links later #}
@@ -97,29 +157,62 @@ Is this the kind of {{bill.noun}} you would expect from them? Why or why not?</l
 {% if stakeholder_posts %}
 <li>A stakeholder organization has made a statement about this {{bill.noun}}.
  What is their relationship to the bill?
- How does their perspective help you understand the {{bill.noun}}?
- Is anyone talking about the {{bill.noun}} off of GovTrack?</li>
+ How does their perspective help you understand the {{bill.noun}}?</li>
+
+<div class="tips">
+	<p>Sometimes organizations with a stake in legislative policy make a statement directly on GovTrack bill pages to let users know their perspective. It looks like an organization has done so for this {{bill.noun}}. Take a look at what the organization has to say about the {{bill.noun}}. Do they have an opinion on whether it should pass? What aspects of the {{bill.noun}} have they chosen to highlight?</p>
+	<p>You can find out in the position statements section in the middle of the <a href="{{bill.get_absolute_url}}">overview tab</a>.</p>
+	<p>Remember to be aware of the who is making each statement. Examining a political organization in depth is a challenging task of its own, but it is important to at least keep in mind that the leadership and goals of a stakeholder can change their perspective.</p>
+</div>
 {% endif %}
 
 {% if not stakeholder_posts %}
 <li>Step away from GovTrack for a moment.
  Is anyone talking about this {{bill.noun}}?
  How does their perspective help you understand the {{bill.noun}}?</li>
+
+<div class="tips">
+	<p>It’s important to compare information from various sources. What other resources could you use to put the information on GovTrack into context? Has anyone else written about the {{bill.noun}}? Try putting the name of the {{bill.noun}} into your favorite search engine to see what comes up. You might find there is already a conversation going on around the {{bill.noun}}, or perhaps this {{bill.noun}} isn’t getting much attention.</p>
+	<p>If you can, you should look at multiple sources with varying perspectives. Don’t take what any news article or organization says for granted without comparing it to a few other sources.</p>
+</div>
 {% endif %}
 
 <li>What kind of expert would be able to tell you more about the policies this {{bill.noun}} would impact?</li>
 
+<div class="tips">
+	<p>Congress often calls in expert witnesses to explain nuanced policy issues. Members of Congress on whichever committee has been assigned to review the {{bill.noun}} will seek out these experts depending on the legislative topic. For example, legislation about nuclear power plants might be referred to the House Committee on Energy and Commerce. Since most of the representatives who serve on that committee are likely not nuclear scientist, they will call in those scientists to explain important details about nuclear energy.</p>
+	<p>By now you should have an idea of the policies, or at least areas of policy, in this {{bill.noun}}. Given that knowledge, what type of experts would you want to hear from to learn more about this {{bill.noun}}? Try to get as specific as you can.</p>
+</div>
 </ol>
 
 <h2><span>What can you do about this {{bill.noun}}?</span></h2>
 
 <ol>
 
+<li>How can you impact your government?</li>
+
+<div class="tips">
+	<p>Start with the basics. What are some of the tools available for Americans to interact with their government? How would you apply those tools to this {{bill.noun}}?</p>
+	<p>Keep in mind that {{bill.noun}}s sometimes get reintroduced to multiple sessions of Congress before ever getting a vote. Odds are good that a given {{bill.noun}} won’t get passed, but maybe there are ways you can help give it another shot. If you think this {{bill.noun}} is not likely to pass in the current session of Congress, how might you try to get it reintroduced in the next one?</p>
+</div>
+
 <li>What can your Member of Congress do to impact this {{bill.noun}}?
  (Hint: Are your representative or senators on a committee this {{bill.noun}}
  was assigned to?)</li>
 
+<div class="tips">
+	<p>In our representative democracy, each member of Congress has an obligation to their constituents. That means your representatives ar the most likely to be responsive to your concerns, since they care about your vote. What can you ask of them?</p>
+	<p>At a minimum, they can vote for a {{bill.noun}} if the chance comes up. But maybe they have more power than that. Is your representative on a committee this {{bill.noun}} was assigned to? If so, they can push for the {{bill.noun}} to get a floor vote. Is your representative in a leadership position? Maybe they can trade favors with another Member of Congress to help advance this {{bill.noun}}.</p>
+	<p>If you aren’t sure who your representatives are, you can find them by <a href="https://www.govtrack.us/congress/members/map">entering your address here</a>. Then try looking at their GovTrack pages to see information such as their committee positions, leadership scores, and frequent cosponsors to get a sense of what they can do.</p>
+</div>
+
 <li>What organizations are working to impact the passage of this {{bill.noun}}?</li>
+
+<div class="tips">
+	<p>The best way to impact a {{bill.noun}} is to get help. It’s nigh impossible for one person to make a significant change in a democracy, but as a group you can make a difference. Advocacy organizations, think tanks, caucuses and other legislative stakeholders are constantly working to influence whether a {{bill.noun}} passes. Are there any organizations interested in this {{bill.noun}}? Try using your favorite search engine to find out.</p>
+	<p>If there are, and you agree with their positions and methods, you may want to join or support that organization. You can help that organization accomplish its goals by volunteering for them or donating some money.</p>
+	<p>If there isn’t an organization you like, maybe you need to do the next best thing: Make one! Grassroots movements form all the time when many people care about an issue that isn’t getting enough attention. Do you know many other people who care as much about this {{bill.noun}} as you do? Starting a grassroots movement is a challenging task, but if there are a lot of people who care about this issue who aren’t being heard, it can be worth the effort.</p>
+</div>
 
 </ol>
 
