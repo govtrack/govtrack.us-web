@@ -125,7 +125,7 @@ def fetch_statements(committee):
           })
         if statements["status"] != "OK": raise Exception()
         statements = statements["results"]
-    except ValueError:
+    except:
         return []
 
     # make simplified statements records
