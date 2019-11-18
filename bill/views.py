@@ -115,6 +115,13 @@ def bill_key_questions(request, congress, type_slug, number):
         "legislator_statements": fetch_statements(bill),
     }
 
+@user_view_for(bill_key_questions)
+def bill_key_questions_user_view(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    ret = { }
+    ret["reactions"] = get_user_bill_reactions(request, bill)
+    ret["position"] = get_user_bill_position_info(request, bill)
+    return ret
 
 def fixup_text_incorporation(text_incorporation):
     if text_incorporation is None:

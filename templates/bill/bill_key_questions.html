@@ -17,6 +17,22 @@
 	#study-guide li {
 		margin: .25em 0 .75em 0;
 	}
+	.tipstoggle {
+		display: inline-block;
+		margin: 0 .5em;
+		cursor: pointer;
+		color: #9D2146;
+		text-decoration: underline;
+		font-family: Quicksand;
+	}
+	.tips {
+		display: none;
+		border: 1px solid #9D2146;
+		background-color: #FFFBFA;
+		color: black;
+		padding: 1em 1em 0 1em;
+		margin-bottom: 1.5em;
+	}
 </style>
 {% endblock %}
 
@@ -223,6 +239,19 @@ Is this the kind of {{bill.noun}} you would expect from them? Why or why not?</l
 Each bill&rsquo;s study guide is a little different &mdash; we automatically choose which questions to include based on the information we have available about the bill.
 Bill study guides are a new feature to GovTrack. You can help us improve them by sending your feedback to <a href="mailto:hello@govtrack.us?subject=Bill study guide">hello@govtrack.us</a>.
 </p>
-
 </div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+	$(function() {
+		$('#study-guide li').each(function() {
+			var question = $(this);
+			var tip = question.next(".tips");
+			var togglebtn = $("<span class='tipstoggle'>Show Me Tips</span>");
+			question.append(togglebtn);
+			togglebtn.click(function() { tip.slideToggle(); });
+		});
+	});
+</script>
 {% endblock %}
