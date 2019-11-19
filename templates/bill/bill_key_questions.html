@@ -95,7 +95,8 @@ How else might you learn about what the {{bill.noun}} would do?</li>
 	{% if legislator_statements or stakeholder_posts %}
 	<p>Someone has made a statement about this bill, which you can find in the position statements section under the <a href="{{bill.get_absolute_url}}">overview tab</a>. Member statements can be useful for analyzing a bill. Just keep in mind they have a stake in the game.</p>
 	{% endif %}
-
+</div>
+	
 {% else %}
 <li>This {{bill.noun}} is only {{text_info.numpages_display}} long. Are you able to understand it?
  Does being short make the {{bill.noun}} less significant?</li>
