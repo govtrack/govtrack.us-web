@@ -84,6 +84,28 @@
           display: inline-block;
           margin: 0 .25em .25em 0;
         }
+	#study-guide {
+		font-size: 16px;
+	}
+	#study-guide li {
+		margin: .25em 0 .75em 0;
+	}
+	.tipstoggle {
+		display: inline-block;
+		margin: 0 .5em;
+		cursor: pointer;
+		color: #9D2146;
+		text-decoration: underline;
+		font-family: Quicksand;
+	}
+	.tips {
+		display: none;
+		border: 1px solid #9D2146;
+		background-color: #FFFBFA;
+		color: black;
+		padding: 1em 1em 0 1em;
+		margin-bottom: 1.5em;
+	}
 	</style>
 {% endblock %}
 {% block og_image %}
@@ -93,6 +115,19 @@
 {% endblock %}
 	
 {% block body_scripts %}
+
+<script>
+	$(function() {
+		$('#study-guide li').each(function() {
+			var question = $(this);
+			var tip = question.next(".tips");
+			var togglebtn = $("<span class='tipstoggle'>Show Me Tips</span>");
+			question.append(togglebtn);
+			togglebtn.click(function() { tip.slideToggle(); });
+		});
+	});
+</script>
+
 <script>
 var current_sort_column = null;
 function update_table() {
@@ -538,59 +573,67 @@ $(function() {
   </div>
 </div>
 
+<div>
 
-<div id="vote-details" class="section">
+	<ul class="nav nav-tabs" role="tablist">
+	   <li role="presentation" class="active"><a href="#details" aria-controls="details" role="tab" data-toggle="tab">Vote Details</a></li>
+	   <li role="presentation"><a href="#studyguide" aria-controls="studyguide" role="tab" data-toggle="tab">Study Guide</a></li>
+	</ul>
 
-<h2><span>Vote Details</span></h2>
+<div class="tab-content">
+   <div id="details" class="tab-pane active">
+	<div id="vote-details" class="section">
 
-<div id="vote_notes" class="clearfix">
-<div style="float: left">
-	<span>Notes: </span>
+	<h2>Details</h2>
 
-	{% if vote.chamber == 2 %}
-	<a href="#" onclick="return show_notes(this)" data-id="speakers_vote">The Speaker&rsquo;s Vote?</a>
-	<div id="notes_speakers_vote" class="popup-content">The Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk. (See <a href="http://www.gpo.gov/fdsys/pkg/HMAN-113/pdf/HMAN-113-houserules.pdf">House Rules</a>, Rule I(7).)</div>
-	{% endif %}
+	<div id="vote_notes" class="clearfix">
+	<div style="float: left">
+	   <span>Notes: </span>
 
-	{% if has_vp_vote %}
-	<a href="#" onclick="return show_notes(this)" data-id="vp">The Vice President&rsquo;s Tie-Breaker</a>
-	<div id="notes_vp" class="popup-content">
-	<p>The Vice President casts a vote in the Senate when there is a tie. This is extremely rare.</p>
-	<p>Article I, section 3 of the U.S. Constitution reads, &ldquo;The Vice President of the United States shall be President of the Senate, but shall have no Vote, unless they be equally divided.&rdquo;</p>
-	</div>
-	{% endif %}
+	   {% if vote.chamber == 2 %}
+	   <a href="#" onclick="return show_notes(this)" data-id="speakers_vote">The Speaker&rsquo;s Vote?</a>
+	   <div id="notes_speakers_vote" class="popup-content">The Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, except when such vote would be decisive.&rdquo; In practice, this means the Speaker of the House rarely votes and only does so when it is politically useful. When the Speaker declines to vote, he or she is simply omitted from the roll call by the House Clerk. (See <a href="http://www.gpo.gov/fdsys/pkg/HMAN-113/pdf/HMAN-113-houserules.pdf">House Rules</a>, Rule I(7).)</div>
+	   {% endif %}
 
-    {% if reconsiderers.0|length > 0 %}
-    <a href="#" onclick="return show_notes(this)" data-id="motiontoreconsider">*{{reconsiderers.1}}&rsquo;s Vote</a>
-    <div id="notes_motiontoreconsider" class="popup-content">
-        {% for v in reconsiderers.0 %}
-            <p>{{v.person_role.get_title_abbreviated}} {{v.person.name_no_details}} ({{v.party.0}}), the {{v.person_role.leadership_title}}, voted {{v.option.value}} against {{v.person.his_her}} party.</p>
-        {% endfor %}
-        <p>Somtimes a party leader will vote on the winning side, even if it is against his or her position, to have the right to call for a new vote under a <a href="https://www.senate.gov/reference/glossary_term/reconsider.htm">motion to reconsider</a>. For more, see <a href="http://www.washingtonpost.com/blogs/wonkblog/wp/2013/02/17/why-is-harry-reid-always-voting-against-his-own-plans/">this explanation</a> from The Washington Post.</p>
-        <p>We do not know the rationale behind any vote, however.</p>
-    </div>
-    {% endif %}
+	   {% if has_vp_vote %}
+	   <a href="#" onclick="return show_notes(this)" data-id="vp">The Vice President&rsquo;s Tie-Breaker</a>
+	   <div id="notes_vp" class="popup-content">
+	   <p>The Vice President casts a vote in the Senate when there is a tie. This is extremely rare.</p>
+	   <p>Article I, section 3 of the U.S. Constitution reads, &ldquo;The Vice President of the United States shall be President of the Senate, but shall have no Vote, unless they be equally divided.&rdquo;</p>
+	   </div>
+	   {% endif %}
 
-	{% if vote.source == 3 %}
-	<a href="#" onclick="return show_notes(this)" data-id="historical">Accuracy of Historical Records</a>
-	<div id="notes_historical" class="popup-content">
-	<p>Our database of roll call votes from 1789-1989 (1990 for House votes) comes from an academic data source, <a href="http://www.voteview.com">VoteView.com</a>,
-	that has digitized paper records going back more than 200 years. Because of the difficulty of this task, the accuracy of these vote records is reduced.</p>
-    <p>From October 2014 through July 2015, we displayed incorrect vote totals in some cases. Although the total correctly reflected the announced positions of
-    Members of Congress, the totals incorrectly included &ldquo;paired&rdquo; votes, which is when two Members of Congress, one planning to vote in favor and the
-    other against, plan ahead of time to both abstain.</p>
-	<p>In addition, these records do not always distinguish between Members of Congress not voting (abstaining) from Members of Congress who were not eligible to vote because
-	they had not yet taken office, or for other reasons. As a result, you may see extra not-voting entries and in these cases Senate votes may show more than 100 senators listed!</p>
-	</div>
-	{% endif %}
+       {% if reconsiderers.0|length > 0 %}
+       <a href="#" onclick="return show_notes(this)" data-id="motiontoreconsider">*{{reconsiderers.1}}&rsquo;s Vote</a>
+       <div id="notes_motiontoreconsider" class="popup-content">
+           {% for v in reconsiderers.0 %}
+               <p>{{v.person_role.get_title_abbreviated}} {{v.person.name_no_details}} ({{v.party.0}}), the {{v.person_role.leadership_title}}, voted {{v.option.value}} against {{v.person.his_her}} party.</p>
+           {% endfor %}
+           <p>Somtimes a party leader will vote on the winning side, even if it is against his or her position, to have the right to call for a new vote under a <a href="https://www.senate.gov/reference/glossary_term/reconsider.htm">motion to reconsider</a>. For more, see <a href="http://www.washingtonpost.com/blogs/wonkblog/wp/2013/02/17/why-is-harry-reid-always-voting-against-his-own-plans/">this explanation</a> from The Washington Post.</p>
+           <p>We do not know the rationale behind any vote, however.</p>
+       </div>
+       {% endif %}
 
-	<a href="#" onclick="return show_notes(this);" data-id="aye_yea">&ldquo;Aye&rdquo; or &ldquo;Yea&rdquo;?</a>
-	<div id="notes_aye_yea" class="popup-content">
-	<p>&ldquo;Aye&rdquo; and &ldquo;Yea&rdquo; mean the same thing, and so do &ldquo;No&rdquo; and &ldquo;Nay&rdquo;. Congress uses different words in different sorts of votes.</p>
-	<p>The U.S. Constitution says that bills should be decided on by the &ldquo;yeas and nays&rdquo; (Article I, Section 7). Congress takes this literally and uses &ldquo;yea&rdquo; and &ldquo;nay&rdquo; when voting on the final passage of bills.</p>
-	<p>All Senate votes use these words. But the House of Representatives uses &ldquo;Aye&rdquo; and &ldquo;No&rdquo; in other sorts of votes.</p>
-	</div>
-</div>
+   	   {% if vote.source == 3 %}
+	   <a href="#" onclick="return show_notes(this)" data-id="historical">Accuracy of Historical Records</a>
+	   <div id="notes_historical" class="popup-content">
+	   <p>Our database of roll call votes from 1789-1989 (1990 for House votes) comes from an academic data source, <a href="http://www.voteview.com">VoteView.com</a>,
+	   that has digitized paper records going back more than 200 years. Because of the difficulty of this task, the accuracy of these vote records is reduced.</p>
+       <p>From October 2014 through July 2015, we displayed incorrect vote totals in some cases. Although the total correctly reflected the announced positions of
+       Members of Congress, the totals incorrectly included &ldquo;paired&rdquo; votes, which is when two Members of Congress, one planning to vote in favor and the
+       other against, plan ahead of time to both abstain.</p>
+	   <p>In addition, these records do not always distinguish between Members of Congress not voting (abstaining) from Members of Congress who were not eligible to vote because
+	   they had not yet taken office, or for other reasons. As a result, you may see extra not-voting entries and in these cases Senate votes may show more than 100 senators listed!</p>
+	   </div>
+	   {% endif %}
+
+	   <a href="#" onclick="return show_notes(this);" data-id="aye_yea">&ldquo;Aye&rdquo; or &ldquo;Yea&rdquo;?</a>
+	   <div id="notes_aye_yea" class="popup-content">
+	   <p>&ldquo;Aye&rdquo; and &ldquo;Yea&rdquo; mean the same thing, and so do &ldquo;No&rdquo; and &ldquo;Nay&rdquo;. Congress uses different words in different sorts of votes.</p>
+	   <p>The U.S. Constitution says that bills should be decided on by the &ldquo;yeas and nays&rdquo; (Article I, Section 7). Congress takes this literally and uses &ldquo;yea&rdquo; and &ldquo;nay&rdquo; when voting on the final passage of bills.</p>
+	   <p>All Senate votes use these words. But the House of Representatives uses &ldquo;Aye&rdquo; and &ldquo;No&rdquo; in other sorts of votes.</p>
+	   </div>
+
 <div style="font-size: 90%; color: #777; float: right">
     Download as
     <a href="{{ vote.get_absolute_url }}/export/csv" rel="nofollow">CSV</a>
@@ -671,7 +714,102 @@ $(function() {
         </div>
 </div>
 </div>
+</div>
 
+
+<div id="studyguide" class="tab-pane">
+	<h2>Study Guide</h2>
+
+	<div class="panel panel-info">
+	   <div class="panel-body">
+	      <p>How well do you know understand this vote? Use this study guide to find out.</p>
+
+	      <p style="margin-bottom: 0">You can find answers to most of the questions below here on the vote page.
+	      {% if vote.related_bill %} For a guide to understanding the {{vote.related_bill.noun}} this vote was about, <a href="{{vote.related_bill.get_absolute_url}}/studyguide">see here</a>.</p>{% endif %}
+	   </div>
+	</div>
+
+	<div id="study-guide">
+	   
+	   <h2><span>What was the procedure for this vote?</span></h2>
+
+	   <ol>
+
+	   <li>What was this vote on?</li>
+
+	   <div class="tips">
+		<p>Not all votes are meant to pass legislation. In the Senate some votes are not about legislation at all, since the Senate must vote to confirm presidential nominations to certain federal positions.</p>
+		{% if vote.category == VoteCategory.nomination %}
+		<p>This vote was on a nomination by the President. Use your favorite search engine to find more about who was nominated and what the position entails. What branch of government is the position? What relevant experience does the nominee have?</p>
+		{% endif %}
+		{% if vote.related_bill %}
+		<p>This vote is related to a {{vote.related_bill.noun}}. However, that doesn’t necessarily tell you what it is about. Congress makes many decisions in the process of passing legislation, such as on the procedures for debating the {{vote.related_bill.noun}}, whether to change the {{vote.related_bill.noun}} before voting on passage, and even whether to vote on passage at all.</p>
+		{% endif %}
+		{% if vote.related_amendment %}
+		<p>This was a vote on an amendment to the {{vote.related_bill.noun}}. You can find the text of the amendment by looking for where it appears in the text of the <a href="{{vote.related_amendment.congressdotgov_link}}">Congressional Record</a>. If you’re wondering why Congress doesn’t make it easier to find the text of each amendment, so are we.</p>
+		{% endif %}
+		<p>You can learn more about the various motions used in Congress at <a href="https://www.everycrsreport.com">EveryCRSReport.com</a>. If you aren’t sure what the {{vote.chamber_name}} was voting on, try seeing if it’s on <a href="https://www.everycrsreport.com/reports/RL32207.html">this list</a>.</p>
+	   </div>
+
+	   <li>Given what this vote is on, what does a vote in favor mean?</li>
+
+	   <div class="tips">
+		<p>As we established previously, not all votes on a {{vote.related_bill.noun}} are on passage. In some cases Congress votes on whether to set aside a {{vote.related_bill.noun}} or send it back to committee, which can effectively kill the {{vote.related_bill.noun}}. In those cases a vote in favor is actually a vote against passing the {{vote.related_bill.noun}}, since it is a vote to let the {{vote.related_bill.noun}} remain in Congress.</p>
+	   </div>
+
+	   {% if vote.related_bill %}
+	   <li>What is the next step after this vote?</li>
+
+	   <div class="tips">
+		<p>Take a look at where this {{vote.related_bill.noun}} is in the legislative process. What might come next? Keep in mind what this specific vote was on, and the context of the {{vote.related_bill.noun}}. Will there be more amendments? Will the other chamber of Congress vote on it, or let it die?</p> 
+		<p>For this question it may help to briefly examine <a href="{vote.related_bill.get_absolute_url">the {{vote.related_bill.noun}} itself.</p>
+	   </div>
+	   {% endif %}
+
+	</ol>
+
+	<h2><span>What is your analysis of this vote?</span></h2>
+
+	<ol>
+
+	   <li>What trends do you see in this vote?</li>
+
+	   <div class="tips">
+		<p>This is most likely a question of partisanship. But Members of Congress side together for many reasons beside being in the same political party, especially so for less prominent legislation or legislation specific to a certain region. What might have determined how the roll call came out in this case? Does it look like Members of Congress voted based on party, geography, or some other reason?</p>
+		{% if has_diagram.map and vote.chamber_name != "Senate" %}
+		<p>One tool that will be helpful in answering this question is the cartogram at the top of the page. A cartogram is a stylized map of the United States that shows each district as an identical hexagon. This view allows you to see the how the Representatives from each district voted sorted by their geography and political party. What trends can you see in the cartogram for this vote?</p>
+		{% endif %}
+	   </div>
+
+	   {% if has_outliers %}
+	   <li>GovTrack marked some legislators’ votes as statistically notable. Why might they be notable?</li>
+
+	   <div class="tips">
+		<p>This question relates to the previous one. If you can find a trend in how Members of Congress voted, you might be able to see anomalies in that trend. GovTrack uses algorithms to look for trends across votes and mark possible anomalies. Do you agree that these votes seem notable? Why or why not?</p>
+	   </div>
+	   {% endif %}
+
+	   <li>How did your {% if vote.chamber_name != "Senate" %}Representative{% else %}Senators{% endif %} vote?</li>
+
+	   <div class="tips">
+		<p>There {% if vote.chamber_name != "Senate" %}is one{% else %}are two{% endif %} vote{% if vote.chamber_name == "Senate" %}s{% endif %} here that should be more important to you than all the others. These are the votes cast by your {% if vote.chamber_name != "Senate" %}Representative{% else %}Senators{% endif %}, which are meant to represent you and your community. Do you agree with how your {% if vote.chamber_name != "Senate" %}Representative{% else %}Senators{% endif %} voted? Why do you think they voted the way they did?</p>
+		<p>If you don’t already know who your Members of Congress are you can find them by <a href="https://www.govtrack.us/congress/members">entering your address here</a>.</p>
+	   </div>
+
+	   {% if vote.chamber_name == "Senate" %}
+	   <li>What percentage of the population are represented by the yeas?</li>
+
+	   <div class="tips">
+		<p>GovTrack displays the percentage of the population represented by the yeas on some Senate votes just under the vote totals. We do this to highlight how the United States population is represented in the Senate. Since each state has two Senators, but the populations of states vary significantly, the individuals living in each state have different levels of Senate representation. For example, California’s population of near 40 million is given the same amount of representation as Wyoming’s population of about 600 thousand.</p>
+		<p>Since there are one hundred Senators, it’s easy to compare the percentages. How does the percent of the Senate that voted yea compare to the percentage of the population they represent? If there is a difference, how important is it?</p>
+	   </div>
+	   {% endif %}
+
+	</div>
+
+</div>
+</div>
+</div>
 {% endwith %}
 
 {% endblock %}
