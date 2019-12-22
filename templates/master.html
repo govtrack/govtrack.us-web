@@ -11,10 +11,9 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap/css/bootstrap-theme.min.css">
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" integrity="sha256-VBrFgheoreGl4pKmWgZh3J23pJrhNlSUOBek+8Z2Gv0=" crossorigin="anonymous">
 		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20190531" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
@@ -275,12 +274,12 @@
 				<section class="col-xs-6 col-sm-2 social">
 					<h4><span>follow</span> GovTrack</h4>
 					<ul>
-						<li><a href="https://www.facebook.com/govtrack/"><i class="fa fa-facebook fa-fw"></i><span>Facebook</span></a></li>
-						<li><a href="http://twitter.com/govtrack"><i class="fa fa-twitter fa-fw"></i><span>Twitter</span></a></li>
-						<li><a href="https://medium.com/govtrack-insider"><i class="fa fa-medium fa-fw"></i><span>Medium</span></a></li>
-						<li><a href="https://www.patreon.com/govtrack"><i class="fa fa-usd fa-fw"></i><span>Patreon</span></a></li>
+						<li><a href="https://www.facebook.com/govtrack/"><i class="fab fa-facebook fa-fw"></i><span>Facebook</span></a></li>
+						<li><a href="http://twitter.com/govtrack"><i class="fab fa-twitter fa-fw"></i><span>Twitter</span></a></li>
+						<li><a href="https://medium.com/govtrack-insider"><i class="fab fa-medium fa-fw"></i><span>Medium</span></a></li>
+						<li><a href="https://www.patreon.com/govtrack"><i class="fas fa-dollar-sign fa-fw"></i><span>Patreon</span></a></li>
 						<li><a href="/blog"><i class="fa fa-quote-right fa-fw"></i><span>Blog</span></a></li>
-						<li><a href="https://github.com/govtrack/govtrack.us-web/commits/master"><i class="fa fa-github fa-fw"></i><span>Code</span></a></li>
+						<li><a href="https://github.com/govtrack/govtrack.us-web/commits/master"><i class="fab fa-github fa-fw"></i><span>Code</span></a></li>
 					</ul>
 				</section>
 
@@ -315,15 +314,12 @@
       </div>
     </div>
 
-	{% if not debug %}
-	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-	{% else %}
-	<script src="/static/lib/jquery.js"></script>
-	{% endif %}
+	<script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?20160310"></script>
 	
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="{{ STATIC_URL }}vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{{ STATIC_URL }}vendor/fontawesome.js"></script>
 
 	{% if not request.anonymous %}
 		<script>$(document).ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->

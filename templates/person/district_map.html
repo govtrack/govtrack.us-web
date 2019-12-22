@@ -205,7 +205,7 @@
   </div>
   <button type="submit" class="btn btn-primary">Find My District</button>
 </form>
-<div style="margin: .5em"><a href="#" onclick="do_by_current_location(); return false;" style="text-decoration: none"><i class="fa fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
+<div style="margin: .5em"><a href="#" onclick="do_by_current_location(); return false;" style="text-decoration: none"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
 </div>
 
 <div class="row">
@@ -266,7 +266,7 @@
 
 						<div class="spanbullets" style="margin-bottom: .75em;">
 						{% if rep.twitterid %}<span><a href="https://twitter.com/@{{rep.twitterid}}">@{{rep.twitterid}}</a></span>{% endif %}
-						{% if role.website %}<span><a href="{{role.website}}">Official Website <i class="fa  fa-external-link"></i></a></span>{% endif %}
+						{% if role.website %}<span><a href="{{role.website}}">Official Website <i class="fas fa-external-link-alt"></i></a></span>{% endif %}
 						{% if role.phone %}<span><span class="nowrap"><a href="tel:+1-{{role.phone}}">{{role.phone}}</a></span></span>{% endif %}
 						</div>
 

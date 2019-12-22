@@ -13,6 +13,7 @@ local/
 pip-log.txt
 static/css/all-min.css
 static/images/dynamic
+static/vendor
 uwsgi.conf
 data
 files

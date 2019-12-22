@@ -196,7 +196,7 @@ def load_scorecards():
 def load_scorecards_for(person):
     # Get the scorecards that apply to this person.
     ret = []
-    for scorecard in load_scorecards():
+    for scorecard in load_scorecards() or []:
         if person.id in scorecard["scores"]:
             ret.append( (scorecard, scorecard["scores"][person.id]) )
 

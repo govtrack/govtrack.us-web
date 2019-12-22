@@ -64,6 +64,11 @@ Vagrant.configure(2) do |config|
     # Initialize the database.
     ./manage.py migrate --noinput
 
+    # Fetch other dependencies
+    ##########################
+
+    ./fetch-external-assets.sh 
+
     # Load some legislative data
     ############################
 
