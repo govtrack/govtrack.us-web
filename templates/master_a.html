@@ -77,9 +77,11 @@
 			{% block sidebar_top %}
 			{% endblock %}
 
+			{% if not DEBUG %}
 			<div class="ads square" data-zone="master_a">
 				<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
 			</div> <!-- /ads square -->
+			{% endif %}
 
 			<div class="hidden-xs">
 
@@ -90,10 +92,10 @@
 
 			<h2>Follow GovTrack on social media for more updates:</h2>
 			<p>
-			<a href="https://www.facebook.com/govtrack/" title="Facebook Page"><i class="fa fa-facebook fa-fw"></i><span class="sr-only">Visit us on Facebook</span></a>
-			<a href="http://twitter.com/govtrack" title="Twitter Page"><i class="fa fa-twitter fa-fw"></i><span class="sr-only">Visit us on Twitter</span></a>
-			<a href="https://medium.com/govtrack-insider" title="Medium Page"><i class="fa fa-medium fa-fw"></i><span class="sr-only">Visit us on Medium</span></a>
-			<a href="https://github.com/govtrack/govtrack.us-web" title="Github"><i class="fa fa-github-alt fa-fw"></i><span class="sr-only">Visit us on Github</span></a>
+			<a href="https://www.facebook.com/govtrack/" title="Facebook Page"><i class="fab fa-facebook fa-fw"></i><span class="sr-only">Visit us on Facebook</span></a>
+			<a href="http://twitter.com/govtrack" title="Twitter Page"><i class="fab fa-twitter fa-fw"></i><span class="sr-only">Visit us on Twitter</span></a>
+			<a href="https://medium.com/govtrack-insider" title="Medium Page"><i class="fab fa-medium fa-fw"></i><span class="sr-only">Visit us on Medium</span></a>
+			<a href="https://github.com/govtrack/govtrack.us-web" title="Github"><i class="fab fa-github-alt fa-fw"></i><span class="sr-only">Visit us on Github</span></a>
 			</p>
 
 			{# MEDIUM POSTS #}

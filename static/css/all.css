@@ -1,4 +1,4 @@
-@import 'https://fonts.googleapis.com/css?family=Quicksand:300,Roboto+Slab:300,700|Titillium+Web:600';
+@import url('/static/vendor/google-fonts.css');
 
 /* GLOBAL STYLES */
 
@@ -698,9 +698,8 @@ aside .download-links { padding: 31px 0 0 }
 	#footer .social li {
 		vertical-align: top;
 		}
-#footer .social ul img {
-	vertical-align: middle;
-	padding: 0 8px 0 2px;
+#footer .social span {
+	margin-left: 3px;
 	}
 #footer .social a { display: block }
 #footer section {

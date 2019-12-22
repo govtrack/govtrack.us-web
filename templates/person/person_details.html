@@ -20,8 +20,8 @@
 {% endblock %}
 
 {% block body_scripts %}
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script src="{{ STATIC_URL }}vendor/highcharts.js"></script>
+<script src="{{ STATIC_URL }}vendor/highcharts.js-accessibility.js"></script>
 <script>
 $(function() {
 	$('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
@@ -299,7 +299,7 @@ function show_pronunciation_guide() {
 	<h2>Links</h2>
 	<div id="seealso-links">
 		{% for label, link, css_class in links %}
-			<a href="{{link}}" target="_blank"><i class="{{css_class}}"></i>{{label}}</a>
+			<a href="{{link}}" target="_blank"><i class="{{css_class}}" style="margin-right: 3px"></i>{{label}}</a>
 		{% endfor %}
 		<div class="clearfix"></div>
 	</div>
