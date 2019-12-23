@@ -3,6 +3,7 @@
 {% load humanize %}
 {% block title %}GovTrack.us: Tracking the U.S. Congress{% endblock %}
 {% block meta_description %}Tracking legislation and votes in the United States Congress.{% endblock %}
+{% block logo_class %}hidden{% endblock %}
 
 {% block head %}
   <meta property="og:title" content="GovTrack.us" />
@@ -10,6 +11,8 @@
   <meta property="og:url" content="{{SITE_ROOT_URL}}" />
 
 <style>
+#masthead { border-bottom: none;}
+
 #bodybody {
 	background-image: url(/static/images/capitol_splash_1200.jpeg);
 	background-repeat: no-repeat;
@@ -28,27 +31,13 @@
 		}
 	}
 
-#masthead {
-	border-top: none;
-	background-color: rgba(0,0,0,.4);
-  color: white;
-}
-#masthead .navbar-toggle { color: #CCC !important; border-color: #CCC; } /* search, hamburger */
-#masthead .navbar-toggle .icon-bar { background-color: #CCC; } /* hamburger */
-
-#sitenewscontainer.navbar-default {
-	border: none;
-	background: none;
-	color: white;
-}
-	#sitenewscontainer.navbar-default a {
-		color: #fccc99;
-		border-bottom: 1px solid #fccc84;
-	}
 
 #jumbotron {
 	font-size: 4vw;
+	font-family: "Roboto Slab";
 	padding-left: .5em;
+  padding-top: 1em;
+	color: #333;
 }
 	#social-media-icons {
 		font-size: 14px;
@@ -58,11 +47,16 @@
 			font-size: 3.5vw;
 		}
 	}
-	@media screen and (max-width: 992px) {
+	@media screen and (min-width: 768px) {
+		#jumbotron #deck2 {
+			max-width: 20em;
+		}
+	}
+	@media screen and (max-width: 768px) {
 		#jumbotron {
 			font-size: 30px;
 		}
-		#deck {
+		#jumbotron-text {
 			background: rgba(255,255,255,.75);
 			padding: .25em;
 		}
@@ -70,46 +64,38 @@
 
 	h1 {
 		font-size: inherit;
+		font-family: inherit;
 		border: none;
 		color: #713;
-		line-height: 1.2em;
-		margin: 22px 0 12px 0;
-		max-width: 12em;
+		line-height: 1em;
+		margin: 0;
 		text-shadow: 2px 2px rgba(200,200,200,.5);
 	}
-		h1 span {
-			padding: .1em .2em;
-			background: rgba(255,255,255,.2);
-		}
 
 	#deck {
-		font-size: 55%;
-		color: #337;
-		font-family: 'Titillium Web';
+		font-size: 45%;
+		font-weight: bold;
 		text-shadow: 1px 1px rgba(200,200,200,.5);
-		padding-left: .25em;
 		max-width: 22em;
 	}
 	#deck2 {
-		color: #226;
-		margin: .5em 0;
-		font-size: 75%;
+    margin-top: 1em;
+		font-size: 45%;
 	}
 
 #maincontent {
+  border-top: solid 6px #334;
 	background: white;
 }
 
 .top-actions > * {
-  margin: 2.5em 0;
-  font-size: 90%;
+  margin-bottom: 2em;
 }
 .top-actions label {
   font-weight: normal;
 }
   #content .top-actions label h2 {
   	font-weight: bold;
-	color: #824;
     margin: 0 0 .5em 0;
   }
   .top-actions label div {
@@ -177,17 +163,17 @@ article {
 		<a href="https://www.patreon.com/govtrack" title="Patreon"><i class="fas fa-dollar-sign fa-fw"></i></a>
 	</div>
 
-	<h1>
-		<span>Tracking</span><wbr><span>the</span><br><span>United</span><wbr><span>States</span><wbr><span>Congress</span>
-	</h1>
-	<div id="deck">
-		Find your representative and senators and legislation that affects you.
-		<div id="deck2">
-			{{number_of_bills|intcomma}} bills <span>&middot;</span>
-			{{number_of_legislators|intcomma}} legislators <span>&middot;</span>
-			{{number_of_votes|intcomma}} votes this year
-		</div>
-	</div>
+  <div id="jumbotron-text">
+  	<h1>
+  		GovTrack.us
+  	</h1>
+  	<div id="deck">
+  		Tracking the United States Congress
+  	</div>
+  	<div id="deck2">
+      GovTrack.us began in 2004 as a project to use technology to make the U.S. Congress more open and accessible. Today we&rsquo;re the leading non-governmental source of legislative information and statistics.
+  	</div>
+  </div>
 </div>
 
 </div> <!-- /#bodybody -->
@@ -201,7 +187,7 @@ article {
   <div class="col-sm-6">
     <form action="#" onsubmit="return do_address_form();">
       <label for="address">
-        <h2>Find your representative and senators in the U.S. Congress.</h2>
+        <h2>Find your representative and senators:</h2>
         <div>Enter your home address:</div>
       </label>
       <table width="100%">
@@ -226,7 +212,7 @@ article {
 
     <form action="#" onsubmit="return do_subject_form();">
       <label for="bill-subject-area">
-        <h2>Find legislation in the U.S. Congress that affects you.</h2>
+        <h2>Find legislation that affects you:</h2>
         <div>Select a subject area to search and get alerts:</div>
       </label>
       <table width="100%">

@@ -38,7 +38,7 @@ a.plain:hover, a.plain:focus, a.plain:active {
 }
 
 h1, h2, h3, h4, h5 {
-	font: normal normal normal 2.5em/1.5em 'Quicksand';
+	font: normal normal normal 2.5em/1.5em 'Titillium Web';
 	line-height: 130%;
 	margin-top: 1.5em;
 	margin-bottom: 1em;
@@ -68,8 +68,7 @@ h1 {
 		margin: 5px 0 15px 0;
 		font-size: 27px;
 		font-weight: normal;
-		padding-bottom: .25em;
-		border-bottom: 1px solid #CCA;
+		font-family: 'Titillium Web';
 	}
 		.h1-multiline h1 {
 			margin: 0;
@@ -191,6 +190,7 @@ blockquote {
 	font-family: Quicksand;
 	font-size: 13px;
 	color: #1D4E70;
+	border-bottom: 1px solid #DDDDDF;
 }
 #masthead .navbar {
 	/* override bootstrap */
@@ -247,15 +247,18 @@ blockquote {
 }
 
 .breadcrumb {
-	margin-top: 0;
-	margin-bottom: 0;
-	padding-bottom: 0; /* override bootstrap, always followed by a h1 which has a margin */
-	padding-left: 0;
+	margin: 0;
+	padding: 0; /* override bootstrap */
 	background: none;
 	font-size: 88%;
+	font-family: 'Quicksand';
 }
 	.breadcrumb a {
+		text-decoration: none;
 	}
+		.breadcrumb a:hover {
+			text-decoration: underline;
+		}
 
 /* bootstrap modals */
 .modal-header {
@@ -536,6 +539,10 @@ aside .download-links { padding: 31px 0 0 }
 
 /*	Tracker widget styles
 	=========================================================== */
+	.btn {
+		font-family: 'Roboto Slab';
+		font-weight: bold;
+	}
 	.track-btn {
 		height: 39px;
 		width: 170px;

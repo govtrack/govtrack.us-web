@@ -88,11 +88,6 @@ def index(request):
     from person.models import Person
     from vote.models import Vote
     return {
-        # for the splash
-        'number_of_bills': Bill.objects.filter(congress=settings.CURRENT_CONGRESS).count(),
-        'number_of_legislators': Person.objects.filter(roles__current=True).count(),
-        'number_of_votes': Vote.objects.filter(created__year=datetime.now().year).count(),
-
         # for the action area below the splash
         'bill_subject_areas': bill_subject_areas,
 
