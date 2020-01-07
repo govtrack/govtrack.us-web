@@ -6,7 +6,8 @@ html { font-size: 15px; /* for rem unit sizing, match the body to be nice */ }
 body {
 	background: #9D2146;
 	color: #141712;
-	font-size: 15px;
+	font-family: 'IBM Plex Sans';
+	font-size: 16px;
 	}
 	#bodybody {
 		background-color: white;
@@ -38,7 +39,7 @@ a.plain:hover, a.plain:focus, a.plain:active {
 }
 
 h1, h2, h3, h4, h5 {
-	font: normal normal normal 2.5em/1.5em 'Titillium Web';
+	font: normal normal normal 2.5em/1.5em inherit;
 	line-height: 130%;
 	margin-top: 1.5em;
 	margin-bottom: 1em;
@@ -67,7 +68,6 @@ h1 {
 		margin: 5px 0 15px 0;
 		font-size: 27px;
 		font-weight: normal;
-		font-family: 'Titillium Web';
 	}
 		.h1-multiline h1 {
 			margin: 0;
@@ -81,7 +81,7 @@ h1 {
 		}
 
 h2 {
-	font-size: 19px;
+	font-size: 18px;
 }
 	h2:first-child {
 		margin-top: 0;
@@ -91,7 +91,7 @@ h2 {
 	}
 		#content h2 span {
 			display: inline-block;
-			padding: 3px 10px 4px 8px;
+			padding: 3px 10px 3px 8px;
 			background-color: #1D4E70;
 			color: white;
 			font-weight: bold;
@@ -543,7 +543,6 @@ aside .download-links { padding: 31px 0 0 }
 /*	Tracker widget styles
 	=========================================================== */
 	.btn {
-		font-family: 'Roboto Slab';
 		font-weight: bold;
 	}
 	.track-btn {
