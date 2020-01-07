@@ -44,7 +44,7 @@ base_context = {
     "SITE_ROOT_URL": settings.SITE_ROOT_URL,
     "GOOGLE_ANALYTICS_KEY": getattr(settings, 'GOOGLE_ANALYTICS_KEY', ''),
     "FACEBOOK_APP_ID": getattr(settings, 'FACEBOOK_APP_ID', ''),
-    "ELECTION_JUST_HAPPENED_YEAR": datetime.datetime.now().year,
+    "ELECTION_JUST_HAPPENED_YEAR": datetime.datetime.now().year if datetime.datetime.now().month >= 11 and (datetime.datetime.now().year % 2) == 0 else None,
 }
 
 def template_context_processor(request):

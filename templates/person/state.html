@@ -138,13 +138,16 @@ $(function() {
 	</form>
 	<div style="margin: .5em"><a href="#" onclick="window.location = '/congress/members/map#address=my+location'; return false;" style="text-decoration: none"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
 	</div>
+	{% endif %}
 
-	<p>{{statename}}&rsquo;s {{stateapp|apnumber}} representatives are:</p>
+	{% endif %}
 
+	{% if stateapp == 1 %}
+		<p>{{statename}}&rsquo;s one representative, called an &ldquo;at-large&rdquo; representative because they represent the entire state, is:</p>
+	{% elif stateapp == "T" %}
+		<p>{{statename}}&rsquo;s one representative, called an &ldquo;at-large&rdquo; representative because they represent the entire area, is:</p>
 	{% else %}
-
-	<p>{{statename}}&rsquo;s one representative, called an &ldquo;at-large&rdquo; representative because they represent the entire state, is:</p>
-
+		<p>{{statename}}&rsquo;s {{stateapp|apnumber}} representatives are:</p>
     {% endif %}
 
     <div class="row members-grid">
@@ -158,7 +161,7 @@ $(function() {
 	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
 	            <p style="margin-top: 1em">The {{district|ordinalhtml}} district is currently vacant.</p>
 	            <div class="info">
-		        	{% if stateapp != 1 %}
+		        	{% if stateapp != 1 and stateapp != "T" %}
 	            	<div><a href="/congress/members/{{state}}/{{district}}">View District Map</a></div>
 	            	{% endif %}
 	            </div>
@@ -169,7 +172,7 @@ $(function() {
 	        	
 	            {% with person.get_current_role as role %}
 	            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
-	            	{% if stateapp != 1 %}
+	            	{% if stateapp != 1 and stateapp != "T" %}
 		            	{{ district|ordinalhtml }} District
 	            	{% else %}
 	            		At Large
@@ -183,7 +186,7 @@ $(function() {
             		<div>Since {{role.logical_dates.0|date}}</div>
                     {% if ELECTION_JUST_HAPPENED_YEAR %}<div>(Current term ends {{role.enddate|date}})</div>{% endif %}
 
-		        	{% if stateapp != 1 %}
+		        	{% if stateapp != 1 and stateapp != "T" %}
 	            	<div><a href="/congress/members/{{state}}/{{district}}">View District Map</a></div>
 	            	{% endif %}
 	            </div>
@@ -193,49 +196,22 @@ $(function() {
         {% endfor %}
     </div>
 
-    		</div>
+        {% if not ELECTION_JUST_HAPPENED_YEAR %}
+        <p style="margin-bottom: 2em">All representatives serve until the end of the current Congress on {{end_of_congress_date|date}}.</p>
+        {% endif %}
+
+	{% if stateapp != "T" %}
+			</div> <!-- /tab -->
 	    	<div role="tabpanel" class="tab-pane" id="map">
 				<h2>Map of Congressional Districts</h2>
 	    		{% include "person/redistricting-notes.html" %}
+	{% endif %}
 
 				<iframe id="map-iframe" style="width: 100%; height: 80vh; border: 1px solid #999;"> </iframe>
 
+	{% if stateapp != "T" %}
 	    	</div>
 	</div> <!-- /tabs -->
-
-	{% else %}
-
-    <div class="members-grid">
-    {% for district, person in representatives %}
-        <div class="member" style="width: 150px">
-        	{% if not person %}
-	            <div class="photo"><div style="width: 100px; height: 120px;">&nbsp;</div></div>
-	            <p style="margin-top: 1em">The delegate&rsquo;s office is currently vacant.</p>
-        	{% else %}
-	            <div class="photo">
-	        		<a href="{{ person.get_absolute_url }}"><img src="{{ person.get_photo_url_100 }}" width="100" height="120"/></a>
-	        	</div>
-	        	
-	            {% with person.get_current_role as role %}
-	            <div class="photo_flag flag_{{role.party|slice:":1"|lower}}">
-	            	At-Large
-	            </div>
-
-	            <p class="moc"><a href="{{ person.get_absolute_url }}" class="plain">{{ person.name_no_details }}</a></p>
-
-	            <div class="info">
-            		<div>{{role.logical_dates.0|date}}-Present</div>
-	            	<div>{{role.party}}</div>
-	            </div>
-	            {% endwith %}
-	        {% endif %}
-        </div>
-        {% endfor %}
-
-		<iframe id="map-iframe" style="width: 100%; height: 80vh; border: 1px solid #999;"> </iframe>
-
-    </div>
-
 	{% endif %}
 
 

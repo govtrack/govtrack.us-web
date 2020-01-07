@@ -405,6 +405,7 @@ def browse_state(request, state):
         "statename": statenames[state],
         "senators": get_senators(state),
         "representatives": get_representatives(state),
+        "end_of_congress_date": get_congress_dates(CURRENT_CONGRESS)[1],
     }
 
 @anonymous_view
