@@ -598,23 +598,25 @@ function show_pronunciation_guide() {
 
 		<ul style="list-style: none; padding: 0;">
 			{% for c in committeeassignments %}
-			<li style="margin: .125em 0">
-				{% if c.role_name != 'Member' %}{{c.role_name}}, {% endif %}
+			<li style="margin: 0 0 .25em 0">
 				<a href="{{c.committee.get_absolute_url}}">{{c.committee}}</a>
+				{% if c.role_name != 'Member' %}<span class="label label-warning">{{c.role_name}}</span>{% endif %}
 				{% if c.subroles or c.subcommittees %}
 				<div style="padding: 0 0 0 .75em; font-size: 88%;">
 				{% if c.subroles %}
-					<ul style="list-style: none; padding: 0;">
+					<ul style="list-style: none; padding: .25em 0 0 0;">
 					{% for s in c.subroles %}
-					<li>{{s.role_name}}, Subcommittee on <a href="{{s.committee.get_absolute_url}}">{{s.committee}}</a></li>
+					<li>
+						<a href="{{s.committee.get_absolute_url}}" style="color: #844">{{s.committee}}</a> subcommittee
+						<span class="label label-warning">{{s.role_name}}</span>
+					</li>
 					{% endfor %}
 					</ul>
 				{% endif %}
 				{% if c.subcommittees %}
-				<div>
-					Member of
+				<div style="padding: .25em 0 0 0;">
 					{% for sc in c.subcommittees %}
-						<a href="{{sc.get_absolute_url}}">{{sc.name}}</a>{% if not forloop.last %}, {% endif %}
+						<a href="{{sc.get_absolute_url}}" style="color: #844">{{sc.name}}</a>{% if not forloop.last %}, {% endif %}
 					{% endfor %}
 					subcommittees
 				</div>
