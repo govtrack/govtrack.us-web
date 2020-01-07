@@ -65,12 +65,16 @@
 {% endblock %}
 
 {% block body_with_container %}
-<div class="container">
-	<div id="maincontent" >
+<div id="maincontent">
+	<div class="container">
 		{% block summary %}
 		{% endblock %}
-	</div><!-- /summary-box -->
+	</div>
+</div><!-- /summary-box -->
 
+<hr style="margin: 0 0 1.5em 0">
+
+<div class="container">
 	<div class="row">
 
 		<div class="col-sm-4 col-sm-push-8 sidebar">
