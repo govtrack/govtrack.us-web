@@ -601,12 +601,25 @@ function show_pronunciation_guide() {
 			<li style="margin: .125em 0">
 				{% if c.role_name != 'Member' %}{{c.role_name}}, {% endif %}
 				<a href="{{c.committee.get_absolute_url}}">{{c.committee}}</a>
+				{% if c.subroles or c.subcommittees %}
+				<div style="padding: 0 0 0 .75em; font-size: 88%;">
 				{% if c.subroles %}
-					<ul style="list-style: none; padding: 0 0 0 .75em; font-size: 88%;">
+					<ul style="list-style: none; padding: 0;">
 					{% for s in c.subroles %}
 					<li>{{s.role_name}}, Subcommittee on <a href="{{s.committee.get_absolute_url}}">{{s.committee}}</a></li>
 					{% endfor %}
 					</ul>
+				{% endif %}
+				{% if c.subcommittees %}
+				<div>
+					Member of
+					{% for sc in c.subcommittees %}
+						<a href="{{sc.get_absolute_url}}">{{sc.name}}</a>{% if not forloop.last %}, {% endif %}
+					{% endfor %}
+					subcommittees
+				</div>
+				{% endif %}
+				</div>
 				{% endif %}
 			</li>
 			{% endfor %}
