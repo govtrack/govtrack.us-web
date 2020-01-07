@@ -50,7 +50,6 @@ h1 {
 	line-height: 1.275em;
 	color: #222;
 	padding-bottom: .25em;
-	border-bottom: 1px solid #CCA;
 	}
 	h1.long {
 		font-size: 23px;
@@ -114,7 +113,7 @@ h5 {
 	text-transform: uppercase;
 	}
 
-h3 span, h4 span, span span, a em {
+h3 span, span span, a em {
 	font-weight: normal;
 	font-style: italic;
 	text-transform: none;
@@ -234,6 +233,10 @@ blockquote {
 				 padding-bottom: 0;
 			}
 		}
+
+.nav.nav-pills {
+	font-family: Quicksand;
+}
 
 #logo {
 	display: block;
