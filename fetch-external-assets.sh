@@ -146,17 +146,15 @@ download \
   https://raw.githubusercontent.com/neverpanic/google-font-download/ba0f7fd6de0933c8e5217fd62d3c1c08578b6ea7/google-font-download \
   /tmp/google-font-download \
   '1f9b2cefcda45d4ee5aac3ff1255770ba193c2aa0775df62a57aa90c27d47db5'
-(cd $VENDOR; bash /tmp/google-font-download -f woff,woff2 -o google-fonts.css Quicksand:500 Roboto\ Slab:300 Roboto\ Slab:700 Titillium\ Web:600)
+(cd $VENDOR; bash /tmp/google-font-download -f woff,woff2 -o google-fonts.css "IBM Plex Sans":300 "IBM Plex Sans":700 Quicksand:500)
 rm -f /tmp/google-font-download
 # generated with: `$SHACMD $VENDOR/{google-fonts.css,*woff*}` but then put the vendor path variable back
 $SHACMD_CHECK << EOF
-0b411e96ea4997ca7719e9bae7b429aae5cb4881797851f28c2437bd3d85d951  $VENDOR/google-fonts.css
+6b761ceb8d25397001d1b82013769a66889a77e6832b0443ec71403ef1af5294  $VENDOR/google-fonts.css
 91925c6009a0039bd0e9c07f75253d81598a3c09a3bf498662c935c674bfeaee  $VENDOR/Quicksand_300.woff
 38c8d523d1f60d51bd199b06b4a5bc573a3ba9c5e29ca9e5dbd85fcb7460bc15  $VENDOR/Quicksand_300.woff2
-6c47a63b3c201d2a10e5e5ae682fca66dc70b955360798595fc8210ea23c97f4  $VENDOR/Roboto_Slab_300.woff
-07844b19245182986c98527d35f1fe21e853a835eb8a80c722113e02e406af7e  $VENDOR/Roboto_Slab_300.woff2
-5b49f1ffb26d12c79f7aa26a4437738df7eb0aa52d2e15c3f2a3ed160824a728  $VENDOR/Roboto_Slab_700.woff
-03a7369d68b1d2ec09b9397b0710d90d4a6efcd33450a87ad618ec8eb2b83c7a  $VENDOR/Roboto_Slab_700.woff2
-af9e0b9fd33062e183365997f895c209635af774242d1702146b4027aa3d6462  $VENDOR/Titillium_Web_600.woff
-ef8a5f444c988e2c08260642c8257654f5e825e839a9c3d355933d4d12e0345b  $VENDOR/Titillium_Web_600.woff2
+6abe6b7ef0abe00b00ffd7b5d9e527102ede9a623f808dc27e21d6f89f67ecff  $VENDOR/IBM_Plex_Sans_300.woff
+80e7ed4fe6e9016456057ea5ecd4898d3a461e595a8244a7538e1a814889d471  $VENDOR/IBM_Plex_Sans_300.woff2
+1cc4f14202c58b49f25a56e5252c48dd835f7b83b4df7c7edc97298ef9adaf10  $VENDOR/IBM_Plex_Sans_700.woff
+1a60331c6fb3a2eef23e7c1e44f7ee6bf41f4f2f96b99757d8bc845b3a807b7d  $VENDOR/IBM_Plex_Sans_700.woff2
 EOF
