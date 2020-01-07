@@ -79,7 +79,7 @@ function do_keyword_tracker_submit() {
 
 <div class="tab-content">
 	<div id="docket" class="tab-pane active">
-		<h2><span>Coming Up</span></h2>
+		<h2><span>Coming up</span></h2>
 		{% if coming_up|length == 0 %}
 			<p>No bills have been posted as coming up by the House or Senate. Bills are put on the calendar of business often just days ahead of major activity. The majority party controls the calendar of business in each chamber.</p>
 		{% else %}
@@ -137,9 +137,9 @@ function do_keyword_tracker_submit() {
 	</div>
 
 	<div id="find" class="tab-pane">
-		<h2><span>Find a Bill</span></h2>
 		<div class="row">
 			<div class="col-sm-7">
+			<h2><span>Find a bill</span></h2>
 			<div style="padding-right: 30px">
 				<p>
 					{% if 5000 > total %}
@@ -174,7 +174,7 @@ function do_keyword_tracker_submit() {
 			</div>
 
 			<div class="col-sm-5">
-				<h3><span>Subject areas</span></h3>
+				<h2><span>Subject areas</span></h2>
 	
 		<div id="subject_list">
 		{% for topterm, subterms in subjects %}
@@ -196,7 +196,7 @@ function do_keyword_tracker_submit() {
 	</div>
 
 	<div id="get-alerts" class="tab-pane">
-		<h2><span>Get Alerts</span></h2>
+		<h2><span>Get alerts</span></h2>
 		<div class="row">
 			<div class="col-sm-6">
 			<div style="padding-right: 30px">
@@ -236,7 +236,7 @@ function do_keyword_tracker_submit() {
 	</div>
 	
 	<div id="bystatus" class="tab-pane">	
-		<h2><span>All Bills</span></h2>
+		<h2><span>All bills</span></h2>
 		<p style="margin-top: 15px">Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
 		{% for name, descr1, descr2, href, count, queryset in groups %}
