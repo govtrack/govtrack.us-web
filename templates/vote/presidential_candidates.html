@@ -121,7 +121,7 @@ function build_chart(data) {
         yAxis: [{ min: 0, max: 100, title: { text: 'Missed Votes (%)' } }],
         tooltip: {
             formatter: function() {
-                return this.series.options.election_year + " Election<br>" + this.series.options.legislator_name + "<br/>Miseed " + this.y  + "% of Votes" + "<br/>" + x_axis_index_to_days(this.x) + " days before the " + this.series.options.election_year + " election";
+                return this.series.options.election_year + " Election<br>" + this.series.options.legislator_name + "<br/>Missed " + this.y  + "% of Votes" + "<br/>" + x_axis_index_to_days(this.x) + " days before the " + this.series.options.election_year + " election";
             }
         },
         plotOptions: {
