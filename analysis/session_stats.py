@@ -147,6 +147,7 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 	bills = list(bills)
 	was_reported = []
 	has_cmte_leaders = []
+	can_has_bipartisan_cosponsor = False
 	has_bipartisan_cosponsor = []
 	has_companion = []
 	for bill in bills:
@@ -185,16 +186,22 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 		if x: has_cmte_leaders.append(bill)
 
 		# Check whether there's a cosponsor from the opposite party of the sponsor.
-		# For independents, use the party they caucus with.
+		# For independents, use the party they caucus with. If the sponsor doesn't
+		# caucus with either party (e.g. Rep. Amash), don't produce this statistic,
+		# and those people don't count toward bipartisanship as cosponsors. Use the
+		# party at the time of (co)sponsorship.
 		# Warning: If someone switches parties, this will change.
 		sponsor_party = bill.sponsor_role.caucus or bill.sponsor_role.party
-		assert sponsor_party in ("Republican", "Democrat")
-		for cosponsor in cosponsors:
-			cosponsor_party = cosponsor.role.caucus or cosponsor.role.party
-			assert cosponsor_party in ("Republican", "Democrat")
-			if cosponsor_party != sponsor_party:
-				has_bipartisan_cosponsor.append(bill)
-				break
+		if sponsor_party != "Independent":
+			can_has_bipartisan_cosponsor = True # was not Independent throughout the time period
+			assert sponsor_party in ("Republican", "Democrat")
+			for cosponsor in cosponsors:
+				cosponsor_party = cosponsor.role.caucus or cosponsor.role.party
+				if cosponsor_party != "Independent":
+					assert cosponsor_party in ("Republican", "Democrat")
+					if cosponsor_party != sponsor_party:
+						has_bipartisan_cosponsor.append(bill)
+						break
 
         # Check if a companion bill was introduced during the time period.
 		if RelatedBill.objects.filter(bill=bill, relation="identical", related_bill__introduced_date__gte=startdate, related_bill__introduced_date__lte=enddate).exists():
@@ -211,11 +218,12 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 		"bills": make_bill_entries(has_cmte_leaders),
 	}
 
-	stats["bills-with-cosponsor-other-party"] = {
-		"value": len(has_bipartisan_cosponsor),
-		"bills": make_bill_entries(has_bipartisan_cosponsor),
-		"num_bills": len(bills),
-	}
+	if can_has_bipartisan_cosponsor:
+		stats["bills-with-cosponsor-other-party"] = {
+			"value": len(has_bipartisan_cosponsor),
+			"bills": make_bill_entries(has_bipartisan_cosponsor),
+			"num_bills": len(bills),
+		}
 
 	stats["bills-with-companion"] = {
 		"value": len(has_companion),
@@ -413,7 +421,7 @@ def collect_stats(session):
 		get_cosponsored_stats(person, role, stats, congress, startdate, enddate)
 		get_sponsorship_analysis_stats(person, role, stats)
 		get_committee_stats(person, role, stats, committee_membership)
-		get_transparency_stats(person, role, stats, congress, startdate, enddate)
+		#get_transparency_stats(person, role, stats, congress, startdate, enddate)
 
 	return AllStats, congress, is_full_congress_stats
 

@@ -307,6 +307,8 @@ function smooth_scroll(elem) {
 			<p class="notes">Companion bills are those that are identified as &ldquo;identical&rdquo; by Congress&rsquo;s Congressional Research Service.</p>
 		{% elif stat.key == "bills-with-cosponsors-both-parties" %}
 			<p class="notes">Only Members of Congress who sponsored more than 10 bills and resolutions are included in this statistic.</p>
+		{% elif stat.key == "bills-with-cosponsor-other-party" %}
+			<p>Cosponsors who caucused with neither the Democratic nor Republican party do not count toward this statistic.</p>
 		{% elif stat.key == "cosponsored-other-party" %}
 			<p class="notes">Only Democratic and Republican Members of Congress who cosponsored more than 10 bills and resolutions are included in this statistic.</p>
 		{% endif %}
