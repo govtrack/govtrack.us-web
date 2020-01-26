@@ -88,24 +88,7 @@ img.staffer-photo { width: 178px; height: 200px; border: 1px solid black; margin
 		</tr>
 	</table>
 
-	{# <p>Ben Hammer is our research staffer. Our past staff and contributors have included Thomas Schoenfelder, Aviad Eilam, Gordon P. Hemsley, <a href="http://www.villagecreative.com">Village Creative</a>, Ben Rellick, Daniel Gabriele, <a href="http://lorien.name/">Grigoriy Petukhov</a>, Patrick Tutwiler, and Kevin Henry.</p> #}
-	
-	<h2><span>Help us open government</span></h2>
-	
-	<p>Join the movement to make our government more open and effective. Here are some ideas:</p>
-	
-	<ul class="bullets">
-	<li>Join your local <a href="http://www.codeforamerica.org/brigade/">Code for America Brigade</a>. Check it out even if you are not a coder.</li>
-	<li>Read the <a href="http://www.openingparliament.org/declaration">Declaration on Parliamentary Openness</a>, an international declaration.</li>
-	<li>Read <a href="https://medium.com/civic-tech-thoughts-from-joshdata">Civic Tech Thoughts</a> and <a href="http://opengovdata.io">Open Government Data: The Book</a> by GovTrack&rsquo;s founder on the open government and open government data movements.</p>
-	</ul>
-
-	<h2><span>For media</span></h2>
-	
-	<ul class="bullets">
-		<li><a href="/static/logo_hires.png">Hi-Res Logo</a></li>
-		<li><a href="/press">Press Clippings</a></li>
-	</ul>
+	{# <p>Our past staff and contributors have included Thomas Schoenfelder, Aviad Eilam, Gordon P. Hemsley, <a href="http://www.villagecreative.com">Village Creative</a>, Ben Rellick, Daniel Gabriele, <a href="http://lorien.name/">Grigoriy Petukhov</a>, Patrick Tutwiler, and Kevin Henry.</p> #}
 </section>
 
 <section class="col-md-offset-1 col-sm-5" style="font-size: 15px;">
@@ -141,6 +124,217 @@ img.staffer-photo { width: 178px; height: 200px; border: 1px solid black; margin
 
 </section>
 </div>
+
+<h2><span>Our timeline</span></h2>
+
+<style>
+	#timeline td {
+		padding-bottom: .66em;
+		line-height: 115%;
+		vertical-align: top;
+	}
+	#timeline strong, #timeline span {
+		margin-right: 1em;
+	}
+	#timeline strong { /* years */
+	}
+	#timeline em { /* feature headings */
+		font-family: Quicksand;
+		margin-right: .25em;
+	}
+	#timeline span { /* feature text */
+		font-size: 95%;
+	}
+	#timeline img {
+		border: none;
+		background: url("/static/timeline-sprite.png");
+		background-position-x: 50%;
+		width: 300px;
+		margin-right: 1em;
+		margin-bottom: .66em;
+	}
+		@media screen and (max-width: 768px) {
+			#timeline img {
+				width: 40vw;
+			}
+		}
+</style>
+<table id="timeline">
+	<tr><!-- each img has an empty gif so the image doesn't show a border if src is invalid, but then it's overridden by the background css -->
+		<td><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -10px; height: 100px;"></td>
+		<td>
+			<strong>2004</strong>
+			<em>Bill status alerts by email</em>
+			<span>GovTrack launched in 2004 with our most fundamental feature: email alerts for legislation and lawmakers you care about.</span>
+			<em>Ideology scores</em>
+			<span>Our first data analysis, <a href="/about/analysis#ideology">Ideology Scores</a> put legislators on a chart from conservative to liberal based on their sponsorship of legislation.</span>
+		</td>
+	</tr>
+	<tr>
+		<td><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -155px; height: 95px;"></td>
+		<td>
+			<strong>2005</strong>
+			<em>Downloadable raw data</em>
+			<span>In support of other civic tech projects, we shared our downloadable data and, later, an API, for others to use to create new apps and research projects.</span>
+			<em>Congressional district maps</em>
+			<span>It was one of the first &ldquo;Google Maps mashups&rdquo; and the first interactive street-level map of congressional districts on the internet, our congressional district maps help you find your representative. (These days our maps use MapBox technology &mdash; thanks MapBox for the discount!)</span>
+		</td>
+	</tr>
+	<tr>
+		<td/>
+		<td>
+			<strong>2006</strong>
+			<em>Committee assignments</em>
+			<span>Our early years were spent gathering more and more legislative information into one place, including legislators&rsquo; committee assignments.</span>
+		</td>
+	</tr>
+	<tr>
+		<td/>
+		<td>
+			<strong>2007</strong>
+			<em>Asked Congress for open data</em>
+			<span>We went to the U.S. Capitol to <a href="https://www.c-span.org/video/?197994-1/transparency-house-representatives">ask Congress for open legislative data</a>.</span>
+		</td>
+	</tr>
+	<tr>
+		<td><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -670px; height: 90px;"></td>
+		<td>
+			<strong>2008</strong>
+			<em>Paragraph-level bill permalinks</em>
+			<span>Bills can be thousands of pages long &mdash; use our paragraph-level links, launched in 2008, to bring your followers directly to the part of the bill you care about (<a href="https://www.govtrack.us/congress/bills/115/hr1628/text/pcs#link=II_C_231&nearest=H0F8893F97D3F48609D1A3017326A281A">example</a>).</span>
+			<em>Compare bill versions</em>
+			<span>Bills can change lots during the legislative process. We give you a way to see those changes. <a href="https://www.govtrack.us/congress/bills/116/s151/text#compare=is">Here’s</a> a comparison of the introduced and passed versions of the Pallone-Thune Telephone Robocall Abuse Criminal Enforcement and Deterrence Act.</span>
+
+		</td>
+	</tr>
+	<tr>
+		<td/>
+		<td>
+			<strong>2009</strong>
+			<em>It&rsquo;s official</em>
+			<span>In 2009, we formed Civic Impulse LLC, a company in the District of Columbia.</span>
+			<em>Senate creates open data for voting records</em>
+			<span>Following our path, the Senate began publishing <a href="https://archives.cjr.org/campaign_desk/senate_goes_xml.php">open data for votes</a>.</span>
+		</td>
+	</tr>
+	<tr>
+		<td/>
+		<td>
+			<strong>2010</strong>
+			<em>Incorporated into the <a href="https://www.majorityleader.gov/content/whip-hoyer-announces-demcom-40%E2%80%94major-upgrade-official-house-democratic-intranet">House Democrats’ intranet</a></em>
+			<span>Our open data became a part of the House Democrats’ internal tool for keeping their caucus informed.</span>
+			<em>Videos</em>
+			<span>As an experiment that ran from 2010-2013, we created some videos explaining legislative issues. However, videos turned out to be unfeasibly labor-intensive to make.</span>
+		</td>
+	</tr>
+	<tr>
+		<td><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -765px; height: 105px;"></td>
+		<td>
+			<strong>2012</strong>
+			<em>Advanced search</em>
+			<span>Search by stage of the legislative process, or sponsor, or Congress, or a variety of other factors using our <a href="https://govtracknews.wordpress.com/2012/05/06/new-faceted-bill-search/">advanced search</a>.</span>
+			<em>Prognosis</em>
+			<span>We <a href="https://govtracknews.wordpress.com/2012/04/08/even-better-bill-prognosis-now-with-real-probabilities/">began</a> publishing estimates of the <a href="http://localhost:8000/about/analysis#prognosis">likelihood of bill passage</a> in 2012 using a novel methodology we invented. Later we began publishing the scores of <a href="https://www.skoposlabs.com/">Skopos Labs</a>. In 2016, <a href="https://www.youtube.com/watch?v=Ylomy1Aw9Hk&feature=youtu.be&t=797">Last Week Tonight with John Oliver</a> mentioned it.</span>
+			<em>Experimental state legislation tracking</em>
+			<span>We try lots of things, but they don’t always work out. It turned out that there’s just too much content and variation to realistically track all 50 states. We ended this feature in 2015.</span>
+			<em>Link to laws referenced in bills</em>
+			<span>We began incorporating links to the U.S. Code and previously passed bills to simplify the process of understanding proposed bills. (<a href="https://www.govtrack.us/congress/bills/112/s2170/text">example</a>)</span>
+		</td>
+	</tr>
+	<tr>
+		<td><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -1010px; height: 60px;"></td>
+		<td>
+			<strong>2013</strong>
+			<em>Legislator report cards</em>
+			<span>Extending the legislator statistics we started with in 2004, the <a href="https://www.govtrack.us/congress/members/report-cards/2019">report cards</a> are much more expansive and give a more nuanced view of each legislator.</span>
+			<em>Original bill summaries</em>
+			<span>We began including the Library of Congress&rsquo;s bill summaries in 2008, but we began writing our own in 2013. (<a href="https://www.govtrack.us/congress/bills/113/hr3979">example</a>) We also included lightly edited summaries from the Republican Policy Committee from 2013-2018. Unfortunately, Democrats did not have a similar site to copy from, and the Republicans have stopped publishing theirs.</span>
+			<em>1,000,000 users in a month</em>
+			<span>In January 2013, 1 million users visited our site &mdash; a record.</span>
+			<em>Seen on TV!</em>
+			<span><a href="http://www.youtube.com/watch?v=J4vDumBJJwA">The McLaughlin Group</a> and <a href="http://www.nbcnews.com/id/26315908/#52933505">The Rachel Maddow Show</a> both mentioned our work.</span>
+		</td>
+	</tr>
+	<tr>
+		<td><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -275px; height: 58px;"></td>
+		<td>
+			<strong>2015</strong>
+			<em>GovTrack Insider</em>
+			<span>After <a href="https://www.kickstarter.com/projects/1872382405/govtrack-insider">a successful Kickstarter</a>, we created an independent location for our writing about bills and related subjects. Our first article was about a <a href="https://govtrackinsider.com/how-congress-voted-on-trade-afb8b4438823">trade bill</a>. One of our most recent articles was about <a href="https://govtrackinsider.com/who-was-nominated-for-the-congressional-gold-medal-in-2019-8d95097a793a">who Congress nominates for Congressional Gold Medals</a>.</span>
+			<em>Legislator subject areas</em>
+			<span>At a user’s suggestion, we created legislator subject areas based on the bills they sponsor. They’re not always what you might expect.</span>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -335px; height: 90px;">
+			<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -880px; height: 130px;">
+		</td>
+		<td>
+			<strong>2017</strong>
+			<em>Bill text incorporation</em>
+			<span>Smaller bills are <a href="https://govtracknews.wordpress.com/2017/01/07/how-a-complex-network-of-bills-becomes-a-law-introducing-a-new-data-analysis-of-text-incorporation/">often passed as part of larger packages</a>. Tracing that path can be very difficult. This feature simplifies that process for you. It also lets us give legislators credit where due that would otherwise be hidden by procedure. Here’s a link to <a href="https://www.govtrack.us/congress/bills/116/hr1865">one bill</a> which we show incorporates 89 other bills.</span>
+			<em>Advocacy organization rankings</em>
+			<span>People often go to organizations that support their views to find out which politicians they believe work to their benefit. We’ve gathered a number of major advocacy organizations’ ratings of legislators so you can see them all together.</span>
+			<em>Congressional Misconduct Database</em>
+			<span>Congress mostly polices itself and has done so since 1789. We have gathered what we believe is the only database of all instances of <a href="https://www.govtrack.us/misconduct">Congressional Misconduct</a>.</span>
+			<em>Fact check goes national</em>
+			<span>Our fact-check of President Trump&rsquo;s bogus claim that he signed more legislation than anyone &mdash; in fact, it was the least &mdash; made national news.</span>
+			<em>Four team members</em>
+			<span>In 2017 we increased the size of our team to four regular team members.</span>
+			<em>1,500,000 users in a month</em>
+			<span>In January 2017, just under 1.5 million users visited our site and 9.7 million people visited our site that year &mdash; a record.</span>
+			<em>End of our open data</em>
+			<span>Happily, we were able to retire our open data and API because <a href="http://fedscoop.com/congress-makes-bill-status-open-to-public">Congress created their</a> own and other organizations created similar APIs.</span>
+		</td>
+	</tr>
+	<tr>
+		<td><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -430px; height: 66px;"></td>
+		<td>
+			<strong>2018</strong>
+			<em>Pronunciation guide</em>
+			<span>Perhaps you too had thought that former Rep. Goodlatte’s name was pronounced like the coffee drink. It is not. Our guide can be very helpful if you’re calling your representative for the first time!</span>
+			<em>Our 500,000th registered user</em>
+			<span>The 500,000th person to sign up for email updates registered this year.</span>
+		</td>
+	</tr>
+	<tr>
+		<td><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="background-position-y: -510px; height: 140px;"></td>
+		<td>
+			<strong>2019</strong>
+			<em>Testified before Congress</em>
+			<span>On May 10, 2019, GovTrack.us founder Joshua Tauberer <a href="https://medium.com/@govtrack/govtrack-testimony-in-house-committee-hearing-on-transparency-and-modernizing-congress-545ae8cdb5f4">testified</a> before the House Select Committee on the Modernization of Congress on the subject of transparency.</span>
+			<em>Bill study guides</em>
+			<span>Every bill page now features a unique set of questions to help you understand the bill, under the “study guides” tab. These questions can be used in the classroom to guide discussion about a bill, or can be helpful templates for what to ask when you call your representatives.</span>
+			<em>Impeachment.guide</em>
+			<span>We launched a spin-off site <a href="https://Impeachment.guide">Impeachment.guide</a> to track the chronology and charges in the impeachment of President Trump.</span>
+		</td>
+	</tr>
+	<tr>
+		<td/>
+		<td>
+			<strong>2020</strong>
+			Let&rsquo;s see what the future holds this year!
+		</td>
+	</tr>
+</table>
+
+<h2><span>Help us open government</span></h2>
+
+<p>Join the movement to make our government more open and effective. Here are some ideas:</p>
+
+<ul class="bullets">
+<li>Join your local <a href="http://www.codeforamerica.org/brigade/">Code for America Brigade</a>. Check it out even if you are not a coder.</li>
+<li>Read the <a href="http://www.openingparliament.org/declaration">Declaration on Parliamentary Openness</a>, an international declaration.</li>
+<li>Read <a href="https://medium.com/civic-tech-thoughts-from-joshdata">Civic Tech Thoughts</a> and <a href="http://opengovdata.io">Open Government Data: The Book</a> by GovTrack&rsquo;s founder on the open government and open government data movements.</p>
+</ul>
+
+<h2><span>For media</span></h2>
+
+<ul class="bullets">
+	<li><a href="/static/logo_hires.png">Hi-Res Logo</a></li>
+	<li><a href="/press">Press Clippings</a></li>
+</ul>
 
 {% endblock %}
 
