@@ -722,7 +722,7 @@ $(function() {
 
 	<div class="panel panel-info">
 	   <div class="panel-body">
-	      <p>How well do you know understand this vote? Use this study guide to find out.</p>
+	      <p>How well do you understand this vote? Use this study guide to find out.</p>
 
 	      <p style="margin-bottom: 0">You can find answers to most of the questions below here on the vote page.
 	      {% if vote.related_bill %} For a guide to understanding the {{vote.related_bill.noun}} this vote was about, <a href="{{vote.related_bill.get_absolute_url}}/studyguide">see here</a>.</p>{% endif %}
@@ -740,7 +740,7 @@ $(function() {
 	   <div class="tips">
 		<p>Not all votes are meant to pass legislation. In the Senate some votes are not about legislation at all, since the Senate must vote to confirm presidential nominations to certain federal positions.</p>
 		{% if vote.category == VoteCategory.nomination %}
-		<p>This vote was on a nomination by the President. Use your favorite search engine to find more about who was nominated and what the position entails. What branch of government is the position? What relevant experience does the nominee have?</p>
+		<p>This vote was on a nomination by the President. Use your favorite search engine to find more about who was nominated and what the position entails. What branch of government is the position in? What relevant experience does the nominee have?</p>
 		{% endif %}
 		{% if vote.related_bill %}
 		<p>This vote is related to a {{vote.related_bill.noun}}. However, that doesn’t necessarily tell you what it is about. Congress makes many decisions in the process of passing legislation, such as on the procedures for debating the {{vote.related_bill.noun}}, whether to change the {{vote.related_bill.noun}} before voting on passage, and even whether to vote on passage at all.</p>
@@ -750,19 +750,21 @@ $(function() {
 		{% endif %}
 		<p>You can learn more about the various motions used in Congress at <a href="https://www.everycrsreport.com">EveryCRSReport.com</a>. If you aren’t sure what the {{vote.chamber_name}} was voting on, try seeing if it’s on <a href="https://www.everycrsreport.com/reports/RL32207.html">this list</a>.</p>
 	   </div>
-
+	
+	{% if " table " in {{vote.question}} or " recommit" in {{vote.question}} %}
 	   <li>Given what this vote is on, what does a vote in favor mean?</li>
 
 	   <div class="tips">
-		<p>As we established previously, not all votes on a {{vote.related_bill.noun}} are on passage. In some cases Congress votes on whether to set aside a {{vote.related_bill.noun}} or send it back to committee, which can effectively kill the {{vote.related_bill.noun}}. In those cases a vote in favor is actually a vote against passing the {{vote.related_bill.noun}}, since it is a vote to let the {{vote.related_bill.noun}} remain in Congress.</p>
+		<p>Not all votes on a {{vote.related_bill.noun}} are on passage. Sometimes Congress votes on whether to set aside a {{vote.related_bill.noun}} or send it back to committee, which can effectively kill the {{vote.related_bill.noun}}. In those cases a vote in favor is actually a vote against passing the {{vote.related_bill.noun}}, since it is a vote to let the {{vote.related_bill.noun}} remain in Congress.</p>
 	   </div>
+	{% endif %}
 
 	   {% if vote.related_bill %}
 	   <li>What is the next step after this vote?</li>
 
 	   <div class="tips">
-		<p>Take a look at where this {{vote.related_bill.noun}} is in the legislative process. What might come next? Keep in mind what this specific vote was on, and the context of the {{vote.related_bill.noun}}. Will there be more amendments? Will the other chamber of Congress vote on it, or let it die?</p> 
-		<p>For this question it may help to briefly examine <a href="{vote.related_bill.get_absolute_url">the {{vote.related_bill.noun}} itself.</p>
+		<p>Take a look at where this {{vote.related_bill.noun}} is in the legislative process. What might come next? Keep in mind what this specific vote was on, and the context of the {{vote.related_bill.noun}}. Will there be amendments? Will the other chamber of Congress vote on it, or let it die?</p> 
+		<p>For this question it may help to briefly examine <a href="{{vote.related_bill.get_absolute_url}}">the {{vote.related_bill.noun}} itself.</p>
 	   </div>
 	   {% endif %}
 
@@ -775,9 +777,9 @@ $(function() {
 	   <li>What trends do you see in this vote?</li>
 
 	   <div class="tips">
-		<p>This is most likely a question of partisanship. But Members of Congress side together for many reasons beside being in the same political party, especially so for less prominent legislation or legislation specific to a certain region. What might have determined how the roll call came out in this case? Does it look like Members of Congress voted based on party, geography, or some other reason?</p>
+		<p>Members of Congress side together for many reasons beside being in the same political party, especially so for less prominent legislation or legislation specific to a certain region. What might have determined how the roll call came out in this case? Does it look like Members of Congress voted based on party, geography, or some other reason?</p>
 		{% if has_diagram.map and vote.chamber_name != "Senate" %}
-		<p>One tool that will be helpful in answering this question is the cartogram at the top of the page. A cartogram is a stylized map of the United States that shows each district as an identical hexagon. This view allows you to see the how the Representatives from each district voted sorted by their geography and political party. What trends can you see in the cartogram for this vote?</p>
+		<p>One tool that will be helpful in answering this question is the cartogram at the top of the page. A cartogram is a stylized map of the United States that shows each district as an identical hexagon. This view allows you to see the how the representatives from each district voted arranged by their geography and colored by their political party. What trends can you see in the cartogram for this vote?</p>
 		{% endif %}
 	   </div>
 
@@ -785,23 +787,23 @@ $(function() {
 	   <li>GovTrack marked some legislators’ votes as statistically notable. Why might they be notable?</li>
 
 	   <div class="tips">
-		<p>This question relates to the previous one. If you can find a trend in how Members of Congress voted, you might be able to see anomalies in that trend. GovTrack uses algorithms to look for trends across votes and mark possible anomalies. Do you agree that these votes seem notable? Why or why not?</p>
+		<p>If you can find a trend in how Members of Congress voted, you might be able to see anomalies in that trend. GovTrack uses algorithms to look for trends across votes and mark possible anomalies. Do any of these anomalies surprise you? Why or why not?</p>
 	   </div>
 	   {% endif %}
 
-	   <li>How did your {% if vote.chamber_name != "Senate" %}Representative{% else %}Senators{% endif %} vote?</li>
+	   <li>How did your {% if vote.chamber_name != "Senate" %}representative{% else %}senators{% endif %} vote?</li>
 
 	   <div class="tips">
-		<p>There {% if vote.chamber_name != "Senate" %}is one{% else %}are two{% endif %} vote{% if vote.chamber_name == "Senate" %}s{% endif %} here that should be more important to you than all the others. These are the votes cast by your {% if vote.chamber_name != "Senate" %}Representative{% else %}Senators{% endif %}, which are meant to represent you and your community. Do you agree with how your {% if vote.chamber_name != "Senate" %}Representative{% else %}Senators{% endif %} voted? Why do you think they voted the way they did?</p>
+		<p>There {% if vote.chamber_name != "Senate" %}is one{% else %}are two{% endif %} vote{% if vote.chamber_name == "Senate" %}s{% endif %} here that should be more important to you than all the others. These are the votes cast by your {% if vote.chamber_name != "Senate" %}representative{% else %}senators{% endif %}, which {% if vote.chamber_name != "Senate" %}is{% else %}are{% endif %} meant to represent you and your community. Do you agree with how your {% if vote.chamber_name != "Senate" %}representative{% else %}senators{% endif %} voted? Why do you think they voted the way they did?</p>
 		<p>If you don’t already know who your Members of Congress are you can find them by <a href="https://www.govtrack.us/congress/members">entering your address here</a>.</p>
 	   </div>
 
 	   {% if vote.chamber_name == "Senate" %}
-	   <li>What percentage of the population are represented by the yeas?</li>
+	   <li>How much of the United States population is represented by the yeas?</li>
 
 	   <div class="tips">
-		<p>GovTrack displays the percentage of the population represented by the yeas on some Senate votes just under the vote totals. We do this to highlight how the United States population is represented in the Senate. Since each state has two Senators, but the populations of states vary significantly, the individuals living in each state have different levels of Senate representation. For example, California’s population of near 40 million is given the same amount of representation as Wyoming’s population of about 600 thousand.</p>
-		<p>Since there are one hundred Senators, it’s easy to compare the percentages. How does the percent of the Senate that voted yea compare to the percentage of the population they represent? If there is a difference, how important is it?</p>
+		<p>GovTrack displays the percentage of the United States population represented by the yeas on some Senate votes just under the vote totals. We do this to highlight how the people of the United States are represented in the Senate. Since each state has two senators, but state populations vary significantly, the individuals living in each state have different Senate representation. For example, California’s population of near 40 million is given the same number of senators as Wyoming’s population of about 600,000.</p>
+		<p>Do the senators who voted yea represent a majority of the people of the United States? Does it matter?</p>
 	   </div>
 	   {% endif %}
 
@@ -809,6 +811,14 @@ $(function() {
 
 </div>
 </div>
+
+<p class="text-info">
+Each vote&rsquo;s study guide is a little different &mdash; we automatically choose which questions to include based on the information we have available about the vote.
+Study guides are a new feature to GovTrack. You can help us improve them by filling out <a href="https://docs.google.com/forms/d/1ROkYIeJHlGeJ4VNETbh3Sq-Iw6X6HD6p-VvIJUMc-hs/">this survey</a> or by sending your feedback to <a href="mailto:hello@govtrack.us?subject=Bill study guide">hello@govtrack.us</a>.
+</p>
+</div>
+{% endblock %}
+
 </div>
 {% endwith %}
 
