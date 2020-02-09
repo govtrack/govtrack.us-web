@@ -15,10 +15,10 @@ $(function() {
 		flags.hits = (parseInt(flags.hits) || 0) + 1;
 
 		!function() {
-			if (show_announcement(flags)) return;
+			//if (show_announcement(flags)) return;
 			//if (show_fundraise(flags)) return;
 			//if (show_usergroup(flags)) return;
-			//if (show_followus(flags)) return;
+			if (show_followus(flags)) return;
 		}();
 
 		// Save flags.
@@ -28,8 +28,8 @@ $(function() {
 
 function show_followus(flags) {
 	// only show this modal once
-	if (flags.follow_us) return false;
-	flags.follow_us = true;
+	if (flags.follow_us == 2) return false;
+	flags.follow_us = 2;
 
 	$('#followus_modal').modal();
 
