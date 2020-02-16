@@ -42,27 +42,27 @@ def new_stakeholder_post(request):
           label="Paste the text of your position statement about " + related_bill.display_number)
 
 
-      if user_admin_of_stakeholders:
-        for s in user_admin_of_stakeholders:
-          for p in Post.objects.filter(stakeholder=s):
-            for bp in p.bill_positions.all():
-              if bp.bill  == related_bill:
-                data = {'organization':(s.id, s.name),
-                        'position':bp.position,
-                        'position_statement_link': p.link,
-                        'position_statement_content':p.content}
-                if request.method == 'POST':
-                  form = NewStakehoderForm(request.POST, initial=data)
-                  if form.is_valid():
-                    if form.cleaned_data['position'] != '':
+    if user_admin_of_stakeholders:
+      for s in user_admin_of_stakeholders:
+        for p in Post.objects.filter(stakeholder=s):
+          for bp in p.bill_positions.all():
+            if bp.bill  == related_bill:
+              data = {'organization':(s.id, s.name),
+                      'position':bp.position,
+                      'position_statement_link': p.link,
+                      'position_statement_content':p.content}
+              if request.method == 'POST':
+                form = NewStakehoderForm(request.POST, initial=data)
+                if form.is_valid():
+                  if form.cleaned_data['position'] != '':
                     bp.position = int(form.cleaned_data['position'])
-                    p.link = form.cleaned_data['position_statement_link']
-                    p.content = form.cleaned_data['position_statement_content']
-                    bp.save()
-                    p.save()
-                    return HttpResponseRedirect(s.get_absolute_url())
-                else:
-                  form = NewStakehoderForm(initial=data)
+                  p.link = form.cleaned_data['position_statement_link']
+                  p.content = form.cleaned_data['position_statement_content']
+                  bp.save()
+                  p.save()
+                  return HttpResponseRedirect(s.get_absolute_url())
+              else:
+                form = NewStakehoderForm(initial=data)
 
 
     if request.method == "GET":
