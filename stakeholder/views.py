@@ -41,7 +41,7 @@ def new_stakeholder_post(request):
         position_statement_content = CharField(required=True, widget=Textarea,
           label="Paste the text of your position statement about " + related_bill.display_number)
 
-
+#If post already exists, update it instead of making a new one. Assumes only one of user's accounts has a statement on a given bill. Should be integrated into code below for clarity. Code added by Ben, a bad coder. 
     if user_admin_of_stakeholders:
       for s in user_admin_of_stakeholders:
         for p in Post.objects.filter(stakeholder=s):
@@ -61,8 +61,6 @@ def new_stakeholder_post(request):
                   bp.save()
                   p.save()
                   return HttpResponseRedirect(s.get_absolute_url())
-              else:
-                form = NewStakehoderForm(initial=data)
 
 
     if request.method == "GET":
