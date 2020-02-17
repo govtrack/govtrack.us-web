@@ -21,6 +21,8 @@ def new_stakeholder_post(request):
     if request.GET.get('bill'):
       related_bill = Bill.from_congressproject_id(request.GET['bill'])
 
+    data = {}
+
     user_admin_of_stakeholders = request.user.stakeholder_set.all()
 
     class NewStakehoderForm(Form):
@@ -39,8 +41,30 @@ def new_stakeholder_post(request):
         position_statement_content = CharField(required=True, widget=Textarea,
           label="Paste the text of your position statement about " + related_bill.display_number)
 
+#If post already exists, update it instead of making a new one. Assumes only one of user's accounts has a statement on a given bill. Should be integrated into code below for clarity. Code added by Ben, a bad coder. 
+    if user_admin_of_stakeholders:
+      for s in user_admin_of_stakeholders:
+        for p in Post.objects.filter(stakeholder=s):
+          for bp in p.bill_positions.all():
+            if bp.bill  == related_bill:
+              data = {'organization':(s.id, s.name),
+                      'position':bp.position,
+                      'position_statement_link': p.link,
+                      'position_statement_content':p.content}
+              if request.method == 'POST':
+                form = NewStakehoderForm(request.POST, initial=data)
+                if form.is_valid():
+                  if form.cleaned_data['position'] != '':
+                    bp.position = int(form.cleaned_data['position'])
+                  p.link = form.cleaned_data['position_statement_link']
+                  p.content = form.cleaned_data['position_statement_content']
+                  bp.save()
+                  p.save()
+                  return HttpResponseRedirect(s.get_absolute_url())
+
+
     if request.method == "GET":
-        form = NewStakehoderForm()
+        form = NewStakehoderForm(initial=data)
     else: # POST
         form = NewStakehoderForm(request.POST)
         if form.is_valid():
