@@ -36,7 +36,7 @@ def new_stakeholder_post(request):
       if related_bill:
         position = ChoiceField(choices=[(None, '(choose)'), (1, "Support"), (0, "Neutral"), (-1, "Oppose")], required=True,
           label="Your organization's position on " + related_bill.display_number)
-        position_statement_link = URLField(required=True,
+        position_statement_link = URLField(required=False,
           label="Link to webpage or PDF containing a position statement about " + related_bill.display_number)
         position_statement_content = CharField(required=True, widget=Textarea,
           label="Paste the text of your position statement about " + related_bill.display_number)
