@@ -461,25 +461,88 @@ def bill_text_user_view(request, congress, type_slug, number, version=None):
 @anonymous_view
 @json_response
 def bill_text_ajax(request):
+    # Load a bill text comparison.
+
     for p in ("left_bill", "left_version", "right_bill", "right_version", "mode"):
         if not p in request.GET:
             raise Http404()
 
+    from .billtext import load_bill_text, get_current_version
+
+    # Load the bills and get the versions to compare.
     try:
-        return load_comparison(request.GET["left_bill"], request.GET["left_version"], request.GET["right_bill"], request.GET["right_version"])
+        left_bill = Bill.objects.get(id=request.GET['left_bill'])
+        left_version = request.GET['left_version']
+
+        right_bill = Bill.objects.get(id=request.GET['right_bill'])
+        right_version = request.GET['right_version']
+
+        if left_version == "": left_version = get_current_version(left_bill)
+        if right_version == "": right_version = get_current_version(right_bill)
+
+        left_metadata = load_bill_text(left_bill, left_version, mods_only=True)
+        right_metadata = load_bill_text(right_bill, right_version, mods_only=True)
+    except Exception as e:
+        return { "error": str(e) }
+
+
+    # Swap the order so the left is the earlier document.
+    if left_metadata["docdate"] > right_metadata["docdate"]:
+        left_bill, right_bill = right_bill, left_bill
+        left_version, right_version = right_version, left_version
+        left_metadata, right_metadata = right_metadata, left_metadata
+
+    # If PDFs are available for both, use the Draftable API.
+
+    if "pdf_file" in left_metadata and "pdf_file" in right_metadata \
+        and hasattr(settings, 'DRAFTABLE_ACCOUNT_ID'):
+        import draftable
+        draftable_client = draftable.Client(settings.DRAFTABLE_ACCOUNT_ID, settings.DRAFTABLE_AUTH_TOKEN)
+        comparison_id = "billtext_c1_{}_{}_{}_{}_{}_{}".format(
+            left_bill.congressproject_id, left_version, "pdf",
+            right_bill.congressproject_id, right_version, "pdf",
+        )
+
+        # See if we've done this one already.
+        comparison = None
+        try:
+            comparison = draftable_client.comparisons.get(comparison_id)
+        except:
+            pass
+
+        if not comparison:
+            def load_side(bill, metadata):
+                from time import strftime
+                return draftable.make_side(
+                    metadata['pdf_file'],
+                    file_type="pdf",
+                    display_name="{}: {} ({})".format(
+                        bill.display_number_with_congress_number,
+                        metadata["doc_version_name"],
+                        metadata["docdate"].strftime("%x")))
+            comparison = draftable_client.comparisons.create(
+                identifier=comparison_id,
+                left=load_side(left_bill, left_metadata),
+                right=load_side(right_bill, right_metadata),
+                public=True,
+            )
+
+        return { "draftable_widget_url": draftable_client.comparisons.public_viewer_url(identifier=comparison_id, wait=True) }
+
+    # Do our own diff and return the diff as XML content.
+
+    try:
+        return make_bill_text_comparison(left_bill, left_version, right_bill, right_version)
     except IOError as e:
         return { "error": str(e) }
 
-def load_comparison(left_bill, left_version, right_bill, right_version, timelimit=10, use_cache=True, force_update=False):
-    from .billtext import load_bill_text, get_current_version
+def make_bill_text_comparison(left_bill, left_version, right_bill, right_version):
+    timelimit = 10
+    use_cache = True
+    force_update=False
+
     from xml_diff import compare
     import lxml
-
-    left_bill = Bill.objects.get(id = left_bill)
-    right_bill = Bill.objects.get(id = right_bill)
-
-    if left_version == "": left_version = get_current_version(left_bill)
-    if right_version == "": right_version = get_current_version(right_bill)
 
     if use_cache:
         # Load from cache.

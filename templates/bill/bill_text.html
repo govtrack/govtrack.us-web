@@ -125,8 +125,18 @@ function load_comparison(alt_bill, alt_version) {
 			if (data.error) {
 				$('#content_loading').html($('<p></p>').text(data.error));
 				return;
+			} else if (data.draftable_widget_url) {
+				// Show the Draftable widget. It's too large to show inline so open it
+				// in a new tab.
+				//window.open(data.draftable_widget_url, '_blank');
+				window.draftable_widget_url = data.draftable_widget_url;
+				$('#bill_text_comparison_modal').modal("show"); // a shown event handler loads the iframe src
+				$('#content_loading').hide();
+				$('#main_text_content').show();
+			} else {
+				// Legacy mode.
+				display_comparison(data.left_text, data.right_text, data.left_meta, data.right_meta);
 			}
-			display_comparison(data.left_text, data.right_text, data.left_meta, data.right_meta);
 		},
 		xhr: function() {
 			try {
@@ -313,6 +323,10 @@ $(function() {
 		}
 	}
 
+	$('#bill_text_comparison_modal').on('shown.bs.modal', function (e) {
+		$('#bill_text_comparison_modal iframe').attr('src', window.draftable_widget_url);
+        });
+
 	// go to a permalink
 	show_permalink(window.location.hash, true)
 
@@ -344,6 +358,21 @@ window.document.addEventListener("DOMContentLoaded", function() {
 
 <div id="permalink_widget">
 	<a class="btn btn-success" href="about:blank">Permalink</a>
+</div>
+
+<!-- bill text comparison widget modal -->
+<div class="modal fade" id="bill_text_comparison_modal" tabindex="-1" role="dialog" aria-labelledby="bill_text_comparison_modal_title" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="bill_text_comparison_modal_title">Text Comparison</h4>
+      </div>
+      <div class="modal-body">
+        <iframe class="embed-responsive-item" src="" allowfullscreen style="width: 100%; height: 80vh;"></iframe>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

@@ -65,6 +65,7 @@ If you used Vagrant, use `vagrant ssh` to go into the virtual machine. Otherwise
     cd congress-project/
     pip2 install -r requirements.txt 
     python2 run govinfo --bulkdata=BILLSTATUS --congress=116
+    python2 run govinfo --collections=BILLS --extract=pdf --years=2020 
     python2 run bills --log=debug --govtrack
     python2 run votes --log=debug --govtrack
     cd ..
