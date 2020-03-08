@@ -124,8 +124,16 @@ function load_comparison(alt_bill, alt_version) {
 			if (data.error) {
 				$('#content_loading').html($('<p></p>').text(data.error));
 				return;
+			} else if (data.draftable_widget_url) {
+				// Show the Draftable widget. It's too large to show inline so open it
+				// in a new tab.
+				window.open(data.draftable_widget_url, '_blank');
+				$('#content_loading').hide();
+				$('#main_text_content').show();
+			} else {
+				// Legacy mode.
+				display_comparison(data.left_text, data.right_text, data.left_meta, data.right_meta);
 			}
-			display_comparison(data.left_text, data.right_text, data.left_meta, data.right_meta);
 		},
 		xhr: function() {
 			try {

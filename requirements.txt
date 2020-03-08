@@ -39,3 +39,4 @@ matplotlib
 pycairo
 exclusiveprocess
 email_validator
+draftable-compare-api
