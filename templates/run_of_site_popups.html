@@ -15,10 +15,10 @@ $(function() {
 		flags.hits = (parseInt(flags.hits) || 0) + 1;
 
 		!function() {
-			//if (show_announcement(flags)) return;
+			if (show_announcement(flags)) return;
 			//if (show_fundraise(flags)) return;
 			//if (show_usergroup(flags)) return;
-			if (show_followus(flags)) return;
+			//if (show_followus(flags)) return;
 		}();
 
 		// Save flags.
@@ -59,8 +59,8 @@ function show_fundraise(flags) {
 
 function show_announcement(flags) {
 	// only show this modal once
-	if (flags.ancmt == 1) return false;
-	flags.ancmt = 1;
+	if (flags.ancmt == 2) return false;
+	flags.ancmt = 2;
 	$('#run_of_site_announcement_modal').modal();
 	return true;
 }
@@ -267,15 +267,17 @@ $(function() {
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="run_of_site_announcement_modal_title">
-    	    We&rsquo;re tracking the impeachment of President Trump
+    	    GovTrack.us is taking a new focus on civic education
     	</h2>
       </div>
       <div class="modal-body">
-	<p>Want to know how impeachment works? Need help keeping track of the events leading up to the impeachment and the charges? We have a new website for you. Check out:</p>
-	<div style="font-size: 115%; font-weight: bold;">
-		<p><a href="https://impeachment.guide">Impeachment.guide</a></p>
-	</div>
-	<p>We are updating the website as new information becomes available.</p>
+		<p><strong>Help us develop the tools to bring real-time legislative data into the classroom.</strong></p>
+
+		<p>If you’ve visited a bill page on GovTrack.us recently, you may have noticed a new “study guide” tab located just below the bill title. This is part of a new project to develop better tools for bringing real-time legislative data into the classroom. We hope to enable educators to build lesson plans centered around any bill or vote in Congress, even those as recent as yesterday.</p>
+
+		<p>We’re looking for feedback from educators about how GovTrack can be used and improved for your classroom. If you teach United States government and would like to speak with us about bringing legislative data into your classroom, please reach out!</p>
+
+		<a href="mailto:hello@govtrack.us?subject=GovTrack%20in%20my%20classroom" class="btn btn-primary">Email Us</a>
       </div>
     </div>
   </div>
