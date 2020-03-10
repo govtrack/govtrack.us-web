@@ -201,7 +201,7 @@ def compare_bills(b1, b2):
   print(b1.id, str(b1).encode("utf8"))
   print(b2.id, str(b2).encode("utf8"))
   ratio1, ratio2, text = compare_text(extract_text(fn2), *state)
-  print(ratio1, ratio2, ratio1*ratio2)
+  print(ratio1, ratio2, len(text))
   print((text[:1000].encode("utf8")))
   print()
 
@@ -603,10 +603,10 @@ elif __name__ == "__main__" and sys.argv[1] == "extract-text":
 
 
 elif __name__ == "__main__" and len(sys.argv) == 3:
-  # Compare two bills by database numeric ID.
+  # Compare two bills.
   from bill.models import *
-  b1 = Bill.objects.get(id=sys.argv[1])
-  b2 = Bill.objects.get(id=sys.argv[2])
+  b1 = Bill.from_congressproject_id(sys.argv[1])
+  b2 = Bill.from_congressproject_id(sys.argv[2])
   compare_bills(b1, b2)
 
 elif __name__ == "__main__":
