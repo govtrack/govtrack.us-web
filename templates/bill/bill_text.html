@@ -465,9 +465,13 @@ window.document.addEventListener("DOMContentLoaded", function() {
 	<div>
 		<h2 style="margin-bottom: 4px">Primary Source</h2>
 		<p id="sourcecredit">
+		{% if textdata.source == "docs.house.gov" %}
+				<a href="{{textdata.gpo_url}}">Docs.House.gov</a>
+		{% else %}
 				<a href="{{textdata.gpo_url}}">Government Publishing Office</a>
 				{% if textdata.source == "cato-deepbills" %}and <a href="http://www.cato.org/resources/data">Cato Institute Deepbills</a>{% endif %}
 				{% if textdata.source == "statutes" %}&mdash; <a href="http://www.gpo.gov/fdsys/browse/collection.action?collectionCode=STATUTE">Statutes at Large</a>{% endif %}
+		{% endif %}
 		</p>
 	</div>
 {% endblock %}
