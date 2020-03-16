@@ -112,7 +112,7 @@ if "bills" in sys.argv:
 	
 	# Scrape upcoming House bills.
 
-	os.system("cd %s; . .env/bin/activate; ./run upcoming_house_floor --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
+	os.system("cd %s; . .env/bin/activate; ./run upcoming_house_floor --download --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
 	do_bill_parse = True
 	
 	# os.system("./manage.py dumpdata --format json bill.BillTerm > data/db/django-fixture-billterms.json")

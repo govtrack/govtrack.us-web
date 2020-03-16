@@ -505,6 +505,7 @@ def load_docs_house_gov(options, bill_index):
         print("No upcoming_house_floor data.")
         return
     for fn in sorted(os.listdir(settings.CONGRESS_DATA_PATH + "/upcoming_house_floor"))[-3:]:
+        if not fn.endswith(".json"): continue # skip directories holding downloads
         data = json.load(open(settings.CONGRESS_DATA_PATH + "/upcoming_house_floor/" + fn))
         for billinfo in data.get("upcoming", []):
             if "bill_id" not in billinfo: continue
