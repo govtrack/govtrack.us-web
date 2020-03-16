@@ -1643,9 +1643,9 @@ class BillLink(models.Model):
 
 class BillTextComparison(models.Model):
     bill1 = models.ForeignKey(Bill, related_name="comparisons1", on_delete=models.CASCADE)
-    ver1 = models.CharField(max_length=6)
+    ver1 = models.CharField(max_length=10)
     bill2 = models.ForeignKey(Bill, related_name="comparisons2", on_delete=models.CASCADE)
-    ver2 = models.CharField(max_length=6)
+    ver2 = models.CharField(max_length=10)
     data = JSONField()
     class Meta:
         unique_together = ( ('bill1', 'ver1', 'bill2', 'ver2'), )

@@ -299,6 +299,10 @@ def get_bill_text_metadata_dhg(bill, version):
             dat["text_file"] = "data/congress/" + file["text_path"]
             dat["has_displayable_text"] = True
             dat["text_file_source"] = "docs.house.gov"
+        if "xml_path" in file:
+            dat["xml_file"] = "data/congress/" + file["xml_path"]
+            dat["has_displayable_text"] = True
+            dat["xml_file_source"] = "docs.house.gov"
         if file["format"] == "xml":
             dat["xml_file"] = "data/congress/" + file["path"]
             dat["has_displayable_text"] = True
