@@ -41,6 +41,7 @@ DATABASE_URL = get_env_variable('DATABASE_URL', DEFAULT_DATABASE_URL)
 DATABASES = {
 	'default': dj_database_url.parse(DATABASE_URL)
 }
+DATABASES['default']['OPTIONS']['charset'] = 'utf8mb4' # MySQL's true Unicode character set
 import django_cache_url
 CACHE_URL = get_env_variable('CACHE_URL', default="locmem://opendataiscool")
 CACHES = {
