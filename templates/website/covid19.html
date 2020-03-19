@@ -1,6 +1,6 @@
 {% extends "master.html" %}
 
-{% block title %}COVID-19 in Congress{% endblock %}
+{% block title %}COVID-19 in Congress tracked by GovTrack.us{% endblock %}
 
 {% block crumbs %}
 {% endblock %}
@@ -19,7 +19,7 @@ $(function() {
 	    return date;
 	};
 	var has_entry = { };
-	Highcharts.chart('affected-legislators-chart', {
+	var chart = {
 	  chart: {
 	    type: 'xrange'
 	  },
@@ -41,7 +41,7 @@ $(function() {
 	    title: {
 	      text: ''
 	    },
-	    categories: ['']
+	    categories: []
 	  },
 	  series: [{
 	    name: '',
@@ -54,7 +54,7 @@ $(function() {
 	    		var cells = $(this).find("td");
 	    		function make_date(s) {
 	    			var parts = s.split(/\//);
-	    			return Date.UTC("20"+parts[2], parts[0], parts[1]);
+	    			return Date.UTC(parseInt("20"+parts[2]), parseInt(parts[0])-1, parseInt(parts[1]));
 	    		}
 	    		
 	    		var x1 = make_date($(cells[0]).text());
@@ -100,16 +100,15 @@ $(function() {
 	    ),
 	    dataLabels: {
 	      enabled: true,
-	      formatter: function()
-            {
-                return this.point.text;
-            }
+	      formatter: function() { return this.point.text; },
+	      style: { fontSize: '10px', fontWeight: 'normal', textOutline: 'none' }
 	    },
 	    legend: { enabled: false }
 	  }]
-
-	});
-
+	};
+	for (let y in has_entry)
+		chart.yAxis.categories.push(parseInt(y)+1);
+	Highcharts.chart('affected-legislators-chart', chart);
 });
 </script>
 {% endblock %}
@@ -138,9 +137,9 @@ $(function() {
 
 	<figure class="highcharts-figure">
 	    <div id="affected-legislators-chart"></div>
-	    <p class="highcharts-description">
+	    <!--<p class="highcharts-description">
 	        Affected Members of Congress
-	    </p>
+	    </p>-->
 	</figure>
 
 
