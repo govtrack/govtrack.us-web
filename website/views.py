@@ -1029,3 +1029,8 @@ def missing_data(request):
     return {
         "people": people,
     }
+
+@anonymous_view
+@render_to('website/covid19.html')
+def covid19(request):
+	return { }

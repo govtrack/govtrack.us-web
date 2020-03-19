@@ -30,4 +30,5 @@ urlpatterns = [
     url(r'^misconduct', website.views.misconduct),
     url(r'^user-group-signup', website.views.user_group_signup),
     url(r'^missing-data', website.views.missing_data),
+    url(r'^covid-19', website.views.covid19),
 ]

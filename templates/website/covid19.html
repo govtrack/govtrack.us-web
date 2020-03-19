@@ -1,0 +1,248 @@
+{% extends "master.html" %}
+
+{% block title %}COVID-19 in Congress{% endblock %}
+
+{% block crumbs %}
+{% endblock %}
+
+{% block body_scripts %}
+<script src="{{ STATIC_URL }}vendor/highcharts.js"></script>
+<script src="{{ STATIC_URL }}vendor/highcharts-accessibility.js"></script>
+<script src="{{ STATIC_URL }}vendor/highcharts-xrange.js"></script>
+<script>
+$(function() {
+	$('.affected-legislators-count').text($('#affected-legislators tbody tr').length);
+
+	Date.prototype.addDays = function(days) {
+	    var date = new Date(this.valueOf());
+	    date.setDate(date.getDate() + days);
+	    return date;
+	};
+	var has_entry = { };
+	Highcharts.chart('affected-legislators-chart', {
+	  chart: {
+	    type: 'xrange'
+	  },
+	  title: {
+	    text: ''
+	  },
+      credits: { enabled: false },
+	  accessibility: {
+	    point: {
+	      descriptionFormatter: function(point) {
+	        return 'x';
+	      }
+	    }
+	  },
+	  xAxis: {
+	    type: 'datetime'
+	  },
+	  yAxis: {
+	    title: {
+	      text: ''
+	    },
+	    categories: ['']
+	  },
+	  series: [{
+	    name: '',
+	    //pointPadding: 2,
+	    //groupPadding: 0,
+	    //borderColor: 'gray',
+        colorByPoint: false,
+	    pointWidth: 30,
+	    data: $('#affected-legislators tbody tr').map(function() {
+	    		var cells = $(this).find("td");
+	    		function make_date(s) {
+	    			var parts = s.split(/\//);
+	    			return Date.UTC("20"+parts[2], parts[0], parts[1]);
+	    		}
+	    		
+	    		var x1 = make_date($(cells[0]).text());
+
+	    		// We're not tracking quarantine end dates, so just make each entry one day long.
+	    		var x2 = new Date(x1).addDays(1).getTime();
+
+	    		// Put this legislator on the first row that has no entries yet on this date range.
+	    		var xrange = [x1];
+	    		//while (xrange[xrange.length-1] != x2) xrange.push(new Date(xrange[xrange.length-1]).addDays(1).getTime());
+	    		var y = 0;
+	    		while (true) {
+	    			var bad = false;
+	    			xrange.forEach(function(x) {
+	    				if (y in has_entry && x in has_entry[y])
+	    				bad = true;
+	    			});
+	    			if (bad) {
+	    				y++;
+	    				continue;
+	    			} else {
+	    				break;
+	    			}
+	    		}
+	    		if (!(y in has_entry)) has_entry[y] = { };
+    			xrange.forEach(function(x) {
+	    			has_entry[y][x] = true;
+	    		});
+
+	    		// Make a short label. Chop off the title and first name by looking for the last space prior to the space before the "(STATE-DISTRICT)".
+	    		var text = $(cells[1]).text(); // legislator name
+	    		text = /\S+ \(.*$/.exec(text)[0];
+	    		console.log(text)
+
+		    	return {
+			      x: x1,
+			      x2: x2,
+			      y: y,
+			      text: text,
+			      color: $(this).hasClass('tested-positive') ? '#D55' : '#333'
+			    };
+	    }
+	    ),
+	    dataLabels: {
+	      enabled: true,
+	      formatter: function()
+            {
+                return this.point.text;
+            }
+	    },
+	    legend: { enabled: false }
+	  }]
+
+	});
+
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+	.table a.legislator { white-space: nowrap }
+</style>
+{% endblock %}
+
+{% block body %}
+	<h1>COVID-19 in Congress</h1>
+	
+	<p>We&rsquo;re tracking Congress&rsquo;s response to COVID-19, the disease caused by the SARS-CoV-2 coronavirus.
+	Below you&rsquo;ll find information on legislative actions and <span class="affected-legislators-count"> </span> Members of Congress who are or have been quarantined, tested positive for COVID-19, or came in contact with someone with COVID-19.</p>
+
+	<h2><span>Legislative Actions</span></h2>
+
+	<p><a href="https://www.govtrack.us/congress/bills/116/hr6074">H.R. 6074: Coronavirus Preparedness and Response Supplemental Appropriations Act, 2020</a> &mdash; Enacted March 4, 2020. Provided $8.3 billion in emergency funding for federal agencies to respond to the coronavirus outbreak related to developing a vaccine, medical supplies, grants for public health agencies, small business loans, and assistance for health systems in other countries. Allowed for temporarily waiving Medicare restrictions and requirements regarding telehealth services.</p>
+	<p><a href="https://www.govtrack.us/congress/bills/116/hr6201">H.R. 6201: Families First Coronavirus Response Act</a> &mdash; Enacted March 18, 2020. Guaranteed free coronavirus testing, established paid leave, enhanced unemployment insurance, expanded food security initiatives, and increased federal Medicaid funding.</p>
+	<p><a href="https://coronavirus.skoposlabs.com">coronavirus.skoposlabs.com</a> &mdash; Other legislative activities and federal regulations tracked by Skopos Labs</p>
+
+	<h2><span>Affected Legislators</span></h2>
+
+	<p>The following <span class="affected-legislators-count"> </span> legislators have self-quarantined or took other action, or no action, after coming in contact with someone with COVID-19 or testing positive for COVID-19 themselves.</p>
+
+	<figure class="highcharts-figure">
+	    <div id="affected-legislators-chart"></div>
+	    <p class="highcharts-description">
+	        Affected Members of Congress
+	    </p>
+	</figure>
+
+
+	<table id="affected-legislators" class="table">
+	<thead>
+		<tr>
+			<th>Date</th>
+			<th>Legislator</th>
+			<th>Event</th>
+			<th>Action</th>
+			<th>Resolution</th>
+			<th>Links</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>3/09/20</td> <td><a href="https://www.govtrack.us/congress/members/matt_gaetz/412690" class="legislator">Rep. Matt Gaetz (FL-1)</a></td> <td>contact with CPAC attendee who tested positive</td> <td>self-quarantine</td> <td>exited quarantine, tested negative</td> <td><a href="https://twitter.com/CraigCaplan/status/1237107937232982018">tweet</a> <a href="https://twitter.com/mkraju/status/1238610164359598081">tweet</a></td></tr>
+
+		<tr><td>3/09/20</td> <td><a href="https://www.govtrack.us/congress/members/julia_brownley/412516" class="legislator">Rep. Julia Brownley (CA-26)</a></td> <td>contact with someone who tested positive</td> <td>DC office to telework</td> <td> </td> <td><a href="https://twitter.com/JakeSherman/status/1237105186218430466">tweet</a></td> </tr>
+
+		<tr><td>3/09/20</td> <td><a href="https://www.govtrack.us/congress/members/ted_cruz/412573" class="legislator">Sen. Ted Cruz (TX)</a></td> <td>contact with two people who tested positive at different times</td> <td>self-quarantine, extended quarantine after found out about contact with second person who tested positive</td> <td>exited quarantine, tested negative</td>  <td><a href="https://twitter.com/mkraju/status/1236797146965446656">tweet</a> <a href="https://twitter.com/SenTedCruz/status/1240081659883663362">tweet</a></td></tr>
+
+		<tr><td>3/09/20</td> <td><a href="https://www.govtrack.us/congress/members/louie_gohmert/400651" class="legislator">Rep. Louie Gohmert (TX-1)</a></td> <td>contact</td> <td>took no action</td> <td> </td> <td><a href="https://twitter.com/jeremyherb/status/1237164212822192133">tweet</a></td> </tr>
+
+		<tr><td>3/09/20</td> <td><a href="https://www.govtrack.us/congress/members/doug_collins/412531" class="legislator">Rep. Doug Collins (GA-9)</a></td> <td>contact</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/CraigCaplan/status/1237098857370173440">tweet</a></td> </tr>
+
+		<tr><td>3/09/20</td> <td><a href="https://www.govtrack.us/congress/members/paul_gosar/412397" class="legislator">Rep. Paul Gosar (AZ-4)</a></td> <td>contact</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/mkraju/status/1236841450832375808">tweet</a></td> </tr>
+
+		<tr><td>3/09/20</td> <td><a href="https://www.govtrack.us/congress/members/mark_meadows/412552" class="legislator">Rep. Mark Meadows (NC-11)</a></td> <td>contact with CPAC attendee who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/ChadPergram/status/1237175826854092800">tweet</a></td> </tr>
+
+		<tr><td>3/10/20</td> <td><a href="https://www.govtrack.us/congress/members/donald_beyer/412657" class="legislator">Rep. Donald Beyer (VA-8)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/CraigCaplan/status/1237510162862276610">tweet</a></td> </tr>
+
+		<tr><td>3/11/20</td> <td><a href="https://www.govtrack.us/congress/members/maria_cantwell/300018" class="legislator">Sen. Maria Cantwell (WA)</a></td> <td>DC staffer tested positive</td> <td>DC office to telework</td> <td> </td> <td><a href="https://twitter.com/StevenTDennis/status/1237927772003209216">tweet</a></td> </tr>
+
+		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/sherrod_brown/400050" class="legislator">Sen. Sherrod Brown (OH)</a></td> <td>staffer in another senator’s office tested positive</td> <td>DC office to telework</td> <td> </td> <td><a href="https://www.brown.senate.gov/newsroom/press/release/brown-closes-dc-office-implements-telework-procedures">press release</a></td> </tr>
+
+		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/joe_manchin/412391" class="legislator">Sen. Joe Manchin (WV)</a></td> <td>energy staff?</td> <td>DC office to telework</td> <td> </td> <td><a href="https://twitter.com/alexanderbolton/status/1238100007355629569">tweet</a></td> </tr>
+
+		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/lindsey_graham/300047" class="legislator">Sen. Lindsey Graham (SC)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td>tested negative</td> <td><a href="https://twitter.com/CraigCaplan/status/1238197442509750280">tweet</a> <a href="https://twitter.com/mkraju/status/1239362206057324550">tweet</a></td></tr>
+
+		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/marco_rubio/412491" class="legislator">Sen. Marco Rubio (FL)</a></td> <td>contact</td> <td>took no action yet</td> <td> </td> <td><a href="https://twitter.com/mkraju/status/1238199353065553928">tweet</a></td> </tr>
+
+		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/rick_scott/412838" class="legislator">Sen. Rick Scott (FL)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/CraigCaplan/status/1238152830848053248">tweet</a></td> </tr>
+
+		<tr><td>3/15/20</td> <td><a href="https://www.govtrack.us/congress/members/david_schweikert/412399" class="legislator">Rep. David Schweikert (AZ-6)</a></td> <td>DC staffer tested positive</td> <td>DC office to telework</td> <td> </td> <td><a href="https://twitter.com/CraigCaplan/status/1239292673099550724">tweet</a></td> </tr>
+
+		<tr><td>3/15/20</td> <td><a href="https://www.govtrack.us/congress/members/ron_johnson/412496" class="legislator">Sen. Ron Johnson (WI)</a></td> <td>contact with someone who tested positive</td> <td>took no action</td> <td> </td> <td><a href="https://twitter.com/CraigCaplan/status/1238867385240731649">tweet</a></td> </tr>
+
+		<tr><td>3/15/20</td> <td><a href="https://www.govtrack.us/congress/members/john_yarmuth/412211" class="legislator">Rep. John Yarmuth (KY-3)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td>tested negative</td> <td><a href="https://twitter.com/RepJohnYarmuth/status/1239299672096849920">tweet</a> <a href="https://twitter.com/CraigCaplan/status/1239619656912121857">tweet</a></td></tr>
+
+		<tr><td>3/16/20</td> <td><a href="https://www.govtrack.us/congress/members/gwen_moore/400661" class="legislator">Rep. Gwen Moore (WI-4)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/CraigCaplan/status/1239660497483505672">tweet</a></td> </tr>
+
+		<tr><td>3/16/20</td> <td><a href="https://www.govtrack.us/congress/members/ben_lujan/412293" class="legislator">Rep. Ben Luján (NM-3)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/ChadPergram/status/1239647625848270859">tweet</a></td> </tr>
+
+		<tr><td>3/16/20</td> <td><a href="https://www.govtrack.us/congress/members/thomas_carper/300019" class="legislator">Sen. Tom Carper (DE)</a></td> <td>district staffer tested positive</td> <td>DC and district staff self-isolating</td> <td> </td> <td><a href="https://twitter.com/PoliticsReid/status/1239530320707411971">tweet</a></td> </tr>
+
+		<tr><td>3/17/20</td> <td><a href="https://www.govtrack.us/congress/members/cory_gardner/412406" class="legislator">Sen. Cory Gardner (CO)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/BresPolitico/status/1240082470176985090">tweet</a></td> </tr>
+
+		<tr><td>3/17/20</td> <td><a href="https://www.govtrack.us/congress/members/jason_crow/412762" class="legislator">Rep. Jason Crow (CO-6)</a></td> <td>contact with a constituent who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/RepJasonCrow/status/1240091874859376642">tweet</a></td> </tr>
+
+		<tr><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/matthew_cartwright/412571" class="legislator">Rep. Matt Cartwright (PA-8)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/RepCartwright/status/1240327021970051074">tweet</a></td> </tr>
+
+		<tr class="tested-positive"><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/mario_diaz_balart/400108" class="legislator">Rep. Mario Diaz-Balart (FL-25)</a></td> <td><b>tested positive</b></td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/ChadPergram/status/1240410327646375936">tweet</a></td> </tr>
+
+		<tr class="tested-positive"><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/ben_mcadams/412829" class="legislator">Rep. Ben McAdams (UT-4)</a></td> <td><b>tested positive</b></td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/CraigCaplan/status/1240439298136121350">tweet</a></td> </tr>
+
+		<tr><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/drew_ferguson/412700" class="legislator">Rep. Drew Ferguson (GA-3)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/RepDrewFerguson/status/1240440543286562822">tweet</a></td> </tr>
+
+		<tr><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/steve_scalise/412261" class="legislator">Rep. Steve Scalise (LA-1)</a></td> <td>contact with Diaz-Balart</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/sahilkapur/status/1240452248565678080">tweet</a></td> </tr>
+
+		<tr><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/ann_wagner/412548" class="legislator">Rep. Ann Wagner (MO-2)</a></td> <td>contact with (presumably) Diaz-Balart</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/HouseInSession/status/1240464073977978880">tweet</a></td> </tr>
+
+		<tr><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/stephanie_murphy/412694" class="legislator">Rep. Stephanie Murphy (FL-7)</a></td> <td>contact with Diaz-Balart</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/RepStephMurphy/status/1240467650205147140">tweet</a></td> </tr>
+
+		<tr><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/kathleen_rice/412647" class="legislator">Rep. Kathleen Rice (NY-4)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/RepKathleenRice/status/1240484572963487749">tweet</a></td> </tr>
+
+		<tr><td>3/19/20</td> <td><a href="https://www.govtrack.us/congress/members/kendra_horn/412808" class="legislator">Rep. Kenda Horn (OK-5)</a></td> <td>contact with McAdams</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/RepKendraHorn/status/1240606349282537472">tweet</a></td> </tr>
+
+		<tr><td>3/19/20</td> <td><a href="https://www.govtrack.us/congress/members/frederica_wilson/412412" class="legislator">Rep. Frederica Wilson (FL-24)</a></td> <td>contact with Diaz-Balart</td> <td>self-quarantine</td> <td> </td> <td><a href="https://twitter.com/alextdaugherty/status/1240591254687232001">tweet</a></td> </tr>
+	</tbody>
+	</table>
+
+	<h2><span>Closed Offices</span></h2>
+
+	<p>In addition, we&rsquo;re tracking a partial list of other actions taken by legislators to protect themselves or their staff:</p>
+
+	<table class="table">
+	<thead>
+		<tr>
+			<th>Date</th>
+			<th>Legislator</th>
+			<th>Event</th>
+			<th>Action</th>
+			<th>Resolution</th>
+			<th>Links</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/mitt_romney/412841" class="legislator">Sen. Mitt Romney (UT)</a></td> <td>unknown</td> <td>DC office to telework</td> <td> </td> <td><a href="https://twitter.com/ChadPergram/status/1238095855376388096">tweet</a></td> </tr>
+
+
+		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/tom_cotton/412508" class="legislator">Sen. Tom Cotton (AR)</a></td> <td>unknown</td> <td>DC office to telework</td> <td> </td> <td><a href="https://www.cotton.senate.gov/?p=press_release&id=1337">press release</a></td> </tr>
+	</tbody>
+	</table>
+{% endblock %}
+
