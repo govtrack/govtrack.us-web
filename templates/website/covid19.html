@@ -86,8 +86,11 @@ $(function() {
 
 	    		// Make a short label. Chop off the title and first name by looking for the last space prior to the space before the "(STATE-DISTRICT)".
 	    		var text = $(cells[1]).text(); // legislator name
-	    		text = /\S+ \(.*$/.exec(text)[0];
-	    		console.log(text)
+                        try {
+	      		  text = /\S+ \(.*$/.exec(text)[0];
+                        } catch (e) {
+	    		  console.log(text)
+			}
 
 		    	return {
 			      x: x1,
