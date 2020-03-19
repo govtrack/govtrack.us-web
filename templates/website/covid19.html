@@ -18,7 +18,85 @@ $(function() {
 	    date.setDate(date.getDate() + days);
 	    return date;
 	};
+
+	function make_series(title, color, filter) {
+		return {
+		    name: title,
+		    //pointPadding: 2,
+		    //groupPadding: 0,
+		    //borderColor: 'gray',
+		    color: color,
+	        colorByPoint: false,
+		    pointWidth: 20,
+		    data: $('#affected-legislators tbody tr')
+		    	  .filter(function() { return !$(this).hasClass('plotted'); })
+		          .filter(filter)
+		          .map(function() {
+		    	$(this).addClass("plotted");
+	    		var cells = $(this).find("td");
+	    		function make_date(s) {
+	    			var parts = s.split(/\//);
+	    			return Date.UTC(parseInt("20"+parts[2]), parseInt(parts[0])-1, parseInt(parts[1]));
+	    		}
+	    		
+	    		var x1 = make_date($(cells[0]).text());
+
+	    		// We're not tracking quarantine end dates, so just make each entry one day long.
+	    		var x2 = new Date(x1).addDays(1).getTime();
+
+	    		// Put this legislator on the first row that has no entries yet on this date range.
+	    		var xrange = [x1];
+	    		while (true) {
+	    			var x = new Date(xrange[xrange.length-1]).addDays(1).getTime();
+	    			if (x == x2) break;
+	    			xrange.push(x);
+	    		}
+	    		var y = 0;
+	    		while (true) {
+	    			var bad = false;
+	    			xrange.forEach(function(x) {
+	    				if (y in has_entry && x in has_entry[y])
+	    				bad = true;
+	    			});
+	    			if (bad) {
+	    				y++;
+	    				continue;
+	    			} else {
+	    				break;
+	    			}
+	    		}
+	    		if (!(y in has_entry)) has_entry[y] = { };
+				xrange.forEach(function(x) {
+	    			has_entry[y][x] = true;
+	    		});
+
+	    		// Make a short label. Chop off the title and first name by looking for the last space prior to the space before the "(STATE-DISTRICT)".
+	    		var text = $(cells[1]).text(); // legislator name
+                try {
+	      		  text = /\S+ \(.*$/.exec(text)[0];
+                } catch (e) {
+	    		  console.log(text)
+			    }
+
+		    	return {
+			      x: x1,
+			      x2: x2,
+			      y: y,
+			      text: text
+			    };
+		    }),
+		    dataLabels: {
+		      enabled: true,
+		      formatter: function() { return this.point.text; },
+		      style: { fontSize: '10px', fontWeight: 'normal', textOutline: 'none' }
+		    },
+		    grouping: false,
+		    enableMouseTracking: false
+		  };
+	}
+
 	var has_entry = { };
+
 	var chart = {
 	  chart: {
 	    type: 'xrange'
@@ -43,72 +121,20 @@ $(function() {
 	    },
 	    categories: []
 	  },
-	  series: [{
-	    name: '',
-	    //pointPadding: 2,
-	    //groupPadding: 0,
-	    //borderColor: 'gray',
-        colorByPoint: false,
-	    pointWidth: 30,
-	    data: $('#affected-legislators tbody tr').map(function() {
-	    		var cells = $(this).find("td");
-	    		function make_date(s) {
-	    			var parts = s.split(/\//);
-	    			return Date.UTC(parseInt("20"+parts[2]), parseInt(parts[0])-1, parseInt(parts[1]));
-	    		}
-	    		
-	    		var x1 = make_date($(cells[0]).text());
-
-	    		// We're not tracking quarantine end dates, so just make each entry one day long.
-	    		var x2 = new Date(x1).addDays(1).getTime();
-
-	    		// Put this legislator on the first row that has no entries yet on this date range.
-	    		var xrange = [x1];
-	    		//while (xrange[xrange.length-1] != x2) xrange.push(new Date(xrange[xrange.length-1]).addDays(1).getTime());
-	    		var y = 0;
-	    		while (true) {
-	    			var bad = false;
-	    			xrange.forEach(function(x) {
-	    				if (y in has_entry && x in has_entry[y])
-	    				bad = true;
-	    			});
-	    			if (bad) {
-	    				y++;
-	    				continue;
-	    			} else {
-	    				break;
-	    			}
-	    		}
-	    		if (!(y in has_entry)) has_entry[y] = { };
-    			xrange.forEach(function(x) {
-	    			has_entry[y][x] = true;
-	    		});
-
-	    		// Make a short label. Chop off the title and first name by looking for the last space prior to the space before the "(STATE-DISTRICT)".
-	    		var text = $(cells[1]).text(); // legislator name
-                        try {
-	      		  text = /\S+ \(.*$/.exec(text)[0];
-                        } catch (e) {
-	    		  console.log(text)
-			}
-
-		    	return {
-			      x: x1,
-			      x2: x2,
-			      y: y,
-			      text: text,
-			      color: $(this).hasClass('tested-positive') ? '#D55' : '#333'
-			    };
-	    }
-	    ),
-	    dataLabels: {
-	      enabled: true,
-	      formatter: function() { return this.point.text; },
-	      style: { fontSize: '10px', fontWeight: 'normal', textOutline: 'none' }
-	    },
-	    legend: { enabled: false }
-	  }]
+	  series: [
+		// Order is important. Legislators in earlier series are not
+		// repeated in later series.
+	  	make_series("Tested Positive for COVID-19", "#D33", function() {
+	  		return $(this).hasClass("tested-positive");
+	  	}),
+	  	make_series("Self-Quarantined", "#458", function() {
+	  		return /self-quarantine/.test($($(this).find('td')[3]).text());
+	  	}),
+	  	make_series("Other", "#444", function() { return true; }) // everyone else
+	  ],
+	  tooltip: { enabled: false },
 	};
+	chart['chart']['height'] = (Object.keys(has_entry).length * 25) + 50;
 	for (let y in has_entry)
 		chart.yAxis.categories.push(parseInt(y)+1);
 	Highcharts.chart('affected-legislators-chart', chart);
@@ -133,6 +159,7 @@ $(function() {
 	<p><a href="https://www.govtrack.us/congress/bills/116/hr6074">H.R. 6074: Coronavirus Preparedness and Response Supplemental Appropriations Act, 2020</a> &mdash; Enacted March 4, 2020. Provided $8.3 billion in emergency funding for federal agencies to respond to the coronavirus outbreak related to developing a vaccine, medical supplies, grants for public health agencies, small business loans, and assistance for health systems in other countries. Allowed for temporarily waiving Medicare restrictions and requirements regarding telehealth services.</p>
 	<p><a href="https://www.govtrack.us/congress/bills/116/hr6201">H.R. 6201: Families First Coronavirus Response Act</a> &mdash; Enacted March 18, 2020. Guaranteed free coronavirus testing, established paid leave, enhanced unemployment insurance, expanded food security initiatives, and increased federal Medicaid funding.</p>
 	<p><a href="https://coronavirus.skoposlabs.com">coronavirus.skoposlabs.com</a> &mdash; Other legislative activities and federal regulations tracked by Skopos Labs</p>
+	<p><a href="https://www.everycrsreport.com/search.html?q=COVID-19">CRS reports related to COVID-19</a></p>
 
 	<h2><span>Affected Legislators</span></h2>
 
