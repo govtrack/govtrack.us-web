@@ -331,7 +331,7 @@ $(function() {
 	show_permalink(window.location.hash, true)
 
 	// go to a comparison
-	var m = /^#compare=(?:(\d+):)?([a-z][a-z0-9]+)?/.exec(window.location.hash);
+	var m = /^#compare=(?:(\d+):)?([a-z][a-z0-9-]+)?/.exec(window.location.hash);
 	if (m) {
 		load_comparison(m[1], m[2]);
 	}
@@ -362,7 +362,7 @@ window.document.addEventListener("DOMContentLoaded", function() {
 
 <!-- bill text comparison widget modal -->
 <div class="modal fade" id="bill_text_comparison_modal" tabindex="-1" role="dialog" aria-labelledby="bill_text_comparison_modal_title" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog modal-lg" role="document" style="width: 95%">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
