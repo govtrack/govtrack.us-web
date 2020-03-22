@@ -1033,4 +1033,54 @@ def missing_data(request):
 @anonymous_view
 @render_to('website/covid19.html')
 def covid19(request):
-	return { }
+    # In order to split the chart by chamber and to track party totals,
+    # we need to pass some additional information into the template.
+    # Hopefully it remains more efficient to pass only info for legislators
+    # listed in the HTML table than for all currently serving members,
+    # but we'll also pass current member totals so we can compute the
+    # current working membership of each chamber.
+    import datetime
+    from person.models import PersonRole, RoleType
+
+    current_members = list(PersonRole.objects.filter(current=True).select_related("person")) # pre-fetch all
+    legislator_data = { }
+    with open('templates/website/covid19.html') as f:
+        for line in f:
+            m = re.search(r"<td>(\d/\d+/\d+)</td>.*href=\"https://www.govtrack.us/congress/members/\S+/(\d+)", line)
+            if m:
+                # For each table line with a date and legislator id, find the
+                # PersonRole for that person at the indicated time.
+                datestr, id = m.groups()
+                id = int(id)
+                date = datetime.date(int("20"+datestr.split("/")[2]), int(datestr.split("/")[0]), int(datestr.split("/")[1]))
+                for pr in current_members: # hard to make more efficient because of date check
+                    if pr.person.id == id and pr.startdate <= date <= pr.enddate:
+                        break
+                else:
+                    raise Exception("Row with unmatched role: " + repr(line))
+
+                # Store data to pass to the template.
+                legislator_data[str(id) + "__" + datestr] = {
+                    "chamber": "senate" if pr.role_type == RoleType.senator else "house",
+                    "is_voting": not pr.is_territory, # doesn't affect total for quorum
+                    "party": pr.get_party_on_date(date),
+                }
+
+    # To show the current party breakdown of each chamber, count up the total membership.
+    # We'll subtract quanrantined members on the client side.
+    current_party_totals = { }
+    for pr in current_members:
+        if pr.is_territory: continue
+        chamber = "senate" if pr.role_type == RoleType.senator else "house"
+        party = pr.caucus or pr.party
+        current_party_totals.setdefault(chamber, {})
+        current_party_totals[chamber].setdefault(party, {})
+        current_party_totals[chamber][party]["count"] = current_party_totals[chamber][party].get("count", 0) + 1
+        if pr.caucus: current_party_totals[chamber][party]["has_independent"] = True
+    for chamber in current_party_totals: # list the majority party first
+        current_party_totals[chamber] = sorted(current_party_totals[chamber].items(), key=lambda p : -p[1]["count"])
+
+    return {
+        "legislator_data": legislator_data,
+        "current_party_totals": current_party_totals,
+    }
