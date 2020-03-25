@@ -1,11 +1,10 @@
 {% if format == "text" %}
-rundate: "2019-11-23"
-subject: "Updated: Impeachment.guide"
+rundate: "2020-03-28"
+subject: "COVID-19 in Congress"
 ----------
 {% endif %}
 
-Last month we launched a new website, [Impeachment.guide](https://impeachment.guide/), to answer key questions about the ongoing House of Representatives impeachment inquiry.
-
-We read through all of the deposition transcripts, we live-tweeted the hearings (we're [@GovTrack](https://twitter.com/govtrack)), and now we've updated [Impeachment.guide](https://impeachment.guide/) with a complete chronology of events beginning in 2018 with Rudy Giuliani and Lev Parnas's work to oust U.S. Ambassador to Ukraine Marie Yovanovitch and ending with last week's public hearings, linking to key documents along the way.
-
-Check out [Impeachment.guide](https://impeachment.guide/) for the chronology, possible charges the President may face, and background on how the impeachment and removal process works.
+We’re tracking [Congress’s response to COVID-19](https://www.govtrack.us/covid-19).
+Find information on legislative actions and the nearly 50 Members of Congress
+who are or have been quarantined, tested positive for COVID-19, or came in contact with someone with 
+COVID-19 at [https://www.govtrack.us/covid-19](https://www.govtrack.us/covid-19).
