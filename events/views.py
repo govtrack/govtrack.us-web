@@ -138,7 +138,8 @@ def edit_subscription_list(request):
         "list_email_display": sublist.get_email_display(),
         "list_trackers": [
             { "id": f.id, "name": f.feedname, "title": f.title, "link": f.link }
-            for f in sublist.trackers.all() ], "state": state }
+            for f in sublist.trackers.all() ],
+        "state": state }
 
 @render_to('events/events_list_items.html')
 def events_list_items(request):
