@@ -1042,29 +1042,47 @@ def covid19(request):
     import datetime
     from person.models import PersonRole, RoleType
 
-    current_members = list(PersonRole.objects.filter(current=True).select_related("person")) # pre-fetch all
+    # Scan the template for the <table>s that hold information about
+    # legislators.
     legislator_data = { }
     with open('templates/website/covid19.html') as f:
         for line in f:
             m = re.search(r"<td>(\d/\d+/\d+)</td>.*href=\"https://www.govtrack.us/congress/members/\S+/(\d+)", line)
             if m:
-                # For each table line with a date and legislator id, find the
-                # PersonRole for that person at the indicated time.
+                # For each table line with a date and legislator id, record
+                # in legislator_data.
                 datestr, id = m.groups()
                 id = int(id)
                 date = datetime.date(int("20"+datestr.split("/")[2]), int(datestr.split("/")[0]), int(datestr.split("/")[1]))
-                for pr in current_members: # hard to make more efficient because of date check
-                    if pr.person.id == id and pr.startdate <= date <= pr.enddate:
-                        break
-                else:
-                    raise Exception("Row with unmatched role: " + repr(line))
-
-                # Store data to pass to the template.
-                legislator_data[str(id) + "__" + datestr] = {
-                    "chamber": "senate" if pr.role_type == RoleType.senator else "house",
-                    "is_voting": not pr.is_territory, # doesn't affect total for quorum
-                    "party": pr.get_party_on_date(date),
+                legislator_data[str(id) + "__" + datestr] = { # key must match how client-side script does a lookup
+                    "id": id,
+                    "date": date,
                 }
+
+    # Fetch all of the PersonRoles that cover the date range of the records.
+    current_members = list(PersonRole.objects.filter(
+        enddate__gte=min(d['date'] for d in legislator_data.values()),
+        startdate__lte=max(d['date'] for d in legislator_data.values()),
+    ).select_related("person"))
+
+    # Find the PersonRole for each record.
+    for data in legislator_data.values():
+        for pr in current_members: # hard to make more efficient because of date check
+            if pr.person.id == data['id'] and pr.startdate <= data['date'] <= pr.enddate:
+                break
+        else:
+            raise Exception("Row with unmatched role: " + repr(line))
+
+        # Store data to pass to the template.
+        data.update({
+            "chamber": "senate" if pr.role_type == RoleType.senator else "house",
+            "is_voting": not pr.is_territory, # doesn't affect total for quorum
+            "party": pr.get_party_on_date(data['date']),
+        })
+
+    # Remove date because it is not JSON serializable.
+    for data in legislator_data.values():
+        del data['date']
 
     # To show the current party breakdown of each chamber, count up the total membership.
     # We'll subtract quanrantined members on the client side.
