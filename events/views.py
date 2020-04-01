@@ -301,3 +301,31 @@ def events_embed_legacy(request):
         html = html[128:]
     return HttpResponse(js, content_type="application/x-javascript; charset=UTF-8")
     
+@anonymous_view
+@render_to('events/view_list.html')
+def view_list(request, list_id):
+    from events.templatetags.events_utils import render_event
+    sublist = get_object_or_404(SubscriptionList, public_id=list_id)
+    feeds = list(sublist.trackers.all())
+    trackers = [
+            {
+                "feed": f,
+                "id": f.id,
+                "name": f.feedname,
+                "title": f.title,
+                "link": f.link or "/events/something/" + f.slug,
+                "thumbnail_image_url": f.thumbnail_image_url(),
+                "noun": f.type_metadata().get("noun"),
+                "description": f.description,
+                "is_subscribable": f.is_subscribable,
+                "recently": [
+                    render_event(event, [f])
+                    for event in f.get_events(1)
+                ],
+            }
+            for f in feeds ]
+    trackers.sort(key = lambda t : (t["name"].split(":")[0], t["title"]))
+    return {
+        "list": sublist,
+        "list_trackers": trackers,
+    }

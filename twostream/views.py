@@ -22,7 +22,7 @@ def user_head(request):
 	
 	user_data = None
 	if request.user.is_authenticated:
-		user_data = { "email": request.user.email }
+		user_data = { "id": request.user.id, "email": request.user.email }
 		if hasattr(request.user, 'twostream_data'):
 			user_data.update(request.user.twostream_data)
 		

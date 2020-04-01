@@ -692,6 +692,12 @@ class PersonRole(models.Model):
 
 # Feeds
 
+def feed_thumbnail_image_url(feed):
+    p = Person.from_feed(feed)
+    if not p.has_photo():
+        return None
+    return p.get_photo_url_200()
+
 from events.models import Feed
 Feed.register_feed(
     "p:",
@@ -704,6 +710,7 @@ Feed.register_feed(
     description = "You will get updates about major activity on sponsored bills and how this Member of Congress votes in roll call votes.",
     is_subscribable = lambda feed : Person.from_feed(feed).get_current_role() is not None,
     track_button_noun = lambda feed : Person.from_feed(feed).him_her,
+    thumbnail_image_url = feed_thumbnail_image_url,
     )
 Feed.register_feed(
     "ps:",
@@ -713,6 +720,7 @@ Feed.register_feed(
     scoped_title = lambda feed : Person.from_feed(feed).lastname + "'s Sponsored Bills",
     category = "federal-bills",
     description = "You will get updates about major activity on bills sponsored by this Member of Congress.",
+    thumbnail_image_url = feed_thumbnail_image_url,
     )
 Feed.register_feed(
     "pv:",
@@ -723,4 +731,5 @@ Feed.register_feed(
     single_event_type = True,
     category = "federal-votes",
     description = "You will get updates on how this Member of Congress votes in roll call votes.",
+    thumbnail_image_url = feed_thumbnail_image_url,
 )

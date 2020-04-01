@@ -268,10 +268,6 @@ class Feed(models.Model):
         return m["link"](self)
         
     @property
-    def view_url(self):
-        return "/events?feeds=" + urllib.parse.quote(self.feedname)
-    
-    @property
     def rss_url(self):
         return "/events/events.rss?feeds=" + urllib.parse.quote(self.feedname)
 
@@ -314,6 +310,13 @@ class Feed(models.Model):
         if callable(m["track_button_noun"]):
             return m["track_button_noun"](self)
         return m["track_button_noun"]
+
+    def thumbnail_image_url(self):
+        m = self.type_metadata()
+        if "thumbnail_image_url" not in m: return None
+        if callable(m["thumbnail_image_url"]):
+            return m["thumbnail_image_url"](self)
+        return m["thumbnail_image_url"]
 
 class Event(models.Model):
     """

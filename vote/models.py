@@ -399,7 +399,8 @@ class Vote(models.Model):
                             ]
                         if feeds != None else []
                 },
-			"thumbnail_url": self.get_thumbnail_url(),
+            "thumbnail_url": self.get_thumbnail_url(),
+            "large_thumbnail_url": self.get_absolute_url() + "/card",
             }
             
     def possible_reconsideration_votes(self, voters=None):

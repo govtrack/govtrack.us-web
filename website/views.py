@@ -1102,3 +1102,4 @@ def covid19(request):
         "legislator_data": legislator_data,
         "current_party_totals": current_party_totals,
     }
+

@@ -1,0 +1,144 @@
+{% extends 'master.html' %}
+
+{% block title %}What You Are Tracking -- GovTrack.us{% endblock %}
+{% block head %}
+<style>
+.if-list-owner {
+    display: none;
+}
+
+.tracker-type-bill { }
+.tracker-type-subjectarea { }
+.tracker-category-commitee { }
+.tracker-category-legislator { }
+
+.panel {
+  border-color: #9D2146;
+}
+.panel-heading, .panel-footer {
+  background-color: #9D2146;
+  color: white;
+}
+</style>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+function refresh_events() {
+    $('#events').html("Loading...");
+    $.ajax({
+        url: "/events/_load_events",
+        type: "POST",
+        data: {
+            {% if request.GET.page %}page: "{{request.GET.page|escapejs}}",{% endif %}
+            listid: active_list
+        },
+        dataType: "html",
+        success: function(data) {
+            $('#events').html(data);
+        }
+    });
+}
+
+$(function() {
+    if (the_user && the_user.id == {{list.user.id}}) {
+        // Enable editing.
+        $('.if-list-owner').show();
+    }
+
+    // Make all of the panel headers and bodies the same height
+    // so boxes line up nicely.
+    function make_same_height(nodes) {
+      var max_height = 0;
+      nodes.each(function() { max_height = Math.max(max_height, $(this).height()) });
+      nodes.css({ minHeight: parseInt(max_height)+"px" });
+    }
+    make_same_height($('.tracker .panel-heading'));
+    make_same_height($('.tracker .panel-body'));
+});
+</script>
+{% endblock %}
+
+{% block body %}
+
+<div class="if-list-owner" style="margin-top: 1em">
+<div class="panel panel-info">
+  <div class="panel-body">
+    <p>Welcome to your list. You can share this page with others, but only you can see this box.</p>
+    <p style="margin: 0">To change the title of this list or to remove trackers from this list, go to <a href="/accounts/lists?listid={{list.id}}">Your Tracker Lists</a>.</p>
+  </div>
+</div>
+</div>
+
+<h1 style="margin-bottom: 0; line-height: 120%; padding: 0">
+    {{list.name}}
+</h1>
+<div style="color: #555; font-family: Quicksand; font-size: 13px; margin-bottom: 30px">
+    A List Published by a GovTrack User
+</div>
+
+<div class="row">
+  {% for tracker in list_trackers %}
+    <div id="tracker-{{tracker.id}}" class="col-sm-6 col-md-4 tracker tracker-type-{{tracker.noun|cut:' '}}">
+      <div class="panel">
+        <div class="panel-heading">
+          <a href="{{tracker.link}}" style="color: inherit; text-decoration: none">
+            <h3 class="panel-title" style="font-weight: bold;">{{tracker.title}}</h3>
+          </a>
+        </div>
+        <div class="panel-body">
+            {% if tracker.thumbnail_image_url or tracker.recently.0.large_thumbnail_url or tracker.recently.0.thumbnail_url %}
+              <a href="{{tracker.link}}">
+              <div style="margin: -15px -15px 0 -15px; background-image: url({% firstof tracker.thumbnail_image_url tracker.recently.0.large_thumbnail_url tracker.recently.0.thumbnail_url %}); background-size: cover; background-position: 50% 50%; min-height: {% if tracker.noun == 'legislator' %}275{% else %}175{% endif %}px">
+              </div>
+              </a>
+            {% else %}
+              {{tracker.description}}
+            {% endif %}
+
+            {% if tracker.recently %}
+              <div style="font-size: 95%">
+              {% if not tracker.thumbnail_image_url %}<hr>{% endif %}
+              <h4 style="font-style: italic">Recently:</h4>
+              {% for event in tracker.recently %}
+                <p>{% if event.date_has_no_time %}
+                     {{event.date|date}}
+                   {% else %}
+                     {{event.date}}
+                   {% endif %}
+                   &mdash;
+                   {{event.type}}
+                   {% if event.title != tracker.title %}
+                   &mdash;
+                    <a href="{{event.url}}">
+                      {{event.title}}
+                    </a>
+                   {% endif %}</p>
+                {{event.body_html|safe}}
+              {% endfor %}
+              </div>
+            {% endif %}
+        </div>
+        <a href="{{tracker.link}}">
+          <div class="panel-footer">
+              {% if tracker.is_subscribable %}
+                Track
+              {% else %}
+                More about
+              {% endif %}
+              this {% firstof tracker.noun '' %} &raquo;
+          </div>
+        </a>
+      </div>
+    </div>
+    {% if forloop.counter|divisibleby:2 %}
+    <div class="clearfix visible-sm"></div>
+    {% endif %}
+    {% if forloop.counter|divisibleby:3 %}
+    <div class="clearfix visible-md visible-lg"></div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+
+{% endblock %}

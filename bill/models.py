@@ -1719,6 +1719,7 @@ Feed.register_feed(
     description = "You will get updates when this bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when a committee meeting is scheduled, when bill text becomes available or when we write a bill summary, plus similar events for related bills.",
     is_subscribable = lambda feed : Bill.from_feed(feed).is_alive,
     track_button_noun = lambda feed : "This Bill",
+    thumbnail_image_url = lambda feed: Bill.from_feed(feed).get_thumbnail_url_ex(),
     )
 Feed.register_feed(
     "crs:",
