@@ -54,6 +54,12 @@ def get_congress_dates(congressnumber):
         CONGRESS_DATES.update(cd)
     return CONGRESS_DATES[congressnumber]
 
+def get_congress_years(congressnumber):
+    dates = get_congress_dates(congressnumber)
+    years = dates[0].year, dates[1].year
+    if dates[1].month == 1: years = (years[0], years[1]-1)
+    return years
+
 def get_session_from_date(when, allow_start_date=True, allow_end_date=True, congress=None):
     global SESSION_DATES
     if SESSION_DATES == [ ]:
