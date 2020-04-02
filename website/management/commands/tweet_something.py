@@ -18,12 +18,11 @@ class Command(BaseCommand):
 	
 	def handle(self, *args, **options):
 		# Construct client.
-		import twitter
-		self.twitter = twitter.Api(consumer_key=settings.TWITTER_OAUTH_TOKEN, consumer_secret=settings.TWITTER_OAUTH_TOKEN_SECRET,
-		                  access_token_key=settings.TWITTER_ACCESS_TOKEN, access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET)
+		from website.util import twitter_api_client
+		self.tweepy_client = twitter_api_client()
 
 		# Determine maximum length of a shortened link.
-		self.short_url_length_https = self.twitter.GetHelpConfiguration()['short_url_length_https']
+		self.short_url_length_https = self.tweepy_client.configuration()['short_url_length_https']
 
 		# What have we tweeted about before? Let's not tweet
 		# it again.
@@ -101,12 +100,12 @@ class Command(BaseCommand):
 			print(repr(text))
 			sys.exit(1)
 
-		tweet = self.twitter.PostUpdate(text, verify_status_length=False) # it does not do link shortening test correctly
+		tweet = self.tweepy_client.update_status(text)
 
 		self.previous_tweets[key] = {
 			"text": text,
 			"when": timezone.now().isoformat(),
-			"tweet": tweet.AsDict(),
+			"tweet": tweet._json,
 		}
 
 		#print(json.dumps(self.previous_tweets[key], indent=2))

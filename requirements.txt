@@ -25,7 +25,7 @@ pynliner
 django-html-emailer
 xml_diff
 diff-match-patch==20181111
-python-twitter
+tweepy
 sparkpost
 user-agents
 dj_database_url

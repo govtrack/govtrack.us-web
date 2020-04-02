@@ -107,8 +107,16 @@ class PersonRoleProcessor(YamlProcessor):
     def state_rank_handler(self, value):
         return self.SENATOR_RANK_MAPPING[value]
 
-@transaction.atomic
 def main(options):
+    update_people_table(options)
+
+    try:
+        update_twitter_list()
+    except Exception as e:
+        print("Error updating twitter list.", e)
+
+@transaction.atomic
+def update_people_table(options):
     """
     Update Person and PersonRole models.
     
@@ -357,11 +365,6 @@ def main(options):
             f = BASE_PATH + p + ".yaml"
             File.objects.save_file(f)
 
-    try:
-        update_twitter_list()
-    except Exception as e:
-        print("Error updating twitter list.", e)
-
 def filter_yaml_term_structure(node):
     ret = { }
     for k, v in node.items():
@@ -373,7 +376,6 @@ def filter_yaml_term_structure(node):
 
 def update_twitter_list():
     from django.conf import settings
-
     if not getattr(settings, 'TWITTER_OAUTH_TOKEN', None): return
 
     def chunk(seq, count):
@@ -392,25 +394,22 @@ def update_twitter_list():
     handles = { h.lower() for h in handles }
 
     # Get the handles currently in the list.
-    import twitter
-    twitter = twitter.Api(consumer_key=settings.TWITTER_OAUTH_TOKEN, consumer_secret=settings.TWITTER_OAUTH_TOKEN_SECRET,
-                          access_token_key=settings.TWITTER_ACCESS_TOKEN, access_token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET)
-    existing = twitter.GetListMembers(owner_screen_name="govtrack", slug="members-of-congress", skip_status=True)
-    existing = { u.screen_name.lower() for u in existing }
+    import tweepy
+    from website.util import twitter_api_client
+    tweepy_client = twitter_api_client()
+    list_id = 845692185165156352 # https://twitter.com/i/lists/845692185165156352 @govtrack/members-of-congress
+    existing = tweepy.Cursor(tweepy_client.list_members, list_id=list_id)
+    existing = { u.screen_name.lower() for u in existing.items() }
 
     # Add anyone not yet listed.
     if handles-existing: print("Adding to our Twitter list:", handles-existing)
     for hh in chunk(handles - existing, 100):
-        twitter.CreateListsMember(
-          screen_name=hh,
-          owner_screen_name="govtrack", slug="members-of-congress")
+        tweepy_client.add_list_members(list_id=list_id, screen_name=",".join(hh))
 
     # Remove anyone that shouldn't be listed.
     if existing-handles: print("Removing from our Twitter list:", existing-handles)
     for hh in chunk(existing - handles, 100):
-        twitter.DestroyListsMember(
-          screen_name=hh,
-          owner_screen_name="govtrack", slug="members-of-congress")
+        tweepy_client.remove_list_members(list_id=list_id, screen_name=",".join(hh))
  		
 
 if __name__ == '__main__':
