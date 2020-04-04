@@ -60,8 +60,8 @@ $(function() {
 		    categories: []
 		  },
 		  series: [
-		  	make_series("Self-Quarantined", "#578"),
-		  	make_series("Tested Positive for COVID-19", "#D54"),
+		  	make_series("Precautionary Self-Quarantined", "#578"),
+		  	make_series("Tested Positive for or Presumed COVID-19", "#D54"),
 		  	make_series("Other", "#444")
 		  ],
 		  tooltip: { enabled: false }
@@ -92,7 +92,7 @@ $(function() {
 			// Assign each affected-legislators row to a series.
 			// Order is important here because we assign to the first series that matches.
 			var series;
-			if ($(this).hasClass('tested-positive'))
+			if ($(this).hasClass('tested-positive') || $(this).hasClass('presumed-positive'))
 				series = 1;
 		  	else if (/self-quarantine/.test($($(this).find('td')[3]).text()))
 		  		series = 0;
@@ -227,7 +227,11 @@ $(function() {
 	<p><a href="https://www.govtrack.us/congress/bills/116/hr6201">H.R. 6201: Families First Coronavirus Response Act</a> &mdash; Enacted March 18, 2020. Guaranteed free coronavirus testing, established paid leave, enhanced unemployment insurance, expanded food security initiatives, and increased federal Medicaid funding.</p>
 	<p><a href="https://www.govtrack.us/congress/bills/116/hr748">H.R. 748: Coronavirus Aid, Relief, and Economic Security Act</a> &mdash; Enacted March 27, 2020. A $2 trillion coronavirus relief bill, which will send $1,200 to each American making $75,000 a year or less, add $600/week to unemployment benefits for four months, give $100 billion to hospitals and health providers, make $500 billion of loans or investments to businesses, states and municipalities, and $32 billion in grants to the airline industry, and more.</p>
 	<p><a href="https://coronavirus.skoposlabs.com">coronavirus.skoposlabs.com</a> &mdash; Other legislative activities and federal regulations tracked by Skopos Labs</p>
-	<p>Policy analysis: <a href="https://www.everycrsreport.com/search.html?q=COVID-19">CRS reports related to COVID-19</a> (everycrsreport.com), <a href="https://www.pogo.org/training/covid-19-resources/">Oversight & Policy Resources</a> (POGO)</p>
+
+	<h2><span>Analysis</span></h2>
+	
+	<p><a href="https://medium.com/p/what-did-congress-do-during-the-1918-flu-pandemic-c0bd96ad2287?source=email-51cfa67992b0--writer.postDistributed&sk=a3ce115fc93bcb3bd552de1fc4c4f9bd">What did Congress do during the 1918 flu pandemic?</a> [GovTrack.us]</p>
+	<p><a href="https://www.everycrsreport.com/search.html?q=COVID-19">CRS reports related to COVID-19</a> [everycrsreport.com], <a href="https://www.pogo.org/training/covid-19-resources/">COVID-19 Oversight & Policy Resources</a> [POGO]</p>
 
 	<h2><span>Affected Legislators</span></h2>
 
@@ -306,7 +310,7 @@ $(function() {
 
 		<tr class="tested-positive" data-expected-end-date="3/28/2020"><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/mario_diaz_balart/400108" class="legislator">Rep. Mario Diaz-Balart (FL-25)</a></td> <td><b>tested positive</b></td> <td>self-quarantine until 3/28/2020</td> <td><a href="https://twitter.com/ChadPergram/status/1240410327646375936">tweet</a></td> </tr>
 
-		<tr class="tested-positive" data-actual-end-date="3/30/2020"><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/ben_mcadams/412829" class="legislator">Rep. Ben McAdams (UT-4)</a></td> <td><b>tested positive</b></td> <td>exited self-quarantine 3/30/2020 having been declared "virus free" by doctors</td> <td><a href="https://twitter.com/CraigCaplan/status/1240439298136121350">tweet</a> <a href+"https://www.ksl.com/article/46736411/ben-mcadams-coronavirus-is-like-being-hit-by-a-truck?fbclid=IwAR3YvOFgxL4ldhb5OlxcC7PhCuffcCPAGicRIQmXUExTKbf23whxsoxkxAY">interview</a></td> </tr>
+		<tr class="tested-positive" data-actual-end-date="3/30/2020"><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/ben_mcadams/412829" class="legislator">Rep. Ben McAdams (UT-4)</a></td> <td><b>tested positive</b></td> <td>exited self-quarantine 3/30/2020 having been declared "virus free" by doctors</td> <td><a href="https://twitter.com/CraigCaplan/status/1240439298136121350">tweet</a> <a href="https://www.ksl.com/article/46736411/ben-mcadams-coronavirus-is-like-being-hit-by-a-truck?fbclid=IwAR3YvOFgxL4ldhb5OlxcC7PhCuffcCPAGicRIQmXUExTKbf23whxsoxkxAY">interview</a></td> </tr>
 
 		<tr data-expected-end-date="3/27/2020"><td>3/18/20</td> <td><a href="https://www.govtrack.us/congress/members/drew_ferguson/412700" class="legislator">Rep. Drew Ferguson (GA-3)</a></td> <td>contact with someone who tested positive</td> <td>self-quarantine until 3/27/2020</td> <td><a href="https://twitter.com/RepDrewFerguson/status/1240440543286562822">tweet</a> <a href="https://twitter.com/RepDrewFerguson/status/1240440544393822210?s=20">tweet</a></td> </tr>
 
@@ -356,29 +360,8 @@ $(function() {
 
 		<tr class="tested-positive" data-expected-end-date="4/10/2020"><td>3/27/20</td> <td><a href="https://www.govtrack.us/congress/members/mike_kelly/412465" class="legislator">Rep. Mike Kelly (PA-16)</a></td> <td><b>tested positive</b></td> <td>self-quarantine until 4/10/2020</td> <td><a href="https://kelly.house.gov/press-release/representative-kelly-tests-positive-covid-19">press release</a></td></tr>
 		
-		<tr data-expected-end-date="4/13/2020"><td>3/30/20</td> <td><a href="https://www.govtrack.us/congress/members/nydia_velazquez/400416" class="legislator">Rep. Nydia Velázquez (NY-7)</a></td> <td>unknown</td> <td>self-quarantine until 4/13/2020; she will not get a test</td> <td><a href="https://twitter.com/NydiaVelazquez/status/1244694107731251200?s=20">tweet</a></td></tr>
+		<tr class="presumed-positive" data-expected-end-date="4/13/2020"><td>3/30/20</td> <td><a href="https://www.govtrack.us/congress/members/nydia_velazquez/400416" class="legislator">Rep. Nydia Velázquez (NY-7)</a></td> <td><b>diagnosed with presumed coronavirus infection</b></td> <td>self-quarantine until 4/13/2020; she will not get a test</td> <td><a href="https://twitter.com/NydiaVelazquez/status/1244694107731251200?s=20">tweet</a></td></tr>
 		</tbody>
-	</table>
-
-	<h2><span>Closed Offices</span></h2>
-
-	<p>In addition, we&rsquo;re tracking a partial list of other actions taken by legislators to protect themselves or their staff:</p>
-
-	<table class="table">
-	<thead>
-		<tr>
-			<th>Date</th>
-			<th>Legislator</th>
-			<th>Event</th>
-			<th>Action</th>
-			<th>Links</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/mitt_romney/412841" class="legislator">Sen. Mitt Romney (UT)</a></td> <td>unknown</td> <td>DC office to telework</td> <td><a href="https://twitter.com/ChadPergram/status/1238095855376388096">tweet</a></td> </tr>
-
-		<tr><td>3/12/20</td> <td><a href="https://www.govtrack.us/congress/members/tom_cotton/412508" class="legislator">Sen. Tom Cotton (AR)</a></td> <td>unknown</td> <td>DC office to telework</td> <td><a href="https://www.cotton.senate.gov/?p=press_release&id=1337">press release</a></td> </tr>
-	</tbody>
 	</table>
 {% endblock %}
 
