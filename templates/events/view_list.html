@@ -12,6 +12,10 @@
 .tracker-category-commitee { }
 .tracker-category-legislator { }
 
+.tracker {
+  margin-bottom: 30px;
+}
+
 .panel {
   border-color: #9D2146;
 }
@@ -45,16 +49,6 @@ $(function() {
         // Enable editing.
         $('.if-list-owner').show();
     }
-
-    // Make all of the panel headers and bodies the same height
-    // so boxes line up nicely.
-    function make_same_height(nodes) {
-      var max_height = 0;
-      nodes.each(function() { max_height = Math.max(max_height, $(this).height()) });
-      nodes.css({ minHeight: parseInt(max_height)+"px" });
-    }
-    make_same_height($('.tracker .panel-heading'));
-    make_same_height($('.tracker .panel-body'));
 });
 </script>
 {% endblock %}
@@ -77,9 +71,9 @@ $(function() {
     A List Published by a GovTrack User
 </div>
 
-<div class="row">
+<div>
   {% for tracker in list_trackers %}
-    <div id="tracker-{{tracker.id}}" class="col-sm-6 col-md-4 tracker tracker-type-{{tracker.noun|cut:' '}}">
+    <div id="tracker-{{tracker.id}}" class="tracker tracker-type-{{tracker.noun|cut:' '}}">
       <div class="panel">
         <div class="panel-heading">
           <a href="{{tracker.link}}" style="color: inherit; text-decoration: none">
@@ -87,56 +81,51 @@ $(function() {
           </a>
         </div>
         <div class="panel-body">
-            {% if tracker.thumbnail_image_url or tracker.recently.0.large_thumbnail_url or tracker.recently.0.thumbnail_url %}
-              <a href="{{tracker.link}}">
-              <div style="margin: -15px -15px 0 -15px; background-image: url({% firstof tracker.thumbnail_image_url tracker.recently.0.large_thumbnail_url tracker.recently.0.thumbnail_url %}); background-size: cover; background-position: 50% 50%; min-height: {% if tracker.noun == 'legislator' %}275{% else %}175{% endif %}px">
-              </div>
-              </a>
-            {% else %}
-              {{tracker.description}}
-            {% endif %}
+          <table width="100%" style="margin: -15px;">
+            <tr valign="top">
+              {% if tracker.thumbnail_image_url or tracker.recently.0.large_thumbnail_url or tracker.recently.0.thumbnail_url %}
+              <td style="width: 200px; background-image: url({% firstof tracker.thumbnail_image_url tracker.recently.0.large_thumbnail_url tracker.recently.0.thumbnail_url %}); background-size: cover; background-position: 50% 50%; height: {% if tracker.noun == 'legislator' %}225{% else %}175{% endif %}px; border-right: 1px solid #EEE; cursor: pointer;" onclick="window.location = '{{tracker.link|escapejs}}'">
+              </td>
+              {% endif %}
+              <td style="padding: 15px">
+
+              {# {{tracker.description}} #}
 
             {% if tracker.recently %}
-              <div style="font-size: 95%">
-              {% if not tracker.thumbnail_image_url %}<hr>{% endif %}
-              <h4 style="font-style: italic">Recently:</h4>
+              <p>Recently:</p>
               {% for event in tracker.recently %}
-                <p>{% if event.date_has_no_time %}
+                <p>
+                {% if event.date_has_no_time %}
                      {{event.date|date}}
                    {% else %}
                      {{event.date}}
                    {% endif %}
                    &mdash;
-                   {{event.type}}
-                   {% if event.title != tracker.title %}
-                   &mdash;
+                   {{event.type}}{% if event.title != tracker.title %}:
                     <a href="{{event.url}}">
                       {{event.title}}
                     </a>
-                   {% endif %}</p>
-                {{event.body_html|safe}}
+                   {% endif %}
+                 </p>
               {% endfor %}
-              </div>
             {% endif %}
+
+            <p>
+              <a href="{{tracker.link}}" style="text-decoration: none; font-size: 85%;">
+                {% if tracker.is_subscribable %}
+                  Track
+                {% else %}
+                  More about
+                {% endif %}
+                this {% firstof tracker.noun '' %} &raquo;
+              </a>
+            </p>
+            </td>
+            </tr>
+          </table>
         </div>
-        <a href="{{tracker.link}}">
-          <div class="panel-footer">
-              {% if tracker.is_subscribable %}
-                Track
-              {% else %}
-                More about
-              {% endif %}
-              this {% firstof tracker.noun '' %} &raquo;
-          </div>
-        </a>
       </div>
     </div>
-    {% if forloop.counter|divisibleby:2 %}
-    <div class="clearfix visible-sm"></div>
-    {% endif %}
-    {% if forloop.counter|divisibleby:3 %}
-    <div class="clearfix visible-md visible-lg"></div>
-    {% endif %}
   {% endfor %}
 </div>
 

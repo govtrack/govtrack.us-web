@@ -335,7 +335,7 @@ $(function() {
             </div>
     {% endfor %}
 
-    <div id="newlist" onclick="return new_list();">
+    <div id="newlist" onclick="return new_list();" style="margin-bottom: 30px">
         <span class="glyphicon glyphicon-plus"></span>
         Create New List
     </div>
@@ -350,8 +350,37 @@ $(function() {
     </h3>
 
     <div class="panel-body">
+    	<div class="row">
+    		<div class="col-sm-6">
+                    <h4 style="margin: 0 0 12px 0">Email Updates</h4>
 
-    <h4 style="margin-top: 0">Trackers</h4>
+                    <select id="email_frequency" name="email_frequency" onchange="change_email_options();" class="form-control" style="margin-bottom: 1em;">
+                        <option value="0">Don&rsquo;t Send Emails</option>
+                        <option value="1">Daily</option>
+                        <option value="2">Weekly</option>
+                    </select>
+
+                    <p>We&rsquo;ll only email you updates when there is something new related to your trackers.</p>
+            </div>
+
+            <div class="col-sm-6">
+                    <h4 style="margin: 0 0 12px 0">Tools</h4>
+
+                    <p>
+                    	<a id="view_link" href="#" class="btn btn-primary"><i class="fa fa-link"></i> Share List</a>
+	                    <a id="rss_link" href="#" class="btn btn-primary"><i class="fa fa-rss"></i> RSS Feed</a>
+                    </p>
+                    
+                    <p>
+                    	Share your list so others can see what you are tracking.
+                    	Copy and paste the RSS Feed link into your RSS reader app.
+                    </p>
+            </div>
+        </div>
+
+        <hr class="hidden-xs" style="border-color: #CCC;">
+
+    <h4 style="margin-top: 0">Trackers In This List</h4>
 
     <p class="if_has_no_trackers text-info" style="display: none;">You have not added any trackers yet! Use the links below to start exploring the site to begin tracking Congress. You&rsquo;ll see &ldquo;Track&rdquo; buttons throughout the site.</p>
 
@@ -363,27 +392,7 @@ $(function() {
         </div><!-- /items -->
     </div> <!-- .if_has_trackers -->
 
-    <p>Add a tracker by searching <a href="/congress/members">Members of Congress</a>, <a href="/congress/bills">bills</a>, <a href="/congress/votes">votes</a>, <a href="/congress/committees">committees</a>, and <a href="/congress/oversight">congressional oversight &amp; investigations</a>.</p>
-
-        <div id="set_freq">
-                    <h4>Get Email Updates</h4>
-                    
-                    <p>Would you like legislative events related to your trackers sent to you by email? Choose how often you would like to hear from us:</p>
-
-                    <select id="email_frequency" name="email_frequency" onchange="change_email_options();" class="form-control" style="margin-bottom: 1em;">
-                        <option value="0">Don&rsquo;t Send Emails</option>
-                        <option value="1">Daily</option>
-                        <option value="2">Weekly</option>
-                    </select>
-
-                    <p>We&rsquo;ll only email you updates when there is something new related to your trackers.</p>
-
-                    <h4>View Your List</h4>
-                    <p><a id="view_link" href="#"><i class="fa fa-link"></i> View Your List</a>. Use this page to see recent legislative events related to your trackers. Or share the link so others can see what you are tracking.</p>
-
-                    <h4>Advanced Tools</h4>
-                    <p><a id="rss_link" href="#"><i class="fa fa-rss"></i> RSS Feed</a> for your trackers. Copy and paste this link into your RSS reader app.</p>
-        </div><!-- /set_freq -->
+    <p>Add a tracker by searching <a href="/congress/members">Members of Congress</a>, <a href="/congress/bills">bills</a>, <a href="/congress/votes">votes</a>, <a href="/congress/committees">committees</a>, and <a href="/congress/oversight">congressional oversight &amp; investigations</a>.</p>        
 </div> <!-- /.panel-body -->
 </div> <!-- /.panel -->
 </div> <!-- /.col -->
