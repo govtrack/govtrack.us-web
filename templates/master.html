@@ -79,64 +79,61 @@
 	      <ul class="nav navbar-nav">
 	        <li><a href="/">Home</a></li>
 	        <li class="dropdown">
-	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Congress <span class="caret"></span></a>
+	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Bills &amp; Votes <span class="caret"></span></a>
+	          <ul class="dropdown-menu">
+				<li><a href="/congress/bills">Bills and Resolutions</a></li>
+				<li><a href="/congress/votes">Roll Call Votes</a></li>
+	            <li role="separator" class="divider"></li>
+				<li><a href="/how-a-bill-becomes-a-law">How does a bill become a law?</a></li>
+				<li><a href="/what-is-the-law">What is the law?</a></li>
+				<li><a href="/congressional-procedures">Congressional Procedures</a></li>
+			  </ul>
+			</li>
+	        <li class="dropdown">
+	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Legislators <span class="caret"></span></a>
 	          <ul class="dropdown-menu">
 				<li><a href="/congress/members">Members of Congress</a></li>
-				<li><a href="/congress/bills">Bills and Resolutions</a></li>
-				<li><a href="/congress/votes">Voting Records</a></li>
 				<li><a href="/congress/committees">Committees</a></li>
 				<li><a href="/congress/oversight">Oversight &amp; Investigations</a></li>
 	            <li role="separator" class="divider"></li>
 				<li><a href="/misconduct">Congressional Misconduct</a></li>
-				<li><a href="/how-a-bill-becomes-a-law">How does a bill become a law?</a></li>
-				<li><a href="/what-is-the-law">What is the law?</a></li>
-				<li><a href="/congressional-procedures">Congressional Procedures</a></li>
-				<li><a href="/reading-list">Books and Games We Recommend</a></li>
 	          </ul>
 	        </li>
-			<li class="dropdown">
-	          	<a href="/start" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Track <span class="caret"></span></a>
-	            <ul class="dropdown-menu">
-					{% if request.anonymous %}
-						<li id="nav_track_start"><a href="/start">Start Tracking</a></li>
-						<li id="nav_track_lists" style="display: none"><a href="/accounts/lists">Your Tracker Lists</a></li>
-                                                <li id="nav_track_positions" style="display: none"><a href="/accounts/positions">What You Have a Position On</a></li>
-					{% else %}
-						{% if user.is_authenticated %}
-						<li><a href="/start">Add a Tracker</a></li>
-						<li><a href="/accounts/lists">What You Are Tracking</a></li>
-                                                <li><a href="/accounts/positions">What You Have a Position On</a></li>
-						{% else %}
-						<li><a href="/start">Start Tracking</a></li>
-						{% endif %}
-					{% endif %}
-					<li><a href="/accounts/docket">Your Docket</a></li>
-		            <li role="separator" class="divider"></li>
-					<li><a href="https://govtrackinsider.com">GovTrack Insider</a></li>
-				</ul>
-			</li>
 			<li class="dropdown">
 				<a href="/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About Us <span class="caret"></span></a>
 	            <ul class="dropdown-menu">
 					<li><a href="/about">About GovTrack.us</a></li>
 					<li><a href="/about-our-data">About Our Data</a></li>
 					<li><a href="/press">Press Clips</a></li>
+		            <li role="separator" class="divider"></li>
+					<li><a href="/start">Start Tracking</a></li>
+					<li><a href="https://govtrackinsider.com">GovTrack Insider</a></li>
 					<li><a href="/sousveillance">What is Congress Browsing?</a></li>
+					<li><a href="/reading-list">Books and Games We Recommend</a></li>
 				</ul>
 			</li>
 	      </ul>
 	      <ul class="nav navbar-nav navbar-right">
 			{% block override_login %}
-			{% if not user.is_authenticated %}
-				<li id="nav_login"><a href="/accounts/login?next={{request.get_full_path|urlencode}}">Log In</a></li>
-				{% if request.anonymous %}
-					<li id="nav_logout" style="display: none"><a href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
-				{% endif %}
-			{% else %}
-				<li><a href="/accounts/profile" title="{{user.email}}">Your Account</a></li>
-				<li><a href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
+
+			{% if not user.is_authenticated %} {# hidden by script on anonymous pages when user is logged in #}
+			<li id="nav_login"><a href="/accounts/login?next={{request.get_full_path|urlencode}}">Log In</a></li>
+			{% endif %}
+			{% if request.anonymous or user.is_authenticated %}
+			<li id="nav_session" class="dropdown" {% if request.anonymous %}style="display: none"{% endif %}> {# shown by script if logged in#}
+	          	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Your Account <span class="caret"></span></a>
+	            <ul class="dropdown-menu">
+					<li><a href="/accounts/lists">Your Tracker Lists</a></li>
+                    <li><a href="/accounts/positions">Your Positions</a></li>
+					<li><a href="/accounts/docket">Your Docket</a></li>
+		            <li role="separator" class="divider"></li>
+					<li><a href="/accounts/profile" title="{{user.email}}">Account Settings</a></li>
+					<li><a href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
+				</ul>
+			</li>
 			{% endif %}
 			{% endblock %}
+
 			<li>
 				<form name="header_search" action="/search" method="GET" class="search-form hidden-xs hidden-sm" role="search">
 					<label for="master_search_q" class="sr-only">Search GovTrack for</label>
@@ -339,11 +336,8 @@
 		{% if request.anonymous %}
 		<!-- Master page elements when using the user-head script  -->
 		if (the_user) {
-			$('#nav_track_start').find('a').text("Add a Tracker");
-			$('#nav_track_lists').show();
-                        $('#nav_track_positions').show();
-			$('#nav_login').find('a').text('Your Account').attr('title', the_user.email).attr('href', '/accounts/profile');
-			$('#nav_logout').show();
+			$('#nav_login').hide();
+			$('#nav_session').show();
 		}
 		{% endif %}
 	</script>
