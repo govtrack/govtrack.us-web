@@ -600,3 +600,26 @@ def truncate_words(s, num):
     from django.utils.text import Truncator
     return Truncator(s).words(num, truncate=" ...")
     
+class TrackerNote(models.Model):
+    user = models.ForeignKey(User, related_name="trackernotes", on_delete=models.CASCADE)
+    sublist = models.ForeignKey(SubscriptionList, related_name="trackernotes", on_delete=models.CASCADE)
+    feed = models.ForeignKey(Feed, related_name="trackernotes", on_delete=models.PROTECT) # maybe CASCADE, why would we delete a Feed?
+    text = models.TextField() # Commonmark / GitHub Flavored Markdown
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [('user', 'sublist', 'feed')]
+
+    def __str__(self):
+        return str(self.user) + " - " +  str(self.feed)[0:30] + " - " + self.plain_text()[0:60]
+
+    def as_html(self):
+        from website.templatetags.govtrack_utils import markdown
+        return markdown(self.text)
+
+    def plain_text(self):
+        # Kill links.
+        import re
+        content = re.sub("\[(.*?)\]\(.*?\)", r"\1", self.text)
+        return content

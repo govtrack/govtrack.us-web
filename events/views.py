@@ -301,12 +301,20 @@ def events_embed_legacy(request):
         html = html[128:]
     return HttpResponse(js, content_type="application/x-javascript; charset=UTF-8")
     
-@anonymous_view
 @render_to('events/view_list.html')
 def view_list(request, list_id):
+    # Get all of the trackers in the list.
     from events.templatetags.events_utils import render_event
     sublist = get_object_or_404(SubscriptionList, public_id=list_id)
     feeds = list(sublist.trackers.all())
+
+    # Get all of the user's notes.
+    notes = TrackerNote.objects.filter(user=sublist.user, sublist=sublist).select_related('feed')
+    notes = { # make a mapping from feed name to note
+        note.feed.feedname: note
+        for note in notes
+    }
+
     trackers = [
             {
                 "feed": f,
@@ -322,6 +330,7 @@ def view_list(request, list_id):
                     render_event(event, [f])
                     for event in f.get_events(1)
                 ],
+                "user_note": notes.get(f.feedname),
             }
             for f in feeds ]
     trackers.sort(key = lambda t : (t["name"].split(":")[0], t["title"]))
@@ -329,3 +338,22 @@ def view_list(request, list_id):
         "list": sublist,
         "list_trackers": trackers,
     }
+
+@login_required
+@json_response
+def save_list_note(request):
+    # Update an existing note, delete an existing note if the text is empty, or
+    # create a new note.
+    sublist = SubscriptionList.objects.get(id=request.POST['list'], user=request.user)
+    feed = Feed.objects.get(id=request.POST['tracker'])
+    text = request.POST['text'].strip()
+    note_qs = TrackerNote.objects.filter(user=request.user, sublist=sublist, feed=feed)
+    if not text:
+        # Delete any existing note.
+        note_qs.delete()
+        return { "deleted": True }
+    else:
+        note, _ = TrackerNote.objects.get_or_create(user=request.user, sublist=sublist, feed=feed)
+        note.text = text
+        note.save()
+        return { "html": note.as_html() }

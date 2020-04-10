@@ -1,6 +1,6 @@
 {% extends 'master.html' %}
 
-{% block title %}What You Are Tracking -- GovTrack.us{% endblock %}
+{% block title %}A User List: {{list.name}} -- GovTrack.us{% endblock %}
 {% block head %}
 <style>
 .if-list-owner {
@@ -16,53 +16,105 @@
   margin-bottom: 30px;
 }
 
-.panel {
+.panel.panel-primary, #content .panel hr {
   border-color: #9D2146;
 }
-.panel-heading, .panel-footer {
-  background-color: #9D2146;
+.panel-primary > .panel-heading, .panel-primary > .panel-footer {
+  background: #9D2146;
   color: white;
+}
+
+#content .note-text > *:first-child {
+  margin-top: 0;
+}
+#content .note-text > *:last-child {
+  margin-bottom: 0;
 }
 </style>
 {% endblock %}
 
 {% block body_scripts %}
 <script>
-function refresh_events() {
-    $('#events').html("Loading...");
-    $.ajax({
-        url: "/events/_load_events",
-        type: "POST",
-        data: {
-            {% if request.GET.page %}page: "{{request.GET.page|escapejs}}",{% endif %}
-            listid: active_list
-        },
-        dataType: "html",
-        success: function(data) {
-            $('#events').html(data);
-        }
-    });
-}
-
 $(function() {
+    {% comment %}
+    // originally this page was designed as an anonymous page
     if (the_user && the_user.id == {{list.user.id}}) {
         // Enable editing.
         $('.if-list-owner').show();
     }
+    {% endcomment %}
+
+    $('.tracker textarea').keydown(function (e) {
+      if (e.ctrlKey && e.keyCode == 13) {
+        // Ctrl-Enter pressed. Save note.
+        save_note($(this).parents('.tracker'));
+      }
+    });
 });
+
+function toggle_note_editor(tracker_div, show, has_note) {
+  tracker_div.find('.note-editor-toggle')
+    .toggle(!show)
+    .text(has_note ? "Edit Note" : "Add a Note");
+  if (show) {
+    tracker_div.find('.note-text').hide();
+    tracker_div.find('.note-editor').slideDown(
+      function() {
+        tracker_div.find('textarea').focus()
+      }
+    );
+  }
+  else {
+    tracker_div.find('.note-text').slideDown();
+    tracker_div.find('.note-editor').slideUp();
+    tracker_div.find('.note-hr-after').toggle(has_note);
+  }
+}
+function save_note(tracker_div) {
+  var text = tracker_div.find("textarea").val();
+  tracker_div.find("button, textarea").prop('disabled', true);
+  $.ajax({
+    url: "/events/_save_list_note",
+    method: "POST",
+    data: {
+      list: {{list.id}},
+      tracker: tracker_div.attr("data-tracker-id"),
+      text: text
+    },
+    success: function(res) {
+      if (res.deleted) {
+        // Note was cleared.
+        toggle_note_editor(tracker_div, false, false);
+        tracker_div.find('.note-text').html('').hide();
+        return;
+      } else {
+        tracker_div.find('.note-text').html(res.html);
+        toggle_note_editor(tracker_div, false, true);
+      }
+    },
+    error: function() {
+      alert("Sorry, there was a problem saving your note.");
+    },
+    complete: function() {
+      tracker_div.find("button, textarea").prop('disabled', false);
+    }
+  })
+}
 </script>
 {% endblock %}
 
 {% block body %}
 
-<div class="if-list-owner" style="margin-top: 1em">
+{% if request.user == list.user %}
+<div style="margin-top: 1em">
 <div class="panel panel-info">
   <div class="panel-body">
     <p>Welcome to your list. You can share this page with others, but only you can see this box.</p>
-    <p style="margin: 0">To change the title of this list or to remove trackers from this list, go to <a href="/accounts/lists?listid={{list.id}}">Your Tracker Lists</a>.</p>
+    <p style="margin: 0">To change the title of this list or to add or remove trackers from this list, go to <a href="/accounts/lists?listid={{list.id}}">Your Tracker Lists</a>.</p>
   </div>
 </div>
 </div>
+{% endif %}
 
 <h1 style="margin-bottom: 0; line-height: 120%; padding: 0">
     {{list.name}}
@@ -73,8 +125,8 @@ $(function() {
 
 <div>
   {% for tracker in list_trackers %}
-    <div id="tracker-{{tracker.id}}" class="tracker tracker-type-{{tracker.noun|cut:' '}}">
-      <div class="panel">
+    <div id="tracker-{{tracker.id}}" class="tracker tracker-type-{{tracker.noun|cut:' '}}" data-tracker-id="{{tracker.id}}">
+      <div class="panel panel-primary">
         <div class="panel-heading">
           <a href="{{tracker.link}}" style="color: inherit; text-decoration: none">
             <h3 class="panel-title" style="font-weight: bold;">{{tracker.title}}</h3>
@@ -89,7 +141,44 @@ $(function() {
               {% endif %}
               <td style="padding: 15px">
 
-              {# {{tracker.description}} #}
+                <div style="float: right; margin: 0 0 1em 1em;">
+                  <a href="{{tracker.link}}" class="btn btn-primary">
+                    {% if tracker.is_subscribable %}
+                      Track
+                    {% else %}
+                      More about
+                    {% endif %}
+                    this {% firstof tracker.noun '' %} &raquo;
+                  </a>
+
+                  {% if request.user == list.user %}
+                  <button class="btn btn-info note-editor-toggle" onclick="toggle_note_editor($(this).parents('.tracker'), true);">
+                    {% if tracker.user_note %}Edit Note{% else %}Add a Note{% endif %}
+                  </button>
+                  {% endif %}
+                </div>
+
+                {% if request.user == list.user %}
+                  <div class="note-editor" style="display: none">
+                    <div class="panel panel-default">
+                      <div class="panel-body">
+                        <p>Write a note to appear on this page. Click <i>Save</i> when you are done. Your note can be seen by anyone with a link to this page, so don&rsquo;t use this space for anything private.</p>
+                        <textarea class="form-control" rows=5 style="margin-bottom: 1em">{{tracker.user_note.text}}</textarea>
+                        <div>
+                          <button class="btn btn-primary" onclick="save_note($(this).parents('.tracker'));">Save</button>
+                          <span style="font-size: 75%; line-height: 105%; color: #666; display: inline-block; margin-left: 3em;">
+                            We use <a href="https://help.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax" target="_blank">GitHub Flavored Markdown</a> for formatting.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+                
+                <blockquote class="note-text" {% if not tracker.user_note %}style="display: none"{% endif %}>
+                  {{tracker.user_note.as_html}}
+                </blockquote>
+                <hr class="note-hr-after" {% if not tracker.user_note %}style="display: none"{% endif %}>
 
             {% if tracker.recently %}
               <p>Recently:</p>
@@ -110,16 +199,6 @@ $(function() {
               {% endfor %}
             {% endif %}
 
-            <p>
-              <a href="{{tracker.link}}" style="text-decoration: none; font-size: 85%;">
-                {% if tracker.is_subscribable %}
-                  Track
-                {% else %}
-                  More about
-                {% endif %}
-                this {% firstof tracker.noun '' %} &raquo;
-              </a>
-            </p>
             </td>
             </tr>
           </table>

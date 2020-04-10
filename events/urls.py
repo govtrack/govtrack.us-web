@@ -9,5 +9,6 @@ urlpatterns = [
     url('^events/_load_events$', events.views.events_list_items, name='events_list_items'),
     url('^events/events.rss$', events.views.events_rss),
     url('^events/embed_legacy$', events.views.events_embed_legacy),
+    url('^events/_save_list_note$', events.views.save_list_note),
     url('^events/([\w\-]+)$', events.views.events_show_feed),
 ]

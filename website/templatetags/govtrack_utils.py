@@ -41,9 +41,10 @@ def markdown(value):
     # plus a second pass filtering using a whitelist for allowed
     # tags and URL schemes.
 
-    import commonmark
-    ast = commonmark.Parser().parse(value)
-    html = commonmark.HtmlRenderer({ 'safe': True }).render(ast)
+    import cmarkgfm
+    from cmarkgfm.cmark import Options as cmarkgfmOptions
+
+    html = cmarkgfm.github_flavored_markdown_to_html(value, options=cmarkgfmOptions.CMARK_OPT_SAFE)
 
     import html5lib, urllib.parse
     def filter_url(url):
