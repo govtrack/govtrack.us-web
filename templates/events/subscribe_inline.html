@@ -71,12 +71,16 @@ function hide_track_panel() {
 		//_paq.push(['trackEvent', 'trackers', 'remove', feed_cur_feed]);
 		return false; // cancel click
 	}
-	function toggle_list_item(node) {
+	function toggle_list_item1(node) {
 		$(node.parentNode.parentNode).find(">li").removeClass('selected');
 		$(node.parentNode).addClass('selected');
 		return false; // cancel click
 	}
 {% else %}
+	function toggle_list_item1(node) {
+		return toggle_list_item(node);
+	}
+{% endif %}
 	function toggle_list_item(node) {
 		var listid = $(node.parentNode).attr("list_id");
 		$.ajax({
@@ -107,17 +111,18 @@ function hide_track_panel() {
 			},
 			dataType: "json",
 			success: function(data) {
-				var item = $('#base_list_row').clone();
+				var item = $(node).parents('.list_select').find('.base_list_row').clone();
+				item.removeClass('base_list_row');
 				item.attr("list_id", data.list_id);
 				item.addClass("selected");
 				item.find(".name").text(data.list_name);
-				item.insertBefore($('#new_list_row'));
+				item.find('.viewlist').attr('href', "/list/" + data.list_public_id);
+				item.insertBefore($(node).parents('.list_select').find('.new_list_row'));
 				item.fadeIn();
 			}
 		});
 		return false;
 	}
-{% endif %}
 	function selected_feed_changed(new_feed) {
 		$("#track_panel_selected_feed li").removeClass('selected');
 		$(new_feed.parentNode).addClass("selected");
@@ -135,9 +140,21 @@ function hide_track_panel() {
 		return false; // cancel click
 	}
 {% endif %}
+
+function show_add_to_list_panel() {
+	// in the simple mode, update the control state now
+	$("#add_to_list_panel").modal();
+	return false;
+}
+
 $(function() {
+	// Control flow comes here after logging in via the link in the panel.
 	if (window.location.hash == "#track") {
 		show_track_panel();
+		window.location.hash = "";
+	}
+	if (window.location.hash == "#addtolist") {
+		show_add_to_list_panel();
 		window.location.hash = "";
 	}
 });
@@ -217,9 +234,9 @@ $(function() {
 				<p style="margin-bottom: .5em">How often would you like email updates?</p>
 
 				<ul>
-					<li email_freq="0" {% if feed in the_list.trackers.all and the_list.email == 0 %}class="selected"{% endif %}><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">No Email Updates</span></a></li>
-					<li email_freq="1" {% if feed in the_list.trackers.all and the_list.email == 1 %}class="selected"{% elif feed in the_list.trackers.all %}{% else %}class="selected"{% endif %}><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">Daily Updates</span></a></li>
-					<li email_freq="2" {% if feed in the_list.trackers.all and the_list.email == 2 %}class="selected"{% endif %}><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">Weekly Updates</span></a></li>
+					<li email_freq="0" {% if feed in the_list.trackers.all and the_list.email == 0 %}class="selected"{% endif %}><span class="target" onclick="return toggle_list_item1(this);"><span class="icon"></span> <span class="name">No Email Updates</span></span></li>
+					<li email_freq="1" {% if feed in the_list.trackers.all and the_list.email == 1 %}class="selected"{% elif feed in the_list.trackers.all %}{% else %}class="selected"{% endif %}><span class="target" onclick="return toggle_list_item1(this);"><span class="icon"></span> <span class="name">Daily Updates</span></span></li>
+					<li email_freq="2" {% if feed in the_list.trackers.all and the_list.email == 2 %}class="selected"{% endif %}><span class="target" onclick="return toggle_list_item1(this);"><span class="icon"></span> <span class="name">Weekly Updates</span></span></li>
 					<div style="clear: both"> </div>
 				</ul>
 
@@ -242,13 +259,17 @@ $(function() {
 				<p>You may put this tracker into one or more of your lists:</p>
 				<ul>
 					{% for list in request.user.userprofile.lists %}
-					<li list_id="{{list.id}}"
-						{% if forloop.first %}id="base_list_row"{% endif %}
-						{% if feed in list.trackers.all %}class="selected"{% endif %} ><a href="#" onclick="return toggle_list_item(this);"><span class="icon"></span> <span class="name">{{list.name}}</span></a></li>
+					<li list_id="{{list.id}}" class="
+						{% if forloop.first %}base_list_row{% endif %}
+						{% if feed in list.trackers.all %}selected{% endif %} ">
+						<span class="target" onclick="return toggle_list_item(this);">
+							<span class="icon"></span> <span class="name">{{list.name}}</span>
+						</span>
+					</li>
 					{% endfor %}
 					
-					<li id="new_list_row" class="new" style="margin-top: .5em"><a href="#" onclick="return new_list();"><span class="icon"></span> Add a new list</a></li>
-					<li class="all"><a href="/accounts/lists"><span class="icon"></span> Edit your lists</a></li>
+					<li class="new_list_row new" style="margin-top: .5em"><span class="target" onclick="return new_list(this);"><span class="glyphicon glyphicon-plus"></span> Add to new list</span></li>
+					<li class="all"><a class="target" href="/accounts/lists"><span class="icon"></span> Edit your lists</a></li>
 					
 					<div style="clear: both"> </div>
 				</ul>
@@ -266,6 +287,69 @@ $(function() {
 
 
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="add_to_list_panel" tabindex="-1" role="dialog" aria-labelledby="add_to_list_panel_ModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h2 class="modal-title" id="add_to_list_panel_ModalLabel">Add this {{feed.type_metadata.noun}} to a list</h2>
+      </div>
+      <div class="modal-body tracker_widget">
+		<div class="row">
+		<div class="col-sm-6">
+			<h3>Using Lists</h3>
+			<p>Use lists to track what you are interested in, or share your lists to let others know
+			what you are trackng. When you share a list, you can include your own comments about this
+			{{feed.type_metadata.noun}}.</p>
+		</div>
+		<div class="col-sm-6">
+			{% if not request.user.is_authenticated %}
+				<h3>Sign up first</h3>
+				<p>You&rsquo;ll need to sign up (or log in) before you can add this {{feed.type_metadata.noun}} to a list.</p>
+			{% else %}
+				<div class="list_select">
+					<h3>Select List</h3>
+					<p>You may put this {{feed.type_metadata.noun}} into one or more of your lists:</p>
+					<ul>
+						{% for list in request.user.userprofile.lists %}
+						<li list_id="{{list.id}}" class="
+							{% if forloop.first %}base_list_row{% endif %}
+							{% if feed in list.trackers.all %}selected{% endif %} ">
+						  <a class="viewlist" href="/list/{{list.get_public_id}}">View <span class="glyphicon glyphicon-play"></span></a>
+						  <span class="target" onclick="return toggle_list_item(this);">
+						  	<span class="icon"></span> <span class="name">{{list.name}}</span>
+						  </span>
+						</li>
+						{% endfor %}
+						
+						<li class="new_list_row new" style="margin-top: .5em"><span class="target" onclick="return new_list(this);"><span class="glyphicon glyphicon-plus"></span> Add to new list</a></li>
+						<li class="all"><a href="/accounts/lists" class="target"><span class="icon"></span> Edit your lists</a></li>
+						
+						<div style="clear: both"> </div>
+					</ul>
+				</div>
+			{% endif %}
+		</div> <!-- /col -->
+		</div> <!-- /row -->
+      </div>
+      <div class="modal-footer">
+		{% if not request.user.is_authenticated %}
+			{% with "#addtolist" as return_hash %}
+				{% with request.get_full_path|add:return_hash as singlesignon_next %}
+					{% include "registration/login_singlesignon.html" %}
+				{% endwith %}
+		        <a class="btn btn-primary" href="/registration/signup?next={{request.path|add:return_hash|urlencode}}">Sign Up</a>
+		        <a class="btn btn-primary" href="/accounts/login?next={{request.path|add:return_hash|urlencode}}">Log In</a>
+			{% endwith %}
+		{% else %}
+			<button type="button" class="btn btn-default" data-dismiss="modal" onclick="hide_track_panel(); return false;">Done</button>
+		{% endif %}
+	  </div> <!-- /col -->
+	  </div> <!-- /row -->
     </div>
   </div>
 </div>

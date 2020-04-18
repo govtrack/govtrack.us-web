@@ -585,7 +585,7 @@ aside .download-links { padding: 31px 0 0 }
 				padding: 0;
 			}
 			.events_to_track li a,
-			.list_select li a {
+			.list_select li .target {
 				display: block;
 				padding: 0 10px;
 				moz-border-radius: 5px;
@@ -593,6 +593,11 @@ aside .download-links { padding: 31px 0 0 }
 				overflow: hidden;
 				line-height: 23px;
 				text-decoration: none;
+				cursor: pointer;
+				color: #9D2146;
+			}
+			.list_select li .target span {
+				font-style: normal; /* override span span */
 			}
 			.events_to_track li a {
 				background: transparent;
@@ -605,25 +610,29 @@ aside .download-links { padding: 31px 0 0 }
 				margin-bottom: 2px;
 				line-height: 125%;
 			}
-			.list_select li.new a,
-			.list_select li.all a {	 /* Styles the "Add New List" link */
+			.list_select li.new .target,
+			.list_select li.all .target {	 /* Styles the "Add New List" link */
 				background: transparent;
 				border: 0;
 			}
-			.list_select li.selected a {
+				.list_select li.new .target .glyphicon {
+					color: #AAA;
+				}
+			.list_select li.selected .target {
 				background: #8e8778;
 				color: #fff;
 			}
-			.list_select li a:hover {
+			.list_select li .target:hover {
 				box-shadow:
 					0 2px 5px rgba(0,0,0,.2);
-				/*behavior: url(/static/js/PIE.htc);*/
 			}
-			.list_select li.new a:hover,
-			.list_select li.all a:hover {
+			.list_select li.new .target:hover,
+			.list_select li.all .target:hover {
 				box-shadow: none;
-				/*behavior: url(/static/js/PIE.htc);*/
 			}
+				.list_select li.new .target:hover .glyphicon {
+					color: #D53;
+				}
 				.events_to_track li span.icon,
 				.list_select li span.icon	 {
 					display: inline-block;
@@ -639,7 +648,7 @@ aside .download-links { padding: 31px 0 0 }
 				.events_to_track li span.icon { background-position: -48px 0; }
 				.events_to_track li:hover span.icon { background-position: -48px -12px; }
 				.events_to_track li.selected span.icon { background-position: -48px -24px; }
-				.list_select li:hover span.icon {
+				.list_select li .target:hover span.icon {
 					background-position: -36px -12px;
 				}
 				.list_select li.selected span.icon {
@@ -657,6 +666,11 @@ aside .download-links { padding: 31px 0 0 }
 				.list_select li.all:hover span.icon {
 					background-position: 0 -12px;
 				}
+			.list_select li a.viewlist {
+				float: right;
+				margin-left: 3px;
+				text-decoration: none;
+			}
 	#track_panel .singlesignon {
 		display: inline-block;
 	}
