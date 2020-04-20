@@ -5,7 +5,7 @@ import website.views
 
 urlpatterns = [
     url(r'^$', website.views.index, name='index'),
-    url(r'^(start|about|about-our-data|contact|press|advertising|legal|what-is-the-law|how-a-bill-becomes-a-law|congressional-procedures|sousveillance|reading-list)$', website.views.staticpage, name='staticpage'),
+    url(r'^(start|about|about-our-data|contact|press|advertising|legal|what-is-the-law|how-a-bill-becomes-a-law|congressional-procedures|sousveillance|reading-list|guide|staff|advocates|media|educators)$', website.views.staticpage, name='staticpage'),
     #url(r'^developers/api$', website.views.api_overview),
     url(r'^congress/?$', website.views.congress_home, name='congress_home'),
     url(r'^search$', website.views.search, name='search'),
