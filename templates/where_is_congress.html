@@ -37,14 +37,16 @@
         <h2 class="modal-title" id="e">Where is Congress?</h2>
       </div>
       <div class="modal-body">
-        <p>Tag line.</p>
         <div id="where_is_congress_chart_date_labels"></div>
         <div class="where_is_congress_charts">
           <div id="where_is_congress_chart_2020"></div>
           <div id="where_is_congress_chart_2019"></div>
         </div>
 
-        <p style="line-height: 120%; font-size: 90%">Committee meetings per day starting on Jan 1 in each year. Darker is more meetings. Meetings are red during the District of Columbia&rsquo;s stay-at-home order.</p>
+        <p style="line-height: 120%; font-size: 85%; margin-top: 2px;">Committee meetings and floor roll call votes each weekday starting on the first Monday in each year. Darker is more meetings and votes. Days with activity are red during the District of Columbia&rsquo;s stay-at-home order.</p>
+
+        <p>By this time last year, Congress held <span class="committee-meetings-count"></span> more committee meetings
+        and <span class="votes-count"></span> more votes.</p>
 
         <p>More info.</p>
       </div>
@@ -72,6 +74,7 @@
     // Get max count on any date.
     var max = 0;
     where_is_congress_chart_data.forEach(function(item) {
+      item.count = item.committee_meetings + item.votes;
       if (item.count > max) max = item.count;
     });
     if (max == 0) max = 1;
@@ -104,9 +107,9 @@
 
     var container = $("<div class='c'/>");
     div.append(container);
-    var cell_width = parseInt(.75 * $(window).width() / (parseInt(where_is_congress_chart_data.filter(function(item) { return item.year == 2020; }).length / 7) + 7));
+    var cell_width = parseInt(.75 * Math.min($(window).width(), 1200) / (parseInt(where_is_congress_chart_data.filter(function(item) { return item.year == 2020; }).length / 7) + 7));
     var col = null;
-    where_is_congress_chart_data.forEach(function(item, i) {
+    where_is_congress_chart_data.filter(function(item) { return item.year == year; }).forEach(function(item, i) {
       if (item.islabel && year == '2019') {
         var label = $("<span/>");
         $('#where_is_congress_chart_date_labels')
@@ -120,7 +123,6 @@
         label.text(item.date);
       }
 
-      if (item.year != year) return;
       if ((i % 7) >= 5) return; // drop weekends from chart
       if ((i % 7) == 0) { col = $("<div/>"); container.append(col); }
       var c = $("<div/>");
@@ -132,13 +134,27 @@
         backgroundColor: color_scale,
         width: cell_width
       });
-      c.attr("title", item.date + ": " + item.count + " committee meeting(s)");
+      c.attr("title", item.date + ": " + item.committee_meetings + " committee meeting(s), " + item.votes + " vote(s)");
       col.append(c);
     });
+  }
+  function where_is_congress_total(year, key) {
+    var ndays = where_is_congress_chart_data.filter(function(item) { return item.year == '2020'; }).length;
+    var total = 0;
+    where_is_congress_chart_data
+        .filter(function(item) { return item.year == year; })
+        .slice(0, ndays) // limit 2019 data to the number of days we've had in 2020 so far
+        .forEach(function(item) { total += item[key]; })
+    return total;
   }
   $(function() {
     where_is_congress_chart('2019');
     where_is_congress_chart('2020');
+    var dx_committee_meetings = where_is_congress_total('2020', 'committee_meetings') - where_is_congress_total('2019', 'committee_meetings');
+    var dx_votes = where_is_congress_total('2020', 'votes') - where_is_congress_total('2019', 'votes');
+    $('#where_is_congress_modal .committee-meetings-count').text(-dx_committee_meetings);
+    $('#where_is_congress_modal .votes-count').text(-dx_votes);
     $('#where_is_congress_modal').modal();
+    
   })
 </script>

@@ -50,23 +50,27 @@ def where_is_congress_data():
         for n in range(int ((end_date - start_date).days)):
             yield start_date + timedelta(n)
 
+    def first_monday(d):
+      if d.weekday() == 0: return d
+      return d + timedelta(7-d.weekday())
+
     # Create a slot for each date in 2019 and the dates so far in 2020.
     data = { }
-    for key in list(daterange(date(2019,1,1), date(2019,12,31))) \
-             + list(daterange(date(2020,1,1), datetime.now().date())):
-        data[key] = { "count": 0 }
+    for key in list(daterange(first_monday(date(2019,1,1)), date(2019,12,31))) \
+             + list(daterange(first_monday(date(2020,1,1)), datetime.now().date())):
+        data[key] = { "committee_meetings": 0, "votes": 0 }
 
     # Count meetings by date.
     from committee.models import CommitteeMeeting
     for cm in CommitteeMeeting.objects.filter(when__gte="2019-01-01").values("when"):
         d = cm['when'].date()
         if d in data:
-            data[d]["count"] += 1
-    #from vote.models import Vote
-    #for v in Vote.objects.filter(created__gte="2019-01-01").values("created"):
-    #    d = v['created'].date()
-    #    if d in data:
-    #        data[d]["count"] += 1
+            data[d]["committee_meetings"] += 1
+    from vote.models import Vote
+    for v in Vote.objects.filter(created__gte="2019-01-01").values("created"):
+        d = v['created'].date()
+        if d in data:
+            data[d]["votes"] += 1
 
     # Make JSON-able.
     for key, value in data.items():
