@@ -4,7 +4,7 @@
   .where_is_congress_charts > div {
     margin-top: .5em;
     overflow: hidden;
-    border: 1px solid #9D2146;
+    border: 1px solid #BBB;
     /*background-image: linear-gradient(to right, #9D2146, white);*/
    }
   .where_is_congress_charts > div > div.y /* year label */ {
@@ -24,7 +24,7 @@
   }
   .where_is_congress_charts > div > div.c > div > div /* cell */ {
     width: 1em;
-    height: 1em;
+    height: .8em;
     margin: 1px;
   }
 </style>
@@ -44,7 +44,7 @@
           <div id="where_is_congress_chart_2019"></div>
         </div>
 
-        <p><small>Committee meetings per day. Darker is more meetings.</small>
+        <p style="line-height: 120%; font-size: 90%">Committee meetings per day starting on Jan 1 in each year. Darker is more meetings. Meetings are red during the District of Columbia&rsquo;s stay-at-home order.</p>
 
         <p>More info.</p>
       </div>
@@ -104,24 +104,9 @@
 
     var container = $("<div class='c'/>");
     div.append(container);
-    var cell_width = .75 * $(window).width() / (parseInt(where_is_congress_chart_data.filter(function(item) { return item.year == 2020; }).length / 7) + 7);
+    var cell_width = parseInt(.75 * $(window).width() / (parseInt(where_is_congress_chart_data.filter(function(item) { return item.year == 2020; }).length / 7) + 7));
     var col = null;
     where_is_congress_chart_data.forEach(function(item, i) {
-      if (item.year != year) return;
-      if ((i % 7) >= 5) return; // drop weekends from chart
-      if ((i % 7) == 0) { col = $("<div/>"); container.append(col); }
-      var c = $("<div/>");
-      var color_scale = HSLToRGB(
-        item.pandemic ? 355 : 110,
-        item.count > 0 ? 70 : 0,
-        95 * (1 - item.count / max * .7));
-      c.css({
-        backgroundColor: color_scale,
-        width: cell_width
-      });
-      c.attr("title", item.date + ": " + item.count + " committee meeting(s)");
-      col.append(c);
-
       if (item.islabel && year == '2019') {
         var label = $("<span/>");
         $('#where_is_congress_chart_date_labels')
@@ -129,10 +114,26 @@
           .css({ height: "1em" });
         label.css({
           position: "absolute",
-          left: ((c.outerWidth()+1) * parseInt(i / 7 + 1) - 10) + "px"
+          left: ((cell_width+1) * parseInt(i / 7 + 1) - 10) + "px",
+          fontSize: "85%"
         });
         label.text(item.date);
       }
+
+      if (item.year != year) return;
+      if ((i % 7) >= 5) return; // drop weekends from chart
+      if ((i % 7) == 0) { col = $("<div/>"); container.append(col); }
+      var c = $("<div/>");
+      var color_scale = HSLToRGB(
+        item.pandemic ? 355 : 110,
+        item.count > 0 ? 70 : 0,
+        95 * (1 - Math.sqrt(item.count / max) * .7));
+      c.css({
+        backgroundColor: color_scale,
+        width: cell_width
+      });
+      c.attr("title", item.date + ": " + item.count + " committee meeting(s)");
+      col.append(c);
     });
   }
   $(function() {

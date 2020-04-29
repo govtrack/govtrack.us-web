@@ -58,14 +58,22 @@ def where_is_congress_data():
 
     # Count meetings by date.
     from committee.models import CommitteeMeeting
-    for cm in CommitteeMeeting.objects.values("when"):
-        raise ValueError(cm)
-        data[cm['when'].year]
+    for cm in CommitteeMeeting.objects.filter(when__gte="2019-01-01").values("when"):
+        d = cm['when'].date()
+        if d in data:
+            data[d]["count"] += 1
+    #from vote.models import Vote
+    #for v in Vote.objects.filter(created__gte="2019-01-01").values("created"):
+    #    d = v['created'].date()
+    #    if d in data:
+    #        data[d]["count"] += 1
 
     # Make JSON-able.
     for key, value in data.items():
+        value["islabel"] = key.day == 1
         value["year"] = key.year
-        value["date"] = key.strftime("%b %d")
+        value["date"] = key.strftime("%b %d").replace(" 0", " ")
+        value["pandemic"] = key > date(2020, 3, 30)
     data = sorted(data.items())
     data = [v for k, v in data]
     where_is_congress_data.data = data
