@@ -15,7 +15,7 @@ $(function() {
 		flags.hits = (parseInt(flags.hits) || 0) + 1;
 
 		!function() {
-			//if (show_announcement(flags)) return;
+			if (show_announcement(flags)) return;
 			//if (show_fundraise(flags)) return;
 			//if (show_usergroup(flags)) return;
 			//if (show_followus(flags)) return;
@@ -59,9 +59,10 @@ function show_fundraise(flags) {
 
 function show_announcement(flags) {
 	// only show this modal once
-	if (flags.ancmt == 2) return false;
-	flags.ancmt = 2;
-	$('#run_of_site_announcement_modal').modal();
+	if (flags.ancmt == 3) return false;
+	flags.ancmt = 3;
+	//$('#run_of_site_announcement_modal').modal();
+	show_where_is_congress_modal();
 	return true;
 }
 </script>

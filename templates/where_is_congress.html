@@ -1,0 +1,171 @@
+{% load govtrack_utils %}
+
+<style>
+  .where_is_congress_charts > div {
+    margin-top: .5em;
+    overflow: hidden;
+    border: 1px solid #BBB;
+    /*background-image: linear-gradient(to right, #9D2146, white);*/
+   }
+  .where_is_congress_charts > div > div.y /* year label */ {
+    position: absolute;
+    background-color: rgba(255,255,255,.85);
+    color: black;
+    margin: 2px 0 0 2px;
+    padding: 1px 3px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  .where_is_congress_charts > div > div.c /* container */ {
+    width: 2000em;
+  }
+  .where_is_congress_charts > div > div.c > div /* column */ {
+    float: left;
+  }
+  .where_is_congress_charts > div > div.c > div > div /* cell */ {
+    width: 1em;
+    height: .8em;
+    margin: 1px;
+  }
+</style>
+
+<div id="where_is_congress_modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="where_is_congress_modal_title" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h2 class="modal-title" id="where_is_congress_modal_title" style="padding-left: 15px;">Where is Congress?</h2>
+      </div>
+      <div class="modal-body" style="padding: 30px;">
+
+        <div style="margin: .25em 0 1em 0; font-size: 120%; line-height: 130%;">
+        <p>Where is Congress during the pandemic? By this time in 2019, Congress held <span class="committee-meetings-count"></span> more committee meetings and <span class="votes-count"></span> more votes than it has this year.</p>
+        <p><strong>It&rsquo;s time for Congress to get back to work &mdash; remotely.</strong></p>
+        </div>
+
+        <div id="where_is_congress_chart_date_labels"></div>
+        <div class="where_is_congress_charts">
+          <div id="where_is_congress_chart_2020"></div>
+          <div id="where_is_congress_chart_2019"></div>
+        </div>
+
+        <p style="line-height: 120%; font-size: 85%; margin-top: 2px; margin-bottom: 25px;">Committee meetings and floor roll call votes each weekday starting on the first Monday in each year. Darker is more meetings and votes. Days with activity are red during the District of Columbia&rsquo;s stay-at-home order.</p>
+
+        <p>When Congress was last in session, 27 legislators were self-quarantining and <a href="https://www.govtrack.us/covid-19">six legislators had tested positive for COVID-19</a>. Then Congress left and work largely ground to a halt.</p>
+
+        <p>So far, Congress has rejected proposals to conduct business remotely <a href="https://s3.amazonaws.com/demandprogress/reports/Summary_and_Analysis_House_Rules_Committee_Democrats_Report_on_Remote_Voting.pdf">on flimsy grounds</a>. The only way for Congress to safely continue its work is to do so from home.</p>
+
+        <p>In the meanwhile, we know what isn&rsquo;t happening, like <a href="http://www.crfb.org/blogs/upcoming-congressional-fiscal-policy-deadlines">funding government agencies beyond September 30</a> &mdash; when another shutdown will begin if Congress doesn&rsquo;t act. And we’re in the dark on what <em>is</em> happening. The country&rsquo;s largest disaster spending was passed without a roll call vote. And the House has begun conducting unofficial committee meetings that side-step transparency and accountability.</p>
+
+        <p>The people&rsquo;s work needs to continue to get the country back on track. And it needs to happen safely for the 541 legislators, safely for their staff and the Capitol&rsquo;s support personnel, and on the record for all to see.</p>
+
+        <p>&mdash; GovTrack.us</p>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function make_data(ndays) {
+    var data = [];
+    for (var i = 0; i < ndays; i++) {
+      data[i] = {
+        islabel: Math.random() < .01,
+        date: "Day " + i,
+        count: parseInt(Math.random()*5),
+        pandemic: i > 50
+      };
+    }
+    return data;
+  }
+
+  var where_is_congress_chart_data = {{WHERE_IS_CONGRESS|json}};
+
+  function where_is_congress_chart(year) {
+    // Get max count on any date.
+    var max = 0;
+    where_is_congress_chart_data.forEach(function(item) {
+      item.count = item.committee_meetings + item.votes;
+      if (item.count > max) max = item.count;
+    });
+    if (max == 0) max = 1;
+
+    function HSLToRGB(h,s,l) {
+      // https://css-tricks.com/converting-color-spaces-in-javascript/
+      s /= 100;
+      l /= 100;
+      let c = (1 - Math.abs(2 * l - 1)) * s,
+          x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+          m = l - c/2,
+          r = 0, g = 0, b = 0;
+          if (0 <= h && h < 60) { r = c; g = x; b = 0;
+          } else if (60 <= h && h < 120) { r = x; g = c; b = 0;
+          } else if (120 <= h && h < 180) { r = 0; g = c; b = x;
+          } else if (180 <= h && h < 240) { r = 0; g = x; b = c;
+          } else if (240 <= h && h < 300) { r = x; g = 0; b = c;
+          } else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+          r = Math.round((r + m) * 255);
+          g = Math.round((g + m) * 255);
+          b = Math.round((b + m) * 255);
+          return "rgb(" + r + "," + g + "," + b + ")";
+      }
+    // Create the chart for this year.
+    var div = $("#where_is_congress_chart_" + year);
+
+    var year_label = $("<div class='y'/>");
+    div.append(year_label);
+    year_label.text(year);
+
+    var container = $("<div class='c'/>");
+    div.append(container);
+    var cell_width = parseInt(.75 * Math.min($(window).width(), 1200) / (parseInt(where_is_congress_chart_data.filter(function(item) { return item.year == 2020; }).length / 7) + 7));
+    var col = null;
+    where_is_congress_chart_data.filter(function(item) { return item.year == year; }).forEach(function(item, i) {
+      if (item.islabel && year == '2019') {
+        var label = $("<span/>");
+        $('#where_is_congress_chart_date_labels')
+          .append(label)
+          .css({ height: "1em" });
+        label.css({
+          position: "absolute",
+          left: ((cell_width+1) * parseInt(i / 7 + 1) - 10) + "px",
+          fontSize: "85%"
+        });
+        label.text(item.date);
+      }
+
+      if ((i % 7) >= 5) return; // drop weekends from chart
+      if ((i % 7) == 0) { col = $("<div/>"); container.append(col); }
+      var c = $("<div/>");
+      var color_scale = HSLToRGB(
+        item.pandemic ? 355 : 110,
+        item.count > 0 ? 70 : 0,
+        95 * (1 - Math.sqrt(item.count / max) * .7));
+      c.css({
+        backgroundColor: color_scale,
+        width: cell_width
+      });
+      c.attr("title", item.date + ": " + item.committee_meetings + " committee meeting(s), " + item.votes + " vote(s)");
+      col.append(c);
+    });
+  }
+  function where_is_congress_total(year, key) {
+    var ndays = where_is_congress_chart_data.filter(function(item) { return item.year == '2020'; }).length;
+    var total = 0;
+    where_is_congress_chart_data
+        .filter(function(item) { return item.year == year; })
+        .slice(0, ndays) // limit 2019 data to the number of days we've had in 2020 so far
+        .forEach(function(item) { total += item[key]; })
+    return total;
+  }
+  function show_where_is_congress_modal() {
+    where_is_congress_chart('2019');
+    where_is_congress_chart('2020');
+    var dx_committee_meetings = where_is_congress_total('2020', 'committee_meetings') - where_is_congress_total('2019', 'committee_meetings');
+    var dx_votes = where_is_congress_total('2020', 'votes') - where_is_congress_total('2019', 'votes');
+    $('#where_is_congress_modal .committee-meetings-count').text(-dx_committee_meetings);
+    $('#where_is_congress_modal .votes-count').text(-dx_votes);
+    $('#where_is_congress_modal').modal();
+  }
+</script>
