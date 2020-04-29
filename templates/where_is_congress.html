@@ -1,0 +1,143 @@
+{% load govtrack_utils %}
+
+<style>
+  .where_is_congress_charts > div {
+    margin-top: .5em;
+    overflow: hidden;
+    border: 1px solid #9D2146;
+    /*background-image: linear-gradient(to right, #9D2146, white);*/
+   }
+  .where_is_congress_charts > div > div.y /* year label */ {
+    position: absolute;
+    background-color: rgba(255,255,255,.85);
+    color: black;
+    margin: 2px 0 0 2px;
+    padding: 1px 3px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  .where_is_congress_charts > div > div.c /* container */ {
+    width: 2000em;
+  }
+  .where_is_congress_charts > div > div.c > div /* column */ {
+    float: left;
+  }
+  .where_is_congress_charts > div > div.c > div > div /* cell */ {
+    width: 1em;
+    height: 1em;
+    margin: 1px;
+  }
+</style>
+
+<div id="where_is_congress_modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="where_is_congress_modal_title" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h2 class="modal-title" id="e">Where is Congress?</h2>
+      </div>
+      <div class="modal-body">
+        <p>Tag line.</p>
+        <div id="where_is_congress_chart_date_labels"></div>
+        <div class="where_is_congress_charts">
+          <div id="where_is_congress_chart_2020"></div>
+          <div id="where_is_congress_chart_2019"></div>
+        </div>
+
+        <p><small>Committee meetings per day. Darker is more meetings.</small>
+
+        <p>More info.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function make_data(ndays) {
+    var data = [];
+    for (var i = 0; i < ndays; i++) {
+      data[i] = {
+        islabel: Math.random() < .01,
+        date: "Day " + i,
+        count: parseInt(Math.random()*5),
+        pandemic: i > 50
+      };
+    }
+    return data;
+  }
+
+  var where_is_congress_chart_data = {{WHERE_IS_CONGRESS|json}};
+
+  function where_is_congress_chart(year) {
+    // Get max count on any date.
+    var max = 0;
+    where_is_congress_chart_data.forEach(function(item) {
+      if (item.count > max) max = item.count;
+    });
+    if (max == 0) max = 1;
+
+    function HSLToRGB(h,s,l) {
+      // https://css-tricks.com/converting-color-spaces-in-javascript/
+      s /= 100;
+      l /= 100;
+      let c = (1 - Math.abs(2 * l - 1)) * s,
+          x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+          m = l - c/2,
+          r = 0, g = 0, b = 0;
+          if (0 <= h && h < 60) { r = c; g = x; b = 0;
+          } else if (60 <= h && h < 120) { r = x; g = c; b = 0;
+          } else if (120 <= h && h < 180) { r = 0; g = c; b = x;
+          } else if (180 <= h && h < 240) { r = 0; g = x; b = c;
+          } else if (240 <= h && h < 300) { r = x; g = 0; b = c;
+          } else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+          r = Math.round((r + m) * 255);
+          g = Math.round((g + m) * 255);
+          b = Math.round((b + m) * 255);
+          return "rgb(" + r + "," + g + "," + b + ")";
+      }
+    // Create the chart for this year.
+    var div = $("#where_is_congress_chart_" + year);
+
+    var year_label = $("<div class='y'/>");
+    div.append(year_label);
+    year_label.text(year);
+
+    var container = $("<div class='c'/>");
+    div.append(container);
+    var cell_width = .75 * $(window).width() / (parseInt(where_is_congress_chart_data.filter(function(item) { return item.year == 2020; }).length / 7) + 7);
+    var col = null;
+    where_is_congress_chart_data.forEach(function(item, i) {
+      if (item.year != year) return;
+      if ((i % 7) >= 5) return; // drop weekends from chart
+      if ((i % 7) == 0) { col = $("<div/>"); container.append(col); }
+      var c = $("<div/>");
+      var color_scale = HSLToRGB(
+        item.pandemic ? 355 : 110,
+        item.count > 0 ? 70 : 0,
+        95 * (1 - item.count / max * .7));
+      c.css({
+        backgroundColor: color_scale,
+        width: cell_width
+      });
+      c.attr("title", item.date + ": " + item.count + " committee meeting(s)");
+      col.append(c);
+
+      if (item.islabel && year == '2019') {
+        var label = $("<span/>");
+        $('#where_is_congress_chart_date_labels')
+          .append(label)
+          .css({ height: "1em" });
+        label.css({
+          position: "absolute",
+          left: ((c.outerWidth()+1) * parseInt(i / 7 + 1) - 10) + "px"
+        });
+        label.text(item.date);
+      }
+    });
+  }
+  $(function() {
+    where_is_congress_chart('2019');
+    where_is_congress_chart('2020');
+    $('#where_is_congress_modal').modal();
+  })
+</script>
