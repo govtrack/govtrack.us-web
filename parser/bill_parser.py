@@ -342,7 +342,7 @@ def main(options):
     else:
         files = glob.glob(settings.CONGRESS_DATA_PATH + '/*/bills/*/*/data.xml')
         
-    if options.filter:
+    if options.filter and options.filter != "recent":
         files = [f for f in files if re.match(options.filter, f)]
         
     log.info('Processing bills: %d files' % len(files))
@@ -383,6 +383,10 @@ def main(options):
             
         if options.slow:
             time.sleep(1)
+
+        if options.filter == "recent":
+          if datetime.fromtimestamp(os.path.getmtime(fname)) < datetime.now() - timedelta(days=1):
+            continue
             
         tree = etree.parse(fname)
         for node in tree.xpath('/bill'):
