@@ -709,20 +709,6 @@
 		</div>
 	{% endif %}	
 
-	{% if bill.oversight_topics.all|length %}
-	<section>
-		<h2><span>Related oversight &amp; investigations</span></h2>
-		<ul>
-		{% for rec in bill.oversight_topics.all %}
-			<li>
-				<a href="{{rec.topic.get_absolute_url}}">{{rec.topic.title}}</a>
-				<div>{{rec.topic.summary}} {{rec.description}}</div>
-			</li>
-		{% endfor %}
-		</ul>
-	</section>
-	{% endif %}
-
 		{% if bill.source == "thomas-congproj" %}
 		<div id="bill-history" style="margin: 30px 0;">
 			<h2><span>History</span></h2>

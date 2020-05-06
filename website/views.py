@@ -58,21 +58,6 @@ def index(request):
             "link_text": "View All",
         })
 
-    # recent oversight topics
-    from oversight.models import OversightTopic
-    oversight_topics = OversightTopic.objects.filter(congress_end__gte=settings.CURRENT_CONGRESS).order_by('-updated')[0:3]
-    if oversight_topics:
-        post_groups.append({
-            "title": "Congressional Oversight and Investigations",
-            "posts": [{
-                "title": topic.title,
-                "url": topic.get_absolute_url(),
-                "published": topic.post_date,
-            } for topic in oversight_topics],
-            "link": "/congress/oversight",
-            "link_text": "View All",
-        })
-
     # trending feeds
     trending_feeds = [Feed.objects.get(id=f) for f in Feed.get_trending_feeds()[0:6]]
     if len(trending_feeds) > 0:
