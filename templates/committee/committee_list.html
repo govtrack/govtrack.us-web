@@ -1,5 +1,5 @@
 {% extends "master_b.html" %}
-{% load humanize persontags %}
+{% load humanize persontags govtrack_utils %}
 
 {% block title %}U.S. Congress List of Commitees - GovTrack.us{% endblock %}
 {% block cat-icon-filename %}img-committees.png{% endblock %}
@@ -8,6 +8,31 @@
 <style>
 	h3 { margin-bottom: 8px; }
 	h3 a:link { font-weight: bold; text-decoration: none; border-bottom: 1px solid #9D2146; }
+
+  #activity_by_date_viz_chart_date_labels {
+    position: relative; /* so labels can be absolutely positioned within */
+    height: 1.5em;
+  }
+  #activity_by_date_viz_chart_cells {
+    overflow: hidden;
+    border-top: 1px solid #BBB;
+    border-bottom: 1px solid #BBB;
+  }
+  #activity_by_date_viz_chart_cells > div /* container to prevent cells from wrapping */ {
+    width: 2000em;
+  }
+  #activity_by_date_viz_chart_cells div.week {
+    float: left;
+  }
+  #activity_by_date_viz_chart_cells div.week.lbl {
+    text-align: center;
+    font-size: 10px;
+  }
+  #activity_by_date_viz_chart_cells div.day {
+    width: 1em;
+    height: 14px;
+    margin: 1px;
+  }
 </style>
 {% endblock %}
 
@@ -25,6 +50,13 @@
 {% endblock %}
 
 {% block body %}
+
+<div class="activity_by_date_viz_chart_container">
+  <div id="activity_by_date_viz_chart_date_labels"></div>
+  <div id="activity_by_date_viz_chart_cells"></div>
+</div>
+<p style="line-height: 120%; font-size: 85%; margin-top: 2px; margin-bottom: 25px;">Committee meetings each weekday over the last year. Darker is more meetings.</p>
+<hr>
 
 <div class="row" style="margin-top: 1.5em">
 	<div class="col-sm-5">
@@ -69,3 +101,80 @@
 </div>
 {% endblock %}
 
+{% block body_scripts %}
+<script>
+  var activity_by_date_viz_chart_data = {{committee_activity_by_date|json}};
+
+  function activity_by_date_viz_chart() {
+    // Get max count on any date.
+    var max = 0;
+    activity_by_date_viz_chart_data.forEach(function(item) {
+      if (item.count > max) max = item.count;
+    });
+    if (max == 0) max = 1;
+
+    function HSLToRGB(h,s,l) {
+      // https://css-tricks.com/converting-color-spaces-in-javascript/
+      s /= 100;
+      l /= 100;
+      let c = (1 - Math.abs(2 * l - 1)) * s,
+          x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+          m = l - c/2,
+          r = 0, g = 0, b = 0;
+          if (0 <= h && h < 60) { r = c; g = x; b = 0;
+          } else if (60 <= h && h < 120) { r = x; g = c; b = 0;
+          } else if (120 <= h && h < 180) { r = 0; g = c; b = x;
+          } else if (180 <= h && h < 240) { r = 0; g = x; b = c;
+          } else if (240 <= h && h < 300) { r = x; g = 0; b = c;
+          } else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+          r = Math.round((r + m) * 255);
+          g = Math.round((g + m) * 255);
+          b = Math.round((b + m) * 255);
+          return "rgb(" + r + "," + g + "," + b + ")";
+      }
+    
+    // Create the chart.
+    var cell_width = parseInt(($('#activity_by_date_viz_chart_cells').width()-75) / (parseInt(activity_by_date_viz_chart_data.length / 5) + 5));
+    var div = $("#activity_by_date_viz_chart_cells");
+    var container = $("<div/>");
+    div.append(container);
+    var col = $("<div class='week lbl'/>"); container.append(col);
+    for (var i = 0; i < 5; i++) {
+        var text = "MTWTF";
+        var c = $("<div class=day/>");
+        col.append(c)
+        c.text(text.charAt(i))
+    }
+    col = null;
+    var prev_month;
+    activity_by_date_viz_chart_data.forEach(function(item, i) {
+      var cur_month = /^\S+/.exec(item.date)[0];
+      if (cur_month != prev_month) {
+        var label = $("<span/>");
+        $('#activity_by_date_viz_chart_date_labels').append(label);
+        label.css({
+          position: "absolute",
+          left: ((cell_width+2) * parseInt(i / 5 + 1)) + "px",
+          fontSize: "85%"
+        });
+        label.text(cur_month);
+      }
+      prev_month = cur_month;
+
+      if ((i % 5) == 0) { col = $("<div class=week/>"); container.append(col); }
+      var c = $("<div class=day/>");
+      var color_scale = HSLToRGB(110, item.count > 0 ? 70 : 0, 95 * (1 - Math.sqrt(item.count / max) * .7));
+      c.css({
+        backgroundColor: color_scale,
+        width: cell_width
+      });
+      c.attr("title", item.date + ": " + item.count + " committee meeting(s)");
+      col.append(c);
+    });
+  }
+
+  $(function() {
+    activity_by_date_viz_chart();
+  });
+</script>
+{% endblock %}

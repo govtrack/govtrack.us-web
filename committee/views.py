@@ -9,7 +9,7 @@ from committee.models import Committee, CommitteeMemberRole, CommitteeType, Comm
 from committee.util import sort_members
 from events.models import Feed
 
-from datetime import datetime
+from datetime import timedelta, date, datetime
 
 from twostream.decorators import anonymous_view, user_view_for
 
@@ -76,12 +76,33 @@ def committee_list(request):
                 c.display_name = c.sortname()
         return sorted(items, key=lambda c : c.display_name)
 
+    # Get data on recent committee activity by date so we can display a visualization.
+    committee_activity_by_date = { }
+    today = datetime.now().date()
+    def first_monday_after(d): # d.weekday() is zero if d is a Monday
+      return d + timedelta((7-d.weekday()) % 7)
+    start_date = first_monday_after(today - timedelta(days=365))
+    def daterange(start_date, end_date): # https://stackoverflow.com/a/1060330
+        for n in range(int((end_date - start_date).days)):
+            yield start_date + timedelta(n)
+    for d in list(daterange(start_date, today)):
+        if d.weekday() <= 4: # exclude Saturday/Sunday because Congress rarely conducts business then
+            committee_activity_by_date[d] = {
+                "count": 0,
+                "date": d.strftime("%b %d").replace(" 0", " "),
+            }
+    for cm in CommitteeMeeting.objects.filter(when__gte=start_date).values_list("when", flat=True):
+        if cm.date() in committee_activity_by_date:
+            committee_activity_by_date[cm.date()]["count"] += 1
+    committee_activity_by_date = [v for k, v in sorted(committee_activity_by_date.items())]
+
     return {
         'senate_committees': getlist(CommitteeType.senate),
         'house_committees': getlist(CommitteeType.house),
         'joint_committees': getlist(CommitteeType.joint),
         'feed': Committee.AllCommitteesFeed(),
         'upcoming_meetings': CommitteeMeeting.objects.filter(when__gte=datetime.now().date()).count(),
+        'committee_activity_by_date': committee_activity_by_date,
     }
 
    
