@@ -1,7 +1,7 @@
 {% extends "master.html" %}
 {% load humanize %}
 
-{% block title %}GovTrack.us - Congressional Misconduct Database{% endblock %}
+{% block title %}GovTrack.us - Legislator Misconduct Database{% endblock %}
 
 {% block head %}
 <style>
@@ -40,18 +40,21 @@
 {% endblock %}
 
 {% block body %}
-<h1>Congressional Misconduct Database</h1>
+<h1>Legislator Misconduct Database</h1>
 
 <div class="row" style="margin-top: 30px; margin-bottom: 15px">
    <div class="col-sm-8">
      <p>
        This page lists {{entries|length|intcomma}} instances of misconduct and alleged misconduct by Members of the United States Congress from 1789 to the present
-       and is updated as new information becomes available.
+       based on public reports of investigations and settlements, felony convictions,
+       and official acts by Congress (and more, see the sidebar).
+       The list is updated as new information becomes available.
      </p>
      <p>
-       The investigations, settlements, and resignations listed on this page <strong>do not imply guilt</strong> in the absence
-       of a conviction, guilty plea, etc. We include investigations even if the Member of Congress is exonerated because the investigation and exoneration are themselves important events.
-       Conversely, investigations that end without a guilty determination <strong>do not imply innocence</strong>.
+       The allegations of misconduct listed on this page <strong>do not imply guilt</strong> in the absence
+       of a conviction or admission of guilt. Exonerations are included because the investigation and exoneration are themselves important events.
+       Conversely, congressional investigations that end without a guilty determination <strong>do not imply innocence</strong>
+       because congressional investigative bodies are political, not judicial.
      </p>
   </div>
 </div>
@@ -65,8 +68,8 @@
         <p>We have included:</p>
         <ul>
           <li>All letters of reproval, censures, and expulsions from Congress from 1789 to the present.</li>
-          <li>All investigations by the <a href="https://oce.house.gov/">House Office of Congressional Ethics (OCE)</a>, the <a href="https://ethics.house.gov/">House Committee on Ethics (HCE)</a>, and the <a href="https://www.ethics.senate.gov/public/">Senate Select Committee on Ethics (SSCE)</a>, and other investigations by a body of Congress that involved alleged personal misconduct from 1789 to the present, including all investigations by the Senate on whether to allow a senator-elect to be seated when it stemmed from allegations of personal misconduct.</li>
-          <li>As many monetary settlements that we are aware of, e.g. those administered by Congress&rsquo;s <a href="https://www.compliance.gov/">Office of Compliance</a> regarding sexual harassment claims, but many settlements are not known to the public.</li>
+          <li>All investigations by the <a href="https://oce.house.gov/">House Office of Congressional Ethics (OCE)</a> (2008&ndash;), the <a href="https://ethics.house.gov/">House Committee on Ethics (HCE)</a> (1975&ndash;), and the <a href="https://www.ethics.senate.gov/public/">Senate Select Committee on Ethics (SSCE)</a> (1962&ndash;), and all Senate votes on &ldquo;exclusion&rdquo; related to personal misconduct.</li>
+          <li>Some other investigations by a body of Congress and monetary settlements that involved alleged personal misconduct that we are aware of, e.g. settlements administered by Congress&rsquo;s <a href="https://www.compliance.gov/">Office of Compliance</a> regarding sexual harassment claims, but most settlements are not known to the public.</li>
           <li>Resignations that we believe to be likely relevant to an allegation of misconduct, because Members of Congress often resign to head-off a Congressional investigation.</li>
           <li>Felony convictions and other cases of misconduct with national significance before and after the Member's time in Congress.</li>
          </ul>
