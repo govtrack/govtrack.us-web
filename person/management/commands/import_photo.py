@@ -43,6 +43,9 @@ class Command(BaseCommand):
 	
 			if im.size[0] < 200 or im.size[1] < 200*ar:
 				raise Exception("image is too small")
+
+			# drop alpha channel since jpeg doesn't support it
+			im = im.convert("RGB")
 	
 			# crop
 			if im.size[0]*ar > im.size[1]:
