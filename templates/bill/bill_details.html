@@ -66,6 +66,9 @@
 #action-panel h1 { font-size: 20px; }
 #action-panel h2 { font-size: 16px; }
 
+#summary {
+  color: black;
+}
 #summary-source-credit {
 	margin-bottom: .5em;
     font-size: 85%;
@@ -302,7 +305,7 @@
              <div id="summary-source-credit">Source: {{summary1.source_text}}</div>
           {% endif %}
           <div id="summary">
-            {{summary1.as_html|truncatewords_html:90|safe}}
+            {{summary1.as_html|truncatewords_html:130|safe}}
           </div>
           <div id="summary-read-more"><a href="{{bill.get_absolute_url}}/summary" class="btn btn-sm">Continue reading &raquo;</a></div>
        </div>
