@@ -87,6 +87,40 @@ p.permalink-target {
 		border-bottom: 1px dotted #FF0;
 	}
 
+#summary-source-credit {
+        margin-bottom: .5em;
+    font-size: 85%;
+    color: #555;
+}
+        @media screen and (min-width: 768px) {
+                #summary-source-credit {
+                    float: right;
+                    margin: -1.6em 0 0 0;
+                }
+        }
+#summary h1, #summary h2, #summary h3, #summary h4, #summary h5 {
+   margin: .75em 0 .25em 0;
+}
+#summary p {
+   text-align: justify;
+   line-height: 127%;
+   margin-bottom: .5em;
+}
+#summary-read-more {
+        position: absolute;
+        width: 100%;
+    margin-top: -50px;
+    padding-top: 25px;
+    background: linear-gradient(0deg, white 10%, transparent);
+    text-align: center;
+}
+  #summary-read-more a {
+    background-color: #9D2146;
+  }
+  #summary-read-more a:hover {
+    background-color: #AA4433;
+  }
+
 {% include "bill/congressxml.css" %}
 
 </style>
@@ -393,14 +427,6 @@ window.document.addEventListener("DOMContentLoaded", function() {
 					You are reading a bill enacted {{days_old|intcomma}} days ago. In the intervening time subsequent legislation may have amended or repealed the provisions below.
 				</div>
 			{% endif %}
-
-			{% if bill.oursummary %}
-				<div class="alert alert-success" role="alert">
-					We have <a href="{{bill.get_absolute_url}}/summary">a summary of this {{bill.noun}}</a> which will help you make sense of what you see below.
-				</div>
-			{% endif %}
-
-
 		</div>
 		<div class="col-sm-4">
 		<div class="pad-left-sm">
@@ -409,6 +435,22 @@ window.document.addEventListener("DOMContentLoaded", function() {
 		</div>
 		</div>
 	</div>
+
+
+	{% with bill.oursummary as summary1 %}
+	{% if summary1 %}
+		<div style="margin: 30px 0;">
+		<h2><span>Summary of this {{bill.noun}}</span></h2>
+		{% if summary1.source_text %}
+			<div id="summary-source-credit">Source: {{summary1.source_text}}</div>
+		{% endif %}
+		<div id="summary">
+			{{summary1.as_html|truncatewords_html:110|safe}}
+		</div>
+		<div id="summary-read-more"><a href="{{bill.get_absolute_url}}/summary" class="btn btn-sm">Continue reading &raquo;</a></div>
+		</div>
+	{% endif %}
+	{% endwith %}
 
 	<hr>
 
