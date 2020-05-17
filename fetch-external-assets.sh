@@ -55,6 +55,12 @@ download \
   $VENDOR/jquery.js \
   '0925e8ad7bd971391a8b1e98be8e87a6971919eb5b60c196485941c3c1df089a'
 
+# jQuery Lazy
+download \
+  https://raw.github.com/eisbehr-/jquery.lazy/master/jquery.lazy.min.js \
+  $VENDOR/jquery.lazy.min.js \
+  '64fbc7f830625ecd6ff3293b96665aebec2a9be9336f02fd47508eb59f7ec23a'
+
 # Bootstrap (MIT License)
 download \
   https://github.com/twbs/bootstrap/releases/download/v3.4.1/bootstrap-3.4.1-dist.zip \

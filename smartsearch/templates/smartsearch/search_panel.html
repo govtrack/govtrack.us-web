@@ -296,8 +296,13 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                     // Display results.
                     for (var i = 0; i < res.results.length; i++) {
                     	var n = $("<div class='result_item'/>");
+
+                       // Prepare images to be lazy-loaded.
+                       res.results[i] = res.results[i].replace(/ src=/g, " data-src=");
+
                     	n.html(res.results[i]);
                     	$('.results').append(n);
+                       n.find('img').Lazy();
                     }
                    	
                     $('#searcherror').text('');
