@@ -294,16 +294,16 @@ function update_search(pagenum, pageinc, elem, isinitial) {
                 	return;
                 } else {
                     // Display results.
-                    for (var i = 0; i < res.results.length; i++) {
-                    	var n = $("<div class='result_item'/>");
+                    var results_container = $('.results');
+                    var results_html = res.results
+                        .map(function(r) { return "<div class='result_item'/>" + r + "</div>\n" })
+                        .join("");
 
-                       // Prepare images to be lazy-loaded.
-                       res.results[i] = res.results[i].replace(/ src=/g, " data-src=");
+                    // Prepare images to be lazy-loaded.
+                    results_html = results_html.replace(/ src=/g, " data-src=");
 
-                    	n.html(res.results[i]);
-                    	$('.results').append(n);
-                       n.find('img').Lazy();
-                    }
+                    results_container.append($("<div>" + results_html + "</div>"));
+                    results_container.find('img').Lazy();
                    	
                     $('#searcherror').text('');
                     
@@ -314,7 +314,7 @@ function update_search(pagenum, pageinc, elem, isinitial) {
 
 					$("#loading_status").hide();
 					$("#show_more").toggle(res.page < res.num_pages);
-					$('.results').show();
+					results_container.show();
                     
 					if (pageinc) {
 						// If this was just a call to append more results fluidly to the bottom
