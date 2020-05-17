@@ -40,56 +40,11 @@ def is_ip_in_any_range(ip, blocks):
 
 trending_feeds = None
 
-
-def where_is_congress_data():
-    if hasattr(where_is_congress_data, 'data'):
-        return where_is_congress_data.data
-    from datetime import timedelta, date, datetime
-    def daterange(start_date, end_date):
-        # https://stackoverflow.com/a/1060330
-        for n in range(int ((end_date - start_date).days)):
-            yield start_date + timedelta(n)
-
-    def first_monday(d):
-      if d.weekday() == 0: return d
-      return d + timedelta(7-d.weekday())
-
-    # Create a slot for each date in 2019 and the dates so far in 2020.
-    data = { }
-    for key in list(daterange(first_monday(date(2019,1,1)), date(2019,12,31))) \
-             + list(daterange(first_monday(date(2020,1,1)), datetime.now().date())):
-        data[key] = { "committee_meetings": 0, "votes": 0 }
-
-    # Count meetings by date.
-    from committee.models import CommitteeMeeting
-    for cm in CommitteeMeeting.objects.filter(when__gte="2019-01-01").values("when"):
-        d = cm['when'].date()
-        if d in data:
-            data[d]["committee_meetings"] += 1
-    from vote.models import Vote
-    for v in Vote.objects.filter(created__gte="2019-01-01").values("created"):
-        d = v['created'].date()
-        if d in data:
-            data[d]["votes"] += 1
-
-    # Make JSON-able.
-    for key, value in data.items():
-        value["islabel"] = key.day == 1
-        value["year"] = key.year
-        value["date"] = key.strftime("%b %d").replace(" 0", " ")
-        value["pandemic"] = key > date(2020, 3, 30)
-    data = sorted(data.items())
-    data = [v for k, v in data]
-    where_is_congress_data.data = data
-    return data
-
-
 base_context = {
     "SITE_ROOT_URL": settings.SITE_ROOT_URL,
     "GOOGLE_ANALYTICS_KEY": getattr(settings, 'GOOGLE_ANALYTICS_KEY', ''),
     "FACEBOOK_APP_ID": getattr(settings, 'FACEBOOK_APP_ID', ''),
     "ELECTION_JUST_HAPPENED_YEAR": datetime.datetime.now().year if datetime.datetime.now().month >= 11 and (datetime.datetime.now().year % 2) == 0 else None,
-    "WHERE_IS_CONGRESS": where_is_congress_data(),
 }
 
 def template_context_processor(request):
@@ -166,3 +121,4 @@ class GovTrackMiddleware:
             )
 
         return response
+
