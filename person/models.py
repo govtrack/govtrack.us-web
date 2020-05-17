@@ -430,7 +430,7 @@ class PersonRole(models.Model):
         pass # ordering = ['startdate'] # causes prefetch_related to be slow
 
     def __str__(self):
-        return '%s / %s to %s / %s / %s' % (self.person.fullname, self.startdate, self.enddate, self.get_role_type_display(), repr(self.congress_numbers()))
+        return '[%s] %s / %s to %s / %s / %s' % (self.id, self.person.fullname, self.startdate, self.enddate, self.get_role_type_display(), ",".join(str(c) for c in (self.congress_numbers() or [])))
 
     def get_office_id(self):
         if self.role_type in (RoleType.president, RoleType.vicepresident):
