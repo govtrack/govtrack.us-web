@@ -2,6 +2,7 @@ from django import template
 from django.utils.translation import ugettext as _
 from django.utils import safestring
 from django.template.defaultfilters import stringfilter
+import re
 import random
 import json as jsonlib
 
@@ -72,6 +73,19 @@ def markdown(value):
             else:
                 # No other attributes are permitted.
                 node.attrib.pop(name)
+
+    # If there is an h1 in the output, demote all of the headings
+    # so we don't create something that interfere's with the page h1.
+    hash1 = False
+    for node in dom.iter():
+      if node.tag in ("h1", "{http://www.w3.org/1999/xhtml}h1"):
+        hash1 = True
+    if hash1:
+      for node in dom.iter():
+        m = re.match("(\{http://www.w3.org/1999/xhtml\})?h(\d)$", node.tag)
+        if m:
+          node.tag = (m.group(1) or "") + "h" + str(int(m.group(2))+1)
+
     html = html5lib.serialize(dom, quote_attr_values="always", omit_optional_tags=False, alphabetical_attributes=True)
 
     return safestring.mark_safe(html)
