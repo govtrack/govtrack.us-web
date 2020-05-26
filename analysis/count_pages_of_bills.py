@@ -57,13 +57,17 @@ def count_pages_of_bills(congress):
 
 		wds = len(plain_text.split(" "))
 
+		W.writerow([congress, "{}-{}".format(*get_congress_years(congress)),
+			b.get_absolute_url(), pp, wds]),
+
 		counters["pages"].append(pp)
 		counters["words"].append(wds)
 
-	W.writerow([congress, "{}-{}".format(*get_congress_years(congress)),
-		len(counters["pages"]), sum(counters["pages"]), sum(counters["words"]),
-		int(round(median(counters["pages"]))), int(round(median(counters["words"]))),
-		missing_text])
+
+	#W.writerow([congress, "{}-{}".format(*get_congress_years(congress)),
+	#	len(counters["pages"]), sum(counters["pages"]), sum(counters["words"]),
+	#	int(round(median(counters["pages"]))), int(round(median(counters["words"]))),
+	#	missing_text])
 
 for c in range(82, CURRENT_CONGRESS+1):
 	count_pages_of_bills(c)
