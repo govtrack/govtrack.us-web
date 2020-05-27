@@ -218,26 +218,96 @@ $(function() {
 {% block body %}
 	<h1>COVID-19 in Congress</h1>
 	
-	<p>We&rsquo;re tracking Congress&rsquo;s response to COVID-19, the disease caused by the SARS-CoV-2 coronavirus.
-	Below you&rsquo;ll find information on legislative actions and <span class="affected-legislators-count"> </span> Members of Congress who are or have been quarantined, tested positive for COVID-19, or came in contact with someone with COVID-19.</p>
+	<p>We&rsquo;re tracking Congress&rsquo;s response to COVID-19, the disease caused by the SARS-CoV-2 coronavirus. Below you&rsquo;ll find information on:</p>
+	<ul>
+	<li><a href="#legislation">Legislative actions and policy</a></li>
+	<li><a href="#proxyvotes">Proxy votes in the House</a></li>
+	<li><span class="affected-legislators-count"> </span> Members of Congress who are or have been <a href="#legislators">quarantined, tested positive for COVID-19, or came in contact</a> with someone with COVID-19</li>
+	</ul>
 
-	<h2><span>Legislative Actions</span></h2>
+	<a name="legislation"></a>
+	<h2><span>Legislative Actions and Policy</span></h2>
 
 	<p><a href="https://www.govtrack.us/congress/bills/116/hr6074">H.R. 6074: Coronavirus Preparedness and Response Supplemental Appropriations Act, 2020</a> &mdash; Enacted March 4, 2020. Provided $8.3 billion in emergency funding for federal agencies to respond to the coronavirus outbreak related to developing a vaccine, medical supplies, grants for public health agencies, small business loans, and assistance for health systems in other countries. Allowed for temporarily waiving Medicare restrictions and requirements regarding telehealth services.</p>
 	<p><a href="https://www.govtrack.us/congress/bills/116/hr6201">H.R. 6201: Families First Coronavirus Response Act</a> &mdash; Enacted March 18, 2020. Guaranteed free coronavirus testing, established paid leave, enhanced unemployment insurance, expanded food security initiatives, and increased federal Medicaid funding.</p>
 	<p><a href="https://www.govtrack.us/congress/bills/116/hr748">H.R. 748: Coronavirus Aid, Relief, and Economic Security Act</a> &mdash; Enacted March 27, 2020. A $2 trillion coronavirus relief bill, which will send $1,200 to each American making $75,000 a year or less, add $600/week to unemployment benefits for four months, give $100 billion to hospitals and health providers, make $500 billion of loans or investments to businesses, states and municipalities, and $32 billion in grants to the airline industry, and more.</p>
+	<p><a href="https://www.govtrack.us/congress/bills/116/hr266">H.R. 266: Paycheck Protection Program and Health Care Enhancement Act</a> &mdash; Enacted April 24, 2020. A $484 billion relief bill that went to replenish the Paycheck Protection Program (PPP) for small businesses and to public health measures such as virus testing and hospital funding.</p>
 	<p><a href="https://coronavirus.skoposlabs.com">coronavirus.skoposlabs.com</a> &mdash; Other legislative activities and federal regulations tracked by Skopos Labs</p>
 
-	<h2><span>Analysis</span></h2>
+	<h3>Policy Analysis</h3>
 	
 	<p><a href="https://medium.com/p/what-did-congress-do-during-the-1918-flu-pandemic-c0bd96ad2287?source=email-51cfa67992b0--writer.postDistributed&sk=a3ce115fc93bcb3bd552de1fc4c4f9bd">What did Congress do during the 1918 flu pandemic?</a> [GovTrack.us]</p>
 	<p><a href="https://www.everycrsreport.com/search.html?q=COVID-19">CRS reports related to COVID-19</a> [everycrsreport.com], <a href="https://www.pogo.org/training/covid-19-resources/">COVID-19 Oversight & Policy Resources</a> [POGO]</p>
 
-	<h2><span>Affected Legislators</span></h2>
+	<a name="proxyvotes"></a>
+	<h2><span>Proxy Voting in the House of Representatives</span></h2>
 
-	<p>In all, <span class="affected-legislators-count"> </span> representatives and senators are or have self-quarantined or took other action, or no action, after coming in contact with someone with COVID-19 or testing positive for COVID-19 themselves.</p>
+	<p>At the peak of the virus&rsquo;s spread in March 2020 before Congress went on recess, 22 representatives, and slightly earlier 6 senators, were simultaneously self-quarantining. Both the House and Senate have adapted their procedures to keep legislators and support staff safe while also keeping Congress operational.</p>
 
-	<p>In the Senate, <span class="party-totals-senate">...</span>. In the House, <span class="party-totals-house">...</span>.</p>
+	<p>On May 15, the House <a href="https://www.govtrack.us/congress/votes/116-2020/h107">passed a rules change</a> to allow proxy voting for floor votes and remote committee committee meetings during this pandemic (<a href="https://docs.house.gov/meetings/RU/RU00/20200514/110750/HRPT-116-420.pdf">see the committee report for further background</a>). Then, pursuant to the new rules, on May 19 the House&rsquo;s Office of Attending Physician and Sergeant at Arms determined the existence of a &ldquo;public health emergency due to a novel coronavirus,&rdquo; which triggered the beginning of proxy voting rules. Under the rules for proxy voting, representatives may designate another representative as their proxy in advance of votes in <a href="https://clerkpreview.house.gov/ProxyLetter#ActiveProxies">a letter to the Clerk of the House of Representatives</a> and must give their proxy exact instructions on how to vote.</p>
+
+	<p>In the Senate, although no proxy voting is allowed for floor votes, some Senate committees have begun holding some meetings with senators participating remotely. And while not yet used, <a href="https://www.everycrsreport.com/reports/RS22952.html">existing Senate rules permit voting by proxy in committee</a>.</p>
+
+	<h3>Legislators voting by proxy</h3>
+
+	{% with LEGISLATOR_PROXIES as proxies %}
+
+	<p>The following {{proxies.current_proxy_pairs|length}} legislators are currently voting by proxy:</p>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Remote Legislator</th>
+				<th>Proxy Legislator</th>
+				<th>Since</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in proxies.current_proxy_pairs %}
+				<tr>
+					<td><a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a></td>
+					<td><a href="{{row.proxy.get_absolute_url}}">{{row.proxy}}</a></td>
+					<td>{{row.from|date}}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<h3>Proxies</h3>
+
+	<p>The following list is the same information as above but grouped by proxy legislator. A legislator may be a proxy for up to ten legislators.</p>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Proxy Legislator</th>
+				<th>Remote Legislators</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for proxy, remote_legislators in proxies.current_by_proxy_sorted %}
+				<tr>
+					<td><a href="{{proxy.get_absolute_url}}">{{proxy}}</a></td>
+					<td>
+						{% for row in remote_legislators %}
+							<a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a>
+							({{row.from|date}}-{{row.until|date}}){% if not forloop.last %}, {% endif %}
+						{% endfor %}
+					</td>
+				</tr>
+			{% endfor %}			
+		</tbody>
+	</table>
+
+	{% endwith %}
+
+
+	<a name="legislators"></a>
+	<h2><span>Quarantined and Sick Legislators</span></h2>
+
+	<p>In all, <span class="affected-legislators-count"> </span> representatives and senators self-quarantined or took other action, or no action, after coming in contact with someone with COVID-19 or testing positive for COVID-19 themselves.</p>
+
+	<p class="hidden">In the Senate, <span class="party-totals-senate">...</span>. In the House, <span class="party-totals-house">...</span>.</p>
 
 	<p>In the charts below, the duration of each self-quarantine is indicated.</p>
 

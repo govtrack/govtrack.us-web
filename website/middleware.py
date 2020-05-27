@@ -6,6 +6,8 @@ import json, datetime, base64, urllib.request, urllib.error, urllib.parse
 
 from emailverification.models import BouncedEmail
 
+from person.views import load_proxy_vote_info
+
 import us
 
 # http://whois.arin.net/rest/org/ISUHR/nets
@@ -45,6 +47,7 @@ base_context = {
     "GOOGLE_ANALYTICS_KEY": getattr(settings, 'GOOGLE_ANALYTICS_KEY', ''),
     "FACEBOOK_APP_ID": getattr(settings, 'FACEBOOK_APP_ID', ''),
     "ELECTION_JUST_HAPPENED_YEAR": datetime.datetime.now().year if datetime.datetime.now().month >= 11 and (datetime.datetime.now().year % 2) == 0 else None,
+    "LEGISLATOR_PROXIES": load_proxy_vote_info,
 }
 
 def template_context_processor(request):

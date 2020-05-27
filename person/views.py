@@ -1008,4 +1008,60 @@ def person_cosponsors(request, pk):
         "date_range": date_range,
     }
 
+def load_proxy_vote_info():
+    import csv
+    from collections import defaultdict
 
+    # Map legislators to their history of proxy assignments and
+    # proxies to a list of their proxy assignments.
+    proxy_pairs = [ ]
+    proxy_map = defaultdict(lambda : [])
+    by_proxy = defaultdict(lambda : [])
+
+    with open("data/legislator-proxies/Remote-Proxy - Sheet1.csv") as f:
+        for rec in csv.DictReader(f):
+            remote_legislator_id = int(rec["Remote ID"])
+            proxy_id = int(rec["Proxy ID"])
+            date_assigned = datetime.strptime(rec["Date Assigned"], "%m/%d/%Y").date()
+            rec = {
+                "remote_legislator": remote_legislator_id,
+                "proxy": proxy_id,
+                "from": date_assigned,
+                "until": None
+            }
+            proxy_pairs.append(rec)
+            proxy_map[remote_legislator_id].append(rec)
+            by_proxy[proxy_id].append(rec)
+
+    # Replace IDs with Person instances.
+    people = Person.objects.in_bulk(set(proxy_map.keys()) | set(by_proxy.keys()))
+    proxy_map = {
+        people[k]: sorted(v, key = lambda rec : rec["from"])
+        for k, v in proxy_map.items()
+    }
+    by_proxy = {
+        people[k]: sorted(v, key = lambda rec : rec["from"])
+        for k, v in by_proxy.items()
+    }
+    for rec in proxy_pairs:
+        rec["remote_legislator"] = people[rec["remote_legislator"]]
+        rec["proxy"] = people[rec["proxy"]]
+
+    proxy_pairs.sort(key = lambda rec : (rec["from"], rec["remote_legislator"].sortname))
+    current_proxy_pairs = [rec for rec in proxy_pairs if not rec["until"]]
+    by_proxy_sorted = sorted(
+        by_proxy.items(),
+        key = lambda kv : (-len(kv[1]), kv[1][-1]["from"], kv[0].sortname)
+    )
+    current_by_proxy_sorted = [
+        (k, [rec for rec in v if not rec["until"]])
+        for k, v in by_proxy_sorted
+        if len([rec for rec in v if not rec["until"]])
+    ]
+
+    return {
+        "current_proxy_pairs": current_proxy_pairs,
+        "proxy_map": proxy_map,
+        "by_proxy": by_proxy,
+        "current_by_proxy_sorted": current_by_proxy_sorted,
+    }
