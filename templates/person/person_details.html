@@ -370,6 +370,11 @@ function show_pronunciation_guide() {
         {% endfor %}
         </div>
 
+	{% if maybe_vp_candidate %}
+	<p>{{person.lastname}} is a potential running mate for 2020 Democratic presidential candidate Joe Biden. 
+	<a href="https://govtrackinsider.com/what-do-we-know-about-the-potential-picks-for-the-democratic-vice-president-cbbbb96ce147">We compared the legislative records of the potential running mates who served in office.</a></p>
+	{% endif %}
+
         {% if is_2020_candidate %}
         <p>{{person.lastname}} is running for President of the United States.
         We&rsquo;re tracking the legislative records of the candidates who
