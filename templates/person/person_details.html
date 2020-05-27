@@ -397,10 +397,15 @@ function show_pronunciation_guide() {
 			{% endfor %}
 		{% endwith %}
 
+	{% if maybe_vp_candidate %}
+	<p>{{person.lastname}} is a potential running mate for 2020 Democratic presidential candidate Joe Biden. 
+	<a href="https://govtrackinsider.com/what-do-we-know-about-the-potential-picks-for-the-democratic-vice-president-cbbbb96ce147">We compared the legislative records of the potential running mates who served in Congress.</a></p>
+	{% endif %}
+
         {% if is_2020_candidate %}
-        <p>{{person.lastname}} is running for President of the United States.
+        <p>{{person.lastname}} is/was running for President of the United States.
         We&rsquo;re tracking the legislative records of the candidates who
-        served in office:</p>
+        served in Congress:</p>
         <ul>
           <li><a href="https://govtrackinsider.com/what-can-govtrack-data-tell-us-about-the-nine-most-recent-and-current-members-of-congress-running-14bc37b1f4b8?source=friends_link&sk=3abe31258eb6f44749ef449174f452ba">What can GovTrack data tell us about the thirteen most recent and current Members of Congress running for President?</a> [updated May 3, 2019]</li>
           <li><a href="https://govtrackinsider.com/legislation-introduced-by-the-2020-candidates-this-year-health-and-criminal-justice-ff5300e553c5?source=friends_link&sk=b078a839dc2475a49478ed24bb8dd83b">Health and Criminal Justice</a> legislation introduced by the candidates [updated May 1, 2019]</li>

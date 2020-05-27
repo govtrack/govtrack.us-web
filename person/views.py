@@ -61,6 +61,17 @@ pronunciation_guide_key = {
 " ": None, "-": None,
 }
 
+vp_2020_candidate_ids = (
+  412242, # Klobuchar
+  412542, # Warren
+  412678, # Harris
+  412533, # Duckworth
+  412696, # Demings
+  412681, # Cortez Masto
+  412558, # Lujan Grisham
+  400013, # Baldwin
+)
+
 prez_2020_candidate_ids = (
   300008, # Biden
   412223, # Gillibrand
@@ -229,6 +240,7 @@ def person_details(request, pk):
                 'misconduct_any_alleged': misconduct_any_alleged,
                 'misconduct_any_not_alleged': misconduct_any_not_alleged,
                 'is_2020_candidate': person.id in prez_2020_candidate_ids,
+                'maybe_vp_candidate':person.id in vp_2020_candidate_ids,
                 }
 
     #ck = "person_details_%s" % pk
