@@ -370,6 +370,33 @@ function show_pronunciation_guide() {
         {% endfor %}
         </div>
 
+		{% with LEGISLATOR_PROXIES as proxies %}
+			{% for rec in proxies.current_proxy_pairs %}
+				{% if rec.remote_legislator == person %}
+					<div class="panel panel-warning">
+						<div class="panel-body">
+							{{person.name_and_title}} is currently voting by proxy under <a href="/covid-19#proxyvotes">new rules</a> in effect during the COVID-19 pandemic. Since {{rec.from|date}}, <a href="{{rec.proxy.get_absolute_url}}">{{rec.proxy}}</a> will be casting {{person.lastname}}&rsquo;s vote. Under the rules for proxy voting, representatives may designate another representative as their proxy and must give their proxy exact instructions on how to vote.
+						</div>
+					</div>
+				{% endif %}
+			{% endfor %}
+			{% for p1, proxy_list in proxies.current_by_proxy_sorted %}
+				{% if p1 == person %}
+					<div class="panel panel-warning">
+						<div class="panel-body">
+							{{person.name_and_title}} is currently serving as a proxy for
+							{% for row in proxy_list %}
+								<a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a>
+								(since {{row.from|date}}){% if not forloop.last and proxy_list|length > 2 %}, {% endif %}
+								{% if forloop.revcounter0 == 1 %}and{% endif %}
+							{% endfor %}
+							under <a href="/covid-19#proxyvotes">new rules</a> in effect during the COVID-19 pandemic. Under the rules for proxy voting, representatives may designate another representative as their proxy and must give their proxy exact instructions on how to vote.
+						</div>
+					</div>
+				{% endif %}
+			{% endfor %}
+		{% endwith %}
+
         {% if is_2020_candidate %}
         <p>{{person.lastname}} is running for President of the United States.
         We&rsquo;re tracking the legislative records of the candidates who
