@@ -1024,22 +1024,23 @@ def load_proxy_vote_info():
     import csv
     from collections import defaultdict
 
-    # Map legislators to their history of proxy assignments and
-    # proxies to a list of their proxy assignments.
+    # Load the proxy database and store as 1) a flat list, 2) a mapping from
+    # legislators to a list of their records (as the remote voter), and 3)
+    # a mapping of proxy legislators to the records they are proxies in.
     proxy_pairs = [ ]
     proxy_map = defaultdict(lambda : [])
     by_proxy = defaultdict(lambda : [])
-
     with open("data/legislator-proxies/Remote-Proxy - Sheet1.csv") as f:
         for rec in csv.DictReader(f):
             remote_legislator_id = int(rec["Remote ID"])
             proxy_id = int(rec["Proxy ID"])
             date_assigned = datetime.strptime(rec["Date Assigned"], "%m/%d/%Y").date()
+            date_revoked = datetime.strptime(rec["Date Revoked"], "%m/%d/%Y").date() if rec["Date Revoked"] else None
             rec = {
                 "remote_legislator": remote_legislator_id,
                 "proxy": proxy_id,
                 "from": date_assigned,
-                "until": None
+                "until": date_revoked
             }
             proxy_pairs.append(rec)
             proxy_map[remote_legislator_id].append(rec)
@@ -1059,12 +1060,14 @@ def load_proxy_vote_info():
         rec["remote_legislator"] = people[rec["remote_legislator"]]
         rec["proxy"] = people[rec["proxy"]]
 
+    # Sort the lists by date then by name and by the number of people the leigslator is a proxy for.
     proxy_pairs.sort(key = lambda rec : (rec["from"], rec["remote_legislator"].sortname))
-    current_proxy_pairs = [rec for rec in proxy_pairs if not rec["until"]]
     by_proxy_sorted = sorted(
         by_proxy.items(),
         key = lambda kv : (-len(kv[1]), kv[1][-1]["from"], kv[0].sortname)
     )
+
+    current_proxy_pairs = [rec for rec in proxy_pairs if not rec["until"]]
     current_by_proxy_sorted = [
         (k, [rec for rec in v if not rec["until"]])
         for k, v in by_proxy_sorted
