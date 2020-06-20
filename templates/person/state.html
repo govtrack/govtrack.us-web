@@ -53,11 +53,14 @@ $(function() {
 {% endblock %}
 
 {% block summary %}
-	<h1>{{statename}}</h1>
+	<h1 style="margin-bottom: 10px">{{statename}}</h1>
 
-	<p style="margin: 30px 0">
+	<p style="margin: 10px 0 20px 0;">
 	{% if stateapp != "T" %}
-		The state of {{statename}} has <b>two</b> senators in the United States Senate and <b>{{stateapp|apnumber}}</b> representatives in the United States House of Representatives.
+		{{statename}} has <b>two</b> senators in the United States Senate and <b>{{stateapp|apnumber}}</b> representatives in the United States House of Representatives.
+		{{statename}}
+		{% if state == "RI" %}&mdash; officially the State of Rhode Island and Providence Plantations &mdash;{% endif %}
+		is a state in the United States.
 
 	{% elif state == "DC" %}
 		The District of Columbia (DC) is the nation&rsquo;s capital district. Although DC has a larger population than some states, the District is not one of the fifty states and so has no senators and its representative in the House of Representatives is a <b>delegate</b> with limited voting privileges.
