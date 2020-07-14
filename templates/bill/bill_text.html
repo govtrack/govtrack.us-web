@@ -415,7 +415,16 @@ window.document.addEventListener("DOMContentLoaded", function() {
 
 	<div class="row" style="margin-top: 2.25em">
 		<div class="col-sm-8">
-			<p style="margin-bottom: 1.5em">The text of the {{bill.noun}} below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).</p>
+			<p style="margin-bottom: 1.5em">
+				The text of the {{bill.noun}} below is as of <strong>{{textdata.docdate}}</strong> ({{textdata.doc_version_name}}).
+				{% if is_latest and not bill.is_success and not bill.is_current %}
+					{% if bill.noun == "resolution" %}
+						The resolution was not adopted.
+					{% else %}
+						The bill was not enacted into law.
+					{% endif %}
+				{% endif %}
+			</p>
 
 			{% if not is_latest %}
 				<div class="alert alert-warning" role="alert">
