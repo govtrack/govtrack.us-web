@@ -78,6 +78,7 @@ copy_env_vars = [
     "GOOGLE_APP_ID",
     "GOOGLE_APP_SECRET",
     "GOOGLE_AUTH_SCOPE",
+    "GOOGLE_API_KEY",
 
     # For email (if one SMTP backend)...
     "EMAIL_HOST",

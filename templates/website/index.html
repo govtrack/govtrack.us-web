@@ -245,7 +245,7 @@ article {
 
 {% for post_group in post_groups %}
 <div style="margin-bottom: 1.5em">
-<h2>{{post_group.title}}</h2>
+<h2 style="margin-top: 3px; border-bottom: 1px solid #777; padding-bottom: 3px;">{{post_group.title}}</h2>
 
 <div class="row">
   {% for post in post_group.posts %}
@@ -256,7 +256,7 @@ article {
       {% else %}
         <div class="col-xs-4 col-sm-12 --kill-right-padding-sm-md" style="padding-top: 3px; padding-bottom: 1em;">
         <a href="{{post.url}}">
-          <img src="{{post.image_url}}" class="img-responsive" {% if "bill" in post.image_url %}style="border: 1px solid #BBB;"{% endif %}/>
+          <img src="{{post.image_url}}" class="img-responsive" {% if "bill" in post.image_url or "ytimg" in post.image_url %}style="border: 1px solid #777;"{% endif %}/>
         </a>
         </div>
         <div class="col-xs-8 col-sm-12">
