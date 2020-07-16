@@ -93,7 +93,7 @@ Some features of the site require additional configuration. To set configuration
     #
     # For local development you may want to use the (default) Xapian search engine, e.g.:
     # xapian:/home/username/govtrack.us-web/xapian_index_person
-    # You'll need to `apt-get install python-xapian` and `pip install xapian-haystack`
+    # You'll need to `apt-get install python3-xapian` and `pip install xapian-haystack`
     # or see https://github.com/notanumber/xapian-haystack.
     #
     # For a production deployment you may want to use Solr instead, e.g.:
