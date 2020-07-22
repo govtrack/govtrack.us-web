@@ -1030,7 +1030,7 @@ def load_proxy_vote_info():
     proxy_pairs = [ ]
     proxy_map = defaultdict(lambda : [])
     by_proxy = defaultdict(lambda : [])
-    with open("data/legislator-proxies/Remote-Proxy - Sheet1.csv") as f:
+    with open("data/legislator-proxies/proxy-list.csv") as f:
         for rec in csv.DictReader(f):
             remote_legislator_id = int(rec["Remote ID"])
             proxy_id = int(rec["Proxy ID"])

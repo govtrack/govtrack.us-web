@@ -281,7 +281,7 @@ def get_bill_status_string(is_current, status):
     
     else: # Bill is not current.
         if status == "INTRODUCED" or status == "REPORTED":
-            status = "This %s was introduced on %s, in a previous session of Congress, but was not enacted."
+            status = "This %s was introduced on %s, in a previous session of Congress, but it did not receive a vote."
         elif status == "PASS_OVER:HOUSE":
             status = "This %s was introduced in a previous session of Congress and was passed by the House on %s but was never passed by the Senate."
         elif status == "PASS_OVER:SENATE":

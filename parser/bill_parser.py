@@ -370,8 +370,10 @@ def main(options):
                     if b.congress >= 103 and b.introduced_date < (datetime.now()-timedelta(days=14)).date():
                         print("No bill text?", fname, b.introduced_date)
                     continue
-                textfile = textfile["text_file"]
-                if os.path.exists(textfile) and File.objects.is_changed(textfile):
+                textfile = textfile.get("text_file")
+                if not textfile:
+                    print("Bill text exists but text-only layer missing", fname, b.introduced_date)
+                elif os.path.exists(textfile) and File.objects.is_changed(textfile):
                     b.update_index(bill_index) # index the full text
                     b.create_events() # events for new bill text documents
                     File.objects.save_file(textfile)

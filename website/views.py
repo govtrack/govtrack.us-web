@@ -28,6 +28,21 @@ def index(request):
 
     post_groups = []
 
+    # Fetch our latest YouTube videos.
+    post_groups.append({
+        "title": "A Bill a Minute",
+        "link": "/events/govtrack-insider",
+        "link_text": "Subscribe to all GovTrack Insider articles",
+        "posts":  [{
+        		"url": "https://www.youtube.com/watch?v=" + video["videoId"],
+    			"title": video["title"],
+    			"snippet": video["description"],
+    			"published": video["publishedAt"],
+    			"image_url": video["thumbnails"]["medium"]["url"],
+    	 } for video in get_youtube_videos("UCL1f7AGknZWFmXWv6bpJzXg", limit=3)[0:3]
+    	]
+    })
+    
     # Fetch our Medium posts for summaries and features.
     from website.models import MediumPost
     post_groups.append({
@@ -1088,3 +1103,30 @@ def covid19(request):
         "current_party_totals": current_party_totals,
     }
 
+
+# https://stackoverflow.com/a/44871104
+def get_youtube_videos(channel_id, limit=None):
+    # See https://stackoverflow.com/questions/14366648/how-can-i-get-a-channel-id-from-youtube
+    # for how to get a channel_id. This function returns a list of dicts. The ID of each video
+    # can be found in the videoId key.
+    import urllib.request
+    import json
+    base_search_url = 'https://www.googleapis.com/youtube/v3/search?'
+    first_url = base_search_url + 'channelId={}&key={}&type=video&part=id,snippet&order=date&maxResults=25'.format(channel_id, settings.GOOGLE_API_KEY)
+    videos = []
+    url = first_url
+    while True:
+        inp = urllib.request.urlopen(url)
+        resp = json.load(inp)
+        for i in resp['items']:
+            v = i['snippet']
+            v.update(i['id'])
+            videos.append(v)
+        try:
+            next_page_token = resp['nextPageToken']
+            url = first_url + '&pageToken={}'.format(next_page_token)
+        except:
+            break
+        if limit is not None and len(video_links) >= limit:
+            break
+    return videos
