@@ -1111,6 +1111,7 @@ def get_youtube_videos(channel_id, limit=None):
     # can be found in the videoId key.
     import urllib.request
     import json
+    if not hasattr(settings, 'GOOGLE_API_KEY'): return []
     base_search_url = 'https://www.googleapis.com/youtube/v3/search?'
     first_url = base_search_url + 'channelId={}&key={}&type=video&part=id,snippet&order=date&maxResults=25'.format(channel_id, settings.GOOGLE_API_KEY)
     videos = []
