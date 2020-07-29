@@ -31,18 +31,18 @@ def index(request):
     # Fetch our latest YouTube videos.
     post_groups.append({
         "title": "A Bill a Minute",
-        "link": "/events/govtrack-insider",
-        "link_text": "Subscribe to all GovTrack Insider articles",
+        "link": "https://www.youtube.com/govtrack",
+        "link_text": "See all videos on YouTube",
         "posts":  [{
         		"url": "https://www.youtube.com/watch?v=" + video["videoId"],
     			"title": video["title"],
     			"snippet": video["description"],
     			"published": video["publishedAt"],
     			"image_url": video["thumbnails"]["medium"]["url"],
-    	 } for video in get_youtube_videos("UCL1f7AGknZWFmXWv6bpJzXg", limit=3)[0:3]
+    	 } for video in get_youtube_videos("UCL1f7AGknZWFmXWv6bpJzXg", limit=3)[0:3] # that's https://www.youtube.com/govtrack
     	]
     })
-    
+
     # Fetch our Medium posts for summaries and features.
     from website.models import MediumPost
     post_groups.append({
