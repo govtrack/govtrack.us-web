@@ -1108,16 +1108,30 @@ def covid19(request):
 def get_youtube_videos(channel_id, limit=None):
     # See https://stackoverflow.com/questions/14366648/how-can-i-get-a-channel-id-from-youtube
     # for how to get a channel_id. This function returns a list of dicts. The ID of each video
-    # can be found in the videoId key.
+    # can be found in the videoId key. Because the Google API has request limits, the result is
+    # cached.
+
+    cache_key = "youtube_{}_{}".format(channel_id, limit)
+    cache_hit = cache.get(cache_key)
+    if cache_hit is not None:
+        if isinstance(cache_hit, str): raise Exception(cache_hit)
+        return cache_hit
+
     import urllib.request
+    import urllib.error
     import json
     if not hasattr(settings, 'GOOGLE_API_KEY'): return []
     base_search_url = 'https://www.googleapis.com/youtube/v3/search?'
     first_url = base_search_url + 'channelId={}&key={}&type=video&part=id,snippet&order=date&maxResults=25'.format(channel_id, settings.GOOGLE_API_KEY)
     videos = []
+    exception = None
     url = first_url
     while True:
-        inp = urllib.request.urlopen(url)
+        try:
+            inp = urllib.request.urlopen(url)
+        except urllib.error.HTTPError as ex:
+            exception = ex
+            break
         resp = json.load(inp)
         for i in resp['items']:
             v = i['snippet']
@@ -1130,4 +1144,12 @@ def get_youtube_videos(channel_id, limit=None):
             break
         if limit is not None and len(video_links) >= limit:
             break
+
+    if exception and not videos:
+        # Cache the fact that we got an exception.
+        cache.set(cache_key, str(exception), 60*5) # 5 minutes
+        raise exception
+
+    cache.set(cache_key, videos, 60*15) # 15 minutes
+
     return videos
