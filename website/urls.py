@@ -9,7 +9,6 @@ urlpatterns = [
     #url(r'^developers/api$', website.views.api_overview),
     url(r'^congress/?$', website.views.congress_home, name='congress_home'),
     url(r'^search$', website.views.search, name='search'),
-    url(r'^events/syndication-feed', website.views.push_to_social_media_rss),
     url(r'^accounts/docket', website.views.your_docket),
     url(r'^accounts/update_settings', website.views.update_account_settings),
     url(r'^accounts/unsubscribe/([A-Za-z0-9]{10,64})', website.views.account_one_click_unsubscribe),

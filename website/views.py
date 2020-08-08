@@ -286,36 +286,6 @@ def search(request):
     if not isinstance(r, list): return r
     return { "results": r }
 
-def push_to_social_media_rss(request):
-    import django.contrib.syndication.views
-    from events.models import Feed
-    from events.templatetags.events_utils import render_event
-    import re
-    
-    feedlist = [Feed.from_name("misc:comingup"), Feed.from_name('misc:enactedbills')]
-    
-    class DjangoFeed(django.contrib.syndication.views.Feed):
-        title = "GovTrack.us Is Tracking Congress"
-        link = "/"
-        description = "GovTrack tracks the activities of the United States Congress. We push this feed to our Twitter and Facebook accounts."
-        
-        def items(self):
-            events = [render_event(item, feedlist) for item in Feed.get_events_for(feedlist, 25)]
-            return [e for e in events if e != None]
-            
-        def item_title(self, item):
-            return re.sub(r"^Legislation ", "", item["type"]) + ": " + item["title"]
-        def item_description(self, item):
-            return item["body_text"]
-        def item_link(self, item):
-            return settings.SITE_ROOT_URL + item["url"]# + "?utm_campaign=govtrack_push&utm_source=govtrack_push" 
-        def item_guid(self, item):
-            return "http://www.govtrack.us/events/guid/" + item["guid"] 
-        def item_pubdate(self, item):
-            return item["date"] if isinstance(item["date"], datetime) or item["date"] is None else datetime.combine(item["date"], time.min)
-            
-    return DjangoFeed()(request)
-
 
 @render_to('website/your_docket.html')
 def your_docket(request):
