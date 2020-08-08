@@ -18,7 +18,7 @@ $(function() {
 			//if (show_announcement(flags)) return;
 			//if (show_fundraise(flags)) return;
 			//if (show_usergroup(flags)) return;
-			//if (show_followus(flags)) return;
+			if (show_followus(flags)) return;
 		}();
 
 		// Save flags.
@@ -28,8 +28,8 @@ $(function() {
 
 function show_followus(flags) {
 	// only show this modal once
-	if (flags.follow_us == 2) return false;
-	flags.follow_us = 2;
+	if (flags.follow_us == 3) return false;
+	flags.follow_us = 3;
 
 	$('#followus_modal').modal();
 
@@ -72,51 +72,23 @@ function show_announcement(flags) {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h2 class="modal-title" id="followusModalTitle">Getting Started with GovTrack.us</h2>
+        <h2 class="modal-title" id="followusModalTitle">We&rsquo;re also on social media</h2>
       </div>
       <div class="modal-body">
-        <p>GovTrack.us is an independent website tracking the status of legislation in the United States Congress and helping you participate in your national legislature. Here are some tips to get started.</p>
+        <p>GovTrack.us is an independent website tracking the status of legislation in the United States Congress and helping you participate in government. <b>Now we&rsquo;re on Instagram too!</b></p>
+        
         <hr>
 
-        <div class="row">
-          <div class="col-sm-6">
-            <p><span class="dropnum">1.</span> Follow us on Twitter and Instagram for updates about legislation in Congress.</p>
+        <p>Follow <a href="https://instagram.com/govtrack.us" style="text-decoration: none; margin: 0 3px; font-weight: bold;"><i class="fab fa-instagram"></i> @govtrack.us</a> on Instagram for new 60-second summary videos of legislation in Congress.</p>
 
-            <div>
-              <a href="https://twitter.com/govtrack?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="true">Follow @govtrack</a>
-              <span style="width: 2em">&nbsp;</span>
-              <a href="https://instagram.com/govtrack.us">
-                 <span style="font-size: 1.5rem;">
-                     <span style="color: indianred;">
-                        <i class="fab fa-instagram"></i>
-                        Follow @govtrack.us
-                     </span>
-                 </span>
-              </a>              
-            </div>
+        <p>Follow <a href="https://twitter.com/govtrack" style="text-decoration: none; margin: 0 3px; font-weight: bold;"><i class="fab fa-twitter"></i> @govtrack</a> on Twitter for posts about legislative activity and other information we&rsquo;re tracking, and some commentary.</p>
 
-            <p><span class="dropnum">2.</span> Sign up for our articles by email and then get legislative alerts for your reps or issues you care about.</p>
-
-            <div>
-              <a class="btn btn-primary btm-sm" href="/events/govtrack-insider" target="_blank"><i class="glyphicon glyphicon-envelope"></i> Sign Up</a>
-              <a class="btn btn-primary btm-sm" href="/start" target="_blank"><i class="glyphicon glyphicon-flash"></i> Get Alerts</a>
-            </div>
-            
-            <p><span class="dropnum">3.</span> Support our work so we can bring you more information about what Congress is doing each day.</p>
-
-            <div>
-              <a class="btn btn-primary btm-sm" href="/accounts/membership" target="_blank"><i class="glyphicon glyphicon-usd"></i> One Time</a>
-              <a class="btn btn-primary btm-sm" href="https://www.patreon.com/govtrack" target="_blank"><i class="glyphicon glyphicon-credit-card"></i> Monthly</a>
-            </div>
-          </div>
-          <div class="col-sm-6" style="max-height: 325px; overflow: auto;">
-            <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/govtrack" data-widget-id="508366437044330496" data-chrome="noheader nofooter noborders transparent" data-tweet-limit="3">Tweets by @govtrack</a>
-          </div>
-        </div>
+        <p>And please consider supporting our work by becoming a monthly backer <a href="http://patreon.com/govtrack" style="text-decoration: none; margin: 0 3px;"><i class="fab fa-patreon"></i> @govtrack</a> on Patreon or <a href="/accounts/membership" target="_blank"><i class="glyphicon glyphicon-usd"></i> leaving a tip</a>.</p>
       </div>
-      <!--<div class="modal-footer">
-      	<button type="button" class="btn btn-default" data-dismiss="modal">Not Now</button>
-      </div>-->
+
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-default" data-dismiss="modal">Continue to Site</button>
+      </div>
     </div>
   </div>
 </div>
