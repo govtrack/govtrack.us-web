@@ -22,6 +22,7 @@ for sr in tqdm.tqdm(sq):
   if bill.original_intent_replaced is True: continue
   counts[bill.sponsor] += 1
 
+# Output from most to fewest.
 for sponsor, count in sorted(counts.items(), key = lambda kv : -kv[1]):
-  print sponsor.name.encode("utf8") + "\t" + str(count)
+  print(sponsor.name + "\t" + str(count))
 
