@@ -81,7 +81,7 @@ h3 { margin: 1em 0; }
 		<div class="row">
 		<div class="col-md-6">
 			<h3>Ideology</h3>
-			<p>The <a href="#ideology">Ideology Analysis</a> compares the sponsorship and cosponsorship patterns of Members of Congress to put them on a scale roughly from liberal to conservative. <a href="#ideology">Read More &raquo;</a></p>
+			<p>The <a href="#ideology">Ideology Analysis</a> compares the sponsorship and cosponsorship patterns of Members of Congress. <a href="#ideology">Read More &raquo;</a></p>
 		</div>
 	
 		<div class="col-md-6">
@@ -102,13 +102,13 @@ h3 { margin: 1em 0; }
 		
 		<div class="row">
 		<div class="col-md-6">
-			<p>The ideology analysis assigns a liberal&ndash;conservative score to each Member of Congress based on his or her pattern of cosponsorship.</p>
+			<p>The ideology analysis assigns a left&ndash;right score to each Member of Congress based on their pattern of cosponsorship.
+			The left&ndash;right score reflects the dominant ideological difference or differences among Members of Congress, which changes over time.</p>
 			
 			<p>In a nutshell, Members of Congress who cosponsor similar sets of bills will get scores close together, while Members of Congress who sponsor different sets of bills will have scores far apart. Members of Congress with similar political views will tend to cosponsor the same set of bills, or bills by the same set of authors, and inversely Members of Congress with different political views will tend to cosponsor different bills.</p>
 			
-			<p>You can find this analysis on the pages for current Members of Congress.</p>
-			
-			<p>The charts to the right plot the ideology score on the horizontal axis and the <a href="#leadership">leadership</a> score on the vertical axis. Look at the extremes. For instance, <a href="/congress/members/james_inhofe/300055">Sen. Jim Inhofe</a> appears as the most extreme Republican in the Senate chart and he is widely regarded as one of the most conservative senators.</p>
+			<p>You can find this analysis on the pages for current Members of Congress
+			and in the charts to the right which plot the ideology score on the horizontal axis and the <a href="#leadership">leadership</a> score on the vertical axis.</p>
 			
 			<h3>Overview</h3>
 			
@@ -124,12 +124,10 @@ h3 { margin: 1em 0; }
 			
 			<p>Here&rsquo;s how it works: Form a matrix (a grid of numbers) with columns representing Members of Congress and rows also representing Members of Congress. Do this for the House and Senate separately. We include (co)sponsorship from the current and previous two Congresses, so between four and six years of data. For the Senate, you have a 100x100 table. In each cell of the table, put the number of times the senator for the row cosponsored a bill introduced by the senator for the column. Or if it's the same senator in the row and column, put in the number of bills he or she introduced. Then compute the singular value decomposition of the matrix (which is how Principal Components Analysis is often done).</p>
 			
-			<p>Every square matrix has a singular value decomposition. The magic is in how you interpret it. The singular value decomposition takes one matrix and gives you back three: called u, s, and v-transpose. V-transpose can be interpreted as a <i>set</i> of scores for each Member of Congress on a new set of dimensions. The dimensions are ranked in order by how much of the original data they explain. We have found that the <i>second</i> dimension best corresponds with ideology. We use the scores from that dimension in our charts.</p>
+			<p>Every square matrix has a singular value decomposition which can be interpreted as a set of sets of scores for each Member of Congress, each set a ranking on different dimension. The dimensions are themselves ranked in order by how much of the original data they explain. We have found that the <i>second</i> dimension best corresponds with what people generally consider political ideology. We use the scores from that dimension in our charts.</p>
 			
-			<p>Each score is a number. It’s entirely arbitrary whether liberal or conservative is positive or negative &mdash; the original matrix is blind to actual information like that. In fact, there’s no guarantee that these numbers even have anything to do with liberal- and conversative-ness. All it tells us is how to separate Members of Congress into two groups, or more precisely how to spread them out along a spectrum in a way that explains their record of cosponsorship. But in practice it captures ideology very well.</p>
+			<p>The analysis is blind to actual information like what the legislation is about or what party each Member of Congress is affiliated with. In fact, there’s no guarantee that the scores have anything to do with liberal- or conversative-ness or any other standard frame for political ideology. All it tells us is how to spread Members of Congress out along a spectrum in a way that explains their record of cosponsorship. But in practice it captures left-right ideology very well.</p>
 			
-			<p>(In the original version of this analysis called the political spectrum, the rows were Members of Congress and the columns were bills. That is, form a matrix with a 1 in each cell where the Member of Congress corresponding to the row sponsored or cosponsored the bill corresponding to the column. The change was made only to reuse the source code with the leadership analysis, which needs a member-member matrix.)</p>
-	
 			<h3>Data</h3>
 			
 			<p>The ideology scores can be found in two CSV files sponsorshipanalysis_h.txt and sponsorshipanalysis_s.txt (House and Senate) over <a href="/data/analysis/by-congress/{{current_congress}}/">here</a>.</p>
