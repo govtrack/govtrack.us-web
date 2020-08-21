@@ -26,33 +26,48 @@ def index(request):
     from bill.views import subject_choices
     bill_subject_areas = subject_choices()
 
+
     post_groups = []
+    MAX_PER_GROUP = 3
 
-    # Fetch our latest YouTube videos.
-    post_groups.append({
-        "title": "A Bill a Minute",
-        "link": "https://www.youtube.com/govtrack",
-        "link_text": "See all videos on YouTube",
-        "posts":  [{
-        		"url": "https://www.youtube.com/watch?v=" + video["videoId"],
-    			"title": video["title"],
-    			"snippet": video["description"],
-    			"published": video["publishedAt"],
-    			"image_url": video["thumbnails"]["medium"]["url"],
-    	 } for video in get_youtube_videos("UCL1f7AGknZWFmXWv6bpJzXg", limit=3)[0:3] # that's https://www.youtube.com/govtrack
-    	]
-    })
+    # Trending feeds. These are short (no image, no snippet) so they go first.
+    trending_feeds = [Feed.objects.get(id=f) for f in Feed.get_trending_feeds()[0:6]]
+    if len(trending_feeds) > 0:
+        post_groups.append({
+            "title": "Trending",
+            "posts": [{
+                "title": feed.title,
+                "url": feed.link,
+            } for feed in trending_feeds ],
+            "compact": True
+        })
 
-    # Fetch our Medium posts for summaries and features.
+
+    # Fetch our latest Medium posts and YouTube videos. Since we publish them in the same
+    # work cycle, we can intermix and expect the most recent few to alternate between them.
+    # But we only get one link at the bottom.
     from website.models import MediumPost
     post_groups.append({
-        "title": "What We're Watching",
-        "posts": MediumPost.objects.order_by('-published')[0:3],
-        "link": "/events/govtrack-insider",
-        "link_text": "Subscribe to all GovTrack Insider articles",
+        "title": "What We’re Watching",
+        "links": [("/events/govtrack-insider", "Subscribe to all GovTrack Insider articles"),
+                  ("https://www.youtube.com/govtrack", "See all videos on YouTube")
+            ],
+        "posts":
+                list(MediumPost.objects.order_by('-published')[0:MAX_PER_GROUP])
+        	+ [{
+        		"url": "https://www.youtube.com/watch?v=" + video["videoId"],
+    			"title": video["title"]
+    				.replace("GovTrack A Bill A Minute: ", "")
+    				.replace("&amp;", "&"), # !, snippet too?
+    			"snippet": video["description"],
+    			"published": datetime.strptime(video["publishedAt"], '%Y-%m-%dT%H:%M:%SZ'),
+    			"image_url": video["thumbnails"]["medium"]["url"],
+    	     } for video in get_youtube_videos("UCL1f7AGknZWFmXWv6bpJzXg", limit=MAX_PER_GROUP) # that's https://www.youtube.com/govtrack
+    	]
     })
+    post_groups[-1]["posts"].sort(key = lambda p : p["published"] if isinstance(p, dict) else p.published, reverse=True)
 
-    # legislation coming up
+    # Legislation coming up. Sadly this is usually the least interesting.
     from django.db.models import F
     from django.conf import settings
     from bill.models import Bill
@@ -68,21 +83,9 @@ def index(request):
                 "title": bill.title,
                 "url": bill.get_absolute_url(),
                 "published": "week of " + bill.scheduled_consideration_date.strftime("%x"),
-            } for bill in coming_up[0:3]],
-            "link": "/congress/bills",
-            "link_text": "View All",
+            } for bill in coming_up[0:6]],
+            "links": [("/congress/bills", "View All")],
         })
-
-    # trending feeds
-    trending_feeds = [Feed.objects.get(id=f) for f in Feed.get_trending_feeds()[0:6]]
-    if len(trending_feeds) > 0:
-        post_groups.append({
-            "title": "Trending",
-            "posts": [{
-                "title": feed.title,
-                "url": feed.link,
-            } for feed in trending_feeds
-        ]})
 
 
     from person.models import Person
@@ -94,7 +97,7 @@ def index(request):
         # for the highlights blocks
         'post_groups': post_groups,
         }
-      
+
 @anonymous_view
 def staticpage(request, pagename):
     if pagename == "developers": pagename = "developers/index"

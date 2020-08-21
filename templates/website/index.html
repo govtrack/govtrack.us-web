@@ -88,8 +88,11 @@
 	background: white;
 }
 
+.top-actions {
+  margin-top: 2em;
+}
 .top-actions > * {
-  margin-bottom: 2em;
+  margin-bottom: 3em;
 }
 .top-actions label {
   font-weight: normal;
@@ -242,13 +245,39 @@ article {
   </div>
 </div>
 
+<div class="row">
+
+<div class="col-md-5">
+  <div class="panel panel-primary">
+    <div class="panel-heading">Special Focuses for 2020</div>
+    <div class="panel-body">
+      We&rsquo;re tracking <a href="/covid-19">cases of COVID-19 in Congress</a>
+      and <a href="https://govtrackinsider.com/tagged/police-reform">Police Reform Legislation</a>.
+    </div>
+  </div>
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">How a bill actually becomes a law... in 2020</div>
+    <div class="panel-body">
+      <p>Middle school social studies textbooks and Schoolhouse Rock songs paint a stereotypical portrait of how congressional legislation gets passed. But in real life, the story of how federal laws actually get enacted usually proves far more complex. To examine how, GovTrack Insider browsed through all the laws enacted by Congress in 2019–20, looking for one that seemed both particularly interesting and undercovered by national media.</p>
+      <a href="https://govtrackinsider.com/how-a-bill-actually-becomes-a-law-in-2020-the-emancipation-national-historic-trail-study-act-768a301974ff">Read
+      the story of The Emancipation National Historic Trail Study Act &raquo;</a>
+    </div>
+  </div>
+
+
+</div>
+
+<div class="col-md-7">
+
 {% for post_group in post_groups %}
-<div style="margin-bottom: 1.5em">
-<h2 style="margin-top: 3px; border-bottom: 1px solid #777; padding-bottom: 3px;">{{post_group.title}}</h2>
+<div class="panel panel-primary" style="margin-bottom: 1.5em">
+  <div class="panel-heading">{{post_group.title}}</div>
+    <div class="panel-body" style="margin-bottom: -.5em">
 
 <div class="row">
-  {% for post in post_group.posts %}
-  <div class="col-sm-4">
+  {% for post in post_group.posts|slice:"0:6" %}
+  <div class="col-sm-6" {% if not post_group.compact %}style="margin-top: 1em; margin-bottom: 1em" {% endif %}>
     <article class="row" style="margin-bottom: .5em">
       {% if not post.image_url %}
         <div class="col-xs-12">
@@ -260,28 +289,30 @@ article {
         </div>
         <div class="col-xs-8 col-sm-12">
       {% endif %}
-      <div style="padding-right: 20px">
-      <h3><a href="{{post.url}}">{{post.title|truncatewords:30}}</a></h3>
+      <h3 style="font-size: 100%"><a href="{{post.url}}" {% if post_group.compact %}style="font-weight: normal"{% endif %}>{{post.title|truncatewords:30}}</a></h3>
       <p style="line-height: 125%;">{{post.snippet|truncatewords:30}}</p>
       <p><span style="font-size: 90%; color: #555;">{{post.published}}</span></p>
       </div>
-      </div>
     </article>
   </div>
-  {% if forloop.counter|divisibleby:3 %}<div class="clearfix"> </div>{% endif %}
+  {% if forloop.counter|divisibleby:2 %}<div class="clearfix"> </div>{% endif %}
   {% endfor %}
 </div> <!-- /row -->
 
-{% if post_group.link %}
 <div style="float: right;">
-  <a href="{{post_group.link}}" style="text-transform: none; font-size: 80%; text-decoration: none;">
-    {{post_group.link_text}} &raquo;
+{% for link in post_group.links %}
+  <a href="{{link.0}}" style="text-transform: none; text-decoration: none; display: block">
+    {{link.1}} &raquo;
   </a>
-</div>
-{% endif %}
-
-</div>
 {% endfor %}
+</div>
+
+</div> <!-- /panel-body -->
+</div> <!-- /panel -->
+{% endfor %}
+
+</div> <!-- /col -->
+</div> <!-- /row -->
 
 	</div><!-- /content -->
 </div> <!-- /container -->
