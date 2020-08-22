@@ -92,6 +92,23 @@
     input.width(w-50);
   }
 
+  function go_to_district(state, number, fragment) {
+      	if (number != 0) {
+          // URLs don't use zero-padding
+          var path = "/congress/members/" + state + "/" + number;
+          if (path == window.location.pathname) {
+            // The page won't reload. Just add a marker & alert.
+            map.addMarker(q, pt);
+            alert("That address is in the same congressional district.");
+          }
+          window.location = path + (fragment || "");
+        }
+      	else {
+            // There is no district page for at-large districts. Redirect to the state page.
+            window.location = "/congress/members/" + state;
+        }
+  }
+
   // Handle geocoding result.
   function go_to_point(pt, q) {
     // Query Mapbox API to get what district is at this location.
@@ -102,21 +119,9 @@
       		alert("That location does not seem to be in a United States Congressional District.");
       		return;
       	}
-      	if (district.number != "00") {
-          // URLs don't use zero-padding
-          var path = "/congress/members/" + district.state + "/" + parseInt(district.number);
-          var fragment = "#q=" + encodeURIComponent(q) + "&marker_lng=" + pt[0] + "&marker_lat=" + pt[1];
-          if (path == window.location.pathname) {
-            // The page won't reload. Just add a marker & alert.
-            map.addMarker(q, pt);
-            alert("That address is in the same congressional district.");
-          }
-          window.location = path + fragment;
-        }
-      	else {
-            // There is no district page for at-large districts. Redirect to the state page.
-            window.location = "/congress/members/" + district.state;
-        }
+
+        var fragment = "#q=" + encodeURIComponent(q) + "&marker_lng=" + pt[0] + "&marker_lat=" + pt[1];
+        go_to_district(district.state, parseInt(district.number), fragment); // remove zero-padding
       });
   }
 
@@ -127,10 +132,21 @@
 	    window.location = "/congress/members/map";
 	    return;
 	}
+
+	// this special query triggers geocoding
   	if (addr == "my location") {
 	    do_by_current_location();
 	    return;
 	}
+
+	// If a congressional district number is given, skip the geocoding step.
+	// Try matching XXNN, with an optional dash or space, then check that the state and district are a valid district (add zero-padding to the district number).
+	var match = /^\s*([A-Za-z]{2})[- ]?(\d+)$/.exec(addr.toUpperCase());
+	if (match && ((match[1] + (match[2].length == 2 ? "" : "0") + match[2]) in bboxes)) {
+		go_to_district(match[1], parseInt(match[2]));
+        	return;
+	}
+
     address_to_latlng(addr, function (pt) { go_to_point(pt, addr); });
   }
 
@@ -198,7 +214,7 @@
 
 <div style="margin: 2em 0">
 <form class="form-inline" onsubmit="do_address(); return false;">
-  <p>Find your representative (a.k.a. congressman or congresswoman) by entering your address or clicking a district in the map:</p>
+  <p>Find your representative (a.k.a. congressman or congresswoman) by entering your address{% if not state %} or clicking a district in the map{% endif %}:</p>
   <div class="form-group">
     <label for="user-address" class="sr-only">Address</label>
     <input type="text" class="form-control" id="user-address" placeholder="Enter an address in the United States">
