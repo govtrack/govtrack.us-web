@@ -29,8 +29,7 @@ $(function() {
 		      formatter: function() { return this.point.text; },
 		      style: { fontSize: '10px', fontWeight: 'normal', textOutline: 'none' }
 		    },
-		    grouping: false,
-		    enableMouseTracking: false
+		    grouping: false
 		};
 	}
 
@@ -46,7 +45,7 @@ $(function() {
 		  accessibility: {
 		    point: {
 		      descriptionFormatter: function(point) {
-		        return 'x';
+		        return point.text;
 		      }
 		    }
 		  },
@@ -64,7 +63,7 @@ $(function() {
 		  	make_series("Tested Positive for or Presumed COVID-19", "#D54"),
 		  	make_series("Other", "#444")
 		  ],
-		  tooltip: { enabled: false }
+		  tooltip: { formatter: function() { return this.point.long_text } }
 		};
 	}
 
@@ -116,10 +115,10 @@ $(function() {
 			while (x2 > Date.now()+86400000) // truncate at tomorrow by subtracting 1 day until it's not in the future
 				x2 -= 86400000; // one day
 
-			// Make a short label. Chop off the title and first name by looking for the last space prior to the space before the "(STATE-DISTRICT)".
+			// Make a very short label --- just the last name.
 			var text = $(cells[1]).text(); // legislator name
 	        try {
-	  		  text = /\S+ \(.*$/.exec(text)[0];
+	  		  text = /(\S+) \(.*$/.exec(text)[1];
 	        } catch (e) {
 			  console.log(text)
 		    }
@@ -129,6 +128,7 @@ $(function() {
 		      x: x1,
 		      x2: x2,
 		      text: text,
+                      long_text: $(cells[1]).text(),
 		      party: ld.party,
 		      is_quarantined: series < 2
 		    };
