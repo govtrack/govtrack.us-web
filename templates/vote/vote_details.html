@@ -326,7 +326,7 @@ $(function() {
     	{% else %}
     		This was a vote to pass a bill or agree to a resolution in the {{vote.chamber_name}}.
     	{% endif %}
-    	{% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text}}{% endif %}
+    	{% if vote.related_bill.explanatory_text %}{{vote.related_bill.explanatory_text|safe}}{% endif %}
 	    {% if vote.category == VoteCategory.passage_suspension %}
 		    This vote was taken under a House procedure called &ldquo;suspension of the rules&rdquo; which is typically used to pass non-controversial bills. Votes under suspension require a 2/3rds majority. A failed vote under suspension can be taken again.
 		{% endif %}

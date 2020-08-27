@@ -314,16 +314,16 @@
 		<p style="margin-bottom: 0">{{subtitle}}</p>
 		{% if not bill.is_success %}<p><small><em>The {{bill.noun}}&rsquo;s titles are written by its sponsor.</em></small></p>{% endif %}
 		{# we should have the title disclaimer even if no long title, but I'm not sure where best to put it #}
+	{% endif %}
 
-	    <!-- automatic explanation -->	
-	    {% if bill.explanatory_text %}
-	    <div class="panel panel-info" style="margin: 30px 0;">
+	<!-- automatic explanation -->	
+	{% if not summary1 and bill.explanatory_text %}
+		    <div class="panel panel-info" style="margin: 30px 0;">
 	    <div class="panel-body">
 		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
-			{{bill.explanatory_text}}
+			{{bill.explanatory_text|safe}}
 	    </div>
 	    </div>
-	    {% endif %}
 	{% endif %}
 	{% endwith %}
 
