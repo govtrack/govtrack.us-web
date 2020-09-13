@@ -367,7 +367,7 @@ def main(options):
                 # Update the index/events for any bill with recently changed text
                 textfile = get_bill_text_metadata(b, None)
                 if not textfile:
-                    if b.congress >= 103 and b.introduced_date < (datetime.now()-timedelta(days=14)).date():
+                    if b.congress >= 103 and b.introduced_date < (datetime.now()-timedelta(days=28)).date():
                         print("No bill text?", fname, b.introduced_date)
                     continue
                 textfile = textfile.get("text_file")
