@@ -126,3 +126,56 @@ hr4077-115	Honest Ads Act
 s1989-115	Honest Ads Act
 hr24-115	Federal Reserve Transparency Act of 2017
 s210-115	Global Health, Empowerment and Rights Act
+hr736-116	Access to Congressionally Mandated Reports Act
+s195-116	Access to Congressionally Mandated Reports Act
+s764-116	Article One Act
+hr7210-116	Budget Transparency Act
+s822-116	Cameras in the Courtroom Act
+hr7513-116	Capitol Police Advancement Act of 2020
+s3287-116	CFO Vision Act
+hr8151-116	Congress Leads by Example Act of 2020
+hr4894-116	Congressional Budget Justification Transparency Act of 2019
+s2560-116	Congressional Budget Justification Transparency Act of 2019
+hr2513-116	Corporate Transparency Act of 2019
+s1978-116	Corporate Transparency Act of 2019
+s3334-116	DOJ OLC Transparency Act
+hr1164-116	Electronic Court Records Reform Act of 2019
+s2064-116	Electronic Court Records Reform Act of 2019
+hr1582-116	Electronic Message Preservation Act
+hr1608-116	Federal Advisory Committee Act Amendments of 2019 (“FACA Amendments Act”)
+s1220-116	Federal Advisory Committee Act Amendments of 2019 (“FACA Amendments Act”)
+hr7668-116	FSGG Approps
+hr7396-116	GOOD Act
+hr2370-116	House Intern Pay Act of 2019
+hr202-116	Inspector General Access Act
+s685-116	Inspector General Access Act
+hr7611-116	Legislative Branch Appropriations Act, 2021
+s196-116	Modernizing Congressional Reporting Act of 2019
+hr4426-116	Office of Technology Assessment Improvement and Enhancement Act
+s2509-116	Office of Technology Assessment Improvement and Enhancement Act
+hr7107-116	PLUM Act
+s3896-116	PLUM Act
+hr6628-116	Power of the Purse Act
+hr1063-116	Presidential Library Donation Reform Act (PLDRA)
+hr2354-116	Prevention of Unconstitutional War with Iran Act of 2019
+s1039-116	Prevention of Unconstitutional War with Iran Act of 2019
+hr3477-116	Reclaiming Congressional Trade Authority Act of 2019
+s899-116	Reclaiming Congressional Trade Authority Act of 2019
+hconres25-116	Recognizing the necessity of preserving official and unofficial records of meetings between the President of the United States and foreign leaders, for the purposes of promoting transparency and the national security of the United States of America.
+hr8006-116	Regulatory Scorecard Act
+hr3403-116	Searchable Legislation Act of 2019
+hr4556-116	See UNdisclosed Legal Interpretations and Get Honest Transparency Act of 2019
+hr3830-116	Taxpayers Right-To-Know Act
+s2177-116	Taxpayers Right-To-Know Act
+s2220-116	The Open and Responsive Government Act
+hr8047-116	To amend the Inspector General Act of 1978 to prohibit an acting Inspector General from serving in more than one position in the Federal Government.
+hr3557-116	To prohibit the imposition of duties on the importation of goods under the International Emergency Economic Powers Act.
+s2413-116	Trade Certainty Act
+hr5150-116	Transparency in Government Act
+sres465-116	A resolution condemning threats by President Donald J. Trump to violate the law of armed conflict with respect to Iran.
+s3733-116	Declassification Reform Act of 2020
+s1990-116	Presidential Appointee Accountability Act
+hr3499-116	Presidential Appointee Accountability Act
+hr8111-116	Reducing Nefarious Crimes Act
+hr150-116	Grant Reporting Efficiency and Agreements Transparency Act of 2019
+hres756-116	Moving Our Democracy and Congressional Operations Towards Modernization Resolution
