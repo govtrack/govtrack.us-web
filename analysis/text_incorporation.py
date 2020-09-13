@@ -192,17 +192,41 @@ def compare_text(text2, sm, word_map, text1w_len):
   ratio2 = sum(b['size'] for b in matched_blocks) / float(len(text2w))
   return ratio1, ratio2, extract
 
+def is_text_incorporated(b1_ratio, b2_ratio, cmp_text_len):
+  # The bills are substantially and symmetrically similar to each other
+  # and the text in common is large enough to exclude cases where all of
+  # the substance in the bills are in the dis-similar parts. The smaller
+  # the absolute amount in common, the higher the relative threshold.
+  if b1_ratio*b2_ratio > max(.95-0.0006*(cmp_text_len-300), .66) and cmp_text_len > 300:
+    return True
+
+  # One bill is substantially (>33%) incorporated within the other
+  # and the text in common is significantly large to ensure that
+  # there are substantive provisions in that part. Require a higher
+  # percentage of overlap in shorter bills.
+  if max(b1_ratio, b2_ratio) > max(.8-0.00015*(cmp_text_len-800), .33) and cmp_text_len > 800:
+    return True
+
+  # One bill has provisions incorporated within the other, and though
+  # it's a small part of the bill, it's a large bill and the text
+  # in common is quite large.
+  if (b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 8000:
+    return True
+
+  return False
+
 def compare_bills(b1, b2):
   from bill.billtext import get_bill_text_metadata
   fn1 = get_bill_text_metadata(b1, None)['xml_file']
   fn2 = get_bill_text_metadata(b2, None)['xml_file']
   text1 = extract_text(fn1)
   state = prepare_text1(text1)
-  print(b1.id, str(b1).encode("utf8"))
-  print(b2.id, str(b2).encode("utf8"))
+  print(b1.id, str(b1))
+  print(b2.id, str(b2))
   ratio1, ratio2, text = compare_text(extract_text(fn2), *state)
   print(ratio1, ratio2, len(text))
-  print((text[:1000].encode("utf8")))
+  print(text)
+  print(is_text_incorporated(ratio1, ratio2, len(text)))
   print()
 
 
@@ -404,20 +428,7 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
         continue
 
     # For other bills...
-    #   a) The bills are substantially similar to each other and the text
-    #      in common is large enough to exclude cases where all of the
-    #      substance in the bills are in the dis-similar parts. The smaller
-    #      the absolute amount in common, the higher the relative threshold.
-    #   b) One bill is substantially (>33%) incorporated within the other
-    #      and the text in common is significantly large to ensure that
-    #      there are substantive provisions in that part.
-    #   d) One bill has provisions incorporated within the other, and though
-    #      it's a small part of the bill, it's a large bill and the text
-    #      in common is quite large.
-    if   (b1_ratio*b2_ratio > max(.95-0.0006*(cmp_text_len-300), .66) and cmp_text_len > 300) \
-      or (max(b1_ratio, b2_ratio) > max(.81-0.00015*(cmp_text_len-800), .33) and cmp_text_len > 800) \
-      or ((b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 8000):
-
+    if is_text_incorporated(b1_ratio, b2_ratio, cmp_text_len):
       # Index this information with both bills.
 
       # For b2, we're saying that it (or parts of it) were enacted
