@@ -403,6 +403,11 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
             "source": dat.get("text_file_source"),
         })
 
+    elif plain_text:
+        # No text format is available to return plain text. Return the empty string.
+        # We don't want to prevent indexing.
+        return ""
+
     return ret
 
 def load_citation_info(metadata):

@@ -515,9 +515,7 @@
 			<span>Text</span>
 		</div>
 		<div class="col-sm-9 col-md-10">
-					{% if not text_info %}
-						<p>Not available yet.</p>
-					{% elif text_info.has_displayable_text %}
+					{% if text_info.has_displayable_text %}
 						{% if text_info.has_thumbnail %}
 							<div style="float: left; margin-right: 9px; max-width: 65px; margin-bottom: .5em">
 								<a href="{{bill.get_absolute_url}}/text">
@@ -534,8 +532,10 @@
 							</small>
 						</p>
 						<div style="clear: both"></div>
-					{% else %}
+					{% elif text_info.gpo_pdf_url %}
 						<p><a href="{{text_info.gpo_pdf_url}}">Read Text &raquo;</a> (PDF; {{text_info.docdate}})</p>
+					{% else %}
+						<p>Not available yet.</p>
 					{% endif %}
 		</div>
 		<div class="clearfix"></div>
