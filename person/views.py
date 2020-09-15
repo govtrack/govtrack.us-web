@@ -1024,13 +1024,22 @@ def load_proxy_vote_info():
     import csv
     from collections import defaultdict
 
+    proxy_list_filename = "data/legislator-proxies/proxy-list.csv"
+    if not os.path.exists(proxy_list_filename):
+        return {
+            "current_proxy_pairs": [],
+            "proxy_map": {},
+            "by_proxy": {},
+            "current_by_proxy_sorted": [],
+        }
+
     # Load the proxy database and store as 1) a flat list, 2) a mapping from
     # legislators to a list of their records (as the remote voter), and 3)
     # a mapping of proxy legislators to the records they are proxies in.
     proxy_pairs = [ ]
     proxy_map = defaultdict(lambda : [])
     by_proxy = defaultdict(lambda : [])
-    with open("data/legislator-proxies/proxy-list.csv") as f:
+    with open(proxy_list_filename) as f:
         for rec in csv.DictReader(f):
             remote_legislator_id = int(rec["Remote ID"])
             proxy_id = int(rec["Proxy ID"])

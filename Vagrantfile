@@ -10,8 +10,10 @@ Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/bionic64"
   config.vm.network "forwarded_port", guest: 8000, host: 8000
   config.vm.provision "shell", inline: <<-SHELL
+    set -euo pipefail # stop script if any command fails
+
     # Create a fake manage.py file in ~ so 'vagrant ssh' can find it easily.
-    ln -s /vagrant/build/vagrant_manage.py manage.py
+    ln -sf /vagrant/build/vagrant_manage.py manage.py
     cd /vagrant
 
     ###############
@@ -29,7 +31,7 @@ Vagrant.configure(2) do |config|
     sudo apt-get update
     # on a new system you might also want to run: sudo apt-get upgrade
     sudo apt install -y -q \
-        git python3-pip virtualenv \
+        git python3-pip virtualenv unzip \
         libcap-dev libcairo-dev python3-xapian
     # on production we don't use python3-xapian
 
@@ -53,8 +55,8 @@ Vagrant.configure(2) do |config|
     # source .venv/bin/activate
 
     # Install Python packages.
-    pip install --upgrade -r requirements.txt
-    pip install --upgrade xapian-haystack # not needed in production
+    # In production, xapian-haystack should be skipped.
+    pip3 install --upgrade -r requirements.txt xapian-haystack
 
     # on production I needed: pip install mysqlclient pylibmc django-mysql
 

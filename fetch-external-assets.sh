@@ -89,15 +89,15 @@ download \
 download \
   https://code.highcharts.com/highcharts.js \
   $VENDOR/highcharts.js \
-  '1e7786708c729feead0fb01ccf5b8635a9247e93d7d7abf67f655cd523516354'
+  '9e423c5c172c03971d4dedb77fac6e82d55cd92b160e16f1827dd6e3feffea2e'
 download \
   https://code.highcharts.com/modules/accessibility.js \
   $VENDOR/highcharts-accessibility.js \
-  '5f13cf209820b9d0271e2d3004533d0d746bf923215b6539a76e7ff219e83270'
+  '9e166aa2e1a21589bb6f0ae7c2e5ef5b711e67cfc7ea338db870d97e656e8556'
 download \
   https://code.highcharts.com/modules/xrange.js \
   $VENDOR/highcharts-xrange.js \
-  '51169fb7e4fb432beeb44d9e4cd299684b3f21e31932dcff3eb09cc78ff69e3d'
+  'ca9dbd0415a1baa2c27a546360575f9c0058fca40061c614ac859911edb7a160'
 
 # Plotly (MIT license)
 download \
@@ -151,18 +151,20 @@ done
 # google fonts
 #  Hind: SIL Open Font License 1.1
 # first download a helper (note: we're about to run a foreign script locally)
-# TODO: Requires bash v4 not available on macOS.
+# TODO: Requires bash v4 not available on macOS. Also it returns with a non-zero
+# exit status ("Failed to determine local font name") but it works, so ignore
+# exit status with || true
 download \
   https://raw.githubusercontent.com/neverpanic/google-font-download/ba0f7fd6de0933c8e5217fd62d3c1c08578b6ea7/google-font-download \
   /tmp/google-font-download \
   '1f9b2cefcda45d4ee5aac3ff1255770ba193c2aa0775df62a57aa90c27d47db5'
-(cd $VENDOR; bash /tmp/google-font-download -f woff,woff2 -o google-fonts.css "IBM Plex Sans":300 "IBM Plex Sans":700 Quicksand:500)
+(cd $VENDOR; bash /tmp/google-font-download -f woff,woff2 -o google-fonts.css "IBM Plex Sans":300 "IBM Plex Sans":700 Quicksand:500) || true
 rm -f /tmp/google-font-download
 # generated with: `$SHACMD $VENDOR/{google-fonts.css,*woff*}` but then put the vendor path variable back
 $SHACMD_CHECK << EOF
-6b761ceb8d25397001d1b82013769a66889a77e6832b0443ec71403ef1af5294  $VENDOR/google-fonts.css
-91925c6009a0039bd0e9c07f75253d81598a3c09a3bf498662c935c674bfeaee  $VENDOR/Quicksand_300.woff
-38c8d523d1f60d51bd199b06b4a5bc573a3ba9c5e29ca9e5dbd85fcb7460bc15  $VENDOR/Quicksand_300.woff2
+8a44eefa80245fe6d3cf0c2603935e7e4046f5c0b8a7c0a14e3639a970e62834  $VENDOR/google-fonts.css
+12fde0b8172646b714aafe719e50cab184ffacde271786e6084b0f70807ffe21  $VENDOR/Quicksand_500.woff
+4813a05d0d0fb1efdaeb730c134af8a9bfcb824f1993cd66026af4fd50f4b492  $VENDOR/Quicksand_500.woff2
 6abe6b7ef0abe00b00ffd7b5d9e527102ede9a623f808dc27e21d6f89f67ecff  $VENDOR/IBM_Plex_Sans_300.woff
 80e7ed4fe6e9016456057ea5ecd4898d3a461e595a8244a7538e1a814889d471  $VENDOR/IBM_Plex_Sans_300.woff2
 1cc4f14202c58b49f25a56e5252c48dd835f7b83b4df7c7edc97298ef9adaf10  $VENDOR/IBM_Plex_Sans_700.woff
