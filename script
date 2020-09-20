@@ -1,23 +1,6 @@
 #!/usr/bin/env bash
 
-# Load the local Python environment.
-if [ -d .venv ]; then
-  #echo "Activating .venv virtual environment."
-  source .venv/bin/activate
-fi
-
-# Load settings.
-if [ -f local/settings.env ]; then
-  #echo "Loading settings from local/settings.env."
-  set -o allexport
-  source local/settings.env;
-fi
-
-# Run a python interpreter that uses a pseudo-random salt to make hash() values
-# of various types be unpredictable between separate invocations of the
-# interpreter, as a defense against denial-of-service attacks.
-
-DJANGO_SETTINGS_MODULE=settings PYTHONPATH=. python -R -u -W ignore /dev/stdin "$@" << EOF;
+DJANGO_SETTINGS_MODULE=settings PYTHONPATH=. ./python_environment -u -W ignore /dev/stdin "$@" << EOF;
 import django
 django.setup()
 

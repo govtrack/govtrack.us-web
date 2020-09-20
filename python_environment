@@ -13,8 +13,4 @@ if [ -f local/settings.env ]; then
   source local/settings.env;
 fi
 
-# Run a python interpreter that uses a pseudo-random salt to make hash() values
-# of various types be unpredictable between separate invocations of the
-# interpreter, as a defense against denial-of-service attacks.
-
-python3 -R "$@"
+python3 "$@"
