@@ -13,8 +13,22 @@ from bill.models import BillSummary
 
 from website.templatetags.govtrack_utils import markdown
 
-global state_population
-state_population = None
+global historical_state_population_data
+historical_state_population_data = None
+def get_state_population_in_year(year):
+    # Load historical population by state.
+    global historical_state_population_data
+    if historical_state_population_data is None:
+        import csv
+        historical_state_population_data = { }
+        for state, row_year, pop in csv.reader(open("analysis/historical_state_population_by_year.csv")):
+            historical_state_population_data[(state, int(row_year))] = int(pop)
+
+    # Clamp the year to the max year in the data, since the data lags real time.
+    year = min(year, max(y for _, y in historical_state_population_data.keys()))
+
+    return { state: pop for (state, year), pop in historical_state_population_data.items() }
+
 
 class CongressChamber(enum.Enum):
     senate = enum.Item(1, 'Senate')
@@ -438,27 +452,30 @@ class Vote(models.Model):
         # Only applicable for senate votes since we are summing state populations.
         if self.chamber != CongressChamber.senate: return None
 
-        # Load historical population by state.
-        global state_population
-        if state_population is None:
-            import csv
-            state_population = { }
-            for state, year, pop in csv.reader(open("analysis/historical_state_population_by_year.csv")):
-                state_population[(state, int(year))] = int(pop)
-
-        # Clamp the year to the max year in the data, since the data lags real time.
-        year = min(self.created.year, max(year for state, year in state_population.keys()))
-
         # Get the votes as a list of pairs holding (state, "+" | "-" | ...).
         votes = self.voters\
                       .filter(voter_type=VoterType.member)\
                       .exclude(option__key='0')\
                       .values_list('person_role__state', 'option__key')
 
-        # Count up the number of times each state appears. When there are no vacancies, each state occurs twice.
-        state_freq = { }
+        # Count up the number of times each state appears in a +/- vote (zero, once, or twice)
+        # for the purposes of apportioning states whose votes are split, and the states that
+        # have senators at the time of the vote by which senators are listed as serving/eligible
+        # to vote.
+        state_freq_ayeno = { }
+        states_with_voters = set()
         for state, vote in votes:
-            state_freq[state] = state_freq.get(state, 0) + 1
+            if state == "": continue # VP tie-breaker
+            states_with_voters.add(state)
+            if vote in ("+", "-", "P"): state_freq_ayeno[state] = state_freq_ayeno.get(state, 0) + 1
+
+        # Sum the populations of the states with senators (i.e. the country's population minus DC and territories).
+        state_population = get_state_population_in_year(self.created.year)
+        total = 0
+        for state in states_with_voters:
+            total += state_population[state]
+        if total == 0:
+            return None
 
         # Get the option key that had the most votes, prefering + over - if a tie.
         vote_totals = { }
@@ -466,20 +483,13 @@ class Vote(models.Model):
             vote_totals[vote] = vote_totals.get(vote, 0) + 1
         winner_option_key = sorted(vote_totals.items(), key = lambda kv : (-kv[1], kv[0]))[0][0]
 
-        # Sum the population of the winning votes and the population of all of the votes, dividing
-        # each voter's share of their state's population by the number of senators voting for
-        # that state, so that if there are vacancies we count each state equally.
+        # Sum the apportioned state populations of the winning votes (i.e. if senators split,
+        # apportion half their state's population to each; if a senator doesn't vote, apportion
+        # the whole population to the voting senator).
         winner = 0
-        total = 0
         for state, vote in votes:
-            pop = state_population.get((state, year))
-            if pop is not None:
-               pop /= state_freq[state]
-               if vote == winner_option_key:
-                   winner += pop
-               total += pop
-        if total == 0:
-            return None
+            if vote == winner_option_key and state in state_population:
+               winner += state_population[state] / state_freq_ayeno[state]
 
         # Return the proportion of winner votes as well as which option we considered the winner.
         return (winner_option_key, round(winner/total*100,1))

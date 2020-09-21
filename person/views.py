@@ -510,7 +510,24 @@ def membersoverview(request):
             return qs.values('party').annotate(count=Count('party')).order_by('-count')
         else:
             return qs.count()
-    
+
+    # Check senate majority party percent vs apportioned total state population of total population
+    # in states + DC (because that's the population data we have).
+    from vote.models import get_state_population_in_year
+    state_population = get_state_population_in_year(datetime.now().year)
+    majority_party = get_current_members(RoleType.senator, False, True)[0]["party"]
+    current_senators = PersonRole.objects.filter(current=True, role_type=RoleType.senator)
+    state_totals = { state: len([p for p in current_senators if p.state == state]) for state in set(p.state for p in current_senators)}
+    majority_party_senators_proportion = len([p for p in current_senators if p.party == majority_party]) / current_senators.count()
+    majority_party_apportioned_population = sum(state_population[p.state]/state_totals[p.state] for p in current_senators if p.party == majority_party)
+    total_state_population = sum(state_population[state] for state in state_population)
+    majority_party_apportioned_population_proportion = majority_party_apportioned_population / total_state_population
+    if int(round(majority_party_senators_proportion*100)) <= int(round(majority_party_apportioned_population_proportion*100)):
+        # Not interesting.
+        majority_party_apportioned_population_proportion = None
+    else:
+        majority_party_apportioned_population_proportion = round(majority_party_apportioned_population_proportion*100, 1)
+
     return {
         "statelist": statelist,
         "senate_by_party": get_current_members(RoleType.senator, False, True),
@@ -520,6 +537,7 @@ def membersoverview(request):
         "house_delegate_vacancies": 6-get_current_members(RoleType.representative, True, False),
         "longevity": get_members_longevity_table(),
         "agesex": get_members_age_sex_table(),
+        "majority_party_apportioned_population_proportion": majority_party_apportioned_population_proportion,
     }
 
 

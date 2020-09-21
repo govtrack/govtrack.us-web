@@ -178,6 +178,10 @@ label { font-weight: normal; }
 	<tr style="border-top: 1px solid #555;"><td/><td>Total Seats</td> <td>100</td></tr>
 	</table>
 
+        {% if majority_party_apportioned_population_proportion %}
+        <p>Although {{senate_by_party.0.party}}s hold the most seats, they represent just {{majority_party_apportioned_population_proportion}}% of the population because the Senate gives two seats to each state regardless of each state&rsquo;s population.</p>
+        {% endif %}
+
 	<p>The District of Columbia, Puerto Rico, and the U.S.’s four other island territories — American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands — are not represented in the Senate.</p>
 
 	<h3>Tenure of Senators</h3>
