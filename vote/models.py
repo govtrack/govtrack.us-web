@@ -473,6 +473,7 @@ class Vote(models.Model):
         state_population = get_state_population_in_year(self.created.year)
         total = 0
         for state in states_with_voters:
+            if state not in state_population: return None # no population data for a state in this year?
             total += state_population[state]
         if total == 0:
             return None

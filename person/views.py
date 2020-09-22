@@ -498,6 +498,25 @@ def get_district_bounds(state, district):
 @anonymous_view
 @render_to('person/overview.html')
 def membersoverview(request):
+    # Get the approximate median population of a congressional district.
+    # Without using actual congressional district populations, we'll instead
+    # divide each state's current population by its number of districts, then
+    # repeat that state mean population for each of its districts, combine those
+    # lists across all states, and then take the median.
+    import numpy
+    from vote.models import get_state_population_in_year
+    state_population = get_state_population_in_year(datetime.now().year)
+    district_median_population = int(round(numpy.median(sum(
+      [ [state_population[state]/app] * app
+        for state, app in stateapportionment.items()
+        if app != "T"],
+    [])), -4))
+
+    # We can also get the population of the smallest and largest states
+    # in millions.
+    min_state_pop = round(min(state_population[state] for state, app in stateapportionment.items() if app != "T") / 1000000, 1)
+    max_state_pop = int(round(max(state_population[state] for state, app in stateapportionment.items() if app != "T") / 1000000))
+
     # Get list of current members by role type --- including or excluding delegates and
     # possibly grouping by party.
     def get_current_members(role_type, delegates, by_party):
@@ -513,8 +532,6 @@ def membersoverview(request):
 
     # Check senate majority party percent vs apportioned total state population of total population
     # in states + DC (because that's the population data we have).
-    from vote.models import get_state_population_in_year
-    state_population = get_state_population_in_year(datetime.now().year)
     majority_party = get_current_members(RoleType.senator, False, True)[0]["party"]
     current_senators = PersonRole.objects.filter(current=True, role_type=RoleType.senator)
     state_totals = { state: len([p for p in current_senators if p.state == state]) for state in set(p.state for p in current_senators)}
@@ -538,6 +555,9 @@ def membersoverview(request):
         "longevity": get_members_longevity_table(),
         "agesex": get_members_age_sex_table(),
         "majority_party_apportioned_population_proportion": majority_party_apportioned_population_proportion,
+        "min_state_pop": min_state_pop,
+        "max_state_pop": max_state_pop,
+        "district_median_population": district_median_population,
     }
 
 

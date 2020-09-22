@@ -162,7 +162,7 @@ label { font-weight: normal; }
 
 	<h2>About the Senate</h2>
 	
-	<p>The United States&rsquo;s 50 states each elect two senators for staggered six-year terms. A senator represents between 1 and 37 million people, depending on their state&rsquo;s population.</p>
+	<p>The United States&rsquo;s 50 states each elect two senators for staggered six-year terms. A senator represents between {{min_state_pop}} and {{max_state_pop}} million people, depending on their state&rsquo;s population.</p>
 	
 	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&rdquo;   Here is a count of senators by party:</p>
 	
@@ -179,7 +179,7 @@ label { font-weight: normal; }
 	</table>
 
         {% if majority_party_apportioned_population_proportion %}
-        <p>Although {{senate_by_party.0.party}}s hold the most seats, they represent just {{majority_party_apportioned_population_proportion}}% of the population because the Senate gives two seats to each state regardless of each state&rsquo;s population.</p>
+        <p>Although {{senate_by_party.0.party}}s hold the most seats, they represent just {{majority_party_apportioned_population_proportion}}% of the country&rsquo;s population because the Senate gives two seats to each state regardless of each state&rsquo;s population.</p>
         {% endif %}
 
 	<p>The District of Columbia, Puerto Rico, and the U.S.’s four other island territories — American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands — are not represented in the Senate.</p>
@@ -196,7 +196,7 @@ label { font-weight: normal; }
 
 	<h2>About the House of Representatives</h2>
 	
-	<p>The states are also divided into 435 congressional districts with a population of about 710,000 each. Each district elects a representative to the House of Representatives for a 2-year term.</p>
+	<p>The United States is also divided into 435 congressional districts with a population of about {{district_median_population|intcomma}} each. Each district elects a representative to the House of Representatives for a two-year term.</p>
 
 	<p>As in the Senate, the day-to-day activities of the House are controlled by the &ldquo;majority party.&rdquo; Here is a count of representatives by party:</p>
 
@@ -214,7 +214,7 @@ label { font-weight: normal; }
 	<tr style="border-top: 1px solid #555;"><td/><td>Total Seats</td> <td>435</td></tr>
 	</table>
 	
-	<p style="margin-top: .5em">The District of Columbia, Puerto Rico, and the U.S.&rsquo;s four other island territories &mdash; American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands &mdash; each send a non-voting delegate to the House. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
+	<p style="margin-top: .5em">The 435 congressional districts do not include the District of Columbia, Puerto Rico, and the U.S.&rsquo;s four other island territories &mdash; American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands &mdash; which each send a non-voting delegate to the House. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
 
 	<h3>Tenure of Representatives</h3>
 	<p>The table below shows a breakdown of how many years the representatives have been serving in office.</p>
