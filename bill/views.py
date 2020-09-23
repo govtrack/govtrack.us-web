@@ -340,7 +340,97 @@ def bill_full_details(request, congress, type_slug, number):
         "bill": bill,
         "related": get_related_bills(bill),
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
+        "cosponsors": get_cosponsors_table(bill),
     }
+
+def get_cosponsors_table(bill):
+    # Get all sponsor/cosponsors.
+    cosponsors = []
+    cosponsors.append({
+        "person": bill.sponsor,
+        "name": bill.sponsor_name,
+        "party": bill.sponsor_role.party,
+        "joined_withdrawn": "Primary Sponsor",
+        "sort_cosponsor_type": 0,
+        "sort_cospsonsor_date": None,
+        "has_committee_roles": True # don't hide in relevance list
+    })
+    for csp in bill.cosponsor_records:
+        cosponsors.append({
+            "person": csp.person,
+            "name": csp.person_name, # !
+            "party": csp.role.party,
+            "joined_withdrawn": csp.joined_date_string,
+            "sort_cosponsor_type": 1 if not csp.withdrawn else 2,
+            "sort_cospsonsor_date": (csp.joined, csp.withdrawn),
+        })
+
+    # Make a mapping from person ID to record.
+    cosponsor_map = { cm["person"].id: cm for cm in cosponsors }
+
+    from committee.models import CommitteeMember, CommitteeMemberRole, MEMBER_ROLE_WEIGHTS
+
+    # Add a place for committee info.
+    for csp in cosponsors:
+        csp["committee_roles"] = []
+        csp["committee_role_sort"] = [0 for _ in MEMBER_ROLE_WEIGHTS]
+
+    # Annotate with cosponsors that are on relevant committees.
+    # Count up the number of times the person has a particular role
+    # on any committee (i.e. number of chair positions).
+    for cm in CommitteeMember.objects.filter(
+        person__in={ c["person"] for c in cosponsors },
+        committee__in=bill.committees.all())\
+        .select_related("committee", "committee__committee"):
+        csp = cosponsor_map[cm.person_id]
+        csp["committee_roles"].append(cm)
+        csp["committee_roles"].sort(key = lambda cm : (cm.committee.is_subcommittee, -MEMBER_ROLE_WEIGHTS[cm.role] ))
+        csp["committee_role_sort"][max(MEMBER_ROLE_WEIGHTS.values()) - MEMBER_ROLE_WEIGHTS[cm.role]] -= 1 # ascending order goes most important to least important
+        csp["has_committee_roles"] = True
+
+        # If the parent committee membership role type is just Member,
+        # remove it - it's redundant with subcommittee info. But we
+        # keep the sort information of the parent committee: i.e.,
+        # one subcommittee membership counts as two memberships (once for
+        # the parent committee and once for the subcomittee) so that
+        # subcommittee membership ranks higher in the sort order than
+        # only main-committee membership, since the subcommittee is
+        # more specific to the bill.
+        if cm.committee.is_subcommittee is not None:
+            for cm2 in csp["committee_roles"]:
+                if cm2.committee == cm.committee.committee and cm2.role == CommitteeMemberRole.member:
+                    csp["committee_roles"].remove(cm2)
+                    break
+
+    # Pre-compute the three sort orders that the UI will offer.
+    # Assign a row index to each cosponsor for each sort order.
+
+    for i, c in enumerate(sorted(cosponsors, key = lambda c : (
+        c["name"],
+        c["sort_cosponsor_type"],
+    ))):
+        c["sort_name"] = i
+
+    for i, c in enumerate(sorted(cosponsors, key = lambda c : (
+        c["sort_cosponsor_type"], # sponsor, cosponsors, withdrawn cosponsors
+        c["committee_role_sort"], # more important committee roles first
+        "\n".join(cm.committee.sortname() for cm in c["committee_roles"]), # keep same committees together
+        c["sort_cospsonsor_date"],
+        c["name"],
+    ))):
+        c["sort_relevance"] = i
+
+    for i, c in enumerate(sorted(cosponsors, key = lambda c : (
+        c["sort_cosponsor_type"], # sponsor, cosponsors, withdrawn cosponsors
+        c["sort_cospsonsor_date"], # join date, then withdrawn date
+        c["name"],
+    ))):
+        c["sort_date"] = i
+
+    # But default to the "relevance" sort.
+    cosponsors.sort(key = lambda c : c["sort_relevance"])
+
+    return cosponsors
 
 @user_view_for(bill_full_details)
 def bill_full_details_user_view(request, congress, type_slug, number):

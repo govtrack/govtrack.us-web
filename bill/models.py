@@ -118,7 +118,7 @@ class Cosponsor(models.Model):
     api_example_parameters = { "sort": "-joined" }
 
     def __str__(self):
-        return self.person_name + " " + self.details() + ": " + str(self.bill)
+        return self.person_name + " " + self.joined_date_string() + ": " + str(self.bill)
 
     @property
     def person_name(self):
@@ -127,11 +127,15 @@ class Cosponsor(models.Model):
         self.person.role = self.role
         return get_person_name(self.person, firstname_position="after", show_title=False)
 
-    def details(self):
+    def joined_date_string(self):
         ret = []
-        if self.joined: ret.append("joined " + date_to_str(self.joined))
-        if self.withdrawn: ret.append("withdrawn " + date_to_str(self.withdrawn))
-        if self.bill.is_current and not self.role.current: ret.append("no longer serving")
+        if self.joined:
+            if self.joined == self.bill.introduced_date:
+                ret.append("Original Cosponsor")
+            else:
+                ret.append(date_to_str(self.joined))
+        if self.withdrawn: ret.append("Withdrawn " + date_to_str(self.withdrawn))
+        if self.bill.is_current and not self.role.current: ret.append("No Longer Serving")
         return "; ".join(ret)
 
     @staticmethod

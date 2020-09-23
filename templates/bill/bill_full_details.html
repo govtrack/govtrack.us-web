@@ -11,30 +11,86 @@
 
 {{block.super}}
 
+<style>
+	span.cosponsor_party {
+		font-size: 90%;
+		padding: 0 2px;
+	}
+
+	#cosponsors-sorts {
+		font-size: 90%;
+		text-align: center;
+	}
+		#cosponsors-sorts a:not(.active) {
+			text-decoration: none;
+		}
+		#cosponsors-sorts a:not(.active):hover {
+			text-decoration: underline;
+		}
+	#cosponsors-expand {
+		margin: -1em 0 0 1em;
+	}
+</style>
+
 {% if bill.congress >= 93 %}
-<h2><span>Cosponsors</span></h2>
-	{% if bill.cosponsor_count == 0 %}
-		none
-	{% else %}
-		<div title="{% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}s{% if not forloop.last %}, {% endif %}{% endfor %}">
-		{{bill.cosponsor_count}} cosponsors ({% for party, count in bill.cosponsor_counts_by_party %}{{count}}{{party.0}}{% if not forloop.last %}, {% endif %}{% endfor %})
-		(<a href="#" onclick="if (!$('#cosponsors').is(':visible')) $('#cosponsors').slideDown(); else $('#cosponsors').slideUp(); return false;">show</a>)
-		</div>
-		<div id="cosponsors" style="display: none">
-			{% for cosp in bill.cosponsor_records %}
-			<div style="margin-top: .25em">
-			<a href="{{cosp.person.get_absolute_url}}">{{cosp.person_name}}</a>
-			{% with cosp.details as cosp_details %}
-				{% if cosp_details %}
-					<span style="margin-left: 1.5em; font-size: 85%">
-						({{cosp_details}})
-					</span>
-				{% endif %}
-			{% endwith %}
-			</div>
+<h2>
+	<span title="{% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}s{% if not forloop.last %}, {% endif %}{% endfor %}">
+		{{bill.cosponsor_count}} Cosponsor{{bill.cosponsor_count|pluralize}}
+		{% if bill.cosponsor_count > 0 %}
+		({% for party, count in bill.cosponsor_counts_by_party %}{{count}}{{party.0}}{% if not forloop.last %}, {% endif %}{% endfor %})
+		{% endif %}
+	</span>
+</h2>
+		{% if bill.cosponsor_count > 0 %}
+		<p id="cosponsors-sorts">
+			<span class="text-mute">Sort</span>
+			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="name">By Name</a>
+			|
+			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="date">By Date</a>
+			|
+			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="relevance" class="active">By Committee</a>
+		</p>
+		{% endif %}
+
+		<table id="cosponsors" class="table">
+		<thead>
+			<tr>
+				<th>Sponsor/Cosponsor</th>
+				<th>Joined/Withdrawn</th>
+				<th>On Assigned Committees</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for csp in cosponsors %}
+			<tr class="{% if not csp.has_committee_roles %}no-relevance hidden{% endif %}"
+			    data-sort-name="{{csp.sort_name}}"
+			    data-sort-relevance="{{csp.sort_relevance}}"
+			    data-sort-date="{{csp.sort_date}}">
+				<td>
+					<span class="cosponsor_party party_{{csp.party|slice:"0:1"}}" title="{{ csp.party }}">{{csp.party|slice:"0:1"}}</span>
+					<a href="{{csp.person.get_absolute_url}}">{{csp.name}}</a>
+				</td>
+				<td>{{csp.joined_withdrawn}}</td>
+				<td>
+					{% for cm in csp.committee_roles %}
+						<div>
+							{{cm.committee.sortname2}}
+							{% if cm.role_name != 'Member' %}<span class="label label-warning">{{cm.role_name}}</span>{% endif %}
+						</div>
+					{% endfor %}
+				</td>
+			</tr>
 			{% endfor %}
-		</div>
-	{% endif %}
+		</tbody>
+		</table>
+		{% regroup cosponsors by has_committee_roles as cosponsors_by_relevance %}
+		{% for grouper, list in cosponsors_by_relevance %}	
+			{% if not grouper %}
+				<p id="cosponsors-expand"><a href="#" onclick="return cosponsors_expand();">
+					Show {{list|length}} more...
+				</a></p>
+			{% endif %}
+		{% endfor %}
 {% endif %}
 
 {% if bill.committees.exists %}
@@ -166,6 +222,31 @@
 
 {% block body_scripts %}
 <script>
+function sort_cosponsors(elem) {
+	var sort_key = $(elem).attr('data-sort-key');
+	$('#cosponsors-sorts a').removeClass("active");
+	$(elem).addClass("active");
+	$('#cosponsors tr').sortElements(function(row) {
+		return parseInt($(row).attr('data-sort-' + sort_key));
+	});
+	if (sort_key == "relevance") {
+		// Reset hidden rows.
+		$("#cosponsors tr.no-relevance").addClass("hidden");
+		$('#cosponsors-expand').show();
+	} else {
+		// Show all rows.
+		$("#cosponsors tr.no-relevance").removeClass("hidden");
+		$('#cosponsors-expand').hide();
+	}
+
+	return false; // discard event
+}
+function cosponsors_expand() {
+	$("#cosponsors tr").removeClass("hidden");
+	$('#cosponsors-expand').fadeOut();
+	return false; // discard event
+}
+
 var minor_votes = $('.minor_vote');
 if (minor_votes.length > 0) {
 	$('#more_votes').show();

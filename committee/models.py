@@ -48,6 +48,10 @@ class Committee(models.Model):
             return reverse('committee_details', args=[self.code])
 
     @property
+    def is_subcommittee(self):
+        return self.committee is not None
+
+    @property
     def fullname(self):
         if self.committee_id == None:
             return self.name
@@ -72,6 +76,14 @@ class Committee(models.Model):
               ((self.committee.sortname + " ") if self.committee else "") \
             + ((m.group(1) + " ") if with_chamber else "") \
             + m.group(5)
+
+    def sortname2(self):
+        if self.committee_id == None:
+            return self.sortname()
+        else:
+            return self.committee.sortname() + " - " \
+              + self.name.replace("Subcommittee on the ", "").replace("Subcommittee on ", "") \
+              + " Subcommittee"
 
     @property
     def name_no_article(self):
