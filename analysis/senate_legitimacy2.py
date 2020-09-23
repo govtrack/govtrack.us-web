@@ -54,6 +54,31 @@ def group_by_session_and_vote_type(vote):
   if vote_type not in ("passage", "nomination"): vote_type = "other"
   return vote["session"], vote_type
 
+def scotus_nominees(vote):
+  session, vote_type = group_by_session_and_vote_type(vote)
+  if vote_type != "nomination": return None
+  if "SUPREME" not in vote["question"].upper(): return None
+  return (vote["date"], vote["question"])
+
+def court_nominees(vote):
+  session, vote_type = group_by_session_and_vote_type(vote)
+  if vote_type != "nomination": return None
+  if "JUDGE" not in vote["question"].upper(): return None
+  print(vote["question"])
+  return session
+
+def exec_nominees(vote):
+  session, vote_type = group_by_session_and_vote_type(vote)
+  if vote_type != "nomination": return None
+  if "JUDGE" in vote["question"].upper(): return None
+  print(vote["question"])
+  return session
+
+def votes_on_passage_by_year(vote):
+  session, vote_type = group_by_session_and_vote_type(vote)
+  if vote_type != "passage": return None
+  return vote["session"]
+
 def analyze_mean_values(votes):
   return [
     len(votes),
@@ -83,4 +108,4 @@ def percent_of_minority_majority(votes):
           ])]
 percent_of_minority_majority.columns = ["count", "pct_min_maj"]
 
-run_analysis(group_by_congress, percent_of_minority_majority)
+run_analysis(court_nominees, analyze_mean_values)
