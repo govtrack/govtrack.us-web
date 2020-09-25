@@ -482,6 +482,7 @@ class Bill(models.Model):
 
     @property
     def sponsor_name(self):
+        if self.sponsor is None: return "Unknown"
         from person.name import get_person_name
         self.sponsor.role = self.sponsor_role
         return get_person_name(self.sponsor, firstname_position='before')

@@ -346,20 +346,21 @@ def bill_full_details(request, congress, type_slug, number):
 def get_cosponsors_table(bill):
     # Get all sponsor/cosponsors.
     cosponsors = []
-    cosponsors.append({
-        "person": bill.sponsor,
-        "name": bill.sponsor_name,
-        "party": bill.sponsor_role.party,
-        "joined_withdrawn": "Primary Sponsor",
-        "sort_cosponsor_type": 0,
-        "sort_cospsonsor_date": None,
-        "has_committee_roles": True # don't hide in relevance list
-    })
+    if bill.sponsor is not None: # historical bills may be missing this
+        cosponsors.append({
+            "person": bill.sponsor,
+            "name": bill.sponsor_name,
+            "party": bill.sponsor_role.party if bill.sponsor_role else "Unknown",
+            "joined_withdrawn": "Primary Sponsor",
+            "sort_cosponsor_type": 0,
+            "sort_cospsonsor_date": None,
+            "has_committee_roles": True # don't hide in relevance list
+        })
     for csp in bill.cosponsor_records:
         cosponsors.append({
             "person": csp.person,
             "name": csp.person_name, # !
-            "party": csp.role.party,
+            "party": csp.role.party if csp.role else "Unknown",
             "joined_withdrawn": csp.joined_date_string,
             "sort_cosponsor_type": 1 if not csp.withdrawn else 2,
             "sort_cospsonsor_date": (csp.joined, csp.withdrawn),
