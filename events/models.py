@@ -151,6 +151,7 @@ class Feed(models.Model):
             subs1 = get_feed_counts(period)
             subs2 = get_feed_counts(period*2)
             if subs1 == None or subs2 == None: return [] # database not configured
+            if len(subs1) == 0 or len(subs2) == 0: continue # site was off-line during this period?
             
             # Order the mentioned feeds by the ratio of recent subscriptions to less recent subscriptions,
             # but giving a boost for the total number of new subscriptions.
