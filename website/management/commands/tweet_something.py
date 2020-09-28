@@ -17,7 +17,6 @@ class Command(BaseCommand):
 	tweets_storage_fn = 'data/misc/tweets.json'
 	
 	def handle(self, *args, **options):
-		return
 		# Construct client.
 		from website.util import twitter_api_client
 		self.tweepy_client = twitter_api_client()
