@@ -208,7 +208,7 @@ def game(committee):
                 return bill
 
     #copy get list of committees from committee view.py
-    def getlist(type_):
+    def getcommitteelist(type_):
         items = list(Committee.objects.filter(committee_type=type_, obsolete=False))
         for c in items:
             if c.name.startswith("Joint "):
@@ -225,7 +225,7 @@ def game(committee):
         for c in items:
             if not c.committee:
                 committee = c.code
-                actual_committees = actual_committees + [committee]
+                actual_committees.append(committee)
         committeesJSON = json.dumps(list(actual_committees), cls=DjangoJSONEncoder)
         return committeesJSON
 
@@ -239,8 +239,7 @@ def game(committee):
     bill = get_random_bill()
 
     return {
-    'house_committees': getlist(CommitteeType.house),
-    'senate_committees': getlist(CommitteeType.senate),
+    'committees': getcommitteelist(CommitteeType.house if bill.originating_chamber == "House" else CommitteeType.senate),
     'bill': bill,
     'number_of_committees': numberofcommittees(bill),
     'actual_committees': getcommittees(bill),

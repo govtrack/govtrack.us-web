@@ -1,28 +1,29 @@
 {% extends "master_b.html" %}
 {% load humanize persontags govtrack_utils %}
 
-{% block title %}Committees of the United States Congress - GovTrack.us{% endblock %}
+{% block title %}Guess the Committee! - GovTrack.us{% endblock %}
 {% block cat-icon-filename %}img-committees.png{% endblock %}
 
 {% block head %}
 <style>
 
- 	button {
-	    background-color: #9D2146;
-	    color: white;
-	    float: right; 
-	    margin-left: .5em;
-	    padding: 3px;
+ 	button[type=submit] {
+ 		display: block;
+	    padding: 6px;
+	    font-size: 115%;
+	    margin: 15px 0;
 	  }
 
 	#committee-game .option {
+		width: 100%;
 	    margin: 10px;
+		height: 3.5em;
 	    padding: 3px;
-	    text-align: center;
 	    background: #1D4E70;
 	    color: white;
 	    margin-bottom: 8px;
-	    cursor: pointer;
+	    border: none;
+	    border-radius: 3px;
 	}
 		#committee-game .option.active {
 		    background: #9D2146;
@@ -34,19 +35,26 @@
 {% block crumbs %}
 <ol class="breadcrumb">
     <li><a href="{% url "congress_home" %}">Congress</a></li>
-    <li>Committees</li>
+    <li><a href="/congress/committees">Committees</a></li>
+    <li>Game</li>
 </ol>
 {% endblock %}
 
 {% block summary %}
-    <h1>Guess the Committee</h1>
-    <p>When a bill is introduced in Congress, the first thing that happens to it is that it gets assigned to a congressional committee. Since the different committees in the House and Senate are each responsible for certain topics of legislation, knowing about the bill should give you a hint about where it was assigned.</p>
-    <p style="margin-bottom: 0">Using the information provided about a random bill in Congress, try to guess which committee(s) it was assigned to.</p>
+    <h1>Guess the Committee<i>!</i></h1>
+    <p>When a bill is introduced in Congress, the first thing that happens to it is that it gets assigned to a congressional committee. Since the committees of the House and Senate are each responsible for certain topics of legislation &mdash; called their jurisdiction &mdash; knowing about the bill should give you a hint about which committee it was assigned to. For descriptions of committee jurisdictions, see our <a href="/congress/committees" target="_blank">committees page</a>.</p>
+    <p style="margin-bottom: 0; font-weight: bold;">Using the information provided about a random bill in Congress, try to guess which committee(s) it was assigned to.</p>
 {% endblock %}
 
 {% block body %}
 
-<h1>{{bill.title}}</h1>
+<div class="panel panel-default committee-game">
+	<div class="panel-heading" style="font-weight: bold; font-size: 115%;">
+		Can you guess which {% if number_of_committees != 1 %}{{number_of_committees}}{% endif %} committee{% if number_of_committees > 1 %}s{% endif %} this bill was assigned to?
+	</div>
+	<div class="panel-body">
+
+		<p>{{bill.title|truncatewords:30}}</p>
 
 {% with bill.oursummary as summary1 %}
 	{% if summary1 %}
@@ -78,63 +86,43 @@
 	{% endif %}
 	{% endwith %}
 
-<div class="row" style="margin-top: 30px; margin-bottom: 15px;">
+		<p>
+			Sponsor: <a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a> ({{bill.sponsor_role.party}}),
+			{{bill.sponsor_role.get_description}}.</p>
 
-	<div class="col-xs-3 col-sm-2" style="padding-right: 0; padding-bottom: 1em;">
-		<a href="{{bill.sponsor.get_absolute_url}}">
-			<img src="{{bill.sponsor.get_photo_url_200}}" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-responsive" style="border: 1px solid #999"/>
-		</a>
+		<p style="margin-bottom: 0"><a href="{{bill.get_absolute_url}}" target="_blank">Read more about this bill &raquo;</a></p>
 	</div>
-	<div class="col-xs-7 col-sm-4">
-		<h3 style="margin: 0 0 .5em 0; font-family: sans-serif;">
-			<a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
-		</h3>
-		<p style="line-height: 125%; margin: 0; font-size: 90%;">Sponsor. {{bill.sponsor_role.get_description}}. {{bill.sponsor_role.party}}.</p>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading" style="font-weight: bold; font-size: 115%;">
+		Guess {{number_of_committees}} committee{% if number_of_committees > 1 %}s{% endif %}
 	</div>
 
-	{% if text_info.has_thumbnail %}
-	<div class="clearfix visible-xs"></div>
-	<div class="col-xs-3 col-sm-2" style="padding-right: 0;">
-		<a href="{{bill.get_absolute_url}}/text">
-			<img src="{{bill.get_absolute_url}}/_text_image" class="img-responsive" alt="Thumbnail of {{bill.noun}} text" style="border: 1px solid #999;"/>
-		</a>
-	</div>
-	<div class="col-xs-7 col-sm-4">
-		<a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a>
-		<small><br>Last Updated: {{text_info.docdate}}
-		{% if text_info.numpages %}
-		<br>Length: {{text_info.numpages_display}}
-		{% endif %}
-		</small>
-	</div>
-	{% endif %}
-</div> <!-- /row -->
-
-<p>This bill was assigned to {{number_of_committees}} committee{% if number_of_committees > 1 %}s{% endif %}. See if you can guess which one{% if number_of_committees > 1 %}s{% endif %}.<p>
+	<div class="panel-body">
 
     <div id="committee-game">
 	<div class="row">
-	{% if bill.current_chamber == "house" %}
-            {% for item in house_committees %}
+        {% for item in committees %}
 	    <div class="col-sm-3">
-		<div class="option" data-committee-id="{{item.code}}">
-  		    {{ item.display_name }}
-		</div>
+			<button class="option" data-committee-id="{{item.code}}">
+	  		    {{ item.display_name }}
+			</button>
 	    </div>
 	    {% endfor %}
-	{% endif %}
-	{% if bill.current_chamber == "senate" %}
-           {% for item in senate_committees %}
-            <div class="col-sm-3">
-               <div class="option" data-committee-id="{{item.code}}">
-                   {{ item.display_name }}
-               </div>
-           </div>
-           {% endfor %}
-        {% endif %}
 	</div>
-	<button class="btn" type="submit">Check My Answer</button>
+
+	<hr>
+
+	<center>
+		<button class="btn btn-danger" type="submit">Check My Answer</button>
+		<button class="btn btn-info btn-sm" onclick="reload_game()">Give me a different bill</button>
+	</center>
+
     </div>
+
+	</div>
+</div>
 
 {% endblock %}    
 
@@ -142,6 +130,11 @@
 <script>
 $(function() {
   // Initialize the game.
+
+  if (location.hash == "#scroll_to_bill") {
+	location.hash = "#";
+	smooth_scroll_to($('.committee-game'));
+  }
 
   $('#committee-game .option').click(function() {
     // When an option button is clicked.
@@ -156,9 +149,12 @@ $(function() {
     $('#committee-game .option.active').each(function() {
       selected_committees.push($(this).attr('data-committee-id'));
     });
-    if(selected_committees.sort().join(',')=== actual_committees.sort().join(',')) {
+
+    if (selected_committees.length != actual_committees.length) {
+        alert("Guess {{number_of_committees}} committee{% if number_of_committees > 1 %}s{% endif %}!");
+    } else if(selected_committees.sort().join(',')=== actual_committees.sort().join(',')) {
         if (confirm("Correct! Play again?")) {
-            location.reload();
+        	reload_game();
         }
     } else {
         for (c in selected_committees) {
@@ -166,13 +162,20 @@ $(function() {
                 correct = correct + 1;
             }
         }
-        if (correct == 0) {
-            alert("Try again!");
+        if (correct == 0 && actual_committees.length == 1) {
+            alert("That's not it. Try again!");
+        } else if (correct == 0) {
+            alert("None of those are right. Try again!");
         } else {
-            alert("Not quite! You got "+correct.toString()+" right.");
+            alert("Not quite! You got " + correct.toString()+" right.");
         }
     }
   });
 });
+
+function reload_game() {
+	location.hash = "#scroll_to_bill";
+    location.reload();
+}
 </script>
 {% endblock %}
