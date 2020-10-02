@@ -218,13 +218,13 @@ $(function() {
 {% block body %}
 	<h1>COVID-19 in Congress</h1>
 	
-	<p>We&rsquo;re tracking Congress&rsquo;s response to COVID-19, the disease caused by the SARS-CoV-2 coronavirus. Below you&rsquo;ll find information on:</p>
+	<p>We&rsquo;re tracking the impact of COVID-19, the disease caused by the SARS-CoV-2 coronavirus, on the operations of Congress. Below you&rsquo;ll find information on:</p>
 	<ul>
-	<li><a href="#legislation">Legislative actions and policy</a></li>
-	<li><a href="#proxyvotes">Proxy votes in the House</a></li>
 	<li><span class="affected-legislators-count"> </span> Members of Congress who are or have been <a href="#legislators">quarantined, tested positive for COVID-19, or came in contact</a> with someone with COVID-19</li>
+	<li><a href="#proxyvotes">Proxy voting in the House</a></li>
 	</ul>
 
+	<!--
 	<a name="legislation"></a>
 	<h2><span>Legislative Actions and Policy</span></h2>
 
@@ -238,68 +238,7 @@ $(function() {
 	
 	<p><a href="https://medium.com/p/what-did-congress-do-during-the-1918-flu-pandemic-c0bd96ad2287?source=email-51cfa67992b0--writer.postDistributed&sk=a3ce115fc93bcb3bd552de1fc4c4f9bd">What did Congress do during the 1918 flu pandemic?</a> [GovTrack.us]</p>
 	<p><a href="https://www.everycrsreport.com/search.html?q=COVID-19">CRS reports related to COVID-19</a> [everycrsreport.com], <a href="https://www.pogo.org/training/covid-19-resources/">COVID-19 Oversight & Policy Resources</a> [POGO]</p>
-
-	<a name="proxyvotes"></a>
-	<h2><span>Proxy Voting in the House of Representatives</span></h2>
-
-	<p>At the peak of the virus&rsquo;s spread in March 2020 before Congress went on recess, 22 representatives, and slightly earlier 6 senators, were simultaneously self-quarantining. Both the House and Senate have adapted their procedures to keep legislators and support staff safe while also keeping Congress operational.</p>
-
-	<p>On May 15, the House <a href="https://www.govtrack.us/congress/votes/116-2020/h107">passed a rules change</a> to allow proxy voting for floor votes and remote committee committee meetings during this pandemic (<a href="https://docs.house.gov/meetings/RU/RU00/20200514/110750/HRPT-116-420.pdf">see the committee report for further background</a>). Then, pursuant to the new rules, on May 19 the House&rsquo;s Office of Attending Physician and Sergeant at Arms determined the existence of a &ldquo;public health emergency due to a novel coronavirus,&rdquo; which triggered the beginning of proxy voting rules. Under the rules for proxy voting, representatives may designate another representative as their proxy in advance of votes in <a href="https://clerkpreview.house.gov/ProxyLetter#ActiveProxies">a letter to the Clerk of the House of Representatives</a> and must give their proxy exact instructions on how to vote.</p>
-
-	<p>In the Senate, although no proxy voting is allowed for floor votes, some Senate committees have begun holding some meetings with senators participating remotely. And while not yet used, <a href="https://www.everycrsreport.com/reports/RS22952.html">existing Senate rules permit voting by proxy in committee</a>.</p>
-
-	<h3>Legislators voting by proxy</h3>
-
-	{% with LEGISLATOR_PROXIES as proxies %}
-
-	<p>The following {{proxies.current_proxy_pairs|length}} legislators are currently voting by proxy:</p>
-
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Remote Legislator</th>
-				<th>Proxy Legislator</th>
-				<th>Since</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for row in proxies.current_proxy_pairs %}
-				<tr>
-					<td><a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a></td>
-					<td><a href="{{row.proxy.get_absolute_url}}">{{row.proxy}}</a></td>
-					<td>{{row.from|date}}</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-
-	<h3>Proxies</h3>
-
-	<p>The following list is the same information as above but grouped by proxy legislator. A legislator may be a proxy for up to ten legislators.</p>
-
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Proxy Legislator</th>
-				<th>Remote Legislators</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for proxy, remote_legislators in proxies.current_by_proxy_sorted %}
-				<tr>
-					<td><a href="{{proxy.get_absolute_url}}">{{proxy}}</a></td>
-					<td>
-						{% for row in remote_legislators %}
-							<a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a>
-							({{row.from|date}}-{{row.until|date}}){% if not forloop.last %}, {% endif %}
-						{% endfor %}
-					</td>
-				</tr>
-			{% endfor %}			
-		</tbody>
-	</table>
-
-	{% endwith %}
+	-->
 
 
 	<a name="legislators"></a>
@@ -478,7 +417,70 @@ $(function() {
 
 		<tr data-expected-end-date="10/12/2020"><td>10/3/20</td> <td><a href="https://www.govtrack.us/congress/members/james_lankford/412464" class="legislator">Sen. James Lankford (OK)</a></td> <td>exposed to Sen. Lee, tested negative on 10/3/2020</td> <td>self-quarantine until 10/12/2020</td> <td><a href="https://twitter.com/SenatorLankford/status/1312409354902138881?s=20">tweet</a></td></tr>
 
-</tbody>
+	</tbody>
 	</table>
+
+	<a name="proxyvotes"></a>
+	<h2><span>Proxy Voting in the House of Representatives</span></h2>
+
+	<p>At the peak of the virus&rsquo;s spread in March 2020 before Congress went on recess, 22 representatives, and slightly earlier 6 senators, were simultaneously self-quarantining. Both the House and Senate have adapted their procedures to keep legislators and support staff safe while also keeping Congress operational.</p>
+
+	<p>On May 15, the House <a href="https://www.govtrack.us/congress/votes/116-2020/h107">passed a rules change</a> to allow proxy voting for floor votes and remote committee committee meetings during this pandemic (<a href="https://docs.house.gov/meetings/RU/RU00/20200514/110750/HRPT-116-420.pdf">see the committee report for further background</a>). Then, pursuant to the new rules, on May 19 the House&rsquo;s Office of Attending Physician and Sergeant at Arms determined the existence of a &ldquo;public health emergency due to a novel coronavirus,&rdquo; which triggered the beginning of proxy voting rules. Under the rules for proxy voting, representatives may designate another representative as their proxy in advance of votes in <a href="https://clerkpreview.house.gov/ProxyLetter#ActiveProxies">a letter to the Clerk of the House of Representatives</a> and must give their proxy exact instructions on how to vote.</p>
+
+	<p>In the Senate, although no proxy voting is allowed for floor votes, some Senate committees have begun holding some meetings with senators participating remotely. And while not yet used, <a href="https://www.everycrsreport.com/reports/RS22952.html">existing Senate rules permit voting by proxy in committee</a>.</p>
+
+	<h3>Legislators voting by proxy</h3>
+
+	{% with LEGISLATOR_PROXIES as proxies %}
+
+	<p>The following {{proxies.current_proxy_pairs|length}} legislators are currently voting by proxy:</p>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Remote Legislator</th>
+				<th>Proxy Legislator</th>
+				<th>Since</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for row in proxies.current_proxy_pairs %}
+				<tr>
+					<td><a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a></td>
+					<td><a href="{{row.proxy.get_absolute_url}}">{{row.proxy}}</a></td>
+					<td>{{row.from|date}}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<h3>Proxies</h3>
+
+	<p>The following list is the same information as above but grouped by proxy legislator. A legislator may be a proxy for up to ten legislators.</p>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Proxy Legislator</th>
+				<th>Remote Legislators</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for proxy, remote_legislators in proxies.current_by_proxy_sorted %}
+				<tr>
+					<td><a href="{{proxy.get_absolute_url}}">{{proxy}}</a></td>
+					<td>
+						{% for row in remote_legislators %}
+							<a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a>
+							({{row.from|date}}-{{row.until|date}}){% if not forloop.last %}, {% endif %}
+						{% endfor %}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	{% endwith %}
+
 {% endblock %}
 
