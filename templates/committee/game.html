@@ -7,22 +7,25 @@
 {% block head %}
 <style>
 
- 	button {
+ 	button[type=submit] {
 	    background-color: #9D2146;
 	    color: white;
 	    float: right; 
 	    margin-left: .5em;
-	    padding: 3px;
+	    padding: 6px;
+	    font-size: 115%;
 	  }
 
 	#committee-game .option {
+		width: 100%;
 	    margin: 10px;
+		height: 3.5em;
 	    padding: 3px;
-	    text-align: center;
 	    background: #1D4E70;
 	    color: white;
 	    margin-bottom: 8px;
-	    cursor: pointer;
+	    border: none;
+	    border-radius: 3px;
 	}
 		#committee-game .option.active {
 		    background: #9D2146;
@@ -46,7 +49,11 @@
 
 {% block body %}
 
-<h1>{{bill.title}}</h1>
+<div class="panel panel-default">
+	<div class="panel-heading" style="font-weight: bold; font-size: 115%;">
+		{{bill.title|truncatewords:30}}
+	</div>
+	<div class="panel-body">
 
 {% with bill.oursummary as summary1 %}
 	{% if summary1 %}
@@ -110,31 +117,35 @@
 	{% endif %}
 </div> <!-- /row -->
 
-<p>This bill was assigned to {{number_of_committees}} committee{% if number_of_committees > 1 %}s{% endif %}. See if you can guess which one{% if number_of_committees > 1 %}s{% endif %}.<p>
+		<p><a href="{{bill.get_absolute_url}}" target="_blank">Read more about this bill &raquo;</a></p>
+	</div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading" style="font-weight: bold; font-size: 115%;">
+		This bill was assigned to {{number_of_committees}} committee{% if number_of_committees > 1 %}s{% endif %}. See if you can guess which one{% if number_of_committees > 1 %}s{% endif %}!
+	</div>
+
+	<div class="panel-body">
 
     <div id="committee-game">
 	<div class="row">
-	{% if bill.current_chamber == "house" %}
-            {% for item in house_committees %}
+        {% for item in committees %}
 	    <div class="col-sm-3">
-		<div class="option" data-committee-id="{{item.code}}">
-  		    {{ item.display_name }}
-		</div>
+			<button class="option" data-committee-id="{{item.code}}">
+	  		    {{ item.display_name }}
+			</button>
 	    </div>
 	    {% endfor %}
-	{% endif %}
-	{% if bill.current_chamber == "senate" %}
-           {% for item in senate_committees %}
-            <div class="col-sm-3">
-               <div class="option" data-committee-id="{{item.code}}">
-                   {{ item.display_name }}
-               </div>
-           </div>
-           {% endfor %}
-        {% endif %}
 	</div>
+
+	<hr>
+
 	<button class="btn" type="submit">Check My Answer</button>
     </div>
+
+	</div>
+</div>
 
 {% endblock %}    
 
