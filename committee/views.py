@@ -165,3 +165,83 @@ def fetch_statements(committee):
     #   if s["person"]: s["title"] = s["title"].replace(s["person"].lastname.lower(), s["person"].lastname) # common easy case fix
 
     return statements
+
+@anonymous_view
+@render_to("committee/game.html")
+def game(committee):
+    from events.models import Feed
+    import re
+    import random
+    from bill.models import Bill, BillType, BillStatus, BillTerm, TermType, BillTextComparison, BillSummary
+    from person.models import Person
+    from settings import CURRENT_CONGRESS
+
+    #copy load bill from bill views.py
+    def load_bill_from_url(congress, type_slug, number):
+        try:
+            bill_type = BillType.by_slug(type_slug)
+        except BillType.NotFound:
+            raise Http404("Invalid bill type: " + type_slug)
+
+        return get_object_or_404(Bill, congress=congress, bill_type=bill_type, number=number)
+
+    #come up with a random bill number
+    def random_bill():
+        types = ['s','hr']
+        randomtype = random.randint(0,1)
+        type_slug = types[randomtype]
+        number = str(random.randint(1,9999))
+        try:
+            load_bill_from_url(CURRENT_CONGRESS, type_slug, number)
+        except:
+            return False
+        bill = load_bill_from_url(CURRENT_CONGRESS, type_slug, number)
+        return bill
+
+    #go fetch the random bill
+    def get_random_bill():
+        is_bill = False
+        while is_bill == False:
+            bill = random_bill()
+            is_bill = bool(bill)
+            if is_bill == True:
+                return bill
+
+    #copy get list of committees from committee view.py
+    def getlist(type_):
+        items = list(Committee.objects.filter(committee_type=type_, obsolete=False))
+        for c in items:
+            if c.name.startswith("Joint "):
+                c.display_name = c.name
+            else:
+                c.display_name = c.sortname()
+        return sorted(items, key=lambda c : c.display_name)
+
+    def getcommittees(bill):
+        import json
+        from django.core.serializers.json import DjangoJSONEncoder
+        actual_committees = []
+        items = bill.committees.all()
+        for c in items:
+            if not c.committee:
+                committee = c.code
+                actual_committees = actual_committees + [committee]
+        committeesJSON = json.dumps(list(actual_committees), cls=DjangoJSONEncoder)
+        return committeesJSON
+
+    def numberofcommittees(bill):
+        count = 0
+        for c in bill.committees.all():
+            if not c.committee:
+                count += 1
+        return count
+
+    bill = get_random_bill()
+
+    return {
+    'house_committees': getlist(CommitteeType.house),
+    'senate_committees': getlist(CommitteeType.senate),
+    'bill': bill,
+    'number_of_committees': numberofcommittees(bill),
+    'actual_committees': getcommittees(bill),
+    }
