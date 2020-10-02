@@ -1020,7 +1020,7 @@ def covid19(request):
     legislator_data = { }
     with open('templates/website/covid19.html') as f:
         for line in f:
-            m = re.search(r"<td>(\d/\d+/\d+)</td>.*href=\"https://www.govtrack.us/congress/members/\S+/(\d+)", line)
+            m = re.search(r"<td>(\d+/\d+/\d+)</td>.*href=\"https://www.govtrack.us/congress/members/\S+/(\d+)", line)
             if m:
                 # For each table line with a date and legislator id, record
                 # in legislator_data.
