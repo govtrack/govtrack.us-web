@@ -14,8 +14,14 @@
 var legislator_data = {{legislator_data|json}};
 
 $(function() {
-	// Update count.
-	$('.affected-legislators-count').text($('#affected-legislators tbody tr').length);
+	// Update count of UNIQUE legislators affected.
+	var legislators = { };
+	$('#affected-legislators tbody tr').each(function() {
+		var cells = $(this).find("td");
+		var legislator_id = /.*\/(\d+)/.exec($(cells[1]).find('a').attr('href'))[1];
+		legislators[legislator_id] = true;
+	});
+	$('.affected-legislators-count').text(Object.keys(legislators).length);
 
 	function make_series(title, color) {
 		return {
@@ -244,7 +250,7 @@ $(function() {
 	<a name="legislators"></a>
 	<h2><span>Quarantined and Sick Legislators</span></h2>
 
-	<p>In all, <span class="affected-legislators-count"> </span> representatives and senators self-quarantined or took other action, or no action, after coming in contact with someone with COVID-19 or testing positive for COVID-19 themselves.</p>
+	<p>In all, <span class="affected-legislators-count"> </span> representatives and senators self-quarantined or took other action, or no action, after coming in contact with someone with COVID-19 or testing positive for COVID-19 themselves &mdash; some multiple times.</p>
 
 	<p class="hidden">In the Senate, <span class="party-totals-senate">...</span>. In the House, <span class="party-totals-house">...</span>.</p>
 
@@ -427,9 +433,9 @@ $(function() {
 
 	<p>On May 15, the House <a href="https://www.govtrack.us/congress/votes/116-2020/h107">passed a rules change</a> to allow proxy voting for floor votes and remote committee committee meetings during this pandemic (<a href="https://docs.house.gov/meetings/RU/RU00/20200514/110750/HRPT-116-420.pdf">see the committee report for further background</a>). Then, pursuant to the new rules, on May 19 the House&rsquo;s Office of Attending Physician and Sergeant at Arms determined the existence of a &ldquo;public health emergency due to a novel coronavirus,&rdquo; which triggered the beginning of proxy voting rules. Under the rules for proxy voting, representatives may designate another representative as their proxy in advance of votes in <a href="https://clerkpreview.house.gov/ProxyLetter#ActiveProxies">a letter to the Clerk of the House of Representatives</a> and must give their proxy exact instructions on how to vote.</p>
 
-	<p>In the Senate, although no proxy voting is allowed for floor votes, some Senate committees have begun holding some meetings with senators participating remotely. And while not yet used, <a href="https://www.everycrsreport.com/reports/RS22952.html">existing Senate rules permit voting by proxy in committee</a>.</p>
+	<p>In the Senate, although no proxy voting is allowed for floor votes, some Senate committees have begun holding some meetings with senators participating remotely. And while not yet used, <a href="https://www.everycrsreport.com/reports/RS22952.html">existing Senate rules may permit voting by proxy in committee</a>.</p>
 
-	<h3>Legislators voting by proxy</h3>
+	<h3>Legislators voting on the House floor by proxy</h3>
 
 	{% with LEGISLATOR_PROXIES as proxies %}
 
@@ -454,7 +460,7 @@ $(function() {
 		</tbody>
 	</table>
 
-	<h3>Proxies</h3>
+	<h3>Proxies for House legislators</h3>
 
 	<p>The following list is the same information as above but grouped by proxy legislator. A legislator may be a proxy for up to ten legislators.</p>
 
