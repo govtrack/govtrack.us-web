@@ -111,7 +111,7 @@ $(function() {
 			            <div class="info">
 			            	<div>{{role.party}}</div>
 		            		<div>Since {{role.logical_dates.0|date}}</div>
-                            {% if role.next_election_year != ELECTION_JUST_HAPPENED_YEAR %}
+                            {% if not role.did_election_just_happen %}
 		            			<div>Next Election in {{role.next_election_year}}</div>
                             {% else %}
 		            			<div>Current Term Ends {{role.enddate|date}}</div>
@@ -187,7 +187,7 @@ $(function() {
 	            <div class="info">
 	            	<div>{{role.party}}</div>
             		<div>Since {{role.logical_dates.0|date}}</div>
-                    {% if ELECTION_JUST_HAPPENED_YEAR %}<div>(Current term ends {{role.enddate|date}})</div>{% endif %}
+                    {% if DID_AN_ELECTION_JUST_HAPPEN %}<div>(Current term ends {{role.enddate|date}})</div>{% endif %}
 
 		        	{% if stateapp != 1 and stateapp != "T" %}
 	            	<div><a href="/congress/members/{{state}}/{{district}}">View District Map</a></div>
@@ -199,7 +199,7 @@ $(function() {
         {% endfor %}
     </div>
 
-        {% if not ELECTION_JUST_HAPPENED_YEAR %}
+        {% if not DID_AN_ELECTION_JUST_HAPPEN %}
         <p style="margin-bottom: 2em">All representatives serve until the end of the current Congress on {{end_of_congress_date|date}}.</p>
         {% endif %}
 

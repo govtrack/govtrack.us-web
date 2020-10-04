@@ -272,7 +272,7 @@
 						{% with rep.current_role as role %}
 						<div>{{role.get_description}}</div>
 	            		<div>Since {{role.logical_dates.0|date}}
-                          {% if role.next_election_year != ELECTION_JUST_HAPPENED_YEAR %}
+                          {% if not role.did_election_just_happen %}
                             (next election in {{role.next_election_year}})
                           {% else %}
                             (current term ends {{role.enddate|date}})

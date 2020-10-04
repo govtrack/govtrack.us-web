@@ -2,6 +2,7 @@
 import os
 import sys
 import re
+import datetime
 
 sys.path.insert(0, 'lib')
 
@@ -174,6 +175,7 @@ IGNORABLE_404_URLS = (
 	)
 
 CURRENT_CONGRESS = 116
+CURRENT_ELECTION_DATE = datetime.date(2020, 11, 3)
 
 EMAIL_UPDATES_FROMADDR = "GovTrack.us Email Updates <noreply@alerts.GovTrack.us>"
 EMAIL_UPDATES_RETURN_PATH = "GovTrack.us Email Updates <bounces+uid=%d@alerts.GovTrack.us>"

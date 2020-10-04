@@ -668,6 +668,12 @@ class PersonRole(models.Model):
             return self.enddate.year
         return self.enddate.year-1
 
+    def did_election_just_happen(self):
+        if not self.current: return False
+        if settings.CURRENT_ELECTION_DATE is None: return False # no election cycle is current
+        if settings.CURRENT_ELECTION_DATE > datetime.datetime.now().date(): return False # election hasn't happened yet
+        return self.next_election_year() == settings.CURRENT_ELECTION_DATE.year # is up this cycle
+
     def get_most_recent_session_stats(self):
         # Which Congress and session's end date is the most recently covered by this role?
         errs = []

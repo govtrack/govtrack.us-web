@@ -325,11 +325,11 @@ function show_pronunciation_guide() {
         		served from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}.
         		   {# note that r has mangled dates so must show year only #}
                     {% if r.current %}
-                    {% if role.next_election_year != ELECTION_JUST_HAPPENED_YEAR %}
+                    {% if not role.did_election_just_happen %}
                       {% if r.ends_with_special_election %}
                         {{ person.lastname }} was appointed to the Senate to fill a vacancy and is up for reelection in a special election in {{role.next_election_year}}.
                       {% else %}
-                        {{ person.lastname }} is next up for reelection in {{role.next_election_year}} and serves until {{role.enddate|date}} unless re-elected.
+                        {{ person.lastname }} is next up for reelection in {{role.next_election_year}} and serves until {{role.enddate|date}}.
                       {% endif %}
                     {% else %} {# there was a recent election that this person was up in, so explain that terms don't end right at the election #}
                        {{ person.lastname }}&rsquo;s current term ends on {{role.enddate|date}}.
