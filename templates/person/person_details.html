@@ -370,6 +370,25 @@ function show_pronunciation_guide() {
         {% endfor %}
         </div>
 
+        {% if role.is_up_for_election or election_guides %}
+		<div class="panel panel-warning" style="margin-top: 2em">
+			<div class="panel-heading"><b>Voting Information</b></div>
+			<div class="panel-body">
+				{% for guide in election_guides %}
+					{% if forloop.first %}
+						<p>
+						{% if role.is_up_for_election %} {# Joe Biden wasn't "up" for election #}
+						{{person}} is up for election.
+						{% endif %}
+						Check out this voter guide from the <a href="https://campuselect.org/" class="plain">Campus Election Engagement Project</a>:</p>
+					{% endif %}
+					<p><a href="{{guide.link}}">{{guide.text}}</a></p>
+				{% endfor %}
+				<p style="margin-bottom: 0; font-style: italic; line-height: 108%">Make sure you are registered to vote and that you vote by mail, early, or know your polling location &mdash; see <a href="https://www.vote.org/">vote.org</a> for help.</p>
+			</div>
+		</div>
+        {% endif %}
+
 		{% with LEGISLATOR_PROXIES as proxies %}
 			{% for rec in proxies.current_proxy_pairs %}
 				{% if rec.remote_legislator == person %}

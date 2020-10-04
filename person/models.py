@@ -461,7 +461,7 @@ class PersonRole(models.Model):
         if self.role_type == RoleType.president:
             return 'President' if short else 'President of the United States'
         if self.role_type == RoleType.vicepresident:
-            return 'Vice President' if short else 'Vice President of the United States (and President of the Senate)'
+            return 'Vice President' if short else 'Vice President of the United States'
         if self.role_type == RoleType.senator:
             return 'Sen.' if short else 'Senator'
         if self.role_type == RoleType.representative:
@@ -667,6 +667,12 @@ class PersonRole(models.Model):
         if (self.extra or {}).get("end-type") == "special-election":
             return self.enddate.year
         return self.enddate.year-1
+
+    def is_up_for_election(self):
+        if not self.current: return False
+        if settings.CURRENT_ELECTION_DATE is None: return False # no election cycle is current
+        if settings.CURRENT_ELECTION_DATE < datetime.datetime.now().date(): return False # election is over
+        return self.next_election_year() == settings.CURRENT_ELECTION_DATE.year # is up this cycle
 
     def did_election_just_happen(self):
         if not self.current: return False

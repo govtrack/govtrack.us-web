@@ -219,6 +219,14 @@ def person_details(request, pk):
         # Get their enacted bills.
         enacted_bills_src_qs = person.sponsored_bills.exclude(original_intent_replaced=True).order_by('-current_status_date')
 
+        # Get voter info guide for their upcoming election.
+        office_id = role.get_office_id()
+        if isinstance(office_id, tuple): office_id = "_".join(str(k) for k in office_id)
+        election_id = office_id
+        if not role.is_up_for_election(): election_id = None
+        # Hard-code Joe Biden so we show election guides.
+        if person.id == 300008 and str(settings.CURRENT_ELECTION_DATE) == "2020-11-03": election_id = "president"
+
         return {'person': person,
                 'role': role,
                 'active_role': active_role,
@@ -241,6 +249,7 @@ def person_details(request, pk):
                 'misconduct_any_not_alleged': misconduct_any_not_alleged,
                 'is_2020_candidate': person.id in prez_2020_candidate_ids,
                 'maybe_vp_candidate':person.id in vp_2020_candidate_ids,
+                'election_guides': load_election_guides(election_id) if election_id else None,
                 }
 
     #ck = "person_details_%s" % pk
@@ -308,6 +317,13 @@ def load_key_votes(person):
     ]
 
     return votes
+
+def load_election_guides(election_id):
+    import csv
+    if not os.path.exists("person/election_guides.csv"): return
+    for rec in csv.DictReader(open("person/election_guides.csv")):
+        if rec["office"] == election_id:
+            yield rec
 
 @user_view_for(person_details)
 def person_details_user_view(request, pk):
