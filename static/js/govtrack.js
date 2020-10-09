@@ -202,7 +202,7 @@ function init_site_search_for_control(elem, options) {
             // Run AJAX query.
             closure["working"] = true;
             $.ajax({
-                url: "http://localhost:8000/search/_autocomplete",
+                url: "/search/_autocomplete",
                 data: {
                     q: q
                 },
