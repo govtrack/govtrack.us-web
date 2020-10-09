@@ -57,26 +57,37 @@ def format_congress_number(value):
 bill_number_re = re.compile(r"(hr|s|hconres|sconres|hjres|sjres|hres|sres)(\d+)(/(\d+))?$", re.I)
 slip_law_number_re = re.compile(r"(P(?:ub[a-z]*)?|P[rv][a-z]*)L(?:aw)?(\d+)-(\d+)$", re.I)
 
-def parse_bill_citation(q, congress=None):
-    b = parse_bill_number(q, congress=congress)
+def parse_bill_citation(q, congress=None, not_exist_ok=False):
+    b = parse_bill_number(q, congress=congress, not_exist_ok=not_exist_ok)
     if not b: b = parse_slip_law_number(q)
     return b
     
-def parse_bill_number(q, congress=None):
+def parse_bill_number(q, congress=None, not_exist_ok=False):
     m = bill_number_re.match(q.replace(" ", "").replace(".", "").replace("-", ""))
     if m == None: return None
+    search_type_flag = None
     if m.group(3) != None:
         cn = int(m.group(4))
+        search_type_flag = "bill-with-congress"
     elif congress != None:
         try:
             cn = int(congress)
         except:
             cn = CURRENT_CONGRESS
+        search_type_flag = "bill-default-congress"
     else:
         cn = CURRENT_CONGRESS
+        search_type_flag = "bill-guessed-congress"
     try:
-        return Bill.objects.get(congress=cn, bill_type=BillType.by_slug(m.group(1).lower()), number=int(m.group(2)))
+        b = Bill.objects.get(congress=cn, bill_type=BillType.by_slug(m.group(1).lower()), number=int(m.group(2)))
+        b.search_type_flag = search_type_flag
+        return b
     except Bill.DoesNotExist:
+        if not_exist_ok:
+          # Return a dummy bill indicating that string matched the regex.
+          b = Bill(congress=cn, bill_type=BillType.by_slug(m.group(1).lower()), number=int(m.group(2)))
+          b.search_type_flag = search_type_flag
+          return b
         return None
 
 def parse_slip_law_number(q):
@@ -84,11 +95,13 @@ def parse_slip_law_number(q):
     if m == None: return None
     pub_priv, cn, ln = m.groups()
     try:
-        return Bill.objects.get(
+        b = Bill.objects.get(
             congress = int(cn),
             sliplawpubpriv = "PUB" if (pub_priv.upper() == "P" or pub_priv.upper().startswith("PUB")) else "PRI",
             sliplawnum = int(ln)
             )
+        b.search_type_flag = "slip-law-number"
+        return b
     except Bill.DoesNotExist:
         return None
 

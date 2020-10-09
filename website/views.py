@@ -4,6 +4,7 @@ from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
@@ -137,7 +138,7 @@ def get_blog_items():
 def congress_home(request):
     return HttpResponseRedirect("/start")
 
-def do_site_search(q, allow_redirect=False, request=None):
+def do_site_search(q, bill_match_mode=None, request=None):
     if q.strip() == "":
         return []
     
@@ -220,9 +221,24 @@ def do_site_search(q, allow_redirect=False, request=None):
        
     from settings import CURRENT_CONGRESS
     from bill.search import parse_bill_citation
-    bill = parse_bill_citation(q)
+    bill = parse_bill_citation(q, not_exist_ok=True)
     congress = "__ALL__"
-    if not bill or not allow_redirect:
+    if bill and not bill._state.adding and bill_match_mode == "redirect":
+        url = bill.get_absolute_url()
+        if request.GET.get("track"): url += "#track"
+        return HttpResponseRedirect(url)
+    if bill and bill_match_mode == "single":
+        # When a bill number matches, just return that bill.
+        # Unless we guessed the Congress number, then show recent
+        # bills with the same type and number.
+        if bill.search_type_flag == "bill-guessed-congress" or bill._state.adding:
+            bills = [ { "obj": b }
+                      for b in Bill.objects.filter(bill_type=bill.bill_type, number=bill.number)
+                                           .order_by('-congress')
+                                           [0:5] ]
+        else:
+            bills = [ { "obj": bill } ]
+    else:
         # query Solr w/ the boosted field
         from haystack.inputs import AutoQuery
         from haystack.query import SQ
@@ -235,17 +251,12 @@ def do_site_search(q, allow_redirect=False, request=None):
             q = q1
             congress = str(CURRENT_CONGRESS)
 
-        bills = [\
-            {"href": b.object.get_absolute_url(),
-             "label": b.object.title,
-             "obj": b.object,
-             "feed": b.object.get_feed() if b.object.is_alive else None,
-             "secondary": b.object.congress != CURRENT_CONGRESS }
-            for b in q[0:9]]
-    else:
-        url = bill.get_absolute_url()
-        if request.GET.get("track"): url += "#track"
-        return HttpResponseRedirect(url)
+        bills = [{ "obj": b.object } for b in q[0:9]]
+    for item in bills:
+       item.update({"href": item["obj"].get_absolute_url(),
+             "label": item["obj"].title,
+             "feed": item["obj"].get_feed() if item["obj"].is_alive else None,
+             "secondary": item["obj"].congress != CURRENT_CONGRESS })
     results.append({
         "title": "Bills and Resolutions",
         "href": "/congress/bills/browse",
@@ -266,7 +277,7 @@ def do_site_search(q, allow_redirect=False, request=None):
              "obj": p,
              "feed": p.get_feed(),
              "secondary": not p.is_top_term() }
-            for p in BillTerm.objects.filter(name__icontains=q, term_type=TermType.new).exclude(name__contains=" Committee on ")[0:9]]
+            for p in BillTerm.objects.filter(name__icontains=q, term_type=TermType.new)[0:9]]
         })
     
     # in each group, make sure the secondary results are placed last, but otherwise preserve order
@@ -285,10 +296,33 @@ def do_site_search(q, allow_redirect=False, request=None):
 
 @render_to('website/search.html')
 def search(request):
-    r = do_site_search(request.GET.get("q", request.POST.get("q", "")), allow_redirect=True, request=request)
+    r = do_site_search(request.GET.get("q", request.POST.get("q", "")), bill_match_mode="redirect", request=request)
     if not isinstance(r, list): return r
     return { "results": r }
 
+@json_response
+def search_autocomplete(request):
+    # Although this is POST-y, we want results cached so use GET.
+
+    # Do the search.
+    r = do_site_search(request.GET.get("q", ""), bill_match_mode="single")
+
+    # Limit the number of results for each group.
+    limit_per_group = 6
+    for i, grp in enumerate(r):
+       grp["results"] = grp["results"][:limit_per_group]
+       limit_per_group = max(int(len(grp["results"]) / 1.5), 1)
+
+    # Remove groups without results.
+    r = [g for g in r if g["results"]]
+
+    # Remove non-JSON-able fields.
+    for grp in r:
+      for item in grp["results"]:
+        if "obj" in item: del item["obj"]
+        if "feed" in item: del item["feed"]
+
+    return { "result_groups": r }
 
 @render_to('website/your_docket.html')
 def your_docket(request):

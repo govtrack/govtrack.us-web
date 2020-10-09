@@ -1206,3 +1206,35 @@ ul.singlesignon {
   padding-left: 3px;
   padding-bottom: 5px;
 }
+
+#site_search_autocomplete_results {
+	border-radius: 0 0 10px 10px;
+	background-color: rgb(29, 78, 112);
+	border: 1px solid rgb(29, 78, 112);
+	padding: .5em 1em;
+}
+	#site_search_autocomplete_results .search-result-group {
+		padding: 5px 0 3px 0;
+		font-size: 90%;
+		color: #DDD;
+	}
+		#site_search_autocomplete_results .search-result-group:first-child {
+			padding-top: 0;
+		}
+	#site_search_autocomplete_results a.result-item {
+		display: block;
+		text-decoration: none;
+		margin: 0 -1em;
+		padding: .25em 1em;
+		background-color: white;
+		color: #444;
+		border-bottom: 1px solid #DDD;
+	}
+		#site_search_autocomplete_results a.result-item:hover, #site_search_autocomplete_results a.result-item:focus {
+			background-color: #9D2146;
+			color: white;
+		}
+	#site_search_autocomplete_results .search-tips {
+		font-size: 95%;
+		line-height: 115%;
+	}

@@ -17,6 +17,11 @@ $(function() {
     // available.
     for (var i = 0; i < window.post_jquery_load_scripts.length; i++)
         window.post_jquery_load_scripts[i]();
+
+    // Autocomplete for the site search box.
+    init_site_search_for_control($('#master_search_q'), {
+        tips: "Enter a bill number like <nobr>H.R. 123</nobr> or <nobr>H.R. 123/110</nobr> (for previous Congresses), law number (e.g. P.L. 110-64), or keywords. Or search legislators, committees, and subject areas."
+    });
 });
 
 function show_modal(title, message) {
@@ -117,4 +122,199 @@ function ordinal(n) {
     else
         m = n % 10;
     return n + "<sup>" + t[m] + "</sup>";
+}
+
+function init_site_search_for_control(elem, options) {
+    var closure = {
+        last_input: 0,
+        working: false,
+        hover: false,
+        blurred: false
+    };
+
+    // Initialize events.
+    elem.on("input", run_search_on_delay);
+    elem.on("blur", function() {
+        closure["blurred"] = true;
+        if (closure["hover"]) return;
+        $("#site_search_autocomplete_results").hide();
+    })
+    elem.on("focus", function() {
+        // If we lost focus to the results but get back
+        // while the results are still open, don't re-start
+        // the search. The user may have pressed ESC, which
+        // closes the results and returns to the input element
+        // but should not re-open results.
+        if (closure["hover"]) return;
+        run_search();
+    });
+    elem.on("keydown", function(event) {
+      if (event.which == 40) { // down arrow
+        // If results are shown, shift focus to first result.
+        var container = $("#site_search_autocomplete_results");
+        if (container.is(":visible")) {
+          var items = container.find('.result-item');
+          if (items) {
+              closure["hover"] = true;
+              event.stopPropagation();
+              setTimeout(function() {
+                $(items[0]).focus();
+              }, 1);
+          }
+        }
+      }
+      if (event.which == 27) { // escape
+        var container = $("#site_search_autocomplete_results");
+        container.hide();
+      }
+    });
+
+    function run_search_on_delay() {
+        // The user made a change to the text. But don't
+        // start the search until a delay in which there
+        // are no more inputs. Increment a sentinel on
+        // each input event. Then delay. After the delay,
+        // if the sentinel has not changed, fire the next
+        // step.
+        closure['last_input']++;
+        var current_input = closure['last_input'];
+        setTimeout(function() {
+            // If we have an AJAX request in progress,
+            // then delay until it's done.
+            if (closure["working"]) {
+                run_search_on_delay();
+                return;
+            }
+
+            // Have any more inputs come in?
+            if (current_input == closure['last_input'])
+                run_search();
+        }, 150);
+    }
+
+    // Run search query and show matches.
+    function run_search() {
+        var q = $(elem).val();
+        if (!/\S/.test(q)) {
+            // Empty / all whitespace.
+            show_results({ result_groups: [] });
+        } else {
+            // Run AJAX query.
+            closure["working"] = true;
+            $.ajax({
+                url: "http://localhost:8000/search/_autocomplete",
+                data: {
+                    q: q
+                },
+                success: function(res) {
+                    closure["working"] = false;
+                    show_results(res);
+                }, error: function() {
+                    closure["working"] = false;
+                }
+            })
+        }
+    }
+
+    // Results UI.
+    function show_results(results) {
+        // Construct a div to hold results.
+        closure["blurred"] = false;
+        closure["hover"] = false;
+        var container = $("#site_search_autocomplete_results");
+        if (container.length == 0) {
+            container = $("<div id=site_search_autocomplete_results></div>");
+            $('body').append(container);
+            container.on("mouseenter", function() {
+                closure["hover"] = true;
+            })
+            container.on("mouseleave", function() {
+                closure["hover"] = false;
+                if (closure["blurred"]) container.hide();
+            })
+        }
+
+        // Clear results.
+        container.text('');
+
+        // Hide if no results and no tips.
+        if (results.result_groups.length == 0 && !(options && options.tips)) {
+            container.hide();
+            return;
+        }
+
+        // Construct results - first by group.
+        results.result_groups.forEach(function(group) {
+            // Make a group header.
+            var group_container = $("<div class='search-result-group'></div>");
+            container.append(group_container);
+            group_container.text(group.title);
+
+            // Add the items.
+            group.results.forEach(function(item) {
+                var item_container = $("<a class='result-item'></a>")
+                container.append(item_container);
+                item_container.text(item.label);
+                item_container.attr('href', item.href);
+
+                // Attach keyboard navigation.
+                item_container.on("keydown", function(event) {
+                  if (event.which == 38) { // up arrow
+                    event.preventDefault();
+                    // prevAll instead of prev so that it can skip result group headings
+                    var prev_item = item_container.prevAll('.result-item:first');
+                    if (!prev_item.length) prev_item = $(elem);
+                    setTimeout(function() {
+                      prev_item.focus();
+                    }, 1);
+                  }
+                  if (event.which == 40) { // down arrow
+                    event.preventDefault();
+                    var next_item = item_container.nextAll('.result-item:first');
+                    if (!next_item.length) return;
+                    setTimeout(function() {
+                      next_item.focus();
+                    }, 1);
+                  }
+                  if (event.which == 27) { // escape
+                    container.hide();
+                    $(elem).focus();
+                  }
+                });
+            });
+        });
+
+
+
+        // Add tips.
+        if (options && options.tips) {
+            var group_container = $("<div class='search-result-group search-tips'></div>");
+            container.append(group_container);
+            group_container.html(options.tips);
+        }
+
+        // Show results.
+        container.css({
+            display: 'block',
+            position: 'absolute',
+            top: $(elem).offset().top + $(elem).outerHeight(),
+        });
+        var w = $(elem).outerWidth();
+        if (w > 300) {
+            container.css({
+                left: $(elem).offset().left,
+                width: $(elem).outerWidth()
+            });
+        } else if ($(window).innerWidth() - $(elem).offset().left > 300) {
+            container.css({
+                left: $(elem).offset().left,
+                width: $(window).innerWidth() - $(elem).offset().left - 5 /* our padding */
+            });
+        } else {
+            container.css({
+                left: 5,
+                width: $(window).innerWidth() - 15
+            });
+        }
+    }
 }
