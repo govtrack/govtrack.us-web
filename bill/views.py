@@ -344,12 +344,18 @@ def bill_full_details(request, congress, type_slug, number):
     }
 
 def get_cosponsors_table(bill):
+    def make_name(person, role):
+        # don't need title because it's implicit from the bill type
+        from person.name import get_person_name
+        person.role = role
+        return get_person_name(person, firstname_position="after", show_title=False)
+
     # Get all sponsor/cosponsors.
     cosponsors = []
     if bill.sponsor is not None: # historical bills may be missing this
         cosponsors.append({
             "person": bill.sponsor,
-            "name": bill.sponsor_name,
+            "name": make_name(bill.sponsor, bill.sponsor_role),
             "party": bill.sponsor_role.party if bill.sponsor_role else "Unknown",
             "joined_withdrawn": "Primary Sponsor",
             "sort_cosponsor_type": 0,
@@ -359,7 +365,7 @@ def get_cosponsors_table(bill):
     for csp in bill.cosponsor_records:
         cosponsors.append({
             "person": csp.person,
-            "name": csp.person_name, # !
+            "name": make_name(csp.person, csp.role),
             "party": csp.role.party if csp.role else "Unknown",
             "joined_withdrawn": csp.joined_date_string,
             "sort_cosponsor_type": 1 if not csp.withdrawn else 2,
