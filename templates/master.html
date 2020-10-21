@@ -11,7 +11,7 @@
 
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 
-        <link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap/css/bootstrap.min.css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap/css/bootstrap.min.css">
 		<link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap/css/bootstrap-theme.min.css">
 
 		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20201009" />
@@ -31,6 +31,16 @@
 	
 
 		{% block extra_css %}{% endblock %}
+
+		{% if not debug %}
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-GD8FT6MB9V"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		  gtag('config', 'G-GD8FT6MB9V');
+		</script>
+		{% endif %}
 
 		<script type="text/javascript">
 		window.post_jquery_load_scripts = [];
@@ -340,6 +350,10 @@
 		ga('set', 'dimension1', the_user ? "Logged In" : "Anonymous");
 		ga('set', 'dimension2', the_segment);
 		ga('send', 'pageview');
+		gtag('set', 'user_properties', {
+		  Registered: the_user ? "Logged In" : "Anonymous",
+		  GeoSegment: the_segment
+		});
 
 		{% if request.anonymous %}
 		<!-- Master page elements when using the user-head script  -->
