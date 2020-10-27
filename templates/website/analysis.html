@@ -116,6 +116,8 @@ h3 { margin: 1em 0; }
 			
 			<p>You’ll see in the charts on the right that the ideology analysis does a good job at separating the Democrats from the Republicans, and within each party the moderates from the extremes. If you wanted to know how your representatives stood in relation to their peers ideologically, this chart is a good place to start.</p>
 			
+			<p>But keep in mind its limitations: Although we don&rsquo;t report a margin of error, the scores fluctuate significantly over time because of the limited data used in the analysis and that legislating is a process involving chance. In addition, while we sometimes refer to this as a left-right score, that&rsquo;s something we attribute to the analysis after we see the results &mdash; it may be measuring something else, perhaps something more closely related to partisan-ness, and it may be affected by the popularity of a legislator since the analysis looks at when legislators work together. Additionally, cosponsorship is a low-risk legislative action that might not reflect how a legislator might vote when forced to make yes-or-no decisions. And our scores may be gamed by legislators who cosponsor bills with the intent to move their score to the left or right.</p>
+			
 			<p>We first began publishing this analysis in 2004, then calling it a political spectrum. A similar analysis by <a href="http://pooleandrosenthal.com/recentpolitics.htm">Professor Keith Poole</a> using voting records rather than cosponsorship produces similar results: see <a href="http://www.voteview.com">voteview.com</a>. (As far as we know, we were the first to apply this sort of analysis to cosponsorship behavior.)</p>
 			
 			<h3>Methodology</h3>
@@ -127,10 +129,11 @@ h3 { margin: 1em 0; }
 			<p>Every square matrix has a singular value decomposition which can be interpreted as a set of sets of scores for each Member of Congress, each set a ranking on different dimension. The dimensions are themselves ranked in order by how much of the original data they explain. We have found that the <i>second</i> dimension best corresponds with what people generally consider political ideology. We use the scores from that dimension in our charts.</p>
 			
 			<p>The analysis is blind to actual information like what the legislation is about or what party each Member of Congress is affiliated with. In fact, there’s no guarantee that the scores have anything to do with liberal- or conversative-ness or any other standard frame for political ideology. All it tells us is how to spread Members of Congress out along a spectrum in a way that explains their record of cosponsorship. But in practice it captures left-right ideology very well.</p>
-			
+
 			<h3>Data</h3>
 			
 			<p>The ideology scores can be found in two CSV files sponsorshipanalysis_h.txt and sponsorshipanalysis_s.txt (House and Senate) over <a href="/data/analysis/by-congress/{{current_congress}}/">here</a>.</p>
+
 			
 			<h3>Source Code</h3>
 			
