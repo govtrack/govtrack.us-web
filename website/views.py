@@ -1149,7 +1149,7 @@ def get_youtube_videos(channel_id, limit=None):
             url = first_url + '&pageToken={}'.format(next_page_token)
         except:
             break
-        if limit is not None and len(video_links) >= limit:
+        if limit is not None and len(videos) >= limit:
             break
 
     if exception and not videos:
