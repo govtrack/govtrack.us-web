@@ -14,7 +14,7 @@ stat_titles = {
     "cosponsors":  { "title": "Cosponsors", "icon": "congress-members", "verb": ("", "Got the", "on their bills"), "superlatives": ("most cosponsors", "fewest cosponsors") },
     "cosponsored":  { "title": "Bills Cosponsored", "icon": "bills-resolutions", "verb": ("Cosponsored", "the", ""), "superlatives": ("most bills", "fewest bills") },
     "cosponsored-other-party":  { "title": "Joining Bipartisan Bills", "icon": "handshake", "verb": ("Joined bipartisan bills", "the", ""), "superlatives": ("most often", "least often") },
-    "ideology": { "title": "Ideology Score", "icon": "congress-members", "verb": ("Ranked", "", ""), "superlatives": ("most right (~conservative)", "most left (~liberal)") },
+    "ideology": { "title": "Ideology Score", "icon": "congress-members", "verb": ("Ranked", "", ""), "superlatives": ("most politically right", "most politically left") },
     "leadership":  { "title": "Leadership Score", "icon": "congress-members", "verb": ("Ranked", "the", ""), "superlatives": ("top leader", "bottom/follower") },
     "committee-positions":  { "title": "Committee Positions", "icon": "committees", "verb": ("Held", "the", ""), "superlatives": ("most committee positions", "fewest committee positions") },
     "transparency-bills":  { "title": "Government Transparency", "icon": "open-government", "verb": ("Supported government transparency", "the", ""), "superlatives": ("most often", "least often") },
