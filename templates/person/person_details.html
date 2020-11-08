@@ -370,6 +370,7 @@ function show_pronunciation_guide() {
         {% endfor %}
         </div>
 
+	{% comment %}
         {% if role.is_up_for_election or election_guides %}
 		<div class="panel panel-warning" style="margin-top: 2em">
 			<div class="panel-heading"><b>Voting Information</b></div>
@@ -388,6 +389,7 @@ function show_pronunciation_guide() {
 			</div>
 		</div>
         {% endif %}
+	{% endcomment %}
 
 		{% with LEGISLATOR_PROXIES as proxies %}
 			{% for rec in proxies.current_proxy_pairs %}
@@ -415,24 +417,6 @@ function show_pronunciation_guide() {
 				{% endif %}
 			{% endfor %}
 		{% endwith %}
-
-	{% if person.id == 412678 %}
-	<h2><span>2020 Election</span></h2>
-	<p>Harris is 2020 Democratic presidential candidate Joe Biden&rsquo;s choice for vice president. 
-	We <a href="https://govtrackinsider.com/our-ideology-score-placed-kamala-harris-as-the-most-liberal-senator-in-2019-bbd25493ca72">summarized
-	some of her legislative proposals</a> to analyze her policy positions.</p>
-	<p>Our numerical analysis of Harris&rsquo;s legislative actions below have been commented on widely in the national news. For more background, see
-	<a href="https://www.washingtonpost.com/politics/2020/08/13/is-kamala-harris-really-most-liberal-senator-trump-claims/">Is Kamala Harris really the most liberal senator, as Trump claims?</a>
-	and <a href="https://www.washingtonpost.com/politics/2020/08/13/what-measures-ideology-tell-us-about-members-congress-what-they-dont/">What measures of ideology tell us about members of Congress — and what they don’t</a> where we explain our methodology and what else to look at.</p>
-	<p>Earlier this year, we <a href="https://govtrackinsider.com/what-do-we-know-about-the-potential-picks-for-the-democratic-vice-president-cbbbb96ce147">compared the legislative records of the potential running mates who served in Congress</a> [May 20, 2020].</p>
-	<p>Before all this, Harris was a candidate for president herself. We
-	<a href="https://govtrackinsider.com/what-can-govtrack-data-tell-us-about-the-nine-most-recent-and-current-members-of-congress-running-14bc37b1f4b8?source=friends_link&sk=3abe31258eb6f44749ef449174f452ba">compared the thirteen most recent and current Members of Congress running for President</a> [May 3, 2019]
-	and their positions on
-        <a href="https://govtrackinsider.com/legislation-introduced-by-the-2020-candidates-this-year-health-and-criminal-justice-ff5300e553c5?source=friends_link&sk=b078a839dc2475a49478ed24bb8dd83b">Health and Criminal Justice</a> [May 1, 2019],
-        <a href="https://govtrackinsider.com/legislation-introduced-by-the-2020-candidates-this-year-oversight-and-immigration-988e15ac11b2?source=friends_link&sk=49efd368d3b64fdc9ad1228416b3122e">Oversight and Immigration</a> [May 20, 2019], and
-        <a href="https://govtrackinsider.com/legislation-introduced-by-the-2020-candidates-this-year-finance-and-the-economy-4d3a34808be5">Finance and the Economy</a> [May 31, 2019].
-        </p>
-        {% endif %}
 
 		{% if misconduct %}
 		<h2><span>
