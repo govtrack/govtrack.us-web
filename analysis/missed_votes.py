@@ -4,7 +4,7 @@
 # statistics by chamber.
 
 # To update from scratch:
-# for c in {1..113}; do echo $c; python missed_votes.py $c; done
+# for c in {1..CURRENT_CONGRESS}; do echo $c; python missed_votes.py $c; done
 
 import csv, datetime, glob, os, re, sys
 import lxml.etree as lxml
@@ -55,6 +55,12 @@ vote_counts = { }
 voters_by_chamber = { "h": set(), "s": set() }
 person_lifetime_vote_dates = { }
 for fn in glob.glob(vote_xml_glob):
+	# This vote ocurred in closed session and at the time of initial publication, all senators were
+	# marked as not voting, which dinged every senator as having a missed vote. We'll skip this
+	# vote in statistics. The Senate XML file is expected to be updated to mark the senators'
+	# votes as something other than Not Voting, and when that happens this will become unnecessary.
+	if "congress/116/votes/2020/s216/" in fn: continue
+
 	m = re.match("data/congress/\d+/votes/(.*)/.*/", fn)
 	session = m.group(1)
 	dom = lxml.parse(fn).getroot()
