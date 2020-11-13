@@ -166,7 +166,7 @@ def fetch_statements(committee):
 
     return statements
 
-@anonymous_view
+#@anonymous_view - don't cache or we can't get a different bill on each page load
 @render_to("committee/game.html")
 def game(committee):
     from events.models import Feed
