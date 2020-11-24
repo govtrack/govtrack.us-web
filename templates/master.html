@@ -132,6 +132,10 @@
 					<li><a href="/congress/committees/game">Guess the Committee<i>!</i></a></li>
 				</ul>
 			</li>
+			<p class="navbar-text navbar-right">
+				<a id="nav-in-session-house" style="display: none" href="https://live.house.gov/" class="navbar-link" title="The House is in session.">H <span class="glyphicon glyphicon-facetime-video" style="top: 2px"></span></a>
+				<a id="nav-in-session-senate" style="display: none" href="https://www.senate.gov/floor/index.htm" class="navbar-link" title="The Senate is in session.">S <span class="glyphicon glyphicon-facetime-video" style="top: 2px"></span></a>
+			</p>
 	      </ul>
 	      <ul class="nav navbar-nav navbar-right">
 			{% block override_login %}
@@ -365,7 +369,7 @@
 		{% endif %}
 	</script>
 
-	<script src="/static/js/govtrack.js?20201009"></script>
+	<script src="/static/js/govtrack.js?20201123"></script>
 	{% include "run_of_site_popups.html" %}
 
     <div id="fb-root"></div>

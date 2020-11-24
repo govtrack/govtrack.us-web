@@ -7,6 +7,7 @@ import json, datetime, base64, urllib.request, urllib.error, urllib.parse
 from emailverification.models import BouncedEmail
 
 from person.views import load_proxy_vote_info
+from website.views import is_congress_in_session_live
 
 import us
 
@@ -71,7 +72,9 @@ def template_context_processor(request):
         context["remote_net_" + request._special_netblock] = True
     except:
         pass
-    
+
+    context["IS_CONGRESS_IN_SESSION_LIVE"] = is_congress_in_session_live
+
     return context
   
 class GovTrackMiddleware:

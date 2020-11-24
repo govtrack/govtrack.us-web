@@ -22,6 +22,10 @@ $(function() {
     init_site_search_for_control($('#master_search_q'), {
         tips: "Enter a bill number like <nobr>H.R. 123</nobr> or <nobr>H.R. 123/110</nobr> (for previous Congresses), law number (e.g. P.L. 110-64), or keywords. Or search legislators, committees, and subject areas."
     });
+
+    // Activate Senate/House in session in the nav bar.
+    if (is_congress_in_session_live.house == "yes") $('#nav-in-session-house').show();
+    if (is_congress_in_session_live.senate == "yes") $('#nav-in-session-senate').show();
 });
 
 function show_modal(title, message) {

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponse, Http404
 from django.urls import resolve
-from django.template import Template, Context
+from django.template import Template, RequestContext
 from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import ensure_csrf_cookie
 
@@ -34,7 +34,7 @@ def user_head(request):
 			# silently ignore, probably the main page was a 404 too
 			pass
 
-	return HttpResponse(head_template.render(Context({
+	return HttpResponse(head_template.render(RequestContext(request, {
 				"csrf_token": request.META.get("CSRF_COOKIE") or "",
 				"user": request.user,
 				"user_data": json.dumps(user_data),
