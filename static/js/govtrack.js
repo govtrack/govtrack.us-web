@@ -110,6 +110,10 @@ function init_ad_zone(ad_container) {
         // Footer leaderboard Google AdSense unit, when the viewport is large enough to display it.
         write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="5620102176"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
+
+    } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 800) {
+	write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3192837063"></ins>');
+        (adsbygoogle = window.adsbygoogle || []).push({});
     }
 }
 
