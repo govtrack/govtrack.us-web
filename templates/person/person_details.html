@@ -391,6 +391,24 @@ function show_pronunciation_guide() {
         {% endif %}
 	{% endcomment %}
 
+	{% if kraken_caucus == "yes" %}
+		<div class="panel panel-danger">
+			<div class="panel-body">
+				{{person.lastname}} was a member of the so-called Kraken Caucus<sup><a href="https://twitter.com/jaketapper/status/1337184530499776517">1</a></sup>,
+				Republican representatives who joined<sup><a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">2</a></sup> a case before the Supreme Court calling for the votes for President of the United States in the 2020 election <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">to be discounted</a>
+				in four states where the Republican candidate narrowly lost, alleging that voters there followed procedures set by the wrong state officials. The case was fueled by conspiracy theories.<sup><a href="https://www.bloomberg.com/news/articles/2020-12-07/sidney-powell-s-michigan-kraken-suit-slammed-by-federal-judge">3</a></sup> The Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">unanimously threw out the case</a>.
+			</div>
+		</div>
+	{% elif kraken_caucus == "no" %}
+		<div class="panel panel-info">
+			<div class="panel-body">
+				{{person.lastname}} was among a minority of House Republicans who in December 2020 did not join the so-called Kraken Caucus<sup><a href="https://twitter.com/jaketapper/status/1337184530499776517">1</a></sup>.
+				Other representatives &mdash; but not {{person.lastname}} &mdash; called for the votes for President of the United States in the 2020 election <a href="https://www.newsweek.com/donald-trump-big-one-supreme-court-gambit-shut-down-ending-legal-push-reverse-defeat-1554302">to be discounted</a>
+				in four states where the Republican candidate narrowly lost in a case fueled by conspiracy theories<sup><a href="https://www.bloomberg.com/news/articles/2020-12-07/sidney-powell-s-michigan-kraken-suit-slammed-by-federal-judge">2</a></sup> that the Supreme Court unanimously rejected.
+			</div>
+		</div>
+	{% endif %}
+
 		{% with LEGISLATOR_PROXIES as proxies %}
 			{% for rec in proxies.current_proxy_pairs %}
 				{% if rec.remote_legislator == person %}
