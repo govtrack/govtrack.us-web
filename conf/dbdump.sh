@@ -6,8 +6,9 @@ mkdir -p $BACKUP_DIR
 
 function backup() {
     # Limit line length to the minimum mysqldump will accept.
-    echo $@... > /dev/stderr
-    mysqldump $(./manage.py dbparams) --net_buffer_length=4096 $@
+    FN=$1 && shift
+    echo $@...
+    mysqldump $(./manage.py dbparams) --no-tablespaces --net_buffer_length=4096 $@ | gzip > $BACKUP_DIR/$(date --iso-8601 | sed s/-//g)-$FN.sql.gz
 }
 
 TABLE_LIST="
@@ -51,7 +52,7 @@ website_userposition
 website_userprofile
 "
 
-backup $TABLE_LIST | gzip > $BACKUP_DIR/userdata.sql.gz
+backup userdata $TABLE_LIST
 
 export TABLE_LIST="
 bill_amendment
@@ -89,5 +90,5 @@ vote_voter
 vote_votesummary
 "
 
-backup $TABLE_LIST | gzip > $BACKUP_DIR/legdata.sql.gz
+backup legdata $TABLE_LIST
 
