@@ -1,95 +1,128 @@
 {% extends "master.html" %}
-{% block title %}GovTrack Voterama{% endblock %}
+{% block title %}Voterama Subscription Service for Editorial Publications - GovTrack.us{% endblock %}
 
 {% block body %}
 
-<h1>GovTrack.us to Acquire Thomas Voting Reports</h1>
+<h1>Voterama Subscription Service for Periodicals and Public Interest Organizations</h1>
+
+<div class="row">
+
+<section class="col-sm-7">
+    <p>GovTrack.us now offers a subscription service for local newspapers, digital publications, and other public interest organizations to disseminate trusted information about Congressional activity to their subscribers and members.</p>
+
+    <p><b>Weekly Voting Reports</b> Each Friday when Congress is in session, subscribers receive a news feature consisting of nonpartisan journalistic descriptions of key congressional actions paired with the votes cast on those measures by their local senators and representatives. Subscribers also receive breaking coverage of especially newsworthy roll call votes.</p>
+
+    <p><b>Newsprint &amp; Digital Coverage</b> Print subscribers receive coverage in their choice of (a) text running from 300 to 900 words or (b) a 2- or 3-column paginated graphic that arrives by email ready for publication. Digital subscribers adapt these text and graphical offerings to their unique online looks and specifications.</p>
+
+    <p><b>Price</b> Subscriptions start at $1,000 per year. Please inquire using the form <span class="hidden-xs">on the right</span><span class="visible-xs-inline">below</span>.</p>
+
+    <p>The Voterama Subscription Service by GovTrack.us is the continuation of Thomas Voting Reports, a.k.a. Voterama in Congress, the longest-running independent news service in Washington which opened in 1971 after the Watergate scandal. GovTrack.us acquires Thomas Voting Reports in 2021.</p>
+</section>
+
+<section class="col-sm-5">
+    <div class="panel panel-info">
+    <div class="panel-body">
+
+    <h3 style="margin: 0">Subscribe now to recieve weekly reports on the votes cast by your legislators:</h3>
+
+    <form style="margin-top: 1em" method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="voteramaPublication">Publication/Organization Name</label>
+        <input type="text" class="form-control" id="voteramaPublication" name="publication" required>
+      </div>
+
+      <div class="form-group">
+        <label for="voteramaContact">Your Name</label>
+        <input type="text" class="form-control" id="voteramaContact" name="name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="voteramaEmail">Your Email Address</label>
+        <input type="email" class="form-control" id="voteramaEmail" name="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="voteramaPhone">Phone Number (optional)</label>
+        <input type="text" class="form-control" id="voteramaPhone" name="phone">
+      </div>
+
+      {% if response %}
+      <p class="text-{{response.class}}">{{response.message}}</p>
+      {% endif %}
+
+      <center>
+        <button type="submit" class="btn btn-primary">Request Information</button>
+      </center>
+    </form>
+
+    </div>
+    </div>
+</section>
+</div>
 
 <div class="row">
 <section class="col-sm-7 col-md-6">
-<p>GovTrack.us, a leading digital publisher of information on Congress and a public
-advocate of using technology to increase transparency on Capitol Hill, has agreed to
-purchase Thomas Voting Reports, the longest-running independent news service
-in Washington. The deal will take effect at the start of the 117th Congress in January.</p>
 
-<h2><span>Thomas Voting Reports</span></h2>
-<p>Thomas Voting Reports, under the trade name Voterama in
-Congress, serves a nationwide subscriber base of newspapers and
-their websites. It publishes a weekly news report of up to 900 words
-featuring nonpartisan journalistic descriptions of key congressional
-actions paired with the votes cast on those measures by local House members and senators.</p>
+<h2><span>GovTrack.us to Acquire Thomas Voting Reports</span></h2>
+<p>GovTrack.us, a leading digital publisher of information on Congress and a
+public advocate of using technology to increase transparency on Capitol Hill,
+has agreed to purchase Thomas Voting Reports, the longest-running independent
+news service in Washington. The deal will take effect at the start of the
+117th Congress in January.</p>
 
-<p>The company opened in 1971 as a regional reporting service covering the local angle in Washington
-for newspaper clients in several states. In 1973, it added 50-state coverage of congressional voting
+<h4><b>About Thomas Voting Reports</b></h4>
+<p>Thomas Voting Reports, under the trade name Voterama in Congress, serves a
+nationwide subscriber base of newspapers and their websites. It publishes a
+weekly news report of up to 900 words featuring nonpartisan journalistic
+descriptions of key congressional actions paired with the votes cast on those
+measures by local House members and senators.</p>
 
-records that continues today and will be merged into GovTrack.us. More than 720 daily U.S. news-
-papers, nearly one in two, have subscribed to the service at one time or another.</p>
+<p>The company opened in 1971 as a regional reporting service covering the
+local angle in Washington for newspaper clients in several states. In 1973, it
+added 50-state coverage of congressional voting records that continues today
+and will be merged into GovTrack.us. More than 720 daily U.S. newspapers,
+nearly one in two, have subscribed to the service at one time or another.</p>
 
-<h2><span>GovTrack.us</span></h2>
-<p>With 10 million unique visitors this year and more than
-80,000 Twitter followers, GovTrack.us, founded in 2004, ranks
-among the most visited nongovernmental, public-interest websites that cover the workings of
-Congress in detail for the benefit of readers including everyday constituents.</p>
+<h4><b>About GovTrack.us</b></h4> 
+<p>With 10 million unique visitors this year and more than 80,000 Twitter
+followers, GovTrack.us, founded in 2004, ranks among the most visited
+nongovernmental, public-interest websites that cover the workings of Congress
+in detail for the benefit of readers including everyday constituents.</p>
 
-<p>GovTrack.us posts status reports and sends email and Twitter alerts on major bills in the legislative
-pipeline; tracks individual voting records; measures lawmakers’ ideology based on the bills they
-cosponsor; and publishes specialized databases in areas including congressional misconduct and
+<p>GovTrack.us posts status reports and sends email and Twitter alerts on
+major bills in the legislative pipeline; tracks individual voting records;
+measures lawmakers’ ideology based on the bills they cosponsor; and publishes
+specialized databases in areas including congressional misconduct and  the
+spread of Covid-19 among members. GovTrack.us was one of the world’s first
+government transparency websites. A representative of the organization
+testified before the House Select Committee on the Modernization of Congress
+in support of more and better disclosure of information to the public.</p>
 
-the spread of Covid-19 among members. GovTrack.us was one of the world’s first government-
-transparency websites. A representative of the organization testified before the House Select
+<h4><b>Statements by Voterama and GovTrack.us Founders</b></h4>
 
-Committee on the Modernization of Congress in support of more and better disclosure of informa-
-tion to the public.</p>
+<p><span style="font-weight:bold">Voterama Editor Richard G. Thomas:</span>
+“Our legacy service rooted in traditional journalism has found a worthy new
+home at GovTrack.us, which skillfully combines Internet and social media
+savvy, enterprise journalism and a spirit of public service to deliver
+important congressional information to citizens. With an autocratic war on
+truth underway on Capitol Hill and throughout our political discourse,
+constituents need access more than ever to trustworthy sources of news and
+information on congressional actions and the records of individual lawmakers.
+GovTrack.us is stepping up to meet this challenge, and we are gratified to see
+our coverage specialty included in their efforts.”</p>
 
-<h2><span>Statements</span></h2>
-<p><span style="font-weight:bold">Voterama Editor Richard G. Thomas:</span> “Our legacy service rooted in traditional journalism has
-found a worthy new home at GovTrack.us, which skillfully combines Internet and social media
-savvy, enterprise journalism and a spirit of public service to deliver important congressional
-information to citizens. With an autocratic war on truth underway on Capitol Hill and throughout
-our political discourse, constituents need access more than ever to trustworthy sources of news
-and information on congressional actions and the records of individual lawmakers. GovTrack.us
-is stepping up to meet this challenge, and we are gratified to see our coverage specialty included
-in their efforts.”</p>
-
-<p><span style="font-weight:bold">GovTrack.us Founder Joshua Tauberer:</span> “Thomas Voting Reports’ mission to provide localized
-congressional-accountability coverage to newspapers across America fits naturally with our work
-
-to inform Americans about the daily activities of Congress. We are honored to bring their journal-
-ism under the same roof as GovTrack’s bill summaries and analyses of legislators’ records. The
-
-synergy between the two services will benefit Voterama subscribers and visitors to GovTrack.us
-with enhanced data and analytical content and will lead to new opportunities to engage readers.”</p>
-
-</section>
-<section class="col-md-offset-1 col-sm-5">
-
-<div class="panel panel-info">
-<div class="panel-body">
-
-<h3 style="padding-left:10pt">Subscribe now to recieve weekly reports on the votes cast by your legislators:</h3>
-
-<div class="subscription-form" style="padding-left:10pt; padding-bottom:15pt">
-    <p>
-        <label for="pub">Publication</label>
-	<input type="text" id="pub" name="pub">
-    </p>
-    <p>
-        <label for="contact">Contact</label>
-        <input type="text" id="contact" name="contact">
-    </p>
-    <p>
-        <label for="email">Email</label>
-        <input type="text" id="email" name="email">
-    </p>
-    <p>
-        <label for="phone">Phone</label>
-        <input type="text" id="phone" name="phone">
-    </p>
-</div>
-
-</div>
-</div>
+<p><span style="font-weight:bold">GovTrack.us Founder Joshua Tauberer:</span>
+“Thomas Voting Reports’ mission to provide localized
+congressional-accountability coverage to newspapers across America fits
+naturally with our work to inform Americans about the daily activities of
+Congress. We are honored to bring their journalism under the same roof as
+GovTrack’s bill summaries and analyses of legislators’ records. The synergy
+between the two services will benefit Voterama subscribers and visitors to
+GovTrack.us with enhanced data and analytical content and will lead to new
+opportunities to engage readers.”</p>
 
 </section>
+
 </div>
 {% endblock %}

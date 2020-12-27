@@ -87,8 +87,9 @@ copy_env_vars = [
     "EMAIL_HOST_PASSWORD",
     "EMAIL_USE_TLS",
     "EMAIL_BACKEND",
+    "VOTERAMA_EMAIL_TO",
 
-    # For us...
+    # Various other accounts we have.
     "GOOGLE_ANALYTICS_KEY",
     "TWITTER_ACCESS_TOKEN", # for automated tweets and to update @GovTrack/Members-of-Congress twitter list
     "TWITTER_ACCESS_TOKEN_SECRET",
@@ -105,6 +106,7 @@ copy_env_vars = [
     "DRAFTABLE_ACCOUNT_ID",
     "DRAFTABLE_AUTH_TOKEN",
 
+    # Data paths.
     "CONGRESS_DATA_PATH",
     "CONGRESS_PROJECT_PATH",
     "MISCONDUCT_DATABASE_PATH",
