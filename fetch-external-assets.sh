@@ -89,15 +89,15 @@ download \
 download \
   https://code.highcharts.com/highcharts.js \
   $VENDOR/highcharts.js \
-  '9e423c5c172c03971d4dedb77fac6e82d55cd92b160e16f1827dd6e3feffea2e'
+  '7c36dee137a93e387a5badf49973f48735c20db78128268bef13221f5be2eabe'
 download \
   https://code.highcharts.com/modules/accessibility.js \
   $VENDOR/highcharts-accessibility.js \
-  '9e166aa2e1a21589bb6f0ae7c2e5ef5b711e67cfc7ea338db870d97e656e8556'
+  '0edb25059116d33dfed6d21d88d76da16da82898a03257906fcadfbd3e9e71af'
 download \
   https://code.highcharts.com/modules/xrange.js \
   $VENDOR/highcharts-xrange.js \
-  'ca9dbd0415a1baa2c27a546360575f9c0058fca40061c614ac859911edb7a160'
+  '85defb2965cabd08d1f796d602377c3cf46c426d0b98945246e618f7a9756f3f'
 
 # Plotly (MIT license)
 download \
