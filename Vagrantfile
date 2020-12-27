@@ -32,8 +32,7 @@ Vagrant.configure(2) do |config|
     # on a new system you might also want to run: sudo apt-get upgrade
     sudo apt install -y -q \
         git python3-pip virtualenv unzip \
-        libcap-dev libcairo-dev python3-xapian
-    # on production we don't use python3-xapian
+        libcap-dev libcairo-dev
 
     # on production I also needed:
     # sudo apt-get install memcached libmysqlclient-dev poppler-utils s3cmd mysql-client
@@ -53,6 +52,10 @@ Vagrant.configure(2) do |config|
     #
     # virtualenv -ppython3 .venv
     # source .venv/bin/activate
+    
+    # Install Xapian: (skip in production, where we use Solr)
+    wget https://raw.githubusercontent.com/notanumber/xapian-haystack/master/install_xapian.sh
+    bash install_xapian.sh 1.4.17
 
     # Install Python packages.
     # In production, xapian-haystack should be skipped.
