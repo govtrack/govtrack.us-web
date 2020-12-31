@@ -60,7 +60,7 @@ def get_related_bills(bill):
 def bill_details(request, congress, type_slug, number):
     # load bill and text
     bill = load_bill_from_url(congress, type_slug, number)
-    text_info = bill.get_text_info(with_citations=True)
+    text_info = bill.get_text_info()
 
     # load stakeholder positions
     from stakeholder.models import BillPosition

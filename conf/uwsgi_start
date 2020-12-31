@@ -12,7 +12,7 @@ else
   BIND_ARGS="--socket /tmp/uwsgi_govtrack_${NAME}.sock --chmod-socket=666 --pidfile /tmp/uwsgi_govtrack_${NAME}.pid"
 fi
 
-if [ -z "$PROCESSES"]; then PROCESSES=1; fi
+if [ -z "$PROCESSES" ]; then PROCESSES=1; fi
 
 source .venv/bin/activate
 ./minify

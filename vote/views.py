@@ -39,7 +39,7 @@ def vote_list(request):
     return vote_search_manager().view(request, "vote/vote_list.html",
         defaults = { "session": default_session,
 					 "sort": request.GET.get("sort",None)},
-        paginate = lambda form : "session" not in form, # people like to see all votes for a year on one page
+        #paginate = lambda form : "session" not in form, # people like to see all votes for a year on one page
         context = { "feed": Feed(feedname="misc:allvotes") })
 
 def load_vote(congress, session, chamber_code, number):
