@@ -833,6 +833,16 @@ def vote_comparison_table_named(request, table_id, table_slug):
 			("115-2017/s109", { "title": "Keeping Filibuster for Supreme Court Nominees" }),
 			("116-2019/s59",  { "title": "Keeping Filibuster 30-Hour Length for Most Nominees" }),
 		]
+	elif int(table_id) == 6:
+		if table_slug != "ndaa-2021":
+			return HttpResponseRedirect("/congress/votes/compare/6/ndaa-2021")
+		title = "Legislators Who Changed Their Vote on the 2021 NDAA"
+		description = "After President Trump vetoed the National Defense Authorization Act, the defense spending bill, for 2021, some legislators changed their position."
+		votes = [
+			("116-2020/h238", { "title": "House Vote on Passage" }),
+			("116-2020/h253",  { "title": "House Veto Override" }),
+			#("116-2020/s264", { "title": "Senate Vote on Passage" }),
+		]
 	else:
 		raise Http404()
 
