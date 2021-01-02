@@ -391,12 +391,20 @@ function show_pronunciation_guide() {
         {% endif %}
 	{% endcomment %}
 
-	{% if kraken_caucus == "yes" %}
+	<!-- Kraken Caucus Labels -->
+	{% if kraken_caucus == "txvpaamicus" or kraken_caucus == "krakensenate" %}
 		<div class="panel panel-danger">
 			<div class="panel-body">
-				{{person.lastname}} was a member of the so-called Kraken Caucus<sup><a href="https://twitter.com/jaketapper/status/1337184530499776517">1</a></sup>,
-				Republican representatives who joined<sup><a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">2</a></sup> a case before the Supreme Court calling for all the votes for President of the United States in the 2020 election <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">to be discounted</a>
-				in four states where the Republican candidate narrowly lost, alleging that some voters there followed procedures set by the wrong state officials. The case was fueled by conspiracy theories.<sup><a href="https://www.bloomberg.com/news/articles/2020-12-07/sidney-powell-s-michigan-kraken-suit-slammed-by-federal-judge">3</a></sup> The Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">unanimously threw out the case</a>.
+				{{person.lastname}} {% if active_role %}is{% else %}was{% endif %} a member of the so-called Kraken Caucus<sup><a href="https://twitter.com/jaketapper/status/1337184530499776517">1</a></sup>,
+				Republican legislators who following the 2020 election called for all the votes to be discounted in states where the Republican candidate for President of the United States narrowly lost.
+				{% if kraken_caucus == "txvpaamicus" %}
+				{{person.lastname}} joined<sup><a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">2</a></sup> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes in Georgia, Michigan, Pennsylvania, and Wisconsin to be discounted alleging that some voters there followed procedures set by the wrong state officials. The case, which did not allege that any voters or election workers acted improperly, was fueled by lies and conspiracy theories.<sup><a href="https://www.bloomberg.com/news/articles/2020-12-07/sidney-powell-s-michigan-kraken-suit-slammed-by-federal-judge">3</a></sup> The Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a> the case.
+				{% endif %}
+				{% if kraken_caucus == "krakensenate" %}
+				On January 6 following each presidential election, Congress determines the winner by counting the Electoral College votes that have been submitted by each state government.
+				{{person.lastname}} was among 11 senators who <a href="https://www.cruz.senate.gov/?p=press_release&id=5541">announced</a> <a href="https://www.hawley.senate.gov/sen-hawley-will-object-during-electoral-college-certification-process-jan-6">that they would object</a> to the counting of the votes from some states &mdash; likely Georgia, Michigan, Pennsylvania, and Wisconsin which were the targets of lies and conspiracy theories about voters and election workers<sup><a href="https://www.bloomberg.com/news/articles/2020-12-07/sidney-powell-s-michigan-kraken-suit-slammed-by-federal-judge">2</a></sup> as well as preposterous legal theories about state law.  
+				{% endif %}
+				Following the rejection of several cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}one legislator in the Kraken Caucus{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
 			</div>
 		</div>
 	{% elif kraken_caucus == "no" %}
