@@ -312,12 +312,18 @@ def vote_thumbnail_image_map(vote):
 	# We only have an SVG for House votes for certain Congresses.
 	if vote.chamber != CongressChamber.house:
 		raise Http404()
-	if vote.congress not in (112, 113, 114, 115, 116):
+
+	if vote.congress in (112, 113, 114, 115, 116, 117):
+		# Although there were some minor changes in district boundaries over
+		# this time period, there weren't changes in the total number of
+		# districts in each state, so we're glossing over the geographic changes.
+		cartogram_year = 2014
+	else:
 		raise Http404()
 
 	# Load the SVG.
 	import xml.etree.ElementTree as ET
-	tree = ET.parse('static/cd-2014.svg')
+	tree = ET.parse(f'static/cd-{cartogram_year}.svg')
 
 	# Fetch color codes per district and make SVG CSS styles.
 	styles = { }

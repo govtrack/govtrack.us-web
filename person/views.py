@@ -103,8 +103,7 @@ TexasVPennsylvaniaAmicus = { 400004, 400046, 400052, 400057, 400108, 400158, 400
 # to reject the electors from "disputed states" (https://www.cruz.senate.gov/?p=press_release&id=5541)
 # plus Sen. Hawley who separately announced he would object to at least Pennsylvania's electors
 # (https://www.hawley.senate.gov/sen-hawley-will-object-during-electoral-college-certification-process-jan-6).
-KrakenSenators = { 412573, 412496, 412464, 412549, 412679, 400032, 412839, 412840 }
-# TODO ^ Senators-Elect Cynthia Lummis (R-Wyo.), Roger Marshall (R-Kan.), Bill Hagerty (R-Tenn.), and Tommy Tuberville (R-Ala.)
+KrakenSenators = { 412573, 412496, 412464, 412549, 412679, 400032, 412839, 412294, 412704, 456798, 456796, 412840 }
 #
 # And the non-Kraken Caucus members...
 # All Republicans representatives serving on Dec 11, 2020 that did not join the
