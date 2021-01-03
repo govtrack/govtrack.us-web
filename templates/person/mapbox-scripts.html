@@ -24,19 +24,25 @@ else
   bbox = [-128.8, 23.6, -65.4, 50.2]; // United States
 {% endif %}
 
-var viewport = geoViewport.viewport(bbox, [window.innerWidth/2, window.innerHeight/2])
-
-// Checks for support of Mapbox GL. Works with most modern browsers.
-if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
+function lngLatBoundsToCameraOptions(bounds) {
+    var w = $('#map').width();
+    var h = $('#map').height();
+    return {
+      center: bounds.getCenter(),
+      zoom: Math.log(((w*h) / ((bounds.getNorth()-bounds.getSouth()) * (bounds.getEast() - bounds.getWest())))) / 1.75
+    };
+  }
 
   // Initialize the map
   mapboxgl.accessToken = accessToken;
+  var bounds = mapboxgl.LngLatBounds.convert([[bbox[0], bbox[1]], [bbox[2], bbox[3]]]);
+  var camera = lngLatBoundsToCameraOptions(bounds);
   var map = new mapboxgl.Map({
-      container: 'map',
-      style: styleURL,
-      center: viewport.center,
-      zoom: viewport.zoom
-  });
+    container: 'map',
+    style: styleURL,
+    center: camera.center,
+    zoom: camera.zoom
+    });
 
   // Once map is fully loaded...
   map.on('load', function() {
@@ -44,31 +50,13 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
     map.addControl(new mapboxgl.NavigationControl(), 'top-left');
     map.touchZoomRotate.disableRotation();
 
-    // Fetch the built-in filters that determine the color assignments
-    // for layers, which we have to preserve when we add additional
-    // filters for state & district.
-    var layer_base_names = ["districts-labels-", "districts-borders-", "districts-fill-"];
-    var layer_base_filters = { };
-    for (var i = 1; i <= 5; i++) {
-      for (var j = 0; j < 3; j++) {
-        var layer = layer_base_names[j] + i;
-        layer_base_filters[layer] = map.getFilter(layer);
-      }
-    }
-
-    // Create a filter to show only the selected state and district. For
-    // layers that have a color filter already applied, we have to put it
-    // back.
+    // Create a filter to show only the selected state and district.
     map.showCongressionalDistrict = function(state, district) {
       var filter = ['all'];
       if (state) filter.push(['==', 'state', state]);
       if (district) filter.push(['==', 'number', district]);
-      for (var i = 1; i <= 5; i++) {
-        for (var j = 0; j < 3; j++) {
-          var layer = layer_base_names[j] + i;
-          map.setFilter(layer, filter.concat([layer_base_filters[layer]]));
-        }
-      }
+      map.setFilter("CD-Fills", filter);
+      // Could also do CD-Outlines and CD-Labels.
     }
     map.showCongressionalDistrict(state, district);
   });
@@ -84,18 +72,6 @@ if (mapboxgl.supported({ failIfMajorPerformanceCaveat: true })) {
     return marker;
   };
 
-} else {
-
-  // If Mapbox GL is not supported
-  // Log this information to the console (perhaps an alert that the website is not fully featured would be better?)
-  console.log('Mapbox GL not supported');
-
-  // Initialize the map
-  L.mapbox.accessToken = accessToken;
-  var map = L.mapbox.map('map').setView([viewport.center[1], viewport.center[0]], viewport.zoom);
-  L.mapbox.styleLayer(styleURL).addTo(map);
-}
-
 function address_to_latlng(address, callback) {
   $.ajax({
     url: 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(address) + '.json?country=us&access_token=' + accessToken,
@@ -110,20 +86,55 @@ function address_to_latlng(address, callback) {
   });
 }
 
-function latlng_to_district(lngLat, callback) {
-  // Note that, from the Mapbox API docs:
-  // "Use of this endpoint is rate limited to 600 requests per minute."
-  $.ajax({
-    url: 'https://api.mapbox.com/v4/' + mapId + '/tilequery/' + lngLat.lng + ',' + lngLat.lat + '.json?radius=0&access_token=' + accessToken,
-    method: 'GET',
-    success: function(resp) {
-      if (resp.type == "FeatureCollection" && resp.features.length > 0) {
-        callback(resp.features[0].properties);
+function map_click_to_district(clickEventData, callback) {
+      // The map control provides a client-side-only way to determine what
+      // is under the cursor. But this only sees features that are currently
+      // shown on the map. so if a filter is applied and the click is on
+      // a district that is not shown, then this will miss the feature,
+      // but we'll fall back to the tilequery API in that case. And it
+      // uses the click event's screen coordinate.
+      var features = map.queryRenderedFeatures(
+        clickEventData.point,
+        {
+          layers: ["CD-Fills"]
+        });
+      if (features.length > 0) {
+        callback(features[0].properties);
         return;
       }
-      callback(null); // failed
-    }
-  });
+
+      if (!map.getFilter("CD-Fills")) {
+        // If no filter is applied, then a negative result is definitive.
+        callback(null);
+        return;
+      }
+      
+      // Fall back to the Mapbox Tilequery API. This is likely to happen
+      // if a filter is applied (which you could test with 
+      // map.getFilter("CD-Fills"), but we might as well see if the click
+      // is on a rendered feature before hitting the API. 
+      return latlng_to_district(clickEventData.lngLat, callback);
+}
+
+function latlng_to_district(lngLat, callback) {
+      // Note that, from the Mapbox API docs:
+      // "Use of this endpoint is rate limited to 600 requests per minute."
+      $.ajax({
+        url: 'https://api.mapbox.com/v4/' + mapId + '/tilequery/' + lngLat.lng + ',' + lngLat.lat + '.json?radius=0&access_token=' + accessToken,
+        method: 'GET',
+        success: function(resp) {
+          if (resp.type == "FeatureCollection" && resp.features.length > 0)
+            // resp is always a FeatureCollection, just sanity checking, but it might
+            // be empty. If it's not empty, it will contain a single Feature
+            // (whose geometry is a Polygon) represending the boundaries of a
+            // congressional district. Its properties come from the original
+            // GeoJSON uploaded to Mapbox.
+            callback(resp.features[0].properties);
+          else
+            // Click was not on a district.
+            callback(null);
+        }
+      });
 }
 
 </script>
