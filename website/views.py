@@ -1078,7 +1078,7 @@ def covid19(request):
             if pr.person.id == data['id'] and pr.startdate <= data['date'] <= pr.enddate:
                 break
         else:
-            raise Exception("Row with unmatched role: " + repr(line))
+            raise Exception("Row with unmatched role: " + repr(data))
 
         # Store data to pass to the template.
         data.update({
