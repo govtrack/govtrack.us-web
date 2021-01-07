@@ -99,12 +99,18 @@ prez_2020_candidate_ids = (
 # https://www.supremecourt.gov/DocketPDF/22/22O155/163550/20201211132250339_Texas%20v.%20Pennsylvania%20Amicus%20Brief%20of%20126%20Representatives%20--%20corrected.pdf
 TexasVPennsylvaniaAmicus = { 400004, 400046, 400052, 400057, 400108, 400158, 400220, 400341, 400376, 400433, 400640, 400643, 400651, 400655, 400656, 400659, 412190, 412191, 412213, 412217, 412226, 412250, 412255, 412256, 412261, 412292, 412295, 412309, 412317, 412395, 412400, 412410, 412417, 412434, 412437, 412443, 412444, 412445, 412460, 412463, 412465, 412472, 412476, 412477, 412480, 412485, 412510, 412525, 412531, 412538, 412548, 412550, 412564, 412568, 412569, 412572, 412574, 412578, 412596, 412601, 412608, 412610, 412619, 412622, 412623, 412624, 412625, 412629, 412630, 412634, 412639, 412641, 412646, 412648, 412655, 412660, 412662, 412670, 412673, 412674, 412683, 412690, 412691, 412692, 412700, 412702, 412703, 412704, 412705, 412706, 412709, 412712, 412724, 412726, 412735, 412736, 412738, 412745, 412746, 412748, 412764, 412765, 412766, 412773, 412777, 412778, 412788, 412792, 412793, 412796, 412811, 412812, 412813, 412815, 412817, 412818, 412819, 412820, 412822, 412823, 412832, 412837, 412843, 412844, 412845, 456791 }
 #
+# Representatives and senators who voted on Jan 6, 2021 to discount the state electors
+# from Arizona and Pennsylvania. (https://www.govtrack.us/congress/votes/117-2021/s1,
+# https://www.govtrack.us/congress/votes/117-2021/h10, https://www.govtrack.us/congress/votes/117-2021/s2,
+# https://www.govtrack.us/congress/votes/117-2021/h11).
+KrakenObjectedToAZPA = {412673, 412675, 412679, 412683, 412690, 412691, 412692, 412698, 412190, 412191, 412704, 412702, 412705, 412706, 412709, 412712, 400433, 412722, 412724, 412213, 412726, 412217, 412735, 412226, 412738, 412743, 412745, 412746, 412748, 456791, 456792, 456793, 456796, 412766, 456799, 456800, 456801, 412255, 412261, 412773, 456805, 456806, 412777, 456807, 456808, 456809, 456813, 456814, 412778, 412788, 456820, 456823, 456824, 412793, 456827, 412796, 456828, 456830, 456833, 456834, 400004, 412292, 456837, 412294, 456841, 456842, 412811, 412812, 412813, 456844, 412815, 456845, 412817, 412818, 412819, 456846, 412309, 412822, 412823, 456847, 456848, 456853, 456855, 456852, 412317, 456850, 412832, 412837, 412838, 412840, 412843, 412844, 412845, 400052, 400057, 400068, 400071, 400077, 412395, 400108, 412397, 412399, 412400, 412410, 400643, 400651, 412434, 412443, 412444, 412445, 400158, 412460, 412463, 412465, 412472, 412476, 412477, 400196, 412485, 412510, 400247, 412538, 412550, 412568, 412569, 412572, 412573, 412574, 412578, 412581, 400297, 412596, 412608, 412622, 412623, 412624, 412625, 400340, 400341, 412629, 412631, 412641, 412646, 412648, 400367, 412655, 412662}
+#
 # Senators who joined the Jan. 2. 2021 Ted Cruz letter announcing their intent
-# to reject the electors from "disputed states" (https://www.cruz.senate.gov/?p=press_release&id=5541)
+# to "object" to the electors from "disputed states" (https://www.cruz.senate.gov/?p=press_release&id=5541)
 # plus Sen. Hawley who separately announced he would object to at least Pennsylvania's electors
 # (https://www.hawley.senate.gov/sen-hawley-will-object-during-electoral-college-certification-process-jan-6)
 # and Loeffler (https://twitter.com/KLoeffler/status/1346230542115745793).
-KrakenSenators = { 412573, 412496, 412464, 412549, 412679, 400032, 412839, 412294, 412704, 456798, 456796, 412840, 456790 }
+KrakenAnnouncedObjection = { 412573, 412496, 412464, 412549, 412679, 400032, 412839, 412294, 412704, 456798, 456796, 412840, 456790 }
 #
 # And the non-Kraken Caucus members...
 # All Republicans representatives serving on Dec 11, 2020 that did not join the
@@ -247,6 +253,12 @@ def person_details(request, pk):
         # Hard-code Joe Biden so we show election guides.
         if person.id == 300008 and str(settings.CURRENT_ELECTION_DATE) == "2020-11-03": election_id = "president"
 
+        # Which Kraken Caucus events did this person take part in?
+        kraken_caucus = set()
+        if person.id in TexasVPennsylvaniaAmicus: kraken_caucus.add("TexasVPennsylvaniaAmicus")
+        if person.id in KrakenObjectedToAZPA: kraken_caucus.add("KrakenObjectedToAZPA")
+        if person.id in KrakenAnnouncedObjection: kraken_caucus.add("KrakenAnnouncedObjection")
+
         return {'person': person,
                 'role': role,
                 'active_role': active_role,
@@ -270,7 +282,7 @@ def person_details(request, pk):
                 'is_2020_candidate': person.id in prez_2020_candidate_ids,
                 'maybe_vp_candidate':person.id in vp_2020_candidate_ids,
                 'election_guides': load_election_guides(election_id) if election_id else None,
-                'kraken_caucus': "txvpaamicus" if person.id in TexasVPennsylvaniaAmicus else "krakensenate" if person.id in KrakenSenators else "no" if person.id in NTCaucus else None,
+                'kraken_caucus': kraken_caucus,
                 }
 
     #ck = "person_details_%s" % pk

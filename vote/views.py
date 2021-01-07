@@ -849,6 +849,17 @@ def vote_comparison_table_named(request, table_id, table_slug):
 			("116-2020/h253",  { "title": "House Veto Override" }),
 			#("116-2020/s264", { "title": "Senate Vote on Passage" }),
 		]
+	elif int(table_id) == 7:
+		if table_slug != "2021-coup-attempt":
+			return HttpResponseRedirect("/congress/votes/compare/7/2021-coup-attempt")
+		title = "Legislators Who Voted to Exclude States from the Electoral College Count on January 6, 2021"
+		description = "Following a terrorist attack on the Capitol to prevent the counting of the Electoral College votes and the selection of the next President, these legislators voted to exclude Arizona and Pennsylvania from the count based on the same lies, conspiracy theories, and preposterous legal arguments that inspired the attack"
+		votes = [
+			("117-2021/s1", { "title": "Senate Vote to Exclude Arizona" }),
+			("117-2021/h10", { "title": "House Vote to Exclude Arizona" }),
+			("117-2021/s2", { "title": "Senate Vote to Exclude Pennsylvania" }),
+			("117-2021/h11", { "title": "House Vote to Exclude Pennsylvania" }),
+		]
 	else:
 		raise Http404()
 
