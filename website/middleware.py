@@ -6,7 +6,6 @@ import json, datetime, base64, urllib.request, urllib.error, urllib.parse
 
 from emailverification.models import BouncedEmail
 
-from person.views import load_proxy_vote_info
 from website.views import is_congress_in_session_live
 
 import us
@@ -48,7 +47,6 @@ base_context = {
     "GOOGLE_ANALYTICS_KEY": getattr(settings, 'GOOGLE_ANALYTICS_KEY', ''),
     "FACEBOOK_APP_ID": getattr(settings, 'FACEBOOK_APP_ID', ''),
     "DID_AN_ELECTION_JUST_HAPPEN": settings.CURRENT_ELECTION_DATE and settings.CURRENT_ELECTION_DATE <= datetime.datetime.now().date(),
-    "LEGISLATOR_PROXIES": load_proxy_vote_info,
 }
 
 def template_context_processor(request):

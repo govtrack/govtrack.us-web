@@ -224,11 +224,7 @@ $(function() {
 {% block body %}
 	<h1>COVID-19 in Congress</h1>
 	
-	<p>We&rsquo;re tracking the impact of COVID-19, the disease caused by the SARS-CoV-2 coronavirus, on the operations of Congress. Below you&rsquo;ll find information on:</p>
-	<ul>
-	<li><span class="affected-legislators-count"> </span> Members of Congress who are or have been <a href="#legislators">quarantined, tested positive for COVID-19, or came in contact</a> with someone with COVID-19</li>
-	<li><a href="#proxyvotes">Proxy voting in the House</a></li>
-	</ul>
+	<p>We&rsquo;re tracking the impact of COVID-19, the disease caused by the SARS-CoV-2 coronavirus, on the operations of Congress.</p>
 
 	<!--
 	<a name="legislation"></a>
@@ -246,9 +242,6 @@ $(function() {
 	<p><a href="https://www.everycrsreport.com/search.html?q=COVID-19">CRS reports related to COVID-19</a> [everycrsreport.com], <a href="https://www.pogo.org/training/covid-19-resources/">COVID-19 Oversight & Policy Resources</a> [POGO]</p>
 	-->
 
-
-	<a name="legislators"></a>
-	<h2><span>Quarantined and Sick Legislators</span></h2>
 
 	<p>In all, <span class="affected-legislators-count"> </span> representatives and senators self-quarantined or took other action, or no action, after coming in contact with someone with COVID-19 or testing positive for COVID-19 themselves &mdash; some multiple times.</p>
 	<p>On December 29, 2020, just a week before he was to take office, <a href="https://www.npr.org/2020/12/30/951332740/louisiana-congressman-elect-dies-after-battling-covid-19">Congressman-elect Luke Letlow died of covid-19</a>. This page is populated by data from our database. Because the Congressman-elect was not yet sworn in, he won't be in our database. However, we wish to acknowledge his death and extend our condolences to his family.</p>
@@ -520,68 +513,6 @@ $(function() {
 
 </tbody>
 	</table>
-
-	<a name="proxyvotes"></a>
-	<h2><span>Proxy Voting in the House of Representatives</span></h2>
-
-	<p>At the peak of the virus&rsquo;s spread in March 2020 before Congress went on recess, 22 representatives, and slightly earlier 6 senators, were simultaneously self-quarantining. Both the House and Senate have adapted their procedures to keep legislators and support staff safe while also keeping Congress operational.</p>
-
-	<p>On May 15, the House <a href="https://www.govtrack.us/congress/votes/116-2020/h107">passed a rules change</a> to allow proxy voting for floor votes and remote committee committee meetings during this pandemic (<a href="https://docs.house.gov/meetings/RU/RU00/20200514/110750/HRPT-116-420.pdf">see the committee report for further background</a>). Then, pursuant to the new rules, on May 19 the House&rsquo;s Office of Attending Physician and Sergeant at Arms determined the existence of a &ldquo;public health emergency due to a novel coronavirus,&rdquo; which triggered the beginning of proxy voting rules. Under the rules for proxy voting, representatives may designate another representative as their proxy in advance of votes in <a href="https://clerkpreview.house.gov/ProxyLetter#ActiveProxies">a letter to the Clerk of the House of Representatives</a> and must give their proxy exact instructions on how to vote.</p>
-
-	<p>In the Senate, although no proxy voting is allowed for floor votes, some Senate committees have begun holding some meetings with senators participating remotely. And while not yet used, <a href="https://www.everycrsreport.com/reports/RS22952.html">existing Senate rules may permit voting by proxy in committee</a>.</p>
-
-	<h3>Legislators voting on the House floor by proxy</h3>
-
-	{% with LEGISLATOR_PROXIES as proxies %}
-
-	<p>The following {{proxies.current_proxy_pairs|length}} legislators are currently voting by proxy:</p>
-
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Remote Legislator</th>
-				<th>Proxy Legislator</th>
-				<th>Since</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for row in proxies.current_proxy_pairs %}
-				<tr>
-					<td><a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a></td>
-					<td><a href="{{row.proxy.get_absolute_url}}">{{row.proxy}}</a></td>
-					<td>{{row.from|date}}</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-
-	<h3>Proxies for House legislators</h3>
-
-	<p>The following list is the same information as above but grouped by proxy legislator. A legislator may be a proxy for up to ten legislators.</p>
-
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Proxy Legislator</th>
-				<th>Remote Legislators</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for proxy, remote_legislators in proxies.current_by_proxy_sorted %}
-				<tr>
-					<td><a href="{{proxy.get_absolute_url}}">{{proxy}}</a></td>
-					<td>
-						{% for row in remote_legislators %}
-							<a href="{{row.remote_legislator.get_absolute_url}}">{{row.remote_legislator}}</a>
-							({{row.from|date}}-{{row.until|date}}){% if not forloop.last %}, {% endif %}
-						{% endfor %}
-					</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-
-	{% endwith %}
 
 {% endblock %}
 
