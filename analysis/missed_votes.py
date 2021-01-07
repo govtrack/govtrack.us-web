@@ -87,16 +87,8 @@ for fn in glob.glob(vote_xml_glob):
 		else:
 			person_lifetime_vote_dates[(where, id)] = (min(person_lifetime_vote_dates[(where, id)][0], date), max(person_lifetime_vote_dates[(where, id)][1], date))
 		
-# Stop-gap measure for start of Congress when no votes have occurred in one chamber or the other.
-# Get a complete list of Members via the GovTrack API. We need to know who so we bring forward
-# any historical data.
-if len(voters_by_chamber['h']) == 0 or len(voters_by_chamber['s']) == 0:
-	import json, urllib.request, urllib.parse, urllib.error
-	voters_by_chamber = { "h": set(), "s": set() }
-	for m in json.load(urllib.request.urlopen("http://www.govtrack.us/api/v1/person/?roles__current=true&limit=600"))["objects"]:
-		c = "s" if (m["current_role"]["role_type"] == "senator") else "h"
-		voters_by_chamber[c].add( int(m["id"]) ) 
-	
+# At start of Congress when no votes have occurred in one chamber or the other, we
+# don't know who is serving in the chamber(s) without votes so we can't bring data forward.
 if len(voters_by_chamber['h']) == 0 or len(voters_by_chamber['s']) == 0:
 	print("missed_votes: There are no voters in one of the chambers. Which means we don't know who is currently serving....")
 	sys.exit(0)

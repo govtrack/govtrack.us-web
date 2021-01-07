@@ -132,7 +132,9 @@ class Command(BaseCommand):
 				count,
 				"s were" if count != 1 else " was",
 				),
-			"https://www.govtrack.us/congress/bills/browse#current_status[]=28&sort=-current_status_date")
+			"https://www.govtrack.us/congress/bills/browse#current_status[]=28&sort=-current_status_date&congress=__ALL__")
+		# Since laws can be enacted after the end of a Congress, we can't generate a link that is for
+		# bills only in the current Congress.
 
 	def tweet_votes_yday(self, if_major):
 		# Tweet count of votes yesterday, by vote type if there were any major votes.
