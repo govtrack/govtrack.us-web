@@ -410,6 +410,12 @@ function show_pronunciation_guide() {
 				Following the rejection of several cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}one legislator{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
 			</div>
 		</div>
+	{% elif kraken_cosponsors %}
+		<div class="panel panel-danger">
+			<div class="panel-body">
+				{{person.lastname}} has cosponsored {{kraken_cosponsors}} bills introduced in the current Congress by members of the so-called Kraken Caucus<sup><a href="https://twitter.com/jaketapper/status/1337184530499776517">1</a></sup>, Republican legislators who fomented the terrorist attack on the Capitol on January 6, 2021 and called for entire states to be disenfranchised in the 2020 presidential election in an attempted coup.
+			</div>
+		</div>
 	{% endif %}
 
 		{% if misconduct %}

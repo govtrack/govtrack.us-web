@@ -112,6 +112,8 @@ KrakenObjectedToAZPA = {412673, 412675, 412679, 412683, 412690, 412691, 412692, 
 # and Loeffler (https://twitter.com/KLoeffler/status/1346230542115745793).
 KrakenAnnouncedObjection = { 412573, 412496, 412464, 412549, 412679, 400032, 412839, 412294, 412704, 456798, 456796, 412840, 456790 }
 #
+KrakenCaucus = TexasVPennsylvaniaAmicus | KrakenObjectedToAZPA | KrakenAnnouncedObjection
+#
 # And the non-Kraken Caucus members...
 # All Republicans representatives serving on Dec 11, 2020 that did not join the
 # Texas v Pennsylvania amicus.
@@ -259,6 +261,24 @@ def person_details(request, pk):
         if person.id in KrakenObjectedToAZPA: kraken_caucus.add("KrakenObjectedToAZPA")
         if person.id in KrakenAnnouncedObjection: kraken_caucus.add("KrakenAnnouncedObjection")
 
+        # For legislators not in the Kraken caucus, we'll report their
+        # affinity to it via cosponsorship.
+        ck = "kraken_cosponsors"
+        kraken_cosponsors = cache.get(ck)
+        if not kraken_cosponsors:
+            # Comparisons are hard over uneven time periods, so we'll
+            # only look at legislation this Congress.
+            from collections import Counter
+            from bill.models import Cosponsor
+            kraken_cosponsors = Counter(
+                Cosponsor.objects
+                .filter(
+                    bill__congress=CURRENT_CONGRESS,
+                    bill__sponsor_id__in=KrakenCaucus,
+                    withdrawn=None)
+                .values_list("person", flat=True))
+            cache.set(ck, kraken_cosponsors, 86400) # one day
+
         return {'person': person,
                 'role': role,
                 'active_role': active_role,
@@ -283,6 +303,7 @@ def person_details(request, pk):
                 'maybe_vp_candidate':person.id in vp_2020_candidate_ids,
                 'election_guides': load_election_guides(election_id) if election_id else None,
                 'kraken_caucus': kraken_caucus,
+                'kraken_cosponsors': kraken_cosponsors.get(person.id, 0),
                 }
 
     #ck = "person_details_%s" % pk
