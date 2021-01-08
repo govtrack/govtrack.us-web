@@ -138,22 +138,16 @@ def prepare_text1(text1):
   # Load the text into a difflib.SequenceMatcher. Convert the text to "words"
   # first, so that the unit of comparison is words. The docs say loading it
   # into seq2 is faster for iterating over documents (as seq1).
-  from difflib import SequenceMatcher
   word_map = { } # for to_words
   text1w = to_words(text1, word_map)
-  sm = SequenceMatcher()
-  sm.set_seq2(text1w)
-  return (sm, word_map, len(text1w))
+  return (text1w, word_map, len(text1w))
 
-def compare_text(text2, sm, word_map, text1w_len):
+def compare_text(text2, text1w, word_map, text1w_len):
   # Clone so that the orginal can be reused on the next call.
   word_map = dict(word_map)
 
-  # Update the SequenceMatcher, which according to the docs is
-  # faster if we keep the instance and update seq1 on each call
-  # with the new text.
+  # Convert the second text to an array of words using the same word to character mapping.
   text2w = to_words(text2, word_map)
-  sm.set_seq1(text2w)
 
   # Invert the word_map for from_words.
   word_map = { v: k for k, v in word_map.items() }
@@ -161,12 +155,22 @@ def compare_text(text2, sm, word_map, text1w_len):
   # Perform diff, getting the "matching blocks" of text. These
   # blocks may be single words or the entire text2 document,
   # distributed anywhere in the text1 document.
-  blocks = sm.get_matching_blocks()[0:-1] # the last block is empty
-  blocks = [{
-    "text1_start": m.b,
-    "text2_start": m.a,
-    "size": m.size,
-  } for m in blocks]
+  import diff_match_patch
+  ops = diff_match_patch.diff(text1w, text2w, timelimit=0, checklines=False, cleanup_semantic=False)
+  i1 = 0; i2 = 0
+  blocks = []
+  for op, oplen in ops:
+    if op != "=":
+      if op == "-": i1 += oplen
+      if op == "+": i2 += oplen
+      continue
+    blocks.append({
+      "text1_start": i1,
+      "text2_start": i2,
+      "size": oplen,
+    })
+    i1 += oplen
+    i2 += oplen
 
   # Annotate each block with its distance to preceding and surrounding
   # blocks.
