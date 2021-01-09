@@ -1,6 +1,5 @@
 #!script
-#;encoding=utf-8
-
+#
 # See if the text of one bill occurs within the text of another.
 # This works in two stages. In the "analysis" stage, all enacted
 # bills are compared to likely candidates for incorporated bills
@@ -25,6 +24,11 @@ import unicodedata
 from io import StringIO
 import lxml.etree
 from numpy import percentile
+
+# Ensure we don't run two times concurrently since this process
+# updates a data file.
+from exclusiveprocess import Lock
+Lock(die=True).forever()
 
 if sys.stdout.isatty():
   from tqdm import tqdm
@@ -270,35 +274,32 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
         existing_comps.add( ((b1_id, b1_versioncode), (b2_id, b2_versioncode) ) )
         writer.writerow(row)
 
-    # For each enacted bill..
-    for b1 in tqdm(enacted_bills):
+    # For each enacted bill, find the set of bills to compare it to.
+    comps = []
+    for b1 in tqdm(enacted_bills, desc="Finding comparison pairs"):
       # Load the enacted bill's text.
 
-      # Loads current metadata and text for the bill.
+      # Loads current metadata for the bill.
       try:
         md1 = get_bill_text_metadata(b1, None)
+        if 'xml_file' not in md1: continue # no xml text
         text1 = extract_text(md1['xml_file'])
       except TypeError: # no bill text at all (accessing [...] of None)
-        continue
-      except KeyError: # no xml_file
         continue
       except ValueError: # xml is bad
         continue
 
-      state = prepare_text1(text1)
-
       # Use Solr's More Like This query to get a preliminary list of
       # bills textually similar to each enacted bill, which lets us
       # cut down on the number of comparisons that we need to run
-      # by a factor of around 100. Pull between 10 and 50 similar
+      # by a factor of around 100. Pull between 10 and 75 similar
       # bills -- depending on how large of a bill the enacted bill
       # is. An authorization bill can have lots of bills incorporated
       # into it, but a short bill could not have very many.
-
       from haystack.query import SearchQuerySet
       qs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"])\
         .filter(congress=b1.congress).more_like_this(b1)
-      how_many = min(50, max(10, len(text1)/1000))
+      how_many = min(75, max(10, len(text1)/1000))
       similar_bills = set(r.object for r in qs[0:how_many])
 
       # Add in any related bills identified by CRS. Related bills aren't
@@ -306,9 +307,8 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
       # but on very large bills (like big approps bills) textual similarity
       # doesn't exhaustively include everythig either in the top ~50 results.
       similar_bills |= set(rb.related_bill for rb in RelatedBill.objects.filter(bill=b1))
-      
-      # Iterate over each similar bill.
 
+      # Iterate over each similar bill.
       for b2 in sorted(similar_bills, key = lambda x : (x.congress, x.bill_type, x.number)):
         # Don't compare to other enacted bills.
         if b2.current_status in BillStatus.final_status_enacted_bill:
@@ -341,7 +341,20 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
         if b1.current_status_date <= b2.current_status_date:
           continue
 
+        comps.append((b1, b2))
+
+    # Now perform text comparison on the pairs of bills.
+    prev_b1 = None
+    for (b1, b2) in tqdm(comps, desc="Comparing text"):
+        # Load the first bill (the enacted bill)'s text.
+        if b1 is not prev_b1:
+          md1 = get_bill_text_metadata(b1, None) # repeated above
+          text1 = extract_text(md1['xml_file'])
+          state = prepare_text1(text1)
+          prev_b1 = b1
+
         # Load the second bill's text.
+        md2 = get_bill_text_metadata(b2, None) # repeated above
         try:
           text2 = extract_text(md2['xml_file'])
         except KeyError: # no xml_file
