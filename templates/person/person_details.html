@@ -395,17 +395,21 @@ function show_pronunciation_guide() {
 	{% if kraken_caucus %}
 		<div class="panel panel-danger">
 			<div class="panel-body">
-				{{person.lastname}} {% if active_role %}is{% else %}was{% endif %} a member of the so-called Kraken Caucus<sup><a href="https://twitter.com/jaketapper/status/1337184530499776517">1</a></sup>,
-				Republican legislators who fomented the terrorist attack on the Capitol on January 6, 2021 that aimed to prevent the determination of the next president of the United States
-				and called for entire states to be disenfranchised in the 2020 presidential election both in an attempt to change the outcome of the election from Democrat to Republican &mdash; an attempted coup.
+				{{person.lastname}} {% if active_role %}is{% else %}was{% endif %} among the Republican legislators
+				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus or "KrakenAnnouncedObjection" in kraken_caucus %}
+				who, by calling for entire states to be disenfranchised in the 2020 presidential election,
+				fomented the terrorist attack on the Capitol on January 6, 2021 that aimed to prevent the determination of the next president of the United States.
+				{% else %}
+				who amplified the same lies and conspiracy theories that were the basis of the terrorist attack on the Capitol on January 6, 2021 that aimed to prevent the determination of the next president of the United States.
+				{% endif %}
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}
-				Shortly after the 2020 election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly lost by {{person.his_her}} party &mdash; to be discounted, claiming that some voters there followed procedures set by the wrong state officials. The case did not allege that any voters or election workers acted improperly but amplified lies and conspiracy theories that fueled the movement that led to the attack on the Capitol. The Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a> the case.
+				Shortly after the 2020 election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly lost by {{person.his_her}} party &mdash; to be discounted, claiming that some voters there followed procedures set by the wrong state officials. The case amplified lies and conspiracy theories that fueled the movement that led to the attack on the Capitol. The Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a> the case.
 				{% endif %}
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
 				In the days leading up to January 6, {{person.lastname}} had announced {{person.his_her}} intent to object on that day to the inclusion of some states in the count of electors that determines the next president, disenfranchising millions of voters based on lies, conspiracy theories, and preposterous legal theories all falsely claiming various sorts of mass fraud that did not occur. The announcement amplified the message that inspired the attack on the Capitol.
 				{% endif %}
 				{% if "KrakenObjectedToAZPA" in kraken_caucus %}
-				On January 6, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted for the exclusion all of the votes in Arizona and/or Pennsylvania</a> &mdash; states narrowly lost by their party &mdash; from the selection of the next president.
+				On January 6 in the hours after the attack on the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted for the exclusion all of the votes in Arizona and/or Pennsylvania</a> &mdash; states narrowly lost by their party &mdash; from the selection of the next president.
 				{% endif %}
 				Following the rejection of several cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}one legislator{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
 			</div>
@@ -413,7 +417,9 @@ function show_pronunciation_guide() {
 	{% elif kraken_cosponsors %}
 		<div class="panel panel-danger">
 			<div class="panel-body">
-				{{person.lastname}} has cosponsored {{kraken_cosponsors}} bills introduced in the current Congress by members of the so-called Kraken Caucus<sup><a href="https://twitter.com/jaketapper/status/1337184530499776517">1</a></sup>, Republican legislators who fomented the terrorist attack on the Capitol on January 6, 2021 and called for entire states to be disenfranchised in the 2020 presidential election in an attempted coup.
+				{{person.lastname}} has cosponsored {{kraken_cosponsors}} bills introduced in the current Congress by
+				Republican legislators who fomented the terrorist attack on the Capitol on January 6, 2021
+				by calling for entire states to be disenfranchised in the 2020 presidential election.
 			</div>
 		</div>
 	{% endif %}
