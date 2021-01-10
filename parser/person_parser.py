@@ -1,3 +1,4 @@
+#!script
 """
 This script parse XML files and fill database
 with Person and PersonRole objects.
@@ -401,16 +402,27 @@ def update_twitter_list():
     existing = tweepy.Cursor(tweepy_client.list_members, list_id=list_id)
     existing = { u.screen_name.lower() for u in existing.items() }
 
-    # Add anyone not yet listed.
-    if handles-existing: print("Adding to our Twitter list:", handles-existing)
-    for hh in chunk(handles - existing, 100):
-        tweepy_client.add_list_members(list_id=list_id, screen_name=",".join(hh))
-
     # Remove anyone that shouldn't be listed.
-    if existing-handles: print("Removing from our Twitter list:", existing-handles)
     for hh in chunk(existing - handles, 100):
-        tweepy_client.remove_list_members(list_id=list_id, screen_name=",".join(hh))
- 		
+        print("Removing from our Twitter list:", hh, sep="\n")
+        tweepy_client.remove_list_members(list_id=list_id, screen_name=hh)
+
+    # Add anyone not yet listed.
+    for hh in chunk(handles - existing, 100):
+        print("Adding to our Twitter list:", hh, sep="\n")
+        tweepy_client.add_list_members(list_id=list_id, screen_name=hh)
+
+    # Update description with last modified date.
+    if existing-handles or handles-existing:
+        tweepy_client.update_list(list_id=list_id, description="""
+All official Twitter accounts of legislators in the United States Congress
+via https://github.com/unitedstates/congress-legislators/. Last Updated
+{updated_date}.""".format(updated_date=datetime.now().date().strftime("%x")))
 
 if __name__ == '__main__':
-    main()
+    import sys
+
+    if sys.argv[-1] == "update_twitter_list":
+        update_twitter_list()
+    else:
+        main()
