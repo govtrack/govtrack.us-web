@@ -16,12 +16,16 @@ var legislator_data = {{legislator_data|json}};
 $(function() {
 	// Update count of UNIQUE legislators affected.
 	var legislators = { };
+	var positive_legislators = { };
 	$('#affected-legislators tbody tr').each(function() {
 		var cells = $(this).find("td");
 		var legislator_id = /.*\/(\d+)/.exec($(cells[1]).find('a').attr('href'))[1];
 		legislators[legislator_id] = true;
+		if ($(this).hasClass('tested-positive') || $(this).hasClass('presumed-positive'))
+			positive_legislators[legislator_id] = true;
 	});
 	$('.affected-legislators-count').text(Object.keys(legislators).length);
+	$('.positive-legislators-count').text(Object.keys(positive_legislators).length);
 
 	function make_series(title, color) {
 		return {
@@ -243,12 +247,20 @@ $(function() {
 	-->
 
 
-	<p>In all, <span class="affected-legislators-count"> </span> representatives and senators self-quarantined, isolated, or took other action, or no action, after coming in contact with someone with COVID-19 or testing positive for COVID-19 themselves &mdash; some multiple times.</p>
+	<p>In all, <span class="affected-legislators-count"> </span> representatives and senators have either isolated because of having COVID-19,
+	self-quarantined after exposure, or took other action or no action after exposure &mdash; some multiple times.</p>
+	<p>Of those, <span class="positive-legislators-count"> </span> representatives and senators have been diagnosed with COVID-19 either through testing or symptoms
+	(some were asymptomatic), but some additional legislators may have had asymptomatic COVID-19 before testing was widely available.</p>
+
+	<hr>
+
 	<p>On December 29, 2020, just a week before he was to take office, <a href="https://www.npr.org/2020/12/30/951332740/louisiana-congressman-elect-dies-after-battling-covid-19">Congressman-elect Luke Letlow died of covid-19</a>. This page is populated by data from our database. Because the Congressman-elect was not yet sworn in, he won't be in our database. However, we wish to acknowledge his death and extend our condolences to his family.</p>
+
+	<hr>
 
 	<p class="hidden">In the Senate, <span class="party-totals-senate">...</span>. In the House, <span class="party-totals-house">...</span>.</p>
 
-	<p>In the charts below, the duration of each self-quarantine/isolation is indicated, reflecting their inability to participate in the legislative process in-person.</p>
+	<p>In the charts below, the duration of each self-quarantine/isolation is indicated, reflecting their inability to participate in the legislative process in-person. In the House of Representatives, <i>proxy voting</i> and updated committee rules allow legislators to participate remotely in most aspects of the legislative process. In the Senate, quarantined and isolated legislators cannot vote remotely on legislation but may be able to participate in some committee activities.</p>
 
 	<figure class="highcharts-figure">
 	    <div id="affected-legislators-chart-senate"></div>
@@ -257,6 +269,8 @@ $(function() {
 	        Affected Members of Congress
 	    </p>-->
 	</figure>
+
+	<hr>
 
 	<table id="affected-legislators" class="table">
 	<thead>
