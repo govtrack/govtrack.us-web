@@ -595,10 +595,38 @@ def membersoverview(request):
             current=True,
             state__in=set(s for s, t in stateapportionment.items() if (t != "T") ^ delegates)
             )
-        if by_party:
-            return qs.values('party').annotate(count=Count('party')).order_by('-count')
-        else:
+        if not by_party:
             return qs.count()
+
+        # Count legislators by party. The order is used to determine the majority party
+        # in each chamber, which needs to also account for independents who caucus with
+        # a party because starting on Jan 20, 2021 that affects which is the majority!
+        counts_by_party = { r["party"]: { "party": r["party"],
+                                          "count": r["count"],
+                                          "caucus_parties": { },
+                                          "vp": False }
+                            for r in qs.filter(caucus=None).values('party').annotate(count=Count('party')) }
+        for r in qs.exclude(caucus=None).values('caucus', 'party').annotate(count=Count('caucus')).order_by('-count'):
+            pp = counts_by_party[r["caucus"]]
+            pp["count"] += r["count"]
+            pp["caucus_parties"][r["party"]] = r["count"]
+
+        # In addition, the Senate majority party may depend on the vice president's party.
+        if role_type == RoleType.senator:
+            vp = PersonRole.objects.filter(
+                  role_type=RoleType.vicepresident,
+                  current=True
+                 ).first()
+            if vp:
+                counts_by_party[vp.party]["vp"] = True
+
+        # Now sort the parties in majority-minority order. Break ties with the VP flag.
+        counts_by_party = sorted(counts_by_party.values(), key = lambda pp : (
+            pp["count"],
+            pp["vp"]
+        ), reverse=True)
+
+        return counts_by_party
 
     # Check senate majority party percent vs apportioned total state population of total population
     # in states + DC (because that's the population data we have).

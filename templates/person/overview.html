@@ -167,16 +167,37 @@ label { font-weight: normal; }
 	<p>The day-to-day activities of the Senate are controlled largely by the political party holding the most seats, called the &ldquo;majority party.&rdquo;   Here is a count of senators by party:</p>
 	
 	<h3>Senators by Party</h3>
-	<table style="width: 15em; margin-bottom: 1em;">
+	<table style="width: 16em; margin-bottom: 1em;">
 	{% for p in senate_by_party %}
-	<tr>
-		<td><span class="party_{{p.party.0}}" style="display: inline-block; line-height: 100%; padding: 1px; margin-bottom: 1px; width: 1em; text-align: center;">{{p.party.0}}</span></td>
-		<th>{{p.party}}s</th> <td>{{p.count}}</td>
+	<tr valign="top">
+		<td style="padding-right: 5px">
+			<span class="party_{{p.party.0}}" style="display: inline-block; line-height: 100%; padding: 1px; margin-bottom: 1px; width: 1em; text-align: center;">{{p.party.0}}</span>
+		</td>
+		<td style="padding-bottom: 4px">
+			<b>{{p.party}}{{p.count|pluralize}}</b>
+			{% if p.caucus_parties %}
+				<div style="font-size: 80%; line-height: 115%;">
+					Includes
+					{% for party, count in p.caucus_parties.items %}
+						{{count}} {{party}}{{count|pluralize}}
+					{% endfor %}
+					who caucus with the {{p.party}}s
+				</div>
+			{% endif %}
+		</td>
+		<td>
+			{{p.count}}
+		</td>
 	</tr>
 	{% endfor %}
 	{% if senate_vacancies > 0 %}<tr><td/><td>Vacancies</td> <td>{{senate_vacancies}}</td></tr>{% endif %}
-	<tr style="border-top: 1px solid #555;"><td/><td>Total Seats</td> <td>100</td></tr>
+	<tr style="border-top: 1px solid #555;"><td/><td style="padding-top: 4px;">Total Seats</td> <td style="padding-top: 4px;">100</td></tr>
 	</table>
+
+	{% if senate_by_party.0.count == 50 and senate_by_party.0.vp %}
+		<p>{{senate_by_party.0.party}}s hold the majority in the Senate because the Vice President, a {{senate_by_party.0.party}}, joins them to cast tie-breaking votes when necessary.</p>
+	{% endif %}
+
 
         {% if majority_party_apportioned_population_proportion %}
         <p>Although {{senate_by_party.0.party}}s hold the most seats, they represent just {{majority_party_apportioned_population_proportion}}% of the country&rsquo;s population because the Senate gives two seats to each state regardless of each state&rsquo;s population.</p>
@@ -204,14 +225,29 @@ label { font-weight: normal; }
 	
 	<table style="width: 15em">
 	{% for p in house_by_party %}
-	<tr>
-		<td><span class="party_{{p.party.0}}" style="display: inline-block; line-height: 100%; padding: 1px; margin-bottom: 1px; width: 1em; text-align: center;">{{p.party.0}}</span></td>
-		<th>{{p.party}}s</th>
-		<td>{{p.count}}</td>
+	<tr valign="top">
+		<td>
+			<span class="party_{{p.party.0}}" style="display: inline-block; line-height: 100%; padding: 1px; margin-bottom: 1px; width: 1em; text-align: center;">{{p.party.0}}</span>
+		</td>
+		<td style="padding-bottom: 4px">
+			<b>{{p.party}}{{p.count|pluralize}}</b>
+			{% if p.caucus_parties %}
+				<div style="font-size: 80%; line-height: 115%;">
+					Includes
+					{% for party, count in p.caucus_parties.items %}
+						{{count}} {{party}}{{count|pluralize}}
+					{% endfor %}
+					who caucus with the {{p.party}}s
+				</div>
+			{% endif %}
+		</td>
+		<td>
+			{{p.count}}
+		</td>
 	</tr>
 	{% endfor %}
 	{% if house_vacancies > 0 %}<tr><td/><td>Vacancies</td> <td>{{house_vacancies}}</td></tr>{% endif %}
-	<tr style="border-top: 1px solid #555;"><td/><td>Total Seats</td> <td>435</td></tr>
+	<tr style="border-top: 1px solid #555;"><td/><td style="padding-top: 4px;">Total Seats</td> <td style="padding-top: 4px;">435</td></tr>
 	</table>
 	
 	<p style="margin-top: .5em">The 435 congressional districts do not include the District of Columbia, Puerto Rico, and the U.S.&rsquo;s four other island territories &mdash; American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands &mdash; which each send a non-voting delegate to the House. Puerto Rico&rsquo;s delegate is called the Resident Commissioner.</p>
