@@ -794,7 +794,7 @@
 				<h3 style="margin: 0 0 5px 0; font-weight: bold;">{{bill.display_number}} {% if bill.is_current %}is{% else %}was{% endif %} a {{bill.bill_type_name}} in the United States Congress.</h3>
 				<p>{{bill.how_a_bill_text}}</p>
 				<p>{{bill.noun|capfirst}}s numbers restart every two years. That means there are other {{bill.noun}}s with the number {{bill.display_number_no_congress_number}}. This is the one from the {{bill.congress|ordinalhtml}} Congress.</p>
-				{% if not bill.is_current %}<p>This {{bill.bill_type_name}} was introduced in the {{bill.congress|ordinalhtml}} Congress, which met from {{congressdates.0|date}} to {{congressdates.1|date}}. Legislation not enacted by the end of a Congress is cleared from the books.</p>{% endif %}
+				{% if not bill.is_current %}<p>This {{bill.bill_type_name}} was introduced in the {{bill.congress|ordinalhtml}} Congress, which met from {{congressdates.0|date}} to {{congressdates.1|date}}. Legislation not passed by the end of a Congress is cleared from the books.</p>{% endif %}
 
 				<!-- Citation -->
 				<h3 style="margin: 0 0 5px 0; font-weight: bold;">

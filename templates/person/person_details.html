@@ -320,6 +320,7 @@ function show_pronunciation_guide() {
         		{{r.get_description_natural|safe}}
         		{% if r.current and r.district > 0 %}(<a href="/congress/members/{{r.state}}/{{r.district}}">view map</a>){% endif %}
     			and {% if r.current %}is{% else %}was{% endif %} {{r.get_party}}.
+			{% if r.current and r.get_description_natural == "Vice President of the United States" %}The Vice President can vote in the Senate to break ties.{% endif %}
     			{{person.he_she_cap}}
         		{% if r.current %}has served since {{ r.startdate }}{% else %}
         		served from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% endif %}.
