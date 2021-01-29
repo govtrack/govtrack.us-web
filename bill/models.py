@@ -688,7 +688,7 @@ class Bill(models.Model):
     def congressdotgov_link(self):
         congressdotgovbilltype = {
            BillType.senate_bill: "senate-bill", BillType.house_bill: "house-bill",
-           BillType.senate_resolution: "senate resolution", BillType.house_resolution: "house-resolution",
+           BillType.senate_resolution: "senate-resolution", BillType.house_resolution: "house-resolution",
            BillType.senate_concurrent_resolution: "senate-concurrent-resolution", BillType.house_concurrent_resolution: "house-concurrent-resolution",
            BillType.senate_joint_resolution: "senate-joint-resolution", BillType.house_joint_resolution: "house-joint-resolution",
         }
