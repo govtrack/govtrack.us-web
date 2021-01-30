@@ -3,7 +3,7 @@
 
 {% block title %}{{person.name_no_details}}&rsquo;s {{session}} Report Card from GovTrack.us{% endblock %}
 
-{% block meta_description %}Year-end {{session}} legislative statistics for {{person}}, the {{ role.get_role_type_display }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
+{% block meta_description %}Year-end {{session}} legislative statistics for {{person}}, the {{ person.role.get_role_type_display }}{% if person.role.state %} from {{ person.role.get_state_display }}{% endif %}{% endblock %}
 
 {% block og_image %}
     <meta name="twitter:card" content="summary">
@@ -110,12 +110,12 @@ function smooth_scroll(elem) {
 	<div class="col-sm-9 col-md-10">
 	{% endif %}
 		<p><em>
-			{% if role.leadership_title %}{{role.leadership_title}}<br>{% endif %}
-			{% if role.senator_rank %}{{role.get_senator_rank_display}}{% endif %}
-			{{ role.get_role_type_display }}
-			{% if role.state %} from {{ role.get_state_display }}{% if role.district == 0 %}'s At-Large District {% endif %}{% if role.district > 0 %}'s {{role.district|ordinalhtml}} District{% endif %}{% endif %}
-			<br>{{ role.party }}
-			<br>{% if role.current %}Serving{% else %}Served{% endif %} {{role.logical_dates.0|date}} &ndash; {{role.logical_dates.1|date}}
+			{% if person.role.leadership_title %}{{person.role.leadership_title}}<br>{% endif %}
+			{% if person.role.senator_rank %}{{person.role.get_senator_rank_display}}{% endif %}
+			{{ person.role.get_role_type_display }}
+			{% if person.role.state %} from {{ person.role.get_state_display }}{% if person.role.district == 0 %}'s At-Large District {% endif %}{% if person.role.district > 0 %}'s {{person.role.district|ordinalhtml}} District{% endif %}{% endif %}
+			<br>{{ person.role.party }}
+			<br>{% if person.role.current %}Serving{% else %}Served{% endif %} {{person.role.logical_dates.0|date}} &ndash; {{person.role.logical_dates.1|date}}
 			</em></p>
 
 		<hr>
@@ -126,8 +126,8 @@ function smooth_scroll(elem) {
 			<p>These statistics cover <b>{{person.lastname}}&rsquo;s record during the {{meta.congress|ordinalhtml}} Congress</b> ({{congress_dates.0|date}}-{{congress_dates.1|date}}) and compare {{himher}} to other {{class}} also serving at the end of the session. Last updated on {{publishdate|date}}. {{meta.notes}}</p>
 		{% endif %}
 
-		{% if role.leadership_title %}
-			<p style="color: red">Members of Congress with party leadership roles often do not participate in the legislative process in the same way as other Members of Congress. Since {{person.lastname}} was busy being {{role.leadership_title}}, the metrics of legislative activity listed below may not apply.</p>
+		{% if person.role.leadership_title %}
+			<p style="color: red">Members of Congress with party leadership roles often do not participate in the legislative process in the same way as other Members of Congress. Since {{person.lastname}} was busy being {{person.role.leadership_title}}, the metrics of legislative activity listed below may not apply.</p>
 		{% endif %}
 
 	{% if photo %}
@@ -247,9 +247,9 @@ function smooth_scroll(elem) {
 			<p>{{person.lastname}} cosponsored <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} and resolution{{stat.value|pluralize}} introduced by other Members of Congress. Cosponsorship shows a willingness to work with others to advance policy goals. <a href="/congress/bills/browse#cosponsors={{person.id}}&congress={{meta.congress}}">View Cosponsored Bills &raquo;</a></p>
 
 		{% elif stat.key == "cosponsored-other-party" %}
-			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% endif %} Of the {{stat.cosponsored}} bills that {{person.lastname}} cosponsored, <strong>{{stat.value|floatformat:"0"}}%</strong> were introduced by a legislator who was not a {{role.party}}.
-			{% if role.opposing_party %}
-				<a href="/congress/bills/browse#cosponsors={{person.id}}&sponsor_party={{role.opposing_party}}&congress={{meta.congress}}">View Cosponsored Bills &raquo;</a>
+			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% endif %} Of the {{stat.cosponsored}} bills that {{person.lastname}} cosponsored, <strong>{{stat.value|floatformat:"0"}}%</strong> were introduced by a legislator who was not a {{person.role.party}}.
+			{% if person.role.opposing_party %}
+				<a href="/congress/bills/browse#cosponsors={{person.id}}&sponsor_party={{person.role.opposing_party}}&congress={{meta.congress}}">View Cosponsored Bills &raquo;</a>
 			{% endif %}
 			</p>
 
@@ -292,7 +292,7 @@ function smooth_scroll(elem) {
 
 
 		{% if stat.key == "missed-votes" %}
-			{% if role.role_type == 2 %}
+			{% if person.role.role_type == 2 %}
 			<p class="notes">The Speaker of the House is not included in this statistic because according to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>
 			{% endif %}
 		{% elif stat.key == "bills-enacted" %}

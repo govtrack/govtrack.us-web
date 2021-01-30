@@ -37,7 +37,13 @@ def load_roles_at_date(persons, when, congress):
     This method is optimized for bulk operation.
     """
 
-    roles = PersonRole.objects.filter(startdate__lte=when, enddate__gte=when, role_type__in=(RoleType.representative, RoleType.senator), person__in=persons)
+    if when:
+        when = (when, when)
+    else:
+        from us import get_congress_dates
+        when = get_congress_dates(congress)
+
+    roles = PersonRole.objects.filter(startdate__lte=when[1], enddate__gte=when[0], role_type__in=(RoleType.representative, RoleType.senator), person__in=persons)
     roles_by_person = {}
     for role in roles:
         if role.congress_numbers() is not None and congress not in role.congress_numbers(): continue

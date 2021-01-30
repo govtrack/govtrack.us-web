@@ -198,7 +198,7 @@
 										{{value}}
 									{% endif %}
 								</td>
-								<td><a href="{{person.get_absolute_url}}/report-card/{{session}}" style="text-decoration: none">{{person}}</a></td>
+								<td><a href="{{person.get_absolute_url}}/report-card/{{session}}" style="text-decoration: none">{{person.name}}</a></td>
 							</tr>
 						{% endfor %}
 						{% if forloop.first and not specific_stat %}

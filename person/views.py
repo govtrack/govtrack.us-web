@@ -910,11 +910,15 @@ def person_session_stats(request, pk, session):
         # no stats
         raise Http404()
 
-    # get the role as stored in the file
-    role = PersonRole.objects.get(id=stats["role_id"])
+    # get the role as stored in the file and set it on the person object so it affects the name
+    person.role = PersonRole.objects.get(id=stats["role_id"])
 
     # mark the role as current if the logical end date is in the future, to fix the display of Served/Serving
-    role.current = (role.logical_dates()[1] > datetime.now().date())
+    person.role.current = (person.role.logical_dates()[1] > datetime.now().date())
+
+    # compute a name for this time period
+    from person.name import get_person_name
+    person.name = get_person_name(person)
 
     # clean and sort the stats for this person so they're ready for display
     from person.views_sessionstats import clean_person_stats
@@ -935,8 +939,8 @@ def person_session_stats(request, pk, session):
 
     # what dates specifically for the congress?
     (period_min, period_max) = get_congress_dates(stats["meta"]["congress"])
-    period_min = max(period_min, role.logical_dates()[0])
-    period_max = min(period_max, role.logical_dates()[1])
+    period_min = max(period_min, person.role.logical_dates()[0])
+    period_max = min(period_max, person.role.logical_dates()[1])
 
     return {
         "publishdate": dateutil.parser.parse(stats["meta"]["as-of"]),
@@ -945,8 +949,7 @@ def person_session_stats(request, pk, session):
         "person": person,
         "photo": person.get_photo()[0],
         "himher": Gender.by_value(person.gender).pronoun_object,
-        "role": role,
-        "class": RoleType.by_value(role.role_type).label.lower() + "s",
+        "class": RoleType.by_value(person.role.role_type).label.lower() + "s",
         "session": session,
         "meta": stats["meta"],
         "stats": stats["stats"],
@@ -970,7 +973,7 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
 
     try:
         cohort_title = get_cohort_name(cohort, True) if cohort else None
-    except ValueError: 
+    except ValueError:
         # invalid URL
         raise Http404()
 
@@ -985,14 +988,23 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
     cohorts = [ (-v, k, get_cohort_name(k, True), v) for k,v in cohorts.items() if "delegation" not in k and v > 10]
     cohorts = sorted(cohorts)
 
+    # Load people and roles in bulk.
+    people = Person.objects.in_bulk({ int(pid) for pid in stats["people"] })
+    roles = PersonRole.objects.in_bulk({ person["role_id"] for person in stats["people"].values() })
+
     # Gather data.
     metrics = { }
     for pid, person in stats["people"].items():
         try:
-            personobj = Person.objects.get(id=int(pid))
+            personobj = people[int(pid)]
         except:
             # debugging
             continue
+
+        # Compute each person's name for their role.
+        from person.name import get_person_name
+        personobj.role = roles.get(person["role_id"])
+        personobj.name = get_person_name(personobj)
 
         for stat, statinfo in person["stats"].items():
             if specific_stat is not None and stat != specific_stat: continue

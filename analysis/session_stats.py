@@ -192,13 +192,11 @@ def get_sponsor_stats(person, role, stats, congress, startdate, enddate, committ
 		# party at the time of (co)sponsorship.
 		# Warning: If someone switches parties, this will change.
 		sponsor_party = bill.sponsor_role.caucus or bill.sponsor_role.party
-		if sponsor_party != "Independent":
-			can_has_bipartisan_cosponsor = True # was not Independent throughout the time period
-			assert sponsor_party in ("Republican", "Democrat")
+		if sponsor_party in ("Republican", "Democrat"):
+			can_has_bipartisan_cosponsor = True # was not Independent/etc. throughout the time period
 			for cosponsor in cosponsors:
 				cosponsor_party = cosponsor.role.caucus or cosponsor.role.party
-				if cosponsor_party != "Independent":
-					assert cosponsor_party in ("Republican", "Democrat")
+				if cosponsor_party in ("Republican", "Democrat"):
 					if cosponsor_party != sponsor_party:
 						has_bipartisan_cosponsor.append(bill)
 						break
