@@ -142,7 +142,7 @@ function load_comparison(alt_bill, alt_version) {
 	$('#content_loading').show();
 	$('#content_loading').html('<p>Loading...</p>');
 	window.location.hash = "#compare=" + ((alt_bill && alt_bill != {{bill.id}}) ? (alt_bill + ":") : "") + alt_version;
-	ga('send', 'event', 'bill_text_comparison', (alt_bill && alt_bill != {{bill.id}}) ? "different-bill" : "different-version");
+	//ga('send', 'event', 'bill_text_comparison', (alt_bill && alt_bill != {{bill.id}}) ? "different-bill" : "different-version");
 	
 	$.ajax({
 		url: "/congress/bills/_ajax/load_text",

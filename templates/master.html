@@ -44,17 +44,6 @@
 
 		<script type="text/javascript">
 		window.post_jquery_load_scripts = [];
-
-		{% if not debug %}
-		<!-- Google Analytics -->
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-		<!-- End Google Analytics -->
-		{% else %}
-			window.ga = function() { };
-		{% endif %}
 		</script>
 
 		{% block head %}{% endblock %}
@@ -179,7 +168,6 @@
     <div id="google_translate_element"></div><script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'es', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, gaTrack: true, gaId: 'UA-1190841-1'}, 'google_translate_element');
-      $('#google_translate_element').click(function() { ga('send', 'event', 'translation', 'widget_click'); } );
     }
     </script><script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 			</li>
@@ -210,14 +198,6 @@
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			{% include "site-news-banner.html" %}
 	<script>
-	function trackOutboundLink(link, category, action) { 
-		try { 
-			ga('send', 'event', category, action);
-		} catch(err){}
-		setTimeout(function() { document.location.href = link.href; }, 100);
-		return false;
-	}
-
 	function hide_site_news() {
 		$('#sitenewscontainer').fadeOut();
 		$.cookie("sitenewsbanner", $('#sitenewscontainer .sitenewsbody').attr("data-seq"), { expires: 14, path: '/' });
@@ -357,11 +337,6 @@
 	{% endif %}
 
 	<script>
-		<!-- Google Analytics page load -->
-		ga('create', '{{GOOGLE_ANALYTICS_KEY|escapejs}}');
-		ga('set', 'dimension1', the_user ? "Logged In" : "Anonymous");
-		ga('set', 'dimension2', the_segment);
-		ga('send', 'pageview');
 		gtag('set', 'user_properties', {
 		  Registered: the_user ? "Logged In" : "Anonymous",
 		  GeoSegment: the_segment
