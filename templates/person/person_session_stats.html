@@ -293,7 +293,7 @@ function smooth_scroll(elem) {
 
 		{% if stat.key == "missed-votes" %}
 			{% if person.role.role_type == 2 %}
-			<p class="notes">The Speaker of the House is not included in this statistic because according to <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, the Speaker of the House is not required to vote in &ldquo;ordinary legislative proceedings, and the delegates from the five island territories and the District of Columbia are also not included because they were not elligible to vote in any roll call votes.</p>
+			<p class="notes">The Speaker of the House, per <a href="http://www.rules.house.gov/singlepages.aspx?NewsID=160&rsbd=165">current House rules</a>, is not required to vote in &ldquo;ordinary legislative proceedings&rdquo; and is never recorded as missing a vote, and may not be included in the comparison with other representatives if not voting. The delegates from the five island territories and the District of Columbia are not eligible to vote in most roll call votes and so may not appear here if not elligible for any vote during the time period of these statistics.</p>
 			{% endif %}
 		{% elif stat.key == "bills-enacted" %}
 			{% if session == '2013' %}
