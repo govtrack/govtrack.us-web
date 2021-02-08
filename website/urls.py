@@ -31,5 +31,4 @@ urlpatterns = [
     url(r'^user-group-signup', website.views.user_group_signup),
     url(r'^missing-data', website.views.missing_data),
     url(r'^covid-19', website.views.covid19),
-    url(r'^voterama', website.views.voterama_landing_page),
 ]

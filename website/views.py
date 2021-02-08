@@ -1189,34 +1189,3 @@ def is_congress_in_session_live():
     cache.set(cache_key, ret, 60*10) # 10 minutes
     return ret
 
-@render_to('website/voterama.html')
-def voterama_landing_page(request):
-    response = None
-
-    if request.method == "POST":
-        from django.core.mail import EmailMessage, send_mail
-        email = EmailMessage(
-            'Voterama Inquiry: ' + request.POST.get("publication", ""),
-            """
-Publication: {publication}
-Contact: "{name}" <{email}>
-Phone: {phone}
-            """.format(**request.POST.dict()),
-            settings.DEFAULT_FROM_EMAIL,
-            settings.VOTERAMA_EMAIL_TO.split(","),
-            [],
-            reply_to=[""""{name}" <{email}>""".format(**request.POST.dict())]
-        )
-        try:
-            email.send(fail_silently=False) 
-            response = {
-                "class": "default",
-                "message": "Your information has been received, and we will contact you shortly."
-            }
-        except Exception as e:
-            response = {
-                "class": "error",
-                "message": "There was a problem. Please contact us by emailing hello@govtrack.us. " + str(e)
-            }
-
-    return { "response": response }
