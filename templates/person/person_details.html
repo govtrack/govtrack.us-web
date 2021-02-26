@@ -403,6 +403,7 @@ function show_pronunciation_guide() {
 				{% endif %}
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}
 				Shortly after the 2020 election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly won by Democrats &mdash; to be discounted, claiming that some voters there followed procedures set by the wrong state officials. The case amplified lies and conspiracy theories that fueled the movement that led to the attack on the Capitol. The Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a> the case.
+				Following the rejection of several cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}one legislator{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
 				{% endif %}
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
 				In the days leading up to January 6, {{person.lastname}} had announced {{person.his_her}} intent to object on that day to the inclusion of some states in the count of electors that determines the next president, disenfranchising millions of voters based on lies, conspiracy theories, and preposterous legal theories all falsely claiming various sorts of mass fraud that did not occur. The announcement amplified the message that inspired the attack on the Capitol.
@@ -415,7 +416,6 @@ function show_pronunciation_guide() {
 				about the election that motivated the insurrection at the Capitol.
 				{% endif %}
 				{% endif %}
-				Following the rejection of several cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}one legislator{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
 			</div>
 		</div>
 	{% elif kraken_cosponsors %}
