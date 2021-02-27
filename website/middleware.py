@@ -47,6 +47,12 @@ base_context = {
     "GOOGLE_ANALYTICS_KEY": getattr(settings, 'GOOGLE_ANALYTICS_KEY', ''),
     "FACEBOOK_APP_ID": getattr(settings, 'FACEBOOK_APP_ID', ''),
     "DID_AN_ELECTION_JUST_HAPPEN": settings.CURRENT_ELECTION_DATE and settings.CURRENT_ELECTION_DATE <= datetime.datetime.now().date(),
+
+    # district maps
+    "MAPBOX_ACCESS_TOKEN": getattr(settings, 'MAPBOX_ACCESS_TOKEN'),
+    "MAPBOX_MAP_STYLE": getattr(settings, 'MAPBOX_MAP_STYLE'),
+    "MAPBOX_MAP_ID": getattr(settings, 'MAPBOX_MAP_ID'),
+    "DISTRICT_BBOXES_FILE": getattr(settings, 'DISTRICT_BBOXES_FILE'),
 }
 
 def template_context_processor(request):

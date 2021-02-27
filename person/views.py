@@ -426,10 +426,6 @@ def browse_map(request):
     return {
         "statelist": statelist,
         "current_members": current_members,
-        "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
-    	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
-    	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
-        "DISTRICT_BBOXES_FILE": settings.DISTRICT_BBOXES_FILE,
     }
     
 def normalize_state_arg(state):
@@ -531,10 +527,6 @@ def browse_district(request, state, district):
         "district_zero": ("%02d" % int(district)),
         "statelist": statelist,
         "legislators": sens+reps,
-        "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
-    	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
-    	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
-        "DISTRICT_BBOXES_FILE": settings.DISTRICT_BBOXES_FILE,
     }
     
 def get_district_bounds(state, district):
@@ -765,10 +757,6 @@ def districtmapembed(request):
         "state": request.GET.get("state", ""),
         "district": request.GET.get("district", ""),
         "bounds": request.GET.get("bounds", None),
-        "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
-    	"MAPBOX_MAP_STYLE": settings.MAPBOX_MAP_STYLE,
-    	"MAPBOX_MAP_ID": settings.MAPBOX_MAP_ID,
-        "DISTRICT_BBOXES_FILE": settings.DISTRICT_BBOXES_FILE,
     }
 
 

@@ -27,9 +27,12 @@ else
 function lngLatBoundsToCameraOptions(bounds) {
     var w = $('#map').width();
     var h = $('#map').height();
+    // during initialization the element dimensions may not be available and can be negative?! in which case use the window dimensions
+    if (!w || !h || (w*h) < 320*200) { w = $(window).width(); h = $(window).height(); }
+    var zoom = Math.log(((w*h) / ((bounds.getNorth()-bounds.getSouth()) * (bounds.getEast() - bounds.getWest())))) / 1.75
     return {
       center: bounds.getCenter(),
-      zoom: Math.log(((w*h) / ((bounds.getNorth()-bounds.getSouth()) * (bounds.getEast() - bounds.getWest())))) / 1.75
+      zoom: zoom
     };
   }
 
