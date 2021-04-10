@@ -1177,13 +1177,13 @@ def is_congress_in_session_live():
     try:
         r = urllib.request.urlopen("https://in-session.house.gov/").read()
         ret["house"] = "no" if r == b'0' else "yes"
-    except urllib.error.HTTPError as ex:
+    except urllib.error.URLError as ex:
         ret["house"] = "error"
 
     try:
         r = urllib.request.urlopen("https://senate.granicus.com/ViewPublisher.php?view_id=20").read()
         ret["senate"] = "no" if b'OFF' in r else "yes"
-    except urllib.error.HTTPError as ex:
+    except urllib.error.URLError as ex:
         ret["senate"] = "error"
 
     cache.set(cache_key, ret, 60*10) # 10 minutes
