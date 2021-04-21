@@ -54,7 +54,7 @@ if "people" in sys.argv:
 	
 	# Pull latest poeple YAML.
 	os.system("cd %s/congress-legislators; git fetch -pq" % settings.CONGRESS_PROJECT_PATH)
-	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % settings.CONGRESS_PROJECT_PATH)
+	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/main" % settings.CONGRESS_PROJECT_PATH)
 	
 	# Load YAML (directly) into db.
 	os.system("./parse.py person") #  -l ERROR
@@ -71,7 +71,7 @@ if "committees" in sys.argv:
 	
 	# Pull latest YAML.
 	os.system("cd %s/congress-legislators; git fetch -pq" % settings.CONGRESS_PROJECT_PATH)
-	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/master" % settings.CONGRESS_PROJECT_PATH)
+	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/main" % settings.CONGRESS_PROJECT_PATH)
 	
 	# Committee events.
 	os.system("cd %s; . .env3/bin/activate; ./run committee_meetings --docs=False --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
