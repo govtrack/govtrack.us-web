@@ -22,7 +22,7 @@ class Command(BaseCommand):
 		self.tweepy_client = twitter_api_client()
 
 		# Determine maximum length of a shortened link.
-		self.short_url_length_https = self.tweepy_client.configuration()['short_url_length_https']
+		self.short_url_length_https = 23 # self.tweepy_client.configuration()['short_url_length_https'] --- this is failing with 'tweepy.error.TweepError: Failed to parse JSON payload: Expecting value: line 1 column 1 (char 0)'
 
 		# What have we tweeted about before? Let's not tweet
 		# it again.
