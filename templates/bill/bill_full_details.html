@@ -44,13 +44,11 @@
 		{% if bill.cosponsor_count > 0 %}
 		<p id="cosponsors-sorts">
 			<span class="text-mute">Sort</span>
-			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="name" {% if not bill.is_aliev %}class="active"{% endif %}>By Name</a>
+			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="name" {% if xxx %}class="active"{% endif %}>By Name</a>
 			|
 			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="date">By Date</a>
-			{% if bill.is_alive %}
 			|
 			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="relevance" class="active">By Committee</a>
-			{% endif %}
 		</p>
 		{% endif %}
 
@@ -59,12 +57,12 @@
 			<tr>
 				<th>Sponsor/Cosponsor</th>
 				<th>Joined/Withdrawn</th>
-				{% if bill.is_alive %}<th>On Assigned Committees</th>{% endif %}
+				<th>On Assigned Committees{% if not bill.is_alive %}<sup>*</sup>{% endif %}</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for csp in cosponsors %}
-			<tr class="{% if not csp.has_committee_roles and bill.is_alive %}no-relevance hidden{% endif %}"
+			<tr class="{% if not csp.has_committee_roles %}no-relevance hidden{% endif %}"
 			    data-sort-name="{{csp.sort_name}}"
 			    data-sort-relevance="{{csp.sort_relevance}}"
 			    data-sort-date="{{csp.sort_date}}">
@@ -73,7 +71,6 @@
 					<a href="{{csp.person.get_absolute_url}}">{{csp.name}}</a>
 				</td>
 				<td>{{csp.joined_withdrawn}}</td>
-				{% if bill.is_alive %}
 				<td>
 					{% for cm in csp.committee_roles %}
 						<div>
@@ -82,12 +79,10 @@
 						</div>
 					{% endfor %}
 				</td>
-				{% endif %}
 			</tr>
 			{% endfor %}
 		</tbody>
 		</table>
-		{% if bill.is_alive %}
 		{% regroup cosponsors by has_committee_roles as cosponsors_by_relevance %}
 		{% for grouper, list in cosponsors_by_relevance %}	
 			{% if not grouper %}
@@ -96,7 +91,7 @@
 				</a></p>
 			{% endif %}
 		{% endfor %}
-		{% endif %}
+		{% if not bill.is_alive %}<p class="small"><sup>*</sup> Current committee assignments.</p>{% endif %}
 {% endif %}
 
 {% if bill.committees.exists %}

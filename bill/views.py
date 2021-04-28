@@ -382,12 +382,16 @@ def get_cosponsors_table(bill):
         csp["committee_roles"] = []
         csp["committee_role_sort"] = [0 for _ in MEMBER_ROLE_WEIGHTS]
 
-    if bill.is_alive:
+    has_committee_roles = False
+    if True:
         # Annotate with cosponsors that are on relevant committees.
         # Count up the number of times the person has a particular role
-        # on any committee (i.e. number of chair positions). Since committee
-        # data is only current assignments, don't do this for historical bills
-        # since it implies assignments at some point when the bill was active.
+        # on any committee (i.e. number of chair positions). Our committee
+        # membership data is current committee assignments which for
+        # non-alive bills can't answer the question of what the cosponsors'
+        # committee assignments were when the bill was alive. However,
+        # as D.S. tells me, current committee assignments are more relevant
+        # anyway for advocacy on the same issue as the bill.
         for cm in CommitteeMember.objects.filter(
           person__in={ c["person"] for c in cosponsors },
           committee__in=bill.committees.all())\
@@ -397,6 +401,7 @@ def get_cosponsors_table(bill):
             csp["committee_roles"].sort(key = lambda cm : (cm.committee.is_subcommittee, -MEMBER_ROLE_WEIGHTS[cm.role] ))
             csp["committee_role_sort"][max(MEMBER_ROLE_WEIGHTS.values()) - MEMBER_ROLE_WEIGHTS[cm.role]] -= 1 # ascending order goes most important to least important
             csp["has_committee_roles"] = True
+            has_committee_roles = True
 
             # If the parent committee membership role type is just Member,
             # remove it - it's redundant with subcommittee info. But we
@@ -416,8 +421,8 @@ def get_cosponsors_table(bill):
     # Assign a row index to each cosponsor for each sort order.
 
     for i, c in enumerate(sorted(cosponsors, key = lambda c : (
-        c["name"],
-        c["sort_cosponsor_type"],
+        c["name"], # we're sorting by name
+        c["sort_cosponsor_type"], # and in an unlikely case of a name clash, sort then by sponsor/cosponsor/withdrawn
     ))):
         c["sort_name"] = i
 
@@ -437,8 +442,8 @@ def get_cosponsors_table(bill):
     ))):
         c["sort_date"] = i
 
-    if bill.is_alive:
-        # But default to the "relevance" sort.
+    if has_committee_roles:
+        # Default to the "relevance" sort.
         cosponsors.sort(key = lambda c : c["sort_relevance"])
     else:
         # If we have no committee data, sort by name.
