@@ -612,6 +612,17 @@
 <div style="margin: 30px 0;">
   <h2 style="margin-bottom: 15px;"><span>Position statements</span></h2>
 
+  {% if bill.statement_admin_policy %}
+  <h3>Statement of Administration Policy</h3>
+  <p>
+  	<a href="{{bill.statement_admin_policy.url}}">
+  		{{bill.statement_admin_policy.president}}:
+  		{{bill.statement_admin_policy.document_title}}
+  	</a>
+  	({{bill.statement_admin_policy.date_issued|date}})
+  </p>
+  {% endif %}
+
   {% if legislator_statements %}
   <h3>What legislators are saying</h3>
   {% for sp in legislator_statements %}

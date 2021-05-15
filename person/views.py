@@ -415,8 +415,20 @@ def http_rest_json(url, args=None, method="GET", headers={}):
         url += "?" + urllib.parse.urlencode(args).encode("utf8")
     req = urllib.request.Request(url, headers=headers)
     r = urllib.request.urlopen(req, timeout=10)
+    if r.getcode() != 200: raise Exception("Failed to load: " + url)
     r = r.read().decode("utf8")
     return json.loads(r)
+
+def http_rest_yaml(url, args=None, method="GET", headers={}):
+    # Call a REST API that returns a YAML object/array and return it as a Python dict/list.
+    import urllib.request, urllib.parse, json
+    if method == "GET" and args != None:
+        url += "?" + urllib.parse.urlencode(args).encode("utf8")
+    req = urllib.request.Request(url, headers=headers)
+    r = urllib.request.urlopen(req, timeout=10)
+    if r.getcode() != 200: raise Exception("Failed to load: " + url)
+    import rtyaml
+    return rtyaml.load(r)
 
 @anonymous_view
 @render_to('person/district_map.html')

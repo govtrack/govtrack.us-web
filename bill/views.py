@@ -71,6 +71,12 @@ def bill_details(request, congress, type_slug, number):
     def add_position_return_post(bp): bp.post.position = bp.position; return bp.post
     stakeholder_posts = [add_position_return_post(bp) for bp in stakeholder_posts]
 
+    # load president who made Statement of Administration policy
+    if bill.statement_admin_policy:
+        from parser.processor import Processor
+        bill.statement_admin_policy["president"] = Person.objects.get(id=bill.statement_admin_policy["president"])
+        bill.statement_admin_policy["date_issued"] = Processor.parse_datetime(bill.statement_admin_policy["date_issued"])
+
     # context
     return {
         'bill': bill,
@@ -794,25 +800,6 @@ def show_bill_browse(template, request, ix1, ix2, context):
         noun = ("bill", "bills"),
         context = context,
         )
-
-def query_popvox(method, args):
-    if isinstance(method, (list, tuple)):
-        method = "/".join(method)
-
-    _args = { }
-    if args != None: _args.update(args)
-    _args["api_key"] = settings.POPVOX_API_KEY
-
-    url = "https://www.popvox.com/api/" + method + "?" + urllib.parse.urlencode(_args).encode("utf8")
-
-    req = urllib.request.Request(url)
-    resp = urllib.request.urlopen(req)
-    if resp.getcode() != 200:
-        raise Exception("Failed to load page: " + url)
-    ret = resp.read()
-    encoding = resp.info().getparam("charset")
-    ret = ret.decode(encoding)
-    return json.loads(ret)
 
 subject_choices_data = None
 def subject_choices():

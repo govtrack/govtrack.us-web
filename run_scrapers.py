@@ -121,6 +121,7 @@ if do_bill_parse:
 	# Load into db.
 	os.system("./parse.py --congress=%d -l %s bill" % (CONGRESS, log_level))
 	os.system("./parse.py --congress=%d -l %s amendment" % (CONGRESS, log_level))
+	os.system("./manage.py shell -c \"import bill.models; bill.models.Bill.LoadStatementsOfAdministrationPolicy()\"")
 
 	# bills are indexed as they are parsed, but to
 	# freshen the index... Because bills index full text and so

@@ -223,6 +223,7 @@ class Bill(models.Model):
     docs_house_gov_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted to http://docs.house.gov (which is different from the date it was expected to be debated).")
     senate_floor_schedule_postdate = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill was posted on the Senate Floor Schedule (which is different from the date it was expected to be debated).")
     scheduled_consideration_date = models.DateTimeField(blank=True, null=True, help_text="The date on which the bill is expected to be considered on the floor for the most recent of docs_house_gov_postdate and senate_floor_schedule_postdate, and if for docs.house.gov it is the week that this is the Monday of.")
+    statement_admin_policy = JSONField(default=[], blank=True, null=True, help_text="Statement of Administration Policy metadata")
 
     # additional data that we compute/set
     text_incorporation = JSONField(default=[], blank=True, null=True, help_text="What enacted bills have provisions of this bill been incorporated into?")
@@ -1617,6 +1618,32 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
             ret["text"] = sanitize(dom.xpath("string(bill/analysis/%s)" % f), as_text=True)
             if ret["text"]: break
         return ret
+
+    @staticmethod
+    def LoadStatementsOfAdministrationPolicy(current_only=True):
+        import tqdm
+        from person.views import http_rest_yaml
+        presidents = http_rest_yaml("https://raw.githubusercontent.com/unitedstates/statements-of-administration-policy/main/presidents.yaml")
+        if current_only: presidents = dict(list(presidents.items())[-1:]) # just scan the last president
+        for president, president_info in presidents.items():
+            saps = http_rest_yaml("https://raw.githubusercontent.com/unitedstates/statements-of-administration-policy/main/archive/{}.yaml".format(president))
+            for sap in tqdm.tqdm(saps, desc=president + "SAPs"):
+                sap["president"] = president_info["id"]["govtrack"]
+                del sap["date_fetched"] # save db space
+                if "source" in sap: del sap["source"] # save db space
+                for bill in sap["bills"]:
+                    try:
+                        b = Bill.from_congressproject_id(bill + "-" + str(sap["congress"]))
+                    except Bill.DoesNotExist:
+                        continue # skip
+                    if "file" in sap:
+                        sap["url"] = "https://raw.githubusercontent.com/unitedstates/statements-of-administration-policy/main/archive/" + sap["file"]
+                    import rtyaml
+                    if rtyaml.dump(b.statement_admin_policy) != rtyaml.dump(sap):
+                        b.statement_admin_policy = sap
+                        b.save(update_fields=["statement_admin_policy"])
+        # TODO: Clear statement_admin_policy fields on bills that no longer have SAP info,
+        # in case of data errors that have been corrected.
 
 class RelatedBill(models.Model):
     bill = models.ForeignKey(Bill, related_name="relatedbills", on_delete=models.CASCADE)
