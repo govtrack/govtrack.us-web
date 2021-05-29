@@ -290,18 +290,23 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
       except ValueError: # xml is bad
         continue
 
-      # Use Solr's More Like This query to get a preliminary list of
-      # bills textually similar to each enacted bill, which lets us
-      # cut down on the number of comparisons that we need to run
-      # by a factor of around 100. Pull between 10 and 300 similar
-      # bills -- depending on how large of a bill the enacted bill
-      # is. An authorization bill can have lots of bills incorporated
-      # into it, but a short bill could not have very many.
-      from haystack.query import SearchQuerySet
-      qs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"])\
-        .filter(congress=b1.congress).more_like_this(b1)
-      how_many = min(300, max(10, len(text1)/1000))
-      similar_bills = set(r.object for r in qs[0:how_many])
+      # How many bills should we expect as an upper bound to be similar
+      # to this bill? The longer this bill is, the more bills might be
+      # incorporated into it. For small bills, we'll use Solr's more-
+      # like-this query to find relevant bills. But for very large bills
+      # which are often omnibus bills with many topics, Solr produces
+      # poor results and doesn't surface all matches. Comparing every
+      # enacted bill to every bill is infeasible.
+      how_many = max(10, len(text1)/1000)
+      if how_many < 100:
+          from haystack.query import SearchQuerySet
+          qs = SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"])\
+            .filter(congress=b1.congress).more_like_this(b1)
+          similar_bills = set(r.object for r in qs[0:how_many])
+      else:
+          # OK for these bills we really have to compare every bill to
+          # every other bill.
+          similar_bills = set(all_bills)
 
       # Add in any related bills identified by CRS. Related bills aren't
       # exhaustive, which is why we also look at textually similar bills,
@@ -343,6 +348,19 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
           continue
 
         comps.append((b1, b2))
+
+    # Only compare 5000 pairs of bills in a run. In the 116th Congress
+    # about 200,000 comparison pairs were performed, so this gets us
+    # all of them in about one month if this script is run once per day,
+    # without this script potentially running for an excessively long
+    # time and blocking other scrapers. Most enacted bills only trigger
+    # a comparison with a handful of other bills, but the blow-up comes
+    # from the large omnibus bills which get compared with every other
+    # introduced bill.
+    max_comps = 500
+    if len(comps) > max_comps:
+        print("Only running first", max_comps, "of", len(comps), "bill comparison pairs.")
+        comps = comps[:max_comps]
 
     # Now perform text comparison on the pairs of bills.
     prev_b1 = None
