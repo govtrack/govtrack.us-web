@@ -488,6 +488,24 @@ class Bill(models.Model):
         self.sponsor.role = self.sponsor_role
         return get_person_name(self.sponsor, firstname_position='before')
 
+    def get_sponsors(self, recursive=True):
+        # For most bills, return a list holding its one primary sponsor.
+        # For bills with the original_intent_replaced flag set, return
+        # an empty list. For enacted bills, use text incorporation data
+        # to add the sponsor(s) of all substantially identical bills.
+        ret = []
+
+        if not self.original_intent_replaced and self.sponsor:
+            ret.append(self.sponsor)
+
+        if recursive and self.text_incorporation:
+            for rec in self.text_incorporation:
+                if rec["my_ratio"] * rec["other_ratio"] > .9:
+                    b2 = Bill.from_congressproject_id(rec["other"])
+                    ret.extend(b2.get_sponsors(recursive=False))
+
+        return ret
+
     @property
     def cosponsor_count(self):
         return self.cosponsor_records.filter(withdrawn=None).count()

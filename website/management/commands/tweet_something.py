@@ -15,14 +15,25 @@ class Command(BaseCommand):
 	help = 'Tweets something interesting as @GovTrack.'
 
 	tweets_storage_fn = 'data/misc/tweets.json'
-	
+
+	def add_arguments(self, parser):
+		parser.add_argument('--dry-run', action="store_true")
+
 	def handle(self, *args, **options):
-		# Construct client.
-		from website.util import twitter_api_client
-		self.tweepy_client = twitter_api_client()
+		self.options = options
 
 		# Determine maximum length of a shortened link.
 		self.short_url_length_https = 23 # self.tweepy_client.configuration()['short_url_length_https'] --- this is failing with 'tweepy.error.TweepError: Failed to parse JSON payload: Expecting value: line 1 column 1 (char 0)'
+
+		if options["dry_run"]:
+			self.previous_tweets = { }
+			self.max_tweets = 50
+			self.tweet_something()
+			return
+
+		# Construct client.
+		from website.util import twitter_api_client
+		self.tweepy_client = twitter_api_client()
 
 		# What have we tweeted about before? Let's not tweet
 		# it again.
@@ -92,13 +103,13 @@ class Command(BaseCommand):
 		text += url
 		text += " 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is four(?) characters as Twitter sees it (plus the preceding space)
 
-		if "TEST" in os.environ:
+		if self.options["dry_run"]:
 			# Don't tweet. Just print and exit.
-			print(self.short_url_length_https)
-			print(key)
-			print(len(text)-len(url)+self.short_url_length_https, text_len_diff)
-			print(repr(text))
-			sys.exit(1)
+			print(text)
+			self.max_tweets -= 1
+			if self.max_tweets <= 0:
+				sys.exit(1)
+			return
 
 		tweet = self.tweepy_client.update_status(text)
 
@@ -199,7 +210,7 @@ class Command(BaseCommand):
 		coming_up.sort(key = lambda b : b.docs_house_gov_postdate if (b.docs_house_gov_postdate and (not b.senate_floor_schedule_postdate or b.senate_floor_schedule_postdate < b.docs_house_gov_postdate)) else b.senate_floor_schedule_postdate)
 		for bill in coming_up:
 			text = "\U0001f51c " + bill.display_number # SOON-> emoji
-			if bill.sponsor and bill.sponsor.twitterid: text += " by @" + bill.sponsor.twitterid
+			text += Command.mention_sponsors(bill)
 			text += ": " + bill.title_no_number
 			self.post_tweet(
 				"%s:comingup:%s" % (timezone.now().date().isoformat(), bill.congressproject_id),
@@ -226,10 +237,17 @@ class Command(BaseCommand):
 			text = get_bill_really_short_status_string(status)
 			if text == "": continue
 			bill_number = bill.display_number
-			if bill.sponsor and bill.sponsor.twitterid: bill_number += " by @" + bill.sponsor.twitterid
+			bill_number += Command.mention_sponsors(bill)
 			text = text % (bill_number, "yesterday")
 			text += " " + bill.title_no_number
 			self.post_tweet(
 				bill.current_status_date.isoformat() + ":bill:%s:status:%s" % (bill.congressproject_id, status),
 				text,
 				"https://www.govtrack.us" + bill.get_absolute_url())
+
+	@staticmethod
+	def mention_sponsors(bill):
+		sponsors = bill.get_sponsors()
+		sponsors = [p for p in sponsors if p.twitterid]
+		if not sponsors: return "" # no sponsors or none with a twitter handle
+		return " by " + ", ".join("@" + sponsor.twitterid for sponsor in sponsors)
