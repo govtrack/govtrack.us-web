@@ -1621,13 +1621,19 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
 
     @staticmethod
     def LoadStatementsOfAdministrationPolicy(current_only=True):
-        import tqdm
+        import sys
+        if sys.stdout.isatty(): # show progress normally
+          from tqdm import tqdm
+        else: # but make a dummy function when running in the background
+          def tqdm(iter, *args, **kwargs):
+            return iter
+
         from person.views import http_rest_yaml
         presidents = http_rest_yaml("https://raw.githubusercontent.com/unitedstates/statements-of-administration-policy/main/presidents.yaml")
         if current_only: presidents = dict(list(presidents.items())[-1:]) # just scan the last president
         for president, president_info in presidents.items():
             saps = http_rest_yaml("https://raw.githubusercontent.com/unitedstates/statements-of-administration-policy/main/archive/{}.yaml".format(president))
-            for sap in tqdm.tqdm(saps, desc=president + "SAPs"):
+            for sap in tqdm(saps, desc=president + "SAPs"):
                 sap["president"] = president_info["id"]["govtrack"]
                 del sap["date_fetched"] # save db space
                 if "source" in sap: del sap["source"] # save db space
