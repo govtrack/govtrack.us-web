@@ -375,7 +375,7 @@ class Event(models.Model):
     source_content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     source_object_id = models.PositiveIntegerField()
     source = generic_fields.GenericForeignKey('source_content_type', 'source_object_id')
-    eventid = models.CharField(max_length=32) # unique w.r.t. the source object 
+    eventid = models.CharField(max_length=32) # unique w.r.t. the source object
 
     when = models.DateTimeField(db_index=True)
     seq = models.IntegerField()

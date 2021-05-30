@@ -795,6 +795,18 @@ class Bill(models.Model):
                     continue # already indexed
                 E.add("state:" + str(state), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_enacted_bill else []))
 
+            # generate events for actions on bills this bill was (parially or fully) incorporated into
+            # that occur after the last action on this bill (ideally after the text was incorporated,
+            # but we don't know at what point in the other bill's history it got the text of this bill).
+            if self.text_incorporation:
+                for rec in self.text_incorporation:
+                    if rec["other_version"] == "enr": # one side is always enr
+                        other_bill = Bill.from_congressproject_id(rec["other"])
+                        for datestr, state, text, srcxml in other_bill.major_actions:
+                            date = eval(datestr)
+                            if date.date() >= self.current_status_date:
+                                E.add("txtinc:{}:{}".format(other_bill.id, str(state)), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_enacted_bill else []))
+
             # generate events for new cosponsors... group by join date, and
             # assume that join dates we've seen don't have new cosponsors
             # added later, or else we may miss that in an email update. we
@@ -830,13 +842,15 @@ class Bill(models.Model):
         if eventid == "summary":
             return self.render_event_summary(feeds)
 
-        ev_type, ev_code = eventid.split(":")
+        ev_type, ev_code = eventid.split(":", 1)
         if ev_type == "state":
             return self.render_event_state(ev_code, feeds)
         elif ev_type == "cosp":
             return self.render_event_cosp(ev_code, feeds)
         elif ev_type == "text":
             return self.render_event_text(ev_code, feeds)
+        elif ev_type == "txtinc":
+            return self.render_event_textincorporation(*ev_code.split(":"), feeds)
         else:
             raise Exception()
 
@@ -1059,6 +1073,47 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 "show_sponsor": self.sponsor in Bill.get_tracked_people(feeds),
 				},
             "thumbnail_url": self.get_thumbnail_url(),
+            }
+
+    def render_event_textincorporation(self, bill_id, status_id, feeds):
+        from .status import BillStatus, get_bill_really_short_status_string
+        other_bill = Bill.objects.get(id=bill_id)
+        status = BillStatus.by_value(int(status_id))
+        date = self.introduced_date
+        action = None
+        ti_rec = None
+
+        # find the text incorporation information for this event
+        if self.text_incorporation:
+            for rec in self.text_incorporation:
+                if rec["other"] == other_bill.congressproject_id:
+                    ti_rec = rec
+
+        # scan for additional state data in the XML blobs for the bill that this bill was incorporated into
+        for datestr, st, text, srcxml in other_bill.major_actions:
+            if st == status:
+                date = eval(datestr)
+                action = text
+                break
+        else:
+            raise Exception("Invalid %s event in %s." % (status, str(self)))
+
+        thumbnail_url = other_bill.get_thumbnail_url()
+
+        return {
+            "type": status.label,
+            "date": date,
+            "date_has_no_time": isinstance(date, datetime.date) or date.time() == datetime.time.min,
+            "title": self.title,
+            "url": self.get_absolute_url(),
+            "body_text_template": """{{how_much}} of this bill was incorporated into {{other_bill|safe}}, {{action|safe}}""",
+            "body_html_template": """<p>{{how_much}} of this bill was incorporated into {{other_bill}}, {{action}}</p>""",
+            "context": {
+                "how_much": "All" if ti_rec and ti_rec["my_ratio"] > .99 else "Some",
+                "other_bill": other_bill,
+                "action": get_bill_really_short_status_string(status.xml_code) % ("which", "on " + date.strftime("%B %d, %Y").replace(" 0", " ")),
+                },
+            "thumbnail_url": thumbnail_url,
             }
 
     def render_event_summary(self, feeds):
