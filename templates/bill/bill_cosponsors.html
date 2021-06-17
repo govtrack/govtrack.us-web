@@ -1,0 +1,172 @@
+{% extends 'bill/bill-pages-layout.html' %}
+{% load humanize govtrack_utils %}
+
+{% block body_class %}bills{% endblock %}
+
+{% block title %}Details for {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
+
+{% block meta_description %}Details for {{bill|truncatewords:24}}{% endblock %}
+
+{% block body %}
+
+{{block.super}}
+
+<style>
+	span.cosponsor_party {
+		font-size: 90%;
+		padding: 0 2px;
+	}
+
+	#cosponsors-sorts {
+		font-size: 90%;
+		text-align: center;
+	}
+		#cosponsors-sorts a:not(.active) {
+			text-decoration: none;
+		}
+		#cosponsors-sorts a:not(.active):hover {
+			text-decoration: underline;
+		}
+	#cosponsors-expand {
+		margin: -1em 0 0 1em;
+	}
+</style>
+
+<h2>
+	<span>
+		Cosponsors of {{bill.display_number}}
+	</span>
+</h2>
+
+<p>This {{bill.noun}} has {{bill.cosponsor_count}} cosponsor{{bill.cosponsor_count|pluralize}}:
+  {% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}{{count|pluralize}}{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+
+
+{% if bill.cosponsor_count > 0 %}
+		<p id="cosponsors-sorts">
+			<span class="text-mute">Sort</span>
+			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="name" {% if xxx %}class="active"{% endif %}>By Name</a>
+			|
+			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="date">By Date</a>
+			|
+			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="relevance" class="active">By Committee</a>
+		</p>
+		{% endif %}
+
+		<table id="cosponsors" class="table">
+		<thead>
+			<tr>
+				<th>Sponsor/Cosponsor</th>
+				<th>Joined/Withdrawn</th>
+				<th>On Assigned Committees{% if not bill.is_alive %}<sup>*</sup>{% endif %}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for csp in cosponsors %}
+			<tr class="{% if not csp.has_committee_roles %}no-relevance hidden{% endif %}"
+			    data-sort-name="{{csp.sort_name}}"
+			    data-sort-relevance="{{csp.sort_relevance}}"
+			    data-sort-date="{{csp.sort_date}}">
+				<td>
+					<span class="cosponsor_party party_{{csp.party|slice:"0:1"}}" title="{{ csp.party }}">{{csp.party|slice:"0:1"}}</span>
+					<a href="{{csp.person.get_absolute_url}}">{{csp.name}}</a>
+				</td>
+				<td>{{csp.joined_withdrawn}}</td>
+				<td>
+					{% for cm in csp.committee_roles %}
+						<div>
+							{{cm.committee.sortname2}}
+							{% if cm.role_name != 'Member' %}<span class="label label-warning">{{cm.role_name}}</span>{% endif %}
+						</div>
+					{% endfor %}
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+		{% regroup cosponsors by has_committee_roles as cosponsors_by_relevance %}
+		{% for grouper, list in cosponsors_by_relevance %}	
+			{% if not grouper %}
+				<p id="cosponsors-expand"><a href="#" onclick="return cosponsors_expand();">
+					Show {{list|length}} more...
+				</a></p>
+			{% endif %}
+		{% endfor %}
+		{% if not bill.is_alive %}<p class="small"><sup>*</sup> Current committee assignments.</p>{% endif %}
+
+
+{% if possible_cosponsors %}
+		<h2>
+			<span>
+				Cosponsorship of Other Relevant Legislators
+			</span>
+		</h2>
+
+		<p>The table below shows whether legislators on relevant committees are the sponsor or cosponsor of this {{bill.noun}}.</p>
+
+		<table class="table">
+		<thead>
+			<tr>
+				<th>Cosponsor?</th>
+				<th>Legislator</th>
+				<th>Committee Assignment</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for csp in possible_cosponsors %}
+			<tr>
+				<td>
+					{% if csp.joined_withdrawn %}
+						{{csp.joined_withdrawn}}
+					{% else %}
+						<span class="text-muted">No</span>
+					{% endif %}
+				</td>
+				<td>
+					<span class="cosponsor_party party_{{csp.party|slice:"0:1"}}" title="{{ csp.party }}">{{csp.party|slice:"0:1"}}</span>
+					<a href="{{csp.person.get_absolute_url}}">{{csp.name}}</a>
+				</td>
+				<td>
+					{% for cm in csp.committee_roles %}
+						<div>
+							{{cm.committee.sortname2}}
+							{% if cm.role_name != 'Member' %}<span class="label label-warning">{{cm.role_name}}</span>{% endif %}
+						</div>
+					{% endfor %}
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+{% endif %}
+
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+function sort_cosponsors(elem) {
+	var sort_key = $(elem).attr('data-sort-key');
+	$('#cosponsors-sorts a').removeClass("active");
+	$(elem).addClass("active");
+	$('#cosponsors tr').sortElements(function(row) {
+		return parseInt($(row).attr('data-sort-' + sort_key));
+	});
+	if (sort_key == "relevance") {
+		// Reset hidden rows.
+		$("#cosponsors tr.no-relevance").addClass("hidden");
+		$('#cosponsors-expand').show();
+	} else {
+		// Show all rows.
+		$("#cosponsors tr.no-relevance").removeClass("hidden");
+		$('#cosponsors-expand').hide();
+	}
+
+	return false; // discard event
+}
+function cosponsors_expand() {
+	$("#cosponsors tr").removeClass("hidden");
+	$('#cosponsors-expand').fadeOut();
+	return false; // discard event
+}
+</script>
+{% endblock %}

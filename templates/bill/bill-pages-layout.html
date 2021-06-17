@@ -328,6 +328,12 @@ function saveUserPosition() {
     {% endwith %}
     {% endwith %}
 
+  {% if bill.cosponsor_count > 0 %}
+    <li role="presentation" {% if page == "/cosponsors" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/cosponsors" role="tab">
+      Cosponsors
+    </a></li>
+  {% endif %}
+
 	{% if bill.source != "americanmemory" %}
     <li role="presentation" {% if page == "/details" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/details" role="tab">Details</a></li>
 	{% endif %}

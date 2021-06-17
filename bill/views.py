@@ -346,42 +346,73 @@ def bill_full_details(request, congress, type_slug, number):
         "bill": bill,
         "related": get_related_bills(bill),
         "text_info": bill.get_text_info(with_citations=True), # for the header tabs
-        "cosponsors": get_cosponsors_table(bill),
     }
 
-def get_cosponsors_table(bill):
+
+@anonymous_view
+@render_to("bill/bill_cosponsors.html")
+def bill_cosponsors(request, congress, type_slug, number):
+    bill = load_bill_from_url(congress, type_slug, number)
+    return {
+        "bill_subpage": "Cosponsors",
+        "bill": bill,
+        "text_info": bill.get_text_info(with_citations=True), # for the header tabs
+        "cosponsors": get_cosponsors_table(bill, mode="cosponsors"),
+        "possible_cosponsors": get_cosponsors_table(bill, mode="others"),
+    }
+
+def get_cosponsors_table(bill, mode=None):
+    from committee.models import CommitteeMember, CommitteeMemberRole, MEMBER_ROLE_WEIGHTS
+
     def make_name(person, role):
         # don't need title because it's implicit from the bill type
         from person.name import get_person_name
         person.role = role
         return get_person_name(person, firstname_position="after", show_title=False)
 
-    # Get all sponsor/cosponsors.
+    cosponsor_records = {
+        csp.person: csp
+        for csp in bill.cosponsor_records
+    }
+
     cosponsors = []
-    if bill.sponsor is not None: # historical bills may be missing this
+
+    def add_cosponsor(person, role):
+        csp = cosponsor_records.get(person)
         cosponsors.append({
-            "person": bill.sponsor,
-            "name": make_name(bill.sponsor, bill.sponsor_role),
-            "party": bill.sponsor_role.party if bill.sponsor_role else "Unknown",
-            "joined_withdrawn": "Primary Sponsor",
-            "sort_cosponsor_type": 0,
-            "sort_cospsonsor_date": None,
+            "person": person,
+            "name": make_name(person, role),
+            "party": role.party if role else "Unknown",
+            "joined_withdrawn":
+                "Primary Sponsor" if person == bill.sponsor
+                else csp.joined_date_string if csp is not None
+                else None,
+            "sort_cosponsor_type":
+                0 if person == bill.sponsor
+                else 1 if csp is not None and not csp.withdrawn
+                else 2,
+            "sort_cospsonsor_date":
+                None if person == bill.sponsor
+                else (csp.joined, csp.withdrawn) if csp is not None
+                else None,
             "has_committee_roles": True # don't hide in relevance list
         })
-    for csp in bill.cosponsor_records:
-        cosponsors.append({
-            "person": csp.person,
-            "name": make_name(csp.person, csp.role),
-            "party": csp.role.party if csp.role else "Unknown",
-            "joined_withdrawn": csp.joined_date_string,
-            "sort_cosponsor_type": 1 if not csp.withdrawn else 2,
-            "sort_cospsonsor_date": (csp.joined, csp.withdrawn),
-        })
+
+    if mode == "cosponsors":
+        # Get all sponsor/cosponsors.
+        if bill.sponsor is not None: # historical bills may be missing this
+            add_cosponsor(bill.sponsor, bill.sponsor_role)
+        for csp in cosponsor_records.values():
+            add_cosponsor(csp.person, csp.role)
+    elif mode == "others":
+        # Collect legislators who are relevant to this bill, without
+        # regard to whether they are a cosponsor of this bill, but
+        # annotate if they are.
+        for mbr in CommitteeMember.objects.filter(committee__in=bill.committees.all()):
+            add_cosponsor(mbr.person, mbr.person.current_role)
 
     # Make a mapping from person ID to record.
     cosponsor_map = { cm["person"].id: cm for cm in cosponsors }
-
-    from committee.models import CommitteeMember, CommitteeMemberRole, MEMBER_ROLE_WEIGHTS
 
     # Add a place for committee info.
     for csp in cosponsors:
@@ -390,7 +421,7 @@ def get_cosponsors_table(bill):
 
     has_committee_roles = False
     if True:
-        # Annotate with cosponsors that are on relevant committees.
+        # Annotate cosponsors that are on relevant committees.
         # Count up the number of times the person has a particular role
         # on any committee (i.e. number of chair positions). Our committee
         # membership data is current committee assignments which for
@@ -433,7 +464,7 @@ def get_cosponsors_table(bill):
         c["sort_name"] = i
 
     for i, c in enumerate(sorted(cosponsors, key = lambda c : (
-        c["sort_cosponsor_type"], # sponsor, cosponsors, withdrawn cosponsors
+        c["sort_cosponsor_type"] if mode == "cosponsors" else 0, # sponsor, cosponsors, withdrawn cosponsors
         c["committee_role_sort"], # more important committee roles first
         "\n".join(cm.committee.sortname() for cm in c["committee_roles"]), # keep same committees together
         c["sort_cospsonsor_date"],
@@ -448,12 +479,9 @@ def get_cosponsors_table(bill):
     ))):
         c["sort_date"] = i
 
-    if has_committee_roles:
-        # Default to the "relevance" sort.
-        cosponsors.sort(key = lambda c : c["sort_relevance"])
-    else:
-        # If we have no committee data, sort by name.
-        cosponsors.sort(key = lambda c : c["sort_name"])
+    # Default to the "relevance" sort --- this matches the
+    # initial activate state of the sort links in the HTML.
+    cosponsors.sort(key = lambda c : c["sort_relevance"])
 
     return cosponsors
 
