@@ -41,7 +41,6 @@
 <p>This {{bill.noun}} has {{bill.cosponsor_count}} cosponsor{{bill.cosponsor_count|pluralize}}:
   {% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}{{count|pluralize}}{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
 
-
 {% if bill.cosponsor_count > 0 %}
 		<p id="cosponsors-sorts">
 			<span class="text-mute">Sort</span>
@@ -51,14 +50,14 @@
 			|
 			<a href="#" onclick="return sort_cosponsors(this);" data-sort-key="relevance" class="active">By Committee</a>
 		</p>
-		{% endif %}
+{% endif %}
 
 		<table id="cosponsors" class="table">
 		<thead>
 			<tr>
 				<th>Sponsor/Cosponsor</th>
 				<th>Joined/Withdrawn</th>
-				<th>On Assigned Committees{% if not bill.is_alive %}<sup>*</sup>{% endif %}</th>
+				<th>On Referred Committees{% if not bill.is_alive %}<sup>*</sup>{% endif %}</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -92,24 +91,31 @@
 				</a></p>
 			{% endif %}
 		{% endfor %}
-		{% if not bill.is_alive %}<p class="small"><sup>*</sup> Current committee assignments.</p>{% endif %}
+	<p class="small">
+		{% if not bill.is_alive %}<sup>*</sup> Based on current committee assignments.{% endif %}
+		An original cosponsor was a cosponsor on the date the legislation was introduced. Other cosponsors are shown with the date they joined, or later withdrew.
+	</p>
+
+	<p>The table above shows whether the sponsor and any cosponsors
+	are members of any committees that the bill has been referred to,
+	a key predictor of whether this {{bill.noun}} will move forward..</p>
 
 
 {% if possible_cosponsors %}
-		<h2>
+		<h2 style="margin-top: 2em">
 			<span>
 				Cosponsorship of Other Relevant Legislators
 			</span>
 		</h2>
 
-		<p>The table below shows whether legislators on relevant committees are the sponsor or cosponsor of this {{bill.noun}}.</p>
+		<p>The table below shows whether legislators on relevant committees or cosponsors of relevant bills are the sponsor or a cosponsor of this {{bill.noun}}.</p>
 
 		<table class="table">
 		<thead>
 			<tr>
 				<th>Cosponsor?</th>
 				<th>Legislator</th>
-				<th>Committee Assignment</th>
+				<th>Committee Assignment(s), Bills Sponsored</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -133,6 +139,14 @@
 							{% if cm.role_name != 'Member' %}<span class="label label-warning">{{cm.role_name}}</span>{% endif %}
 						</div>
 					{% endfor %}
+					{% if csp.other_bills %}
+					<div>
+					{% for rb in csp.other_bills %}
+						<a href="{{rb.get_absolute_url}}" title="{{rb}}" class="plain">
+							{{rb.display_number_with_congress_number}}</a>{% if not forloop.last %}, {% endif %}
+					{% endfor %}
+					</div>
+					{% endif %}
 				</td>
 			</tr>
 			{% endfor %}

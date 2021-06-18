@@ -376,10 +376,12 @@ def get_cosponsors_table(bill, mode=None):
     }
 
     cosponsors = []
+    cosponsor_map = { }
 
     def add_cosponsor(person, role):
+        if person.id in cosponsor_map: return cosponsor_map[person.id]
         csp = cosponsor_records.get(person)
-        cosponsors.append({
+        rec = {
             "person": person,
             "name": make_name(person, role),
             "party": role.party if role else "Unknown",
@@ -395,8 +397,11 @@ def get_cosponsors_table(bill, mode=None):
                 None if person == bill.sponsor
                 else (csp.joined, csp.withdrawn) if csp is not None
                 else None,
-            "has_committee_roles": True # don't hide in relevance list
-        })
+            "has_committee_roles": True if person == bill.sponsor else None # don't hide sponsor in relevance list
+        }
+        cosponsors.append(rec)
+        cosponsor_map[rec["person"].id] = rec
+        return rec
 
     if mode == "cosponsors":
         # Get all sponsor/cosponsors.
@@ -408,11 +413,12 @@ def get_cosponsors_table(bill, mode=None):
         # Collect legislators who are relevant to this bill, without
         # regard to whether they are a cosponsor of this bill, but
         # annotate if they are.
-        for mbr in CommitteeMember.objects.filter(committee__in=bill.committees.all()):
-            add_cosponsor(mbr.person, mbr.person.current_role)
-
-    # Make a mapping from person ID to record.
-    cosponsor_map = { cm["person"].id: cm for cm in cosponsors }
+        for mbr in { r.person for r in CommitteeMember.objects.filter(committee__in=bill.committees.all()) }: # uniqueify
+            add_cosponsor(mbr, mbr.current_role)
+        for rb in bill.find_reintroductions():
+          for csp in rb.cosponsor_records:
+              if csp.person.current_role: # exclude legislators no longer serving
+                  add_cosponsor(csp.person, csp.person.current_role).setdefault("other_bills", []).append(rb)
 
     # Add a place for committee info.
     for csp in cosponsors:
@@ -467,7 +473,8 @@ def get_cosponsors_table(bill, mode=None):
         c["sort_cosponsor_type"] if mode == "cosponsors" else 0, # sponsor, cosponsors, withdrawn cosponsors
         c["committee_role_sort"], # more important committee roles first
         "\n".join(cm.committee.sortname() for cm in c["committee_roles"]), # keep same committees together
-        c["sort_cospsonsor_date"],
+        c["sort_cospsonsor_date"] if mode == "cosponsors" else 0,
+        c["party"] != bill.sponsor_role.party if mode == "others" and bill.sponsor_role else 0, # same party first
         c["name"],
     ))):
         c["sort_relevance"] = i

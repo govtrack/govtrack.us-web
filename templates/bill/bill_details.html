@@ -510,22 +510,6 @@
 		<div class="clearfix"></div>
 				{% endif %}
 
-		{% if bill.cosponsor_count > 0 %}
-		<div class="col-sm-3 col-md-2">
-			<span>Cosponsors</span>
-		</div>
-		<div class="col-sm-9 col-md-10">
-			<p>
-				<a href="{{bill.get_absolute_url}}/cosponsors" role="tab">
-		      		{{bill.cosponsor_count}} Cosponsor{{bill.cosponsor_count|pluralize}}</a>
-		      {% if bill.cosponsor_count > 0 %}
-		      ({% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}{{count|pluralize}}{% if not forloop.last %}, {% endif %}{% endfor %})
-		      {% endif %}
-		    </p>
-		</div>
-		<div class="clearfix"></div>
-		{% endif %}
-
 				{% if text_info or bill.is_current %}
 		<div class="col-sm-3 col-md-2">
 			<span>Text</span>
@@ -558,6 +542,23 @@
 				{% endif %}
 
 				{% endif %} {# / not show media bar #}
+
+		{% if bill.cosponsor_count > 0 %}
+		<div class="col-sm-3 col-md-2">
+			<span>Cosponsors</span>
+		</div>
+		<div class="col-sm-9 col-md-10">
+			<p>
+				<a href="{{bill.get_absolute_url}}/cosponsors" role="tab">
+		      		{{bill.cosponsor_count}} Cosponsor{{bill.cosponsor_count|pluralize}}</a>
+		      {% if bill.cosponsor_count > 0 %}
+		      ({% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}{{count|pluralize}}{% if not forloop.last %}, {% endif %}{% endfor %})
+		      {% endif %}
+		    </p>
+		</div>
+		<div class="clearfix"></div>
+		{% endif %}
+
 
 				{% if prognosis and bill.is_alive %}
 		<div class="col-sm-3 col-md-2">
