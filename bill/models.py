@@ -798,13 +798,14 @@ class Bill(models.Model):
             # generate events for actions on bills this bill was (parially or fully) incorporated into
             # that occur after the last action on this bill (ideally after the text was incorporated,
             # but we don't know at what point in the other bill's history it got the text of this bill).
+            def as_date(dt): return dt.date() if isinstance(dt, datetime.datetime) else dt
             if self.text_incorporation:
                 for rec in self.text_incorporation:
                     if rec["other_version"] == "enr": # one side is always enr
                         other_bill = Bill.from_congressproject_id(rec["other"])
                         for datestr, state, text, srcxml in other_bill.major_actions:
                             date = eval(datestr)
-                            if date.date() >= self.current_status_date:
+                            if date.date() >= as_date(self.current_status_date):
                                 E.add("txtinc:{}:{}".format(other_bill.id, str(state)), date, index_feeds + common_feeds + (enacted_feed if state in BillStatus.final_status_enacted_bill else []))
 
             # generate events for new cosponsors... group by join date, and
@@ -1840,7 +1841,10 @@ Feed.register_feed(
     noun = "bill",
     link = lambda feed: Bill.from_feed(feed).get_absolute_url(),
     category = "federal-bills",
-    description = "You will get updates when this bill is scheduled for debate, has a major action such as a vote, or gets a new cosponsor, when a committee meeting is scheduled, when bill text becomes available or when we write a bill summary, plus similar events for related bills.",
+    description = """You will get updates for major actions that take place on this bill and some related bills. Major actions
+include if this bill gets a new cosponsor, has a hearing scheduled, is reported by committee, scheduled for debate, voted on, or enacted,
+or if the bill's text is incorporated into another bill that is enacted. You will also get updates when bill's text becomes available
+and when we write a summary of the legislation.""",
     is_subscribable = lambda feed : Bill.from_feed(feed).is_alive,
     track_button_noun = lambda feed : "This Bill",
     thumbnail_image_url = lambda feed: Bill.from_feed(feed).get_thumbnail_url_ex(),
