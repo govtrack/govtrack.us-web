@@ -390,12 +390,14 @@ def get_cosponsors_table(bill, mode=None):
                 else csp.joined_date_string if csp is not None
                 else None,
             "sort_cosponsor_type":
-                0 if person == bill.sponsor
-                else 1 if csp is not None and not csp.withdrawn
-                else 2,
-            "sort_cospsonsor_date":
+                0 if person == bill.sponsor # sponsor
+                else 1 if csp is not None and not csp.withdrawn # cosponsor
+                else 2 if csp is not None # withdrawn
+                else 3, # not ever a sponsor/cosponsor
+            "sort_cospsonsor_date": # must match sort_cosponsor_type because the '...type' buckets first and date comparisons are only made within those groups
                 None if person == bill.sponsor
-                else (csp.joined, csp.withdrawn) if csp is not None
+                else csp.joined if csp is not None and not csp.withdrawn
+                else csp.withdrawn if csp is not None
                 else None,
             "has_committee_roles": True if person == bill.sponsor else None # don't hide sponsor in relevance list
         }
@@ -470,10 +472,10 @@ def get_cosponsors_table(bill, mode=None):
         c["sort_name"] = i
 
     for i, c in enumerate(sorted(cosponsors, key = lambda c : (
-        c["sort_cosponsor_type"] if mode == "cosponsors" else 0, # sponsor, cosponsors, withdrawn cosponsors
+        c["sort_cosponsor_type"] if mode == "cosponsors" else 0, # sponsor, cosponsors, withdrawn cosponsors; don't sort this way for others mode
         c["committee_role_sort"], # more important committee roles first
         "\n".join(cm.committee.sortname() for cm in c["committee_roles"]), # keep same committees together
-        c["sort_cospsonsor_date"] if mode == "cosponsors" else 0,
+        c["sort_cospsonsor_date"] if mode == "cosponsors" else 0, # in 'others' mode since we don't bucket by sort_sponsor_type then sort_cospsonsor_date is not comparable
         c["party"] != bill.sponsor_role.party if mode == "others" and bill.sponsor_role else 0, # same party first
         c["name"],
     ))):
