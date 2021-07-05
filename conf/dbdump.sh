@@ -8,7 +8,8 @@ function backup() {
     # Limit line length to the minimum mysqldump will accept.
     FN=$1 && shift
     echo $@...
-    mysqldump $(./manage.py dbparams) --no-tablespaces --net_buffer_length=4096 $@ | gzip > $BACKUP_DIR/$(date --iso-8601 | sed s/-//g)-$FN.sql.gz
+    mysqldump $(./manage.py dbparams) --no-tablespaces --net_buffer_length=4096 --default-character-set=utf8mb4 $@ \
+      | gzip > $BACKUP_DIR/$(date --iso-8601 | sed s/-//g)-$FN.sql.gz
 }
 
 TABLE_LIST="
