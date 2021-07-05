@@ -1189,3 +1189,137 @@ def is_congress_in_session_live():
     cache.set(cache_key, ret, 60*10) # 10 minutes
     return ret
 
+def get_user_communities(user, request):
+    # A user is granted access to communities according to their
+    # email address and connecting IP address.
+    from website.models import Community
+    communities = set()
+
+    if user:
+        if user.is_staff:
+            communities.add("capitol-hill")
+
+        if user.email.endswith("@mail.house.gov") or user.email.endswith(".senate.gov"):
+            communities.add("capitol-hill")
+
+    if request:
+        if getattr(request, "_special_netblock", None)  in ["house", "senate"]:
+            communities.add("capitol-hill")
+
+    # Return Community objects.
+    communities = set(Community.objects.filter(slug__in=communities))
+
+    return communities
+
+def community_forum_userdata(request, subject):
+    communities = get_user_communities(request.user if request.user.is_authenticated else None, request)
+    return {
+        "html": render_community_forum(request, subject, communities)
+    }
+
+def render_community_forum(request, subject, communities):
+    # Return all of the messages on boards for the given subject
+    # in communities that the user is a member of.
+
+    if not communities:
+        return ""
+
+    # Load all of the messages on all of the boards.
+    from website.models import CommunityMessageBoard, CommunityMessage
+    messages = [
+        {
+            "community": board.community,
+            "messages": list(CommunityMessage.objects.filter(board=board).order_by("-created")),
+        }
+        for board in CommunityMessageBoard.objects.filter(subject=subject, community__in=communities)
+    ]
+
+    # Drop boards without messages (we'll add them back at the end).
+    messages = [mm for mm in messages if len(mm["messages"]) > 0]
+
+    # Sort boards by most recent message.
+    messages.sort(key = lambda board : board["messages"][0].created, reverse=True)
+
+    # Add communities without messages at the end.
+    for community in communities - set(mm["community"] for mm in messages):
+        messages.append({ "community": community, "messages": [] })
+
+    # Render.
+    from django.template.loader import get_template
+    return get_template('website/community_messages.html').render({
+        "subject": subject,
+        "messages": messages,
+        "most_recent_message": CommunityMessage.objects.filter(author=request.user).order_by('-created').first()
+          if request.user.is_authenticated else None,
+        "request": request,
+    })
+
+@login_required
+@json_response
+def community_forum_post_message(request):
+    from website.models import CommunityMessageBoard, CommunityMessage
+    from events.models import Feed
+
+    if request.method != "POST": return HttpResponseBadRequest()
+    try:
+        if "update_message_id" not in request.POST:
+            community = int(request.POST["community"])
+            subject = request.POST["subject"]
+
+            community = [c for c in get_user_communities(request.user, None)
+              if c.id == community][0] # ensure user has / still has access to this community
+            #Feed.from_name(subject, must_exist=True) # throws if feed does not exist, in testing we don't have feeds
+
+            update_message = None
+        else:
+            # Get the message to update (and ensure the ID corresponds to a message the user owns).
+            update_message = CommunityMessage.objects.get(id=request.POST["update_message_id"], author=request.user)
+
+            # Check that the user still have access to the board the message is on.
+            if update_message.board.community not in get_user_communities(request.user, None): return HttpResponseBadRequest()
+
+        author = request.POST["author"]
+        body = request.POST["body"]
+    except:
+        return HttpResponseBadRequest()
+
+    if not author.strip() or not body.strip():
+        return {
+            "status": "error",
+            "message": "Author and body cannot be empty."
+        }
+
+    if update_message is None:
+        # Create a new message.
+        board, _ = CommunityMessageBoard.objects.get_or_create(community=community, subject=subject)
+        try:
+            m = CommunityMessage(
+                board=board,
+                author=request.user,
+                author_display=author,
+                message=body,
+            )
+            m.save()
+        except:
+            # Message is too long?
+            return HttpResponseBadRequest()
+
+    elif request.POST.get("delete") == "delete":
+        update_message.delete()
+        return {
+            "status": "ok",
+        }
+
+    else:
+        # Edit an existing message.
+        m = update_message
+        m.push_message_state()
+        m.author_display = author
+        m.message = body
+        m.save()
+
+    from django.template.loader import get_template
+    return {
+        "status": "ok",
+        "message": get_template("website/community_messages_message.html").render({ "message": m, "request": request })
+    }

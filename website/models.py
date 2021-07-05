@@ -380,3 +380,51 @@ class UserGroupSignup(models.Model):
     groups = models.CharField(max_length=256, blank=True, null=True)
     when = models.DateTimeField(auto_now_add=True, db_index=True)
 
+
+class Community(models.Model):
+    slug = models.SlugField()
+    name = models.CharField(max_length=256, help_text="The display name of the community.")
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    access_explanation = models.TextField(help_text="Displayed below the post form to let the user know who can read the post.")
+    login_teaser = models.TextField(help_text="Teaser text to get an anonymous user to log in to post. Applicable if the community is based on an IP-range.")
+    post_teaser = models.TextField(help_text="Teaser text to get a logged in user to open the post form.")
+    author_display_field_label = models.TextField(help_text="The text to use for the form field label for the author_display field, which is a signature line for the author, recognizing that a person's name, title, and organization can change over time without a change in user account or email address.")
+
+    def __str__(self): return "{} ({})".format(self.name, self.slug)
+
+    class Meta:
+    	verbose_name_plural = "Communities"
+
+class CommunityMessageBoard(models.Model):
+    community = models.ForeignKey(Community, on_delete=models.PROTECT, help_text="The community that has acccess to read and post to this board.")
+    subject = models.CharField(max_length=20, db_index=True, help_text="A code for the topic of the board, i.e. where the board appears on the website.")
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def __str__(self): return self.get_subject_title()
+
+    def get_subject_link(self):
+        return Feed.from_name(self.subject, must_exist=False).link
+    def get_subject_title(self):
+        return Feed.from_name(self.subject, must_exist=False).title
+
+class CommunityMessage(models.Model):
+    board = models.ForeignKey(CommunityMessageBoard, on_delete=models.PROTECT, help_text="The board that this message is a part of.")
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author_display = models.TextField(help_text="A signature line for the author, recognizing that a person's name, title, and organization can change over time without a change in user account or email address.")
+    message = models.TextField()
+    history = JSONField(help_text="The history of edits to this post as a list of dicts holding previous field values.")
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+    	index_together = [("board", "modified")]
+
+    def push_message_state(self):
+        if not isinstance(self.history, list): self.history = []
+        self.history.append({ "author_display": self.author_display, "message": self.message, "modified": self.modified.isoformat() })
+        self.save(update_fields=["history"])
+
+    @property
+    def has_been_edited(self):
+    	return bool(self.history)
+    

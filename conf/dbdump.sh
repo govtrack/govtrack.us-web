@@ -42,6 +42,9 @@ userpanels_panelinvitation
 userpanels_panelmembership
 website_campaignsupporter
 website_communityinterest
+website_community
+website_communitymessageboard
+website_communitymessage
 website_mediumpost
 website_paypalpayment
 website_reaction
