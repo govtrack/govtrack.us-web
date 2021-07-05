@@ -28,6 +28,11 @@ class UserProfile(models.Model):
     # for the constituent calls research project
     research_anon_key = models.IntegerField(blank=True, null=True, unique=True)
 
+    # since some permissions depend on the user's email address, we must re-confirm people's
+    # email addresses periodically
+    pending_email_reconfirmation = models.DateTimeField(blank=True, null=True)
+    email_reconfirmed_at = models.DateTimeField(blank=True, null=True)
+
     def lists(self):
         # make sure the 'default' list exists
         SubscriptionList.objects.get_or_create(
