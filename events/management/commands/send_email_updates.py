@@ -101,6 +101,7 @@ class Command(BaseCommand):
 				#, id__lt=169660)
 
 		users = users\
+				.filter(is_active=True)\
 				.values("id", "email", "last_login")\
 				.order_by('id')
 
