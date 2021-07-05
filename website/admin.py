@@ -13,4 +13,7 @@ class MediumPostAdmin(admin.ModelAdmin):
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(MediumPost, MediumPostAdmin)
+admin.site.register(Community)
+admin.site.register(CommunityMessageBoard)
+admin.site.register(CommunityMessage)
 

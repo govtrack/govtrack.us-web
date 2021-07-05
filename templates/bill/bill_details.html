@@ -42,6 +42,10 @@
     	$('#your-stakeholder-name').text(the_page.stakeholders[0].title)
     if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);
 
+    if (the_page.community_forum) {
+    	$('#community-forum').html(the_page.community_forum.html).show();
+    }
+
 	// UI fixups
     $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
 
@@ -294,6 +298,9 @@
 
 {% block body %}
 	{{block.super}}
+
+	<div id="community-forum" style="display: none">
+	</div>
 
 	<!-- summary snippet or bill full title -->
 

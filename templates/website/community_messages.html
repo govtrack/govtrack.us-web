@@ -1,0 +1,231 @@
+{% if request.user.is_authenticated %}
+  <script>
+    function community_forum_expand_postform(elem) {
+      $(elem).hide();
+      let form = $(elem).parent('.community-forum-postform').find('> form');
+      form.show();
+      if (form.find('input').val() == "") form.find('input').focus();
+      else form.find('textarea').focus();
+      return false;
+    }
+    function community_forum_collapse_postform(elem) {
+      $(elem).parent('form').hide();
+      $(elem).parents('.community-forum-postform').find('> a').show();
+      return false;
+    }
+    function community_forum_submit_post(elem) {
+      $(elem).find('input, textarea, button').prop('disabled', true);
+      $.ajax({
+        url: "/community-forum/_ajax/post",
+        method: "POST",
+        data: {
+          community: $(elem).attr('data-forum-id'),
+          subject: "{{subject|escapejs}}",
+          author: $(elem).find('input[name=author]').val(),
+          body: $(elem).find('textarea[name=body]').val()
+        },
+        success: function(res) {
+          if (res.error) {
+            alert(res.error);
+            return;
+          }
+
+          // Reset to allow for another post and close up the form.
+          $(elem).find('textarea').val('');
+          community_forum_collapse_postform($(elem).find('.closer'));
+
+          // Insert the rendered message at the top of the forum.
+          $(elem).parents('.community-forum-wrapper').find('.thread').prepend($(res.message));
+          $(elem).parents('.community-forum-wrapper').addClass("has-messages");
+        },
+        error: function(res) {
+          alert("Error while saving post.");
+        },
+        complete: function() {
+          $(elem).find('input, textarea, button').prop('disabled', false);
+        }
+      });
+      return false;
+    }
+
+    function community_forum_edit_open(elem) {
+      let post = $(elem).parents('.community-forum-message');
+      let community_id = post.attr('data-community-id');
+      let editor = $('#community-forum-edit' + community_id);
+
+      if (editor.is(":visible")) {
+        // Cancel current editor.
+        community_forum_edit_cancel(editor.find('.btn-danger'));
+      }
+
+      let message_id = post.attr('data-message-id');
+      editor.attr('data-message-id', message_id);
+      editor.find('#forumPostAuthorEdit').val(post.attr('data-author'));
+      editor.find('#forumPostTextEdit').val(post.attr('data-message'));
+      editor.insertAfter(post);
+      editor.show();
+      post.hide();
+
+      return false;
+    }
+
+    function community_forum_edit_cancel(elem) {
+      let editor = $(elem).parents('.community-forum-message-editor');
+      let message_id = editor.attr('data-message-id');
+      let post = $('.community-forum-message[data-message-id=' + message_id + "]");
+      editor.hide();
+      post.show();
+      return false;
+    }
+
+    function community_forum_edit_save(elem) {
+      let editor = $(elem);
+      let message_id = editor.attr('data-message-id');
+      let post = $('.community-forum-message[data-message-id=' + message_id + "]");
+      $(elem).find('input, textarea, button').prop('disabled', true);
+      $.ajax({
+        url: "/community-forum/_ajax/post",
+        method: "POST",
+        data: {
+          update_message_id: message_id,
+          author: $(elem).find('input[name=author]').val(),
+          body: $(elem).find('textarea[name=body]').val()
+        },
+        success: function(res) {
+          if (res.error) {
+            alert(res.error);
+            return;
+          }
+
+          // Update the post HTML.
+          post.html($(res.message));
+
+          // Close the editor.
+          community_forum_edit_cancel(editor.find('.btn-default'));
+        },
+        error: function(res) {
+          alert("Error while saving post.");
+        },
+        complete: function() {
+          $(elem).find('input, textarea, button').prop('disabled', false);
+        }
+      });
+      return false;
+    }
+
+    function community_forum_edit_delete(elem) {
+      if (!confirm("Are you sure you want to delete this message?"))
+        return false;
+
+      let editor = $(elem).parents('.community-forum-message-editor');
+      let message_id = editor.attr('data-message-id');
+      let post = $('.community-forum-message[data-message-id=' + message_id + "]");
+      $(elem).find('input, textarea, button').prop('disabled', true);
+      $.ajax({
+        url: "/community-forum/_ajax/post",
+        method: "POST",
+        data: {
+          update_message_id: message_id,
+          author: "_",
+          body: "_",
+          delete: "delete"
+        },
+        success: function(res) {
+          if (res.error) {
+            alert(res.error);
+            return;
+          }
+
+          // Delete the post HTML and close the editor, but in the
+          // other order because community_forum_edit_cancel assumes
+          // the post still exists.
+          community_forum_edit_cancel(editor.find('.btn-default'));
+          post.remove();
+          if (editor.parents('.community-forum-wrapper').find('.thread .community-forum-message').length == 0)
+            editor.parents('.community-forum-wrapper').removeClass("has-messages");
+        },
+        error: function(res) {
+          alert("Error while deleting post.");
+        },
+        complete: function() {
+          $(elem).find('input, textarea, button').prop('disabled', false);
+        }
+      });
+      return false;
+    }
+    </script>
+{% endif %}
+
+{% for board in messages %}
+  <div class="community-forum-wrapper {% if board.messages|length > 0 %}has-messages{% endif %}">
+    <div class="thread-wrapper">
+      <h3>{{board.community.name}} Messages</h3>
+      <div class="thread">
+          {% for message in board.messages %}
+            {% include "website/community_messages_message.html" with message=message %}
+          {% endfor %}
+      </div>
+    </div>
+
+    <div class="community-forum-postform">
+      {% if not request.user.is_authenticated %}
+        <a href="/accounts/login?next={{request.get_full_path|urlencode}}" class="plain nohover">
+          <div class="community-forum-teaser">
+              <p style="margin:0">
+                  <span class="glyphicon glyphicon-flash"> </span>
+                  {{messages.0.community.login_teaser}}
+              </p>
+          </div>
+        </a>
+      {% else %}
+        <a href="#" class="plain nohover" onclick="return community_forum_expand_postform(this);">
+            <div class="community-forum-teaser">
+                <p style="margin:0">
+                    <span class="glyphicon glyphicon-flash"> </span>
+                    {{board.community.post_teaser}}
+                </p>
+            </div>
+        </a>
+
+        <form style="display: none" onsubmit="return community_forum_submit_post(this)" data-forum-id="{{board.community.id}}">
+          <a href="#" class="plain closer" onclick="return community_forum_collapse_postform(this);">
+            <h3>Post to {{board.community.name}}</h3>
+          </a>
+          <div style="margin: 10px">
+            <div class="form-group">
+              <label for="forumPostAuthor{{forloop.index}}">{{board.community.author_display_field_label}}</label>
+              <input type="text" class="form-control" id="forumPostAuthor{{forloop.counter}}" required name="author"
+              {% if most_recent_message %}value="{{most_recent_message.author_display}}{% endif %}">
+            </div>
+            <div class="form-group">
+              <label for="forumPostText{{forloop.index}}">Message</label>
+              <textarea class="form-control" id="forumPostText{{forloop.counter}}" required name="body"></textarea>
+              <p class="help-block">URLs will be automatically turned into links.</p>
+            </div>
+            <button type="submit" class="btn btn-primary">Post</button>
+            <p class="small" style="margin: 1em 0 0 0">
+              {{board.community.access_explanation}}
+              Posts are editable and can be deleted.
+            </p>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <form id="community-forum-edit{{board.community.id}}" onsubmit="return community_forum_edit_save(this)" data-forum-id="{{board.community.id}}" class="community-forum-message-editor" style="display: none">
+    <hr>
+    <div class="form-group">
+      <label for="forumPostAuthorEdit">{{board.community.author_display_field_label}}</label>
+      <input type="text" class="form-control" id="forumPostAuthorEdit" required name="author">
+    </div>
+    <div class="form-group">
+      <label for="forumPostTextEdit">Message</label>
+      <textarea class="form-control" id="forumPostTextEdit" required name="body"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Message</button>
+    <button class="btn btn-danger" onclick="return community_forum_edit_delete(this);">Delete Message</button>
+    <button class="btn btn-default" onclick="return community_forum_edit_cancel(this);">Cancel</button>
+    <hr>
+  </form>
+{% endfor %}

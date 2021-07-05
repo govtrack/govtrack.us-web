@@ -40,4 +40,4 @@ pycairo
 exclusiveprocess
 email_validator
 draftable-compare-api
-cmarkgfm
+cmarkgfm<0.5.0

@@ -34,6 +34,9 @@ a.plain:link, #masthead a:link, #intro-box a:link {
 a.plain:hover, a.plain:focus, a.plain:active {
 	text-decoration: underline;
 	}
+	a.nohover:hover {
+		text-decoration: none;
+	}
 .nav-tabs>li>a {
 	text-decoration: none;
 }
@@ -1237,4 +1240,51 @@ ul.singlesignon {
 	#site_search_autocomplete_results .search-tips {
 		font-size: 95%;
 		line-height: 115%;
+	}
+
+#community-forum .community-forum-wrapper {
+	margin-top: 2em;
+	margin-bottom: 2em;
+	border: 1px solid #CCC;
+	padding: 15px;
+}
+	#community-forum .community-forum-wrapper.has-messages {
+	}
+	#community-forum .community-forum-teaser {
+		font-size: 90%;
+		color: #666;
+	}
+	#community-forum .community-forum-teaser span.glyphicon {
+		color: #9D2146;
+	}
+	#community-forum .thread-wrapper {
+		display: none;
+	}
+	#community-forum .has-messages .thread-wrapper {
+		display: block;
+	}
+	#community-forum h3 {
+		margin: -15px -15px 0 -15px;
+		background-color: #9D2146;
+		padding: 7px 15px;
+		color: white;
+		font-family: Quicksand;
+	}
+	#community-forum form {
+		margin: 0;
+		padding: 0;
+	}
+		#community-forum form label {
+			font-weight: normal;
+		}
+	.community-forum-message {
+		margin: 1em 0;
+	}
+		.community-forum-message .author {
+			font-weight: bold;
+		}
+		#content .community-forum-message p {
+			margin-bottom: .2em;
+		}
+	.community-forum-message-editor {
 	}

@@ -1,0 +1,18 @@
+{% load govtrack_utils %}
+<div class="community-forum-message" data-community-id="{{message.board.community.id}}" data-message-id="{{message.id}}" data-author="{{message.author_display}}" data-message="{{message.message}}">
+	{% if message.author == request.user %}
+		<div style="float: right">
+			<a href="#" style="color: #777; font-size: 85%;" class="plain" onclick="return community_forum_edit_open(this)">
+				edit
+			</a>
+		</div>
+	{% endif %}
+	<div>
+		<span class="author">{{message.author_display}}</span>
+		<span class="date">
+			({{message.created|date}} {{message.created|time}}{% if message.has_been_edited %};
+				edited {{message.modified|date}} {{message.modified|time}}{% endif %})
+		</span>
+	</div>
+	<div class="body">{{message.message|markdown}}</div>
+</div>

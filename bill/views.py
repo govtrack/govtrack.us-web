@@ -274,6 +274,9 @@ def bill_details_user_view(request, congress, type_slug, number):
     if request.user.is_authenticated:
         ret["stakeholders"] = [ { "id": s.id, "title": s.name } for s in request.user.stakeholder_set.all() ]
 
+    from website.views import community_forum_userdata
+    ret["community_forum"] = community_forum_userdata(request, bill.get_feed().feedname)
+
     return ret
 
 def get_user_bill_reactions(request, bill):
