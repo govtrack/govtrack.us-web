@@ -473,7 +473,8 @@ def load_senate_floor_schedule(options, bill_index):
 
 def load_senate_floor_schedule_data():
     try:
-        dom = etree.parse(urllib.request.urlopen("https://www.senate.gov/legislative/schedule/floor_schedule.xml")).getroot()
+        r = urllib.request.Request("https://www.senate.gov/legislative/schedule/floor_schedule.xml", headers={ "User-Agent": "GovTrack.us scraper" })
+        dom = etree.parse(urllib.request.urlopen(r)).getroot()
     except etree.XMLSyntaxError:
         print("Invalid XML received for https://www.senate.gov/legislative/schedule/floor_schedule.xml")
         return
