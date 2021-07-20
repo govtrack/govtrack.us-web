@@ -808,6 +808,10 @@ function show_pronunciation_guide() {
 			<li><a href="https://www.govinfo.gov/bulkdata/BILLSTATUS">GovInfo.gov</a>, for sponsored bills</li>
 		{% endif %}
 	{% endwith %}
+	{% if person.id == 456805 %}
+		<li>Rep. Boebert <a href="https://twitter.com/tobymorton/status/1415426789191598081">threatened legal action</a> against
+		<a href="https://www.thelaurenboebert.com">a parody website</a> for using her official portrait without permission; therefore, we do not display her photo above.</li>
+	{% endif %}
 	</ul>
 	</section>
 	
