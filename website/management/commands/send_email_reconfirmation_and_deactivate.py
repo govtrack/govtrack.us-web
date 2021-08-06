@@ -61,7 +61,7 @@ class Command(BaseCommand):
             .filter(userprofile__pending_email_reconfirmation=None)
 
         # Only take a bunch in this batch.
-        users = users[0:100]
+        users = users[0:1000]
 
         now = timezone.now()
 
@@ -103,7 +103,7 @@ class Command(BaseCommand):
             .filter(userprofile__pending_email_reconfirmation__lt=now-reconfirmation_timeout)
         
         # Only take a bunch in this batch.
-        users = users[0:100]
+        users = users[0:1000]
 
         # Send emails & deactivate.
         for user in users:
