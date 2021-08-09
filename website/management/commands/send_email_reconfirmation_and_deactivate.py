@@ -25,6 +25,9 @@ class ConfirmEmailAction:
         else:
             return "email/reconfirm_email_final"
 
+    def email_from_address(self): # send bounces to an address that encodes the userid
+        return (settings.EMAIL_UPDATES_RETURN_PATH % self.user_id)
+
     def get_response(self, request, vrec):
         user = User.objects.get(id=self.user_id)
         user.is_active = True
@@ -83,6 +86,7 @@ class Command(BaseCommand):
                 prof.email_reconfirmed_at.isoformat() if prof.email_reconfirmed_at else "-",
                 user.email)
 
+            # Send confirmation email.
             axn = ConfirmEmailAction()
             axn.user_id = user.id
             send_email_verification(user.email, None, axn)
