@@ -28,14 +28,17 @@ TYPE_MAPPING = {'senate': CommitteeType.senate,
 ROLE_MAPPING = {
     'Ex Officio': CommitteeMemberRole.exofficio,
     'Chairman': CommitteeMemberRole.chair,
+    'Chairwoman': CommitteeMemberRole.chair,
     'Cochairman': CommitteeMemberRole.chair, # huh!
     'Co-Chairman': CommitteeMemberRole.chair, # huh!
     'Chair': CommitteeMemberRole.chair,
+    'Chairperson': CommitteeMemberRole.chair,
     'Ranking Member': CommitteeMemberRole.ranking_member,
     'Vice Chairman': CommitteeMemberRole.vice_chair,
     'Vice Chair': CommitteeMemberRole.vice_chair,
     'Vice Chairwoman': CommitteeMemberRole.vice_chair,
     'Vice-Chair': CommitteeMemberRole.vice_chair,
+    'Vice Chairperson': CommitteeMemberRole.vice_chair,
     'Member': CommitteeMemberRole.member,
 }
 
