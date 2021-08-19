@@ -38,8 +38,9 @@
 	</span>
 </h2>
 
-<p>This {{bill.noun}} has {{bill.cosponsor_count}} cosponsor{{bill.cosponsor_count|pluralize}}:
-  {% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}{{count|pluralize}}{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+<p>This {{bill.noun}} {% if bill.is_alive %}has{% else %}had{% endif %} {{bill.cosponsor_count}} cosponsor{{bill.cosponsor_count|pluralize}} &mdash;
+  {% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}{{count|pluralize}}{% if not forloop.last %}, {% endif %}{% endfor %}
+  &mdash; not including its sponsor.</p>
 
 {% if bill.cosponsor_count > 0 %}
 		<p id="cosponsors-sorts">

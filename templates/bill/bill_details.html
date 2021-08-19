@@ -440,6 +440,11 @@
 							</strong>
 						</div>
 						<p style="margin-top: .25em">{{bill.current_status_description}}</p>
+						{% if bill.noun == "bill" and not bill.is_success %}
+						<p style="margin-top: .25em">Although this bill was not enacted, its provisions could have become law by being included in another bill.
+						It is common for legislative text to be introduced concurrently in multiple bills (called companion bills), re-introduced in
+						subsequent sessions of Congress in new bills, or added to larger bills (sometimes called omnibus bills).</p>
+						{% endif %}
 
 					{% endif %}
 
