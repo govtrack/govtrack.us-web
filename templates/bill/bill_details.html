@@ -409,6 +409,9 @@
 						{% endwith %}
 						</p>
 						<p>{{bill.current_status_description}}</p>
+						{% if bill.noun == "bill" and not bill.is_success %}
+						<p style="margin-top: .25em">Other activity may have occurred on another bill with identical or similar provisions.</p>
+						{% endif %}
 
 						{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
 						<p><span class="glyphicon glyphicon-calendar"> </span> The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</p>
