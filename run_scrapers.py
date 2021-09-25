@@ -101,6 +101,12 @@ if "text" in sys.argv:
 	# Update text incorporation analysis for any new text versions.
 	os.system("analysis/text_incorporation.py analyze %d" % CONGRESS)
 	os.system("analysis/text_incorporation.py load %d" % CONGRESS)
+
+	# Clear old bill text PDF thumbnail images. They'll be regenerated on the fly if a user visits a page that needs it.
+	find_cmd = """find congress/ -mtime +90 \( -name "document-_text_image*.png" -or -name "document-card*.png" -or -name "document-thumbnail*.png" \)  -print0"""
+	#os.system(find_cmd + """ | du --files0-from=- -hc | tail -n1""") # show total size on disk that would be reclaimed
+	#os.system(find_cmd + """ | xargs -0 rm""")
+
 	
 	# don't know if we got any new files, so assume we now need to update bills
 	do_bill_parse = True
