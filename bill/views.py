@@ -1111,10 +1111,11 @@ def bill_text_image(request, congress, type_slug, number, image_type):
 
     # Rasterizes a page of a PDF to a greyscale PIL.Image.
     # Crop out the GPO seal & the vertical margins.
-    def pdftopng(pdffile, pagenumber, width=900):
+    def pdftopng(pdf_bytes, pagenumber, width=900):
         from PIL import Image
         import subprocess, io
-        pngbytes = subprocess.check_output(["/usr/bin/pdftoppm", "-f", str(pagenumber), "-l", str(pagenumber), "-scale-to", str(width), "-png", pdffile])
+        pngbytes = subprocess.check_output(["/usr/bin/pdftoppm", "-f", str(pagenumber), "-l", str(pagenumber), "-scale-to", str(width), "-png", "-"],
+            input=pdf_bytes)
         im = Image.open(io.BytesIO(pngbytes))
         im = im.convert("L")
 
@@ -1145,46 +1146,55 @@ def bill_text_image(request, congress, type_slug, number, image_type):
 
     from PIL import Image
 
-    if not metadata:
+    if not metadata or not metadata.get("base_path"):
         # Start with a blank page.
         w = max(width, 100)
         pg1 = Image.new("RGB", (w, int(aspect*w)), color=(255,255,255))
         pg2 = pg1
-    elif metadata.get("pdf_file"):
+    else:
         # Check if we have a cached file. We want to cache longer than our HTTP cache
         # because these thumbnails basically never change and calling pdftoppm is expensive.
+        # But see run_scrapers.py for how we can periodically delete old thumbnail files
+        # because they take up a ton of disk space.
         import os.path
-        cache_fn = metadata["pdf_file"].replace(".pdf", "-" + image_type + "_" + str(width) + "_" + str(round(aspect,3)) + ".png")
+        cache_fn = os.path.join(metadata["base_path"], "document-" + image_type + "_" + str(width) + "_" + str(round(aspect,3)) + ".png")
         if os.path.exists(cache_fn):
             with open(cache_fn, "rb") as f:
                 return HttpResponse(f.read(), content_type="image/png")
 
-        # Use the PDF files on disk.
-        pg1 = pdftopng(metadata.get("pdf_file"), 1)
+        # Use the PDF files on disk, or extract from the package.zip file, or download the PDF on the fly.
+        if metadata.get("pdf_file"):
+            with open(metadata["pdf_file"], 'rb') as f:
+                pdf_bytes = f.read()
+        elif metadata.get("govinfo_package_file"):
+            import zipfile
+            with zipfile.ZipFile(metadata["govinfo_package_file"]) as zf:
+                for n in zf.namelist():
+                    if re.search(r"/pdf/.*.pdf$", n):
+                        pdf_bytes = zf.read(n)
+                        break
+                else:
+                    # No PDF is available.
+                    raise Http404()
+        elif settings.DEBUG and metadata.get("gpo_pdf_url"):
+            # When debugging in a local environment we may not have bill text available
+            # so download the PDF from GPO.
+            import os, tempfile, subprocess
+            pdf_bytes = subprocess.check_output(["/usr/bin/wget", "-O", "-", "-q", metadata["gpo_pdf_url"]])
+        else:
+            # No PDF is available.
+            raise Http404()
+
+        pg1 = pdftopng(pdf_bytes, 1)
         try:
-            pg2 = pdftopng(metadata.get("pdf_file"), 2)
+            pg2 = pdftopng(pdf_bytes, 2)
         except:
             pg2 = pg1.crop((0, 0, pg1.size[0], 0)) # may only be one page!
-    elif settings.DEBUG:
-        # When debugging in a local environment we may not have bill text available
-        # so download the PDF from GPO.
-        import os, tempfile, subprocess
-        try:
-            (fd1, fn1) = tempfile.mkstemp(suffix=".pdf")
-            os.close(fd1)
-            subprocess.check_call(["/usr/bin/wget", "-O", fn1, "-q", metadata["gpo_pdf_url"]])
-            pg1 = pdftopng(fn1, 1)
-            pg2 = pdftopng(fn1, 2)
-        finally:
-            os.unlink(fn1)
-    else:
-        # No PDF is available.
-        raise Http404()
+
 
     # Since some bills have big white space at the top of the first page,
     # we'll combine the first two pages and then shift the window down
     # until the real start of the bill.
-    
     img = Image.new(pg1.mode, (pg1.size[0], int(pg1.size[1]+pg2.size[1])))
     img.paste(pg1, (0,0))
     img.paste(pg2, (0,pg1.size[1]))

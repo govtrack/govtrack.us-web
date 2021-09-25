@@ -223,8 +223,9 @@ def get_bill_text_version_regular(bill, version):
     dat["issued_on"] = datetime.date(*(int(d) for d in dat["issued_on"].split("-")))
 
     # find content files
-        
+
     basename += "/" + dat["version_code"]
+    dat["base_path"] = basename
 
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
     bt = BillType.by_value(bill.bill_type).slug
@@ -252,6 +253,13 @@ def get_bill_text_version_regular(bill, version):
     if os.path.exists(pdf_fn):
         dat["pdf_file"] = pdf_fn
         dat["has_thumbnail"] = True
+        dat["thumbnail_path"] = bill.get_absolute_url() + "/_text_image"
+
+    # get a govinfo package file that we'll assume contains a PDF file, if one exists
+    package_fn = basename + "/package.zip"
+    if os.path.exists(package_fn):
+        dat["govinfo_package_file"] = package_fn
+        dat["has_thumbnail"] = True # we assume it has a PDF that we can turn into a thumbnail
         dat["thumbnail_path"] = bill.get_absolute_url() + "/_text_image"
 
     # get an XML file if one exists
@@ -350,7 +358,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
         })
 
     # Pass through some fields.
-    for f in ('html_file', 'xml_file', 'pdf_file', 'has_thumbnail', 'thumbnail_path'):
+    for f in ('html_file', 'xml_file', 'pdf_file', 'has_thumbnail', 'thumbnail_path', 'base_path', 'govinfo_package_file'):
         if f in dat:
             ret[f] = dat[f]
 

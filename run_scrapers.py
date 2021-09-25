@@ -93,7 +93,7 @@ if "text" in sys.argv:
 	# bill text and generates feed events for text availability.
 
 	# Update the mirror of bill text from GPO's GovInfo.gov.
-	os.system("cd %s; . .env3/bin/activate; ./run govinfo --collections=BILLS --extract=mods,text,xml,pdf --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
+	os.system("cd %s; . .env3/bin/activate; ./run govinfo --collections=BILLS --extract=mods,text,xml --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
 
 	# Also metadata for committee reports.
 	os.system("cd %s; . .env3/bin/activate; ./run govinfo --collections=CRPT --extract=mods --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
