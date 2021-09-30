@@ -1146,7 +1146,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
 
     from PIL import Image
 
-    if not metadata or not metadata.get("base_path"):
+    if not metadata or not metadata.get("thumbnail_base_path"):
         # Start with a blank page.
         w = max(width, 100)
         pg1 = Image.new("RGB", (w, int(aspect*w)), color=(255,255,255))
@@ -1157,7 +1157,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         # But see run_scrapers.py for how we can periodically delete old thumbnail files
         # because they take up a ton of disk space.
         import os.path
-        cache_fn = os.path.join(metadata["base_path"], "document-" + image_type + "_" + str(width) + "_" + str(round(aspect,3)) + ".png")
+        cache_fn = metadata["thumbnail_base_path"] + "-" + image_type + "_" + str(width) + "_" + str(round(aspect,3)) + ".png"
         if os.path.exists(cache_fn):
             with open(cache_fn, "rb") as f:
                 return HttpResponse(f.read(), content_type="image/png")

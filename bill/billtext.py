@@ -225,7 +225,6 @@ def get_bill_text_version_regular(bill, version):
     # find content files
 
     basename += "/" + dat["version_code"]
-    dat["base_path"] = basename
 
     from bill.models import BillType # has to be here and not module-level to avoid cyclic dependency
     bt = BillType.by_value(bill.bill_type).slug
@@ -253,6 +252,7 @@ def get_bill_text_version_regular(bill, version):
     if os.path.exists(pdf_fn):
         dat["pdf_file"] = pdf_fn
         dat["has_thumbnail"] = True
+        dat["thumbnail_base_path"] = basename + "/document"
         dat["thumbnail_path"] = bill.get_absolute_url() + "/_text_image"
 
     # get a govinfo package file that we'll assume contains a PDF file, if one exists
@@ -260,6 +260,7 @@ def get_bill_text_version_regular(bill, version):
     if os.path.exists(package_fn):
         dat["govinfo_package_file"] = package_fn
         dat["has_thumbnail"] = True # we assume it has a PDF that we can turn into a thumbnail
+        dat["thumbnail_base_path"] = basename + "/document"
         dat["thumbnail_path"] = bill.get_absolute_url() + "/_text_image"
 
     # get an XML file if one exists
@@ -301,6 +302,7 @@ def get_bill_text_metadata_dhg(bill, version):
         if file["format"] == "pdf":
             dat["pdf_file"] = "data/congress/" + file["path"]
             dat["has_thumbnail"] = True
+            dat["thumbnail_base_path"] = os.path.splitext(dat["pdf_file"])[0]
             dat["thumbnail_path"] = bill.get_absolute_url() + "/_text_image"
             dat["urls"]["pdf"] = file["url"]
         if "text_path" in file:
@@ -358,7 +360,7 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
         })
 
     # Pass through some fields.
-    for f in ('html_file', 'xml_file', 'pdf_file', 'has_thumbnail', 'thumbnail_path', 'base_path', 'govinfo_package_file'):
+    for f in ('html_file', 'xml_file', 'pdf_file', 'has_thumbnail', 'thumbnail_path', 'thumbnail_base_path', 'govinfo_package_file'):
         if f in dat:
             ret[f] = dat[f]
 
