@@ -349,7 +349,7 @@ if __name__ == "__main__" and sys.argv[1] == "analyze":
 
         comps.append((b1, b2))
 
-    # Only compare 5000 pairs of bills in a run. In the 116th Congress
+    # Only compare some pairs of bills in a run. In the 116th Congress
     # about 200,000 comparison pairs were performed, so this gets us
     # all of them in about one month if this script is run once per day,
     # without this script potentially running for an excessively long
