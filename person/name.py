@@ -11,7 +11,9 @@ def get_person_name(person,
 
     if firstname.endswith('.'):
         firstname = person.middlename
-        
+    elif person.id in (400702,): # John Quincy Adams
+        firstname += " " + person.middlename
+
     if person.nickname:
         if firstname_style == None:
             firstname += " \u201c%s\u201d" % person.nickname
