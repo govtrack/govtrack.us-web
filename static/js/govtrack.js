@@ -52,13 +52,16 @@ function init_ad_zone(ad_container) {
     // save cookie
     $.cookie("ad_exp", form_qs(ad_cookie), { expires: 21, path: '/' });
 
+    /*
     // Activate page-level auto-placement ads.
+    // TODO: Do this at most once per page.
     if (!is_ad_free) {
         (adsbygoogle = window.adsbygoogle || []).push({
           google_ad_client: "ca-pub-3418906291605762",
           enable_page_level_ads: true
         });
     }
+    */
 
     // Show ad.
 
