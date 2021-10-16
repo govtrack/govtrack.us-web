@@ -41,11 +41,12 @@ pronunciation_guide_key = {
 "aw": "l<u>aw</u>", "g": "<u>g</u>et",
 "ay": "s<u>ay</u>", "h": "<u>h</u>at",
 "e": "b<u>e</u>d", "j": "<u>j</u>am",
-"ee": "m<u>ee</u>t", "k": "<u>k</u>ing",
-                    "l": "<u>l</u>eg",
+"eh": "b<u>e</u>d", "k": "<u>k</u>ing",
+"ee": "m<u>ee</u>t", "l": "<u>l</u>eg",
 "er": "h<u>er</u>", "m": "<u>m</u>an",
 "ew": "f<u>ew</u>", "n": "<u>n</u>ot",
 "i": "p<u>i</u>n", "ng": "si<u>ng</u>",
+"ih": "p<u>i</u>n",
 "ī": "<u>eye</u>", "nk": "tha<u>nk</u>",
 "o": "t<u>o</u>p", "p": "<u>p</u>en",
 "oh": "m<u>o</u>st", "r": "<u>r</u>ag",
@@ -124,8 +125,6 @@ NTCaucus = [412723, 400029, 400068, 400071, 400077, 400157, 400219, 400247, 4002
 @render_to('person/person_details.html')
 def person_details(request, pk):
     def build_info():
-        global pronunciation_guide
-
         if re.match(r"\d", pk):
             person = get_object_or_404(Person, pk=pk)
         else:
@@ -211,39 +210,6 @@ def person_details(request, pk):
         misconduct_any_alleged = (len([ m for m in misconduct if m["alleged"]  ]) > 0)
         misconduct_any_not_alleged = (len([ m for m in misconduct if not m["alleged"]  ]) > 0)
 
-        # Load pronunciation from guide. Turn into a mapping from GovTrack IDs to data.
-        if pronunciation_guide is None:
-            import rtyaml
-            if not hasattr(settings, 'PRONUNCIATION_DATABASE_PATH'):
-                # debugging
-                pronunciation_guide = { }
-            else:
-                pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open(settings.PRONUNCIATION_DATABASE_PATH)) }
-
-        # Get this person's entry.
-        pronunciation = pronunciation_guide.get(person.id)
-        # TODO: Validate that the 'name' in the guide matches the name we're actually displaying.
-        if pronunciation and not pronunciation.get("key"):
-          # Show a key to the letters used in the pronunciation guide. Break apart the name
-          # into words which we'll show in columns.
-          pronunciation["key"] = []
-          for namepart in pronunciation["respell"].split(" // "):
-            for nameword in namepart.split(" "):
-                # Parse out the symbols actually used in the guide. Sweep from left to right chopping
-                # off valid respelling letter combinations, chopping off the longest one where possible.
-                pronunciation["key"].append([])
-                i = 0
-                while i < len(nameword):
-                  for s in sorted(pronunciation_guide_key, key = lambda s : -len(s)):
-                    if nameword[i:i+len(s)] in (s, s.upper()):
-                      pronunciation["key"][-1].append( (nameword[i:i+len(s)], pronunciation_guide_key[s]) )
-                      i += len(s)
-                      break
-                  else:
-                    # respelling did not match any valid symbol, should be an error but we don't
-                    # want to issue an Oops! for this
-                    break
-
         # Get their enacted bills.
         enacted_bills_src_qs = person.sponsored_bills.exclude(original_intent_replaced=True).order_by('-current_status_date')
 
@@ -283,7 +249,7 @@ def person_details(request, pk):
                 'role': role,
                 'active_role': active_role,
                 'active_congressional_role': active_role and role.role_type in (RoleType.senator, RoleType.representative),
-                'pronunciation': pronunciation,
+                'pronunciation': load_pronunciation_key(person),
                 'photo': photo_url,
                 'photo_credit': photo_credit,
                 'links': links,
@@ -318,6 +284,47 @@ def person_details(request, pk):
         return redirect(ret["person"].get_absolute_url(), permanent=True)
            
     return ret
+
+def load_pronunciation_key(person):
+        global pronunciation_guide
+
+        # Load pronunciation from guide. Turn into a mapping from GovTrack IDs to data.
+        if pronunciation_guide is None:
+            import rtyaml
+            if not hasattr(settings, 'PRONUNCIATION_DATABASE_PATH'):
+                # debugging
+                pronunciation_guide = { }
+            else:
+                pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open(settings.PRONUNCIATION_DATABASE_PATH)) }
+
+        # Get this person's entry.
+        pronunciation = pronunciation_guide.get(person.id)
+
+        # TODO: Validate that the 'name' in the guide matches the name we're actually displaying.
+
+        if pronunciation and not pronunciation.get("key"):
+          # Show a key to the letters used in the pronunciation guide. Break apart the name
+          # into words which we'll show in columns.
+          pronunciation["key"] = []
+          for namepart in pronunciation["respell"].split(" // "):
+            for nameword in namepart.split(" "):
+                # Parse out the symbols actually used in the guide. Sweep from left to right chopping
+                # off valid respelling letter combinations, chopping off the longest one where possible.
+                pronunciation["key"].append([])
+                i = 0
+                while i < len(nameword):
+                  for s in sorted(pronunciation_guide_key, key = lambda s : -len(s)):
+                    if nameword[i:i+len(s)] in (s, s.upper()):
+                      pronunciation["key"][-1].append( (nameword[i:i+len(s)], pronunciation_guide_key[s]) )
+                      i += len(s)
+                      break
+                  else:
+                    # respelling did not match any valid symbol, should be an error but we don't
+                    # want to issue an Oops! for this
+                    break
+
+        return pronunciation
+
 
 def load_key_votes(person):
     # Get this person's key votes.
