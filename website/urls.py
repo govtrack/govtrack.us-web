@@ -5,7 +5,7 @@ import website.views
 
 urlpatterns = [
     url(r'^$', website.views.index, name='index'),
-    url(r'^(start|about|about-our-data|contact|press|advertising|legal|what-is-the-law|how-a-bill-becomes-a-law|congressional-procedures|sousveillance|reading-list|how-to-use|for-hill-staff|for-advocates|for-journalists|for-educators)$', website.views.staticpage, name='staticpage'),
+    url(r'^(start|about|about-our-data|contact|press|advertising|legal|what-is-the-law|how-a-bill-becomes-a-law|congressional-procedures|reading-list|how-to-use|for-hill-staff|for-advocates|for-journalists|for-educators)$', website.views.staticpage, name='staticpage'),
     #url(r'^developers/api$', website.views.api_overview),
     url(r'^congress/?$', website.views.congress_home, name='congress_home'),
     url(r'^search$', website.views.search, name='search'),
@@ -26,7 +26,6 @@ urlpatterns = [
     url(r'^_ajax/update-position', website.views.update_userposition, name='update-userposition'),
     url(r'^_ajax/reaction', website.views.add_remove_reaction, name='reaction'),
     url(r'^reactions.json', website.views.dump_reactions, name='dump_reactions'),
-    url(r'^sousveillance.json', website.views.dump_sousveillance),
     url(r'^misconduct', website.views.misconduct),
     url(r'^user-group-signup', website.views.user_group_signup),
     url(r'^missing-data', website.views.missing_data),

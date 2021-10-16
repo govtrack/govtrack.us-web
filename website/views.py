@@ -721,60 +721,6 @@ def dump_reactions(request):
     ]
     return HttpResponse(json.dumps(ret, indent=2), content_type="application/json")
 
-def dump_sousveillance(request):
-    from datetime import datetime, timedelta
-    from website.models import Sousveillance
-    from website.middleware import is_ip_in_any_range, HOUSE_NET_RANGES, SENATE_NET_RANGES, EOP_NET_RANGES
-    import re
-    import urllib.request, urllib.parse, urllib.error
-    import user_agents
-
-    def get_netblock_label(ip):
-        if is_ip_in_any_range(ip, HOUSE_NET_RANGES): return "House"
-        if is_ip_in_any_range(ip, SENATE_NET_RANGES): return "Senate"
-        if is_ip_in_any_range(ip, EOP_NET_RANGES): return "WH"
-    
-    # get hits in the time period
-    records = Sousveillance.objects\
-      .order_by('-when')\
-      [0:60]
-    def format_record(r, recursive):
-      path = r.req["path"]
-      if "twostream" in path:
-        try:
-            path = r.req["referrer"].replace("https://www.govtrack.us", "")
-        except:
-            pass
-      if "?" in path: path = path[:path.index("?")] # ensure no qsargs
-      if r.req.get("query"): path += "?" + urllib.parse.urlencode({ k.encode("utf8"): v.encode("utf8") for k,v in list(r.req["query"].items()) })
-
-      if r.req['agent']:
-          ua = str(user_agents.parse(r.req['agent']))
-          if ua == "Other / Other / Other": ua = "bot"
-          ua = re.sub(r"(\d+)(\.[\d\.]+)", r"\1", ua) # remove minor version numbers
-      else:
-          ua = "unknown"
-
-      ret = {
-        "reqid": r.id,
-        "when": r.when.strftime("%b %-d, %Y %-I:%M:%S %p"),
-        "netblock": get_netblock_label(r.req['ip']) if r.req['ip'] else None,
-        "path": path,
-        "query": r.req.get('query', {}),
-        "ua": ua,
-      }
-      if recursive:
-          ret["netblock"] = ", ".join(sorted(set( get_netblock_label(rr.req["ip"]) for rr in Sousveillance.objects.filter(subject=r.subject) if rr.req["ip"] )))
-          ret["recent"] = [format_record(rr, False) for rr in Sousveillance.objects.filter(subject=r.subject, id__lt=r.id).order_by('-when')[0:15]]
-      return ret
-    records = [
-      format_record(r, True)
-      for r in records
-    ]
-    return HttpResponse(json.dumps(records, indent=2), content_type="application/json")
-dump_sousveillance.max_age = 30
-dump_sousveillance = anonymous_view(dump_sousveillance)
-
 misconduct_data = None
 def load_misconduct_data():
     global misconduct_data

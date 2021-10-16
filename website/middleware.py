@@ -106,29 +106,5 @@ class GovTrackMiddleware:
         except:
             pass
 
-        response = self.get_response(request)
-
-		# log some requets for processing later
-        if hasattr(request, "_special_netblock"):
-            uid = request.COOKIES.get("uuid")
-            if not uid:
-                import uuid
-                uid = base64.urlsafe_b64encode(uuid.uuid4().bytes).replace(b'=', b'').decode("ascii")
-            response.set_cookie("uuid", uid, max_age=60*60*24*365*10)
-
-            from website.models import Sousveillance
-            Sousveillance.objects.create(
-                subject=uid,
-                user=request.user if request.user.is_authenticated else None,
-                req={
-                    "path": request.path,
-                    "query": { k: request.GET[k] for k in request.GET if k in ("q",) }, # whitelist qsargs
-                    "method": request.method,
-                    "referrer": request.META.get("HTTP_REFERER"),
-                    "agent": request.META.get("HTTP_USER_AGENT"),
-                    "ip": request.META.get("REMOTE_ADDR"),
-                }
-            )
-
-        return response
+        return self.get_response(request)
 

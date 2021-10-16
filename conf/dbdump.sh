@@ -50,7 +50,6 @@ website_mediumpost
 website_paypalpayment
 website_reaction
 website_req
-website_sousveillance
 website_usergroupsignup
 website_userposition
 website_userprofile
