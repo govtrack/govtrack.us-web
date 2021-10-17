@@ -45,7 +45,6 @@ trending_feeds = None
 base_context = {
     "SITE_ROOT_URL": settings.SITE_ROOT_URL,
     "GOOGLE_ANALYTICS_KEY": getattr(settings, 'GOOGLE_ANALYTICS_KEY', ''),
-    "FACEBOOK_APP_ID": getattr(settings, 'FACEBOOK_APP_ID', ''),
     "DID_AN_ELECTION_JUST_HAPPEN": settings.CURRENT_ELECTION_DATE and settings.CURRENT_ELECTION_DATE <= datetime.datetime.now().date(),
 
     # district maps

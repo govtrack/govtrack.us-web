@@ -72,9 +72,6 @@ copy_env_vars = [
     "RECAPTCHA_SECRET_KEY",
     "TWITTER_OAUTH_TOKEN", # also for automated tweets and used to update @GovTrack/Members-of-Congress twitter list
     "TWITTER_OAUTH_TOKEN_SECRET",
-    "FACEBOOK_APP_ID", # also used for Facebook widgets
-    "FACEBOOK_APP_SECRET",
-    "FACEBOOK_AUTH_SCOPE",
     "GOOGLE_APP_ID",
     "GOOGLE_APP_SECRET",
     "GOOGLE_AUTH_SCOPE",
