@@ -172,7 +172,9 @@ window.post_jquery_load_scripts.push(function() {
   }
 
   // load existing user position
+  // show this control only if the user has existing data
   if (the_page && the_page.position) {
+    $('#UserPositionContainer').show();
     $("#UserPositionContainer .LikertContainer .val").each(function(item) {
       if ($(this).attr("data-value") == the_page.position.likert)
         $(this).addClass('active');
@@ -239,7 +241,7 @@ function saveUserPosition() {
   </div>
 </div>
 
-<div id="UserPositionContainer" class="col-xs-6 col-sm-12" style="margin-bottom: 13px">
+<div id="UserPositionContainer" class="col-xs-6 col-sm-12" style="margin-bottom: 13px; display: none;">
     <h2 style="margin-bottom: 4px">Save your opinion <span class="sr-only">on this {{bill.noun}} on a six-point scale from strongly oppose to strongly support</span></h2>
     <div class="LikertFrame">
       <span class="sidelabel glyphicon glyphicon-thumbs-down"></span>
