@@ -167,8 +167,11 @@ blockquote {
 .ads {
 	display: none;
 }
-.ads.square {
-	margin: 60px 0;
+.ads.in-sidebar {
+	margin: 50px -5px;
+	padding: 10px 5px;
+	border-top: 1px solid #DDC;
+	border-bottom: 1px solid #DDC;
 	}
 .ads.footer.leaderboard {
 	margin: 20px 0 20px 0;
