@@ -344,10 +344,12 @@
 	{% endif %}
 
 	<script>
+		{% if not debug %}
 		gtag('set', 'user_properties', {
 		  Registered: the_user ? "Logged In" : "Anonymous",
 		  GeoSegment: the_segment
 		});
+		{% endif %}
 
 		{% if request.anonymous %}
 		<!-- Master page elements when using the user-head script  -->
