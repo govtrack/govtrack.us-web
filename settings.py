@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware', # must be after AuthenticationMiddleware
     'django.contrib.messages.middleware.MessageMiddleware',
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'twostream.middleware.CacheLogic',
@@ -96,6 +97,8 @@ INSTALLED_APPS = [
     #'debug_toolbar',
     #'silk',
     'crispy_forms',
+    'django_otp',
+    'django_otp.plugins.otp_totp',
 
     'haystack',
     'htmlemailer',
@@ -128,7 +131,7 @@ except ImportError:
     pass
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend', # only used for the admin?
+    'django.contrib.auth.backends.ModelBackend', # only used for the admin but the default admin page is hidden by the OTP login so not used directly, but the OTP login depends on this backend to do the password check
     'registration.views.EmailPasswordLoginBackend', # regular login
     'registration.views.DirectLoginBackend', # social login
 ]
@@ -204,3 +207,5 @@ SILKY_INTERCEPT_PERCENT = 1
 SILKY_PYTHON_PROFILER = True
 
 SHOW_TOOLBAR_CALLBACK = lambda : True
+
+OTP_TOTP_ISSUER = "GovTrack.us"

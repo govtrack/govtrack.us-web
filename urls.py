@@ -5,12 +5,22 @@ import django.views.static
 from django.contrib import admin
 
 from django.contrib.auth import views as auth_views
+
 import registration.views
 import website.api
 import website.views
 import events.views
 
-urlpatterns = [
+urlpatterns = []
+
+# OTP-enabled login for staff access to the Django admin (and their own accounts), overriding the default login page
+from django.contrib.auth.views import LoginView
+from django_otp.forms import OTPAuthenticationForm
+urlpatterns += [
+    url(r'^admin/login/?$', LoginView.as_view(authentication_form=OTPAuthenticationForm, template_name="login_otp.html")),
+]
+
+urlpatterns += [
     url(r'^admin/', admin.site.urls),
 
 	# main URLs
