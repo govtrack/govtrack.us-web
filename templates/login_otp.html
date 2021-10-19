@@ -1,0 +1,21 @@
+{% extends "master.html" %}
+{% block title %}
+GovTrack Admin Login
+{% endblock %}
+{% block body %}
+<form action="#" method="POST" class="form">
+    {% csrf_token %}
+    <h1>GovTrack Admin Login</h1>
+    <div class="form-row"> {{ form.username.errors }}{{ form.username.label_tag }}{{ form.username }} </div>
+    <div class="form-row"> {{ form.password.errors }}{{ form.password.label_tag }}{{ form.password }} </div>
+    {% if form.get_user %}
+    <div class="form-row"> {{ form.otp_device.errors }}{{ form.otp_device.label_tag }}{{ form.otp_device }} </div>
+    {% endif %}
+    <div class="form-row"> {{ form.otp_token.errors }}{{ form.otp_token.label_tag }}{{ form.otp_token }} </div>
+    <div class="submit-row">
+        <input type="submit" value="Log in"/>
+        {% if form.get_user %}<input type="submit" name="otp_challenge" value="Get Challenge" />{% endif %}
+    </div>
+    {{form.errors}}
+</form>
+{% endblock %}
