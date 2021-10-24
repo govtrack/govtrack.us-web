@@ -21,7 +21,7 @@ if (state && district)
 else if (state)
   bbox = bboxes[state];
 else
-  bbox = [-128.8, 23.6, -65.4, 50.2]; // United States
+  bbox = [-128.8, 23.5, -65.4, 53]; // United States
 {% endif %}
 
 function lngLatBoundsToCameraOptions(bounds) {
@@ -37,12 +37,16 @@ function lngLatBoundsToCameraOptions(bounds) {
   }
 
   // Initialize the map
+  // Use an Albers equal area projection. Center the projection on the state/district
+  // if we're opening on a state/district to minimize distortion in the default view,
+  // although that creates an interesting effect when zooming out!
   mapboxgl.accessToken = accessToken;
   var bounds = mapboxgl.LngLatBounds.convert([[bbox[0], bbox[1]], [bbox[2], bbox[3]]]);
   var camera = lngLatBoundsToCameraOptions(bounds);
   var map = new mapboxgl.Map({
     container: 'map',
     style: styleURL,
+    projection: { name: 'albers', center: camera.center.toArray(), parallels: [23.5, 53] },
     center: camera.center,
     zoom: camera.zoom
     });
