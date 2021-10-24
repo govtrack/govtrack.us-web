@@ -644,8 +644,8 @@ def membersoverview(request):
     majority_party = get_current_members(RoleType.senator, False, True)[0]["party"]
     current_senators = PersonRole.objects.filter(current=True, role_type=RoleType.senator)
     state_totals = { state: len([p for p in current_senators if p.state == state]) for state in set(p.state for p in current_senators)}
-    majority_party_senators_proportion = len([p for p in current_senators if p.party == majority_party]) / current_senators.count()
-    majority_party_apportioned_population = sum(state_population[p.state]/state_totals[p.state] for p in current_senators if p.party == majority_party)
+    majority_party_senators_proportion = len([p for p in current_senators if p.party == majority_party or p.caucus == majority_party]) / current_senators.count()
+    majority_party_apportioned_population = sum(state_population[p.state]/state_totals[p.state] for p in current_senators if p.party == majority_party or p.caucus == majority_party)
     total_state_population = sum(state_population[state] for state in state_population)
     majority_party_apportioned_population_proportion = majority_party_apportioned_population / total_state_population
     if int(round(majority_party_senators_proportion*100)) <= int(round(majority_party_apportioned_population_proportion*100)):
@@ -669,6 +669,21 @@ def membersoverview(request):
         "district_median_population": district_median_population,
     }
 
+def get_senator_apportioned_population_table():
+    import csv, sys
+    from vote.models import get_state_population_in_year
+    state_population = get_state_population_in_year(datetime.now().year)
+    current_senators = PersonRole.objects.filter(current=True, role_type=RoleType.senator)
+    state_totals = { state: len([p for p in current_senators if p.state == state]) for state in set(p.state for p in current_senators)}
+    total_state_population = sum(state_population[state] for state in set(role.state for role in current_senators))
+    w = csv.writer(sys.stdout)
+    for role in current_senators:
+        w.writerow([
+            role.person,
+            role.party,
+            role.caucus,
+            state_population[role.state]/state_totals[role.state] / total_state_population
+        ])
 
 def get_members_longevity_table():
     # Get a breakdown of members by chamber and party by longevity. Sum the total number
