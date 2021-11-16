@@ -43,10 +43,13 @@ function lngLatBoundsToCameraOptions(bounds) {
   mapboxgl.accessToken = accessToken;
   var bounds = mapboxgl.LngLatBounds.convert([[bbox[0], bbox[1]], [bbox[2], bbox[3]]]);
   var camera = lngLatBoundsToCameraOptions(bounds);
+  var projection = null;
+  if (state != "AK" && state != "AS") // the albers projection doesn't work right for these
+    projection = { name: 'albers', center: camera.center.toArray(), parallels: [23.5, 53] };
   var map = new mapboxgl.Map({
     container: 'map',
     style: styleURL,
-    projection: { name: 'albers', center: camera.center.toArray(), parallels: [23.5, 53] },
+    projection: projection,
     center: camera.center,
     zoom: camera.zoom
     });
