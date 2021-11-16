@@ -58,7 +58,7 @@ def get_person_name(person,
             name += '-'
         if show_district:
             name += role.state
-            if role.role_type == RoleType.representative:
+            if role.role_type == RoleType.representative and role.district != 0:
                 name += str(role.district)
                 
         if role_recent and not role.current:
