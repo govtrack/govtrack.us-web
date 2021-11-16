@@ -35,6 +35,7 @@ class Command(BaseCommand):
 			print("Not a user.")
 			return
 		
+		print("Active:", user.is_active)
 		print("Joined:", user.date_joined)
 		print("Last Login:", user.last_login)
 		
