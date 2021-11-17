@@ -5,16 +5,16 @@ LC_ALL=en_US.UTF-8
 LANG=en_US.UTF-8
 LC_TYPE=en_US.UTF-8
 
-45 2 * * 1-6 { cd /home/govtrack/web; ./run_scrapers.py text committees; }
-45 4 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes stats; ./manage.py govtrack_insider_sync; }
-15 6 * * * { cd /home/govtrack/web; ./run_scrapers.py bills; }
-15 9-18 * * 1-5 { cd /home/govtrack/web; ./run_scrapers.py votes; }
-45 9-21/3 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes; ./manage.py govtrack_insider_sync; }
+# Hours are in UTC.
 
-0 7 * * 1-5 { cd /home/govtrack/web; date; ./manage.py send_email_updates daily; }
+10,35 * * * 1-5 { cd /home/govtrack/web; ./run_scrapers.py votes; }
+45 */3 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes committees; ./manage.py govtrack_insider_sync; }
+45 8 * * * { cd /home/govtrack/web; ./run_scrapers.py stats; }
+
+0 10 * * 1-5 { cd /home/govtrack/web; date; ./manage.py send_email_updates daily; }
 0 13 * * 6 { cd /home/govtrack/web; date; ./manage.py send_email_updates weekly; }
 
-25 2 * * * { cd /home/govtrack/web; ./manage.py clear_expired_email_verifications; ./manage.py clearsessions; ./manage.py send_email_reconfirmation_and_deactivate; }
+25 7 * * * { cd /home/govtrack/web; ./manage.py clear_expired_email_verifications; ./manage.py clearsessions; ./manage.py send_email_reconfirmation_and_deactivate; }
 
-0 7-20 * * * { cd /home/govtrack/web; ./manage.py tweet_something; }
+1 13-23 * * * { cd /home/govtrack/web; ./manage.py tweet_something; }
 
