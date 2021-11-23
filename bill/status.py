@@ -223,6 +223,12 @@ class BillStatus(enum.Enum):
         search_help_text="Enacted. It is not known whether the President signed the bill due to limitations in the source data.",
         explanation="The bill was enacted. (It is not known whether the President signed the bill due to limitations in the source data.)",
         sort_order=(3,6))
+    enacted_incorporation = enum.Item(34, # this is only used in tweet_something
+        'Enacted \u2014 incorporated into another bill',
+        xml_code='ENACTED:INCORPORATION',
+        search_help_text="Enacted by having its text incoporated into an enacted bill.",
+        explanation="The bill's provisions were incorporated into another bill that was enacted.",
+        sort_order=(3,7))
 
     # indicates statuses whose descriptions are clear that the bill is no longer active,
     # other statuses are displayed as "Died: " for bills from previous congresses.
@@ -330,7 +336,7 @@ def get_bill_status_string(is_current, status):
     elif status == "ENACTED:UNKNOWN":
         status = "This %s was enacted on %s."
     
-    return status   
+    return status
 
 def get_bill_really_short_status_string(status):
     # Returns a string with two %s's in it, one for a noun describing the
@@ -387,12 +393,14 @@ def get_bill_really_short_status_string(status):
     elif status == "VETOED:POCKET":
         status = "%s was pocket vetoed %s."
     elif status == "ENACTED:SIGNED":
-        status = "%s was enacted (signed by President) %s."
+        status = "%s was enacted (🖊️ by president) %s."
     elif status == "ENACTED:VETO_OVERRIDE":
         status = "%s was enacted (by veto override) %s."
     elif status == "ENACTED:TENDAYRULE":
         status = "%s was enacted (by ten day rule) %s."
     elif status == "ENACTED:UNKNOWN":
         status = "%s was enacted %s."
-    return status   
+    elif status == "ENACTED:INCORPORATION":
+        status = "Provisions of %s were enacted %s."
+    return status
 

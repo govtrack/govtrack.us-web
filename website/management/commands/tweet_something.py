@@ -239,14 +239,17 @@ class Command(BaseCommand):
 		# the enacted bill so we tweet that it also was enacted and track which
 		# bill it was enacted through. Skip bills with the same title, since that
 		# will appear redundant and that should cover companion bills that we
-		# already pull in the sponsors name for.
-		for b, st, via in bills:
+		# already pull in the sponsors name for. Expand the source set of bills
+		# back more days because text analysis can take time to complete.
+		for b in Bill.objects.filter(
+			current_status_date__gte=timezone.now().date()-timedelta(days=7),
+			current_status__in=BillStatus.final_status_enacted_bill):
 			if b.text_incorporation:
 				for rec in b.text_incorporation:
 					if rec["my_version"] == "enr": # one side is always enr
 						b2 = Bill.from_congressproject_id(rec["other"])
 						if b.title_no_number == b2.title_no_number: continue
-						bills.append((b2, st, b))
+						bills.append((b2, BillStatus.enacted_incorporation, b))
 
 		# Choose bill with the most salient status, breaking ties with the highest proscore.
 		bills.sort(key = lambda b : (b[1].sort_order, b[0].proscore(), b[2] is None), reverse=True)
@@ -256,8 +259,8 @@ class Command(BaseCommand):
 			if text == "": continue
 			bill_number = bill.display_number
 			bill_number += Command.mention_sponsors(bill)
-			text = text % (bill_number, "yesterday")
-			if via: text += " (via {})".format(via.display_number)
+			text = text % (bill_number, "yesterday" if via is None else "on " + via.current_status_date.strftime("%x"))
+			if via: text = text.rstrip('.') + " (via {}).".format(via.display_number)
 			text += " " + bill.title_no_number
 			self.post_tweet(
 				bill.current_status_date.isoformat() + ":bill:%s:status:%s" % (bill.congressproject_id, status),
