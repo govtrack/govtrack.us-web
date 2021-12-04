@@ -242,17 +242,19 @@ class Command(BaseCommand):
 		# already pull in the sponsors name for. Expand the source set of bills
 		# back more days because text analysis can take time to complete.
 		for b in Bill.objects.filter(
-			current_status_date__gte=timezone.now().date()-timedelta(days=7),
+			current_status_date__gte=timezone.now().date()-timedelta(days=20),
 			current_status__in=BillStatus.final_status_enacted_bill):
 			if b.text_incorporation:
 				for rec in b.text_incorporation:
 					if rec["my_version"] == "enr": # one side is always enr
 						b2 = Bill.from_congressproject_id(rec["other"])
-						if b.title_no_number == b2.title_no_number: continue
+						if b.title_no_number == b2.title_no_number: continue # probably a companion bill, see below
 						bills.append((b2, BillStatus.enacted_incorporation, b))
 
 		# Choose bill with the most salient status, breaking ties with the highest proscore.
-		bills.sort(key = lambda b : (b[1].sort_order, b[0].proscore(), b[2] is None), reverse=True)
+		bills.sort(key = lambda b : (b[2] is None, b[1].sort_order, b[0].proscore()), reverse=True)
+
+		# Post tweets.
 		for bill, status, via in bills:
 			if "Providing for consideration" in bill.title: continue
 			text = get_bill_really_short_status_string(status.xml_code)
