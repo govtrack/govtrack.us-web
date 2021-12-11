@@ -115,7 +115,7 @@ Additionally, some data files are stored in separate repositories and must be ob
 * congress project bill status data (etc.)
 * congress-legislators data
 * legislator photos (static/legislator-photos is symlinked to ../data/legislators-photos/photos, so this must go in `data` for now)
-* GovTrack's scorecards, misconduct, and name pronuciation repositories
+* GovTrack's misconduct and name pronuciation repositories
 
 # Credits
 
@@ -137,7 +137,6 @@ You'll need several other data repositories that you can put in the `data` direc
 
 * Our [congressional misconduct database](https://github.com/govtrack/misconduct) YAML file: `MISCONDUCT_DATABASE_PATH=data/misconduct/misconduct.yaml`
 * Our [legislator name pronunciation database](https://github.com/govtrack/pronunciation/): `PRONUNCIATION_DATABASE_PATH=data/pronunciation/legislators.yaml`
-* Our [advocacy organization scorecards database](https://github.com/govtrack/advocacy-organization-scorecards): `SCORECARDS_DATABASE_PATH=data/advocacy-organization-scorecards/scorecards`
 
 At this point you should be able to run `./manage.py runserver` and test that the site works.
 

@@ -560,7 +560,7 @@ function show_pronunciation_guide() {
 
 
 <div id="member-details">
-	{% if analysis_data.sponsorship or analysis_data.scorecards or has_session_stats %}
+	{% if analysis_data.sponsorship or has_session_stats %}
 	<section id="sponsorship_analysis">
 		<h2><span>Analysis</span></h2>
 
@@ -586,7 +586,7 @@ function show_pronunciation_guide() {
 
 		{% endif %}
 
-		{% if analysis_data.scorecards %}
+		{% if analysis_data.scorecards and 0 %}
 			<h3>Ratings from Advocacy Organizations</h3>
 			<div id="scorecards">
 				<style scoped>

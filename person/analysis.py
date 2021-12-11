@@ -11,7 +11,7 @@ def load_data(person):
         "sponsorship": load_sponsorship_analysis(person),
         "missedvotes": load_votes_analysis(person),
         #"influence": load_influence_analysis(person),
-        "scorecards": load_scorecards_for(person),
+        #"scorecards": load_scorecards_for(person),
     }
     
 def load_sponsorship_analysis(person):

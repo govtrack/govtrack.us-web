@@ -954,7 +954,6 @@ def missing_data(request):
         pronunciation_guide = { p["id"]["govtrack"]: p for p in rtyaml.load(open(settings.PRONUNCIATION_DATABASE_PATH)) }
 
     from person.models import Person
-    from person.analysis import load_scorecards_for
     people = { }
     def add_person(p):
         return people.setdefault(p.id, {
@@ -975,9 +974,6 @@ def missing_data(request):
             # Check that the name in the guide matches the name we display.
             elif pronunciation_guide[p.id]['name'] != p.firstname + " // " + p.lastname:
                 add_person(p).update({ "pronunciation": "mismatch" })
-        if not load_scorecards_for(p):
-            # new legislators won't have scorecards for a while
-            add_person(p).update({ "scorecards": "✘" })
     people = sorted(people.values(), key=lambda p : p['name'])
 
     return {
