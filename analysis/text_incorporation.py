@@ -47,7 +47,7 @@ def extract_text(fn):
     dom = lxml.etree.parse(fn)
   except lxml.etree.XMLSyntaxError:
     raise ValueError("xml syntax error")
-  if (dom.find("legis-body") or dom.find("resolution-body")) is None:
+  if (dom.find("legis-body") or dom.find("resolution-body") or dom.find("engrossed-amendment-body")) is None:
     raise ValueError("missing legis-body or resolution-body in " + fn)
 
   # Serializes the content of a node into plain text.
@@ -101,7 +101,7 @@ def extract_text(fn):
   # or resolution-body. There may be more than one such node if the
   # bill is in amendment form.
   buf = StringIO()
-  for n in dom.xpath("legis-body|resolution-body"):
+  for n in dom.xpath("legis-body|resolution-body|engrossed-amendment-body"):
     serialize_node(n, buf)
   text = buf.getvalue()
 
