@@ -399,16 +399,34 @@ function show_pronunciation_guide() {
 				{{person.lastname}} {% if active_role %}is{% else %}was{% endif %} among the Republican legislators
 				whose attempt to disenfranchise Democratic states in the 2020 presidential election was a part of the
 				months-long attempted coup that included the January 6, 2021 insurrection at the Capitol.
+
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}
 				Shortly after the 2020 election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly won by Democrats &mdash; to be discounted based on lies, conspiracy theories, and a preposterous legal argument which the Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a>.
 				Following the rejection of several related cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}another legislator who joined the case{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
 				{% endif %}
+
+				{% if person.id == 412226 %}
+				Jordan futher <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged the Vice President</a>,
+				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
+				follow the Constitution's procedure in which Congress may vote to exclude electors.
+				{% elif person.id == 400651 %}
+				Gohmert further <a href="https://www.politico.com/news/2021/12/16/jan-6-gohmert-lawsuit-pence-524839">sued the Vice President</a>,
+				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
+				follow the Constitution's procedure in which Congress may vote to exclude electors.
+				{% else %}
+				Other legislators <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged</a> and even
+				<a href="https://www.politico.com/news/2021/12/16/jan-6-gohmert-lawsuit-pence-524839">sued the Vice President</a>,
+				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
+				follow the Constitution's procedure in which Congress may vote to exclude electors.
+				{% endif %}
+
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
 				In the days leading up to January 6, {{person.lastname}} had announced {{person.his_her}} intent to object on that day to the inclusion of some states in the count of electors that determines the next president, which would have disenfranchised millions of voters based on lies, conspiracy theories, and preposterous legal theories all falsely claiming various sorts of mass fraud that did not occur. The announcement amplified the message that inspired the attack on the Capitol.
 				{% if "KrakenObjectedToAZPA" not in kraken_caucus %}
 				{{person.he_she|capfirst}} ultimately did not vote to exclude any states from the Electoral College, however.
 				{% endif %}
 				{% endif %}
+
 				{% if "KrakenObjectedToAZPA" in kraken_caucus %}
 				On January 6, 2021 in the hours after the attack on the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted for the exclusion of all of the votes in Arizona and/or Pennsylvania</a> &mdash; states narrowly won by Democrats &mdash; from the Electoral College count that determined the next President of the United States.
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus or "KrakenAnnouncedObjection" in kraken_caucus %}
