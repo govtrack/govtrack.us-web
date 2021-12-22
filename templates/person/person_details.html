@@ -436,6 +436,11 @@ function show_pronunciation_guide() {
 				about the election that motivated the insurrection at the Capitol.
 				{% endif %}
 				{% endif %}
+
+				{% if person.id == 412572 %}
+					<hr>
+					{{person.lastname}} said in December 2021 that he <a href="https://www.politico.com/minutes/congress/12-22-2021/rices-regret/">regretted his Jan. 6 vote</a>.
+				{% endif %}
 			</div>
 		</div>
 	{% endif %}
