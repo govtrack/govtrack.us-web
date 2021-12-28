@@ -405,6 +405,13 @@ function show_pronunciation_guide() {
 				Following the rejection of several related cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}another legislator who joined the case{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
 				{% endif %}
 
+				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
+				In the days leading up to January 6, {{person.lastname}} had announced {{person.his_her}} intent to object on that day to the inclusion of some states in the count of electors that determines the next president, which would have disenfranchised millions of voters based on lies, conspiracy theories, and preposterous legal theories all falsely claiming various sorts of mass fraud that did not occur. The announcement amplified the message that inspired the attack on the Capitol.
+				{% if "KrakenObjectedToAZPA" not in kraken_caucus %}
+				{{person.he_she|capfirst}} ultimately did not vote to exclude any states from the Electoral College, however.
+				{% endif %}
+				{% endif %}
+
 				{% if person.id == 412226 %}
 				Jordan futher <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged the Vice President</a>,
 				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
@@ -414,17 +421,10 @@ function show_pronunciation_guide() {
 				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
 				follow the Constitution's procedure in which Congress may vote to exclude electors.
 				{% else %}
-				Other legislators <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged</a> and even
-				<a href="https://www.politico.com/news/2021/12/16/jan-6-gohmert-lawsuit-pence-524839">sued the Vice President</a>,
+				Many legislators were a part of a <a href="https://www.thedailybeast.com/trump-advisor-peter-navarro-lays-out-how-he-and-steve-bannon-planned-to-overturn-bidens-electoral-win?ref=home&via=twitter_page">coordinated campaign</a>
+				by the Trump Administration to pressure the Vice President,
 				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
 				follow the Constitution's procedure in which Congress may vote to exclude electors.
-				{% endif %}
-
-				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
-				In the days leading up to January 6, {{person.lastname}} had announced {{person.his_her}} intent to object on that day to the inclusion of some states in the count of electors that determines the next president, which would have disenfranchised millions of voters based on lies, conspiracy theories, and preposterous legal theories all falsely claiming various sorts of mass fraud that did not occur. The announcement amplified the message that inspired the attack on the Capitol.
-				{% if "KrakenObjectedToAZPA" not in kraken_caucus %}
-				{{person.he_she|capfirst}} ultimately did not vote to exclude any states from the Electoral College, however.
-				{% endif %}
 				{% endif %}
 
 				{% if "KrakenObjectedToAZPA" in kraken_caucus %}
