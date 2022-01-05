@@ -205,21 +205,21 @@ def is_text_incorporated(b1_ratio, b2_ratio, cmp_text_len):
   # and the text in common is large enough to exclude cases where all of
   # the substance in the bills are in the dis-similar parts. The smaller
   # the absolute amount in common, the higher the relative threshold.
-  if b1_ratio*b2_ratio > max(.95-0.0006*(cmp_text_len-300), .66) and cmp_text_len > 300:
-    return True
+  if b1_ratio*b2_ratio > max(.95-0.0006*(cmp_text_len-300), .75) and cmp_text_len > 300:
+    return "symmetric"
 
   # One bill is substantially (>33%) incorporated within the other
   # and the text in common is significantly large to ensure that
   # there are substantive provisions in that part. Require a higher
   # percentage of overlap in shorter bills.
-  if max(b1_ratio, b2_ratio) > max(.8-0.00015*(cmp_text_len-800), .33) and cmp_text_len > 800:
-    return True
+  if max(b1_ratio, b2_ratio) > max(.8-0.00005*(cmp_text_len-800), .33) and cmp_text_len > 800:
+    return "incorporated"
 
   # One bill has provisions incorporated within the other, and though
   # it's a small part of the bill, it's a large bill and the text
   # in common is quite large.
   if (b1_ratio>.15 or b2_ratio>.15) and cmp_text_len > 8000:
-    return True
+    return "provision"
 
   return False
 
@@ -464,7 +464,7 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
         continue
 
     # For other bills...
-    if is_text_incorporated(b1_ratio, b2_ratio, cmp_text_len):
+    if is_text_incorporated(b1_ratio, b2_ratio, cmp_text_len) is not False:
       # Index this information with both bills.
 
       # For b2, we're saying that it (or parts of it) were enacted
@@ -531,6 +531,50 @@ elif __name__ == "__main__" and sys.argv[1] == "load":
     .exclude(id__in=seen_bills)), desc="Clearing"):
     b.text_incorporation = None
     save_bill(b)
+
+elif __name__ == "__main__" and sys.argv[1] == "count":
+  # Count the number of bills enacted by incorporation.
+
+  import csv
+
+  congress = int(sys.argv[2])
+  csv_fn = "data/analysis/by-congress/%d/text_comparison.csv" % congress
+
+  # Identify the most recent bill version for each bill. Since the
+  # CSV file is in chronological order by the date the text analysis
+  # was performed, and each line uses only the most recent text for
+  # a bill, we can look at the last occurrence of a bill to see what
+  # text version is the latest. On a second pass, we'll skip analyses
+  # over earlier versions of a bill.
+  latest_version_code = { }
+  for row in csv.reader(open(csv_fn)):
+    timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text \
+       = row
+    latest_version_code[b1_id] = b1_versioncode
+    latest_version_code[b2_id] = b2_versioncode
+
+  # Count by bill.
+  total = 0
+  count = 0
+  for row in csv.reader(open(csv_fn)):
+    timestamp, b1_id, b1_versioncode, b1_ratio, b2_id, b2_versioncode, b2_ratio, cmp_text_len, cmp_text \
+       = row
+    b1_ratio = round(float(b1_ratio),3)
+    b2_ratio = round(float(b2_ratio),3)
+    cmp_text_len = int(cmp_text_len)
+
+    # b1 is the enacted bill.
+    # b2 is a non-enacted bill that might have had text incorporated into b1.
+
+    # Skip if this record is for an outdated version of either bill.
+    if b1_versioncode != latest_version_code[b1_id]: continue
+    if b2_versioncode != latest_version_code[b2_id]: continue
+
+    total += 1
+    if is_text_incorporated(b1_ratio, b2_ratio, cmp_text_len) is not False:
+      count += 1
+
+  print(total, "total", count, "incorporated")
 
 elif __name__ == "__main__" and sys.argv[-1] == "test":
   # Look at our table and see how many relationships it identified
