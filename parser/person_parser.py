@@ -142,6 +142,7 @@ def update_people_table(options):
     # Start parsing.
     
     had_error = False
+    now = datetime.now().date()
 
     # Get combined data.
     legislator_data = { }
@@ -243,7 +244,6 @@ def update_people_table(options):
 
                 # But executives...
                 else:
-                    now = datetime.now().date()
                     role.current = role.startdate <= now and role.enddate >= now
                     # Because of date overlaps at noon transition dates, ensure that only the last term that covers
                     # today is current --- reset past roles to not current. Doesn't handle turning off retirning people tho.
@@ -255,9 +255,11 @@ def update_people_table(options):
                 role.leadership_title = None
                 for leadership_node in node.get("leadership_roles", []):
                     # must match on date and chamber
-                    if leadership_node["start"] >= role.enddate.isoformat(): continue # might start on the same day but is for the next Congress
-                    if "end" in leadership_node and leadership_node["end"] <= role.startdate.isoformat(): continue # might start on the same day but is for the previous Congress
-                    if leadership_node["chamber"] != RoleType.by_value(role.role_type).congress_chamber.lower(): continue
+                    if leadership_node["chamber"] != RoleType.by_value(role.role_type).congress_chamber.lower(): continue # the roles are in different chambers so they don't match
+                    if leadership_node["start"] >= role.enddate.isoformat(): continue # might start on the last day but is for a later Congress
+                    if "end" in leadership_node and leadership_node["end"] <= role.startdate.isoformat(): continue # might end on the first day but is for a previous Congress
+                    if "end" in leadership_node and leadership_node["end"] < role.enddate.isoformat() and leadership_node["end"] <= now.isoformat():
+                        continue # this role is over and, for historical terms, didn't continue to the end of the term, so it doesn't get stored since we only hold roles held at the end of the term
                     role.leadership_title = leadership_node["title"]
 
                 new_roles.append(role)
