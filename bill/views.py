@@ -856,28 +856,42 @@ def subject_choices():
 
 # used by bills_overview and bill_statistics
 bill_status_groups = [
-    ("Enacted Laws",
-        "enacted bills and joint resolutions", " so far in this session of Congress", " (both bills and joint resolutions can be enacted as law)",
+    ("Enacted Legislation (including via incorporation)",
+        "enacted bills", "including bills and joint resolutions identical to or incorporated into enacted legislation, based on an automated GovTrack.us data analyis",
+        "including bills (and joint resolutions) identical to or incorporated into enacted legislation, based on an approximate, automated GovTrack.us data analyis that varies by Congress",
+        "enacted_ex"),
+    ("Enacted Legislation",
+        "enacted bills", "that were either signed by the president or enacted via a veto override or the 10-day rule (including joint resolutions which can also be enacted as law)", None,
         BillStatus.final_status_enacted_bill), # 2
     ("Passed Resolutions",
-        "passed resolutions", " so far in this session of Congress (for joint and concurrent resolutions, passed both chambers)", " (for joint and concurrent resolutions, this means passed both chambers)",
+        "passed resolutions", "(for joint and concurrent resolutions, we mean passed both chambers)", None,
         BillStatus.final_status_passed_resolution), # 3
     ("Got A Vote",
-        "bills and joint/concurrent resolutions", " that had a significant vote in one chamber, making them likely to have further action", " that had a significant vote in one chamber",
+        "bills and resolutions", "that had a significant vote in one chamber, making them likely to have further action", "that had a significant vote in one chamber but were not enacted (or, for resolutions, passed)",
         (BillStatus.pass_over_house, BillStatus.pass_over_senate, BillStatus.pass_back_senate, BillStatus.pass_back_house, BillStatus.conference_passed_house, BillStatus.conference_passed_senate, BillStatus.passed_bill)), # 7
     ("Failed Legislation",
-        "bills and resolutions", " that failed a vote on passage and are now dead or failed a significant vote such as cloture, passage under suspension, or resolving differences", " that failed a vote on passage or failed a significant vote such as cloture, passage under suspension, or resolving differences",
-        (BillStatus.fail_originating_house, BillStatus.fail_originating_senate, BillStatus.fail_second_house, BillStatus.fail_second_senate, BillStatus.prov_kill_suspensionfailed, BillStatus.prov_kill_cloturefailed, BillStatus.prov_kill_pingpongfail)), # 7
-    ("Vetoed Bills (w/o Override)",
-        "bills", " that were vetoed and the veto was not overridden by Congress", " that were vetoed and the veto was not overridden by Congress",
+        "bills and resolutions", "that failed a vote on passage and are dead or failed a significant vote such as cloture, passage under suspension, or resolving differences", None,
+        (BillStatus.fail_originating_house, BillStatus.fail_originating_senate, BillStatus.fail_second_house, BillStatus.fail_second_senate, BillStatus.prov_kill_suspensionfailed, BillStatus.prov_kill_cloturefailed, BillStatus.prov_kill_pingpongfail)),
+    ("Vetoed Bills (without Override)",
+        "vetoed bills", "that was not overridden by Congress", None,
         (BillStatus.prov_kill_veto, BillStatus.override_pass_over_house, BillStatus.override_pass_over_senate, BillStatus.vetoed_pocket, BillStatus.vetoed_override_fail_originating_house, BillStatus.vetoed_override_fail_originating_senate, BillStatus.vetoed_override_fail_second_house, BillStatus.vetoed_override_fail_second_senate)), # 8
     ("Other Legislation",
-        "bills and resolutions", " that have been introduced or reported by committee and await further action", " that were introduced, referred to committee, or reported by committee but had no further action",
+        "bills and resolutions", "that have been introduced or reported by committee and await further action", "that were introduced or reported by committee but did not have further action",
         (BillStatus.introduced, BillStatus.reported)), # 3
 ]
 
 def load_bill_status_qs(statuses, congress=CURRENT_CONGRESS):
-    return Bill.objects.filter(congress=congress, current_status__in=statuses)
+    if statuses != "enacted_ex":
+        return Bill.objects.filter(congress=congress, current_status__in=statuses)
+    else:
+        from haystack.query import SearchQuerySet
+        return SearchQuerySet().using("bill").filter(indexed_model_name__in=["Bill"], enacted_ex=True, congress=congress)
+
+def load_bill_status_search_link(congress, statuses):
+    return "/congress/bills/browse?sort=-current_status_date" \
+           + ("&congress={}".format(congress) if congress else "") \
+           + (("&status=" + ",".join(str(s) for s in statuses)) if statuses != "enacted_ex" \
+             else "#enacted_ex=on")
 
 @anonymous_view
 @render_to('bill/bills_overview.html')
@@ -889,9 +903,9 @@ def bills_overview(request):
         # info about bills by status
         groups = [
             (   g[0], # title
-                g[1], # text 1
-                g[2], # text 2
-                "/congress/bills/browse?status=" + ",".join(str(s) for s in g[4]) + "&sort=-current_status_date", # link
+                g[1], # noun
+                g[2], # continuation text
+               load_bill_status_search_link(None, g[4]),
                load_bill_status_qs(g[4]).count(), # count in category
                load_bill_status_qs(g[4]).order_by('-current_status_date')[0:6], # top 6 in this category
                 )
@@ -960,7 +974,7 @@ def bill_statistics(request):
             counts_by_congress[-1]["counts"].append(
                 { "count": t,
                   "percent": "%0.0f" % float(100.0*t/total),
-                  "link": "/congress/bills/browse?congress=%s&status=%s" % (c, ",".join(str(s) for s in g[4])),
+                  "link": load_bill_status_search_link(c, g[4])
                   } )
     counts_by_congress.reverse()
 

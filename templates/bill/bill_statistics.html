@@ -98,7 +98,7 @@ $(function() {
 		<tr>
 			<th style="padding: 0 1em 1em 0;">Congress</th>
 			{% for grp in groups2 %}
-				<th style="padding: 0 1em 1em 0;" title="{{grp.1}}{{grp.3}}">{{grp.0}}</th>
+				<th style="padding: 0 1em 1em 0;" title="{{grp.1|capfirst}} {% firstof grp.3 grp.2 %}">{{grp.0}}</th>
 			{% endfor %}
 			<th style="padding: 0 0 1em 0;">TOTAL</th>
 		</tr>
@@ -122,7 +122,7 @@ $(function() {
 		<p>Here is what we mean in each column:</p>
 		<ul class="bullets">
 			{% for grp in groups2 %}
-				<li><b>{{grp.0}}:</b> {{grp.1|capfirst}}{{grp.3}}</li>
+				<li><b>{{grp.0}}:</b> {{grp.1|capfirst}} {% firstof grp.3 grp.2 %}</li>
 			{% endfor %}
 		</ul>
 

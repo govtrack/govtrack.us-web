@@ -239,12 +239,12 @@ function do_keyword_tracker_submit() {
 		<h2><span>All bills</span></h2>
 		<p style="margin-top: 15px">Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
 			
-		{% for name, descr1, descr2, href, count, queryset in groups %}
+		{% for name, noun, descr2, href, count, queryset in groups %}
 		{% if count > 0 %}
 			<h3>{{name}}</h3>
 			
 			{% if 10 > count %}
-				<p>There are {{count|intcomma}} {{descr1}}{{descr2}}:</p>
+				<p>There are {{count|intcomma}} {{noun}} {{descr2}}:</p>
 		
 				<ul>
 				{% for bill in queryset %}
@@ -255,7 +255,7 @@ function do_keyword_tracker_submit() {
 				{% endfor %}
 				</ul>
 			{% else %}
-				<p>There are <a href="{{href}}">{{count|intcomma}} {{descr1}}</a>{{descr2}}.</p>
+				<p>There are <a href="{{href}}">{{count|intcomma}} {{noun}}</a> {{descr2}}.</p>
 			{% endif %}
 		{% endif %}
 		{% endfor %}
