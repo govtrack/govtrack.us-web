@@ -580,11 +580,15 @@ class PersonRole(models.Model):
         if len(parties) > 1: parties[-1] = "and " + parties[-1]
         return most_recent_descr1 + most_recent + most_recent_descr2 + "previously " + (", " if len(parties) > 2 else " ").join(parties)
 
-    def get_party_on_date(self, when):
+    def get_party_on_date(self, when, caucus=False):
+        if isinstance(when, datetime.datetime):
+            when = when.date()
         if self.extra and "party_affiliations" in self.extra:
             for pa in self.extra["party_affiliations"]:
-                if pa['start'] <= when.date().isoformat() <= pa['end']:
+                if pa['start'] <= when.isoformat() <= pa['end']:
+                    if caucus: return pa.get("caucus") or pa['party']
                     return pa['party']
+        if caucus: return self.caucus or self.party
         return self.party
 
     @property
@@ -701,6 +705,90 @@ class PersonRole(models.Model):
     def get_sort_key(self):
         # As it happens, our enums define a good sort order between senators and representatives.
         return (self.role_type, self.senator_rank)
+
+    @staticmethod
+    def get_majority_party(role_type, when):
+        # Get the majority party for the Houe or Senate
+        # (passing RoleType.repreentative or RoleType.senator)
+        # on a particular date. The result is cached in memory
+        # indefinitely.
+
+        import dateutil.parser
+
+        # Initialize the cache.
+        if not hasattr(PersonRole.get_majority_party, 'cache'):
+            PersonRole.get_majority_party.cache = { RoleType.senator: [], RoleType.representative: [] }
+
+        # Search the cache for any matching time period.
+        for start_date, end_date, majority_party in PersonRole.get_majority_party.cache[role_type]:
+            if start_date <= when < end_date:
+                return majority_party
+
+        # Compute the majority party. Get all legislators serving
+        # on the given date. Use "gt" and not "gte" on the end date
+        # because at the ends of Congresses turnover is at noon, and
+        # we'll assume the caller is asking for the next Congress.
+        roles = list(PersonRole.objects.filter(role_type=role_type,
+                                                startdate__lte=when,
+                                                enddate__gt=when))
+
+        # For legislators who changed party mid-term, update the role
+        # party, caucus, start, and end fields accordingly.
+        for p in roles:
+            if p.extra and "party_affiliations" in p.extra:
+                for pa in p.extra["party_affiliations"]:
+                    if pa['start'] <= when.isoformat() < pa['end']:
+                        p.party = pa['party']
+                        p.caucus = pa.get('caucus')
+                        p.startdate = dateutil.parser.parse(pa['start']).date()
+                        p.enddate = dateutil.parser.parse(pa['end']).date()
+
+        # Compute the counts by party (or caucus if set, for independents).
+        from collections import defaultdict
+        party_counts = defaultdict(lambda : 0)
+        for p in roles:
+            party_counts[p.caucus or p.party] += 1
+
+        # Get the party with the highest count.
+        majority_party = max(party_counts, key = lambda p : party_counts[p])
+
+        # If the highest count is not a majority (i.e. a tie)...
+        if party_counts[majority_party] <= len(roles) / 2:
+            # In the House, there is no majority.
+            majority_party = None
+
+            # In the Senate, the majority is determined by the party of
+            # the Vice President (although in reality there is likely
+            # a complex power-sharing agreement). Use "gt" and not "gte"
+            # on the end date because at the ends of presidential terms
+            # turnover is at noon, and we'll assume the caller is asking
+            # about the afternoon.
+            vp = PersonRole.objects.filter(role_type=RoleType.vicepresident,
+                                           startdate__lte=when,
+                                           enddate__gt=when).first()
+            if vp:
+                majority_party = vp.caucus or vp.party
+                roles.append(vp) # limit the cache entry to the duration of this role as well
+
+        # This can be cached for the time period starting with the
+        # beginning of the most recent role and ending with the nearest
+        # end of a role, and not in the future.
+        cache_start = max([p.startdate for p in roles])
+        cache_end = min([p.enddate for p in roles] + [datetime.datetime.now().date()])
+
+        # Additionally, in case there are other roles that start/end within
+        # this window, we have to reduce it further.
+        role = PersonRole.objects.filter(role_type=role_type, enddate__lt=when)\
+                          .order_by('-enddate').first()
+        if role: cache_start = max(cache_start, role.enddate)
+        role = PersonRole.objects.filter(role_type=role_type, startdate__gt=when)\
+                          .order_by('startdate').first()
+        if role: cache_end = min(cache_end, role.startdate)
+
+        # Add cache entry.
+        PersonRole.get_majority_party.cache[role_type].append((cache_start, cache_end, majority_party))
+
+        return majority_party
 
 # Feeds
 

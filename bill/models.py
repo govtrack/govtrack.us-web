@@ -320,14 +320,14 @@ class Bill(models.Model):
         r *= type_boost[self.bill_type]
         return r
     def sponsor_party(self):
+        from person.types import RoleType
+        from person.models import PersonRole
         if not self.sponsor_role: return None
-        mp = getattr(Bill, "_majority_party", { })
-        if self.congress not in mp:
-            from .prognosis import load_majority_party
-            mp[self.congress] = load_majority_party(self.congress)
-            Bill._majority_party = mp
-        p = self.sponsor_role.party
-        return (p, "Majority Party" if p == mp[self.congress][self.bill_type] else "Minority Party")
+        p = self.sponsor_role.get_party_on_date(self.introduced_date)
+        pm = PersonRole.get_majority_party(RoleType.senator if self.originating_chamber == "Senate" else RoleType.representative, self.introduced_date)
+        if pm is not None:
+          pm = "Majority Party" if self.sponsor_role.get_party_on_date(self.introduced_date, caucus=True) == pm else "Minority Party"
+        return (p, pm)
     def enacted_ex(self):
         return self.was_enacted_ex() is not None
     def usc_citations_uptree(self):

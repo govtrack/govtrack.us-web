@@ -641,7 +641,7 @@ def membersoverview(request):
 
     # Check senate majority party percent vs apportioned total state population of total population
     # in states + DC (because that's the population data we have).
-    majority_party = get_current_members(RoleType.senator, False, True)[0]["party"]
+    majority_party = PersonRole.get_majority_party(RoleType.senator, datetime.now().date())
     current_senators = PersonRole.objects.filter(current=True, role_type=RoleType.senator)
     state_totals = { state: len([p for p in current_senators if p.state == state]) for state in set(p.state for p in current_senators)}
     majority_party_senators_proportion = len([p for p in current_senators if p.party == majority_party or p.caucus == majority_party]) / current_senators.count()
