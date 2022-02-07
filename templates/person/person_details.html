@@ -251,7 +251,8 @@ function show_pronunciation_guide() {
 	<h1>
 		{% if role.party %}
 		<div style="position: relative;">
-		  <div class="party_{{role.party.0}}" style="position: absolute; top: 8px; left: -21px; width: 14px; height: 25px; border-radius: 3px;" title="{{role.party}}">&nbsp;</div>
+		  <div class="party_{% firstof role.caucus.0 role.party.0 %}" title="{{role.party}}{% if role.caucus %} (caucuses with {{role.caucus}}s){% endif %}"
+                       style="position: absolute; top: 8px; left: -21px; width: 14px; height: 25px; border-radius: 3px;">&nbsp;</div>
 		</div>
 		{% endif %}
 		{{person.name_and_title}}
