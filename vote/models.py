@@ -368,7 +368,7 @@ class Vote(models.Model):
                     my_reps.add(Person.from_feed(f))
                 except ValueError:
                     pass # not a person-related feed
-            my_reps = sorted(my_reps, key = lambda p : p.sortname)
+            my_reps = sorted(my_reps, key = lambda p : p.sortname_strxfrm)
         else:
             my_reps = []
 

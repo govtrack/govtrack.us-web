@@ -174,7 +174,7 @@ for election_year, election_date in elections.items():
 				continue
 			median_score = median(all_scores)
 
-			for person in sorted(reported_people, key = lambda p : people[p].sortname):
+			for person in sorted(reported_people, key = lambda p : people[p].sortname_strxfrm):
 				role = PersonRole.objects.filter(person=people[person], startdate__lte=windows[window][1], enddate__gte=windows[window][0]).order_by('-enddate').first()
 				people[person].role = role # so get_person_name uses the role at the time the person was serving
 				if not stats[person]['windows'][window][2]: continue

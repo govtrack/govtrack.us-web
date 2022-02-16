@@ -468,10 +468,11 @@ class SearchManager(object):
                 counts.sort(key=lambda x: x[0])
             elif option.sort == "KEY-REVERSE":
                 counts.sort(key=lambda x: x[0], reverse=True)
-            elif option.sort == "LABEL":
-                counts.sort(key=lambda x: x[1])
-            elif option.sort == "LABEL-REVERSE":
-                counts.sort(key=lambda x: x[1], reverse=True)
+            elif option.sort in ("LABEL", "LABEL-REVERSE"):
+                # Python's built-in sort is not locale-aware and messes up non-ASCII letters.
+                import locale
+                locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+                counts.sort(key=lambda x: locale.strxfrm(x[1]), reverse=(option.sort=="LABEL-REVERSE"))
             elif callable(option.sort):
                 counts.sort(key=lambda x : option.sort( objs[x[0]] if objs and x[0] in objs else x[0] ))
 

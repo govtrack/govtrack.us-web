@@ -363,7 +363,7 @@ class Bill(models.Model):
         from bill.search_indexes import BillIndex
         from tqdm import tqdm
         index = BillIndex()
-        for billid in tqdm(Bill.objects.all().values_list('id', flat=True)):
+        for billid in tqdm(Bill.objects.filter(congress__in=(107,117)).all().values_list('id', flat=True)):
             Bill.objects.get(id=billid).update_index(index)
 
     # api

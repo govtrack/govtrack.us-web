@@ -26,7 +26,7 @@ def build(role_type, congress, session, session_start, session_end, people_sort_
 	# add new people in sorted order by name
 	people = list(set([r.person for r in people_map.values()]))
 	if len(people_map) != len(people): raise ValueError() # sanity check that there is one role per person in this congress/chamber
-	people.sort(key=lambda p : p.sortname)
+	people.sort(key=lambda p : p.sortname_strxfrm)
 	for p in people:
 		if p not in data_matrix:
 			people_sort_order.append(p)

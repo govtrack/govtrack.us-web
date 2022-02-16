@@ -1068,8 +1068,8 @@ def person_session_stats_overview(request, session, cohort, specific_stat):
     for m in metrics:
         m["contexts"] = sorted(m["contexts"].values(), key = lambda c : -c["N"])
         for c in m["contexts"]:
-            c["people"][0].sort(key = lambda v : (v[0], v[2].sortname)) # sort by rank, then by name
-            c["people"][1].sort(key = lambda v : (v[0], v[2].sortname))
+            c["people"][0].sort(key = lambda v : (v[0], v[2].sortname_strxfrm)) # sort by rank, then by name
+            c["people"][1].sort(key = lambda v : (v[0], v[2].sortname_strxfrm))
 
     import dateutil.parser
     return {
@@ -1173,7 +1173,7 @@ def person_cosponsors(request, pk):
     # Sort.
     for info in ret.values():
         info['by_issue'] = sorted(info['by_issue'].items(), key = lambda kv : kv[1], reverse=True)
-    ret = sorted(ret.items(), key = lambda kv : (kv[1]['total'], kv[1]['last_date'], kv[0].sortname), reverse=True)
+    ret = sorted(ret.items(), key = lambda kv : (kv[1]['total'], kv[1]['last_date'], kv[0].sortname_strxfrm), reverse=True)
 
     # Total bills, date range.
     from bill.models import Bill

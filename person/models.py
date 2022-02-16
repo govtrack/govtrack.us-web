@@ -71,14 +71,24 @@ class Person(models.Model):
         return r
     def get_index_text_boosted(self):
         return self.lastname
-    haystack_index = ('sortname', 'gender')
+    haystack_index = ('gender',)
     haystack_index_extra = (
+        ('sortname_strxfrm>sortname', 'Char'),
         ('is_currently_serving', 'Boolean'),
         ('current_role_type', 'Integer'), ('current_role_title', 'Char'), ('all_role_types', 'MultiValue'),
         ('current_role_state', 'Char'), ('all_role_states', 'MultiValue'),
         ('current_role_district', 'Integer'), ('all_role_districts', 'MultiValue'),
         ('current_role_party', 'Char'), ('all_role_parties', 'MultiValue'),
         ('first_took_office', 'Date'), ('left_office', 'Date'))
+    @property
+    def sortname_strxfrm(self):
+        # The default sort order of Python and Haystack sorts á after z,
+        # which puts legislators into the wrong order. Before going into
+        # the search index, expand the name to a binary encoding that
+        # sorts correctly.
+        import locale
+        locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+        return locale.strxfrm(self.sortname)
     def get_current_role_field(self, fieldname):
         # Returns the value of a field on a current PersonRole for
         # this Person. If the Person has no current role, returns None.
@@ -144,7 +154,7 @@ class Person(models.Model):
             person = role.person
             person.role = role
             ret.append(person)
-        ret.sort(key = lambda person : (person.role.get_sort_key(), person.sortname))
+        ret.sort(key = lambda person : (person.role.get_sort_key(), person.sortname_strxfrm))
         return ret
 
     @property

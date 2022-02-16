@@ -29,7 +29,7 @@ for vote in votes:
 		voters = vote.voters.all()
 		if people: voters = voters.filter(person__in=people)
 		voters = list(voters.select_related('person', 'option'))
-		voters = sorted(voters, key = lambda v : v.person.sortname)
+		voters = sorted(voters, key = lambda v : v.person.sortname_strxfrm)
 	else:
 		voters = [None]
 
