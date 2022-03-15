@@ -361,7 +361,7 @@ def get_bill_really_short_status_string(status):
     elif status == "CONFERENCE:PASSED:SENATE":
         status = "%s's conference report passed Senate %s."
     elif status == "PROV_KILL:SUSPENSIONFAILED":
-        status = "%s was killed in the House %s."
+        status = "%s failed a fast-track vote in the House %s."
     elif status == "PROV_KILL:CLOTUREFAILED":
         status = "%s was killed in a Senate cloture vote %s."
     elif status == "PROV_KILL:PINGPONGFAIL":
