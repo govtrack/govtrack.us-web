@@ -7,20 +7,27 @@ from vote.models import *
 
 stats = { }
 
-for vv in Voter.objects.filter(
-	vote__created__gte=sys.argv[1],
-	vote__created__lte=sys.argv[2],
-	vote__chamber=CongressChamber.by_key(sys.argv[3]),
-	).values('person', 'option__key'):
+votes = Voter.objects.filter(
+  vote__chamber=CongressChamber.by_key(sys.argv[1])
+)
+votes = votes.filter(person__in=set(Person.objects.filter(roles__current=True)))
+if len(sys.argv) > 2:
+	votes = votes.filter(vote__created__gte=sys.argv[2])
+if len(sys.argv) > 3:
+	votes = votes.filter(vote__created__lte=sys.argv[3])
 
-	d = stats.setdefault(vv['person'], { "total": 0, "missed": 0 })
+for vv in votes.values('person', 'person_role', 'option__key'):
+	d = stats.setdefault(vv['person'], { "total": 0, "count": 0, "role": None })
 	d['total'] += 1
 	if vv['option__key'] == "0":
-		d['missed'] += 1
+		d['count'] += 1
+	d['role'] = vv['person_role']
 
 w = csv.writer(sys.stdout)
-w.writerow(["person_id", "name", "eligible", "missed"])
+w.writerow(["person_id", "name", "eligible", "count"])
 people = Person.objects.in_bulk(stats.keys())
-stats = sorted(stats.items(), key = lambda kv : kv[1]['missed']/float(kv[1]['total']))
+roles = PersonRole.objects.in_bulk({ stat['role'] for stat in stats.values() })
+stats = sorted(stats.items(), key = lambda kv : kv[1]['count']/float(kv[1]['total']))
 for person, stats in stats:
-	w.writerow([ person, people[person].name.encode("utf8"), stats['total'], stats['missed'] ])	
+	people[person].role = roles[stats['role']]
+	w.writerow([ person, people[person].name, stats['total'], stats['count'] ])
