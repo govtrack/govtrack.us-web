@@ -203,10 +203,15 @@ def person_details(request, pk):
             # squash all errors
             vote_explanations = { }
 
-        # Misconduct - load and filter this person's entries, keeping original order.
-        # Choose 'Alleged misconduct', 'Misconduct', 'Misconduct/alleged misconduct' as appropriate.
+        # Misconduct - load this person's entries, keeping original order.
+        # Exclude 'resolved' instances that were merely 'alleged' because it's not really fair to list those,
+        # except keep resignations and settlements because they usually are used to avoid consequences.
+        # ('alleged' is added in load_misconduct_data.)
+        # Choose a heading from 'Alleged misconduct', 'Misconduct', 'Misconduct/alleged misconduct' as appropriate.
         from website.views import load_misconduct_data
-        misconduct = [m for m in load_misconduct_data() if m["person"] == person ]
+        misconduct = [m for m in load_misconduct_data()
+                      if m["person"] == person
+                      and not ("resolved" in m["tags"] and m["alleged"] and "resignation" not in m["tags"] and "settlement" not in m["tags"]) ]
         misconduct_any_alleged = (len([ m for m in misconduct if m["alleged"]  ]) > 0)
         misconduct_any_not_alleged = (len([ m for m in misconduct if not m["alleged"]  ]) > 0)
 

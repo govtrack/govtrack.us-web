@@ -812,7 +812,7 @@ misconduct_status_tags = [
 ]
 misconduct_tag_filters = misconduct_type_tags + misconduct_consequence_tags + misconduct_status_tags
 
-misconduct_tags_guilty = set(["expulsion", "censure", "reprimand", "fined", "exclusion", "conviction", "plea"])
+misconduct_tags_guilty = set(["expulsion", "censure", "reprimand", "fined", "exclusion", "conviction", "plea", "confirmation"])
 
 @anonymous_view
 @render_to('website/misconduct.html')
