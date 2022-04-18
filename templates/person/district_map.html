@@ -207,10 +207,6 @@
 
 
 <div style="margin: 2em 0">
-{% include "person/redistricting-notes.html" %}
-</div>
-
-<div style="margin: 2em 0">
 <form class="form-inline" onsubmit="do_address(); return false;">
   <p>Find your representative (a.k.a. congressman or congresswoman) by entering your address{% if not state %} or clicking a district in the map{% endif %}:</p>
   <div class="form-group">
@@ -303,6 +299,10 @@
 	{% else %}
 		<div class="col-xs-12">
 	{% endif %}
+
+	<div style="margin: 2em 0">
+	{% include "person/redistricting-notes.html" %}
+	</div>
 
 	<div id='map'></div>
 	
