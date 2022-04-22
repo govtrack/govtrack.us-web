@@ -398,17 +398,17 @@ function show_pronunciation_guide() {
 		<div class="panel panel-danger">
 			<div class="panel-body">
 				{{person.lastname}} {% if active_role %}is{% else %}was{% endif %} among the Republican legislators
-				who participated in the	months-long, multifarious attempted coup that included the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a>.
+				who participated in the	months-long, multifarious attempted coup following the 2020 presidential election.
 
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}
-				Shortly after the 2020 election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly won by Democrats &mdash; to be discounted based on lies and a preposterous legal argument which the Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a>.
+				Shortly after the election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly won by Democrats &mdash; to be discounted, in order to change the outcome of the election, based on lies and a preposterous legal argument which the Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a>.
 				Following the rejection of several related cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}another legislator who joined the case{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
 				{% endif %}
 
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
-				In the days leading up to January 6, {{person.lastname}} had announced {{person.his_her}} intent to object on that day to the inclusion of some states in the count of electors that determines the next president, which would have disenfranchised millions of voters based on lies, conspiracy theories, and preposterous legal theories all falsely claiming various sorts of mass fraud that did not occur. The announcement amplified the message that inspired the attack on the Capitol.
+				In the days leading up to January 6, {{person.lastname}} had announced {{person.his_her}} intent to object on that day to the inclusion of some states in the final tally that determined the next president, which would have disenfranchised millions of voters based on lies, conspiracy theories, and preposterous legal theories all falsely claiming various sorts of mass fraud that did not occur. The announcement amplified the message that inspired the Jan. 6 insurrection at the Capitol.
 				{% if "KrakenObjectedToAZPA" not in kraken_caucus %}
-				{{person.he_she|capfirst}} ultimately did not vote to exclude any states from the Electoral College, however.
+				({{person.he_she|capfirst}} ultimately did not vote to exclude any states from the Electoral College, however.)
 				{% endif %}
 				{% endif %}
 
@@ -421,21 +421,26 @@ function show_pronunciation_guide() {
 				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
 				follow the Constitution's procedure in which Congress may vote to exclude electors.
 				{% else %}
-				Many of these legislators were a part of a <a href="https://www.thedailybeast.com/trump-advisor-peter-navarro-lays-out-how-he-and-steve-bannon-planned-to-overturn-bidens-electoral-win?ref=home&via=twitter_page">coordinated campaign</a>
+				Many of these legislators were also a part of a <a href="https://www.thedailybeast.com/trump-advisor-peter-navarro-lays-out-how-he-and-steve-bannon-planned-to-overturn-bidens-electoral-win?ref=home&via=twitter_page">coordinated campaign</a>
 				by the Trump Administration to pressure the Vice President
 				to exclude Democratic states from the electoral count rather than
 				follow the Constitution's procedure in which Congress may vote to exclude electors.
 				{% endif %}
 
 				{% if "KrakenObjectedToAZPA" in kraken_caucus %}
-				On January 6, 2021 in the hours after the attack on the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted to reject the state-certified election results of Arizona and/or Pennsylvania</a> (states narrowly won by Democrats), which would have excluded them from the Electoral College count that determined the next President of the United States and potentially changed the outcome of the election.
+				On January 6, 2021 in the hours after the insurrection at the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted to reject the state-certified election results of Arizona and/or Pennsylvania</a> (states narrowly won by Democrats), which would have excluded them from the Electoral College count that determined the next President of the United States and potentially changed the outcome of the election.
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus or "KrakenAnnouncedObjection" in kraken_caucus %}
 				These legislators have generally changed their story after their vote, claiming it was merely a protest and not intended to change the outcome of the election as they clearly sought prior to the vote.
 				{% else %}
-				These legislators pumped the same lies and preposterous legal arguments
-				about the election that motivated the insurrection at the Capitol.
+				These legislators pumped the lies and preposterous legal arguments
+				about the election that motivated the January 6, 2021 insurrection at the Capitol.
 				{% endif %}
 				{% endif %}
+
+				In the days after the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a> which succeeded in halting, for a time, the electoral count that determined the outcome of the presidential election,
+				top legislators in both parties
+				{% if person.id == 412190 %}&mdash; including {{person.lastname}} &mdash; {% endif %}
+				<a href="https://www.nytimes.com/2022/04/21/us/politics/trump-mitch-mcconnell-kevin-mccarthy.html">said President Trump “bears responsibility” and some urged him to resign</a> ahead of his impeachment for inciting the insurrection at the Capitol, but Republican leadership returned to supporting the former president shortly after.
 
 				{% if person.id == 412572 %}
 					<hr>
