@@ -402,7 +402,22 @@ function show_pronunciation_guide() {
 
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}
 				Shortly after the election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly won by Democrats &mdash; to be discounted, in order to change the outcome of the election, based on lies and a preposterous legal argument which the Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a>.
-				Following the rejection of several related cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}another legislator who joined the case{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.
+				(Following the rejection of several related cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}another legislator who joined the case{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.)
+				{% endif %}
+
+				{% if person.id == 412226 %}
+				Jordan futher <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged the Vice President</a>
+				and participated in a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a> by the Trump Administration
+				to exclude some Democratic states from the electoral count rather than follow the Constitution's procedure in which Congress may vote to exclude electors.
+				{% elif person.id == 400651 %}
+				Gohmert further <a href="https://www.politico.com/news/2021/12/16/jan-6-gohmert-lawsuit-pence-524839">sued the Vice President</a>
+				and participated in a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a>
+				to pressure the Vice President to exclude some Democratic states from the electoral count rather than
+				follow the Constitution's procedure in which Congress may vote to exclude electors.
+				{% elif person.id == 412226 or person.id == 412683 or person.id == 412395 or person.id == 412690 or person.id == 456814 or person.id == 400651 or person.id == 412623 or person.id == 412397 or person.id == 412745 or person.id == 412569 %}
+				{{person.lastname}} was {% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}also{% endif %} a part of a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a>
+				by the Trump Administration to pressure the Vice President to exclude some Democratic states from the electoral count rather than
+				follow the Constitution's procedure in which Congress may vote to exclude electors, and other extrajudicial strategies to suppress certified election results.
 				{% endif %}
 
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
@@ -412,23 +427,8 @@ function show_pronunciation_guide() {
 				{% endif %}
 				{% endif %}
 
-				{% if person.id == 412226 %}
-				Jordan futher <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged the Vice President</a>,
-				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
-				follow the Constitution's procedure in which Congress may vote to exclude electors.
-				{% elif person.id == 400651 %}
-				Gohmert further <a href="https://www.politico.com/news/2021/12/16/jan-6-gohmert-lawsuit-pence-524839">sued the Vice President</a>,
-				who was also the vice presidential candidate on the Republican ticket, to exclude Democratic states from the electoral count rather than
-				follow the Constitution's procedure in which Congress may vote to exclude electors.
-				{% else %}
-				Many of these legislators were also a part of a <a href="https://www.thedailybeast.com/trump-advisor-peter-navarro-lays-out-how-he-and-steve-bannon-planned-to-overturn-bidens-electoral-win?ref=home&via=twitter_page">coordinated campaign</a>
-				by the Trump Administration to pressure the Vice President
-				to exclude Democratic states from the electoral count rather than
-				follow the Constitution's procedure in which Congress may vote to exclude electors.
-				{% endif %}
-
 				{% if "KrakenObjectedToAZPA" in kraken_caucus %}
-				On January 6, 2021 in the hours after the insurrection at the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted to reject the state-certified election results of Arizona and/or Pennsylvania</a> (states narrowly won by Democrats), which would have excluded them from the Electoral College count that determined the next President of the United States and potentially changed the outcome of the election.
+				On January 6, 2021 in the hours after the insurrection at the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted to reject the state-certified election results of Arizona and/or Pennsylvania</a> (states narrowly won by Democrats), which could have changed the outcome of the election.
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus or "KrakenAnnouncedObjection" in kraken_caucus %}
 				These legislators have generally changed their story after their vote, claiming it was merely a protest and not intended to change the outcome of the election as they clearly sought prior to the vote.
 				{% else %}
@@ -436,7 +436,7 @@ function show_pronunciation_guide() {
 				about the election that motivated the January 6, 2021 insurrection at the Capitol.
 				{% endif %}
 				{% endif %}
-
+ 
 				In the days after the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a> which succeeded in halting, for a time, the electoral count that determined the outcome of the presidential election,
 				top legislators in both parties
 				{% if person.id == 412190 %}&mdash; including {{person.lastname}} &mdash; {% endif %}
