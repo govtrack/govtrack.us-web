@@ -427,6 +427,12 @@ function show_pronunciation_guide() {
 				{% endif %}
 				{% endif %}
 
+				{% if person.id == 412397 %}
+				Gosar perpetuated <a href="https://www.propublica.org/article/big-lie-trump-stolen-election-inside-creation">a debunked conspiracy theory</a> on the House floor
+				ahead of the final electoral count.
+				{% endif %}
+
+
 				{% if "KrakenObjectedToAZPA" in kraken_caucus %}
 				On January 6, 2021 in the hours after the insurrection at the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted to reject the state-certified election results of Arizona and/or Pennsylvania</a> (states narrowly won by Democrats), which could have changed the outcome of the election.
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus or "KrakenAnnouncedObjection" in kraken_caucus %}
