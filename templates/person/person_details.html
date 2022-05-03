@@ -418,6 +418,10 @@ function show_pronunciation_guide() {
 				{{person.lastname}} was {% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}also{% endif %} a part of a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a>
 				by the Trump Administration to pressure the Vice President to exclude some Democratic states from the electoral count rather than
 				follow the Constitution's procedure in which Congress may vote to exclude electors, and other extrajudicial strategies to suppress certified election results.
+					{% if person.id == 412569 %}
+					Perry peddled <a href="https://www.cnn.com/2022/04/26/politics/mark-meadows-texts-scott-perry-key-role-overturn-election/index.html">debuked conspiracy theories about voting machines</a>
+					and a <a href="https://www.judiciary.senate.gov/imo/media/doc/Interim%20Staff%20Report%20FINAL.pdf">plan to push state legislatures with Republican majorities to replace their certified election results with a vote by state legislators</a>.
+					{% endif %}
 				{% endif %}
 
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
