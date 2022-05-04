@@ -190,6 +190,15 @@ class Person(models.Model):
         self.sortname = get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
         self.name = get_person_name(self, firstname_position='before', role_recent=True)
 
+    @staticmethod
+    def UpdateNames():
+        for p in Person.objects.all():
+          prev = (p.name, p.sortname)
+          p.set_names()
+          if (p.name, p.sortname) != prev:
+              print(p.id, prev, "=>", (p.name, p.sortname))
+              p.save(update_fields=["name", "sortname"])
+
     @property
     def him_her(self):
         return { Gender.male: "him", Gender.female: "her" }.get(self.gender, "them")

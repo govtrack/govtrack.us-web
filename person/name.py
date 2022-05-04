@@ -11,7 +11,16 @@ def get_person_name(person,
 
     if firstname.endswith('.'):
         firstname = person.middlename
+
+    # Some people have middle names that are crucial for distinguishing
+    # who the person is (i.e. John Quincy Adams who is not John Adams).
     elif person.id in (400702,): # John Quincy Adams
+        firstname += " " + person.middlename
+
+    # Others use their middle names with such regularity that it is hard
+    # to recognize the legislator without it, but we'll only display it
+    # in first-last format.
+    elif person.id in (400204, 400295, 400659, 412293, 456814, ) and firstname_position == 'before':
         firstname += " " + person.middlename
 
     if person.nickname:
