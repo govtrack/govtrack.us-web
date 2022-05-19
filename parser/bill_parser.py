@@ -124,7 +124,13 @@ class BillProcessor(XmlProcessor):
 
     def process_introduced(self, obj, node):
         elem = node.xpath('./introduced')[0]
-        obj.introduced_date = self.parse_datetime(elem.get('datetime')).date()
+        introduced_date = elem.get('datetime')
+        if introduced_date is not None:
+            obj.introduced_date = self.parse_datetime(introduced_date).date()
+        else:
+            # Bills parsed from the Statutes at Large don't (or may not?) have an
+            # introduced date. Fall back to the status date which will be set later.
+            obj.introduced_date = None
 
     def process_current_status(self, obj, node):
         elem = node.xpath('./state')[0]
@@ -132,6 +138,7 @@ class BillProcessor(XmlProcessor):
         if status == "REFERRED": status = "INTRODUCED"
         obj.current_status_date = self.parse_datetime(elem.get('datetime'))
         obj.current_status = BillStatus.by_xml_code(status)
+        if obj.introduced_date is None: obj.introduced_date = obj.current_status_date # see process_introduced
 
     def process_titles(self, obj, node):
         titles = []
