@@ -401,7 +401,7 @@ function show_pronunciation_guide() {
 				who participated in the	months-long, multifarious attempted coup following the 2020 presidential election.
 
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}
-				Shortly after the election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly won by Democrats &mdash; to be discounted, in order to change the outcome of the election, based on lies and a preposterous legal argument which the Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a>.
+				Shortly after the election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly won by Democrats &mdash; to be discarded, in order to change the outcome of the election, based on lies and a preposterous legal argument which the Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a>.
 				(Following the rejection of several related cases before the Supreme Court, {% if person.id == 400651 %}he{% else %}another legislator who joined the case{% endif %} <a href="https://twitter.com/atrupar/status/1345377936300453891">called for violence</a>.)
 				{% endif %}
 
@@ -447,10 +447,14 @@ function show_pronunciation_guide() {
 				{% endif %}
 				{% endif %}
  
+				{% if person.id == 412190 %}
 				In the days after the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a> which succeeded in halting, for a time, the electoral count that determined the outcome of the presidential election,
-				top legislators in both parties
-				{% if person.id == 412190 %}&mdash; including {{person.lastname}} &mdash; {% endif %}
-				<a href="https://www.nytimes.com/2022/04/21/us/politics/trump-mitch-mcconnell-kevin-mccarthy.html">said President Trump “bears responsibility” and some urged him to resign</a> ahead of his impeachment for inciting the insurrection at the Capitol, but Republican leadership returned to supporting the former president shortly after.
+				{{person.lastname}} <a href="https://www.nytimes.com/2022/04/21/us/politics/trump-mitch-mcconnell-kevin-mccarthy.html">said President Trump “bears responsibility” and urged him to resign</a> ahead of his impeachment for inciting the insurrection at the Capitol,
+				and said his behavior was <a href="https://www.cnn.com/videos/politics/2022/05/04/kevin-mccarthy-audio-denounced-donald-trump-after-insurrection-sot-lead-vpx.cnn">&ldquo;atrocious and totally wrong,&rdquo;</a> but he returned to supporting the former president shortly after.
+				{% else %}
+				The <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a>
+				disrupted Congress&rsquo;s count of electors that determined the outcome of the presidential election with the goal to prevent President Joe Biden from taking office.
+				{% endif %}
 
 				{% if person.id == 412572 %}
 					<hr>
