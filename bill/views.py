@@ -732,6 +732,7 @@ def make_bill_text_comparison(left_bill, left_version, right_bill, right_version
             pass
 
     # Load bill text metadata.
+    from .billtext import load_bill_text
     left = load_bill_text(left_bill, left_version, mods_only=True)
     right = load_bill_text(right_bill, right_version, mods_only=True)
 
