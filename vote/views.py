@@ -868,7 +868,8 @@ def vote_comparison_table_named(request, table_id, table_slug):
 
 	# Return.
 	return {
-		"title": title,
+		"html_title": title,
+		"h1_title": title,
 		"description": description,
 		"votes": votes,
 		"party_totals": party_totals,
@@ -880,26 +881,70 @@ def vote_comparison_table_named(request, table_id, table_slug):
 @render_to('vote/comparison.html')
 def vote_comparison_table_arbitrary(request, vote_ids):
     # Get votes to show.
+    # Allow integer vote IDs (primary keys in our database) or
+    # congress project-style IDs.
     votes = []
     for vote_id in vote_ids.split(","):
         try:
-            vote = get_object_or_404(Vote, id=vote_id)
+            vote_id_int = int(vote_id)
+            try:
+                vote = get_object_or_404(Vote, id=vote_id)
+            except ValueError:
+                raise Http404()
         except ValueError:
-            raise Http404()
+            vote = Vote.from_congressproject_id(vote_id)
         votes.append(vote)
+
+    # Votes list as a string.
+    votes_list = ",".join([vote.congressproject_id for vote in votes])
 
     # Compute matrix.
     votes, party_totals, voters = get_vote_matrix(votes)
 
+    # Download as CSV?
+    if request.GET.get("download", "") == "csv":
+        outfile = StringIO()
+        writer = csv.writer(outfile)
+        writer.writerow(["", ""] + [vote.question for vote in votes])
+        writer.writerow(["", ""] + ["https://www.govtrack.us" + vote.get_absolute_url() for vote in votes])
+        for voter in voters:
+            writer.writerow([voter["person_name"], voter["party"]] + [opt.option.value if opt else "" for opt in voter["votes"]])
+        output = outfile.getvalue()
+        r = HttpResponse(output, content_type='text/csv; charset=utf-8')
+        r['Content-Disposition'] = 'attachment; filename=vote_comparison_{}.csv'.format("-".join(str(vote.id) for vote in votes))
+        #r = HttpResponse(output, content_type='text/plain; charset=utf-8')
+        return r
+
     # Return.
     return {
-        "title": "Vote Comparison",
+        "html_title": "Vote Comparison ({})".format(", ".join(votes_list.split(","))),
+        "h1_title": "Custom Vote Comparison",
         "description": "",
         "votes": votes,
+        "votes_list": votes_list,
         "party_totals": party_totals,
         "voters": voters,
         "col_width_pct": int(round(100/(len(votes)+1))),
     }
+
+def vote_comparison_table_arbitrary_add(request):
+    # Combine the vote_cmp_list cookie set on the last page view of the comparison
+    # page with the vote query string parameter, and redirect to the comparison page
+    # with those votes.
+    import urllib.parse # the comma comes back as %2C
+    vote_comparison_list = []
+    for s in urllib.parse.unquote(request.COOKIES.get('vote_cmp_list', '')).split(","):
+        try:
+            vote_comparison_list.append(Vote.from_congressproject_id(s))
+        except:
+            pass
+    try:
+        vote_comparison_list.append(Vote.from_congressproject_id(request.GET.get("vote", "")))
+    except:
+        pass
+    if len(vote_comparison_list) == 0:
+        raise Http404()
+    return HttpResponseRedirect("/congress/votes/compare/" + ",".join(v.congressproject_id for v in vote_comparison_list))
 
 def get_vote_matrix(votes, filter_people=None, tqdm=lambda _ : _):
 	# Convert votes array to Vote instances with extra fields attached as instance fields.
@@ -938,6 +983,10 @@ def get_vote_matrix(votes, filter_people=None, tqdm=lambda _ : _):
 		return vote
 
 	votes = [fetch_vote(item) for item in votes]
+
+	# For each vote, make a list of all of the votes except that one for "Remove" links.
+	for vote in votes:
+		vote.comparison_remove_me_list = ",".join([vote2.congressproject_id for vote2 in votes if vote2 != vote])
 
 	# Compute totals by party, which yields a matrix like the matrix for voters
 	# where the rows are parties and in each row the 'votes' key provides columns

@@ -74,6 +74,11 @@ def vote_search_manager():
         </div>
         <div class="col-xs-12 col-sm-6 col-md-8">
             <div><span class="fa fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
+            <div style="padding: 3px 0 0 3px"><a class="btn btn-sm btn-default" style="padding: 3px; font-weight: normal; color: #444;"
+              href="/congress/votes/compare/_add?vote={{object.congressproject_id}}"
+              title="Compare to Another Vote">
+              <i class="glyphicon glyphicon-list"> </i> Compare Vote
+            </a></div>
         </div>
         <div class="col-xs-12">
           <div style="margin-left: 5px">

@@ -557,6 +557,13 @@ $(function() {
             </span>
         </button>
 
+        <button class="btn btn-sm btn-default" onclick="window.location='/congress/votes/compare/_add?vote={{vote.congressproject_id}}';">
+            <i class="glyphicon glyphicon-list"> </i>
+            <span style="margin-left: 3px;">
+                Compare to Another Vote
+            </span>
+        </button>
+
         {% with SITE_ROOT_URL|add:vote.get_absolute_url as share_url %}
         <div>
             <a href="https://twitter.com/share" class="twitter-share-button" data-url="{{share_url}}" data-text="{{vote.result}} - {{vote.question|truncatechars:67}}" data-via="GovTrack" data-size="large"></a>

@@ -12,6 +12,7 @@ urlpatterns = [
     url('^votes/check_thumbnails', vote.views.vote_check_thumbnails),
     url('^votes/presidential-candidates', vote.views.presidential_candidates),
     url('^votes/compare/(\d+)/([\w\-]+)$', vote.views.vote_comparison_table_named),
-    url('^votes/compare/([\d,]+)$', vote.views.vote_comparison_table_arbitrary),
+    url('^votes/compare/_add$', vote.views.vote_comparison_table_arbitrary_add),
+    url('^votes/compare/([\w\.,-]+)$', vote.views.vote_comparison_table_arbitrary),
     url('^_admin/go_to_vote_summary_admin', vote.views.go_to_summary_admin, name="vote_go_to_summary_admin"),
 ]

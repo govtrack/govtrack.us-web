@@ -105,6 +105,20 @@ class Vote(models.Model):
     def __str__(self):
         return self.question
 
+    @property
+    def congressproject_id(self):
+        return "{chamber}{number}-{congress}.{session}".format(chamber="s" if self.chamber == CongressChamber.senate else "h",
+            number=self.number, congress=self.congress, session=self.session)
+
+    @staticmethod
+    def from_congressproject_id(s):
+        import re
+        try:
+            m = re.match(r"(h|s)(\d+)-(\d+)\.(\w+)$", s.lower())
+            return Vote.objects.get(congress=m.group(3), session=m.group(4), chamber=CongressChamber.senate if m.group(1) == "s" else CongressChamber.house, number=m.group(2))
+        except:
+            raise Vote.DoesNotExist(s)
+
     def calculate_totals(self):
         # totals by yes/no/other
         self.total_plus = self.voters.filter(option__key='+').count()

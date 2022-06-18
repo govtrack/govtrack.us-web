@@ -1,6 +1,6 @@
 {% extends "master_b.html" %}
 {% load humanize govtrack_utils %}
-{% block title %}{{title}} - Compare Voting Records - GovTrack.us{% endblock %}
+{% block title %}{{html_title}} - Compare Voting Records - GovTrack.us{% endblock %}
 {% block meta_description %}{{description}} - Compare the voting records of senators and representatives in the U.S. Congress.{% endblock %}
 
 {% block head %}
@@ -25,6 +25,10 @@
 {% block body_scripts %}
 <script>
 $(function() {
+    // Store a cookie with the votes compared on this page so the user
+    // can easily add to it.
+    $.cookie("vote_cmp_list", "{{votes_list|escapejs}}", { expires: 21, path: '/' });
+
     // Default but do it here anyway.
     $('#sort-options a').click(function() {
         var key = $(this).attr("data-key");
@@ -66,12 +70,17 @@ function do_sort(key) {
     <ol class="breadcrumb">
         <li><a href="{% url "congress_home" %}">Congress</a></li>
         <li><a href="/congress/votes">Votes</a></li>
-        <li class="active">{{title}}</li>
+        <li class="active">{{h1_title}}</li>
     </ol>
 
-	<h1>{{title}}</h1>
+	<h1>{{h1_title}}</h1>
 
 	<h3>{{description}}</h3>
+
+    {% if not description %}
+       <p><em>To add another vote to this table, <a href="/congress/votes">find another vote</a> and click the Compare To Another Vote button.
+       <a href="{{request.url}}?download=csv">Download this vote comparison</a>.</em></p>
+    {% endif %}
 
     <div id="table-container">
 
@@ -101,6 +110,17 @@ function do_sort(key) {
             </tr>
         </thead>
         <tbody>
+            {# comparison ops #}
+            <tr>
+                <td> </td>
+                {% for v in votes %}
+                    <td style="color: #666; font-size: 80%">
+                        <a href="/congress/votes/compare/{{v.comparison_remove_me_list}}">remove</a>
+                        </a>
+                    </td>
+                {% endfor %}
+            </tr>
+
             {# when #}
             <tr>
                 <th scope="row">
