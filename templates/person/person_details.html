@@ -426,7 +426,12 @@ function show_pronunciation_guide() {
 				{% endif %}
 
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
-				In the days leading up to January 6, {{person.lastname}} had announced {{person.his_her}} intent to object on that day to the inclusion of some states in the final tally that determined the next president, which would have disenfranchised millions of voters based on lies, conspiracy theories, and preposterous legal theories all falsely claiming various sorts of mass fraud that did not occur. The announcement amplified the message that inspired the Jan. 6 insurrection at the Capitol.
+				In the days leading up to January 6, 2021&rsquo;s congressional certification of the election, {{person.lastname}} announced {{person.his_her}} intent to object to the inclusion of some states from the certification, which would have disenfranchised millions of voters and amplified lies, conspiracy theories, and preposterous legal theories about purported fraud. 
+					{% if person.id == 412496 %}
+					Then on January 6, Johnson attempted to change Wisconsin&rsquo;s votes by submitting
+					<a href="https://www.jsonline.com/story/news/politics/2022/06/21/jan-6-hearing-ron-johnson-wanted-deliver-fake-electors-pence/7690825001/">fraudulent electors</a>
+					to Congress for consideration instead.
+					{% endif %}
 				{% if "KrakenObjectedToAZPA" not in kraken_caucus %}
 				({{person.he_she|capfirst}} ultimately did not vote to exclude any states from the Electoral College, however.)
 				{% endif %}
