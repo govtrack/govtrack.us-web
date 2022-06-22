@@ -798,6 +798,7 @@ misconduct_type_tags = [
 misconduct_consequence_tags = [
   ("expulsion", "expulsion"),
   ("censure", "censure"),
+  ("contempt", "contempt of Congress"),
   ("reprimand", "reprimand"),
   ("fined", "fined by House/Senate"),
   ("resignation", "resignation"),
