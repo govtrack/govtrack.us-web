@@ -345,13 +345,13 @@ function show_pronunciation_guide() {
 
 				{% if r.is_territory %}
 					<p style="font-size: 90%; line-height: 125%">
-					Because {{r.state_name_article}} is a territory of the United States, 
-					and not a state, its representative in the House of Representatives is a 
+					Because {{r.state_name_article}} is a territory of the United States,
+					and not a state, its representative in the House of Representatives is a
 					delegate{% if r.state == "PR" %}, called the resident commissioner,
-					{% endif %} with limited voting privileges &mdash; {{ person.lastname }} 
-					can currently vote in committee and in certain votes on the House floor, but not 
-					if their vote would be decisive. Delegates have a marginalized role in 
-					Congress and their constituents are not represented in Congress in the 
+					{% endif %} with limited voting privileges &mdash; {{ person.lastname }}
+					can currently vote in committee and in certain votes on the House floor, but not
+					if their vote would be decisive. Delegates have a marginalized role in
+					Congress and their constituents are not represented in Congress in the
 					same manner as most citizens.
 					</p>
 				{% elif r.is_historical_territory %}
@@ -419,9 +419,9 @@ function show_pronunciation_guide() {
 				by the Trump Administration to pressure the Vice President to exclude some Democratic states from the electoral count rather than
 				follow the Constitution's procedure in which Congress may vote to exclude electors, and other extrajudicial strategies to suppress certified election results.
 					{% if person.id == 412569 %}
-					Perry peddled <a href="https://www.cnn.com/2022/04/26/politics/mark-meadows-texts-scott-perry-key-role-overturn-election/index.html">debuked conspiracy theories about voting machines</a>
-					and a <a href="https://www.judiciary.senate.gov/imo/media/doc/Interim%20Staff%20Report%20FINAL.pdf">plan to push state legislatures with Republican majorities to replace their certified election results with a vote by state legislators</a>
-					<a href="https://www.politico.com/news/2022/06/09/cheney-scott-perry-jan-6-hearing-00038724">and may have sought a pardon</a> for his involvement in the plan.
+					Perry peddled <a href="https://www.cnn.com/2022/04/26/politics/mark-meadows-texts-scott-perry-key-role-overturn-election/index.html">debuked conspiracy theories about voting machines</a> and pushed
+					a plan for state legislatures with Republican majorities to <a href="https://www.judiciary.senate.gov/imo/media/doc/Interim%20Staff%20Report%20FINAL.pdf">replace their certified election results with a vote by state legislators</a>
+					and a plan to install a new attorney general who promoted election conspiracy theories.
 					{% endif %}
 					{% if person.id == 412683 %}
 					Biggs <a href="https://www.npr.org/2022/06/21/1105848096/jan-6-committee-hearing-transcript">urged the Arizona legislature to discard the result of the state&rsquo;s election</a> for president (although he accepted the result of his own re-election in the very same election).
@@ -429,7 +429,7 @@ function show_pronunciation_guide() {
 				{% endif %}
 
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
-				In the days leading up to January 6, 2021&rsquo;s congressional certification of the election, {{person.lastname}} announced {{person.his_her}} intent to object to the inclusion of some states from the certification, which would have disenfranchised millions of voters and amplified lies, conspiracy theories, and preposterous legal theories about purported fraud. 
+				In the days leading up to January 6, 2021&rsquo;s congressional certification of the election, {{person.lastname}} announced {{person.his_her}} intent to object to the inclusion of some states from the certification, which would have disenfranchised millions of voters and amplified lies, conspiracy theories, and preposterous legal theories about purported fraud.
 					{% if person.id == 412496 %}
 					Then on January 6, Johnson attempted to change Wisconsin and Michigan&rsquo;s votes by submitting
 					<a href="https://www.jsonline.com/story/news/politics/2022/06/21/jan-6-hearing-ron-johnson-wanted-deliver-fake-electors-pence/7690825001/">fraudulent electors</a>
@@ -448,7 +448,7 @@ function show_pronunciation_guide() {
 				{% if person.id == 412465 %}
 					Then on January 6, Kelly attempted to change Michigan and Wisconsin&rsquo;s votes by submitting
 					<a href="https://justthenews.com/government/jan-6-panels-ron-johnson-narrative-exposes-ills-one-sided-hearing">fraudulent electors</a>
-					to Congress for consideration instead of the electors certified by the states.
+					to Congress for consideration instead of the electors certified by the states, according to Sen. Johnson, although Kelly denied it.
 					<!-- also https://www.wpr.org/jan-6-committee-ron-johnsons-staff-offered-hand-fake-elector-documents-pence -->
 				{% endif %}
 
@@ -461,7 +461,7 @@ function show_pronunciation_guide() {
 				about the election that motivated the January 6, 2021 insurrection at the Capitol.
 				{% endif %}
 				{% endif %}
- 
+
 				{% if person.id == 412190 %}
 				In the days after the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a> which succeeded in halting, for a time, the electoral count that determined the outcome of the presidential election,
 				{{person.lastname}} <a href="https://www.nytimes.com/2022/04/21/us/politics/trump-mitch-mcconnell-kevin-mccarthy.html">said President Trump “bears responsibility” and urged him to resign</a> ahead of his impeachment for inciting the insurrection at the Capitol,
@@ -469,6 +469,10 @@ function show_pronunciation_guide() {
 				{% else %}
 				The <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a>
 				disrupted Congress&rsquo;s count of electors that determined the outcome of the presidential election with the goal to prevent President Joe Biden from taking office.
+				{% endif %}
+
+				{% if person.id == 412395 or person.id == 412690 or person.id == 412683 or person.id == 400651 or person.id == 412569 or person.id == 456814 %}
+					In the days after Jan. 6, {{person.lastname}} requested from President Trump <a href="https://www.cnn.com/2022/06/23/politics/january-6-hearing-day-5-takeaways/index.html">a pardon for crimes {{person.he_she}} may have committed</a> in attempting to change the result of the election in Trump&rsquo;s favor.
 				{% endif %}
 
 				{% if person.id == 412572 %}
@@ -495,7 +499,7 @@ function show_pronunciation_guide() {
         	</div>
 		{% endfor %}
 		{% endif %}
-		
+
 	</div><!-- /container -->
 
 	<!-- contact panel -->
@@ -593,7 +597,7 @@ function show_pronunciation_guide() {
 				</div>
 			  </div>
 			  {% endif %}
-			</div>	      
+			</div>
 	        <p style="font-size: 90%; line-height: 125%;">You are currently on the website GovTrack.us, which has no affiliation with {{person.lastname}} and is <b>not</b> a government website. Choose from the options above to find the right way to contact {{person.lastname}}.</p>
 	      </div>
 	      {% comment %} <div class="modal-footer">
