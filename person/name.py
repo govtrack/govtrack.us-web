@@ -2,8 +2,46 @@ from datetime import datetime
 
 from person.models import RoleType
 
+def get_dopplegangers():
+    # Return a list of person IDs for people that have the same
+    # first and last name for whom we should display a suffix
+    # (if they also have the same or no middle name, and if set) or
+    # a middle name (if set).
+    # (Note: Junior-senior pairs often have the same middle name!)
+    if hasattr(get_dopplegangers, 'data'): return get_dopplegangers.data
+    from person.models import Person
+    from collections import defaultdict
+
+    get_dopplegangers.data = { }
+
+    # Use suffixes for people with the same first, middle, and last name.
+    # We assume that suffixes in those cases are unique.
+    data = defaultdict(lambda : [])
+    for id_name_role in Person.objects.values_list("id", "firstname", "middlename", "lastname", "roles__role_type")\
+                         .exclude(namemod=None).distinct():
+        data[id_name_role[1:]].append(id_name_role[0])
+    get_dopplegangers.data["suffix"] = set(sum([v for k, v in data.items() if len(v) > 1], []))
+
+    # Use middle names for people with the same first and last name, except
+    # those above that are distinguished by suffixes already.
+    data = defaultdict(lambda : [])
+    for id_name_role in Person.objects.values_list("id", "firstname", "lastname", "roles__role_type")\
+                         .exclude(middlename=None).distinct():
+        data[id_name_role[1:]].append(id_name_role[0])
+    get_dopplegangers.data["middle"] = set(sum([v for k, v in data.items() if len(v) > 1], [])) - get_dopplegangers.data["suffix"]
+
+    # Also use suffixes for people with the same first and last name
+    # and different middle names when there is no middle name.
+    data = defaultdict(lambda : [])
+    for id_name_role in Person.objects.values_list("id", "firstname", "lastname", "roles__role_type")\
+                         .exclude(namemod=None).distinct():
+        data[id_name_role[1:]].append(id_name_role[0])
+    get_dopplegangers.data["suffix"] |= set(sum([v for k, v in data.items() if len(v) > 1], [])) - get_dopplegangers.data["middle"]
+
+    return get_dopplegangers.data
+
 def get_person_name(person,
-				firstname_position=None, show_suffix=False, firstname_style=None,
+				firstname_position=None, firstname_style=None,
 				role_recent=None,
                 show_title=True, show_party=True, show_district=True, show_type=False):
 
@@ -13,8 +51,8 @@ def get_person_name(person,
         firstname = person.middlename
 
     # Some people have middle names that are crucial for distinguishing
-    # who the person is (i.e. John Quincy Adams who is not John Adams).
-    elif person.id in (400702,): # John Quincy Adams
+    # who the person is (i.e. 400702 John Quincy Adams who is not John Adams).
+    elif person.middlename and person.id in get_dopplegangers()["middle"]:
         firstname += " " + person.middlename
 
     # Others use their middle names with such regularity that it is hard
@@ -31,15 +69,14 @@ def get_person_name(person,
  
     if firstname_position == 'before':
         name = firstname + ' ' + person.lastname
+        if person.namemod and person.id in get_dopplegangers()["suffix"]:
+            name += ' ' + person.namemod
+    
     elif firstname_position == 'after':
         name = person.lastname + ', ' + firstname
     else:
         name = person.lastname
         
-    if show_suffix:
-        if person.namemod:
-            name += ' ' + person.namemod
-    
     if hasattr(person, "role"):
         role = person.role # use this when it is set
     elif role_recent:

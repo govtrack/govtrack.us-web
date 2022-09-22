@@ -513,7 +513,7 @@ def bill_widget(request, congress, type_slug, number):
     from person.name import get_person_name
     if bill.sponsor: bill.sponsor.role = bill.sponsor_role # for rending name
     sponsor_name = None if not bill.sponsor else \
-        get_person_name(bill.sponsor, firstname_position='before', show_suffix=True)
+        get_person_name(bill.sponsor, firstname_position='before')
 
     return {
         "SITE_ROOT_URL": settings.SITE_ROOT_URL,

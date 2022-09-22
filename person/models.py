@@ -163,12 +163,12 @@ class Person(models.Model):
 
     @cache_result
     def name_no_district(self):
-        return get_person_name(self, firstname_position='before', show_suffix=True, role_recent=True, show_district=False)
+        return get_person_name(self, firstname_position='before', role_recent=True, show_district=False)
 
     @cache_result
     def name_no_details(self):
         """The person's full name (excluding all title details)."""
-        return get_person_name(self, firstname_position='before', show_suffix=True)
+        return get_person_name(self, firstname_position='before')
         
     @cache_result
     def name_no_details_lastfirst(self):
@@ -180,11 +180,11 @@ class Person(models.Model):
             
     @cache_result
     def name_and_title(self):
-        return get_person_name(self, firstname_position='before', show_suffix=True, role_recent=True, show_party=False, show_district=False)
+        return get_person_name(self, firstname_position='before', role_recent=True, show_party=False, show_district=False)
 
     @cache_result
     def name_lastonly(self):
-        return get_person_name(self, firstname_position='none', show_suffix=False, role_recent=True, show_party=True, show_district=True)
+        return get_person_name(self, firstname_position='none', role_recent=True, show_party=True, show_district=True)
 
     def set_names(self):
         self.sortname = get_person_name(self, firstname_position='after', role_recent=True, show_district=True, show_title=False, show_type=True)
@@ -192,6 +192,7 @@ class Person(models.Model):
 
     @staticmethod
     def UpdateNames():
+        # After this you probably should run ./manage.py update_index -v 0 -u person person.
         for p in Person.objects.all():
           prev = (p.name, p.sortname)
           p.set_names()
