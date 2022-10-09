@@ -77,39 +77,82 @@ def get_person_name(person,
         name = person.lastname + ', ' + firstname
     else:
         name = person.lastname
-        
-    if hasattr(person, "role"):
-        role = person.role # use this when it is set
+
+    # Add their title, party, state, and district, to the extent appropriate for their role.
+
+    # Which role to use for this part?
+    if getattr(person, "role", None):
+        # Use this attribute when it is set.
+        roles = { person.role }
+    elif hasattr(person, "_roles"):
+        # Use this attribute when it is set.
+        roles = person._roles
     elif role_recent:
-    	role = person.get_most_recent_role()
+    	roles = { person.get_most_recent_role() }
     else:
-    	return name
-        
-    if role is None:
+    	roles = set()
+
+    if len(roles) == 0:
         return name
- 
+
+    roles = sorted(roles, key = lambda r : r.startdate)
+
+    def combine(formatter, separator="/"):
+        items = []
+        for role in roles:
+            item = formatter(role)
+            if items and item == items[-1]: continue
+            items.append(item)
+        return separator.join(items)
+
     if show_title:
-        name = role.get_title_abbreviated() + ' ' + name
- 
+        name = combine(lambda role : role.get_title_abbreviated()) + ' ' + name
+
     if show_type:
-        name += " (%s)" % role.get_title_abbreviated()
-        
-    if role and role.role_type in (RoleType.president, RoleType.vicepresident):
-        show_district = False
+        name += " (" + combine(lambda role : role.get_title_abbreviated()) + ")"
+
+    has_state_or_district = False
+    for role in roles:
+        if role.role_type not in (RoleType.president, RoleType.vicepresident):
+            has_state_or_district = True
  
-    if show_party or show_district:
+    if show_party or (show_district and has_state_or_district):
         name += ' ['
+
         if show_party:
-            name += role.party[0] if role.party else '?'
-        if show_party and show_district:
-            name += '-'
-        if show_district:
-            name += role.state
-            if role.role_type == RoleType.representative and role.district != 0:
-                name += str(role.district)
+            # If the party is the same in all of the roles, show it.
+            if len(set(role.party for role in roles)) == 1:
+                name += combine(lambda role : role.party[0] if role.party else '?')
+                if show_district and has_state_or_district:
+                    name += '-'
+                show_party = False # don't show below
+
+        if show_district and has_state_or_district:
+            # If the state is the same in all of the roles, show it.
+            # Unless we didn't show the party yet, since the party should
+            # preceed the state.
+            show_state = True
+            if not show_party:
+                state = list(set(role.state for role in roles if role.state))
+                if len(state) == 1:
+                    name += state[0]
+                    show_state = False # don't show below
+
+            # Combine the district, plus the party and state if they were not the
+            # same in all of the roles.
+            def district_combiner(role):
+                item = ""
+                if show_party: item += (role.party[0] if role.party else '?')
+                if show_state and role.state:
+                    if show_party: item += "-"
+                    item += role.state
+                if role.role_type == RoleType.representative and role.district != 0:
+                    item += str(role.district)
+                return item
+            name += combine(district_combiner)
                 
-        if role_recent and not role.current:
-        	a, b = role.logical_dates(round_end=True)
+        if role_recent and not roles[0].current:
+        	a, b = roles[0].logical_dates(round_end=True)
         	name += ", %d-%d" % (a.year, b.year)
         	
         name += ']'
