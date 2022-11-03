@@ -171,9 +171,9 @@ def person_details(request, pk):
         links = []
         if role.current:
             if role.website: links.append(("%s's Official Website" % person.lastname, role.website, "fas fa-external-link-alt"))
-            if person.twitterid: links.append(("@" + person.twitterid, "http://twitter.com/" + person.twitterid, "fab fa-twitter"))
+            #if person.twitterid: links.append(("@" + person.twitterid, "http://twitter.com/" + person.twitterid, "fab fa-twitter"))
         if person.osid: links.append(("OpenSecrets", "http://www.opensecrets.org/politicians/summary.php?cid=" + person.osid, "fas fa-money-check"))
-        if person.pvsid: links.append(("VoteSmart", "http://votesmart.org/candidate/" + person.pvsid, "fa fa-th-list"))
+        #if person.pvsid: links.append(("VoteSmart", "http://votesmart.org/candidate/" + person.pvsid, "fa fa-th-list"))
         if person.bioguideid: links.append(("Bioguide", "http://bioguide.congress.gov/scripts/biodisplay.pl?index=" + person.bioguideid, "fa fa-user"))
         if person.cspanid: links.append(("C-SPAN", "http://www.c-spanvideo.org/person/" + str(person.cspanid), "fab fa-youtube"))
 
