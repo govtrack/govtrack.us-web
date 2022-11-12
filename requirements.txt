@@ -42,3 +42,4 @@ email_validator
 draftable-compare-api
 cmarkgfm<0.5.0
 django_otp
+Mastodon.py
