@@ -140,7 +140,7 @@ class Command(BaseCommand):
 		# Tweet & Toot
 
 		try:
-			tweet = self.tweepy_client.update_status(text)._json
+			tweet = self.tweepy_client.update_status(tweet_text)._json
 		except Exception as e:
 			tweet = { "error": str(e) }
 

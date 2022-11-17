@@ -88,7 +88,8 @@ def get_person_name(person,
         # Use this attribute when it is set.
         roles = person._roles
     elif role_recent:
-    	roles = { person.get_most_recent_role() }
+        role = person.get_most_recent_role()
+        roles = { role } if role else set()
     else:
     	roles = set()
 
