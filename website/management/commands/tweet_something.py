@@ -27,8 +27,8 @@ class Command(BaseCommand):
 		self.short_url_length_https = 23 # self.tweepy_client.configuration()['short_url_length_https'] --- this is failing with 'tweepy.error.TweepError: Failed to parse JSON payload: Expecting value: line 1 column 1 (char 0)'
 
 		# Construct clients.
-		from website.util import twitter_api_client
-		self.tweepy_client = twitter_api_client()
+		#from website.util import twitter_api_client
+		#self.tweepy_client = twitter_api_client()
 
 		from mastodon import Mastodon
 		self.mastodon = Mastodon(
@@ -139,10 +139,11 @@ class Command(BaseCommand):
 
 		# Tweet & Toot
 
-		try:
-			tweet = self.tweepy_client.update_status(tweet_text)._json
-		except Exception as e:
-			tweet = { "error": str(e) }
+		#try:
+		#	tweet = self.tweepy_client.update_status(tweet_text)._json
+		#except Exception as e:
+		#	tweet = { "error": str(e) }
+		tweet = { "error": "disabled-by-jt" }
 
 		try:
 			toot = self.mastodon.toot(toot_text)

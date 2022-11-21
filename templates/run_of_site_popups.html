@@ -28,13 +28,10 @@ $(function() {
 
 function show_followus(flags) {
 	// only show this modal once
-	if (flags.follow_us == 3) return false;
-	flags.follow_us = 3;
+	if (flags.follow_us == 4) return false;
+	flags.follow_us = 4;
 
 	$('#followus_modal').modal();
-
-	// add twitter async script
-	!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
 
 	return true;
 }
@@ -71,18 +68,14 @@ function show_announcement(flags) {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h2 class="modal-title" id="followusModalTitle">We&rsquo;re also on social media</h2>
+        <h2 class="modal-title" id="followusModalTitle">We&rsquo;re now on Mastodon</h2>
       </div>
       <div class="modal-body">
-        <p>GovTrack.us is an independent website tracking the status of legislation in the United States Congress and helping you participate in government. <b>Now we&rsquo;re on Instagram too!</b></p>
-        
-        <hr>
-
-        <p>Follow <a href="https://instagram.com/govtrack.us" style="text-decoration: none; margin: 0 3px; font-weight: bold;"><i class="fab fa-instagram"></i> @govtrack.us</a> on Instagram for new 60-second summary videos of legislation in Congress.</p>
-
-        <p>Follow <a href="https://twitter.com/govtrack" style="text-decoration: none; margin: 0 3px; font-weight: bold;"><i class="fab fa-twitter"></i> @govtrack</a> on Twitter for posts about legislative activity and other information we&rsquo;re tracking, and some commentary.</p>
-
-        <p>And please consider supporting our work by becoming a monthly backer <a href="http://patreon.com/govtrack" style="text-decoration: none; margin: 0 3px;"><i class="fab fa-patreon"></i> @govtrack</a> on Patreon or <a href="/accounts/membership" target="_blank"><i class="glyphicon glyphicon-usd"></i> leaving a tip</a>.</p>
+        <p>Mastodon is an alternative social media platform. It&rsquo;s an open protocol, which means it does not have an owner using the platform
+	to bait violent anti-democratic conspiracy theories or to engage in anti-semitism.</p>
+	<p>Follow us at <a href="https://mastodon.social/@GovTrack">@GovTrack@mastodon.social</a>!</p>
+	<hr>
+        <p>We are also still on Instagram at <a href="https://instagram.com/govtrack.us" style="text-decoration: none; margin: 0 3px; font-weight: bold;"><i class="fab fa-instagram"></i> @govtrack.us</a> posting 60-second summary videos of legislation in Congress.</p>
       </div>
 
       <div class="modal-footer">
