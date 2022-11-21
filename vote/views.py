@@ -892,7 +892,10 @@ def vote_comparison_table_arbitrary(request, vote_ids):
             except ValueError:
                 raise Http404()
         except ValueError:
-            vote = Vote.from_congressproject_id(vote_id)
+            try:
+                vote = Vote.from_congressproject_id(vote_id)
+            except Vote.DoesNotExist:
+                raise Http404()
         votes.append(vote)
 
     # Votes list as a string.
