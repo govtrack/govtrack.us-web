@@ -397,7 +397,9 @@ function show_pronunciation_guide() {
 	{% if kraken_caucus %}
 		<div class="panel panel-danger">
 			<div class="panel-body">
-				{{person.lastname}} {% if active_role %}is{% else %}was{% endif %} among the Republican legislators
+				{{person.lastname}} was
+				{% if person.id == 412395 %}a <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">&ldquo;ringleader&rdquo;</a>{% endif %}
+				among the Republican legislators
 				who participated in President Trump&rsquo;s months-long, multifarious attempted coup during the 2020 presidential election
 				and culminating in the Jan. 6, 2021 insurrection at the Capitol.
 
@@ -415,6 +417,7 @@ function show_pronunciation_guide() {
 				and participated in a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a>
 				to pressure the Vice President to exclude some Democratic states from the electoral count rather than
 				follow the Constitution's procedure in which Congress may vote to exclude electors.
+
 				{% elif person.id == 412226 or person.id == 412683 or person.id == 412395 or person.id == 412690 or person.id == 456814 or person.id == 400651 or person.id == 412623 or person.id == 412397 or person.id == 412745 or person.id == 412569 %}
 				{{person.lastname}} was {% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}also{% endif %} a part of a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a>
 				by the Trump Administration to pressure the Vice President to exclude some Democratic states from the electoral count rather than
@@ -427,6 +430,15 @@ function show_pronunciation_guide() {
 					{% if person.id == 412683 %}
 					Biggs <a href="https://www.npr.org/2022/06/21/1105848096/jan-6-committee-hearing-transcript">urged the Arizona legislature to discard the result of the state&rsquo;s election</a> for president (although he accepted the result of his own re-election in the very same election).
 					{% endif %}
+				{% elif person.id == 412655 %}
+				Babin was also a part of <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">a coordinated campaign with the Trump Administration</a> to convince legislators to reject the state-certified election results.
+				{% elif person.id == 412675 %}
+				Davidson was a part of <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">a coordinated campaign with the Trump Administration</a> to pursue discredited allegations.
+				{% elif person.id == 412819 or person.id == 412845 %}
+				{{person.lastname}} was also a part of <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">a coordinated campaign with the Trump Administration</a> to pressure state legislators to reverse their own certifications of election results and declare a winner without regard to vote totals.
+				{% elif person.id == 412712 or person.id == 412294 %}
+				{{person.lastname}} was a part of <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">a coordinated campaign with the Trump Administration</a> spreading conspiracy theories about the election.
+
 				{% endif %}
 
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
@@ -456,11 +468,18 @@ function show_pronunciation_guide() {
 				{% if "KrakenObjectedToAZPA" in kraken_caucus %}
 				On January 6, 2021 in the hours after the insurrection at the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted to reject the state-certified election results of Arizona and/or Pennsylvania</a> (states narrowly won by Democrats), which could have changed the outcome of the election.
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus or "KrakenAnnouncedObjection" in kraken_caucus %}
+				{% if person.id != 412738 %}
 				These legislators have generally changed their story after their vote, claiming it was merely a protest and not intended to change the outcome of the election as they clearly sought prior to the vote.
+				{% endif %}
+
 				{% else %}
 				These legislators pumped the lies and preposterous legal arguments
 				about the election that motivated the January 6, 2021 insurrection at the Capitol.
 				{% endif %}
+				{% endif %}
+
+				{% if person.id == 412738 %}
+				After Congress accepted the state-certified results, Norman <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">urged President Trump</a> to suspend civil law to stay in office.
 				{% endif %}
 
 				{% if person.id == 412190 %}
@@ -482,6 +501,27 @@ function show_pronunciation_guide() {
 				{% endif %}
 			</div>
 		</div>
+	{% elif person.id == 412555 %}
+		<div class="panel panel-danger">
+			<div class="panel-body">
+				{{person.lastname}} was
+				among the Republican legislators
+				who participated in President Trump&rsquo;s months-long, multifarious attempted coup during the 2020 presidential election.
+				Cramer <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">offered to raise funds for the Trump Campaign&rsquo;s efforts to contest the election results</a>.
+			</div>
+		</div>
+	{% elif person.id == 412552 %}
+		<div class="panel panel-danger">
+			<div class="panel-body">
+				As Chief of Staff to President Trump after resigning his role in Congress, Meadows was
+				<a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">a key intermediary between
+				Trump and Republican legislators</a>
+				who participated in Trump&rsquo;s months-long, multifarious attempted coup during the 2020 presidential election.
+
+				In December 2021, the House of Representatives <a href="https://www.govtrack.us/congress/votes/117-2021/h447">voted 220-208</a> to hold Meadows in criminal contempt of Congress for refusing to comply with a subpoena to appear before the January 6 Committee, but the Department of Justice <a href="https://edition.cnn.com/2022/06/03/politics/justice-department-declines-charge-meadows-scavino-january-6/index.html">declined to prosecute</a>.
+			</div>
+		</div>
+
 	{% endif %}
 
 		{% if misconduct %}
