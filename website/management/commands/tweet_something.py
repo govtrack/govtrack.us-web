@@ -313,6 +313,6 @@ class Command(BaseCommand):
 	@staticmethod
 	def mention_sponsors(bill):
 		sponsors = bill.get_sponsors()
-		sponsors = [p for p in sponsors if p.twitterid]
-		if not sponsors: return "" # no sponsors or none with a twitter handle
-		return " by " + ", ".join("@" + sponsor.twitterid for sponsor in sponsors)
+		#sponsors = [p for p in sponsors if p.twitterid]
+		#if not sponsors: return "" # no sponsors or none with a twitter handle
+		return " by " + ", ".join(sponsor.name for sponsor in sponsors)
