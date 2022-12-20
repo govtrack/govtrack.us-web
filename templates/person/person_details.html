@@ -336,6 +336,8 @@ function show_pronunciation_guide() {
                     {% else %} {# there was a recent election that this person was up in, so explain that terms don't end right at the election #}
                        {{ person.lastname }}&rsquo;s current term ends on {{role.enddate|date}}.
                     {% endif %}
+
+                    {% if person.get_age %} {{ person.he_she_cap }} is {{ person.get_age }} years old. {% endif %}
                     {% endif %}
         		</p>
 
