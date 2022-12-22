@@ -72,9 +72,9 @@ rm -f /tmp/bootstrap.zip
 
 # Font Awesome (for the spinner on ajax calls, various icons; MIT License)
 download \
-  https://use.fontawesome.com/releases/v5.0.13/js/all.js \
+  https://use.fontawesome.com/releases/v5.15.4/js/all.js \
   $VENDOR/fontawesome.js \
-  'e629fd9f6785d9a4cb5f5cc1cd3d3a758f35ad8c4451de510169e82a6dc4c78e'
+  '812ab0e46f86b2ce98ab2425ab2224b90d0845952a1ac0d5abd734b6217e98bf'
 
 # Josh's Bootstrap Helpers (MIT License)
 # When this (client side JS) is updated, you must also
@@ -89,15 +89,15 @@ download \
 download \
   https://code.highcharts.com/highcharts.js \
   $VENDOR/highcharts.js \
-  '7c36dee137a93e387a5badf49973f48735c20db78128268bef13221f5be2eabe'
+  '673bd09ddf7e6ef2a256f386fcadb761a647503b28f4634b4aa57ef58b2303ad'
 download \
   https://code.highcharts.com/modules/accessibility.js \
   $VENDOR/highcharts-accessibility.js \
-  '0edb25059116d33dfed6d21d88d76da16da82898a03257906fcadfbd3e9e71af'
+  '1993f715ebdb86fe875e827066e77915d876ad3c19de76a910f1d5917cfeb474'
 download \
   https://code.highcharts.com/modules/xrange.js \
   $VENDOR/highcharts-xrange.js \
-  '85defb2965cabd08d1f796d602377c3cf46c426d0b98945246e618f7a9756f3f'
+  '830bfd8ca074872eb3394d62109b0f1e5ccb8e1afaed7e671a264ee6f6474fbc'
 
 # Plotly (MIT license)
 download \
