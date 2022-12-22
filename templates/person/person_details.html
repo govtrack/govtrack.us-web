@@ -301,6 +301,7 @@ function show_pronunciation_guide() {
 	<div id="seealso-links">
 		{% for label, link, css_class in links %}
 			<a href="{{link}}" target="_blank"><i class="{{css_class}}" style="margin-right: 3px"></i>{{label}}</a>
+			{% if css_class == "fab fa-mastodon" %}(Mastodon){% endif %}
 		{% endfor %}
 		<div class="clearfix"></div>
 	</div>

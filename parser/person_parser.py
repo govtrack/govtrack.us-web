@@ -211,11 +211,25 @@ def update_people_table(options):
             # after the roles are updated.
             person.set_names()
 
+            # Update Mastodon info which requires making a Webfinger HTTP request.
+            # Since we don't want to necessarily refresh the webfinger info on
+            # each database update, we will wait to see if the legislator is
+            # already in the database below.
+            mastodon_id = node.get("social", {}).get("mastodon")
+            
             # Now try to load the person with such ID from
-            # database. If found it then just update it
+            # database. If found, then just update it,
             # else create new Person object
             try:
+                # Find an existing object.
                 ex_person = Person.objects.get(pk=person.pk)
+
+                # Finish loading info that depended on whether the object
+                # already existed in the database.
+                person.fediverse_webfinger = ex_person.fediverse_webfinger
+                person.set_mastodon_handle(mastodon_id, options.force)
+
+                # Save if anything changed.
                 if person_processor.changed(ex_person, person) or options.force:
                     # If the person has PK of existing record,
                     # coming in via the YAML-specified GovTrack ID,
@@ -225,6 +239,11 @@ def update_people_table(options):
                     person.save()
                     
             except Person.DoesNotExist:
+                # Finish loading info that depended on whether the object
+                # already existed in the database.
+                person.set_mastodon_handle(mastodon_id, options.force)
+
+                # Create new person.
                 created_persons.add(person.pk)
                 person.save()
                 log.warn("Created %s" % person)

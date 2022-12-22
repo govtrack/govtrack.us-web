@@ -50,6 +50,7 @@ class Person(models.Model):
     youtubeid = models.CharField(max_length=255, blank=True, null=True, help_text="The name of the person's official YouTube channel, if known.")
     twitterid = models.CharField(max_length=50, blank=True, null=True, help_text="The name of the person's official Twitter handle, if known.")
     cspanid = models.IntegerField(blank=True, null=True, help_text="The ID of the person on CSPAN websites, if known.")
+    fediverse_webfinger = JSONField(blank=True, null=True, help_text="The person's official (not campaign) Mastodon account's webfinger record, or a stub.")
     
     # cached name info
     name = models.CharField(max_length=96, help_text="The person's full name with title, district, and party information for current Members of Congress, in a typical display format.")
@@ -414,6 +415,66 @@ class Person(models.Model):
             p = Person.objects.get(id=pid)
             cache.set(cache_key, p, 60*60*4) # 4 hours
         return p
+
+    def get_mastodon_handle_and_link(self):
+        # TODO: Validate the 'href' value in some way?
+        if not self.fediverse_webfinger: return None
+        handle = self.fediverse_webfinger.get("subject")
+        if not isinstance(handle, str) or not handle.startswith("acct:"): return None
+        handle = "@" + handle[5:]
+        for link in self.fediverse_webfinger.get("links", []):
+            if link.get('rel') == 'http://webfinger.net/rel/profile-page' \
+              and link['href'].startswith("https://"):
+                return handle, link['href']
+        for link in self.fediverse_webfinger.get("links", []):
+            if link.get('type') == 'text/html' \
+              and link['href'].startswith("https://"):
+                return handle, link['href']
+        return None # could not find link
+
+    def set_mastodon_handle(self, mastodon_id, force_refresh=False):
+        # Clear info if no account is set.
+        if not mastodon_id:
+            #if self.fediverse_webfinger: print("Clearing", self)
+            self.fediverse_webfinger = None
+            return
+
+        # Parse ID to local and instance parts and form an acct: URI.
+        import re
+        m = re.match(r"^@(.*)@(.*)$", mastodon_id)
+        if not m: raise ValueError(mastodon_id)
+        local_name, instance_name = m.groups()
+        acct = "acct:" + local_name + "@" + instance_name
+
+        # If force_refresh is False and there is already recent webfinger
+        # information for this account stored, then no update is needed.
+        # Since the stored "subject" may be normalized from the handle
+        # we have, check against the original handle we queried.
+        # TODO: Check __fetched_date.
+        if isinstance(self.fediverse_webfinger, dict) \
+           and self.fediverse_webfinger.get("__query_resource") == acct:
+           #and not force_refresh:
+           #print("No change for", self)
+           return
+
+        # Issue a webfinger request.
+        import requests
+        import urllib.parse
+        url = 'https://{}/.well-known/webfinger?resource={}'.format(
+            urllib.parse.quote(instance_name),
+            urllib.parse.quote(acct),
+        )
+        print(url + "...")
+        resp = requests.get(url=url)
+        data = resp.json()
+
+        # Attach the handle we queried on and the date so we can refresh
+        # the info after an interval.
+        data["__query_resource"] = acct
+        data["__fetched_date"] = datetime.datetime.now().isoformat()
+
+        # Store webfinger response.
+        self.fediverse_webfinger = data
 
 class PersonRole(models.Model):
     """Terms held in office by Members of Congress, Presidents, and Vice Presidents. Each term corresponds with an election, meaning each term in the House covers two years (one 'Congress'), as President/Vice President four years, and in the Senate six years (three 'Congresses')."""
