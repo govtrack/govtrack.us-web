@@ -24,7 +24,7 @@
 	to open up Congress&rsquo;s data.</p>
 
 	<table class="table coverage_table">
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">Current Information<br>(117<sup>th</sup> Congress)</th></tr>
+		<tr><th colspan="2" style="padding: 1em 0 .5em 0">Current Information<br>(118<sup>th</sup> Congress)</th></tr>
 		
 		<tr>
 			<td><span class="nowrap">Members of Congress</span></td>
@@ -36,7 +36,7 @@
 			but you can also get raw Member data in XML from the <a href="http://clerk.house.gov/xml/lists/MemberData.xml">House</a> and
 			<a href="http://www.senate.gov/general/contact_information/senators_cfm.xml">Senate</a>.</p>
 			<p>Also see <a href="https://medium.com/civic-tech-thoughts-from-joshdata/how-to-build-an-app-to-call-write-congress-f79771addc2b">How To Build an App to Call/Write Congress</a> and <a href="https://medium.com/@govtrack/creating-congressional-district-maps-with-mapbox-4888e4b79cf">Creating congressional district maps with Mapbox</a> which explain how to find someone&rsquo;s congressional district and how to use that to help them contact their representative or senator.</p>
-			<p>We also compile the only comprehensive database of <a href="/misconduct">congressional misconduct</a>, which you can <a href="https://github.com/govtrack/misconduct">download from GitHub</a>, as well as a <a href="https://github.com/govtrack/pronunciation/">pronunciation guide</a> for the names of members of Congress.</p>
+			<p style="margin-bottom: 0;">We also compile the only comprehensive database of <a href="/misconduct">congressional misconduct</a>, which you can <a href="https://github.com/govtrack/misconduct">download from GitHub</a>, as well as a <a href="https://github.com/govtrack/pronunciation/">pronunciation guide</a> for the names of members of Congress.</p>
 			</td>
 		</tr>
 		<tr>
@@ -45,33 +45,32 @@
 			Legislative activity typically appears there the next business day. We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data.</p>
 			<p>The <a href="https://propublica.github.io/congress-api-docs/">ProPublica Congress API</a> is the only public API for legislative information.
 			The API was formerly the Sunlight Foundation Congress API and traces <a href="http://luigimontanez.com/2010/how-we-use-mongodb-at-sunlight/index.html">its history</a> to our legislative data offerings back in 2010.</p>
-			<p>Prognosis scores (predictions of enactment) are from <a href="https://www.skoposlabs.com/">Skopos Labs</a>.</td>
+			<p style="margin-bottom: 0;">Prognosis scores (predictions of enactment) are from <a href="https://www.skoposlabs.com/">Skopos Labs</a>.</td>
 		</tr>
 		<tr>
 			<td>Bill Summaries</td>
 			<td>We display several sorts of bill summaries, including many that we write ourselves. Other summaries are from
 			the Library of Congress&rsquo;s Congressional Research Service (the same summaries on <a href="https://www.congress.gov/">Congress.gov</a>; we get them
-			the same way we get bill status, see above)
-			and the <a href="http://www.gop.gov/">House Republican Conference</a>.</td>
+			the same way we get bill status, see above).</td>
 		</tr>
 		<tr>
 			<td>Votes</td>
 			<td><p>Roll call votes are retrieved from the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites in XML format. We update our vote data roughly hourly. We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data.</p>
-			<p>Missed and mistaken vote explanations are from <a href="https://projects.propublica.org/explanations/">ProPublica</a>.</td>
+			<p style="margin-bottom: 0;">Missed and mistaken vote explanations are from <a href="https://projects.propublica.org/explanations/">ProPublica</a>.</td>
 		</tr>
 		<tr>
 			<td>Bill Text</td>
-			<td>The text of legislation is retrieved from <a href="https://www.govinfo.gov/app/collection/bills">GPO&rsquo;s GovInfo.gov</a> in PDF, XML, and plain text formats. We update bill text daily, but text only becomes available typically 1-3 business days after major action on the bill, sometimes much later.
-			We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data, <a href="https://github.com/govtrack/congressxml">congressxml</a> to render the XML as HTML, and <a href="https://github.com/govtrack/linkify-citations/tree/xpath-rewrite">linkify-citations</a> to hyperlink legal citations in bill text. We use <a href="https://draftable.com/">Draftable</a> to show text comparisons between bills and versions of bills.</td>
+			<td>The text of legislation is retrieved from <a href="https://www.govinfo.gov/app/collection/bills">GPO&rsquo;s GovInfo.gov</a> in PDF, XML, and plain text formats. We update bill text daily, but text only becomes available typically at a minimum of 1-3 legislative days after major action on the bill and sometimes the delay is much later.
+			We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data, <a href="https://github.com/govtrack/congressxml">congressxml</a> to render the XML as HTML, and <a href="https://github.com/govtrack/linkify-citations/tree/xpath-rewrite">linkify-citations</a> to hyperlink legal citations in bill text.</td>
 		</tr>
 		<tr>
 			<td>What&rsquo;s Coming Up</td>
 			<td>Our list of bills coming up is from the <a href="http://www.senate.gov/pagelayout/legislative/d_three_sections_with_teasers/calendars.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>.
-			    The committee meetings calendar is from the <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>. Updated daily. All offer XML data.</td>
+			    Upcoming committee meetings are from the <a href="http://www.senate.gov/pagelayout/committees/b_three_sections_with_teasers/committee_hearings.htm">Senate</a> website and <a href="http://docs.house.gov">Docs.House.Gov</a>. Updated daily. All offer XML data.</td>
 		</tr>
 		<tr>
 			<td>District Maps</td>
-			<td>Congressional district boundaries on the maps are from the <a href="https://www.census.gov/geo/maps-data/data/tiger-line.html">U.S. Census Bureau</a> and maps are hosted courtesy of <a href="https://www.mapbox.com/">Mapbox</a> (see <a href="https://medium.com/@govtrack/creating-congressional-district-maps-with-mapbox-4888e4b79cf">how we do it</a>).</td>
+			<td>Congressional district boundaries on the maps are from state redistricting data as collected by the <a href="https://thearp.org/">American Redistricting Project</a> and the map widget is courtesy of <a href="https://www.mapbox.com/">Mapbox</a> (see <a href="https://medium.com/@govtrack/creating-congressional-district-maps-with-mapbox-4888e4b79cf">how we do it</a>).</td>
 		</tr>
 		<tr>
 			<td>Press Statements</td>
@@ -79,7 +78,7 @@
 		</tr>
 
 
-		<tr><th colspan="2" style="padding: 1em 0 .5em 0">2015-2018<br>(114<sup>th</sup>-116<sup>th</sup> Congresses)</th></tr>
+		<tr><th colspan="2" style="padding: 1em 0 .5em 0">2015-2022<br>(114<sup>th</sup>-117<sup>th</sup> Congresses)</th></tr>
 
 		<tr>
 			<td>Bill Status</td>
@@ -92,6 +91,10 @@
 		<tr>
 			<td>Bill Text</td>
 			<td>From <a href="https://www.govinfo.gov/app/collection/bills">GPO&rsquo;s GovInfo.gov</a> (see above).</td>
+		</tr>
+		<tr>
+			<td>Bill Summaries</td>
+			<td>See above. Additionally, some summaries were from the <a href="http://www.gop.gov/">House Republican Conference</a>.</td>
 		</tr>
 
 		<tr><th colspan="2" style="padding: 1em 0 .5em 0">1989-2014<br>(101<sup>st</sup>-113<sup>th</sup> Congresses)</th></tr>

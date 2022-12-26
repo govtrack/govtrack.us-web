@@ -313,7 +313,9 @@ def vote_thumbnail_image_map(vote):
 	if vote.chamber != CongressChamber.house:
 		raise Http404()
 
-	if vote.congress in (112, 113, 114, 115, 116, 117):
+	if vote.congress in (118, 119, 120, 121, 122, 123):
+		cartogram_year = 2022
+	elif vote.congress in (113, 114, 115, 116, 117):
 		# Although there were some minor changes in district boundaries over
 		# this time period, there weren't changes in the total number of
 		# districts in each state, so we're glossing over the geographic changes.
@@ -350,10 +352,6 @@ def vote_thumbnail_image_map(vote):
 		elif node.tag.endswith("polygon"):
 			# No voter for this district.
 			node.set("style", "fill: white; stroke: #666; stroke-width: 1px;")
-		#elif node.get("id") == "non-voting-delegates":
-		#	# The non-voting-delegates group holds the districts
-		#	# we should hide because they don't have a vote.
-		#	tree.getroot().remove(node)
 
 	# Send raw SVG response.
 	return (ET.tostring(tree.getroot()), "image/svg+xml")
