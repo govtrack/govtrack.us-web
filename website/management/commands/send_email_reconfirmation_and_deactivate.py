@@ -11,8 +11,8 @@ from website.models import UserProfile
 from emailverification.utils import send_email_verification
 from emailverification.models import Ping, BouncedEmail
 
-reconfirmation_interval = timedelta(days=365) # one year
-reconfirmation_timeout = timedelta(days=20)
+reconfirmation_interval = timedelta(days=365*3) # three years
+reconfirmation_timeout = timedelta(days=30.5) # one month
 
 class ConfirmEmailAction:
     user_id = None
