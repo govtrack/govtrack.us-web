@@ -858,8 +858,8 @@ def subject_choices():
 # used by bills_overview and bill_statistics
 bill_status_groups = [
     ("Enacted Legislation (including via incorporation)",
-        "enacted bills", "including bills and joint resolutions identical to or incorporated into enacted legislation, based on an automated GovTrack.us data analyis",
-        "including bills (and joint resolutions) identical to or incorporated into enacted legislation, based on an approximate, automated GovTrack.us data analyis that varies by Congress",
+        "enacted bills", "including bills and joint resolutions identical to or incorporated into enacted legislation, based on an automated GovTrack.us data analysis",
+        "including bills (and joint resolutions) identical to or incorporated into enacted legislation, based on an approximate, automated GovTrack.us data analysis that varies by Congress",
         "enacted_ex"),
     ("Enacted Legislation",
         "enacted bills", "that were either signed by the president or enacted via a veto override or the 10-day rule (including joint resolutions which can also be enacted as law)", None,
