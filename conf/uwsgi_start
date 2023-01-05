@@ -21,4 +21,6 @@ honcho -e local/settings.env run \
 	--wsgi-file wsgi.py \
 	$BIND_ARGS \
 	--processes $PROCESSES --master \
-	--close-on-exec
+	--close-on-exec \
+	--harakiri=45 \
+	--stats /tmp/uwsg_govtrack_${NAME}_stats.sock
