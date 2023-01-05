@@ -532,7 +532,7 @@ $(function() {
                 Each hexagon represents one congressional district.
                 {% for item in totals.options %}
                   {% if item.option.key == "+" %}
-                    Solid hexes are {{item.option.value}} votes.
+                    Dark shaded hexes are {{item.option.value}} votes.
                   {% endif %}
                 {% endfor %}
             </div>

@@ -279,11 +279,11 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 
 vote_diagram_colors = { # see also person.views.membersoverview
 	("D", "+"): (0/255.0, 142/255.0, 209/255.0), # same as CSS color
-	("D", "-"): (213/255.0, 244/255.0, 255/255.0), # reduced saturation and then matched lightness with R at 95
+	("D", "-"): (192/255.0, 232/255.0, 270/255.0), # L=>90, C=>24
 	("I", "+"): (0.07, 0.05, 0.07),
 	("I", "-"): (0.85, 0.85, 0.85),
 	("R", "+"): (248/255.0, 54/255.0, 49/255.0), # same as CSS color
-	("R", "-"): (255/255.0, 227/255.0, 223/255.0), # reduced saturation and then matched lightness with D at 95
+	("R", "-"): (270/255.0, 213/255.0, 201/255.0), # L=>90 C=>24
 }
 
 def vote_thumbnail_small(vote):
@@ -333,13 +333,13 @@ def vote_thumbnail_image_map(vote):
 		if not voter.person_role: continue # some votes cannot map voters to roles such as when there are mismatches w/ the term start/end dates
 		if voter.option.key not in ("+", "-"): continue # don't know what color to assign here
 		district = voter.person_role.state.lower() + ("%02d" % voter.person_role.district)
-		clr = vote_diagram_colors.get((voter.person_role.party[0], "+"))
+		clr = vote_diagram_colors.get((voter.person_role.party[0], voter.option.key))
 		if clr:
 			clr = tuple([c*256 for c in clr])
-			if voter.option.key == "+":
-				styles[district] = "fill: rgb(%d,%d,%d); stroke: #AAA; strike-width: 1px;" % clr
-			else:
-				styles[district] = "fill: transparent; stroke: rgb(%d,%d,%d); strike-width: 1px;" % clr
+			#if voter.option.key == "+":
+			styles[district] = "fill: rgb(%d,%d,%d); stroke: #AAA; strike-width: 1px;" % clr
+			#else:
+			#	styles[district] = "fill: transparent; stroke: rgb(%d,%d,%d); strike-width: 1px;" % clr
 	if len(styles) == 0:
 		# Does not have any +/- votes.
 		raise Http404()
