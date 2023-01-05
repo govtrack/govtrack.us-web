@@ -345,7 +345,7 @@ def vote_thumbnail_image_map(vote):
 		raise Http404()
 
 	# Apply.
-	for node in tree.getroot():
+	for node in tree.getroot().iter():
 		style = styles.get(node.get("id"))
 		if style:
 			node.set("style", style)
