@@ -4,9 +4,9 @@ import logging
 class Progress(object):
     def __init__(self, step=None, total=None, stop=None, name='items'):
         if not total and not step:
-            raise Exception('Both step and total arguments are None')
+            raise Exception('Both step and total arguments are None/zero')
         if total and not step:
-            step = int(total / 20)
+            step = max(int(total / 20), 1)
         self.step = step
         self.count = 0
         self.total = total

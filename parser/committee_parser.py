@@ -141,11 +141,12 @@ def parse_committee_members(options):
         # load committee members
         tree = yaml_load(MEMBERS_FILE)
         total = len(tree)
-        progress = Progress(total=total, name='committees')
+        progress = Progress(total=total + 1, name='committees') # it's an error if total is zero
         
         # We can delete CommitteeMember objects because we don't have
         # any foreign keys to them.
         CommitteeMember.objects.all().delete()
+        progress.tick() # representing the extra '1' added to the progress total
 
         # Process committee nodes
         for committee, members in tree.items():

@@ -90,9 +90,16 @@ def load_votes_analysis(person):
     
     congressnumber = role.most_recent_congress_number()
     if not congressnumber: return None
-    
-    fn = 'data/analysis/by-congress/%d/person/missedvotes/%d.csv' % (congressnumber, person.pk)
-    if not os.path.exists(fn): return None
+
+    # Get stats for the person's latest role but at the start of a new Congress
+    # there might not be stats yet, so try the previous one.
+    for c in (congressnumber, congressnumber-1):
+      fn = 'data/analysis/by-congress/%d/person/missedvotes/%d.csv' % (c, person.pk)
+      if os.path.exists(fn):
+          congressnumber = c
+          break
+    else: # did not break
+      return None
     
     lifetime_rec = None
     time_recs = []
