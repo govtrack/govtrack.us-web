@@ -863,7 +863,7 @@ function show_pronunciation_guide() {
 		{% else %}much worse than
 		{% endif %}
 		the median of {{analysis_data.missedvotes.pctile50|floatformat:1}}%
-		among the lifetime records of {% if analysis_data.missedvotes.chamber == 's' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
+		among the lifetime records of {% if analysis_data.missedvotes.chamber == 'Senate' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
 
 		{% if vote_explanations.member.total_explanations > 0 %}
 			ProPublica has tracked <a href="https://projects.propublica.org/explanations/members/{{person.bioguideid}}">{{vote_explanations.member.total_explanations}} explanation{{vote_explanations.member.total_explanations|pluralize}}</a> for these missed votes.
@@ -872,7 +872,7 @@ function show_pronunciation_guide() {
 		The chart below reports missed votes over time.</p>
 
 		<p><i>
-		We don&rsquo;t track why legislators miss votes, but it&rsquo;s often due to medical absenses and major life events.
+		We don&rsquo;t track why legislators miss votes, but it&rsquo;s often due to medical absenses, major life events, and running for higher office.
 		{% if is_2020_candidate %}Legislators running for president or vice president typically miss votes while on the campaign trail &mdash; that&rsquo;s normal. See our <a href="/congress/votes/presidential-candidates">analysis of presidential candidates&rsquo; missed votes</a>.{% endif %}
 		</i></p>
 
@@ -882,7 +882,11 @@ function show_pronunciation_guide() {
 		<table id="missedvotestable" style="display: none">
 			<tr> <th>Time Period</th> <th>Votes Eligible</th> <th>Missed Votes</th> <th>Percent</th> <th>Percentile</th> </tr>
 			{% for rec in analysis_data.missedvotes.data %}
-				<tr><td>{{rec.time}}</td> <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinalhtml}}</td></tr>
+				<tr><td title="{{rec.congress|ordinal}} Congress, {{rec.session}}, {{rec.chamber}}, Q{{rec.period|add:1}}">
+                                    {{rec.time}}
+                                    {% if rec.period == 4 %}{{rec.congress|ordinal}} Congress{% endif %} {# the 5th quarter is January of the next year #}
+                                    {% if analysis_data.missedvotes.multiple_chambers %}({{rec.chamber}}){% endif %}</td>
+                                    <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinalhtml}}</td></tr>
 			{% endfor %}
 		</table>
 

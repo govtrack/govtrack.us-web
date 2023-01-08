@@ -101,8 +101,8 @@ def load_votes_analysis(person):
         rec = {
             "congress": rec["congress"],
             "session": rec["session"],
-            "chamber": rec["chamber"],
-            "period": rec["period"],
+            "chamber": "House" if rec["chamber"] == "h" else "Senate",
+            "period": int(rec["period"]) if rec["period"] != "" else None, # the lifetime record has no period
             "total": int(rec["total_votes"]),
             "missed": int(rec["missed_votes"]),
             "percent": round(float(rec["percent"]), 1),
@@ -130,9 +130,10 @@ def load_votes_analysis(person):
             time_recs.append(rec)
             
     if lifetime_rec == None: return None
-            
-    # It's confusing to take records from two chambers, so filter by chamber.
-    time_recs = [rec for rec in time_recs if rec["chamber"] == lifetime_rec["chamber"]]
+
+    # Set a flag if there are records from both chambers so the template can show the chamber
+    # if so.
+    lifetime_rec["multiple_chambers"] = len(set(rec["chamber"] for rec in time_recs)) > 1
     
     lifetime_rec["data"] = time_recs
     return lifetime_rec
