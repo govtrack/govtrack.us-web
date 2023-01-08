@@ -11,7 +11,7 @@ import yaml
 
 from person.models import Person
 
-CONGRESS_PROJECT_PATH = "../congress-project"
+CONGRESS_PROJECT_PATH = "../congress-project-wdir"
 
 # Get a mapping from the old THOMAS IDs and Bioguide IDs to current Members of Congress.
 people = yaml.load(open(CONGRESS_PROJECT_PATH + "/congress-legislators/legislators-current.yaml"))
