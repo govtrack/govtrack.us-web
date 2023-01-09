@@ -398,13 +398,22 @@ function show_pronunciation_guide() {
 
 	<!-- Kraken Caucus Labels -->
 	{% if kraken_caucus %}
-		<div class="panel panel-danger">
+		<div class="panel panel-danger" style="margin-top: 30px">
+			<div class="panel-heading" style="background: white; font-weight: bold; padding: 5px 15px;">
+				Elections must be decided by counting votes
+			</div>
 			<div class="panel-body">
+				<p style="color: black">Our work to hold Congress accountable only matters if elections are decided by counting votes.
+				President Trump, his senior government advisors, and Republican legislators collaborated to have the 2020
+				presidential election decided instead by incumbent politicians running in the very same election. Their attempts
+				to suppress entire state-certified vote counts without adjudication in the courts and using a disinformation
+				campaign of lies and conspiracy theories was a months-long, multifarious attempted coup.</p>
+				<hr>
+
 				{{person.lastname}} was
 				{% if person.id == 412395 %}a <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">&ldquo;ringleader&rdquo;</a>{% endif %}
 				among the Republican legislators
-				who participated in President Trump&rsquo;s months-long, multifarious attempted coup during the 2020 presidential election
-				which led to the Jan. 6, 2021 insurrection at the Capitol.
+				who participated in the attempted coup.
 
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}
 				Shortly after the election, {{person.lastname}} <a href="https://projects.propublica.org/represent/members/trump-texas-amicus-house-members">joined</a> a <a href="https://www.supremecourt.gov/DocketPDF/22/22O155/162953/20201207234611533_TX-v-State-Motion-2020-12-07%20FINAL.pdf">case before the Supreme Court</a> calling for all the votes for president in Georgia, Michigan, Pennsylvania, and Wisconsin &mdash; states that were narrowly won by Democrats &mdash; to be discarded, in order to change the outcome of the election, based on lies and a preposterous legal argument which the Supreme Court <a href="https://www.supremecourt.gov/orders/courtorders/121120zr_p860.pdf">rejected</a>.
@@ -473,7 +482,7 @@ function show_pronunciation_guide() {
 				{% endif %}
 
 				{% if "KrakenObjectedToAZPA" in kraken_caucus %}
-				On January 6, 2021 in the hours after the insurrection at the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted to reject the state-certified election results of Arizona and/or Pennsylvania</a> (states narrowly won by Democrats), which could have changed the outcome of the election.
+				On January 6, 2021 in the hours after the violent insurrection at the Capitol, {{person.lastname}} <a href="https://www.govtrack.us/congress/votes/compare/7/2021-coup-attempt">voted to reject the state-certified election results of Arizona and/or Pennsylvania</a> (states narrowly won by Democrats), which could have changed the outcome of the election.
 				{% if "TexasVPennsylvaniaAmicus" in kraken_caucus or "KrakenAnnouncedObjection" in kraken_caucus %}
 				{% if person.id != 412738 %}
 				These legislators have generally changed their story after their vote, claiming it was merely a protest and not intended to change the outcome of the election as they clearly sought prior to the vote.
@@ -481,7 +490,7 @@ function show_pronunciation_guide() {
 
 				{% else %}
 				These legislators pumped the lies and preposterous legal arguments
-				about the election that motivated the January 6, 2021 insurrection at the Capitol.
+				about the election that motivated the January 6, 2021 violent insurrection at the Capitol.
 				{% endif %}
 				{% endif %}
 
@@ -490,14 +499,13 @@ function show_pronunciation_guide() {
 				{% endif %}
 
 				{% if person.id == 412190 %}
-				In the days after the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a> which succeeded in halting, for a time, the electoral count that determined the outcome of the presidential election,
+				In the days after the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 violent insurrection at the Capitol</a> which succeeded in halting, for a time, the electoral count that determined the outcome of the presidential election,
 				{{person.lastname}} <a href="https://www.nytimes.com/2022/04/21/us/politics/trump-mitch-mcconnell-kevin-mccarthy.html">said President Trump “bears responsibility” and urged him to resign</a> ahead of his impeachment for inciting the insurrection at the Capitol,
 				and said his behavior was <a href="https://www.cnn.com/videos/politics/2022/05/04/kevin-mccarthy-audio-denounced-donald-trump-after-insurrection-sot-lead-vpx.cnn">&ldquo;atrocious and totally wrong,&rdquo;</a> but he returned to supporting the former president shortly after.
 				{% else %}
-				The <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 insurrection at the Capitol</a>,
+				The <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 violent insurrection at the Capitol</a>,
 				<a href="https://www.justsecurity.org/84551/important-elements-of-the-january-6th-report/">led on the front lines by militant white supremacy groups</a>,
-				attempted to prevent President-elect Joe Biden from taking office by disrupting Congress&rsquo;s count of electors which determines the outcome of the
-				presidential election.
+				attempted to prevent President-elect Joe Biden from taking office by disrupting Congress&rsquo;s count of electors.
 				{% endif %}
 
 				{% if person.id == 412395 or person.id == 412690 or person.id == 412683 or person.id == 400651 or person.id == 412569 or person.id == 456814 %}
