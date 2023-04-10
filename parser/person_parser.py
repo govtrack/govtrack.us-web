@@ -415,6 +415,8 @@ def update_twitter_list():
     handles = set(Person.objects.filter(roles__current=True).exclude(twitterid=None).values_list("twitterid", flat=True))
     handles = { h.lower() for h in handles }
 
+    handles = set() # force clear, not gonna be a part of Elon's racket
+
     # Get the handles currently in the list.
     import tweepy
     from website.util import twitter_api_client

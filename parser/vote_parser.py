@@ -317,6 +317,8 @@ def main(options):
                         if vote.source == VoteSource.keithpoole and voter.option.key == "0":
                             # Drop this record.
                             voters.remove(voter)
+                        elif voter.person.id == 412728: # died before taking office so we're missing a role but don't want to remove him from the record
+                            pass
                         else:
                             log.error("%s: Could not find role for %s on %s." % (fname, voter.person, vote.created))
                             vote.missing_data = True
