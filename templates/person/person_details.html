@@ -423,17 +423,17 @@ function show_pronunciation_guide() {
 				{% if person.id == 412226 %}
 				Jordan futher <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged the Vice President</a>
 				and participated in a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a> by the Trump Administration
-				to exclude some Democratic states from the electoral count rather than follow the Constitution's procedure in which Congress may vote to exclude electors.
+				to exclude some Democratic states from the electoral count rather than follow the procedure set in law in which Congress may vote to exclude electors.
 				{% elif person.id == 400651 %}
 				Gohmert further <a href="https://www.politico.com/news/2021/12/16/jan-6-gohmert-lawsuit-pence-524839">sued the Vice President</a>
 				and participated in a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a>
 				to pressure the Vice President to exclude some Democratic states from the electoral count rather than
-				follow the Constitution's procedure in which Congress may vote to exclude electors.
+				follow the procedure set in law in which Congress may vote to exclude electors.
 
 				{% elif person.id == 412226 or person.id == 412683 or person.id == 412395 or person.id == 412690 or person.id == 456814 or person.id == 400651 or person.id == 412623 or person.id == 412397 or person.id == 412745 or person.id == 412569 %}
 				{{person.lastname}} was {% if "TexasVPennsylvaniaAmicus" in kraken_caucus %}also{% endif %} a part of a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a>
 				by the Trump Administration to pressure the Vice President to exclude some Democratic states from the electoral count rather than
-				follow the Constitution's procedure in which Congress may vote to exclude electors, and other extrajudicial strategies to suppress certified election results.
+				follow the procedure set in law in which Congress may vote to exclude electors, and other extrajudicial strategies to suppress certified election results.
 					{% if person.id == 412569 %}
 					Perry peddled <a href="https://www.cnn.com/2022/04/26/politics/mark-meadows-texts-scott-perry-key-role-overturn-election/index.html">debuked conspiracy theories about voting machines</a> and pushed
 					a plan for state legislatures with Republican majorities to <a href="https://www.judiciary.senate.gov/imo/media/doc/Interim%20Staff%20Report%20FINAL.pdf">replace their certified election results with a vote by state legislators</a>
@@ -930,10 +930,6 @@ function show_pronunciation_guide() {
 			<li><a href="https://www.govinfo.gov/bulkdata/BILLSTATUS">GovInfo.gov</a>, for sponsored bills</li>
 		{% endif %}
 	{% endwith %}
-	{% if person.id == 456805 %}
-		<li>Rep. Boebert <a href="https://twitter.com/tobymorton/status/1415426789191598081">threatened legal action</a> against
-		<a href="https://www.thelaurenboebert.com">a parody website</a> for using her official portrait without permission; therefore, we do not display her photo above.</li>
-	{% endif %}
 	</ul>
 	</section>
 	
