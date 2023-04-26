@@ -1291,3 +1291,21 @@ ul.singlesignon {
 		}
 	.community-forum-message-editor {
 	}
+
+#master-fundraiser-bar {
+	background: #9D2146;
+	padding: 4px;
+	font-size: 90%;
+	text-align: right;
+}
+	#master-fundraiser-bar a {
+		color: white;
+		text-decoration: none;
+	}
+	#master-fundraiser-bar span {
+		margin: 3px;
+		border-radius: 5px;
+		padding: 0px 3px;
+		background: #FD5;
+		color: black;
+		}
