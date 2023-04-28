@@ -65,7 +65,7 @@ def vote_search_manager():
 
     <div class="row">
         <div class="col-xs-12">
-            <div style="margin-bottom: .2em"><a href="{{object.get_absolute_url}}">{{object.question|truncatewords_html:50}}</a></div>
+            <div style="margin-bottom: .2em"><a href="{{object.get_absolute_url}}" title="{{object.question}}">{{object.question|truncatewords_html:50}}</a></div>
         </div>
         <div style="font-size: 93%">
         <div class="col-xs-12 col-sm-6 col-md-4">

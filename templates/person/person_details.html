@@ -787,7 +787,7 @@ function show_pronunciation_guide() {
 
 		<ul style="list-style: none; padding: 0;">
 		{% for bill in enacted_bills|slice:"0:7" %}
-			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a></li>
+			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:30}}</a></li>
 		{% endfor %}
 		</ul>
 		<p><a href="/congress/bills/browse?sponsor={{person.id}}#enacted_ex=on">View All &raquo;</a></p>
@@ -817,7 +817,7 @@ function show_pronunciation_guide() {
 		<p>{{person.lastname}} recently introduced the following legislation:</p>
 		<ul style="list-style: none; padding: 0;">
 			{% for bill in recent_bills %}
-			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:15}}</a></li>
+			<li style="margin-bottom: .3em"><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:15}}</a></li>
 			{% endfor %}
 		</ul>
 		<p>

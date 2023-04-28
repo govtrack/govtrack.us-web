@@ -286,7 +286,7 @@ article {
         </div>
         <div class="col-xs-8 col-sm-12">
       {% endif %}
-      <h3 style="font-size: 100%"><a href="{{post.url}}" {% if post_group.compact %}style="font-weight: normal"{% endif %}>{{post.title|truncatewords:30}}</a></h3>
+      <h3 style="font-size: 100%"><a href="{{post.url}}" {% if post_group.compact %}style="font-weight: normal"{% endif %} title="{{post.title}}">{{post.title|truncatewords:30}}</a></h3>
       <p style="line-height: 125%;">{{post.snippet|truncatewords:30}}</p>
       <p><span style="font-size: 90%; color: #555;">{{post.published}}</span></p>
       </div>

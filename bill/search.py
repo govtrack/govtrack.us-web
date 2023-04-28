@@ -167,7 +167,7 @@ def bill_search_manager():
 			<img src="{{object.get_absolute_url}}/thumbnail?aspect=1.2&width=125" class="img-responsive"/>
 		</div>
 		<div class="col-xs-10 col-md-11">
-    	<div style="margin-bottom: 3px"><a href="{{object.get_absolute_url}}" style="font-size: 15px; line-height: 125%;">{{object|truncatewords_html:50}}</a></div>
+    	<div style="margin-bottom: 3px"><a href="{{object.get_absolute_url}}" style="font-size: 15px; line-height: 125%;" title="{{object}}">{{object|truncatewords_html:50}}</a></div>
 		<div style="font-size: 90%">
     	{% if object.sponsor %}<div style="margin-bottom: 3px">Sponsor: {{object.sponsor_name}}</div>{% endif %}
 		<table width="100%"><tr valign="top">

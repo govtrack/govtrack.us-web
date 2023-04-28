@@ -655,7 +655,7 @@
   <h3>What legislators are saying</h3>
   {% for sp in legislator_statements %}
     <p style="margin-bottom: .5em">
-      &ldquo;<a href="{{sp.url}}">{{sp.title|truncatewords:50}}</a>&rdquo;
+      &ldquo;<a href="{{sp.url}}" title="{{sp.title}}">{{sp.title|truncatewords:50}}</a>&rdquo;
       <br><span style="font-size: 90%">&nbsp; &nbsp; &mdash;
       <a href="{{sp.person.get_absolute_url}}" style="text-decoration: none; color: #1D4E70">{{sp.person}}</a>
       {% if sp.relevance %}({{sp.relevance}}){% endif %}

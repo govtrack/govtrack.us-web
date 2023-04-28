@@ -102,7 +102,7 @@ function do_keyword_tracker_submit() {
 					{% if bill.senate_floor_schedule_postdate %}<div><b>Senate</b></div>{% endif %}
 				</td>
 				<td>
-				<p><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a></p>
+				<p><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:30}}</a></p>
 					{% if not bill.current_status in BILL_STATUS_INTRO %}
 						<p>{{bill.current_status_description}}</p>
 					{% endif %}
@@ -119,7 +119,7 @@ function do_keyword_tracker_submit() {
 		<div style="margin-bottom: 1.5em">
 		{% for f in trending_bill_feeds %}
 			<div style="margin-bottom: .5em;">
-				<a href="{{f.link}}">{{f.title|truncatewords:30}}</a>
+				<a href="{{f.link}}" title="{{f.title}}">{{f.title|truncatewords:30}}</a>
 			</div>
 		{% endfor %}
 		</div>
@@ -129,7 +129,7 @@ function do_keyword_tracker_submit() {
 		<div id="top_tracked_bills">
 		{% for bill, count in top_tracked_bills %}
 			<div style="margin-bottom: .5em;">
-				<a href="{{bill.get_absolute_url}}">{{bill|truncatewords:30}}</a>
+				<a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:30}}</a>
 				<br><small>tracked by {{count}} user{{count|pluralize}}</small>
 			</div>
 		{% endfor %}
@@ -249,7 +249,7 @@ function do_keyword_tracker_submit() {
 				<ul>
 				{% for bill in queryset %}
 					<li>
-						<div><a href="{{bill.get_absolute_url}}">{{bill|truncatewords:20}}</a></div>
+						<div><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:20}}</a></div>
 						<div style="margin-bottom: .5em">{{bill.current_status_description}}</div>
 					</li>
 				{% endfor %}

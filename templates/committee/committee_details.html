@@ -149,7 +149,7 @@
                         {% endif %}
 					</div>
 					{% if member.subcommittee_role %}
-						<div class="info">{{member.subcommittee_role.role_name.lower}}, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}" class="plain">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
+						<div class="info">{{member.subcommittee_role.role_name.lower}}, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}" class="plain" title="{{member.subcommittee_role.committee.name}}">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
 					{% endif %}
 		            {% endwith %}
 		        </div>
@@ -168,7 +168,7 @@
 					<ul id="committee_bill_list">
 					{% for bill in current_bills_sorted.bills %}
 						<li>
-							<a href="{{bill.get_absolute_url}}">{{bill|truncatewords:50}}</a>
+							<a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:50}}</a>
 							<br>Sponsor: {{bill.sponsor}}
 							<br>Status: {{bill.get_current_status_display}}
 						</li>
@@ -212,7 +212,7 @@
 			  <p>Committee press statements from <a href="https://projects.propublica.org/represent/">ProPublica Represent</a>:</p>
 			  {% for sp in press_statements %}
 			    <p style="margin-bottom: .5em">
-			      &ldquo;<a href="{{sp.url}}" target="_blank">{{sp.title|truncatewords:50}}</a>&rdquo;
+			      &ldquo;<a href="{{sp.url}}" target="_blank" title="{{sp.title}}">{{sp.title|truncatewords:50}}</a>&rdquo;
 			      <br><span style="font-size: 90%">&nbsp; &nbsp; &mdash;
 			      {{sp.date|date}}</span>
 			    </p>

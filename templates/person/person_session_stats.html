@@ -213,19 +213,19 @@ function smooth_scroll(elem) {
 
 		{% elif stat.key == "bills-enacted" %}
 			<p>{{person.lastname}} introduced <strong>{{stat.value|intcomma}}</strong> bill{{stat.value|pluralize}} that became law in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. {% if stat.value > 0 %}<a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a>{% endif %}</p>
-			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}" title="{{title}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-enacted-ti" %}
 			<p>{{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} that became law, including via incorporation into other measures, in {{period}}. Keep in mind that it takes a law to repeal a law. Very few bills ever become law. {% if stat.value > 0 %}<a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}&enacted_ex=on">View Enacted Bills &raquo;</a>{% endif %}</p>
-			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}" title="{{title}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-reported" %}
 			<p>Most bills and resolutions languish in committee without any action. {{person.lastname}} introduced <strong>{{stat.value}}</strong> bill{{stat.value|pluralize}} in {{period}} that got past committee and to the floor for consideration.</p>
-			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}" title="{{title}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-with-committee-leaders" %}
 			<p><strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions in {{period}} had a cosponsor who was a chair or ranking member of a committee that the bill was referred to. Getting support from committee leaders on relevant committees is a crucial step in moving legislation forward.</p>
-			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}" title="{{title}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "bills-with-cosponsors-both-parties" %}
 			<p>{% if h.rank_descending < h.rank_ascending %}In this era of partisanship, it is encouraging to see Members of Congress working across the aisle.{% else %}{{person.lastname}} tends to gather cosponsors only on one side of the aisle.{% endif %} <strong>{{stat.value|floatformat:"0"}}%</strong> of {{person.lastname}}&rsquo;s {{stat.num_bills}} bills and resolutions had both a Democratic cosponsor and a Republican cosponsor in {{period}}.</p>
@@ -238,7 +238,7 @@ function smooth_scroll(elem) {
 
 		{% elif stat.key == "bills-with-companion" %}
 			<p>The House and Senate often work on the same issue simultaneously by introducing <emph>companion bills</emph> in each chamber. <strong>{{stat.value}}</strong> of {{person.lastname}}&rsquo;s bills and resolutions had a companion bill in the {{stat.other_chamber}}. Working with a sponsor in the other chamber makes a bill more likely to be passed by both the House and Senate.</p>
-			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.bills|length > 0 %}<p class="details">Those bills were: {% for title, link in stat.bills %}<a href="{{link}}" title="{{title}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% elif stat.key == "cosponsors" %}
 			<p>{{person.lastname}}&rsquo;s bills and resolutions had <strong>{{stat.value|intcomma}}</strong> cosponsor{{stat.value|pluralize}} in {{period}}. Securing cosponsors is an important part of getting support for a bill, although having more cosponsors does not always mean a bill will get a vote. <a href="/congress/bills/browse#sponsor={{person.id}}&congress={{meta.congress}}">View Bills &raquo;</a></p>
@@ -272,8 +272,8 @@ function smooth_scroll(elem) {
 
 		{% elif stat.key == "transparency-bills" %}
 			<p>GovTrack looked at whether {{person.lastname}} supported any of {{stat.num_bills}} <a href="https://github.com/govtrack/govtrack.us-web/blob/master/analysis/transparency-bills.txt">government transparency, accountability, and effectiveness bills</a> in the {{stat.chamber}} that we identified in this session. We gave {{person.lastname}} <strong>{{stat.value}}</strong> point{{stat.value|pluralize}}, based on one point for cosponsoring and three points for sponsoring any of these bills.</p>
-			{% if stat.sponsored|length > 0 %}<p class="details">{{person.lastname}} sponsored {% for title, link in stat.sponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
-			{% if stat.cosponsored|length > 0 %}<p class="details">{{person.lastname}} cosponsored {% for title, link in stat.cosponsored %}<a href="{{link}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.sponsored|length > 0 %}<p class="details">{{person.lastname}} sponsored {% for title, link in stat.sponsored %}<a href="{{link}}" title="{{title}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+			{% if stat.cosponsored|length > 0 %}<p class="details">{{person.lastname}} cosponsored {% for title, link in stat.cosponsored %}<a href="{{link}}" title="{{title}}">{{title|truncatewords:7}}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 
 		{% else %}
 			<p>{{stat.value}}</p>
