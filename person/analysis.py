@@ -1,5 +1,11 @@
+#!script
+
 import os, glob, io
 import csv, json, rtyaml
+from collections import defaultdict
+
+from numpy import median
+
 from us import parse_govtrack_date
 from .types import RoleType
 from .models import Person
@@ -10,6 +16,7 @@ def load_data(person):
     return {
         "sponsorship": load_sponsorship_analysis(person),
         "missedvotes": load_votes_analysis(person),
+        "earmarks": load_earmarks_for(2024, person),
         #"influence": load_influence_analysis(person),
         #"scorecards": load_scorecards_for(person),
     }
@@ -213,3 +220,70 @@ def load_scorecards_for(person):
 
     # Return.
     return ret
+
+def load_earmarks_for(fiscalyear, person):
+    fn = f'data/misc/earmarks_fy{fiscalyear}_house.csv'
+    if not os.path.exists(fn): return None
+
+    def format_dollar_amount(value):
+        if value >= 4000000: # >=4 million, round to millions
+            return f"${int(round(value / 1000000))} million"
+        if value >= 1000000: # 1 million, round to 1/10th of a million
+            return f"${round(value / 100000) / 10} million"
+        if value >= 10000: # 10 thousand, round to thousands
+            return f"${int(round(value / 1000) * 1000):,}"
+        return f"${int(round(value / 1000))}"
+
+    # legislators_by_bioguideid = {
+    #     p.bioguideid: p
+    #     for p in Person.objects.filter(roles__current=True).exclude(bioguideid=None).distinct() }
+    total_requests_by_legislator = defaultdict(lambda : 0)
+    this_legislators_requests = []
+    with open(fn) as f:
+        f.readline() # credit notice
+        for rec in csv.DictReader(f):
+            #p = legislators_by_bioguideid[rec['Member Bioguide ID']]
+            #if rec['Party'] == 'D':
+            amount = int(float(rec['Amount Requested'].replace("$", "").replace(",", "")))
+            total_requests_by_legislator[rec['Member Bioguide ID']] += amount
+            if rec['Member Bioguide ID']== person.bioguideid:
+                this_legislators_requests.append({
+                    'amount': amount,
+                    'amount_display': format_dollar_amount(amount),
+                    'recipient': rec['Recipient'],
+                    'purpose': rec['Project Purpose'],
+                    'link': rec['Member Website'],
+                })
+
+    this_legislators_requests.sort(key = lambda req : -req["amount"])
+
+    # As of 4/30/2023, the total number of representatives in the
+    # spreadsheet is 369 (85% of all 435 reps), 154 Republicans
+    # (69% of 224 Republican reps including delegates) and 215
+    # Democrats (of 216 Democratic reps including delegates).
+
+    # Only return data for legislators for which we might have information,
+    # which are legislators in the dataset and any legislators who
+    # were serving in the House at the time the dataset was created.
+    # print(
+    #     set(Person.objects.filter(roles__current=True, roles__role_type=2).exclude(bioguideid=None).distinct().values_list("bioguideid", flat=True))
+    #     - set(total_requests_by_legislator))
+    legislators_without_earmarks = {'O000175', 'M001177', 'B001302', 'H001072', 'M001156', 'C001115', 'M001224', 'M001165', 'B000668', 'P000609', 'R000600', 'N000190', 'M001218', 'J000301', 'P000605', 'P000615', 'M000871', 'F000446', 'E000298', 'L000564', 'W000804', 'B001297', 'W000812', 'B001307', 'H001082', 'G000576', 'P000618', 'M001211', 'B001317', 'G000579', 'R000614', 'A000372', 'B001299', 'C001039', 'Y000067', 'S000929', 'S001195', 'B001311', 'C001116', 'A000379', 'S001189', 'L000589', 'B001314', 'S001213', 'C001132', 'A000377', 'B001248', 'F000478', 'M001195', 'W000816', 'J000289', 'T000480', 'H001093', 'W000795', 'S001183', 'D000615', 'F000469', 'R000103', 'B001316', 'S001199', 'D000626', 'T000165', 'G000590', 'G000565', 'H001058', 'F000450', 'G000595', 'B001275', 'M001212', 'M000194', 'F000246', 'M001184'}
+    if person.bioguideid not in total_requests_by_legislator \
+      and person.bioguideid not in legislators_without_earmarks:
+        return None
+
+    ret = {
+        "fiscal_year": fiscalyear,
+        "total_requested_display": format_dollar_amount(total_requests_by_legislator[person.bioguideid]),
+        "requests": this_legislators_requests,
+        "link": this_legislators_requests[0]['link'] if this_legislators_requests else None,
+        "median_total_request_display": format_dollar_amount(median(list(total_requests_by_legislator.values()))),
+        "total_reps_requesting": len(total_requests_by_legislator),
+        "total_reps_serving": 441, # as of 4/30/2023 when database was pulled, including delegates
+    }
+
+    return ret
+
+#if __name__ == "__main__":
+#    print(load_earmarks_for(2024, Person.objects.get(id=400416)))
