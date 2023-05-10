@@ -55,7 +55,7 @@ Vagrant.configure(2) do |config|
     
     # Install Xapian: (skip in production, where we use Solr)
     wget https://raw.githubusercontent.com/notanumber/xapian-haystack/master/install_xapian.sh
-    bash install_xapian.sh 1.4.17
+    bash install_xapian.sh 1.4.22
 
     # Install Python packages.
     # In production, xapian-haystack should be skipped.
