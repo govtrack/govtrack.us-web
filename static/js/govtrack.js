@@ -87,6 +87,11 @@ function init_ad_zone(ad_container) {
         (adsbygoogle = window.adsbygoogle || []).push({});
         */
 
+    } else if (ad_container.attr('data-zone') == "master_a") {
+        // Master A Google AdSense Responsive unit
+        write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
+        (adsbygoogle = window.adsbygoogle || []).push({});
+
     } else if (ad_container.attr('data-zone') == "master_a" && $(window).width() >= 1170) {
 		// Master A Google AdSense 336x280 unit.
         write_ad_code('<ins class="adsbygoogle" style="margin:0 -4px;display:inline-block;width:336px;height:280px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="4342089141"></ins>');
@@ -95,11 +100,6 @@ function init_ad_zone(ad_container) {
     } else if (ad_container.attr('data-zone') == "master_a" && $(window).width() >= 970) {
 		// Master A Google AdSense 200x200 unit.
         write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:200px;height:200px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8659683806"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-
-    } else if (ad_container.attr('data-zone') == "master_a") {
-        // Master A Google AdSense Responsive unit
-        write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
 
     } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 800) {

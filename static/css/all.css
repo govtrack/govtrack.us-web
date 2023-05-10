@@ -1309,3 +1309,24 @@ ul.singlesignon {
 		background: #FD5;
 		color: black;
 		}
+
+#seealso-links {
+	background: #FDFDFD;
+	border: 1px solid #DDD;
+	border-radius: .5em;
+	padding: 5px 15px 0px 15px;
+    font-family: Quicksand;
+    line-height: 150%;
+}
+    #seealso-links a {
+        display: inline-block;
+        text-decoration: none;
+        margin-right: 1.25em;
+        margin-bottom: .33em;
+    }
+        #seealso-links a:hover {
+            text-decoration: underline;
+        }
+    #seealso-links a i {
+        margin-right: .4em;
+    }

@@ -1,4 +1,4 @@
-{% extends "master_a.html" %}
+{% extends "master.html" %}
 {% load govtrack_utils %}
 {% load humanize persontags govtrack_utils %}
 
@@ -246,7 +246,14 @@ function show_pronunciation_guide() {
 
 {% block body_class %}member{% endblock %}
 
-{% block summary %}
+{% block body %}
+
+{% if not DEBUG or 1 %}
+<div class="ads" data-zone="header">
+	<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
+</div> <!-- /ads square -->
+{% endif %}
+
 <div class="h1-multiline">
 	<h1>
 		{% if role.party %}
@@ -292,26 +299,9 @@ function show_pronunciation_guide() {
 			{% endif %}
 	{% endif %}
 </div>
-{% endblock %}
 
-{% block sidebar_top %}
-	{% if links %}
-	<div>
-	<h2>Links</h2>
-	<div id="seealso-links">
-		{% for label, link, css_class in links %}
-			<a href="{{link}}" target="_blank"><i class="{{css_class}}" style="margin-right: 3px"></i>{{label}}</a>
-			{% if css_class == "fab fa-mastodon" %}(Mastodon){% endif %}
-		{% endfor %}
-		<div class="clearfix"></div>
-	</div>
-	</div>
-	{% endif %}
-{% endblock %}
-
-{% block body %}
 <div class="row group">
-	<div id="track_panel_base" class="col-sm-8">
+	<div id="track_panel_base" class="col-sm-8 col-md-6">
 		<div style="margin: .5em 0 1em 0">
         {% for r in person.roles_condensed %}
         	{% if forloop.first %}
@@ -395,6 +385,36 @@ function show_pronunciation_guide() {
 		</div>
         {% endif %}
 	{% endcomment %}
+
+	{% if links %}
+	<div id="seealso-links" style="margin-bottom: 30px;">
+		{% for label, link, css_class in links %}
+			<a href="{{link}}" target="_blank"><i class="{{css_class}}" style="margin-right: 7px"></i>{{label}}</a>
+			{% if css_class == "fab fa-mastodon" %}(Mastodon){% endif %}
+		{% endfor %}
+		<div class="clearfix"></div>
+	</div>
+	{% endif %}
+
+  </div>
+
+	<div class="aside col-sm-4 col-md-3">
+		<div id="event_subscribe_inline_container"> </div>
+
+		{% if photo %}
+			<div class="photo" style="margin-bottom: 10px">
+				<img src="{{ photo }}" alt="Photo of {{person}}" class="img-responsive"/>
+			</div>
+		{% endif %}
+	</div><!-- /photo container -->
+
+	<div class="col-md-3 hidden-xs hidden-sm">
+		<div class="ads" data-zone="master_a">
+			<div class="explainer">(<a href="/advertising">About Ads</a> | <a href="/accounts/membership">Hide These Ads</a>)</div>
+		</div> <!-- /ads -->
+	</div><!-- /col -->
+</div> <!-- /row -->
+
 
 	<!-- Kraken Caucus Labels -->
 	{% if kraken_caucus %}
@@ -542,7 +562,6 @@ function show_pronunciation_guide() {
 				In December 2021, the House of Representatives <a href="https://www.govtrack.us/congress/votes/117-2021/h447">voted 220-208</a> to hold Meadows in criminal contempt of Congress for refusing to comply with a subpoena to appear before the January 6 Committee, but the Department of Justice <a href="https://edition.cnn.com/2022/06/03/politics/justice-department-declines-charge-meadows-scavino-january-6/index.html">declined to prosecute</a>.
 			</div>
 		</div>
-
 	{% endif %}
 
 		{% if misconduct %}
@@ -562,7 +581,6 @@ function show_pronunciation_guide() {
 		{% endfor %}
 		{% endif %}
 
-	</div><!-- /container -->
 
 	<!-- contact panel -->
 	<style>
@@ -669,18 +687,6 @@ function show_pronunciation_guide() {
 	  </div>
 	</div>
 	<!-- /contact panel -->
-
-	<div class="aside col-sm-4">
-		<div id="event_subscribe_inline_container"> </div>
-
-		{% if photo %}
-			<div class="photo" style="margin-bottom: 10px">
-				<img src="{{ photo }}" alt="Photo of {{person}}" class="img-responsive"/>
-			</div>
-		{% endif %}
-	</div><!-- /aside -->
-</div>
-
 
 <div id="member-details">
 	{% if analysis_data.earmarks %}
