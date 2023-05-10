@@ -40,6 +40,16 @@ function show_modal(title, message) {
     $('#error_modal').modal({});
 }
 
+function addLazyScriptTag(src, onload) {
+    // https://stackoverflow.com/questions/8578617/inject-a-script-tag-with-remote-src-and-wait-for-it-to-execute
+    const script = document.createElement('script');
+    script.src = src;
+    script.crossorigin = "anonymous";
+    if (onload) script.addEventListener('load', onload);
+    if (onerror) script.addEventListener('error', onerror);
+    document.getElementsByTagName('head')[0].appendChild(script);
+}
+
 function init_ad_zone(ad_container) {
     // Track some ad impression statistics.
     var ad_cookie = $.cookie("ads");
@@ -52,16 +62,11 @@ function init_ad_zone(ad_container) {
     // save cookie
     $.cookie("ad_exp", form_qs(ad_cookie), { expires: 21, path: '/' });
 
-    /*
-    // Activate page-level auto-placement ads.
-    // TODO: Do this at most once per page.
-    if (!is_ad_free) {
-        (adsbygoogle = window.adsbygoogle || []).push({
-          google_ad_client: "ca-pub-3418906291605762",
-          enable_page_level_ads: true
-        });
+    // Load AdSense.
+    if (!window.has_added_adsense_script_tag && !is_ad_free) {
+        addLazyScriptTag("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3418906291605762");
+        window.has_added_adsense_script_tag = true;
     }
-    */
 
     // Show ad.
 
