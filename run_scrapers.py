@@ -52,7 +52,7 @@ if "DEBUG" in os.environ: log_level = "info"
 if "people" in sys.argv:
 	if CONGRESS != settings.CURRENT_CONGRESS: raise ValueErrror()
 	
-	# Pull latest poeple YAML.
+	# Pull latest people YAML.
 	os.system("cd %s/congress-legislators; git fetch -pq" % settings.CONGRESS_PROJECT_PATH)
 	os.system("cd %s/congress-legislators; git merge --ff-only -q origin/main" % settings.CONGRESS_PROJECT_PATH)
 	
