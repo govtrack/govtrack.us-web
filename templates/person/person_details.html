@@ -880,6 +880,8 @@ function show_pronunciation_guide() {
 	</section><!-- /sponsorship -->
 {% endif %}
 
+	{% include "ad_footer_leaderboard.html" %}
+
 	{% if analysis_data.missedvotes or key_votes|length > 0 %}
 	<section id="voting-record">
 		<h2><span>Voting Record</span></h2>

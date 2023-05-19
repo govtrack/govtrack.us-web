@@ -107,25 +107,29 @@ function init_ad_zone(ad_container) {
         write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
 
-    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 800) {
-        // Footer leaderboard Media.net unit, when the viewport is large enough to display it.
-        write_ad_code('<div id="536175723"></div>');
-        try { window._mNHandle.queue.push(function () {
-            window._mNDetails.loadTag("536175723", "728x90", "536175723");
-        }); } catch (error) { }
-
-//    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 800) {
-        // Footer leaderboard Google AdSense unit, when the viewport is large enough to display it.
+    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 1200) { // container width is 960
+        // Master A Google AdSense Responsive unit
+        write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 992) { // container width is 960
+        // Footer leaderboard Google AdSense unit (728x90)
         write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="5620102176"></ins>');
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 330) {
+        // Smartphone Banner Google AdSense unit (320x50)
+        write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8745863219"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
 
     } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 1200) { // container width is 960
+	// Top Billboard Google AdSense unit (970x250)
 	write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:970px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="9787482143"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
     } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 992) { // container width is 960
+	// Top Leaderboard Google AdSense unit (728x90)
 	write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3192837063"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
     } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 330) {
+        // Smartphone Banner Google AdSense unit (320x50)
 	write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8745863219"></ins>');
         (adsbygoogle = window.adsbygoogle || []).push({});
     }
