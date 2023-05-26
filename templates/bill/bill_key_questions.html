@@ -92,7 +92,7 @@ How else might you learn about what the {{bill.noun}} would do?</li>
 	{% if bill.text_incorporation|length > 1 %}
 	<p>You’ve been tricked! This isn’t one bill, it’s several bills in a conga line! Actually, it’s called an “omnibus” bill, and it’s when Congress decides to pass a bunch of legislation in a single package. You can browse through the incorporated bills in the related bills section under the <a href="{{bill.get_absolute_url}}/details">details tab</a>. It may be better to investigate a few of those rather than the whole omnibus.</p>
 	{% endif %}
-	{% if legislator_statements or stakeholder_posts %}
+	{% if legislator_statements %}
 	<p>Someone has made a statement about this bill, which you can find in the position statements section under the <a href="{{bill.get_absolute_url}}">overview tab</a>. Member statements can be useful for analyzing a bill. Just keep in mind they have a stake in the game.</p>
 	{% endif %}
 </div>
@@ -172,19 +172,6 @@ Is this the kind of {{bill.noun}} you would expect from them? Why or why not?</l
 
 {# Add links later #}
 
-{% if stakeholder_posts %}
-<li>A stakeholder organization has made a statement about this {{bill.noun}}.
- What is their relationship to the bill?
- How does their perspective help you understand the {{bill.noun}}?</li>
-
-<div class="tips">
-	<p>Sometimes organizations with a stake in legislative policy make a statement directly on GovTrack bill pages to let users know their perspective. It looks like an organization has done so for this {{bill.noun}}. Take a look at what the organization has to say about the {{bill.noun}}. Do they have an opinion on whether it should pass? What aspects of the {{bill.noun}} have they chosen to highlight?</p>
-	<p>You can find out in the position statements section in the middle of the <a href="{{bill.get_absolute_url}}">overview tab</a>.</p>
-	<p>Remember to be aware of the who is making each statement. Examining a political organization in depth is a challenging task of its own, but it is important to at least keep in mind that the leadership and goals of a stakeholder can change their perspective.</p>
-</div>
-{% endif %}
-
-{% if not stakeholder_posts %}
 <li>Step away from GovTrack for a moment.
  Is anyone talking about this {{bill.noun}}?
  How does their perspective help you understand the {{bill.noun}}?</li>
@@ -193,7 +180,6 @@ Is this the kind of {{bill.noun}} you would expect from them? Why or why not?</l
 	<p>It’s important to compare information from various sources. What other resources could you use to put the information on GovTrack into context? Has anyone else written about the {{bill.noun}}? Try putting the name of the {{bill.noun}} into your favorite search engine to see what comes up. You might find there is already a conversation going on around the {{bill.noun}}, or perhaps this {{bill.noun}} isn’t getting much attention.</p>
 	<p>If you can, you should look at multiple sources with varying perspectives. Don’t take what any news article or organization says for granted without comparing it to a few other sources.</p>
 </div>
-{% endif %}
 
 <li>What kind of expert would be able to tell you more about the policies this {{bill.noun}} would impact?</li>
 

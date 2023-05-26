@@ -38,8 +38,6 @@
 <script>
 	// dynamic DOM elements
     $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
-    if (the_page.stakeholders && the_page.stakeholders.length)
-    	$('#your-stakeholder-name').text(the_page.stakeholders[0].title)
     if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);
 
     if (the_page.community_forum) {
@@ -50,10 +48,6 @@
     $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
 
 	$('[data-toggle="tooltip"]').tooltip()
-
-	function show_stakeholder_position(postid) {
-		$("#stakeholder-position-" + postid).modal();
-	}
 </script>
 {% endblock %}
 
@@ -630,6 +624,7 @@
 
 	<div id="admin_panel"> </div>
 
+{% if bill.statement_admin_policy or legislator_statements %}
 <div style="margin: 30px 0;">
   <h2 style="margin-bottom: 15px;"><span>Position statements</span></h2>
 
@@ -658,57 +653,8 @@
   <p style="font-size: 90%"><a href="{{bill.propublica_represent_link}}/statements">More statements at ProPublica Represent...</a></p>
   {% endif %}
 
-  {% if stakeholder_posts %}
-  <h3>What stakeholders are saying</h3>
-  <style>
-    .stakeholder-post {
-    	margin-bottom: 5px;
-    	padding: 5px 10px;
-    	line-height: 128%;
-    }
-    .stakeholder-post.has-content:hover { cursor: pointer; background-color: #F5F5F5; border-radius: 8px;}
-    .stakeholder-position-1 { border-left: 3px solid #0A0; }
-    	.stakeholder-position-1 .stakeholder-position { color: #070; }
-    .stakeholder-position--1 { border-left: 3px solid #F00; }
-    	.stakeholder-position--1 .stakeholder-position { color: #F00; }
-    .stakeholder-position {
-    	display: block;
-    	float: left;
-    	margin-right: .3em;
-    }
-    .stakeholder-name {
-    	display: block;
-    	white-space: nowrap;
-    	font-weight: bold;
-    	text-decoration: underline;
-    }
-  </style>
-  {% for sp in stakeholder_posts %}
-  	<div class="stakeholder-post stakeholder-position-{{sp.position}} {% if sp.content %}has-content{% endif %}" {% if sp.content %}onclick="show_stakeholder_position({{sp.id}}); return false;"{% endif %}>
-		{% if sp.position == 1 %}
-			<span class="stakeholder-position glyphicon glyphicon-thumbs-up"></span>
-		{% endif %}
-		{% if sp.position == -1 %}
-			<span class="stakeholder-position glyphicon glyphicon-thumbs-down"></span>
-		{% endif %}
-  		<span class="stakeholder-name">{{sp.stakeholder.name}}</span>{% if sp.content %}
-  			{{sp.title|truncatewords:41}}
-  		{% endif %}
-        <div class="clearfix"></div>
-  	</div>
-  {% endfor %}
-  {% endif %}
-
-  <div id="stakeholders-register" style="margin: 18px 0 25px 0; font-size: 85%; padding: .4em; border: 1px solid #DDC; background: #FFE; font-style: italic; ">
-	<style scoped>
-		#stakeholders-register a:not(:hover) { color: #333; text-decoration: none; }
-	</style>
-	<a href="/stakeholders/new-post?bill={{bill.congressproject_id}}">
-          {% if not stakeholder_posts %}We&rsquo;re collecting the statements of stakeholder organizations.{% endif %}
-		<span id="your-stakeholder-name">Your organization</span>&rsquo;s position statement could be on this page! Register your organization&rsquo;s position on this bill &raquo;
-	</a>
-  </div>
 </div>
+{% endif %}
 
 	{% if text_incorporation and bill.is_success %}
 		<h2><span>Incorporated legislation</span></h2>
@@ -959,29 +905,6 @@ var DISQUSWIDGETS = {
 </script>
 <script src="//govtrack.disqus.com/count-data.js?1={{feed.feedname|urlencode}}"> </script>
 {% endif %}
-
-{% for sp in stakeholder_posts %}
-<div id="stakeholder-position-{{sp.id}}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="stakeholder-position-{{sp.id}}-title" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h2 class="modal-title" id="stakeholder-position-{{sp.id}}-title">
-        	{{sp.stakeholder.name}}
-      		{% if sp.position == 1 %}supports this {{bill.noun}}{% endif %}
-      		{% if sp.position == -1 %}opposes this {{bill.noun}}{% endif %}
-       </h2>
-      </div>
-      <div class="modal-body">
-      	{% if sp.link or sp.stakeholder.website %}
-      		<p style="font-size: 90%; color: #555; margin-bottom: 1em;">This position statement was submitted by <a href="{% firstof sp.link sp.stakeholder.website %}">{{sp.stakeholder.name}}</a> on {{sp.created|date}}.</p>
-      	{% endif %}
-      	{{sp.content|markdown}}
-      </div>
-    </div>
-  </div>
-</div>
-{% endfor %}
 
 <div id="event_subscribe_inline_container"> </div>
 

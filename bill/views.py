@@ -62,15 +62,6 @@ def bill_details(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     text_info = bill.get_text_info()
 
-    # load stakeholder positions
-    from stakeholder.models import BillPosition
-    stakeholder_posts = bill.stakeholder_positions\
-        .filter(post__stakeholder__verified=True)\
-        .select_related("post", "post__stakeholder")\
-        .order_by('-created')
-    def add_position_return_post(bp): bp.post.position = bp.position; return bp.post
-    stakeholder_posts = [add_position_return_post(bp) for bp in stakeholder_posts]
-
     # load president who made Statement of Administration policy
     if bill.statement_admin_policy:
         from parser.processor import Processor
@@ -89,7 +80,6 @@ def bill_details(request, congress, type_slug, number):
         "text_info": text_info,
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
         "show_media_bar": not bill.original_intent_replaced and bill.sponsor and bill.sponsor.has_photo() and text_info and text_info.get("has_thumbnail"),
-        "stakeholder_posts": stakeholder_posts,
         "legislator_statements": fetch_statements(bill),
     }
 
@@ -100,15 +90,6 @@ def bill_key_questions(request, congress, type_slug, number):
     bill = load_bill_from_url(congress, type_slug, number)
     text_info = bill.get_text_info(with_citations=True)
 
-    # load stakeholder positions
-    from stakeholder.models import BillPosition
-    stakeholder_posts = bill.stakeholder_positions\
-        .filter(post__stakeholder__verified=True)\
-        .select_related("post", "post__stakeholder")\
-        .order_by('-created')
-    def add_position_return_post(bp): bp.post.position = bp.position; return bp.post
-    stakeholder_posts = [add_position_return_post(bp) for bp in stakeholder_posts]
-
     # context
     return {
         'bill': bill,
@@ -117,7 +98,6 @@ def bill_key_questions(request, congress, type_slug, number):
         "prognosis": bill.get_prognosis_with_details(),
         "text_info": text_info,
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
-        "stakeholder_posts": stakeholder_posts,
         "legislator_statements": fetch_statements(bill),
     }
 
@@ -271,8 +251,6 @@ def bill_details_user_view(request, congress, type_slug, number):
 
     ret["reactions"] = get_user_bill_reactions(request, bill)
     ret["position"] = get_user_bill_position_info(request, bill)
-    if request.user.is_authenticated:
-        ret["stakeholders"] = [ { "id": s.id, "title": s.name } for s in request.user.stakeholder_set.all() ]
 
     from website.views import community_forum_userdata
     ret["community_forum"] = community_forum_userdata(request, bill.get_feed().feedname)

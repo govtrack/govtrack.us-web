@@ -116,7 +116,6 @@ INSTALLED_APPS = [
     'bill',
     'oversight',
     'userpanels',
-    'stakeholder',
 
     # for django-registration-pv
     'emailverification',
