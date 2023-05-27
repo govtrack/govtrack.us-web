@@ -886,7 +886,7 @@ def bills_overview(request):
                 g[2], # continuation text
                load_bill_status_search_link(None, g[4]),
                load_bill_status_qs(g[4]).count(), # count in category
-               load_bill_status_qs(g[4]).order_by('-current_status_date')[0:6], # top 6 in this category
+               [getattr(sr, 'object', sr) for sr in load_bill_status_qs(g[4]).order_by('-current_status_date')[0:6]], # top 6 in this category, convert Haystack results to bills if they are Haystack results
                 )
             for g in bill_status_groups ]
 

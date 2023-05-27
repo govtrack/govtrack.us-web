@@ -249,8 +249,8 @@ function do_keyword_tracker_submit() {
 				<ul>
 				{% for bill in queryset %}
 					<li>
-						<div><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill.object|truncatewords:20}}</a></div>
-						<div style="margin-bottom: .5em">{{bill.object.current_status_description}}</div>
+						<div><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:20}}</a></div>
+						<div style="margin-bottom: .5em">{{bill.current_status_description}}</div>
 					</li>
 				{% endfor %}
 				</ul>
