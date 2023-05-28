@@ -40,7 +40,7 @@ class PersonProcessor(YamlProcessor):
     FIELD_MAPPING = {
         'id__govtrack': 'id',
         'id__bioguide': 'bioguideid',
-        'id__votesmart': 'pvsid',
+#        'id__votesmart': 'pvsid',
         'id__opensecrets': 'osid',
         'id__cspan': 'cspanid',
         'social__youtube': 'youtubeid',
