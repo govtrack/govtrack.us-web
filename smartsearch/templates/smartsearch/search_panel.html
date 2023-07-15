@@ -73,7 +73,10 @@ function show_facets(postdata, options, isinitial) {
                 var opt = $("<div class='choices'><input type='" + type + "' onclick='update_search(null, null, this)'/> <label style='display: inline'><span class='name'> </span> <span class='count'> </span></label></div>");
                 opt.find('input').attr('id', "searchform_field_" + field + "_" + j);
                 opt.find('input').attr('name', field);
-                opt.find('input').attr('value', values[j][0]);
+                if (values[j][0] !== null)  // e.g. from NullBooleanField
+                    opt.find('input').attr('value', values[j][0]);
+                else
+                    opt.find('input').attr('value', '__NULL__');
                 
                 opt.find('label').attr('for', "searchform_field_" + field + "_" + j);
                 if (values[j][0] == "__ALL__") {
@@ -91,7 +94,7 @@ function show_facets(postdata, options, isinitial) {
                     // restore checked status
                     if (postdata[field]) {
                         for (i in postdata[field]) {
-                            if (postdata[field][i] == (""+values[j][0])) { // convert value to string
+                            if ((""+postdata[field][i]) == (""+values[j][0])) { // convert value to string
                                 opt.find('input').attr('checked', '1');
                                 if (postdata[field][i] != "__ALL__") has_default_value = false;
                             }

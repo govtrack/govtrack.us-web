@@ -272,7 +272,9 @@ class SearchManager(object):
                                 yield True
                             elif y == "false":
                                 yield False
-                            else:                        
+                            elif y == "__NULL__":
+                                yield None
+                            else:
                                 yield y
                     values = list(parse_booleans(values))
 
