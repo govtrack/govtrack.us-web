@@ -15,6 +15,10 @@
 {% block head %}
 	<meta property="og:title" content="{{ vote.question|truncatewords:10 }} -- {{ vote.get_chamber_display }} Vote #{{ vote.number }} -- {{ vote.created|date:"DATE_FORMAT" }}" />
 	<style>
+    #vote-summary-wrapper {
+        border: 1px solid #AAA;
+        padding: 10px 10px 0 10px;
+    }
     #vote-summary-wrapper > div > h2:first-child {
         margin-top: 0;
     }
@@ -349,7 +353,7 @@ $(function() {
                     </div>
                 </div>
                 <div id="vote-summary-toggle"
-                     style="margin: 0 -19px; position: absolute; bottom: 0; width: 100%; text-align: center; padding: 1.25em 1em .5em 1em; background: linear-gradient(0deg, white 40%, transparent); font-size: 90%; display: none;">
+                     style="position: absolute; left: 2px; bottom: 2px; width: 90%; text-align: center; padding: 1.25em 1em .5em 1em; background: linear-gradient(0deg, white 40%, transparent); font-size: 90%; display: none;">
                   <a id="vote-summary-wrapper-more"
                     class="btn btn-sm btn-info"
                      href="#"

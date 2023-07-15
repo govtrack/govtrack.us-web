@@ -63,12 +63,13 @@ download \
 
 # Bootstrap (MIT License)
 download \
-  https://github.com/twbs/bootstrap/releases/download/v3.4.1/bootstrap-3.4.1-dist.zip \
-  /tmp/bootstrap.zip \
-  'd49793cf773cbd393ac2cf340c3b4ddab5365fa7c292098ac07e12eab3efd92e'
-unzip -d /tmp /tmp/bootstrap.zip
-mv /tmp/bootstrap-3.4.1-dist $VENDOR/bootstrap
-rm -f /tmp/bootstrap.zip
+  https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css \
+  $VENDOR/bootstrap.min.css \
+  'c0bcf7898fdc3b87babca678cd19a8e3ef570e931c80a3afbffcc453738c951a'
+download \
+  https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js \
+  $VENDOR/bootstrap.bundle.min.js \
+  '9520018fa5d81f4e4dc9d06afb576f90cbbaba209cfcc6cb60e1464647f7890b'
 
 # Font Awesome (for the spinner on ajax calls, various icons; MIT License)
 download \
