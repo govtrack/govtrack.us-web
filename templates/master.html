@@ -1,11 +1,10 @@
 {% load govtrack_utils %}
 {% with "/static/" as STATIC_URL %} {% comment %}The 500 error page doesn't set this variable! {% endcomment %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
         
 		<title>{% block title %}{% endblock %}</title>
 
@@ -27,8 +26,7 @@
 		<meta name="msapplication-TileImage" content="/static/favicon/ms-icon-144x144.png">
 		<meta name="theme-color" content="#9B2347">
 
-		<link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap/css/bootstrap.min.css">
-		<link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap.min.css">
 
 		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20230510" />
 
@@ -86,116 +84,110 @@
 	</div>
 
 	<div id="masthead">
-	<nav class="navbar">
-	  <div class="container">
-	    <div class="navbar-header">
-	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapsable" aria-expanded="false">
-	        <span class="sr-only">Toggle navigation</span>
-	        <span class="icon-bar"></span>
-	        <span class="icon-bar"></span>
-	        <span class="icon-bar"></span>
-	      </button>
-	      <a class="navbar-toggle" style="padding: 7px 8px 4px 8px; color: #557D9A;" href="/search" title="Search Site">
-	        <span class="sr-only">Search GovTrack</span>
-	        <span class="glyphicon glyphicon-search" style="font-size: 17px;"></span>
-	      </a>
-	      <a id="logo" href="/" class="navbar-brand {% block logo_class %}{% endblock %}">govtrack.us</a>
-	    </div>
 
-	    <div class="collapse navbar-collapse" id="navbar-collapsable">
-	      <ul class="nav navbar-nav">
-	        <li><a href="/">Home</a></li>
-	        <li class="dropdown">
-	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Bills &amp; Votes <span class="caret"></span></a>
-	          <ul class="dropdown-menu">
-				<li><a href="/congress/bills">Bills and Resolutions</a></li>
-				<li><a href="/congress/votes">Roll Call Votes</a></li>
-	            <li role="separator" class="divider"></li>
-				<li><a href="/how-a-bill-becomes-a-law">How does a bill become a law?</a></li>
-				<li><a href="/what-is-the-law">What is the law?</a></li>
-				<li><a href="/congressional-procedures">Congressional Procedures</a></li>
-			  </ul>
-			</li>
-	        <li class="dropdown">
-	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Legislators <span class="caret"></span></a>
-	          <ul class="dropdown-menu">
-				<li><a href="/congress/members">Members of Congress</a></li>
-				<li><a href="/congress/members/map">Congressional Districts Map</a></li>
-				<li><a href="/congress/committees">Committees</a></li>
-	            <li role="separator" class="divider"></li>
-				<li><a href="/misconduct">Misconduct Database</a></li>
-				<li><a href="/covid-19">COVID-19 in Congress</a></li>
-	          </ul>
-	        </li>
-			<li class="dropwdown">
-				<a href="/how-to-use" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Using GovTrack <span class="caret"></span></a>
-				<ul class="dropdown-menu">
-					<li><a href="/start">Start Tracking</a></li>
-					<li><a href="/how-to-use">How To Use GovTrack</a></li>
-					<li><a href="/for-educators">For Educators</a></li>
-					<li><a href="/for-advocates">For Advocates</a></li>
-					<li><a href="/for-hill-staff">For Congressional Staff</a></li>
-					<li><a href="/for-journalists">For Journalists</a></li>
-				</ul>
-			</li>
-			<li class="dropdown">
-				<a href="/about" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About Us <span class="caret"></span></a>
-				<ul class="dropdown-menu">
-					<li><a href="/about">About GovTrack.us</a></li>
-					<li><a href="/about-our-data">About Our Data</a></li>
-					<li><a href="/press">Press Clips</a></li>
-					<li role="separator" class="divider"></li>
-					<li><a href="https://govtrackinsider.com">GovTrack Insider</a></li>
-					<li><a href="/reading-list">Books and Games We Recommend</a></li>
-					<li><a href="/congress/committees/game">Guess the Committee<i>!</i></a></li>
-				</ul>
-			</li>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container">
+    <a id="logo" href="/" class="navbar-brand {% block logo_class %}{% endblock %}" style="background-color: transparent; position: relative; top: -3px;">govtrack.us</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+				<li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Bills &amp; Votes
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/congress/bills">Bills and Resolutions</a></li>
+						<li><a class="dropdown-item" href="/congress/votes">Roll Call Votes</a></li>
+            <li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item" href="/how-a-bill-becomes-a-law">How does a bill become a law?</a></li>
+						<li><a class="dropdown-item" href="/what-is-the-law">What is the law?</a></li>
+						<li><a class="dropdown-item" href="/congressional-procedures">Congressional Procedures</a></li>
+				  </ul>
+				</li>
+				<li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Legislators
+          </a>
+          <ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/congress/members">Members of Congress</a></li>
+						<li><a class="dropdown-item" href="/congress/members/map">Congressional Districts Map</a></li>
+						<li><a class="dropdown-item" href="/congress/committees">Committees</a></li>
+            <li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item" href="/misconduct">Misconduct Database</a></li>
+						<li><a class="dropdown-item" href="/covid-19">COVID-19 in Congress</a></li>
+				  </ul>
+				</li>
+				<li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Using GovTrack
+          </a>
+          <ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/start">Start Tracking</a></li>
+						<li><a class="dropdown-item" href="/how-to-use">How To Use GovTrack</a></li>
+						<li><a class="dropdown-item" href="/for-educators">For Educators</a></li>
+						<li><a class="dropdown-item" href="/for-advocates">For Advocates</a></li>
+						<li><a class="dropdown-item" href="/for-hill-staff">For Congressional Staff</a></li>
+						<li><a class="dropdown-item" href="/for-journalists">For Journalists</a></li>
+				  </ul>
+				</li>
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						About Us
+					</a>
+          			<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/about">About GovTrack.us</a></li>
+						<li><a class="dropdown-item" href="/about-our-data">About Our Data</a></li>
+						<li><a class="dropdown-item" href="/press">Press Clips</a></li>
+						<li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item" href="https://govtrackinsider.com">GovTrack Insider</a></li>
+						<li><a class="dropdown-item" href="/reading-list">Books and Games We Recommend</a></li>
+						<li><a class="dropdown-item" href="/congress/committees/game">Guess the Committee<i>!</i></a></li>
+				  </ul>
+				</li>
+		  </ul>
+		  <form class="d-flex" role="search" name="header_search">
+			<label for="master_search_q" class="sr-only">Search GovTrack for</label>
+			<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="master_search_q" name="q">
+			<button class="btn btn-outline-success" type="submit">Search</button>
+		  </form>
+		  <ul class="navbar-nav d-flex" style="padding-left: 2em;">
+				{% block override_login %}
+				{% if not user.is_authenticated %} {# hidden by script on anonymous pages when user is logged in #}
+				<li id="nav_login" class="nav-item"><a class="nav-link" href="/accounts/login?next={{request.get_full_path|urlencode}}">Log In</a></li>
+				{% endif %}
+				{% if request.anonymous or user.is_authenticated %}
+				<li id="nav_session" class="nav-item dropdown" {% if request.anonymous %}style="display: none"{% endif %}> {# shown by script if logged in #}
+					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						Your Account
+					</a>
+         			 <ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/accounts/lists">Your Tracker Lists</a></li>
+						<li><a class="dropdown-item" href="/accounts/positions">Your Positions</a></li>
+						<li><a class="dropdown-item" href="/accounts/docket">Your Docket</a></li>
+						<li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item" href="/accounts/profile" title="{{user.email}}">Account Settings</a></li>
+						<li><a class="dropdown-item" href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
+					</ul>
+				</li>
+				{% endif %}
+				{% endblock %}
+		  </ul>
+    </div>
+  </div>
+</nav>
+
+			{% comment %}
 			<p class="navbar-text navbar-right">
 				<a id="nav-in-session-house" style="display: none" href="https://live.house.gov/" class="navbar-link" title="The House is in session.">H <span class="glyphicon glyphicon-facetime-video" style="top: 2px"></span></a>
 				<a id="nav-in-session-senate" style="display: none" href="https://www.senate.gov/legislative/floor_activity_pail.htm" class="navbar-link" title="The Senate is in session.">S <span class="glyphicon glyphicon-facetime-video" style="top: 2px"></span></a>
 			</p>
-	      </ul>
-	      <ul class="nav navbar-nav navbar-right">
-			{% block override_login %}
+			{% endcomment %}
 
-			{% if not user.is_authenticated %} {# hidden by script on anonymous pages when user is logged in #}
-			<li id="nav_login"><a href="/accounts/login?next={{request.get_full_path|urlencode}}">Log In</a></li>
-			{% endif %}
-			{% if request.anonymous or user.is_authenticated %}
-			<li id="nav_session" class="dropdown" {% if request.anonymous %}style="display: none"{% endif %}> {# shown by script if logged in#}
-	          	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Your Account <span class="caret"></span></a>
-	            <ul class="dropdown-menu">
-					<li><a href="/accounts/lists">Your Tracker Lists</a></li>
-                    <li><a href="/accounts/positions">Your Positions</a></li>
-					<li><a href="/accounts/docket">Your Docket</a></li>
-		            <li role="separator" class="divider"></li>
-					<li><a href="/accounts/profile" title="{{user.email}}">Account Settings</a></li>
-					<li><a href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
-				</ul>
-			</li>
-			{% endif %}
-			{% endblock %}
 
-			<li>
-				<form name="header_search" action="/search" method="GET" class="search-form hidden-xs hidden-sm" role="search">
-					<label for="master_search_q" class="sr-only">Search GovTrack for</label>
-					<div class="text"><input type="text" placeholder="Search" id="master_search_q" name="q"/></div>
-					<input class="btn-search" type="submit" value="Search" />
-				</form>
-		      <a class="navbar-toggle visible-sm" style="padding: 6px 8px 2px 8px; color: #557D9A;" href="/search" title="Search Site">
-		        <span class="sr-only">Search GovTrack</span>
-		        <span class="glyphicon glyphicon-search" style="font-size: 14px;"></span>
-		      </a>
-		    </li>
-	        <!--<li>
-	        	<a href="https://www.govtrack.us/accounts/membership" style="background-color: #F96854; margin-left: 20px;">
-	        		Support Us
-	        	</a>
-	        </li>-->
-	      </ul>
-	    </div><!-- /.navbar-collapse -->
-	  </div><!-- /.container -->
-	</nav>
 
 	<div id="sitenewscontainer" class="navbar-default" style="display: none">
 	<div id="sitenews">
@@ -205,7 +197,7 @@
 				<div>An email update to you bounced. We have turned off your email updates. Please contact the website administrator to reactivate email updates.</div>
 			</div>
 			<div style="clear: both"> </div>
-	{% elif 1 %}
+	{% elif 0 %}
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			{% include "site-news-banner.html" %}
 	<script>
@@ -334,7 +326,7 @@
 	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?20160310"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery.lazy.min.js"></script>
 	
-    <script src="{{ STATIC_URL }}vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{{ STATIC_URL }}vendor/bootstrap.bundle.min.js"></script>
     <script src="{{ STATIC_URL }}vendor/fontawesome.js"></script>
 
 	{% if not request.anonymous %}

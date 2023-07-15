@@ -202,42 +202,12 @@ blockquote {
 	margin-bottom: 0;
 	border: none;
 }
-		#masthead .nav a {
-			color: inherit;
-		}
-		#masthead .nav a:hover, #masthead .nav a:focus, #masthead .nav .open>a {
-			background-color: inherit;
-			color: #9D2146;
-		}
-		#masthead .nav .dropdown-menu {
-			background: linear-gradient(#9D2146, #A35);
+	#masthead .navbar a {
+		color: black;
+	}
+		#masthead .navbar .dropdown ul a:hover {
+			background-color: #9D2146;
 			color: white;
-		}
-		#masthead .dropdown-menu {
-			margin-top: -2px;
-		}
-		#masthead .dropdown-menu a:hover, #masthead .dropdown-menu a:focus {
-			color: black;
-		}
-		#masthead .navbar-toggle {
-			border-color: #557D9A;
-		}
-		#masthead .navbar-toggle .icon-bar {
-			background-color: #557D9A;
-		}
-		#masthead input {
-			color: black;
-		}
-		.nav-item-image img {
-			padding-top: 1px;
-			width: 49px;
-			height: 49px;
-		}
-		@media screen and (min-width: 768px) {
-			#masthead .nav-item-image {
-				 padding-top: 0;
-				 padding-bottom: 0;
-			}
 		}
 
 .nav.nav-pills {
