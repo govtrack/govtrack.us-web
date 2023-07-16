@@ -14,7 +14,7 @@
 <td width="100" style="padding-right: 1em">
 	{% if meta.thumbnail_url %}
 		<a href="{{meta.url}}" {% if request.POST.newtab == '1' %}target="_blank"{% endif %}>
-			<img src="{{meta.thumbnail_url}}" class="img-responsive">
+			<img src="{{meta.thumbnail_url}}" class="img-fluid">
 		</a>
 	{% endif %}
 </td>

@@ -502,7 +502,7 @@ $(function() {
     <div class="col-sm-6 col-md-5">
         <div style="margin: 1em 0">
 			<h3>Ideology Vote Chart</h3>
-            <img src="{{ vote.get_absolute_url }}/diagram" class="img-responsive" />
+            <img src="{{ vote.get_absolute_url }}/diagram" class="img-fluid" />
             <div style="margin: .5em 0; max-width: 300px;" class="diagram-legend">
                 <div style="float: left; margin: 0 .25em 1em 0">Key:</div>
                 {% for item in totals.options %}
@@ -530,7 +530,7 @@ $(function() {
     <div class="col-sm-6">
         <div style="margin-top: 1em">
 			<h3>Cartogram Map</h3>
-            <img src="{{ vote.get_absolute_url }}/map" class="img-responsive" style="margin: auto;" />
+            <img src="{{ vote.get_absolute_url }}/map" class="img-fluid" style="margin: auto;" />
             <div style="margin: .5em 0;" class="diagram-legend">
                 Each hexagon represents one congressional district.
                 {% for item in totals.options %}

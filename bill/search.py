@@ -164,7 +164,7 @@ def bill_search_manager():
     sm.set_template("""
 	<div class="row">
 		<div class="col-xs-2 col-md-1" style="padding-right: 0">
-			<img src="{{object.get_absolute_url}}/thumbnail?aspect=1.2&width=125" class="img-responsive"/>
+			<img src="{{object.get_absolute_url}}/thumbnail?aspect=1.2&width=125" class="img-fluid"/>
 		</div>
 		<div class="col-xs-10 col-md-11">
     	<div style="margin-bottom: 3px"><a href="{{object.get_absolute_url}}" style="font-size: 15px; line-height: 125%;" title="{{object}}">{{object|truncatewords_html:50}}</a></div>
