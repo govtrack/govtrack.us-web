@@ -230,14 +230,13 @@ blockquote {
 	overflow: hidden;
 }
 
-.breadcrumb {
-	margin: 0;
-	padding: 0; /* override bootstrap */
-	background: none;
+ol.breadcrumb {
+	margin: 15px 0;
 	font-size: 88%;
 	font-family: 'Quicksand';
 }
 	.breadcrumb a {
+		color: #555;
 		text-decoration: none;
 	}
 		.breadcrumb a:hover {
