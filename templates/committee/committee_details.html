@@ -98,14 +98,28 @@
 <div>
 	<ul class="nav nav-tabs" role="tablist">
 		{% if members|length > 0 %}
-		<li role="presentation" class="active"><a href="#members" aria-controls="members" role="tab" data-toggle="tab">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a></li>
+		<li class="nav-item" role="presentation">
+			<a href="#members" aria-controls="members" class="nav-link active" data-bs-toggle="tab" role="tab" aria-selected="true">{% if not parent %}Committee{% else %}Subcommittee{% endif %} Members</a>
+		</li>
 		{% endif %}
-		<li role="presentation" {% if members|length == 0 %}class="active"{% endif %}><a href="#activity" aria-controls="activity" role="tab" data-toggle="tab">Bills</a></li>
-        {% if recent_reports|length > 0 %}
-			<li role="presentation"><a href="#reports" aria-controls="reports" role="tab" data-toggle="tab">Reports</a></li>
-        {% endif %}
-		{% if subcommittees %}<li role="presentation"><a href="#subcommittees" aria-controls="subcommittees" role="tab" data-toggle="tab">Subcommittees</a></li>{% endif %}
-		{% if press_statements %}<li role="presentation"><a href="#statements" aria-controls="statements" role="tab" data-toggle="tab">Press Statements</a></li>{% endif %}
+		<li class="nav-item" role="presentation">
+			<a href="#activity" aria-controls="activity" class="nav-link {% if members|length == 0 %}active{% endif %}" data-bs-toggle="tab" role="tab" {% if members|length == 0 %}aria-selected="true"{% endif %}>Bills</a>
+		</li>
+		{% if recent_reports|length > 0 %}
+			<li class="nav-item" role="presentation">
+				<a href="#reports" aria-controls="reports" class="nav-link" data-bs-toggle="tab" role="tab">Reports</a>
+			</li>
+		{% endif %}
+		{% if subcommittees %}
+		<li class="nav-item" role="presentation">
+			<a href="#subcommittees" aria-controls="subcommittees" class="nav-link" data-bs-toggle="tab" role="tab">Subcommittees</a>
+		</li>
+		{% endif %}
+		{% if press_statements %}
+		<li class="nav-item" role="presentation">
+			<a class="nav-link" href="#statements" aria-controls="statements" data-bs-toggle="tab" role="tab">Press Statements</a>
+		</li>
+		{% endif %}
 	</ul>
 
 	<div class="tab-content">

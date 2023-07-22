@@ -18,7 +18,7 @@
 var map_loaded = false;
 $(function() {
    {% if stateapp != "T" %}
-    $('a[data-toggle="tab"][href="#map"]').on('shown.bs.tab', load_map_iframe);
+    $('a[data-bs-toggle="tab"][href="#map"]').on('shown.bs.tab', load_map_iframe);
     if (window.location.hash == "#map")
     	load_map_iframe(); // already open
    {% else %}
@@ -77,9 +77,9 @@ $(function() {
 {% block body %}
 	{% if stateapp != "T" %}
 		<ul class="nav nav-tabs" role="tablist" id="tabs">
-			<li role="presentation" class="active"><a href="#senators" aria-controls="senators" role="tab" data-toggle="tab">Senators</a></li>
-			<li role="presentation"><a href="#representatives" aria-controls="representatives" role="tab" data-toggle="tab">Representatives</a></li>
-			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map of Congressional Districts</a></li>
+			<li class="nav-item" role="presentation"><a href="#senators" aria-controls="senators" class="nav-link active" data-bs-toggle="tab" role="tab" aria-selected="true">Senators</a></li>
+			<li class="nav-item" role="presentation"><a href="#representatives" aria-controls="representatives" class="nav-link" data-bs-toggle="tab" role="tab">Representatives</a></li>
+			<li class="nav-item" role="presentation"><a href="#map" aria-controls="map" class="nav-link" data-bs-toggle="tab" role="tab">Map of Congressional Districts</a></li>
 		</ul>
 
 

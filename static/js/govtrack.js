@@ -1,5 +1,7 @@
 $(function() {
     // Activate tab state from URL fragment.
+    // TODO This doesn't work when activating a tab within a tab
+    // if a parent tab also needs to be activated.
     $('.nav-tabs a').each(function() {
         if (window.location.hash == "#"+this.getAttribute("aria-controls"))
             $(this).tab('show');
