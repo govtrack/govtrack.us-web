@@ -196,7 +196,6 @@ blockquote {
 	margin-bottom: 15px;
 	font-size: 13px;
 	color: #1D4E70;
-	border-bottom: 1px solid #DDDDDF;
 }
 #masthead .navbar {
 	/* override bootstrap */
@@ -669,12 +668,9 @@ aside .download-links { padding: 31px 0 0 }
 		#footer nav li {
 			vertical-align: top;
 			}
-		#footer nav a, #footer .social a {
+		#footer nav a {
 			display: block;
 			}
-#footer .social {
-	font-size: 12px;
-	}
 #footer h4 {
 	margin: 0 0 5px;
 	text-transform: uppercase;
@@ -682,16 +678,6 @@ aside .download-links { padding: 31px 0 0 }
 	#footer h4 span {
 		text-transform: none;
 		}
-#footer .social ul {
-	line-height: 2em;
-	}
-	#footer .social li {
-		vertical-align: top;
-		}
-#footer .social span {
-	margin-left: 3px;
-	}
-#footer .social a { display: block }
 #footer section {
 	margin-bottom: 25px;
 	overflow: hidden;
@@ -1248,13 +1234,12 @@ ul.singlesignon {
 	}
 
 #master-fundraiser-bar {
-	background: #9D2146;
-	padding: 4px;
+	padding: 6px 4px 2px 0;
 	font-size: 90%;
 	text-align: right;
 }
 	#master-fundraiser-bar a {
-		color: white;
+		color: #666;
 		text-decoration: none;
 	}
 	#master-fundraiser-bar span {

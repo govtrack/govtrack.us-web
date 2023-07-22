@@ -32,7 +32,7 @@
 	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/brands.css" rel="stylesheet">
 
 
-		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20230510" />
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20230726" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
@@ -154,7 +154,7 @@
 		  </ul>
 		  <form class="d-flex" role="search" name="header_search">
 			<label for="master_search_q" class="sr-only">Search GovTrack for</label>
-			<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="master_search_q" name="q">
+			<input class="form-control me-2" type="search" placeholder="bill, name, or topic" aria-label="Search" id="master_search_q" name="q">
 			<button class="btn btn-outline-success" type="submit">Search</button>
 		  </form>
 		  <ul class="navbar-nav d-flex" style="padding-left: 2em;">
@@ -165,7 +165,11 @@
 				{% if request.anonymous or user.is_authenticated %}
 				<li id="nav_session" class="nav-item dropdown" {% if request.anonymous %}style="display: none"{% endif %}> {# shown by script if logged in #}
 					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						{% if not user.is_authenticated %}
 						Your Account
+						{% else %}
+						{{ user.email }}
+						{% endif %}
 					</a>
          			 <ul class="dropdown-menu">
 						<li><a class="dropdown-item" href="/accounts/lists">Your Tracker Lists</a></li>
@@ -282,9 +286,9 @@
 					</ul>
 				</nav>
 
-				<section class="col-6 col-md-2 social">
+				<section class="col-6 col-md-2">
 					<ul>
-						<li><a rel="me" href="https://mastodon.social/@GovTrack"><i class="fab fa-mastodon fa-fw"></i> Mastodon</a></li>
+						<li><a rel="me" href="https://mastodon.social/@GovTrack"><i class="fab fa-mastodon fa-fw"></i>Mastodon</a></li>
 						<li><a href="https://www.instagram.com/govtrack.us/"><i class="fab fa-instagram fa-fw"></i><span>Instagram</span></a></li>
 						<li><a href="https://www.tiktok.com/@govtrack.us"><i class="fab fa-tiktok fa-fw"></i><span>TikTok</span></a></li>
 						<li><a href="https://www.patreon.com/govtrack"><i class="fas fa-dollar-sign fa-fw"></i><span>Patreon</span></a></li>
@@ -352,6 +356,7 @@
 		if (the_user) {
 			$('#nav_login').hide();
 			$('#nav_session').show();
+			$('#nav_session > a').text(the_user.email);
 		}
 		{% endif %}
 	</script>
