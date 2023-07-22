@@ -213,6 +213,10 @@ blockquote {
 .nav.nav-pills {
 	font-family: Quicksand;
 }
+.nav-pills .nav-link.active {
+	background-color: #9D2146;
+	color: white !important;
+}
 
 #logo {
 	display: block;

@@ -322,32 +322,32 @@ function saveUserPosition() {
 {% block body %}
 
 {% with page=request.path|cut:bill.get_absolute_url %}
- <ul id="bill-subpages" class="nav nav-pills" role="tablist">
-    <li role="presentation" {% if page == "" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}">Overview</a></li>
+ <ul id="bill-subpages" class="nav nav-pills">
+    <li class="nav-item"><a href="{{bill.get_absolute_url}}" class="nav-link {% if page == "" %}active{% endif %}">Overview</a></li>
 
 	{% with bill.oursummary as summary1 %}
 	{% with bill.get_formatted_summary as summary2 %}
 	{% if summary1 or summary2 %}
-    <li role="presentation" {% if page == "/summary" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/summary" role="tab">Summary</a></li>
+    <li class="nav-item"><a href="{{bill.get_absolute_url}}/summary" class="nav-link {% if page == "/summary" %}active{% endif %}">Summary</a></li>
     {% endif %}
     {% endwith %}
     {% endwith %}
 
   {% if bill.cosponsor_count > 0 %}
-    <li role="presentation" {% if page == "/cosponsors" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/cosponsors" role="tab">
+    <li class="nav-item"><a href="{{bill.get_absolute_url}}/cosponsors" class="nav-link {% if page == "/cosponsors" %}active{% endif %}">
       Cosponsors
     </a></li>
   {% endif %}
 
 	{% if bill.source != "americanmemory" %}
-    <li role="presentation" {% if page == "/details" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/details" role="tab">Details</a></li>
+    <li class="nav-item"><a href="{{bill.get_absolute_url}}/details" class="nav-link {% if page == "/details" %}active{% endif %}">Details</a></li>
 	{% endif %}
 
 	{% if text_info.has_displayable_text or is_on_bill_text_page %}
-    <li role="presentation" {% if is_on_bill_text_page %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/text" role="tab">Text</a></li>
+    <li class="nav-item"><a href="{{bill.get_absolute_url}}/text" class="nav-link {% if is_on_bill_text_page %}active{% endif %}">Text</a></li>
 	{% endif %}
 
-    <li role="presentation" {% if page == "/studyguide" %}class="active"{% endif %}><a href="{{bill.get_absolute_url}}/studyguide" role="tab">Study Guide</a></li>
+    <li class="nav-item"><a href="{{bill.get_absolute_url}}/studyguide" class="nav-link {% if page == "/studyguide" %}active{% endif %}">Study Guide</a></li>
 
 </ul>
 

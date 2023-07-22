@@ -109,11 +109,15 @@
 <script>
 function add_summary(name, href, first_summary) {
 	// add a sub-tab
-	var tab = $('<li role="presentation"><a role="tab" data-toggle="tab"/></li>');
-	tab.find('a').text(name).attr('href', '#' + href)
+	var tab = $('<li class="nav-item" role="presentation"><a class="nav-link" data-bs-toggle="tab" role="tab"/></li>');
+	tab.find('a')
+		.text(name)
+		.attr('href', '#' + href)
+		.attr('aria-controls', href);
 	$('#summary-tabs').append(tab);
 	if ((first_summary && window.location.hash.length <= 1) || "#"+href==window.location.hash) {
 		tab.addClass('active');
+		tab.attr('aria-selected', 'true');
 		$('#' + href).addClass('active');
 		first_summary = false;
 	}
