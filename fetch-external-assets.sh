@@ -161,15 +161,17 @@ download \
   https://raw.githubusercontent.com/neverpanic/google-font-download/ba0f7fd6de0933c8e5217fd62d3c1c08578b6ea7/google-font-download \
   /tmp/google-font-download \
   '1f9b2cefcda45d4ee5aac3ff1255770ba193c2aa0775df62a57aa90c27d47db5'
-(cd $VENDOR; bash /tmp/google-font-download -f woff,woff2 -o google-fonts.css "IBM Plex Sans":300 "IBM Plex Sans":700 Quicksand:500) || true
+(cd $VENDOR; bash /tmp/google-font-download -f woff,woff2 -o google-fonts.css \
+  "Public Sans:300" "Public Sans:700" "IBM Plex Serif:400") || true
 rm -f /tmp/google-font-download
-# generated with: `$SHACMD $VENDOR/{google-fonts.css,*woff*}` but then put the vendor path variable back
+# generated with:
+# sha256sum static/vendor/{google-fonts.css,*woff*} | sed s"#static/vendor#\$VENDOR#"
 $SHACMD_CHECK << EOF
-8a44eefa80245fe6d3cf0c2603935e7e4046f5c0b8a7c0a14e3639a970e62834  $VENDOR/google-fonts.css
-12fde0b8172646b714aafe719e50cab184ffacde271786e6084b0f70807ffe21  $VENDOR/Quicksand_500.woff
-4813a05d0d0fb1efdaeb730c134af8a9bfcb824f1993cd66026af4fd50f4b492  $VENDOR/Quicksand_500.woff2
-6abe6b7ef0abe00b00ffd7b5d9e527102ede9a623f808dc27e21d6f89f67ecff  $VENDOR/IBM_Plex_Sans_300.woff
-80e7ed4fe6e9016456057ea5ecd4898d3a461e595a8244a7538e1a814889d471  $VENDOR/IBM_Plex_Sans_300.woff2
-1cc4f14202c58b49f25a56e5252c48dd835f7b83b4df7c7edc97298ef9adaf10  $VENDOR/IBM_Plex_Sans_700.woff
-1a60331c6fb3a2eef23e7c1e44f7ee6bf41f4f2f96b99757d8bc845b3a807b7d  $VENDOR/IBM_Plex_Sans_700.woff2
+c533160dfaa3672313040bb01372f9a1940476c023af99b167bfc926fb879375  $VENDOR/google-fonts.css
+418c8c851f89d2c8750d3291d1c4d7a728fc4dc6e96e4e05757f426fbbf99572  $VENDOR/IBM_Plex_Serif_400.woff
+256774147c18fde1089393e4008316d583dd0fe5f5aacc9438b23640ce1c552a  $VENDOR/IBM_Plex_Serif_400.woff2
+2bce22a0c5820ccb6a8361f2351ac653114b8db1a228f666f21584126024beb5  $VENDOR/Public_Sans_300.woff
+43493d1ab775f9889358c6df1bc8d88227edc90b07d864bb765298bd47da7ed1  $VENDOR/Public_Sans_300.woff2
+99ca49a60694ac4b6c446edf683f35df2b7526fee627fe9a017d29f2198d98b0  $VENDOR/Public_Sans_700.woff
+060efad3a20c5fbce28790fca46a54496ac35733e72484cab36bf37344054e66  $VENDOR/Public_Sans_700.woff2
 EOF

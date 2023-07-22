@@ -6,8 +6,9 @@ html { font-size: 15px; /* for rem unit sizing, match the body to be nice */ }
 body {
 	background: #9D2146;
 	color: #141712;
-	font-family: 'IBM Plex Sans';
+	font-family: 'Public Sans';
 	font-size: 16px;
+	font-weight: 300;
 	}
 	#bodybody {
 		background-color: white;
@@ -42,7 +43,7 @@ a.plain:hover, a.plain:focus, a.plain:active {
 }
 
 h1, h2, h3, h4, h5 {
-	font: normal normal normal 2.5em/1.5em inherit;
+	font-weight: 700;
 	line-height: 130%;
 	margin-top: 1.5em;
 	margin-bottom: 1em;
@@ -193,7 +194,6 @@ blockquote {
 
 #masthead {
 	margin-bottom: 15px;
-	font-family: Quicksand;
 	font-size: 13px;
 	color: #1D4E70;
 	border-bottom: 1px solid #DDDDDF;
@@ -212,7 +212,6 @@ blockquote {
 		}
 
 .nav.nav-pills {
-	font-family: Quicksand;
 }
 .nav-pills .nav-link.active {
 	background-color: #9D2146;
@@ -233,7 +232,6 @@ blockquote {
 ol.breadcrumb {
 	margin: 15px 0;
 	font-size: 88%;
-	font-family: 'Quicksand';
 }
 	.breadcrumb a {
 		color: #555;
@@ -970,7 +968,6 @@ dl.schema > div {
 }
 
 input[type=text].default {
-	font-family: Verdana, Arial, sans-serif;
 	font-size: 90%;
 	color: #888;
 	}
@@ -1014,7 +1011,6 @@ ul.singlesignon {
 			margin: -5px auto 0;
 			text-align: center;
 			text-decoration: none;
-			font-family: sans-serif;
 		}
 	#sitenews div.sitenewsbody {
 		width: 100%;
@@ -1231,7 +1227,6 @@ ul.singlesignon {
 		background-color: #9D2146;
 		padding: 7px 15px;
 		color: white;
-		font-family: Quicksand;
 	}
 	#community-forum form {
 		margin: 0;
@@ -1275,7 +1270,6 @@ ul.singlesignon {
 	border: 1px solid #DDD;
 	border-radius: .5em;
 	padding: 5px 15px 0px 15px;
-    font-family: Quicksand;
     line-height: 150%;
 }
     #seealso-links > * {
