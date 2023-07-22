@@ -1318,14 +1318,12 @@ ul.singlesignon {
     font-family: Quicksand;
     line-height: 150%;
 }
-    #seealso-links a {
+    #seealso-links > * {
         display: inline-block;
-        text-decoration: none;
         margin-right: 1.25em;
         margin-bottom: .33em;
     }
         #seealso-links a:hover {
-            text-decoration: underline;
         }
     #seealso-links a i {
         margin-right: .4em;
