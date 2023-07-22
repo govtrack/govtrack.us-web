@@ -67,8 +67,18 @@ function do_keyword_tracker_submit() {
 
 <div class="clearfix">
 	<img src="/static/images/img-bills-resolutions.png" alt="Page Icon" style="float: right"/>
-	<h1 style="margin-top: 30px; border: none">Bills and Resolutions</h1>
+	<h1 style="margin-top: 30px; border: none">Bills and Resolutions in Congress</h1>
+
+				<p>
+					{% if 5000 > total %}
+					Each year the United States Congress considers about 5,000 bills and resolutions,
+					{% else %}
+					There are {{total|intcomma}} bills and resolutions currently before the United States Congress,
+					{% endif %}
+					but of those only about 7% will become law.
+				</p>
 </div>
+
 
 <ul class="nav nav-tabs" role="tablist">
 	<li class="nav-item" role="presentation"><a href="#docket" aria-controls="docket" class="nav-link active" data-bs-toggle="tab" role="tab" aria-selected="true">Coming Up &amp; Trending</a></li>
@@ -141,15 +151,6 @@ function do_keyword_tracker_submit() {
 			<div class="col-sm-7">
 			<h2><span>Find a bill</span></h2>
 			<div style="padding-right: 30px">
-				<p>
-					{% if 5000 > total %}
-					Each year the United States Congress considers about 5,000 bills and resolutions,
-					{% else %}
-					There are {{total|intcomma}} bills and resolutions currently before the United States Congress,
-					{% endif %}
-					but of those only about 7% will become law.
-				</p>
-
 				<p>Congress works in two-year legislative sessions tied to the elections. The current session is called the {{current_congress|ordinalhtml}} Congress and it began on {{current_congress_dates.0|date}}. All bills not enacted by the end of the session on {{current_congress_dates.1|date}} die, and Congress will start over.</p>
 
 				<p>Because there are so many bills and resolutions, it can be difficult to find the one you are looking for. Please consider your options:</p>
