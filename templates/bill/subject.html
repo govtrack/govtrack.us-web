@@ -7,8 +7,7 @@
 {% block crumbs %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
-    <li class="breadcrumb-item"><a href="/congress/bills">Bills</a></li>
+    <li class="breadcrumb-item"><a href="/congress/bills">Bills &amp; Resolutions</a></li>
     {% with term.parents.all as parents %}
     {% if parents|length > 0 %}
     <li class="breadcrumb-item"></li>

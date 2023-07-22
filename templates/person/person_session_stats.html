@@ -85,7 +85,6 @@ function smooth_scroll(elem) {
 {% block crumbs %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
     <li class="breadcrumb-item"><a href="/congress/members">Members of Congress</a></li>
     <li class="breadcrumb-item"><a href="{{person.get_absolute_url}}">{{person.name_no_details}}</a></li>
     <li class="breadcrumb-item"><a href="/congress/members/report-cards/{{session}}">All {{session}} Report Cards</a></li>

@@ -48,7 +48,6 @@
 {% block crumbs %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
     <li class="breadcrumb-item"><a href="/congress/members">Members of Congress</a></li>
     {% if cohort or specific_stat %}
     <li class="breadcrumb-item"><a href="/congress/members/report-cards/{{session}}">{{session}} Report Cards</a></li>

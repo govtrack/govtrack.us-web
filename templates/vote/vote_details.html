@@ -271,8 +271,7 @@ $(function() {
 {% block crumbs %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
-    <li class="breadcrumb-item"><a href="/congress/votes">Votes</a></li>
+    <li class="breadcrumb-item"><a href="/congress/votes">Roll Call Votes</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{vote.name}} in {{vote.created.year}} ({{ vote.congress|ordinalhtml }} Congress)</li>
   </ol>
 </nav>

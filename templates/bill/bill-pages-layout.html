@@ -283,8 +283,7 @@ function saveUserPosition() {
 {# BREADCRUMBS #}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
-    <li class="breadcrumb-item"><a href="/congress/bills">Bills</a></li>
+    <li class="breadcrumb-item"><a href="/congress/bills">Bills &amp; Resolutions</a></li>
     {% if not bill_subpage %}
     <li class="breadcrumb-item active" aria-current="page">{{bill.display_number_with_congress_number}}</li>
     {% else %}

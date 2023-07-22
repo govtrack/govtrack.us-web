@@ -16,8 +16,7 @@
 {% block crumbs %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
-    <li class="breadcrumb-item"><a href="/congress/bills">Bills</a></li>
+    <li class="breadcrumb-item"><a href="/congress/bills">Bills &amp; Resolutions</a></li>
     {% if parent %}
     <li class="breadcrumb-item"><a href="/congress/bills/uscode">U.S. Code Index</a></li>
     {% if parent.parent_section %}<li class="breadcrumb-item"><a href="/congress/bills/uscode/{{parent.parent_section.id}}">{{parent.parent_section.name|truncatewords:4}}</a>{% endif %}</li>
