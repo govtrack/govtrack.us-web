@@ -614,49 +614,10 @@ class Bill(models.Model):
 
         # There are no prognoses for dead bills.
         if self.congress != settings.CURRENT_CONGRESS: return None
-
-        # Load and cache the Skopos Labs prognosis data.
-        from django.core.cache import cache
-        key = "Bill.prognosis.skopos"
-        ret = cache.get(key)
-        if ret is None:
-            # Cache miss.
-            try:
-                import csv
-                with open("data/skopos_labs_predictions.csv") as f:
-                    ret = { row["bill_id"].lower(): { "prediction": float(row["Prediction"])*100 } # , "notes": row["descs"] }
-                            for row in csv.DictReader(f) }
-            except:
-                # On any sort of error, just ignore.
-                return None
-            cache.set(key, ret, 60*60*4.5) # 4.5 hours, since the file is updated daily
-
-        # Extract the info for this bill.
-        ret = ret.get(self.congressproject_id)
-        if ret:
-            ret["success_name"] = "enacted" if self.bill_type in (BillType.senate_bill, BillType.house_bill, BillType.senate_joint_resolution, BillType.house_joint_resolution) \
-                else "agreed to"
-        return ret
-
-    def get_prognosis_with_details(self):
-        # The notes --- the explanation for the prognosis --- is too much to cache in memcached
-        # in a single entry. Just go to disk for each bill. This only happens on bill pages.
-        # Same return value as get_prognosis, but adds a "notes" key.
-        try:
-            import csv
-            with open("data/skopos_labs_predictions.csv") as f:
-                for row in csv.DictReader(f):
-                    if row["bill_id"].lower() == self.congressproject_id:
-                        return {
-                          "prediction": float(row["Prediction"])*100,
-                          "notes": row["descs"],
-                          "success_name": ("enacted" if self.bill_type in (BillType.senate_bill, BillType.house_bill, BillType.senate_joint_resolution, BillType.house_joint_resolution)
-                                               else "agreed to"),
-                        }
-        except:
-            # On any sort of error, just ignore.
-            pass
-        return None
+        from .prognosis import compute_prognosis
+        prog = compute_prognosis(self)
+        prog["congressdates"] = get_congress_dates(prog["congress"])
+        return prog
 
     def get_formatted_summary(self):
         return get_formatted_bill_summary(self)

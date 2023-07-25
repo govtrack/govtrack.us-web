@@ -263,16 +263,12 @@ def onenorm(u): return sum(abs(u))</pre>
 	</div> <!-- /leadership pane -->
 	
 	<div id="prognosis" class="tab-pane">
-		<p style="margin: 1em 0">The following information pertained to our prognosis analysis until October 2016, when we began showing predictions by <a href="https://www.skoposlabs.com/">Skopos Labs</a>. You may find the description of our old analysis below informative, but it is no longer the methodology used on GovTrack.</p>
-
-		<hr>
-
 		<h2>Bill Prognosis Analysis</h2>
 		
 		<div class="row">
 		<div class="col-md-6">
 			<p>GovTrack computes a prognosis for each bill, which is the probability that the bill will be enacted. Our computation is based on factors that are correlated with successful or failed bills in the past, such as whether the sponsor is a committee chair.</p>
-			
+
 			<p>What is the point of this?</p>
 			
 			<ul class="bullets">
@@ -286,8 +282,9 @@ def onenorm(u): return sum(abs(u))</pre>
 			
 			<p>The data that goes into this analysis are factors that we compute for bills, such as whether the sponsor is a committee chair (see right for a full list), and whether the bill was successful. We &ldquo;train&rdquo; the model on bills from the {{prognosis_training_congress|ordinalhtml}} Congress ({{prognosis_training_congress_dates.0|date:"Y"}}-{{prognosis_training_congress_dates.1|date:"Y"}}) to compute probabilities for bills in the current Congress.</p>
 			
-			<p>We first began publishing prognosis scores in 2012. As far as we know, we were the first to apply this analysis to Congressional bills.</p>
-			
+			<p>We first began publishing prognosis scores in 2012. As far as we know, we were the first to apply this analysis to Congressional bills.
+			<p>(From late 2016 to mid 2023 we published predictions made by PredictGov/Skopos Labs and put our own analysis on pause.)</p>
+						
 			<h3>Methodology</h3>
 			
 			<p>This analysis is based on a logistic regression. Logistic regression is similar to simple linear regression but it is more appropriate when modeling probabilities. We create eight separate models: For each of the four types of legislative measures (bills, joint resolutions, concurrent resolutions, and simple resolutions), we compute one model that predicts whether the bill/resolution will get out of committee and a separate model that computes, for bills/resolutions out of committee, whether the bill/resolution will be enacted or agreed to.</p>

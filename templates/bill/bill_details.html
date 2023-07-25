@@ -538,7 +538,6 @@
 		</div>
 		<div class="clearfix"></div>
 				{% endif %}
-
 				{% endif %} {# / not show media bar #}
 
 		{% if bill.cosponsor_count > 0 %}
@@ -558,7 +557,7 @@
 		{% endif %}
 
 
-				{% if prognosis and bill.is_alive %}
+		{% if prognosis and bill.is_alive %}
 		<div class="col-sm-3 col-md-2">
 			<span>Prognosis</span>
 		</div>
@@ -567,11 +566,10 @@
 						{% if prognosis.prediction|floatformat:0 == "0" %}data-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
 						>
 						{{prognosis.prediction|floatformat:0}}% chance</span> of being {{prognosis.success_name}}
-                        according to <a href="https://www.skoposlabs.com/" style="font-weight: normal">Skopos Labs</a>
 						(<a href="#" onclick="$('#prognosis-details').modal(); return false;" style="font-weight: normal;">details</a>)
 		</div>
 		<div class="clearfix"></div>
-				{% endif %}
+		{% endif %}
 				
 				{% with reintro_as=reintros.1 related_newer=bill.get_related_bills_newer %}
 					
@@ -876,13 +874,50 @@
         <h2 class="modal-title" id="prognosis-details-title">Prognosis Details</h2>
       </div>
       <div class="modal-body">
-      	<p style="margin-bottom: .25em">This {{bill.noun}} has a <b>{{prognosis.prediction|floatformat:0}}%</b> chance of being {{prognosis.success_name}}.</p>
-        {% if prognosis.notes %}
-          <p>Factors considered:</p>
-          <p style="margin: 1em">{{prognosis.notes}}</p>
-          <p>(Factors are based on correlations which may not indicate causation.)</p>
-        {% endif %}
-        <p>Predictions are by <a href="https://www.skoposlabs.com/">Skopos Labs</a>.</p>
+      	<p style="margin-bottom: .25em">This {{bill.noun}} has a . . .</p>
+		{% if prognosis.is_introduced %}
+			<p><b>
+			{{prognosis.prediction_1|floatformat:0}}%</b> chance of getting past committee.<br/>
+			<b>{{prognosis.prediction|floatformat:0}}%</b> chance of being {{prognosis.success_name}}.</p>
+			<p>{% if 40 > prognosis.success_rate_1 %}Only {% endif %}{{prognosis.success_rate_1|floatformat:0}}% of {{prognosis.bill_type_descr}} made it past committee
+			and {% if 40 > prognosis.success_rate %}only {% endif %} about {{prognosis.success_rate|floatformat:0}}% were {{prognosis.success_name_2}}
+			in {{prognosis.congressdates.0|date:"Y"}}&ndash;{{prognosis.congressdates.1|date:"Y"}}.</p>
+		{% else %}
+			<p><b>{{prognosis.prediction|floatformat:0}}%</b> chance of being {{prognosis.success_name}}.</p>
+			<p>{% if 40 > prognosis.success_rate_2 %}Only about {% endif %}{{prognosis.success_rate_2|floatformat:0}}% of {{prognosis.bill_type_descr}} that made it past committee in {{prognosis.congressdates.0|date:"Y"}}&ndash;{{prognosis.congressdates.1|date:"Y"}} were {{prognosis.success_name_2}}.</p>
+		{% endif %}
+
+		{% if prognosis.factors_help_help or prognosis.factors_hurt_hurt or prognosis.factors_help_hurt or prognosis.factors_hurt_help %}
+		<hr>
+		<h3 style="margin: 0 0 .5em 0">Factors considered:</h3>
+		<style>
+			#prognosis_factors_considered td {
+				vertical-align: top;
+				line-height: 115%;
+				padding: 0 .25em .5em 0;
+			}
+		</style>
+		<table id="prognosis_factors_considered">
+		{% for factor in prognosis.factors_help_help %}
+			<tr><td>↑</td> <td>{{factor}}</td></tr>
+		{% endfor %}
+		{% for factor in prognosis.factors_hurt_hurt %}
+			<tr><td>↓</td> <td>{{factor}}</td></tr>
+		{% endfor %}
+		{% for factor in prognosis.factors_help_hurt %}
+			<tr><td>↑↓</td> <td>{{factor}}</td></tr>
+		{% endfor %}
+		{% for factor in prognosis.factors_hurt_help %}
+			<tr><td>↓↑</td> <td>{{factor}}</td></tr>
+		{% endfor %}
+		</table>
+		<p>These factors are correlated with either an increased or decreased chance of being {{prognosis.success_name}}.</p>
+		<hr>
+		{% endif %}
+
+		<p>Please read our full <a href="/about/analysis#prognosis">methodology</a> for further details.</p>
+		
+		</div>
       </div>
     </div>
   </div>

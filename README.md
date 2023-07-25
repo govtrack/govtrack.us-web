@@ -161,7 +161,6 @@ To scrape and load new data, you'll need to set up the `congress` project.
 * Symlink the `data/congress` _data_ directory as the `data` directory inside the congress project working directory.
 * Clone the [congress-legislators](https://github.com/unitedstates/congress-legislators/) project as a subdirectory of the congress project working directory and follow its installation steps to create a separate Python 3 virtualenv for its scripts in its `scripts/.env` directory.
 * Try launching the scrapers from the GovTrack directory: `./run_scrapers.py people`, `./run_scrapers.py committees`, etc.
-* Copy over our local/skoposlabs_s3cmd.ini file.
 * Enable the crontab.
 
 The crontab sends the outputs of the commands to Josh, so the server needs a sendmail-like command. The easiest to set up is msmtp, like so:
