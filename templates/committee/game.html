@@ -51,11 +51,11 @@
 
 {% block body %}
 
-<div class="panel panel-default committee-game">
+<div class="card committee-game">
 	<div class="panel-heading" style="font-weight: bold; font-size: 115%;">
 		Can you guess which {% if number_of_committees != 1 %}{{number_of_committees}}{% endif %} committee{% if number_of_committees > 1 %}s{% endif %} this bill was assigned to?
 	</div>
-	<div class="panel-body">
+	<div class="card-body">
 
 		<p>{{bill.title|truncatewords:30}}</p>
 
@@ -80,8 +80,8 @@
 
 	<!-- automatic explanation -->	
 	{% if not summary1 and bill.explanatory_text %}
-		    <div class="panel panel-info" style="margin: 30px 0;">
-	    <div class="panel-body">
+		    <div class="card bg-info" style="margin: 30px 0;">
+	    <div class="card-body">
 		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
 			{{bill.explanatory_text|safe}}
 	    </div>
@@ -97,12 +97,12 @@
 	</div>
 </div>
 
-<div class="panel panel-default">
+<div class="card">
 	<div class="panel-heading" style="font-weight: bold; font-size: 115%;">
 		Guess {{number_of_committees}} committee{% if number_of_committees > 1 %}s{% endif %}
 	</div>
 
-	<div class="panel-body">
+	<div class="card-body">
 
     <div id="committee-game">
 	<div class="row">

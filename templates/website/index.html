@@ -211,31 +211,23 @@ article {
 <div class="row">
 
 <div class="col-md-5">
-  <div class="panel panel-primary">
-    <div class="panel-heading">How a bill actually becomes a law... in 2020</div>
-    <div class="panel-body">
+  <div class="card">
+    <div class="card-header">How a bill actually becomes a law... in 2020</div>
+    <div class="card-body">
       <p>Middle school social studies textbooks and Schoolhouse Rock songs paint a stereotypical portrait of how congressional legislation gets passed. But in real life, the story of how federal laws actually get enacted usually proves far more complex. To examine how, GovTrack Insider browsed through all the laws enacted by Congress in 2019–20, looking for one that seemed both particularly interesting and undercovered by national media.</p>
       <a href="https://govtrackinsider.com/how-a-bill-actually-becomes-a-law-in-2020-the-emancipation-national-historic-trail-study-act-768a301974ff">Read
       the story of The Emancipation National Historic Trail Study Act &raquo;</a>
     </div>
   </div>
 
-  <div class="panel panel-primary">
-    <div class="panel-heading">COVID in Congress</div>
-    <div class="panel-body">
-      We&rsquo;re tracking <a href="/covid-19">cases of COVID-19 in Congress</a>.
-    </div>
-  </div>
-
-
 </div>
 
 <div class="col-md-7">
 
 {% for post_group in post_groups %}
-<div class="panel panel-primary" style="margin-bottom: 1.5em">
-  <div class="panel-heading">{{post_group.title}}</div>
-    <div class="panel-body" style="margin-bottom: -.5em">
+<div class="card" style="margin-bottom: 1.5em">
+  <div class="card-header">{{post_group.title}}</div>
+    <div class="card-body" style="margin-bottom: -.5em">
 
 <div class="row">
   {% for post in post_group.posts|slice:"0:6" %}
@@ -269,8 +261,8 @@ article {
 {% endfor %}
 </div>
 
-</div> <!-- /panel-body -->
-</div> <!-- /panel -->
+</div> <!-- /card-body -->
+</div> <!-- /card -->
 {% endfor %}
 
 </div> <!-- /col -->

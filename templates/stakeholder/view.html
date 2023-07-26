@@ -52,8 +52,8 @@
 {% if stakeholder.verified is False %}
     <p class="text-danger">GovTrack staff rejected your request to register this stakeholder. For more information, please contact us.</p>
 {% elif stakeholder.verified is None %}
-    <div class="panel panel-info">
-        <div class="panel-body">
+    <div class="card bg-info">
+        <div class="card-body">
             <div>This organization is in the queue to be confirmed by GovTrack staff. You&rsquo;ll hear from us in a few days with more information.</div>
             {% if stakeholder.twitter_handle %}
                 <hr>

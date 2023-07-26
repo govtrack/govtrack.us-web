@@ -107,8 +107,8 @@ function save_note(tracker_div) {
 
 {% if request.user == list.user %}
 <div style="margin-top: 1em">
-<div class="panel panel-info">
-  <div class="panel-body">
+<div class="card bg-info">
+  <div class="card-body">
     <p>Welcome to your list. You can share this page with others, but only you can see this box.</p>
     <p style="margin: 0">To change the title of this list or to add or remove trackers from this list, go to <a href="/accounts/lists?listid={{list.id}}">Your Tracker Lists</a>.</p>
   </div>
@@ -126,13 +126,13 @@ function save_note(tracker_div) {
 <div>
   {% for tracker in list_trackers %}
     <div id="tracker-{{tracker.id}}" class="tracker tracker-type-{{tracker.noun|cut:' '}}" data-tracker-id="{{tracker.id}}">
-      <div class="panel panel-primary">
-        <div class="panel-heading">
+      <div class="card bg-primary">
+        <div class="card-heading">
           <a href="{{tracker.link}}" style="color: inherit; text-decoration: none">
             <h3 class="panel-title" style="font-weight: bold;">{{tracker.title}}</h3>
           </a>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
           <table width="100%" style="margin: -15px;">
             <tr valign="top">
               {% if tracker.thumbnail_image_url or tracker.recently.0.large_thumbnail_url or tracker.recently.0.thumbnail_url %}
@@ -160,8 +160,8 @@ function save_note(tracker_div) {
 
                 {% if request.user == list.user %}
                   <div class="note-editor" style="display: none">
-                    <div class="panel panel-default">
-                      <div class="panel-body">
+                    <div class="card">
+                      <div class="card-body">
                         <p>Write a note to appear on this page. Click <i>Save</i> when you are done. Your note can be seen by anyone with a link to this page, so don&rsquo;t use this space for anything private.</p>
                         <textarea class="form-control" rows=5 style="margin-bottom: 1em">{{tracker.user_note.text}}</textarea>
                         <div>

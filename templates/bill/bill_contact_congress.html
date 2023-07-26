@@ -14,26 +14,26 @@
       border: 1px solid #999;
     }
 
-    .panel-red {
+    .bg-red {
       background-color: #9D2146;
       border-radius: 20px;
       padding: 5px;
       color: white;
       font-weight: bold;
     }
-      .panel-red a {
+      .bg-red a {
         color: inherit;
         font-weight: normal;
       }
 
-    .panel-blue {
+    .bg-blue {
       background-color: #1D4E70;
       border-radius: 20px;
       padding: 5px;
       color: white;
       font-weight: bold;
     }
-      .panel-blue a {
+      .bg-blue a {
         color: inherit;
         font-weight: normal;
       }
@@ -81,8 +81,8 @@
 
     <p>We&rsquo;ll walk you through the process of writing or calling your representative and senators in Congress about {{bill.display_number}}. But before we can help, we need to know where you call home so we can figure out who represents you.</p>
 
-    <form onsubmit="enter_address(); return false;" style="margin: 1.5em 0;" class="panel panel-red">
-    <div class="panel-body">
+    <form onsubmit="enter_address(); return false;" style="margin: 1.5em 0;" class="card bg-red">
+    <div class="card-body">
       <h2 style="margin: 0">I live at...</h2>
       <div class="row">
         <div class="col-xs-8 col-md-8">
@@ -145,8 +145,8 @@
         </table>
       </div>
 
-      <div id="who-to-contact-overview" class="panel panel-blue">
-        <div class="panel-body">
+      <div id="who-to-contact-overview" class="card bg-blue">
+        <div class="card-body">
           <p>
             {# The logic here should match the javascript of how we populate the "ask" text. #}
 
@@ -167,8 +167,8 @@
         </div>
       </div>
 
-      <div id="who-to-contact-no-targets" class="panel panel-blue">
-        <div class="panel-body">
+      <div id="who-to-contact-no-targets" class="card bg-blue">
+        <div class="card-body">
           <p>
             {{bill.display_number}} is currently pending before the
             {% if bill.current_chamber == "senate" %}Senate, but you do not have any senators.
@@ -181,8 +181,8 @@
 
   </div>
   <div class="col-md-5">
-    <div class="panel panel-info" style="font-size: 90%">
-    <div class="panel-body">
+    <div class="card bg-info" style="font-size: 90%">
+    <div class="card-body">
       <h2 style="margin: 0 0 1em 0; font-size: 105%; font-weight: bold;">
         General tips
       </h2>
