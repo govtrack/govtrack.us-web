@@ -22,7 +22,7 @@ function show_track_panel() {
 		$('#track_panel .events_to_track').show();
 	}
 	
-	$("#track_panel").modal();
+	new bootstrap.Modal("#track_panel").show();
 	
 	return false;
 }
@@ -143,7 +143,7 @@ function hide_track_panel() {
 
 function show_add_to_list_panel() {
 	// in the simple mode, update the control state now
-	$("#add_to_list_panel").modal();
+	new bootstrap.Modal("#add_to_list_panel").show();
 	return false;
 }
 
@@ -164,8 +164,8 @@ $(function() {
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="track_panel_ModalLabel">Track this {{feed.type_metadata.noun}}</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body tracker_widget">
 
@@ -248,7 +248,7 @@ $(function() {
       </div>
       <div class="modal-footer">
 
-				<button type="button" class="btn btn-default" data-dismiss="modal" onclick="hide_track_panel(); return false;">Cancel</button>
+				<button type="button" class="btn btn-default" data-bs-dismiss="modal" onclick="hide_track_panel(); return false;">Cancel</button>
    				<a href="#" class="btn btn-primary add" onclick="has_tracker = true; return save_tracker()">Add Tracker</a>
 				<a href="#" class="btn btn-danger if_has_tracker" onclick="has_tracker = false; return remove_tracker()" style="display: none;">Remove Tracker</a>
 
@@ -268,7 +268,7 @@ $(function() {
 					</li>
 					{% endfor %}
 					
-					<li class="new_list_row new" style="margin-top: .5em"><span class="target" onclick="return new_list(this);"><span class="glyphicon glyphicon-plus"></span> Add to new list</span></li>
+					<li class="new_list_row new" style="margin-top: .5em"><span class="target" onclick="return new_list(this);"><span class="fas fa-plus"></span> Add to new list</span></li>
 					<li class="all"><a class="target" href="/accounts/lists"><span class="icon"></span> Edit your lists</a></li>
 					
 					<div style="clear: both"> </div>
@@ -280,7 +280,7 @@ $(function() {
 
       </div>
       <div class="modal-footer">
-			<button type="button" class="btn btn-default" data-dismiss="modal" onclick="hide_track_panel(); return false;">Done</button>
+			<button type="button" class="btn btn-default" data-bs-dismiss="modal" onclick="hide_track_panel(); return false;">Done</button>
 		{% endif %}
 		
 	{% endif %}
@@ -295,8 +295,8 @@ $(function() {
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="add_to_list_panel_ModalLabel">Add this {{feed.type_metadata.noun}} to a list</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body tracker_widget">
 		<div class="row">
@@ -319,14 +319,14 @@ $(function() {
 						<li list_id="{{list.id}}" class="
 							{% if forloop.first %}base_list_row{% endif %}
 							{% if feed in list.trackers.all %}selected{% endif %} ">
-						  <a class="viewlist" href="/list/{{list.get_public_id}}">View <span class="glyphicon glyphicon-play"></span></a>
+						  <a class="viewlist" href="/list/{{list.get_public_id}}">View <span class="fas fa-play"></span></a>
 						  <span class="target" onclick="return toggle_list_item(this);">
 						  	<span class="icon"></span> <span class="name">{{list.name}}</span>
 						  </span>
 						</li>
 						{% endfor %}
 						
-						<li class="new_list_row new" style="margin-top: .5em"><span class="target" onclick="return new_list(this);"><span class="glyphicon glyphicon-plus"></span> Add to new list</a></li>
+						<li class="new_list_row new" style="margin-top: .5em"><span class="target" onclick="return new_list(this);"><span class="fas fa-plus"></span> Add to new list</a></li>
 						<li class="all"><a href="/accounts/lists" class="target"><span class="icon"></span> Edit your lists</a></li>
 						
 						<div style="clear: both"> </div>
@@ -346,7 +346,7 @@ $(function() {
 		        <a class="btn btn-primary" href="/accounts/login?next={{request.path|add:return_hash|urlencode}}">Log In</a>
 			{% endwith %}
 		{% else %}
-			<button type="button" class="btn btn-default" data-dismiss="modal" onclick="hide_track_panel(); return false;">Done</button>
+			<button type="button" class="btn btn-default" data-bs-dismiss="modal" onclick="hide_track_panel(); return false;">Done</button>
 		{% endif %}
 	  </div> <!-- /col -->
 	  </div> <!-- /row -->

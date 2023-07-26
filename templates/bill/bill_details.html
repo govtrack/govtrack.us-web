@@ -44,10 +44,11 @@
     	$('#community-forum').html(the_page.community_forum.html).show();
     }
 
-	// UI fixups
-    $('#dead-prev-congress-popover').popover({ placement: 'bottom', trigger: 'hover' })
-
-	$('[data-toggle="tooltip"]').tooltip()
+    // UI fixups
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl, { container: 'body' }))
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, { container: 'body' }))
 </script>
 {% endblock %}
 
@@ -245,7 +246,7 @@
 		{% if bill.is_alive %}
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 		<button class="btn btn-success" onclick="return show_track_panel();">
-			<i class="glyphicon glyphicon-envelope"> </i>
+			<i class="fas fa-envelope"> </i>
 			<span style="margin-left: 3px;">
 				Track {{bill.display_number_no_congress_number}}
 			</span>
@@ -254,7 +255,7 @@
 
 		{% if bill.current_chamber %}
 		<a class="btn btn-info" href="{{bill.get_absolute_url}}/comment">
-			<i class="fas fa-phone-square"> </i>
+			<i class="fas fa-phone"> </i>
 			<span style="margin-left: 3px;">
 				Call or Write Congress
 			</span>
@@ -262,7 +263,7 @@
 		{% endif %}
 
 		<button class="btn" onclick="return show_add_to_list_panel();" style="border: 1px solid #999; color: #555;">
-			<i class="glyphicon glyphicon-list-alt"> </i>
+			<i class="fas fa-list"> </i>
 			<span style="margin-left: 3px;">
 				Add to List
 			</span>
@@ -310,7 +311,7 @@
 	{% if not summary1 and bill.explanatory_text %}
 	    <div class="card" style="margin: 30px 0;">
 	    <div class="card-body">
-		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
+			<i class="fas fa-circle-info"></i>
 			{{bill.explanatory_text|safe}}
 	    </div>
 	    </div>
@@ -324,12 +325,12 @@
 {% if show_media_bar %}
 <div class="row" style="margin-top: 30px; margin-bottom: 15px;">
 	{% if not bill.original_intent_replaced and bill.sponsor.has_photo %}
-	<div class="col-xs-3 col-sm-2" style="padding-right: 0; padding-bottom: 1em;">
+	<div class="col-3 col-md-2" style="padding-right: 0; padding-bottom: 1em;">
 		<a href="{{bill.sponsor.get_absolute_url}}">
 			<img src="{{bill.sponsor.get_photo_url_200}}" alt="Photo of sponsor {{bill.sponsor.name_no_details}}" class="img-fluid" style="border: 1px solid #999"/>
 		</a>
 	</div>
-	<div class="col-xs-7 col-sm-4">
+	<div class="col-7 col-md-4">
 		<h3 style="margin: 0 0 .5em 0; font-family: sans-serif;">
 			<a class="name" href="{{bill.sponsor.get_absolute_url}}">{{bill.sponsor.name_no_details}}</a>
 		</h3>
@@ -338,13 +339,12 @@
 	{% endif %}
 
 	{% if text_info.has_thumbnail %}
-	<div class="clearfix visible-xs"></div>
-	<div class="col-xs-3 col-sm-2" style="padding-right: 0;">
+	<div class="col-3 col-md-2" style="padding-right: 0;">
 		<a href="{{bill.get_absolute_url}}/text">
 			<img src="{{bill.get_absolute_url}}/_text_image" class="img-fluid" alt="Thumbnail of {{bill.noun}} text" style="border: 1px solid #999;"/>
 		</a>
 	</div>
-	<div class="col-xs-7 col-sm-4">
+	<div class="col-7 col-md-4">
 		<a href="{{bill.get_absolute_url}}/text">Read Text &raquo;</a>
 		<small><br>Last Updated: {{text_info.docdate}}
 		{% if text_info.numpages %}
@@ -397,11 +397,11 @@
 						{% endif %}
 
 						{% if bill.docs_house_gov_postdate and bill.docs_house_gov_postdate.date > bill.current_status_date %}
-						<p><span class="glyphicon glyphicon-calendar"> </span> The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</p>
+						<p><span class="fas fa-calendar-days"> </span> The House Majority Leader indicated on {{bill.docs_house_gov_postdate|date:"DATE_FORMAT"}} that this {{bill.noun}} may be considered in the week ahead.</p>
 						{% endif %}
 						
 						{% if bill.senate_floor_schedule_postdate and bill.senate_floor_schedule_postdate.date > bill.current_status_date %}
-						<p><span class="glyphicon glyphicon-calendar"> </span> Added to the <strong>Senate&rsquo;s floor schedule</strong> for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</p>
+						<p><span class="fas fa-calendar-days"> </span> Added to the <strong>Senate&rsquo;s floor schedule</strong> for the next legislative day on {{bill.senate_floor_schedule_postdate|date:"DATE_FORMAT"}}.</p>
 						{% endif %}
 					
 						{% if bill.get_upcoming_meetings|length %}
@@ -416,8 +416,9 @@
 					{% else %}
 						<div>
 							<strong id="dead-prev-congress-popover"
-							data-toggle="What is a previous Congress?"
-							data-content="Congress operates in two-year cycles that follow elections. Each cycle is called a &ldquo;Congress.&rdquo; This {{bill.noun}} was introduced in the {{bill.congress|ordinal}} Congress, which was from {{congressdates.0|date}} to {{congressdates.1|date}}. Bills are not carried forward from Congress to Congress.">
+							data-bs-toggle="popover"
+							data-bs-title="What is a previous Congress?"
+							data-bs-content="Congress operates in two-year cycles that follow elections. Each cycle is called a &ldquo;Congress.&rdquo; This {{bill.noun}} was introduced in the {{bill.congress|ordinal}} Congress, which was from {{congressdates.0|date}} to {{congressdates.1|date}}. Bills are not carried forward from Congress to Congress.">
 							{% if bill.was_enacted_ex %}
 								{{bill.get_current_status_display}}
 							{% else %}
@@ -563,10 +564,10 @@
 		</div>
 		<div class="col-sm-9 col-md-10">
 						<span
-						{% if prognosis.prediction|floatformat:0 == "0" %}data-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
+						{% if prognosis.prediction|floatformat:0 == "0" %}data-bs-toggle="tooltip" data-placement="bottom" title="AW HEEEELLLL ZERO!"{% endif %}
 						>
 						{{prognosis.prediction|floatformat:0}}% chance</span> of being {{prognosis.success_name}}
-						(<a href="#" onclick="$('#prognosis-details').modal(); return false;" style="font-weight: normal;">details</a>)
+						(<a href="#" onclick="new bootstrap.Modal('#prognosis-details').show(); return false;" style="font-weight: normal;">details</a>)
 		</div>
 		<div class="clearfix"></div>
 		{% endif %}
@@ -768,7 +769,7 @@
 			<div class="card bg-info">
 			  <div class="card-body">
 				<!-- What is a bill? -->
-				<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
+				<span class="fas fa-circle-info" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
 				<h3 style="margin: 0 0 5px 0; font-weight: bold;">{{bill.display_number}} {% if bill.is_current %}is{% else %}was{% endif %} a {{bill.bill_type_name}} in the United States Congress.</h3>
 				<p>{{bill.how_a_bill_text}}</p>
 				<p>{{bill.noun|capfirst}}s numbers restart every two years. That means there are other {{bill.noun}}s with the number {{bill.display_number_no_congress_number}}. This is the one from the {{bill.congress|ordinalhtml}} Congress.</p>
@@ -870,8 +871,8 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="prognosis-details-title">Prognosis Details</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
       	<p style="margin-bottom: .25em">This {{bill.noun}} has a . . .</p>

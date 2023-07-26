@@ -26,7 +26,11 @@
 		<meta name="msapplication-TileImage" content="/static/favicon/ms-icon-144x144.png">
 		<meta name="theme-color" content="#9B2347">
 
-		<link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap.min.css">
+		<link href="{{ STATIC_URL }}vendor/bootstrap.min.css" rel="stylesheet">
+	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/fontawesome.css" rel="stylesheet">
+	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/solid.css" rel="stylesheet">
+	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/brands.css" rel="stylesheet">
+
 
 		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20230510" />
 
@@ -182,8 +186,8 @@
 
 			{% comment %}
 			<p class="navbar-text navbar-right">
-				<a id="nav-in-session-house" style="display: none" href="https://live.house.gov/" class="navbar-link" title="The House is in session.">H <span class="glyphicon glyphicon-facetime-video" style="top: 2px"></span></a>
-				<a id="nav-in-session-senate" style="display: none" href="https://www.senate.gov/legislative/floor_activity_pail.htm" class="navbar-link" title="The Senate is in session.">S <span class="glyphicon glyphicon-facetime-video" style="top: 2px"></span></a>
+				<a id="nav-in-session-house" style="display: none" href="https://live.house.gov/" class="navbar-link" title="The House is in session.">H <span class="fas fa-video" style="top: 2px"></span></a>
+				<a id="nav-in-session-senate" style="display: none" href="https://www.senate.gov/legislative/floor_activity_pail.htm" class="navbar-link" title="The Senate is in session.">S <span class="fas fa-video" style="top: 2px"></span></a>
 			</p>
 			{% endcomment %}
 
@@ -244,7 +248,7 @@
 				    {% for message in messages %}
 			        {# Django levels are: debug (map to Boostrap 'info'), info, success, warning, error (map to Boostrap 'danger') #}
 			        <div class="alert fade in alert-{% if message.level_tag == "error" %}danger{% elif message.level_tag == "debug" %}info{% else %}{{message.level_tag}}{% endif %}">
-			            <button type="button" class="close" data-dismiss="alert">&times;</button>
+			            <button type="button" class="close" data-bs-dismiss="alert">&times;</button>
 			            {{ message }}
 			        </div>
 			        {% endfor %}
@@ -263,7 +267,7 @@
 			<div class="container">
 			<div class="row">
 
-				<nav class="col-xs-6 col-sm-3 col-md-2">
+				<nav class="col-6 col-md-2">
 					<ul>
 						<li><a href="/">Home</a></li>
 						<li><a href="/start">Start Tracking</a></li>
@@ -280,7 +284,7 @@
 					</ul>
 				</nav>
 
-				<section class="col-xs-6 col-sm-2 social">
+				<section class="col-6 col-md-2 social">
 					<ul>
 						<li><a rel="me" href="https://mastodon.social/@GovTrack"><i class="fab fa-mastodon fa-fw"></i> Mastodon</a></li>
 						<li><a href="https://www.instagram.com/govtrack.us/"><i class="fab fa-instagram fa-fw"></i><span>Instagram</span></a></li>
@@ -290,7 +294,7 @@
 					</ul>
 				</section>
 
-				<section class="col-xs-12 col-md-offset-1 col-sm-6">
+				<section class="col-12 col-md-8">
 					<p>Launched in 2004, GovTrack helps everyone learn about and track the activities of the United States Congress. This is a project of <a href="http://www.civicimpulse.com">Civic Impulse, LLC</a>. GovTrack.us is not a government website.</p>
 
 					<p><a href="/about">About the Site</a> | <a href="/contact">Contact Us</a></p>
@@ -309,13 +313,13 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h2 class="modal-title" id="errorModalTitle">[error message]</h2>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+            <button type="button" class="btn btn-default" data-bs-dismiss="modal">OK</button>
           </div>
         </div>
       </div>
@@ -325,10 +329,8 @@
 	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-utils.js?20160310"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery.lazy.min.js"></script>
+	<script src="{{ STATIC_URL }}vendor/bootstrap.bundle.min.js"></script>
 	
-    <script src="{{ STATIC_URL }}vendor/bootstrap.bundle.min.js"></script>
-    <script src="{{ STATIC_URL }}vendor/fontawesome.js"></script>
-
 	{% if not request.anonymous %}
 		<script>$(document).ajaxSend(function(event, xhr, settings) { if (!/^https?:.*/.test(settings.url)) xhr.setRequestHeader("X-CSRFToken", "{{csrf_token|escapejs}}"); });</script> <!-- {% csrf_token %} -->
 		<script>

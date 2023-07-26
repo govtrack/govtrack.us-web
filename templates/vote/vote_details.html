@@ -358,7 +358,7 @@ $(function() {
                      href="#"
                      onclick="$('#vote-summary-wrapper').data('original-height', $('#vote-summary-wrapper').height()); $('#vote-summary-wrapper').animate({ minHeight: $('#vote-summary-wrapper>div').outerHeight() + $('#vote-summary-toggle').outerHeight() }); $('#vote-summary-wrapper-more').hide(); $('#vote-summary-wrapper-less').show(); return false;">
                             Show More Summary
-                            <span class="glyphicon glyphicon-menu-down"></span>
+                            <span class="fas fa-menu-down"></span>
                     </a>
                   <a id="vote-summary-wrapper-less"
                      href="#"
@@ -366,7 +366,7 @@ $(function() {
                      style="display: none;"
                      onclick="$('#vote-summary-wrapper').animate({ minHeight: $('#vote-summary-wrapper').data('original-height') }); $('#vote-summary-wrapper-more').show(); $('#vote-summary-wrapper-less').hide(); return false;">
                             Show Less Summary
-                            <span class="glyphicon glyphicon-menu-up"></span>
+                            <span class="fas fa-menu-up"></span>
                   </a>
                 </div>
 			</div>
@@ -553,15 +553,15 @@ $(function() {
     </h3>
 
     <div id="what-you-can-do-actions" class="clearfix">
-        <button class="btn btn-sm btn-default" onclick="window.location='/events/track-something?feed=misc:allvotes';">
-            <i class="glyphicon glyphicon-envelope"> </i>
+        <button class="btn btn-sm btn-primary" onclick="window.location='/events/track-something?feed=misc:allvotes';">
+            <i class="fas fa-envelope"> </i>
             <span style="margin-left: 3px;">
                 Get Email Alerts
             </span>
         </button>
 
-        <button class="btn btn-sm btn-default" onclick="window.location='/congress/votes/compare/_add?vote={{vote.congressproject_id}}';">
-            <i class="glyphicon glyphicon-list"> </i>
+        <button class="btn btn-sm btn-secondary" onclick="window.location='/congress/votes/compare/_add?vote={{vote.congressproject_id}}';">
+            <i class="fas fa-list"> </i>
             <span style="margin-left: 3px;">
                 Compare to Another Vote
             </span>
