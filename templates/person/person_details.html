@@ -371,9 +371,9 @@ function show_pronunciation_guide() {
 
 	{% comment %}
         {% if role.is_up_for_election or election_guides %}
-		<div class="panel panel-warning" style="margin-top: 2em">
-			<div class="panel-heading"><b>Voting Information</b></div>
-			<div class="panel-body">
+		<div class="card bg-info" style="margin-top: 2em">
+			<div class="card-heading"><b>Voting Information</b></div>
+			<div class="card-body">
 				{% for guide in election_guides %}
 					{% if forloop.first %}
 						<p>
@@ -424,11 +424,11 @@ function show_pronunciation_guide() {
 
 	<!-- Kraken Caucus Labels -->
 	{% if kraken_caucus %}
-		<div class="panel panel-danger" style="margin: 30px auto 10px auto; max-width: 40em;">
-			<div class="panel-heading" style="background: white; font-weight: bold; padding: 5px 15px;">
+		<div class="card bg-info" style="margin: 30px auto 10px auto; max-width: 40em;">
+			<div class="card-heading" style="background: white; font-weight: bold; padding: 5px 15px;">
 				Elections must be decided by counting votes
 			</div>
-			<div class="panel-body">
+			<div class="card-body">
 				<p style="color: black">Our work to hold Congress accountable only matters if elections are decided by counting votes.
 				President Trump, his senior government advisors, and Republican legislators collaborated to have the 2020
 				presidential election decided instead by incumbent politicians running in the very same election. Their attempts
@@ -551,8 +551,8 @@ function show_pronunciation_guide() {
 			</div>
 		</div>
 	{% elif person.id == 412555 %}
-		<div class="panel panel-danger">
-			<div class="panel-body">
+		<div class="card bg-info">
+			<div class="card-body">
 				{{person.lastname}} was
 				among the Republican legislators
 				who participated in President Trump&rsquo;s months-long, multifarious attempted coup during the 2020 presidential election.
@@ -560,8 +560,8 @@ function show_pronunciation_guide() {
 			</div>
 		</div>
 	{% elif person.id == 412552 %}
-		<div class="panel panel-danger">
-			<div class="panel-body">
+		<div class="card bg-info">
+			<div class="card-body">
 				As Chief of Staff to President Trump after resigning his role in Congress, Meadows was
 				<a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">a key intermediary between
 				Trump and Republican legislators</a>

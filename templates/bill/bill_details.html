@@ -308,8 +308,8 @@
 
 	<!-- automatic explanation -->	
 	{% if not summary1 and bill.explanatory_text %}
-		    <div class="panel panel-info" style="margin: 30px 0;">
-	    <div class="panel-body">
+	    <div class="card" style="margin: 30px 0;">
+	    <div class="card-body">
 		<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
 			{{bill.explanatory_text|safe}}
 	    </div>
@@ -765,8 +765,8 @@
 			</div> <!-- /bill-history -->
 			{% endif %}
 
-			<div class="panel panel-info">
-			  <div class="panel-body">
+			<div class="card bg-info">
+			  <div class="card-body">
 				<!-- What is a bill? -->
 				<span class="glyphicon glyphicon-info-sign" aria-hidden="true" style="float: right; font-size: 150%; color: white; margin: -2px"></span>
 				<h3 style="margin: 0 0 5px 0; font-weight: bold;">{{bill.display_number}} {% if bill.is_current %}is{% else %}was{% endif %} a {{bill.bill_type_name}} in the United States Congress.</h3>

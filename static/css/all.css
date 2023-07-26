@@ -267,13 +267,11 @@ blockquote {
 		color: white;
 	}
 
-.panel-info {
-	border: none;
-	border-radius: 12px;
-	background-color: #fece99;
-    color: black;
+.bg-info {
+	background-color: #fece99 !important;
+	color: black;
 }
-	.panel-info a {
+	.bg-info a {
 		color: #003300;
 	}
 .panel-success {
