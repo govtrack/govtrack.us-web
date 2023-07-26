@@ -14,16 +14,19 @@
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="{% url "congress_home" %}">Congress</a></li>
-	<li><a href="/congress/bills">Bills</a></li>
-	{% if parent %}
-		<li><a href="/congress/bills/uscode">U.S. Code Index</a></li>
-		{% if parent.parent_section %}<li><a href="/congress/bills/uscode/{{parent.parent_section.id}}">{{parent.parent_section.name|truncatewords:4}}</a></li>{% endif %}
-	{% else %}
-		<li class="active">U.S. Code Index</li>
-	{% endif %}
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
+    <li class="breadcrumb-item"><a href="/congress/bills">Bills</a></li>
+    {% if parent %}
+    <li class="breadcrumb-item"><a href="/congress/bills/uscode">U.S. Code Index</a></li>
+    {% if parent.parent_section %}<li class="breadcrumb-item"><a href="/congress/bills/uscode/{{parent.parent_section.id}}">{{parent.parent_section.name|truncatewords:4}}</a>{% endif %}</li>
+    {% else %}
+    <li class="breadcrumb-item active" aria-current="page">U.S. Code Index</li>
+    {% endif %}
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block summary %}

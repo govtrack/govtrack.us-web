@@ -5,23 +5,24 @@
 {% block cat-icon-filename %}img-bills-resolutions.png{% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-<li><a href="{% url "congress_home" %}">Congress</a></li>
-<li><a href="/congress/bills">Bills</a></li>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
+    <li class="breadcrumb-item"><a href="/congress/bills">Bills</a></li>
+    {% with term.parents.all as parents %}
+    {% if parents|length > 0 %}
+    <li class="breadcrumb-item"></li>
+    {% for parent in parents %}
+    {% if not forloop.first %} / {% endif %}
+    <a href="{{parent.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{parent.name}}</a>
+    {% endfor %}
+    </li>
+    {% endif %}
+    {% endwith %}
+    <li class="breadcrumb-item active" aria-current="page">{{term.name}}</li>
+  </ol>
+</nav>
 
-{% with term.parents.all as parents %}
-{% if parents|length > 0 %}
-	<li>
-	{% for parent in parents %}
-		{% if not forloop.first %} / {% endif %}
-		<a href="{{parent.get_absolute_url}}{% if request.GET.congress %}?congress={{request.GET.congress|urlencode}}{% endif %}">{{parent.name}}</a>
-	{% endfor %}
-	</li>
-{% endif %}
-{% endwith %}
-
-<li class="active">{{term.name}}</li>
-</ol>
 {% endblock %}
 
 {% block summary %}

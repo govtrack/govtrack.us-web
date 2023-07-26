@@ -67,11 +67,14 @@ function do_sort(key) {
 <div class="container{% if 0 %}-fluid{% endif %}">
 <div style="margin: 0 15px">
 
-    <ol class="breadcrumb">
-        <li><a href="{% url "congress_home" %}">Congress</a></li>
-        <li><a href="/congress/votes">Votes</a></li>
-        <li class="active">{{h1_title}}</li>
-    </ol>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
+        <li class="breadcrumb-item"><a href="/congress/votes">Votes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{h1_title}}</li>
+      </ol>
+    </nav>
+
 
 	<h1>{{h1_title}}</h1>
 

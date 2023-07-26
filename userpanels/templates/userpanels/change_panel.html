@@ -11,11 +11,14 @@
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-<li><a href="/panels">Panel Management</a></li>
-<li><a href="/panels/{{panel.id}}">{{panel.title|truncatewords:5}}</a></li>
-<li class="active">Edit Panel</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/panels">Panel Management</a></li>
+    <li class="breadcrumb-item"><a href="/panels/{{panel.id}}">{{panel.title|truncatewords:5}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Edit Panel</li>
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block body %}

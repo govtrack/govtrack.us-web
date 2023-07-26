@@ -14,12 +14,15 @@
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="{% url "congress_home" %}">Congress</a></li>
-	<li><a href="/congress/bills">Bills</a></li>
-	<li><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a></li>
-	<li class="active">Widget</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
+    <li class="breadcrumb-item"><a href="/congress/bills">Bills</a></li>
+    <li class="breadcrumb-item"><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Widget</li>
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block summary %}

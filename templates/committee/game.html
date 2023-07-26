@@ -33,11 +33,14 @@
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-    <li><a href="{% url "congress_home" %}">Congress</a></li>
-    <li><a href="/congress/committees">Committees</a></li>
-    <li>Game</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
+    <li class="breadcrumb-item"><a href="/congress/committees">Committees</a></li>
+    <li class="breadcrumb-item">Game</li>
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block summary %}

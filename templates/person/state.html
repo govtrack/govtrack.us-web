@@ -45,11 +45,14 @@ $(function() {
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="/congress">Congress</a></li>
-	<li><a href="/congress/members">Members of Congress</a></li>
-	<li class="active">{{statename}}</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/congress">Congress</a></li>
+    <li class="breadcrumb-item"><a href="/congress/members">Members of Congress</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{statename}}</li>
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block summary %}

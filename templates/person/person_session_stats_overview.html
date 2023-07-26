@@ -46,17 +46,20 @@
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="{% url "congress_home" %}">Congress</a></li>
-	<li><a href="/congress/members">Members of Congress</a></li>
-	{% if cohort or specific_stat %}
-		<li><a href="/congress/members/report-cards/{{session}}">{{session}} Report Cards</a></li>
-		{% if cohort %}<li class="active">{{cohort_title}}</li>{% endif %}
-		{% if specific_stat %}<li class="active">{{specific_stat_title}}</li>{% endif %}
-	{% else %}
-		<li class="active">{{session}} Report Cards</li>
-	{% endif %}
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
+    <li class="breadcrumb-item"><a href="/congress/members">Members of Congress</a></li>
+    {% if cohort or specific_stat %}
+    <li class="breadcrumb-item"><a href="/congress/members/report-cards/{{session}}">{{session}} Report Cards</a></li>
+    {% if cohort %}<li class="breadcrumb-item active" aria-current="page">{{cohort_title}}{% endif %}</li>
+    {% if specific_stat %}<li class="breadcrumb-item active" aria-current="page">{{specific_stat_title}}{% endif %}</li>
+    {% else %}
+    <li class="breadcrumb-item active" aria-current="page">{{session}} Report Cards</li>
+    {% endif %}
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block body_class %}member{% endblock %}
