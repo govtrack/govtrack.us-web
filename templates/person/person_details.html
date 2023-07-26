@@ -237,11 +237,15 @@ function show_pronunciation_guide() {
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="{% url "congress_home" %}">Congress</a></li>
-	<li><a href="/congress/members">Members of Congress</a></li>
-	<li class="active">{{person.name_no_details}}</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/congress/members">Members of Congress</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{person.name_no_details}}</li>
+    </ol>
+  </nav>
+
+</nav>
 {% endblock %}
 
 {% block body_class %}member{% endblock %}

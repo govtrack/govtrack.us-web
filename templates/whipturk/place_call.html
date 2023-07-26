@@ -28,10 +28,13 @@
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="/publicwhip/my-calls">Public Whip</a></li>
-	<li class="active">Place a Call</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/publicwhip/my-calls">Public Whip</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Place a Call</li>
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block body %}

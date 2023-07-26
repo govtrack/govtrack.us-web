@@ -182,18 +182,21 @@
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-	<li><a href="/congress">Congress</a></li>
-	<li><a href="/congress/members">Members of Congress</a></li>
-	{% if state %}
-		<li><a href="/congress/members/map">Map</a></li>
-		{% if not district %}
-		<li>{{statename}}</li>
-		{% else %}
-		<li><a href="/congress/members/{{state}}">{{statename}}</a></li>
-		{% endif %}
-	{% endif %}
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/congress">Congress</a></li>
+    <li class="breadcrumb-item"><a href="/congress/members">Members of Congress</a></li>
+    {% if state %}
+    <li class="breadcrumb-item"><a href="/congress/members/map">Map</a></li>
+    {% if not district %}
+    <li class="breadcrumb-item">{{statename}}</li>
+    {% else %}
+    <li class="breadcrumb-item"><a href="/congress/members/{{state}}">{{statename}}</a></li>
+    {% endif %}
+    {% endif %}
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block body %}

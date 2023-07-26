@@ -12,10 +12,13 @@
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-{# <li><a href="/stakeholders">Stakeholders</a></li> #}
-{# <li class="active">Register a New Stakeholder</li> #}
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    {# <li class="breadcrumb-item"><a href="/stakeholders">Stakeholders</a> #}</li>
+    {# <li class="breadcrumb-item active" aria-current="page">Register a New Stakeholder #}</li>
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block body %}

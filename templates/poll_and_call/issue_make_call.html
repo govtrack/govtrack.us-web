@@ -98,9 +98,12 @@ function poll_call_status() {
 {% endblock %}
 
 {% block crumbs %}
-<ol class="breadcrumb">
-	<li class="active">Call Congress</li>
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page">Call Congress</li>
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block body_class %}issue{% endblock %}

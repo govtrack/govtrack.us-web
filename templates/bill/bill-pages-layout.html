@@ -281,16 +281,19 @@ function saveUserPosition() {
 
 {% block crumbs %}
 {# BREADCRUMBS #}
-<ol class="breadcrumb">
-  <li><a href="{% url "congress_home" %}">Congress</a></li>
-  <li><a href="/congress/bills">Bills</a></li>
-  {% if not bill_subpage %}
-  <li class="active">{{bill.display_number_with_congress_number}}</li>
-  {% else %}
-  <li><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a>
-  <li class="active">{{bill_subpage}}</li>
-  {% endif %}
-</ol>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url "congress_home" %}">Congress</a></li>
+    <li class="breadcrumb-item"><a href="/congress/bills">Bills</a></li>
+    {% if not bill_subpage %}
+    <li class="breadcrumb-item active" aria-current="page">{{bill.display_number_with_congress_number}}</li>
+    {% else %}
+    <li class="breadcrumb-item"><a href="{{bill.get_absolute_url}}">{{bill.display_number_with_congress_number}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{bill_subpage}}</li>
+    {% endif %}
+  </ol>
+</nav>
+
 {% endblock %}
 
 {% block summary %}
