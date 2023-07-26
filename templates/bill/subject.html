@@ -35,7 +35,7 @@
 		<p>Use this page to browse bills in the U.S. Congress related to the subject {{term.name}}, as determined by the Library of Congress.</p>
 
 		{% if subs|length > 0 %}
-			<p>Narrow your focus by drilling down into <a href="#" onclick="$('#subterms_modal').modal(); return false;">{{subs|length}} subcategories</a>.</p>
+			<p>Narrow your focus by drilling down into <a href="#" onclick="new bootstrap.Modal('#subterms_modal').show(); return false;">{{subs|length}} subcategories</a>.</p>
 		{% endif %}
 	</div>
 
@@ -51,8 +51,8 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="subterms_modal_title">Sub-categories of {{term}}</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
       	<p>{{term}} has {{subs|length}} sub-categories that you can use to track a more targeted set of legislation:</p>

@@ -232,19 +232,19 @@ function saveUserPosition() {
 
 {# REACTIONS #}
 <div class="row" style="margin-bottom: 0">
-<div class="col-xs-6 col-sm-12" style="margin-bottom: 13px">
+<div class="col-6 col-sm-12" style="margin-bottom: 13px">
   <h2 style="margin-bottom: 4px">React <span class="sr-only">to this {{bill.noun}}</span> with an emoji</h2>
-  <div id="emoji-reactions" data-toggle="tooltip" data-placement="bottom" style="display: none;">
+  <div id="emoji-reactions" style="display: none;">
     <span class="main"> </span>
     <a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">···</a>
     <span class="other" style="display: none"> </span>
   </div>
 </div>
 
-<div id="UserPositionContainer" class="col-xs-6 col-sm-12" style="margin-bottom: 13px; display: none;">
+<div id="UserPositionContainer" class="col-6 col-sm-12" style="margin-bottom: 13px; display: none;">
     <h2 style="margin-bottom: 4px">Save your opinion <span class="sr-only">on this {{bill.noun}} on a six-point scale from strongly oppose to strongly support</span></h2>
     <div class="LikertFrame">
-      <span class="sidelabel glyphicon glyphicon-thumbs-down"></span>
+      <span class="sidelabel fas fa-thumbs-down"></span>
       <div class="LikertContainer"> {# to get rid of whitespace between elems, close tags are on next line #}
         <span class="val" data-value="-3" title="{{-3|likerttext}}"><span class="far fa-circle"></span><span class="fas fa-check-circle"></span>
         </span><span class="val" data-value="-2" title="{{-2|likerttext}}"><span class="far fa-circle"></span><span class="fas fa-check-circle"></span>
@@ -254,11 +254,11 @@ function saveUserPosition() {
         </span><span class="val" data-value="2"  title="{{2|likerttext}}"><span class="far fa-circle"></span><span class="fas fa-check-circle"></span>
         </span><span class="val" data-value="3"  title="{{3|likerttext}}"><span class="far fa-circle"></span><span class="fas fa-check-circle"></span></span>
       </div>
-      <span class="sidelabel glyphicon glyphicon-thumbs-up"></span>
+      <span class="sidelabel fas fa-thumbs-up"></span>
     </div>
     <div class="explanation">
       <a href="#" class="notesToggle" onclick="return false;" title="Show or hide your notes">
-        <span class="glyphicon glyphicon-pencil"></span>
+        <span class="fas fa-pencil"></span>
         <span class="text">Add Note</span>
       </a>
       <a href="/accounts/positions" style="margin-left: .75em;">All Positions &raquo;</a>
@@ -356,8 +356,8 @@ function saveUserPosition() {
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="UserPositionModalTitle">Add a Note</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <p>
@@ -374,7 +374,7 @@ function saveUserPosition() {
           title="My notes on why I oppose or support this {{bill.noun}}."></textarea>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Save Note</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Note</button>
       </div>
     </div>
   </div>

@@ -69,15 +69,15 @@ def vote_search_manager():
         </div>
         <div style="font-size: 93%">
         <div class="col-xs-12 col-sm-6 col-md-4">
-            <div><span class="fa fa-barcode fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.name}}</div>
-            <div><span class="fa fa-calendar fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
+            <div><span class="fa-solid fa-barcode fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.name}}</div>
+            <div><span class="fa-solid fa-calendar fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-8">
-            <div><span class="fa fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
+            <div><span class="fa-solid fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
             <div style="padding: 3px 0 0 3px"><a class="btn btn-sm btn-default" style="padding: 3px; font-weight: normal; color: #444;"
               href="/congress/votes/compare/_add?vote={{object.congressproject_id}}"
               title="Compare to Another Vote">
-              <i class="glyphicon glyphicon-list"> </i> Compare Vote
+              <i class="fas fa-list"> </i> Compare Vote
             </a></div>
         </div>
         <div class="col-xs-12">

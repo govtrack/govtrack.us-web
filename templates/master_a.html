@@ -62,7 +62,7 @@
 <div class="container">
 	<div class="row">
 
-		<div class="col-sm-4 col-sm-push-8 sidebar">
+		<div class="col-sm-4 order-2 sidebar">
 		  <div>
 			{% block sidebar_top %}
 			{% endblock %}
@@ -93,14 +93,14 @@
 				{% if forloop.counter <= 3 %}
 					<div class="row">
 						{% if post.image_100px %}
-						<div class="col-xs-3" style="margin-top: 3px; padding-right: 0; margin-right: -5px;">
+						<div class="col-3" style="margin-top: 3px; padding-right: 0; margin-right: -5px;">
 							<a href="{{post.url}}">
 								<img src="{{post.image_100px}}" style="border: 1px solid #BBB;"/ class="img-fluid">
 							</a>
 						</div>
-						<div class="col-xs-9">
+						<div class="col-9">
 						{% else %}
-						<div class="col-xs-12">
+						<div class="col-12">
 						{% endif %}
 							<div><a href="{{post.url}}">{{post.title}}</a></div>
 							<p>{{post.snippet}} <span class="text-muted" style="font-size: 90%;"> {{post.published|date}}</span></p>
@@ -116,7 +116,7 @@
 		  </div> <!-- /sidebar div-->
 		</div> <!-- /col -->
 
-		<div class="col-sm-8 col-sm-pull-4">
+		<div class="col-sm-8 order-1">
 			<div id="content">
 				{% block body %}
 				{% endblock %}

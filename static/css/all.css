@@ -47,6 +47,7 @@ h1, h2, h3, h4, h5 {
 	margin-top: 1.5em;
 	margin-bottom: 1em;
 	}
+	.popover-header { margin: 0; } // overrides h3
 h1 {
 	margin: 15px 0;
 	font-size: 30px;
@@ -249,15 +250,12 @@ blockquote {
 	color: white;
 	padding: 12px 15px;
 }
-	.modal-header .close {
-		opacity: .75;
-		color: white;
-	}
 	h2.modal-title {
 	  margin: 0 !important;
 	  font-weight: bold;
 	  font-size: 22px;
 	}
+	.modal-header .btn-close { color: transparent; }
 .modal-body {
 	background-color: #FAFAFF;
 }
@@ -593,9 +591,6 @@ aside .download-links { padding: 31px 0 0 }
 				background: transparent;
 				border: 0;
 			}
-				.list_select li.new .target .glyphicon {
-					color: #AAA;
-				}
 			.list_select li.selected .target {
 				background: #8e8778;
 				color: #fff;
@@ -608,9 +603,6 @@ aside .download-links { padding: 31px 0 0 }
 			.list_select li.all .target:hover {
 				box-shadow: none;
 			}
-				.list_select li.new .target:hover .glyphicon {
-					color: #D53;
-				}
 				.events_to_track li span.icon,
 				.list_select li span.icon	 {
 					display: inline-block;
@@ -1228,9 +1220,6 @@ ul.singlesignon {
 	#community-forum .community-forum-teaser {
 		font-size: 90%;
 		color: #666;
-	}
-	#community-forum .community-forum-teaser span.glyphicon {
-		color: #9D2146;
 	}
 	#community-forum .thread-wrapper {
 		display: none;

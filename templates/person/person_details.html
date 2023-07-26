@@ -231,7 +231,7 @@ $(function() {
 })
 
 function show_pronunciation_guide() {
-	$("#pronunciation_modal").modal();
+	new bootstrap.Modal("#pronunciation_modal").show();
 }
 </script>
 {% endblock %}
@@ -278,7 +278,7 @@ function show_pronunciation_guide() {
 		<p style="font-size: 12px; color: #555; margin-top: 2px; cursor: pointer" onclick="show_pronunciation_guide()">
 			pronounced
 			{{pronunciation.respell}}
-			<span class="glyphicon glyphicon-info-sign"></span>
+			<span class="fas fa-circle-info"></span>
 		</p>
 	{% endif %}
 </div>
@@ -287,15 +287,15 @@ function show_pronunciation_guide() {
 {% if active_role %}
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 			<button class="btn btn-sm btn-success" onclick="return show_track_panel();">
-				<i class="glyphicon glyphicon-envelope"> </i>
+				<i class="fas fa-envelope"> </i>
 				<span style="margin-left: 3px;">
 					Track {{person.him_her|capfirst}}
 				</span>
 			</button>
 
 			{% if role.website %}
-			<button class="btn btn-sm btn-default" onclick="$('#contact_modal').modal();" style="background: white;">
-				<i class="glyphicon glyphicon-comment"> </i>
+			<button class="btn btn-sm btn-light" onclick="new bootstrap.Modal('#contact_modal').show();">
+				<i class="fas fa-comment"> </i>
 				<span style="margin-left: 3px;">
 					Contact {{person.him_her|capfirst}}
 				</span>
@@ -395,7 +395,7 @@ function show_pronunciation_guide() {
 		{% for label, link, css_class in links %}
 			<span>
 			<a href="{{link}}" target="_blank"><i class="{{css_class}}" style="margin-right: 7px"></i>{{label}}</a>
-			{% if css_class == "fab fa-mastodon" %}(Mastodon){% endif %}
+			{% if css_class == "fa-brands fa-mastodon" %}(Mastodon){% endif %}
 		  </span>
 		{% endfor %}
 		<div class="clearfix"></div>
@@ -597,6 +597,9 @@ function show_pronunciation_guide() {
 		text-align: right;
 		width: 7%;
 	}
+        #contact_modal h4 {
+		margin-top: -3px;
+	}
 	#contact_modal .list-group-item > div {
 		float: left;
 		width: 93%;
@@ -618,13 +621,16 @@ function show_pronunciation_guide() {
 	#contact_modal .contact_expando a {
 		color: #FFE;
 	}
+	#contact_modal .list-group-item.active {
+		background-color: #9D2146;
+	}
 	</style>
 	<div id="contact_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="contact_modalTitle" aria-hidden="true">
 	  <div class="modal-dialog" role="document">
 	    <div class="modal-content">
 	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 	        <h2 class="modal-title" id="contact_modalTitle">Contact {{person.name_and_title}}</h2>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 	      </div>
 	      <div class="modal-body">
 			<div class="list-group">
@@ -686,10 +692,10 @@ function show_pronunciation_guide() {
 			  </div>
 			  {% endif %}
 			</div>
-	        <p style="font-size: 90%; line-height: 120%;">You are currently on the website GovTrack.us, which has no affiliation with {{person.lastname}} and is <b>not</b> a government website. Choose from the options above to find the right way to contact {{person.lastname}}.</p>
+	        <p style="margin: 1em 0; font-size: 90%; line-height: 120%;">You are currently on the website GovTrack.us, which has no affiliation with {{person.lastname}} and is <b>not</b> a government website. Choose from the options above to find the right way to contact {{person.lastname}}.</p>
 	      </div>
 	      {% comment %} <div class="modal-footer">
-	        <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+	        <button type="button" class="btn btn-default" data-bs-dismiss="modal">OK</button>
 	      </div> {% endcomment %}
 	    </div>
 	  </div>
@@ -999,8 +1005,8 @@ function show_pronunciation_guide() {
     <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h2 class="modal-title" id="pronunciationModalTitle">Pronunciation Guide</h2>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
 			<center>

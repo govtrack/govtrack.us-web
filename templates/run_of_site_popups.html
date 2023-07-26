@@ -31,7 +31,7 @@ function show_followus(flags) {
 	if (flags.follow_us == 4) return false;
 	flags.follow_us = 4;
 
-	$('#followus_modal').modal();
+	new bootstrap.Modal('#followus_modal').show();
 
 	return true;
 }
@@ -41,7 +41,7 @@ function show_usergroup(flags) {
 	if (flags.hits <= 10) return false;
 	if (flags.usergroup) return false;
 	flags.usergroup = true;
-	$('#usergroup_modal').modal();
+	new bootstrap.Modal('#usergroup_modal').show();
 	return true;
 }
 
@@ -49,7 +49,7 @@ function show_fundraise(flags) {
 	// only show this modal once
 	if (flags.fundraise == 1) return false;
 	flags.fundraise = 1;
-	$('#fundraise_modal').modal();
+	new bootstrap.Modal('#fundraise_modal').show();
 	return true;
 }
 
@@ -57,7 +57,7 @@ function show_announcement(flags) {
 	// only show this modal once
 	if (flags.ancmt == 2) return false;
 	flags.ancmt = 2;
-	$('#run_of_site_announcement_modal').modal();
+	new bootstrap.Modal('#run_of_site_announcement_modal').show();
 	return true;
 }
 </script>
@@ -67,8 +67,8 @@ function show_announcement(flags) {
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="followusModalTitle">We&rsquo;re on Mastodon</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <p>We are excited to now be on Mastodon, a social network developed by and for its users, as well as TikTok.</p>
@@ -77,7 +77,7 @@ function show_announcement(flags) {
       </div>
 
       <div class="modal-footer">
-      	<button type="button" class="btn btn-default" data-dismiss="modal">Continue to Site</button>
+      	<button type="button" class="btn btn-default" data-bs-dismiss="modal">Continue to Site</button>
       </div>
     </div>
   </div>
@@ -145,8 +145,8 @@ $(function() {
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="usergroup_modal_title">Join GovTrack&rsquo;s Advisory Community</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
       	<p>We’re looking to learn more about who uses GovTrack and what features you find helpful or think could be improved. If you can, please take a few minutes to help us improve GovTrack for users like you.</p>
@@ -194,7 +194,7 @@ $(function() {
       		<p>Thank you for joining the GovTrack Advisory Community! We&rsquo;ll be in touch.</p>
       	</div>
       	<div style="padding-top: .5em;">
-	      	<!--<button type="button" class="btn btn-default pull-right" data-dismiss="modal">No Thanks</button>-->
+	      	<!--<button type="button" class="btn btn-default pull-right" data-bs-dismiss="modal">No Thanks</button>-->
 	      	<button type="button" class="btn btn-primary">Next &raquo;</button>
 	    </div>
       </div>
@@ -207,10 +207,10 @@ $(function() {
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="fundraise_modal_title">
     	    There’s never been a better time for civic engagement.
     	</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
 		<p>You’ve cast your vote. Now what? Join 10 million other Americans using GovTrack to learn about and contact your representative and senators and track what Congress is doing each day.</p>
@@ -230,10 +230,10 @@ $(function() {
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h2 class="modal-title" id="run_of_site_announcement_modal_title">
     	    GovTrack.us is taking a new focus on civic education
     	</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
 		<p><strong>Help us develop the tools to bring real-time legislative data into the classroom.</strong></p>
@@ -243,7 +243,7 @@ $(function() {
 		<p>We’re looking for feedback from educators about how GovTrack can be used and improved for your classroom. If you teach United States government and would like to speak with us about bringing legislative data into your classroom, please reach out!</p>
 
 		<a href="mailto:hello@govtrack.us?subject=GovTrack%20in%20my%20classroom" class="btn btn-primary">Email Us</a>
-		<button type="button" class="btn btn-default" data-dismiss="modal">Continue to site &raquo;</button>
+		<button type="button" class="btn btn-default" data-bs-dismiss="modal">Continue to site &raquo;</button>
       </div>
     </div>
   </div>

@@ -139,7 +139,7 @@ function activate_list(elem) {
 }
 
 function add_tracker(id, name, title, link, save) {
-    var t = $("<li class='active'><a href='#' onclick='return toggle_tracker(this.parentNode);' class='toggle-tracker'><span class='sr-only remove-tracker'>Remove Tracker</span><span class='remove-tracker glyphicon glyphicon-trash' title='Remove Tracker'/> <span class='add-tracker-back'>(Add It Back!)</a> <a class='tracker-link'></a></li>");
+    var t = $("<li class='active'><a href='#' onclick='return toggle_tracker(this.parentNode);' class='toggle-tracker'><span class='sr-only remove-tracker'>Remove Tracker</span><span class='remove-tracker fas fa-trash' title='Remove Tracker'/> <span class='add-tracker-back'>(Add It Back!)</a> <a class='tracker-link'></a></li>");
     t.find("a.tracker-link").attr("href", link).text(title);
     t.attr("feedname", name);
     $("#list_trackers").append(t);
@@ -318,12 +318,12 @@ $(function() {
                 <div class="buttons">
                     <a class="button-rename-list">
                         <span class="sr-only">Rename List</span>
-                        <span class='glyphicon glyphicon-pencil' title='Rename List'></span>
+                        <span class='fas fa-pencil' title='Rename List'></span>
                     </a>
 
                     <a class="button-delete-list no_default_list">
                         <span class="sr-only">Delete List</span>
-                        <span class='glyphicon glyphicon-trash' title='Delete List'></span>
+                        <span class='fas fa-trash' title='Delete List'></span>
                     </a>
                 </div>
                 <div class="list-name">{{list.name}}</div>
@@ -336,7 +336,7 @@ $(function() {
     {% endfor %}
 
     <div id="newlist" onclick="return new_list();" style="margin-bottom: 30px">
-        <span class="glyphicon glyphicon-plus"></span>
+        <span class="fas fa-plus"></span>
         Create New List
     </div>
 
@@ -367,8 +367,8 @@ $(function() {
                     <h4 style="margin: 0 0 12px 0">Tools</h4>
 
                     <p>
-                    	<a id="view_link" href="#" class="btn btn-primary"><i class="fa fa-link"></i> Share List</a>
-	                    <a id="rss_link" href="#" class="btn btn-primary"><i class="fa fa-rss"></i> RSS Feed</a>
+                    	<a id="view_link" href="#" class="btn btn-primary"><i class="fas fa-link"></i> Share List</a>
+	                    <a id="rss_link" href="#" class="btn btn-primary"><i class="fas fa-rss"></i> RSS Feed</a>
                     </p>
                     
                     <p>

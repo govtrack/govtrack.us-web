@@ -477,24 +477,26 @@ window.post_jquery_load_scripts.push(function() {
 <div>
 	<div class="row">
     {% if sort_options|length > 0 %}
-	<div class="col-sm-6 col-sm-push-6">
-        <div style="float: right;">
-          <div class="input-group">
-            <label for="searchform_sort" class="input-group-addon" style="font-size: 12px">sort by</label>
-            <select id="searchform_sort" name="sort" size="1" onchange="update_search()" class="form-control" style="font-size: 12px">
-                {% for label, key, default in sort_options %}
-                    <option value="{{key}}" {% if default %}selected{% endif %}>{{label}}</option>
-                {% endfor %}
-            </select>
-          </div>
-        </div>
+	<div class="col-md order-md-2">
+        <table>
+        <tr>
+            <td style="text-align: right; padding-right: 1em">
+                <label for="searchform_sort"><nobr>Sort By</nobr></label>
+            </td>
+            <td>
+                <select id="searchform_sort" name="sort" onchange="update_search()" class="form-select">
+                    {% for label, key, default in sort_options %}
+                        <option value="{{key}}" {% if default %}selected{% endif %}>{{label}}</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+    </table>
 	</div>
-	<div class="col-sm-6 col-sm-pull-6">
-	{% else %}
-	<div class="col-xs-12">
     {% endif %}
 
-    <p class="summary" style="display: none;">
+    <div class="col-md order-md-1">
+    <p class="summary" style="display: none; padding-top: 5px">
         <span class="total">xxx</span> <span class="noun">things</span> matched your search<span class="searchdescr"></span>.
     </p>
 	</div>
