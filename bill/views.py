@@ -903,7 +903,7 @@ def bills_overview(request):
             .annotate(count=Count('tracked_in_lists'))\
             .order_by('-count')\
             .values('feedname', 'count')\
-            [0:25]
+            [0:12]
         top_bills = [(Bill.from_feed(Feed.from_name(bf["feedname"])), bf["count"]) for bf in top_bills]
 
         # trending bills

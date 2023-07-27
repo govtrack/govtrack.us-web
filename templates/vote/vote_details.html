@@ -293,7 +293,7 @@ $(function() {
   {% endif %}
 </div>
 
-<div id="vote_explainer">
+<div id="vote_explainer" style="margin-bottom: 15px;">
 	{% if vote.oursummary %}
 		<div class="row">
 		<div class="col-sm-8">
@@ -420,8 +420,11 @@ $(function() {
 </div>
 
 {% with vote.totals as totals %}
-<div style="margin: 30px 0">
-    <h3 style="margin: 0">Totals</h3>
+<div class="card" style="margin-bottom: 15px">
+  <div class="card-header">
+    Vote Outcome
+  </div>
+  <div class="card-body">
     <table class="stats" style="margin: 0 30px 0 0">
         <thead>
             <tr>
@@ -497,15 +500,19 @@ $(function() {
         {% endfor %}
     {% endif %}
     {% endwith %}
+  </div>
 </div>
 
 <div class="row">
 {% if has_diagram.diagram %}
-    <div class="col-sm-6 col-md-5">
-        <div style="margin: 1em 0">
-			<h3>Ideology Vote Chart</h3>
-            <img src="{{ vote.get_absolute_url }}/diagram" class="img-fluid" />
-            <div style="margin: .5em 0; max-width: 300px;" class="diagram-legend">
+    <div class="col-md-6 col-lg-5">
+        <div class="card" style="margin-bottom: 15px;">
+          <div class="card-header">
+            Ideology Vote Chart
+          </div>
+          <img src="{{ vote.get_absolute_url }}/diagram" class="img-fluid card-img-top" />
+          <div class="card-body">
+            <div style="margin: .5em 0;" class="diagram-legend">
                 <div style="float: left; margin: 0 .25em 1em 0">Key:</div>
                 {% for item in totals.options %}
                   {% if item.option.key == "+" or item.option.key == "-" %}
@@ -523,17 +530,21 @@ $(function() {
                 {% endfor %}
             </div>
             {% if has_ideology_scores %}
-            <div class="diagram-legend" style="margin-top: 3px">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</div>
+            <p class="card-text">Seat position based on our <a href="/about/analysis#ideology">ideology score</a>.</p>
             {% endif %}
+          </div>
         </div>
     </div>
 {% endif %}
 {% if has_diagram.map and vote.chamber_name != "Senate" %}
-    <div class="col-sm-6">
-        <div style="margin-top: 1em">
-			<h3>Cartogram Map</h3>
-            <img src="{{ vote.get_absolute_url }}/map" class="img-fluid" style="margin: auto;" />
-            <div style="margin: .5em 0;" class="diagram-legend">
+    <div class="col-md-6">
+        <div class="card" style="margin-bottom: 15px;">
+          <div class="card-header">
+            Cartogram Map
+          </div>
+          <img src="{{ vote.get_absolute_url }}/map" class="img-fluid card-img-top" style="margin: 5px" />
+          <div class="card-body">
+            <p class="card-text">
                 Each hexagon represents one congressional district.
                 {% for item in totals.options %}
                   {% if item.option.key == "+" %}
@@ -541,6 +552,7 @@ $(function() {
                   {% endif %}
                 {% endfor %}
             </div>
+          </div>
         </div>
     </div>
 {% endif %}

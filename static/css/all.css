@@ -23,6 +23,9 @@ a:link, a:visited {
 		color: white;
 		text-decoration: none;
 	}
+	.card h5 a {
+		text-decoration: none;
+	}
 a:hover, a:focus, a:active {
 	color: #9D2146;
 	}
@@ -109,9 +112,7 @@ h4 {
 	font-size: 1.05em;
 }
 h5 {
-	font-family: inherit;
 	font-size: 1em;
-	text-transform: uppercase;
 	}
 
 h3 span, span span, a em {
