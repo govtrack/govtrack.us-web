@@ -40,9 +40,9 @@
     $('#event_subscribe_inline_container').html(the_page.events_subscribe_button);
     if (the_page.admin_panel) $('#admin_panel').html(the_page.admin_panel);
 
-    if (the_page.community_forum) {
-    	$('#community-forum').html(the_page.community_forum.html).show();
-    }
+    //if (the_page.community_forum) {
+    //	$('#community-forum').html(the_page.community_forum.html).show();
+    //}
 
     // UI fixups
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
@@ -282,8 +282,8 @@
 {% block body %}
 	{{block.super}}
 
-	<div id="community-forum" style="display: none">
-	</div>
+	<!--<div id="community-forum" style="display: none">
+	</div>-->
 
 	<!-- summary snippet or bill full title -->
 
