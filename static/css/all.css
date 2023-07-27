@@ -45,20 +45,16 @@ a.plain:hover, a.plain:focus, a.plain:active {
 h1, h2, h3, h4, h5 {
 	font-weight: 700;
 	line-height: 130%;
-	margin-top: 1.5em;
+	margin-top: 15px;
 	margin-bottom: 1em;
 	}
-	.popover-header { margin: 0; } // overrides h3
+	.popover-header { margin: 0; } /* overrides h3 */
 h1 {
-	margin: 15px 0;
-	font-size: 30px;
-	font-weight: bold;
+	margin-bottom: 30px; /* sum of nav margin bottom and h1 margin-top above */
 	line-height: 1.275em;
-	color: #222;
-	padding-bottom: .25em;
 	}
 	h1.long {
-		font-size: 23px;
+		font-size: 2rem;
 		line-height: 1.25em;
 	}
 	h1 sup {
