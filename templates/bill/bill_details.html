@@ -9,15 +9,10 @@
 
 {% block og_image %}
 	{% if text_info.has_thumbnail %}
-		<meta property="og:image" content="https://www.govtrack.us{{bill.get_absolute_url}}/thumbnail"/>
-		<meta name="twitter:image" content="https://www.govtrack.us{{bill.get_absolute_url}}/card"/>
+		<meta property="og:image" content="https://www.govtrack.us{{bill.get_absolute_url}}/card"/>
 	{% else %}
 		<meta property="og:image" content="https://www.govtrack.us/static/images/media_icon.png?20230729" />
-		<meta name="twitter:image" content="https://www.govtrack.us/static/images/media_icon.png?20230729" />
 	{% endif %}
-	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:title" content="{{bill.title}}">
-	{% if subtitle %}<meta name="twitter:description" content="{{subtitle}}">{% endif %}
 	<meta name="twitter:label1" content="Current Status">
 	<meta name="twitter:data1" content="{{bill.get_current_status_display}}">
 	{% if bill.sponsor %}

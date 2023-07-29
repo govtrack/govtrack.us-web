@@ -6,9 +6,7 @@
 {% block meta_description %}Year-end {{session}} legislative statistics for {{person}}, the {{ person.role.get_role_type_display }}{% if person.role.state %} from {{ person.role.get_state_display }}{% endif %}{% endblock %}
 
 {% block og_image %}
-    <meta name="twitter:card" content="summary">
     <meta property="og:image" content="https://www.govtrack.us{{person.get_photo.0}}"/>
-    <meta name="twitter:image" content="https://www.govtrack.us{{person.get_photo.0}}"/>
 {% endblock %}
 
 {% block head %}
