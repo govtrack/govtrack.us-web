@@ -95,7 +95,6 @@ def bill_key_questions(request, congress, type_slug, number):
         'bill': bill,
         "congressdates": get_congress_dates(bill.congress),
         "dead": bill.congress != CURRENT_CONGRESS and bill.current_status not in BillStatus.final_status_obvious,
-        "prognosis": bill.get_prognosis_with_details(),
         "text_info": text_info,
         "text_incorporation": fixup_text_incorporation(bill.text_incorporation),
         "legislator_statements": fetch_statements(bill),

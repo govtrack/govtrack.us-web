@@ -11,7 +11,7 @@ import sys
 from collections import defaultdict
 
 from vote.models import Vote
-from vote.views import get_vote_outliers, load_ideology_scores, attach_ideology_scores
+from vote.views import get_vote_outliers, attach_ideology_scores
 
 tqdm = lambda x : x
 if sys.stdout.isatty():
