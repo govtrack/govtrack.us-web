@@ -423,7 +423,7 @@ function show_pronunciation_guide() {
 
 
 	<!-- Kraken Caucus Labels -->
-	{% if kraken_caucus %}
+	{% if kraken_caucus or person.id == 412555 or person.id == 412552 %}
 		<div class="card bg-info" style="margin: 30px auto 10px auto; max-width: 40em;">
 			<div class="card-heading" style="background: white; font-weight: bold; padding: 5px 15px;">
 				Elections must be decided by counting votes
@@ -431,10 +431,13 @@ function show_pronunciation_guide() {
 			<div class="card-body">
 				<p style="color: black">Our work to hold Congress accountable only matters if elections are decided by counting votes.
 				President Trump, his senior government advisors, and Republican legislators collaborated to have the 2020
-				presidential election decided instead by incumbent politicians running in the very same election. Their attempts
+				presidential election decided by themselves rather than by voters. Their attempts
 				to suppress entire state-certified vote counts without adjudication in the courts and using a disinformation
 				campaign of lies and conspiracy theories was a months-long, multifarious attempted coup.</p>
+
 				<hr>
+
+		{% if kraken_caucus %}
 
 				{{person.lastname}} was
 				{% if person.id == 412395 %}a <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">&ldquo;ringleader&rdquo;</a>{% endif %}
@@ -447,7 +450,7 @@ function show_pronunciation_guide() {
 				{% endif %}
 
 				{% if person.id == 412226 %}
-				Jordan futher <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged the Vice President</a>
+				Jordan futher <a href="https://www.politico.com/minutes/congress/12-15-2021/jim-jordan-text-Jan6/">urged the Vice President</a> to
 				and participated in a <a href="https://www.politico.com/news/2022/04/22/gop-lawmakers-deeply-involved-in-trump-plans-to-overturn-election-new-evidence-suggests-00027340">coordinated campaign</a> by the Trump Administration
 				to exclude some Democratic states from the electoral count rather than follow the procedure set in law in which Congress may vote to exclude electors.
 				{% elif person.id == 400651 %}
@@ -480,7 +483,7 @@ function show_pronunciation_guide() {
 				{% endif %}
 
 				{% if "KrakenAnnouncedObjection" in kraken_caucus %}
-				In the days leading up to January 6, 2021&rsquo;s congressional certification of the election, {{person.lastname}} announced {{person.his_her}} intent to object to the inclusion of some states from the certification, which would have disenfranchised millions of voters and amplified lies, conspiracy theories, and preposterous legal theories about purported fraud.
+				In the days leading up to January 6, 2021&rsquo;s congressional certification of the election by counting electors, {{person.lastname}} announced {{person.his_her}} intent to object to the inclusion of some states&rsquo; electors in the count, disenfranchising millions of voters without due process and amplifying lies, conspiracy theories, and preposterous legal theories about purported outcome-determining fraud which did not occur.
 					{% if person.id == 412496 %}
 					Then on January 6, Johnson attempted to change Wisconsin and Michigan&rsquo;s votes by submitting
 					<a href="https://www.jsonline.com/story/news/politics/2022/06/21/jan-6-hearing-ron-johnson-wanted-deliver-fake-electors-pence/7690825001/">a fraudulent slate of electors</a>
@@ -533,7 +536,8 @@ function show_pronunciation_guide() {
 				{% else %}
 				The <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 violent insurrection at the Capitol</a>,
 				<a href="https://www.justsecurity.org/84551/important-elements-of-the-january-6th-report/">led on the front lines by militant white supremacy groups</a>,
-				attempted to prevent President-elect Joe Biden from taking office by disrupting Congress&rsquo;s count of electors.
+				attempted to prevent President-elect Joe Biden from taking office by disrupting Congress&rsquo;s count of electors. President Trump was indicted in 2023
+				for soliciting the Vice President to subvert Congress&rsquo;s certification of the election and his role in the fraudulent slates of electors and the insurrection at the Capitol.
 				{% endif %}
 
 				{% if person.id == 412395 or person.id == 412690 or person.id == 412683 or person.id == 400651 or person.id == 412569 or person.id == 456814 %}
@@ -548,28 +552,23 @@ function show_pronunciation_guide() {
 				{% if person.id == 412190 or person.id == 412226 or person.id == 412569 or person.id == 412683 %}
 					In 2022, {{person.lastname}} defied a subpoena to testify in the investigation of the January 6th Committee.
 				{% endif %}
-			</div>
-		</div>
+
 	{% elif person.id == 412555 %}
-		<div class="card bg-info">
-			<div class="card-body">
 				{{person.lastname}} was
 				among the Republican legislators
 				who participated in President Trump&rsquo;s months-long, multifarious attempted coup during the 2020 presidential election.
 				Cramer <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">offered to raise funds for the Trump Campaign&rsquo;s efforts to contest the election results</a>.
-			</div>
-		</div>
 	{% elif person.id == 412552 %}
-		<div class="card bg-info">
-			<div class="card-body">
 				As Chief of Staff to President Trump after resigning his role in Congress, Meadows was
 				<a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">a key intermediary between
 				Trump and Republican legislators</a>
-				who participated in Trump&rsquo;s months-long, multifarious attempted coup during the 2020 presidential election.
+				who participated in those efforts.
 
 				In December 2021, the House of Representatives <a href="https://www.govtrack.us/congress/votes/117-2021/h447">voted 220-208</a> to hold Meadows in criminal contempt of Congress for refusing to comply with a subpoena to appear before the January 6 Committee, but the Department of Justice <a href="https://edition.cnn.com/2022/06/03/politics/justice-department-declines-charge-meadows-scavino-january-6/index.html">declined to prosecute</a>.
-			</div>
+				In August 2023, he was <a href="https://www.politico.com/news/2023/08/15/fulton-county-trump-indictment-defendants-00111220">charged with a state felony</a> for his role in a phone call in which Trump asked a Georgia official to add votes to his side.
+	{% endif %}
 		</div>
+	</div>
 	{% endif %}
 
 		{% if misconduct %}
