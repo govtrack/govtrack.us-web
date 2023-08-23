@@ -66,5 +66,9 @@ Disallow: */_text_image
 Disallow: *?*
 Crawl-delay: 30
 
+User-agent: GPTBot
+Disallow: /
+
 Sitemap: https://www.govtrack.us/sitemap.xml
+
 
