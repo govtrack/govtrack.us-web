@@ -553,19 +553,25 @@ def go_ad_free_redirect(request):
     
 def go_ad_free_finish(request):
     from website.models import PayPalPayment
+    from dateutil.relativedelta import relativedelta
+
+    # Execute the payment.
     (payment, rec) = PayPalPayment.execute(request)
 
+    # Save to user's profile
     if rec.user:
         prof = rec.user.userprofile()
 
-        try:
-            # Update the user profile.
-            if prof.paid_features == None: prof.paid_features = { }
-            prof.paid_features["ad_free_year"] = (payment.id, None)
-            prof.save()
-          
-        except Exception as e:
-            raise ValueError(str(e) + " while processing " + payment.id)
+        now = datetime.now()
+        pfrec = { }
+        pfrec["paypal_payment_id"] = payment.id
+        pfrec["date"] = now.isoformat()
+        expires = now + relativedelta(years=1)
+        pfrec["expires"] = expires.isoformat()
+
+        if prof.paid_features == None: prof.paid_features = { }
+        prof.paid_features["ad_free"] = pfrec
+        prof.save()
 
     # Send user back to the start.
     request.session["go-ad-free-payment"] = payment.id

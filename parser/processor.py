@@ -79,7 +79,10 @@ class Processor(object):
                 try:
                     return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S-04:00')
                 except ValueError:
-                    return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+                    try:
+                        return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+                    except ValueError:
+                        return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f')
 
     def is_model_field(self, obj, fieldname):
         from django.db.models import FieldDoesNotExist
