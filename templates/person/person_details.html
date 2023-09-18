@@ -590,6 +590,17 @@ function show_pronunciation_guide() {
 		{% endfor %}
 		{% endif %}
 
+	{% if is_slaveholder %}
+		<h2><span>Legislators who enslaved Black people</span></h2>
+		<div style="margin-bottom: 1em">
+			{{person.lastname}} was among more than 1,800 legislators who enslaved Black people.
+			The Washington Post compiled the
+			<a href="https://www.washingtonpost.com/history/interactive/2022/congress-slaveowners-names-list/?itid=sf_local_dont-miss-brights_p004_f001">first database of slaveholding members of Congress</a>
+			by examining thousands of pages of census records and historical documents.
+			{{person.lastname}} was one of them.
+        	</div>
+	{% endif %}
+
 
 	<!-- contact panel -->
 	<style>

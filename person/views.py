@@ -121,6 +121,8 @@ KrakenCaucus = TexasVPennsylvaniaAmicus | KrakenObjectedToAZPA | KrakenAnnounced
 NTCaucus = [412723, 400029, 400068, 400071, 400077, 400157, 400219, 400247, 400297, 400340, 400365, 400373, 400380, 400404, 400411, 400414, 400419, 400440, 400644, 400654, 412196, 412278, 412302, 412310, 412393, 412394, 412397, 412399, 412402, 412405, 412416, 412421, 412427, 412461, 412486, 412487, 412500, 412503, 412536, 412539, 412541, 412553, 412566, 412581, 412609, 412631, 412649, 412654, 412661, 412664, 412675, 412676, 412698, 412699, 412710, 412713, 412721, 412722, 412731, 412732, 412740, 412747, 412779, 412794, 412807, 412816, 412821, 412826, 412831, 412836, 456792, 456793]
 
 
+# LEGISLATOR DETAILS PAGE
+
 @anonymous_view
 @render_to('person/person_details.html')
 def person_details(request, pk):
@@ -276,6 +278,7 @@ def person_details(request, pk):
                 'election_guides': load_election_guides(election_id) if election_id else None,
                 'kraken_caucus': kraken_caucus,
                 'kraken_cosponsors': kraken_cosponsors.get(person.id, 0),
+                'is_slaveholder': person.bioguideid in get_slaveholders(),
                 }
 
     #ck = "person_details_%s" % pk
@@ -392,6 +395,21 @@ def load_election_guides(election_id):
         if rec["office"] == election_id:
             yield rec
 
+def get_slaveholders():
+    ck = "washingtonpost/data-congress-slaveowners#0"
+    ret = cache.get(ck)
+    if not ret:
+        ret = set()
+        import csv
+        with open("data/data-congress-slaveowners/data/congress_slaveowners.csv") as f:
+            for rec in csv.DictReader(f):
+                if rec["is_slaveholder"] == "true":
+                    ret.add(rec["bioguide"])
+        cache.set(ck, ret, 86400 * 3) # three days
+    return ret
+
+# USER-SPECIFIC NON-CACHED RESPONSE FOR LEGISLATOR DETAILS PAGE
+
 @user_view_for(person_details)
 def person_details_user_view(request, pk):
     person = get_object_or_404(Person, pk=pk)
@@ -409,6 +427,8 @@ def render_subscribe_inline(request, feed):
                 'request': request,
 				})
     return { 'events_subscribe_button': events_button }
+
+# LEGISLATOR SEARCH
 
 @anonymous_view
 def searchmembers(request, mode=None):
