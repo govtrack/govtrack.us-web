@@ -14,7 +14,7 @@ from bill.models import Bill, BillType, BillStatus, BillTerm, TermType, BillText
 from bill.search import bill_search_manager, parse_bill_citation
 from bill.title import get_secondary_bill_title
 from committee.util import sort_members
-from person.models import Person
+from person.models import Person, PersonRole, RoleType
 from events.models import Feed
 
 from settings import CURRENT_CONGRESS
@@ -401,6 +401,13 @@ def get_cosponsors_table(bill, mode=None):
           for csp in rb.cosponsor_records:
               if csp.person.current_role: # exclude legislators no longer serving
                   add_cosponsor(csp.person, csp.person.current_role).setdefault("other_bills", []).append(rb)
+
+        # If the bill has a lot of cosponsors, it's interesting to see who is not a cosponsor
+        # among currently serving legislators.
+        if len(cosponsor_records) > .75 * (441 if bill.originating_chamber == "House" else 100):
+            for r in PersonRole.objects.filter(current=True, role_type=RoleType.representative if bill.originating_chamber == "House" else RoleType.senator):
+                  if r.person != bill.sponsor and r.person not in cosponsor_records:
+                      add_cosponsor(r.person, r)
 
     # Add a place for committee info.
     for csp in cosponsors:
