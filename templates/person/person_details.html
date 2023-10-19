@@ -531,28 +531,30 @@ function show_pronunciation_guide() {
 				After Congress accepted the state-certified results, Norman <a href="https://talkingpointsmemo.com/feature/mark-meadows-exchanged-texts-with-34-members-of-congress-about-plans-to-overturn-the-2020-election">urged President Trump</a> to suspend civil law to stay in office.
 				{% endif %}
 
-				{% if person.id == 412190 %}
-				In the days after the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 violent insurrection at the Capitol</a> which succeeded in halting, for a time, the electoral count that determined the outcome of the presidential election,
-				{{person.lastname}} <a href="https://www.nytimes.com/2022/04/21/us/politics/trump-mitch-mcconnell-kevin-mccarthy.html">said President Trump “bears responsibility” and urged him to resign</a> ahead of his impeachment for inciting the insurrection at the Capitol,
-				and said his behavior was <a href="https://www.cnn.com/videos/politics/2022/05/04/kevin-mccarthy-audio-denounced-donald-trump-after-insurrection-sot-lead-vpx.cnn">&ldquo;atrocious and totally wrong,&rdquo;</a> but he returned to supporting the former president shortly after.
-				{% else %}
+				{% if person.id == 412190 or person.id == 412226 or person.id == 412569 or person.id == 412683 %}
+					In 2022, {{person.lastname}} defied a subpoena to testify in the investigation of the January 6th Committee.
+				{% endif %}
+
+
+				<hr>
+
 				The <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 violent insurrection at the Capitol</a>,
 				<a href="https://www.justsecurity.org/84551/important-elements-of-the-january-6th-report/">led on the front lines by militant white supremacy groups</a>,
 				attempted to prevent President-elect Joe Biden from taking office by disrupting Congress&rsquo;s count of electors. President Trump was indicted in 2023
 				for soliciting the Vice President to subvert Congress&rsquo;s certification of the election and his role in the fraudulent slates of electors and the insurrection at the Capitol.
-				{% endif %}
+				A Trump advisor <a href="https://www.washingtonpost.com/national-security/2023/10/19/pro-trump-lawyer-sidney-powell-pleads-guilty-georgia-election-interference-case/">pleaded guilty to tampering with voting machines after the election</a>.
 
-				{% if person.id == 412395 or person.id == 412690 or person.id == 412683 or person.id == 400651 or person.id == 412569 or person.id == 456814 %}
+				{% if person.id == 412190 %}
+					<hr>
+				In the days after the <a href="https://www.buzzfeednews.com/article/zoetillman/200-people-guilty-plea-jan-6-insurrection">January 6, 2021 violent insurrection at the Capitol</a> which succeeded in halting, for a time, the electoral count that determined the outcome of the presidential election,
+				{{person.lastname}} <a href="https://www.nytimes.com/2022/04/21/us/politics/trump-mitch-mcconnell-kevin-mccarthy.html">said President Trump “bears responsibility” and urged him to resign</a> ahead of his impeachment for inciting the insurrection at the Capitol,
+				and said his behavior was <a href="https://www.cnn.com/videos/politics/2022/05/04/kevin-mccarthy-audio-denounced-donald-trump-after-insurrection-sot-lead-vpx.cnn">&ldquo;atrocious and totally wrong,&rdquo;</a> but he returned to supporting the former president shortly after.
+				{% elif person.id == 412395 or person.id == 412690 or person.id == 412683 or person.id == 400651 or person.id == 412569 or person.id == 456814 %}
+					<hr>
 					In the days after Jan. 6, {{person.lastname}} requested from President Trump <a href="https://www.cnn.com/2022/06/23/politics/january-6-hearing-day-5-takeaways/index.html">a pardon for crimes {{person.he_she}} may have committed</a> in attempting to change the result of the election in Trump&rsquo;s favor.
-				{% endif %}
-
-				{% if person.id == 412572 %}
+				{% elif person.id == 412572 %}
 					<hr>
 					{{person.lastname}} said in December 2021 that he <a href="https://www.politico.com/minutes/congress/12-22-2021/rices-regret/">regretted his Jan. 6 vote</a>.
-				{% endif %}
-
-				{% if person.id == 412190 or person.id == 412226 or person.id == 412569 or person.id == 412683 %}
-					In 2022, {{person.lastname}} defied a subpoena to testify in the investigation of the January 6th Committee.
 				{% endif %}
 
 	{% elif person.id == 412555 %}

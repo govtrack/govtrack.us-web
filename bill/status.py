@@ -373,7 +373,7 @@ def get_bill_really_short_status_string(status):
     elif status == "VETOED:OVERRIDE_PASS_OVER:SENATE":
         status = "%s passed in Senate veto override %s (House next)."
     elif status == "PASSED:SIMPLERES":
-        status = "%s passed %s."
+        status = "%s was agreed to %s."
     elif status == "PASSED:CONSTAMEND":
         status = "%s was agreed to %s."
     elif status == "PASSED:CONCURRENTRES":
