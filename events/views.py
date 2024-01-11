@@ -159,7 +159,11 @@ def events_list_items(request):
         raise Http404()
         
     if len(feedlist) > 0 or show_empty:
-        qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, int(request.POST.get('count', '100'))) # get all events
+        try:
+            count = int(request.POST.get('count', '100'))
+        except:
+            raise Http404()
+        qs = Feed.get_events_for(feedlist if len(feedlist) > 0 else None, count) # get all events
     else:
         qs = []
     page = Paginator(qs, 50)

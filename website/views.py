@@ -670,7 +670,7 @@ def add_remove_reaction(request):
         and request.POST.get("emoji") in Reaction.EMOJI_CHOICES:
 
         r, isnew = Reaction.objects.get_or_create(
-            subject=request.POST["subject"],
+            subject=request.POST["subject"][:20],
             user=request.user if request.user.is_authenticated else None,
             anon_session_key=Reaction.get_session_key(request) if not request.user.is_authenticated else None,
         )
