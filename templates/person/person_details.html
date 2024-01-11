@@ -337,7 +337,12 @@ function show_pronunciation_guide() {
         		</p>
 
 				{% if r.leadership_title %}
-				<p>{{person.he_she|capfirst}} {% if r.current %}is{% else %}was{% endif %} also {{r.leadership_title }}, a party leadership role. Party leaders focus more on setting their party&rsquo;s legislative priorties than on introducing legislation.</p>
+				<p>{{person.he_she|capfirst}} {% if r.current %}is{% else %}was{% endif %} also {{r.leadership_title }},
+					{% if r.leadership_title == "Speaker of the House" %}
+						a role created by the Constitution to guide the chamber&rsquo;s daily operations.
+					{% else %}
+						a party leadership role. Party leaders focus more on setting their party&rsquo;s legislative priorties than on introducing legislation.</p>
+					{% endif %}
 				{% endif %}
 
 				{% if r.is_territory %}
