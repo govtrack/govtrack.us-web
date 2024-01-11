@@ -39,7 +39,6 @@ utm = "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_m
 template_body_text = None
 template_body_html = None
 announce = None
-medium_posts = None
 
 class Command(BaseCommand):
 	help = 'Sends out email updates of events to subscribing users.'
@@ -51,7 +50,6 @@ class Command(BaseCommand):
 		global template_body_text
 		global template_body_html
 		global announce
-		global medium_posts
 
 		if options["mode"][0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
 			print("Specify daily or weekly or testadmin or testcount.")
@@ -112,10 +110,6 @@ class Command(BaseCommand):
 		template_body_text = get_template("events/emailupdate_body.txt")
 		template_body_html = get_template("events/emailupdate_body.html")
 		announce = load_announcement("website/email/email_update_announcement.md", options["mode"][0] == "testadmin")
-
-		# get GovTrack Insider posts
-		from website.models import MediumPost
-		medium_posts = list(MediumPost.objects.order_by('-published')[0:6])
 
 		# counters for analytics on what we sent
 		counts = {
@@ -328,7 +322,6 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				"body_text": body_text,
 				"body_html": body_html,
 				"announcement": announce,
-				"medium_posts": medium_posts,
 				"SITE_ROOT_URL": settings.SITE_ROOT_URL,
 				"utm": utm,
 			},

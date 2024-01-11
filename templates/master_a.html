@@ -84,31 +84,6 @@
 			<a href="https://www.instagram.com/govtrack.us/" title="Instagram Page"><i class="fab fa-instagram fa-fw"></i><span class="sr-only">Visit us on Instagram</span></a>
 			</p>
 
-			{# MEDIUM POSTS #}
-			{% if medium_posts %}
-		     	<h2>On GovTrack Insider:</h2>
-				{% for post in medium_posts %}
-				{% if forloop.counter <= 3 %}
-					<div class="row">
-						{% if post.image_100px %}
-						<div class="col-3" style="margin-top: 3px; padding-right: 0; margin-right: -5px;">
-							<a href="{{post.url}}">
-								<img src="{{post.image_100px}}" style="border: 1px solid #BBB;"/ class="img-fluid">
-							</a>
-						</div>
-						<div class="col-9">
-						{% else %}
-						<div class="col-12">
-						{% endif %}
-							<div><a href="{{post.url}}">{{post.title}}</a></div>
-							<p>{{post.snippet}} <span class="text-muted" style="font-size: 90%;"> {{post.published|date}}</span></p>
-							</p>
-						</div>
-					</div>
-				{% endif %}
-				{% endfor %}
-		    {% endif %}
-
 			</div> <!-- /hidden-xs -->
 
 		  </div> <!-- /sidebar div-->

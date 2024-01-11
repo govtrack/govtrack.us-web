@@ -8,7 +8,7 @@ LC_TYPE=en_US.UTF-8
 # Hours are in UTC.
 
 10,35 * * * 1-5 { cd /home/govtrack/web; ./run_scrapers.py votes; }
-45 */3 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes committees; ./manage.py govtrack_insider_sync; }
+45 */3 * * * { cd /home/govtrack/web; ./run_scrapers.py text bills votes committees; }
 45 8 * * * { cd /home/govtrack/web; ./run_scrapers.py stats; }
 
 0 10 * * 1-5 { cd /home/govtrack/web; date; ./manage.py send_email_updates daily; }

@@ -105,36 +105,10 @@
 <div class="section">
 Like these updates?
 A <a href="https://www.patreon.com/govtrack">recurring tip</a> or <a href="https://www.govtrack.us/accounts/membership">one-time tip</a> will help us keep this service free for everyone.
-NEW!! Join us on
-<a href="https://mastodon.social/@GovTrack" title="Mastodon Page">Mastodon</a>,
-<a href="https://www.tiktok.com/@govtrack.us" title="TikTok Page">TikTok</a>,
-and <a href="https://www.instagram.com/govtrack.us/" title="Instagram Page">Instagram</a>
-for more updates. We post one-minute video summaries of some legislation on TikTok and Instagram now.
+Join us on <a href="https://mastodon.social/@GovTrack" title="Mastodon Page">Mastodon</a>
+for more updates.
 </div>
 
-		{% if medium_posts %}
-		<div class="section">
-			            <h2>On GovTrack Insider</h2>
-						{% for post in medium_posts|slice:"0:2" %}
-			            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #F2F2F2;margin-bottom:5px;margin-top:20px;padding-top:10px;width:100%;">
-			            	<tr valign="top">
-				            	<td style="text-align:left !important;">
-									{% if post.image_100px %}
-									<div style="float: right; margin: 10px 0 1em 1em">
-										<a href="{{post.url}}?{{utm}}">
-											<img src="{{post.image_100px}}" style="border: 1px solid #888; width: 65px;"/>
-										</a>
-									</div>
-									{% endif %}
-	
-			                        <p><a href="{{post.url}}?{{utm}}">{{post.title}}</a></p>
-									<p><span style="font-size: 90%; color: #555;">{{post.snippet}} <span class="article-date">{{post.published}}</span></span></p>
-				            	</td>
-			            	</tr>
-			            </table>
-						{% endfor %}
-			</div>
-			{% endif %}
 
 <div class="section">
 						{{body_html|safe}}
