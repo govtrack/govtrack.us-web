@@ -1,6 +1,7 @@
-from .models import Req
+from .models import Req, IpAddrInfo
 from django.core.cache import cache
 from django.conf import settings
+from django.db.models import F
  
 import json, datetime, base64, urllib.request, urllib.error, urllib.parse
 
@@ -92,10 +93,16 @@ class GovTrackMiddleware:
               if request.user.is_authenticated else 0
         }
 
-        # Is the user in one of the special netblocks?
+        # Get the user's IP address.
+        ip = None
         try:
             ip = request.META["REMOTE_ADDR"]
             ip = ip.replace("::ffff:", "") # ipv6 wrapping ipv4
+        except:
+            pass
+
+        # Is the user in one of the special netblocks?
+        try:
             if is_ip_in_any_range(ip, HOUSE_NET_RANGES):
                 request._special_netblock = "house"
             if is_ip_in_any_range(ip, SENATE_NET_RANGES):
@@ -104,6 +111,19 @@ class GovTrackMiddleware:
                 request._special_netblock = "eop"
         except:
             pass
+
+        # Record a hit to an IP address so that in an off-line
+        # task we can gather additional information about the
+        # IP address for use in lead generation.
+        if ip is not None:
+            try:
+                numupdated = IpAddrInfo.objects\
+                    .filter(ipaddr=ip)\
+                    .update(hits=F('hits') + 1, last_hit=datetime.datetime.now())
+                if numupdated == 0:
+                    IpAddrInfo.objects.create(ipaddr=ip)
+            except:
+                pass
 
         return self.get_response(request)
 

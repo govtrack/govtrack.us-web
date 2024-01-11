@@ -430,3 +430,10 @@ class CommunityMessage(models.Model):
     def has_been_edited(self):
     	return bool(self.history)
     
+
+class IpAddrInfo(models.Model):
+    ipaddr = models.GenericIPAddressField(db_index=True, unique=True)
+    first_hit = models.DateTimeField(auto_now_add=True)
+    last_hit = models.DateTimeField(auto_now=True, db_index=True)
+    hits = models.IntegerField(default=1, db_index=True)
+    leadfeeder = JSONField(default={}, blank=True, null=True)
