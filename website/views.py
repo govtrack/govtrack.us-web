@@ -43,31 +43,6 @@ def index(request):
             "compact": True
         })
 
-
-    # Fetch our latest Medium posts and YouTube videos. Since we publish them in the same
-    # work cycle, we can intermix and expect the most recent few to alternate between them.
-    # But we only get one link at the bottom.
-    from website.models import MediumPost
-    post_groups.append({
-        "title": "What We’re Watching",
-        "links": [("/events/govtrack-insider", "Subscribe to all GovTrack Insider articles"),
-                  ("https://www.youtube.com/govtrack", "See all videos on YouTube")
-            ],
-        "posts":
-                list(MediumPost.objects.order_by('-published')[0:MAX_PER_GROUP])
-        	+ [{
-        		"url": "https://www.youtube.com/watch?v=" + video["videoId"],
-    			"title": video["title"]
-    				.replace("GovTrack A Bill A Minute: ", "")
-    				.replace("&amp;", "&"), # !, snippet too?
-    			"snippet": video["description"],
-    			"published": datetime.strptime(video["publishedAt"], '%Y-%m-%dT%H:%M:%SZ'),
-    			"image_url": video["thumbnails"]["medium"]["url"],
-    	     } for video in get_youtube_videos("UCL1f7AGknZWFmXWv6bpJzXg", limit=MAX_PER_GROUP) # that's https://www.youtube.com/govtrack
-    	]
-    })
-    post_groups[-1]["posts"].sort(key = lambda p : p["published"] if isinstance(p, dict) else p.published, reverse=True)
-
     # Legislation coming up. Sadly this is usually the least interesting.
     from django.db.models import F
     from django.conf import settings
