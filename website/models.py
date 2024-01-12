@@ -429,7 +429,6 @@ class CommunityMessage(models.Model):
     @property
     def has_been_edited(self):
     	return bool(self.history)
-    
 
 class IpAddrInfo(models.Model):
     ipaddr = models.GenericIPAddressField(db_index=True, unique=True)

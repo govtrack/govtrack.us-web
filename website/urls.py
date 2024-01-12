@@ -22,7 +22,6 @@ urlpatterns = [
     url(r'^accounts/_set_district$', website.views.set_district),
     url(r'^accounts/community/login', website.views.discourse_sso),
     url(r'^videos(?:/(?P<video_id>[a-z0-9\-_]+))?', website.views.videos),
-    url(r'^medium-post-redirector/(\d+)?', website.views.medium_post_redirector),
     url(r'^_ajax/update-position', website.views.update_userposition, name='update-userposition'),
     url(r'^_ajax/reaction', website.views.add_remove_reaction, name='reaction'),
     url(r'^reactions.json', website.views.dump_reactions, name='dump_reactions'),
