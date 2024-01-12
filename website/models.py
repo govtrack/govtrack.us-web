@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from jsonfield import JSONField
+from markdownx.models import MarkdownxField
 
 from events.models import Feed, SubscriptionList
 
@@ -11,6 +12,7 @@ class UserProfile(models.Model):
     massemail = models.BooleanField(default=True) # may we send you mail?
     old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
     last_mass_email = models.IntegerField(default=0)
+    last_blog_post_emailed = models.IntegerField(default=0)
     congressionaldistrict = models.CharField(max_length=4, blank=True, null=True, db_index=True) # or 'XX00' if the user doesn't want to provide it
     
     # monetization
@@ -436,3 +438,27 @@ class IpAddrInfo(models.Model):
     last_hit = models.DateTimeField(auto_now=True, db_index=True)
     hits = models.IntegerField(default=1, db_index=True)
     leadfeeder = JSONField(default={}, blank=True, null=True)
+
+class BlogPost(models.Model):
+    title = models.CharField(max_length=128)
+    body = MarkdownxField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    published = models.BooleanField(default=False, db_index=True)
+
+    class Meta:
+        index_together = [("published", "created")]
+
+    def __str__(self):
+        return self.title
+
+    def body_html(self):
+        from website.templatetags.govtrack_utils import markdown
+        return markdown(self.body)
+
+    def body_text(self):
+        # Replace Markdown-style [text][href] links with the text plus bracketed href.
+        import re
+        body_text = self.body
+        body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 at \2", body_text)
+        return body_text

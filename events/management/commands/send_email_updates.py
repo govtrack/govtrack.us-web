@@ -38,7 +38,7 @@ django.setup() # StackOverflow user says call setup when using multiprocessing
 utm = "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email"
 template_body_text = None
 template_body_html = None
-announce = None
+latest_blog_post = None
 
 class Command(BaseCommand):
 	help = 'Sends out email updates of events to subscribing users.'
@@ -49,7 +49,7 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		global template_body_text
 		global template_body_html
-		global announce
+		global latest_blog_post
 
 		if options["mode"][0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
 			print("Specify daily or weekly or testadmin or testcount.")
@@ -109,7 +109,7 @@ class Command(BaseCommand):
 		# load globals
 		template_body_text = get_template("events/emailupdate_body.txt")
 		template_body_html = get_template("events/emailupdate_body.html")
-		announce = load_announcement("website/email/email_update_announcement.md", options["mode"][0] == "testadmin")
+		latest_blog_post = load_latest_blog_post()
 
 		# counters for analytics on what we sent
 		counts = {
@@ -235,10 +235,12 @@ def pool_worker(conn):
 
 def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events, mail_connection):
 	global launch_time
+	global latest_blog_post
 
 	user_start_time = datetime.now()
 
 	user = User.objects.get(id=user_id)
+	profile = UserProfile.objects.get(user=user)
 	
 	# get the email's From: header and return path
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
@@ -272,10 +274,15 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			if most_recent_event is None: most_recent_event = max_id
 			most_recent_event = max(most_recent_event, max_id)
 
+	# Suppress the latest blog post if the user was already sent it.
+	if latest_blog_post and profile.last_blog_post_emailed >= latest_blog_post.id:
+		latest_blog_post = None
+
 	user_querying_end_time = datetime.now()
 	
-	# Don't send an empty email.... unless we're testing and we want to send some old events.
-	if len(eventslists) == 0 and not send_old_events and announce is None:
+	# Don't send an empty email (no events and no latest blog post)
+	# .... unless we're testing and we want to send some old events.
+	if len(eventslists) == 0 and not send_old_events and latest_blog_post is None:
 		return {
 			"total_time_querying": user_querying_end_time-user_start_time,
 		}
@@ -321,7 +328,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				"emailpingurl": emailpingurl,
 				"body_text": body_text,
 				"body_html": body_html,
-				"announcement": announce,
+				"latest_blog_post": latest_blog_post,
 				"SITE_ROOT_URL": settings.SITE_ROOT_URL,
 				"utm": utm,
 			},
@@ -329,7 +336,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				'Reply-To': emailfromaddr,
 				'Auto-Submitted': 'auto-generated',
 				'X-Auto-Response-Suppress': 'OOF',
-				'X-Unsubscribe-Link': UserProfile.objects.get(user=user).get_one_click_unsub_url(),
+				'X-Unsubscribe-Link': profile.get_one_click_unsub_url(),
 			},
 			fail_silently=False,
 			connection=mail_connection,
@@ -358,6 +365,9 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			sublist.last_event_mailed = max(sublist.last_event_mailed, most_recent_event) if sublist.last_event_mailed is not None else most_recent_event
 			sublist.last_email_sent = launch_time
 			sublist.save()
+		if latest_blog_post:
+			profile.last_blog_post_emailed = latest_blog_post.id
+			profile.save()
 
 	user_sending_end_time = datetime.now()
 
@@ -369,46 +379,19 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		"total_time_sending": user_sending_end_time-user_rendering_end_time,
 	}
 
-def load_announcement(template_path, testing):
-	# Load the Markdown template for the current blast.
-	templ = get_template(template_path)
-
-	# Get the text-only body content, which also includes some email metadata.
-	# Replace Markdown-style [text][href] links with the text plus bracketed href.
-	ctx = { "format": "text", "utm": "" }
-	body_text = templ.render(ctx).strip()
-	body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 at \2", body_text)
-
-	# The top of the text content contains metadata in YAML format,
-	# with "id" and "subject" required and active: true or rundate set to today's date in ISO format.
-	meta_info, body_text = body_text.split("----------", 1)
-	body_text = body_text.strip()
-	meta_info = yaml.load(meta_info)
-
-	# Under what cases do we use this announcement?
-	if meta_info.get("active"):
-		pass # active is set to something truthy
-	elif meta_info.get("rundate") == launch_time.date().isoformat():
-		pass # rundate matches date this job was started
-	elif "rundate" in meta_info and testing:
-		pass # when testing ignore the actual date set
-	else:
-		# the announcement file is inactive/stale
+def load_latest_blog_post():
+	from website.models import BlogPost
+	latest_blog_post = BlogPost.objects\
+		.filter(published=True)\
+		.order_by('-created')\
+		.first()
+	if not latest_blog_post:
 		return None
 
-	# Get the HTML body content.
-	ctx = {
-		"format": "html",
-		"utm": "",
-	}
-	body_html = templ.render(ctx).strip()
-	body_html = markdown(body_html)
+	# Pre-render the HTML and plain text versions.
+	latest_blog_post.body_html = latest_blog_post.body_html()
+	latest_blog_post.body_text = latest_blog_post.body_text()
 
-	# Store everything in meta_info.
-	
-	meta_info["body_text"] = body_text
-	meta_info["body_html"] = body_html
-	
-	return meta_info
+	return latest_blog_post
 
 

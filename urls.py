@@ -22,8 +22,9 @@ urlpatterns += [
 
 urlpatterns += [
     url(r'^admin/', admin.site.urls),
+    url('markdownx/', include('markdownx.urls')),
 
-	# main URLs
+    # main URLs
     url(r'', include('redirect.urls')),
     url(r'', include('website.urls')),
     url(r'^congress/members(?:$|/)', include('person.urls')),
@@ -44,7 +45,7 @@ urlpatterns += [
     url(r'^accounts/logout$', auth_views.LogoutView.as_view(), { "redirect_field_name": "next" }),
     url(r'^accounts/profile$', registration.views.profile, name='registration.views.profile'),
 
-	url(r'^dump_request', website.views.dumprequest),
+    url(r'^dump_request', website.views.dumprequest),
 ]
 
 # sitemaps

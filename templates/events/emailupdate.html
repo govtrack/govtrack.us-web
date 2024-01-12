@@ -92,16 +92,6 @@
 <tr>
 <td>
 
-						<!-- ANNOUNCEMENT -->
-						{% if announcement %}
-<div style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
-						<div id="announcement-holder">
-				            {% if announcement.subject %}<h2>{{announcement.subject}}</h2>{% endif %}
-							{{announcement.body_html|safe}}
-						</div>
-</div>
-						{% endif %}
-
 <div class="section">
 Like these updates?
 A <a href="https://www.patreon.com/govtrack">recurring tip</a> or <a href="https://www.govtrack.us/accounts/membership">one-time tip</a> will help us keep this service free for everyone.
@@ -109,6 +99,14 @@ Join us on <a href="https://mastodon.social/@GovTrack" title="Mastodon Page">Mas
 for more updates.
 </div>
 
+						{% if latest_blog_post %}
+<div style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
+						<div id="announcement-holder">
+				            <h2>{{latest_blog_post.title}}</h2>
+							{{latest_blog_post.body_html|safe}}
+						</div>
+</div>
+						{% endif %}
 
 <div class="section">
 						{{body_html|safe}}

@@ -210,19 +210,20 @@ article {
 
 <div class="row">
 
-<div class="col-md-5">
+<div class="col-lg-6">
+  {% if latest_blog_post %}
   <div class="card">
-    <div class="card-header">How a bill actually becomes a law... in 2020</div>
+    <div class="card-header">{{latest_blog_post.title}}</div>
     <div class="card-body">
-      <p>Middle school social studies textbooks and Schoolhouse Rock songs paint a stereotypical portrait of how congressional legislation gets passed. But in real life, the story of how federal laws actually get enacted usually proves far more complex. To examine how, GovTrack Insider browsed through all the laws enacted by Congress in 2019–20, looking for one that seemed both particularly interesting and undercovered by national media.</p>
-      <a href="https://govtrackinsider.com/how-a-bill-actually-becomes-a-law-in-2020-the-emancipation-national-historic-trail-study-act-768a301974ff">Read
-      the story of The Emancipation National Historic Trail Study Act &raquo;</a>
+      {{latest_blog_post.body_html|safe}}
+      <div style="font-style: italic">&mdash; {{latest_blog_post.created|date:"SHORT_DATETIME_FORMAT"}}</div>
     </div>
   </div>
+  {% endif %}
 
 </div>
 
-<div class="col-md-7">
+<div class="col-lg-6">
 
 {% for post_group in post_groups %}
 <div class="card" style="margin-bottom: 1.5em">

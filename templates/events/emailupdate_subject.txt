@@ -1,1 +1,1 @@
-GovTrack Update for {{date}}{% if announcement.subject %} | {{announcement.subject}}{% endif %}
+Activity in Congress{% if latest_blog_post %}: {{latest_blog_post.title}}{% endif %} ({{date}})

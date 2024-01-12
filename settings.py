@@ -99,6 +99,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'django_otp',
     'django_otp.plugins.otp_totp',
+    #'django_otp.plugins.otp_static', # necessary for bootstrapping access to the admin
+    'markdownx',
 
     'haystack',
     'htmlemailer',
@@ -208,3 +210,5 @@ SILKY_PYTHON_PROFILER = True
 SHOW_TOOLBAR_CALLBACK = lambda : True
 
 OTP_TOTP_ISSUER = "GovTrack.us"
+
+MARKDOWNX_MARKDOWNIFY_FUNCTION = 'website.templatetags.govtrack_utils.markdown'

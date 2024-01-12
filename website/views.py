@@ -27,9 +27,15 @@ def index(request):
     from bill.views import subject_choices
     bill_subject_areas = subject_choices()
 
-
     post_groups = []
     MAX_PER_GROUP = 3
+
+    # Get our latest blog post.
+    from .models import BlogPost
+    latest_blog_post = BlogPost.objects\
+        .filter(published=True)\
+        .order_by('-created')\
+        .first()
 
     # Trending feeds. These are short (no image, no snippet) so they go first.
     trending_feeds = [Feed.objects.get(id=f) for f in Feed.get_trending_feeds()[0:6]]
@@ -64,13 +70,9 @@ def index(request):
         })
 
 
-    from person.models import Person
-    from vote.models import Vote
     return {
-        # for the action area below the splash
-        'bill_subject_areas': bill_subject_areas,
-
-        # for the highlights blocks
+        'bill_subject_areas': bill_subject_areas, # for the action area below the splash
+        'latest_blog_post': latest_blog_post,
         'post_groups': post_groups,
         }
 

@@ -1,9 +1,16 @@
 {% autoescape off %}GovTrack Email Update
 =====================
 
-{% if announcement %}----- {{announcement.body_text}} -----
+This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to {{SITE_ROOT_URL}}/accounts/profile.
 
-{% endif %}This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to {{SITE_ROOT_URL}}/accounts/profile.
+{% if latest_blog_post %}=====================================================================
+
+{{latest_blog_post.title}}
+
+{{last_blog_post_emailed.body_text}}
+
+{% endif %}
+=====================================================================
 
 {{body_text}}
 
