@@ -42,16 +42,6 @@ function show_modal(title, message) {
     $('#error_modal').modal({});
 }
 
-function addLazyScriptTag(src, onload) {
-    // https://stackoverflow.com/questions/8578617/inject-a-script-tag-with-remote-src-and-wait-for-it-to-execute
-    const script = document.createElement('script');
-    script.src = src;
-    script.crossorigin = "anonymous";
-    if (onload) script.addEventListener('load', onload);
-    if (onerror) script.addEventListener('error', onerror);
-    document.getElementsByTagName('head')[0].appendChild(script);
-}
-
 function init_ad_zone(ad_container) {
     // Track some ad impression statistics.
     var ad_cookie = $.cookie("ads");
@@ -64,10 +54,26 @@ function init_ad_zone(ad_container) {
     // save cookie
     $.cookie("ad_exp", form_qs(ad_cookie), { expires: 21, path: '/' });
 
-    // Load AdSense.
-    if (!window.has_added_adsense_script_tag && !is_ad_free) {
-        addLazyScriptTag("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3418906291605762");
-        window.has_added_adsense_script_tag = true;
+    // Defer ad zone scripts until the partner script is loaded.
+    let deferred_scripts = [];
+    window.deferred_ad_script ||= (func) => { deferred_scripts.push(func); };
+
+    // Load ad partner script.
+    if (!window.has_added_ads_script_tag && !is_ad_free) {
+        // https://stackoverflow.com/questions/8578617/inject-a-script-tag-with-remote-src-and-wait-for-it-to-execute
+
+        // Publir
+        const script = document.createElement('script');
+        script.src = "//a.publir.com/platform/1591.js";
+        script.id = "headerbidder";
+        script.type = "text/javascript";
+        script.addEventListener('load', () => {
+            deferred_scripts.forEach((func) => func()); // execute deferred scripts
+            window.deferred_ad_script = (func) => { func(); }; // now execute immediately
+        });
+        document.getElementsByTagName('head')[0].appendChild(script);
+
+        window.has_added_ads_script_tag = true;
     }
 
     // Show ad.
@@ -88,52 +94,15 @@ function init_ad_zone(ad_container) {
         // for debugging, show a green box
         write_ad_code('<div style="width:336px;height:280px;background:green"></div>')
 
-    /*} else if (the_segment == "House" || the_segment == "Senate") {
-        // ad unit targeting staff only
-        write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="7881093146"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-        */
+    } else if (ad_container.attr('data-zone') == "sidebar") {
+        // Sidebar Zone - Publir
+        write_ad_code('<div id="div-hre-Govtrack-4171" class="publirAds">');
+        window.deferred_ad_script(() => { googletag.cmd.push(function() {  googletag.pubads().addEventListener('slotRenderEnded', function(event) { if (event.slot.getSlotElementId() == "div-hre-Govtrack-4171") {googletag.display("div-hre-Govtrack-4171");} });}); });
 
-    } else if (ad_container.attr('data-zone') == "master_a" && $(window).width() >= 1170) {
-		// Master A Google AdSense 336x280 unit.
-        write_ad_code('<ins class="adsbygoogle" style="margin:0 -4px;display:inline-block;width:336px;height:280px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="4342089141"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-
-    } else if (ad_container.attr('data-zone') == "master_a" && $(window).width() >= 970) {
-		// Master A Google AdSense 200x200 unit.
-        write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:200px;height:200px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8659683806"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-
-    } else if (ad_container.attr('data-zone') == "master_a") {
-        // Master A Google AdSense Responsive unit
-        write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-
-    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 1200) { // container width is 960
-        // Master A Google AdSense Responsive unit
-        write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 992) { // container width is 960
-        // Footer leaderboard Google AdSense unit (728x90)
-        write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="5620102176"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 330) {
-        // Smartphone Banner Google AdSense unit (320x50)
-        write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8745863219"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-
-    } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 1200) { // container width is 960
-	// Top Billboard Google AdSense unit (970x250)
-	write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:970px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="9787482143"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 992) { // container width is 960
-	// Top Leaderboard Google AdSense unit (728x90)
-	write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3192837063"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 330) {
-        // Smartphone Banner Google AdSense unit (320x50)
-	write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8745863219"></ins>');
-        (adsbygoogle = window.adsbygoogle || []).push({});
+    } else if (ad_container.attr('data-zone') == "in_page_leader") {
+        // Header / Footer / In-Page Leaderboard Zone - Publir
+        write_ad_code('<div id="div-hre-Govtrack-4169" class="publirAds">');
+        window.deferred_ad_script(() => { googletag.cmd.push(function() {  googletag.pubads().addEventListener('slotRenderEnded', function(event) { if (event.slot.getSlotElementId() == "div-hre-Govtrack-4169") {googletag.display("div-hre-Govtrack-4169");} });}); });
     }
 }
 
