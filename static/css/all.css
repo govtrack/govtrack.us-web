@@ -215,13 +215,15 @@ blockquote {
 
 #logo {
 	display: block;
-	background: url(../images/logo.png?201906) 0 0 no-repeat;
-	height: 30px;
-	width: 110px;
-	margin-top: 11px;
+	background: url(../images/logo.png?20240215) 0 0 no-repeat;
+	height: 45px;
+	width: 125px;
+	margin-top: -10px;
 	margin-left: 15px;
 	text-indent: -9999px;
 	overflow: hidden;
+	position: relative;
+	top: 7px;
 }
 
 ol.breadcrumb {
