@@ -1,0 +1,30 @@
+{% extends "master.html" %}
+{% block title %}GovTrack.us - Posts from Us{% endblock %}
+{% block meta_description %}Original reporting and other news from GovTrack.us{% endblock %}
+
+{% block extra_css %}
+<style>
+section {
+    max-width: 45em;
+}
+</style>
+{% endblock %}
+
+{% block crumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/posts">News From Us</a></li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<section>
+    <h1>{{post.title}}</h1>
+
+    <p>{{post.created|date}}</p>
+
+    {{post.body_html|safe}}
+</section>
+{% endblock %}
+

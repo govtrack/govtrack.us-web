@@ -217,6 +217,7 @@ article {
     <div class="card-body">
       {{latest_blog_post.body_html|safe}}
       <div style="font-style: italic">&mdash; {{latest_blog_post.created|date:"SHORT_DATETIME_FORMAT"}}</div>
+      <div style="margin-top: 1em">(<a href="/posts">View older posts &raquo;</a>)</div>
     </div>
   </div>
   {% endif %}

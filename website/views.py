@@ -13,7 +13,7 @@ from common.decorators import render_to
 from twostream.decorators import anonymous_view
 from registration.helpers import json_response
 
-from website.models import UserProfile
+from website.models import UserProfile, BlogPost
 from events.models import Feed
 import us
 
@@ -1245,3 +1245,17 @@ def community_forum_post_message(request):
         "status": "ok",
         "message": get_template("website/community_messages_message.html").render({ "message": m, "request": request })
     }
+
+
+@anonymous_view
+def posts(request, id=None, slug=None):
+    if not id:
+        return render(request, 'website/posts.html', {
+            "posts": BlogPost.objects.filter(published=True).order_by('-created') })
+
+    post = get_object_or_404(BlogPost, published=True, id=id)
+
+    if request.path != post.get_absolute_url():
+        return redirect(post.get_absolute_url())
+
+    return render(request, 'website/post.html', { "post": post })

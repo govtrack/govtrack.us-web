@@ -36,7 +36,7 @@ def ordinalhtml(value):
 
 @register.filter(is_safe=True)
 @stringfilter
-def markdown(value):
+def markdown(value, trusted=False):
     # Renders the string using CommonMark in safe mode, which blocks
     # raw HTML in the input and also some links using a blacklist,
     # plus a second pass filtering using a whitelist for allowed
@@ -45,7 +45,8 @@ def markdown(value):
     import cmarkgfm
     from cmarkgfm.cmark import Options as cmarkgfmOptions
 
-    html = cmarkgfm.github_flavored_markdown_to_html(value, options=cmarkgfmOptions.CMARK_OPT_SAFE)
+    html = cmarkgfm.github_flavored_markdown_to_html(value,
+        options=cmarkgfmOptions.CMARK_OPT_SAFE if not trusted else 0)
 
     import html5lib, urllib.parse
     def filter_url(url):

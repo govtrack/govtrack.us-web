@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 
+import re
 from jsonfield import JSONField
 from markdownx.models import MarkdownxField
 
@@ -442,6 +443,7 @@ class IpAddrInfo(models.Model):
 class BlogPost(models.Model):
     title = models.CharField(max_length=128)
     body = MarkdownxField()
+    info = JSONField(default={}, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     published = models.BooleanField(default=False, db_index=True)
@@ -452,13 +454,56 @@ class BlogPost(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        from django.template.defaultfilters import slugify
+        if not self.published: return "/posts"
+        return "/posts/{}/{}_{}".format(self.id, self.created.date().isoformat(), slugify(self.title))
+
+    def body_preview(self):
+        body_text = self.body.strip()
+        body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1", body_text) # remove linkss
+        body_text = re.sub(r"^#+\s*(.*?\s*)\n", r"\1: ", body_text)
+        body_text = re.sub('<[^<]+?>', '', body_text) # remove HTML embedded in Markdown, assumes HTML is trusted
+        return body_text
+
     def body_html(self):
         from website.templatetags.govtrack_utils import markdown
-        return markdown(self.body)
+        return markdown(self.body, trusted=True)
 
     def body_text(self):
         # Replace Markdown-style [text][href] links with the text plus bracketed href.
-        import re
-        body_text = self.body
+        # Does not handle trusted HTML embedded in Markdown.
+        body_text = self.body.strip()
         body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 at \2", body_text)
         return body_text
+
+    @staticmethod
+    def import_wordpress_posts():
+        import json, iso8601
+        from django.utils.timezone import make_naive
+        with open("../posts.json") as f:
+            posts = json.load(f)
+        for post in posts:
+            for bp in BlogPost.objects.all():
+                if bp.info and bp.info["url"] == post["url"]:
+                    print("Updating #", bp.id)
+                    break
+            else:
+                print("Adding...", post["title"])
+                bp = BlogPost()
+
+            bp.title = post["title"]
+            bp.body = post["body"].replace("&nbsp;", " ")
+            bp.published = True
+            del post["body"]
+            bp.info = post
+            bp.save()
+
+            # published/modified are updated on save() so can't be directly edited above
+            def parse_dt(date_str):
+                d = iso8601.parse_date(date_str)
+                return make_naive(d)
+            BlogPost.objects.filter(id = bp.id).update(
+                created = parse_dt(post["published"]),
+                updated = parse_dt(post["modified"])
+            )

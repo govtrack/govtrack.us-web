@@ -1,1 +1,1 @@
-Activity in Congress{% if latest_blog_post %}: {{latest_blog_post.title}}{% endif %} ({{date}})
+Activity in Congress{% if latest_blog_post %}: {{latest_blog_post.title|safe}}{% endif %} ({{date}})

@@ -86,7 +86,7 @@ h1 {
 h2 {
 	font-size: 18px;
 }
-	h2:first-child {
+	h2:first-child, #content h2:first-child {
 		margin-top: 0;
 	}
 	#content h2 {
