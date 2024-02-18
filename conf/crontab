@@ -14,7 +14,7 @@ LC_TYPE=en_US.UTF-8
 0 10 * * 1-5 { cd /home/govtrack/web; date; ./manage.py send_email_updates daily; }
 0 13 * * 6 { cd /home/govtrack/web; date; ./manage.py send_email_updates weekly; }
 
-25 7 * * * { cd /home/govtrack/web; ./manage.py clear_expired_email_verifications; ./manage.py clearsessions; ./manage.py send_email_reconfirmation_and_deactivate; }
+25 7 * * * { cd /home/govtrack/web; ./manage.py clear_expired_email_verifications; ./manage.py clearsessions; }
 
 1 13-23 * * * { cd /home/govtrack/web; ./manage.py tweet_something; }
 
