@@ -50,7 +50,7 @@ function init_ad_zone(ad_container) {
 
     // put users in buckets: assign each user a random number in [0,1].
     if (!ad_cookie.segment) ad_cookie.segment = Math.random();
-    
+
     // save cookie
     $.cookie("ad_exp", form_qs(ad_cookie), { expires: 21, path: '/' });
 
@@ -60,12 +60,26 @@ function init_ad_zone(ad_container) {
 
     // Load ad partner script.
     if (!window.has_added_ads_script_tag && !is_ad_free) {
+        window.ad_provider = (ad_cookie.segment < .75) ? "adsense" : "publir";
+
         // https://stackoverflow.com/questions/8578617/inject-a-script-tag-with-remote-src-and-wait-for-it-to-execute
 
-        // Publir
         const script = document.createElement('script');
-        script.src = "//a.publir.com/platform/1591.js";
-        script.id = "headerbidder";
+
+        // Google AdSense
+        if (window.ad_provider == "adsense")
+        {
+            script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3418906291605762";
+            script.crossorigin = "anonymous";
+        }
+
+        // Publir
+        if (window.ad_provider == "publir")
+        {
+            script.src = "//a.publir.com/platform/1591.js";
+            script.id = "headerbidder";
+        }
+
         script.type = "text/javascript";
         script.addEventListener('load', () => {
             deferred_scripts.forEach((func) => func()); // execute deferred scripts
@@ -94,15 +108,59 @@ function init_ad_zone(ad_container) {
         // for debugging, show a green box
         write_ad_code('<div style="width:336px;height:280px;background:green"></div>')
 
-    } else if (ad_container.attr('data-zone') == "sidebar") {
-        // Sidebar Zone - Publir
-        write_ad_code('<div id="div-hre-Govtrack-4171" class="publirAds">');
-        window.deferred_ad_script(() => { googletag.cmd.push(function() {  googletag.pubads().addEventListener('slotRenderEnded', function(event) { if (event.slot.getSlotElementId() == "div-hre-Govtrack-4171") {googletag.display("div-hre-Govtrack-4171");} });}); });
+    } else if (window.ad_provider == "adsense") {
+        if (ad_container.attr('data-zone') == "sidebar" && $(window).width() >= 1170) {
+            // Master A Google AdSense 336x280 unit.
+            write_ad_code('<ins class="adsbygoogle" style="margin:0 -4px;display:inline-block;width:336px;height:280px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="4342089141"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
 
-    } else if (ad_container.attr('data-zone') == "in_page_leader") {
-        // Header / Footer / In-Page Leaderboard Zone - Publir
-        write_ad_code('<div id="div-hre-Govtrack-4169" class="publirAds">');
-        window.deferred_ad_script(() => { googletag.cmd.push(function() {  googletag.pubads().addEventListener('slotRenderEnded', function(event) { if (event.slot.getSlotElementId() == "div-hre-Govtrack-4169") {googletag.display("div-hre-Govtrack-4169");} });}); });
+        } else if (ad_container.attr('data-zone') == "sidebar" && $(window).width() >= 970) {
+            // Master A Google AdSense 200x200 unit.
+            write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:200px;height:200px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8659683806"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
+
+        } else if (ad_container.attr('data-zone') == "sidebar") {
+            // Master A Google AdSense Responsive unit
+            write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
+
+        } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 1200) { // container width is 960
+            // Master A Google AdSense Responsive unit
+            write_ad_code('<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3758146349" data-ad-format="auto"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 992) { // container width is 960
+            // Footer leaderboard Google AdSense unit (728x90)
+            write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="5620102176"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        } else if (ad_container.attr('data-zone') == "footer" && $(window).width() >= 330) {
+            // Smartphone Banner Google AdSense unit (320x50)
+            write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8745863219"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
+
+        } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 1200) { // container width is 960
+            // Top Billboard Google AdSense unit (970x250)
+            write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:970px;height:250px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="9787482143"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 992) { // container width is 960
+            // Top Leaderboard Google AdSense unit (728x90)
+            write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="3192837063"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        } else if (ad_container.attr('data-zone') == "header" && $(window).width() >= 330) {
+            // Smartphone Banner Google AdSense unit (320x50)
+            write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8745863219"></ins>');
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        }
+    } else if (window.ad_provider == "publir") {
+        if (ad_container.attr('data-zone') == "sidebar") {
+            // Sidebar Zone - Publir
+            write_ad_code('<div id="div-hre-Govtrack-4171" class="publirAds">');
+            window.deferred_ad_script(() => { googletag.cmd.push(function() {  googletag.pubads().addEventListener('slotRenderEnded', function(event) { if (event.slot.getSlotElementId() == "div-hre-Govtrack-4171") {googletag.display("div-hre-Govtrack-4171");} });}); });
+
+        } else if (ad_container.attr('data-zone') == "header" || ad_container.attr('data-zone') == "footer") {
+            // Header / Footer / In-Page Leaderboard Zone - Publir
+            write_ad_code('<div id="div-hre-Govtrack-4169" class="publirAds">');
+            window.deferred_ad_script(() => { googletag.cmd.push(function() {  googletag.pubads().addEventListener('slotRenderEnded', function(event) { if (event.slot.getSlotElementId() == "div-hre-Govtrack-4169") {googletag.display("div-hre-Govtrack-4169");} });}); });
+        }
     }
 }
 
