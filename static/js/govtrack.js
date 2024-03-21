@@ -72,6 +72,15 @@ function init_ad_zone(ad_container) {
             script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3418906291605762";
             script.crossorigin = "anonymous";
         }
+        else
+        {
+            // Always load the AdSense code for vignette ads, even if the display ads are coming from another provider.
+            const script_adsense = document.createElement('script');
+            script_adsense.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3418906291605762";
+            script_adsense.crossorigin = "anonymous";
+            script_adsense.type = "text/javascript";
+            document.getElementsByTagName('head')[0].appendChild(script_adsense);
+        }
 
         // Publir
         if (window.ad_provider == "publir")
