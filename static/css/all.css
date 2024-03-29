@@ -145,6 +145,9 @@ header ul, footer ul {
 
 blockquote {
 	font-size: inherit;
+	margin-left: 1em;
+	border-left: 3px solid #888;
+	padding-left: 1em;
 }
 
 /* LAYOUT STYLES */
