@@ -1709,6 +1709,7 @@ def get_formatted_bill_summary(bill):
     date = dateutil.parser.parse(summary.get("date")) if summary.get("date") else None
 
     summary = summary.text
+    if summary is None: return None
     if summary.strip() == "": return None
     summary = "".join(["<p>" + cgi.escape(p) + "</p>\n" for p in summary.split("\n\n")])
 
