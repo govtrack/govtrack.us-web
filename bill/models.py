@@ -732,7 +732,7 @@ class Bill(models.Model):
                 index_feeds.append(self.sponsor.get_feed("ps"))
             index_feeds.extend([ix.get_feed() for ix in self.terms.all()])
             index_feeds.extend([cx.get_feed("bills") for cx in self.committees.all()])
-            index_feeds.extend([Feed.objects.get_or_create(feedname="usc:" + str(sec))[0] for sec in self.usc_citations_uptree()])
+            #index_feeds.extend([Feed.objects.get_or_create(feedname="usc:" + str(sec))[0] for sec in self.usc_citations_uptree()])
 
             # also index into feeds for any related bills and previous versions of this bill
             # that people may still be tracking. exclude related bills that are related to
