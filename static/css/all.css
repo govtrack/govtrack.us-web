@@ -974,14 +974,14 @@ ul.singlesignon {
 }
 
 #sitenewscontainer {
-	padding: 2px 0 1px 0;
+	padding: 4px 0 3px 0;
 	border-bottom: 1px solid #eee;
 	box-shadow: 0px 0px 1px 0px #666;
 	font-size: 13px;
 	color: #666;
 }
 	#sitenewscontainer a {
-		color: #55E;
+		color: #9D2146;
 	}
 #sitenews {
 	margin: 0 auto;

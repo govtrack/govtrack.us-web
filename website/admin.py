@@ -10,10 +10,13 @@ class UserProfileAdmin(admin.ModelAdmin):
     readonly_fields = ['user']
 
 class MediumPostAdmin(admin.ModelAdmin):
-	list_display = ['published', 'title', 'url']
+    list_display = ['published', 'title', 'url']
 
 class BlogPostAdmin(MarkdownxModelAdmin):
-    list_display = ['title', 'published', 'created', 'updated']
+    list_display = ['title', 'published', 'created', 'category']
+    list_filter = ['category', 'published']
+    search_fields = ['title']
+    ordering = ('-created',)
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(MediumPost, MediumPostAdmin)

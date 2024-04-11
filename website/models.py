@@ -441,7 +441,18 @@ class IpAddrInfo(models.Model):
     leadfeeder = JSONField(default={}, blank=True, null=True)
 
 class BlogPost(models.Model):
+    CATEGORIES = [
+        ("sitenews", "News About GovTrack"),
+        ("sitehelp", "Using GovTrack Tips"),
+        ("analysis", "Analysis and Commentary"),
+        ("billsumm", "Bill Summary"),
+        ("legrecap", "Legislative Recap"),
+        ("legahead", "Legislative Preview"),
+    ]
+
     title = models.CharField(max_length=128)
+    category = models.CharField(max_length=24, blank=True, null=True,
+        choices=[(None, "Not Set")] + CATEGORIES)
     body = MarkdownxField()
     info = JSONField(default={}, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -449,7 +460,8 @@ class BlogPost(models.Model):
     published = models.BooleanField(default=False, db_index=True)
 
     class Meta:
-        index_together = [("published", "created")]
+        index_together = [("published", "created"),
+                          ("published", "category", "created")]
 
     def __str__(self):
         return self.title
@@ -478,10 +490,30 @@ class BlogPost(models.Model):
         return body_text
 
     @staticmethod
+    def get_categories_with_freq():
+        categories = [{ "key": c[0], "label": c[1], "freq": None, "rawfreq": None }
+            for c in BlogPost.CATEGORIES ]
+        from datetime import datetime, timedelta
+        for cat in categories:
+            qs = BlogPost.objects.filter(published=True, category=cat["key"], created__gt=datetime.now() - timedelta(days=365*2))
+            if qs.count() == 0: continue
+            n = min(qs.count(), 10)
+            p = qs.order_by('-created')[n-1]
+            nperday = n / (datetime.now() - p.created).days
+            for period, days in (("week", 7), ("month", 30.5), ("year", 365.25)):
+               nperperiod = round(nperday * days)
+               if nperperiod >= 1:
+                   cat['rawfreq'] = nperday
+                   cat['freq'] = str(nperperiod) + " per " + period
+                   break
+        categories = sorted(categories, key = lambda cat : cat["rawfreq"] or 0, reverse=True)
+        return categories
+
+    @staticmethod
     def import_wordpress_posts():
         import json, iso8601
         from django.utils.timezone import make_naive
-        with open("../posts.json") as f:
+        with open("../medium_scraped_posts_archive.json") as f:
             posts = json.load(f)
         for post in posts:
             for bp in BlogPost.objects.all():
@@ -505,5 +537,5 @@ class BlogPost(models.Model):
                 return make_naive(d)
             BlogPost.objects.filter(id = bp.id).update(
                 created = parse_dt(post["published"]),
-                updated = parse_dt(post["modified"])
+                updated = parse_dt(post["published"])
             )

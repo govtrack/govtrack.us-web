@@ -7,6 +7,7 @@ import json, datetime, base64, urllib.request, urllib.error, urllib.parse
 
 from emailverification.models import BouncedEmail
 
+from website.models import BlogPost
 from website.views import is_congress_in_session_live
 
 import us
@@ -70,6 +71,14 @@ def template_context_processor(request):
         pass
 
     context["IS_CONGRESS_IN_SESSION_LIVE"] = is_congress_in_session_live
+
+    # Most recent blog post
+    bp = cache.get("blog_post2")
+    if not bp:
+        bp = BlogPost.objects.filter(published=True).order_by('-created').first()
+        if bp:
+            cache.set("blog_post2", bp, 60 * 30)
+    context["blog_post"] = bp
 
     return context
   

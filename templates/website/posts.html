@@ -4,6 +4,9 @@
 
 {% block extra_css %}
 <style>
+    section h3 {
+        margin: 0 0 .25em 0;
+    }
 </style>
 {% endblock %}
 
@@ -11,8 +14,9 @@
 <h1>Original reporting and other news from us</h1>
 
 {% for post in posts %}
-    <section style="margin: .5em 0">
-        <h3><a href="{{post.get_absolute_url}}">{{post.title}}</a> ({{post.created|date}})</h3>
+    <section style="margin: 0 0 1em 0">
+        <h3><a href="{{post.get_absolute_url}}">{{post.title}}</a> ({{post.created|date}}
+         &middot; {{post.get_category_display}})</h3>
 	<p>{{post.body_preview|truncatewords:50}}</p>
     </section>
 {% endfor %}

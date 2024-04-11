@@ -41,6 +41,7 @@ userpanels_panel
 userpanels_panel_admins
 userpanels_panelinvitation
 userpanels_panelmembership
+website_blogpost
 website_campaignsupporter
 website_communityinterest
 website_community

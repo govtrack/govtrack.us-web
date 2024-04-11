@@ -55,7 +55,7 @@ def markdown(value, trusted=False):
         except Exception as e:
             # invalid URL
             return None
-        if urlp.scheme not in ("http", "https"):
+        if urlp.scheme not in ("http", "https") and (not trusted or urlp.scheme not in ("data",)):
             return None
         return url
     valid_tags = set('strong em a code p h1 h2 h3 h4 h5 h6 pre br hr img ul ol li span blockquote'.split())

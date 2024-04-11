@@ -193,7 +193,7 @@
 
 
 
-	<div id="sitenewscontainer" class="navbar-default" style="display: none">
+	<div id="sitenewscontainer" class="navbar-default" {# style="display: none" #}>
 	<div id="sitenews">
 	{% if user_has_bounced_mail %}
 			<div style="float: right; width: 20px; text-align: right; font-weight: bold;"> </div>
@@ -201,6 +201,8 @@
 				<div>An email update to you bounced. We have turned off your email updates. Please contact the website administrator to reactivate email updates.</div>
 			</div>
 			<div style="clear: both"> </div>
+	{% elif 1 %}
+			<a href="{{blog_post.get_absolute_url}}">{{blog_post.get_category_display}} {{blog_post.created|date}}: {{blog_post.title}}</a>
 	{% elif 0 %}
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			{% include "site-news-banner.html" %}
