@@ -11,7 +11,12 @@
 {% endblock %}
 
 {% block body %}
-<h1>Original reporting and other news from us</h1>
+
+{% if category == "news" %}
+<h1>Site news</h1>
+{% else %}
+<h1>What&rsquo;s Coming Up, Weekly Recaps, Analysis, and Tips for Using GovTrack</h1>
+{% endif %}
 
 {% for post in posts %}
     <section style="margin: 0 0 1em 0">

@@ -974,6 +974,7 @@ ul.singlesignon {
 }
 
 #sitenewscontainer {
+	margin-bottom: 20px;
 	padding: 4px 0 3px 0;
 	border-bottom: 1px solid #eee;
 	box-shadow: 0px 0px 1px 0px #666;

@@ -1248,10 +1248,18 @@ def community_forum_post_message(request):
 
 
 @anonymous_view
-def posts(request, id=None, slug=None):
+def posts(request, category=None, id=None, slug=None):
     if not id:
+        posts = BlogPost.objects.filter(published=True).order_by('-created')
+        if category == None:
+            pass
+        elif category == "news":
+            posts = posts.filter(category="sitenews")
+        else:
+            raise Http404()
         return render(request, 'website/posts.html', {
-            "posts": BlogPost.objects.filter(published=True).order_by('-created') })
+            "category": category,
+            "posts": posts })
 
     post = get_object_or_404(BlogPost, published=True, id=id)
 
