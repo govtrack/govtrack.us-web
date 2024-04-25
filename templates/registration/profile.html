@@ -8,42 +8,6 @@
 {% block body %}
 <h1 style="border: none">Account Settings</h1>
 
-	<h2><span>Emails</span></h2>
-
-	{% with request.user.userprofile.lists_with_email as lists %}
-
-	{% if lists|length > 0 or request.user.userprofile.massemail %}
-		<h3>Unsubscribe?</h3>
-		<p>To unsubscribe from all future email from GovTrack, click the following button:</p>
-		<form action="/accounts/update_settings" method="post" style="margin: 1em 2em">{% csrf_token %}
-			<input type="hidden" name="action" value="unsubscribe"/>
-			<input type="submit" class="submit" value="Unsubscribe From Everything"/>
-		</form>
-	{% else %}
-		<div>You are set to not receive any email from GovTrack.</div>
-	{% endif %}
-
-		<h3>Email Updates</h3>
-		{% if lists|length > 0 %}
-			<p>You have email updates turned on for the following lists you created. Use the <a href="/accounts/lists">What I&rsquo;m Tracking</a> page to change how often you get email updates for these lists.</p>
-			{% for list in lists %}
-				<p style="margin-left: 2em">{{list.name}} ({{list.get_email_display}})</p>
-			{% endfor %}
-		{% else %}
-			<p style="margin-top: 1em">You have no <a href="/accounts/lists">lists</a> that are configured for email updates.</p>
-		{% endif %}
-		{% endwith %}
-		<h3>Site Announcements</h3>
-		{% if request.user.userprofile.massemail %}
-			<p>We send occasional emails about changes to GovTrack.us and government transparency in Congress, about twice a year. Click the button to turn off site announcements.</p>
-		{% else %}
-			<p>You have turned off site announcements.</p>
-		{% endif %}
-		<form action="/accounts/update_settings" method="post" style="margin-left: 2em">{% csrf_token %}
-			<input type="hidden" name="action" value="massemail"/>
-			<input type="submit" class="submit" value="{% if request.user.userprofile.massemail %}Stop Site Announcements{% else %}Send Me Site Announcements{% endif %}"/>
-		</form>
-
 {% with user.userprofile.get_membership_subscription_info as msi %}
 {% if msi.message %}
 	<h2><span>Membership Subscription</span></h2>
@@ -92,18 +56,24 @@
 			{% endif %}
 		</form>
 
-		<p style="margin-top: 2em">For other account issues, please <a href="/contact">contact us</a>.</p>
-
 		{% include "registration/profile_singlesignon.html" %}
 
+	<h2><span>Unsubscribe</span></h2>
+
+	<p>To control what emails you get from us, head over to <a href="/accounts/lists">Your Email Subscriptions</a>.</p>
+
+	{% with request.user.userprofile.lists_with_email as lists %}
+	{% if lists|length > 0 or request.user.userprofile.massemail %}
+		<p>Or to unsubscribe from all email from GovTrack, click the following button:</p>
+		<form action="/accounts/update_settings" method="post" style="margin: 1em 2em">{% csrf_token %}
+			<input type="hidden" name="action" value="unsubscribe"/>
+			<input type="submit" class="submit" value="Unsubscribe From Everything"/>
+		</form>
+	{% else %}
+		<div>You are set to not receive any email from GovTrack.</div>
+	{% endif %}
+	{% endwith %}
+
+	<hr>
+	<p style="margin-top: 2em">For other account issues, please <a href="/contact">contact us</a>.</p>
 {% endblock %}
-
-{% block body_scripts %}
-{% if request.method == "POST" %}
-<script>$(function(){
-  $("html, body").animate({ scrollTop: $('#login-section').offset().top - $(window).height()/10 });
-});</script>
-{% endif %}
-{% endblock %}
-
-

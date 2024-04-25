@@ -1,5 +1,5 @@
 {% extends 'master.html' %}
-{% block title %}What You Are Tracking -- GovTrack.us{% endblock %}
+{% block title %}Your Email Subscriptions and Tracker Lists -- GovTrack.us{% endblock %}
 {% block head %}
 <style>
 h1 {
@@ -292,17 +292,63 @@ $(function() {
 {% endblock %}
 
 {% block body %}
-<h1>Your Tracker Lists</h1>
+<h1>Your Email Subscriptions and Tracker Lists</h1>
 
 {% if message %}
 <p class="text-info">{{message}}</p>
 {% endif %}
 
+<h2 style="margin-top: 2em"><span>Analysis and Updates</span></h2>
+
+<p>Which of the following general updates would you like to get by email from us?</p>
+
+<form action="/accounts/update_settings" method="post" style="margin: 1em 0;">{% csrf_token %}
+    <input type="hidden" name="action" value="posts"/>
+    <div class="row">
+    {% for category in request.user.userprofile.get_blogpost_categories %}
+    <div class="col-sm-6 col-md-4" style="margin-bottom: .5em;">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="{{category.key}}" id="postcat_{{category.key}}" name="postcatsub"
+            {% if category.subscribed %}checked{% endif %}>
+          <label class="form-check-label" for="postcat_{{category.key}}" style="color: black;">
+            {{category.label}}
+          </label>
+          <div style="font-size: 95%; line-height: 120%;">
+            {% if category.key == "legahead" %}
+                What&rsquo;s coming up in Congress in the week ahead.
+            {% elif category.key == "legrecap" %}
+                Highlights of recent activity in Congress with links to read more.
+            {% elif category.key == "analysis" %}
+                Some thoughts from us about what&rsquo;s happening in Congress.
+            {% elif category.key == "sitenews" %}
+                Announcements about new GovTrack features, etc.
+            {% elif category.key == "sitehelp" %}
+                Tips for using GovTrack capabilities that you may not know about.
+            {% endif %}
+            {% if category.freq %}About {{category.freq}}{% else %}Very infrequent{% endif %}.
+          </div>
+        </div>
+    </div>
+    {% endfor %}
+    </div>
+    <div class="form-check form-switch" style="margin-bottom: 1em;">
+      <input class="form-check-input" type="checkbox" value="weekly" id="postfreq" name="postfreq"
+        {% if request.user.userprofile.get_blogpost_freq == "weekly" %}checked{% endif %}>
+      <label class="form-check-label" for="postfreq">
+        Only send one general update each week
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+<h2 style="margin-top: 2em"><span>Tracker Lists</span></h2>
+
 <p>Create lists of Members of Congress, bills &amp; resolutions, votes, and committees. We can email you updates each day or week. And you can share your lists with others, or create RSS feeds.</p>
 
 <div class="row">
 <div class="col-md-4 col-lg-3">
-    <h2 style="margin: 0; font-size: 100%; font-weight: bold; border-bottom: 1px solid black;">Your Lists</h2>
+    <h3 style="margin: 0; font-size: 100%; font-weight: bold; border-bottom: 1px solid black;">Your Lists</h3>
 
     <p style="margin: 1em 0; font-size: 90%; line-height: 100%;">
         Click on a list to manage its trackers and email update settings.

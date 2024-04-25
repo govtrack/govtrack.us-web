@@ -32,7 +32,7 @@
 	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/brands.css" rel="stylesheet">
 
 
-		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20240215" />
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20240426" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
@@ -170,8 +170,8 @@
 						{{ user.email }}
 						{% endif %}
 					</a>
-         			 <ul class="dropdown-menu">
-						<li><a class="dropdown-item" href="/accounts/lists">Your Tracker Lists</a></li>
+     			 <ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/accounts/lists">Your Email Subscriptions &amp; Tracker Lists</a></li>
 						<li><a class="dropdown-item" href="/accounts/positions">Your Positions</a></li>
 						<li><a class="dropdown-item" href="/accounts/docket">Your Docket</a></li>
 						<li><hr class="dropdown-divider"></li>
@@ -204,7 +204,7 @@
 			</div>
 			<div style="clear: both"> </div>
 	{% elif 1 %}
-			<a href="{{blog_post.get_absolute_url}}">{{blog_post.get_category_display}} {{blog_post.created|date}}: {{blog_post.title}}</a>
+			<a href="{{blog_post.get_absolute_url}}">{{blog_post.get_category_display}} {{blog_post.created|date}}: <b>{{blog_post.title}}</b> &raquo;</a>
 	{% elif 0 %}
 			<div class="ex"><a href="#" onclick="return hide_site_news()">X</a></div>
 			{% include "site-news-banner.html" %}

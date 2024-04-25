@@ -4,9 +4,6 @@
 
 {% block extra_css %}
 <style>
-section {
-    max-width: 45em;
-}
 </style>
 {% endblock %}
 
@@ -20,12 +17,24 @@ section {
 {% endblock %}
 
 {% block body %}
-<section>
-    <h1>{{post.title}}</h1>
+<h1>{{post.title}}</h1>
 
-    <p>{{post.created|date}}</p>
+<div class="row">
+    <div class="col-md order-md-2" style="margin-bottom: 2em">
+        <div class="ms-md-3" style="border: 1px solid #777; border-radius: 1em; padding: 1em; background-color: #F9F9F9;">
+        <h2>Get {{post.get_category_display}} Updates In Your Inbox!</h2>
+        <p>Sign up (it&rsquo;s free!) to get posts like this straight to your inbox. You&rsquo;ll be able to choose posts from these categories:</p>
+        <p>{% for cat in categories %}{{cat.label}}{% if not forloop.last %} &nbsp; &ndash; &nbsp; {% endif %}{% endfor %}</p>
+        <p><a href="/accounts/lists" class="btn btn-primary">Sign Up &raquo;</a></p>
+        </div>
+    </div>
 
-    {{post.body_html|safe}}
-</section>
+    <div class="col-md">
+
+      <p>{{post.created|date}}</p>
+
+      {{post.body_html|safe}}
+    </div>
+</div>
 {% endblock %}
 

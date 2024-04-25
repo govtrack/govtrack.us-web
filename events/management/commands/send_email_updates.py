@@ -38,7 +38,7 @@ django.setup() # StackOverflow user says call setup when using multiprocessing
 utm = "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_medium=email"
 template_body_text = None
 template_body_html = None
-latest_blog_post = None
+latest_blog_post_by_category = None
 
 class Command(BaseCommand):
 	help = 'Sends out email updates of events to subscribing users.'
@@ -49,7 +49,6 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		global template_body_text
 		global template_body_html
-		global latest_blog_post
 
 		if options["mode"][0] not in ('daily', 'weekly', 'testadmin', 'testcount'):
 			print("Specify daily or weekly or testadmin or testcount.")
@@ -64,14 +63,7 @@ class Command(BaseCommand):
 			send_old_events = True
 			list_email_freq = (1,2)
 		else:
-			# Find the subscription lists w/ daily emails turned on.
-			# Exclude lists we sent an email out to in the last 20 hours,
-			# in case we're re-starting this process and some new events crept in.
-			sublists = SubscriptionList.objects\
-				.filter(email=1)\
-				.exclude(last_email_sent__gt=launch_time-timedelta(hours=20))
-			
-			users = None
+			users = User.objects.all()
 			send_mail = True
 			mark_lists = True
 			send_old_events = False
@@ -79,20 +71,11 @@ class Command(BaseCommand):
 				list_email_freq = (1,)
 			elif options["mode"][0] == "weekly":
 				list_email_freq = (1,2)
-				# Add in the subscription lists for weekly updates (we do both daily and weekly when
-				# we run the weekly batch) but in case we're re-starting the batch, don't send emails
-				# to users if they only have a weekly list and we emailed them during the week.
-				sublists |= SubscriptionList.objects\
-					.filter(email=2)\
-					.exclude(last_email_sent__gt=launch_time-timedelta(days=5))
 			elif options["mode"][0] == "testcount":
 				# count up how many daily emails we would send, but don't send any
 				list_email_freq = (1,)
 				send_mail = False
 				mark_lists = False
-
-			# And get a list of those users.
-			users = User.objects.filter(subscription_lists__in=sublists).distinct()
 
 		if os.environ.get("START"):
 			users = users.filter(id__gte=int(os.environ["START"]))
@@ -109,7 +92,7 @@ class Command(BaseCommand):
 		# load globals
 		template_body_text = get_template("events/emailupdate_body.txt")
 		template_body_html = get_template("events/emailupdate_body.html")
-		latest_blog_post = load_latest_blog_post()
+		load_latest_blog_posts()
 
 		# counters for analytics on what we sent
 		counts = {
@@ -235,7 +218,7 @@ def pool_worker(conn):
 
 def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events, mail_connection):
 	global launch_time
-	global latest_blog_post
+	global latest_blog_post_by_category
 
 	user_start_time = datetime.now()
 
@@ -255,12 +238,21 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 	most_recent_event = None
 	eventcount = 0
 	for sublist in user.subscription_lists.all():
+		# If this list does not have email updates turned on for
+		# the target frequently, move on.
+		if sublist.email not in list_email_freq: continue
+
+		# Exclude lists we sent an email out to very recently, in case
+		# we're re-starting this process and some new events crept in.
+		too_recent_window = timedelta(hours=20) if sublist.email == 1 \
+		                    else timedelta(days=5)
+		if sublist.last_email_sent is not None and \
+		   sublist.last_email_sent > launch_time - too_recent_window:
+			continue
+
 		# Get a list of all of the trackers this user has in all lists. We use the
 		# complete list, even in non-email-update-lists, for rendering events.
 		all_trackers |= set(sublist.trackers.all())
-
-		# If this list does not have email updates turned on, move on.
-		if sublist.email not in list_email_freq: continue
 
 		# For debugging, clear the last_event_mailed flag so we can find some events
 		# to send.
@@ -274,15 +266,24 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			if most_recent_event is None: most_recent_event = max_id
 			most_recent_event = max(most_recent_event, max_id)
 
-	# Suppress the latest blog post if the user was already sent it.
-	if latest_blog_post and profile.last_blog_post_emailed >= latest_blog_post.id:
-		latest_blog_post = None
+	# Get the latest blog post that is newer than the last one they
+	# were sent and is not in an unsubscribed category. Take the
+	# latest one. Skip when sending daily emails and the user only
+	# wants weekly blog posts.
+	blog_post_cats = [cat["key"] for cat in profile.get_blogpost_categories()
+		if cat["subscribed"]]
+	blog_post = None
+	if not (profile.get_blogpost_freq() == "weekly" and 2 not in list_email_freq):
+		for post in latest_blog_post_by_category:
+		   if post.id <= profile.last_blog_post_emailed: continue
+		   if post.category not in blog_post_cats: continue
+		   blog_post = post
 
 	user_querying_end_time = datetime.now()
 	
 	# Don't send an empty email (no events and no latest blog post)
 	# .... unless we're testing and we want to send some old events.
-	if len(eventslists) == 0 and not send_old_events and latest_blog_post is None:
+	if len(eventslists) == 0 and not send_old_events and blog_post is None:
 		return {
 			"total_time_querying": user_querying_end_time-user_start_time,
 		}
@@ -328,7 +329,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 				"emailpingurl": emailpingurl,
 				"body_text": body_text,
 				"body_html": body_html,
-				"latest_blog_post": latest_blog_post,
+				"blog_post": blog_post,
 				"SITE_ROOT_URL": settings.SITE_ROOT_URL,
 				"utm": utm,
 			},
@@ -365,8 +366,8 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			sublist.last_event_mailed = max(sublist.last_event_mailed, most_recent_event) if sublist.last_event_mailed is not None else most_recent_event
 			sublist.last_email_sent = launch_time
 			sublist.save()
-		if latest_blog_post:
-			profile.last_blog_post_emailed = latest_blog_post.id
+		if blog_post:
+			profile.last_blog_post_emailed = blog_post.id
 			profile.save()
 
 	user_sending_end_time = datetime.now()
@@ -379,19 +380,28 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		"total_time_sending": user_sending_end_time-user_rendering_end_time,
 	}
 
-def load_latest_blog_post():
+def load_latest_blog_posts():
+	# Load the latest blog post by category since
+	# users may have unsubscribed from the category
+	# of the latest post.
+
+	global latest_blog_post_by_category
+
+	# Scan recent blog posts and keep the latest one
+	# in each category.
 	from website.models import BlogPost
-	latest_blog_post = BlogPost.objects\
-		.filter(published=True)\
-		.order_by('-created')\
-		.first()
-	if not latest_blog_post:
-		return None
+	latest_blog_post_by_category = { }
+	for post in BlogPost.objects\
+		.filter(published=True, created__gt=datetime.now() - timedelta(days=14))\
+		.order_by('created'):
+		if post.category == "billsumm": continue # see BlogPost
+		latest_blog_post_by_category[post.category] = post
 
-	# Pre-render the HTML and plain text versions.
-	latest_blog_post.body_html = latest_blog_post.body_html()
-	latest_blog_post.body_text = latest_blog_post.body_text()
+	# Turn dict into a list sorted by creation date ascending.
+	latest_blog_post_by_category = list(latest_blog_post_by_category.values())
+	latest_blog_post_by_category.sort(key = lambda post : post.created)
 
-	return latest_blog_post
-
-
+	# Pre-render the HTML and plain text of each.
+	for post in latest_blog_post_by_category:
+		post.body_html = post.body_html()
+		post.body_text = post.body_text()

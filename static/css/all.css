@@ -40,6 +40,14 @@ a.plain:hover, a.plain:focus, a.plain:active {
 	a.nohover:hover {
 		text-decoration: none;
 	}
+a.btn-primary, button.btn-primary {
+	background-color: #9D2146;
+	border-color: #9D2146;
+}
+a.btn-secondary, button.btn-secondary {
+	background-color: #1d4e70;
+	border-color: #1d4e70;
+}
 .nav-tabs>li>a {
 	text-decoration: none;
 }

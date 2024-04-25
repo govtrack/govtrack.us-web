@@ -18,13 +18,27 @@
 <h1>What&rsquo;s Coming Up, Weekly Recaps, Analysis, and Tips for Using GovTrack</h1>
 {% endif %}
 
+<div class="row">
+    <div class="col-md order-md-2" style="margin-bottom: 2em">
+        <div class="ms-md-3" style="border: 1px solid #777; border-radius: 1em; padding: 1em; background-color: #F9F9F9;">
+        <h2>Get these updates in your inbox!</h2>
+        <p>Sign up (it&rsquo;s free!) to get analysis and other original reporting from us straight to your inbox.</p>
+        <p>{% for cat in categories %}{{cat.label}}{% if not forloop.last %} &nbsp; &ndash; &nbsp; {% endif %}{% endfor %}</p>
+        <p><a href="/accounts/lists" class="btn btn-primary">Sign Up &raquo;</a></p>
+        </div>
+    </div>
+
+    <div class="col-md">
+
 {% for post in posts %}
     <section style="margin: 0 0 1em 0">
         <h3><a href="{{post.get_absolute_url}}">{{post.title}}</a> ({{post.created|date}}
          &middot; {{post.get_category_display}})</h3>
-	<p>{{post.body_preview|truncatewords:50}}</p>
+        <p>{{post.body_preview|truncatewords:50}}</p>
     </section>
 {% endfor %}
 
+    </div>
+</div>
 {% endblock %}
 

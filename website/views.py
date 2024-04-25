@@ -329,11 +329,29 @@ def update_account_settings(request):
         p.massemail = False
         p.save()
         
-    if request.POST.get("action") == "massemail":
-		# Toggle.
+    if request.POST.get("action") == "posts":
+        # Record the unsubscribed categories in userprofile.massemail_options,
+        # unless they are all unsubscribed, in which case set userprofile.massemail
+        # to False.
         p = request.user.userprofile()
-        p.massemail = not p.massemail
+        catsub = request.POST.getlist('postcatsub', '')
+        if len(catsub) == 0:
+            p.massemail = False
+            p.massemail_options = ""
+        else:
+            # Record the categories not selected.
+            p.massemail = True
+            massemail_options = [
+                "unsubcat:" + cat["key"]
+                for cat in p.get_blogpost_categories()
+                if cat["key"] not in catsub
+            ]
+            if request.POST.get("postfreq", "") == "weekly":
+                massemail_options.append("postfreq:weekly")
+            p.massemail_options = ",".join(massemail_options)
+            assert len(p.massemail_options) <= UserProfile._meta.get_field("massemail_options").max_length
         p.save()
+        return HttpResponseRedirect("/accounts/lists")
             
     return HttpResponseRedirect("/accounts/profile")
 
@@ -1259,11 +1277,14 @@ def posts(request, category=None, id=None, slug=None):
             raise Http404()
         return render(request, 'website/posts.html', {
             "category": category,
-            "posts": posts })
+            "posts": posts,
+            "categories": BlogPost.get_categories_with_freq() })
 
     post = get_object_or_404(BlogPost, published=True, id=id)
 
     if request.path != post.get_absolute_url():
         return redirect(post.get_absolute_url())
 
-    return render(request, 'website/post.html', { "post": post })
+    return render(request, 'website/post.html', {
+        "post": post,
+        "categories": BlogPost.get_categories_with_freq() })

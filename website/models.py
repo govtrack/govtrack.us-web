@@ -11,11 +11,12 @@ from events.models import Feed, SubscriptionList
 class UserProfile(models.Model):
     user = models.OneToOneField(User, db_index=True, on_delete=models.CASCADE)
     massemail = models.BooleanField(default=True) # may we send you mail?
+    massemail_options = models.CharField(max_length=128, default="")
     old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
     last_mass_email = models.IntegerField(default=0)
     last_blog_post_emailed = models.IntegerField(default=0)
     congressionaldistrict = models.CharField(max_length=4, blank=True, null=True, db_index=True) # or 'XX00' if the user doesn't want to provide it
-    
+
     # monetization
     paid_features = JSONField(default={}, blank=True, null=True) # maps feature name to tuple (payment ID, sale ID or None if not useful)
 
@@ -113,6 +114,25 @@ class UserProfile(models.Model):
 
     def is_inactive(self):
         return self.inactivity_warning_sent and (not self.user.last_login or self.user.last_login < self.inactivity_warning_sent)
+
+    def get_blogpost_categories(self):
+        unsubscribed_categories = {
+            key.split(":")[1]
+            for key in self.massemail_options.split(",")
+            if key.startswith("unsubcat:")
+        }
+        for cat in BlogPost.get_categories_with_freq():
+            if not self.massemail:
+                cat["subscribed"] = False
+            else:
+                cat["subscribed"] = cat["key"] not in unsubscribed_categories
+            yield cat
+
+    def get_blogpost_freq(self):
+        for key in self.massemail_options.split(","):
+            if key.startswith("postfreq:"):
+                return key[len("postfreq:"):]
+        return None
 
 def get_user_profile(user):
     if hasattr(user, "_profile"): return user._profile
@@ -491,8 +511,16 @@ class BlogPost(models.Model):
 
     @staticmethod
     def get_categories_with_freq():
-        categories = [{ "key": c[0], "label": c[1], "freq": None, "rawfreq": None }
-            for c in BlogPost.CATEGORIES ]
+        # We're not posting in the billsumm category lately,
+        # so no need to let users know about it. We'll
+        # also block it in send_email_updates just in case.
+
+        categories = [
+            { "key": c[0], "label": c[1], "freq": None, "rawfreq": None }
+            for c in BlogPost.CATEGORIES
+            if c[0] != "billsumm"
+            ]
+
         from datetime import datetime, timedelta
         for cat in categories:
             qs = BlogPost.objects.filter(published=True, category=cat["key"], created__gt=datetime.now() - timedelta(days=365*2))
