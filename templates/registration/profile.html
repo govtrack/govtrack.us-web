@@ -10,15 +10,20 @@
 
 {% with user.userprofile.get_membership_subscription_info as msi %}
 {% if msi.message %}
+<div style="margin-bottom: 2em">
 	<h2><span>Membership Subscription</span></h2>
 
 	<p>{{msi.message}} More about <a href="/accounts/membership">GovTrack Membership</a>.</p>
+</div>
 {% endif %}
 {% endwith %}
 
-<h2 id="login-section"><span>Login</span></h2>
+<div class="row">
 
-<p style="margin: 2em 0">These settings control how you log in to GovTrack and where we&rsquo;ll send your email updates to.</p>
+<div class="col-lg" style="margin-bottom: 1em">
+		<h2><span>Login</span></h2>
+
+		<p>Your email address is how you log in to GovTrack and where we&rsquo;ll send your email updates to. To change you email address or password, use the forms below.</p>
 
 		{% if success %}<p class="error" style="margin-top: 1em">{{success}}</p>{% endif %}
 	
@@ -57,7 +62,9 @@
 		</form>
 
 		{% include "registration/profile_singlesignon.html" %}
+</div>
 
+<div class="col-lg" style="margin-bottom: 1em">
 	<h2><span>Unsubscribe</span></h2>
 
 	<p>To control what emails you get from us, head over to <a href="/accounts/lists">Your Email Subscriptions</a>.</p>
@@ -73,7 +80,12 @@
 		<div>You are set to not receive any email from GovTrack.</div>
 	{% endif %}
 	{% endwith %}
+</div>
 
-	<hr>
-	<p style="margin-top: 2em">For other account issues, please <a href="/contact">contact us</a>.</p>
+</div>
+
+<hr style="margin: 1em 0 2em 0">
+
+<p>For other account issues, please <a href="/contact">contact us</a>.</p>
+
 {% endblock %}
