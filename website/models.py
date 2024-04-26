@@ -491,12 +491,39 @@ class BlogPost(models.Model):
         if not self.published: return "/posts"
         return "/posts/{}/{}_{}".format(self.id, self.created.date().isoformat(), slugify(self.title))
 
-    def body_preview(self):
-        body_text = self.body.strip()
-        body_text = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1", body_text) # remove linkss
-        body_text = re.sub(r"^#+\s*(.*?\s*)\n", r"\1: ", body_text)
-        body_text = re.sub('<[^<]+?>', '', body_text) # remove HTML embedded in Markdown, assumes HTML is trusted
-        return body_text
+    def body_preview_html(self):
+        # Remove images before character truncation.
+        text = re.sub(r"!\[(.*?)\]\((.*?)\)", r"", self.body)
+
+        # Truncate plain text at a word boundary.
+        # After this point, for some reasonn the Markdown renderer
+        # doesn't always render and leaves everything as Markdown.
+        from django.utils.text import Truncator
+        text = Truncator(text).words(50, truncate=" ...")
+
+        # Remove any truncated link markup at the end.
+        text = re.sub(r"\[([^\]]+ \.\.\.$)", "\1", text)
+
+        # Render to HTML.
+        from website.templatetags.govtrack_utils import markdown
+        html = markdown(text.strip(), trusted=True)
+
+        # Remove block-level formatting.
+        import html5lib, urllib.parse
+        valid_tags = set('strong em a code span'.split())
+        valid_tags = set('{http://www.w3.org/1999/xhtml}' + tag for tag in valid_tags)
+        dom = html5lib.HTMLParser().parseFragment(html)
+        for node in dom.iter():
+            if node.tag not in valid_tags and node.tag != 'DOCUMENT_FRAGMENT':
+                node.tag = '{http://www.w3.org/1999/xhtml}span'
+            for name, val in list(node.attrib.items()):
+                node.attrib.pop(name)
+        html = html5lib.serialize(dom, quote_attr_values="always", omit_optional_tags=False, alphabetical_attributes=True)
+
+        # Remove any straggling links from unrendered Markdown (see above).
+        html = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1", html)
+
+        return html
 
     def body_html(self):
         from website.templatetags.govtrack_utils import markdown
