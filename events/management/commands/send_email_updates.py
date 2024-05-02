@@ -145,8 +145,10 @@ class Command(BaseCommand):
 
 		for i, user in enumerate(user_iterator()):
 			# Skip users who have been given an inactivity warning and have not
-			# logged in afterwards.
-			if UserProfile.objects.get(user_id=user["id"]).is_inactive():
+			# logged in afterwards. Some early accounts or incompletely created
+			# accounts may be missing a UserProfile object.
+			prof = UserProfile.objects.filter(user_id=user["id"]).first()
+			if prof and prof.is_inactive():
 				counts["total_users_skipped_stale"] += 1
 				continue
 
@@ -223,8 +225,8 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 	user_start_time = datetime.now()
 
 	user = User.objects.get(id=user_id)
-	profile = UserProfile.objects.get(user=user)
-	
+	profile = user.userprofile()
+
 	# get the email's From: header and return path
 	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
 			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
