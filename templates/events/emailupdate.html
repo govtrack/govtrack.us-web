@@ -102,7 +102,8 @@ for more updates.
 						{% if blog_post %}
 <div style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
 						<div id="announcement-holder">
-				            <h2>{{blog_post.title}} ({{blog_post.created|date}})</h2>
+					        	<h2>{{blog_post.title}} ({{blog_post.created|date}})</h2>
+							{% if blog_post.author %}<p>By {{blog_post.author}}</p>{% endif %}
 							{{blog_post.body_html|safe}}
 						</div>
 </div>

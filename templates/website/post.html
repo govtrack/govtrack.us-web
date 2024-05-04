@@ -1,5 +1,5 @@
 {% extends "master.html" %}
-{% block title %}GovTrack.us - Posts from Us{% endblock %}
+{% block title %}{{post.title}} - GovTrack.us{% endblock %}
 {% block meta_description %}Original reporting and other news from GovTrack.us{% endblock %}
 
 {% block extra_css %}
@@ -31,7 +31,10 @@
 
     <div class="col-md">
 
-      <p>{{post.created|date}}</p>
+      <p>
+          {{post.created|date}}
+          {% if post.author %}&middot; by {{post.author}}{% endif %}
+      </p>
 
       {{post.body_html|safe}}
     </div>

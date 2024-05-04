@@ -282,6 +282,11 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 		   blog_post = post
 
 	user_querying_end_time = datetime.now()
+
+	# Don't send blog-post-only emails to users who haven't yet gotten a blog post
+	# and haven't logged in recently to avoid resurrecting inactive accounts.
+	if len(eventslists) == 0 and profile.last_blog_post_emailed == 0 and user.last_login < datetime(2024, 1, 1):
+            blog_post = None
 	
 	# Don't send an empty email (no events and no latest blog post)
 	# .... unless we're testing and we want to send some old events.

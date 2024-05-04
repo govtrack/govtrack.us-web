@@ -473,6 +473,7 @@ class BlogPost(models.Model):
     title = models.CharField(max_length=128)
     category = models.CharField(max_length=24, blank=True, null=True,
         choices=[(None, "Not Set")] + CATEGORIES)
+    author = models.CharField(max_length=128, blank=True, null=True)
     body = MarkdownxField()
     info = JSONField(default={}, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)

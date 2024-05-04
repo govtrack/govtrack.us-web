@@ -13,7 +13,7 @@ class MediumPostAdmin(admin.ModelAdmin):
     list_display = ['published', 'title', 'url']
 
 class BlogPostAdmin(MarkdownxModelAdmin):
-    list_display = ['title', 'published', 'created', 'category']
+    list_display = ['title', 'published', 'created', 'category', 'author']
     list_filter = ['category', 'published']
     search_fields = ['title']
     ordering = ('-created',)

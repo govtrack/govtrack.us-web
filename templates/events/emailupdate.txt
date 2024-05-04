@@ -7,7 +7,9 @@ This is your email update from www.GovTrack.us. To change your email update sett
 
 {{blog_post.title}} ({{blog_post.created|date}})
 
-{{blog_post.body_text}}
+{% if blog_post.author %}By {{blog_post.author}}
+
+{% endif %}{{blog_post.body_text}}
 
 {% endif %}
 =====================================================================
