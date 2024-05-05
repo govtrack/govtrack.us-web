@@ -105,6 +105,11 @@ for more updates.
 					        	<h2>{{blog_post.title}} ({{blog_post.created|date}})</h2>
 							{% if blog_post.author %}<p>By {{blog_post.author}}</p>{% endif %}
 							{{blog_post.body_html|safe}}
+							<p style="font-style: italic; font-size: 90%">
+							   Let us know what you think about these updates
+							   by tooting us on <a href="https://mastodon.social/@GovTrack">Mastodon</a>
+							   or <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">sending us an email</a>.
+							</p>
 						</div>
 </div>
 						{% endif %}
