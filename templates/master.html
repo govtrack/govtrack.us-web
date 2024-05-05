@@ -277,13 +277,6 @@
 						<li><a href="/about">About GovTrack</a></li>
 						<li><a href="/about-our-data">About the Data</a></li>
 						<li><a href="/legal">Privacy &amp; Legal</a></li>
-						{% if not user.is_authenticated %}
-						<li><a href="/accounts/login">Log in</a></li>
-						{% else %}
-						<li><a href="/accounts/lists">What I&rsquo;m Tracking</a></li>
-						<li><a href="/accounts/profile">Account Settings</a></li>
-						<li><a href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
-						{% endif %}
 					</ul>
 				</nav>
 
