@@ -46,7 +46,6 @@ def committee_details(request, parent_code, child_code=None):
             "member_highlights": [m for m in members if m.role in (CommitteeMemberRole.chair, CommitteeMemberRole.vice_chair, CommitteeMemberRole.ranking_member)],
             "party_counts": party_counts,
             "recent_reports": obj.get_recent_reports(),
-            "press_statements": fetch_statements(obj),
             }
 
 
@@ -125,46 +124,6 @@ def committee_calendar(request):
         'feed': Committee.AllCommitteesFeed(),
     }
 
-def fetch_statements(committee):
-    from person.views import http_rest_json
-    from parser.processor import Processor
-
-    # only full committee statements are available
-    if committee.committee: # has a parent committee
-        return []
-
-    # load statements from ProPublica API, ignoring any network errors
-    try:
-        statements = http_rest_json(
-          "https://api.propublica.org/congress/v1/statements/committees/{committee_id}.json".format(
-            committee_id=committee.code,
-          ),
-          headers={
-            'X-API-Key': settings.PROPUBLICA_CONGRESS_API_KEY,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          })
-        if statements["status"] != "OK": raise Exception()
-        statements = statements["results"]
-    except:
-        return []
-
-    # make simplified statements records
-    statements = [{
-        "date": Processor.parse_datetime(s["date"]).date(),
-        "type": s["statement_type"],
-        "title": s["title"],
-        "url": s["url"],
-    } for s in statements
-      if s["date"]]
-
-    # # downcase all-caps titles
-    # for s in statements:
-    #   if s["title"] != s["title"].upper(): continue
-    #   s["title"] = s["title"].lower()
-    #   if s["person"]: s["title"] = s["title"].replace(s["person"].lastname.lower(), s["person"].lastname) # common easy case fix
-
-    return statements
 
 #@anonymous_view - don't cache or we can't get a different bill on each page load
 @render_to("committee/game.html")

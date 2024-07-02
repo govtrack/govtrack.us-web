@@ -460,10 +460,6 @@ $(function() {
                     &nbsp;</div>{% endfor %}<div style="display: inline-block; padding-left: 5px;">
                       {{ item.count }}
                     </div>
-
-                    {% if item.option.key == "0" and propublica_count > 0 %}
-                        <div style="font-size: 83%; text-align: left; padding: 0 5px 4px 5px;"><a href="{{propublica_url}}">{{propublica_count}} explanation{{propublica_count|pluralize}} via ProPublica</a></div>
-                    {% endif %}
                 </td>
                 {% for count in item.party_counts %}
 	                <td style="padding: 6px 8px">
@@ -700,8 +696,6 @@ $(function() {
                         <a href="{{ voter.person.get_absolute_url }}" style="color: #444" class="plain">{{ voter.person.name_lastfirst_short }}</a>
 						{% if voter in reconsiderers.0 %}
                             <a class="note" title="See note above." onclick="return show_notes('motiontoreconsider')">*</a>
-                        {% elif voter.explanation %}
-                            <a class="note" title="{{voter.explanation.reason}} -- Explanation from ProPublica" href="{{propublica_url}}"><sup>EXPL</sup></a>
                         {% endif %}
                     {% endif %}
                 </td>

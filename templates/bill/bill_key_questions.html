@@ -91,9 +91,6 @@ How else might you learn about what the {{bill.noun}} would do?</li>
 	{% if bill.text_incorporation|length > 1 %}
 	<p>You’ve been tricked! This isn’t one bill, it’s several bills in a conga line! Actually, it’s called an “omnibus” bill, and it’s when Congress decides to pass a bunch of legislation in a single package. You can browse through the incorporated bills in the related bills section under the <a href="{{bill.get_absolute_url}}/details">details tab</a>. It may be better to investigate a few of those rather than the whole omnibus.</p>
 	{% endif %}
-	{% if legislator_statements %}
-	<p>Someone has made a statement about this bill, which you can find in the position statements section under the <a href="{{bill.get_absolute_url}}">overview tab</a>. Member statements can be useful for analyzing a bill. Just keep in mind they have a stake in the game.</p>
-	{% endif %}
 </div>
 	
 {% else %}
@@ -146,18 +143,6 @@ Is this the kind of {{bill.noun}} you would expect from them? Why or why not?</l
 	<p>Where do they fall on the GovTrack Ideology-Leadership Chart? We publish an analysis of members’ cosponsorships to give an idea of where each member falls on the political spectrum, and how much influence they have in Congress. This information could be helpful context for understanding the {{bill.noun}}.</p>
 	<p>These are only a few of the factors at play when a member chooses to sponsor legislation. What wasn’t on this list that should be?</p>
 </div>
-
-{% if legislator_statements %}
-<li>Some Members of Congress have made statements about this {{bill.noun}}.
- What do those statements tell you about the {{bill.noun}}?
- Do the statements agree about what the {{bill.noun}} would do?</li>
-
-<div class="tips">
-	<p>One way to learn more about a {{bill.noun}} is to look at what members of Congress say about it. You can find press releases about this {{bill.noun}} made by members of Congress in the position statements section of the <a href="{{bill.get_absolute_url}}">overview tab</a>, or at <a href="{{bill.propublica_represent_link}}/statements">ProPublica Represent</a>.</p>
-	<p>When a member makes a press release about a {{bill.noun}} they signal that the {{bill.noun}} is important, and often include their argument in support or opposition of it. Understanding those arguments is informative for understanding the {{bill.noun}} itself.</p>
-</div>
-
-{% endif %}
 
 {% if bill.find_reintroductions|length > 0  %}
 <li>This {{bill.noun}} has been introduced in another Congress. What has changed between versions?</li>

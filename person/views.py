@@ -199,13 +199,6 @@ def person_details(request, pk):
             item["pct"] = int(round(float(item["count"]) / total_count * 100))
             del item["terms"]
 
-        # Missed vote explanations from ProPublica
-        try:
-            vote_explanations = http_rest_json("https://projects.propublica.org/explanations/api/members/%s.json" % person.bioguideid)
-        except: 
-            # squash all errors
-            vote_explanations = { }
-
         # Misconduct - load this person's entries, keeping original order.
         # Exclude 'resolved' instances that were merely 'alleged' because it's not really fair to list those,
         # except keep resignations and settlements because they usually are used to avoid consequences.
@@ -268,7 +261,6 @@ def person_details(request, pk):
                 'feed': person.get_feed(),
                 'has_session_stats': has_session_stats,
                 'bill_subject_areas': bills_by_subject_counts,
-                'vote_explanations': vote_explanations,
                 'key_votes': load_key_votes(person),
                 'misconduct': misconduct,
                 'misconduct_any_alleged': misconduct_any_alleged,

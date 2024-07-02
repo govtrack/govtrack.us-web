@@ -617,7 +617,7 @@
 
 	<div id="admin_panel"> </div>
 
-{% if bill.statement_admin_policy or legislator_statements %}
+{% if bill.statement_admin_policy %}
 <div style="margin: 30px 0;">
   <h2 style="margin-bottom: 15px;"><span>Position statements</span></h2>
 
@@ -630,20 +630,6 @@
   	</a>
   	({{bill.statement_admin_policy.date_issued|date}})
   </p>
-  {% endif %}
-
-  {% if legislator_statements %}
-  <h3>What legislators are saying</h3>
-  {% for sp in legislator_statements %}
-    <p style="margin-bottom: .5em">
-      &ldquo;<a href="{{sp.url}}" title="{{sp.title}}">{{sp.title|truncatewords:50}}</a>&rdquo;
-      <br><span style="font-size: 90%">&nbsp; &nbsp; &mdash;
-      <a href="{{sp.person.get_absolute_url}}" style="text-decoration: none; color: #1D4E70">{{sp.person}}</a>
-      {% if sp.relevance %}({{sp.relevance}}){% endif %}
-      on {{sp.date|date}}</span>
-    </p>
-  {% endfor %}
-  <p style="font-size: 90%"><a href="{{bill.propublica_represent_link}}/statements">More statements at ProPublica Represent...</a></p>
   {% endif %}
 
 </div>

@@ -114,11 +114,6 @@
 			<a href="#subcommittees" aria-controls="subcommittees" class="nav-link" data-bs-toggle="tab" role="tab">Subcommittees</a>
 		</li>
 		{% endif %}
-		{% if press_statements %}
-		<li class="nav-item" role="presentation">
-			<a class="nav-link" href="#statements" aria-controls="statements" data-bs-toggle="tab" role="tab">Press Statements</a>
-		</li>
-		{% endif %}
 	</ul>
 
 	<div class="tab-content">
@@ -224,19 +219,6 @@
 		</div>
 		{% endif %}
 
-		{% if press_statements %}
-		<div id="statements" class="tab-pane">
-			<h2>Press Statements</h2>
-			  <p>Committee press statements from <a href="https://projects.propublica.org/represent/">ProPublica Represent</a>:</p>
-			  {% for sp in press_statements %}
-			    <p style="margin-bottom: .5em">
-			      &ldquo;<a href="{{sp.url}}" target="_blank" title="{{sp.title}}">{{sp.title|truncatewords:50}}</a>&rdquo;
-			      <br><span style="font-size: 90%">&nbsp; &nbsp; &mdash;
-			      {{sp.date|date}}</span>
-			    </p>
-			  {% endfor %}
-		</div>
-		{% endif %}
 	</div><!-- /panes -->
 </div><!-- /.twelve.columns -->
 

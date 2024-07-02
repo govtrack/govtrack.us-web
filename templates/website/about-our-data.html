@@ -43,8 +43,8 @@
 			<td>Bill Status</td>
 			<td><p>The status of pending legislation is retreived daily from the <a href="https://www.govinfo.gov/bulkdata/BILLSTATUS">U.S. Government Publishing Office (GPO) GovInfo.gov Bill Status XML Bulk Data</a>.
 			Legislative activity typically appears there the next business day. We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data.</p>
-			<p>The <a href="https://propublica.github.io/congress-api-docs/">ProPublica Congress API</a> is the only public API for legislative information.
-			The API was formerly the Sunlight Foundation Congress API and traces <a href="http://luigimontanez.com/2010/how-we-use-mongodb-at-sunlight/index.html">its history</a> to our legislative data offerings back in 2010.</p>
+			<!--<p>The <a href="https://propublica.github.io/congress-api-docs/">ProPublica Congress API</a> is the only public API for legislative information.
+			The API was formerly the Sunlight Foundation Congress API and traces <a href="http://luigimontanez.com/2010/how-we-use-mongodb-at-sunlight/index.html">its history</a> to our legislative data offerings back in 2010.</p>-->
 		</tr>
 		<tr>
 			<td>Bill Summaries</td>
@@ -55,7 +55,7 @@
 		<tr>
 			<td>Votes</td>
 			<td><p>Roll call votes are retrieved from the <a href="http://www.senate.gov/pagelayout/legislative/a_three_sections_with_teasers/votes.htm">Senate</a> and <a href="http://clerk.house.gov/legislative/legvotes.aspx">House</a> websites in XML format. We update our vote data roughly hourly. We use the open source <a href="https://github.com/unitedstates/congress">congress project</a> to automate and simplify retrieving the data.</p>
-			<p style="margin-bottom: 0;">Missed and mistaken vote explanations are from <a href="https://projects.propublica.org/explanations/">ProPublica</a>.</td>
+			</td>
 		</tr>
 		<tr>
 			<td>Bill Text</td>
@@ -70,10 +70,6 @@
 		<tr>
 			<td>District Maps</td>
 			<td>Congressional district boundaries on the maps are from state redistricting data as collected by the <a href="https://thearp.org/">American Redistricting Project</a> and the map widget is courtesy of <a href="https://www.mapbox.com/">Mapbox</a> (see <a href="https://medium.com/@govtrack/creating-congressional-district-maps-with-mapbox-4888e4b79cf">how we do it</a>).</td>
-		</tr>
-		<tr>
-			<td>Press Statements</td>
-			<td>Press statements by legislators and committee on legislation are retreived from <a href="https://projects.propublica.org/represent/">ProPublica Represent</a>.</td>
 		</tr>
 
 

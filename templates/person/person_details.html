@@ -965,11 +965,6 @@ function show_pronunciation_guide() {
 		{% endif %}
 		the median of {{analysis_data.missedvotes.pctile50|floatformat:1}}%
 		among the lifetime records of {% if analysis_data.missedvotes.chamber == 'Senate' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
-
-		{% if vote_explanations.member.total_explanations > 0 %}
-			ProPublica has tracked <a href="https://projects.propublica.org/explanations/members/{{person.bioguideid}}">{{vote_explanations.member.total_explanations}} explanation{{vote_explanations.member.total_explanations|pluralize}}</a> for these missed votes.
-		{% endif %}
-
 		The chart below reports missed votes over time.</p>
 
 		<p><i>

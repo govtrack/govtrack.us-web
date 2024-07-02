@@ -678,12 +678,6 @@ class Bill(models.Model):
             number=self.number,
         )
 
-    def propublica_represent_link(self):
-        return "https://projects.propublica.org/represent/bills/{congress}/{bill}".format(
-            congress=self.congress,
-            bill=self.bill_type_slug + str(self.number),
-        )
-
     def get_feed(self):
         from events.models import Feed
         bt = BillType.by_value(self.bill_type)
