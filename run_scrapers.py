@@ -154,7 +154,7 @@ if "votes" in sys.argv:
 	os.system("analysis/key_votes.py %d" % CONGRESS)
 
 	# During election season.
-	os.system("analysis/missed_votes_prezcandidates.py > /tmp/votes-$$.json && mv /tmp/votes-$$.json data/analysis/presidential-candidates-missed-votes.json")
+	#os.system("analysis/missed_votes_prezcandidates.py > /tmp/votes-$$.json && mv /tmp/votes-$$.json data/analysis/presidential-candidates-missed-votes.json")
 
 if "stats" in sys.argv:
 	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)

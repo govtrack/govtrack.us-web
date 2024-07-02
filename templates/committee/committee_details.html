@@ -127,10 +127,12 @@
 			<h2>Members</h2>
 		    <div class="row">
 	        {% for member in members %}
+			{% comment %}
 		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-lg"></div>{% endif %}
 		        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-md"></div>{% endif %}
 		        {% if forloop.counter0|divisibleby:3 %}<div class="clearfix visible-sm"></div>{% endif %}
 		        {% if forloop.counter0|divisibleby:2 %}<div class="clearfix visible-xs"></div>{% endif %}
+			{% endcomment %}
 		        <div class="member col-xs-6 col-sm-4 col-md-3 col-lg-2">
 
 		            <div class="photo">
