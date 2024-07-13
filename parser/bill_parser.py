@@ -380,6 +380,8 @@ def main(options):
                 textfile = textfile.get("text_file")
                 if not textfile:
                     print("Bill text exists but text-only layer missing", fname, b.introduced_date)
+                elif len(textfile) > 100:
+                    pass # File has a limit on path length and docs.house.gov filenames can be very long
                 elif os.path.exists(textfile) and File.objects.is_changed(textfile):
                     b.update_index(bill_index) # index the full text
                     b.create_events() # events for new bill text documents
