@@ -11,6 +11,8 @@ This is your email update from www.GovTrack.us. To change your email update sett
 
 {% endif %}{{blog_post.body_text}}
 
+(This post is also on our website at {{SITE_ROOT_URL}}{{blog_post.get_absolute_url}}.)
+
 {% endif %}
 =====================================================================
 
