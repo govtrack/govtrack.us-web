@@ -27,6 +27,11 @@ def load_sponsorship_analysis(person):
     
     congressnumber = role.most_recent_congress_number()
     if not congressnumber: return None
+
+    # Harris served only a few days in 2021 but it kicks in
+    # the next Congress. Report the previous Congress which
+    # would be more reliable for her.
+    if person.id == 412678: congressnumber = 116
     
     return load_sponsorship_analysis2(congressnumber, role.role_type, person)
     
