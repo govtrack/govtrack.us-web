@@ -369,7 +369,7 @@ function show_pronunciation_guide() {
 
         		{{r.get_description_natural|safe}}
         		as {{r.get_party}}
-        		from {{ r.startdate|date:"Y" }} to {{ r.enddate|date:"Y" }}{% if forloop.last %}.</p>{% else %};{% endif %}
+        		from {{ r.startdate|date:r.startdate_fmt }} to {{ r.enddate|date:r.enddate_fmt }}{% if forloop.last %}.</p>{% else %};{% endif %}
 	        {% endif %}
         {% endfor %}
         </div>

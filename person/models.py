@@ -740,6 +740,18 @@ class PersonRole(models.Model):
                 return datetime.date(d.year-1, 12, 31)
         return d
 
+    @property
+    def startdate_fmt(self):
+        if self.startdate.month >= 5: return "" # show full date
+        return "Y"
+
+    @property
+    def enddate_fmt(self):
+        # The end date may have been rewritten by round_down_enddate
+        # and we should not show the full date in that case.
+        if self.enddate.month <= 7: return "" # show full date
+        return "Y"
+
     def next_election_year(self):
         # For current terms, roles end at the end of a Congress on Jan 3.
         # The election occurs in the year before.
