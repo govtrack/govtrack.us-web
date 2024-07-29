@@ -401,6 +401,7 @@ def load_latest_blog_posts():
 	latest_blog_post_by_category = { }
 	for post in BlogPost.objects\
 		.filter(published=True, created__gt=datetime.now() - timedelta(days=14))\
+		.exclude(id=434)\
 		.order_by('created'):
 		if post.category == "billsumm": continue # see BlogPost
 		latest_blog_post_by_category[post.category] = post

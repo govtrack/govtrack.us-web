@@ -34,6 +34,7 @@ def index(request):
     from .models import BlogPost
     latest_blog_post = BlogPost.objects\
         .filter(published=True)\
+	.exclude(id=434)\
         .order_by('-created')\
         .first()
 
