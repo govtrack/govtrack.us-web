@@ -16,6 +16,7 @@ elections = {
 	2012: date(2012, 11, 6),
 	2016: date(2016, 11, 8),
 	2020: date(2020, 11, 3),
+	2024: date(2024, 11, 5),
 }
 
 super_tuesday = {
@@ -23,6 +24,7 @@ super_tuesday = {
 	2012: date(2012, 3, 6),
 	2016: date(2016, 3, 1),
 	2020: date(2020, 3, 3),
+	2024: date(2024, 3, 5),
 }
 
 super_tuesday_avg = int(round(mean([(elections[y] - super_tuesday[y]).days for y in elections])))
@@ -31,6 +33,10 @@ super_tuesday_avg = int(round(mean([(elections[y] - super_tuesday[y]).days for y
 # plus the end date of their campaign --- the election date (for party nominees),
 # or the date they conceded/withdrew.
 candidates = {
+	2024: {
+		456876: { "party": "R", "end": elections[2024] }, # Vance for VP
+	},
+
 	2020: {
 		# Democratic candidates
 		300008: { "party": "D", "end": elections[2020] }, # Biden
