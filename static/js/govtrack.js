@@ -60,7 +60,8 @@ function init_ad_zone(ad_container) {
 
     // Load ad partner script.
     if (!window.has_added_ads_script_tag && !is_ad_free) {
-        window.ad_provider = /*(ad_cookie.segment < .75) ?*/ "adsense" /*: "..."*/;
+        //window.ad_provider = (ad_cookie.segment < .75) ? "adsense" : "publir";
+        window.ad_provider = "publir";
 
         // https://stackoverflow.com/questions/8578617/inject-a-script-tag-with-remote-src-and-wait-for-it-to-execute
 
@@ -72,7 +73,7 @@ function init_ad_zone(ad_container) {
             script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3418906291605762";
             script.crossorigin = "anonymous";
         }
-        else
+        else if (false)
         {
             // Always load the AdSense code for vignette ads, even if the display ads are coming from another provider.
             const script_adsense = document.createElement('script');
@@ -82,11 +83,11 @@ function init_ad_zone(ad_container) {
             document.getElementsByTagName('head')[0].appendChild(script_adsense);
         }
 
-        // Another provider
-        if (window.ad_provider == "...")
+        // Publir
+        if (window.ad_provider == "publir")
         {
-            script.src = "...";
-            script.id = "...";
+            script.src = "//a.publir.com/platform/1591.js";
+            script.id = "headerbidder";
         }
 
         script.type = "text/javascript";
@@ -158,6 +159,17 @@ function init_ad_zone(ad_container) {
             // Smartphone Banner Google AdSense unit (320x50)
             write_ad_code('<ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px" data-ad-client="ca-pub-3418906291605762" data-ad-slot="8745863219"></ins>');
             (adsbygoogle = window.adsbygoogle || []).push({});
+        }
+    } else if (window.ad_provider == "publir") {
+        if (ad_container.attr('data-zone') == "sidebar") {
+            // Sidebar Zone - Publir
+            write_ad_code('<div id="div-hre-Govtrack-4171" class="publirAds">');
+            window.deferred_ad_script(() => { googletag.cmd.push(function() {  googletag.pubads().addEventListener('slotRenderEnded', function(event) { if (event.slot.getSlotElementId() == "div-hre-Govtrack-4171") {googletag.display("div-hre-Govtrack-4171");} });}); });
+
+        } else if (ad_container.attr('data-zone') == "header" || ad_container.attr('data-zone') == "footer") {
+            // Header / Footer / In-Page Leaderboard Zone - Publir
+            write_ad_code('<div id="div-hre-Govtrack-4169" class="publirAds">');
+            window.deferred_ad_script(() => { googletag.cmd.push(function() {  googletag.pubads().addEventListener('slotRenderEnded', function(event) { if (event.slot.getSlotElementId() == "div-hre-Govtrack-4169") {googletag.display("div-hre-Govtrack-4169");} });}); });
         }
     }
 }
