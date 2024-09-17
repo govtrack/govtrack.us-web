@@ -400,6 +400,21 @@ class Person(models.Model):
         stats["meta"] = datafile["meta"] # copy this over
         return stats
 
+    @staticmethod
+    def load_caucus_membership_data():
+        if hasattr(Person.load_caucus_membership_data, '_cache'):
+            return Person.load_caucus_membership_data._cache
+        import glob, rtyaml
+        CACUSES_DIRECTORY = "/home/govtrack/data/caucuses/118"
+        caucus_membership = set()
+        for caucus in glob.glob(CACUSES_DIRECTORY + "/*.yaml"):
+          caucusdata = rtyaml.load(open(caucus))
+          caucus = caucus.replace(".yaml", "")
+          for p in caucusdata["members"]:
+            caucus_membership.add((caucusdata["name"], p["id"]))
+        Person.load_caucus_membership_data._cache = caucus_membership
+        return caucus_membership
+
     def get_feed(self, feed_type="p"):
         if feed_type not in ("p", "pv", "ps"): raise ValueError(feed_type)
         from events.models import Feed

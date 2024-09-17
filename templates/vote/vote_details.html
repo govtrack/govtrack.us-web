@@ -418,14 +418,23 @@ $(function() {
 </div>
 
 {% with vote.totals as totals %}
-<div class="card" style="margin-bottom: 15px">
+<div class="card" style="margin-top: 30px; margin-bottom: 15px">
   <div class="card-header">
     Vote Outcome
   </div>
   <div class="card-body">
+    <!-- Horizontal Table -->
     <table class="stats" style="margin: 0 30px 0 0">
         <thead>
-            <tr>
+            {% if totals.features %}
+            <tr style="font-style: italic" class="d-none d-md-table-row">
+                <th colspan="3"></th>
+                <th colspan="{{totals.parties|length}}">By Party</th>
+                <th style="border-right: 1px solid #BBB; padding-left: 6px; padding-right: 6px;" class="d-none d-md-table-cell"></th>
+                <th colspan="{{totals.features|length}}">Selected Caucuses</th>
+            </tr>
+            {% endif %}
+            <tr style="line-height: 115%">
                 <th></th>
                 <th colspan="2">All Votes</th>
                 {% for party in totals.parties %}
@@ -435,6 +444,15 @@ $(function() {
                         {% else %}
                     	V<span class="hidden-xs">ice </span>P<span class="hidden-xs">resident</span>
                         {% endif %}
+                    </th>
+                {% endfor %}
+                {% if totals.features %}
+                    <th style="border-right: 1px solid #BBB; padding-left: 6px; padding-right: 6px;" class="d-none d-md-table-cell">
+                    </th>
+                {% endif %}
+                {% for feature in totals.features %}
+                    <th style="padding-left: 6px; padding-right: 6px; max-width: 12em;" class="d-none d-md-table-cell">
+                        {{feature}}
                     </th>
                 {% endfor %}
             </tr>
@@ -467,10 +485,27 @@ $(function() {
 						<div style="height: .25em;"><div style="height: .25em; width: {{7|mult:count.count|div:totals.max_option_count|floatformat:3}}vw; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
 					</td>
                 {% endfor %}
+                {% if item.feature_counts %}
+                    <td style="border-right: 1px solid #BBB; padding: 6px 8px;" class="d-none d-md-table-cell">
+                    </td>
+                {% endif %}
+                {% for count in item.feature_counts %}
+                    <td style="padding: 6px 8px; font-weight: normal;" class="d-none d-md-table-cell">
+                        <div>{{ count.count }}</div>
+                        <div style="height: .25em;">
+                        {% for subcount in count.by_party %}
+                        {% if subcount.count %}
+                        <div style="height: .25em; width: {{7|mult:subcount.count|div:totals.max_option_count|floatformat:3}}vw; display: inline-block;" class="color_{{subcount.party.0}}">&nbsp;</div>
+                        {% endif %}
+                        {% endfor %}
+                        </div>
+                    </td>
+                {% endfor %}
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
     <p style="margin: 1em 0 0 0; font: 12px/20px serif;">
         {{ vote.result }}.
 
@@ -481,19 +516,116 @@ $(function() {
             The Vice President cast a tie-breaking vote.
         {% endif %}
 
-        Source: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
+        Official record: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
     </p>
     {% with vote.get_equivalent_aye_voters_us_population_percent as pct %}
     {% if pct %}
         {% for item in totals.options %}
             {% if item.option.key == pct.0 %}
-               <p style="margin: 0; font: 12px/20px serif;">
+               <p style="margin: 0; font: 12px/18px serif;">
                    The {{item.option.value}} votes represented {{pct.1|floatformat:0}}% of the country&rsquo;s population by apportioning each state&rsquo;s population to its voting senators.
                </p>
             {% endif %}
         {% endfor %}
     {% endif %}
     {% endwith %}
+
+
+    {% if totals.features %}
+
+    <!-- Caucuses Table for Small Screens -->
+    <div class="d-md-none" style="margin-top: 20px">
+    <table class="stats" style="margin-top: 0">
+        <thead>
+            <tr>
+            <th style="text-align: left;">Selected Caucuses</th>
+            {% for item in totals.options %}
+            {% if item.feature_counts %}
+                <th scope="row" style="white-space: nowrap; min-width: 6em; border: none; font-weight: {% if item.option.winner %}bold{% else %}inherit{% endif %};">
+                    {{ item.option }}
+                </th>
+            {% endif %}
+            {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% comment %}
+            <tr>
+                <th>All Votes</th>
+                {% for item in totals.options %}
+                    <td style="padding: 6px; {% if item.option.winner %}font-weight: bold{% endif %}">
+                      <div>{{ item.count }}</div>
+
+                      {% if item.percent is not None %}
+                      <div>{{ item.percent }}<span style="margin-left: 2px; font-size: 80%; color: #555;">%</span></div>
+                      {% endif %}
+
+                      <div>
+                      {% for count in item.party_counts %}<div style="width: {{10|mult:count.count|div:totals.max_option_count|floatformat:3}}vw; display: inline-block;" class="color_{{count.party|slice:"0:1"}}"> 
+                        &nbsp;</div>{% endfor %}<div style="display: inline-block; padding-left: 5px;">
+                        </div>
+                      </div>
+                    </td>
+                {% endfor %}
+            </tr>
+            {% for party in totals.parties %}
+            <tr style="line-height: 115%">
+                <th style="padding: 6px;">
+                    {% if party != "Vice President" %}
+                    {{party|slice:"0:1"}}<span class="hidden-xs">{{party|slice:"1:"}}s</span>
+                    {% else %}
+                    V<span class="hidden-xs">ice </span>P<span class="hidden-xs">resident</span>
+                    {% endif %}
+                </th>
+                {% for item in totals.options %}
+                    {% for count in item.party_counts %}
+                    {% if count.party == party %}
+                        <td style="padding: 6px 8px">
+                            <div>{{ count.count }}</div>
+                            <div style="height: .25em;"><div style="height: .25em; width: {{7|mult:count.count|div:totals.max_option_count|floatformat:3}}vw; display: inline-block;" class="color_{{count.party.0}}">&nbsp;</div></div>
+                        </td>
+                    {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            {% endcomment %}
+            {% for feature in totals.features %}
+            <tr style="line-height: 115%">
+                <th style="text-align: left;">
+                    {{feature}}
+                </th>
+                {% for item in totals.options %}
+                    {% for count in item.feature_counts %}
+                    {% if count.feature == feature %}
+                        <td style="padding: 6px 8px; font-weight: normal;">
+                            <div>{{ count.count }}</div>
+                            <div style="height: .25em;">
+                            {% for subcount in count.by_party %}
+                            {% if subcount.count %}
+                            <div style="height: .25em; width: {{7|mult:subcount.count|div:totals.max_option_count|floatformat:3}}vw; display: inline-block;" class="color_{{subcount.party.0}}">&nbsp;</div>
+                            {% endif %}
+                            {% endfor %}
+                            </div>
+                        </td>
+                    {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <!-- Caucuses Explanation -->
+    <p style="margin: .5em 0 0 0; font: 12px/18px serif;">
+        Caucuses are selected based on a statistical analysis of their
+        relevance to the vote outcome. Caucus membership may not be
+        the latest &mdash; we are still working on that. Legislators
+        may be a member of multiple caucuses.
+    </p>
+    {% endif %}
   </div>
 </div>
 

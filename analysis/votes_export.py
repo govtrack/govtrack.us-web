@@ -4,30 +4,25 @@ import csv, sys
 from django.conf import settings
 
 from person.models import Person
-from vote.models import Vote
+from vote.models import Vote, CongressChamber
 
-with_voters = False
+with_voters = True
 
 w = csv.writer(sys.stdout)
 w.writerow(
 	["congress", "session", "chamber", "number", "date", "category", "question", "link"]
-	+ (["person", "vote"] if with_voters else [])
+	+ (["person", "name", "vote"] if with_voters else [])
 )
 
-#votes = Vote.objects.filter(
-#	#congress=113,
-#	session__in=(2015, 2017),
-#	chamber=CongressChamber.senate
-#	).order_by('created')
-
-with_voters = True
-people = set(Person.objects.filter(roles__current=True, roles__state="TX"))
-votes = Vote.objects.filter(voters__person__in=people).distinct()
+votes = Vote.objects.filter(
+	congress=118,
+	#session__in=(2015, 2017),
+	chamber=CongressChamber.house
+	).order_by('created')
 
 for vote in votes:
 	if with_voters:
 		voters = vote.voters.all()
-		if people: voters = voters.filter(person__in=people)
 		voters = list(voters.select_related('person', 'option'))
 		voters = sorted(voters, key = lambda v : v.person.sortname_strxfrm)
 	else:
@@ -44,7 +39,8 @@ for vote in votes:
 				vote.question,
 				settings.SITE_ROOT_URL + vote.get_absolute_url(),
 			] + ([
+				voter.person.id,
 				voter.person.sortname,
 				voter.option.value,
 			] if with_voters else [])
-		w.writerow([str(v).encode("utf8") for v in row])
+		w.writerow(row)

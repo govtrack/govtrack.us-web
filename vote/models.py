@@ -13,6 +13,17 @@ from bill.models import BillSummary
 
 from website.templatetags.govtrack_utils import markdown
 
+
+# Define U.S. Census Regions
+# https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
+census_regions = {
+  "Northeast": { "CT", "ME", "MA", "NH", "RI", "VT", "NJ", "NY", "PA" },
+  "Midwest": { "IN", "IL", "MI", "OH", "WI", "IA", "KS", "MN", "MO", "NE", "ND", "SD" },
+  "South": { "DE", "DC", "FL", "GA", "MD", "NC", "SC", "VA", "WV", "AL", "KY", "MS", "TN", "AR", "LA", "OK", "TX "},
+  "West": { "AZ", "CO", "ID", "NM", "MT", "UT", "NV", "WY", "AK", "CA", "HI", "OR", "WA" },
+}
+
+
 global historical_state_population_data
 historical_state_population_data = None
 def get_state_population_in_year(year):
@@ -282,6 +293,9 @@ class Vote(models.Model):
         total_party_stats = dict((x, {'yes': 0, 'no': 0, 'other': 0, 'total': 0})\
                                  for x in all_parties)
 
+        # Perform a statistical analysis using additional features.
+        feature_analysis = self.feature_analysis(all_voters)
+
         # For each option find the count, the percent of voting members, and the party break down.
         details = []
         for option in all_options:
@@ -316,6 +330,18 @@ class Vote(models.Model):
                 
             detail = {'option': option, 'count': len(voters),
                 'percent': percent, 'party_counts': party_counts,
+                'feature_counts': [{
+                  'feature': feature,
+                  'count': len([v for v in voters
+                                if feature in feature_analysis["featuremap"].get(v.person.id, [])]),
+                  'by_party':
+                     [ {"party": party,
+                        "count": len([v for v in voters if v.party == party
+                                     and feature in feature_analysis["featuremap"].get(v.person.id, [])]) }
+                        for party in all_parties ]
+                   }
+                   for feature in feature_analysis["featurelist"]
+                 ] if feature_analysis and option.key in ("+", "-") else None
                 }
             if option.key == '+':
                 detail['yes'] = True
@@ -336,9 +362,85 @@ class Vote(models.Model):
 
         totals = {'options': details, 'max_option_count': max(detail['count'] for detail in details),
                 'party_counts': party_counts, 'parties': all_parties,
+                'features': feature_analysis["featurelist"] if feature_analysis else None
                 }
         self._cached_totals = totals
         return totals
+
+    def feature_analysis(self, all_voters):
+        # Do a regression analysis using other factors and add all statistically
+        # significant factors as additional columns in the output table.
+
+        # Load All Caucus Membership Data
+        from person.models import Person
+        caucus_membership = Person.load_caucus_membership_data()
+        all_caucuses = set(x[0] for x in caucus_membership)
+
+        # Build feature table and vote result vector.
+        X = [ ]
+        Y = [ ]
+        featuremap = { }
+        for voter in all_voters:
+          if voter.person_role is None: continue # Vice President tie-breaker or missing data
+          if voter.option.key not in ("+", "-"): continue # only take yes/no votes
+          Y.append(voter.option.key == "+") # make binary
+          features = dict([
+                   ("intercept", 1), # required
+                   ("party", voter.party == "Republican"), # arbitrary
+                   ]
+                   # Census regions are interesting but are difficult
+                   # to explain on the page if we have to say caucus
+                   # & regions.
+                   # + [
+                   #  (region, voter.person_role.state in statelist)
+                   #  for region, statelist in census_regions.items()
+                   # ]
+                   + [
+                    (caucus, (caucus, voter.person.bioguideid) in caucus_membership)
+                    for caucus in all_caucuses
+                   ]
+                   )
+          X.append(features)
+          featuremap[voter.person.id] = set(f for f, v in features.items() if bool(v))
+        if len(X) == 0:
+          return None
+
+        # Analyze
+        from vote.analysis import logistic_regression_fit_best_model
+        model = logistic_regression_fit_best_model(X, Y)
+        if not model:
+          return None
+
+        # When the analysis totally fails we just get all of the features back.
+        if len(model["features"]) > 5:
+          return None
+
+        # Discard if no features other than the intercept and party are
+        # statistically significant. Since party is displayed separately,
+        # we don't need to re-include it as a feature. Also limit the
+        # total number of features displayed.
+        selected_features = list(set(model["features"].keys()) - { "intercept", "party" })[0:5]
+        if len(selected_features) == 0:
+          return None
+
+        # Put selected_features in order of its coefficient from most positive
+        # (aye/yea, which is always listed first on vote pages) to most negative
+        # (no/nay).
+        selected_features.sort(key = lambda feature : -model["features"][feature]["value"])
+
+        # Simplify the featuremap to only include selected features and put
+        # them in the same order as in selected_features.
+        featuremap = {
+          personid: [f for f in selected_features if f in features]
+          for personid, features in featuremap.items()
+        }
+
+        # Return a list of features from most to least significant and a map
+        # from voters to features.
+        return {
+          "featurelist": selected_features,
+          "featuremap": featuremap
+        }
 
     def summary(self):
         ret = self.result
@@ -508,6 +610,7 @@ class Vote(models.Model):
 
         # Return the proportion of winner votes as well as which option we considered the winner.
         return (winner_option_key, round(winner/total*100,1))
+
 
 class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='options', on_delete=models.CASCADE)

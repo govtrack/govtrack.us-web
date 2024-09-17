@@ -45,3 +45,4 @@ django_otp
 Mastodon.py
 requests
 django-markdownx
+statsmodels
