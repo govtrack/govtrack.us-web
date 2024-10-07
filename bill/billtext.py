@@ -404,8 +404,8 @@ def load_bill_text(bill, version, plain_text=False, mods_only=False, with_citati
             return bill_text_content.replace("\u000C", "\n=============================================\n")
             
         # Return the text wrapped in <pre>, and replace form feeds with an <hr>.
-        import cgi
-        bill_text_content = "<pre>" + cgi.escape(bill_text_content) + "</pre>"
+        import html
+        bill_text_content = "<pre>" + html.escape(bill_text_content) + "</pre>"
         bill_text_content = bill_text_content.replace("\u000C", "<hr>") # (OCR'd layers only)
 
         ret.update({

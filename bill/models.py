@@ -1692,7 +1692,7 @@ def get_formatted_bill_summary(bill):
     # used regex to add XML structure, which we saved in a bills.summary directory.
     # Now we just read the original text scraped from THOMAS and split into paragraphs.
 
-    import cgi
+    import html
     with open(bill.data_dir_path + "/data.xml") as f:
        dom = etree.parse(f)
 
@@ -1705,7 +1705,7 @@ def get_formatted_bill_summary(bill):
     summary = summary.text
     if summary is None: return None
     if summary.strip() == "": return None
-    summary = "".join(["<p>" + cgi.escape(p) + "</p>\n" for p in summary.split("\n\n")])
+    summary = "".join(["<p>" + html.escape(p) + "</p>\n" for p in summary.split("\n\n")])
 
     return date, summary
 
