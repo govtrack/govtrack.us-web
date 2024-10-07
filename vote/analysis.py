@@ -137,11 +137,13 @@ def logistic_regression(X, Y, exclude_features = set()):
     warnings.filterwarnings("ignore", message="Perfect separation")
     warnings.filterwarnings("ignore", message="divide by zero encountered")
     warnings.filterwarnings("ignore", message="overflow encountered in exp")
+    warnings.filterwarnings("ignore", message="HessianInversionWarning")
     try:
-    	# method='bfgs' avoids Singular Matrix which is very common for
-    	# binary data where features may be linear combinations of other
-    	# features
-    	fit = model.fit(method='bfgs', maxiter=100, disp=False, warn_convergence=False) # disp silences stdout
+      # method='bfgs' avoids Singular Matrix which is very common for
+      # binary data where features may be linear combinations of other
+      # features
+      fit = model.fit(method='bfgs', maxiter=100, disp=False, warn_convergence=False) # disp silences stdout
+      rsquared = float(fit.prsquared) # .rsquared for OLS; for Logit this can also throw PerfectSeparationError
     except:
     	# various errors can be thrown
       return None
@@ -149,7 +151,7 @@ def logistic_regression(X, Y, exclude_features = set()):
 
   # Transform results back into a dictionary.
   return {
-    "rsquared": float(fit.prsquared), # .rsquared for OLS
+    "rsquared": rsquared,
     "features": {
       feature: {
         "value": float(fit.params[i]),
