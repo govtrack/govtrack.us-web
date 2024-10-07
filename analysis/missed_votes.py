@@ -72,6 +72,12 @@ for fn in glob.glob(vote_xml_glob):
 		session_bin_dates[bin] = (date, date)
 	else:
 		session_bin_dates[bin] = (min(session_bin_dates[bin][0], date), max(session_bin_dates[bin][1], date))
+
+	bin_congress = (congress, None, where, None)
+	if not bin_congress in session_bin_dates:
+		session_bin_dates[bin_congress] = (date, date)
+	else:
+		session_bin_dates[bin_congress] = (min(session_bin_dates[bin_congress][0], date), max(session_bin_dates[bin_congress][1], date))
 		
 	for voter in dom.xpath("voter[@id]"):
 		id = int(voter.get("id"))
@@ -127,26 +133,44 @@ for p in voters_by_chamber['h'] | voters_by_chamber['s']:
 					else:
 						person_lifetime_vote_dates[(rec["chamber"], p)] = (min(person_lifetime_vote_dates[(rec["chamber"], p)][0], parse_datetime(rec["period_start"])), max(person_lifetime_vote_dates[(rec["chamber"], p)][1], parse_datetime(rec["period_end"])))
 				else:
-					bin = (int(rec["congress"]), rec["session"], rec["chamber"], int(rec["period"]))
+					bin = (int(rec["congress"]), rec["session"] if rec["session"] else None,
+						rec["chamber"] if rec["chamber"] else None, int(rec["period"]) if rec["period"] else None)
 					session_bin_dates[bin] = (parse_datetime(rec["period_start"]), parse_datetime(rec["period_end"]))
 					vote_counts[p][bin] = { "total": int(rec["total_votes"]), "missed": int(rec["missed_votes"]) }
 			break # don't look at previous congresses, we have their house and senate records both here
 
-# Compute lifetime missed vote totals by chamber for currently serving members in that chamber.
+# Compute lifetime and this-Congress missed vote totals by chamber for currently serving members in that chamber.
 for where in ('h', 's'):
 	for p in voters_by_chamber[where]:
 		# currently serving but has not voted in this chamber in this Congress yet
 		if p not in vote_counts: vote_counts[p] = { }
-			
+
 		vote_counts[p][('lifetime', where)] = {
-			"total": sum(bv["total"] for bk, bv in vote_counts[p].items() if bk[0] != "lifetime" and bk[2] == where),
-			"missed": sum(bv["missed"] for bk, bv in vote_counts[p].items() if bk[0] != "lifetime" and bk[2] == where),
+			"total": sum(bv["total"] for bk, bv in vote_counts[p].items() if bk[0] != "lifetime" and bk[2] == where and bk[3] is not None),
+			"missed": sum(bv["missed"] for bk, bv in vote_counts[p].items() if bk[0] != "lifetime" and bk[2] == where and bk[3] is not None),
 		}
 		if vote_counts[p][('lifetime', where)]['total'] == 0:
 			del vote_counts[p][('lifetime', where)]
+
+		vote_counts[p][(congress, None, where, None)] = {
+			"total": sum(bv["total"] for bk, bv in vote_counts[p].items() if bk[0] == congress and bk[2] == where and bk[3] is not None),
+			"missed": sum(bv["missed"] for bk, bv in vote_counts[p].items() if bk[0] == congress and bk[2] == where and bk[3] is not None),
+		}
+		if vote_counts[p][(congress, None, where, None)]['total'] == 0:
+			del vote_counts[p][(congress, None, where, None)]
+
 		
-# Compute medians and percentiles.
-for bin in [("lifetime", "s"), ("lifetime", "h")] + sorted(session_bin_dates):
+# Compute medians and percentiles for each legislator's lifetime record, their
+# record in this Congress, and each calendar-quarter bin.
+def bin_key(bin):
+	# Bins are in the format of either (congress, session, chamber, quarter)
+	# or ("lifetime", chamber). Since int (congress) and str ("lifetime") are
+	# not comparabiel (thanks Python 3!), we need a custom sort function to
+	# make the tuples comparable.
+	if bin[0] == "lifetime": return (99999, bin[1])
+	if bin[3] is None: return (bin[0], "", bin[2], -1)
+	return bin
+for bin in [("lifetime", "s"), ("lifetime", "h")] + sorted(session_bin_dates, key=bin_key):
 	if bin[0] != "lifetime":
 		# Get Members of Congress that were present in the bin.
 		plist = [p for p in vote_counts if bin in vote_counts[p]]
@@ -185,7 +209,6 @@ for bin in [("lifetime", "s"), ("lifetime", "h")] + sorted(session_bin_dates):
 		
 	if bin[0] == "lifetime":
 		# Write out the lifetime statistics in a main file sorted by percentile.
-		# (The user can compute his own median here.)
 		
 		# filter out MoCs that are currently serving but have not voted yet
 		plist = [p for p in plist if bin in vote_counts[p]]
@@ -198,16 +221,21 @@ for bin in [("lifetime", "s"), ("lifetime", "h")] + sorted(session_bin_dates):
 			# since it might indicate we included that person in medians, but we didn't.
 			v = vote_counts[p][bin]
 			w.writerow([p, v['total'], v['missed'], v['percent'], v['percentile'], person_lifetime_vote_dates[(bin[1], p)][0].isoformat(), person_lifetime_vote_dates[(bin[1], p)][1].isoformat()])
+	elif bin[1] is None and bin[3] is None:
+		# Write out the per-Congress statistics in a main file sorted by percentile.
+		
+		# filter out MoCs that are currently serving but have not voted yet
+		plist = [p for p in plist if bin in vote_counts[p]]
+		
+		plist.sort(key = lambda p : -vote_counts[p][bin]['percentile'])
+		w = csv.writer(open(datadir_stats + "missedvotes_thiscongress_%s.csv" % bin[2], "w"))
+		w.writerow(["id", "total_votes", "missed_votes", "percent", "percentile"])
+		for p in plist:
+			v = vote_counts[p][bin]
+			w.writerow([p, v['total'], v['missed'], v['percent'], v['percentile']])
 		
 # Write out statistics by Member of Congress. Although we're only writing out currently serving MoCs,
 # include their lifetime records for both the house and senate.
-def bin_key(bin):
-	# Bins are in the format of either (congress, session, chamber, quarter)
-	# or ("lifetime", chamber). Since int (congress) and str ("lifetime") are
-	# not comparabiel (thanks Python 3!), we need a custom sort function to
-	# make the tuples comparable.
-	if bin[0] == "lifetime": return (1, bin)
-	return (0, bin)
 for p in vote_counts:
 	w = csv.writer(open(datadir_stats + "person/missedvotes/%d.csv" % p, "w"))
 	# columns are tied to how we load in historical data above
@@ -216,6 +244,8 @@ for p in vote_counts:
 		v = vote_counts[p][bin]
 		if bin[0] == "lifetime":
 			dates = person_lifetime_vote_dates[(bin[1], p)]
+		elif bin[1] is None:
+			continue
 		else:
 			dates = session_bin_dates[bin]
 		if len(bin) == 2: bin = [bin[0], None, bin[1], None]
