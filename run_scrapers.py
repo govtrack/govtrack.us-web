@@ -93,10 +93,12 @@ if "text" in sys.argv:
 	# bill text and generates feed events for text availability.
 
 	# Update the mirror of bill text from GPO's GovInfo.gov.
-	os.system("cd %s; usc-run govinfo --collections=BILLS --extract=mods,text,xml --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
+	os.system("cd %s; usc-run govinfo --collections=BILLS --extract=mods,text,xml --years=%s --log=%s" % (settings.CONGRESS_PROJECT_PATH,
+		",".join(str(datetime.datetime.now().year + d) for d in (-1, 0)), log_level))
 
 	# Also metadata for committee reports.
-	os.system("cd %s; usc-run govinfo --collections=CRPT --extract=mods --log=%s" % (settings.CONGRESS_PROJECT_PATH, log_level))
+	os.system("cd %s; usc-run govinfo --collections=CRPT --extract=mods --years=%s --log=%s" % (settings.CONGRESS_PROJECT_PATH,
+		",".join(str(datetime.datetime.now().year + d) for d in (-1, 0)), log_level))
 
 	# Update text incorporation analysis for any new text versions.
 	os.system("analysis/text_incorporation.py analyze %d" % CONGRESS)
