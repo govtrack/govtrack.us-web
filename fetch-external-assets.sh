@@ -73,11 +73,11 @@ download \
 
 # Font Awesome (for the spinner on ajax calls, various icons; MIT License)
 download \
-  https://use.fontawesome.com/releases/v6.4.0/fontawesome-free-6.4.0-web.zip \
+  https://use.fontawesome.com/releases/v6.6.0/fontawesome-free-6.6.0-web.zip \
   /tmp/fontawesome.zip \
-  '55a75eba37b67ecc9f715291b2b0d121fbf41a425044590177a25f236da9813b'
+  'f425638f6db13622074ccd9369941170935a40891094b6505c5bc28c29f028eb'
 (cd /tmp; unzip fontawesome.zip;)
-mv /tmp/fontawesome-free-6.4.0-web $VENDOR/fontawesome
+mv /tmp/fontawesome-free-6.6.0-web $VENDOR/fontawesome
 
 # Josh's Bootstrap Helpers (MIT License)
 # When this (client side JS) is updated, you must also
