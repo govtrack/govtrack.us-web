@@ -516,7 +516,12 @@ $(function() {
             The Vice President cast a tie-breaking vote.
         {% endif %}
 
-        Official record: <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
+        {% if totals.party_is_caucus %}
+            Independents are grouped with the party they caucus with.
+        {% endif %}
+    </p>
+    <p style="margin: 0 0 0 0; font: 12px/20px serif;">
+        Data from the official record at <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
     </p>
     {% with vote.get_equivalent_aye_voters_us_population_percent as pct %}
     {% if pct %}

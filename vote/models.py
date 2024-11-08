@@ -248,7 +248,8 @@ class Vote(models.Model):
             elif not voter.person or not voter.person_role:
                 voter.party = "Unknown"
             else:
-                voter.party = voter.person_role.get_party_on_date(self.created)
+                voter.party = voter.person_role.get_party_on_date(self.created, caucus=True)
+                voter.party_is_caucus = voter.party != voter.person_role.get_party_on_date(self.created, caucus=False)
 
         return ret
        
@@ -267,6 +268,7 @@ class Vote(models.Model):
         for option in all_options:
             voters_by_option[option] = [x for x in all_voters if x.option == option]
         total_count = len(all_voters)
+        party_is_caucus = any(getattr(x, "party_is_caucus", False) for x in all_voters)
 
         # How many legislators count toward or against passage? For most votes, only ayes
         # and nays count toward a majority (i.e. present and not voting don't), or special
@@ -361,7 +363,7 @@ class Vote(models.Model):
         details = [d for d in details if d["count"] > 0 or "hide_if_empty" not in d]
 
         totals = {'options': details, 'max_option_count': max(detail['count'] for detail in details),
-                'party_counts': party_counts, 'parties': all_parties,
+                'party_counts': party_counts, 'parties': all_parties, 'party_is_caucus': party_is_caucus,
                 'features': feature_analysis["featurelist"] if feature_analysis else None
                 }
         self._cached_totals = totals
