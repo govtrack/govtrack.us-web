@@ -215,8 +215,11 @@ article {
   <div class="card">
     <div class="card-header">{{latest_blog_post.title}}</div>
     <div class="card-body">
+      <p style="margin: 0 0 .5em 0; color: #444; font-size: 95%;">
+        {{latest_blog_post.created|date}} &middot; {{latest_blog_post.get_category_display}}
+        {% if latest_blog_post.author %}&middot; by {{latest_blog_post.author}}{% endif %}
+      </p>
       {{latest_blog_post.body_html|safe}}
-      <div style="font-style: italic">&mdash; {{latest_blog_post.created|date:"SHORT_DATETIME_FORMAT"}}</div>
       <div style="margin-top: 1em">
         <a href="/posts" class="btn btn-secondary">View Older Posts &raquo;</a>
         <a href="/accounts/lists" class="btn btn-primary">Sign Up For Email Alerts &raquo;</a>

@@ -33,7 +33,10 @@
 {% for post in posts %}
     <section style="margin: 0 0 1em 0">
         <h3><a href="{{post.get_absolute_url}}">{{post.title}}</a></h3>
-        <p style="margin: 0; color: #444; font-size: 98%;">{{post.created|date}} &middot; {{post.get_category_display}}</p>
+        <p style="margin: 0; color: #444; font-size: 98%;">
+	{{post.created|date}} &middot; {{post.get_category_display}}
+	{% if post.author %}&middot; by {{post.author}}{% endif %}
+	</p>
         <p>{{post.body_preview_html|safe}}</p>
     </section>
 {% endfor %}
