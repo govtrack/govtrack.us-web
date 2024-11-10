@@ -34,21 +34,9 @@ def index(request):
     from .models import BlogPost
     latest_blog_post = BlogPost.objects\
         .filter(published=True)\
-	.exclude(id=434)\
+        .exclude(id=434)\
         .order_by('-created')\
         .first()
-
-    # Trending feeds. These are short (no image, no snippet) so they go first.
-    trending_feeds = [Feed.objects.get(id=f) for f in Feed.get_trending_feeds()[0:6]]
-    if len(trending_feeds) > 0:
-        post_groups.append({
-            "title": "Trending",
-            "posts": [{
-                "title": feed.title,
-                "url": feed.link,
-            } for feed in trending_feeds ],
-            "compact": True
-        })
 
     # Recent votes.
     from vote.models import Vote
@@ -66,7 +54,7 @@ def index(request):
                 "url": vote.get_absolute_url(),
                 "published": vote.created.strftime("%x"),
             } for vote in recent_votes],
-            "links": [("/congress/votes", "View All")],
+            "links": [("/congress/votes", "All Votes")],
         })
 
     # Legislation coming up. Sadly this is usually the least interesting.
@@ -86,9 +74,20 @@ def index(request):
                 "url": bill.get_absolute_url(),
                 "published": "week of " + bill.scheduled_consideration_date.strftime("%x"),
             } for bill in coming_up[0:6]],
-            "links": [("/congress/bills", "View All")],
+            "links": [("/congress/bills", "Search and Track Legislation")],
         })
 
+    # Trending feeds.
+    trending_feeds = [Feed.objects.get(id=f) for f in Feed.get_trending_feeds()[0:6]]
+    if len(trending_feeds) > 0:
+        post_groups.append({
+            "title": "Trending",
+            "posts": [{
+                "title": feed.title,
+                "url": feed.link,
+            } for feed in trending_feeds ],
+            "compact": True
+        })
 
     return {
         'bill_subject_areas': bill_subject_areas, # for the action area below the splash

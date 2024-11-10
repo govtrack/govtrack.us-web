@@ -23,7 +23,7 @@
 	background-position: 30% 40%;
   border-top: 1px solid #666;
   border-bottom: 1px solid #666;
-  padding: 10vh;
+  padding: 45px;
 }
 	@media screen and (max-width: 1024px) {
 		#jumbotron {
@@ -36,25 +36,37 @@
 		}
 	}
 
-	#jumbotron-text {
-    background: rgba(255,255,255,.75);
-    padding: 40px;
-    text-align: center;
-    margin: auto;
-    max-width: 25em;
-    font-size: 40px;
+	.jumbotron-card {
+    margin-bottom: 45px;
+    background: rgba(255,255,255,.9);
+    border: 1px solid rgba(0,0,0,.125);
+    padding: 45px;
     color: #333;
 	}
+  .jumbotron-text {
+    text-align: center;
+    font-size: 28px;
+    line-height: 140%;
+  }
 	@media screen and (max-width: 1200px) {
-		#jumbotron-text {
-			font-size: 3.5vw;
+		.jumbotron-text {
+			font-size: 24px;
 		}
 	}
 	@media screen and (max-width: 768px) {
-		#jumbotron-text {
-			font-size: 25px;
+		.jumbotron-text {
+			font-size: 18px;
 		}
 	}
+  .jumbotron-card h3:first-child {
+    margin-top: 0;
+  }
+  .jumbotron-card h3, .jumbotron-card h4 {
+    font-weight: bold;
+  }
+  .jumbotron-card .btn {
+    margin-bottom: 15px;
+  }
 
 	h1 {
 		font-size: inherit;
@@ -135,10 +147,37 @@ article {
 </script>
 {% endblock %}
 
+{% block override_sitenews %}
+  {# the post shown here is also shown below #}
+{% endblock %}
+
 {% block body_with_container %}
 <div id="jumbotron">
-  <div id="jumbotron-text">
-    We&rsquo;re tracking the U.S. Congress to make our government more open and accessible.
+  <div class="container">
+    <div class="row">
+      <div class="col-lg">
+        <div class="jumbotron-card jumbotron-text" style="border-top: 2px solid #9D2146;">
+          We&rsquo;re tracking the activities of the <nobr>United States Congress</nobr> to help you be the best <b>advocate</b> for the issues you care about and to create a more <b>open</b> and <b>accountable</b> government.
+        </div>
+      </div>
+      {% if latest_blog_post %}
+      <div class="col-lg">
+        <div class="jumbotron-card" style="border-top: 2px solid #1d4e70;">
+          <h3>{{latest_blog_post.title}}</h3>
+          <p style="margin: 0 0 .5em 0; color: #444; font-size: 95%;">
+            {{latest_blog_post.created|date}} &middot; {{latest_blog_post.get_category_display}}
+            {% if latest_blog_post.author %}&middot; by {{latest_blog_post.author}}{% endif %}
+          </p>
+          {{latest_blog_post.body_html|truncatewords_html:80|safe}}
+          <div style="margin-top: 15px">
+            <a href="{{latest_blog_post.get_absolute_url}}" class="btn btn-primary">Read More &raquo;</a>
+            <a href="/posts" class="btn btn-secondary">View Older Posts &raquo;</a>
+            <a href="/accounts/lists" class="btn btn-success">Sign Up For Emails &raquo;</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
   </div>
 </div>
 
@@ -199,7 +238,6 @@ article {
         <a href="/congress/bills/#bystatus"><i class="fas fa-file" aria-hidden="true"></i> All Bills</a> &middot;
         <a href="/congress/bills/#get-alerts"><i class="fas fa-bell" aria-hidden="true"></i> Get Alerts</a> &middot;
         <a href="/congress/bills/browse"><i class="fas fa-list" aria-hidden="true"></i> Search</a> &middot;
-        <a href="/congress/votes"><i class="fas fa-check-square" aria-hidden="true"></i> Votes</a> &middot;
         <a href="/congress/committees/"><i class="fas fa-users" aria-hidden="true"></i> Committees</a> &middot;
         <a href="/congress/bills/">More</a>
       </div>
@@ -210,29 +248,8 @@ article {
 
 <div class="row">
 
-<div class="col-lg-6">
-  {% if latest_blog_post %}
-  <div class="card">
-    <div class="card-header">{{latest_blog_post.title}}</div>
-    <div class="card-body">
-      <p style="margin: 0 0 .5em 0; color: #444; font-size: 95%;">
-        {{latest_blog_post.created|date}} &middot; {{latest_blog_post.get_category_display}}
-        {% if latest_blog_post.author %}&middot; by {{latest_blog_post.author}}{% endif %}
-      </p>
-      {{latest_blog_post.body_html|safe}}
-      <div style="margin-top: 1em">
-        <a href="/posts" class="btn btn-secondary">View Older Posts &raquo;</a>
-        <a href="/accounts/lists" class="btn btn-primary">Sign Up For Email Alerts &raquo;</a>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-</div>
-
-<div class="col-lg-6">
-
 {% for post_group in post_groups %}
+<div class="col-lg-6">
 <div class="card" style="margin-bottom: 1.5em">
   <div class="card-header">{{post_group.title}}</div>
     <div class="card-body" style="margin-bottom: -.5em">
@@ -271,6 +288,7 @@ article {
 
 </div> <!-- /card-body -->
 </div> <!-- /card -->
+</div> <!-- col -->
 {% endfor %}
 
 </div> <!-- /col -->

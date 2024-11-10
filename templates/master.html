@@ -187,6 +187,7 @@
 
 
 
+	{% block override_sitenews %}
 	<div id="sitenewscontainer" class="navbar-default" {# style="display: none" #}>
 	<div id="sitenews">
 	{% if user_has_bounced_mail %}
@@ -225,6 +226,8 @@
 	{% endif %}
 	</div> <!-- /sitenews -->
 	</div> <!-- /sitenewscontainer -->
+	{% endblock %}
+
 	</div> <!-- /masthead -->
 
 	{% block override_breadcrumbs %}
