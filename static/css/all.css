@@ -202,11 +202,11 @@ blockquote {
 #masthead {
 	margin-bottom: 15px;
 	font-size: 13px;
-	color: #1D4E70;
+	color: #444;
 }
 #masthead .navbar {
 	/* override bootstrap */
-	margin-bottom: 0;
+	margin-bottom: 20px;
 	border: none;
 }
 	#masthead .navbar a {
@@ -217,6 +217,16 @@ blockquote {
 			color: white;
 		}
 
+	#masthead #logo-container {
+		margin-bottom: 10px;
+	}
+	@media (min-width: 992px)
+	{
+		#masthead #logo-container {
+			margin-bottom: -10px;
+		}
+	}
+
 .nav.nav-pills {
 }
 .nav-pills .nav-link.active {
@@ -226,15 +236,13 @@ blockquote {
 
 #logo {
 	display: block;
-	background: url(../images/logo.png?20240215) 0 0 no-repeat;
-	height: 45px;
-	width: 125px;
-	margin-top: -10px;
-	margin-left: 15px;
+	background: url(../images/logo.png?20241110) 0 0 no-repeat;
+	height: 25px;
+	width: 196px;
+	margin-right: 50px;
 	text-indent: -9999px;
 	overflow: hidden;
 	position: relative;
-	top: 7px;
 }
 
 ol.breadcrumb {
