@@ -66,12 +66,38 @@
 
 	<div id="skiptocontent"><a href="#maincontent">skip to main content</a></div>
 
-	<div id="master-fundraiser-bar">
+	<div id="masthead-overbar">
 		<div class="container">
-			<a href="/accounts/membership">
-				Hide The Ads with a
-				<span>Yearly Membership ▶</span>
+			<a href="/accounts/membership" class="yellow">
+				<span>Hide The Ads ▶</span>
 			</a>
+
+		  <div style="display: inline-block; padding-left: 2em;">
+				{% block override_login %}
+				{% if not user.is_authenticated %} {# hidden by script on anonymous pages when user is logged in #}
+				<a id="nav_login" class="yellow" href="/accounts/login?next={{request.get_full_path|urlencode}}"><span>Log In ▶</span></a>
+				{% endif %}
+				{% if request.anonymous or user.is_authenticated %}
+				<div id="nav_session" class="dropdown" {% if request.anonymous %}style="display: none"{% endif %}> {# shown by script if logged in #}
+					 <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: .15rem .5rem">
+						{% if not user.is_authenticated %}
+						Your Account
+						{% else %}
+						{{ user.email }}
+						{% endif %}
+					 </button>
+     			 <ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/accounts/lists">Your Subscriptions &amp; Lists</a></li>
+						<li><a class="dropdown-item" href="/accounts/positions">Your Positions</a></li>
+						<li><a class="dropdown-item" href="/accounts/docket">Your Docket</a></li>
+						<li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item" href="/accounts/profile" title="{{user.email}}">Account Settings</a></li>
+						<li><a class="dropdown-item" href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
+					</ul>
+				</div>
+				{% endif %}
+				{% endblock %}
+		  </div>			
 		</div>
 	</div>
 
@@ -149,32 +175,6 @@
 			<input class="form-control me-2" type="search" placeholder="bill, name, or topic" aria-label="Search" id="master_search_q" name="q">
 			<button class="btn btn-outline-success" type="submit">Search</button>
 		  </form>
-		  <ul class="navbar-nav d-flex" style="padding-left: 2em;">
-				{% block override_login %}
-				{% if not user.is_authenticated %} {# hidden by script on anonymous pages when user is logged in #}
-				<li id="nav_login" class="nav-item"><a class="nav-link" href="/accounts/login?next={{request.get_full_path|urlencode}}">Log In</a></li>
-				{% endif %}
-				{% if request.anonymous or user.is_authenticated %}
-				<li id="nav_session" class="nav-item dropdown" {% if request.anonymous %}style="display: none"{% endif %}> {# shown by script if logged in #}
-					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-						{% if not user.is_authenticated %}
-						Your Account
-						{% else %}
-						{{ user.email }}
-						{% endif %}
-					</a>
-     			 <ul class="dropdown-menu">
-						<li><a class="dropdown-item" href="/accounts/lists">Your Email Subscriptions &amp; Tracker Lists</a></li>
-						<li><a class="dropdown-item" href="/accounts/positions">Your Positions</a></li>
-						<li><a class="dropdown-item" href="/accounts/docket">Your Docket</a></li>
-						<li><hr class="dropdown-divider"></li>
-						<li><a class="dropdown-item" href="/accounts/profile" title="{{user.email}}">Account Settings</a></li>
-						<li><a class="dropdown-item" href="/accounts/logout?next={{request.get_full_path|urlencode}}">Log Out</a></li>
-					</ul>
-				</li>
-				{% endif %}
-				{% endblock %}
-		  </ul>
     </div>
   </div>
 </nav>
@@ -340,7 +340,7 @@
 		if (the_user) {
 			$('#nav_login').hide();
 			$('#nav_session').show();
-			$('#nav_session > a').text(the_user.email);
+			$('#nav_session > button').text(the_user.email);
 		}
 		{% endif %}
 	</script>
