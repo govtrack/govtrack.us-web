@@ -1251,22 +1251,22 @@ ul.singlesignon {
 	.community-forum-message-editor {
 	}
 
-#master-fundraiser-bar {
+#masthead-overbar {
 	padding: 6px 4px 2px 0;
 	font-size: 90%;
 	text-align: right;
 }
-	#master-fundraiser-bar a {
+	#masthead-overbar a.yellow {
 		color: #666;
 		text-decoration: none;
 	}
-	#master-fundraiser-bar span {
+	#masthead-overbar .yellow span {
 		margin: 3px;
 		border-radius: 5px;
 		padding: 0px 3px;
 		background: #FD5;
 		color: black;
-		}
+	}
 
 #seealso-links {
 	background: #FDFDFD;
