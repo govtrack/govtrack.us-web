@@ -52,6 +52,7 @@ def vote_search_manager():
     sm.add_sort('Narrowest Margin','margin', func=lambda qs : qs.order_by('margin', 'total_plus').exclude(margin=None))
     sm.add_sort('Most Supported by Majority Party','-mp', func=lambda qs : qs.order_by('-majority_party_percent_plus', '-total_plus').exclude(majority_party_percent_plus=None))
     sm.add_sort('Most Opposed by Majority Party','mp', func=lambda qs : qs.order_by('majority_party_percent_plus', 'total_plus').exclude(majority_party_percent_plus=None))
+    sm.add_sort('Least Party Uniformity','uniformity', func=lambda qs : qs.order_by('party_uniformity').exclude(party_uniformity=None))
     
     #def safe_strftime(date, format):
     #    return date.replace(year=3456).strftime(format).replace("3456", str(date.year)).replace(" 12:00AM", "")

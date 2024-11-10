@@ -94,6 +94,7 @@ class Vote(models.Model):
     percent_plus = models.FloatField(blank=True, null=True, help_text="The percent of positive votes. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
     margin = models.FloatField(blank=True, null=True, help_text="The absolute value of the difference in the percent of positive votes and negative votes. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
     majority_party_percent_plus = models.FloatField(blank=True, null=True, help_text="The percent of positive votes among the majority party only. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
+    party_uniformity = models.FloatField(blank=True, null=True, help_text="A party uniformity score based on the percent of each party voting yes. Null for votes that aren't yes/no (like election of the speaker, quorum calls).")
 
     related_bill = models.ForeignKey('bill.Bill', related_name='votes', blank=True, null=True, help_text="A related bill.", on_delete=models.PROTECT)
     related_amendment = models.ForeignKey('bill.Amendment', related_name='votes', blank=True, null=True, help_text="A related amendment.", on_delete=models.PROTECT)
@@ -144,12 +145,24 @@ class Vote(models.Model):
             self.percent_plus = self.total_plus/float(self.total_plus + self.total_minus + self.total_other)
             self.margin = abs(self.total_plus - self.total_minus) / float(self.total_plus + self.total_minus)
 
-        # how did the majority party vote?
+        totals = self.totals(include_features=False)
+
         if self.total_plus > 0:
-            majority_party_votes = self.totals()['party_counts'][0] # first party is the one with the most voters
+            # how did the majority party vote?
+            majority_party_votes = totals['party_counts'][0] # first party is the one with the most voters
             self.majority_party_percent_plus = majority_party_votes['yes']/majority_party_votes['total']
+
+            # how uniform were the parties?
+            # Sum the count-weighted uniformity scores for all of the parties, and for each party score uniformity
+            # as a sin-smoothed distance from a 50% split.
+            import math
+            self.party_uniformity = sum([
+              math.sin(abs(pt['yes']/pt['total'] - .5) * math.pi)
+                * pt['total'] / totals["total_count"]
+              for pt in totals["party_counts"] ])
         else:
             self.majority_party_percent_plus = None
+            self.party_uniformity = None
 
         # pass or failed?
         import re
@@ -253,7 +266,7 @@ class Vote(models.Model):
 
         return ret
        
-    def totals(self):
+    def totals(self, include_features=True):
         # If cached value exists then return it
         if hasattr(self, '_cached_totals'):
             return self._cached_totals
@@ -296,7 +309,7 @@ class Vote(models.Model):
                                  for x in all_parties)
 
         # Perform a statistical analysis using additional features.
-        feature_analysis = self.feature_analysis(all_voters)
+        feature_analysis = self.feature_analysis(all_voters) if include_features else None
 
         # For each option find the count, the percent of voting members, and the party break down.
         details = []
@@ -363,7 +376,8 @@ class Vote(models.Model):
         details = [d for d in details if d["count"] > 0 or "hide_if_empty" not in d]
 
         totals = {'options': details, 'max_option_count': max(detail['count'] for detail in details),
-                'party_counts': party_counts, 'parties': all_parties, 'party_is_caucus': party_is_caucus,
+                'party_counts': party_counts, 'parties': all_parties,
+                'total_count': total_count, 'party_is_caucus': party_is_caucus,
                 'features': feature_analysis["featurelist"] if feature_analysis else None
                 }
         self._cached_totals = totals
