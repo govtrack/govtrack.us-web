@@ -53,7 +53,7 @@ a.btn-secondary, button.btn-secondary {
 }
 
 h1, h2, h3, h4, h5 {
-	font-weight: 700;
+	font-weight: normal;
 	line-height: 130%;
 	margin-top: 15px;
 	margin-bottom: 1em;
@@ -115,11 +115,16 @@ h2 {
 h3 {
 	font-size: 1.15em;
 }
+	#content h3 {
+		font-weight: 700;
+	}
 h4 {
 	font-size: 1.05em;
+	font-weight: 700;
 }
 h5 {
 	font-size: 1em;
+	font-weight: 700;
 	}
 
 h3 span, span span, a em {
@@ -246,7 +251,7 @@ blockquote {
 }
 
 ol.breadcrumb {
-	margin: 15px 0;
+	margin: 5px 0 0 0;
 	font-size: 88%;
 }
 	.breadcrumb a {
