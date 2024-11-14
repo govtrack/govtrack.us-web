@@ -887,7 +887,7 @@ function show_pronunciation_guide() {
 			{% for c in committeeassignments %}
 			<li style="margin: 0 0 .25em 0">
 				<a href="{{c.committee.get_absolute_url}}">{{c.committee}}</a>
-				{% if c.role_name != 'Member' %}<span class="label label-warning">{{c.role_name}}</span>{% endif %}
+				{% if c.role_name != 'Member' %}<span class="badge bg-warning">{{c.role_name}}</span>{% endif %}
 				{% if c.subroles or c.subcommittees %}
 				<div style="padding: 0 0 0 .75em; font-size: 90%;">
 				{% if c.subroles %}

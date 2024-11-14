@@ -76,7 +76,7 @@
 					{% for cm in csp.committee_roles %}
 						<div>
 							{{cm.committee.sortname2}}
-							{% if cm.role_name != 'Member' %}<span class="label label-warning">{{cm.role_name}}</span>{% endif %}
+							{% if cm.role_name != 'Member' %}<span class="badge bg-warning">{{cm.role_name}}</span>{% endif %}
 						</div>
 					{% endfor %}
 				</td>
@@ -137,7 +137,7 @@
 					{% for cm in csp.committee_roles %}
 						<div>
 							{{cm.committee.sortname2}}
-							{% if cm.role_name != 'Member' %}<span class="label label-warning">{{cm.role_name}}</span>{% endif %}
+							{% if cm.role_name != 'Member' %}<span class="badge bg-warning">{{cm.role_name}}</span>{% endif %}
 						</div>
 					{% endfor %}
 					{% if csp.other_bills %}

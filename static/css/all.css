@@ -1285,3 +1285,7 @@ ul.singlesignon {
     #seealso-links a i {
         margin-right: .4em;
     }
+
+.badge.bg-warning {
+	color: black;
+}
