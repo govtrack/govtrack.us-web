@@ -22,7 +22,7 @@
 	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/brands.css" rel="stylesheet">
 
 
-		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20240426" />
+		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20241114" />
 
 		<meta name="description" content="{% block meta_description %}{% endblock %}" />
 		<meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
@@ -172,8 +172,8 @@
 		  </ul>
 		  <form class="d-flex" role="search" name="header_search" action="/search">
 			<label for="master_search_q" class="sr-only">Search GovTrack for</label>
-			<input class="form-control me-2" type="search" placeholder="bill, name, or topic" aria-label="Search" id="master_search_q" name="q">
-			<button class="btn btn-outline-success" type="submit">Search</button>
+			<input class="form-control me-2" type="search" placeholder="bill, legislator, or keyword" aria-label="Search" id="master_search_q" name="q">
+			<button class="btn btn-outline-success" type="submit"><span class="fas fa-search"></span> <span class="sr-only">Search</span></button>
 		  </form>
     </div>
   </div>

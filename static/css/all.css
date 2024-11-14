@@ -205,13 +205,13 @@ blockquote {
 /* MASTER LAYOUT */
 
 #masthead {
-	margin-bottom: 15px;
+	margin-bottom: 20px;
 	font-size: 13px;
 	color: #444;
 }
 #masthead .navbar {
 	/* override bootstrap */
-	margin-bottom: 20px;
+	margin-bottom: 10px;
 	border: none;
 }
 	#masthead .navbar a {
@@ -249,6 +249,21 @@ blockquote {
 	overflow: hidden;
 	position: relative;
 }
+
+@media (min-width: 992px) {
+#master_search_q {
+	font-size: 14px;
+	height: 30px;
+	margin-top: 2px;
+}
+form[name=header_search] button {
+	height: 30px;
+	margin-top: 2px;
+	padding: 3px 6px;
+}
+}
+
+/* breadcrumbs */
 
 ol.breadcrumb {
 	margin: 5px 0 0 0;
@@ -995,10 +1010,8 @@ ul.singlesignon {
 }
 
 #sitenewscontainer {
-	margin-bottom: 20px;
-	padding: 4px 0 3px 0;
-	border-bottom: 1px solid #eee;
-	box-shadow: 0px 0px 1px 0px #666;
+	margin: 5px 0;
+	padding: 0 15px; /* gutter */
 	font-size: 13px;
 	color: #666;
 }
