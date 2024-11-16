@@ -260,11 +260,11 @@ def vote_thumbnail_image(request, congress, session, chamber_code, number, image
 
 vote_diagram_colors = { # see also person.views.membersoverview
 	("D", "+"): (0/255.0, 142/255.0, 209/255.0), # same as CSS color
-	("D", "-"): (192/255.0, 232/255.0, 270/255.0), # L=>90, C=>24
+	("D", "-"): (215/255.0, 248/255.0, 280/255.0), # L=>96, C=>20
 	("I", "+"): (0.07, 0.05, 0.07),
 	("I", "-"): (0.85, 0.85, 0.85),
 	("R", "+"): (248/255.0, 54/255.0, 49/255.0), # same as CSS color
-	("R", "-"): (270/255.0, 213/255.0, 201/255.0), # L=>90 C=>24
+	("R", "-"): (281/255.0, 232/255.0, 222/255.0), # L=>96 C=>20
 }
 
 def vote_thumbnail_small(vote):

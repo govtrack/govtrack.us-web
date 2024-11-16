@@ -423,14 +423,13 @@ ol.breadcrumb {
 		vertical-align: middle;
 		}
 	.stats tbody th {
-		font: 12px/20px serif;
 		font-weight: normal;
 		text-align: right;
 		line-height: 100%;
 		padding: 0 10px 0 0;
 		}
-	.stats thead {
-		font: 12px/20px serif;
+	.stats th {
+		font: 12px/20px;
 		}
 		.stats thead th {
 			height: 30px;

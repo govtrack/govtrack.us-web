@@ -60,8 +60,11 @@
 		}
 
     #vote-details td, #vote-details th {
-        font-size: 12px;
+        font-size: 13px;
     }
+        #vote-details .state-district {
+            letter-spacing: -.5px;
+        }
 
 	#vote-details a.note {
 		cursor: pointer;
@@ -284,7 +287,7 @@ $(function() {
 <h1 class="long" data-vote-id="{{vote.id}}" style="margin-bottom: 0; border: none;">
   {{ vote.question }}
 </h1>
-<div style="margin: 2px 0 16px 0; font-size: 12px; font-weight: normal; color: black; line-height: 125%; padding-bottom: 6px; border-bottom: 1px solid #CCA;">
+<div style="margin: 2px 0 16px 0; font-size: 12px; font-weight: normal; color: black; line-height: 125%;">
   {{ vote.created|date }} {% if vote.has_time %}at {{ vote.created|time }} ET{% endif %}.
   {% if vote.question_details %}
     {{ vote.question_details }}.
@@ -418,11 +421,7 @@ $(function() {
 </div>
 
 {% with vote.totals as totals %}
-<div class="card" style="margin-top: 30px; margin-bottom: 15px">
-  <div class="card-header">
-    Vote Outcome
-  </div>
-  <div class="card-body">
+<div style="margin: 30px 0 45px 0;">
     <!-- Horizontal Table -->
     <table class="stats" style="margin: 0 30px 0 0">
         <thead>
@@ -506,7 +505,8 @@ $(function() {
         </tbody>
     </table>
 
-    <p style="margin: 1em 0 0 0; font: 12px/20px serif;">
+    <div style="font: 12px/16px;">
+    <p style="margin: 1em 0 .33em 0;">
         {{ vote.result }}.
 
         {% if vote.required == "1/2" %}Simple Majority{% else %}{{ vote.required }}{% endif %}
@@ -520,21 +520,21 @@ $(function() {
             Independents are grouped with the party they caucus with.
         {% endif %}
     </p>
-    <p style="margin: 0 0 0 0; font: 12px/20px serif;">
+    <p style="margin: 0 0 .33em 0;">
         Data from the official record at <a href="{{vote.get_source_link}}">{{ vote.get_source_display }}</a>.
     </p>
     {% with vote.get_equivalent_aye_voters_us_population_percent as pct %}
     {% if pct %}
         {% for item in totals.options %}
             {% if item.option.key == pct.0 %}
-               <p style="margin: 0; font: 12px/18px serif;">
+               <p style="margin: 0;">
                    The {{item.option.value}} votes represented {{pct.1|floatformat:0}}% of the country&rsquo;s population by apportioning each state&rsquo;s population to its voting senators.
                </p>
             {% endif %}
         {% endfor %}
     {% endif %}
     {% endwith %}
-
+    </div>
 
     {% if totals.features %}
 
@@ -624,14 +624,13 @@ $(function() {
     </div>
 
     <!-- Caucuses Explanation -->
-    <p style="margin: .5em 0 0 0; font: 12px/18px serif;">
+    <p style="margin: .5em 0 0 0; font: 12px/18px;">
         Caucuses are selected based on a statistical analysis of their
         relevance to the vote outcome. Caucus membership may not be
         the latest &mdash; we are still working on that. Legislators
         may be a member of multiple caucuses.
     </p>
     {% endif %}
-  </div>
 </div>
 
 <div class="row">
@@ -716,18 +715,6 @@ $(function() {
 </div>
 
 <div>
-
-	<ul class="nav nav-tabs" role="tablist">
-	   <li class="nav-item" role="presentation"><a href="#details" aria-controls="details" class="nav-link active" data-bs-toggle="tab" role="tab" aria-selected="true">Vote Details</a></li>
-	   <li class="nav-item" role="presentation"><a href="#studyguide" aria-controls="studyguide" class="nav-link" data-bs-toggle="tab" role="tab">Study Guide</a></li>
-	</ul>
-
-<div class="tab-content">
-   <div id="details" class="tab-pane active">
-	<div id="vote-details" class="section">
-
-	<h2><span>Vote Details</span></h2>
-
 	<div id="vote_notes">
 	<div>
 	   <span>Notes: </span>
@@ -781,6 +768,7 @@ $(function() {
     <a href="{{ vote.get_absolute_url }}/export/csv" rel="nofollow">CSV</a>
 </div>
 </div>
+</div>
     <div class="clearfix"> </div>
 
         <table id="vote-list-template" class="vote-list stats" style="display: none">
@@ -789,7 +777,7 @@ $(function() {
                     <th width="13%">Vote</th>
                     <th width="15%">{% if vote.chamber == 1 %}State{% else %}District{% endif %}</th>
                     <th width="12%">Party</th>
-                    <th style="text-align: left; padding-left: 10px;">Representative</th>
+                    <th style="text-align: left; padding-left: 10px;">Legislator</th> <!-- or VP? -->
                     <th style="display: none">Score</th> <!-- for sorting only -->
                 </tr>
             </thead>
@@ -803,9 +791,9 @@ $(function() {
                 class="{% if voter.is_outlier %}voter_outlier{% endif %}"
             	>
                 <td class="vote_{{ voter.option.alpha_key }}"><span class="nowrap">{% if voter.option.value == "Not Voting" %}No Vote{% else %}{{ voter.option.value }}{% endif %}</span></td>
-                <td>
+                <td class="state-district">
                 	{% if voter.voter_type_is_member %}
-		                {{ voter.person_role.state }}{% if voter.person_role.district and voter.person_role.district != -1 %} {{ voter.person_role.district|ordinalhtml }}{% endif %}
+		                {{ voter.person_role.state }}{% if voter.person_role.district and voter.person_role.district != -1 %}&nbsp;&ndash;&nbsp;{{ voter.person_role.district }}{% endif %}
                     {% else %}
                     	-- {% comment %} a single dash confuses the table sorter?? {% endcomment %}
                     {% endif %}
@@ -844,6 +832,7 @@ $(function() {
         </tbody>
         </table>
 
+    <div id="vote-details">
         <div id="vote-details-outliers">
             <h3>Statistically Notable Votes</h3>
 			<div class="vote-table-container"> </div>
@@ -853,26 +842,15 @@ $(function() {
             <h3>All Votes</h3>
 			<div class="vote-table-container"> </div>
         </div>
+    </div>
 </div>
-</div>
-</div>
 
-
-<div id="studyguide" class="tab-pane">
-	<h2>Study Guide</h2>
-
-	<div class="card bg-info">
-	   <div class="card-body">
-	      <p>How well do you understand this vote? Use this study guide to find out.</p>
-
-	      <p style="margin-bottom: 0">You can find answers to most of the questions below here on the vote page.
-	      {% if vote.related_bill %} For a guide to understanding the {{vote.related_bill.noun}} this vote was about, <a href="{{vote.related_bill.get_absolute_url}}/studyguide">see here</a>.</p>{% endif %}
-	   </div>
-	</div>
+<div id="studyguide" style="margin-top: 45px">
+	<h2><span>Study Guide</span></h2>
 
 	<div id="study-guide">
 	   
-	   <h2><span>What was the procedure for this vote?</span></h2>
+	   <h3>What was the procedure for this vote?</h3>
 
 	   <ol>
 
@@ -911,7 +889,7 @@ $(function() {
 
 	</ol>
 
-	<h2><span>What is your analysis of this vote?</span></h2>
+	<h3>What is your analysis of this vote?</h3>
 
 	<ol>
 
@@ -949,13 +927,6 @@ $(function() {
 	   {% endif %}
 
 	</div>
-
-<p class="text-info">
-Each vote&rsquo;s study guide is a little different &mdash; we automatically choose which questions to include based on the information we have available about the vote.
-Study guides are a new feature to GovTrack. You can help us improve them by filling out <a href="https://docs.google.com/forms/d/1ROkYIeJHlGeJ4VNETbh3Sq-Iw6X6HD6p-VvIJUMc-hs/">this survey</a> or by sending your feedback to <a href="mailto:hello@govtrack.us?subject=Vote study guide">hello@govtrack.us</a>.
-</p>
-</div>
-</div>
 </div>
 {% endwith %}
 

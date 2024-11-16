@@ -50,6 +50,25 @@ def index(request):
             "compact": True
         })
 
+    # Recent votes.
+    from vote.models import Vote
+    recent_votes = Vote.objects\
+        .filter(created__gt=datetime.now() - timedelta(days = 7))\
+        .filter(category__in=Vote.MAJOR_CATEGORIES)\
+        .order_by('-created')\
+        [0:5]
+    if len(recent_votes) > 0:
+        post_groups.append({
+            "title": "Recent Major Votes",
+            "posts": [{
+                "image_url": vote.get_thumbnail_url(),
+                "title": vote.question,
+                "url": vote.get_absolute_url(),
+                "published": vote.created.strftime("%x"),
+            } for vote in recent_votes],
+            "links": [("/congress/votes", "View All")],
+        })
+
     # Legislation coming up. Sadly this is usually the least interesting.
     from django.db.models import F
     from django.conf import settings

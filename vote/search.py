@@ -59,21 +59,21 @@ def vote_search_manager():
 
     sm.set_template("""
     <div class="row">
-        <div class="col-xs-2 col-md-1" style="padding-right: 0">
+        <div class="col-2" style="padding-right: 0">
             <img src="{{object.get_absolute_url}}/thumbnail" class="img-fluid"/>
         </div>
-        <div class="col-xs-10 col-md-11">
+        <div class="col-10">
 
     <div class="row">
-        <div class="col-xs-12">
+        <div class="col-12">
             <div style="margin-bottom: .2em"><a href="{{object.get_absolute_url}}" title="{{object.question}}">{{object.question|truncatewords_html:50}}</a></div>
         </div>
-        <div style="font-size: 93%">
-        <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="row" style="font-size: 93%">
+        <div class="col-12 col-sm-6 col-md-4">
             <div><span class="fa-solid fa-barcode fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.name}}</div>
             <div><span class="fa-solid fa-calendar fa-fw" aria-hidden="true" style="margin-left: 4px; color: #888"></span> {{object.created|date}} {{object.created|time|cut:"midnight"}}</div>
         </div>
-        <div class="col-xs-12 col-sm-6 col-md-8">
+        <div class="col-12 col-sm-6 col-md-8">
             <div><span class="fa-solid fa-info fa-fw" aria-hidden="true" style="color: #888"></span> {{object.summary}}</div>
             <div style="padding: 3px 0 0 3px"><a class="btn btn-sm btn-default" style="padding: 3px; font-weight: normal; color: #444;"
               href="/congress/votes/compare/_add?vote={{object.congressproject_id}}"
@@ -81,7 +81,7 @@ def vote_search_manager():
               <i class="fas fa-list"> </i> Compare Vote
             </a></div>
         </div>
-        <div class="col-xs-12">
+        <div class="col-12">
           <div style="margin-left: 5px">
             {% if object.question_details and not object.oursummary %}<div style="margin-top: .25em">{{object.question_details}}</div>{% endif %}
             {% if object.get_summary %}<div style="margin-top: .25em; font-style: italic; line-height: 126%;">{{object.get_summary.plain_text|truncatewords:50}}</div>{% endif %}
