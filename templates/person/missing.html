@@ -1,0 +1,56 @@
+{% extends "master_b.html" %}
+{% load humanize govtrack_utils static %}
+{% block title %}Missing Members of the United States Congress - GovTrack.us{% endblock %}
+{% block cat-icon-filename %}img-congress-members.png{% endblock %}
+
+{% block head %}
+<style>
+h2 { font-weight: bold; }
+label { font-weight: normal; }
+</style>
+{% endblock %}
+
+{% block body_scripts %}
+<script src="{{ STATIC_URL }}vendor/highcharts.js"></script>
+<script src="{{ STATIC_URL }}vendor/highcharts-accessibility.js"></script>
+<script>
+$(() => {
+   {% for m in missing %}
+      {% if m.chart %}
+         {% include "person/missed_votes_chart.inc.js" with person=m.person missedvotes=m.chart %}
+      {% endif %}
+   {% endfor %}
+});
+</script>
+{% endblock %}
+
+{% block summary %}
+   <h1>Missing Legislators</h1>
+   <p>Legislators who have missed a significant number of roll call votes lately are listed below.
+   There are many valid reasons for missing votes including unexpected medical issues,
+   family commitments, and running for higher office. Rarely, legislators have extended absences.
+   Most legislators miss around 3% of roll call votes over their career.</p>
+{% endblock %}
+
+{% block body %}
+
+{% if not missing %}
+<p>No legislators currently appear to be missing based on their missed votes.</p>
+{% endif %}
+
+{% for m in missing %}
+<div style="margin-bottom: 1.5em">
+    <h3 style="font-weight: bold;"><a href="{{m.person.get_absolute_url}}">{{m.person}}</a></h3>
+    <p>Beginning on {{m.firstmissedvote|date}}, {{m.person.lastname}} has missed
+       {{m.missedvotes}} of {{m.totalvotes}} roll call votes
+       ({{m.missedvotespct}}%). {{m.explanation_html|safe}}</p>
+    {% if m.chart %}
+      {% include "person/missed_votes_chart.inc.html" with person=m.person missedvotes=m.chart %}
+    {% endif %}
+</div>
+{% if not forloop.last %}<hr>{% endif %}
+{% endfor %}
+
+{% endblock %}
+
+

@@ -141,95 +141,7 @@ $(function() {
 	{% endif %}
 
 	{% if analysis_data.missedvotes %}
-	var chart = new Highcharts.Chart({
-		chart: {
-			renderTo: 'voting_record_chart',
-			type: 'spline',
-			height: 225,
-			marginTop: 5,
-		},
-		title: { text: 'Missed Votes (%)' },
-		legend: { enabled: false },
-		credits: { enabled: false },
-		xAxis: {
-			labels: { rotation: -90, align: "right" {% if analysis_data.missedvotes.data|length > 20 and analysis_data.missedvotes.data|length < 40 %}, step: 2{% endif %} {% if analysis_data.missedvotes.data|length >= 40 %}, step: 4{% endif %} },
-			categories: [{% for rec in analysis_data.missedvotes.data %}"{{rec.time|escapejs}}"{% if not forloop.last %}, {% endif %}{% endfor %} ]
-		},
-		yAxis: {
-			title: {
-				text: 'Missed Votes (%)'
-			},
-			min: 0,
-			minorGridLineWidth: 0,
-			gridLineWidth: 0,
-			alternateGridColor: null,
-			plotBands: [{
-				from: 0,
-				to: {{analysis_data.missedvotes.pctile25}},
-				color: 'rgba(68, 170, 213, 0.1)',
-				label: {
-					text: '25th Percentile',
-					verticalAlign: 'top',
-					style: { color: '#606060' }
-				}
-			}, {
-				from: {{analysis_data.missedvotes.pctile25}},
-				to: {{analysis_data.missedvotes.pctile50}},
-				color: 'rgba(68, 170, 213, 0.3)',
-				label: {
-					text: 'Median',
-					verticalAlign: 'top',
-					style: { color: '#606060' }
-				}
-			}, {
-				from: {{analysis_data.missedvotes.pctile50}},
-				to: {{analysis_data.missedvotes.pctile75}},
-				color: 'rgba(68, 170, 213, 0.1)',
-				label: {
-					text: '75th Percentile',
-					verticalAlign: 'top',
-					style: { color: '#606060' }
-				}
-			}, {
-				from: {{analysis_data.missedvotes.pctile75}},
-				to: {{analysis_data.missedvotes.pctile90}},
-				color: 'rgba(68, 170, 213, 0.3)',
-				label: {
-					text: '90th Percentile',
-					verticalAlign: 'top',
-					style: { color: '#606060' }
-				}
-			}]
-		},
-		tooltip: {
-			formatter: function() {
-					return this.x +': '+ this.y +'% votes missed';
-			}
-		},
-		plotOptions: {
-			spline: {
-				lineWidth: 2,
-				marker: {
-					radius: 3
-				},
-				states: {
-					hover: {
-						lineWidth: 2
-					}
-				}
-			}
-		},
-		series: [{
-			name: '{{person.lastname|escapejs }} - Missed Votes %',
-			data: [{% for rec in analysis_data.missedvotes.data %}{{rec.percent}}{% if not forloop.last %}, {% endif %}{% endfor %} ]
-
-		}],
-		navigation: {
-			menuItemStyle: {
-				fontSize: '10px'
-			}
-		}
-	});
+		{% include "person/missed_votes_chart.inc.js" with missedvotes=analysis_data.missedvotes %}
 	{% endif %}
 })
 
@@ -376,6 +288,16 @@ function show_pronunciation_guide() {
 	        {% endif %}
         {% endfor %}
         </div>
+
+        {% if analysis_data.missing %}
+            <div style="margin: .5em 0 1em 0">
+            <b>Absence:</b> {{analysis_data.missing.explanation_html|safe}}
+            Beginning on {{analysis_data.missing.firstmissedvote|date}}, {{person.lastname}} has missed
+            {{analysis_data.missing.missedvotes}} of {{analysis_data.missing.totalvotes}} roll call votes
+            ({{analysis_data.missing.missedvotespct}}%). See the missed votes chart at the bottom of this
+            page for details.
+            </div>
+        {% endif %}	
 
 	{% comment %}
         {% if role.is_up_for_election or election_guides %}
@@ -1005,43 +927,24 @@ function show_pronunciation_guide() {
 		{% endif %}
 
 		{% if analysis_data.missedvotes %}
-		<h3>Missed Votes</h3>
-		<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed|intcomma}} of {{analysis_data.missedvotes.total|intcomma}} roll call votes, which is {{analysis_data.missedvotes.percent}}%.
-		This is
-		{% if analysis_data.missedvotes.percentile < 35 %}better than
-		{% elif analysis_data.missedvotes.percentile <= 65 %}on par with
-		{% elif analysis_data.missedvotes.percentile <= 80 %}worse than
-		{% else %}much worse than
-		{% endif %}
-		the median of {{analysis_data.missedvotes.pctile50|floatformat:1}}%
-		among the lifetime records of {% if analysis_data.missedvotes.chamber == 'Senate' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
-		The chart below reports missed votes over time.</p>
+			<h3>Missed Votes</h3>
+			
+			<p>From {{analysis_data.missedvotes.firstdate|date:"M Y"}} to {{analysis_data.missedvotes.lastdate|date:"M Y"}}, {{person.lastname}} missed {{analysis_data.missedvotes.missed|intcomma}} of {{analysis_data.missedvotes.total|intcomma}} roll call votes, which is {{analysis_data.missedvotes.percent}}%.
+			This is
+			{% if analysis_data.missedvotes.percentile < 35 %}better than
+			{% elif analysis_data.missedvotes.percentile <= 65 %}on par with
+			{% elif analysis_data.missedvotes.percentile <= 80 %}worse than
+			{% else %}much worse than
+			{% endif %}
+			the median of {{analysis_data.missedvotes.pctile50|floatformat:1}}%
+			among the lifetime records of {% if analysis_data.missedvotes.chamber == 'Senate' %}senators{% else %}representatives{% endif %} {% if active_congressional_role %}currently serving{% else %}serving in {{analysis_data.missedvotes.lastdate|date:"M Y"}}{% endif %}.
+			The chart below reports missed votes over time.</p>
 
-		<p><i>
-		We don&rsquo;t track why legislators miss votes, but it&rsquo;s often due to medical absenses, major life events, and running for higher office.
-		{% if is_2020_candidate %}Legislators running for president or vice president typically miss votes while on the campaign trail &mdash; that&rsquo;s normal. See our <a href="/congress/votes/presidential-candidates">analysis of presidential candidates&rsquo; missed votes</a>.{% endif %}
-		</i></p>
-
-		<div id="voting_record_chart"> </div>
-
-		<p style="text-align: center; margin-top: .5em; font-size: 90%;"><a href="#" onclick="$('#missedvotestable').slideDown(); $(this).hide(); return false;">Show the numbers...</a></p>
-		<table id="missedvotestable" style="display: none">
-			<tr> <th>Time Period</th> <th>Votes Eligible</th> <th>Missed Votes</th> <th>Percent</th> <th>Percentile</th> </tr>
-			{% for rec in analysis_data.missedvotes.data %}
-				<tr><td title="{{rec.congress|ordinal}} Congress, {{rec.session}}, {{rec.chamber}}, Q{{rec.period|add:1}}">
-                                    {{rec.time}}
-                                    {% if rec.period == 4 %}{{rec.congress|ordinal}} Congress{% endif %} {# the 5th quarter is January of the next year #}
-                                    {% if analysis_data.missedvotes.multiple_chambers %}({{rec.chamber}}){% endif %}</td>
-                                    <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinalhtml}}</td></tr>
-			{% endfor %}
-		</table>
-
-		<!--
-		<div class="alert alert-info">
-		See how <a href="/congress/votes/presidential-candidates">presidential campaigns affect voting records</a>.
-		</div>
-		-->
-
+			<p><i>
+			We don&rsquo;t track why legislators miss votes, but it&rsquo;s often due to medical absenses, major life events, and running for higher office.
+			{% if is_2020_candidate %}Legislators running for president or vice president typically miss votes while on the campaign trail &mdash; that&rsquo;s normal. See our <a href="/congress/votes/presidential-candidates">analysis of presidential candidates&rsquo; missed votes</a>.{% endif %}
+			</i></p>
+			{% include "person/missed_votes_chart.inc.html" with missedvotes=analysis_data.missedvotes %}
 		{% endif %}
 
 	</section><!-- /voting-record -->

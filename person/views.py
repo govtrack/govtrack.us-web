@@ -1208,3 +1208,12 @@ def person_cosponsors(request, pk):
         "date_range": date_range,
     }
 
+@anonymous_view
+@render_to('person/missing.html')
+def missing_legislators(request):
+    missing = None
+    for congress in range(CURRENT_CONGRESS, 100, -1):
+        missing = analysis.load_missing_legislators(congress)
+        if missing: break
+    return { "missing": list(missing) }
+

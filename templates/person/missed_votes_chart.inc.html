@@ -1,0 +1,27 @@
+{% load govtrack_utils %}
+{% load humanize persontags govtrack_utils %}
+
+<style>
+  .missedvotestable th { padding: 0 .5em; }
+</style>
+
+<div id="voting_record_chart_{{person.id}}"> </div>
+
+<p style="text-align: center; margin-top: .5em; font-size: 90%;"><a href="#" onclick="$('#missedvotestable_{{person.id}}').slideDown(); $(this).hide(); return false;">Show the numbers...</a></p>
+<table id="missedvotestable_{{person.id}}" style="display: none" class="missedvotestable">
+  <tr> <th>Time Period</th> <th>Votes Eligible</th> <th>Missed Votes</th> <th>Percent</th> <th>Percentile</th> </tr>
+  {% for rec in missedvotes.data %}
+    <tr><td title="{{rec.congress|ordinal}} Congress, {{rec.session}}, {{rec.chamber}}, Q{{rec.period|add:1}}">
+                            {{rec.time}}
+                            {% if rec.period == 4 %}{{rec.congress|ordinal}} Congress{% endif %} {# the 5th quarter is January of the next year #}
+                            {% if missedvotes.multiple_chambers %}({{rec.chamber}}){% endif %}</td>
+                            <td style="text-align: center">{{rec.total}}</td> <td style="text-align: center">{{rec.missed}}</td> <td style="text-align: center">{{rec.percent}}%</td> <td style="text-align: center">{{rec.percentile|ordinalhtml}}</td></tr>
+  {% endfor %}
+</table>
+
+<!--
+<div class="alert alert-info">
+See how <a href="/congress/votes/presidential-candidates">presidential campaigns affect voting records</a>.
+</div>
+-->
+

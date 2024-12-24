@@ -7,8 +7,8 @@ from collections import defaultdict
 from numpy import median
 
 from us import parse_govtrack_date
-from .types import RoleType
-from .models import Person
+from person.types import RoleType
+from person.models import Person
 
 from django.conf import settings
 
@@ -16,6 +16,7 @@ def load_data(person):
     return {
         "sponsorship": load_sponsorship_analysis(person),
         "missedvotes": load_votes_analysis(person),
+        "missing": is_legislator_missing(person),
         #"earmarks": load_earmarks_for(2024, person),
         #"influence": load_influence_analysis(person),
         #"scorecards": load_scorecards_for(person),
@@ -144,6 +145,7 @@ def load_votes_analysis(person):
             # Take the "lifetime" record with the most recent period_start, since there may be one
             # record for the House and one record for the Senate.
             if lifetime_rec == None or lifetime_rec["firstdate"] < rec["firstdate"]:
+                if lifetime_rec: rec["firstdate"] = lifetime_rec["firstdate"]
                 lifetime_rec = rec
         else:
             time_recs.append(rec)
@@ -290,5 +292,39 @@ def load_earmarks_for(fiscalyear, person):
 
     return ret
 
+
+def load_missing_legislators(congress):
+    fn = f'data/analysis/by-congress/{congress}/missinglegislators.csv'
+    if not os.path.exists(fn): return None
+    for row in csv.DictReader(open(fn)):
+        row["person"] = Person.objects.get(id=int(row["person"]))
+        row["missedvotes"] = int(row["missedvotes"])
+        row["totalvotes"] = int(row["totalvotes"])
+        row["missedvotespct"] = int(round(100 * row["missedvotes"] / row["totalvotes"]))
+        row["firstmissedvote"] = parse_govtrack_date(row["firstmissedvote"])
+        row["lastvote"] = parse_govtrack_date(row["lastvote"])
+
+        if row["person"].id == 412677:
+            row["explanation_html"] = "Rep. Evans had a stroke in early 2024."
+        if row["person"].id == 412612:
+            row["explanation_html"] = "Rep. Pelosi suffered a hip fracture from a fall during foreign travel."
+
+        row["chart"] = load_votes_analysis(row["person"])
+
+        yield row
+
+
+def is_legislator_missing(person):
+    role = person.get_most_recent_congress_role()
+    if not role or not role.current: return None
+    congressnumber = role.most_recent_congress_number()
+    if not congressnumber: return None
+    missing_legislators = load_missing_legislators(congressnumber)
+    for row in missing_legislators:
+        if row["person"] == person:
+            return row
+    return None
+
+
 #if __name__ == "__main__":
-#    print(load_earmarks_for(2024, Person.objects.get(id=400416)))
+#    print(is_legislator_missing(Person.objects.get(id=456933)))

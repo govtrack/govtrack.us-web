@@ -11,7 +11,8 @@ urlpatterns = [
 	# must put things that could look like names of members of congress first
 	url(r'^report-cards/(\d{4})(?:/([^/\.]+)(?:/([^/\.]+))?)?$', person.views.person_session_stats_overview, name='person_session_stats_overview'),
 	url(r'^report-cards/(\d{4})/([^/]+)/([^/\.]+).csv$', person.views.person_session_stats_export, name='person_session_stats_export'),
-
+	url(r'^missing', person.views.missing_legislators),
+	
     url(r'^([A-Za-z]+)/?$', person.views.browse_state), # Wikipedia has bad links using state names instead of abbrs, so we support it
     url(r'^([A-Za-z]+)/(\d{1,2})/?$', person.views.browse_district), # Wikipedia has bad links using state names instead of abbrs, so we support it
 

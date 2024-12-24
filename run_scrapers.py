@@ -161,6 +161,7 @@ if "votes" in sys.argv:
 if "stats" in sys.argv:
 	os.system("analysis/sponsorship_analysis.py %d" % CONGRESS)
 	os.system("analysis/missed_votes.py %d" % CONGRESS)
+	os.system("analysis/missed_votes_missing_members.py %d" % CONGRESS)
 	
 if "am_mem_bills" in sys.argv:
 	# American Memory

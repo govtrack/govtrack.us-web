@@ -19,9 +19,13 @@ class Command(BaseCommand):
 	def add_arguments(self, parser):
 		parser.add_argument('--ignore-history', action="store_true")
 		parser.add_argument('--dry-run', action="store_true")
+		parser.add_argument('--max', action="store", type=int, default=1)
 
 	def handle(self, *args, **options):
 		self.options = options
+
+		# For testing, how many tweets to do in this run.
+		self.max = self.options["max"]
 
 		# Determine maximum length of a shortened link.
 		self.short_url_length_https = 23 # self.tweepy_client.configuration()['short_url_length_https'] --- this is failing with 'tweepy.error.TweepError: Failed to parse JSON payload: Expecting value: line 1 column 1 (char 0)'
@@ -38,7 +42,6 @@ class Command(BaseCommand):
 
 		if options["ignore_history"]:
 			self.previous_tweets = { }
-			self.max_tweets = 50
 
 		else:
 			# What have we tweeted about before? Let's not tweet
@@ -81,6 +84,7 @@ class Command(BaseCommand):
 		# Find something interesting to tweet!
 		self.tweet_new_signed_laws_yday()
 		self.tweet_votes_yday(True)
+		self.tweet_missing_legislators()
 		self.tweet_new_bills_yday()
 		self.tweet_coming_up()
 		self.tweet_a_bill_action()
@@ -90,6 +94,7 @@ class Command(BaseCommand):
 
 	def post_tweet(self, key, text, url):
 		if key in self.previous_tweets:
+			print(key)
 			return
 
 		# For good measure, ensure Unicode is normalized. Twitter
@@ -100,8 +105,8 @@ class Command(BaseCommand):
 		if self.options["dry_run"]:
 			# Don't tweet. Just print and exit.
 			print(text)
-			self.max_tweets -= 1
-			if self.max_tweets <= 0:
+			self.max -= 1
+			if self.max <= 0:
 				sys.exit(1)
 			return
 
@@ -316,3 +321,14 @@ class Command(BaseCommand):
 		#sponsors = [p for p in sponsors if p.twitterid]
 		#if not sponsors: return "" # no sponsors or none with a twitter handle
 		return " by " + ", ".join(sponsor.name for sponsor in sponsors)
+
+	def tweet_missing_legislators(self):
+		if settings.CURRENT_CONGRESS < 119: return # don't flood
+		from person.analysis import load_missing_legislators
+		for m in load_missing_legislators(settings.CURRENT_CONGRESS):
+			self.post_tweet(
+				"missingmember:" + str(m["person"].id) + ":" + m["firstmissedvote"].isoformat(),
+				f"""{m["person"].name} may be missing. They missed {m["missedvotes"]}"""
+				+ f""" of {m["totalvotes"]} roll call votes ({m["missedvotespct"]}%)"""
+				+ f""" since {m["firstmissedvote"].strftime("%x")}.""",
+				"https://www.govtrack.us/congress/members/missing")

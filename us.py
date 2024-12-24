@@ -30,6 +30,10 @@ def parse_govtrack_date(d, as_date=False):
         return datetime.strptime(d, '%Y-%m-%d').date()
     
     try:
+        return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S')
+    except ValueError:
+        pass
+    try:
         return datetime.strptime(d, '%Y-%m-%dT%H:%M:%S-04:00')
     except ValueError:
         pass
