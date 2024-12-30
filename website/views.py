@@ -1307,3 +1307,17 @@ def posts(request, category=None, id=None, slug=None):
     return render(request, 'website/post.html', {
         "post": post,
         "categories": BlogPost.get_categories_with_freq() })
+
+import django.contrib.syndication.views
+class BlogPostsFeed(django.contrib.syndication.views.Feed):
+    title = "GovTrack.us Posts"
+    link = "/posts"
+    description = "Upcoming legislation in Congress, recaps, analysis, and site news from GovTrack.us."
+    def items(self):
+        return BlogPost.objects.order_by('-created')[:15]
+    def item_title(self, item):
+        return item.title
+    def item_description(self, item):
+        from django.template.defaultfilters import truncatewords
+        return truncatewords(item.body_text(), 150)
+

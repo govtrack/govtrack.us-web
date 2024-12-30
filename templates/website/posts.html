@@ -10,6 +10,10 @@
 </style>
 {% endblock %}
 
+{% block head %}
+<link rel="alternate" type="application/rss+xml" href="https://www.govtrack.us/posts.rss" />
+{% endblock %}
+
 {% block body %}
 
 {% if category == "news" %}

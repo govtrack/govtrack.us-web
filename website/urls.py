@@ -30,5 +30,6 @@ urlpatterns = [
     url(r'^missing-data', website.views.missing_data),
     url(r'^covid-19', website.views.covid19),
     url(r'^community-forum/_ajax/post', website.views.community_forum_post_message),
+    url(r'^posts.rss', website.views.BlogPostsFeed()),
     url(r'^posts(?:/(?:(?P<category>analysis|news)|(?P<id>\d+)/(?P<slug>[a-z0-9\-_]+)))?$', website.views.posts),
 ]
