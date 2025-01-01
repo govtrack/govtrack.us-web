@@ -40,7 +40,7 @@
 
 <p>This {{bill.noun}} {% if bill.is_alive %}has{% else %}had{% endif %} {{bill.cosponsor_count}} cosponsor{{bill.cosponsor_count|pluralize}} &mdash;
   {% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}{{count|pluralize}}{% if not forloop.last %}, {% endif %}{% endfor %}
-  &mdash; not including its sponsor.</p>
+  &mdash; plus its sponsor.</p>
 
 {% if bill.cosponsor_count > 0 %}
 		<p id="cosponsors-sorts">
@@ -63,7 +63,7 @@
 		</thead>
 		<tbody>
 			{% for csp in cosponsors %}
-			<tr class="{% if not csp.has_committee_roles %}no-relevance hidden{% endif %}"
+			<tr class="{% if not csp.has_committee_roles %}no-relevance d-none{% endif %}"
 			    data-sort-name="{{csp.sort_name}}"
 			    data-sort-relevance="{{csp.sort_relevance}}"
 			    data-sort-date="{{csp.sort_date}}">
@@ -95,11 +95,10 @@
 	<p class="small">
 		{% if not bill.is_alive %}<sup>*</sup> Based on current committee assignments.{% endif %}
 		An original cosponsor was a cosponsor on the date the legislation was introduced. Other cosponsors are shown with the date they joined, or later withdrew.
-	</p>
-
-	<p>The table above shows whether the sponsor and any cosponsors
+	The table indicates whether the sponsor and cosponsors
 	are members of any committees that the bill has been referred to,
-	a key predictor of whether this {{bill.noun}} will move forward.</p>
+	which is a key predictor of whether this {{bill.noun}} will move forward.
+	</p>
 
 
 {% if possible_cosponsors %}
@@ -168,18 +167,18 @@ function sort_cosponsors(elem) {
 	});
 	if (sort_key == "relevance") {
 		// Reset hidden rows.
-		$("#cosponsors tr.no-relevance").addClass("hidden");
+		$("#cosponsors tr.no-relevance").addClass("d-none");
 		$('#cosponsors-expand').show();
 	} else {
 		// Show all rows.
-		$("#cosponsors tr.no-relevance").removeClass("hidden");
+		$("#cosponsors tr.no-relevance").removeClass("d-none");
 		$('#cosponsors-expand').hide();
 	}
 
 	return false; // discard event
 }
 function cosponsors_expand() {
-	$("#cosponsors tr").removeClass("hidden");
+	$("#cosponsors tr").removeClass("d-none");
 	$('#cosponsors-expand').fadeOut();
 	return false; // discard event
 }
