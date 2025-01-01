@@ -306,8 +306,11 @@ def load_missing_legislators(congress):
 
         if row["person"].id == 412677:
             row["explanation_html"] = "Rep. Evans had a stroke in early 2024."
-        if row["person"].id == 412612:
-            row["explanation_html"] = "Rep. Pelosi suffered a hip fracture from a fall during foreign travel."
+        if row["person"].id == 400314:
+            row["explanation_html"] = "Rep. Pelosi suffered a hip fracture from a fall during foreign travel in December 2024."
+        if row["person"].id == 400162:
+            row["explanation_html"] = "Rep. Grijalva underwent treatment for lung cancer in 2024."
+
 
         row["chart"] = load_votes_analysis(row["person"])
 

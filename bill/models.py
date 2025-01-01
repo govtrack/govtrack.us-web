@@ -1669,6 +1669,8 @@ The {{noun}} now has {{cumulative_cosp_count}} cosponsor{{cumulative_cosp_count|
                 for bill in sap["bills"]:
                     try:
                         b = Bill.from_congressproject_id(bill + "-" + str(sap["congress"]))
+                    except enum.NotFound:
+                        continue # skip
                     except Bill.DoesNotExist:
                         continue # skip
                     if "file" in sap:
