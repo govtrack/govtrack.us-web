@@ -317,7 +317,10 @@ def main(options):
                         if vote.source == VoteSource.keithpoole and voter.option.key == "0":
                             # Drop this record.
                             voters.remove(voter)
-                        elif voter.person.id == 412728: # died before taking office so we're missing a role but don't want to remove him from the record
+                        elif vote.question == "Call by States":
+                            # Legislators-elect like 412728 who died before taking office and
+                            # 412690 who announced he would not take his seat are in the first
+                            # quorum call of the House but are expected to not have a role.
                             pass
                         else:
                             log.error("%s: Could not find role for %s on %s." % (fname, voter.person, vote.created))
