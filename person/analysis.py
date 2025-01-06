@@ -303,6 +303,11 @@ def load_missing_legislators(congress):
         row["missedvotespct"] = int(round(100 * row["missedvotes"] / row["totalvotes"]))
         row["firstmissedvote"] = parse_govtrack_date(row["firstmissedvote"])
         row["lastvote"] = parse_govtrack_date(row["lastvote"])
+        row["returnstart"] = parse_govtrack_date(row["returnstart"]) if row["returnstart"] else None
+        row["returnlastvote"] = parse_govtrack_date(row["returnlastvote"]) if row["returnlastvote"] else None
+        row["returnmissedvotes"] = int(row["returnmissedvotes"]) if row["returnlastvote"] else None
+        row["returntotalvotes"] = int(row["returntotalvotes"]) if row["returntotalvotes"] else None
+        row["returnmissedvotespct"] = (int(round(100 * row["returnmissedvotes"] / row["returntotalvotes"]))) if row["returntotalvotes"] else None
 
         if row["person"].id == 412677:
             row["explanation_html"] = "Rep. Evans had a stroke in early 2024."
@@ -330,4 +335,5 @@ def is_legislator_missing(person):
 
 
 #if __name__ == "__main__":
-#    print(is_legislator_missing(Person.objects.get(id=456933)))
+#    import sys
+#    print(is_legislator_missing(Person.objects.get(id=sys.argv[1])))

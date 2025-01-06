@@ -76,8 +76,8 @@ for id, votes in recent_votes.items():
 	# partial absences.
 	missed = 0
 	run = None
-	for i, (date, chamber, vote) in enumerate(votes):
-		if vote:
+	for i, (date, chamber, novote) in enumerate(votes):
+		if novote:
 			missed += 1
 			missedpct = missed / (i + 1)
 			w = math.log((votes[0][0] - date).days + 10)
@@ -101,6 +101,37 @@ for id, votes in recent_votes.items():
 	# the missed votes percent lower than the cutoff below.
 	if run["last"] - run["first"] < datetime.datetime.now() - votes[0][0]: continue
 
+	# The legislator may have returned from an absence but overall still not
+	# yet gone under the threshold to drop off this list. Find a bisecting
+	# point in the run that maximizes the differenc between the missed votes
+	# percent before and after. If the legislator is totally back then the
+	# recent missed votes percent will be zero so a ratio would be hard, and
+	# we should bias for longer return time spans.
+	missed = 0
+	for i in range(run["total"] - 1):
+		if votes[i][2]: missed += 1
+		mp1 = missed / (i + 1)
+		mp2 = (run["missed"] - missed) / (run["total"] - (i + 1))
+		d = mp2 - mp1
+		if d >= run.get("return", {}).get("d", 0):
+			run["return"] = {
+				"d": d,
+				"missed": missed, "total": i + 1,
+				"first": votes[i][0], "last": votes[0][0],
+				"runlast": votes[i+1][0],
+			}
+
+	if run.get("return", {}).get("d", 0) > .5:
+		# Update the run to reflect the worst portion.
+		run.update({
+			"missed": run["missed"] - run["return"]["missed"],
+			"total": run["total"] - run["return"]["total"],
+			"missedpct": None, # clear, not used beyond this point
+			"last": run["return"]["runlast"],
+		})
+	elif "return" in run:
+		del run["return"]
+
 	runs.append(run)
 
 # Sort members by duration of the run.
@@ -108,7 +139,12 @@ runs.sort(key = lambda r : r["first"])
 
 # Write out.
 W = csv.writer(open(output_file, "w"))
-W.writerow(["person", "missedvotes", "totalvotes", "firstmissedvote", "lastvote", "lastchamber"])
+W.writerow(["person", "lastchamber",
+	"missedvotes", "totalvotes", "firstmissedvote", "lastvote",
+	"returnstart", "returnlastvote", "returnmissedvotes", "returntotalvotes"])
 for run in runs:
-	W.writerow([run["id"], run["missed"], run["total"], run["first"].isoformat(), run["last"].isoformat(), run["chamber"]])
+	W.writerow(
+		[run["id"], run["chamber"],
+		run["missed"], run["total"], run["first"].isoformat(), run["last"].isoformat()]
+		+ ([ run["return"]["first"].isoformat(), run["return"]["last"].isoformat(), run["return"]["missed"], run["return"]["total"] ] if "return" in run else []))
 
