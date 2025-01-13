@@ -94,7 +94,6 @@ class Command(BaseCommand):
 
 	def post_tweet(self, key, text, url):
 		if key in self.previous_tweets:
-			print(key)
 			return
 
 		# For good measure, ensure Unicode is normalized. Twitter
@@ -326,9 +325,10 @@ class Command(BaseCommand):
 		if settings.CURRENT_CONGRESS < 119: return # don't flood
 		from person.analysis import load_missing_legislators
 		for m in load_missing_legislators(settings.CURRENT_CONGRESS):
+			if m["returntotalvotes"]: continue # skip if legislator appears to already have returned
 			self.post_tweet(
 				"missingmember:" + str(m["person"].id) + ":" + m["firstmissedvote"].isoformat(),
-				f"""{m["person"].name} may be missing. They missed {m["missedvotes"]}"""
+				f"""{m["person"].name} may be missing. {m["person"].he_she_cap} missed {m["missedvotes"]}"""
 				+ f""" of {m["totalvotes"]} roll call votes ({m["missedvotespct"]}%)"""
 				+ f""" since {m["firstmissedvote"].strftime("%x")}.""",
 				"https://www.govtrack.us/congress/members/missing")
