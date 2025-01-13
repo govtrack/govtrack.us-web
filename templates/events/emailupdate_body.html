@@ -1,26 +1,26 @@
 {% load events_utils %}
 {% for list, events in eventslists %}
-  <h2 style="text-align:left; margin: 30px 0 15px 0;">{{list.name}}</h2>
+  <h2 style="margin: 30px 0 15px 0;">{{list.name}}</h2>
   {% for event in events %}
     {% with event|render_event:feed as meta %}
-      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #F2F2F2;margin-bottom:10px;margin-top:20px;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #F2F2F2;margin-bottom:8px;margin-top:16px;">
         <tr valign="top">
-          <td width="100" style="padding-right: 1em; padding-top: 20px;">
+          <td width="100" style="padding-right: 1em; padding-top: 16px;">
             {% if meta.thumbnail_url %}
               <a href="{{SITE_ROOT_URL}}{{meta.url|append_qsarg:utm}}">
                 <img src="{% if ":" not in meta.thumbnail_url %}{{SITE_ROOT_URL}}{% endif %}{{meta.thumbnail_url}}" style="width: 100%;">
               </a>
             {% endif %}
           </td>
-          <td style="text-align:left !important; padding-top: 20px;">
-            <h5>{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} &mdash; {{meta.type}}</h5>
-            <h3><span style="text-align:left"><a href="{{SITE_ROOT_URL}}{{meta.url|append_qsarg:utm}}">{{meta.title}}</a></span></h3>
+          <td style="padding-top: 16px;">
+            <p style="margin: 0">{% if not meta.date_has_no_time %}{{event.when}}{% else %}{{event.when|date}}{% endif %} &mdash; {{meta.type}}</p>
+            <h3 style="text-align: left"><a href="{{SITE_ROOT_URL}}{{meta.url|append_qsarg:utm}}">{{meta.title}}</a></h3>
             {{meta.body_html|safe}}
             {% if event.feeds and event.feeds|length > 0 %}
-              <div style="font-size: 80%">Trackers:
+              <p style="font-size: 10px">Trackers:
                 {% for feed in event.feeds %}{% if not forloop.first %}, {% endif %}
-                <a href="{{SITE_ROOT_URL}}{{feed.link|append_qsarg:utm}}">{{feed.title}}</a>{% endfor %}.
-              </div>
+                <a href="{{SITE_ROOT_URL}}{{feed.link|append_qsarg:utm}}" style="font-size: 10px">{{feed.title}}</a>{% endfor %}.
+              </p>
             {% endif %}
           </td>
         </tr>

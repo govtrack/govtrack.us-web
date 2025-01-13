@@ -1,103 +1,26 @@
-{% extends "htmlemailer/boilerplate.html" %}
+{% extends "email/boilerplate.html" %}
 {% block head %}
 <style>
-	#backgroundTable {
-		font-family: Arial, sans-serif;
-		background-color: #F2F2F2;
-	}
-
-	li { font-size: 11pt; }
-
-	a {
-		color: #9D2146;
-	}
-	h1 {
-		font-family: Arial, sans-serif;
-		font-weight: bold;
-		font-size: 21pt;
-		text-align: left;
-	}
-	h2 {
-		font-family: Arial, sans-serif;
-		font-size: 18pt;
-		line-height: 18pt; 
-		margin-top: 10px;
-		margin-bottom: 0px;
-		text-align: left;
-	}
-	h3 {
-		font-family: Arial, sans-serif;
-		font-size: 11pt; 
-		margin: 10px 0;
-		line-height: 13pt;
-		text-align: left;
-	}
-		h3 a {
-			color: #9D2146 !important;
-		}
-	h4 {
-		font-family: Arial, sans-serif;
-		font-size: 11pt;
-		font-weight: normal;
-		text-align: left;
-	}
-	h5 {
-		font-family: Arial, sans-serif;
-		font-weight: bold;
-		font-size: 10pt;
-		color: #969698;
-		margin-bottom: 10px;
-		margin-top: 0;
-		text-align: left;
-	}
-	.section {
-		margin: 1em 0;
-		border-radius: 15px;
-		background-color: #ffffff;
-		padding: 15px;
-		text-align:left !important;
-	}
-	p {
-		font-family: Arial, sans-serif;
-		font-size: 11pt;
-		font-weight: normal;
-		line-height: 14pt;
-		margin-top: 10px;
-		text-align: left;
-	}
-
-
-#announcement-holder {
-	margin-bottom: 2em;
-	padding: .25em 1em .25em 1em;
-	border: 1px solid #DDD;
-	background-color: #F3F3FF;
-}
-#announcement-holder p, #announcement-holder li {
-	margin-bottom: .25em;
-}
 </style>
 {% endblock %}
 {% block body %}
 
 <!-- HEADER -->
-<div style="background-color: #FFFFFF; margin-bottom: 30px; padding: 30px; text-align: center;">
+<div style="background-color: #FFFFFF; margin-bottom: 30px; text-align: center;">
 	<div><a href="https://www.govtrack.us/?{{utm}}" target="blank"><img src="https://www.govtrack.us/static/images/logo.png" alt="GovTrack.us" border="0"></a></div>
-	<div style="font-weight: bold; margin-top: 4px;">Email Update on Activity in Congress</div>
+	<div style="margin-top: 4px;">Email Update on Activity in Congress</div>
 </div>
 
 <!-- CONTENT AREA -->
 
-<table id="wideWrapper" border="0" cellpadding="0" cellspacing="0" style="max-width: 850px; margin: 0 auto;">
-<tr>
-<td>
-
-<div class="section">
+<p>
 Like these updates?
 A <a href="https://www.patreon.com/govtrack">recurring tip</a> or <a href="https://www.govtrack.us/accounts/membership">one-time tip</a> will help us keep this service free for everyone.
-Join us on <a href="https://mastodon.social/@GovTrack" title="Mastodon Page">Mastodon</a>
-for more updates.
-</div>
+Follow us on <a href="https://mastodon.social/@GovTrack">Mastodon</a>,
+<a href="https://bsky.app/profile/govtrack.us">Bluesky</a>,
+and <a href="https://www.linkedin.com/company/10005730/admin/dashboard/">LinkedIn</a>
+for our social media posts.
+</p>
 
 						{% if blog_post %}
 <div style="background-color:#ffffff;border-radius:6px;text-align:left !important;">
@@ -105,7 +28,7 @@ for more updates.
 					        	<h2>{{blog_post.title}} ({{blog_post.created|date}})</h2>
 							{% if blog_post.author %}<p>By {{blog_post.author}}</p>{% endif %}
 							{{blog_post.body_html|safe}}
-							<p style="font-style: italic; font-size: 90%">
+							<p style="font-style: italic; line-height: 14px;">
 							   <a href="{{SITE_ROOT_URL}}{{blog_post.get_absolute_url}}">View this post on the web</a>.
 							   <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">Send us an email with your questions about this post</a>.
 							</p>
@@ -116,33 +39,16 @@ for more updates.
 <div class="section">
 						{{body_html|safe}}
 </div>
+{% endblock %}
 
-
-
-	<!-- FOOTER -->
-
-	<table border="0" cellpadding="0" cellspacing="0" style="text-align:center !important;">
-	<tr>
-        <td align="center" valign="top" width="100%" class="templateColumnContainer">
-        	<table border="0" cellpadding="10" cellspacing="0" width="100%">
-        		<tr>
-        			<td valign="top">
-			        	<p style="text-align:center;">You are receiving this email because you are subscribed to email updates from <a href="https://www.govtrack.us?{{utm}}">www.GovTrack.us</a>.</p>
-			        	<p style="text-align:center;">To change your email update settings go to your <a href="https://www.govtrack.us/accounts/lists?{{utm}}">subscription settings</a> or <a href="{unsubscribe}">unsubscribe from all mail from us</a>.</p>
-						<p style="text-align:center;">GovTrack.us is a project of <a href="https://civicimpulse.com?{{utm}}">{accountcompany}</a>, {accountaddress1}, {accountcity} {accountstate} {accountzip} {accountcountry}. You may contact us at <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">hello@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</p>
-				    </td>
-			    </tr>
-			</table>
-		</td>
-	</tr>
-	</table>
-
-</td>
-</tr>
-</table>
+{% block footer %}
+<p>You are receiving this email because you are subscribed to email updates from <a href="https://www.govtrack.us?{{utm}}">www.GovTrack.us</a>.</p>
+<p>To change your email update settings go to your <a href="https://www.govtrack.us/accounts/lists?{{utm}}">subscription settings</a> or <a href="{unsubscribe}">unsubscribe from all mail from us</a>.</p>
+<p>GovTrack.us is a project of <a href="https://civicimpulse.com?{{utm}}">{accountcompany}</a>, {accountaddress1}, {accountcity} {accountstate} {accountzip} {accountcountry}. You may contact us at <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">hello@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</p>
 
 {% if emailpingurl %}
 <!-- Sorry but we want to know if your email address is still valid. -->
 <img src="{{emailpingurl}}" width="1" height="1"/>
 {% endif %}
+
 {% endblock %}
