@@ -13,7 +13,7 @@ from vote.models import Vote
 
 
 class Stakeholder(models.Model):
-    verified = models.NullBooleanField(default=None, help_text="Whether this organization has been verified (True), if verification was denied (False), or if verification is pending (None).")
+    verified = models.BooleanField(default=None, null=True, help_text="Whether this organization has been verified (True), if verification was denied (False), or if verification is pending (None).")
 
     name = models.CharField(max_length=150, help_text="The display name of the stakeholder.")
     slug = models.SlugField(help_text="The slug used in URLs.")

@@ -86,7 +86,7 @@ class Vote(models.Model):
     question = models.TextField(help_text="Descriptive text for what the vote was about.")
     required = models.CharField(max_length=10, help_text="A code indicating what number of votes was required for success. Often '1/2' or '3/5'. This field should be interpreted with care. It comes directly from the upstream source and may need some 'unpacking.' For instance, while 1/2 always mean 1/2 of those voting (i.e. excluding absent and abstain), 3/5 in some cases means to include absent/abstain and in other cases to exclude.")
     result = models.TextField(help_text="Descriptive text for the result of the vote.")
-    passed = models.NullBooleanField(help_text="Whether the vote passed or failed, for votes that have such an option. Otherwise None.")
+    passed = models.BooleanField(null=True, help_text="Whether the vote passed or failed, for votes that have such an option. Otherwise None.")
 
     total_plus = models.IntegerField(blank=True, default=0, help_text="The count of positive votes (aye/yea).")
     total_minus = models.IntegerField(blank=True, default=0, help_text="The count of negative votes (nay/no).")
@@ -644,7 +644,7 @@ class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='options', on_delete=models.CASCADE)
     key = models.CharField(max_length=20)
     value = models.CharField(max_length=255)
-    winner = models.NullBooleanField(help_text="If known, whether this Option is the one that was the vote's winner.")
+    winner = models.BooleanField(null=True, help_text="If known, whether this Option is the one that was the vote's winner.")
 
     def __repr__(self):
         return "<{} {}>".format(self.key, self.value)

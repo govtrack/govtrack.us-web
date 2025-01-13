@@ -159,8 +159,8 @@ def compare_text(text2, text1w, word_map, text1w_len):
   # Perform diff, getting the "matching blocks" of text. These
   # blocks may be single words or the entire text2 document,
   # distributed anywhere in the text1 document.
-  import diff_match_patch
-  ops = diff_match_patch.diff(text1w, text2w, timelimit=0, checklines=False, cleanup_semantic=False)
+  import fast_diff_match_patch
+  ops = fast_diff_match_patch.diff(text1w, text2w, timelimit=0, checklines=False, cleanup="No")
   i1 = 0; i2 = 0
   blocks = []
   for op, oplen in ops:

@@ -106,11 +106,11 @@ class GovTrackEmailBackend(EmailBackend):
         # For the rest, do a MX lookup. Domains handled by *.mail.protection.outlook.com are Microsoft addresses.
         # Get the MX records, and take the first record's host component.
         try:
-            mx = validate_email(email)['mx'][0][1]
+            mx = validate_email(email).mx[0][1]
         except EmailNotValidError as e:
             # Syntax or MX lookup failed?
             return False
-        except (KeyError, IndexError) as e:
+        except (AttributeError, IndexError) as e:
             # No MX info?
             return False
         if mx.endswith(".outlook.com"):

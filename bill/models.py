@@ -227,7 +227,7 @@ class Bill(models.Model):
 
     # additional data that we compute/set
     text_incorporation = JSONField(default=[], blank=True, null=True, help_text="What enacted bills have provisions of this bill been incorporated into?")
-    original_intent_replaced = models.NullBooleanField(help_text="Whether the bill has become the vehicle for passage of an unrelated measure *and* the original substance of the bill is completely gone. Set to False to flag that the enacted bill has been reviewed and it was not a vehicle.")
+    original_intent_replaced = models.BooleanField(null=True, help_text="Whether the bill has become the vehicle for passage of an unrelated measure *and* the original substance of the bill is completely gone. Set to False to flag that the enacted bill has been reviewed and it was not a vehicle.")
 
     # role is a new field added with, but might not be perfect for overlapping roles (see Cosponsor)
     #for role in PersonRole.objects.filter(startdate__gt="1960-01-01"):

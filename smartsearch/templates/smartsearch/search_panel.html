@@ -73,7 +73,7 @@ function show_facets(postdata, options, isinitial) {
                 var opt = $("<div class='choices'><input type='" + type + "' onclick='update_search(null, null, this)'/> <label style='display: inline'><span class='name'> </span> <span class='count'> </span></label></div>");
                 opt.find('input').attr('id', "searchform_field_" + field + "_" + j);
                 opt.find('input').attr('name', field);
-                if (values[j][0] !== null)  // e.g. from NullBooleanField
+                if (values[j][0] !== null)  // e.g. from BooleanField(null=True)
                     opt.find('input').attr('value', values[j][0]);
                 else
                     opt.find('input').attr('value', '__NULL__');

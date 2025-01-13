@@ -19,6 +19,8 @@ if DEBUG and "SSH_CONNECTION" in os.environ:
 	INTERNAL_IPS = ('127.0.0.1', os.environ["SSH_CONNECTION"].split(" ")[0])
 	if sys.argv == ['./manage.py', 'runserver']: print("Internal IPs:", repr(INTERNAL_IPS))
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField' # added after migration from Django 2.2 to 3.2+
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.

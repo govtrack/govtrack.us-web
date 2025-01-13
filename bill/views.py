@@ -154,14 +154,13 @@ def bill_details_user_view(request, congress, type_slug, number):
     return ret
 
 def get_user_bill_reactions(request, bill):
-    import json
     from website.models import Reaction
 
     # get aggregate counts
     reaction_subject = "bill:" + bill.congressproject_id
     emoji_counts = { }
     for r in Reaction.objects.filter(subject=reaction_subject).values("reaction").annotate(count=Count('id')):
-        v = json.loads(r["reaction"])
+        v = r["reaction"]
         if isinstance(v, dict):
             for emoji in v.get("emojis", []):
                 emoji_counts[emoji] = emoji_counts.get(emoji, 0) + r["count"]
@@ -1109,7 +1108,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
 
     # Resize to requested width.
     if width:
-        img.thumbnail((width, int(aspect*width)), Image.ANTIALIAS)
+        img.thumbnail((width, int(aspect*width)), Image.LANCZOS)
 
     # Add symbology.
     if image_type in ("thumbnail", "card"):

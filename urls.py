@@ -1,4 +1,4 @@
-from django.conf.urls import url, include
+from django.urls import re_path, include
 from django.conf import settings
 import django.views.static
 
@@ -18,37 +18,37 @@ urlpatterns = []
 from django.contrib.auth.views import LoginView
 from django_otp.forms import OTPAuthenticationForm
 urlpatterns += [
-    url(r'^admin/login/?$', LoginView.as_view(authentication_form=OTPAuthenticationForm, template_name="login_otp.html")),
+    re_path(r'^admin/login/?$', LoginView.as_view(authentication_form=OTPAuthenticationForm, template_name="login_otp.html")),
 ]
 
 urlpatterns += [
-    url(r'^admin/', admin.site.urls),
-    url('markdownx/', include('markdownx.urls')),
+    re_path(r'^admin/', admin.site.urls),
+    re_path('markdownx/', include('markdownx.urls')),
 
     # main URLs
-    url(r'', include('redirect.urls')),
-    url(r'', include('website.urls')),
-    url(r'^congress/members(?:$|/)', include('person.urls')),
-    url(r'^congress/committees/', include('committee.urls')),
-    url(r'^congress/', include('vote.urls')),
-    url(r'^congress/bills/', include('bill.urls')),
-    url(r'^congress/other-people/(presidents|vice-presidents)$', other_people_list),
-    url(r'^congress/other-people/[^/]+/(\d+)$', person_details),
-    url(r'', include('events.urls')),
-    url(r'^api/v2/([^/]+)(?:/(\d+))?', website.api.apiv2),
-    url(r'^panels/', include('userpanels.urls')),
-    url(r'^list/([A-Za-z0-9]+)$', events.views.view_list),
+    re_path(r'', include('redirect.urls')),
+    re_path(r'', include('website.urls')),
+    re_path(r'^congress/members(?:$|/)', include('person.urls')),
+    re_path(r'^congress/committees/', include('committee.urls')),
+    re_path(r'^congress/', include('vote.urls')),
+    re_path(r'^congress/bills/', include('bill.urls')),
+    re_path(r'^congress/other-people/(presidents|vice-presidents)$', other_people_list),
+    re_path(r'^congress/other-people/[^/]+/(\d+)$', person_details),
+    re_path(r'', include('events.urls')),
+    re_path(r'^api/v2/([^/]+)(?:/(\d+))?', website.api.apiv2),
+    re_path(r'^panels/', include('userpanels.urls')),
+    re_path(r'^list/([A-Za-z0-9]+)$', events.views.view_list),
 
-    url(r'^_twostream/', include('twostream.urls')),
+    re_path(r'^_twostream/', include('twostream.urls')),
 
     # django-registration-pv
-    url(r'^emailverif/', include('emailverification.urls')),
-    url(r'^registration/', include('registration.urls')),
-    url(r'^accounts/login/?$', registration.views.loginform), # Django adds a slash when logging out?
-    url(r'^accounts/logout$', auth_views.LogoutView.as_view(), { "redirect_field_name": "next" }),
-    url(r'^accounts/profile$', registration.views.profile, name='registration.views.profile'),
+    re_path(r'^emailverif/', include('emailverification.urls')),
+    re_path(r'^registration/', include('registration.urls')),
+    re_path(r'^accounts/login/?$', registration.views.loginform), # Django adds a slash when logging out?
+    re_path(r'^accounts/logout$', auth_views.LogoutView.as_view(), { "redirect_field_name": "next" }),
+    re_path(r'^accounts/profile$', registration.views.profile, name='registration.views.profile'),
 
-    url(r'^dump_request', website.views.dumprequest),
+    re_path(r'^dump_request', website.views.dumprequest),
 ]
 
 # sitemaps
@@ -68,8 +68,8 @@ sitemaps = OrderedDict([
         #("votes_archive", vote.views.sitemap_archive), # takes too long to load
 	])
 urlpatterns += [
-    url(r'^sitemap\.xml$', anonymous_view(sitemap_index_view), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemap_pages'}),
-    url(r'^sitemap-(?P<section>.+)\.xml$', anonymous_view(sitemap_map_view), {'sitemaps': sitemaps}, name='sitemap_pages'),
+    re_path(r'^sitemap\.xml$', anonymous_view(sitemap_index_view), {'sitemaps': sitemaps, 'sitemap_url_name': 'sitemap_pages'}),
+    re_path(r'^sitemap-(?P<section>.+)\.xml$', anonymous_view(sitemap_map_view), {'sitemaps': sitemaps}, name='sitemap_pages'),
 ]
 
 if settings.DEBUG:
@@ -81,12 +81,6 @@ if settings.DEBUG:
     from django.conf.urls.static import static
     urlpatterns += static("/data", document_root="data")
 
-    # serve the debug toolbar
-    import debug_toolbar
-    urlpatterns = [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns
-
 if "silk" in settings.INSTALLED_APPS:
-	urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
+	urlpatterns += [re_path(r'^silk/', include('silk.urls', namespace='silk'))]
 

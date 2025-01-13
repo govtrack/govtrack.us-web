@@ -174,7 +174,7 @@ def build_matrix(congressnumber, starting_congress, house_or_senate, people, peo
 	# Turn this into a dense numpy array with cells flagged as 1 if there is such
 	# a transition. Keep adding 1s... Start with the identity matrix because
 	# every rep should be counted as sponsoring his own bills.
-	P = numpy.identity(nreps, numpy.float) # numpy.zeros( (nreps,nreps) )
+	P = numpy.identity(nreps, float) # numpy.zeros( (nreps,nreps) )
 	for sponsor, cosponsor in cells:
 		P[sponsor, cosponsor] += 1.0
 

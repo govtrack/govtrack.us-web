@@ -1,5 +1,4 @@
 from django import template
-from django.utils.translation import ugettext as _
 from django.utils import safestring
 from django.template.defaultfilters import stringfilter
 import re
@@ -29,7 +28,7 @@ def ordinalhtml(value):
         value = int(value)
     except ValueError:
         return value
-    t = (_('th'), _('st'), _('nd'), _('rd'), _('th'), _('th'), _('th'), _('th'), _('th'), _('th'))
+    t = ('th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th')
     if value % 100 in (11, 12, 13): # special case
         return safestring.mark_safe("%d<sup>%s</sup>" % (value, t[0]))
     return safestring.mark_safe('%d<sup>%s</sup>' % (value, t[value % 10]))
@@ -46,7 +45,7 @@ def markdown(value, trusted=False):
     from cmarkgfm.cmark import Options as cmarkgfmOptions
 
     html = cmarkgfm.github_flavored_markdown_to_html(value,
-        options=cmarkgfmOptions.CMARK_OPT_SAFE if not trusted else 0)
+        options=cmarkgfmOptions.CMARK_OPT_UNSAFE if trusted else 0)
 
     import html5lib, urllib.parse
     def filter_url(url):

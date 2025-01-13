@@ -1,5 +1,5 @@
 honcho
-django==2.2.*
+django<4.2 # MySQL has to be upgraded to 8 after this
 uwsgi
 lxml
 python-prctl
@@ -40,7 +40,7 @@ pycairo
 exclusiveprocess
 email_validator
 draftable-compare-api
-cmarkgfm<0.5.0
+cmarkgfm
 django_otp
 Mastodon.py
 requests

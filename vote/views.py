@@ -189,7 +189,7 @@ def get_vote_outliers(voters):
 	# Perform regression.
 	try:
 		regression_beta, J_bar, l = logistic_regression(x, y)
-	except ValueError:
+	except: # LinAlgError
 		# Something went wrong. No outliers will be reported.
 		return
 

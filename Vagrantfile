@@ -50,15 +50,16 @@ Vagrant.configure(2) do |config|
     # With Vagrant, it's not necessary, so it's commented out. But you
     # should run these two commands:
     #
-    # virtualenv -ppython3 .venv
+    # python3.8 -m virtualenv -ppython3.8 .venv
     # source .venv/bin/activate
     
     # Install Xapian: (skip in production, where we use Solr)
     wget https://raw.githubusercontent.com/notanumber/xapian-haystack/master/install_xapian.sh
-    bash install_xapian.sh 1.4.22
+    bash install_xapian.sh 1.4.27
 
     # Install Python packages.
     # In production, xapian-haystack should be skipped.
+    # inlinestyler currently needs this patch: https://github.com/dlanger/inlinestyler/pull/33
     pip3 install --upgrade -r requirements.txt xapian-haystack
 
     # on production I needed: pip install mysqlclient pylibmc django-mysql

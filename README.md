@@ -9,7 +9,7 @@ Local Development
 
 ### Development using Vagrant
 
-GovTrack.us is based on Python 3 and Django 2.1 and runs on Ubuntu 18.04 or OS X. To simplify local development, we have a `Vagrantfile` in this directory. You can get started quickly simply by installing [Vagrant](https://www.vagrantup.com/) and running:
+GovTrack.us is based on Python 3.8 and Django 4.1 and runs on Ubuntu 18.04 or OS X. To simplify local development, we have a `Vagrantfile` in this directory. You can get started quickly simply by installing [Vagrant](https://www.vagrantup.com/) and running:
 
     # Get this repo (you must clone with `--recursive`)
     git clone --recursive https://github.com/govtrack/govtrack.us-web.git
@@ -40,7 +40,9 @@ See further down about configuration.
 
 ### Development without Vagrant
 
-To set up GovTrack development without a virtual machine, get the source code in this repository (use `--recursive`, as mentioned above), and then you'll need to follow along with the steps in our [Vagrantfile](Vagrantfile) by just looking at what we did and doing the same on your command line.
+To set up GovTrack development without a virtual machine, get the source code in this repository (use `--recursive`, as mentioned above).
+
+Then follow along with the steps in our [Vagrantfile](Vagrantfile) by just looking at what we did and doing the same on your command line.
 
 At the end:
 
@@ -156,14 +158,14 @@ Install nginx, supervisord (which keeps the uWSGI process running), and certbot 
 
 To scrape and load new data, you'll need to set up the `congress` project.
 
-* Clone the congress project repo anywhere and install it into th website's Python virtual environment (`pip install ../path/to/congress`).
+* Clone the congress project repo anywhere and install it into the website's Python virtual environment (`pip install ../path/to/congress`).
 * Make a new working directory that the scripts will be run in. Set that directory as `CONGRESS_PROJECT_PATH` in GovTrack's `local/settings.env`.
 * Symlink the `data/congress` _data_ directory as the `data` directory inside the congress project working directory.
 * Clone the [congress-legislators](https://github.com/unitedstates/congress-legislators/) project as a subdirectory of the congress project working directory and follow its installation steps to create a separate Python 3 virtualenv for its scripts in its `scripts/.env` directory.
 * Try launching the scrapers from the GovTrack directory: `./run_scrapers.py people`, `./run_scrapers.py committees`, etc.
 * Enable the crontab.
 
-The crontab sends the outputs of the commands to Josh, so the server needs a sendmail-like command. The easiest to set up is msmtp, like so:
+The crontab sends the outputs of the commands to the address in `conf/crontab` (which is hard-coded as Josh's address), so the server needs a sendmail-like command. The easiest to set up is msmtp, like so:
 
 	apt install msmtp-mta
 	cat > /etc/msmtprc <<EOF;

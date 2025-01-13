@@ -85,7 +85,7 @@ class Processor(object):
                         return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%f')
 
     def is_model_field(self, obj, fieldname):
-        from django.db.models import FieldDoesNotExist
+        from django.core.exceptions import FieldDoesNotExist
         try:
             return obj._meta.get_field(fieldname) is not None # =! None breaks because of operator overloading
         except FieldDoesNotExist:
