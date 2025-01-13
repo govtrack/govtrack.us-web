@@ -11,7 +11,7 @@ from events.models import Feed, SubscriptionList
 class UserProfile(models.Model):
     user = models.OneToOneField(User, db_index=True, on_delete=models.CASCADE)
     massemail = models.BooleanField(default=True) # may we send you mail?
-    massemail_options = models.CharField(max_length=128, default="")
+    massemail_options = models.CharField(max_length=128, default="", blank=True)
     old_id = models.IntegerField(blank=True, null=True) # from the pre-2012 GovTrack database
     last_mass_email = models.IntegerField(default=0)
     last_blog_post_emailed = models.IntegerField(default=0)
