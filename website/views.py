@@ -140,6 +140,7 @@ def do_site_search(q, bill_match_mode=None, request=None):
     
     results = []
     
+    # Search bills
     from bill.models import Bill
     from vote.models import Vote
     if "pass" in q or "fail" in q or "vote" in q:
@@ -162,6 +163,7 @@ def do_site_search(q, bill_match_mode=None, request=None):
     from haystack.query import SearchQuerySet
     from events.models import Feed
 
+    # Search legislators
     from person.models import RoleType
     sqs = SearchQuerySet().using("person")\
         .filter(
@@ -184,7 +186,30 @@ def do_site_search(q, bill_match_mode=None, request=None):
              "secondary": p.object.get_current_role() == None }
             for p in sqs[0:9]]
         })
-       
+
+    # Search non-legislator presidents and vice presidents
+    sqs = SearchQuerySet().using("person")\
+        .filter(
+            indexed_model_name__in=["Person"],
+            content=q)\
+        .exclude(all_role_types__in=(RoleType.representative, RoleType.senator))
+    if 'XapianEngine' not in settings.HAYSTACK_CONNECTIONS['person']['ENGINE']:
+        # Xapian doesn't provide a 'score' so we can't do this when debugging.
+        sqs = sqs.order_by('-is_currently_serving', '-score')
+    results.append({
+        "title": "Other Presidents and Vice Presidents",
+        #"href": "/congress/members/all",
+        #"qsarg": "name",
+        "noun": "Presidents and Vice Presidents",
+        "results": [
+            {"href": p.object.get_absolute_url(),
+             "label": p.object.name,
+             "obj": p.object,
+             "feed": p.object.get_feed(),
+             "secondary": p.object.get_current_role() == None }
+            for p in sqs[0:9]]
+        })
+
     import us
     results.append({
         "title": "States",

@@ -152,6 +152,7 @@ function show_pronunciation_guide() {
 {% endblock %}
 
 {% block crumbs %}
+{% if "congress/members" in request.path %} {# non-members in the other-people route #}
 <nav aria-label="breadcrumb">
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -161,6 +162,7 @@ function show_pronunciation_guide() {
   </nav>
 
 </nav>
+{% endif %}
 {% endblock %}
 
 {% block body_class %}member{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "master_b.html" %}
+{% load humanize govtrack_utils static %}
+{% block title %}{{title}} - GovTrack.us{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block body_scripts %}
+{% endblock %}
+
+{% block summary %}
+   <h1>{{title}}</h1>
+{% endblock %}
+
+{% block body %}
+
+<ul>
+{% for r in roles %}
+  <li><a href="{{r.person.get_absolute_url}}">{{r.name}}</a></li>
+{% endfor %}
+</ul>
+
+{% endblock %}
+
+

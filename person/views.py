@@ -133,11 +133,6 @@ def person_details(request, pk):
             # support bioguide IDs for me
             person = get_object_or_404(Person, bioguideid=pk)
 
-        # There are some people in the database --- presidents and vice presidents --- who have never served in Congress.
-        # We don't have any inbound links to those pages, so don't serve them.
-        if not person.roles.filter(role_type__in=(RoleType.representative, RoleType.senator)).exists():
-            raise Http404()
-
         # current role
         role = person.get_current_role()
         if role:
@@ -1216,4 +1211,24 @@ def missing_legislators(request):
         missing = analysis.load_missing_legislators(congress)
         if missing: break
     return { "missing": list(missing) }
+
+@anonymous_view
+@render_to('person/other_people_list.html')
+def other_people_list(request, list_type):
+    from person.name import get_person_name
+    q = PersonRole.objects.all()
+    if list_type == "presidents":
+        q = q.filter(role_type=RoleType.president)
+        title = "Presidents of the United States"
+    elif list_type == "vice-presidents":
+        q = q.filter(role_type=RoleType.vicepresident)
+        title = "Vice Presidents of the United States"
+    q = q.order_by('-startdate')
+    roles = []
+    for r in q:
+        if roles and roles[-1].person == r.person: continue # don't repeat consecutive roles
+        r.person.role = r # for get_person_name
+        r.name = get_person_name(r.person, firstname_position='before', party_style="full")
+        roles.append(r)
+    return { "title": title, "roles": roles }
 

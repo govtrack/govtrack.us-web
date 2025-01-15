@@ -229,9 +229,16 @@ class Person(models.Model):
         return self.roles.filter(current=True).exists()
 
     def get_absolute_url(self):
-        name = slugify('%s %s' % (self.firstname if not self.firstname.endswith(".") else self.middlename, self.lastname))
-        name = name.replace('-', '_')
-        return '/congress/members/%s/%d' % (name, self.pk)
+        if not hasattr(Person, '_non_legislator_ids'):
+            Person._non_legislator_ids = set(Person.objects.exclude(roles__role_type__in=(RoleType.representative, RoleType.senator)).values_list("id", flat=True))
+        if not self.pk in Person._non_legislator_ids:
+            path = '/congress/members/'
+        else:
+            path = '/congress/other-people/'
+        path += slugify('%s %s' % (self.firstname if not self.firstname.endswith(".") else self.middlename, self.lastname))\
+                   .replace('-', '_')
+        path += "/" + str(self.pk)
+        return path
 
     def get_age(self):
         if not self.birthday:

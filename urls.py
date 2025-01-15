@@ -10,6 +10,7 @@ import registration.views
 import website.api
 import website.views
 import events.views
+from person.views import person_details, other_people_list
 
 urlpatterns = []
 
@@ -31,6 +32,8 @@ urlpatterns += [
     url(r'^congress/committees/', include('committee.urls')),
     url(r'^congress/', include('vote.urls')),
     url(r'^congress/bills/', include('bill.urls')),
+    url(r'^congress/other-people/(presidents|vice-presidents)$', other_people_list),
+    url(r'^congress/other-people/[^/]+/(\d+)$', person_details),
     url(r'', include('events.urls')),
     url(r'^api/v2/([^/]+)(?:/(\d+))?', website.api.apiv2),
     url(r'^panels/', include('userpanels.urls')),

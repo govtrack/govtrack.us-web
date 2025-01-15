@@ -43,7 +43,7 @@ def get_dopplegangers():
 def get_person_name(person,
 				firstname_position=None, firstname_style=None,
 				role_recent=None,
-                show_title=True, show_party=True, show_district=True, show_type=False):
+                show_title=True, show_party=True, party_style="abbr", show_district=True, show_type=False):
 
     firstname = person.firstname
 
@@ -123,7 +123,7 @@ def get_person_name(person,
         if show_party:
             # If the party is the same in all of the roles, show it.
             if len(set(role.party for role in roles)) == 1:
-                name += combine(lambda role : role.party[0] if role.party else '?')
+                name += combine(lambda role : '?' if not role.party else role.party if party_style == "full" else role.party[0])
                 if show_district and has_state_or_district:
                     name += '-'
                 show_party = False # don't show below
@@ -152,7 +152,7 @@ def get_person_name(person,
                 return item
             name += combine(district_combiner)
                 
-        if role_recent and not roles[0].current:
+        if (role_recent and not roles[0].current) or getattr(person, "role", None):
         	a, b = roles[0].logical_dates(round_end=True)
         	name += ", %d-%d" % (a.year, b.year)
         	
