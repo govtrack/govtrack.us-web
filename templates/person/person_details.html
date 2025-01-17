@@ -297,6 +297,7 @@ function show_pronunciation_guide() {
             From {{analysis_data.missing.firstmissedvote|date}} to {{analysis_data.missing.lastvote|date}}
             {{person.lastname}} missed {{analysis_data.missing.missedvotes}} of {{analysis_data.missing.totalvotes}} roll call votes
             ({{analysis_data.missing.missedvotespct}}%).
+            {% if analysis_data.missing.lastpresent %}{{person.he_she_cap}} last voted on {{analysis_data.missing.lastpresent|date}}.{% endif %}
             {% if analysis_data.missing.returntotalvotes %}Since {{ analysis_data.missing.returnstart|date }} {{person.he_she}} has missed
             {{analysis_data.missing.returnmissedvotes}} of {{analysis_data.missing.returntotalvotes}} roll call votes ({{analysis_data.missing.returnmissedvotespct}}%).{% endif %}
             See the missed votes chart at the bottom of this page for details.

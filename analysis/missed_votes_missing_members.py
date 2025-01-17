@@ -73,9 +73,10 @@ for id, votes in recent_votes.items():
 	# Find the date with the highest missed votes percent between it and now,
 	# but weigh recent days less because if the legislator is currently in
 	# a short total absense it will be 100% and we wouldn't see prolonged
-	# partial absences.
+	# partial absences. Scan the vots from most recent to least recent.
 	missed = 0
 	run = None
+	last_voted = None
 	for i, (date, chamber, novote) in enumerate(votes):
 		if novote:
 			missed += 1
@@ -85,15 +86,26 @@ for id, votes in recent_votes.items():
 				run = { "missed": missed, "total": i + 1, "missedpct": missedpct,
 					"weighted_missed_pct": missedpct * w,
 					"first": date, "last": votes[0][0],
+					"legislative_days": len(set(v[0].date() for v in votes[:i+1])),
 					"id": id, "chamber": votes[0][1] }
+		elif last_voted is None:
+			last_voted = i
 	if not run: continue
+
+	if last_voted is not None: run["last_voted"] = votes[last_voted][0]
 
 	# Don't ding members missing less than one half of votes.
 	if run["missedpct"] < 1/2: continue
 
-	# Don't ding members missing for less than 5 days because we can't research
-	# absences fast enough to contextualize these, which are probably minor.
-	if (run["last"].date() - run["first"].date()).days < 5: continue
+	# Don't ding members missing for less than 10 days because we can't research
+	# absences fast enough to contextualize thesee, which are probably minor, and
+	# with more entries the list becomes noisy and people complain that we are
+	# unfairly dinging legislators.
+	if (run["last"].date() - run["first"].date()).days < 10: continue
+
+	# Don't ding members missing for less than 3 legislative days because single-day
+	# absenses are not uncommon.
+	if run["legislative_days"] < 3: continue
 
 	# In recesses, legislators don't have an opportunity to return from a short
 	# absense. Skip runs that are shorter than the length of the recess so far.
@@ -120,7 +132,6 @@ for id, votes in recent_votes.items():
 				"first": votes[i][0], "last": votes[0][0],
 				"runlast": votes[i+1][0],
 			}
-
 	if run.get("return", {}).get("d", 0) > .5:
 		# Update the run to reflect the worst portion.
 		run.update({
@@ -140,11 +151,12 @@ runs.sort(key = lambda r : r["first"])
 # Write out.
 W = csv.writer(open(output_file, "w"))
 W.writerow(["person", "lastchamber",
-	"missedvotes", "totalvotes", "firstmissedvote", "lastvote",
+	"missedvotes", "totalvotes", "firstmissedvote", "lastvote", "lastpresent",
 	"returnstart", "returnlastvote", "returnmissedvotes", "returntotalvotes"])
 for run in runs:
 	W.writerow(
 		[run["id"], run["chamber"],
-		run["missed"], run["total"], run["first"].isoformat(), run["last"].isoformat()]
+		run["missed"], run["total"], run["first"].isoformat(), run["last"].isoformat(),
+		run["last_voted"].isoformat() if "last_voted" in run else None]
 		+ ([ run["return"]["first"].isoformat(), run["return"]["last"].isoformat(), run["return"]["missed"], run["return"]["total"] ] if "return" in run else []))
 

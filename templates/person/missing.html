@@ -26,7 +26,7 @@ $(() => {
 
 {% block summary %}
    <h1>Missing Legislators</h1>
-   <p>Legislators who have missed a significant number of roll call votes lately are listed below.
+   <p>Legislators who have missed more than half of roll call votes over the last 10 days or more are listed below.
    There are many valid reasons for missing votes including unexpected medical issues,
    family commitments, and running for higher office. Rarely, legislators have extended absences.
    Most legislators miss around 3% of roll call votes over their career.</p>
@@ -44,6 +44,7 @@ $(() => {
     <p>
        Between {{m.firstmissedvote|date}} and {{m.lastvote|date}}, {{m.person.lastname}} missed
        {{m.missedvotes}} of {{m.totalvotes}} roll call votes ({{m.missedvotespct}}%).
+       {% if m.lastpresent %}{{m.person.he_she_cap}} last voted on {{m.lastpresent|date}}.{% endif %}
        {{m.explanation_html|safe}}
        {% if m.returntotalvotes %}Since {{ m.returnstart|date }} {{m.person.he_she}} has missed
          {{m.returnmissedvotes}} of {{m.returntotalvotes}} roll call votes ({{m.returnmissedvotespct}}%).{% endif %}
