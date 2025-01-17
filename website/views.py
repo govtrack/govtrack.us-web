@@ -1345,4 +1345,7 @@ class BlogPostsFeed(django.contrib.syndication.views.Feed):
     def item_description(self, item):
         from django.template.defaultfilters import truncatewords
         return truncatewords(item.body_text(), 150)
-
+    def item_pubdate(self, item):
+        return item.created
+    def item_updateddate(self, item):
+        return item.updated
