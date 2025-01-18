@@ -1,6 +1,6 @@
 {% extends "master_b.html" %}
 {% load humanize govtrack_utils static %}
-{% block title %}Members of the United States Congress - GovTrack.us{% endblock %}
+{% block title %}Legislators in the United States Congress - GovTrack.us{% endblock %}
 {% block meta_description %}The United States Congress is made up of 100 senators, 435 representatives, and 6 delegates to the House of Representatives.{% endblock %}
 {% block meta_keywords %}United States Congress,U.S. Congress,congressional districts,map,senator,senators,representative,representatives,congressman,congressmen,congresswoman,congresswomen,House of Representatives,Senate{% endblock %}
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
@@ -99,16 +99,14 @@ label { font-weight: normal; }
 {% endblock %}
 
 {% block summary %}
-	<h1>Members of Congress</h1>
-	<p>Use GovTrack to find out who represents you in Congress, what bills they have sponsored, and how they voted.</p>
+	<h1>Representatives and Senators in Congress</h1>
+	<p>Use GovTrack to find out which legislators represent you in Congress, what bills they have sponsored, and how they voted.</p>
 {% endblock %}
 
 {% block body %}
-	<div class="row">
-	<div class="col-sm-6">
-
-	<h2>Find Your Representative and Senators</h2>
-
+<h2>Find Your Representative and Senators</h2>
+<div class="row">
+<div class="col-sm-6">
 	<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
 		<a href="/congress/members/map#my_location=1" style="float: right"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a>
 		<label for="address" style="display: block; margin-bottom: .25em;">Enter your address:</label>
@@ -121,8 +119,8 @@ label { font-weight: normal; }
 			<div><a href="/congress/members/map">View a Map of All Congressional Districts</a></div>
 		</div>
 	</form>
-
-	<div style="padding-right: 1em">
+</div>
+<div class="col-sm-6">
 			<label for="state" style="margin: .5em 0;">Or select a state:</label>
 			<select id="state" onchange="if (this.value != '') window.location='/congress/members/' + this.value" class="form-control">
 				<option value="">(Select State)</option>
@@ -130,31 +128,26 @@ label { font-weight: normal; }
 				<option value="{{abbr}}" {% if abbr == state %}selected{% endif %}>{{abbr}} - {{name}}</option>
 				{% endfor %}								
 			</select>
-	</div>
 
-	<h2>All Representatives and Senators in Congress</h2>
+	<h3>All Representatives and Senators in Congress</h3>
+	<p><a href="/congress/members/current">List all Current Representatives and Senators in Congress</a></p>
+	<p><a href="/congress/members/all">Search Former Representatives and Senators in Congress</a></p>
+	<p><a href="/congress/members/missing">Missing Legislators</a></p>
+
+	<h2>Report Cards</h2>
+
+	<p>After each two-year session of Congress we compile all of our statistics into a report card for each Member of Congress.</p>
 
 	<p>
-		<a href="/congress/members/current">List all Members of Congress</a>
-		&middot;
-		<a href="/congress/members/all">Search Former Members of Congress</a>
+	<a href="/congress/members/report-cards/2022">2022 Report Cards</a> <!--for the 117<sup>th</sup> Congress--> (2021-2022) <!-- (posted Feb. 12, 2023) -->&middot;
+	<a href="/congress/members/report-cards/2020">2020 Report Cards</a> <!--for the 116<sup>th</sup> Congress--> (2019-2020) <!-- (posted Jan. 30, 2021) -->&middot;
+	<a href="/congress/members/report-cards/2018">2018 Report Cards</a> <!--for the 115<sup>th</sup> Congress--> (2017-2018) <!-- (posted Jan. 20, 2019) -->&middot;
+	<a href="/congress/members/report-cards/2016">2016 Report Cards</a> <!--for the 114<sup>th</sup> Congress--> (2015-2016) <!-- (posted Jan. 7, 2017) -->&middot;
+	<a href="/congress/members/report-cards/2014">2014 Report Cards</a> <!--for the 113<sup>th</sup> Congress--> (2013-2014) <!-- (posted Jan. 16, 2015) -->
 	</p>
 
-<hr>
-
-<p><a href="/congress/members/missing">Missing Legislators</a></p>
-
-<hr>
-
-<h2>Report Cards</h2>
-
-<p>Each year or two we compile all of our statistics into a report card for each Member of Congress.</p>
-
-<p><a href="/congress/members/report-cards/2022">2022 Report Cards</a> for the 117<sup>th</sup> Congress (2021-2022) <!-- (posted Feb. 12, 2023) --></p>
-<p><a href="/congress/members/report-cards/2020">2020 Report Cards</a> for the 116<sup>th</sup> Congress (2019-2020) <!-- (posted Jan. 30, 2021) --></p>
-<p><a href="/congress/members/report-cards/2018">2018 Report Cards</a> for the 115<sup>th</sup> Congress (2017-2018) <!-- (posted Jan. 20, 2019) --></p>
-<p><a href="/congress/members/report-cards/2016">2016 Report Cards</a> for the 114<sup>th</sup> Congress (2015-2016) <!-- (posted Jan. 7, 2017) --></p>
-<p><a href="/congress/members/report-cards/2014">2014 Report Cards</a> for the 113<sup>th</sup> Congress (2013-2014) <!-- (posted Jan. 16, 2015) --></p>
+</div>
+</div>
 
 <hr>
 
@@ -162,12 +155,12 @@ label { font-weight: normal; }
 <a href="/congress/other-people/vice-presidents">Vice Presidents of the United States</a> may cast tie-breaking votes in the Senate
 and serve as the chamber&rsquo;s ceremonial president.</p>
 
-	</div>
-
-	<div class="col-sm-6">
+<hr>
 
 	<p>The United States Congress has two chambers, one called the Senate and the other called the House of Representatives (or &ldquo;House&rdquo; for short) which share the responsibilities of the legislative process to create federal statutory law. They occupy opposite ends of the Capitol Building.</p>
 
+<div class="row">
+<div class="col-sm-6">
 	<h2>About the Senate</h2>
 	
 	<p>The United States&rsquo;s 50 states each elect two senators for staggered six-year terms. A senator represents between {{min_state_pop}} and {{max_state_pop}} million people, depending on their state&rsquo;s population.</p>
@@ -222,7 +215,8 @@ and serve as the chamber&rsquo;s ceremonial president.</p>
 	<div id="senate_agesex_chart"></div>
 	<p>{{agesex.1.summary.percent_older_men}}% of senators are men over the age of {{agesex.1.summary.age}}, while only {{agesex.1.summary.percent_younger_women}}% of senators are women {{agesex.1.summary.age}} years old or younger.</p>
 	{% endif %}
-
+</div>
+<div class="col-sm-6">
 	<h2>About the House of Representatives</h2>
 	
 	<p>The United States is also divided into 435 congressional districts with a population of about {{district_median_population|intcomma}} each. Each district elects a representative to the House of Representatives for a two-year term.</p>
