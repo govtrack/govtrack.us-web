@@ -15,12 +15,14 @@
 	<p>Search GovTrack for <a href="/congress/members">senators and representatives</a>, states and territories, <a href="/congress/bills">bills and resolutions</a>, and <a href="/congress/committees">committees</a> using this form.</p>
 	{% endif %}
 
-	<form method="get">
-	  <div class="form-group">
-	    <label for="q">Search for...</label>
+	<label for="q">Search for...</label>
+	<form method="get" class="row row-cols-lg-auto g-3 align-items-center">
+  	 <div class="col-12">
 	    <input type="text" class="form-control" id="q" name="q" value="{{request.GET.q}}">
-	  </div>
-	  <button type="submit" class="btn btn-default">Search</button>
+	 </div>
+  	 <div class="col-12">
+	    <button type="submit" class="btn btn-primary">Search</button>
+	 </div>
 	</form>
 
 	<div class="small" style="margin-top: 1em">
