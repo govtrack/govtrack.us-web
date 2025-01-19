@@ -135,14 +135,19 @@ def person_details(request, pk):
 
         # current role
         role = person.get_current_role()
-        if role:
-            active_role = True
-        else:
-            active_role = False
+        if not role:
+            # For non-current people, select their "highest" role
+            # and then their most recent role.
+            role_type_order = (RoleType.representative, RoleType.senator, RoleType.vicepresident, RoleType.president)
             try:
-                role = person.roles.order_by('-enddate')[0]
-            except IndexError:
+                role = sorted(person.roles.all(), key = lambda r : (role_type_order.index(r.role_type), r.enddate))[-1]
+            except:
                 role = None
+
+        # name & title corresponding to selected role
+        from person.name import get_person_name
+        person.role = role
+        name = get_person_name(person, firstname_position="before", show_title=True, show_party=False, show_district=False)
     
         # photo
         photo_url, photo_credit = person.get_photo()
@@ -243,8 +248,8 @@ def person_details(request, pk):
 
         return {'person': person,
                 'role': role,
-                'active_role': active_role,
-                'active_congressional_role': active_role and role.role_type in (RoleType.senator, RoleType.representative),
+                'name': name,
+                'active_congressional_role': role and role.current and role.role_type in (RoleType.senator, RoleType.representative),
                 'pronunciation': load_pronunciation_key(person),
                 'photo': photo_url,
                 'photo_credit': photo_credit,

@@ -2,9 +2,9 @@
 {% load govtrack_utils %}
 {% load humanize persontags govtrack_utils %}
 
-{% block title %}{{person.name_no_details}}, {% if not active_role %}former {% endif %}{{ role.get_title }}{% if role.state %} for {{ role.state_name_article }}{% if role.district > 0 %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
+{% block title %}{{person.name_no_details}}, {% if not role.current %}former {% endif %}{{ role.get_title }}{% if role.state %} for {{ role.state_name_article }}{% if role.district > 0 %}'s {{role.district|ordinal}} Congressional District{% endif %}{% endif %} - GovTrack.us{% endblock %}
 
-{% block meta_description %}Legislative profile for {{person}}, the {% if not active_role %}former{% endif %} {{ role.get_title }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
+{% block meta_description %}Legislative profile for {{person}}, the {% if not role.current %}former{% endif %} {{ role.get_title }}{% if role.state %} from {{ role.get_state_display }}{% endif %}{% endblock %}
 {% block meta_keywords %}{{person.name_no_district}},legislation,bills,district,sponsor,cosponsor,votes,missed votes,absences,committees{% endblock %}
 
 {% block head %}
@@ -186,11 +186,11 @@ function show_pronunciation_guide() {
                        style="position: absolute; top: 8px; left: -21px; width: 14px; height: 25px; border-radius: 3px;">&nbsp;</div>
 		</div>
 		{% endif %}
-		{{person.name_and_title}}
+		{{name}}
 	</h1>
 	<p>
-		{% if role and active_role and role.leadership_title %}{{role.leadership_title}} and{% endif %}
-		{% if not active_role %}Former {% endif %}
+		{% if role and role.current and role.leadership_title %}{{role.leadership_title}} and{% endif %}
+		{% if not role.current %}Former {% endif %}
 		{{ role.get_title }}{% if role.state %} for
 			{{ role.state_name_article }}{% if role.district == 0 %}&rsquo;s At-Large District{% elif role.district > 0 %}&rsquo;s {{role.district|ordinalhtml}} District{% endif %}{% endif %}
 	</p>
@@ -204,7 +204,7 @@ function show_pronunciation_guide() {
 </div>
 
 <div class="action-row clearfix">
-{% if active_role %}
+{% if role.current %}
 		<script>function show_track_panel() { return false; } /* default impl before script loaded */</script>
 			<button class="btn btn-sm btn-success" onclick="return show_track_panel();">
 				<i class="fas fa-envelope"> </i>
@@ -690,7 +690,7 @@ function show_pronunciation_guide() {
 		<p style="font-size: 90%; line-height: 120%;">Most legislation has no activity after being introduced.</p>
         </p>
 
-		{% if role and active_role and role.leadership_title %}<p>As {{role.leadership_title}}, {{person.lastname}} may be focused on {{person.his_her}} responsibilities other than introducing legislation, such as setting the chamber&rsquo;s agenda, uniting {{person.his_her}} party, and brokering deals.</p>{% endif %}
+		{% if role and role.current and role.leadership_title %}<p>As {{role.leadership_title}}, {{person.lastname}} may be focused on {{person.his_her}} responsibilities other than introducing legislation, such as setting the chamber&rsquo;s agenda, uniting {{person.his_her}} party, and brokering deals.</p>{% endif %}
 	</section><!-- /sponsorship -->
 {% endif %}
 
