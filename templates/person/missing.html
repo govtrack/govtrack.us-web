@@ -17,7 +17,7 @@ label { font-weight: normal; }
 $(() => {
    {% for m in missing %}
       {% if m.chart %}
-         {% include "person/missed_votes_chart.inc.js" with person=m.person missedvotes=m.chart %}
+         {% include "person/missed_votes_chart.inc.js" with person=m.person missedvotes=m.chart missed_votes_max_100=1 %}
       {% endif %}
    {% endfor %}
 });

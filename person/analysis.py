@@ -152,11 +152,14 @@ def load_votes_analysis(person):
             
     if lifetime_rec == None: return None
 
+    lifetime_rec["max_percent"] = max(r["percent"] for r in time_recs)
+
     # Set a flag if there are records from both chambers so the template can show the chamber
     # if so.
     lifetime_rec["multiple_chambers"] = len(set(rec["chamber"] for rec in time_recs)) > 1
     
     lifetime_rec["data"] = time_recs
+
     return lifetime_rec
 
 def load_influence_analysis(person):

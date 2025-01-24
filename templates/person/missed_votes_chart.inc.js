@@ -16,10 +16,13 @@ var chart = new Highcharts.Chart({
     title: {
       text: 'Missed Votes (%)'
     },
-    min: 0,
     minorGridLineWidth: 0,
     gridLineWidth: 0,
     alternateGridColor: null,
+    min: 0,
+    {% if missed_votes_max_100 %}max: 100,
+    {% else %}
+    max: {% if missedvotes.max_percent >= 50 %}100{% else %}null{% endif %},
     plotBands: [{
       from: 0,
       to: {{missedvotes.pctile25}},
@@ -57,6 +60,7 @@ var chart = new Highcharts.Chart({
         style: { color: '#606060' }
       }
     }]
+    {% endif %}
   },
   tooltip: {
     formatter: function() {
