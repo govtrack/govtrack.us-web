@@ -625,8 +625,20 @@ class Vote(models.Model):
                winner += state_population[state] / state_freq_ayeno[state]
 
         # Return the proportion of winner votes as well as which option we considered the winner.
-        return (winner_option_key, round(winner/total*100,1))
+        return (winner_option_key, winner/total*100)
 
+    @staticmethod
+    def analyze_equivalent_aye_voters_us_population_percent():
+        import tqdm
+        for vote in tqdm.tqdm(list(Vote.objects\
+            .filter(
+                    total_plus__gt=0, # votes without ayes are not relevant
+                    chamber=CongressChamber.senate, # in the senate
+                    congress__gte=57, # first Congress than began after 1900 when we first have pop data
+                    category__in=Vote.MAJOR_CATEGORIES, # there are crazy-low population percents for some procedural votes
+            )\
+            .order_by('-created'))):
+            print(vote.created.year, vote.get_absolute_url(), vote.category, *vote.get_equivalent_aye_voters_us_population_percent(), sep=",")
 
 class VoteOption(models.Model):
     vote = models.ForeignKey('vote.Vote', related_name='options', on_delete=models.CASCADE)
