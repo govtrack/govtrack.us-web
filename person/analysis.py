@@ -313,12 +313,14 @@ def load_missing_legislators(congress):
         row["returntotalvotes"] = int(row["returntotalvotes"]) if row["returntotalvotes"] else None
         row["returnmissedvotespct"] = (int(round(100 * row["returnmissedvotes"] / row["returntotalvotes"]))) if row["returntotalvotes"] else None
 
-        if row["person"].id == 412677:
-            row["explanation_html"] = "Rep. Evans had a stroke in early 2024."
-        if row["person"].id == 400314:
-            row["explanation_html"] = "Rep. Pelosi suffered a hip fracture from a fall during foreign travel in December 2024."
-        if row["person"].id == 400162:
-            row["explanation_html"] = "Rep. Grijalva underwent treatment for lung cancer in 2024."
+        explanations = {
+            412677: "Rep. Evans had a stroke in early 2024.", # 2024-12
+            400314: "Rep. Pelosi suffered a hip fracture from a fall during foreign travel in December 2024.", # 2024-12
+            400162: "Rep. Grijalva underwent treatment for lung cancer in 2024.", # 2024-12
+            456886: "Rep. Pettersen said in January 2025 that she is unable to travel due to her pregnancy.", # 2025-01
+        }
+        if row["person"].id in explanations:
+            row["explanation_html"] = explanations[row["person"].id]
 
 
         row["chart"] = load_votes_analysis(row["person"])
