@@ -104,7 +104,7 @@ for id, votes in recent_votes.items():
 	if (run["last"].date() - run["first"].date()).days < 10: continue
 
 	# Don't ding members missing for less than 3 legislative days because single-day
-	# absenses are not uncommon.
+	# absences are not uncommon.
 	if run["legislative_days"] < 3: continue
 
 	# In recesses, legislators don't have an opportunity to return from a short
