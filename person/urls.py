@@ -13,8 +13,9 @@ urlpatterns = [
 	url(r'^report-cards/(\d{4})/([^/]+)/([^/\.]+).csv$', person.views.person_session_stats_export, name='person_session_stats_export'),
 	url(r'^missing', person.views.missing_legislators),
 	
-    url(r'^([A-Za-z]+)/?$', person.views.browse_state), # Wikipedia has bad links using state names instead of abbrs, so we support it
-    url(r'^([A-Za-z]+)/(\d{1,2})/?$', person.views.browse_district), # Wikipedia has bad links using state names instead of abbrs, so we support it
+	url(r'^([A-Za-z]+)/?$', person.views.browse_state), # Wikipedia has bad links using state names instead of abbrs, so we support it
+	url(r'^([A-Za-z]+)/(\d{1,2})/?$', person.views.browse_district), # Wikipedia has bad links using state names instead of abbrs, so we support it
+	url(r'^([A-Za-z]{2})/(\d{1,2}).png$', person.views.district_map_static_image), # Wikipedia has bad links using state names instead of abbrs, so we support it
 
 	url(r'^[^/]+/(\d+)$', person.views.person_details, name='person_details'), # name slug (but it's ignored) "/" ID
     url(r'^([A-Z]?\d+)$', person.views.person_details, name='person_details'), # allow bioguide ID here

@@ -464,15 +464,34 @@ def browse_map(request):
         "statelist": statelist,
         "current_members": current_members,
     }
-    
-def normalize_state_arg(state):
+
+def normalize_state_arg(state, district=None):
     if state.lower() in state_abbr_from_name:
         # Wikipedia links use state names!
-        return state_abbr_from_name[state.lower()]
+        state = state_abbr_from_name[state.lower()]
     elif state.upper() not in statenames:
         raise Http404()
     else:
-        return state.upper()
+        state = state.upper()
+
+    if state not in stateapportionment: raise Http404()
+
+    if district is not None:
+        # make district an integer
+        try:
+            district = int(district)
+        except ValueError:
+            raise Http404()
+
+        # check that the district is in range
+        if stateapportionment[state] in ("T", 1):
+            # territories and state-at large districts have no district page or image
+            raise Http404()
+        elif district < 1 or district > stateapportionment[state]:
+            # invalid district number
+            raise Http404()
+
+    return state, district
 
 def get_senators(state):
     # Load senators for all states that are not territories.
@@ -511,8 +530,7 @@ def get_representatives(state):
 @anonymous_view
 @render_to('person/state.html')
 def browse_state(request, state):
-    state = normalize_state_arg(state)
-    if state not in stateapportionment: raise Http404()
+    state, _ = normalize_state_arg(state)
             
     return {
         "state": state,
@@ -526,23 +544,8 @@ def browse_state(request, state):
 @anonymous_view
 @render_to('person/district_map.html')
 def browse_district(request, state, district):
-    state = normalize_state_arg(state)
-    if state not in stateapportionment: raise Http404()
+    state, district = normalize_state_arg(state, district)
 
-    # make district an integer
-    try:
-        district = int(district)
-    except ValueError:
-        raise Http404()
-
-    # check that the district is in range
-    if stateapportionment[state] in ("T", 1):
-        # territories and state-at large districts have no page here
-        raise Http404()
-    elif district < 1 or district > stateapportionment[state]:
-        # invalid district number
-        raise Http404()
-    
     # senators
     sens = [({}, s) for s in get_senators(state)]
     if len(sens) > 0:
@@ -565,7 +568,21 @@ def browse_district(request, state, district):
         "statelist": statelist,
         "legislators": sens+reps,
     }
-    
+
+@anonymous_view
+def district_map_static_image(request, state, district):
+    state, district = normalize_state_arg(state, district)
+    width, height = 512, 512
+    center_lat, center_long, center_zoom = get_district_bounds(state, district)
+    center_zoom += log(width / 1000) / log(2)
+    district = "%02d" % district
+    # The MapBox static maps API also supports a bbox but in a test of NY-6 it didn't work right.
+    url = f"https://api.mapbox.com/styles/v1/{settings.MAPBOX_MAP_STYLE}/static/{center_long},{center_lat},{center_zoom}/{width}x{height}?access_token={settings.MAPBOX_ACCESS_TOKEN}&layer_id=CD-Fills&setfilter=[%27all%27,[%27==%27,%27state%27,%27{state}%27],[%27==%27,%27number%27,%27{district}%27]]"
+    import urllib.request
+    req = urllib.request.Request(url)
+    r = urllib.request.urlopen(req, timeout=10)
+    return HttpResponse(r.read(), content_type=r.info()["Content-Type"])
+
 def get_district_bounds(state, district):
     zoom_info_cache_key = "map_zoom_%s-%s" % (state, "" if not district else district)
 
