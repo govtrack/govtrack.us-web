@@ -10,7 +10,7 @@ from htmlemailer import send_mail
 
 from datetime import datetime, timedelta
 
-blast_id = 7
+blast_id = 8
 
 class Command(BaseCommand):
 	help = 'Sends out an email blast to users with a site announcement.'
@@ -26,15 +26,16 @@ class Command(BaseCommand):
 			test_addrs = [cmd]
 		else:
 			# some subset of users
-			users = UserProfile.objects.all()\
-				.filter(
-				    Q(user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*1))
-				  | Q(user__last_login__gt=datetime.now()-timedelta(days=31*4))
-				  | Q(user__date_joined__gt=datetime.now()-timedelta(days=31*4))
-                ).distinct()
+			users = UserProfile.objects.all()#\
+				#.filter(
+				#    Q(user__subscription_lists__last_email_sent__gt=datetime.now()-timedelta(days=31*12))
+				#  | Q(user__last_login__gt=datetime.now()-timedelta(days=31*12))
+				#  | Q(user__date_joined__gt=datetime.now()-timedelta(days=31*12))
+				#  | Q(last_blog_post_emailed__gt=0)
+                #).distinct()
 
 			# also require:
-			# * the mass email flag is turned
+			# * the mass email flag is not turnd off
 			# * we haven't sent them this blast already
 			users = users.filter(
 					massemail=True,
@@ -43,14 +44,17 @@ class Command(BaseCommand):
 
 			test_addrs = None
 
-		print(users.count(), test_addrs)
-			
+		# Get the list of user IDs.
+		users = set(users.values_list("user", flat=True))
+
+		# Skip users that have had a bounced email recorded - avoid getting bad reputation
+		bounced = set(BouncedEmail.objects.order_by("user__id").values_list("user", flat=True))
+		users = users - bounced
+		users = list(users)
+
+		print(len(users), test_addrs)
 		if cmd == "count":
 			return
-
-		# Get the list of user IDs.
-			
-		users = list(users.order_by("user__id").values_list("user", flat=True))
 
 		# Only do a batch.
 
@@ -81,25 +85,28 @@ class Command(BaseCommand):
 		State.workers = []
 
 		def wait_workers(n):
-			popped = 0
+			# Wait for any of the workers to complete until
+			# there are not more than N workers.
 			while len(State.workers) > n:
-				ar = State.workers.pop(0)
-				if ar.get():
-					State.total_emails_sent += 1
-				popped += 1
-			return popped
+				timeout = .1 / len(State.workers) # pause a bit for each worker to complete
+				for ar in State.workers:
+					#print(len(State.workers), "|", ar, timeout, "...")
+					ar.wait(timeout)
+					if ar.ready():
+						#print("   popped")
+						State.total_emails_sent += 1
+						State.workers.remove(ar)
+						break
 
 		pool = Pool(processes=3)
 
 		for i, userid in enumerate(users):
-			#if send_blast(userid, args[0] == "test", test_addrs, i, len(users)):
-			#	total_emails_sent += 1
 			ar = pool.apply_async(
 				send_blast,
 				[userid, cmd != "go", test_addrs, i, len(users)])
 			State.workers.append(ar)
 				
-			if wait_workers(15):
+			if wait_workers(8):
 				# if DEBUG, clear memory
 				from django import db
 				db.reset_queries()
@@ -112,13 +119,8 @@ def send_blast(user_id, is_test, test_addrs, counter, counter_max):
 	user = User.objects.get(id=user_id)
 	prof = user.userprofile()
 
-	# skip users that have had a bounced email recorded - avoid getting bad reputation
-	if BouncedEmail.objects.filter(user=user).exists():
-		return
-
 	# from address / return path address
-	emailfromaddr = getattr(settings, 'EMAIL_UPDATES_FROMADDR',
-			getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com'))
+	emailfromaddr = getattr(settings, 'SERVER_EMAIL', 'no.reply@example.com')
 	emailreturnpath = emailfromaddr
 	if hasattr(settings, 'EMAIL_UPDATES_RETURN_PATH'):
 		emailreturnpath = (settings.EMAIL_UPDATES_RETURN_PATH % user.id)
@@ -138,9 +140,12 @@ def send_blast(user_id, is_test, test_addrs, counter, counter_max):
 				"unsub_url": settings.SITE_ROOT_URL + "/accounts/unsubscribe/" + prof.get_one_click_unsub_key()
 			},
 			headers = {
-				'From': "GovTrack.us <noreply@alerts.govtrack.us>",
-				'Reply-To': "GovTrack.us <hello@govtrack.us>",
+				'From': settings.SERVER_EMAIL,
+				#'Reply-To': "GovTrack.us <hello@govtrack.us>",
+				'Auto-Submitted': 'auto-generated',
 				'X-Auto-Response-Suppress': 'OOF',
+				'X-Unsubscribe-Link': prof.get_one_click_unsub_url(),
+				'List-Unsubscribe': "<" + prof.get_one_click_unsub_url() + ">",
 			},
 			fail_silently=False
 		)
