@@ -277,7 +277,7 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 	blog_post = None
 	if not (profile.get_blogpost_freq() == "weekly" and 2 not in list_email_freq):
 		for post in latest_blog_post_by_category:
-		   if post.id <= profile.last_blog_post_emailed and not send_old_events: continue
+		   if post.id <= profile.last_blog_post_emailed: continue
 		   if post.category not in blog_post_cats: continue
 		   blog_post = post
 
@@ -359,7 +359,6 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			print(user, "user is on suppression list already")
 		else:
 			print(user, e)
-			import traceback; traceback.print_exc()
 		# raise - debugging - must also disable process pool to see what happened
 
 		# don't update this user's lists with what events were sent because it failed
