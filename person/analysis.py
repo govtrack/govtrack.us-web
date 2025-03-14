@@ -318,6 +318,7 @@ def load_missing_legislators(congress):
             400314: "Rep. Pelosi suffered a hip fracture from a fall during foreign travel in December 2024.", # 2024-12
             400162: "Rep. Grijalva underwent treatment for lung cancer in 2024.", # 2024-12
             456886: "Rep. Pettersen said in January 2025 that she is unable to travel due to her pregnancy.", # 2025-01
+            456883: "Rep. Mullin had complications from a knee operation in February 2025.", # 2025-03
         }
         if row["person"].id in explanations:
             row["explanation_html"] = explanations[row["person"].id]
