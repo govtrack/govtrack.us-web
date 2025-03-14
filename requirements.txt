@@ -31,7 +31,6 @@ user-agents
 dj_database_url
 django-cache-url
 dj-haystack-url
-paypalrestsdk
 django-crispy-forms
 rtyaml
 plotly
@@ -46,3 +45,4 @@ Mastodon.py
 requests
 django-markdownx
 statsmodels
+stripe

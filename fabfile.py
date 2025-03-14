@@ -125,7 +125,6 @@ def install_deps():
         # list to make development easier.
         sudo('pip install psycopg2')
         sudo('pip install mysqlclient')
-        sudo('pip install paypalrestsdk') # installs 'cryptography' package which requires libssl-dev which we skip in local development
 
         # Similarly, we only need gunicorn if we're serving from a VM.
         sudo('pip install gunicorn')

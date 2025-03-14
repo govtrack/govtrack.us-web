@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
@@ -503,107 +504,113 @@ def financial_report(request):
     
 @render_to('website/ad_free_start.html')
 def go_ad_free_start(request):
-    # just show the go-ad-free page.
+    # if there is a checkout session ID in the request session,
+    # try to process it in case the webhook failed and get it
+    # so we can display a checkout session in progress
+    cs = None
+    try:
+        cs = go_ad_free_complete_checkout_session(request.session["go-ad-free-payment"])
+        cs = ("%0.2f" % (cs.amount_total / 100),
+              datetime.utcfromtimestamp(cs.created),
+              cs.payment_status == "paid")
+    except:
+        pass
     
     # does the user have an ad-free payment already?
     msi = { }
     if not request.user.is_anonymous:
         msi = request.user.userprofile().get_membership_subscription_info()
 
-    # or did the user make an anonymous payment?
-    from website.models import PayPalPayment
-    p = None
-    try:
-        p = PayPalPayment.objects.get(paypal_id=request.session["go-ad-free-payment"])
-    except:
-        pass
-    return { "msi": msi, "anonymous_payment": p }
+    return { "msi": msi, "checkout_session": cs }
     
-def go_ad_free_redirect(request):
-    # create a Payment and redirect to the approval step, and track this
+def go_ad_free_checkout(request):
     try:
         amount = float(request.POST["amount"])
     except:
         return HttpResponseRedirect(reverse(go_ad_free_start))
 
+    # We have different SKUs if the user is/isn't logged in, to avoid confusion,
+    # and these SKUs are different in the Stripe test environment.
+    if settings.STRIPE_SECRET_KEY.startswith("sk_test_"):
+        # Test environment.
+        skus = ["prod_RwVgM4oUqy1dGk", "prod_RwVfbypzdrpSuE"] # logged out, logged in
+    else:
+        # Live environment
+        skus = ["prod_RwVghshnIhc4gG", "prod_RwVgXw4hgeen4n"] # logged out, logged in
+    descriptions = ["GovTrack.us Tip", "GovTrack.us Ad-Free for One Year"] # logged out, logged in
 
-    import paypalrestsdk
-
-    sandbox = ""
-    if paypalrestsdk.api.default().mode == "sandbox":
-        sandbox = "-sandbox"
-
-    # slightly different SKU if the user is/isn't logged in
     if request.user.is_anonymous:
-        item = {
-            "name": "Support GovTrack.us (%.02d)" % amount,
-            "sku": "govtrack-tip" + sandbox,
-        }
-        description = "Thank you for supporting GovTrack.us%s!" % sandbox
+        productid = skus[0]
+        description = descriptions[0]
     else:
-        item = {
-            "name": "Ad-Free GovTrack.us for 1 Year (%.02d)" % amount,
-            "sku": "govtrack-ad-free-for-year" + sandbox,
-        }
-        description = "Ad-Free%s: GovTrack.us is ad-free for a year while you're logged in." % sandbox
+        productid = skus[1]
+        description = descriptions[1]
 
-    item.update({
-        "price": "%.02f" % amount,
-        "currency": "USD",
-        "quantity": 1,
-    })
-    
-    payment = paypalrestsdk.Payment({
-      "intent": "sale",
-      "payer": { "payment_method": "paypal" },
-      "transactions": [{
-        "item_list": {
-          "items": [item]
-            },
-          "amount": {
-            "total": item["price"],
-            "currency": item["currency"],
-          },
-          "description": description }],
-      "redirect_urls": {
-        "return_url": request.build_absolute_uri(reverse(go_ad_free_finish)),
-        "cancel_url": request.build_absolute_uri(reverse(go_ad_free_start)),
-      },
-    })
-    
-    if not payment.create():
-      raise ValueError("Error creating PayPal.Payment: " + repr(payment.error))
+    import stripe
+    try:
+      checkout_session = stripe.checkout.Session.create(
+        success_url=request.build_absolute_uri(reverse(go_ad_free_start)),
+        cancel_url=request.build_absolute_uri(reverse(go_ad_free_start)),
+        client_reference_id=("user=" + str(request.user.id)) if not request.user.is_anonymous else None,
+        payment_intent_data={ "description": description },
+        line_items=[{
+          "price_data": { "currency": "USD",
+                         "product": productid,
+                         "unit_amount": int(amount * 100), # it's in cents
+                       },
+          "quantity": 1
+        }],
+        mode="payment",
+        customer_email=request.user.email if not request.user.is_anonymous else None,
+      )
+    except Exception as e:
+      raise ValueError("Error creating payment session: " + str(e))
+
+    request.session["go-ad-free-payment"] = checkout_session.id
       
-    request.session["paypal-payment-to-execute"] = payment.id
-
-    from website.models import PayPalPayment
-    rec = PayPalPayment(
-        paypal_id=payment.id,
-        user=request.user if not request.user.is_anonymous else None,
-        response_data=payment.to_dict(),
-        notes=item["name"])
-    rec.save()
-  
-    for link in payment.links:
-        if link.method == "REDIRECT":
-            return HttpResponseRedirect(link.href)
-    else:
-        raise ValueError("No redirect in PayPal.Payment: " + payment.id)
+    return HttpResponseRedirect(checkout_session.url)
     
-def go_ad_free_finish(request):
-    from website.models import PayPalPayment
-    from dateutil.relativedelta import relativedelta
+@csrf_exempt
+def go_ad_free_webhook(request):
+  import stripe
 
-    # Execute the payment.
-    (payment, rec) = PayPalPayment.execute(request)
+  payload = request.body
+  sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+  event = None
 
-    # Save to user's profile
-    if rec.user:
-        prof = rec.user.userprofile()
+  try:
+    event = stripe.Webhook.construct_event(
+      payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+    )
+  except ValueError as e:
+    return HttpResponse(status=400)
+  except stripe.error.SignatureVerificationError as e:
+    return HttpResponse(status=400)
 
+  if (
+    event['type'] == 'checkout.session.completed'
+    or event['type'] == 'checkout.session.async_payment_succeeded'
+  ):
+    go_ad_free_complete_checkout_session(event['data']['object']['id'])
+
+  return HttpResponse(status=200)
+
+def go_ad_free_complete_checkout_session(session_id):
+    import stripe
+    checkout_session = stripe.checkout.Session.retrieve(session_id,
+        expand=['line_items'])
+    if checkout_session.payment_status != 'unpaid' \
+      and checkout_session.client_reference_id:
+
+        # Save to user's profile
+        from django.contrib.auth.models import User
+        user = User.objects.get(id=int(checkout_session.client_reference_id.split("=")[1]))
+        prof = user.userprofile()
+
+        from dateutil.relativedelta import relativedelta
         now = datetime.now()
         pfrec = { }
-        pfrec["paypal_payment_id"] = payment.id
+        pfrec["stripe_checkout_session_id"] = checkout_session.id
         pfrec["date"] = now.isoformat()
         expires = now + relativedelta(years=1)
         pfrec["expires"] = expires.isoformat()
@@ -611,11 +618,7 @@ def go_ad_free_finish(request):
         if prof.paid_features == None: prof.paid_features = { }
         prof.paid_features["ad_free"] = pfrec
         prof.save()
-
-    # Send user back to the start.
-    request.session["go-ad-free-payment"] = payment.id
-    return HttpResponseRedirect(reverse(go_ad_free_start))
- 
+    return checkout_session
 
 @anonymous_view
 def videos(request, video_id=None):

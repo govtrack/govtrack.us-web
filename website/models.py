@@ -60,8 +60,6 @@ class UserProfile(models.Model):
             from parser.processor import Processor
             created = Processor.parse_datetime(ad_free["date"])
             expires = Processor.parse_datetime(ad_free["expires"]) if ad_free["expires"] is not None else None
-            #pmt = PayPalPayment.objects.get(paypal_id = ad_free["paypal_payment_id])
-            #expires = pmt.created.replace(year=pmt.created.year+1)
             if expires is None:
                 ret["active"] = True
                 ret["message"] = "You went ad-free for life on %s. Thanks!" % created.strftime("%x")
@@ -180,40 +178,6 @@ class PayPalPayment(models.Model):
     class Meta:
         unique_together = ( ('user', 'created'), ) # dangerous?
 
-    @staticmethod
-    def from_session(request):
-        import paypalrestsdk
-        try:
-            payment_id = request.session["paypal-payment-to-execute"]
-            del request.session["paypal-payment-to-execute"]
-        except KeyError:
-            raise ValueError("User session lost track of payment object." )
-
-        payment = paypalrestsdk.Payment.find(payment_id)
-
-        try:
-            rec = PayPalPayment.objects.get(paypal_id = payment.id)
-        except PayPalPayment.DoesNotExist:
-            raise ValueError("Trying to complete a payment that does not exist in our database: " + payment.id)
-    
-        return (payment, rec)
-
-    @staticmethod
-    def execute(request):
-        # Get object.
-        (payment, rec) = PayPalPayment.from_session(request)
-        
-        # Execute if it's not already been executed (in case of page reload).
-        if payment.state == "created" and not rec.executed:
-            if not payment.execute({"payer_id": request.GET["PayerID"]}):
-                raise ValueError("Error executing PayPal.Payment (%s): " % (payment.id, repr(payment.error)))
-            
-        # Update our database record of the payment.
-        rec.response_data = payment.to_dict()
-        rec.executed = True
-        rec.save()
-        
-        return (payment, rec)
 
 class MediumPost(models.Model):
     medium_id = models.CharField(max_length=32, unique=True)

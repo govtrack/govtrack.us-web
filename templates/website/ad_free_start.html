@@ -26,15 +26,18 @@
 
 		{% if msi.active %}
 			<p class="text-danger"><b>{{msi.message}}</b></p>
-		{% elif anonymous_payment %}
-			<p class="text-danger"><b>Thank you for your contribution of ${{anonymous_payment.response_data.transactions.0.amount.total}} on {{anonymous_payment.created|date}}!</b></p>
+		{% endif %}
+		{% if checkout_session %}
+			<p class="text-danger"><b>Thank you for your ${{checkout_session.0}} payment on {{checkout_session.1|date}}.
+			{% if not checkout_session.2 %}Your payment is pending.{% endif %}
+			</b></p>
 		{% endif %}
 
 		<div style="border: 1px solid #CCC; padding: 15px; margin: 2em -10px; background-color: #FFD; border-radius: 10px;">
-			<form id="go_ad_free" method="post" action="/accounts/membership/start">
+			<form id="go_ad_free" method="post" action="/accounts/membership/checkout">
 				{% csrf_token %}
 
-				<p><b>Add me to GovTrack.us&rsquo;s inner circle with a membership at the following yearly level:</b></p>
+				<p><b>Please create my one-year membership at the following level:</b></p>
 
 				<p>
 					<label class="radio-inline"><input name="amount" type="radio" value="100"> $100</label>
@@ -85,7 +88,7 @@
 
 				<hr style="border-color: #DD9"/>
 
-				<p style="font-size: 90%; margin: 0;">We use PayPal as our payment processor. GovTrack.us is a project of Civic Impulse, LLC, a tiny company that makes sure this website keeps on chugging. Contributions are <b>not</b> tax-deductible.</p>
+				<p style="font-size: 90%; margin: 0;">We use Stripe as our payment processor. GovTrack.us is a project of Civic Impulse, LLC, a tiny company that makes sure this website keeps on chugging. Payments are <b>not</b> tax-deductible.</p>
 
 			</form>
 		</div>

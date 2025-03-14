@@ -90,9 +90,7 @@ copy_env_vars = [
     "GOOGLE_ANALYTICS_KEY",
     "TWITTER_ACCESS_TOKEN", # for automated tweets and to update @GovTrack/Members-of-Congress twitter list
     "TWITTER_ACCESS_TOKEN_SECRET",
-    "PAYPAL_CLIENT_MODE",
-    "PAYPAL_CLIENT_ID",
-    "PAYPAL_CLIENT_SECRET",
+    "STRIPE_PUB_KEY", "STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET",
     "MAPBOX_ACCESS_TOKEN",
     "MAPBOX_MAP_STYLE",
     "MAPBOX_MAP_ID",
@@ -118,10 +116,10 @@ for var in copy_env_vars:
         if var == "EMAIL_USE_TLS": val = (val.lower()=="true")
         locals()[var] = val
 
-# The hide-the-ads payment requires Paypal integration:
-if locals().get("PAYPAL_CLIENT_ID"):
-    import paypalrestsdk
-    paypalrestsdk.configure(mode=PAYPAL_CLIENT_MODE, client_id=PAYPAL_CLIENT_ID, client_secret=PAYPAL_CLIENT_SECRET)
+# The hide-the-ads payment requires Stripe integration:
+if locals().get("STRIPE_SECRET_KEY"):
+    import stripe
+    stripe.api_key = STRIPE_SECRET_KEY
 
 # Multiple email backends?
 from django.core.mail.backends.smtp import EmailBackend as SMTPEmailBackend
