@@ -46,3 +46,4 @@ requests
 django-markdownx
 statsmodels
 stripe
+atproto

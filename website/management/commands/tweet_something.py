@@ -12,7 +12,7 @@ class OkITweetedSomething(Exception):
 	pass
 
 class Command(BaseCommand):
-	help = 'Tweets/Toots something interesting as @GovTrack.'
+	help = 'Post a tracked legislative event to social media.'
 
 	tweets_storage_fn = 'data/misc/tweets.json'
 
@@ -27,9 +27,6 @@ class Command(BaseCommand):
 		# For testing, how many tweets to do in this run.
 		self.max = self.options["max"]
 
-		# Determine maximum length of a shortened link.
-		self.short_url_length_https = 23 # self.tweepy_client.configuration()['short_url_length_https'] --- this is failing with 'tweepy.error.TweepError: Failed to parse JSON payload: Expecting value: line 1 column 1 (char 0)'
-
 		# Construct clients.
 		#from website.util import twitter_api_client
 		#self.tweepy_client = twitter_api_client()
@@ -39,6 +36,10 @@ class Command(BaseCommand):
 		    access_token = settings.MASTODON_GOVTRACK_PUSH_BOT_ACCESS_TOKEN,
 		    api_base_url = 'https://mastodon.social'
 		)
+
+		from atproto import Client
+		self.bluesky = Client()
+		self.bluesky.login(settings.BLUESKY_USERNAME, settings.BLUESKY_PASSWORD)
 
 		if options["ignore_history"]:
 			self.previous_tweets = { }
@@ -89,6 +90,7 @@ class Command(BaseCommand):
 		self.tweet_coming_up()
 		self.tweet_a_bill_action()
 		self.tweet_votes_yday(False)
+		#self.test_message()
 
 	###
 
@@ -111,25 +113,6 @@ class Command(BaseCommand):
 
 		# Truncate to hit the right total length.
 
-		# Twitter doesn't count codepoints as one character, contrary to the dev docs.
-		# Only certain ranges count as 1, the rest count as two. See
-		# https://twitter.com/FakeUnicode/status/928741001186783232. Since truncatechars
-		# sees actual codepoints, it will not trim to the right length, so we'll
-		# compute the difference between what Python and Twitter see, and we'll
-		# reduce the target length accordingly.
-		text_len_diff = sum([1 for c in text if not( (0 <= ord(c) <= 0x10FF) or (0x2000 <= ord(c) <= 0x200D) or (0x2010 <= ord(c) <= 0x201F) or (0x2032 <= ord(c) <= 0x2037) )])
-		tweet_text = truncatechars(text,
-			280 # max tweet length
-			-1 # space
-			-self.short_url_length_https # link after being automatically shortened
-			-1 # space
-			-4 # emoji
-			-text_len_diff # number of characters we have to reduce by so Twitter doesn't see more than 280, even tho we might see 280
-		)
-		tweet_text += " "
-		tweet_text += url
-		tweet_text += " 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is four(?) characters as Twitter sees it (plus the preceding space)
-
 		toot_text = truncatechars(text,
 			480 # max toot length, minus some amount in case Unicode is handled weirdly in the character count limit
 			-1 # space
@@ -141,27 +124,38 @@ class Command(BaseCommand):
 		toot_text += url
 		toot_text += " 🏛️" # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is four(?) characters as Twitter sees it (plus the preceding space)
 
-		# Tweet & Toot
-
-		#try:
-		#	tweet = self.tweepy_client.update_status(tweet_text)._json
-		#except Exception as e:
-		#	tweet = { "error": str(e) }
-		tweet = { "error": "disabled-by-jt" }
+		# Toot
 
 		try:
 			toot = self.mastodon.toot(toot_text)
 		except Exception as e:
 			toot = { "error": str(e) }
 
-		if "error" in tweet and "error" in toot:
-			raise Exception(str(tweet) + "/" + str(toot))
+		# Now Bluesky
+
+		bsky_text = truncatechars(text,
+			300 # max length measured in grapheme clusters, so we may get a few extra codepoints
+			-1 # space
+			-(len(url) * 2 + 4) # seems like it might be markdown-encoded internally, didn't check
+			-1 # space
+			-4 # emoji
+		)
+		from atproto import client_utils as atproto_client_utils
+		bsky_text = atproto_client_utils.TextBuilder().text(bsky_text)
+		bsky_text.text(" ")
+		bsky_text.link(url, url)
+		bsky_text.text(" 🏛️") # there's a civics building emoji there indicating to followers this is an automated tweet? the emoji is four(?) characters as Twitter sees it (plus the preceding space)
+
+		try:
+			bskypost = self.bluesky.send_post(bsky_text)
+		except Exception as e:
+			bskypost = { "error": str(e) }
 
 		self.previous_tweets[key] = {
 			"text": text,
 			"when": timezone.now().isoformat(),
-			"tweet": tweet,
-			"toot": toot
+			"toot": toot,
+			"bsky": bskypost,
 		}
 
 		#print(json.dumps(self.previous_tweets[key], indent=2))
@@ -332,3 +326,6 @@ class Command(BaseCommand):
 				+ f""" of {m["totalvotes"]} roll call votes ({m["missedvotespct"]}%)"""
 				+ f""" since {m["firstmissedvote"].strftime("%x")}.""",
 				"https://www.govtrack.us/congress/members/missing")
+
+	def test_message(self):
+		self.post_tweet("testmessage", "This is a test of our automated legislative update social media posts.", "https://www.govtrack.us")
