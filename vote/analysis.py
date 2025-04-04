@@ -1,6 +1,9 @@
 #!script
 
 def logistic_regression(X, Y, exclude_features = set()):
+  # The "intercept" feature with the value 1 should be added
+  # to all data points.
+
   # Transform X from a list of dicts of factors to
   # a matrix with a defined order. Also transform
   # True to 1, False to -1, and None to 0. (We don't
@@ -24,11 +27,15 @@ def logistic_regression(X, Y, exclude_features = set()):
 
   # Run regression.
 
-  #from statsmodels.api import OLS
-  #model = OLS(Y, X)
+  from statsmodels.api import OLS
+  model = OLS(Y, X)
+  method = "qr"
 
-  from statsmodels.discrete.discrete_model import Logit
-  model = Logit(Y, X)
+  # This is giving weird results.
+  #from statsmodels.discrete.discrete_model import Logit
+  #model = Logit(Y, X)
+  #method = "bfgs"
+
   import warnings
   with warnings.catch_warnings():
     warnings.filterwarnings("ignore", message="Perfect separation")
@@ -39,12 +46,12 @@ def logistic_regression(X, Y, exclude_features = set()):
       # method='bfgs' avoids Singular Matrix which is very common for
       # binary data where features may be linear combinations of other
       # features
-      fit = model.fit(method='bfgs', maxiter=100, disp=False, warn_convergence=False) # disp silences stdout
-      rsquared = float(fit.prsquared) # .rsquared for OLS; for Logit this can also throw PerfectSeparationError
+      fit = model.fit(method=method, disp=False, warn_convergence=False) # disp silences stdout
+      rsquared = float(fit.rsquared if hasattr(fit, 'rsquared') else fit.prsquared) # .rsquared for OLS; for Logit this can also throw PerfectSeparationError
     except:
     	# various errors can be thrown
       return None
-  #if not fit.converged: return None # not in old version currently installed
+  #if not fit.converged: return None # always seems to be false
 
   # Transform results back into a dictionary.
   return {
@@ -55,7 +62,8 @@ def logistic_regression(X, Y, exclude_features = set()):
         "pvalue": float(fit.pvalues[i])
       }
       for i, feature in enumerate(features)
-    }
+    },
+    "fittedvalues": [dict(zip(("y", "yfit", "resid"), row)) for row in zip(Y, fit.fittedvalues, fit.resid if hasattr(fit, "resid") else fit.resid_response)],
   }
 
 

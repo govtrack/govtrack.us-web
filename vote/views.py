@@ -170,35 +170,26 @@ def get_vote_outliers(voters):
 	# Run a really simple statistical model to see which voters don't
 	# match predicted outcomes.
 
-	import numpy
-	from logistic_regression import logistic_regression, calcprob
+	from vote.analysis import logistic_regression_fit_best_model
 
-	# Build a binary matrix of predictors.
-	predictor_names = ('party', 'ideolog_score')
 	party_values = { "Democrat": -1, "Republican": 1 }
 	vote_values = { "+": 1, "-": 0 }
-	x = [ [] for predictor in predictor_names ]
+	x = [ ]
 	y = [ ]
 	for voter in voters:
-		x[0].append(party_values.get(voter.party, 0)) # independents and unrecognized parties get 0
-		x[1].append(getattr(voter, 'ideolog_score', 0)) # ideology scores may not be available in a Congress, also not available for vice president
+		x.append({
+			"intercept": 1,
+			"party": party_values.get(voter.party, 0), # independents and unrecognized parties get 0
+			"ideology": getattr(voter, 'ideolog_score', 0), # ideology scores may not be available in a Congress, also not available for vice president
+		})
 		y.append(vote_values.get(voter.option.key, .5)) # present, not voting, etc => .5
-	x = numpy.array(x)
-	y = numpy.array(y)
 
 	# Perform regression.
-	try:
-		regression_beta, J_bar, l = logistic_regression(x, y)
-	except: # LinAlgError
-		# Something went wrong. No outliers will be reported.
-		return
-
-	# Predict votes.
-	estimate = calcprob(regression_beta, x)/100.0
+	model = logistic_regression_fit_best_model(x, y)
 
 	# Mark voters whose vote is far from the prediction.
 	for i, v in enumerate(voters):
-		v.is_outlier = (abs(y[i]-estimate[i]) > .7)
+		v.is_outlier = (abs(model['fittedvalues'][i]['resid']) > .7) if model else False
 
 @anonymous_view
 def vote_export_csv(request, congress, session, chamber_code, number):
