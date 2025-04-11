@@ -885,22 +885,32 @@ def lookup_district(request):
             tile = self.reader.get(self.zoomlevel, x, y)
             if self.header["tile_compression"] == Compression.GZIP:
                 tile = gzip.decompress(tile)
-            features = mapbox_vector_tile.decode(tile)
+            features = mapbox_vector_tile.decode(tile, default_options={ "y_coord_down": True })
             return (features, tilex, tiley)
 
         def intersect_features(self, features, tilex, tiley):
+            if not 'layer' in features: return
             layer = features['layer']
             extent = layer['extent']
+            if not 'features' in layer: return
             for feature in layer['features']:
                 geometry = feature['geometry']
-                if geometry['type'] != 'Polygon':
+                #print(geometry['type'], feature['properties']['title_short'])
+                if geometry['type'] == 'Polygon':
+                    geometry = [geometry['coordinates']]
+                elif geometry['type'] == 'MultiPolygon':
+                    geometry = geometry['coordinates']
+                else:
                     continue
-                poly = geometry['coordinates']
-                poly = [
-                    [(ptx / extent, pty / extent) for (ptx, pty) in ring]
-                    for ring in poly]
-                if shapely.Polygon(poly[0], poly[1:]).contains(shapely.Point((tilex, tiley))):
-                    yield feature
+                geometry = [
+                    [ [(ptx / extent, pty / extent) for (ptx, pty) in ring]
+                     for ring in poly ]
+                    for poly in geometry ]
+                for poly in geometry:
+                    if shapely.Polygon(poly[0], poly[1:]).contains(shapely.Point((tilex, tiley))):
+                        #print("", "matched")
+                        yield feature
+                        break # no need to match other polygons within this MultiPolygon
 
         def __call__(self, lng, lat):
             (features, tilex, tiley) = self.get_tile(lng, lat)

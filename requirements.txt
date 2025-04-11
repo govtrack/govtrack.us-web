@@ -47,3 +47,6 @@ django-markdownx
 statsmodels
 stripe
 atproto
+pmtiles
+mapbox-vector-tile
+shapely
