@@ -79,9 +79,9 @@
     var input = $('#user-address');
     var w = $('#user-address').parents("form").innerWidth();
     $('#user-address').parents("form").find("button").each(function() {
-      w -= $(this).outerWidth();
+      w -= $(this).outerWidth() * 1.2;
     })
-    input.width(w-50);
+    input.width(w - 50);
   }
 
   function go_to_district(state, number, fragment) {
@@ -205,10 +205,8 @@
 <div style="margin: 2em 0">
 <form class="form-inline" onsubmit="do_address(); return false;">
   <p>Find your representative (a.k.a. congressman or congresswoman) by entering your address{% if not state %} or clicking a district in the map{% endif %}:</p>
-  <div class="form-group">
-    <label for="user-address" class="sr-only">Address</label>
-    <input type="text" class="form-control" id="user-address" placeholder="Enter an address in the United States">
-  </div>
+  <label for="user-address" class="sr-only">Address</label>
+  <input type="text" class="form-control" id="user-address" placeholder="Enter an address in the United States" style="max-width: 25em; display: inline-block;">
   <button type="submit" class="btn btn-primary">Find My District</button>
 </form>
 <div style="margin: .5em"><a href="#" onclick="do_by_current_location(); return false;" style="text-decoration: none"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
