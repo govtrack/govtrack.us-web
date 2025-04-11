@@ -1,0 +1,11 @@
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+{% if map_driver == 'mapbox' %}
+	<script src='https://api.mapbox.com/mapbox-gl-js/v2.6.0-beta.1/mapbox-gl.js'></script>
+	<link href='https://api.mapbox.com/mapbox-gl-js/v2.6.0-beta.1/mapbox-gl.css' rel='stylesheet' />
+{% else %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.6.0/maplibre-gl.min.css" integrity="sha512-qN/uDg9bS3IAldWq4lswyC+9ZSoShtfyNDp+FaJhdtXJqdgubHA+s4nB8BajW0m90Y0+RBGbqu2anzbxiQYdHA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.6.0/maplibre-gl.min.js" integrity="sha512-FcWazYy5A1zzYDC431+DKtEYdoBYFdQcWFHyWSR8CxKivuV98UeDdO332YqQE+vYcAqyjzN3MD8qprQIMm4CFg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
+    <script src="/static/maps/protomaps-style.jsonp"></script>
+{% endif %}

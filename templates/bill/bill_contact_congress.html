@@ -6,7 +6,7 @@
 {% block title %}Call or Write Congress About {{bill|truncatewords:16}} - GovTrack.us{% endblock %}
 
 {% block head %}
-  {% include "person/mapbox-head.html" %}
+  {% include "person/district_map_head.html" %}
   <style>
     #map {
       width: 100%;
@@ -265,7 +265,7 @@
 
 {% block body_scripts %}
 
-{% include "person/mapbox-scripts.html" %}
+{% include "person/district_map_scripts.html" %}
 
 <script>
   $(function() {

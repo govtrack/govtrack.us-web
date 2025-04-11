@@ -54,6 +54,7 @@ base_context = {
     "MAPBOX_MAP_STYLE": getattr(settings, 'MAPBOX_MAP_STYLE', None),
     "MAPBOX_MAP_ID": getattr(settings, 'MAPBOX_MAP_ID', None),
     "DISTRICT_BBOXES_FILE": getattr(settings, 'DISTRICT_BBOXES_FILE', None),
+    "DISTRICT_PMTILES_FILE": getattr(settings, 'DISTRICT_PMTILES_FILE', None),
 }
 
 def template_context_processor(request):

@@ -131,7 +131,7 @@ article {
 {% block body_scripts %}
 <script type="text/javascript">
   function do_address_form() {
-    window.location = "/congress/members/map#address=" + encodeURIComponent($('#address').val());
+    window.location = "/congress/members/map?map_driver=mapbox#address=" + encodeURIComponent($('#address').val());
     return false;
   }
   function do_by_current_location() {

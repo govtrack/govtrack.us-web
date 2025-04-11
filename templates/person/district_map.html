@@ -6,7 +6,7 @@
 {% block cat-icon-filename %}img-congress-members.png{% endblock %}
 
 {% block head %}
-  {% include "person/mapbox-head.html" %}
+  {% include "person/district_map_head.html" %}
   <style>
     .spanbullets span:after {
       display: inline;
@@ -25,17 +25,11 @@
 {% endblock %}
 
 {% block body_scripts %}
-  {% include "person/mapbox-scripts.html" %}
+  {% include "person/district_map_scripts.html" %}
   
   <script>
   var current_district_popup;
-  var hover_popup = new mapboxgl.Popup({
-    closeButton: false,
-    closeOnClick: false
-  });
-  map.on("mouseenter", "CD-Fills", function(e) { map.getCanvas().style.cursor = 'pointer'; });
-  //map.on("mouseleave", "CD-Fills", function(e) { map.getCanvas().style.cursor = ''; }); // when going between districts a leave event for the previous district can fire after the enter event for the next district?
-  //map.on("click", "CD-Fills", function(e) { show_district_popup(e, e.features[0].properties); }); // doesn't work if not all districts are shaded
+  var hover_popup = makePopup();
   map.on("click", function(e) { map_click_to_district(e, function(feature) { show_district_popup(e, feature); }) });
   var current_legislators_by_district = {
     {% for m in current_members %}
@@ -93,17 +87,17 @@
   function go_to_district(state, number, fragment) {
       	if (number != 0) {
           // URLs don't use zero-padding
-          var path = "/congress/members/" + state + "/" + number;
+          var path = "/congress/members/" + state + "/" + number {% if map_driver %}+"?map_driver={{map_driver|urlencode}}" {% endif %};
           if (path == window.location.pathname) {
             // The page won't reload. Just add a marker & alert.
-            map.addMarker(q, pt);
+            map.addMarker(q);
             alert("That address is in the same congressional district.");
           }
           window.location = path + (fragment || "");
         }
       	else {
             // There is no district page for at-large districts. Redirect to the state page.
-            window.location = "/congress/members/" + state;
+            window.location = "/congress/members/" + state {% if map_driver %}+"?map_driver={{map_driver|urlencode}}" {% endif %};
         }
   }
 

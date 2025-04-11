@@ -94,7 +94,6 @@ copy_env_vars = [
     "MAPBOX_ACCESS_TOKEN",
     "MAPBOX_MAP_STYLE",
     "MAPBOX_MAP_ID",
-    "DISTRICT_BBOXES_FILE",
     "COMMUNITY_FORUM_URL",
     "COMMUNITY_FORUM_SSO_KEY",
     "PROPUBLICA_CONGRESS_API_KEY",
@@ -110,6 +109,8 @@ copy_env_vars = [
     "MISCONDUCT_DATABASE_PATH",
     "PRONUNCIATION_DATABASE_PATH",
     "SCORECARDS_DATABASE_PATH",
+    "DISTRICT_BBOXES_FILE",
+    "DISTRICT_PMTILES_FILE",
 ]
 for var in copy_env_vars:
     val = get_env_variable(var, default='')

@@ -24,5 +24,6 @@ urlpatterns = [
 
     re_path(r'^embed/mapframe(?:\.xpd)?$', person.views.districtmapembed, name='districtmapembed'),
 
+    re_path(r'^lookup-district\.json$', person.views.lookup_district),
     re_path(r'^lookup\.json$', person.views.lookup_reps),
 ]

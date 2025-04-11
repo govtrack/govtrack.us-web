@@ -179,3 +179,6 @@ The crontab sends the outputs of the commands to the address in `conf/crontab` (
 	user *******
 	password *******
 	EOF
+
+For the congressional district maps, you'll need to fill in `static/maps` with `bboxes.js`, a `.pmtiles` file, and `protomaps-style.jsonp`,
+and then set the `DISTRICT_PMTILES_FILE` and `DISTRICT_BBOXES_FILE` settings to the (relative) paths to those files.

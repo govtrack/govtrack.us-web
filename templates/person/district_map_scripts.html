@@ -1,0 +1,313 @@
+<script id="district-bboxes" src="/{{DISTRICT_BBOXES_FILE}}"> </script>
+
+<script>
+{% if map_driver == 'mapbox' %}
+// Mapbox configuration
+var accessToken = '{{MAPBOX_ACCESS_TOKEN|escapejs}}';
+var styleURL = 'mapbox://styles/{{MAPBOX_MAP_STYLE|escapejs}}';
+var mapId = '{{MAPBOX_MAP_ID|escapejs}}';
+mapboxgl.accessToken = accessToken;
+{% endif %}
+
+var state = {% if state %}"{{state|upper|escapejs}}"{% else %}null{% endif %};
+var district = {% if district %}parseInt("{{district|upper|escapejs}}"){% else %}null{% endif %};
+{% if district %}if (district < 10) district = "0" + district; else district = "" + district;{% endif %}
+
+{% if bounds %}
+{# user-specified #}
+var bbox = "{{bounds|escapejs}}".split(',');
+  bbox = [parseFloat(bbox[0]), parseFloat(bbox[3]), parseFloat(bbox[2]), parseFloat(bbox[1])];
+{% else %}
+var bbox;
+if (state && district)
+  bbox = bboxes[state + district]
+else if (state)
+  bbox = bboxes[state];
+else
+  bbox = [-128.8, 23.5, -65.4, 53]; // United States
+{% endif %}
+
+function lngLatBoundsToCameraOptions(bounds) {
+    var w = $('#map').width();
+    var h = $('#map').height();
+    // during initialization the element dimensions may not be available and can be negative?! in which case use the window dimensions
+    if (!w || !h || (w*h) < 320*200) { w = $(window).width(); h = $(window).height(); }
+    var zoom = Math.log(((w*h) / ((bounds.getNorth()-bounds.getSouth()) * (bounds.getEast() - bounds.getWest())))) / 1.75
+    return {
+      center: bounds.getCenter(),
+      zoom: zoom
+    };
+  }
+
+  // Initialize the map
+  let map;
+  {% if map_driver == 'mapbox' %}
+    // Use an Albers equal area projection. Center the projection on the state/district
+    // if we're opening on a state/district to minimize distortion in the default view,
+    // although that creates an interesting effect when zooming out!
+    var bounds = mapboxgl.LngLatBounds.convert([[bbox[0], bbox[1]], [bbox[2], bbox[3]]]);
+    var camera = lngLatBoundsToCameraOptions(bounds);
+    var projection = null;
+    if (state != "AK" && state != "AS") // the albers projection doesn't work right for these
+      projection = { name: 'albers', center: camera.center.toArray(), parallels: [23.5, 53] };
+    map = new mapboxgl.Map({
+      container: 'map',
+      style: styleURL,
+      projection: projection,
+      center: camera.center,
+      zoom: camera.zoom
+      });
+
+    function address_to_latlng(address, callback) {
+      $.ajax({
+        url: 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(address) + '.json?country=us&access_token=' + accessToken,
+        method: 'GET',
+        success: function(resp) {
+          if (resp.type == "FeatureCollection" && resp.features.length > 0) {
+            callback(resp.features[0].center);
+            return;
+          }
+          alert("Could not find that address.");
+        }
+      });
+    }
+
+    function latlng_to_district(lngLat, callback) {
+      // Note that, from the Mapbox API docs:
+      // "Use of this endpoint is rate limited to 600 requests per minute."
+      $.ajax({
+        url: 'https://api.mapbox.com/v4/' + mapId + '/tilequery/' + lngLat.lng + ',' + lngLat.lat + '.json?radius=0&access_token=' + accessToken,
+        method: 'GET',
+        success: function(resp) {
+          if (resp.type == "FeatureCollection" && resp.features.length > 0)
+            // resp is always a FeatureCollection, just sanity checking, but it might
+            // be empty. If it's not empty, it will contain a single Feature
+            // (whose geometry is a Polygon) represending the boundaries of a
+            // congressional district. Its properties come from the original
+            // GeoJSON uploaded to Mapbox.
+            callback(resp.features[0].properties);
+          else
+            // Click was not on a district.
+            callback(null);
+        }
+      });
+    }
+
+  {% else %}
+    let protocol = new pmtiles.Protocol({/*metadata: true*/});
+    maplibregl.addProtocol("pmtiles", protocol.tile);
+
+    const protomaps_layers_base = 11;
+
+    let style_fills = [
+      {
+        id: "CD-Fills",
+        source: "congressional_districts",
+        "source-layer": "layer",
+        type: "fill",
+        paint: {
+          "fill-color": [
+            "case",
+             ["==", ["get", "color_index"], 0], "hsl(42, 75%, 40%)",
+             ["==", ["get", "color_index"], 1], "hsl(42, 75%, 45%)",
+             ["==", ["get", "color_index"], 2], "hsl(42, 75%, 55%)",
+             ["==", ["get", "color_index"], 3], "hsl(42, 75%, 65%)",
+             ["==", ["get", "color_index"], 4], "hsl(42, 75%, 75%)",
+             "hsl(0, 0%, 0%)"
+          ],
+          "fill-opacity": ["interpolate",["linear"],["zoom"],4,.8,12,0]
+        },
+      }
+    ];
+
+    let style_outlines_labels = [
+      {
+        id: "cdoutline",
+        source: "congressional_districts",
+        "source-layer": "layer",
+        type: "line",
+        paint: {
+          "line-color": "rgb(100, 90, 120)",
+          "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 10],
+          "line-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0, 8, 1, 12, .25],
+        },
+      },
+      {
+        id: "cdlabel",
+        source: "congressional_districts",
+        "source-layer": "layer",
+        filter: ["==","group","label"],
+        type: "symbol",
+        layout: {
+            "symbol-placement": "point",
+            "text-font": [
+                "Noto Sans Regular"
+            ],
+            'text-field': ["step", ["zoom"], 
+                ['get', 'title_short'],
+                5, ["step", ["get", "area"], ['get', 'title_short'], 10**11, ['get', 'title_long']],
+                7, ["step", ["get", "area"], ['get', 'title_short'], 10**10, ['get', 'title_long']],
+                9, ["step", ["get", "area"], ['get', 'title_short'], 10**9, ['get', 'title_long']],
+                10, ["step", ["get", "area"], ['get', 'title_short'], 10**8, ['get', 'title_long']],
+                11, ["step", ["get", "area"], ['get', 'title_short'], 10**7, ['get', 'title_long']],
+                12, ["step", ["get", "area"], ['get', 'title_short'], 10**6, ['get', 'title_long']],
+                13, ['get', 'title_long']],
+            'text-size': ["interpolate", ["linear"], ["zoom"],
+                4, 16,
+                15, ["interpolate", ["linear"], ["get", "area"], 10**6, 16, 10**8, 40]],
+        },
+        paint: {
+            'text-color': '#202',
+            'text-halo-color': '#fff',
+            'text-halo-width': 3
+        },
+      },
+    ];
+
+
+    var bounds = maplibregl.LngLatBounds.convert([[bbox[0], bbox[1]], [bbox[2], bbox[3]]]);
+    var camera = lngLatBoundsToCameraOptions(bounds);
+    map = new maplibregl.Map({
+      container: "map",
+      
+      center: camera.center,
+      zoom: camera.zoom,
+
+      style: {
+        version: 8,
+
+        sources: {
+          congressional_districts: {
+            type: "vector",
+            url: "pmtiles:///{{DISTRICT_PMTILES_FILE|escapejs}}", {# Django's runserver doesn't support HTTP Range #}
+          },
+
+          "protomaps": {
+              "type": "vector",
+              "attribution": "<a href=\"https://github.com/protomaps/basemaps\">Protomaps</a> © <a href=\"https://openstreetmap.org\">OpenStreetMap</a>",
+              "url": "pmtiles://https://govtrackus.s3.us-east-1.amazonaws.com/congressional-district-maps/baselayer.pmtiles"
+          }
+
+          // Backup OSM baselayer.
+          /*
+          "osm": {
+            "type": "raster",
+            "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            "tileSize": 256,
+            "attribution": "&copy; OpenStreetMap Contributors",
+            "maxzoom": 19
+          }*/
+        },
+
+        //glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+
+        // TODO: Clone these locally?
+        "sprite": "https://protomaps.github.io/basemaps-assets/sprites/v4/light",
+        "glyphs": "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
+
+        layers: 
+          // The backup OSM baselayer but isn't as nice as when we put
+          // land vector layers behind our fills and roads etc on top 
+          // of our fills.
+          /*[{
+            "id": "osm",
+            "type": "raster",
+            "source": "osm"
+          }],*/
+
+
+          protomaps_style.layers.slice(0, protomaps_layers_base)
+            .concat(style_fills)
+            // Water, roads, and labels go on top of our fills but below our outlines and labels.
+            .concat(protomaps_style.layers.slice(protomaps_layers_base))
+            .concat(style_outlines_labels)
+      },
+    });
+
+    function latlng_to_district(lngLat, callback) {
+      $.ajax({
+        url: '/congress/members/lookup-district.json',
+        data: lngLat,
+        method: 'POST',
+        success: function(resp) {
+          if (!resp)
+            callback(null);
+          callback(resp);
+        }
+      });
+    }
+
+    function address_to_latlng(address, callback) {
+      // Redirect to a version of this page with the mapbox driver.
+      window.location = "/congress/members/map?map_driver=mapbox#address=" + encodeURIComponent(address)
+      return;
+      alert("Sorry, finding a congressional district using an address is not currently available.");
+    }
+
+    let mapboxgl = maplibregl;
+  {% endif %}
+
+  function makePopup()
+  {
+    return new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+  }
+
+  // Once map is fully loaded...
+  map.on('load', function() {
+    // set controls
+    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+    map.touchZoomRotate.disableRotation();
+
+    // Create a filter to show only the selected state and district.
+    map.showCongressionalDistrict = function(state, district) {
+      var filter = ['all'];
+      if (state) filter.push(['==', 'state', state]);
+      if (district) filter.push(['==', 'number', district]);
+      map.setFilter("CD-Fills", filter);
+      // Could also do CD-Outlines and CD-Labels.
+    }
+    map.showCongressionalDistrict(state, district);
+  });
+
+  // Add markers.
+  map.addMarker = function(label, lnglat) {
+    var marker = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    }).setLngLat(lnglat)
+      .setText(label)
+      .addTo(map);
+    return marker;
+  };
+
+function map_click_to_district(clickEventData, callback) {
+      // The map control provides a client-side-only way to determine what
+      // is under the cursor. But this only sees features that are currently
+      // shown on the map. so if a filter is applied and the click is on
+      // a district that is not shown, then this will miss the feature,
+      // but we'll fall back to the tilequery API in that case. And it
+      // uses the click event's screen coordinate.
+      var features = map.queryRenderedFeatures(
+        clickEventData.point,
+        {
+          layers: ["CD-Fills"]
+        });
+      if (features.length > 0) {
+        callback(features[0].properties);
+        return;
+      }
+
+      if (!map.getFilter("CD-Fills")) {
+        // If no filter is applied, then a negative result is definitive.
+        callback(null);
+        return;
+      }
+      
+      // If a filter is applied, we need to use an API. 
+      return latlng_to_district(clickEventData.lngLat, callback);
+}
+
+</script>

@@ -4,12 +4,12 @@
   <meta charset='utf-8' />
   <title>GovTrack.us Congressional Districts Map Widget</title>
 
-  <!-- See https://github.com/aaronpdennis/congress-maps -->
+  <!-- See https://github.com/govtrack/congress-maps -->
 
   <!-- jQuery -->
   <script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery.js"></script>
 
-  {% include "person/mapbox-head.html" %}
+  {% include "person/district_map_head.html" %}
 
   <style>
       body { margin:0; padding:0; background-color: white; }
@@ -23,10 +23,6 @@
 <!-- Map Container -->
 <div id='map'></div>
 
-<div id='geocoding-status' style="display: none">
-  <h1>Locating that place...</h1>
-</div>
-
 {% if not hide_footer %}
   <div id="footer">
     <div>
@@ -35,7 +31,7 @@
   </div>
 {% endif %}
 
-{% include "person/mapbox-scripts.html" %}
+{% include "person/district_map_scripts.html" %}
 
 {% if request.GET.marker_lat %}
 <script>
@@ -59,13 +55,7 @@ map.on('load', function() {
 
 <script>
 $(function() {
-  function show_geocoding_status() {
-    $('#map').hide();
-    $('#geocoding-status').show();
-  }
-
   function go_to_point(pt) {
-    // Query Mapbox API to get what district is at this location.
     var longitude = pt[0];
     var latitude = pt[1];
     latlng_to_district({
@@ -89,14 +79,6 @@ $(function() {
       go_to_point([position.coords.longitude, position.coords.latitude]);
     });
 
-  {% elif request.GET.address %}
-    // Note that, from the Mapbox API docs, we're rate limited to 600
-    // requests per minute.
-    address_to_latlng(
-      "{{request.GET.address|escapejs}}",
-      function(pt) {
-        go_to_point(pt);
-    })
   {% endif %}
 })
 
