@@ -298,9 +298,9 @@ $(function() {
 <p class="text-info">{{message}}</p>
 {% endif %}
 
-<h2 style="margin-top: 2em"><span>Analysis and Updates</span></h2>
+<h2 style="margin-top: 2em"><span>Email Subscriptions</span></h2>
 
-<p>Which of the following general updates would you like to get by email from us?</p>
+<p>Which of the following types of updates would you like to get by email from us (in addition to your tracker lists below)?</p>
 
 <form action="/accounts/update_settings" method="post" style="margin: 1em 0;">{% csrf_token %}
     <input type="hidden" name="action" value="posts"/>
@@ -310,7 +310,7 @@ $(function() {
         <div class="form-check">
           <input class="form-check-input" type="checkbox" value="{{category.key}}" id="postcat_{{category.key}}" name="postcatsub"
             {% if category.subscribed %}checked{% endif %}>
-          <label class="form-check-label" for="postcat_{{category.key}}" style="color: black;">
+          <label class="form-check-label" for="postcat_{{category.key}}" style="color: black; font-weight: bold;">
             {{category.label}}
           </label>
           <div style="font-size: 95%; line-height: 120%;">
@@ -319,7 +319,9 @@ $(function() {
             {% elif category.key == "legrecap" %}
                 Highlights of recent activity in Congress with links to read more.
             {% elif category.key == "analysis" %}
-                Some thoughts from us about what&rsquo;s happening in Congress.
+                Thoughts from us about what&rsquo;s happening in Congress.
+            {% elif category.key == "execbrch" %}
+                Updates on executive orders and other actions by the President, the White House, and top Executive Branch officials.
             {% elif category.key == "sitenews" %}
                 Announcements about new GovTrack features, etc.
             {% elif category.key == "sitehelp" %}

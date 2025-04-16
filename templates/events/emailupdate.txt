@@ -11,7 +11,7 @@ This is your email update from www.GovTrack.us. To change your email update sett
 
 {% endif %}{{blog_post.body_text}}
 
-(This post is also on our website at {{SITE_ROOT_URL}}{{blog_post.get_absolute_url}}.)
+(This post is also on our website at {{SITE_ROOT_URL}}{{blog_post.get_absolute_url}}. Select which emails you get from us at https://www.govtrack.us/accounts/lists.)
 
 {% endif %}
 =====================================================================
@@ -23,6 +23,6 @@ This is your email update from www.GovTrack.us. To change your email update sett
 To change your email updates settings go to {{SITE_ROOT_URL}}/accounts/lists or you can unsubscribe from all future mail from us at {unsubscribe}.
 
 GovTrack.us is a project of {accountcompany} (https://civicimpulse.com), {accountaddress1}, {accountcity} {accountstate} {accountzip} {accountcountry}.
-You may contact us at hello+u{{user.id}}@govtrack.us. The email address this message was sent from is not monitored for replies.
+You may contact us at hello+u{{user.id}}@govtrack.us.
 
 {% endautoescape %}

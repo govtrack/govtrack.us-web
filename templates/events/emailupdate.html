@@ -103,8 +103,9 @@ for our social media posts.
 							<p>{% if blog_post.author %}By {{blog_post.author}}{% endif %} ({{blog_post.created|date}})</p>
 							{{blog_post.body_html|safe}}
 							<p style="font-style: italic; font-size: 90%">
-							   <a href="{{SITE_ROOT_URL}}{{blog_post.get_absolute_url}}">View this post on the web</a>.
-							   <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">Send us an email with your questions about this post</a>.
+							   <a href="{{SITE_ROOT_URL}}{{blog_post.get_absolute_url}}">View this post on the web</a> &middot;
+							   <a href="{{SITE_ROOT_URL}}/accounts/lists">Select which updates you get from us</a> &middot;
+							   <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">Send us feedback about this post</a>
 							</p>
 						</div>
 						</div>
@@ -126,7 +127,7 @@ for our social media posts.
         			<td valign="top">
 			        	<p style="text-align:center;">You are receiving this email because you are subscribed to email updates from <a href="https://www.govtrack.us?{{utm}}">www.GovTrack.us</a>.</p>
 			        	<p style="text-align:center;">To change your email update settings go to your <a href="https://www.govtrack.us/accounts/lists?{{utm}}">subscription settings</a> or <a href="{unsubscribe}">unsubscribe from all mail from us</a>.</p>
-						<p style="text-align:center;">GovTrack.us is a project of <a href="https://civicimpulse.com?{{utm}}">{accountcompany}</a>, {accountaddress1}, {accountcity} {accountstate} {accountzip} {accountcountry}. You may contact us at <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">hello@govtrack.us</a>. The email address this message was sent from is not monitored for replies.</p>
+						<p style="text-align:center;">GovTrack.us is a project of <a href="https://civicimpulse.com?{{utm}}">{accountcompany}</a>, {accountaddress1}, {accountcity} {accountstate} {accountzip} {accountcountry}. You may contact us at <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">hello@govtrack.us</a>.</p>
 				    </td>
 			    </tr>
 			</table>

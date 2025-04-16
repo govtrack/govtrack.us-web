@@ -397,19 +397,22 @@ def load_latest_blog_posts():
 	global latest_blog_post_by_category
 
 	# Scan recent blog posts and keep the latest one
-	# in each category.
+	# in each category. Since we backdate some posts,
+	# we order by id so we can still send in the order
+	# we publish.
 	from website.models import BlogPost
 	latest_blog_post_by_category = { }
 	for post in BlogPost.objects\
 		.filter(published=True, created__gt=datetime.now() - timedelta(days=14))\
 		.exclude(id=434)\
-		.order_by('created'):
+		.order_by('id'):
+#		.order_by('created'): # also see below
 		if post.category == "billsumm": continue # see BlogPost
 		latest_blog_post_by_category[post.category] = post
 
 	# Turn dict into a list sorted by creation date ascending.
 	latest_blog_post_by_category = list(latest_blog_post_by_category.values())
-	latest_blog_post_by_category.sort(key = lambda post : post.created)
+	latest_blog_post_by_category.sort(key = lambda post : post.id) # alternatively, .created, see above
 
 	# Pre-render the HTML and plain text of each.
 	for post in latest_blog_post_by_category:

@@ -432,6 +432,7 @@ class BlogPost(models.Model):
         ("billsumm", "Bill Summary"),
         ("legrecap", "Legislative Recap"),
         ("legahead", "Legislative Preview"),
+        ("execbrch", "The White House"),
     ]
 
     title = models.CharField(max_length=128)
@@ -440,8 +441,8 @@ class BlogPost(models.Model):
     author = models.CharField(max_length=128, blank=True, null=True)
     body = MarkdownxField()
     info = JSONField(default={}, blank=True, null=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField()
     published = models.BooleanField(default=False, db_index=True)
 
     class Meta:
@@ -519,7 +520,7 @@ class BlogPost(models.Model):
             if qs.count() == 0: continue
             n = min(qs.count(), 10)
             p = qs.order_by('-created')[n-1]
-            nperday = n / (datetime.now() - p.created).days
+            nperday = n / max((datetime.now() - p.created).days, 30)
             for period, days in (("week", 7), ("month", 30.5), ("year", 365.25)):
                nperperiod = round(nperday * days)
                if nperperiod >= 1:
