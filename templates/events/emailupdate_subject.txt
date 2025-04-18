@@ -1,1 +1,1 @@
-Activity in Congress{% if blog_post %}: {{blog_post.title|safe}}{% endif %} ({{date}})
+{% if not blog_post %}Activity in Congress ({{date}}){% else %}{{blog_post.title|safe}}{% endif %}

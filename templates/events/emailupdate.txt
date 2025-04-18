@@ -1,4 +1,4 @@
-{% autoescape off %}GovTrack Email Update
+{% autoescape off %}GovTrack Update on Activity in Congress and the White House
 =====================
 
 This is your email update from www.GovTrack.us. To change your email update settings, including to unsubscribe, go to {{SITE_ROOT_URL}}/accounts/lists.
