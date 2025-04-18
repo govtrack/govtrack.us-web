@@ -437,12 +437,11 @@ def http_rest_json(url, args=None, method="GET", headers={}):
     # Call a REST API that returns a JSON object/array and return it as a Python dict/list.
     import urllib.request, urllib.parse, json
     if method == "GET" and args != None:
-        url += "?" + urllib.parse.urlencode(args).encode("utf8")
+        url += "?" + urllib.parse.urlencode(args)
     req = urllib.request.Request(url, headers=headers)
     r = urllib.request.urlopen(req, timeout=10)
     if r.getcode() != 200: raise Exception("Failed to load: " + url)
-    r = r.read().decode("utf8")
-    return json.loads(r)
+    return json.load(r)
 
 def http_rest_yaml(url, args=None, method="GET", headers={}):
     # Call a REST API that returns a YAML object/array and return it as a Python dict/list.
@@ -833,15 +832,33 @@ def districtmapembed(request):
 
 @json_response
 def lookup_district(request):
+    if "address" in request.POST:
+        address = request.POST["address"]
+        url = "https://api.geoapify.com/v1/geocode/search"
+        try:
+            geojson = http_rest_json(url, { "text": address, "apiKey": settings.GEOAPIFY_API_KEY }, headers={'Accept': 'application/json'})
+            lng_lat = geojson['features'][0]['geometry']['coordinates']
+        except:
+            return None
+    else:
+        try:
+            lng_lat = (float(request.POST.get("lng")), float(request.POST.get("lat")))
+        except:
+            return None
+
     # Use a pmfiles file to resolve district lookups.
     # See congress-maps repository.
+    if not hasattr(lookup_district, '_lookup_from_lnglat'):
+        lookup_district._lookup_from_lnglat = create_district_lookup_service()
 
-    try:
-        lng = float(request.POST.get("lng"))
-        lat = float(request.POST.get("lat"))
-    except:
-        return None
+    # The maps page is expecting the same GeoJSON feature properties as we
+    # have in the maps pmtiles data, so we can just return the whole feature properties.
+    district_features = lookup_district._lookup_from_lnglat(*lng_lat)
+    if district_features:
+        district_features["query"] = lng_lat # if was a geocode request
+    return district_features
 
+def create_district_lookup_service():
     import math
     import gzip
     import urllib.request
@@ -864,7 +881,7 @@ def lookup_district(request):
                 with open(filename, "r+b") as f:
                     source = MmapSource(f)
             else:
-                source = PmtilesWebSource(filename)            
+                source = PmtilesWebSource(filename)
             self.reader = Reader(source)
             self.header = self.reader.header()
             self.zoomlevel = zoomlevel
@@ -921,9 +938,7 @@ def lookup_district(request):
     zoom = 12
     pmtiles = PmtilesLookup(fname, zoom)
 
-    # The maps page is expecting the same GeoJSON feature properties as we
-    # have in the maps pmtiles data, so we can just return the whole feature properties.
-    return pmtiles(lng, lat)
+    return pmtiles
 
 @anonymous_view
 @json_response

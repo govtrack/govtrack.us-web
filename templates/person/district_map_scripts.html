@@ -238,10 +238,18 @@ function lngLatBoundsToCameraOptions(bounds) {
     }
 
     function address_to_latlng(address, callback) {
-      // Redirect to a version of this page with the mapbox driver.
-      window.location = "/congress/members/map?map_driver=mapbox#address=" + encodeURIComponent(address)
-      return;
-      alert("Sorry, finding a congressional district using an address is not currently available.");
+      $.ajax({
+        url: '/congress/members/lookup-district.json',
+        data: { address: address },
+        method: 'POST',
+        success: function(resp) {
+          if (resp) {
+            callback(resp.query, resp);
+            return;
+          }
+          alert("Could not find that address.");
+        }
+      });
     }
 
     let mapboxgl = maplibregl;

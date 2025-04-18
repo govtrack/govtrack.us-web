@@ -14,7 +14,6 @@ from numpy import median
 
 from vote.models import Vote, CongressChamber, VoterType, VoteCategory, VoteSummary
 from vote.search import vote_search_manager
-from person.views import http_rest_json
 from events.models import Feed
 from us import get_all_sessions
 

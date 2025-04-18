@@ -102,8 +102,13 @@
   }
 
   // Handle geocoding result.
+  function go_to_district_from_feature_with_marker(district, marker, q)
+  {
+      var fragment = "#q=" + encodeURIComponent(q) + "&marker_lng=" + marker[0] + "&marker_lat=" + marker[1];
+      go_to_district(district.state, parseInt(district.number), fragment); // remove zero-padding
+  }
   function go_to_point(pt, q) {
-    // Query Mapbox API to get what district is at this location.
+    // Query API to get what district is at this location.
     latlng_to_district({
       lat: pt[1],
       lng: pt[0]}, function(district) {
@@ -111,9 +116,7 @@
       		alert("That location does not seem to be in a United States Congressional District.");
       		return;
       	}
-
-        var fragment = "#q=" + encodeURIComponent(q) + "&marker_lng=" + pt[0] + "&marker_lat=" + pt[1];
-        go_to_district(district.state, parseInt(district.number), fragment); // remove zero-padding
+        go_to_district_from_feature_with_marker(district, pt, q)
       });
   }
 
@@ -125,7 +128,7 @@
 	    return;
 	}
 
-	// this special query triggers geocoding
+	// this special query triggers geocoding by browser-supplied location
   	if (addr == "my location") {
 	    do_by_current_location();
 	    return;
@@ -139,7 +142,12 @@
         	return;
 	}
 
-    address_to_latlng(addr, function (pt) { go_to_point(pt, addr); });
+    address_to_latlng(addr, function (pt, feature) {
+        if (!feature)
+           go_to_point(pt, addr);
+        else
+           go_to_district_from_feature_with_marker(feature, pt, addr);
+    });
   }
 
   function do_by_current_location() {
