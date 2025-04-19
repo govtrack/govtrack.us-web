@@ -383,3 +383,64 @@ function init_site_search_for_control(elem, options) {
         }
     }
 }
+
+function redirect_to_district_page(state, district, lnglat, queryText)
+{
+  let path = "/congress/members/" + state;
+  if (district != 0)
+    path += "/" + district;
+  if (queryText || lnglat)
+    path += "#";
+  if (queryText)
+    path += "q=" + encodeURIComponent(queryText);
+  if (queryText && lnglat)
+    path += "&";
+  if (lnglat)
+    path += "marker_lng=" + lnglat[0] + "&marker_lat=" + lnglat[1];
+  window.location = path;
+}
+
+function find_district_from_address_or_location(query, callback) {
+  // Query is either { address: "12 Main Street..." }
+  // or { lng: ..., lat: ... }. Callback is called with
+  // callback(state, district, lnglat, queryText),
+  // where queryText is the address if given, otherwise null.
+  $.ajax({
+    url: '/congress/members/lookup-district.json',
+    data: query,
+    method: 'POST',
+    success: function(feature) {
+      if (!feature) {
+        alert("Could not find that address.");
+        return;
+      }
+
+      // feature is a GeoJSON features dictionary from our pmtiles file,
+      // plus a 'query' attribute with lng and lat properties if this
+      // query was an address.
+      let state = feature.state;
+      let district = parseInt(feature.number);
+      let lnglat = feature.query;
+      let queryText = query.address; // may be null
+      callback(state, district, lnglat, queryText);
+    }
+  });
+}
+
+function redirect_to_district_page_from_address(address)
+{
+  find_district_from_address_or_location({ address: address }, redirect_to_district_page);
+}  
+
+function redirect_to_district_page_from_geolocation() {
+  if ("geolocation" in navigator)
+  {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      find_district_from_address_or_location(
+        { lng: position.coords.longitude, lat: position.coords.latitude},
+        redirect_to_district_page);
+    });
+    return;
+  }
+  alert("Location not available.");
+}

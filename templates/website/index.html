@@ -131,13 +131,9 @@ article {
 {% block body_scripts %}
 <script type="text/javascript">
   function do_address_form() {
-    window.location = "/congress/members/map?map_driver=mapbox#address=" + encodeURIComponent($('#address').val());
-    return false;
+    redirect_to_district_page_from_address($('#address').val());
   }
-  function do_by_current_location() {
-    window.location = "/congress/members/map#my_location=1";
-    return false;
-  }
+
   function do_subject_form() {
     var url = $('#bill-subject-area').val();
     if (url)
@@ -189,7 +185,7 @@ article {
 
 <div class="row top-actions">
   <div class="col-sm-6">
-    <form action="#" onsubmit="return do_address_form();">
+    <form action="#" onsubmit="do_address_form(); return false;">
       <label for="address">
         <h2>Find your representative and senators:</h2>
         <div>Enter your home address:</div>
@@ -205,7 +201,7 @@ article {
       </tr>
       </table>
       <div class="underlinks">
-        <a href="#" onclick="do_by_current_location(); return false;"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a> &middot;
+        <a href="#" onclick="redirect_to_district_page_from_geolocation(); return false;"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a> &middot;
         <a href="/congress/members/map"><i class="fas fa-globe" aria-hidden="true"></i> View a Map</a> &middot;
         <a href="/congress/members"><i class="fas fa-list" aria-hidden="true"></i> Find Members of Congress</a> &middot;
       </div>

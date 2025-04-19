@@ -10,10 +10,9 @@
 
 <script type="text/javascript">
 function doform() {
-	window.location = "/congress/members/map#address=" + encodeURIComponent($('#address').val());
+	redirect_to_district_page_from_address($('#address').val());
 	return false;
 }
-
 
 function make_longevity_chart(elemid, data, xaxis) {
 	Highcharts.chart(elemid, {
@@ -108,7 +107,7 @@ label { font-weight: normal; }
 <div class="row">
 <div class="col-sm-6">
 	<form action="#" onsubmit="return doform();" style="margin-bottom: 1em">
-		<a href="/congress/members/map#my_location=1" style="float: right"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a>
+		<a href="#" style="float: right" onclick="redirect_to_district_page_from_geolocation(); return false;"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at Home</a>
 		<label for="address" style="display: block; margin-bottom: .25em;">Enter your address:</label>
 		<table style="width: 100%;"><tr>
 		<td><input id="address" class="form-control" type="text" value="" placeholder="415 N. Main St., Hannibal, Missouri" /></td>

@@ -131,15 +131,13 @@ $(function() {
 
     {% if stateapp != 1 %}
 	<div style="margin: 1.75em 0;">
-	<form class="form-inline" onsubmit="window.location = '/congress/members/map#address=' + encodeURIComponent($('#user-address').val()); return false;">
+	<form class="form-inline" onsubmit="redirect_to_district_page_from_address($('#user-address').val()	); return false;">
       <div style="font-weight: bold; margin-bottom: 4px;">Find your representative by entering your address:</div>
-	  <div class="form-group">
-	    <label for="user-address" class="sr-only">Address</label>
-	    <input type="text" class="form-control" id="user-address" placeholder="Enter an address in {{statename}}" name="address">
-	  </div>
-	  <button type="submit" class="btn btn-primary">Find District</button>
+		  <label for="user-address" class="sr-only">Address</label>
+		  <input type="text" class="form-control" id="user-address" placeholder="Enter an address in {{statename}}" style="max-width: 25em; display: inline-block;">
+		  <button type="submit" class="btn btn-primary">Find My District</button>
 	</form>
-	<div style="margin: .5em"><a href="#" onclick="window.location = '/congress/members/map#address=my+location'; return false;" style="text-decoration: none"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
+	<div style="margin: .5em"><a href="#" onclick="redirect_to_district_page_from_geolocation(); return false;" style="text-decoration: none"><i class="fas fa-map-marker" aria-hidden="true"></i> I&rsquo;m at home, use my phone/computer&rsquo;s location</a></div>
 	</div>
 	{% endif %}
 
