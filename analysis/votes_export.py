@@ -15,9 +15,9 @@ w.writerow(
 )
 
 votes = Vote.objects.filter(
-	congress=118,
+	congress__gte=118,
 	#session__in=(2015, 2017),
-	chamber=CongressChamber.house
+	chamber=CongressChamber.senate
 	).order_by('created')
 
 for vote in votes:
