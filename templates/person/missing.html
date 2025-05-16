@@ -41,11 +41,11 @@ $(() => {
 {% for m in missing %}
 <div style="margin-bottom: 1.5em">
     <h3 style="font-weight: bold;"><a href="{{m.person.get_absolute_url}}">{{m.person}}</a></h3>
+    {% if m.explanation_html %}<p>{{m.explanation_html|safe}}</p>{% endif %}
     <p>
        Between {{m.firstmissedvote|date}} and {{m.lastvote|date}}, {{m.person.lastname}} missed
        {{m.missedvotes}} of {{m.totalvotes}} roll call votes ({{m.missedvotespct}}%).
-       {% if m.lastpresent %}{{m.person.he_she_cap}} last voted on {{m.lastpresent|date}}.{% endif %}
-       {{m.explanation_html|safe}}
+       {% if m.lastpresent and m.returnmissedvotes != 0 %}{{m.person.he_she_cap}} last voted on {{m.lastpresent|date}}.{% endif %}
        {% if m.returntotalvotes %}Since {{ m.returnstart|date }} {{m.person.he_she}} has missed
          {{m.returnmissedvotes}} of {{m.returntotalvotes}} roll call votes ({{m.returnmissedvotespct}}%).{% endif %}
     </p>

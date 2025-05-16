@@ -145,8 +145,8 @@ for id, votes in recent_votes.items():
 
 	runs.append(run)
 
-# Sort members by duration of the run.
-runs.sort(key = lambda r : r["first"])
+# Sort members first by whether they have returned and then by duration of the run.
+runs.sort(key = lambda r : ("return" in r, r["first"]))
 
 # Write out.
 W = csv.writer(open(output_file, "w"))
