@@ -39,6 +39,7 @@ utm = "utm_campaign=govtrack_email_update&utm_source=govtrack/email_update&utm_m
 template_body_text = None
 template_body_html = None
 latest_blog_post_by_category = None
+prev_blog_post_creation_dates = None
 
 class Command(BaseCommand):
 	help = 'Sends out email updates of events to subscribing users.'
@@ -221,6 +222,7 @@ def pool_worker(conn):
 def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_events, mail_connection):
 	global launch_time
 	global latest_blog_post_by_category
+	global prev_blog_post_creation_dates
 
 	user_start_time = datetime.now()
 
@@ -269,15 +271,16 @@ def send_email_update(user_id, list_email_freq, send_mail, mark_lists, send_old_
 			most_recent_event = max(most_recent_event, max_id)
 
 	# Get the latest blog post that is newer than the last one they
-	# were sent and is not in an unsubscribed category. Take the
-	# latest one. Skip when sending daily emails and the user only
-	# wants weekly blog posts.
+	# were sent and is not in an unsubscribed category.
+	# Skip when sending daily emails and the user only wants weekly blog posts.
 	blog_post_cats = [cat["key"] for cat in profile.get_blogpost_categories()
 		if cat["subscribed"]]
 	blog_post = None
 	if not (profile.get_blogpost_freq() == "weekly" and 2 not in list_email_freq):
 		for post in latest_blog_post_by_category:
-		   if post.id <= profile.last_blog_post_emailed and not send_old_events: continue
+		   if profile.last_blog_post_emailed in prev_blog_post_creation_dates \
+			and post.created <= prev_blog_post_creation_dates[profile.last_blog_post_emailed] \
+			and not send_old_events: continue
 		   if post.category not in blog_post_cats: continue
 		   blog_post = post
 
@@ -395,6 +398,7 @@ def load_latest_blog_posts():
 	# of the latest post.
 
 	global latest_blog_post_by_category
+	global prev_blog_post_creation_dates
 
 	# Scan recent blog posts and keep the latest one
 	# in each category. Since we backdate some posts,
@@ -405,16 +409,22 @@ def load_latest_blog_posts():
 	for post in BlogPost.objects\
 		.filter(published=True, created__gt=datetime.now() - timedelta(days=14))\
 		.exclude(id=434)\
-		.order_by('id'):
-#		.order_by('created'): # also see below
+		.order_by('created'):
 		if post.category == "billsumm": continue # see BlogPost
 		latest_blog_post_by_category[post.category] = post
 
 	# Turn dict into a list sorted by creation date ascending.
 	latest_blog_post_by_category = list(latest_blog_post_by_category.values())
-	latest_blog_post_by_category.sort(key = lambda post : post.id) # alternatively, .created, see above
+	latest_blog_post_by_category.sort(key = lambda post : post.created)
 
 	# Pre-render the HTML and plain text of each.
 	for post in latest_blog_post_by_category:
 		post.body_html = post.body_html()
 		post.body_text = post.body_text()
+
+	# Pre-cache the creation dates of these and subsequent blog posts that users may have
+	# been emailed that will be used to prevent sending earlier posts.
+	prev_blog_post_creation_dates = {
+		post.id: post.created
+		for post in BlogPost.objects.filter(created__gte=latest_blog_post_by_category[0].created)
+	}
