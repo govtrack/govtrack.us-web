@@ -3,7 +3,8 @@ from django.conf import settings
 
 from decimal import Decimal
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
+import rtyaml
 
 import stripe
 
@@ -11,8 +12,14 @@ class Command(BaseCommand):
   args = ''
 
   def handle(self, *args, **options):
-    payouts = stripe.Payout.list(limit=1).data
-    range = { "payout": payouts[0].id }
+    payout = stripe.Payout.list(limit=1).data[0]
+    print(rtyaml.dump({
+      "id": payout.id,
+      "created": datetime.fromtimestamp(payout.created),
+      "amount": str(Decimal(payout.amount) / 100)
+    }))
+
+    range = { "payout": payout.id }
 
     count = 0
     totals = defaultdict(lambda : 0)
@@ -40,9 +47,9 @@ class Command(BaseCommand):
       range["starting_after"] = page.data[-1].id
 
     total = sum(totals.values())
-    print(total)
-    print()
+    assert total == Decimal(payout.amount) / 100
+
     totals = list(totals.items())
     totals.sort(key = lambda item : -item[1])
     for k, v in totals:
-      print(v, k)
+      print(v, "Stripe - " + k, sep="\t")
