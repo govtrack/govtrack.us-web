@@ -244,7 +244,7 @@ function show_pronunciation_guide() {
                     {% if r.current %}
                     {% if not role.did_election_just_happen %}
                       {% if r.ends_with_special_election %}
-                        {{ person.lastname }} was appointed to the Senate to fill a vacancy and is up for reelection in a special election in {{role.next_election_year}}.
+                        {{ person.lastname }} was appointed to the Senate to fill a vacancy and may be up for reelection in a special election some time before their term ends on {{role.enddate|date}}.
                       {% else %}
                         {{ person.lastname }} is next up for reelection in {{role.next_election_year}} and serves until {{role.enddate|date}}.
                       {% endif %}
@@ -607,7 +607,7 @@ function show_pronunciation_guide() {
 	{% if committeeassignments %}
 	<section id="membership">
 		<h2><span>Committee Membership</span></h2>
-		<p>{{person.name_no_details}} sits on the following committees:</p>
+		<p>{{person.lastname}} sits on the following committees:</p>
 
 		<ul style="list-style: none; padding: 0;">
 			{% for c in committeeassignments %}
