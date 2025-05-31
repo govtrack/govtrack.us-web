@@ -178,14 +178,26 @@ def build_matrix(congressnumber, starting_congress, house_or_senate, people, peo
 	for sponsor, cosponsor in cells:
 		P[sponsor, cosponsor] += 1.0
 
-	return start_date, end_date, rep_to_row, nreps, P
-
-def smooth_matrix(nreps, P):
 	# Take the square root of each cell to flatten out outliers where one person
 	# cosponsors a lot of other people's bills.
 	for i in range(nreps):
 		for j in range(nreps):
 			P[i,j] = math.sqrt(P[i,j])
+
+	return start_date, end_date, rep_to_row, nreps, P
+
+def normalize_matrix(nreps, P):
+	P = numpy.copy(P)
+
+	# When we use raw counts, the numbers are not distributed around zero so the
+	# first principle component is a raw shift in the positive direction. This
+	# way the first component is actually the ideology score. It's not obvious
+	# if we should normalize the rows or the columns though. Use z-scores.
+	# This seems to make the actual results worse though.
+	for i in range(nreps):
+		P[i,:] = scipy.stats.zscore(P[i,:])
+
+	return P
 
 def build_party_list(rep_to_row, people, nreps):
 	parties = [None for i in range(nreps)]
@@ -197,14 +209,18 @@ def ideology_analysis(nreps, parties, P):
 	# Ideology (formerly "Political Spectrum") Analysis
 	###################################################
 
-	# Run a singular value decomposition to get a rank-reduction, one dimension
-	# of which should separate representatives on a liberal-conservative scale.
-	# In practice it looks like the second dimension works best. Also, this works
-	# best before we normalize columns to sum to one. That is, we want cells
-	# to be 1 when the column person cosponsors a bill of the row person.
+	#P = normalize_matrix(nreps, P)
+
+	# Run a singular value decomposition to get a rank-reduction. The second
+	# principle component correlates well with independent judgements of
+	# where legislators are on a political right-left scale.
 	u, s, vh = numpy.linalg.svd(P)
 	spectrum = vh[1,:]
-	
+	spectrum2 = vh[0,:]
+
+	# The singular values tell us the significane of the components.
+	#print(s[0:10])
+
 	# To make the spectrum left-right, we'll multiply the scores by the sign of
 	# the mean score of the Republicans to put them on the right.
 	# Actually, since scale doesn't matter, just multiply it by the mean.
@@ -214,9 +230,9 @@ def ideology_analysis(nreps, parties, P):
 
 	# Scale the values from 0 to 1.
 	spectrum = rescale(spectrum)
-	
-	return spectrum
-	
+
+	return spectrum, spectrum2
+
 def leadership_analysis(nreps, P):
 	# Leadership Analysis based on the Google PageRank Algorithm
 	############################################################
@@ -392,12 +408,11 @@ def do_analysis(congressnumber, starting_congress, house_or_senate, people, peop
 	outdir = "data/analysis/by-congress/" + str(congressnumber)
 
 	start_date, end_date, rep_to_row, nreps, P = build_matrix(congressnumber, starting_congress, house_or_senate, people, people_list)
-	smooth_matrix(nreps, P)
 	parties = build_party_list(rep_to_row, people, nreps)
-	spectrum = ideology_analysis(nreps, parties, P)
+	spectrum, spectrum2 = ideology_analysis(nreps, parties, P)
 	leadership = leadership_analysis(nreps, P)
 	ids, names, other_cols = build_output_columns(rep_to_row, people)
-	draw_figure(congressnumber, house_or_senate, start_date, end_date, nreps, parties, spectrum, "Ideology", leadership, "Leadership", names, outdir)
+	draw_figure(congressnumber, house_or_senate, start_date, end_date, nreps, parties, spectrum, "Ideology", spectrum2, "Ideology2", names, outdir)
 	descr = describe_members(nreps, parties, spectrum, leadership)
 	write_stats_to_disk(congressnumber, house_or_senate, nreps, ids, parties, names, spectrum, leadership, descr, other_cols, outdir)
 	write_metadata_to_disk(congressnumber, house_or_senate, start_date, end_date, outdir)
@@ -412,7 +427,6 @@ def influence_matrix(congressnumber, starting_congress, house_or_senate, people,
 		if cosponsor != None: # baseline
 			#P[(rep_to_row[sponsor], rep_to_row[cosponsor])] += 1
 			P[(rep_to_row[cosponsor], rep_to_row[sponsor])] += 1
-		smooth_matrix(nreps, P)
 		spectrum = ideology_analysis(nreps, parties, P)
 		score = spectrum[rep_to_row[sponsor]]
 		pctile = scipy.stats.percentileofscore([spectrum[i] for i in range(nreps) if parties[i] == "Democrat"], score)
