@@ -64,6 +64,7 @@
 
 	<div id="bodybody">
 
+	<header>
 	<div id="skiptocontent"><a href="#maincontent">skip to main content</a></div>
 
 	<div id="masthead-overbar">
@@ -233,6 +234,7 @@
 	{% endblock %}
 
 	</div> <!-- /masthead -->
+	</header>
 
 	{% block override_breadcrumbs %}
 	<div id="breadcrumbs">
@@ -242,6 +244,7 @@
 	</div>
 	{% endblock %}
 
+	<div role="main">
 	{% block body_with_container %}
 		<div id="maincontent" class="container">
 			<div id="content">
@@ -263,6 +266,7 @@
 			</div><!-- /content -->
 		</div> <!-- /container -->
 	{% endblock %}
+	</div>
 
 	</div> <!-- /#bodybody -->
 
@@ -270,7 +274,7 @@
 			<div class="container">
 			<div class="row">
 
-				<nav class="col-6 col-md-2">
+				<nav class="col-6 col-md-2" aria-label="Footer Links">
 					<ul>
 						<li><a href="/">Home</a></li>
 						<li><a href="/about">About GovTrack</a></li>
@@ -280,7 +284,7 @@
 					</ul>
 				</nav>
 
-				<nav class="col-6 col-md-2">
+				<nav class="col-6 col-md-2" aria-label="Social Media Links">
 					<ul>
 						<li><a href="/posts/news"><i class="fas fa-list fa-fw"></i>Site News</a></li>
 						<li><a rel="me" href="https://mastodon.social/@GovTrack"><i class="fab fa-mastodon fa-fw"></i>Mastodon</a></li>

@@ -105,7 +105,7 @@
       color: white;
       margin-left: .5em;
     }
-.underlinks { margin-top: .75em; margin-left: 2px; color: #AAA; }
+.underlinks { margin-top: .75em; margin-left: 2px; }
 .underlinks a { display: inline-block; text-decoration: none; margin: 2px 4px; }
 
 article {
@@ -152,9 +152,9 @@ article {
   <div class="container">
     <div class="row">
       <div class="col-lg">
-        <div class="jumbotron-card jumbotron-text" style="border-top: 2px solid #9D2146;">
+        <h1 class="jumbotron-card jumbotron-text" style="border-top: 2px solid #9D2146;">
           We&rsquo;re tracking the activities of the <nobr><b>United States Congress</b></nobr> and the <b><nobr>White House</nobr></b> to make a more <b>open</b> and <b>accountable</b> government.
-        </div>
+        </h1>
       </div>
       {% if latest_blog_post %}
       <div class="col-lg">
@@ -190,13 +190,13 @@ article {
         <h2>Find your representative and senators:</h2>
         <div>Enter your home address:</div>
       </label>
-      <table width="100%">
+      <table width="100%" role="none">
         <tr>
           <td>
             <input type="text" class="form-control" id="address" placeholder="415 N. Main St., Hannibal, Missouri" style="width: 100%;">
           </td>
           <td>
-            <button type="submit" class="btn">Go &raquo;</button>
+            <button type="submit" class="btn">Find My District &raquo;</button>
           </td>
       </tr>
       </table>
@@ -215,18 +215,18 @@ article {
         <h2>Find legislation that affects you:</h2>
         <div>Select a subject area to search and get alerts:</div>
       </label>
-      <table width="100%">
+      <table width="100%" role="none">
         <tr>
           <td>
-            <select id="bill-subject-area" class="form-control" onchange="$(this).parents('form').submit();">
-              <option value="">Select Issue Area</option>
+            <select id="bill-subject-area" class="form-control">
+              <option value="">Select Subject Area...</option>
               {% for top_term, subterms in bill_subject_areas %}
                 <option value="{{top_term.get_absolute_url}}">{{top_term.name}}</option>
               {% endfor %}
             </select>
           </td>
           <td>
-            <button type="submit" class="btn">Go &raquo;</button>
+            <button type="submit" class="btn">View Bills &raquo;</button>
           </td>
         </tr>
       </table>
@@ -258,13 +258,17 @@ article {
         <div class="col-xs-12">
       {% else %}
         <div class="col-xs-4 col-sm-12 --kill-right-padding-sm-md" style="padding-top: 3px; padding-bottom: 1em;">
-        <a href="{{post.url}}">
-          <img src="{{post.image_url}}" class="img-fluid" {% if "bill" in post.image_url or "ytimg" in post.image_url %}style="border: 1px solid #777;"{% endif %}/>
+        <a href="{{post.url}}"
+          aria-labelledby="cards-{{forloop.parentloop.counter}}-{{forloop.counter}}-text" />
+          <img src="{{post.image_url}}" class="img-fluid" {% if "bill" in post.image_url or "ytimg" in post.image_url %}style="border: 1px solid #777;"{% endif %}
+            aria-labelledby="cards-{{forloop.parentloop.counter}}-{{forloop.counter}}-text" />
         </a>
         </div>
         <div class="col-xs-8 col-sm-12">
       {% endif %}
-      <h3 style="font-size: 100%"><a href="{{post.url}}" {% if post_group.compact %}style="font-weight: normal"{% endif %} title="{{post.title}}">{{post.title|truncatewords:30}}</a></h3>
+      <h3 style="font-size: 100%" id="cards-{{forloop.parentloop.counter}}-{{forloop.counter}}-text">
+        <a href="{{post.url}}" {% if post_group.compact %}style="font-weight: normal"{% endif %} title="{{post.title}}">{{post.title|truncatewords:30}}</a>
+      </h3>
       <p style="line-height: 125%;">{{post.snippet|truncatewords:30}}</p>
       <p><span style="font-size: 90%; color: #555;">{{post.published}}</span></p>
       </div>

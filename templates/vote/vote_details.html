@@ -65,6 +65,9 @@
         #vote-details .state-district {
             letter-spacing: -.5px;
         }
+	#vote-details .party {
+		font-weight: bold;
+	}
 
 	#vote-details a.note {
 		cursor: pointer;
@@ -164,6 +167,7 @@ function show_table(container, only_outliers, show_title) {
     if (only_outliers) {
         // Make an intermediate clone that only contains the outliers.
         table = table.clone();
+        table.attr('aria-label', 'Statistically notable votes');
         table.find('tbody tr:not(.voter_outlier)').remove();
         if (table.find('tbody tr').length == 0) {
             container.hide();
@@ -423,7 +427,7 @@ $(function() {
 {% with vote.totals as totals %}
 <div style="margin: 30px 0 45px 0;">
     <!-- Horizontal Table -->
-    <table class="stats" style="margin: 0 30px 0 0">
+    <table class="stats" style="margin: 0 30px 0 0" aria-label="Vote totals broken down by vote and party">
         <thead>
             {% if totals.features %}
             <tr style="font-style: italic" class="d-none d-md-table-row">
@@ -640,7 +644,7 @@ $(function() {
           <div class="card-header">
             Ideology Vote Chart
           </div>
-          <img src="{{ vote.get_absolute_url }}/diagram" class="img-fluid card-img-top" />
+          <img src="{{ vote.get_absolute_url }}/diagram" class="img-fluid card-img-top" alt="Diagram in the style of the seats on the floor of the House or Senate showing how legislators voted." />
           <div class="card-body">
             <div style="margin: .5em 0;" class="diagram-legend">
                 <div style="float: left; margin: 0 .25em 1em 0">Key:</div>
@@ -650,7 +654,7 @@ $(function() {
                         {% if count.party.0 == "D" or count.party.0 == "R" %}
                             {% for k, v in diagram_key_colors %}
                                 {% if count.count > 0 and k.0 == count.party.0 and k.1 == "+" %}
-                                    <span style="padding: 2px 4px; border: 1px solid transparent; {% if item.option.key == "+" %}background{% else %}border{% endif %}-color: {{v}}; cursor: default; {% if item.option.key == "+" %}color: white;{% else %}color: #222;{% endif %}" title="{{count.party}} {{item.option.value}}">
+                                    <span style="padding: 2px 4px; border: 1px solid transparent; {% if item.option.key == "+" %}background{% else %}border{% endif %}-color: {{v}}; cursor: default; {% if item.option.key == "+" %}color: white;{% else %}color: #222;{% endif %}; font-weight: bold;" title="{{count.party}} {{item.option.value}}">
                                         {{count.party}} - {{item.option.value}}</span>
                                 {% endif %}
                             {% endfor %}
@@ -672,7 +676,7 @@ $(function() {
           <div class="card-header">
             Cartogram Map
           </div>
-          <img src="{{ vote.get_absolute_url }}/map" class="img-fluid card-img-top" style="margin: 5px" />
+          <img src="{{ vote.get_absolute_url }}/map" class="img-fluid card-img-top" style="margin: 5px" alt="Diagram in the style of a cartogram, which is a type of map, showing how legislators voted." />
           <div class="card-body">
             <p class="card-text">
                 Each hexagon represents one congressional district.
@@ -771,7 +775,7 @@ $(function() {
 </div>
     <div class="clearfix"> </div>
 
-        <table id="vote-list-template" class="vote-list stats" style="display: none">
+        <table id="vote-list-template" class="vote-list stats" style="display: none" aria-label="Votes of legislators">
             <thead class="sortable">
                 <tr>
                     <th width="13%">Vote</th>
@@ -801,7 +805,7 @@ $(function() {
                 <td>
                     {% if voter.voter_type != 1 %}
                         {% if voter.party|slice:"0:1" in "DIR" %}
-                            <span class="party_{{voter.party|slice:"0:1"}}" title="{{ voter.party }}">
+                            <span class="party_{{voter.party|slice:"0:1"}} party" title="{{ voter.party }}">
                                 &nbsp;
                                 {{voter.party|slice:"0:1"}}
                                 &nbsp;

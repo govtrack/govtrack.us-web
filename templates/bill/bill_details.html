@@ -196,7 +196,7 @@
 	#status-row-grid .img.status_enacted_tendayrule
 	 { background-position: -370px 0; }
 #status-row-grid .pending {
-	color: #999;
+	color: #777;
 }
 	#status-row-grid .pending .img {
 		opacity: .3;
@@ -221,7 +221,7 @@
 	}
 		.property-panel .col-sm-3 span {
 			padding: 2px 6px;
-			background-color: #36A;
+			background-color: #1D4E70; /* same as #content h2 span */
 			border-radius: 6px;
 			color: white;
 			font-size: 90%;
@@ -541,7 +541,7 @@
 		</div>
 		<div class="col-sm-9 col-md-10">
 			<p>
-				<a href="{{bill.get_absolute_url}}/cosponsors" role="tab">
+				<a href="{{bill.get_absolute_url}}/cosponsors">
 		      		{{bill.cosponsor_count}} Cosponsor{{bill.cosponsor_count|pluralize}}</a>
 		      {% if bill.cosponsor_count > 0 %}
 		      ({% for party, count in bill.cosponsor_counts_by_party %}{{count}} {{party}}{{count|pluralize}}{% if not forloop.last %}, {% endif %}{% endfor %})
@@ -674,7 +674,11 @@
 			<h2><span>History</span></h2>
 
 			{% if current or bill.get_major_events|length > 0 %}
-				<table id="status-row-grid">
+				<table id="status-row-grid" aria-label="Bill Action History">
+				<thead class="sr-only">
+					<tr><th>Date</th> <th/> <th>Action</th></tr>
+				</thead>
+				<tbody>
 				{% for item in bill.get_major_events %}
 					{% if item.first_future_event %}
 						<tr class="status-item pending">
@@ -742,6 +746,7 @@
 						</td>
 					</tr>
 				{% endfor %}
+				</tbody>
 				</table>
 			</div> <!-- /bill-history -->
 			{% endif %}

@@ -24,7 +24,7 @@
      padding: .25em 0 .25em .15em;
      margin: 0 .25em .25em 0;
      border: 1px solid rgba(255,255,255,0);
-     opacity: .5;
+     color: #666;
   }
     #emoji-reactions a.has-count {
       opacity: 1;
@@ -38,7 +38,6 @@
     #emoji-reactions a span {
        display: inline-block;
        font-style: normal;
-       color: #777;
        font-size: 90%;
        line-height: 90%;
        padding: 0 1px;
@@ -236,7 +235,7 @@ function saveUserPosition() {
   <h2 style="margin-bottom: 4px">React <span class="sr-only">to this {{bill.noun}}</span> with an emoji</h2>
   <div id="emoji-reactions" style="display: none;">
     <span class="main"> </span>
-    <a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">···</a>
+    <a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">▶</a>
     <span class="other" style="display: none"> </span>
   </div>
 </div>
