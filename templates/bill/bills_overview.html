@@ -1,7 +1,7 @@
 {% extends "master.html" %}
 {% load humanize govtrack_utils %}
 
-{% block title %}Bills and Resolutions -- GovTrack.us{% endblock %}
+{% block title %}Bills and Resolutions in Congress -- GovTrack.us{% endblock %}
 {% block meta_description %}Find legislation in the U.S. Congress.{% endblock %}
 
 {% block head %}
@@ -88,7 +88,7 @@ function do_keyword_tracker_submit() {
 </ul>
 
 <div class="tab-content">
-  <div id="docket" class="tab-pane active">
+  <div id="docket" class="tab-pane active" aria-label="Coming Up, Trending, and Top Tracked Bills">
     <h2><span>Coming up</span></h2>
     {% if coming_up|length == 0 %}
       <p>No bills have been posted as coming up by the House or Senate. Bills are put on the calendar of business often just days ahead of major activity. The majority party controls the calendar of business in each chamber.</p>
@@ -99,11 +99,12 @@ function do_keyword_tracker_submit() {
       {% for bill in coming_up %}
         <div class="col-6 col-md-4 col-lg-3">
         <div class="card" style="margin-bottom: 15px;">
-          <a href="{{bill.get_absolute_url}}">
-            <img src="{{bill.get_absolute_url}}/card" class="img-fluid">
+          <a href="{{bill.get_absolute_url}}" aria-labelledby="comingup-card-{{forloop.counter}}-text">
+            <img src="{{bill.get_absolute_url}}/card" class="img-fluid" aria-labelledby="comingup-card-{{forloop.counter}}-text">
           </a>
           <div class="card-body">
-                <h5 class="card-title"><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:30}}</a></h5>
+                <h5 id="comingup-card-{{forloop.counter}}-text"
+                  class="card-title"><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:30}}</a></h5>
 
                 <p class="card-text">
                   On
@@ -142,11 +143,14 @@ function do_keyword_tracker_submit() {
     {% for bill, count in top_tracked_bills %}
       <div class="col-6 col-md-4 col-lg-3">
       <div class="card" style="margin-bottom: 15px;">
-        <a href="{{bill.get_absolute_url}}">
-          <img src="{{bill.get_absolute_url}}/card" class="img-fluid">
+        <a href="{{bill.get_absolute_url}}" aria-labelledby="topbills-card-{{forloop.counter}}-text">
+          <img src="{{bill.get_absolute_url}}/card" class="img-fluid"
+            aria-labelledby="topbills-card-{{forloop.counter}}-text">
         </a>
         <div class="card-body">
-          <h5 class="card-title"><a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:30}}</a></h5>
+          <h5 id="topbills-card-{{forloop.counter}}-text" class="card-title">
+            <a href="{{bill.get_absolute_url}}" title="{{bill}}">{{bill|truncatewords:30}}</a>
+          </h5>
           <p class="card-text">
             Tracked by {{count}} user{{count|pluralize}}
           </p>
@@ -157,7 +161,7 @@ function do_keyword_tracker_submit() {
     </div>
   </div>
 
-  <div id="find" class="tab-pane">
+  <div id="find" class="tab-pane" aria-label="Find a Bill">
     <div class="row">
       <div class="col-sm-7">
       <h2><span>Find a bill</span></h2>
@@ -207,7 +211,7 @@ function do_keyword_tracker_submit() {
 
   </div>
 
-  <div id="get-alerts" class="tab-pane">
+  <div id="get-alerts" class="tab-pane" aria-label="Get Alerts">
     <h2><span>Get alerts</span></h2>
     <div class="row">
       <div class="col-sm-6">
@@ -247,7 +251,7 @@ function do_keyword_tracker_submit() {
     </div>      
   </div>
   
-  <div id="bystatus" class="tab-pane">  
+  <div id="bystatus" class="tab-pane" aria-label="All Bills">  
     <h2><span>All bills</span></h2>
     <p style="margin-top: 15px">Here is a breakdown of all {{total|intcomma}} bills and resolutions currently before Congress:</p>
       

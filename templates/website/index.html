@@ -58,8 +58,10 @@
 			font-size: 18px;
 		}
 	}
-  .jumbotron-card h3:first-child {
+  .jumbotron-card h2:first-child {
     margin-top: 0;
+    font-size: 23px;
+    font-weight: bold;
   }
   .jumbotron-card h3, .jumbotron-card h4 {
     font-weight: bold;
@@ -159,7 +161,7 @@ article {
       {% if latest_blog_post %}
       <div class="col-lg">
         <div class="jumbotron-card" style="border-top: 2px solid #1d4e70;">
-          <h3>{{latest_blog_post.title}}</h3>
+          <h2>{{latest_blog_post.title}}</h2>
           <p style="margin: 0 0 .5em 0; color: #444; font-size: 95%;">
             {{latest_blog_post.created|date}} &middot; {{latest_blog_post.get_category_display}}
             {% if latest_blog_post.author %}&middot; by {{latest_blog_post.author}}{% endif %}

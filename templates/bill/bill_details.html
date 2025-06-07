@@ -196,13 +196,13 @@
 	#status-row-grid .img.status_enacted_tendayrule
 	 { background-position: -370px 0; }
 #status-row-grid .pending {
-	color: #777;
+	color: #555;
 }
 	#status-row-grid .pending .img {
 		opacity: .3;
 	}
 #status-row-grid .related-bill {
-	color: #777;
+	color: #555;
 }
 
 
@@ -230,6 +230,8 @@
 	#content .property-panel p { margin-bottom: 5px; }
 
 .modal-body h1:first-child { margin-top: 0; }
+
+#citation-format-list li { margin: .33em 0; }
 </style>
 {% endblock %}
 
@@ -703,11 +705,9 @@
 							</div>
 						</td>
 						<td>
-							{% if item.vote_obj and not item.bill %}<a href="{{item.vote_obj.get_absolute_url}}">{% endif %}
 							<div class="img status_{{item.key}}">
 								&nbsp;
 							</div>
-							{% if item.vote_obj and not item.bill %}</a>{% endif %}
 						</td>
 						<td class="status-description">
 							<div class="status-label" title="{{item.actionline}}">
@@ -725,7 +725,7 @@
 								<p class="links">
 									{% with vit=item.vote_obj.get_thumbnail_url %}
 									{% if vit %}
-										<a href="{{item.vote_obj.get_absolute_url}}">
+										<a href="{{item.vote_obj.get_absolute_url}}" aria-label="View Vote">
 											<img
 												src="{{vit}}"
 												alt="thumbnail image of vote"
@@ -789,7 +789,7 @@
 						$('#active-citation-format').text($(elem).text());
 						return false;
 					}</script>
-					<ul class="list-inline" style="margin-top: -.5em; font-size: 12px">
+					<ul id="citation-format-list" style="margin-top: -.25em; font-size: 12px">
 						<li>show another citation format:</li>
 						<li style="display: none"><a href="#" onclick="return show_cite(this)" data-cite="mla">MLA</a></li>
 						<li><a href="#" onclick="return show_cite(this)" data-cite="apa">APA</a></li>
