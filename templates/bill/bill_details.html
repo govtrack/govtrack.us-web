@@ -151,12 +151,14 @@
 		#status-row-grid .status-item .status-description p.links a {
 			margin-right: 1em;
 		}
-#status-row-grid .img {
+#status-row-grid img, #status-row-grid div.img {
 	width: 53px;
-	height: 35px;
 	margin: 0 6px 6px 6px;
-	background-image: url(/static/images/status_icons.png);
 }
+	#status-row-grid div.img {
+		height: 35px;
+		background-image: url(/static/images/status_icons.png);
+	}
 	#status-row-grid .img.status_introduced { }
 	#status-row-grid .img.status_reported { background-position: -53px 0; }
 	#status-row-grid .img.status_pass_over_house,
@@ -705,9 +707,24 @@
 							</div>
 						</td>
 						<td>
-							<div class="img status_{{item.key}}">
-								&nbsp;
-							</div>
+							{% with vit=item.vote_obj.get_thumbnail_url %}
+							{% if item.bill %}
+								{# activity on a related bill, no icon #}
+							{% elif vit %}
+								<a href="{{item.vote_obj.get_absolute_url}}" aria-label="View Vote">
+									<img
+										src="{{vit}}"
+										alt="thumbnail image of vote"
+										>
+								</a>
+							{% elif item.text_version %}
+								<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}" {% if item.text_date %}title="{{item.text_date|date}}"{% endif %} aria-label="Read Bill Text">
+									<img src="{{bill.get_absolute_url}}/_text_image?textversion={{item.text_version}}" {% if item.text_date %}title="{{item.text_date|date}}"{% endif %} style="border: 1px solid #DDD;" aria-label="Read Bill Text">
+								</a>
+							{% else %}
+								<div class="img status_{{item.key}}">&nbsp;</div>
+							{% endif %}
+							{% endwith %} {# vit #}
 						</td>
 						<td class="status-description">
 							<div class="status-label" title="{{item.actionline}}">
@@ -723,17 +740,6 @@
 								</p>
 								{% if item.vote_obj.oursummary %}{{item.vote_obj.oursummary.as_html|truncatewords_html:30|safe}}{% endif %}
 								<p class="links">
-									{% with vit=item.vote_obj.get_thumbnail_url %}
-									{% if vit %}
-										<a href="{{item.vote_obj.get_absolute_url}}" aria-label="View Vote">
-											<img
-												src="{{vit}}"
-												alt="thumbnail image of vote"
-												style="max-width: 75px; float: left; margin: 2px 1em 1em 0;"
-												>
-										</a>
-									{% endif %}
-									{% endwith %}
 									{% if item.vote_obj %}<a href="{{item.vote_obj.get_absolute_url}}">View Vote &raquo;</a>{% endif %}
 									{% if item.committee_report_link %}<a href="{{item.committee_report_link}}">Read Report &raquo;</a>{% endif %}
 									{% if item.text_version %}<a href="{{bill.get_absolute_url}}/text/{{item.text_version}}" {% if item.text_date %}title="{{item.text_date|date}}"{% endif %}>Read {% if item.text_version_compare_to %}Updated{% endif %} Text &raquo;</a>{% endif %}

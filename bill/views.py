@@ -1031,8 +1031,10 @@ def bill_text_image(request, congress, type_slug, number, image_type):
 
     # Find the PDF file and rasterize the first two pages.
 
+    textversion = request.GET.get("textversion") # usually None
+
     try:
-        metadata = load_bill_text(bill, None, mods_only=True)
+        metadata = load_bill_text(bill, textversion, mods_only=True)
     except IOError:
         # if bill text metadata isn't available, we won't show the bill text as a part of the thumbnail
         metadata = None
