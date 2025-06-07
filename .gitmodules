@@ -6,7 +6,7 @@
 	url = git://github.com/JoshData/diff_match_patch-python.git
 [submodule "ext/congressxml"]
 	path = ext/congressxml
-	url = https://github.com/govtrack/congressxml
+	url = git@github.com:govtrack/congressxml.git
 [submodule "ext/django-simplegetapi"]
 	path = ext/django-simplegetapi
 	url = https://github.com/JoshData/django-simplegetapi
