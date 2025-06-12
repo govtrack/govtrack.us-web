@@ -1004,7 +1004,8 @@ def get_vote_matrix(votes, filter_people=None, tqdm=lambda _ : _):
 			# Add name info at the moment of the vote.
 			from person.name import get_person_name
 			voter.person.role = voter.person_role
-			voter.person.role.party = voter.party # party at this moment
+			if voter.person.role is not None:
+				voter.person.role.party = voter.party # party at this moment
 			v["votes"][i].person_name = get_person_name(voter.person, firstname_position='after', show_district=True, show_title=False, show_type=more_than_one_chamber, show_party=False)
 
 	# Choose one name & party & state-district (for sort).
@@ -1020,7 +1021,7 @@ def get_vote_matrix(votes, filter_people=None, tqdm=lambda _ : _):
 			voter["party"] = list(parties)[0]
 			voter["party_order"] = party_sort_order.index(voter["party"])
 
-		roles = set((v.person_role.state, str(v.person_role.role_type), str(v.person_role.senator_rank), ("%02d" % v.person_role.district if v.person_role.district else "")) for v in voter["votes"] if v is not None)
+		roles = set((v.person_role.state, str(v.person_role.role_type), str(v.person_role.senator_rank), ("%02d" % v.person_role.district if v.person_role.district else "")) for v in voter["votes"] if v is not None and v.person_role is not None)
 		if len(roles) == 1:
 			voter["state_district"] = "-".join(list(roles)[0])
 
