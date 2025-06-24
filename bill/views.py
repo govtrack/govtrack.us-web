@@ -1025,7 +1025,8 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         from PIL import ImageOps
         bbox = ImageOps.invert(im).getbbox()
         vpad = int(.02*im.size[1])
-        im = im.crop( (0, max(0, bbox[1]-vpad), im.size[0], min(im.size[1], bbox[3]+vpad) ) )
+        if bbox:
+            im = im.crop( (0, max(0, bbox[1]-vpad), im.size[0], min(im.size[1], bbox[3]+vpad) ) )
 
         return im
 
