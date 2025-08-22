@@ -1033,6 +1033,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
     # Find the PDF file and rasterize the first two pages.
 
     textversion = request.GET.get("textversion") # usually None
+    if textversion and not re.match("^[a-z0-9-]+$", textversion): raise Http404()
 
     try:
         metadata = load_bill_text(bill, textversion, mods_only=True)
