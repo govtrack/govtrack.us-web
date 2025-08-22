@@ -100,8 +100,9 @@ run_analysis_for_president("Bush 41", ("1989-01-20","1993-01-19"))
 run_analysis_for_president("Clinton", ("1993-01-20","2001-01-19"))
 run_analysis_for_president("Bush 43", ("2001-01-20","2009-01-19"))
 run_analysis_for_president("Obama", ("2009-01-20","2017-01-19"))
-run_analysis_for_president("Trump", ("2017-01-20","2021-01-19"))
+run_analysis_for_president("Trump A", ("2017-01-20","2021-01-19"))
 run_analysis_for_president("Biden", ("2021-01-20","2025-01-19"))
+run_analysis_for_president("Trump B", ("2025-01-20","2029-01-19"))
 
 # Write out.
 
