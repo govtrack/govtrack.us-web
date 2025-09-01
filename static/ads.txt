@@ -449,3 +449,6 @@ video.unrulymedia.com, 5672421953199218469, RESELLER
 
 -------------------------------********-----------------------------------
 
+
+pubmatic.com, 157583, DIRECT, 5d62403b186f2ace #Prebid
+pubmatic.com, 165139, DIRECT, 5d62403b186f2ace #TAM
