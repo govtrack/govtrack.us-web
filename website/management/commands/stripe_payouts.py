@@ -12,7 +12,10 @@ class Command(BaseCommand):
   args = ''
 
   def handle(self, *args, **options):
-    payout = stripe.Payout.list(limit=1).data[0]
+    for payout in stripe.Payout.list(limit=3):
+      self.show_payout(payout)
+
+  def show_payout(self, payout):
     print(rtyaml.dump({
       "id": payout.id,
       "created": datetime.fromtimestamp(payout.created),
@@ -53,3 +56,4 @@ class Command(BaseCommand):
     totals.sort(key = lambda item : -item[1])
     for k, v in totals:
       print(v, "Stripe - " + k, sep="\t")
+    print()
