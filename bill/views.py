@@ -995,6 +995,7 @@ def bill_text_image(request, congress, type_slug, number, image_type):
         width = int(request.GET["width"])
     except:
         width = 0 # don't resize
+    if width < 0 or width > 512: raise Http404()
 
     # We're going to display this next to photos of members of congress,
     # so use that aspect ratio by default.
