@@ -459,7 +459,7 @@ def main(options):
         
     # Find what might be coming up this week.
     load_docs_house_gov(options, bill_index)
-    load_senate_floor_schedule(options, bill_index)
+    #load_senate_floor_schedule(options, bill_index) # the file seems to have changed schema and doesn't have any bills listed
 
 
 def load_senate_floor_schedule(options, bill_index):
