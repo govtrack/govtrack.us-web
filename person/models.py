@@ -783,6 +783,7 @@ class PersonRole(models.Model):
         # data. The end date is thus not known because it will be when the
         # special election winner is certified.
         if not self.current: raise ValueError()
+        if self.role_type in (RoleType.president, RoleType.vicepresident): return None # presidents are term limited so it looks funky if we get that wrong
         if (self.extra or {}).get("end-type") == "special-election":
             return self.enddate.year
         return self.enddate.year-1
