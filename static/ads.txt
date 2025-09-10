@@ -452,3 +452,59 @@ video.unrulymedia.com, 5672421953199218469, RESELLER
 
 pubmatic.com, 157583, DIRECT, 5d62403b186f2ace #Prebid
 pubmatic.com, 165139, DIRECT, 5d62403b186f2ace #TAM
+
+##
+
+
+#Decide
+decide.co, 8991159263576577, DIRECT, 5e1158f8c4b38075
+pubmatic.com, 163198, RESELLER, 5d62403b186f2ace
+infolinks.com, 3438945, direct
+pubmatic.com, 156872, reseller, 5d62403b186f2ace
+xandr.com, 3251, reseller
+indexexchange.com, 191306, reseller
+lijit.com, 268479, reseller, fafdf38b16bf6b2b
+media.net, 8CUY6IX4H, reseller
+openx.com, 543174347, reseller, 6a698e2ec38604c6
+video.unrulymedia.com, 2221906906, reseller
+improvedigital.com, 2016, reseller
+onetag.com, 598ce3ddaee8c90, reseller
+33across.com, 0010b00002CpYhEAAV, reseller, bbea06d9c4d2853c
+smartadserver.com, 3238, reseller, 060d053dcf45cbf3
+sharethrough.com, 1SghQadK, reseller, d53b998a7bd4ecd2
+zetaglobal.net, 533, reseller
+adipolo.com, decide2025, DIRECT
+adipolosolutions.com, decide2025, DIRECT
+pmbmonetize.com, decide2025, DIRECT
+opamarketplace.com, decide2025, DIRECT
+smartadline.com, decide2025, RESELLER
+copper6.com, decide2025, DIRECT
+omgstudios.com, decide2025, DIRECT
+google.com, pub-9135355251665930, RESELLER, f08c47fec0942fa0 #Opa
+google.com, pub-2930805104418204, RESELLER, f08c47fec0942fa0 #GreeterAPL
+google.com, pub-4903453974745530, RESELLER, f08c47fec0942fa0 #APL
+google.com, pub-4836542095728076, RESELLER, f08c47fec0942fa0 #Positive
+google.com, pub-6804276076764268, RESELLER, f08c47fec0942fa0
+google.com, pub-4055201897775689, DIRECT, f08c47fec0942fa0 #ADX
+google.com, pub-8050349969200917, DIRECT, f08c47fec0942fa0 #ADS
+themediagrid.com, DJQVCM, DIRECT, 35d5010d7789b49d
+video.unrulymedia.com, 270404831, RESELLER
+onetag.com, 61d88450bdb25bc, DIRECT
+onetag.com, 61d88450bdb25bc-OB, DIRECT
+appnexus.com,16912,DIRECT, f5ab79cb980f11d1
+appnexus.com,16912,RESELLER, f5ab79cb980f11d1
+aps.amazon.com, d4004b5f-4fb6-4be2-82ae-0e36b8f52c12, DIRECT
+google.com, pub-9966039342650298, RESELLER, f08c47fec0942fa0
+google.com, pub-9857612698505806, RESELLER, f08c47fec0942fa0
+gannett.com, 22675194701, DIRECT
+didna.io, 494n1p17244a, DIRECT
+google.com, pub-3565385483761681, RESELLER, f08c47fec0942fa0
+google.com, pub-5717092533913515, RESELLER, f08c47fec0942fa0
+rubiconproject.com, 27316, DIRECT, 0bfd66d529a55807
+adipolo.com, 22703897216, RESELLER
+adipolosolutions.com, 22652786701, RESELLER
+pmbmonetize.com, 22703897216, RESELLER
+opamarketplace.com, 22703897216, RESELLER
+smartadline.com, 22703897216, RESELLER
+
+
