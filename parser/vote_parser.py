@@ -17,7 +17,7 @@ from bill.models import Bill, BillType, Amendment, AmendmentType
 from vote.models import (Vote, VoteOption, VoteSource, Voter,
                          CongressChamber, VoteCategory, VoterType)
 
-from django.template.defaultfilters import truncatewords
+from django.template.defaultfilters import truncatewords, truncatechars
 from django.conf import settings
 
 log = logging.getLogger('parser.vote_parser')
@@ -248,6 +248,9 @@ def main(options):
                         "(On [^:]+): " + vote.related_bill.display_number.replace(". ", " ").replace(".", " ").upper() + " .*",
                         r"\1: " + truncatewords(vote.related_bill.title, 15),
                         vote.question)
+
+                # truncate to fit in table
+                vote.vote_type = truncatechars(vote.vote_type, 255)
                     
                 vote.save()
                 
