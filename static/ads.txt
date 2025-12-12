@@ -350,7 +350,7 @@ Adagio :
 # Owner and manager info
 managerdomain=publir.com
 publir.com, MISSING_ACCOUNT_ID, DIRECT
-ownerdomain=publir.com
+ownerdomain=govtrack.us
 adagio.io, 1378, DIRECT
 # Adagio - Magnite
 rubiconproject.com, 19116, RESELLER, 0bfd66d529a55807
@@ -506,5 +506,37 @@ adipolosolutions.com, 22652786701, RESELLER
 pmbmonetize.com, 22703897216, RESELLER
 opamarketplace.com, 22703897216, RESELLER
 smartadline.com, 22703897216, RESELLER
+
+kueez.com,7456dbf65934913f3d9589d7915f87b1, DIRECT
+rubiconproject.com,16920,RESELLER,0bfd66d529a55807
+openx.com, 557564833, RESELLER, 6a698e2ec38604c6
+lijit.com,407406,RESELLER,fafdf38b16bf6b2b
+media.net,8cu4jtrf9,RESELLER
+pubmatic.com,162110,RESELLER,5d62403b186f2ace
+sharethrough.com,n98xdzel,RESELLER,d53b998a7bd4ecd2
+33across.com, 0010b00002ODU4HAAX,RESELLER, bbea06d9c4d2853c
+yieldmo.com,3133660606033240149,RESELLER
+onetag.com,6e053d779444c00,RESELLER
+video.unrulymedia.com,3486482593,RESELLER
+sonobi.com,4c4fba1717,RESELLER,d1a215d9eb5aee9e
+smartadserver.com,4288,RESELLER,060d053dcf45cbf3
+zetaglobal.com,108,RESELLER
+improvedigital.com,2106,RESELLER
+adform.com,2926,RESELLER,9f5210a2f0999e32
+start.io, 185522363, RESELLER
+loopme.com,11576,RESELLER,6c8d5f95897a5a3b
+themediagrid.com,uot45z,RESELLER,35d5010d7789b49d
+trustedstack.com, TSIO6G4I5, RESELLER
+themediagrid.com, 7H3QAS, RESELLER, 35d5010d7789b49d
+smaato.com, 1100059464, RESELLER, 07bcf65f187117b4
+smaato.com, 1100004890, RESELLER, 07bcf65f187117b4
+appnexus.com,8826,RESELLER,f5ab79cb980f11d1
+
+# Adagio - ConnectAd
+connectad.io, 456, RESELLER, 85ac85a30c93b3e5
+rubiconproject.com, 26800, RESELLER, 0bfd66d529a55807
+# Adagio - Freewheel
+freewheel.tv, 536359-r-524565, RESELLER
+freewheel.tv, 536359-r-523319, RESELLER
 
 
