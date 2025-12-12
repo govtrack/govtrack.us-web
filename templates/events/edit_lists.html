@@ -139,7 +139,7 @@ function activate_list(elem) {
 }
 
 function add_tracker(id, name, title, link, save) {
-    var t = $("<li class='active'><a href='#' onclick='return toggle_tracker(this.parentNode);' class='toggle-tracker'><span class='sr-only remove-tracker'>Remove Tracker</span><span class='remove-tracker fas fa-trash' title='Remove Tracker'/> <span class='add-tracker-back'>(Add It Back!)</a> <a class='tracker-link'></a></li>");
+    var t = $("<li class='active'><a href='#' onclick='return toggle_tracker(this.parentNode);' class='toggle-tracker'><span class='visually-hidden remove-tracker'>Remove Tracker</span><span class='remove-tracker fas fa-trash' title='Remove Tracker'/> <span class='add-tracker-back'>(Add It Back!)</a> <a class='tracker-link'></a></li>");
     t.find("a.tracker-link").attr("href", link).text(title);
     t.attr("feedname", name);
     $("#list_trackers").append(t);
@@ -365,12 +365,12 @@ $(function() {
             <div class="list {% if forloop.first and not feeds %}active{% endif %} {% if list.is_default %}default_list{% endif %}" listid="{{list.id}}" onclick="activate_list(this)" list_email="{{list.email}}">
                 <div class="buttons">
                     <a class="button-rename-list">
-                        <span class="sr-only">Rename List</span>
+                        <span class="visually-hidden">Rename List</span>
                         <span class='fas fa-pencil' title='Rename List'></span>
                     </a>
 
                     <a class="button-delete-list no_default_list">
-                        <span class="sr-only">Delete List</span>
+                        <span class="visually-hidden">Delete List</span>
                         <span class='fas fa-trash' title='Delete List'></span>
                     </a>
                 </div>

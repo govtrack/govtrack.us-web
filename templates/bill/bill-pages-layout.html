@@ -232,7 +232,7 @@ function saveUserPosition() {
 {# REACTIONS #}
 <div class="row" style="margin-bottom: 0">
 <div class="col-6 col-sm-12" style="margin-bottom: 13px">
-  <h2 style="margin-bottom: 4px">React <span class="sr-only">to this {{bill.noun}}</span> with an emoji</h2>
+  <h2 style="margin-bottom: 4px">React <span class="visually-hidden">to this {{bill.noun}}</span> with an emoji</h2>
   <div id="emoji-reactions" style="display: none;">
     <span class="main"> </span>
     <a class="see-other" href="#" onclick="$(this).remove(); $('#emoji-reactions .other').fadeIn(); return false;" title="Show more reactions">▶</a>
@@ -241,7 +241,7 @@ function saveUserPosition() {
 </div>
 
 <div id="UserPositionContainer" class="col-6 col-sm-12" style="margin-bottom: 13px; display: none;">
-    <h2 style="margin-bottom: 4px">Save your opinion <span class="sr-only">on this {{bill.noun}} on a six-point scale from strongly oppose to strongly support</span></h2>
+    <h2 style="margin-bottom: 4px">Save your opinion <span class="visually-hidden">on this {{bill.noun}} on a six-point scale from strongly oppose to strongly support</span></h2>
     <div class="LikertFrame">
       <span class="sidelabel fas fa-thumbs-down"></span>
       <div class="LikertContainer"> {# to get rid of whitespace between elems, close tags are on next line #}
