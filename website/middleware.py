@@ -1,4 +1,3 @@
-from .models import Req, IpAddrInfo
 from django.core.cache import cache
 from django.conf import settings
 from django.db.models import F
@@ -113,19 +112,6 @@ class GovTrackMiddleware:
                 request._special_netblock = "eop"
         except:
             pass
-
-        # Record a hit to an IP address so that in an off-line
-        # task we can gather additional information about the
-        # IP address for use in lead generation.
-        if ip is not None:
-            try:
-                numupdated = IpAddrInfo.objects\
-                    .filter(ipaddr=ip)\
-                    .update(hits=F('hits') + 1, last_hit=datetime.datetime.now())
-                if numupdated == 0:
-                    IpAddrInfo.objects.create(ipaddr=ip)
-            except:
-                pass
 
         return self.get_response(request)
 
