@@ -33,20 +33,6 @@
 
 		{% block extra_css %}{% endblock %}
 
-		{% if not debug %}
-		<script async src="https://www.googletagmanager.com/gtag/js?id=G-GD8FT6MB9V"></script>
-		<script>
-		  window.dataLayer = window.dataLayer || [];
-		  function gtag(){dataLayer.push(arguments);}
-		  gtag('js', new Date());
-		  gtag('config', 'G-GD8FT6MB9V');
-		</script>
-		{% else %}
-		<script>
-		  function gtag() { }
-		</script>
-		{% endif %}
-
 		<script type="text/javascript">
 		window.post_jquery_load_scripts = [];
 		</script>
@@ -336,13 +322,6 @@
 	{% endif %}
 
 	<script>
-		{% if not debug %}
-		gtag('set', 'user_properties', {
-		  Registered: the_user ? "Logged In" : "Anonymous",
-		  GeoSegment: the_segment
-		});
-		{% endif %}
-
 		{% if request.anonymous %}
 		<!-- Master page elements when using the user-head script  -->
 		if (the_user) {
