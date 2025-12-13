@@ -1,5 +1,5 @@
 honcho
-django<4.2 # MySQL has to be upgraded to 8 after this
+django<5 # Python has to b updated to 3.10 after 4.x
 uwsgi
 lxml
 python-prctl
@@ -28,7 +28,7 @@ fast-diff-match-patch
 tweepy
 sparkpost
 user-agents
-dj_database_url
+dj_database_url<3 # seems to require newer Python
 django-cache-url
 dj-haystack-url
 django-crispy-forms
