@@ -406,7 +406,7 @@ class CommunityMessage(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     class Meta:
-    	index_together = [("board", "modified")]
+        indexes = [models.Index(fields=["board", "modified"])]
 
     def push_message_state(self):
         if not isinstance(self.history, list): self.history = []
@@ -446,8 +446,8 @@ class BlogPost(models.Model):
     published = models.BooleanField(default=False, db_index=True)
 
     class Meta:
-        index_together = [("published", "created"),
-                          ("published", "category", "created")]
+        indexes = [models.Index(fields=["published", "created"]),
+                   models.Index(fields=["published", "category", "created"])]
 
     def __str__(self):
         return self.title
