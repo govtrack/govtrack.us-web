@@ -180,7 +180,7 @@ function lngLatBoundsToCameraOptions(bounds) {
           congressional_districts: {
             type: "vector",
             //url: "pmtiles:///{{DISTRICT_PMTILES_FILE|escapejs}}", {# Django's runserver doesn't support HTTP Range #}
-            "url": "pmtiles://https://govtrackus.s3.us-east-1.amazonaws.com/congressional-district-maps/cd-119-2024.pmtiles"
+            "url": "pmtiles://https://cloudflare-r2.govtrack.us/maps/cd-119-2024.pmtiles"
           },
 
           "protomaps": {
