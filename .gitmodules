@@ -9,4 +9,4 @@
 	url = git@github.com:govtrack/congressxml.git
 [submodule "ext/django-simplegetapi"]
 	path = ext/django-simplegetapi
-	url = https://github.com/JoshData/django-simplegetapi
+	url = git@github.com:govtrack/django-simplegetapi.git
