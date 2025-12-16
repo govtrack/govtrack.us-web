@@ -71,6 +71,14 @@ download \
   $VENDOR/bootstrap.bundle.min.js \
   '9520018fa5d81f4e4dc9d06afb576f90cbbaba209cfcc6cb60e1464647f7890b'
 
+# Font Awesome (for the spinner on ajax calls, various icons; MIT License)
+download \
+  https://use.fontawesome.com/releases/v6.6.0/fontawesome-free-6.6.0-web.zip \
+  /tmp/fontawesome.zip \
+  'f425638f6db13622074ccd9369941170935a40891094b6505c5bc28c29f028eb'
+(cd /tmp; unzip fontawesome.zip;)
+mv /tmp/fontawesome-free-6.6.0-web $VENDOR/fontawesome
+
 # Josh's Bootstrap Helpers (MIT License)
 # When this (client side JS) is updated, you must also
 # update templates/bootstrap-helpers.html, which is the

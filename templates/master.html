@@ -17,6 +17,10 @@
 		<meta name="theme-color" content="#9B2347">
 
 		<link href="{{ STATIC_URL }}vendor/bootstrap.min.css" rel="stylesheet">
+	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/fontawesome.css" rel="stylesheet">
+	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/solid.css" rel="stylesheet">
+	  <link href="{{ STATIC_URL }}vendor/fontawesome/css/brands.css" rel="stylesheet">
+
 
 		<link media="all" rel="stylesheet" href="{{ STATIC_URL }}css/all{% if not debug %}-min{% endif %}.css?20241114" />
 
@@ -36,8 +40,6 @@
 		<script type="text/javascript">
 		window.post_jquery_load_scripts = [];
 		</script>
-
-		<script src="https://kit.fontawesome.com/f4ce1afff3.js" crossorigin="anonymous"></script>
 
 		{% block head %}{% endblock %}
 	</head>
