@@ -44,7 +44,7 @@ function show_modal(title, message) {
 
 function init_ad_zone(ad_container) {
     // Track some ad impression statistics.
-    var ad_cookie = $.cookie("ads");
+    var ad_cookie = $.cookie("ad_exp");
     if (ad_cookie) ad_cookie = parse_qs(ad_cookie);
     if (!ad_cookie) ad_cookie = { };
 
