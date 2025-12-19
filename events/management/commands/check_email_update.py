@@ -35,10 +35,17 @@ class Command(BaseCommand):
 			print("Not a user.")
 			return
 		
+		print("ID", user.id)
 		print("Active:", user.is_active)
 		print("Joined:", user.date_joined)
 		print("Last Login:", user.last_login)
-		
+
+		prof = user.userprofile()
+		print("Permit Email:", prof.massemail)
+		print("Last Blast:", prof.last_mass_email)
+		print("Last Blog Post:", prof.last_blog_post_emailed)
+		print("Email Options:", prof.massemail_options or "(none)")
+
 		try:
 			p = Ping.objects.get(user=user)
 			print("Last Ping:", p.pingtime)
