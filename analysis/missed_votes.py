@@ -55,10 +55,9 @@ vote_counts = { }
 voters_by_chamber = { "h": set(), "s": set() }
 person_lifetime_vote_dates = { }
 for fn in glob.glob(vote_xml_glob):
-	# This vote ocurred in closed session and at the time of initial publication, all senators were
-	# marked as not voting, which dinged every senator as having a missed vote. We'll skip this
-	# vote in statistics. The Senate XML file is expected to be updated to mark the senators'
-	# votes as something other than Not Voting, and when that happens this will become unnecessary.
+	# This vote ocurred in closed session and all senators were marked as not voting,
+	# which dinged every senator as having a missed vote. We'll skip this.
+	# https://www.senate.gov/legislative/LIS/roll_call_votes/vote1162/vote_116_2_00216.htm
 	if "congress/116/votes/2020/s216/" in fn: continue
 
 	m = re.match("data/congress/\d+/votes/(.*)/.*/", fn)
@@ -81,7 +80,7 @@ for fn in glob.glob(vote_xml_glob):
 		
 	for voter in dom.xpath("voter[@id]"):
 		id = int(voter.get("id"))
-		if id == "0": raise ValueError()
+		if id == 0: continue # vice president tie-breaker
 		ctr = vote_counts.setdefault(id, {}).setdefault(bin, { "total": 0, "missed": 0 })
 		ctr['total'] += 1
 		if voter.get("vote") == "0": ctr['missed'] += 1
