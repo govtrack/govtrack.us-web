@@ -321,6 +321,8 @@ def load_missing_legislators(congress):
             456883: "Rep. Mullin had complications from a knee operation in February 2025.", # 2025-03
             412606: "Rep. Norcross was hospitalized for a gallbladder infection on April 5, 2025.", # 2025-05
             412272: "Rep. Connolly announced the return of esophageal cancer on April 28, 2025.", # 2025-05
+            412845: "Rep. Murphy may be out for cancer treatment.", # 2026-01
+            412402: "Rep. Womack announced a family member’s serious medical issue in November 2025.", # 2026-01
         }
         if row["person"].id in explanations:
             row["explanation_html"] = explanations[row["person"].id]
