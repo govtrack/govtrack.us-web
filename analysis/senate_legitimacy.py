@@ -14,32 +14,6 @@ from person.models import PersonRole, RoleType
 
 def percent(value): return round(value*100, 2)
 
-# Historical total U.S. population.
-# U.S. Census, 2010 Census, Population and Housing Unit Counts, Table 2
-# https://www2.census.gov/library/publications/decennial/2010/cph-2/cph-2-1.pdf
-us_pop = { 2020: 330317527, # NOTE: This data point from https://www.census.gov/popclock/
-           2010: 308745538,
-           2000: 281424603,
-           1990: 248718302,
-           1980: 226542199,
-           1970: 203302031,
-           1960: 179323175,
-           1950: 151325798,
-           1940: 132164569,
-           1930: 123202624,
-           1920: 106021537,
-           1910: 92228496,
-           1900: 76212168 }
-def us_pop_at(year):
-	# Interpolate or extrapolate.
-	dec1 = year // 10 * 10 # decade at or before year
-	dec2 = dec1 + 10 # decade after
-	dec2 = min(dec2, max(us_pop.keys())) # limit to max data year
-	dec1 = dec2 - 10 # if dec2 was limited to max data year, move dec1 to prior decade
-	r = (year - dec1) / (dec2 - dec1)
-	# Linearly interpolate or extrapolate.
-	return (1-r)*us_pop[dec1] + r*us_pop[dec2]
-
 # Load historical state populations.
 state_pop = { }
 for state, year, pop in csv.reader(open("analysis/historical_state_population_by_year.csv")):
@@ -50,7 +24,7 @@ state_pop_max_year = max(year for (state, year) in state_pop.keys())
 
 # Write headers.
 W = csv.writer(sys.stdout)
-W.writerow(["congress", "session", "date", "category", "question", "yea_senators", "yea_statespop", "yea_uspop", "link"])
+W.writerow(["congress", "session", "date", "category", "question", "yea_senators", "yea_statespop", "yea_statespopweb", "link"])
 
 # Process each vote.
 for vote in tqdm.tqdm(list(Vote.objects\
@@ -61,8 +35,6 @@ for vote in tqdm.tqdm(list(Vote.objects\
 	)\
 	.order_by('-created'))):
 
-	pop_year = vote.created.year
-
 	# Get how everyone voted. Exclude some data errors where voters are not tied to roles.
 	votes = vote.voters.all()\
 		.exclude(person_role=None)\
@@ -71,19 +43,18 @@ for vote in tqdm.tqdm(list(Vote.objects\
 	# Count up the number of voting legislators for each state,
 	voting_legislators_per_state = defaultdict(lambda : 0)
 	for option, state, _ in votes:
+		if state == "": continue # Vice President's tie-breaker
 		if option not in ("+", "-"): continue # we only care about voting legislators
 		voting_legislators_per_state[state] += 1
 
 	# Get the state populations in the year of the vote. For this year's votes, we don't have
 	# state populations yet, so just use the last year we have.
-	state_pop_year = { state: pop for (state, year), pop in state_pop.items() if year == min(pop_year, state_pop_max_year) }
+	state_pop_year = { state: pop for (state, year), pop in state_pop.items() if year == min(vote.created.year, state_pop_max_year) }
 
-	# Sum up the total population in states with senators (i.e. real states at the time of the vote).
-	all_states = set(state for _, state, _ in votes if state != "")
+	# Sum up the total population in states with voting senators (i.e. real states at the time of the vote).
+	#all_states = set(state for _, state, _ in votes if state != "") # includes non-voting senators but that may not be fair
+	all_states = set(voting_legislators_per_state)
 	state_pop_total = sum(state_pop_year[state] for state in all_states)
-
-	# Get the total U.S. population in this time. Interpolate (or beyond the last year, extrapolate).
-	country_population = us_pop_at(pop_year)
 
 	# Sum up the total population represented by each vote option # (i.e. yes/no),
 	# apportioning the population of each state evenly across the legislators representing
@@ -104,10 +75,15 @@ for vote in tqdm.tqdm(list(Vote.objects\
 	# get the % of yes voters out of senators voting and out of the country's population as a whole
 	count_percent_yea = count_by_option["+"] / (count_by_option["+"] + count_by_option.get("-", 0))
 	statepop_percent_yea = pop_by_option["+"] / state_pop_total
-	uspop_percent_yea = pop_by_option["+"] / country_population
+
+	# just get interesting ones
+	if statepop_percent_yea > .47: continue
+
+	# just get enacted bills
+	if not vote.is_on_passage or not vote.related_bill or not vote.related_bill.enacted_ex(): continue
 
 	# print
 	W.writerow([vote.congress, vote.session if len(vote.session) == 4 else vote.created.year, vote.created.isoformat(),
 	            VoteCategory.by_value(vote.category).key, str(vote),
-	            percent(count_percent_yea), percent(statepop_percent_yea), percent(uspop_percent_yea),
+	            percent(count_percent_yea), percent(statepop_percent_yea), vote.get_equivalent_aye_voters_us_population_percent(),
 	            "https://www.govtrack.us"+vote.get_absolute_url()])

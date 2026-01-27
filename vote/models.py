@@ -598,8 +598,9 @@ class Vote(models.Model):
         states_with_voters = set()
         for state, vote in votes:
             if state == "": continue # VP tie-breaker
+            if vote not in ("+", "-", "P"): continue
             states_with_voters.add(state)
-            if vote in ("+", "-", "P"): state_freq_ayeno[state] = state_freq_ayeno.get(state, 0) + 1
+            state_freq_ayeno[state] = state_freq_ayeno.get(state, 0) + 1
 
         # Sum the populations of the states with senators (i.e. the country's population minus DC and territories).
         state_population = get_state_population_in_year(self.created.year)

@@ -326,7 +326,7 @@ def main(options):
                             # quorum call of the House but are expected to not have a role.
                             pass
                         else:
-                            log.error("%s: Could not find role for %s on %s." % (fname, voter.person, vote.created))
+                            log.error(f"{fname}: Could not find role for {voter.person} on {vote.created}, possible roles: {voter.person.roles.all()}")
                             vote.missing_data = True
                             vote.save()
 
