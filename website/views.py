@@ -625,37 +625,6 @@ def videos(request, video_id=None):
     return render(request, 'website/videos.html', { "video_id": video_id })
 
 
-def set_district(request):
-    try:
-        state = request.POST["state"]
-        if state != "XX" and state not in us.statenames: raise Exception()
-        district = int(request.POST["district"])
-    except:
-        return HttpResponseBadRequest()
-
-    # Who represents?
-    from person.models import Person
-    mocs = None
-    if state != "XX":
-        mocs = [p.id for p in Person.from_state_and_district(state, district)]
-
-    # Form response.
-    response = HttpResponse(
-        json.dumps({ "status": "ok", "mocs": mocs }),
-        content_type="application/json")
-
-    if request.user.is_authenticated:
-        # Save to database.
-        prof = request.user.userprofile()
-        prof.congressionaldistrict = "%s%02d" % (state, district)
-        prof.save()
-    else:
-        # Save in cookie.
-        response.set_cookie("cong_dist", json.dumps({ "state": state, "district": district }),
-            max_age=60*60*24*21)
-
-    return response
-
 @anonymous_view
 def dumprequest(request):
 	return HttpResponse(

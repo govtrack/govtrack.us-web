@@ -19,7 +19,6 @@ urlpatterns = [
     re_path(r'^accounts/membership/checkout$', website.views.go_ad_free_checkout),
     re_path(r'^accounts/membership/webhook$', website.views.go_ad_free_webhook),
     re_path(r'^accounts/positions', website.views.get_user_position_list),
-    re_path(r'^accounts/_set_district$', website.views.set_district),
     re_path(r'^accounts/community/login', website.views.discourse_sso),
     re_path(r'^videos(?:/(?P<video_id>[a-z0-9\-_]+))?', website.views.videos),
     re_path(r'^_ajax/update-position', website.views.update_userposition, name='update-userposition'),
