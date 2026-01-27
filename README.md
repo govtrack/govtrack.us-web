@@ -140,11 +140,9 @@ You'll need several other data repositories that you can put in the `data` direc
 * Our [congressional misconduct database](https://github.com/govtrack/misconduct) YAML file: `MISCONDUCT_DATABASE_PATH=data/misconduct/misconduct.yaml`
 * Our [legislator name pronunciation database](https://github.com/govtrack/pronunciation/): `PRONUNCIATION_DATABASE_PATH=data/pronunciation/legislators.yaml`
 
-At this point you should be able to run `./manage.py runserver` and test that the site works.
+At this point you should be able to run `./manage.py runserver` or `conf/gunicorn_start` and test that the site works.
 
-And `conf/uwsgi_start test 1` should start the uWSGI application daemon.
-
-Install nginx, supervisord (which keeps the uWSGI process running), and certbot and set up their configuration files:
+Install nginx, supervisord (which keeps the gunicorn process running), and certbot and set up their configuration files:
 
     apt install nginx supervisor certbot python3-certbot-nginx
     rm /etc/nginx/sites-enabled/default
@@ -155,6 +153,8 @@ Install nginx, supervisord (which keeps the uWSGI process running), and certbot 
     service nginx restart
     service supervisor restart
     certbot # and follow prompts, but without the HTTP redirect because we already have it
+
+Currently I had to modify gunicorn source code at `.venv/lib/python3.8/site-packages/gunicorn/workers/sync.py` to fix a crash on first page load.
 
 To scrape and load new data, you'll need to set up the `congress` project.
 

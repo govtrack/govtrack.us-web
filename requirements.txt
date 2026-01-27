@@ -1,6 +1,5 @@
 honcho
 django<5 # Python has to b updated to 3.10 after 4.x
-uwsgi
 lxml
 python-prctl
 python-dateutil
@@ -50,3 +49,4 @@ atproto
 pmtiles
 mapbox-vector-tile
 shapely
+gunicorn
