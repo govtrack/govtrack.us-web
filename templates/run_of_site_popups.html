@@ -8,7 +8,7 @@ $(function() {
 		if (win_loc_hash == "#track") return;
 
 		// Read the persistent cookie for flags.
-		var flags = $.cookie("flags1");
+		var flags = { }; // $.cookie("flags1");
 		flags = !flags ? {} : parse_qs(flags);
 
 		// Increment a counter.
@@ -22,7 +22,7 @@ $(function() {
 		}();
 
 		// Save flags.
-		$.cookie("flags1", form_qs(flags), { expires: 28, path: '/' });
+		//$.cookie("flags1", form_qs(flags), { expires: 28, path: '/' });
 	}, 750)
 });
 

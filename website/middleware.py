@@ -113,5 +113,23 @@ class GovTrackMiddleware:
         except:
             pass
 
-        return self.get_response(request)
+        # Pass to next middleware.
+        response = self.get_response(request)
 
+        # Cloudflare was giving 502 Bad gateway pages to some users until they
+        # clear their cookies. I'm not sure what cookie might be set that is
+        # causing the issue, so we'll try to clear anything we can find. This
+        # will log people out, so we can only do this once, by using a new
+        # cookie to flag that it's been done. Assumes cookies were set with
+        # default "/" path.
+        # Skip our "anonymous" requests where request.COOKIES has already
+        # been cleared.
+        if not getattr(request, "anonymous", False) \
+         and len(request.COOKIES) > 0 \
+         and "govtrackdidreset" not in request.COOKIES:
+            for cookiename in request.COOKIES:
+                if cookiename != "csrftoken":
+                    response.delete_cookie(cookiename)
+            response.set_cookie("govtrackdidreset", value="1", max_age=datetime.timedelta(days=30))
+
+        return response

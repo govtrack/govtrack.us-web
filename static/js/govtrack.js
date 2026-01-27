@@ -44,15 +44,15 @@ function show_modal(title, message) {
 
 function init_ad_zone(ad_container) {
     // Track some ad impression statistics.
-    var ad_cookie = $.cookie("ad_exp");
-    if (ad_cookie) ad_cookie = parse_qs(ad_cookie);
-    if (!ad_cookie) ad_cookie = { };
+    //var ad_cookie = $.cookie("ad_exp");
+    //if (ad_cookie) ad_cookie = parse_qs(ad_cookie);
+    //if (!ad_cookie) ad_cookie = { };
 
     // put users in buckets: assign each user a random number in [0,1].
-    if (!ad_cookie.segment) ad_cookie.segment = Math.random();
+    //if (!ad_cookie.segment) ad_cookie.segment = Math.random();
 
     // save cookie
-    $.cookie("ad_exp", form_qs(ad_cookie), { expires: 21, path: '/' });
+    //$.cookie("ad_exp", form_qs(ad_cookie), { expires: 21, path: '/' });
 
     // Defer ad zone scripts until the partner script is loaded.
     let deferred_scripts = [];
