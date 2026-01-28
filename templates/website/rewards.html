@@ -1,0 +1,228 @@
+{% extends "master.html" %}
+{% load static %}
+{% block title %}GovTrack.us Backer Rewards{% endblock %}
+
+{% comment %}
+gm convert -append ../path/to/*.png -resize 350x static/images/rewards-mockups.png
+{% endcomment %}
+
+{% block body_class %}about{% endblock %}
+
+{% block extra_css %}
+<style>
+  p, li { margin-bottom: 1em; max-width: 50rem; font-size: 18px; }
+
+  h2
+  {
+    margin-top: 30px;
+    border-top: 1px solid #AAA;
+    padding-top: 30px;
+    font-size: 26px;
+    font-weight: bold;
+  }
+
+  .mockrow
+  {
+  }
+
+  .mock
+  {
+    margin: 1em 0;
+    background: url("/static/images/rewards-mockups.png");
+    background-size: cover;
+    width: var(--tile-size);
+    height: var(--tile-size);
+    background-position-y: calc(-1 * var(--tile) * var(--tile-size));
+    --tile-size: 33vw;
+  }
+  @media screen and (min-width: 576px) {
+    .mockrow-4 .mock { --tile-size: 220px; } }
+  @media screen and (min-width: 768px) {
+    .mockrow-4 .mock { --tile-size: 150px; }  }
+  @media screen and (min-width: 992px) {
+    .mockrow-4 .mock { --tile-size: 200px; } }
+  @media screen and (min-width: 1200px) {
+    .mockrow-4 .mock { --tile-size: 250px; } }
+  @media screen and (min-width: 1400px) {
+    .mockrow-4 .mock { --tile-size: 301px; } }
+</style>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+  function verify_password()
+  {
+    return true; // this is too annoying
+
+    // It's ok. I'm reviewing orders before approval!
+    // This is just to stop easy spam.
+    if (prompt("Please enter the password we gave you.") == "open")
+      return true;
+    alert("That was the wrong password. You can try again.")
+    return false;
+  }
+</script>
+{% endblock %}
+
+{% block body %}
+<h1>Backer Rewards!</h1>
+
+<p>Thanks so much for financially supporting our work!!
+If you&rsquo;ve been given this link, then <b>we owe you some free merch</b> for your support.</p>
+
+<p>Here&rsquo;s how you can get your reward:</p>
+
+<ol>
+  <li>Scroll down to find the item you want: a short or long sleeve t-shirt, tote bag, mouse pad, or desk mat.</li>
+  <li>Click the <a onclick="return false;" class="btn btn-primary">Order ...</a> button <b>underneath the item you want</b>.</li>
+  <li>Enter your shipping address on our fulfillment partner website Printful.
+  <br><b>Please use the same email address you use on Kickstarter/Patreon, if you can.</b>
+  <br><b>You won&rsquo;t be asked for billing information.</b></li>
+  <li>Please give us a week to confirm your order. Shipments should go out about 2 weeks after you place the order.</li>
+  <li>If we owe you two items, you can do this a second time. You can&rsquo;t combine different products into the same order &mdash; just place another order.</li>
+</ol>
+
+<h2>Short-Sleeve T-Shirt &mdash; White House Graphic</h2>
+
+<p>Show that you're tracking the White House with GovTrack with this short-sleeve t-shirt:</p>
+
+<div class="row mockrow mockrow-4 ">
+  <div class="col">
+    <img class="mock" style="--tile: 8">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 10">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 12">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 14">
+  </div>
+</div>
+
+<p>This short-sleeve t-shirt features a stock image of the White House, a blue and red gauge measuring the White House's transparency, and our website address in big letters in the front. Our logo is on the back. Available in four colors.</p>
+
+<p>This is a unisex heavyweight 100% cotton short-sleeve t-shirt.</p>
+
+<p><a onclick="return verify_password();" href="https://www.printful.com/product-template/95499710/b1e01fc4b490fe820c67a8cc5b3e5403" class="btn btn-primary">Order Short-Sleeve GovTrack + White House T-Shirt</a></p>
+
+
+<h2>Short-Sleeve T-Shirt &mdash; Congress + White House Graphic</h2>
+
+<p>Show that you're tracking Congress and the White House with GovTrack with this short-sleeve t-shirt:</p>
+
+<div class="row mockrow mockrow-4 ">
+  <div class="col">
+    <img class="mock" style="--tile: 9">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 11">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 13">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 15">
+  </div>
+</div>
+
+<p>This short-sleeve t-shirt features an image of the White House up against a photo of the U.S. Capitol dome, separated by a blue and red gauge measuring the balance of power between the first and second branches of the federal government, in the upper left corner. Our logo is also on the back. Available in four colors.</p>
+
+<p>This is a unisex heavyweight 100% cotton short-sleeve t-shirt.</p>
+
+<p><a onclick="return verify_password();" href="https://www.printful.com/product-template/95499712/700cf3ff7f70bf2dc479aa57c67400c0" class="btn btn-primary">Order Short-Sleeve GovTrack + Congress + White House T-Shirt</a></p>
+
+
+<h2>Long-Sleeve T-Shirt &mdash; White House Graphic</h2>
+
+<p>Show that you're tracking the White House with GovTrack with this long-sleeve t-shirt:</p>
+
+<div class="row mockrow mockrow-4 ">
+  <div class="col">
+    <img class="mock" style="--tile: 17">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 19">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 21">
+  </div>
+  <div class="col"></div>
+</div>
+
+<p>This long-sleeve t-shirt features a stock image of the White House, a blue and red gauge measuring the White House's transparency, and our website address in big letters on the front. Our logo is on the back. Available in three colors.</p>
+
+<p>This is a unisex 100% cotton crew neck long-sleeve t-shirt.</p>
+
+<p><a onclick="return verify_password();" href="https://www.printful.com/product-template/95499703/fb6ef1d823940560706cd5426332c28b" class="btn btn-primary">Order Long-Sleeve GovTrack + White House T-Shirt</a></p>
+
+
+<h2>Transparent Tote Bag</h2>
+
+<p>Now you can have some more transparency in your life with this clear tote bag!</p>
+
+<div class="row mockrow mockrow-4 ">
+  <div class="col">
+    <img class="mock" style="--tile: 0">
+  </div>
+</div>
+
+<p>The bag says "Make Congress & the White House Transparent & Accountable" on one side. It's transparent around the word transparent! The other side, which you can see through from the front if there's nothing inside, has our website address and logo. Did I mention it's clear?</p>
+
+<p><a onclick="return verify_password();" href="https://www.printful.com/product-template/95499714/89064ba704ee7bb3321612ad466420ea" class="btn btn-primary">Order Transparent Tote Bag</a></p>
+
+
+<h2>Regular Tote Bags</h2>
+
+<p>Show that you're tracking Congress and the White House with GovTrack with a tote bag:</p>
+
+<div class="row mockrow mockrow-4 ">
+  <div class="col">
+    <img class="mock" style="--tile: 5">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 6">
+  </div>
+  <div class="col"></div>
+  <div class="col"></div>
+</div>
+
+<p>This tote features an image of the White House up against a photo of the U.S. Capitol dome, separated by a blue and red gauge measuring the balance of power between the first and second branches of the federal government. Our logo is also on the reverse side. Both colors have the same design. Available in black and tan.</p>
+
+<p>This is an organic cotton twill tote bag. Fabric weight: 8 oz/yd² (272 g/m²). Dimensions: 16″ × 14 ½″ × 5″. Weight limit: 30 lbs. 1″ wide dual straps, 24.5″ length.</p>
+
+<p><a onclick="return verify_password();" href="https://www.printful.com/product-template/95499722/caa0cf8f33decef85b96257683e8ff13" class="btn btn-primary">Order Black Tote Bag</a></p>
+
+<p><a onclick="return verify_password();" href="https://www.printful.com/product-template/95499723/c5edc23bd13f54bf34fd8b78f10de139" class="btn btn-primary">Order Tan Tote Bag</a></p>
+
+
+<h2>Mouse Pad / Desk Mat</h2>
+
+<p>When you're writing a letter to your legislator about the latest action by the White House, this mouse pad / desk mat will at least make things more ergonomic, which is important too.:</p>
+
+<div class="row mockrow mockrow-4">
+  <div class="col">
+    <img class="mock" style="--tile: 1">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 2">
+  </div>
+  <div class="col">
+    <img class="mock" style="--tile: 3">
+  </div>
+  <div class="col"></div>
+</div>
+
+<p>The design is an American flag re-imagined as a bar chart because our website www.GovTrack.us has unique statistics about legislators and legislation in Congress. Our website address and slogan are on the middle right side.</p>
+
+<p>Smooth polyester top. Anti-slip rubber base. Hemmed edges. Thickness: 0. 12″.</p>
+
+<p><a onclick="return verify_password();" href="https://www.printful.com/product-template/95499728/6da4f58d52e64cceb26f5ef262828e66" class="btn btn-primary">Order Mouse Pad / Desk Mat</a></p>
+
+<hr style="margin: 2em">
+
+<p>Want one of these graphics on something else? Check out the customizable product catalog at <a href="https://www.printful.com">Printful</a> and send us a message and we can try to accommodate.</p>
+
+{% endblock %}
+
