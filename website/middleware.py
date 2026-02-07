@@ -129,7 +129,10 @@ class GovTrackMiddleware:
          and "govtrackdidreset" not in request.COOKIES:
             for cookiename in request.COOKIES:
                 if cookiename != "csrftoken":
-                    response.delete_cookie(cookiename)
+                    try:
+                        response.delete_cookie(cookiename)
+                    except: # CookieError
+                        pass # unclear why this happens, somehow getting empty cookie name in spam requests
             response.set_cookie("govtrackdidreset", value="1", max_age=datetime.timedelta(days=30))
 
         return response
