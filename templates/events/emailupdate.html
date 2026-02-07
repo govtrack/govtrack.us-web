@@ -99,12 +99,11 @@ for our social media posts.
 						<div id="announcement-holder">
 					        	<h2>{{blog_post.title}}</h2>
 							<p>{% if blog_post.author %}By {{blog_post.author}}{% endif %} ({{blog_post.created|date}})</p>
-							{{blog_post.body_html|safe}}
 							<p style="font-style: italic; font-size: 90%">
 							   <a href="{{SITE_ROOT_URL}}{{blog_post.get_absolute_url}}">View this post on the web</a> &middot;
-							   <a href="{{SITE_ROOT_URL}}/accounts/lists">Select which updates you get from us</a> &middot;
-							   <a href="mailto:hello@govtrack.us?subject=Email%20update%20|%20ref#%20{{user.id}}">Send us feedback about this post</a>
+							   <a href="{{SITE_ROOT_URL}}/accounts/lists">Select which updates you get from us</a>
 							</p>
+							{{blog_post.body_html|safe}}
 						</div>
 						</div>
 						{% endif %}
