@@ -35,7 +35,23 @@ def committee_details(request, parent_code, child_code=None):
         if role: # member left congress but is still listed as committee member
             party_counts[role.party] = party_counts.get(role.party, 0) + 1
     party_counts = sorted(party_counts.items(), key = lambda p : -p[1])
-    
+
+    if child_code is None:
+        # Mark members with statistically interesting caucus membership.
+        from settings import CURRENT_CONGRESS
+        from person.models import Person
+        caucuses = Person.load_caucus_membership_data(only_congress=CURRENT_CONGRESS, load_people=True)
+        caucuses = Person.caucus_committe_analysis(caucuses)
+        member_map = { }
+        for m in members:
+            m.caucuses = []
+            member_map[m.person.id] = m
+        for caucus in caucuses:
+            if obj not in [c for _, c in caucus["committees"]]: continue # only satisically relevant ones
+            for p in caucus["members"]:
+                if p.id in member_map:
+                    member_map[p.id].caucuses.append(caucus)
+
     return {'committee': obj,
             'parent': parent,
             'subcommittees': subcommittees,

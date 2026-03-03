@@ -307,6 +307,16 @@ function show_pronunciation_guide() {
             </div>
         {% endif %}	
 
+        {% if caucuses %}
+            <div style="margin: .5em 0 1em 0">
+            	{{person.lastname}} is a member of
+            	<a href="/congress/members/caucuses">
+            		{% for c in caucuses %}
+            			{{c.name}}{% if not forloop.last %}, {% endif %}{% if forloop.revcounter == 2 %} and {% endif %}{% endfor %}</a>.
+            	<i style="font-size: 80%;">Caucus membership information may be incomplete or out of date.</i>
+        	  </div>
+        {% endif %}
+
 	{% comment %}
         {% if role.is_up_for_election or election_guides %}
 		<div class="card bg-info" style="margin-top: 2em">

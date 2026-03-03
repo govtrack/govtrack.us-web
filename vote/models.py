@@ -393,8 +393,12 @@ class Vote(models.Model):
 
         # Load All Caucus Membership Data
         from person.models import Person
-        caucus_membership = Person.load_caucus_membership_data()
-        all_caucuses = set(caucus_name for congress, caucus_name, member_bgid in caucus_membership)
+        caucus_metadata = Person.load_caucus_membership_data(only_congress=self.congress)
+        caucus_membership = {
+            caucus["name"]: set(m["id"] for m in caucus["members"])
+            for caucus in caucus_metadata
+        }
+        all_caucus_names = { caucus["name"] for caucus in caucus_metadata }
 
         # Build feature table and vote result vector.
         X = [ ]
@@ -416,8 +420,8 @@ class Vote(models.Model):
                    #  for region, statelist in census_regions.items()
                    # ]
                    + [
-                    (caucus, (self.congress, caucus, voter.person.bioguideid) in caucus_membership)
-                    for caucus in all_caucuses
+                    (caucus, voter.person.bioguideid in caucus_membership[caucus])
+                    for caucus in all_caucus_names
                    ]
                    )
           X.append(features)

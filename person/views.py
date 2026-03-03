@@ -246,6 +246,12 @@ def person_details(request, pk):
                 .values_list("person", flat=True))
             cache.set(ck, kraken_cosponsors, 86400) # one day
 
+        caucuses = []
+        for (congress, caucus) in Person.load_caucus_membership_data():
+            if congress != CURRENT_CONGRESS: continue
+            if person.bioguideid not in [m["id"] for m in caucus["members"]]: continue
+            caucuses.append(caucus)
+
         return {'person': person,
                 'role': role,
                 'name': name,
@@ -258,6 +264,7 @@ def person_details(request, pk):
                 'enacted_bills': [b for b in enacted_bills_src_qs if b.was_enacted_ex(cache_related_bills_qs=enacted_bills_src_qs)],
                 'recent_bills': person.sponsored_bills.all().order_by('-introduced_date')[0:7],
                 'committeeassignments': get_committee_assignments(person),
+                'caucuses': caucuses,
                 'feed': person.get_feed(),
                 'has_session_stats': has_session_stats,
                 'bill_subject_areas': bills_by_subject_counts,
@@ -1365,3 +1372,24 @@ def other_people_list(request, list_type):
         roles.append(r)
     return { "title": title, "roles": roles }
 
+@anonymous_view
+@render_to('person/caucuses.html')
+def caucuses(request):
+    caucuses = Person.load_caucus_membership_data(only_congress=CURRENT_CONGRESS, load_people=True)
+
+    # Make counts by party.
+    from copy import deepcopy
+    from collections import defaultdict
+    caucuses = deepcopy(caucuses) # don't corrupt cached data
+    for caucus in caucuses:
+        caucus["counts_by_party"] = defaultdict(lambda : 0)
+        for p in caucus["members"]:
+            caucus["counts_by_party"][p.role.caucus or p.role.party] += 1
+        caucus["counts_by_party"] = sorted([(count, party)
+                                           for (party, count)
+                                           in caucus["counts_by_party"].items()],
+                                           key = lambda cp : -cp[0])
+
+    caucuses = Person.caucus_committe_analysis(caucuses)
+
+    return { "caucuses": caucuses }

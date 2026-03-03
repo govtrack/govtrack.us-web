@@ -7,6 +7,7 @@ urlpatterns = [
     re_path(r'^$', person.views.membersoverview),
     re_path(r'^map$', person.views.browse_map, name="person_list"),
     re_path(r'^(current|all)$', person.views.searchmembers, name="person_search"),
+    re_path(r'^caucuses$', person.views.caucuses),
 
     # must put things that could look like names of members of congress first
     re_path(r'^report-cards/(\d{4})(?:/([^/\.]+)(?:/([^/\.]+))?)?$', person.views.person_session_stats_overview, name='person_session_stats_overview'),

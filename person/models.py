@@ -408,19 +408,107 @@ class Person(models.Model):
         return stats
 
     @staticmethod
-    def load_caucus_membership_data():
-        if hasattr(Person.load_caucus_membership_data, '_cache'):
-            return Person.load_caucus_membership_data._cache
-        import glob, rtyaml
-        CACUSES_GLOB = "/home/govtrack/data/caucuses/*/*.yaml"
-        caucus_membership = set()
-        for caucus_fn in glob.glob(CACUSES_GLOB):
-          congress = int(re.search(r"/(\d+)/", caucus_fn).group(1))
-          caucusdata = rtyaml.load(open(caucus_fn))
-          for p in caucusdata["members"]:
-            caucus_membership.add((congress, caucusdata["name"], p["id"]))
-        Person.load_caucus_membership_data._cache = caucus_membership
-        return caucus_membership
+    def load_caucus_membership_data(only_congress=None, load_people=False):
+        if not hasattr(Person.load_caucus_membership_data, '_cache'):
+            import glob, rtyaml
+            import parser.processor
+            CACUSES_GLOB = "/home/govtrack/data/caucuses/*/*.yaml"
+            caucus_metadata = [ ]
+            for caucus_fn in glob.glob(CACUSES_GLOB):
+              congress, caucus_id = re.search(r"/(\d+)/(.*).yaml", caucus_fn).groups()
+              caucusdata = rtyaml.load(open(caucus_fn))
+              caucusdata["id"] = caucus_id
+              caucusdata["updated"] = parser.processor.Processor.parse_datetime(caucusdata["updated"])
+              caucus_metadata.append((int(congress), caucusdata))
+            caucus_metadata.sort(key = lambda c : (c[0], -len(c[1]["members"]))) # sort by Congress then reverse by member count
+            Person.load_caucus_membership_data._cache = caucus_metadata
+        else:
+            caucus_metadata = Person.load_caucus_membership_data._cache
+
+        if only_congress:
+            caucus_metadata = [caucus for congress, caucus in caucus_metadata
+                               if congress == only_congress]
+
+        if load_people:
+            from copy import deepcopy
+            caucus_metadata = deepcopy(caucus_metadata) # don't corrupt cached data
+
+            # Replace member list entries with Person instances.
+            # Get bioguide IDs, convert to IDs, load in_bulk,
+            # make a map from bioguide IDs, replace member list,
+            # and sort.
+            all_members = set(sum(([m["id"] for m in caucus["members"]]
+                                      for caucus in caucus_metadata), []))
+            all_members = list(Person.objects.filter(bioguideid__in=all_members).values_list('id', flat=True))
+            all_members = Person.objects.in_bulk(all_members)
+            bioguide_map = { p.bioguideid: p for p in all_members.values() }
+            for caucus in caucus_metadata:
+                caucus["members"] = sorted([
+                    bioguide_map[m["id"]]
+                    for m in caucus["members"]
+                ], key = lambda p : p.sortname)
+
+            # Load the current role for all members and assign to the same
+            # Person instances that were put into caucus_metadata.
+            # (I think this will speed up name generation as well.)
+            roles = PersonRole.objects.filter(person__in=all_members.values(), current=True)
+            for r in roles:
+                all_members[r.person.id].role = r
+
+        return caucus_metadata
+
+    @staticmethod
+    def caucus_committe_analysis(caucuses):
+        # Find over-/under-representation on committees.
+
+        from copy import deepcopy
+        caucuses = deepcopy(caucuses) # don't corrupt cached data
+
+        # Get the total number of legislators in each chamber.
+        from django.db.models import Count
+        for caucus in caucuses:
+            caucus["committees"] = []
+            caucus["committees_underrep"] = []
+        legislator_totals = { a["role_type"]: a["count"]
+                              for a in PersonRole.objects.filter(current=True)\
+                                .values("role_type")\
+                                .annotate(count=Count('id')) }
+
+        # For each committee-caucus pair...
+        from committee.models import Committee, CommitteeType
+        from scipy.stats import binom
+        for committee in Committee.objects.filter(committee=None): # not subcommittees
+            if committee.committee_type == CommitteeType.joint: continue # math may not work
+            committee_members = set(cm.person for cm in committee.members.all())
+            if len(committee_members) < 5: continue # math def doesn't work with zero, probably also with low numbers
+            for caucus in caucuses:
+                # Get the number of committee members who are also caucus members
+                # and the expected number.
+                count = len(set(caucus["members"]) & committee_members)
+
+                # Flag if counts' divergence is statistically significant based
+                # on a binomial distribution. The repeated 'experiment' of the
+                # distribution is whether each caucus member is on the committee,
+                # and the expected probability of 'yes' is the number of committee
+                # members divided by the number of members of the chamber. The
+                # cumulative distribution for 'count' and higher is the probability
+                # that count is that or less.
+                n = len([p for p in caucus["members"]
+                        if p.role.role_type in committee.chamber_role_types()])
+                p = len(committee_members) / sum(
+                             legislator_totals[r]
+                             for r in committee.chamber_role_types())
+                phack = 0.05
+                if binom.cdf(count, n, p) <= phack:
+                    caucus["committees_underrep"].append([ count, committee ])
+                if n > 0 and 1 - binom.cdf(count, n - 1, p) <= phack:
+                    caucus["committees"].append([ count, committee ])
+
+        for caucus in caucuses:
+            caucus["committees_underrep"].sort(key = lambda cc : cc[0])
+            caucus["committees"].sort(key = lambda cc : -cc[0])
+
+        return caucuses
 
     def get_feed(self, feed_type="p"):
         if feed_type not in ("p", "pv", "ps"): raise ValueError(feed_type)

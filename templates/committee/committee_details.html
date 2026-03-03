@@ -92,7 +92,7 @@
 			{% if committee.committee_type == TYPE_JOINT %}
 				This is a &ldquo;joint&rdquo; committee, which means it has members from both the House and Senate.
 			{% elif member_highlights|length > 0 %}
-				The chair is always selected from the majority party and the ranking member is the most senior member of the minority party.
+				The chair is always selected from the chamber&rsquo;s majority party and the ranking member is the most senior member of the minority party.
 			{% endif %}
 			{% if party_counts|length > 0 and committee.code != "HSSO" and committee.code.0 != "J" %}
 				The majority party ensures it has a majority on every committee.
@@ -128,12 +128,11 @@
 		    <div class="row">
 	        {% for member in members %}
 			{% comment %}
-		        {% if forloop.counter0|divisibleby:6 %}<div class="clearfix visible-lg"></div>{% endif %}
 		        {% if forloop.counter0|divisibleby:4 %}<div class="clearfix visible-md"></div>{% endif %}
 		        {% if forloop.counter0|divisibleby:3 %}<div class="clearfix visible-sm"></div>{% endif %}
 		        {% if forloop.counter0|divisibleby:2 %}<div class="clearfix visible-xs"></div>{% endif %}
 			{% endcomment %}
-		        <div class="member col-xs-6 col-sm-4 col-md-3 col-lg-2">
+		        <div class="member col-xs-6 col-sm-4 col-md-3">
 
 		            <div class="photo">
 	            		<a href="{{ member.person.get_absolute_url }}"><img src="{{ member.person.get_photo_url_100 }}" width="100" height="120" alt="Portrait of {{ member.person.name_no_details }}"/></a>
@@ -169,6 +168,9 @@
 					{% if member.subcommittee_role %}
 						<div class="info">{{member.subcommittee_role.role_name.lower}}, Subcommittee on <a href="{{member.subcommittee_role.committee.url}}" class="plain" title="{{member.subcommittee_role.committee.name}}">{{member.subcommittee_role.committee.name|truncatewords:7}}</a></div>
 					{% endif %}
+					{% for caucus in member.caucuses %}
+						<div class="info">{{caucus.name}}</div>
+					{% endfor %}
 		            {% endwith %}
 		        </div>
 		        {% endfor %}

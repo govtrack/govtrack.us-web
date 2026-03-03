@@ -101,6 +101,12 @@ class Committee(models.Model):
     def committee_type_abbrev(self):
         return CommitteeType.by_value(self.committee_type).abbrev
 
+    def chamber_role_types(self):
+        from person.models import RoleType
+        if self.committee_type == CommitteeType.house: return { RoleType.representative }
+        if self.committee_type == CommitteeType.senate: return { RoleType.senator }
+        if self.committee_type == CommitteeType.joint: return { RoleType.representative, RoleType.senator }
+
     def has_current_bills(self):
         return self.bills.filter(congress=CURRENT_CONGRESS).exists()
     def current_bills_sorted(self):
