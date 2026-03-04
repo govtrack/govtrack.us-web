@@ -13,7 +13,10 @@ from us import get_all_sessions
 def session_filter(qs, form):
     session_index = form["session"]
     if session_index != None:
-        s = get_all_sessions()[int(session_index)]
+        try:
+            s = get_all_sessions()[int(session_index)]
+        except:
+            return None
         qs = qs.filter(congress=s[0], session=s[1])
     return qs
     

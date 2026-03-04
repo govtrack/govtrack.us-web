@@ -117,7 +117,10 @@ def usc_cite(qs, form):
 	v = form.get("usc_cite", "").strip()
 	if v != "":
 		if not re.match("^\d+$", v):
-			v = USCSection.objects.get(citation=v).id
+			try:
+				v = USCSection.objects.get(citation=v).id
+			except:
+				return None
 		return qs.filter(usc_citations_uptree=v)
 	return None
 

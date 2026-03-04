@@ -165,7 +165,10 @@ class SearchManager(object):
 
             if qsparams["faceting"] == "false":
                 if not paginate or paginate(qsparams):
-                    page_number = int(qsparams.get("page", "1"))
+                    try:
+                        page_number = int(qsparams.get("page", "1"))
+                    except:
+                        page_number = 1
                     per_page = 20
                 else:
                     page_number = 1
@@ -241,7 +244,7 @@ class SearchManager(object):
                 
                 if isinstance(qs_, dict):
                     filters.update(qs_)
-                else:
+                elif qs_ is not None:
                     qs = qs_
                 
             else:
@@ -319,7 +322,10 @@ class SearchManager(object):
                     # Pre-load all objects in bulk. Then yield in the right order.
                     objects = self.manager.bulk_loader(item.pk for item in self.qs)
                     for item in self.qs:
-                        yield objects[int(item.pk)]
+                        try:
+                            yield objects[int(item.pk)]
+                        except:
+                            pass
             return SR(qs, self)
 
         else:
