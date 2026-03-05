@@ -66,18 +66,23 @@
 {% block body %}
 	<div id="event_subscribe_inline_container"> </div>
 
-			<dl class="dl-horizontal wide" style="margin-bottom: .5em">
+		<table class="table" style="width: auto;">
+			<tbody>
 				{% for mem in member_highlights %}
-					<dt>{{mem.get_role_display}}:</dt>
-					<dd style="margin-bottom: .25em"><a href="{{mem.person.get_absolute_url}}">{{mem.person}}</a></dd>
+				<tr>
+					<th scope="row">{{mem.get_role_display}}</th>
+					<td><a href="{{mem.person.get_absolute_url}}">{{mem.person}}</a></td>
+				</tr>
 				{% endfor %}
-			</dl>
-			<dl class="dl-horizontal wide" style="margin-bottom: 1em">
 				{% for party, count in party_counts %}
-					<dt>{{party}}s:</dt>
-					<dd style="margin-bottom: .25em">{{count}}</dd>
+				<tr>
+					<th scope="row">{{party}}s</th>
+					<td>{{count}}</td>
+				</tr>
 				{% endfor %}
 			</dl>
+		</tbody>
+	</table>
 
 			{% if members|length == 0 %}
 			<p>The membership of this committee is not yet available.</p>

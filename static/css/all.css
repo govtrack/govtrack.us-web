@@ -356,31 +356,6 @@ ol.breadcrumb {
 		padding: 0 0 12px;
 		margin: 0 0 9px;
 		}
-	dl.dl-horizontal dt {
-		font-weight: normal;
-	}
-	@media (min-width: 768px) {
-		dl.dl-horizontal dt {
-			width: 90px;
-			}
-		dl.dl-horizontal dd {
-			margin-left: 100px;
-		}
-			dl.dl-horizontal dd p {
-				line-height: 127%;
-				margin-bottom: .33em;
-			}
-				dl.dl-horizontal dd p:first-child {
-					line-height: inherit;
-					margin-bottom: .1em;
-				}
-		dl.dl-horizontal.wide dt {
-			width: 130px;
-			}
-		dl.dl-horizontal.wide dd {
-			margin-left: 140px;
-			}
-	}
 
 .photo img {
 	-moz-box-shadow: 2px 2px 2px 0px rgba(168,168,168,1);
