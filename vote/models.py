@@ -38,7 +38,8 @@ def get_state_population_in_year(year):
     # Clamp the year to the max year in the data, since the data lags real time.
     year = min(year, max(y for _, y in historical_state_population_data.keys()))
 
-    return { state: pop for (state, year), pop in historical_state_population_data.items() }
+    return { state: pop for (state, year_), pop in historical_state_population_data.items()
+             if year_ == year }
 
 
 class CongressChamber(enum.Enum):

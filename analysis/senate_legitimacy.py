@@ -24,7 +24,7 @@ state_pop_max_year = max(year for (state, year) in state_pop.keys())
 
 # Write headers.
 W = csv.writer(sys.stdout)
-W.writerow(["congress", "session", "date", "category", "question", "yea_senators", "yea_statespop", "yea_statespopweb", "link"])
+W.writerow(["congress", "session", "date", "category", "question", "yea_senators_pct", "yea_statespop_pct", "link"])
 
 # Process each vote.
 for vote in tqdm.tqdm(list(Vote.objects\
@@ -85,5 +85,5 @@ for vote in tqdm.tqdm(list(Vote.objects\
 	# print
 	W.writerow([vote.congress, vote.session if len(vote.session) == 4 else vote.created.year, vote.created.isoformat(),
 	            VoteCategory.by_value(vote.category).key, str(vote),
-	            percent(count_percent_yea), percent(statepop_percent_yea), vote.get_equivalent_aye_voters_us_population_percent(),
+	            percent(count_percent_yea), percent(statepop_percent_yea),
 	            "https://www.govtrack.us"+vote.get_absolute_url()])
