@@ -47,7 +47,7 @@ def committee_details(request, parent_code, child_code=None):
             m.caucuses = []
             member_map[m.person.id] = m
         for caucus in caucuses:
-            if obj not in [c for _, c in caucus["committees"]]: continue # only satisically relevant ones
+            if obj not in [c for _, c, _, _ in caucus["committees"]]: continue # only satisically relevant ones
             for p in caucus["members"]:
                 if p.id in member_map:
                     member_map[p.id].caucuses.append(caucus)

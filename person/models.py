@@ -469,10 +469,16 @@ class Person(models.Model):
         for caucus in caucuses:
             caucus["committees"] = []
             caucus["committees_underrep"] = []
-        legislator_totals = { a["role_type"]: a["count"]
+        from django.db.models.functions import Coalesce
+        legislator_totals = { (a["role_type"], a["party_caucus"]): a["count"]
                               for a in PersonRole.objects.filter(current=True)\
-                                .values("role_type")\
+                                .annotate(party_caucus=Coalesce("caucus", "party"))\
+                                .values("role_type", "party_caucus")\
                                 .annotate(count=Count('id')) }
+
+        # Pre-load current role info to get party of committee members.
+        legislator_party = { role.person: role.party
+                             for role in PersonRole.objects.filter(current=True) }
 
         # For each committee-caucus pair...
         from committee.models import Committee, CommitteeType
@@ -481,28 +487,42 @@ class Person(models.Model):
             if committee.committee_type == CommitteeType.joint: continue # math may not work
             committee_members = set(cm.person for cm in committee.members.all())
             if len(committee_members) < 5: continue # math def doesn't work with zero, probably also with low numbers
+            committee.icon = Committee.ICONS.get(committee.code)
             for caucus in caucuses:
+                # Get the parties of the caucus members.
+                caucus_parties = set(p.role.party for p in caucus["members"])
+
                 # Get the number of committee members who are also caucus members
                 # and the expected number.
                 count = len(set(caucus["members"]) & committee_members)
 
                 # Flag if counts' divergence is statistically significant based
                 # on a binomial distribution. The repeated 'experiment' of the
-                # distribution is whether each caucus member is on the committee,
-                # and the expected probability of 'yes' is the number of committee
-                # members divided by the number of members of the chamber. The
-                # cumulative distribution for 'count' and higher is the probability
-                # that count is that or less.
+                # distribution is whether each caucus member (in the same chamber
+                # as the committee) is on the committee, and the expected probability
+                # of 'yes' is the number of committee members divided by the number
+                # of members of the chamber. The cumulative distribution for 'count'
+                # and higher is the probability that count is that or less.
+                #
+                # For single-party caucuses, the expected probability of 'yes is
+                # based on legislators only of the same party, since the distribution
+                # of parties on committees is exogenous.
                 n = len([p for p in caucus["members"]
                         if p.role.role_type in committee.chamber_role_types()])
-                p = len(committee_members) / sum(
-                             legislator_totals[r]
-                             for r in committee.chamber_role_types())
+                committee_members_same_party = len([c for c in committee_members if legislator_party.get(c) in caucus_parties])
+                legislators_same_chamber_and_party = sum(legislator_totals[(chamber, party)]
+                                                         for chamber in committee.chamber_role_types()
+                                                         for party in caucus_parties)
+                p = committee_members_same_party / legislators_same_chamber_and_party
                 phack = 0.05
+                committee_rec = [count,
+                                 committee,
+                                 committee_members_same_party,
+                                 (list(caucus_parties)[0] + "s on committee") if len(caucus_parties) == 1 else "committee members"]
                 if binom.cdf(count, n, p) <= phack:
-                    caucus["committees_underrep"].append([ count, committee ])
+                    caucus["committees_underrep"].append(committee_rec)
                 if n > 0 and 1 - binom.cdf(count, n - 1, p) <= phack:
-                    caucus["committees"].append([ count, committee ])
+                    caucus["committees"].append(committee_rec)
 
         for caucus in caucuses:
             caucus["committees_underrep"].sort(key = lambda cc : cc[0])

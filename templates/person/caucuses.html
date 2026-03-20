@@ -19,11 +19,11 @@
 {% block body %}
 
 {% for caucus in caucuses %}
-   <h2 style="margin-top: 2em; font-weight: bold;">{{caucus.name}}</h2>
+   <h2 style="margin-top: 2em; font-weight: bold; font-size: 22px;">{{caucus.name}}</h2>
    <p>
-      <a data-bs-toggle="modal" data-bs-target="#modalCaucusMembers{{forloop.index}}" href="#" style="text-decoration: none;">
+      <a data-bs-toggle="modal" data-bs-target="#modalCaucusMembers{{forloop.counter}}" href="#" style="text-decoration: none;">
       {% if caucus.counts_by_party|length == 1 %}
-         <span class="party_{{caucus.counts_by_party.0.1|slice:"0:1"}}" style="padding: 3px">
+         <span class="party_{{caucus.counts_by_party.0.1|slice:"0:1"}}" style="padding: 3px; cursor: pointer;">
          {{caucus.counts_by_party.0.0}} {{caucus.counts_by_party.0.1}}{{caucus.counts_by_party.0.0|pluralize}}
          </span>
       {% else %}
@@ -40,26 +40,37 @@
    </p>
    {% if caucus.committees %}
       <p>Caucus members are over-represented on the following committees where they may have particular influence:</p>
-      <ul>
-         {% for count, committee in caucus.committees %}
-            <li><a href="{{committee.get_absolute_url}}">{{committee.name}}</a>
-            ({{count}} members)</li>
-         {% endfor %}
-      </ul>
+      <table>
+      {% for count, committee, committee_members_total, committee_members_type in caucus.committees %}
+        <tr valign="top">
+          <td style="max-width: 70px; padding-right: 20px;">
+            {% if committee.icon %}
+            <a href="{{ committee.get_absolute_url }}">
+              <img src="/static/images/committee-icons/{{committee.icon}}.png" class="img-fluid" style="margin-bottom: 15px";/>
+            </a>
+            {% endif %}
+          </td>
+          <td>
+             <a href="{{committee.get_absolute_url}}">{{committee.name}}</a>
+             <br>({{count}} caucus members out of {{committee_members_total}} {{committee_members_type}})
+          </td>
+        </tr>
+      {% endfor %}
+      </table>
    {% endif %}
    {% if caucus.committees_underrep %}
       <p>Caucus members are <i>under-</i>represented on the
-         {% for count, committee in caucus.committees_underrep %}
+         {% for count, committee, committee_members_total, committee_members_type  in caucus.committees_underrep %}
             <a href="{{committee.get_absolute_url}}">{{committee.name}}</a>
             ({{count}}){% if not forloop.last %}, {% endif %}
          {% endfor %}.</p>
    {% endif %}
 
-   <div id="modalCaucusMembers{{forloop.index}}" class="modal" tabindex="-1">
+   <div id="modalCaucusMembers{{forloop.counter}}" class="modal" tabindex="-1">
      <div class="modal-dialog">
        <div class="modal-content">
          <div class="modal-header">
-           <h5 class="modal-title">Members of {{caucus.name}}</h5>
+           <h5 class="modal-title" style="margin: 0">Members of {{caucus.name}}</h5>
            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
          <div class="modal-body">
