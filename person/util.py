@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from committee.util import sort_members
-from committee.models import CommitteeMemberRole
+from committee.models import Committee, CommitteeMemberRole
 from person.models import PersonRole
 from person.types import RoleType
 
@@ -23,6 +23,7 @@ def get_committee_assignments(person):
     role_tree = []
     for role in roles:
         if not role.committee.committee: # is a main committee
+            role.committee.icon = Committee.ICONS.get(role.committee.code)
             role.subroles = sort_members([x for x in parent_mapping.get(role.committee.pk, []) if x.role not in (CommitteeMemberRole.member, CommitteeMemberRole.exofficio)])
             role.subcommittees = sorted([x.committee for x in parent_mapping.get(role.committee.pk, []) if x.role in (CommitteeMemberRole.member, CommitteeMemberRole.exofficio)], key = lambda c : c.name_no_article)
             role_tree.append(role)

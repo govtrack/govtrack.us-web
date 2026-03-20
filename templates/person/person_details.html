@@ -619,9 +619,17 @@ function show_pronunciation_guide() {
 		<h2><span>Committee Membership</span></h2>
 		<p>{{person.lastname}} sits on the following committees:</p>
 
-		<ul style="list-style: none; padding: 0;">
+    <table>
 			{% for c in committeeassignments %}
-			<li style="margin: 0 0 .25em 0">
+      <tr valign="top">
+        <td style="max-width: 70px; padding-right: 20px;">
+          {% if c.committee.icon %}
+          <a href="{{ c.committee.get_absolute_url }}">
+            <img src="/static/images/committee-icons/{{c.committee.icon}}.png" class="img-fluid" style="margin-bottom: 15px";/>
+          </a>
+          {% endif %}
+        </td>
+        <td>
 				<a href="{{c.committee.get_absolute_url}}">{{c.committee}}</a>
 				{% if c.role_name != 'Member' %}<span class="badge bg-warning">{{c.role_name}}</span>{% endif %}
 				{% if c.subroles or c.subcommittees %}
@@ -646,9 +654,10 @@ function show_pronunciation_guide() {
 				{% endif %}
 				</div>
 				{% endif %}
-			</li>
+        </td>
+      </tr>
 			{% endfor %}
-		</ul>
+		</table>
 	</section><!-- /membership -->
 	
 {% endif %}

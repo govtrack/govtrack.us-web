@@ -89,6 +89,7 @@ def committee_list(request):
                 c.display_name = c.name
             else:
                 c.display_name = c.sortname()
+            c.icon = Committee.ICONS.get(c.code)
         return sorted(items, key=lambda c : c.display_name)
 
     # Get data on recent committee activity by date so we can display a visualization.
@@ -112,8 +113,8 @@ def committee_list(request):
     committee_activity_by_date = [v for k, v in sorted(committee_activity_by_date.items())]
 
     return {
-        'senate_committees': getlist(CommitteeType.senate),
-        'house_committees': getlist(CommitteeType.house),
+        'committees': [("Senate", getlist(CommitteeType.senate)),
+                       ("House", getlist(CommitteeType.house))],
         'joint_committees': getlist(CommitteeType.joint),
         'feed': Committee.AllCommitteesFeed(),
         'upcoming_meetings': CommitteeMeeting.objects.filter(when__gte=datetime.now().date()).count(),
