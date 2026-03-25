@@ -477,7 +477,7 @@ class Person(models.Model):
                                 .annotate(count=Count('id')) }
 
         # Pre-load current role info to get party of committee members.
-        legislator_party = { role.person: role.party
+        legislator_party = { role.person: role.caucus or role.party
                              for role in PersonRole.objects.filter(current=True) }
 
         # For each committee-caucus pair...
@@ -490,7 +490,7 @@ class Person(models.Model):
             committee.icon = Committee.ICONS.get(committee.code)
             for caucus in caucuses:
                 # Get the parties of the caucus members.
-                caucus_parties = set(p.role.party for p in caucus["members"])
+                caucus_parties = set(p.role.caucus or p.role.party for p in caucus["members"])
 
                 # Get the number of committee members who are also caucus members
                 # and the expected number.
@@ -510,7 +510,7 @@ class Person(models.Model):
                 n = len([p for p in caucus["members"]
                         if p.role.role_type in committee.chamber_role_types()])
                 committee_members_same_party = len([c for c in committee_members if legislator_party.get(c) in caucus_parties])
-                legislators_same_chamber_and_party = sum(legislator_totals[(chamber, party)]
+                legislators_same_chamber_and_party = sum(legislator_totals.get((chamber, party), 0)
                                                          for chamber in committee.chamber_role_types()
                                                          for party in caucus_parties)
                 p = committee_members_same_party / legislators_same_chamber_and_party

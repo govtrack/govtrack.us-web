@@ -176,7 +176,7 @@ label { font-weight: normal; }
 					{% for party, count in p.caucus_parties.items %}
 						{{count}} {{party}}{{count|pluralize}}
 					{% endfor %}
-					who caucus with the {{p.party}}s
+					who caucus{% if count == 1 %}es{% endif %} with the {{p.party}}s
 				</div>
 			{% endif %}
 		</td>
