@@ -20,6 +20,9 @@
 
 {% for caucus in caucuses %}
    <h2 style="margin-top: 2em; font-weight: bold; font-size: 22px;">{{caucus.name}}</h2>
+
+   {% if caucus.summary %}<p><b>{{caucus.summary}}</b></p>{% endif %}
+
    <p>
       <a data-bs-toggle="modal" data-bs-target="#modalCaucusMembers{{forloop.counter}}" href="#" style="text-decoration: none;">
       {% if caucus.counts_by_party|length == 1 %}
@@ -31,13 +34,14 @@
             {{caucus.members|length}} member{{caucus.members|length|pluralize}}
          {% endcomment %}
          {% for count, party in caucus.counts_by_party %}
-            <span class="party_{{party|slice:"0:1"}}" style="padding: 3px; margin-right: .5em">
+            <span class="party_{{party|slice:"0:1"}}" style="padding: 3px; margin-right: .5em; cursor: pointer;">
                {{count}} {{party}}{{count|pluralize}}
             </span>
          {% endfor %}
       {% endif %}
       </a>
    </p>
+   {% if caucus.description or caucus.url %}<p>{{caucus.description}} (<a href="{{caucus.url}}">{{caucus.url}}</a>)</p>{% endif %}
    {% if caucus.committees %}
       <p>Caucus members are over-represented on the following committees where they may have particular influence:</p>
       <table>

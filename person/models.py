@@ -412,13 +412,25 @@ class Person(models.Model):
         if not hasattr(Person.load_caucus_membership_data, '_cache'):
             import glob, rtyaml
             import parser.processor
-            CACUSES_GLOB = "/home/govtrack/data/caucuses/*/*.yaml"
+
+            caucuses_dir = "/home/govtrack/data/caucuses/descriptions/*.yaml"
+            caucus_descriptions = { }
+            for caucus_fn in glob.glob(caucuses_dir):
+              caucus_id = re.search(r"/(\w*).yaml$", caucus_fn).group(1)
+              caucus_descriptions[caucus_id] = rtyaml.load(open(caucus_fn))
+              del caucus_descriptions[caucus_id]["name"] # take from Congress-specific files below
+
+            caucuses_dir = "/home/govtrack/data/caucuses/*/*.yaml"
             caucus_metadata = [ ]
-            for caucus_fn in glob.glob(CACUSES_GLOB):
-              congress, caucus_id = re.search(r"/(\d+)/(.*).yaml", caucus_fn).groups()
+            for caucus_fn in glob.glob(caucuses_dir):
+              try:
+                  congress, caucus_id = re.search(r"/(\d+)/(.*).yaml$", caucus_fn).groups()
+              except:
+                  continue # 'descriptions' directory fails regex
               caucusdata = rtyaml.load(open(caucus_fn))
               caucusdata["id"] = caucus_id
               caucusdata["updated"] = parser.processor.Processor.parse_datetime(caucusdata["updated"])
+              if caucus_id in caucus_descriptions: caucusdata.update(caucus_descriptions[caucus_id])
               caucus_metadata.append((int(congress), caucusdata))
             caucus_metadata.sort(key = lambda c : (c[0], -len(c[1]["members"]))) # sort by Congress then reverse by member count
             Person.load_caucus_membership_data._cache = caucus_metadata

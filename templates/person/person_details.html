@@ -26,6 +26,11 @@
 {% endblock %}
 
 {% block body_scripts %}
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
+
 <script src="{{ STATIC_URL }}vendor/highcharts.js"></script>
 <script src="{{ STATIC_URL }}vendor/highcharts-accessibility.js"></script>
 <script>
@@ -312,7 +317,7 @@ function show_pronunciation_guide() {
             	{{person.lastname}} is a member of
             	<a href="/congress/members/caucuses">
             		{% for c in caucuses %}
-            			{{c.name}}{% if not forloop.last %}, {% endif %}{% if forloop.revcounter == 2 %} and {% endif %}{% endfor %}</a>.
+            			<span {% if c.summary %}data-bs-toggle="tooltip" data-bs-title="{{c.summary}}"{% endif %}>{{c.name}}</span>{% if not forloop.last %}, {% endif %}{% if forloop.revcounter == 2 %} and {% endif %}{% endfor %}</a>.
             	<i style="font-size: 80%;">Caucus membership information may be incomplete or out of date.</i>
         	  </div>
         {% endif %}
