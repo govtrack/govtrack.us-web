@@ -1,12 +1,11 @@
 #!script
 
 # Compute a Markov transition matrix representing the cosponsorship patterns
-# of representatives and (separately) senators for a given time period.
-# Each transition is from a Member of Congress to another Member of Congress
-# if the former cosponsors a bill of the latter. The matrix is constructed so that
-# the columns represent the transition probabilities (i.e. columns sum to 1).
-#
-# From the transition matrix we compute "PageRanks", which are essentially
+# of House representatives and (separately) State senators, for a given time period.
+# Each transition is from a Member of Congress to another Member of Congress,
+# if the former cosponsors a bill of the latter. Columns represent the transition probabilities (i.e. columns sum to 1).
+# 
+# From the transition matrix, we compute "PageRanks", which are essentially
 # implicit leadership scores based on Member cosponsorship behavior, and
 # an ideological score based on a singular value decomposition of the matrix
 # rank reduction, using the 2nd dimension.
